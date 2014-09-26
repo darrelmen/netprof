@@ -32,7 +32,7 @@ public class UserManager {
   //private static final int ONE_YEAR = 24 * 365;
 
   private static final int EXPIRATION_HOURS = WEEK_HOURS;
- // private static final int SHORT_EXPIRATION_HOURS = DAY_HOURS;
+  // private static final int SHORT_EXPIRATION_HOURS = DAY_HOURS;
 //  private static final int FOREVER_HOURS = ONE_YEAR;
 
   private static final int NO_USER_SET = -1;
@@ -53,10 +53,10 @@ public class UserManager {
   private final PropertyHandler props;
 
   /**
-   * @see mitll.langtest.client.LangTest#onModuleLoad2()
    * @param lt
    * @param service
    * @param props
+   * @see mitll.langtest.client.LangTest#onModuleLoad2()
    */
   public UserManager(UserNotification lt, LangTestDatabaseAsync service, PropertyHandler props) {
     this.userNotification = lt;
@@ -74,7 +74,7 @@ public class UserManager {
     if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
       anonymousLogin();
     } else if (loginType.equals(PropertyHandler.LOGIN_TYPE.UNDEFINED) && // no explicit setting, so it's dependent on the mode
-      (props.isGoodwaveMode() )) {   // no login for pron mode
+        (props.isGoodwaveMode())) {   // no login for pron mode
       anonymousLogin();
     } else {
       login();
@@ -91,8 +91,7 @@ public class UserManager {
       console("UserManager.login : current user : " + user);
       rememberAudioType();
       getPermissionsAndSetUser(user);
-    }
-    else {
+    } else {
       new StudentDialog(service, props, this, userNotification).displayLoginBox();
     }
   }
@@ -104,13 +103,14 @@ public class UserManager {
     }
   }
 
-  private native static void consoleLog( String message) /*-{
-      console.log( "UserManager:" + message );
+  private native static void consoleLog(String message) /*-{
+      console.log("UserManager:" + message);
   }-*/;
 
 
   /**
    * TODO : instead have call to get permissions for a user.
+   *
    * @param user
    */
   private void getPermissionsAndSetUser(final int user) {
@@ -155,14 +155,15 @@ public class UserManager {
   }
 
   private void addAnonymousUser() {
-    StudentDialog studentDialog = new StudentDialog(service,props,this,userNotification);
+    StudentDialog studentDialog = new StudentDialog(service, props, this, userNotification);
     System.out.println("UserManager.addAnonymousUser : adding anonymous user");
 
-    studentDialog.addUser(89, "male", 0,"", new ArrayList<User.Permission>());
+    studentDialog.addUser(89, "male", 0, "", new ArrayList<User.Permission>());
   }
 
   /**
    * For display purposes
+   *
    * @return
    * @see mitll.langtest.client.LangTest#getGreeting()
    */
@@ -236,8 +237,8 @@ public class UserManager {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#checkLogin();
    * @return
+   * @see mitll.langtest.client.LangTest#checkLogin();
    */
   public boolean isUserExpired() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
@@ -248,9 +249,9 @@ public class UserManager {
   }
 
   /**
-   * @see #isUserExpired()
    * @param sid
    * @return
+   * @see #isUserExpired()
    */
   private boolean checkUserExpired(String sid) {
     boolean expired = false;
@@ -269,32 +270,37 @@ public class UserManager {
 
   /**
    * Need these to be prefixed by app title so if we switch webapps, we don't get weird user ids
+   *
    * @return
    */
   private String getUserIDCookie() {
     return appTitle + ":" + USER_ID;
   }
+
   private String getUserChosenID() {
     return appTitle + ":" + USER_CHOSEN_ID;
   }
+
   private String getAudioType() {
     return appTitle + ":" + AUDIO_TYPE;
   }
+
   private String getLoginType() {
     return appTitle + ":" + LOGIN_TYPE;
   }
+
   private String getExpires() {
     return appTitle + ":" + "expires";
   }
 
   /**
-   * @see #getUser()
    * @param sid
+   * @see #getUser()
    */
   private boolean userExpired(String sid) {
     String expires = getExpiresCookie();
     if (expires == null) {
-      System.out.println("checkExpiration : no expires item?");
+      System.out.println("userExpired : checkExpiration : no expires item?");
     } else {
       try {
         long expirationDate = Long.parseLong(expires);
@@ -307,7 +313,7 @@ public class UserManager {
         }
 
         if (expirationDate < System.currentTimeMillis()) {
-          System.out.println("checkExpiration : " + sid + " has expired.");
+          System.out.println("userExpired : checkExpiration : " + sid + " has expired : " + new Date(expirationDate));
           return true;
         }
       } catch (NumberFormatException e) {
@@ -317,6 +323,10 @@ public class UserManager {
     return false;
   }
 
+  /**
+   * @return
+   * @see #userExpired(String)
+   */
   private String getExpiresCookie() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     return localStorageIfSupported.getItem(getExpires());
@@ -367,10 +377,10 @@ public class UserManager {
       rememberUserSessionEnd(localStorageIfSupported, futureMoment);
       localStorageIfSupported.setItem(getAudioType(), "" + audioType);
       localStorageIfSupported.setItem(getLoginType(), "" + userType);
-      System.out.println("storeUser : user now " + sessionID + " / " + getUser() + " audio '" + audioType+"' expires in " + (DURATION/1000) + " seconds");
+      System.out.println("storeUser : user now " + sessionID + " / " + getUser() + " audio '" + audioType + "' expires in " + (DURATION / 1000) + " seconds");
       userNotification.rememberAudioType(audioType);
 
-      getPermissionsAndSetUser((int)sessionID);
+      getPermissionsAndSetUser((int) sessionID);
 
     } else {  // not sure what we could possibly do here...
       userID = sessionID;
@@ -381,8 +391,8 @@ public class UserManager {
 
 
   /**
-   * @see #userExpired(String)
    * @param futureMoment
+   * @see #userExpired(String)
    */
   private void rememberUserSessionEnd(long futureMoment) {
     if (Storage.isLocalStorageSupported()) {
@@ -403,13 +413,19 @@ public class UserManager {
 */
 
   /**
-   * @see #storeUser(long, String, String, mitll.langtest.client.PropertyHandler.LOGIN_TYPE)
-   * @see #rememberUserSessionEnd(long)
    * @param localStorageIfSupported
    * @param futureMoment
+   * @see #storeUser(long, String, String, mitll.langtest.client.PropertyHandler.LOGIN_TYPE)
+   * @see #rememberUserSessionEnd(long)
    */
   private void rememberUserSessionEnd(Storage localStorageIfSupported, long futureMoment) {
+
     localStorageIfSupported.setItem(getExpires(), "" + futureMoment);
+
+    String expires = getExpiresCookie();
+
+    long expirationDate = Long.parseLong(expires);
+    System.out.println("rememberUserSessionEnd : user will expire on " + new Date(expirationDate));
   }
 
   private long getUserSessionEnd() {
@@ -422,8 +438,9 @@ public class UserManager {
 
   /**
    * If we have lots of students moving through stations quickly, we want to auto logout once a day, once an hour?
-   *
+   * <p/>
    * Egyptian should never time out -- for anonymous students
+   *
    * @return
    */
   private long getUserSessionDuration() {
