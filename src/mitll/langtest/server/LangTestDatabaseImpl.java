@@ -1185,12 +1185,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   // Results ---------------------
 
   /**
+   * Sometimes we type faster than we can respond, so we can throw away stale requests.
+   *
+   * Filter results by search criteria -- unit->value map (e.g. chapter=5), userid, and foreign language text
+   * @param req - to echo back -- so that if we get an old request we can discard it
+   * @param sortInfo - encoding which fields we want to sort, and ASC/DESC choice
    * @return
    * @see mitll.langtest.client.result.ResultManager#createProvider(int, com.google.gwt.user.cellview.client.CellTable)
    */
   @Override
   public ResultAndTotal getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, long userid, String flText, int req) {
-    // List<MonitorResult> results = db.getMonitorResults();
     List<MonitorResult> results = getResults(unitToValue, userid, flText);
     if (!results.isEmpty()) {
       Comparator<MonitorResult> comparator = results.get(0).getComparator(Arrays.asList(sortInfo.split(",")));
@@ -1203,7 +1207,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
     }
     int n = results.size();
-    List<MonitorResult> resultList = results.subList(start, Math.min(end, n));
+    int min = Math.min(end, n);
+    if (start > min) {
+      logger.debug("original req from " + start + " to " + end);
+      start = 0;
+    }
+    List<MonitorResult> resultList = results.subList(start, min);
     return new ResultAndTotal(new ArrayList<MonitorResult>(resultList), n, req);
   }
 
@@ -1214,14 +1223,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private List<MonitorResult> getResults(Map<String, String> unitToValue, long userid, String flText) {
     Collection<MonitorResult> results = db.getMonitorResults();
-    logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText);
+    //logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText);
 
     Trie<MonitorResult> trie;
 
     for (String type : getTypeOrder()) {
       if (unitToValue.containsKey(type)) {
 
-        logger.debug("getResults making trie for " + type);
+       // logger.debug("getResults making trie for " + type);
         // make trie from results
         trie = new Trie<MonitorResult>();
 
@@ -1234,19 +1243,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
         trie.endMakingNodes();
 
-        String s = unitToValue.get(type);
-        Collection<MonitorResult> matchesLC = trie.getMatchesLC(s);
-
-        // stop!
-
-        results = matchesLC;
+        results = trie.getMatchesLC(unitToValue.get(type));
       }
     }
 
     if (userid > -1) { // asking for userid
       // make trie from results
-
-      logger.debug("making trie for userid " + userid);
+//      logger.debug("making trie for userid " + userid);
 
       trie = new Trie<MonitorResult>();
       trie.startMakingNodes();
@@ -1255,32 +1258,34 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
       trie.endMakingNodes();
 
-      Set<Long> imatches = new TreeSet<Long>();
-      Collection<MonitorResult> matchesLC = trie.getMatchesLC(Long.toString(userid));
-
-      results = matchesLC;
+      results = trie.getMatchesLC(Long.toString(userid));
     }
 
     // must be asking for text
     if (flText != null && !flText.isEmpty()) { // asking for text
       trie = new Trie<MonitorResult>();
       trie.startMakingNodes();
-      logger.debug("searching over " + results.size());
-      // int n = 0;
+ //     logger.debug("searching over " + results.size());
       for (MonitorResult result : results) {
-        // if (n++ < 10) {
-        //    logger.debug("adding " + result.getForeignText());
-        //  }
-        trie.addEntryToTrie(new ResultWrapper(result.getForeignText().trim(), result));
+         trie.addEntryToTrie(new ResultWrapper(result.getForeignText().trim(), result));
       }
       trie.endMakingNodes();
 
       results = trie.getMatchesLC(flText);
     }
-    logger.debug("getResults returning " + results.size());
+    logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText + " returning " + results.size() + " results...");
     return new ArrayList<MonitorResult>(results);
   }
 
+  /**
+   * Respond to type ahead.
+   *
+   * @param unitToValue
+   * @param userid
+   * @param flText
+   * @param which
+   * @return
+   */
   @Override
   public Collection<String> getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which) {
     Collection<MonitorResult> results = db.getMonitorResults();
@@ -1293,7 +1298,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     for (String type : getTypeOrder()) {
       if (unitToValue.containsKey(type)) {
 
-        logger.debug("getResultAlternatives making trie for " + type);
+    //    logger.debug("getResultAlternatives making trie for " + type);
         // make trie from results
         trie = new Trie<MonitorResult>();
 
@@ -1311,7 +1316,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
         // stop!
         if (which.equals(type)) {
-          logger.debug("\tmatch for " + type);
+  //        logger.debug("\tmatch for " + type);
 
           boolean allInt = true;
           for (MonitorResult result : matchesLC) {
@@ -1337,7 +1342,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
             return sorted;
           }
 
-          logger.debug("returning " + matches);
+//          logger.debug("returning " + matches);
 
           return matches;
         } else {
@@ -1366,7 +1371,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         for (MonitorResult result : matchesLC) {
           imatches.add(result.getUserid());
         }
-        logger.debug("returning " + imatches);
+        //logger.debug("returning " + imatches);
 
         for (Long m : imatches) matches.add(Long.toString(m));
         matches = getLimitedSizeList(matches);
@@ -1377,15 +1382,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     // must be asking for text
-    //if (flText != null) { // asking for text
     trie = new Trie<MonitorResult>();
     trie.startMakingNodes();
-    logger.debug("searching over " + results.size());
-    // int n = 0;
+    //logger.debug("searching over " + results.size());
     for (MonitorResult result : results) {
-      // if (n++ < 10) {
-      //    logger.debug("adding " + result.getForeignText());
-      //  }
       trie.addEntryToTrie(new ResultWrapper(result.getForeignText(), result));
     }
     trie.endMakingNodes();
@@ -1395,14 +1395,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     for (MonitorResult result : matchesLC) {
       matches.add(result.getForeignText().trim());
     }
-    logger.debug("returning text " + matches);
+    //logger.debug("returning text " + matches);
 
-    // if (which.equals(MonitorResult.TEXT)) {
-    matches = getLimitedSizeList(matches);
-    return matches;
-    // }
-    //}
-
+    return getLimitedSizeList(matches);
   }
 
   private Collection<String> getLimitedSizeList(Collection<String> matches) {
