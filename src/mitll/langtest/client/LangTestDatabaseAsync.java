@@ -49,7 +49,7 @@ public interface LangTestDatabaseAsync {
 */
 
 
-  void getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, long userid, String flText, AsyncCallback<ResultAndTotal> async);
+  void getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, long userid, String flText, int req, AsyncCallback<ResultAndTotal> async);
 
   void getResultStats(AsyncCallback<Map<String, Number>> async);
 
