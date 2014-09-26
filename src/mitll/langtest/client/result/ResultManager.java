@@ -43,9 +43,6 @@ import java.util.*;
  */
 public class ResultManager extends PagerTable {
   private static final int PAGE_SIZE = 12;
-  //  protected static final String UNGRADED = "Ungraded";
-//  protected static final String SKIP = "Skip";
-//  protected static final int GRADING_WIDTH = 700;
   protected static final String TIMESTAMP = "timestamp";
   private static final String CORRECT = "Correct";
   private static final String PRO_F_SCORE = "ProFScore";
@@ -392,6 +389,7 @@ public class ResultManager extends PagerTable {
 
     Column<?, ?> time = getColumn(TIMESTAMP);
     cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(time, false));
+    cellTable.setWidth("100%", false);
 
     // Create a SimplePager.
     return getPagerAndTable(cellTable);
