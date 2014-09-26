@@ -73,7 +73,7 @@ public interface LangTestDatabase extends RemoteService {
   Map<String, Map<String, Integer>> getResultPerExercise();
   List<Session> getSessions();
 
-  ResultAndTotal getResults(int start, int end, String sortInfo,Map<String, String> unitToValue, long userid, String flText);
+  ResultAndTotal getResults(int start, int end, String sortInfo,Map<String, String> unitToValue, long userid, String flText, int req);
 
   Map<String,Number> getResultStats();
 
