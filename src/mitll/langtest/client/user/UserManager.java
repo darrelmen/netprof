@@ -364,8 +364,8 @@ public class UserManager {
    */
   void storeUser(long sessionID, String audioType, String userChosenID, PropertyHandler.LOGIN_TYPE userType) {
     //System.out.println("storeUser : user now " + sessionID + " audio type '" + audioType +"'");
-    final long DURATION = getUserSessionDuration();
-    long futureMoment = getUserSessionEnd(DURATION);
+    final long duration = getUserSessionDuration();
+    long futureMoment = getUserSessionEnd(duration);
     if (USE_COOKIE) {
       Date expires = new Date(futureMoment);
       Cookies.setCookie("sid", "" + sessionID, expires);
@@ -377,7 +377,7 @@ public class UserManager {
       rememberUserSessionEnd(localStorageIfSupported, futureMoment);
       localStorageIfSupported.setItem(getAudioType(), "" + audioType);
       localStorageIfSupported.setItem(getLoginType(), "" + userType);
-      System.out.println("storeUser : user now " + sessionID + " / " + getUser() + " audio '" + audioType + "' expires in " + (DURATION / 1000) + " seconds");
+      System.out.println("storeUser : user now " + sessionID + " / " + getUser() + " audio '" + audioType + "' expires in " + (duration / 1000) + " seconds");
       userNotification.rememberAudioType(audioType);
 
       getPermissionsAndSetUser((int) sessionID);
@@ -441,11 +441,10 @@ public class UserManager {
    * <p/>
    * Egyptian should never time out -- for anonymous students
    *
-   * @return
+   * @return one year for anonymous
    */
   private long getUserSessionDuration() {
-    //boolean useShortExpiration = loginType.equals(PropertyHandler.LOGIN_TYPE.STUDENT);
     long mult = loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS) ? 52 : 4;
-    return HOUR_IN_MILLIS * mult;//(useShortExpiration ? SHORT_EXPIRATION_HOURS : EXPIRATION_HOURS);
+    return EXPIRATION_HOURS * mult;
   }
 }
