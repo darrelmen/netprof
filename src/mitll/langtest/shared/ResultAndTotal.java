@@ -11,11 +11,13 @@ import java.util.List;
 public class ResultAndTotal implements IsSerializable {
   public List<MonitorResult> results;
   public int numTotal;
+  public int req;
   public ResultAndTotal() {}
 
-  public ResultAndTotal(ArrayList<MonitorResult> monitorResults, int n) {
+  public ResultAndTotal(ArrayList<MonitorResult> monitorResults, int n, int req) {
     this.results = monitorResults;
     this.numTotal = n;
+    this.req = req;
   }
 
 }
