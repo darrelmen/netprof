@@ -15,47 +15,10 @@ class RegistrationInfo extends BasicDialog {
   private final ListBoxFormField genderGroup;
   private final FormField dialectGroup;
 
-  /**
-   * @seex mitll.langtest.client.user.StudentDialog#displayLoginBox()
-   * @paramx dialogBox
-   * @paramx lowerLeft
-   */
-/*  public RegistrationInfo(Panel dialogBox, Panel lowerLeft) {
-    Form form = new Form();
-    form.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
-
-    form.addStyleName("form-horizontal");
-
-    Fieldset fieldsetLeft = new Fieldset();
-    Fieldset fieldsetRight = new Fieldset();
-
-    DivWidget divLeft = new DivWidget();
-    divLeft.addStyleName("floatLeft");
-
-    DivWidget divRight = new DivWidget();
-    divRight.addStyleName("floatRight");
-
-    divLeft.add(fieldsetLeft);
-    form.add(divLeft);
-
-    divRight.add(fieldsetRight);
-    form.add(divRight);
-
-    dialogBox.add(divLeft);
-    dialogBox.add(divRight);
-
-    genderGroup = getListBoxFormField(fieldsetRight, "Gender", getGenderBox());
-
-    //addControlGroupEntrySimple(fieldsetLeft, "Permissions", lowerLeft);
-    ageEntryGroup = addControlFormField(fieldsetLeft, "Your age");
-    dialectGroup = getDialect(fieldsetRight);
-  }*/
-
   public RegistrationInfo(Fieldset toAddTo) {
     genderGroup = getListBoxFormFieldNoLabel(toAddTo, "Gender", getGenderBox());
     genderGroup.box.setWidth("100px");
     genderGroup.box.addStyleName("topMargin");
-    //addControlGroupEntrySimple(fieldsetLeft, "Permissions", lowerLeft);
     ageEntryGroup = addControlFormFieldWithPlaceholder(toAddTo, false,2,2,"Your age");
     ageEntryGroup.box.setWidth("88px");
     dialectGroup = getDialect(toAddTo);
@@ -69,8 +32,6 @@ class RegistrationInfo extends BasicDialog {
 
   private FormField getDialect(Panel dialogBox) {
     final FormField dialectGroup = addControlFormFieldWithPlaceholder(dialogBox, false, 3, 25, DIALECT);
-//    dialectGroup.group.addStyleName("topTwentyMargin");
-
     dialectGroup.box.addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
         if (dialectGroup.box.getText().length() > 0) {
@@ -84,7 +45,7 @@ class RegistrationInfo extends BasicDialog {
   private static final String DIALECT = "Dialect";
 
   /**
-   * @see #checkThenRegister(String, RegistrationInfo, com.github.gwtbootstrap.client.ui.Modal, String, java.util.Collection)
+   * @see mitll.langtest.client.user.UserPassLogin#getSignUpButton(com.github.gwtbootstrap.client.ui.base.TextBoxBase, com.github.gwtbootstrap.client.ui.base.TextBoxBase)
    * @return
    */
   public boolean checkValidGender() {
