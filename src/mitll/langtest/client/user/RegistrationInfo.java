@@ -1,31 +1,52 @@
 package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.Fieldset;
+import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 
 /**
-* Created by go22670 on 8/22/14.
-*/
+ * Created by go22670 on 8/22/14.
+ */
 class RegistrationInfo extends BasicDialog {
+  private static final String YOUR_AGE = "Your age";
+  private static final String GENDER_GROUP = "GenderGroup";
+  private static final String CHOOSE_A_GENDER = "Choose male or female.";
+  private static final String DIALECT = "Dialect";
+
   private final FormField ageEntryGroup;
-  private final ListBoxFormField genderGroup;
+  //private final ListBoxFormField genderGroup;
+  // private final ControlGroup genderGroup;
   private final FormField dialectGroup;
+  private RadioButton male = new RadioButton(GENDER_GROUP, "Male");
+  private RadioButton female = new RadioButton(GENDER_GROUP, "Female");
+  private Panel genders;
 
   public RegistrationInfo(Fieldset toAddTo) {
-    genderGroup = getListBoxFormFieldNoLabel(toAddTo, "Gender", getGenderBox());
-    genderGroup.box.setWidth("100px");
-    genderGroup.box.addStyleName("topMargin");
-    ageEntryGroup = addControlFormFieldWithPlaceholder(toAddTo, false,2,2,"Your age");
+    genders = new HorizontalPanel();
+    genders.add(male);
+    female.addStyleName("leftFiveMargin");
+    genders.add(female);
+    genders.addStyleName("leftTenMargin");
+
+    male.addStyleName("topFiveMargin");
+    female.addStyleName("topFiveMargin");
+    //  group.add(group1);
+    toAddTo.add(genders);
+    //  genderGroup = group;
+    ageEntryGroup = addControlFormFieldWithPlaceholder(toAddTo, false, 2, 2, YOUR_AGE);
     ageEntryGroup.box.setWidth("88px");
+    genders.add(ageEntryGroup.box);
+
     dialectGroup = getDialect(toAddTo);
   }
 
   public void setVisible(boolean visible) {
-    genderGroup.setVisible(visible);
+    genders.setVisible(visible);
     ageEntryGroup.setVisible(visible);
     dialectGroup.setVisible(visible);
   }
@@ -41,30 +62,41 @@ class RegistrationInfo extends BasicDialog {
     });
     return dialectGroup;
   }
-  private static final String CHOOSE_A_GENDER = "Choose a gender.";
-  private static final String DIALECT = "Dialect";
 
   /**
-   * @see mitll.langtest.client.user.UserPassLogin#getSignUpButton(com.github.gwtbootstrap.client.ui.base.TextBoxBase, com.github.gwtbootstrap.client.ui.base.TextBoxBase)
    * @return
+   * @see mitll.langtest.client.user.UserPassLogin#getSignUpButton(com.github.gwtbootstrap.client.ui.base.TextBoxBase, com.github.gwtbootstrap.client.ui.base.TextBoxBase)
    */
   public boolean checkValidGender() {
-    boolean valid = !getGenderGroup().getValue().equals(UNSET);
+    boolean valid = male.getValue() || female.getValue();
     if (!valid) {
-      getGenderGroup().markSimpleError(CHOOSE_A_GENDER, Placement.LEFT);
+      male.setFocus(true);
+      setupPopover(male, TRY_AGAIN, CHOOSE_A_GENDER, Placement.LEFT, false);
     }
     return valid;
+  }
+
+  public boolean isMale() {
+    return male.getValue();
   }
 
   public FormField getAgeEntryGroup() {
     return ageEntryGroup;
   }
 
-  public ListBoxFormField getGenderGroup() {
-    return genderGroup;
-  }
+  //public ControlGroup getGenderGroup() {
+  //  return genderGroup;
+  // }
 
   public FormField getDialectGroup() {
     return dialectGroup;
+  }
+
+  public RadioButton getMale() {
+    return male;
+  }
+
+  public RadioButton getFemale() {
+    return female;
   }
 }
