@@ -916,11 +916,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   // Users ---------------------
 
-/*  @Override
-  public synchronized int userExists(String login) {
-    return db.userExists(login);
-  }*/
-
   /**
    * @param login
    * @param passwordH
@@ -1026,15 +1021,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public void markState(String id, STATE state, long creatorID) {
     db.getUserListManager().markState(id, state, creatorID);
   }
-
-  /**
-   * @param ids
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#getRepeatButton()
-   */
-/*  @Override
-  public void setAVPSkip(Collection<Long> ids) {
-    db.getAnswerDAO().changeType(ids);
-  }*/
 
   /**
    * @param id
@@ -1196,23 +1182,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @param age
-   * @param gender
-   * @param experience
-   * @param nativeLang
-   * @param dialect
-   * @param userID
-   * @param permissions
-   * @return
-   * @deprecatedx called from student dialog
-   */
-/*  @Override
-  public long addUser(int age, String gender, int experience,
-                      String nativeLang, String dialect, String userID, Collection<User.Permission> permissions) {
-    return db.addUser(getThreadLocalRequest(), age, gender, experience, nativeLang, dialect, userID, permissions);
-  }*/
-
-  /**
    * @param userID
    * @param passwordH
    * @param emailH
@@ -1229,34 +1198,50 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                       boolean isMale, int age, String dialect) {
     User user = db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind, isMale, age, dialect);
     if (user != null && !user.isEnabled()) { // user = null means existing user.
-      url = trimURL(url);
-      String userID1 = user.getUserID();
-      String toHash = userID1 + "_" + System.currentTimeMillis();
-      String hash = getHash(toHash);
-      db.getUserDAO().addKey(user.getId(), false, hash);
-
-      String message = "Hi Tamas" + ",<br/><br/>" +
-          "User '" + userID1 +
-          "' would like to be a content developer for " + serverProps.getLanguage() +
-          "." + "<br/>" +
-
-          "Click the link to allow them." +
-          "<br/><br/>" +
-          "Regards, Administrator";
-
-      getMailSupport().sendEmail(NP_SERVER,
-          url + "?cd=" + hash + "&" +
-              "er" +
-              "=" + rot13(email),
-          serverProps.getApprovalEmailAddress(),
-          "gordon.vidaver@ll.mit.edu",
-          "Content Developer approval for " + userID1 + " for " + serverProps.getLanguage(),
-          message,
-          "Click to approve" // link text
-      );
+      db.addContentDeveloper(url, email, user,getMailSupport());
     }
     return user;
   }
+
+/*  private void addContentDeveloper(String url, String email, User user) {
+    url = trimURL(url);
+    String userID1 = user.getUserID();
+    String toHash = userID1 + "_" + System.currentTimeMillis();
+    String hash = getHash(toHash);
+    db.getUserDAO().addKey(user.getId(), false, hash);
+
+    for (int i = 0; i < approvers.size(); i++) {
+      String tamas = approvers.get(i);
+      String approvalEmailAddress = emails.get(i);
+      String message = getEmailApproval(userID1, tamas);
+      sendApprovalEmail(url, email, userID1, hash, message, approvalEmailAddress);
+    }
+  }*/
+
+/*  private void sendApprovalEmail(String url, String email, String userID1, String hash, String message, String approvalEmailAddress) {
+    getMailSupport().sendEmail(NP_SERVER,
+        url + "?cd=" + hash + "&" +
+            "er" +
+            "=" + rot13(email),
+        approvalEmailAddress,
+        "gordon.vidaver@ll.mit.edu",
+        "Content Developer approval for " + userID1 + " for " + serverProps.getLanguage(),
+        message,
+        "Click to approve" // link text
+    );
+  }
+
+  private String getEmailApproval(String userID1, String tamas) {
+    return "Hi " +
+        tamas + ",<br/><br/>" +
+        "User '" + userID1 +
+        "' would like to be a content developer for " + serverProps.getLanguage() +
+        "." + "<br/>" +
+
+        "Click the link to allow them." +
+        "<br/><br/>" +
+        "Regards, Administrator";
+  }*/
 
   private String rot13(String val) {
     StringBuilder builder = new StringBuilder();
@@ -1283,10 +1268,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getUserDAO().getUserWhere(id);
   }
 
-  /// TODO : replace with columns on user id table
-  //Map<String,Long> keyToUser = new HashMap<String, Long>();
-  // Map<String,Long> keyToEnabledUser = new HashMap<String, Long>();
-
   /**
    * @param user
    * @param email
@@ -1301,7 +1282,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     if (validUserAndEmail != null) {
       logger.debug("resetPassword for " + user + " sending reset password email.");
-      //keyToUser.put(hash,validUserAndEmail.getId());
       String toHash = user + "_" + System.currentTimeMillis();
       String hash = getHash(toHash);
       db.getUserDAO().addKey(validUserAndEmail.getId(), true, hash);
