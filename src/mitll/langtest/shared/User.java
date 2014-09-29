@@ -21,7 +21,7 @@ public class User extends MiniUser {
   private boolean enabled;
   private boolean admin;
   private int numResults;
-  private Demographics demographics;
+ // private Demographics demographics;
   private float rate = 0.0f;
   private boolean complete;
   private float completePercent;
@@ -131,11 +131,11 @@ public class User extends MiniUser {
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#joinWithDLIUsers(java.util.List)
-   * @param demographics
+   * @paramx demographics
    */
-  public void setDemographics(Demographics demographics) {
+/*  public void setDemographics(Demographics demographics) {
     this.demographics = demographics;
-  }
+  }*/
 
   public void setRate(float rate) {
     this.rate = rate;
@@ -185,7 +185,6 @@ public class User extends MiniUser {
     return userKind;
   }
 
-
   public boolean isEnabled() {
     return enabled;
   }
@@ -202,6 +201,7 @@ public class User extends MiniUser {
         " emailH " + getEmailHash() +
         " passH " + getPasswordHash() +
         " kind " + getUserKind()+
-        " demo " + demographics + " perms " + getPermissions();
+        //" demo " + demographics +
+        " perms " + getPermissions();
   }
 }
