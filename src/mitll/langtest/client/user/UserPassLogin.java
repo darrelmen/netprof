@@ -30,20 +30,46 @@ import mitll.langtest.shared.User;
  * Created by go22670 on 8/11/14.
  */
 public class UserPassLogin extends UserDialog {
-  public static final int MIN_LENGTH_USER_ID = 4;
+  private static final int MIN_LENGTH_USER_ID = 4;
 
-  public static final int MIN_PASSWORD = 5;
-  public static final int MIN_EMAIL = 13;
-  public static final int LEFT_SIDE_WIDTH = 483;
-  public static final String SIGN_UP_SUBTEXT = "Or add missing info";//password and email";
-  public static final String PLEASE_ENTER_YOUR_PASSWORD = "Please enter your password.";
-  public static final String BAD_PASSWORD = "Wrong password - have you signed up?";
-  public static final String PASSWORD = "Password";
-  public static final String USERNAME = "Username";
-  public static final String SIGN_IN = "Sign In";
-  public static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer user id.";
-  public static final String VALID_EMAIL = "Please enter a valid email address.";
-  public static final String PLEASE_WAIT = "Please wait";
+  private static final int MIN_PASSWORD = 5;
+  private static final int MIN_EMAIL = 13;
+  private static final int LEFT_SIDE_WIDTH = 483;
+  private static final String SIGN_UP_SUBTEXT = "Or add missing info";//password and email";
+  private static final String PLEASE_ENTER_YOUR_PASSWORD = "Please enter your password.";
+  private static final String BAD_PASSWORD = "Wrong password - have you signed up?";
+  private static final String PASSWORD = "Password";
+  private static final String USERNAME = "Username";
+  private static final String SIGN_IN = "Sign In";
+  private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer user id.";
+  private static final String VALID_EMAIL = "Please enter a valid email address.";
+  private static final String PLEASE_WAIT = "Please wait";
+  //private static final String INITIAL_PROMPT = "<b>Classroom</b> allows you to practice your vocabulary and learn pronunciation.";//"Learn how to pronounce words and practice vocabulary.";
+  private static final String INITIAL_PROMPT = "Practice vocabulary and learn pronunciation.";//"Learn how to pronounce words and practice vocabulary.";
+  private static final String FIRST_BULLET = "Practice vocabulary with audio flashcards";//"Do flashcards to learn or review vocabulary";
+  private static final String SECOND_BULLET = "Record your voice and get feedback on your pronunciation";//"Get feedback on your pronunciation";
+  private static final String THIRD_BULLET = "Create and share vocab lists for study and review";//"Make your own lists of words to study later or to share.";
+  private static final String PLEASE_ENTER_A_PASSWORD = "Please enter a password";
+  private static final String PLEASE_ENTER_A_LONGER_PASSWORD = "Please enter a longer password";
+  private static final String PLEASE_ENTER_THE_SAME_PASSWORD = "Please enter the same password";
+  private static final String PASSWORD_HAS_BEEN_CHANGED = "Password has been changed";
+  private static final String SUCCESS = "Success";
+  private static final String CHANGE_PASSWORD = "Change Password";
+  private static final String CHOOSE_A_NEW_PASSWORD = "Choose a new password";
+  private static final String FORGOT_PASSWORD = "Forgot password?";
+  private static final String ENTER_A_USER_NAME = "Enter a user name.";
+  private static final String CHECK_EMAIL = "Check Email";
+  private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
+  private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Enter your email to reset your password.";
+  private static final String FORGOT_USERNAME = "Forgot username?";
+  private static final String SEND = "Send";
+  private static final String SIGN_UP = "Sign Up";
+  private static final String ARE_YOU_A = "Please select one : Are you a";
+  private static final String STUDENT = "Student";
+  private static final String TEACHER = "Teacher";
+  private static final String CONTENT_DEVELOPER = "Content Developer";
+  private static final String SIGN_UP_WIDTH = "266px";
+  //public static final String PLEASE_ENTER_A_PASSWORD1 = "Please enter a password.";
   private final UserManager userManager;
   private final KeyPressHelper enterKeyButtonHelper;
   private FormField user;
@@ -83,6 +109,10 @@ public class UserPassLogin extends UserDialog {
     };
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#showLogin() 
+   * @return
+   */
   public Panel getContent() {
     Panel container = new DivWidget();
     DivWidget child = new DivWidget();
@@ -127,14 +157,14 @@ public class UserPassLogin extends UserDialog {
     final Fieldset fieldset = new Fieldset();
     form.add(fieldset);
 
-    Heading w = new Heading(3, "Choose a new password");
+    Heading w = new Heading(3, CHOOSE_A_NEW_PASSWORD);
     fieldset.add(w);
     w.addStyleName("leftFiveMargin");
     final FormField firstPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
     final FormField secondPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
 
 
-    final Button changePassword = new Button("Change Password");
+    final Button changePassword = new Button(CHANGE_PASSWORD);
     changePassword.getElement().setId("changePassword");
     eventRegistration.register(changePassword);
     changePassword.addStyleName("floatRight");
@@ -145,15 +175,15 @@ public class UserPassLogin extends UserDialog {
         String first = firstPassword.box.getText();
         String second = secondPassword.box.getText();
         if (first.isEmpty()) {
-          markError(firstPassword, "Please enter a password");
+          markError(firstPassword, PLEASE_ENTER_A_PASSWORD);
         } else if (first.length() < MIN_PASSWORD) {
-          markError(firstPassword, "Please enter a longer password");
+          markError(firstPassword, PLEASE_ENTER_A_LONGER_PASSWORD);
         } else if (second.isEmpty()) {
-          markError(secondPassword, "Please enter a password");
+          markError(secondPassword, PLEASE_ENTER_A_PASSWORD);
         } else if (second.length() < MIN_PASSWORD) {
-          markError(secondPassword, "Please enter a longer password");
+          markError(secondPassword, PLEASE_ENTER_A_LONGER_PASSWORD);
         } else if (!second.equals(first)) {
-          markError(secondPassword, "Please enter the same password");
+          markError(secondPassword, PLEASE_ENTER_THE_SAME_PASSWORD);
 
         } else {
           changePassword.setEnabled(false);
@@ -172,7 +202,7 @@ public class UserPassLogin extends UserDialog {
               if (!result) {
                 markError(changePassword, "Password has already been changed?");
               } else {
-                markError(changePassword, "Success", "Password has been changed", Placement.LEFT);
+                markError(changePassword, SUCCESS, PASSWORD_HAS_BEEN_CHANGED, Placement.LEFT);
                 Timer t = new Timer() {
                   @Override
                   public void run() {
@@ -212,36 +242,19 @@ public class UserPassLogin extends UserDialog {
 
     leftAndRight.add(right);
     right.addStyleName("floatRight");
+
     DivWidget rightDiv = new DivWidget();
-
-    Form form = new Form();
-    rightDiv.add(form);
-
-    rightDiv.add(getSignUpForm());
-
-    form.addStyleName("topMargin");
-    form.addStyleName("formRounded");
-    form.getElement().getStyle().setBackgroundColor("white");
-
-    Fieldset fieldset = new Fieldset();
-    form.add(fieldset);
     right.add(rightDiv);
 
-    user = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, USERNAME);
-    user.box.addStyleName("topMargin");
-    user.box.addStyleName("rightFiveMargin");
-    user.box.getElement().setId("Username_Box_SignIn");
-    user.box.setFocus(true);
-    user.box.setWidth("266px");
+    rightDiv.add(populateSignInForm(getSignInForm()));
+    rightDiv.add(getSignUpForm());
+  }
 
+  private Form populateSignInForm(Form signInForm) {
+    Fieldset fieldset = new Fieldset();
+    signInForm.add(fieldset);
 
-    user.box.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        signInHasFocus = true;
-        eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "focus in username field");
-      }
-    });
+    makeSignInUserName(fieldset);
 
     password = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
     password.box.addFocusHandler(new FocusHandler() {
@@ -257,10 +270,38 @@ public class UserPassLogin extends UserDialog {
     hp.add(password.box);
     hp.addStyleName("leftFiveMargin");
 
+    hp.add(getSignInButton());
+    fieldset.add(hp);
+
+    Panel hp2 = new HorizontalPanel();
+
+    Anchor forgotUser = getForgotUser();
+    hp2.add(forgotUser);
+    forgotUser.addStyleName("leftTenMargin");
+
+    Anchor forgotPassword = getForgotPassword();
+    hp2.add(forgotPassword);
+    fieldset.add(hp2);
+
+    forgotPassword.addStyleName("leftFiveMargin");
+
+    getFocusOnField(user);
+
+    return signInForm;
+  }
+
+  private Form getSignInForm() {
+    Form signInForm = new Form();
+    signInForm.addStyleName("topMargin");
+    signInForm.addStyleName("formRounded");
+    signInForm.getElement().getStyle().setBackgroundColor("white");
+    return signInForm;
+  }
+
+  private Button getSignInButton() {
     signIn = new Button(SIGN_IN);
     signIn.getElement().setId("SignIn");
     eventRegistration.register(signIn);
-    hp.add(signIn);
     signIn.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -284,39 +325,43 @@ public class UserPassLogin extends UserDialog {
     signIn.addStyleName("leftFiveMargin");
 
     signIn.setType(ButtonType.PRIMARY);
-    fieldset.add(hp);
+    return signIn;
+  }
 
-    Panel hp2 = new HorizontalPanel();
+  private void makeSignInUserName(Fieldset fieldset) {
+    user = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, USERNAME);
+    user.box.addStyleName("topMargin");
+    user.box.addStyleName("rightFiveMargin");
+    user.box.getElement().setId("Username_Box_SignIn");
+    user.box.setFocus(true);
+    user.box.setWidth(SIGN_UP_WIDTH);
 
-    final Anchor forgotUser = getForgotUser();
-    hp2.add(forgotUser);
-    forgotUser.addStyleName("leftTenMargin");
 
-    final Anchor forgotPassword = getForgotPassword();
-    hp2.add(forgotPassword);
-    fieldset.add(hp2);
-
-    forgotPassword.addStyleName("leftFiveMargin");
-
-    getFocusOnField(user);
+    user.box.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        signInHasFocus = true;
+        eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "focus in username field");
+      }
+    });
   }
 
 
-  DecoratedPopupPanel resetEmailPopup;
-  Button sendEmail;
+  private DecoratedPopupPanel resetEmailPopup;
+  private Button sendEmail;
 
   public Anchor getForgotPassword() {
-    final Anchor forgotPassword = new Anchor("Forgot password?");
+    final Anchor forgotPassword = new Anchor(FORGOT_PASSWORD);
     forgotPassword.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         if (user.getText().isEmpty()) {
-          markError(user, "Enter a user name.");
+          markError(user, ENTER_A_USER_NAME);
           return;
         }
         final HidePopupTextBox emailEntry = new HidePopupTextBox();
         resetEmailPopup = new DecoratedPopupPanel(true);
-        sendEmail = new Button("Send");
+        sendEmail = new Button(SEND);
         sendEmail.setType(ButtonType.PRIMARY);
         sendEmail.addStyleName("leftTenMargin");
         sendEmail.addClickHandler(new ClickHandler() {
@@ -325,9 +370,7 @@ public class UserPassLogin extends UserDialog {
             String text = emailEntry.getText();
             if (!isValidEmail(text)) {
        /*       System.out.println("email is '" + text+ "' ");*/
-              markError(emailEntry,
-                  "Please check",
-                  VALID_EMAIL, Placement.TOP);
+              markError(emailEntry, "Please check", VALID_EMAIL, Placement.TOP);
               return;
             }
 
@@ -340,8 +383,8 @@ public class UserPassLogin extends UserDialog {
 
               @Override
               public void onSuccess(Boolean result) {
-                String heading = result ? "Check Email" : "Unknown email";
-                String message = result ? "Please check your email" : user.box.getText() + " doesn't have that email. Check for a typo?";
+                String heading = result ? CHECK_EMAIL : "Unknown email";
+                String message = result ? PLEASE_CHECK_YOUR_EMAIL : user.box.getText() + " doesn't have that email. Check for a typo?";
                 setupPopover(sendEmail, heading, message, Placement.LEFT, 5000, new MyPopover() {
                   boolean isFirst = true;
 
@@ -363,7 +406,7 @@ public class UserPassLogin extends UserDialog {
         });
         eventRegistration.register(sendEmail, "N/A", "reset password");
 
-        makePopup(resetEmailPopup, emailEntry, sendEmail, "Enter your email to reset your password.");
+        makePopup(resetEmailPopup, emailEntry, sendEmail, ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD);
         resetEmailPopup.showRelativeTo(forgotPassword);
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           public void execute() {
@@ -375,18 +418,18 @@ public class UserPassLogin extends UserDialog {
     return forgotPassword;
   }
 
-  DecoratedPopupPanel sendUsernamePopup;
-  Button sendUsernameEmail;
+  private DecoratedPopupPanel sendUsernamePopup;
+  private Button sendUsernameEmail;
 
   public Anchor getForgotUser() {
-    final Anchor forgotUsername = new Anchor("Forgot username?");
+    final Anchor forgotUsername = new Anchor(FORGOT_USERNAME);
     forgotUsername.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         final HidePopupTextBox emailEntry = new HidePopupTextBox();
         sendUsernamePopup = new DecoratedPopupPanel(true);
         sendUsernamePopup.setAutoHideEnabled(true);
-        sendUsernameEmail = new Button("Send");
+        sendUsernameEmail = new Button(SEND);
         sendUsernameEmail.getElement().setId("SendUsernameEmail");
         sendUsernameEmail.setType(ButtonType.PRIMARY);
         sendUsernameEmail.addStyleName("leftTenMargin");
@@ -417,7 +460,7 @@ public class UserPassLogin extends UserDialog {
                 } else {
                   eventRegistration.logEvent(sendUsernameEmail,"send username link","N/A","valid email request ");
 
-                  setupPopover(sendUsernameEmail, "Check Email", "Please check your email", Placement.LEFT, 5000, new MyPopover() {
+                  setupPopover(sendUsernameEmail, CHECK_EMAIL, PLEASE_CHECK_YOUR_EMAIL, Placement.LEFT, 5000, new MyPopover() {
                     boolean isFirst = true;
 
                     @Override
@@ -476,13 +519,10 @@ public class UserPassLogin extends UserDialog {
   private Button signUp;
 
   public Form getSignUpForm() {
-    Form form = new Form();
-    form.addStyleName("topMargin");
-    form.addStyleName("formRounded");
-    form.getElement().getStyle().setBackgroundColor("white");
+    Form form = getSignInForm();
 
     Fieldset fieldset = new Fieldset();
-    Heading w = new Heading(3, "Sign Up", SIGN_UP_SUBTEXT);
+    Heading w = new Heading(3, SIGN_UP, SIGN_UP_SUBTEXT);
     w.addStyleName("signUp");
     form.add(w);
     form.add(fieldset);
@@ -491,7 +531,7 @@ public class UserPassLogin extends UserDialog {
     final TextBoxBase userBox = signUpUser.box;
     userBox.addStyleName("topMargin");
     userBox.addStyleName("rightFiveMargin");
-    userBox.setWidth("266px");
+    userBox.setWidth(SIGN_UP_WIDTH);
     userBox.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
     userBox.addFocusHandler(new FocusHandler() {
       @Override
@@ -506,7 +546,7 @@ public class UserPassLogin extends UserDialog {
     final TextBoxBase emailBox = signUpEmail.box;
     emailBox.addStyleName("topMargin");
     emailBox.addStyleName("rightFiveMargin");
-    emailBox.setWidth("266px");
+    emailBox.setWidth(SIGN_UP_WIDTH);
     emailBox.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
@@ -524,8 +564,9 @@ public class UserPassLogin extends UserDialog {
       }
     });
     signUpPassword.box.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    signUpPassword.box.setWidth(SIGN_UP_WIDTH);
 
-    Heading w1 = new Heading(5, "Are you a");
+    Heading w1 = new Heading(5, ARE_YOU_A);
     fieldset.add(w1);
     w1.addStyleName("leftTenMargin");
     w1.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
@@ -563,6 +604,11 @@ public class UserPassLogin extends UserDialog {
   private RegistrationInfo registrationInfo;
   private User.Kind selectedRole = User.Kind.STUDENT;
 
+  /**
+   *
+   * @return
+   * @see #getSignUpForm()
+   */
   private DivWidget getShowGroup() {
     ButtonToolbar w = new ButtonToolbar();
     w.addStyleName("bottomFiveMargin");
@@ -571,21 +617,22 @@ public class UserPassLogin extends UserDialog {
     buttonGroup.setToggle(ToggleType.RADIO);
     w.add(buttonGroup);
 
-    buttonGroup.add(getChoice("Student", true, new ClickHandler() {
+    buttonGroup.add(getChoice(STUDENT, true, new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         selectedRole = User.Kind.STUDENT;
         registrationInfo.setVisible(false);
       }
     }));
-    buttonGroup.add(getChoice("Teacher", false, new ClickHandler() {
+    buttonGroup.add(getChoice(TEACHER, false, new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         selectedRole = User.Kind.TEACHER;
         registrationInfo.setVisible(false);
       }
     }));
-    buttonGroup.add(getChoice("Content Developer", false, new ClickHandler() {
+
+    buttonGroup.add(getChoice(CONTENT_DEVELOPER, false, new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         selectedRole = User.Kind.CONTENT_DEVELOPER;
@@ -609,7 +656,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   public void getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
-    signUp = new Button("Sign Up");
+    signUp = new Button(SIGN_UP);
     signUp.getElement().setId("SignUp");
     eventRegistration.register(signUp);
 
@@ -628,7 +675,7 @@ public class UserPassLogin extends UserDialog {
           markError(signUpEmail, VALID_EMAIL);
         } else if (signUpPassword.box.getValue().length() < MIN_PASSWORD) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "short password");
-          markError(signUpPassword, signUpPassword.box.getValue().isEmpty() ? "Please enter a password." :
+          markError(signUpPassword, signUpPassword.box.getValue().isEmpty() ? PLEASE_ENTER_A_PASSWORD :
               "Please enter a password at least " + MIN_PASSWORD + " characters long.");
         } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && !registrationInfo.checkValidGender()) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't check gender");
@@ -706,23 +753,31 @@ public class UserPassLogin extends UserDialog {
     left.addStyleName("floatLeft");
     left.setWidth(LEFT_SIDE_WIDTH + "px");
     leftAndRight.add(left);
-    int size = 2;
-    int subSize = size + 1;
-    left.add(new Heading(size, "Learn how to pronounce words and practice vocabulary."));
-    Heading w1 = new Heading(subSize, "Do flashcards to learn or review vocabulary", "Speak your answers. Compete with your friends.");
+    int size = 1;
+    int subSize = size + 2;
+    Heading w2 = new Heading(size, INITIAL_PROMPT);
+    left.add(w2);
+    w2.getElement().getStyle().setTextAlign(Style.TextAlign.LEFT);
+    Heading w1 = new Heading(subSize, FIRST_BULLET);//, "Speak your answers. Compete with your friends.");
     left.add(w1);
+    w1.getElement().getStyle().setMarginTop(20, Style.Unit.PX);
 
-    Node child2 = w1.getElement().getChild(1);
+    //Node child2 = w1.getElement().getChild(1);
 
-    com.google.gwt.dom.client.Element as = com.google.gwt.dom.client.Element.as(child2);
-    as.getStyle().setFontSize(16, Style.Unit.PX);
-    Heading w = new Heading(subSize, "Get feedback on your pronunciation", "Compare yourself to a native speaker.");
+    //com.google.gwt.dom.client.Element as = com.google.gwt.dom.client.Element.as(child2);
+    //as.getStyle().setFontSize(16, Style.Unit.PX);
+    Heading w = new Heading(subSize, SECOND_BULLET);//, "Compare yourself to a native speaker.");
     left.add(w);
-    child2 = w.getElement().getChild(1);
-    as = com.google.gwt.dom.client.Element.as(child2);
-    as.getStyle().setPaddingLeft(2, Style.Unit.PX);
-    as.getStyle().setFontSize(16, Style.Unit.PX);
-    left.add(new Heading(subSize, "Make your own lists of words to study later or to share."));
+    w.getElement().getStyle().setMarginTop(20, Style.Unit.PX);
+
+    //child2 = w.getElement().getChild(1);
+    //as = com.google.gwt.dom.client.Element.as(child2);
+    //as.getStyle().setPaddingLeft(2, Style.Unit.PX);
+    //as.getStyle().setFontSize(16, Style.Unit.PX);
+    Heading w3 = new Heading(subSize, THIRD_BULLET);
+    left.add(w3);
+    w3.getElement().getStyle().setMarginTop(20, Style.Unit.PX);
+
   }
 
 
