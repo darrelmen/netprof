@@ -45,7 +45,7 @@ public class DatabaseImpl implements Database {
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
   private UserDAO userDAO;
-  private DLIUserDAO dliUserDAO;
+  //private DLIUserDAO dliUserDAO;
   private ResultDAO resultDAO;
   private AudioDAO audioDAO;
   private AnswerDAO answerDAO;
@@ -154,7 +154,7 @@ public class DatabaseImpl implements Database {
 
     userExerciseDAO = new UserExerciseDAO(this);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
-    dliUserDAO = new DLIUserDAO(this);
+    //dliUserDAO = new DLIUserDAO(this);
     resultDAO = new ResultDAO(this);
     audioDAO = new AudioDAO(this, userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
@@ -180,7 +180,7 @@ public class DatabaseImpl implements Database {
 
     try {
       userDAO.createUserTable(this);
-      dliUserDAO.createUserTable(this);
+     // dliUserDAO.createUserTable(this);
       userListManager.setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
@@ -443,7 +443,7 @@ public class DatabaseImpl implements Database {
   /**
    * @param audioAttribute
    * @see mitll.langtest.server.LangTestDatabaseImpl#markAudioDefect(mitll.langtest.shared.AudioAttribute, String)
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#getPanelForAudio(mitll.langtest.shared.CommonExercise, mitll.langtest.shared.AudioAttribute, mitll.langtest.client.custom.tabs.RememberTabAndContent)
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio(mitll.langtest.shared.CommonExercise, mitll.langtest.shared.AudioAttribute, mitll.langtest.client.custom.tabs.RememberTabAndContent)
    */
   public void markAudioDefect(AudioAttribute audioAttribute) {
     if (audioDAO.markDefect(audioAttribute) < 1) {
@@ -681,7 +681,7 @@ public class DatabaseImpl implements Database {
       logger.error("Got " + e, e);
     }
 
-    joinWithDLIUsers(users);
+    //joinWithDLIUsers(users);
     return users;
   }
 
@@ -739,7 +739,7 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  Collection<User> joinWithDLIUsers(List<User> users) {
+/*  Collection<User> joinWithDLIUsers(List<User> users) {
     List<DLIUser> users1 = dliUserDAO.getUsers();
     Map<Long, User> userMap = userDAO.getMap(users);
 
@@ -751,7 +751,7 @@ public class DatabaseImpl implements Database {
     }
     //if (users1.isEmpty()) logger.info("no dli users.");
     return userMap.values();
-  }
+  }*/
 
   public List<Result> getResultsWithGrades() {
     List<Result> results = resultDAO.getResults();
@@ -920,9 +920,11 @@ public class DatabaseImpl implements Database {
     }
   }
 
+/*
   public void addDLIUser(DLIUser dliUser) throws Exception {
     dliUserDAO.addUser(dliUser);
   }
+*/
 
   public UserListManager getUserListManager() {
     return userListManager;
@@ -931,7 +933,7 @@ public class DatabaseImpl implements Database {
   /**
    * @param exercise
    * @return
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#duplicateExercise
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise
    * @see mitll.langtest.server.LangTestDatabaseImpl#duplicateExercise(mitll.langtest.shared.custom.UserExercise)
    */
   public UserExercise duplicateExercise(UserExercise exercise) {
@@ -968,7 +970,7 @@ public class DatabaseImpl implements Database {
    * @param id
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#deleteItem(String)
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#deleteItem(String, long, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.PagingExerciseList, mitll.langtest.client.list.PagingExerciseList)
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#deleteItem(String, long, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.PagingExerciseList, mitll.langtest.client.list.PagingExerciseList)
    */
   public boolean deleteItem(String id) {
     getAddRemoveDAO().add(id, AddRemoveDAO.REMOVE);
