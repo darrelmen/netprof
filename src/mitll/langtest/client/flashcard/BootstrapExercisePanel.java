@@ -328,7 +328,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#receivedAudioAnswer
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer
    * @param result
    */
   public void receivedAudioAnswer(final AudioAnswer result) {
