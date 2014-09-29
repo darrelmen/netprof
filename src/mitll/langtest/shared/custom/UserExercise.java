@@ -143,7 +143,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     if (slowSpeed != null) {
       imported.addAudio(slowSpeed);
     }
-    imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
     imported.setEnglishSentence(getEnglish());
     imported.setTranslitSentence(getTransliteration());
     imported.setUnitToValue(getUnitToValue());
