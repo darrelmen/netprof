@@ -18,7 +18,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.TooltipHelper;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -68,7 +67,7 @@ public class BasicDialog {
     return new FormField(user, userGroup,minLength);
   }
 
-  ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
+/*  ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
     ControlGroup group = addControlGroupEntry(dialogBox, label, user, "");
     return new ListBoxFormField(user, group);
   }
@@ -76,7 +75,7 @@ public class BasicDialog {
   ListBoxFormField getListBoxFormFieldNoLabel(Panel dialogBox, String label, ListBox user) {
     ControlGroup group = addControlGroupEntryNoLabel(dialogBox, user);
     return new ListBoxFormField(user, group);
-  }
+  }*/
 
   protected ControlGroup addControlGroupEntryNoLabel(Panel dialogBox, Widget widget) {
     final ControlGroup userGroup = new ControlGroup();
@@ -87,6 +86,18 @@ public class BasicDialog {
     dialogBox.add(userGroup);
     return userGroup;
   }
+
+
+  protected ControlGroup addControlGroupEntryNoLabel(Widget widget) {
+    final ControlGroup userGroup = new ControlGroup();
+    userGroup.addStyleName("leftFiveMargin");
+    widget.addStyleName("leftFiveMargin");
+
+    userGroup.add(widget);
+    //dialogBox.add(userGroup);
+    return userGroup;
+  }
+
 
 
   /**
@@ -249,7 +260,7 @@ public class BasicDialog {
   }
 
   /**
-   * @see mitll.langtest.client.custom.EditableExercise#checkForForeignChange()
+   * @see mitll.langtest.client.custom.dialog.EditableExercise#checkForForeignChange()
    * @param dialectGroup
    * @param header
    * @param message
@@ -290,17 +301,12 @@ public class BasicDialog {
 
   void markError(Widget dialect, String header, String message, Placement placement) {
     // System.out.println("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
-    // dialect.setFocus(true);
-//    setupPopover(dialect, header, message, placement);
     Widget widget = dialect;
-
-
     setupPopoverThatHidesItself(widget, header, message, placement);
   }
 
-
   private void setupPopoverThatHidesItself(final Widget w, String heading, final String message,Placement placement) {
-    System.out.println("\ttriggering popover on '" + w.getTitle() + "' with " + heading + "/" + message);
+//    System.out.println("\ttriggering popover on '" + w.getTitle() + "' with " + heading + "/" + message);
     setupPopover(w, heading, message, placement);
   }
 
@@ -316,7 +322,7 @@ public class BasicDialog {
   }
 
   protected Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis, final MyPopover popover) {
-    configurePopup(popover, w, heading, message, placement);
+    configurePopup(popover, w, heading, message, placement, false);
 
     Timer t = new Timer() {
       @Override
@@ -334,11 +340,12 @@ public class BasicDialog {
    * @param heading
    * @param message
    * @param placement
+   * @param isHTML
    */
-  void setupPopover(final FocusWidget w, String heading, final String message, Placement placement) {
+  void setupPopover(final FocusWidget w, String heading, final String message, Placement placement, boolean isHTML) {
     System.out.println(new Date() + " : setupPopover   : triggering popover on " + w.getElement().getId() + " with " + heading +"/"+message);
     final Popover popover = new Popover();
-    configurePopup(popover, w, heading, message, placement);
+    configurePopup(popover, w, heading, message, placement, isHTML);
 
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
@@ -347,10 +354,11 @@ public class BasicDialog {
     });
   }
 
-  private void configurePopup(Popover popover, Widget w, String heading, String message, Placement placement) {
-    System.out.println(new Date() + "configurePopup : triggering popover on " + w.getElement().getId() + " with " + heading +"/"+message + " " + placement);
+  private void configurePopup(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML) {
+  //  System.out.println(new Date() + "configurePopup : triggering popover on " + w.getElement().getId() + " with " + heading +"/"+message + " " + placement);
 
     popover.setWidget(w);
+    popover.setHtml(isHTML);
     popover.setText(message);
     popover.setHeading(heading);
     popover.setPlacement(placement);
@@ -358,10 +366,10 @@ public class BasicDialog {
     popover.show();
   }
 
-  ListBox getGenderBox() {
+/*  ListBox getGenderBox() {
     List<String> values = Arrays.asList("GENDER", MALE, FEMALE);
     return getListBox(values);
-  }
+  }*/
 
   protected ListBox getListBox(List<String> values) {
     final ListBox genderBox = new ListBox(false);
@@ -377,6 +385,16 @@ public class BasicDialog {
     user.setPlaceholder(hint);
     return getFormField(dialogBox, user, minLength);
   }
+
+/*
+  protected FormField addControlFormFieldWithPlaceholder(boolean isPassword, int minLength, int maxLength, String hint) {
+    final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
+    user.setMaxLength(maxLength);
+    user.setPlaceholder(hint);
+    final ControlGroup userGroup = addControlGroupEntryNoLabel(user);
+    return new FormField(user, userGroup, minLength);
+  }
+*/
 
   private FormField getFormField(Panel dialogBox, TextBox user, int minLength) {
     final ControlGroup userGroup = addControlGroupEntryNoLabel(dialogBox, user);
@@ -415,10 +433,10 @@ public class BasicDialog {
       this.group = group;
     }
 
-    public void clearError() {
+  /*  public void clearError() {
       group.setType(ControlGroupType.NONE);
       //hidePopovers();
-    }
+    }*/
 
     public void setVisible(boolean visible) {
       group.setVisible(visible);
@@ -432,7 +450,7 @@ public class BasicDialog {
     public String toString() { return "FormField value " + getText(); }
   }
 
-  protected class ListBoxFormField {
+/*  protected class ListBoxFormField {
     public final ListBox box;
     private final ControlGroup group;
 
@@ -447,7 +465,7 @@ public class BasicDialog {
 
     void markSimpleError(String message, Placement placement) {
       box.setFocus(true);
-      setupPopover(box, TRY_AGAIN, message, placement);
+      setupPopover(box, TRY_AGAIN, message, placement, false);
     }
 
     public void setVisible(boolean v) { box.setVisible(v); group.setVisible(v); }
@@ -455,7 +473,7 @@ public class BasicDialog {
     public String toString() {
       return "Box: " + getValue();
     }
-  }
+  }*/
 
   /**
    * @see StudentDialog#displayLoginBox()
