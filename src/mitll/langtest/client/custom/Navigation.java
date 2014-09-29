@@ -368,8 +368,6 @@ public class Navigation implements RequiresResize {
     // your list tab
     yourStuff = makeTab(tabPanel, IconType.FOLDER_CLOSE, YOUR_LISTS);
 
-//    TabAndContent tabAndContent = makeTab(tabPanel, iconType, label);
-
     yourStuff.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
