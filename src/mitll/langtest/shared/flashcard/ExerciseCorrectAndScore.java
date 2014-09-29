@@ -99,9 +99,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
         n++;
       }
     }
-    float v = n > 0f ? (c / n) : 0f;
-
-    return v;
+    return n > 0f ? (c / n) : 0f;
   }
 
   public int getAvgScorePercent() {
