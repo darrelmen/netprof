@@ -23,8 +23,8 @@ import java.util.*;
  * Time: 1:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExercisePanel extends VerticalPanel implements
-  BusyPanel, ExerciseQuestionState, PostAnswerProvider, ProvidesResize, RequiresResize {
+public abstract class ExercisePanel extends VerticalPanel implements
+  BusyPanel, PostAnswerProvider, ProvidesResize, RequiresResize {
   private static final int CONTENT_SCROLL_HEIGHT = 220;
   private static final String PROMPT = "Read the following text and answer the question or questions below.";
   private final List<Widget> answers = new ArrayList<Widget>();
@@ -233,7 +233,7 @@ public class ExercisePanel extends VerticalPanel implements
    * @param completedExercise
    */
   @Override
-  public void postAnswers(final ExerciseController controller, final CommonExercise completedExercise) {
+  public abstract void postAnswers(final ExerciseController controller, final CommonExercise completedExercise); /*{
     int i = 1;
     int user = controller.getUser();
     final Set<Widget> incomplete = new HashSet<Widget>();
@@ -261,7 +261,7 @@ public class ExercisePanel extends VerticalPanel implements
             if (incomplete.isEmpty()) {
               System.out.println("ExercisePanel.loadNextExercise " + completedExercise.getID());
 
-              exerciseList.loadNextExercise(completedExercise/*.getID()*/);
+              exerciseList.loadNextExercise(completedExercise*//*.getID()*//*);
             }
             else {
               System.out.println("ExercisePanel.postAnswers " + incomplete.size() + " incomplete...");
@@ -272,9 +272,9 @@ public class ExercisePanel extends VerticalPanel implements
         );
       }
     }
-  }
+  }*/
 
-  private void showPopup(String toShow) {
+/*  private void showPopup(String toShow) {
     final PopupPanel popupImage = new PopupPanel(true);
     popupImage.add(new HTML(toShow));
     popupImage.showRelativeTo(navigationHelper.getNext());
@@ -283,7 +283,7 @@ public class ExercisePanel extends VerticalPanel implements
       public void run() { popupImage.hide(); }
     };
     t.schedule(3000);
-  }
+  }*/
 
   protected Widget getAnswerWidget(final CommonExercise exercise, final LangTestDatabaseAsync service,
                                    ExerciseController controller, final int index) { return null; }
