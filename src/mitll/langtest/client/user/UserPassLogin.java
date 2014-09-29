@@ -2,22 +2,21 @@ package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.CheckBox;
+import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.HidePopupTextBox;
@@ -35,7 +34,7 @@ public class UserPassLogin extends UserDialog {
   private static final int MIN_PASSWORD = 5;
   private static final int MIN_EMAIL = 13;
   private static final int LEFT_SIDE_WIDTH = 483;
-  private static final String SIGN_UP_SUBTEXT = "Or add missing info";//password and email";
+  private static final String SIGN_UP_SUBTEXT = "Sign up";//Or never entered a password?";//password and email";
   private static final String PLEASE_ENTER_YOUR_PASSWORD = "Please enter your password.";
   private static final String BAD_PASSWORD = "Wrong password - have you signed up?";
   private static final String PASSWORD = "Password";
@@ -46,9 +45,9 @@ public class UserPassLogin extends UserDialog {
   private static final String PLEASE_WAIT = "Please wait";
   //private static final String INITIAL_PROMPT = "<b>Classroom</b> allows you to practice your vocabulary and learn pronunciation.";//"Learn how to pronounce words and practice vocabulary.";
   private static final String INITIAL_PROMPT = "Practice vocabulary and learn pronunciation.";//"Learn how to pronounce words and practice vocabulary.";
-  private static final String FIRST_BULLET = "Practice vocabulary with audio flashcards";//"Do flashcards to learn or review vocabulary";
-  private static final String SECOND_BULLET = "Record your voice and get feedback on your pronunciation";//"Get feedback on your pronunciation";
-  private static final String THIRD_BULLET = "Create and share vocab lists for study and review";//"Make your own lists of words to study later or to share.";
+  private static final String FIRST_BULLET = "Practice vocabulary with audio flashcards.";//"Do flashcards to learn or review vocabulary";
+  private static final String SECOND_BULLET = "Record your voice and get feedback on your pronunciation.";//"Get feedback on your pronunciation";
+  private static final String THIRD_BULLET = "Create and share vocab lists for study and review.";//"Make your own lists of words to study later or to share.";
   private static final String PLEASE_ENTER_A_PASSWORD = "Please enter a password";
   private static final String PLEASE_ENTER_A_LONGER_PASSWORD = "Please enter a longer password";
   private static final String PLEASE_ENTER_THE_SAME_PASSWORD = "Please enter the same password";
@@ -64,11 +63,12 @@ public class UserPassLogin extends UserDialog {
   private static final String FORGOT_USERNAME = "Forgot username?";
   private static final String SEND = "Send";
   private static final String SIGN_UP = "Sign Up";
-  private static final String ARE_YOU_A = "Please select one : Are you a";
+  private static final String ARE_YOU_A = "Please choose : Are you a";
   private static final String STUDENT = "Student";
   private static final String TEACHER = "Teacher";
-  private static final String CONTENT_DEVELOPER = "Content Developer";
+  //private static final String CONTENT_DEVELOPER = "Content Developer";
   private static final String SIGN_UP_WIDTH = "266px";
+  public static final int BULLET_MARGIN = 25;
   //public static final String PLEASE_ENTER_A_PASSWORD1 = "Please enter a password.";
   private final UserManager userManager;
   private final KeyPressHelper enterKeyButtonHelper;
@@ -110,7 +110,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#showLogin() 
+   * @see mitll.langtest.client.LangTest#showLogin()
    * @return
    */
   public Panel getContent() {
@@ -344,6 +344,32 @@ public class UserPassLogin extends UserDialog {
         eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "focus in username field");
       }
     });
+
+    user.box.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        if (!user.getText().isEmpty()) {
+          service.userExists(user.getText(), "", new AsyncCallback<User>() {
+            @Override
+            public void onFailure(Throwable caught) {
+
+            }
+
+            @Override
+            public void onSuccess(User result) {
+              System.out.println("makeSignInUserName : for " + user.getText() + " got back " + result);
+              if (result != null) {
+                String emailHash = result.getEmailHash();
+                String passwordHash = result.getPasswordHash();
+                if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
+                  copyInfoToSignUp(result);
+                }
+              }
+            }
+          });
+        }
+
+      }});
   }
 
 
@@ -517,17 +543,60 @@ public class UserPassLogin extends UserDialog {
   }
 
   private Button signUp;
+   CheckBox contentDevCheckbox;
 
   public Form getSignUpForm() {
     Form form = getSignInForm();
 
     Fieldset fieldset = new Fieldset();
-    Heading w = new Heading(3, SIGN_UP, SIGN_UP_SUBTEXT);
+    Heading w = new Heading(3, "New User?", SIGN_UP_SUBTEXT);
     w.addStyleName("signUp");
     form.add(w);
     form.add(fieldset);
 
-    signUpUser = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, 20, USERNAME);
+    TextBoxBase userBox = makeSignUpUsername(fieldset);
+
+    TextBoxBase emailBox = makeSignUpEmail(fieldset);
+
+    makeSignUpPassword(fieldset, emailBox);
+
+    Heading w1 = new Heading(5, ARE_YOU_A);
+    fieldset.add(w1);
+    w1.addStyleName("leftTenMargin");
+    w1.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
+    w1.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+
+    fieldset.add(getShowGroup());
+
+    contentDevCheckbox = new CheckBox("Record Reference Audio?");
+
+    String html = "After you click sign up, " +
+        "LTEA personnel will approve your account.<br/>" +
+        "You will receive an email once it's approved.<br/>" +
+        "You will not be able to access Classroom for recording or QC until approval is granted.";
+
+    setupPopover(contentDevCheckbox,"Recording audio/Quality Control",html,Placement.LEFT, true);
+
+    contentDevCheckbox.setVisible(false);
+    contentDevCheckbox.addStyleName("leftTenMargin");
+    contentDevCheckbox.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        selectedRole = contentDevCheckbox.getValue() ? User.Kind.CONTENT_DEVELOPER : User.Kind.TEACHER;
+        registrationInfo.setVisible(contentDevCheckbox.getValue());
+      }
+    });
+    contentDevCheckbox.getElement().getStyle().setPaddingBottom(10, Style.Unit.PX);
+    fieldset.add(contentDevCheckbox);
+
+    makeRegistrationInfo(fieldset);
+    fieldset.add(getSignUpButton(userBox, emailBox));
+
+    return form;
+  }
+
+  private TextBoxBase makeSignUpUsername(Fieldset fieldset) {
+    signUpUser = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, BULLET_MARGIN, USERNAME);
     final TextBoxBase userBox = signUpUser.box;
     userBox.addStyleName("topMargin");
     userBox.addStyleName("rightFiveMargin");
@@ -541,7 +610,10 @@ public class UserPassLogin extends UserDialog {
 
       }
     });
+    return userBox;
+  }
 
+  private TextBoxBase makeSignUpEmail(Fieldset fieldset) {
     signUpEmail = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, "Email");
     final TextBoxBase emailBox = signUpEmail.box;
     emailBox.addStyleName("topMargin");
@@ -554,7 +626,10 @@ public class UserPassLogin extends UserDialog {
         eventRegistration.logEvent(emailBox, "SignUp_EmailBox", "N/A", "focus in email field in sign up form");
       }
     });
+    return emailBox;
+  }
 
+  private void makeSignUpPassword(Fieldset fieldset, final TextBoxBase emailBox) {
     signUpPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
     signUpPassword.box.addFocusHandler(new FocusHandler() {
       @Override
@@ -565,15 +640,9 @@ public class UserPassLogin extends UserDialog {
     });
     signUpPassword.box.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
     signUpPassword.box.setWidth(SIGN_UP_WIDTH);
+  }
 
-    Heading w1 = new Heading(5, ARE_YOU_A);
-    fieldset.add(w1);
-    w1.addStyleName("leftTenMargin");
-    w1.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
-    w1.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
-    fieldset.add(getShowGroup());
-    getSignUpButton(userBox, emailBox);
-
+  private void makeRegistrationInfo(Fieldset fieldset) {
     registrationInfo = new RegistrationInfo(fieldset);
 
     registrationInfo.getAgeEntryGroup().box.addFocusHandler(new FocusHandler() {
@@ -588,17 +657,19 @@ public class UserPassLogin extends UserDialog {
         signInHasFocus = false;
       }
     });
-    registrationInfo.getGenderGroup().box.addFocusHandler(new FocusHandler() {
+    registrationInfo.getMale().addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
         signInHasFocus = false;
       }
     });
-
+    registrationInfo.getFemale().addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        signInHasFocus = false;
+      }
+    });
     registrationInfo.setVisible(false);
-    fieldset.add(signUp);
-
-    return form;
   }
 
   private RegistrationInfo registrationInfo;
@@ -622,23 +693,26 @@ public class UserPassLogin extends UserDialog {
       public void onClick(ClickEvent event) {
         selectedRole = User.Kind.STUDENT;
         registrationInfo.setVisible(false);
+        contentDevCheckbox.setVisible(false);
       }
     }));
+
     buttonGroup.add(getChoice(TEACHER, false, new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         selectedRole = User.Kind.TEACHER;
         registrationInfo.setVisible(false);
+        contentDevCheckbox.setVisible(true);
       }
     }));
-
+/*
     buttonGroup.add(getChoice(CONTENT_DEVELOPER, false, new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         selectedRole = User.Kind.CONTENT_DEVELOPER;
         registrationInfo.setVisible(true);
       }
-    }));
+    }));*/
 
     Style style = w.getElement().getStyle();
     style.setMarginLeft(9, Style.Unit.PX);
@@ -655,7 +729,7 @@ public class UserPassLogin extends UserDialog {
     return onButton;
   }
 
-  public void getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
+  public Button getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
     signUp = new Button(SIGN_UP);
     signUp.getElement().setId("SignUp");
     eventRegistration.register(signUp);
@@ -696,6 +770,8 @@ public class UserPassLogin extends UserDialog {
     signUp.addStyleName("leftFiveMargin");
 
     signUp.setType(ButtonType.SUCCESS);
+
+    return signUp;
   }
 
   private void gotSignUp(String user, String password, String email, User.Kind kind) {
@@ -703,7 +779,7 @@ public class UserPassLogin extends UserDialog {
     String emailH = Md5Hash.getHash(email);
 
     boolean isCD = kind == User.Kind.CONTENT_DEVELOPER;
-    String gender = isCD ? registrationInfo.getGenderGroup().box.getValue() : "male";
+    String gender = isCD ? registrationInfo.isMale() ? "male":"female" : "male";
     String age = isCD ? registrationInfo.getAgeEntryGroup().getText() : "";
     int age1 = isCD ? Integer.parseInt(age) : 0;
     String dialect = isCD ? registrationInfo.getDialectGroup().getText() : "unk";
@@ -754,30 +830,73 @@ public class UserPassLogin extends UserDialog {
     left.setWidth(LEFT_SIDE_WIDTH + "px");
     leftAndRight.add(left);
     int size = 1;
-    int subSize = size + 2;
+ //   int subSize = size + 2;
     Heading w2 = new Heading(size, INITIAL_PROMPT);
     left.add(w2);
+    w2.getElement().getStyle().setPaddingBottom(24, Style.Unit.PX);
     w2.getElement().getStyle().setTextAlign(Style.TextAlign.LEFT);
-    Heading w1 = new Heading(subSize, FIRST_BULLET);//, "Speak your answers. Compete with your friends.");
-    left.add(w1);
-    w1.getElement().getStyle().setMarginTop(20, Style.Unit.PX);
+ //   Heading w1 = new Heading(subSize, FIRST_BULLET);//, "Speak your answers. Compete with your friends.");
+    Widget w1 = new HTML(FIRST_BULLET);//, "Speak your answers. Compete with your friends.");
+    Panel h = new HorizontalPanel();
+    h.add(new Image(LangTest.LANGTEST_IMAGES + "NewProF2_48x48.png"));
+    h.add(w1);
+    configure(h);
+
+    left.add(h);
+   // w1.getElement().getStyle().setMarginTop(20, Style.Unit.PX);
+  //  w1.getElement().getStyle().setFontSize(21, Style.Unit.PT);
+    w1.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
+    configure(w1);
 
     //Node child2 = w1.getElement().getChild(1);
 
     //com.google.gwt.dom.client.Element as = com.google.gwt.dom.client.Element.as(child2);
     //as.getStyle().setFontSize(16, Style.Unit.PX);
-    Heading w = new Heading(subSize, SECOND_BULLET);//, "Compare yourself to a native speaker.");
-    left.add(w);
-    w.getElement().getStyle().setMarginTop(20, Style.Unit.PX);
+    //Heading w = new Heading(subSize, SECOND_BULLET);//, "Compare yourself to a native speaker.");
+    Widget w = new HTML(SECOND_BULLET);
+
+    h = new HorizontalPanel();
+    h.add(new Image(LangTest.LANGTEST_IMAGES + "NewProF1_48x48.png"));
+    h.add(w);
+    configure(h);
+
+    left.add(h);
+  //  w.getElement().getStyle().setMarginTop(20, Style.Unit.PX);
+   // w.getElement().getStyle().setFontSize(21, Style.Unit.PT);
+    w.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
+    configure(w);
 
     //child2 = w.getElement().getChild(1);
     //as = com.google.gwt.dom.client.Element.as(child2);
     //as.getStyle().setPaddingLeft(2, Style.Unit.PX);
     //as.getStyle().setFontSize(16, Style.Unit.PX);
-    Heading w3 = new Heading(subSize, THIRD_BULLET);
+    //Widget w3 = new Heading(subSize, THIRD_BULLET);
+    Widget w3 = new HTML(THIRD_BULLET);
     left.add(w3);
-    w3.getElement().getStyle().setMarginTop(20, Style.Unit.PX);
 
+
+    h = new HorizontalPanel();
+    h.add(new Image(LangTest.LANGTEST_IMAGES + "listIcon_48x48_transparent.png"));
+    h.add(w3);
+    configure(h);
+
+    left.add(h);
+
+    w3.getElement().getStyle().setMarginTop(-1, Style.Unit.PX);
+    configure(w3);
+
+
+  }
+
+  private void configure(Panel h) {
+    h.getElement().getStyle().setMarginTop(BULLET_MARGIN, Style.Unit.PX);
+    h.getElement().getStyle().setPaddingBottom(10, Style.Unit.PX);
+  }
+
+  private void configure(Widget w3) {
+    w3.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
+    w3.getElement().getStyle().setFontSize(16, Style.Unit.PT);
+    w3.getElement().getStyle().setLineHeight(1, Style.Unit.EM);
   }
 
 
@@ -788,7 +907,6 @@ public class UserPassLogin extends UserDialog {
    */
   private void gotLogin(final String user, final String pass, final boolean emptyPassword) {
     final String hashed = Md5Hash.getHash(pass);
-
     //  System.out.println("gotLogin : user is '" +user + "' pass '" + pass +"' or " + hashed);
 
     signIn.setEnabled(false);
@@ -812,12 +930,7 @@ public class UserPassLogin extends UserDialog {
           String emailHash = result.getEmailHash();
           String passwordHash = result.getPasswordHash();
           if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
-            signUpUser.box.setText(result.getUserID());
-            signUpPassword.box.setText(password.getText());
-            getFocusOnField(signUpEmail);
-            eventRegistration.logEvent(signIn, "sign in", "N/A", "copied info to sign up form");
-
-            markError(signUpEmail, "Add info", "Current users should add an email and password.", Placement.TOP);
+            copyInfoToSignUp(result);
             signIn.setEnabled(true);
           } else {
             System.out.println("Got valid user " + result);
@@ -856,6 +969,15 @@ public class UserPassLogin extends UserDialog {
         }
       }
     });
+  }
+
+  private void copyInfoToSignUp(User result) {
+    signUpUser.box.setText(result.getUserID());
+    signUpPassword.box.setText(password.getText());
+    getFocusOnField(signUpEmail);
+    eventRegistration.logEvent(signIn, "sign in", "N/A", "copied info to sign up form");
+
+    markError(signUpEmail, "Add info", "Current users should add an email and password.", Placement.TOP);
   }
 
   public void storeUser(User result) {
