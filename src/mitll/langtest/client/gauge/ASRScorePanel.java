@@ -17,7 +17,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.pretest.PretestGauge;
 import mitll.langtest.client.scoring.ScoreListener;
 import mitll.langtest.client.sound.PlayAudioWidget;
-import mitll.langtest.shared.ScoreAndPath;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -47,7 +46,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private final Panel phoneList;
   private final List<CorrectAndScore> scores2 = new ArrayList<CorrectAndScore>();
   private final SimplePanel scoreHistoryPanel;
-  private final SimpleColumnChart chart = new SimpleColumnChart();
+  //private final SimpleColumnChart chart = new SimpleColumnChart();
   private float classAvg = 0f;
   private String refAudio;
   private final ExerciseController controller;
@@ -406,7 +405,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     p.add(left);
     HTML child = new HTML(phone);
     Float score = phoneAccuracies.get(phone);
-    p.getElement().getStyle().setBackgroundColor(chart.getColor(score));
+    p.getElement().getStyle().setBackgroundColor(SimpleColumnChart.getColor(score));
     float x = score * 100.0f;
     child.setTitle(((int) x) + "%");
     p.add(child);
