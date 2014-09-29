@@ -66,7 +66,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int MAX_CACHE_SIZE = 100;
   private static final int NO_USER_INITIAL = -2;
   private static final boolean SHOW_STATUS = false;
- // private static final boolean SHOW_EXCEPTION_TO_USER = false;
   private static final String PLEASE_ALLOW_ACCESS_TO_THE_MICROPHONE = "Please allow access to the microphone.";
   private static final String TRY_AGAIN = "Try Again";
 
@@ -532,8 +531,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #onModuleLoad2
    */
   private void checkAdmin(boolean isAdmin) {
-    if (isAdmin || props.isGrading()) {
-    //  final LangTest outer = this;
+    if (isAdmin/* || props.isGrading()*/) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
           Window.alert("Code download failed");
