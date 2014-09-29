@@ -6,7 +6,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.AudioAnswer;
@@ -99,13 +98,12 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    * And then move on to the next item.
    *
    * @param result        response from server
-   * @param questionState ignored here
    * @param outer         ignored here
    * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile
    */
   @Override
-  protected void receivedAudioAnswer(final AudioAnswer result, ExerciseQuestionState questionState, Panel outer) {
-    System.out.println("FlashcardRecordButtonPanel.receivedAudioAnswer " + result);
+  protected void receivedAudioAnswer(final AudioAnswer result, Panel outer) {
+   // System.out.println("FlashcardRecordButtonPanel.receivedAudioAnswer " + result);
     recordButton.setVisible(false);
     waiting.setVisible(false);
     if (result.isCorrect()) {
