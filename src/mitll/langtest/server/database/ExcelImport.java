@@ -909,16 +909,10 @@ public class ExcelImport implements ExerciseDAO {
                                String english, String foreignLanguagePhrase, String translit, String meaning,
                                String context, boolean promptInEnglish, String refAudioIndex, boolean lookForOldAudio) {
     String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context, language);
-
-    //logger.debug("id  " + id+  " context " + context);
-
     Exercise imported = new Exercise("import", id, content, promptInEnglish, true, english, context);
 
     //logger.debug("id  " + id+  " context " + imported.getContext());
-
     imported.setMeaning(meaning);
-    imported.addQuestion();   // TODO : needed?
-    imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
 
     if (lookForOldAudio) {
       addOldSchoolAudio(refAudioIndex, imported);
