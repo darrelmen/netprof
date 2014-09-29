@@ -20,7 +20,7 @@ import java.util.Collection;
  * Does fancy font sizing depending on available width...
  */
 public class Flashcard implements RequiresResize {
-  private static final String PRONUNCIATION_FEEDBACK = "NetProF";//"PRONUNCIATION FEEDBACK";
+  private static final String PRONUNCIATION_FEEDBACK = "Classroom";//NetProF";//"PRONUNCIATION FEEDBACK";
   private static final double MAX_FONT_EM = 1.7d;
   private static final int SLOP = 55;
   private static final String NEW_PRO_F1_PNG = "NewProF1.png";
