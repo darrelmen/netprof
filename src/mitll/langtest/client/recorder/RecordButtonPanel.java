@@ -1,6 +1,5 @@
 package mitll.langtest.client.recorder;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -10,7 +9,6 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
 
@@ -31,7 +29,6 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   private final LangTestDatabaseAsync service;
   private final ExerciseController controller;
   private final CommonExercise exercise;
-  private final ExerciseQuestionState questionState;
   private final int index;
   private int reqid = 0;
   private Panel panel;
@@ -51,7 +48,6 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     this.service = service;
     this.controller = controller;
     this.exercise = exercise;
-    this.questionState = null;
     this.index = index;
     this.doFlashcardAudio = doFlashcardAudio;
     layoutRecordButton(recordButton = makeRecordButton(controller,recordButtonTitle));
@@ -168,7 +164,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
             return;
           }
           recordButton.setEnabled(true);
-          receivedAudioAnswer(result, questionState, outer);
+          receivedAudioAnswer(result, outer);
 
           long now = System.currentTimeMillis();
           long diff = now - then;
@@ -199,6 +195,6 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   protected String getAudioType() { return controller.getAudioType();  }
 
   public Widget getRecordButton() { return recordButton; }
-  protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {}
+  protected void receivedAudioAnswer(AudioAnswer result, final Panel outer) {}
   protected void receivedAudioFailure() {}
 }
