@@ -1,6 +1,5 @@
 package mitll.langtest.client;
 
-import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
@@ -18,21 +17,10 @@ import java.util.Map;
  * The async counterpart of <code>LangTestDatabase</code>.
  */
 public interface LangTestDatabaseAsync {
-  void addTextAnswer(int usedID, CommonExercise exercise, int questionID, String answer, String answerType, AsyncCallback<Void> async);
-  void userExists(String login, AsyncCallback<Integer> async);
+ // void addTextAnswer(int usedID, CommonExercise exercise, int questionID, String answer, String answerType, AsyncCallback<Void> async);
+ // void userExists(String login, AsyncCallback<Integer> async);
 
-  /**
-   * @param age
-   * @param gender
-   * @param experience
-   * @param nativeLang
-   * @param dialect
-   * @param userID
-   * @param permissions
-   * @param async
-   * @deprecated
-   */
-  void addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, Collection<User.Permission> permissions, AsyncCallback<Long> async);
+  //void addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, Collection<User.Permission> permissions, AsyncCallback<Long> async);
   void getUsers(AsyncCallback<List<User>> async);
   void getUserBy(long id, AsyncCallback<User> async);
 
@@ -114,7 +102,7 @@ public interface LangTestDatabaseAsync {
 
   void markState(String id, STATE state, long creatorID, AsyncCallback<Void> async);
 
-  void setAVPSkip(Collection<Long> ids, AsyncCallback<Void> async);
+  //void setAVPSkip(Collection<Long> ids, AsyncCallback<Void> async);
 
   void getReviewLists(AsyncCallback<List<UserList>> async);
 
