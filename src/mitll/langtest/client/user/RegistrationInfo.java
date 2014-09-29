@@ -84,10 +84,6 @@ class RegistrationInfo extends BasicDialog {
     return ageEntryGroup;
   }
 
-  //public ControlGroup getGenderGroup() {
-  //  return genderGroup;
-  // }
-
   public FormField getDialectGroup() {
     return dialectGroup;
   }
