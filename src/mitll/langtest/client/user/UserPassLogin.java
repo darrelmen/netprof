@@ -7,6 +7,7 @@ import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.Scheduler;
@@ -20,6 +21,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.HidePopupTextBox;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.Result;
@@ -284,7 +286,21 @@ public class UserPassLogin extends UserDialog {
     fieldset.add(hp2);
 
     forgotPassword.addStyleName("leftFiveMargin");
+    Panel hp3 = new HorizontalPanel();
+    //final Heading w = new Heading(6, "Current user but no password?");
+    HTML w = new HTML("Current user but no password?");
+    w.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
+    hp3.add(w);
+    final Icon child = new Icon(IconType.QUESTION_SIGN);
+    hp3.add(child);
+    child.addStyleName("topFiveMargin");
+    child.addStyleName("leftFiveMargin");
+    w.addStyleName("leftTenMargin");
 
+    new TooltipHelper().addTooltip(w,"Current users who don't have a password and email should sign up below");
+    new TooltipHelper().addTooltip(child,"Current users who don't have a password and email should sign up below");
+
+    fieldset.add(hp3);
     getFocusOnField(user);
 
     return signInForm;
