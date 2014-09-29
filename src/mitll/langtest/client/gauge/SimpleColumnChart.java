@@ -15,7 +15,14 @@ public class SimpleColumnChart {
 /*  private static final float HALF = 2f;
   public static final float GRAPH_MAX = 100f;*/
 
-  public Widget getChart(boolean showOnlyOneExercise, List<Float> scores, int height, float classAvg) {
+  /**
+   *
+   * @param showOnlyOneExercise
+   * @param scores
+   * @param height
+   * @return
+   */
+/*  public Widget getChart(boolean showOnlyOneExercise, List<Float> scores, int height) {
     Chart chart = new Chart()
       .setType(Series.Type.COLUMN)
       .setChartTitleText("")
@@ -41,9 +48,9 @@ public class SimpleColumnChart {
         .setPoints(single);
       chart.addSeries(series);
     }
-/*    chart.getYAxis().setPlotBands(
+*//*    chart.getYAxis().setPlotBands(
       getAvgScore(classAvg*100,chart)
-    );*/
+    );*//*
 
     chart.getYAxis().setAxisTitleText("")
       .setMin(0)
@@ -51,7 +58,7 @@ public class SimpleColumnChart {
 
     chart.getXAxis().setAllowDecimals(false).setLabels(new XAxisLabels().setEnabled(false));
     return chart;
-  }
+  }*/
 
 /*  private <T extends SetScore> PlotBand getAvgScore(float avg, Chart chart) {
     return getPlotBand(avg, chart, "#2031ff", LeaderboardPlot.AVERAGE);
