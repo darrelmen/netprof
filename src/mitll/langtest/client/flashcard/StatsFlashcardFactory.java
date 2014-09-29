@@ -245,7 +245,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
 
     /**
      * @param result
-     * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, mitll.langtest.client.exercise.ExerciseQuestionState, com.google.gwt.user.client.ui.Panel)
+     * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, com.google.gwt.user.client.ui.Panel)
      */
     public void receivedAudioAnswer(final AudioAnswer result) {
       //System.out.println("StatsPracticePanel.receivedAudioAnswer: result " + result);
