@@ -42,7 +42,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
   private final LangTestDatabaseAsync service;
   private final String textToAlign;
   private final String identifier;
-  private final SimpleColumnChart chart = new SimpleColumnChart();
+  //private final SimpleColumnChart chart = new SimpleColumnChart();
   protected AudioAnswer lastResult;
 
   /**
@@ -235,7 +235,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
       HTML word = new HTML(words[wordIndex] + " ");
       word.getElement().getStyle().setProperty("fontSize", "130%");
       word.getElement().getStyle().setProperty("marginLeft", "2px");
-      word.getElement().getStyle().setBackgroundColor(chart.getColor(wordInfo.getScore()));
+      word.getElement().getStyle().setBackgroundColor(SimpleColumnChart.getColor(wordInfo.getScore()));
       colorfulSent.add(word);
       wordIndex += 1;
     }
@@ -256,7 +256,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
 	  TooltipHelper tooltipHelper = new TooltipHelper();
 	  bar.setWidth(iscore + "px");
 	  bar.setHeight(HEIGHT + "px");
-	  bar.getElement().getStyle().setBackgroundColor(chart.getColor(score));
+	  bar.getElement().getStyle().setBackgroundColor(SimpleColumnChart.getColor(score));
 	  bar.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
 
 	  tooltipHelper.createAddTooltip(bar, "Score " + score + "%", Placement.BOTTOM);
