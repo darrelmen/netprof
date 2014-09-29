@@ -31,7 +31,7 @@ public class UserManager {
   private static final int WEEK_HOURS = DAY_HOURS * 7;
   //private static final int ONE_YEAR = 24 * 365;
 
-  private static final int EXPIRATION_HOURS = 8*WEEK_HOURS;
+  private static final int EXPIRATION_HOURS = 52*WEEK_HOURS;
  // private static final int SHORT_EXPIRATION_HOURS = DAY_HOURS;
 //  private static final int FOREVER_HOURS = ONE_YEAR;
 
