@@ -73,7 +73,6 @@ public interface CommonExercise extends CommonShell {
   ExerciseAnnotation getAnnotation(String field);
 
   Exercise toExercise();
-  CommonUserExercise toCommonUserExercise();
 
   // super nice to remove these... and make read only
 
