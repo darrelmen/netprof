@@ -22,6 +22,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
@@ -278,7 +279,7 @@ public class NPFHelper implements RequiresResize {
             @Override
             public Panel getExercisePanel(CommonExercise exercise) {
               ReviewEditableExercise reviewEditableExercise =
-                new ReviewEditableExercise(service, controller, itemMarker, exercise.toCommonUserExercise(), ul,
+                new ReviewEditableExercise(service, controller, itemMarker, new UserExercise(exercise), ul,
                   pagingExerciseList, predefinedContent, npfHelper);
               SimplePanel ignoredContainer = new SimplePanel();
 
