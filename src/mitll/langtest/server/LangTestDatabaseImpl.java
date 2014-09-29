@@ -916,10 +916,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   // Users ---------------------
 
-  @Override
+/*  @Override
   public synchronized int userExists(String login) {
     return db.userExists(login);
-  }
+  }*/
 
   /**
    * @param login
@@ -1031,10 +1031,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param ids
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#getRepeatButton()
    */
-  @Override
+/*  @Override
   public void setAVPSkip(Collection<Long> ids) {
     db.getAnswerDAO().changeType(ids);
-  }
+  }*/
 
   /**
    * @param id
@@ -1204,13 +1204,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userID
    * @param permissions
    * @return
-   * @deprecated called from student dialog
+   * @deprecatedx called from student dialog
    */
-  @Override
+/*  @Override
   public long addUser(int age, String gender, int experience,
                       String nativeLang, String dialect, String userID, Collection<User.Permission> permissions) {
     return db.addUser(getThreadLocalRequest(), age, gender, experience, nativeLang, dialect, userID, permissions);
-  }
+  }*/
 
   /**
    * @param userID
