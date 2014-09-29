@@ -223,7 +223,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#makeAudioRow()
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#makeAudioRow()
    * List of audio is sorted to show regular before slow.
    *
    * @param isMale
@@ -340,7 +340,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#makeAudioRow()
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#makeAudioRow()
    * @param malesMap
    * @return
    */
