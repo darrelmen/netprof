@@ -16,7 +16,7 @@ class ButtonContainer {
   private final Set<Button> enabled = new HashSet<Button>();
   private final Set<Button> disabled = new HashSet<Button>();
   private final Map<String, Collection<Button>> nameToButton = new HashMap<String, Collection<Button>>();
-  final boolean debug = false;
+  private final boolean debug = false;
 
   public void add(Button b, String name) {
     buttons.add(b);
