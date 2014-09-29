@@ -200,7 +200,7 @@ public class EditItem {
         Panel panel = new SimplePanel();
         panel.getElement().setId("EditItemPanel");
         // TODO : do something better here than toCommonUserExercise
-        populatePanel(e.toCommonUserExercise(), panel, ul, originalList, itemMarker, outer);
+        populatePanel(new UserExercise(e), panel, ul, originalList, itemMarker, outer);
         return panel;
       }
     }, userManager);
