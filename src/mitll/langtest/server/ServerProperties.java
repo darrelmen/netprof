@@ -49,7 +49,7 @@ public class ServerProperties {
   private static final String ARABIC_TEXT_DATA_COLLECT = "arabicTextDataCollect";
   private static final String MIN_PRON_SCORE = "minPronScore";
   private static final String MIN_PRON_SCORE_DEFAULT = "0.20";
-  private static final String GOODWAVE_MODE = "goodwaveMode";
+ // private static final String GOODWAVE_MODE = "goodwaveMode";
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
   private static final String SORT_EXERCISES = "sortExercises";
@@ -61,9 +61,9 @@ public class ServerProperties {
   private static final String INCLUDE_FEEDBACK = "includeFeedback";
   private static final String MAPPING_FILE = "mappingFile";
   private static final String NO_MODEL = "noModel";
-  private static final String USE_MODEL_DICTIONARY = "useDictionary";
+ // private static final String USE_MODEL_DICTIONARY = "useDictionary";
   private static final String TIER_INDEX = "tierIndex";
-  private static final String DIALOG = "dialog";
+//  private static final String DIALOG = "dialog";
   public static final String VLR_PARLE_PILOT_ITEMS_TXT = "vlr-parle-pilot-items.txt";
   public static final String QUIET_AUDIO_OK = "quietAudioOK";
   public static final String APPROVAL_EMAIL = "approvalEmail";
