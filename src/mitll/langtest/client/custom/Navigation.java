@@ -17,6 +17,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.ExerciseListLayout;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.custom.content.AVPHelper;
@@ -86,7 +87,7 @@ public class Navigation implements RequiresResize {
   private static final String RECORD_EXAMPLE = "Record In-context Audio";
   private static final String CONTENT1 = "content";
   public static final String CLASSROOM = "classroom";
-  public static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
+  private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
 
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
@@ -94,7 +95,7 @@ public class Navigation implements RequiresResize {
   private final SimpleChapterNPFHelper practiceHelper;
 
   private ScrollPanel listScrollPanel;
-  private final ListInterface listInterface;
+  //private final ListInterface listInterface;
   private final NPFHelper npfHelper;
   private final NPFHelper avpHelper;
 
@@ -111,17 +112,18 @@ public class Navigation implements RequiresResize {
    * @param service
    * @param userManager
    * @param controller
-   * @param predefinedContentList
+   * @paramx predefinedContentList
    * @param feedback
    * @see mitll.langtest.client.LangTest#populateRootPanel()
    */
   public Navigation(final LangTestDatabaseAsync service, final UserManager userManager,
-                    final ExerciseController controller, final ListInterface predefinedContentList,
+                    final ExerciseController controller, //final ListInterface predefinedContentList,
                     UserFeedback feedback) {
     this.service = service;
     this.userManager = userManager;
     this.controller = controller;
-    this.listInterface = predefinedContentList;
+    //this.listInterface = predefinedContentList;
+
     storage = new KeyStorage(controller);
     npfHelper = new NPFHelper(service, feedback, userManager, controller, false);
     avpHelper = new AVPHelper(service, feedback, userManager, controller);
@@ -130,7 +132,10 @@ public class Navigation implements RequiresResize {
     recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller, true);
     recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false);
 
-    contentHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller, listInterface) {
+    contentHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller,
+    //    listInterface
+        null
+    ) {
       protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
         return new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
           @Override
@@ -142,13 +147,20 @@ public class Navigation implements RequiresResize {
     };
 
     practiceHelper = makePracticeHelper(service, userManager, controller, feedback);
+    ListInterface predefinedContentList = null;// TODO : fill in!!!
     reviewItem = new NPFHelper.ReviewItemHelper(service, feedback, userManager, controller, predefinedContentList, npfHelper);
     editItem = new EditItem(service, userManager, controller, predefinedContentList, feedback, npfHelper);
   }
 
+  private ListInterface makeExerciseList(FluidRow secondRow, Panel exerciseListContainer, Panel currentExerciseVPanel, UserFeedback feedback, ExerciseController controller) {
+    return new ExerciseListLayout(controller.getProps()).makeExerciseList(secondRow, exerciseListContainer, feedback, currentExerciseVPanel, service, controller);
+  }
+
   private SimpleChapterNPFHelper makePracticeHelper(final LangTestDatabaseAsync service, final UserManager userManager,
                                                     final ExerciseController controller, final UserFeedback feedback) {
-    return new SimpleChapterNPFHelper(service, feedback, userManager, controller, listInterface) {
+    return new SimpleChapterNPFHelper(service, feedback, userManager, controller, //listInterface
+        null
+    ) {
       StatsFlashcardFactory statsFlashcardFactory;
 
       @Override
@@ -248,14 +260,18 @@ public class Navigation implements RequiresResize {
     tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
       @Override
       public void onShow(TabPanel.ShowEvent showEvent) {
-       /* System.out.println("got shown event : '" +showEvent + "'\n" +
+        System.out.println("got shown event : '" +showEvent + "'\n" +
             "\ntarget " + showEvent.getTarget()+
-            " ' target name '" + showEvent.getTarget().getName() + "'");*/
+            " ' target name '" + showEvent.getTarget().getName() + "'");
+
         String targetName = showEvent.getTarget() == null ? "" : showEvent.getTarget().toString();
         final String chapterNameToUse = getChapterName();
 
         boolean wasChapters = targetName.contains(chapterNameToUse);
-        Panel createdPanel = listInterface.getCreatedPanel();
+
+        //Panel createdPanel = listInterface.getCreatedPanel();
+        // TODO : figure out the list to talk to another way...
+        Panel createdPanel = null;//listInterface.getCreatedPanel();
         boolean hasCreated = createdPanel != null;
         // System.out.println("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "' hasCreated " + hasCreated);
         if (hasCreated && wasChapters && (createdPanel instanceof GoodwaveExercisePanel)) {
@@ -283,17 +299,19 @@ public class Navigation implements RequiresResize {
     addPracticeTab();
 
     // chapter tab
-    final String chapterNameToUse = getChapterName();
-    chapters = makeFirstLevelTab(tabPanel, isQualityControl ? IconType.FLAG : IconType.LIGHTBULB, chapterNameToUse);
-    chapters.getContent().add(contentForChaptersTab);
-    chapters.getTab().addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(chapterNameToUse);
-        logEvent(chapters, chapterNameToUse);
-      }
-    });
-
+//    if (!isQualityControl) {
+      final String chapterNameToUse = CHAPTERS;//getChapterName();
+  //  chapters = makeFirstLevelTab(tabPanel, isQualityControl ? IconType.FLAG : IconType.LIGHTBULB, chapterNameToUse);
+    chapters = makeFirstLevelTab(tabPanel, IconType.LIGHTBULB, chapterNameToUse);
+      chapters.getContent().add(contentForChaptersTab);
+      chapters.getTab().addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          checkAndMaybeClearTab(chapterNameToUse);
+          logEvent(chapters, chapterNameToUse);
+        }
+      });
+  //  }
 
     studyLists = makeFirstLevelTab(tabPanel, IconType.FOLDER_CLOSE, STUDY_LISTS);
     final TabPanel w = new TabPanel();
@@ -302,31 +320,27 @@ public class Navigation implements RequiresResize {
     studyLists.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        // checkAndMaybeClearTab(STUDY_LISTS);
-        // refreshViewLessons(true, false);
         clickOnTab(yourStuff);
         w.selectTab(0);
         refreshViewLessons(true, false);
         logEvent(studyLists, STUDY_LISTS);
       }
     });
-//    addListTabs();
 
     if (isQualityControl) {
-      contentTab = makeFirstLevelTab(tabPanel, IconType.LIGHTBULB, CONTENT);
+      //String chapterNameToUse2  =  MARK_DEFECTS;
+      contentTab = makeFirstLevelTab(tabPanel, IconType.FLAG, MARK_DEFECTS);
       contentTab.getContent().getElement().setId("content_contentPanel");
       contentTab.getTab().addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          checkAndMaybeClearTab(CONTENT);
+          checkAndMaybeClearTab(MARK_DEFECTS);
           contentHelper.showNPF(contentTab, CONTENT1);
-          logEvent(recorderTab, CONTENT);
+          logEvent(recorderTab, MARK_DEFECTS);
         }
       });
-      addPracticeTab();
-    }
+      //addPracticeTab();
 
-    if (isQualityControl) {
       review = makeFirstLevelTab(tabPanel, IconType.EDIT, FIX_DEFECTS);
       review.getContent().getElement().setId("viewReview_contentPanel");
       review.getTab().addClickHandler(new ClickHandler() {
@@ -413,6 +427,7 @@ public class Navigation implements RequiresResize {
 
   /**
    * Make the practice tab...
+   * @see #addTabs(com.google.gwt.user.client.ui.Panel)
    */
   private void addPracticeTab() {
     practiceTab = makeFirstLevelTab(tabPanel, IconType.REPLY, PRACTICE);
@@ -445,9 +460,7 @@ public class Navigation implements RequiresResize {
   private final Map<String, Integer> nameToIndex = new HashMap<String, Integer>();
 
   private TabAndContent makeFirstLevelTab(TabPanel tabPanel, IconType iconType, String label) {
-
     //System.out.println("makeFirstLevelTab " + label);
-
     TabAndContent tabAndContent = makeTab(tabPanel, iconType, label);
     nameToIndex.put(label, tabs.size());
     tabs.add(tabAndContent);
@@ -657,7 +670,7 @@ public class Navigation implements RequiresResize {
   private class ButtonClickEvent extends ClickEvent {}
 
   /*To call click() function for Programmatic equivalent of the user clicking the button.*/
-  private class MyClickEvent extends ClickEvent {}
+ // private class MyClickEvent extends ClickEvent {}
 
   private void viewBrowse() { viewLessons(browse.getContent(), true, false, false); }
 
@@ -804,7 +817,7 @@ public class Navigation implements RequiresResize {
     downloadLink.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        controller.logEvent(downloadLink, "DownloadLink", "N/A", "downloading audio for " +name);
+        controller.logEvent(downloadLink, "DownloadLink", "N/A", "downloading audio for " + name);
       }
     });
     downloadLink.getElement().setId("DownloadLink_" + linkid);
@@ -861,10 +874,12 @@ public class Navigation implements RequiresResize {
     if (ul.getCreator().getId() != user) {
       service.addVisitor(ul.getUniqueID(), user, new AsyncCallback<Void>() {
         @Override
-        public void onFailure(Throwable caught) {}
+        public void onFailure(Throwable caught) {
+        }
 
         @Override
-        public void onSuccess(Void result) {}
+        public void onSuccess(Void result) {
+        }
       });
     }
   }
@@ -1126,7 +1141,10 @@ public class Navigation implements RequiresResize {
     final boolean doNormalRecording;
 
     public RecorderNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller, boolean doNormalRecording) {
-      super(service, feedback, userManager, controller, Navigation.this.listInterface);
+      super(service, feedback, userManager, controller,
+          //Navigation.this.listInterface
+          null
+      );
       this.doNormalRecording = doNormalRecording;
     }
 
@@ -1140,7 +1158,7 @@ public class Navigation implements RequiresResize {
             @Override
             public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
               super.postAnswers(controller, completedExercise);
-              tellOtherListExerciseDirty(e);
+              //tellOtherListExerciseDirty(e);
             }
           };
         }
