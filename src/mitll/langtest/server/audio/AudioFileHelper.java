@@ -38,6 +38,7 @@ public class AudioFileHelper {
   private AutoCRT autoCRT;
   private final DatabaseImpl db;
   private final LangTestDatabaseImpl langTestDatabase;
+  private boolean checkedLTS = false;
 
   /**
    * @see mitll.langtest.server.ScoreServlet#getAudioFileHelper()
@@ -52,6 +53,27 @@ public class AudioFileHelper {
     this.serverProps = serverProperties;
     this.db = db;
     this.langTestDatabase = langTestDatabase;
+  }
+
+  public void checkLTS(List<CommonExercise> exercises) {
+    synchronized (this) {
+      if (!checkedLTS) {
+        checkedLTS = true;
+        int count = 0;
+        for (CommonExercise exercise : exercises) {
+          boolean validForeignPhrase = checkLTS(exercise.getForeignLanguage());
+          if (!validForeignPhrase) {
+            if (count < 10) {
+              logger.error("huh? for " + exercise.getID() + " we can't parse " + exercise.getID() + " " + exercise.getEnglish() + " fl " + exercise.getForeignLanguage());
+            }
+            count++;
+          }
+        }
+        if (count > 0) {
+          logger.error("huh? out of " + exercises.size() + " LTS fails on " + count);
+        }
+      }
+    }
   }
 
   /**
