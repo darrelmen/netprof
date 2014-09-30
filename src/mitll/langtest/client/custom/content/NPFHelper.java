@@ -350,27 +350,27 @@ public class NPFHelper implements RequiresResize {
       //System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
 
       Panel twoRows = new FlowPanel();
-      twoRows.getElement().setId("twoRows");
+      twoRows.getElement().setId("NPFHelper_twoRows");
 
       Panel exerciseListContainer = new SimplePanel();
       exerciseListContainer.addStyleName("floatLeft");
-      exerciseListContainer.getElement().setId("exerciseListContainer");
+      exerciseListContainer.getElement().setId("NPFHelper_exerciseListContainer");
 
       // second row ---------------
       FluidRow topRow = new FluidRow();
-      topRow.getElement().setId("topRow");
+      topRow.getElement().setId("NPFHelper_topRow");
 
       twoRows.add(topRow);
 
       Panel bottomRow = new HorizontalPanel();
       bottomRow.add(exerciseListContainer);
-      bottomRow.getElement().setId("bottomRow");
+      bottomRow.getElement().setId("NPFHelper_bottomRow");
       styleBottomRow(bottomRow);
 
       twoRows.add(bottomRow);
 
       FlowPanel currentExerciseVPanel = new FlowPanel();
-      currentExerciseVPanel.getElement().setId("defect_currentExercisePanel");
+      currentExerciseVPanel.getElement().setId("NPFHelper_defect_currentExercisePanel");
 
       currentExerciseVPanel.addStyleName("floatLeftList");
       bottomRow.add(currentExerciseVPanel);
@@ -391,6 +391,15 @@ public class NPFHelper implements RequiresResize {
       bottomRow.addStyleName("trueInlineStyle");
     }
 
+    /**
+     * @see #doInternalLayout(mitll.langtest.shared.custom.UserList, String)
+     * @param topRow
+     * @param currentExercisePanel
+     * @param instanceName
+     * @param userListID
+     * @param incorrectFirst
+     * @return
+     */
     private FlexSectionExerciseList makeNPFExerciseList(final Panel topRow, Panel currentExercisePanel, String instanceName,
                                                         long userListID, boolean incorrectFirst) {
       final FlexSectionExerciseList exerciseList = makeExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst);
@@ -421,6 +430,15 @@ public class NPFHelper implements RequiresResize {
     }
 
     protected class MyFlexSectionExerciseList extends FlexSectionExerciseList {
+      /**
+       * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
+       * @see mitll.langtest.client.custom.Navigation.RecorderNPFHelper#getMyListLayout(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.custom.SimpleChapterNPFHelper)
+       * @see mitll.langtest.client.custom.content.NPFHelper.FlexListLayout#makeExerciseList(com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel, String, boolean)
+       * @param topRow
+       * @param currentExercisePanel
+       * @param instanceName
+       * @param incorrectFirst
+       */
       public MyFlexSectionExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
         super(topRow, currentExercisePanel, FlexListLayout.this.service, FlexListLayout.this.feedback, FlexListLayout.this.controller, instanceName, incorrectFirst);
       }
