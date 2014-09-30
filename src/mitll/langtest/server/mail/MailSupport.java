@@ -2,14 +2,9 @@ package mitll.langtest.server.mail;
 
 import org.apache.log4j.Logger;
 
-import javax.mail.Address;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
+import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,16 +20,18 @@ public class MailSupport {
   private final boolean debugEmail;
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getMailSupport()
    * @param debugEmail
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getMailSupport()
    */
   public MailSupport(boolean debugEmail) {
-    this.debugEmail = debugEmail;
+    this.debugEmail = true;//debugEmail;
+  }
+
+  public void sendEmail(String serverName, String to, String replyTo, String subject, String message) {
+    sendEmail(serverName, null, to, replyTo, subject, message, null);
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#sendEmail(String, String, String, String, String)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(String, String, String, mitll.langtest.shared.User.Kind, String, String)
    * @param serverName
    * @param baseURL
    * @param to
@@ -42,6 +39,8 @@ public class MailSupport {
    * @param subject
    * @param message
    * @param linkText
+   * @see mitll.langtest.server.LangTestDatabaseImpl#sendEmail(String, String, String, String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(String, String, String, mitll.langtest.shared.User.Kind, String, String)
    */
   public void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message, String linkText) {
     List<String> toAddresses = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<String>();
@@ -57,7 +56,25 @@ public class MailSupport {
         body);
   }
 
-  public String getHTMLEmail(String linkText, String message, String link2) {
+  private String getHTMLEmail(String linkText, String message, String link2) {
+    String linkHTML = link2 != null && linkText != null ? "<a\n" + "      href=\"" +
+        link2 +
+        "\">" +
+        "<span\n" + "      style='color:#004276'>" +
+        linkText +
+        "</span>" +
+        "</a>" : "";
+
+    String alternateCopyPaste = link2 != null && linkText != null ? "<span style='font-size:8.5pt;font-family:\"Arial\",\"sans-serif\";\n" +
+        "    color:#333333'>Or, copy and paste this URL into your browser: <a\n" +
+        "    href=\"" +
+        link2 +
+        "\"><b>" +
+        "<span\n" +
+        "    style='color:#004276'>" +
+        link2 +
+        "</span></b></a>" : "";
+
     return "<html>" +
         "<head>" +
         "</head>" +
@@ -78,13 +95,7 @@ public class MailSupport {
         "      <td style='border:none;padding:10.5pt 10.5pt 10.5pt 10.5pt'>\n" +
         "      <h1 style='margin-top:0in;margin-right:0in;margin-bottom:3.0pt;\n" + "      margin-left:0in'>" +
         "<span style='font-size:12.5pt;font-family:\"Georgia\",\"serif\";\n" + "      font-weight:normal'>" +
-        "<a\n" + "      href=\"" +
-        link2 +
-        "\">" +
-        "<span\n" + "      style='color:#004276'>" +
-        linkText +
-        "</span>" +
-        "</a>" +
+        linkHTML +
 
         "<p></p>" +
         "</span>" +
@@ -95,15 +106,9 @@ public class MailSupport {
         "   <tr>\n" +
         "    <td style='padding:0in 0in 0in 0in'>\n" +
         "    <p>" +
-        "<span style='font-size:8.5pt;font-family:\"Arial\",\"sans-serif\";\n" +
-        "    color:#333333'>Or, copy and paste this URL into your browser: <a\n" +
-        "    href=\"" +
-        link2 +
-        "\"><b>" +
-        "<span\n" +
-        "    style='color:#004276'>" +
-        link2 +
-        "</span></b></a>" +
+
+        alternateCopyPaste +
+
         "<p></p></span>" +
         "</p>\n" +
         "    </td>\n" +
@@ -117,79 +122,53 @@ public class MailSupport {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#logAndNotifyServerException(Exception)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#logMessage(String)
-   *
-   * @param subject
-   * @param message
-   */
- /* private void email(String subject, String message) {
-    normalEmail(RECIPIENT_NAME, EMAIL, new ArrayList<String>(),subject, message, LOCALHOST);
-  }*/
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#logAndNotifyServerException(Exception)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#logMessage(String)
    * @param receiver
    * @param subject
    * @param message
+   * @see mitll.langtest.server.LangTestDatabaseImpl#logAndNotifyServerException(Exception)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#logMessage(String)
    */
   public void email(String receiver, String subject, String message) {
-    normalEmail(RECIPIENT_NAME, receiver, new ArrayList<String>(),subject, message, LOCALHOST);
+    normalEmail(RECIPIENT_NAME, receiver, new ArrayList<String>(), subject, message, LOCALHOST);
   }
-
-/*  public void email(String recipientName, String recipientEmail, String subject, String message) {
-    normalEmail(recipientName, recipientEmail, new ArrayList<String>(),subject, message,"localhost");
-  }
-
-  public void ccemail(String recipientName, String recipientEmail, String subject, String message) {
-    List<String> ccs = new ArrayList<String>();
-    ccs.add(SWADE);
-    normalEmail(recipientName, recipientEmail, ccs, subject, message,"localhost");
-  }
-
-  public void email(String recipientName, String recipientEmail, List<String> ccEmails, String subject, String message) {
-    normalEmail(recipientName, recipientEmail, ccEmails, subject, message,"localhost");
-  }*/
 
   private void normalEmail(String recipientName, String recipientEmail, List<String> ccEmails,
                            String subject, String message, String email_server) {
     try {
       Properties props = new Properties();
       props.put("mail.smtp.host", email_server);
-      props.put("mail.debug", ""+debugEmail);
+      props.put("mail.debug", "" + debugEmail);
       Session session = Session.getDefaultInstance(props, null);
-     // logger.debug("sending email to " + recipientEmail);
+      // logger.debug("sending email to " + recipientEmail);
       Message msg = makeMessage(session, recipientName, recipientEmail, ccEmails, subject, message);
       Transport.send(msg);
     } catch (Exception e) {
       if (e.getMessage().contains("Could not connect to SMTP")) {
         logger.info("couldn't send email - no mail daemon? ");
-      }
-      else {
-        logger.error("Couldn't send email to " +recipientEmail+". Got " +e,e);
+      } else {
+        logger.error("Couldn't send email to " + recipientEmail + ". Got " + e, e);
       }
     }
   }
 
   /**
-   * @see #sendEmail(String, String, String, String, String, String, String)
    * @param senderName
    * @param senderEmail
    * @param recipientEmails
    * @param subject
    * @param message
+   * @see #sendEmail(String, String, String, String, String, String, String)
    */
   private void normalFullEmail(String senderName,
-                              String senderEmail,
-                              String replyToEmail,
-                              List<String> recipientEmails,
+                               String senderEmail,
+                               String replyToEmail,
+                               List<String> recipientEmails,
 
-                              String subject, String message) {
+                               String subject, String message) {
     try {
       Properties props = new Properties();
       props.put("mail.smtp.host", LOCALHOST);
-      props.put("mail.debug", ""+debugEmail);
+      props.put("mail.debug", "" + debugEmail);
 
       // TODO : Remove me!
       if (debugEmail) {
@@ -199,14 +178,13 @@ public class MailSupport {
 
       Session session = Session.getDefaultInstance(props, null);
       Message msg = makeHTMLMessage(session,
-        senderName, senderEmail, replyToEmail, recipientEmails,
-        subject, message);
+          senderName, senderEmail, replyToEmail, recipientEmails,
+          subject, message);
       Transport.send(msg);
     } catch (Exception e) {
       if (e.getMessage().contains("Could not connect to SMTP")) {
-        logger.info("couldn't send email - no mail daemon? subj " + subject,e);
-      }
-      else {
+        logger.info("couldn't send email - no mail daemon? subj " + subject, e);
+      } else {
         logger.error("Couldn't send email to " + recipientEmails + ". Got " + e, e);
       }
     }
@@ -255,10 +233,10 @@ public class MailSupport {
                                   String subject, String message) throws Exception {
     Message msg = new MimeMessage(session);
 
-    logger.info("Sending from " + senderEmail + " " + senderName + " to " +recipientEmails + " sub " +subject + " " +message);
+    logger.info("Sending from " + senderEmail + " " + senderName + " to " + recipientEmails + " sub " + subject + " " + message);
     msg.setFrom(new InternetAddress(senderEmail, senderName));
     for (String receiver : recipientEmails) {
-      logger.info("\tSending  to " +receiver);
+      logger.info("\tSending  to " + receiver);
       msg.addRecipient(Message.RecipientType.TO, new InternetAddress(receiver));
     }
     msg.setSubject(subject);
