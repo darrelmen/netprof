@@ -42,5 +42,8 @@ public class ExerciseListWrapper implements IsSerializable {
   }
   public CommonExercise getFirstExercise() { return firstExercise;  }
 
-  public String toString() { return "req " + reqID + " has " + exercises.size() + " exercises, first is " + firstExercise.getID(); }
+  public String toString() {
+    return "req " + reqID + " has " + exercises.size() + " exercises" +
+        (firstExercise != null ? ", first is " + firstExercise.getID() : "");
+  }
 }
