@@ -70,9 +70,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final String TRY_AGAIN = "Try Again";
 
   /**
-   * @see #makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel)
+   * @seex #makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel)
    */
-  private ListInterface exerciseList;
+ // private ListInterface exerciseList;
 
   private UserManager userManager;
   private ResultManager resultManager;
@@ -176,7 +176,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public void logMessageOnServer(String message, String prefix) {
     int user = userManager != null ? userManager.getUser() : -1;
-    String exerciseID = exerciseList != null ? exerciseList.getCurrentExerciseID() : "Unknown";
+    String exerciseID = /*exerciseList != null ? exerciseList.getCurrentExerciseID() :*/ "Unknown";
     String suffix = " browser " + browserCheck.getBrowserAndVersion() +
       " : " + message;
     logMessageOnServer(prefix +
@@ -292,9 +292,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     setPageTitle();
     browserCheck.checkForCompatibleBrowser();
 
-/*    if (isAdmin()) {
-      loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
-    }*/
+    loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
   }
 
 
@@ -345,7 +343,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Panel currentExerciseVPanel = new FlowPanel();
     currentExerciseVPanel.getElement().setId("currentExercisePanel");
 
-    makeExerciseList(secondRow, exerciseListContainer, currentExerciseVPanel);
+    //makeExerciseList(secondRow, exerciseListContainer, currentExerciseVPanel);
 
     if (showOnlyOneExercise()) {
       RootPanel.get().add(getHeadstart(currentExerciseVPanel));
@@ -363,7 +361,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     modeSelect();
 
-    navigation = new Navigation(service, userManager, this, exerciseList, this);
+    navigation = new Navigation(service, userManager, this, //exerciseList,
+        this);
 
     firstRow.add(navigation.getNav(bothSecondAndThird));
 
@@ -554,20 +553,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  //private boolean isAdmin() {
-  //  return props.isAdminView();
-  //}
-
   /**
    * Supports different flavors of exercise list -- Paging, Grading, and vanilla.
    *
    * @see #populateBelowHeader(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel)
    */
-  private ListInterface makeExerciseList(FluidRow secondRow, Panel exerciseListContainer, Panel currentExerciseVPanel) {
+/*  private ListInterface makeExerciseList(FluidRow secondRow, Panel exerciseListContainer, Panel currentExerciseVPanel) {
     this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, exerciseListContainer, this, currentExerciseVPanel, service, this);
     return exerciseList;
-  }
+  }*/
 
+  // TODO : why is this not called?
   private void loadVisualizationPackages() {
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       @Override
@@ -636,9 +632,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void addResizeHandler() {
     Window.addResizeHandler(new ResizeHandler() {
       public void onResize(ResizeEvent event) {
-        if (exerciseList != null) {
+ /*       if (exerciseList != null) {
           exerciseList.onResize();
-        }
+        }*/
         if (navigation != null) navigation.onResize();
         if (flashcard != null) {
           flashcard.onResize();
@@ -653,7 +649,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   @Override
   public int getLeftColumnWidth() {
-    return exerciseList.getWidget().getOffsetWidth();
+    return 225;//exerciseList.getWidget().getOffsetWidth();
   }
 
   /**
@@ -771,7 +767,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       //}
     }
     // have to wait until we know what kind of user has logged in before knowing what to present
-    exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this, exerciseList, 1.0f) {
+ /*   exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this, exerciseList, 1.0f) {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
         boolean reviewer = permissions.contains(User.Permission.QUALITY_CONTROL);
@@ -781,7 +777,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           return new CommentNPFExercise(e, controller, exerciseList, false, "classroom");
         }
       }
-    }, userManager);
+    }, userManager);*/
   }
 
   /**
@@ -825,11 +821,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void resetState() {
     System.out.println("resetState");
-    exerciseList.removeHistoryListener();
+    //exerciseList.removeHistoryListener();
     History.newItem(""); // clear history!
     userManager.clearUser();
-    exerciseList.removeCurrentExercise();
-    exerciseList.clear();
+   // exerciseList.removeCurrentExercise();
+   // exerciseList.clear();
     lastUser = NO_USER_INITIAL;
     modeSelect();
   }
@@ -880,14 +876,15 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         " audio type " + getAudioType() + " perms " + getPermissions());
     reallySetFactory();
 
-    if (getPermissions().contains(User.Permission.QUALITY_CONTROL)) {
+/*    if (getPermissions().contains(User.Permission.QUALITY_CONTROL)) {
       exerciseList.setInstance(User.Permission.QUALITY_CONTROL.toString());
     } else {
       exerciseList.setInstance("flex");
-    }
+    }*/
 
     System.out.println("\tconfigureUIGivenUser : " + userID + " get exercises...");
 
+/*
     boolean askedForExercises = exerciseList.getExercises(userID);
     if (askedForExercises){
       System.out.println(
@@ -899,6 +896,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
       exerciseList.reload();
     }
+*/
     navigation.showInitialState();
 
     lastUser = userID;
@@ -1085,16 +1083,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     logMessageOnServer("Showing error message", title + " : " + msg);
   }
 
-  @Override
-  public void showProgress() { showProgress(exerciseList);  }
+//  @Override
+//  public void showProgress() { showProgress(exerciseList);  }
 
+/*
   private void showProgress(ListInterface exerciseList) {
+*/
 /*    if (progressBar != null) {
       //progressBar.showAdvance(exerciseList);
-    }*/
-  }
+    }*//*
 
-  public ListInterface getExerciseList() { return exerciseList; }
+  }
+*/
+
+  //public ListInterface getExerciseList() { return exerciseList; }
 
   /**
    * @see mitll.langtest.client.recorder.FlashcardRecordButton#FlashcardRecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, String)
