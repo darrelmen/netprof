@@ -107,6 +107,8 @@ public class KeyPressHelper {
 
   private void gotEvent(NativeEvent ne, boolean isKeyDown) {
     for (KeyListener keyPressHandler : listeners.values()) {
+
+      System.out.println("KeyPressHelper " + keyPressHandler + " getting " + ne + " down " +isKeyDown);
       keyPressHandler.gotPress(ne, isKeyDown);
     }
   }
