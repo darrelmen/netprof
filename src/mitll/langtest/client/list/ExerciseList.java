@@ -60,7 +60,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param factory
    * @param controller
    * @param instance
-   * @see mitll.langtest.client.LangTest#makeExerciseList
+   * @seex mitll.langtest.client.LangTest#makeExerciseList
    */
   ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                ExercisePanelFactory factory,
@@ -295,7 +295,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         }
 
         rememberAndLoadFirst(result.getExercises(), result.getFirstExercise(), selectionID);
-        controller.showProgress();
+//        controller.showProgress();
       }
     }
   }
@@ -333,7 +333,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
           listener.listChanged(exercises, "");
         }
         pushFirstSelection(id);
-        controller.showProgress();
+        //controller.showProgress();
       }
     }
   }
