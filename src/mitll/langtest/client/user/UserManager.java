@@ -118,7 +118,7 @@ public class UserManager {
    */
   private void getPermissionsAndSetUser(final int user) {
     console("getPermissionsAndSetUser : " + user);
-    System.out.println("UserManager.getPermissionsAndSetUser " + user + " asking server for info...");
+   // System.out.println("UserManager.getPermissionsAndSetUser " + user + " asking server for info...");
 
     service.getUserBy(user, new AsyncCallback<User>() {
       @Override
@@ -128,7 +128,7 @@ public class UserManager {
 
       @Override
       public void onSuccess(User result) {
-        System.out.println("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
+//        System.out.println("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
 
         if (loginType == PropertyHandler.LOGIN_TYPE.ANONYMOUS && result.getUserKind() != User.Kind.ANONYMOUS) {
           clearUser();
