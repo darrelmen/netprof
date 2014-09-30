@@ -76,26 +76,28 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     this.instance = instance;
 
     // System.out.println("made factory ---------------------\n");
-    boolean sharedList = exerciseList == null;
+/*    boolean sharedList = exerciseList == null;
     if (sharedList) {   // when does this happen??
       exerciseList = controller.getExerciseList();
-    }
+    }*/
 
-    exerciseList.addListChangedListener(new ListChangeListener<CommonShell>() {
-      /**
-       * @see mitll.langtest.client.list.ExerciseList#rememberAndLoadFirst
-       * @param items
-       * @param selectionID
-       */
-      @Override
-      public void listChanged(List<CommonShell> items, String selectionID) {
-        StatsFlashcardFactory.this.selectionID = selectionID;
-        allExercises = items;
-        //originalExercises = items;
-        System.out.println("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
-        reset();
-      }
-    });
+    if (exerciseList != null) { // TODO ? can this ever happen?
+      exerciseList.addListChangedListener(new ListChangeListener<CommonShell>() {
+        /**
+         * @param items
+         * @param selectionID
+         * @see mitll.langtest.client.list.ExerciseList#rememberAndLoadFirst
+         */
+        @Override
+        public void listChanged(List<CommonShell> items, String selectionID) {
+          StatsFlashcardFactory.this.selectionID = selectionID;
+          allExercises = items;
+          //originalExercises = items;
+          System.out.println("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
+          reset();
+        }
+      });
+    }
     KeyStorage storage = new KeyStorage(controller) {
       @Override
       protected String getKey(String name) {
@@ -106,7 +108,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     controlState.setStorage(storage);
     // System.out.println("setting shuffle --------------------- " +controlState.isShuffle()+ "\n");
 
-    if (!sharedList) {
+    if (exerciseList != null) {
       exerciseList.simpleSetShuffle(controlState.isShuffle());
     }
   }
