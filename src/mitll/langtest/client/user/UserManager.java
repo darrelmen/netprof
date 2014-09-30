@@ -28,10 +28,10 @@ public class UserManager {
   private static final long HOUR_IN_MILLIS = 1000 * 60 * 60;
 
   private static final int DAY_HOURS = 24;
-  private static final int WEEK_HOURS = DAY_HOURS * 7;
+  private static final long WEEK_HOURS = DAY_HOURS * 7;
   //private static final int ONE_YEAR = 24 * 365;
 
-  private static final int EXPIRATION_HOURS = WEEK_HOURS;
+  private static final long EXPIRATION_HOURS = WEEK_HOURS * HOUR_IN_MILLIS;
   // private static final int SHORT_EXPIRATION_HOURS = DAY_HOURS;
 //  private static final int FOREVER_HOURS = ONE_YEAR;
 
