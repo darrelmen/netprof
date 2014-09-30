@@ -71,6 +71,9 @@ public class UserPassLogin extends UserDialog {
   //private static final String CONTENT_DEVELOPER = "Content Developer";
   private static final String SIGN_UP_WIDTH = "266px";
   public static final int BULLET_MARGIN = 25;
+  public static final String CURRENT_USER_TOOLTIP = "Current users who don't have a password and email should sign up below.";
+  public static final String CURRENT_USER = "Are you a current user without a password?";
+  public static final String RECORD_AUDIO_HEADING = "Recording audio/Quality Control";
   //public static final String PLEASE_ENTER_A_PASSWORD1 = "Please enter a password.";
   private final UserManager userManager;
   private final KeyPressHelper enterKeyButtonHelper;
@@ -288,7 +291,7 @@ public class UserPassLogin extends UserDialog {
     forgotPassword.addStyleName("leftFiveMargin");
     Panel hp3 = new HorizontalPanel();
     //final Heading w = new Heading(6, "Current user but no password?");
-    HTML w = new HTML("Current user but no password?");
+    HTML w = new HTML(CURRENT_USER);
     w.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
     hp3.add(w);
     final Icon child = new Icon(IconType.QUESTION_SIGN);
@@ -297,8 +300,8 @@ public class UserPassLogin extends UserDialog {
     child.addStyleName("leftFiveMargin");
     w.addStyleName("leftTenMargin");
 
-    new TooltipHelper().addTooltip(w,"Current users who don't have a password and email should sign up below");
-    new TooltipHelper().addTooltip(child,"Current users who don't have a password and email should sign up below");
+    new TooltipHelper().addTooltip(w,     CURRENT_USER_TOOLTIP);
+    new TooltipHelper().addTooltip(child, CURRENT_USER_TOOLTIP);
 
     fieldset.add(hp3);
     getFocusOnField(user);
@@ -586,12 +589,13 @@ public class UserPassLogin extends UserDialog {
 
     contentDevCheckbox = new CheckBox("Record Reference Audio?");
 
-    String html = "After you click sign up, " +
+    String html = "Click here if you want to record reference audio or review current audio.<br/>" +
+        "After you click sign up, " +
         "LTEA personnel will approve your account.<br/>" +
         "You will receive an email once it's approved.<br/>" +
         "You will not be able to access Classroom for recording or QC until approval is granted.";
 
-    setupPopover(contentDevCheckbox,"Recording audio/Quality Control",html,Placement.LEFT, true);
+    setupPopover(contentDevCheckbox, RECORD_AUDIO_HEADING,html,Placement.LEFT, true);
 
     contentDevCheckbox.setVisible(false);
     contentDevCheckbox.addStyleName("leftTenMargin");
