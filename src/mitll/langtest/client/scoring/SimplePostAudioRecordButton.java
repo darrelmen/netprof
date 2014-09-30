@@ -229,7 +229,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
 		  return colorfulSent;
 	  }
 	  List<TranscriptSegment> ts = lastResult.getPretestScore().getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
-	  String[] words = sentToColor.split("\\s+");
+	  String[] words = sentToColor.replaceAll("-", " ").split("\\s+");
 	  int wordIndex = 0;
 	  for(int i = 0; i < ts.size(); i++){ // why the offset? Because of the silence tags.
 		  TranscriptSegment wordInfo = ts.get(i);
