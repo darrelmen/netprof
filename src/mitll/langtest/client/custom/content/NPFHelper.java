@@ -92,6 +92,8 @@ public class NPFHelper implements RequiresResize {
     }
   }
 
+  public ListInterface getExerciseList() { return npfExerciseList; }
+
   private void addNPFToContent(UserList ul, Panel listContent, String instanceName, boolean loadExercises) {
     Panel npfContent = doNPF(ul, instanceName, loadExercises);
     listContent.add(npfContent);
