@@ -97,6 +97,8 @@ class SimpleChapterNPFHelper implements RequiresResize {
     return widgets;
   }
 
+  public ListInterface getExerciseList() { return npfExerciseList; }
+
   /**
    * @see Navigation#addPracticeTab()
    * @see mitll.langtest.client.custom.Navigation#selectPreviousTab(String)
