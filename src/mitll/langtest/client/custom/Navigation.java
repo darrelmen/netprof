@@ -17,7 +17,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.ExerciseListLayout;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.custom.content.AVPHelper;
@@ -32,8 +31,8 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.WaveformExercisePanel;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
@@ -82,12 +81,14 @@ public class Navigation implements RequiresResize {
   private static final int SUBTAB_EDIT_INDEX = 2;
 
   private static final String EDIT_ITEM = "editItem";
+ // public static final String LEARN1 = "learn";
   private static final String LEARN = "learn";
   private static final String RECORD_AUDIO = "Record Audio";
   private static final String RECORD_EXAMPLE = "Record In-context Audio";
   private static final String CONTENT1 = "content";
   public static final String CLASSROOM = "classroom";
   private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
+  public static final String MARK_DEFECTS1 = "markDefects";
 
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
@@ -103,7 +104,7 @@ public class Navigation implements RequiresResize {
 
   private final ChapterNPFHelper defectHelper;
   private final SimpleChapterNPFHelper recorderHelper, recordExampleHelper;
-  private final SimpleChapterNPFHelper contentHelper;
+  private final SimpleChapterNPFHelper markDefectsHelper, learnHelper;
   private final NPFHelper.ReviewItemHelper reviewItem;
 
   private final KeyStorage storage;
@@ -126,35 +127,53 @@ public class Navigation implements RequiresResize {
 
     storage = new KeyStorage(controller);
     npfHelper = new NPFHelper(service, feedback, userManager, controller, false);
+
     avpHelper = new AVPHelper(service, feedback, userManager, controller);
 
     defectHelper = new ChapterNPFHelper(service, feedback, userManager, controller, true);
     recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller, true);
     recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false);
 
-    contentHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller,
-    //    listInterface
+    markDefectsHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller,
+        //    listInterface
         null
     ) {
       protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
         return new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
-            return new CommentNPFExercise(e, controller, exerciseList, false, CLASSROOM);
+            return new QCNPFExercise(e, controller, exerciseList, MARK_DEFECTS1);
+
+          }
+        };
+      }
+    };
+
+    learnHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller,
+        //    listInterface
+        null
+    ) {
+      protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
+        return new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
+          @Override
+          public Panel getExercisePanel(CommonExercise e) {
+            return new CommentNPFExercise(e, controller, exerciseList, false, "classroom");
           }
         };
       }
     };
 
     practiceHelper = makePracticeHelper(service, userManager, controller, feedback);
-    ListInterface predefinedContentList = null;// TODO : fill in!!!
-    reviewItem = new NPFHelper.ReviewItemHelper(service, feedback, userManager, controller, predefinedContentList, npfHelper);
-    editItem = new EditItem(service, userManager, controller, predefinedContentList, feedback, npfHelper);
+   // ListInterface predefinedContentList = null;// TODO : fill in!!!
+    reviewItem = new NPFHelper.ReviewItemHelper(service, feedback, userManager, controller, npfHelper.getExerciseList(), npfHelper);
+    editItem = new EditItem(service, userManager, controller, npfHelper.getExerciseList(), feedback, npfHelper);
   }
 
+/*
   private ListInterface makeExerciseList(FluidRow secondRow, Panel exerciseListContainer, Panel currentExerciseVPanel, UserFeedback feedback, ExerciseController controller) {
     return new ExerciseListLayout(controller.getProps()).makeExerciseList(secondRow, exerciseListContainer, feedback, currentExerciseVPanel, service, controller);
   }
+*/
 
   private SimpleChapterNPFHelper makePracticeHelper(final LangTestDatabaseAsync service, final UserManager userManager,
                                                     final ExerciseController controller, final UserFeedback feedback) {
@@ -240,7 +259,7 @@ public class Navigation implements RequiresResize {
   private TabPanel tabPanel;
   private TabAndContent yourStuff, othersStuff, studyLists;
   private TabAndContent browse, chapters, create;
-  private TabAndContent review, recorderTab, recordExampleTab, contentTab, practiceTab;
+  private TabAndContent review, recorderTab, recordExampleTab, markDefectsTab, practiceTab;
   private final List<TabAndContent> tabs = new ArrayList<TabAndContent>();
   private Panel chapterContent;
 
@@ -260,11 +279,12 @@ public class Navigation implements RequiresResize {
     tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
       @Override
       public void onShow(TabPanel.ShowEvent showEvent) {
+        TabLink target = showEvent.getTarget();
+        String targetName = target == null ? "" : target.toString();
         System.out.println("got shown event : '" +showEvent + "'\n" +
-            "\ntarget " + showEvent.getTarget()+
-            " ' target name '" + showEvent.getTarget().getName() + "'");
+            "\ntarget " + target +
+            " ' target name '" + targetName+ "'");
 
-        String targetName = showEvent.getTarget() == null ? "" : showEvent.getTarget().toString();
         final String chapterNameToUse = getChapterName();
 
         boolean wasChapters = targetName.contains(chapterNameToUse);
@@ -285,9 +305,9 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see #showInitialState()
    * @param contentForChaptersTab the standard npf content
    * @return
+   * @see #showInitialState()
    */
   private void addTabs(Panel contentForChaptersTab) {
     tabPanel.clear();
@@ -300,18 +320,19 @@ public class Navigation implements RequiresResize {
 
     // chapter tab
 //    if (!isQualityControl) {
-      final String chapterNameToUse = CHAPTERS;//getChapterName();
-  //  chapters = makeFirstLevelTab(tabPanel, isQualityControl ? IconType.FLAG : IconType.LIGHTBULB, chapterNameToUse);
+    final String chapterNameToUse = CHAPTERS;//getChapterName();
+    //  chapters = makeFirstLevelTab(tabPanel, isQualityControl ? IconType.FLAG : IconType.LIGHTBULB, chapterNameToUse);
     chapters = makeFirstLevelTab(tabPanel, IconType.LIGHTBULB, chapterNameToUse);
-      chapters.getContent().add(contentForChaptersTab);
-      chapters.getTab().addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          checkAndMaybeClearTab(chapterNameToUse);
-          logEvent(chapters, chapterNameToUse);
-        }
-      });
-  //  }
+    chapters.getContent().add(contentForChaptersTab);
+    chapters.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        checkAndMaybeClearTab(chapterNameToUse);
+        learnHelper.showNPF(chapters, LEARN);
+        logEvent(chapters, chapterNameToUse);
+      }
+    });
+    //  }
 
     studyLists = makeFirstLevelTab(tabPanel, IconType.FOLDER_CLOSE, STUDY_LISTS);
     final TabPanel w = new TabPanel();
@@ -329,13 +350,13 @@ public class Navigation implements RequiresResize {
 
     if (isQualityControl) {
       //String chapterNameToUse2  =  MARK_DEFECTS;
-      contentTab = makeFirstLevelTab(tabPanel, IconType.FLAG, MARK_DEFECTS);
-      contentTab.getContent().getElement().setId("content_contentPanel");
-      contentTab.getTab().addClickHandler(new ClickHandler() {
+      markDefectsTab = makeFirstLevelTab(tabPanel, IconType.FLAG, MARK_DEFECTS);
+      markDefectsTab.getContent().getElement().setId("content_contentPanel");
+      markDefectsTab.getTab().addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
           checkAndMaybeClearTab(MARK_DEFECTS);
-          contentHelper.showNPF(contentTab, CONTENT1);
+          markDefectsHelper.showNPF(markDefectsTab, MARK_DEFECTS1);
           logEvent(recorderTab, MARK_DEFECTS);
         }
       });
@@ -566,15 +587,17 @@ public class Navigation implements RequiresResize {
       } else if (value.equals(OTHERS_LISTS)) {
         showMyLists(false, true);
       } else if (value.equals(BROWSE)) {
-        viewBrowse();
+        viewBrowse(); // CHAPTERS
       } else if (value.equals(FIX_DEFECTS)) {
         viewReview(review.getContent());
+      } else if (value.equals(CHAPTERS)) {
+        learnHelper.showNPF(chapters, LEARN);
       } else if (value.equals(RECORD_AUDIO)) {
         recorderHelper.showNPF(recorderTab, "record_audio");
       } else if (value.equals(RECORD_EXAMPLE)) {
         recordExampleHelper.showNPF(recordExampleTab, "record_example_audio");
-      } else if (value.equals(CONTENT) && contentTab != null) {
-        contentHelper.showNPF(contentTab, CONTENT1);
+      } else if (value.equals(CONTENT) && markDefectsTab != null) {
+        markDefectsHelper.showNPF(markDefectsTab, CONTENT1);
       } else if (value.equals(PRACTICE) && practiceTab != null) {
         practiceHelper.showNPF(practiceTab, PRACTICE);
         practiceHelper.hideList();
@@ -585,10 +608,12 @@ public class Navigation implements RequiresResize {
     else {
       System.err.println("selectPreviousTab : found value  '" + value + "' " +
           " but I only know about tabs : " + nameToIndex.keySet());
-      final String chapterNameToUse = getChapterName();
+ //     final String chapterNameToUse = getChapterName();
 
-      tabPanel.selectTab(getSafeTabIndexFor(chapterNameToUse));
+//      tabPanel.selectTab(getSafeTabIndexFor(chapterNameToUse));
+      selectPreviousTab(PRACTICE);
     }
+
   }
 
   /**
@@ -745,7 +770,7 @@ public class Navigation implements RequiresResize {
     recorderHelper.onResize();
     recorderHelper.onResize();
     editItem.onResize();
-    contentHelper.onResize();
+    markDefectsHelper.onResize();
     practiceHelper.onResize();
   }
 
