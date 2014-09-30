@@ -281,22 +281,24 @@ public class Navigation implements RequiresResize {
       public void onShow(TabPanel.ShowEvent showEvent) {
         TabLink target = showEvent.getTarget();
         String targetName = target == null ? "" : target.toString();
-        System.out.println("got shown event : '" +showEvent + "'\n" +
+ /*       System.out.println("got shown event : '" +showEvent + "'\n" +
             "\ntarget " + target +
-            " ' target name '" + targetName+ "'");
+            " ' target name '" + targetName+ "'");*/
 
-        final String chapterNameToUse = getChapterName();
-
-        boolean wasChapters = targetName.contains(chapterNameToUse);
-
-        //Panel createdPanel = listInterface.getCreatedPanel();
-        // TODO : figure out the list to talk to another way...
-        Panel createdPanel = null;//listInterface.getCreatedPanel();
+        boolean wasChapters = targetName.contains(CHAPTERS);
+        Panel createdPanel = learnHelper != null && learnHelper.getExerciseList() != null ? learnHelper.getExerciseList().getCreatedPanel() : null;
         boolean hasCreated = createdPanel != null;
         // System.out.println("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "' hasCreated " + hasCreated);
         if (hasCreated && wasChapters && (createdPanel instanceof GoodwaveExercisePanel)) {
-          //System.out.println("\tgot chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
+       //   System.out.println("\taddShowHandler got chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
           ((GoodwaveExercisePanel) createdPanel).wasRevealed();
+        } else {
+     /*     System.out.println("\taddShowHandler ignoring target " + targetName);
+          System.out.println("\taddShowHandler ignoring target " + learnHelper);
+          System.out.println("\taddShowHandler ignoring target " + learnHelper.getExerciseList());
+          if (learnHelper.getExerciseList() != null) {
+            System.out.println("\taddShowHandler ignoring target " + learnHelper.getExerciseList().getCreatedPanel());
+          }*/
         }
       }
     });
