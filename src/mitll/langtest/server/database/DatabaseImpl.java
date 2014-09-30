@@ -1,7 +1,5 @@
 package mitll.langtest.server.database;
 
-import com.google.gwt.util.tools.shared.Md5Utils;
-import com.google.gwt.util.tools.shared.StringUtils;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -9,7 +7,6 @@ import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.custom.*;
 import mitll.langtest.server.database.instrumentation.EventDAO;
-import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -43,7 +40,7 @@ import java.util.*;
  */
 public class DatabaseImpl implements Database {
   private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
-  public static final int LOG_THRESHOLD = 10;
+  private static final int LOG_THRESHOLD = 10;
 
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
@@ -71,7 +68,7 @@ public class DatabaseImpl implements Database {
   private final String absConfigDir;
   private String mediaDir;
   private final ServerProperties serverProps;
-  private LogAndNotify logAndNotify;
+  private final LogAndNotify logAndNotify;
 
   private boolean addDefects = true;
 
@@ -350,7 +347,7 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  private List<CommonExercise> getRawExercises(boolean useFile, String lessonPlanFile, boolean isExcel) {
+  private void getRawExercises(boolean useFile, String lessonPlanFile, boolean isExcel) {
     if (useFile && !isExcel) {
       if (isWordPairs) {
         ((FileExerciseDAO) exerciseDAO).readWordPairs(lessonPlanFile, doImages);
@@ -358,7 +355,7 @@ public class DatabaseImpl implements Database {
         ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath, configDir, lessonPlanFile);
       }
     }
-    return exerciseDAO.getRawExercises();
+    exerciseDAO.getRawExercises();
   }
 
   /**
@@ -574,12 +571,12 @@ public class DatabaseImpl implements Database {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(int, String, int, String, String, String, java.util.Collection)
    */
-  public long addUser(HttpServletRequest request,
+ /* public long addUser(HttpServletRequest request,
                       int age, String gender, int experience,
                       String nativeLang, String dialect, String userID, Collection<User.Permission> permissions) {
     String ip = getIPInfo(request);
     return addUser(age, gender, experience, ip, nativeLang, dialect, userID, permissions);
-  }
+  }*/
 
   /**
    * @param request
@@ -601,75 +598,6 @@ public class DatabaseImpl implements Database {
     }
     return user;
   }
-
-  private static final String NP_SERVER = "np.ll.mit.edu";
-  private static final String REPLY_TO = "admin@" + NP_SERVER;
-
-  private String getHash(String toHash) {
-    return StringUtils.toHexString(Md5Utils.getMd5Digest(toHash.getBytes()));
-  }
-
-  private static final List<String> approvers = Arrays.asList("Tamas", "Alex", "David", "Sandy");
-  private static final List<String> emails = Arrays.asList("tamas.g.marius.civ@mail.mil", "alexandra.cohen@dliflc.edu", "david.randolph@dliflc.edu", "sandra.wagner@dliflc.edu");
-
-  public void addContentDeveloper(String url, String email, User user, MailSupport mailSupport) {
-    url = trimURL(url);
-    String userID1 = user.getUserID();
-    String toHash = userID1 + "_" + System.currentTimeMillis();
-    String hash = getHash(toHash);
-    getUserDAO().addKey(user.getId(), false, hash);
-
-    for (int i = 0; i < approvers.size(); i++) {
-      String tamas = approvers.get(i);
-      String approvalEmailAddress = emails.get(i);
-      String message = getEmailApproval(userID1, tamas);
-      sendApprovalEmail(url, email, userID1, hash, message, approvalEmailAddress, mailSupport);
-    }
-  }
-
-  private void sendApprovalEmail(String url, String email, String userID1, String hash, String message, String approvalEmailAddress, MailSupport mailSupport) {
-    mailSupport.sendEmail(NP_SERVER,
-        url + "?cd=" + hash + "&" +
-            "er" +
-            "=" + rot13(email),
-        approvalEmailAddress,
-        "gordon.vidaver@ll.mit.edu",
-        "Content Developer approval for " + userID1 + " for " + serverProps.getLanguage(),
-        message,
-        "Click to approve" // link text
-    );
-  }
-
-  private String getEmailApproval(String userID1, String tamas) {
-    return "Hi " +
-        tamas + ",<br/><br/>" +
-        "User '" + userID1 +
-        "' would like to be a content developer for " + serverProps.getLanguage() +
-        "." + "<br/>" +
-
-        "Click the link to allow them." +
-        "<br/><br/>" +
-        "Regards, Administrator";
-  }
-
-  private String trimURL(String url) {
-    if (url.contains("127.0.0.1")) return url;
-    else return url.split("\\?")[0].split("\\#")[0];
-  }
-
-
-  private String rot13(String val) {
-    StringBuilder builder = new StringBuilder();
-    for (char c : val.toCharArray()) {
-      if (c >= 'a' && c <= 'm') c += 13;
-      else if (c >= 'A' && c <= 'M') c += 13;
-      else if (c >= 'n' && c <= 'z') c -= 13;
-      else if (c >= 'N' && c <= 'Z') c -= 13;
-      builder.append(c);
-    }
-    return builder.toString();
-  }
-
 
   /**
    * @param user
