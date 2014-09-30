@@ -600,7 +600,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    */
   protected void loadNext() {
    // System.out.println("loadNext after " + exercise.getID());
-    controller.getExerciseList().loadNextExercise(exercise);
+ //   controller.getExerciseList().loadNextExercise(exercise);
   }
 
   @Override
