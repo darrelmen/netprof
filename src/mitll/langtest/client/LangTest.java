@@ -30,7 +30,6 @@ import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import mitll.langtest.client.custom.Navigation;
-import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.KeyPressHelper;
@@ -41,13 +40,10 @@ import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.instrumentation.EventTable;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.monitoring.MonitoringManager;
-import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
 import mitll.langtest.client.result.ResultManager;
-import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.user.*;
@@ -1106,8 +1102,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void addKeyListener(KeyPressHelper.KeyListener listener) {
     keyPressHelper.addKeyHandler(listener);
     if (keyPressHelper.getSize() > 2) {
-      System.out.println("addKeyListener " + listener.getName() +
-        " key press handler now " + keyPressHelper);
+      System.out.println("addKeyListener " + listener.getName() + " key press handler now " + keyPressHelper);
     }
   }
 

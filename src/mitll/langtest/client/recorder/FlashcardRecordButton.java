@@ -82,6 +82,10 @@ public class FlashcardRecordButton extends RecordButton {
   }
 
   protected void addKeyListener(ExerciseController controller, final String instance) {
+
+
+  //     System.out.println("FlashcardRecordButton.addKeyListener : using " + getElement().getId() + " for " + instance);
+
     KeyPressHelper.KeyListener listener = new KeyPressHelper.KeyListener() {
       @Override
       public String getName() {
@@ -91,7 +95,7 @@ public class FlashcardRecordButton extends RecordButton {
       @Override
       public void gotPress(NativeEvent ne, boolean isKeyDown) {
         if (isKeyDown) {
-          checkKeyDown(ne);
+          checkKeyDown(ne,this);
         } else {
           checkKeyUp(ne);
         }
@@ -104,7 +108,7 @@ public class FlashcardRecordButton extends RecordButton {
     controller.addKeyListener(listener);
   }
 
-  protected void checkKeyDown(NativeEvent event) {
+  protected void checkKeyDown(NativeEvent event, KeyPressHelper.KeyListener listener) {
     if (!shouldIgnoreKeyPress()) {
       boolean isSpace = checkIsSpace(event);
       //System.out.println("checkKeyDown got key press...");
@@ -136,7 +140,7 @@ public class FlashcardRecordButton extends RecordButton {
       }
     }
     else {
-      //System.out.println("checkKeyDown ignoring key press...");
+    //  System.out.println("checkKeyDown ignoring key press... " + listener);
     }
   }
 
@@ -165,7 +169,14 @@ public class FlashcardRecordButton extends RecordButton {
   }
 
   protected boolean shouldIgnoreKeyPress() {
-    return !isAttached() || checkHidden(getElement().getId()) || controller.getUser() == -1;
+    boolean b = !isAttached() || checkHidden(getElement().getId()) || controller.getUser() == -1;
+
+    //if (b) {
+      //System.out.println("attached " + isAttached());
+   //   System.out.println("hidden   " + checkHidden(getElement().getId()));
+    //  System.out.println("user     " + controller.getUser());
+   // }
+    return b;
   }
 
   @Override
