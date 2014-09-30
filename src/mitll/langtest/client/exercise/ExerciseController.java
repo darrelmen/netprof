@@ -26,8 +26,8 @@ import java.util.Collection;
 public interface ExerciseController extends EventRegistration {
   LangTestDatabaseAsync getService();
   UserFeedback getFeedback();
-  ListInterface getExerciseList();
-  void showProgress();
+ // ListInterface getExerciseList();
+ // void showProgress();
 
   int getUser();
 
