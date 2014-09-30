@@ -4,8 +4,6 @@ import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
 import com.google.common.io.Files;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.google.gwt.util.tools.shared.Md5Utils;
-import com.google.gwt.util.tools.shared.StringUtils;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.audio.AudioCheck;
@@ -13,6 +11,7 @@ import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.EmailHelper;
 import mitll.langtest.server.database.SectionHelper;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.database.custom.UserListManager;
@@ -51,10 +50,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final String MP3 = ".mp3";
   public static final String DATABASE_REFERENCE = "databaseReference";
   private static final int SLOW_EXERCISE_EMAIL = 2000;
-  private static final String NP_SERVER = "np.ll.mit.edu";
-  private static final String REPLY_TO = "admin@" + NP_SERVER;
-  //private static final String CONTENT_DEVELOPER_APPROVAL_EMAIL = "gordon.vidaver@ll.mit.edu";
-  private static final String RP = "rp";
+  public static final String ENGLISH = "English";
 
   private DatabaseImpl db;
   private AudioFileHelper audioFileHelper;
@@ -62,7 +58,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String configDir;
   private ServerProperties serverProps;
   private PathHelper pathHelper;
-  //private String reqURL, path, info;
 
   /**
    * @param request
@@ -74,9 +69,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   protected void service(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {
     try {
-    //  reqURL = request.getRequestURI();
-    //  path = request.getServletPath();
-    //  info = request.getPathInfo();
       super.service(request, response);
     } catch (ServletException e) {
       logAndNotifyServerException(e);
@@ -107,7 +99,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private List<CommonShell> getExerciseShells(Collection<? extends CommonExercise> exercises) {
-    return serverProps.getLanguage().equals("English") ? getExerciseShellsShort(exercises) : getExerciseShellsCombined(exercises);
+    return serverProps.getLanguage().equals(ENGLISH) ? getExerciseShellsShort(exercises) : getExerciseShellsCombined(exercises);
   }
 
   private List<CommonShell> getExerciseShellsShort(Collection<? extends CommonExercise> exercises) {
@@ -186,7 +178,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         // now sort : everything gets sorted the same way
         List<CommonExercise> commonExercises;
         if (incorrectFirstOrder) {
-          commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises,userID);
+          commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, userID);
         } else {
           commonExercises = new ArrayList<CommonExercise>(exercises);
           new ExerciseSorter(getTypeOrder()).getSortedByUnitThenAlpha(commonExercises, role.equals(Result.AUDIO_TYPE_RECORDER));
@@ -263,8 +255,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
               if (onlyExamples) {
                 if (hasExample) break;
-              }
-              else if (hasReg && hasSlow) {
+              } else if (hasReg && hasSlow) {
                 break;
               }
             }
@@ -408,9 +399,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<CommonExercise> copy;
 
     if (incorrectFirst) {
-      copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState,userID);
-    }
-    else {
+      copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID);
+    } else {
       copy = new ArrayList<CommonExercise>(exercisesForState);
 
       new ExerciseSorter(getTypeOrder()).getSortedByUnitThenAlpha(copy, role.equals(Result.AUDIO_TYPE_RECORDER));
@@ -573,7 +563,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public CommonExercise getFirstExercise() {
     List<User> users = db.getUserDAO().getUsers();
 
-    //  Random rand = new Random();
     if (users.isEmpty()) return null;
     User user = users.get(0);
 
@@ -657,12 +646,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     try {
       hostName = InetAddress.getLocalHost().getHostName();
     } catch (UnknownHostException e) {
-      logger.error("Got "+e,e);
+      logger.error("Got " + e, e);
     }
     sendEmail("slow exercise on " + language, "Getting ex " + id + " on " + language + " took " + diff +
         " millis, threads " + threadInfo + " on " + hostName);
   }
-
 
   /**
    * @param byID
@@ -690,7 +678,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  private boolean checkedLTS = false;
   private ExerciseTrie fullTrie;
 
   /**
@@ -707,7 +694,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       fullTrie = new ExerciseTrie(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
     }
 
-    checkLTS(exercises);
+    audioFileHelper.checkLTS(exercises);
     long now = System.currentTimeMillis();
     if (now - then > 200) {
       logger.info("took " + (now - then) + " millis to get the predef exercise list for " + serverProps.getLanguage());
@@ -715,33 +702,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return exercises;
   }
 
-  private void checkLTS(List<CommonExercise> exercises) {
-    synchronized (this) {
-      if (!checkedLTS) {
-        checkedLTS = true;
-        int count = 0;
-        for (CommonExercise exercise : exercises) {
-          boolean validForeignPhrase = isValidForeignPhrase(exercise.getForeignLanguage());
-          if (!validForeignPhrase) {
-            if (count < 10) {
-              logger.error("huh? for " + exercise.getID() + " we can't parse " + exercise.getID() + " " + exercise.getEnglish() + " fl " + exercise.getForeignLanguage());
-            }
-            count++;
-          }
-        }
-        if (count > 0) {
-          logger.error("huh? out of " + exercises.size() + " LTS fails on " + count);
-        }
-      }
-    }
-  }
-
   /**
-<<<<<<< HEAD
-   * TODOx : come back to this!!!
-=======
-   * TODO : come back to this!!!
->>>>>>> newLogin
    *
    * @param wavFile
    * @return true if mp3 file exists
@@ -1039,7 +1000,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public List<UserList> getReviewLists() {
-    //logger.debug("asking for review lists --- ");
     List<UserList> lists = new ArrayList<UserList>();
     UserListManager userListManager = db.getUserListManager();
     UserList defectList = userListManager.getDefectList(getTypeOrder());
@@ -1190,7 +1150,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param email
    * @param isMale
    * @param age
-   * @param dialect @return null if existing user
+   * @param dialect   @return null if existing user
    * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, mitll.langtest.shared.User.Kind)
    */
   @Override
@@ -1198,61 +1158,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                       boolean isMale, int age, String dialect) {
     User user = db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind, isMale, age, dialect);
     if (user != null && !user.isEnabled()) { // user = null means existing user.
-      db.addContentDeveloper(url, email, user,getMailSupport());
+      getEmailHelper().addContentDeveloper(url, email, user, getMailSupport());
     }
     return user;
   }
 
-/*  private void addContentDeveloper(String url, String email, User user) {
-    url = trimURL(url);
-    String userID1 = user.getUserID();
-    String toHash = userID1 + "_" + System.currentTimeMillis();
-    String hash = getHash(toHash);
-    db.getUserDAO().addKey(user.getId(), false, hash);
-
-    for (int i = 0; i < approvers.size(); i++) {
-      String tamas = approvers.get(i);
-      String approvalEmailAddress = emails.get(i);
-      String message = getEmailApproval(userID1, tamas);
-      sendApprovalEmail(url, email, userID1, hash, message, approvalEmailAddress);
-    }
-  }*/
-
-/*  private void sendApprovalEmail(String url, String email, String userID1, String hash, String message, String approvalEmailAddress) {
-    getMailSupport().sendEmail(NP_SERVER,
-        url + "?cd=" + hash + "&" +
-            "er" +
-            "=" + rot13(email),
-        approvalEmailAddress,
-        "gordon.vidaver@ll.mit.edu",
-        "Content Developer approval for " + userID1 + " for " + serverProps.getLanguage(),
-        message,
-        "Click to approve" // link text
-    );
-  }
-
-  private String getEmailApproval(String userID1, String tamas) {
-    return "Hi " +
-        tamas + ",<br/><br/>" +
-        "User '" + userID1 +
-        "' would like to be a content developer for " + serverProps.getLanguage() +
-        "." + "<br/>" +
-
-        "Click the link to allow them." +
-        "<br/><br/>" +
-        "Regards, Administrator";
-  }*/
-
-  private String rot13(String val) {
-    StringBuilder builder = new StringBuilder();
-    for (char c : val.toCharArray()) {
-      if (c >= 'a' && c <= 'm') c += 13;
-      else if (c >= 'A' && c <= 'M') c += 13;
-      else if (c >= 'n' && c <= 'z') c -= 13;
-      else if (c >= 'N' && c <= 'Z') c -= 13;
-      builder.append(c);
-    }
-    return builder.toString();
+  private EmailHelper getEmailHelper() {
+    return new EmailHelper(serverProps, db.getUserDAO(),getMailSupport(),pathHelper);
   }
 
   /**
@@ -1264,9 +1176,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public User getUserBy(long id) {
-    return db.getUserDAO().getUserWhere(id);
-  }
+  public User getUserBy(long id) { return db.getUserDAO().getUserWhere(id);  }
 
   /**
    * @param user
@@ -1277,100 +1187,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public boolean resetPassword(String user, String email, String url) {
     logger.debug("resetPassword for " + user);
-
-    User validUserAndEmail = db.getUserDAO().isValidUserAndEmail(user, getHash(email));
-
-    if (validUserAndEmail != null) {
-      logger.debug("resetPassword for " + user + " sending reset password email.");
-      String toHash = user + "_" + System.currentTimeMillis();
-      String hash = getHash(toHash);
-      db.getUserDAO().addKey(validUserAndEmail.getId(), true, hash);
-
-      String message = "Hi " + user + ",<br/><br/>" +
-          "Click the link below to change your password." +
-          "<br/><br/>" +
-          "Regards, Administrator";
-
-      url = trimURL(url);
-      sendEmail(url + "?" + RP + "=" + hash,
-          email,
-          "Password Reset",
-          message,
-          "Reset Password" // link text
-      );
-
-      //logger.debug("key map is " +keyToUser);
-      return true;
-    } else {
-      logger.debug("couldn't find user " + user + " and email " + email);
-      String message = "User " + user + " with email " + email + " tried to reset password - but they're not valid.";
-      String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
-      logger.debug(prefixedMessage);
-      getMailSupport().email(serverProps.getEmailAddress(), "Invalid password reset for " + serverProps.getLanguage(), prefixedMessage);
-      return false;
-    }
-  }
-
-  private void sendEmail(String link, String to, String subject, String message, String linkText) {
-    getMailSupport().sendEmail(NP_SERVER,
-        link,
-        to,
-        REPLY_TO,
-        subject,
-        message,
-        linkText// link text
-    );
+    return getEmailHelper().resetPassword(user, email, url);
   }
 
   /**
    * @param token
+   * @param emailR - email encoded by rot13
    * @return
    * @see mitll.langtest.client.LangTest#handleCDToken
    */
   public Long enableCDUser(String token, String emailR, String url) {
-    // Long userID = keyToEnabledUser.remove(token);
-
-    User userWhereEnabledReq = db.getUserDAO().getUserWhereEnabledReq(token);
-    Long userID = null;
-    if (userWhereEnabledReq == null) {
-      logger.debug("user id '" + userID + "' for " + token);
-      userID = null;
-    } else {
-      userID = userWhereEnabledReq.getId();
-      logger.debug("user id '" + userID + "' for " + token + " vs " + userWhereEnabledReq.getId());
-    }
-    String email = rot13(emailR);
-
-    if (userID == null) {
-      return null;
-    } else {
-      boolean b = db.getUserDAO().enableUser(userID);
-      if (b) {
-        db.getUserDAO().clearKey(userID, false);
-
-        User userWhere = db.getUserDAO().getUserWhere(userID);
-        url = trimURL(url);
-
-        logger.debug("Sending user email... link is " + url);
-        String message = "Hi " + userWhere.getUserID() + ",<br/>" +
-            "You have been approved to be a content developer for " + serverProps.getLanguage() + "." +
-            "<br/>Click on the link below to log in." +
-            "<br/><br/>" +
-            "Regards, Administrator";
-        sendEmail(url // baseURL
-            ,
-            email, // destination email
-            "Account approved", // subject
-            message,
-            "Click here to return to the site." // link text
-        );
-      }
-      return (b ? userID : -1);
-    }
-  }
-
-  public String getHash(String toHash) {
-    return StringUtils.toHexString(Md5Utils.getMd5Digest(toHash.getBytes()));
+    return getEmailHelper().enableCDUser(token, emailR, url);
   }
 
   /**
@@ -1380,16 +1207,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public long getUserIDForToken(String token) {
-    //Long aLong = keyToUser.get(token);
     User user = db.getUserDAO().getUserWhereResetKey(token);
-    if (user == null) {
-      //if (aLong != null) logger.error("huh? disagree - ");
-      return -1;
-    } else {
-      //if (aLong != user.getId()) logger.error("disagree --");
-      return user.getId();
-      //  return aLong;
-    }
+    return (user == null) ? -1 : user.getId();
   }
 
   @Override
@@ -1415,29 +1234,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public boolean forgotUsername(String emailH, String email, String url) {
     User valid = db.getUserDAO().isValidEmail(emailH);
-
-    url = trimURL(url);
-
-    if (valid != null) {
-      logger.debug("Sending user email...");
-      String message = "Hi " + valid.getUserID() + ",<br/>" +
-          "Your user name is " + valid.getUserID() + "." +
-          "<br/><br/>" +
-          "Regards, Administrator";
-      sendEmail(url // baseURL
-          ,
-          email, // destination email
-          "Your user name", // subject
-          message,
-          "Click here to return to the site." // link text
-      );
-    }
+    getEmailHelper().getUserNameEmail(email, url, valid);
     return valid != null;
-  }
-
-  public String trimURL(String url) {
-    if (url.contains("127.0.0.1")) return url;
-    else return url.split("\\?")[0].split("\\#")[0];
   }
 
   // Results ---------------------
@@ -1772,7 +1570,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String config = servletContext.getInitParameter("config");
     this.relativeConfigDir = "config" + File.separator + config;
     this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
-
 
     pathHelper.setConfigDir(configDir);
 
