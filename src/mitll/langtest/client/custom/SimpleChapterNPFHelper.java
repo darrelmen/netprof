@@ -31,7 +31,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
 
   protected final UserFeedback feedback;
   protected PagingExerciseList npfExerciseList;
-  final ListInterface predefinedContentList;
+//  final ListInterface predefinedContentList;
 
   /**
    * @see Navigation#Navigation
@@ -48,7 +48,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
     this.feedback = feedback;
     this.controller = controller;
     this.userManager = userManager;
-    this.predefinedContentList = predefinedContentList;
+  //  this.predefinedContentList = predefinedContentList;
 
     final SimpleChapterNPFHelper outer = this;
     this.flexListLayout = getMyListLayout(service, feedback, userManager, controller, outer);
@@ -68,7 +68,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
    * @param instanceName flex, review, etc.
    */
   public void showNPF(TabAndContent tabAndContent, String instanceName) {
-    //System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " loadExercises " + loadExercises);
+    System.out.println(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
@@ -117,14 +117,14 @@ class SimpleChapterNPFHelper implements RequiresResize {
           @Override
           public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
             super.postAnswers(controller, completedExercise);
-            tellOtherListExerciseDirty(e);
+  //          tellOtherListExerciseDirty(e);
           }
         };
       }
     };
   }
 
-  protected void tellOtherListExerciseDirty(CommonExercise e) {
+/*  protected void tellOtherListExerciseDirty(CommonExercise e) {
     if (e.getID().equals(predefinedContentList.getCurrentExerciseID())) {
       System.out.println( "WaveformExercisePanel.reloading "+ e.getID());
 
@@ -134,7 +134,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
       System.out.println( "WaveformExercisePanel.not reloading "+ e.getID());
 
     }
-  }
+  }*/
 
   @Override
   public void onResize() {
