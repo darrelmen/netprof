@@ -31,7 +31,7 @@ public class ControlState {
   public boolean isForeign() { return showState.equals(FOREIGN);}
 
   /**
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory#StatsFlashcardFactory(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, String)
+   * @see StatsFlashcardFactory#StatsFlashcardFactory(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, String, mitll.langtest.shared.custom.UserList)
    * @param storage
    */
   public void setStorage(KeyStorage storage) {
