@@ -85,7 +85,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Flashcard flashcard;
 
   private Panel headerRow;
-  private FluidRow secondRow;
+ // private FluidRow secondRow;
   private Panel firstRow;
 
   private StartupInfo startupInfo;
@@ -315,8 +315,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void populateBelowHeader(Container verticalContainer, Panel firstRow) {
     // second row ---------------
-    secondRow = new FluidRow();
-    secondRow.getElement().setId("secondRow");
+   // secondRow = new FluidRow();
+  //  secondRow.getElement().setId("secondRow");
 
     // third row ---------------
 
@@ -324,16 +324,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     exerciseListContainer.addStyleName("floatLeft");
     exerciseListContainer.getElement().setId("exerciseListContainer");
 
-    Panel thirdRow = new HorizontalPanel();
+/*    Panel thirdRow = new HorizontalPanel();
     thirdRow.add(exerciseListContainer);   // left side of third row is exercise list
     thirdRow.getElement().setId("thirdRow");
     thirdRow.setWidth("100%");
-    thirdRow.addStyleName("trueInlineStyle");
+    thirdRow.addStyleName("trueInlineStyle");*/
 
-    Panel bothSecondAndThird = new FlowPanel();
+/*    Panel bothSecondAndThird = new FlowPanel();
     bothSecondAndThird.getElement().setId("secondAndThirdRowContainer");
     bothSecondAndThird.add(secondRow);
-    bothSecondAndThird.add(thirdRow);
+    bothSecondAndThird.add(thirdRow);*/
 
     // set up center right panel, initially with flash record panel
     Panel currentExerciseVPanel = new FlowPanel();
@@ -345,7 +345,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       RootPanel.get().add(getHeadstart(currentExerciseVPanel));
     } else {
       currentExerciseVPanel.addStyleName("floatLeftList");
-      thirdRow.add(currentExerciseVPanel);     // right side of third row is exercise panel
+      //thirdRow.add(currentExerciseVPanel);     // right side of third row is exercise panel
       RootPanel.get().add(verticalContainer);
     }
 
@@ -357,10 +357,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     modeSelect();
 
-    navigation = new Navigation(service, userManager, this, //exerciseList,
-        this);
+    navigation = new Navigation(service, userManager, this, this);
 
-    firstRow.add(navigation.getNav(bothSecondAndThird));
+    firstRow.add(navigation.getNav(/*bothSecondAndThird*/));
 
     if (SHOW_STATUS) {
       DivWidget w = new DivWidget();
@@ -640,7 +639,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public int getHeightOfTopRows() {
-    return headerRow.getOffsetHeight() + secondRow.getOffsetHeight();
+    return headerRow.getOffsetHeight();// + secondRow.getOffsetHeight();
   }
 
   @Override
