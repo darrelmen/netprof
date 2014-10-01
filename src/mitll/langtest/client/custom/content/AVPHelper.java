@@ -20,6 +20,7 @@ import mitll.langtest.shared.custom.UserList;
 * To change this template use File | Settings | File Templates.
 */
 public class AVPHelper extends NPFHelper {
+  UserList ul;
   /**
    * @see mitll.langtest.client.custom.Navigation#Navigation
    * @param service
@@ -31,11 +32,17 @@ public class AVPHelper extends NPFHelper {
     super(service, feedback, userManager, controller, false);
   }
 
+  /**
+   * @see #doInternalLayout(mitll.langtest.shared.custom.UserList, String)
+   * @param ul
+   * @param instanceName
+   * @return
+   */
   @Override
   protected Panel getRightSideContent(UserList ul, String instanceName) {
     Panel npfContentPanel = new SimplePanel();
     npfContentPanel.getElement().setId("AVPHelper_internalLayout_RightSideContent");
-
+    this.ul = ul;
     npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getUniqueID());
     return npfContentPanel;
   }
@@ -67,7 +74,7 @@ public class AVPHelper extends NPFHelper {
 
   @Override
   protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList, final String instanceName, boolean showQC) {
-    return new StatsFlashcardFactory(service, feedback, controller, exerciseList, "AVPHelper");
+    return new StatsFlashcardFactory(service, feedback, controller, exerciseList, "AVPHelper", ul);
   }
 
   @Override
