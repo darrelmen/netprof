@@ -1,8 +1,8 @@
 package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.CheckBox;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -10,11 +10,9 @@ import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
-import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -35,7 +33,7 @@ import mitll.langtest.shared.User;
 public class UserPassLogin extends UserDialog {
   private static final int MIN_LENGTH_USER_ID = 4;
 
-  private static final int MIN_PASSWORD = 5;
+  private static final int MIN_PASSWORD = 4;
   private static final int MIN_EMAIL = 13;
   private static final int LEFT_SIDE_WIDTH = 483;
   private static final String SIGN_UP_SUBTEXT = "Sign up";//Or never entered a password?";//password and email";
@@ -72,12 +70,15 @@ public class UserPassLogin extends UserDialog {
   private static final String TEACHER = "Teacher";
   //private static final String CONTENT_DEVELOPER = "Content Developer";
   private static final String SIGN_UP_WIDTH = "266px";
-  public static final int BULLET_MARGIN = 25;
-  public static final String CURRENT_USER_TOOLTIP = "Current users who don't have a password and email should sign up below.";
-  public static final String CURRENT_USER = "Are you a current user without a password?";
-  public static final String RECORD_AUDIO_HEADING = "Recording audio/Quality Control";
-  public static final int WAIT_FOR_READING_APPROVAL = 4000;
-  //public static final String PLEASE_ENTER_A_PASSWORD1 = "Please enter a password.";
+  private static final int BULLET_MARGIN = 25;
+  private static final String CURRENT_USER_TOOLTIP = "Current users who don't have a password and email should sign up below.";
+  private static final String CURRENT_USER = "Are you a current user without a password?";
+  private static final String RECORD_AUDIO_HEADING = "Recording audio/Quality Control";
+  private static final int WAIT_FOR_READING_APPROVAL = 4000;
+  private static final String PLEASE_CHECK = "Please check";
+//  private static final String RECORD_REFERENCE_AUDIO = "Record Reference Audio?";
+  private static final String RECORD_REFERENCE_AUDIO = "Are you an assigned reference audio recorder?";
+  //private static final String PLEASE_ENTER_A_PASSWORD1 = "Please enter a password.";
   private final UserManager userManager;
   private final KeyPressHelper enterKeyButtonHelper;
   private FormField user;
@@ -86,7 +87,7 @@ public class UserPassLogin extends UserDialog {
   private FormField signUpPassword;
   private FormField password;
   private boolean signInHasFocus = true;
-  private EventRegistration eventRegistration;
+  private final EventRegistration eventRegistration;
   private Button signIn;
 
   /**
@@ -137,7 +138,6 @@ public class UserPassLogin extends UserDialog {
   }
 
   public Panel getResetPassword(final String token) {
-
     Panel container = new DivWidget();
     DivWidget child = new DivWidget();
     container.add(child);
@@ -245,7 +245,7 @@ public class UserPassLogin extends UserDialog {
     else return url.split("\\?")[0].split("#")[0];
   }
 
-  public void getRightLogin(Panel leftAndRight) {
+  private void getRightLogin(Panel leftAndRight) {
     DivWidget right = new DivWidget();
 
     leftAndRight.add(right);
@@ -371,6 +371,8 @@ public class UserPassLogin extends UserDialog {
       @Override
       public void onBlur(BlurEvent event) {
         if (!user.getText().isEmpty()) {
+          eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "left username field '" + user.getText()+ "'");
+
           service.userExists(user.getText(), "", new AsyncCallback<User>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -379,18 +381,19 @@ public class UserPassLogin extends UserDialog {
 
             @Override
             public void onSuccess(User result) {
-              System.out.println("makeSignInUserName : for " + user.getText() + " got back " + result);
+       //       System.out.println("makeSignInUserName : for " + user.getText() + " got back " + result);
               if (result != null) {
                 String emailHash = result.getEmailHash();
                 String passwordHash = result.getPasswordHash();
                 if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
+                  eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "existing legacy user " + result.toStringShort());
+
                   copyInfoToSignUp(result);
                 }
               }
             }
           });
         }
-
       }});
   }
 
@@ -398,7 +401,7 @@ public class UserPassLogin extends UserDialog {
   private DecoratedPopupPanel resetEmailPopup;
   private Button sendEmail;
 
-  public Anchor getForgotPassword() {
+  private Anchor getForgotPassword() {
     final Anchor forgotPassword = new Anchor(FORGOT_PASSWORD);
     forgotPassword.addClickHandler(new ClickHandler() {
       @Override
@@ -418,7 +421,7 @@ public class UserPassLogin extends UserDialog {
             String text = emailEntry.getText();
             if (!isValidEmail(text)) {
        /*       System.out.println("email is '" + text+ "' ");*/
-              markError(emailEntry, "Please check", VALID_EMAIL, Placement.TOP);
+              markError(emailEntry, PLEASE_CHECK, VALID_EMAIL, Placement.TOP);
               return;
             }
 
@@ -469,7 +472,11 @@ public class UserPassLogin extends UserDialog {
   private DecoratedPopupPanel sendUsernamePopup;
   private Button sendUsernameEmail;
 
-  public Anchor getForgotUser() {
+  /**
+   * @see #populateSignInForm(com.github.gwtbootstrap.client.ui.Form)
+   * @return
+   */
+  private Anchor getForgotUser() {
     final Anchor forgotUsername = new Anchor(FORGOT_USERNAME);
     forgotUsername.addClickHandler(new ClickHandler() {
       @Override
@@ -486,9 +493,7 @@ public class UserPassLogin extends UserDialog {
           public void onClick(final ClickEvent event) {
             final String text = emailEntry.getText();
             if (!isValidEmail(text)) {
-              markError(emailEntry,
-                  "Please check",
-                  VALID_EMAIL, Placement.TOP);
+              markError(emailEntry, PLEASE_CHECK, VALID_EMAIL, Placement.TOP);
               return;
             }
 
@@ -540,7 +545,7 @@ public class UserPassLogin extends UserDialog {
     return forgotUsername;
   }
 
-  public boolean isValidEmail(String text) {
+  private boolean isValidEmail(String text) {
     return text.toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
   }
 
@@ -556,7 +561,7 @@ public class UserPassLogin extends UserDialog {
     commentPopup.add(vp);
   }
 
-  protected void getFocusOnField(final FormField user) {
+  private void getFocusOnField(final FormField user) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         user.box.setFocus(true);
@@ -567,7 +572,7 @@ public class UserPassLogin extends UserDialog {
   private Button signUp;
   private CheckBox contentDevCheckbox;
 
-  public Form getSignUpForm() {
+  private Form getSignUpForm() {
     Form form = getSignInForm();
 
     Fieldset fieldset = new Fieldset();
@@ -592,7 +597,7 @@ public class UserPassLogin extends UserDialog {
 
     fieldset.add(getRolesChoices());
 
-    contentDevCheckbox = new CheckBox("Record Reference Audio?");
+    contentDevCheckbox = new CheckBox(RECORD_REFERENCE_AUDIO);
 
     String html = "Click here if you want to record reference audio or review current audio.<br/>" +
         "After you click sign up, " +
@@ -737,8 +742,8 @@ public class UserPassLogin extends UserDialog {
   private RegistrationInfo registrationInfo;
   private User.Kind selectedRole = User.Kind.UNSET;
 
-  private RadioButton studentChoice = new RadioButton("ROLE_CHOICE", STUDENT);
-  private RadioButton teacherChoice = new RadioButton("ROLE_CHOICE", TEACHER);
+  private final RadioButton studentChoice = new RadioButton("ROLE_CHOICE", STUDENT);
+  private final RadioButton teacherChoice = new RadioButton("ROLE_CHOICE", TEACHER);
 
   /**
    *
@@ -794,7 +799,7 @@ public class UserPassLogin extends UserDialog {
     return onButton;
   }*/
 
-  public Button getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
+  private Button getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
     signUp = new Button(SIGN_UP);
     signUp.getElement().setId("SignUp");
     eventRegistration.register(signUp);
@@ -842,7 +847,7 @@ public class UserPassLogin extends UserDialog {
     return signUp;
   }
 
-  private void gotSignUp(String user, String password, String email, User.Kind kind) {
+  private void gotSignUp(final String user, String password, String email, User.Kind kind) {
     String passH = Md5Hash.getHash(password);
     String emailH = Md5Hash.getHash(email);
 
@@ -854,7 +859,6 @@ public class UserPassLogin extends UserDialog {
 
     signUp.setEnabled(false);
 
- //   System.out.println("kind is " +kind);
     service.addUser(user, passH, emailH, kind, Window.Location.getHref(), email,
         gender.equalsIgnoreCase("male"), age1, dialect, new AsyncCallback<User>() {
           @Override
@@ -868,15 +872,16 @@ public class UserPassLogin extends UserDialog {
           @Override
           public void onSuccess(User result) {
             if (result == null) {
-              eventRegistration.logEvent(signUp, "signing up", "N/A", "Tried to sign up, but existing user.");
+              eventRegistration.logEvent(signUp, "signing up", "N/A", "Tried to sign up, but existing user (" +user+   ").");
               signUp.setEnabled(true);
               markError(signUpUser, "User exists already, please sign in or choose a different name.");
             } else {
               if (result.isEnabled()) {
-                eventRegistration.logEvent(signUp, "signing up", "N/A", "successful sign up.");
+                eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result));
                 storeUser(result);
               } else {
-                eventRegistration.logEvent(signUp, "signing up", "N/A", "successful sign up but waiting for approval from Tamas.");
+                eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result) +
+                    "but waiting for approval from Tamas.");
                 markError(signUp, "Wait for approval", "You will get an approval message by email.", Placement.TOP);
                 Timer t = new Timer() {
                   @Override
@@ -892,7 +897,11 @@ public class UserPassLogin extends UserDialog {
         });
   }
 
-  public void getLeftIntro(Panel leftAndRight) {
+  private String getSignUpEvent(User result) {
+    return "successful sign up as " + result.getUserID() + "/" + result.getId() + " as " +result.getUserKind();
+  }
+
+  private void getLeftIntro(Panel leftAndRight) {
     DivWidget left = new DivWidget();
     left.addStyleName("floatLeft");
     left.setWidth(LEFT_SIDE_WIDTH + "px");
@@ -1048,7 +1057,7 @@ public class UserPassLogin extends UserDialog {
     markError(signUpEmail, "Add info", "Current users should add an email and password.", Placement.TOP);
   }
 
-  public void storeUser(User result) {
+  private void storeUser(User result) {
     System.out.println("UserPassLogin.storeUser - " + result);
     enterKeyButtonHelper.removeKeyHandler();
     userManager.storeUser(result, getAudioTypeFromPurpose(result.getUserKind()));
