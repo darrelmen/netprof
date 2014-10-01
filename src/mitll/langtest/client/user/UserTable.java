@@ -23,6 +23,7 @@ public class UserTable extends PagerTable {
   private static final int PAGE_SIZE = 5;
  // private static final boolean INCLUDE_EXPERIENCE = false;
   public static final String USER_ID = "User ID";
+  public static final int PAGE_SIZE1 = 7;
 
   private Widget lastTable = null;
   private Button closeButton;
@@ -266,7 +267,7 @@ public class UserTable extends PagerTable {
 
     // Create a SimplePager.
     // return getPagerAndTable(table, table, 10, 10);
-    return getOldSchoolPagerAndTable(table, table, 8, 8);
+    return getOldSchoolPagerAndTable(table, table, PAGE_SIZE1, PAGE_SIZE1);
   }
 
 /*  private void addLanguage(CellTable<User> table) {
