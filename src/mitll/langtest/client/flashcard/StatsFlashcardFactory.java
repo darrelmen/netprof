@@ -23,6 +23,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
@@ -59,6 +60,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   final StickyState sticky;
   Panel scoreHistory;
   private Map<String, Collection<String>> selection;
+  UserList ul;
 
   /**
    * @param service
@@ -66,15 +68,16 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
    * @param controller
    * @param exerciseList
    * @param instance
+   * @param ul
    * @see mitll.langtest.client.custom.content.AVPHelper#getFactory
    * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
    */
   public StatsFlashcardFactory(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller,
-                               ListInterface exerciseList, String instance) {
+                               ListInterface exerciseList, String instance, UserList ul) {
     super(service, feedback, controller, exerciseList);
     controlState = new ControlState();
     this.instance = instance;
-
+    this.ul = ul;
     // System.out.println("made factory ---------------------\n");
 /*    boolean sharedList = exerciseList == null;
     if (sharedList) {   // when does this happen??
@@ -314,10 +317,12 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
 /*      System.out.println("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
         " with " + exToCorrect + " and latest " + latestResultID + " and ids " +copies);*/
 
-      service.getUserHistoryForList(user, copies, latestResultID, selection, new AsyncCallback<AVPScoreReport>() {
+      // TODO : add optional user list argument!
+
+      service.getUserHistoryForList(user, copies, latestResultID, selection, ul == null ? -1 : ul.getUniqueID(), new AsyncCallback<AVPScoreReport>() {
         @Override
         public void onFailure(Throwable caught) {
-          System.err.println("StatsPracticePanel.onSetComplete. : got failure " + caught);
+          //System.err.println("StatsPracticePanel.onSetComplete. : got failure " + caught);
         }
 
         @Override
@@ -502,11 +507,11 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     protected void gotClickOnNext() {
       abortPlayback();
 
-      System.out.println("on last " +exerciseList.onLast());
+      //System.out.println("on last " + exerciseList.onLast());
       if (exerciseList.onLast()) {
         onSetComplete();
       } else {
-        System.out.println("load next " +exerciseList.getCurrentExerciseID());
+        //System.out.println("load next " + exerciseList.getCurrentExerciseID());
 
         exerciseList.loadNext();
       }
