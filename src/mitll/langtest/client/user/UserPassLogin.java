@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
@@ -562,7 +563,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   private Button signUp;
-   CheckBox contentDevCheckbox;
+  private CheckBox contentDevCheckbox;
 
   public Form getSignUpForm() {
     Form form = getSignInForm();
@@ -585,7 +586,35 @@ public class UserPassLogin extends UserDialog {
     w1.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
     w1.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
 
-    fieldset.add(getShowGroup());
+   // fieldset.add(getShowGroup());
+
+    Panel roles = new HorizontalPanel();
+    roles.addStyleName("leftTenMargin");
+
+    roles.add(studentChoice);
+    studentChoice.addStyleName("leftFiveMargin");
+    roles.add(teacherChoice);
+    teacherChoice.addStyleName("topFiveMargin");
+    fieldset.add(roles);
+
+    studentChoice.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        selectedRole = User.Kind.STUDENT;
+        registrationInfo.setVisible(false);
+        contentDevCheckbox.setVisible(false);
+      }
+    });
+
+    teacherChoice.addClickHandler( new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        selectedRole = User.Kind.TEACHER;
+        registrationInfo.setVisible(false);
+        contentDevCheckbox.setVisible(true);
+      }
+    });
+    addTooltip(teacherChoice,"Teachers have the option of recording reference audio.");
 
     contentDevCheckbox = new CheckBox("Record Reference Audio?");
 
@@ -695,12 +724,15 @@ public class UserPassLogin extends UserDialog {
   private RegistrationInfo registrationInfo;
   private User.Kind selectedRole = User.Kind.STUDENT;
 
+  private RadioButton studentChoice = new RadioButton("ROLE_CHOICE", STUDENT);
+  private RadioButton teacherChoice = new RadioButton("ROLE_CHOICE", TEACHER);
+
   /**
    *
    * @return
    * @see #getSignUpForm()
    */
-  private DivWidget getShowGroup() {
+/*  private DivWidget getShowGroup() {
     ButtonToolbar w = new ButtonToolbar();
     w.addStyleName("bottomFiveMargin");
     w.getElement().getStyle().setMarginTop(3, Style.Unit.PX);
@@ -725,20 +757,20 @@ public class UserPassLogin extends UserDialog {
         contentDevCheckbox.setVisible(true);
       }
     }));
-/*
+*//*
     buttonGroup.add(getChoice(CONTENT_DEVELOPER, false, new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         selectedRole = User.Kind.CONTENT_DEVELOPER;
         registrationInfo.setVisible(true);
       }
-    }));*/
+    }));*//*
 
     Style style = w.getElement().getStyle();
     style.setMarginLeft(9, Style.Unit.PX);
 
     return w;
-  }
+  }*/
 
   private Button getChoice(String title, boolean isActive, ClickHandler handler) {
     Button onButton = new Button(title);
