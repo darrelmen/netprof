@@ -120,6 +120,7 @@ class FlashcardPanel extends HorizontalPanel {
     inner.add(threePartContent);
 
     addRecordingAndFeedbackWidgets(e, service, controller, inner2);
+    inner2.add(getFinalWidgets());
 
     HTML warnNoFlash = new HTML(WARN_NO_FLASH);
     warnNoFlash.setVisible(false);
@@ -133,7 +134,6 @@ class FlashcardPanel extends HorizontalPanel {
     if (controlState.isAudioOn() && mainContainer.isVisible() && !isHidden(foreign)) {
       playRef();
     }
-    inner2.add(getFinalWidgets());
   }
 
   private CommentBox commentBox;
