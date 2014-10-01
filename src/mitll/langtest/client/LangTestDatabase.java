@@ -92,7 +92,7 @@ public interface LangTestDatabase extends RemoteService {
   void logMessage(String message);
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID);
 
-  AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID, Map<String, Collection<String>> typeToSection);
+  AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID, Map<String, Collection<String>> typeToSection, long userListID);
 
   StartupInfo getStartupInfo();
   long addUserList(long userid, String name, String description, String dliClass, boolean isPublic);
