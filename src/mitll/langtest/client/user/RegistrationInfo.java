@@ -19,8 +19,6 @@ class RegistrationInfo extends BasicDialog {
   private static final String DIALECT = "Dialect";
 
   private final FormField ageEntryGroup;
-  //private final ListBoxFormField genderGroup;
-  // private final ControlGroup genderGroup;
   private final FormField dialectGroup;
   private RadioButton male = new RadioButton(GENDER_GROUP, "Male");
   private RadioButton female = new RadioButton(GENDER_GROUP, "Female");
