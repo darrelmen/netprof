@@ -107,6 +107,7 @@ public class NPFHelper implements RequiresResize {
    * @param instanceName
    * @param loadExercises
    * @return
+   * @see #addNPFToContent(mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.Panel, String, boolean)
    */
   private Panel doNPF(UserList ul, String instanceName, boolean loadExercises) {
    // System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul);
@@ -124,6 +125,7 @@ public class NPFHelper implements RequiresResize {
    * @param ul
    * @param instanceName
    * @return
+   * @see #doNPF(mitll.langtest.shared.custom.UserList, String, boolean)
    */
   protected Panel doInternalLayout(UserList ul, String instanceName) {
     //System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
