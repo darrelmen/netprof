@@ -55,7 +55,13 @@ public class SetCompleteDisplay {
   public Widget showFeedbackCharts(List<AVPHistoryForList> result,
                                    Map<String, Double> exToScore, int numCorrect, int numIncorrect, int numExercises) {
     Panel container = new HorizontalPanel();
+    container.getElement().setId("correctAndPron_Charts");
+    addLeftAndRightCharts(result, exToScore, numCorrect, numIncorrect, numExercises, container);
 
+    return container;
+  }
+
+  public void addLeftAndRightCharts(List<AVPHistoryForList> result, Map<String, Double> exToScore, int numCorrect, int numIncorrect, int numExercises, Panel container) {
     // add left chart and table
     AVPHistoryForList sessionAVPHistoryForList = result.get(0);
     Chart chart = makeCorrectChart(result, sessionAVPHistoryForList, numCorrect, numIncorrect, numExercises);
@@ -67,7 +73,6 @@ public class SetCompleteDisplay {
     Chart chart2 = makePronChart(getAvgScore(exToScore), sessionAVPHistoryForListScore);
     container.add(chart2);
     container.add(makeTable(sessionAVPHistoryForListScore, SCORE));
-    return container;
   }
 
   private Chart makeCorrectChart(List<AVPHistoryForList> result, AVPHistoryForList sessionAVPHistoryForList,
@@ -204,10 +209,8 @@ public class SetCompleteDisplay {
                                 List<CommonShell> allExercises, ExerciseController controller) {
     final Map<String,String> idToExercise = new HashMap<String, String>();
     for (CommonShell commonShell : allExercises) {
-      idToExercise.put(commonShell.getID()/* +"/1"*/, commonShell.getTooltip());
+      idToExercise.put(commonShell.getID(), commonShell.getTooltip());
     }
-
-    // System.out.println("map " + idToExercise);
 
     SimplePagingContainer<ExerciseCorrectAndScore> container = new SimplePagingContainer<ExerciseCorrectAndScore>(controller) {
 
@@ -234,8 +237,7 @@ public class SetCompleteDisplay {
         Column<ExerciseCorrectAndScore, SafeHtml> column3 = getColumn3();
         table.addColumn(column3, "Score");
         column3.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        table.setColumnWidth(column3, "70" +
-            "px");
+        table.setColumnWidth(column3, "70" + "px");
       }
 
       private Column<ExerciseCorrectAndScore, SafeHtml> getColumn() {
