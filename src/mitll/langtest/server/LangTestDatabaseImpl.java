@@ -159,7 +159,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         " and user list id " + userListID + " user " + userID + " role " + role + " filter " + onlyUnrecordedByMe + " only examples " + onlyExamples);
 
     try {
-      UserList userListByID = userListID != -1 ? db.getUserListManager().getUserListByID(userListID, getTypeOrder()) : null;
+      UserList userListByID = userListID != -1 ? db.getUserListByID(userListID) : null;
 
       if (typeToSelection.isEmpty()) {   // no unit-chapter filtering
         // get initial exercise set, either from a user list or predefined
@@ -1510,13 +1510,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
-                                              Map<String, Collection<String>> typeToSection) {
+                                              Map<String, Collection<String>> typeToSection, long userListID) {
     //logger.debug("getUserHistoryForList " + userid + " and " + ids + " type to section " + typeToSection);
 
-    Collection<CommonExercise> exercisesForState = (typeToSection == null || typeToSection.isEmpty()) ? getExercises() :
-        db.getSectionHelper().getExercisesForSelectionState(typeToSection);
+    UserList userListByID = userListID != -1 ? db.getUserListByID(userListID) : null;
     List<String> allIDs = new ArrayList<String>();
-    for (CommonExercise exercise : exercisesForState) allIDs.add(exercise.getID());
+    if (userListByID != null) {
+      for (CommonExercise exercise : userListByID.getExercises()) allIDs.add(exercise.getID());
+    } else {
+      Collection<CommonExercise> exercisesForState = (typeToSection == null || typeToSection.isEmpty()) ? getExercises() :
+          db.getSectionHelper().getExercisesForSelectionState(typeToSection);
+      for (CommonExercise exercise : exercisesForState) allIDs.add(exercise.getID());
+    }
     //logger.debug("for " + typeToSection + " found " + allIDs.size());
     return db.getUserHistoryForList(userid, ids, latestResultID, allIDs);
   }
