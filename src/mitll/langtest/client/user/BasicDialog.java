@@ -31,11 +31,11 @@ import java.util.List;
  */
 public class BasicDialog {
   public static final int ILR_CHOICE_WIDTH = 80;
-  public static final int MIN_LENGTH_USER_ID = 8;
+ // public static final int MIN_LENGTH_USER_ID = 8;
   protected static final String TRY_AGAIN = "Try Again";
-  static final String UNSET = "GENDER";
-  private static final String MALE = "Male";
-  private static final String FEMALE = "Female";
+ // static final String UNSET = "GENDER";
+ // private static final String MALE = "Male";
+ // private static final String FEMALE = "Female";
 
   protected FormField addControlFormField(Panel dialogBox, String label) {
     return addControlFormField(dialogBox, label, false, 0, 30, "");
@@ -371,13 +371,13 @@ public class BasicDialog {
     return getListBox(values);
   }*/
 
-  protected ListBox getListBox(List<String> values) {
+/*  protected ListBox getListBox(List<String> values) {
     final ListBox genderBox = new ListBox(false);
     for (String s : values) {
       genderBox.addItem(s);
     }
     return genderBox;
-  }
+  }*/
 
   protected FormField addControlFormFieldWithPlaceholder(Panel dialogBox, boolean isPassword, int minLength, int maxLength, String hint) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
@@ -476,13 +476,10 @@ public class BasicDialog {
   }*/
 
   /**
-   * @see StudentDialog#displayLoginBox()
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getDeleteButton(String, com.google.gwt.event.dom.client.ClickHandler)
    * @param w
    * @param tip
    * @return
    */
-  protected Tooltip addTooltip(Widget w, String tip) {
-//    System.out.println("adding " +tip + " to " +w.getElement().getId());
-    return new TooltipHelper().addTooltip(w, tip);
-  }
+  protected Tooltip addTooltip(Widget w, String tip) { return new TooltipHelper().addTooltip(w, tip);  }
 }
