@@ -24,9 +24,11 @@ public class StickyState {
   /**
    *
    * @param e
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory#getExercisePanel(mitll.langtest.shared.CommonExercise)
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
    */
   protected void storeCurrent(CommonExercise e) {
-    //System.out.println("StickyState.storeCurrent store current " + e.getID());
+    System.out.println("StickyState.storeCurrent store current " + e.getID());
     storage.storeValue(CURRENT_EXERCISE, e.getID());
   }
 
