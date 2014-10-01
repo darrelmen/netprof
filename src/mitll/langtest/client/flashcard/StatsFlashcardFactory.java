@@ -47,6 +47,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   private static final String SKIP_TO_END = "See your scores";
   private static final boolean ADD_KEY_BINDING = true;
   private static final String GO_BACK = "Go back";
+  public static final String N_A = "N/A";
 
   private CommonExercise currentExercise;
   private final ControlState controlState;
@@ -61,6 +62,8 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   Panel scoreHistory;
   private Map<String, Collection<String>> selection;
   UserList ul;
+  private Widget contentPanel;
+
 
   /**
    * @param service
@@ -96,7 +99,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
           StatsFlashcardFactory.this.selectionID = selectionID;
           allExercises = items;
           //originalExercises = items;
-          System.out.println("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
+      //    System.out.println("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
           reset();
         }
       });
@@ -205,6 +208,10 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     this.selection = selection;
   }
 
+  public void setContentPanel(Widget contentPanel) {
+    this.contentPanel = contentPanel;
+  }
+
   /**
    * @see #getExercisePanel(mitll.langtest.shared.CommonExercise)
    */
@@ -220,6 +227,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
           StatsFlashcardFactory.this.controlState,
           soundFeedback,
           soundFeedback.endListener, StatsFlashcardFactory.this.instance, exerciseListToUse);
+    //  System.out.println("made " + this + " for " + e.getID());
     }
 
     @Override
@@ -260,8 +268,8 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
         return;
       }
       resultIDs.add(result.getResultID());
-      exToScore.put(currentExercise.getID(), result.getScore());
-      exToCorrect.put(currentExercise.getID(), result.isCorrect());
+      exToScore.put(exercise.getID(), result.getScore());
+      exToCorrect.put(exercise.getID(), result.isCorrect());
 
       StringBuilder builder = new StringBuilder();
       StringBuilder builder2 = new StringBuilder();
@@ -296,12 +304,19 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
      * @see #nextAfterDelay(boolean, String)
      */
     public void onSetComplete() {
+      if (!startOver.isVisible()) return;
+
       startOver.setVisible(false);
       seeScores.setVisible(false);
       setPrevNextVisible(false);
 
       sticky.resetStorage();
-      sticky.storeCurrent(currentExercise);
+      if (exercise == null) {
+        System.err.println("StatsPracticePanel.onSetComplete. : err : no exercise?");
+      }
+      else {
+        sticky.storeCurrent(exercise);
+      }
 
       final int user = controller.getUser();
 
@@ -316,8 +331,6 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
 
 /*      System.out.println("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
         " with " + exToCorrect + " and latest " + latestResultID + " and ids " +copies);*/
-
-      // TODO : add optional user list argument!
 
       service.getUserHistoryForList(user, copies, latestResultID, selection, ul == null ? -1 : ul.getUniqueID(), new AsyncCallback<AVPScoreReport>() {
         @Override
@@ -335,14 +348,62 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
 
     private void showFeedbackCharts(List<AVPHistoryForList> result, final List<ExerciseCorrectAndScore> sortedHistory) {
       setMainContentVisible(false);
-      container = completeDisplay.showFeedbackCharts(result, exToScore, getCorrect(), getIncorrect(), allExercises.size());
-      Panel leftRight = new HorizontalPanel();
+
+      contentPanel.removeStyleName("centerPractice");
+      contentPanel.addStyleName("noWidthCenterPractice");
+    //  System.out.println("showFeedbackCharts ---- \n\n\n");
+
+      //container = completeDisplay.showFeedbackCharts(result, exToScore, getCorrect(), getIncorrect(), allExercises.size());
+      HorizontalPanel widgets = new HorizontalPanel();
+      container = widgets;
+      scoreHistory = completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
+      scoreHistory.add(getButtonsBelowScoreHistory());
+      widgets.add(scoreHistory);
+      completeDisplay.addLeftAndRightCharts(result, exToScore, getCorrect(), getIncorrect(), allExercises.size(),widgets);
+
+
+/*      Panel leftRight = new HorizontalPanel();
+      leftRight.getElement().setId("setCompleteDisplayLeftRight");
+      leftRight.addStyleName("floatLeft");*/
+      belowContentDiv.add(container);
+
+
+  //    leftRight.add(scoreHistory);
+
+    //  Panel child = getButtonsBelowScoreHistory();
+
+
+      //DivWidget right = new DivWidget();
+     // right.getElement().setId("setCompleteDisplayLeftRight_rightside");
+
+     // right.add(container);
+     // right.addStyleName("floatRight");
+     // leftRight.add(right);
+
+
+     /* Panel leftRight = new HorizontalPanel();
+      leftRight.getElement().setId("setCompleteDisplayLeftRight");
       leftRight.addStyleName("floatLeft");
       belowContentDiv.add(leftRight);
+
       scoreHistory = completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
+
       leftRight.add(scoreHistory);
-      Panel child = new VerticalPanel();
+
+      Panel child = getButtonsBelowScoreHistory();
+
       scoreHistory.add(child);
+
+      DivWidget right = new DivWidget();
+      right.getElement().setId("setCompleteDisplayLeftRight_rightside");
+
+      right.add(container);
+      right.addStyleName("floatRight");
+      leftRight.add(right);*/
+    }
+
+    private Panel getButtonsBelowScoreHistory() {
+      Panel child = new VerticalPanel();
 
       final Button w = getIncorrectListButton();
       child.add(w);
@@ -351,11 +412,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       repeatButton.addStyleName("topFiveMargin");
 
       child.add(repeatButton);
-
-      DivWidget right = new DivWidget();
-      right.add(container);
-      right.addStyleName("floatRight");
-      leftRight.add(right);
+      return child;
     }
 
     private Button getIncorrectListButton() {
@@ -367,14 +424,14 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       w.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-
           //   System.out.println("----> click on " + START_OVER);
           w.setVisible(false);
           doIncorrectFirst();
         }
       });
 
-      controller.register(w, currentExercise.getID());
+
+      controller.register(w, N_A);
       return w;
     }
 
@@ -382,9 +439,13 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
      * @see #getIncorrectListButton()
      */
     protected void doIncorrectFirst() {
-      abortPlayback();
-      setMainContentVisible(true);
+      /*abortPlayback();
       belowContentDiv.clear();
+      belowContentDiv.add(getSkipToEnd());
+      belowContentDiv.add(getStartOver());
+      setMainContentVisible(true);
+      */
+      showFlashcardDisplay();
 
       currentExercise = null;
       reset();
@@ -424,18 +485,24 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
         @Override
         public void onClick(ClickEvent event) {
 
-          //System.out.println("getRepeatButton : click on " + GO_BACK);
+//          System.out.println("getRepeatButton : click on " + GO_BACK);
 
-          abortPlayback();
           w1.setVisible(false);
-          setMainContentVisible(true);
-          belowContentDiv.remove(container);
+          showFlashcardDisplay();
 
           startOver();
         }
       });
-      controller.register(w1, currentExercise.getID());
+      controller.register(w1, N_A);
       return w1;
+    }
+
+    private void showFlashcardDisplay() {
+      abortPlayback();
+      belowContentDiv.clear();
+      belowContentDiv.add(getSkipToEnd());
+      belowContentDiv.add(getStartOver());
+      setMainContentVisible(true);
     }
 
     /**
@@ -451,9 +518,9 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       String lastID = allExercises.get(allExercises.size() - 1).getID();
       String currentExerciseID = sticky.getCurrentExerciseID();
 
-      // System.out.println("startOver : current " + currentExerciseID);
+       System.out.println("startOver : current " + currentExerciseID);
 
-      if (currentExerciseID != null && !currentExerciseID.equals(lastID)) {
+      if (currentExerciseID != null && !currentExerciseID.isEmpty() && !currentExerciseID.equals(lastID)) {
         exerciseList.loadExercise(currentExerciseID);
       } else {
         reset();
@@ -466,7 +533,13 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     }
 
     private void makeFlashcardButtonsVisible() {
+     contentPanel.removeStyleName("noWidthCenterPractice");
+      contentPanel.addStyleName("centerPractice");
+
+   //   System.out.println("makeFlashcardButtonsVisible ---- \n\n\n");
+
       startOver.setVisible(true);
+      startOver.setEnabled(true);
       seeScores.setVisible(true);
       setPrevNextVisible(true);
     }
@@ -491,7 +564,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
 
     /**
      * @param toAddTo
-     * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#BootstrapExercisePanel
+     * @see mitll.langtest.client.flashcard.FlashcardPanel#FlashcardPanel
      */
     @Override
     protected void addRowBelowPrevNext(DivWidget toAddTo) {
@@ -531,19 +604,20 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
           sticky.clearCurrent();
 
           startOver.setEnabled(false);
-          //startOverAndForgetScores();
-          startOverInOrder();
+          startOver();
         }
       });
       new TooltipHelper().addTooltip(startOver, "Start over from the beginning.");
 
-      controller.register(startOver, currentExercise.getID());
+      controller.register(startOver, N_A);
       return startOver;
     }
 
+/*
     protected void startOverInOrder() {
       startOver();
     }
+*/
 
     protected void abortPlayback() {
       cancelTimer();
@@ -558,7 +632,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       seeScores = new Button(SKIP_TO_END);
       seeScores.setIcon(IconType.TROPHY);
       seeScores.getElement().setId("AVP_SkipToEnd");
-      controller.register(seeScores, currentExercise.getID());
+      controller.register(seeScores, N_A);
 
       seeScores.addStyleName("leftFiveMargin");
       seeScores.setType(ButtonType.PRIMARY);
