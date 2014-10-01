@@ -193,15 +193,21 @@ public class User extends MiniUser {
     this.enabled = enabled;
   }
 
+  public String toStringShort() {
+    return "user " + getId() +  "/" + getUserID() +
+        " is a " + getGender() + " age " + getAge() +
+        " kind " + getUserKind()+
+        " perms " + getPermissions();
+  }
+
   public String toString() {
     return "user " + getId() +  "/" + getUserID() +
         " is a " + getGender() + " age " + getAge() +
-        " native lang = " + getNativeLang() +
+       // " native lang = " + getNativeLang() +
         " dialect " + getDialect() +
         " emailH " + getEmailHash() +
         " passH " + getPasswordHash() +
         " kind " + getUserKind()+
-        //" demo " + demographics +
         " perms " + getPermissions();
   }
 }
