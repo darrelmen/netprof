@@ -216,7 +216,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   void pushNewItem(String exerciseID) {
-    System.out.println("------------ ExerciseList.pushNewItem : (" + instance + ") push history " + exerciseID + " - ");
+   // System.out.println("------------ ExerciseList.pushNewItem : (" + instance + ") push history " + exerciseID + " - ");
     History.newItem("#item=" + exerciseID + ";instance=" + instance);
   }
 
