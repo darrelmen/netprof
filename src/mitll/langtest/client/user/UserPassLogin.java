@@ -14,6 +14,7 @@ import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -75,6 +76,7 @@ public class UserPassLogin extends UserDialog {
   public static final String CURRENT_USER_TOOLTIP = "Current users who don't have a password and email should sign up below.";
   public static final String CURRENT_USER = "Are you a current user without a password?";
   public static final String RECORD_AUDIO_HEADING = "Recording audio/Quality Control";
+  public static final int WAIT_FOR_READING_APPROVAL = 4000;
   //public static final String PLEASE_ENTER_A_PASSWORD1 = "Please enter a password.";
   private final UserManager userManager;
   private final KeyPressHelper enterKeyButtonHelper;
@@ -588,33 +590,7 @@ public class UserPassLogin extends UserDialog {
 
    // fieldset.add(getShowGroup());
 
-    Panel roles = new HorizontalPanel();
-    roles.addStyleName("leftTenMargin");
-
-    roles.add(studentChoice);
-    studentChoice.addStyleName("leftFiveMargin");
-    roles.add(teacherChoice);
-    teacherChoice.addStyleName("topFiveMargin");
-    fieldset.add(roles);
-
-    studentChoice.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        selectedRole = User.Kind.STUDENT;
-        registrationInfo.setVisible(false);
-        contentDevCheckbox.setVisible(false);
-      }
-    });
-
-    teacherChoice.addClickHandler( new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        selectedRole = User.Kind.TEACHER;
-        registrationInfo.setVisible(false);
-        contentDevCheckbox.setVisible(true);
-      }
-    });
-    addTooltip(teacherChoice,"Teachers have the option of recording reference audio.");
+    fieldset.add(getRolesChoices());
 
     contentDevCheckbox = new CheckBox("Record Reference Audio?");
 
@@ -642,6 +618,43 @@ public class UserPassLogin extends UserDialog {
     fieldset.add(getSignUpButton(userBox, emailBox));
 
     return form;
+  }
+
+  private Panel getRolesChoices() {
+    Panel roles = new HorizontalPanel();
+    roles.addStyleName("leftTenMargin");
+
+    roles.add(studentChoice);
+    HTML or = new HTML("or");
+    roles.add(or);
+    or.addStyleName("leftFiveMargin");
+   // studentChoice.addStyleName("leftFiveMargin");
+    roles.add(teacherChoice);
+  //  teacherChoice.addStyleName("topFiveMargin");
+    teacherChoice.addStyleName("leftFiveMargin");
+
+    studentChoice.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        selectedRole = User.Kind.STUDENT;
+        registrationInfo.setVisible(false);
+        contentDevCheckbox.setVisible(false);
+        contentDevCheckbox.setValue(false);
+      }
+    });
+
+    teacherChoice.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        selectedRole = User.Kind.TEACHER;
+        registrationInfo.setVisible(false);
+        contentDevCheckbox.setVisible(true);
+      }
+    });
+
+    addTooltip(teacherChoice,"Teachers have the option of recording reference audio.");
+
+    return roles;
   }
 
   private TextBoxBase makeSignUpUsername(Fieldset fieldset) {
@@ -722,7 +735,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   private RegistrationInfo registrationInfo;
-  private User.Kind selectedRole = User.Kind.STUDENT;
+  private User.Kind selectedRole = User.Kind.UNSET;
 
   private RadioButton studentChoice = new RadioButton("ROLE_CHOICE", STUDENT);
   private RadioButton teacherChoice = new RadioButton("ROLE_CHOICE", TEACHER);
@@ -772,14 +785,14 @@ public class UserPassLogin extends UserDialog {
     return w;
   }*/
 
-  private Button getChoice(String title, boolean isActive, ClickHandler handler) {
+/*  private Button getChoice(String title, boolean isActive, ClickHandler handler) {
     Button onButton = new Button(title);
     onButton.getElement().setId("Choice_" + title);
     eventRegistration.register(onButton, "N/A");
     onButton.addClickHandler(handler);
     onButton.setActive(isActive);
     return onButton;
-  }
+  }*/
 
   public Button getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
     signUp = new Button(SIGN_UP);
@@ -803,6 +816,9 @@ public class UserPassLogin extends UserDialog {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "short password");
           markError(signUpPassword, signUpPassword.box.getValue().isEmpty() ? PLEASE_ENTER_A_PASSWORD :
               "Please enter a password at least " + MIN_PASSWORD + " characters long.");
+        } else if (selectedRole == User.Kind.UNSET) {
+          markError(studentChoice,"Please choose","Please select either student or teacher.", Placement.LEFT);
+          eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't check role");
         } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && !registrationInfo.checkValidGender()) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't check gender");
         } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && !highlightIntegerBox(registrationInfo.getAgeEntryGroup())) {
@@ -861,7 +877,7 @@ public class UserPassLogin extends UserDialog {
                 storeUser(result);
               } else {
                 eventRegistration.logEvent(signUp, "signing up", "N/A", "successful sign up but waiting for approval from Tamas.");
-                markError(signUp, "Wait for approval", "You will get an approval message by email.", Placement.LEFT);
+                markError(signUp, "Wait for approval", "You will get an approval message by email.", Placement.TOP);
                 Timer t = new Timer() {
                   @Override
                   public void run() {
@@ -869,7 +885,7 @@ public class UserPassLogin extends UserDialog {
 
                   }
                 };
-                t.schedule(4000);
+                t.schedule(WAIT_FOR_READING_APPROVAL);
               }
             }
           }
