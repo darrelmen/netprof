@@ -620,6 +620,8 @@ public class DatabaseImpl implements Database {
    * <p/>
    * Uses return generated keys to get the user id
    *
+   * JUST FOR TESTING
+   *
    * @param age
    * @param gender
    * @param experience
@@ -627,7 +629,6 @@ public class DatabaseImpl implements Database {
    * @param dialect     speaker dialect
    * @param permissions
    * @return assigned id
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
   public long addUser(int age, String gender, int experience, String ipAddr,
                       String nativeLang, String dialect, String userID, Collection<User.Permission> permissions) {
