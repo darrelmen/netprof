@@ -50,6 +50,7 @@ public class NPFHelper implements RequiresResize {
   public PagingExerciseList npfExerciseList;
   private Panel npfContentPanel;
   private final boolean showQC;
+  DivWidget contentPanel;
 
   /**
    * @see mitll.langtest.client.custom.Navigation#Navigation
@@ -219,11 +220,11 @@ public class NPFHelper implements RequiresResize {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
         if (showQC) {
-          System.out.println("\nNPFHelper : making new QCNPFExercise for " +e + " instance " + instanceName);
+         // System.out.println("\nNPFHelper : making new QCNPFExercise for " +e + " instance " + instanceName);
           return new QCNPFExercise(e, controller, exerciseList, instanceName);
         }
         else {
-          System.out.println("\nmaking new CommentNPFExercise for " +e + " instance " + instanceName);
+         // System.out.println("\nmaking new CommentNPFExercise for " +e + " instance " + instanceName);
           return new CommentNPFExercise(e, controller, exerciseList, false, instanceName);
         }
       }
@@ -239,6 +240,10 @@ public class NPFHelper implements RequiresResize {
   @Override
   public void onResize() { if (npfContentPanel != null) {  npfExerciseList.onResize(); } }
 
+  public void setContentPanel(DivWidget content) {
+    this.contentPanel = content;
+  }
+
   /**
    * Created by GO22670 on 3/26/2014.
    */
@@ -249,7 +254,7 @@ public class NPFHelper implements RequiresResize {
     private final NPFHelper npfHelper;
 
     /**
-     * @see mitll.langtest.client.custom.Navigation#Navigation(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, mitll.langtest.client.user.UserFeedback)
+     * @see mitll.langtest.client.custom.Navigation#Navigation
      * @param service
      * @param feedback
      * @param userManager
