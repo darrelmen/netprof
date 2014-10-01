@@ -1158,6 +1158,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                       boolean isMale, int age, String dialect) {
     User user = db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind, isMale, age, dialect);
     if (user != null && !user.isEnabled()) { // user = null means existing user.
+      logger.debug("user " + userID +"/" +user+
+          " wishes to be a content developer. Asking for approval...");
       getEmailHelper().addContentDeveloper(url, email, user, getMailSupport());
     }
     return user;
