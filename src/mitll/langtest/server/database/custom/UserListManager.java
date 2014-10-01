@@ -413,7 +413,7 @@ public class UserListManager {
    * @see mitll.langtest.client.custom.Navigation#viewReview
    * @see #markCorrectness(String, boolean, long)
    * @return
-   * @param typeOrder
+   * @param typeOrder used by sorter to sort first in unit & chapter order
    */
   public UserList getDefectList(Collection<String> typeOrder) {
     Set<String> defectIds = new HashSet<String>();
@@ -433,13 +433,15 @@ public class UserListManager {
   }
 
   /**
-   * @see
+   * @see #getAttentionList(java.util.Collection)
+   * @see #getCommentedList(java.util.Collection)
+   * @see #getDefectList(java.util.Collection)
    * @param allKnown
    * @param name
    * @param description
    * @param ids
    * @param userListMaginID
-   * @param typeOrder
+   * @param typeOrder used by sorter to sort first in unit & chapter order
    * @return
    */
   private UserList getReviewList(List<CommonUserExercise> allKnown, String name, String description,
@@ -667,6 +669,7 @@ public class UserListManager {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserListName(long)
    * @param id
    * @param typeOrder
    * @return
