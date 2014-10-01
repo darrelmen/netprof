@@ -31,6 +31,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.WaveformExercisePanel;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
@@ -96,7 +97,6 @@ public class Navigation implements RequiresResize {
   private final SimpleChapterNPFHelper practiceHelper;
 
   private ScrollPanel listScrollPanel;
-  //private final ListInterface listInterface;
   private final NPFHelper npfHelper;
   private final NPFHelper avpHelper;
 
@@ -118,14 +118,24 @@ public class Navigation implements RequiresResize {
    * @see mitll.langtest.client.LangTest#populateRootPanel()
    */
   public Navigation(final LangTestDatabaseAsync service, final UserManager userManager,
-                    final ExerciseController controller, //final ListInterface predefinedContentList,
-                    UserFeedback feedback) {
+                    final ExerciseController controller, UserFeedback feedback) {
     this.service = service;
     this.userManager = userManager;
     this.controller = controller;
-    //this.listInterface = predefinedContentList;
-
     storage = new KeyStorage(controller);
+
+    learnHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller, null
+    ) {
+      protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
+        return new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
+          @Override
+          public Panel getExercisePanel(CommonExercise e) {
+            return new CommentNPFExercise(e, controller, exerciseList, false, "classroom");
+          }
+        };
+      }
+    };
+
     npfHelper = new NPFHelper(service, feedback, userManager, controller, false);
 
     avpHelper = new AVPHelper(service, feedback, userManager, controller);
@@ -135,8 +145,7 @@ public class Navigation implements RequiresResize {
     recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false);
 
     markDefectsHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller,
-        //    listInterface
-        null
+        learnHelper.getExerciseList()
     ) {
       protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
         return new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
@@ -149,42 +158,32 @@ public class Navigation implements RequiresResize {
       }
     };
 
-    learnHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller,
-        //    listInterface
-        null
-    ) {
-      protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
-        return new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
-          @Override
-          public Panel getExercisePanel(CommonExercise e) {
-            return new CommentNPFExercise(e, controller, exerciseList, false, "classroom");
-          }
-        };
-      }
-    };
-
     practiceHelper = makePracticeHelper(service, userManager, controller, feedback);
-   // ListInterface predefinedContentList = null;// TODO : fill in!!!
-    reviewItem = new NPFHelper.ReviewItemHelper(service, feedback, userManager, controller, npfHelper.getExerciseList(), npfHelper);
-    editItem = new EditItem(service, userManager, controller, npfHelper.getExerciseList(), feedback, npfHelper);
+    ListInterface exerciseList = npfHelper.getExerciseList();
+    reviewItem = new NPFHelper.ReviewItemHelper(service, feedback, userManager, controller, exerciseList, npfHelper);
+    editItem = new EditItem(service, userManager, controller, exerciseList, feedback, npfHelper);
   }
 
-/*
-  private ListInterface makeExerciseList(FluidRow secondRow, Panel exerciseListContainer, Panel currentExerciseVPanel, UserFeedback feedback, ExerciseController controller) {
-    return new ExerciseListLayout(controller.getProps()).makeExerciseList(secondRow, exerciseListContainer, feedback, currentExerciseVPanel, service, controller);
-  }
-*/
-
+  /**
+   * @see #Navigation(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
+   * @param service
+   * @param userManager
+   * @param controller
+   * @param feedback
+   * @return
+   */
   private SimpleChapterNPFHelper makePracticeHelper(final LangTestDatabaseAsync service, final UserManager userManager,
                                                     final ExerciseController controller, final UserFeedback feedback) {
-    return new SimpleChapterNPFHelper(service, feedback, userManager, controller, //listInterface
+    return new SimpleChapterNPFHelper(service, feedback, userManager, controller,
         null
     ) {
       StatsFlashcardFactory statsFlashcardFactory;
+      Widget outerBottomRow;
 
       @Override
       protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList) {
         statsFlashcardFactory = new StatsFlashcardFactory(service, feedback, controller, exerciseList, "practice", null);
+        statsFlashcardFactory.setContentPanel(outerBottomRow);
         return statsFlashcardFactory;
       }
 
@@ -226,11 +225,7 @@ public class Navigation implements RequiresResize {
               }
 
               @Override
-              protected void onLastItem() {
-                statsFlashcardFactory.resetStorage();
-
-                //super.onLastItem();
-              }
+             protected void onLastItem() {  statsFlashcardFactory.resetStorage();  }
 
               @Override
               protected void loadExercises(Map<String, Collection<String>> typeToSection, String item) {
@@ -242,7 +237,9 @@ public class Navigation implements RequiresResize {
 
           @Override
           protected void styleBottomRow(Panel bottomRow) {
+        //    System.out.println("-----\n\n Adding style to " + bottomRow.getElement().getId());
             bottomRow.addStyleName("centerPractice");
+            outerBottomRow = bottomRow;
           }
         };
       }
@@ -458,17 +455,18 @@ public class Navigation implements RequiresResize {
     practiceTab.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        //System.out.println("got practice click !!! \n\n\n");
-        checkAndMaybeClearTab(PRACTICE);
-        practiceHelper.showNPF(practiceTab, PRACTICE);
-        practiceHelper.hideList();
+        showPracticeTab();
         logEvent(practiceTab, PRACTICE);
       }
     });
   }
 
-  private String getChapterName() {
-    return isQC() ? MARK_DEFECTS : CHAPTERS;
+  private void showPracticeTab() {
+    checkAndMaybeClearTab(PRACTICE);
+    System.out.println("\n\n\n\n ------- showPracticeTab make practice tab  - " + practiceTab.getContent());
+    practiceHelper.showNPF(practiceTab, PRACTICE);
+    practiceHelper.setContentPanel(practiceTab.getContent());
+    practiceHelper.hideList();
   }
 
   private boolean isQC() {  return controller.getPermissions().contains(User.Permission.QUALITY_CONTROL); }
@@ -538,11 +536,6 @@ public class Navigation implements RequiresResize {
           if (result.size() == 1 && // if only one empty list - one you've created
               result.iterator().next().isEmpty()) {
             // choose default tab to show
-
-            //final String chapterNameToUse = getChapterName();
-            //tabPanel.selectTab(getSafeTabIndexFor(chapterNameToUse));
-            //  tabPanel.selectTab(0);
-            //   System.out.println("practice is initial tab...");
             selectPreviousTab(PRACTICE);
           } else {
             boolean foundCreated = false;
@@ -565,9 +558,12 @@ public class Navigation implements RequiresResize {
   public void refreshInitialState() {
     String value = storage.getValue(CLICKED_TAB);
     if (value.isEmpty()) {   // no previous tab
-      checkAndMaybeClearTab(PRACTICE);
+   /*   checkAndMaybeClearTab(PRACTICE);
+      practiceHelper.setContentPanel(practiceTab.getContent());
       practiceHelper.showNPF(practiceTab, PRACTICE);
-      practiceHelper.hideList();
+      practiceHelper.hideList();*/
+
+      showPracticeTab();
     }
     else {
       selectPreviousTab(value);
@@ -601,8 +597,9 @@ public class Navigation implements RequiresResize {
       } else if (value.equals(CONTENT) && markDefectsTab != null) {
         markDefectsHelper.showNPF(markDefectsTab, CONTENT1);
       } else if (value.equals(PRACTICE) && practiceTab != null) {
-        practiceHelper.showNPF(practiceTab, PRACTICE);
-        practiceHelper.hideList();
+    /*    practiceHelper.showNPF(practiceTab, PRACTICE);
+        practiceHelper.hideList();*/
+        showPracticeTab();
       } else {
         System.out.println("got unknown value '" + value+ "'");
       }
@@ -670,7 +667,7 @@ public class Navigation implements RequiresResize {
     } else if (toUse.getTab() == null) {
       System.err.println("huh? toUse has a null tab? " + toUse);
     } else {
-      System.out.println("click on tab " + toUse);
+   //   System.out.println("click on tab " + toUse);
       toUse.getTab().fireEvent(new ButtonClickEvent());
     }
   }
@@ -695,9 +692,6 @@ public class Navigation implements RequiresResize {
 
   /*To call click() function for Programmatic equivalent of the user clicking the button.*/
   private class ButtonClickEvent extends ClickEvent {}
-
-  /*To call click() function for Programmatic equivalent of the user clicking the button.*/
- // private class MyClickEvent extends ClickEvent {}
 
   private void viewBrowse() { viewLessons(browse.getContent(), true, false, false); }
 
@@ -950,7 +944,8 @@ public class Navigation implements RequiresResize {
         @Override
         public void onClick(ClickEvent event) {
           storage.storeValue(SUB_TAB, PRACTICE1);
-          // System.out.println("getListOperations : got click on practice");
+        //   System.out.println("getListOperations : got click on practice " + fpractice.getContent());
+          avpHelper.setContentPanel(fpractice.getContent());
           avpHelper.showNPF(ul, fpractice, PRACTICE1, true);
           controller.logEvent(fpractice.getTab(), "Tab", "UserList_" + ul.getID(), PRACTICE1);
         }
@@ -1090,6 +1085,9 @@ public class Navigation implements RequiresResize {
       } else if (subTab.equals(PRACTICE1)) {
         tabPanel.selectTab(SUBTAB_PRACTICE_INDEX);
         clickOnTab(practiceTab);
+      //  avpHelper.showNPF(ul, practiceTab, PRACTICE1, true);
+
+        avpHelper.setContentPanel(practiceTab.getContent());
         avpHelper.showNPF(ul, practiceTab, PRACTICE1, true);
       } else if (subTab.equals(EDIT_ITEM)) {
         boolean reviewOrComment = isReview || isComment;
@@ -1168,10 +1166,7 @@ public class Navigation implements RequiresResize {
     final boolean doNormalRecording;
 
     public RecorderNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller, boolean doNormalRecording) {
-      super(service, feedback, userManager, controller,
-          //Navigation.this.listInterface
-          null
-      );
+      super(service, feedback, userManager, controller, learnHelper.getExerciseList());
       this.doNormalRecording = doNormalRecording;
     }
 
