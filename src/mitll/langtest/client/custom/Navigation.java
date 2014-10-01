@@ -248,29 +248,29 @@ public class Navigation implements RequiresResize {
 
   /**
    * @return
-   * @param secondAndThird
+   * @paramz secondAndThird
    * @see mitll.langtest.client.LangTest#populateRootPanel()
    */
-  public Widget getNav(final Panel secondAndThird) {  return getTabPanel(secondAndThird);  }
+  public Widget getNav(/*final Panel secondAndThird*/) {  return getTabPanel(/*secondAndThird*/);  }
 
   private TabPanel tabPanel;
   private TabAndContent yourStuff, othersStuff, studyLists;
   private TabAndContent browse, chapters, create;
   private TabAndContent review, recorderTab, recordExampleTab, markDefectsTab, practiceTab;
   private final List<TabAndContent> tabs = new ArrayList<TabAndContent>();
-  private Panel chapterContent;
+ // private Panel chapterContent;
 
   /**
-   * @see #getNav(com.google.gwt.user.client.ui.Panel)
-   * @param contentForChaptersTab
+   * @see #getNav
+   * @paramx contentForChaptersTab
    * @return
    */
-  private Panel getTabPanel(Panel contentForChaptersTab) {
+  private Panel getTabPanel(/*Panel contentForChaptersTab*/) {
     tabPanel = new TabPanel();
     tabPanel.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     tabPanel.getElement().setId("tabPanel");
 
-    this.chapterContent = contentForChaptersTab;
+  //  this.chapterContent = contentForChaptersTab;
 
     // so we can know when chapters is revealed and tell it to update it's lists
     tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
@@ -304,11 +304,11 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @param contentForChaptersTab the standard npf content
+   * @paramz contentForChaptersTab the standard npf content
    * @return
    * @see #showInitialState()
    */
-  private void addTabs(Panel contentForChaptersTab) {
+  private void addTabs(/*Panel contentForChaptersTab*/) {
     tabPanel.clear();
     tabs.clear();
     nameToTab.clear();
@@ -322,7 +322,7 @@ public class Navigation implements RequiresResize {
     final String chapterNameToUse = CHAPTERS;//getChapterName();
     //  chapters = makeFirstLevelTab(tabPanel, isQualityControl ? IconType.FLAG : IconType.LIGHTBULB, chapterNameToUse);
     chapters = makeFirstLevelTab(tabPanel, IconType.LIGHTBULB, chapterNameToUse);
-    chapters.getContent().add(contentForChaptersTab);
+   // chapters.getContent().add(contentForChaptersTab);
     chapters.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -447,7 +447,7 @@ public class Navigation implements RequiresResize {
 
   /**
    * Make the practice tab...
-   * @see #addTabs(com.google.gwt.user.client.ui.Panel)
+   * @see #addTabs
    */
   private void addPracticeTab() {
     practiceTab = makeFirstLevelTab(tabPanel, IconType.REPLY, PRACTICE);
@@ -462,11 +462,17 @@ public class Navigation implements RequiresResize {
   }
 
   private void showPracticeTab() {
-    checkAndMaybeClearTab(PRACTICE);
-    System.out.println("\n\n\n\n ------- showPracticeTab make practice tab  - " + practiceTab.getContent());
-    practiceHelper.showNPF(practiceTab, PRACTICE);
-    practiceHelper.setContentPanel(practiceTab.getContent());
-    practiceHelper.hideList();
+    if (practiceTab != null) {
+      checkAndMaybeClearTab(PRACTICE);
+      System.out.println("\n\n\n\n ------- showPracticeTab make practice tab  - " + practiceTab.getContent());
+      practiceHelper.showNPF(practiceTab, PRACTICE);
+      practiceHelper.setContentPanel(practiceTab.getContent());
+      practiceHelper.hideList();
+    }
+    else {
+      System.err.println("\n\n\n\n ------- showPracticeTab make practice tab  - " + practiceTab);
+
+    }
   }
 
   private boolean isQC() {  return controller.getPermissions().contains(User.Permission.QUALITY_CONTROL); }
@@ -503,7 +509,7 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see #getTabPanel(com.google.gwt.user.client.ui.Panel)
+   * @see #getTabPanel
    * @see #showMyLists(boolean, boolean)
    * @see #deleteList(com.github.gwtbootstrap.client.ui.Button, mitll.langtest.shared.custom.UserList, boolean)
    * @see #clickOnYourLists(long)
@@ -521,7 +527,7 @@ public class Navigation implements RequiresResize {
   public void showInitialState() {
     final int user = userManager.getUser();
 
-    addTabs(chapterContent);
+    addTabs(/*chapterContent*/);
 
 /*    System.out.println("showInitialState show initial state for " + user +
         " : getting user lists " + controller.isReviewMode());*/
@@ -610,7 +616,9 @@ public class Navigation implements RequiresResize {
  //     final String chapterNameToUse = getChapterName();
 
 //      tabPanel.selectTab(getSafeTabIndexFor(chapterNameToUse));
-      selectPreviousTab(PRACTICE);
+//      selectPreviousTab(PRACTICE);
+      showPracticeTab();
+
     }
 
   }
@@ -673,7 +681,7 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see Navigation#getTabPanel(com.google.gwt.user.client.ui.Panel)
+   * @see Navigation#getTabPanel
    * @see Navigation#getListOperations(mitll.langtest.shared.custom.UserList, String)
    * @param tabPanel
    * @param iconType
@@ -725,7 +733,7 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see #getTabPanel(com.google.gwt.user.client.ui.Panel)
+   * @see #getTabPanel
    * @param contentPanel
    */
   private void viewReview(final Panel contentPanel) {
