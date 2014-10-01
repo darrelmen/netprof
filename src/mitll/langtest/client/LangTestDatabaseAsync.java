@@ -17,10 +17,6 @@ import java.util.Map;
  * The async counterpart of <code>LangTestDatabase</code>.
  */
 public interface LangTestDatabaseAsync {
- // void addTextAnswer(int usedID, CommonExercise exercise, int questionID, String answer, String answerType, AsyncCallback<Void> async);
- // void userExists(String login, AsyncCallback<Integer> async);
-
-  //void addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, Collection<User.Permission> permissions, AsyncCallback<Long> async);
   void getUsers(AsyncCallback<List<User>> async);
   void getUserBy(long id, AsyncCallback<User> async);
 
@@ -94,15 +90,13 @@ public interface LangTestDatabaseAsync {
 
   void deleteItem(String exid, AsyncCallback<Boolean> async);
 
-  void getUserHistoryForList(long userid, Collection<String> ids, long latestResultID, Map<String, Collection<String>> typeToSection, AsyncCallback<AVPScoreReport> async);
+  void getUserHistoryForList(long userid, Collection<String> ids, long latestResultID, Map<String, Collection<String>> typeToSection, long userListID, AsyncCallback<AVPScoreReport> async);
 
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, AsyncCallback<Void> async);
 
   void getEvents(AsyncCallback<List<Event>> async);
 
   void markState(String id, STATE state, long creatorID, AsyncCallback<Void> async);
-
-  //void setAVPSkip(Collection<Long> ids, AsyncCallback<Void> async);
 
   void getReviewLists(AsyncCallback<List<UserList>> async);
 
