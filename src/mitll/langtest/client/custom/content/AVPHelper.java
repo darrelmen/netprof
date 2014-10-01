@@ -74,7 +74,12 @@ public class AVPHelper extends NPFHelper {
 
   @Override
   protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList, final String instanceName, boolean showQC) {
-    return new StatsFlashcardFactory(service, feedback, controller, exerciseList, "AVPHelper", ul);
+    StatsFlashcardFactory avpHelper = new StatsFlashcardFactory(service, feedback, controller, exerciseList, "AVPHelper", ul);
+
+    System.out.println("getFactory setting content panel " + contentPanel);
+
+    avpHelper.setContentPanel(contentPanel);
+    return avpHelper;
   }
 
   @Override
