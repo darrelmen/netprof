@@ -115,18 +115,22 @@ public class UserDAO extends DAO {
     if (userByID != null && kind != User.Kind.ANONYMOUS) {
       if (userByID.getEmailHash() != null && userByID.getPasswordHash() != null &&
           !userByID.getEmailHash().isEmpty() && !userByID.getPasswordHash().isEmpty()) {
+        logger.debug("addUser : user " +userID +" is an existing user.");
         return null; // existing user!
       } else {
         updateUser(userByID.getId(), kind, passwordH, emailH);
         User userWhere = getUserWhere(userByID.getId());
-        logger.debug("returning updated user " + userWhere);
+        logger.debug("addUser : returning updated user " + userWhere);
         return userWhere;
       }
     } else {
       Collection<User.Permission> perms = (kind == User.Kind.CONTENT_DEVELOPER) ? CD_PERMISSIONS : EMPTY_PERM;
       boolean enabled = (kind != User.Kind.CONTENT_DEVELOPER) || isAdmin(userID);
       long l = addUser(age, isMale ? MALE : FEMALE, 0, ipAddr, "", dialect, userID, enabled, perms, kind, passwordH, emailH);
-      return getUserWhere(l);
+      User userWhere = getUserWhere(l);
+      logger.debug("addUser : added new user " + userWhere);
+
+      return userWhere;
     }
   }
 
@@ -211,6 +215,7 @@ public class UserDAO extends DAO {
       if (passwordH == null) {
         logger.error("Got null password Hash?", new Exception("empty password hash"));
       }
+      logger.debug("update user #" +id);
 
       Connection connection = getConnection();
       PreparedStatement statement = connection.prepareStatement(
