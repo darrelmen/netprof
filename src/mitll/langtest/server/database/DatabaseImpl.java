@@ -1044,7 +1044,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.DownloadServlet#writeUserList(javax.servlet.http.HttpServletResponse, DatabaseImpl, String)
    */
   public String writeZip(OutputStream out, long listid) throws Exception {
-    UserList userListByID = getUserListManager().getUserListByID(listid, getSectionHelper().getTypeOrder());
+    UserList userListByID = getUserListByID(listid);
 
     String language1 = getServerProps().getLanguage();
     if (userListByID == null) {
@@ -1058,7 +1058,7 @@ public class DatabaseImpl implements Database {
   }
 
   public String getUserListName(long listid) {
-    UserList userListByID = getUserListManager().getUserListByID(listid, getSectionHelper().getTypeOrder());
+    UserList userListByID = getUserListByID(listid);
     String language1 = getServerProps().getLanguage();
     if (userListByID == null) {
       logger.error("huh? can't find user list " + listid);
@@ -1066,6 +1066,10 @@ public class DatabaseImpl implements Database {
     } else {
       return language1 + "_" + userListByID.getName();
     }
+  }
+
+  public UserList getUserListByID(long listid) {
+    return getUserListManager().getUserListByID(listid, getSectionHelper().getTypeOrder());
   }
 
   public String getPrefix(Map<String, Collection<String>> typeToSection) {
