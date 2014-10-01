@@ -184,7 +184,7 @@ public class Navigation implements RequiresResize {
 
       @Override
       protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList) {
-        statsFlashcardFactory = new StatsFlashcardFactory(service, feedback, controller, exerciseList, "practice");
+        statsFlashcardFactory = new StatsFlashcardFactory(service, feedback, controller, exerciseList, "practice", null);
         return statsFlashcardFactory;
       }
 
