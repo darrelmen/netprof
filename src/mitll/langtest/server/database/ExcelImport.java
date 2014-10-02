@@ -310,9 +310,7 @@ public class ExcelImport implements ExerciseDAO {
     long max = rt.maxMemory();
 
     ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
-    logger.debug(serverProps.getLanguage() + " current thread group " + threadGroup.getName() + " = " + threadGroup.activeCount());
-
-    logger.debug(serverProps.getLanguage() +
+    logger.debug(serverProps.getLanguage() + " current thread group " + threadGroup.getName() + " = " + threadGroup.activeCount() +
         " : # cores = " + Runtime.getRuntime().availableProcessors() + " heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
   }
 
@@ -327,10 +325,10 @@ public class ExcelImport implements ExerciseDAO {
     String language1 = serverProps.getLanguage();
     try {
       long then = System.currentTimeMillis();
-      logger.debug("starting to read spreadsheet for " + language1 + " on " + Thread.currentThread() + " at " + System.currentTimeMillis());
+     // logger.debug("starting to read spreadsheet for " + language1 + " on " + Thread.currentThread() + " at " + System.currentTimeMillis());
 
       XSSFWorkbook wb = new XSSFWorkbook(inp);
-      logger.debug("finished reading spreadsheet for " + language1 + " on " + Thread.currentThread() + " at " + System.currentTimeMillis());
+//      logger.debug("finished reading spreadsheet for " + language1 + " on " + Thread.currentThread() + " at " + System.currentTimeMillis());
 
       long now = System.currentTimeMillis();
       if (now-then > 1000) {
@@ -1020,7 +1018,9 @@ public class ExcelImport implements ExerciseDAO {
             c++;
             if (c < 15) {
               logger.warn("file " + test.getAbsolutePath() + " does not exist - " + audio.getAudioRef());
-              logger.warn("installPath " + installPath + "mediaDir " + mediaDir +" mediaDir1 " + mediaDir1);
+              if (c < 2) {
+                logger.warn("installPath " + installPath + "mediaDir " + mediaDir +" mediaDir1 " + mediaDir1);
+              }
             }
           }
         }
