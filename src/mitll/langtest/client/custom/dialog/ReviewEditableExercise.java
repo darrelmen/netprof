@@ -207,7 +207,7 @@ public class ReviewEditableExercise extends EditableExercise {
 
     if (b) {
       for (RememberTabAndContent tab : tabs) {
-        setupPopover(tab.getContent(), getWarningHeader(), getWarningForFL(), Placement.TOP, DELAY_MILLIS);
+        setupPopover(tab.getContent(), getWarningHeader(), getWarningForFL(), Placement.TOP, DELAY_MILLIS, false);
       }
     }
 
