@@ -24,6 +24,7 @@ public class UserTable extends PagerTable {
  // private static final boolean INCLUDE_EXPERIENCE = false;
   public static final String USER_ID = "User ID";
   public static final int PAGE_SIZE1 = 7;
+  public static final int INSET_PERCENT = 40;
 
   private Widget lastTable = null;
   private Button closeButton;
@@ -51,8 +52,8 @@ public class UserTable extends PagerTable {
 
     final VerticalPanel dialogVPanel = new VerticalPanel();
 
-    int left = (Window.getClientWidth()) / 20;
-    int top = (Window.getClientHeight()) / 20;
+    int left = (Window.getClientWidth()) / INSET_PERCENT;
+    int top = (Window.getClientHeight()) / INSET_PERCENT;
     dialogBox.setPopupPosition(left, top);
 
     service.getUsers(new AsyncCallback<List<User>>() {
