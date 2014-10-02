@@ -20,7 +20,6 @@ import mitll.langtest.client.custom.TooltipHelper;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -306,23 +305,23 @@ public class BasicDialog {
   }
 
   private void setupPopoverThatHidesItself(final Widget w, String heading, final String message,Placement placement) {
-//    System.out.println("\ttriggering popover on '" + w.getTitle() + "' with " + heading + "/" + message);
+    System.out.println("\tsetupPopoverThatHidesItself triggering popover on '" + w.getTitle() + "' with " + heading + "/" + message);
     setupPopover(w, heading, message, placement);
   }
 
   protected void setupPopover(Widget w, String heading, String message, Placement placement) {
     int delayMillis = 3000;
-    setupPopover(w, heading, message, placement, delayMillis);
+    setupPopover(w, heading, message, placement, delayMillis, false);
   }
 
-  protected Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis) {
+  protected Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis, boolean isHTML) {
     final MyPopover popover = new MyPopover();
 
-    return setupPopover(w, heading, message, placement, delayMillis, popover);
+    return setupPopover(w, heading, message, placement, delayMillis, popover, isHTML);
   }
 
-  protected Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis, final MyPopover popover) {
-    configurePopup(popover, w, heading, message, placement, false);
+  protected Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis, final MyPopover popover, boolean isHTML) {
+    configurePopup(popover, w, heading, message, placement, isHTML);
 
     Timer t = new Timer() {
       @Override
@@ -341,6 +340,7 @@ public class BasicDialog {
    * @param message
    * @param placement
    * @param isHTML
+   * @see UserPassLogin#getSignUpForm()
    */
   void setupPopover(final FocusWidget w, String heading, final String message, Placement placement, boolean isHTML) {
     System.out.println(new Date() + " : setupPopover   : triggering popover on " + w.getElement().getId() + " with " + heading +"/"+message);
