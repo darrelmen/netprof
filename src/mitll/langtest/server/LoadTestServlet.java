@@ -25,17 +25,16 @@ import java.io.*;
 import java.util.*;
 
 /**
- * All in support of Liz tethered iOS app.
  * <p/>
  * User: GO22670
  */
-@SuppressWarnings("serial")
+//@SuppressWarnings("serial")
 public class LoadTestServlet extends DatabaseServlet {
   private static final Logger logger = Logger.getLogger(LoadTestServlet.class);
   public static final String DATABASE_REFERENCE = "databaseReference";
   public static final String LOAD_TESTING = "loadTesting";
-  public static final String ADD_ANON_USER = "addAnonUser";
-  public static final String GET_EXERCISE_I_DS_FOR = "getExerciseIDsFor";
+ // public static final String ADD_ANON_USER = "addAnonUser";
+ // public static final String GET_EXERCISE_I_DS_FOR = "getExerciseIDsFor";
   public static final String GET_EXERCISE = "getExercise";
   public static final String GET_FIRST_EXERCISE = "getFirstExercise";
   public static final String GET_RANDOM_EXERCISE = "getRandomExercise";
