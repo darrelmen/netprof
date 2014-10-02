@@ -882,6 +882,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param passwordH
    * @return
    * @see mitll.langtest.client.user.UserPassLogin#gotLogin
+   * @see mitll.langtest.client.user.UserPassLogin#makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
    */
   public User userExists(String login, String passwordH) {
     return db.getUserDAO().getUser(login, passwordH);
