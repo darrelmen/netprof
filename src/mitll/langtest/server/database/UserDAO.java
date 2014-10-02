@@ -210,12 +210,19 @@ public class UserDAO extends DAO {
     return 0;
   }
 
+  /**
+   * @see #addUser(String, String, String, mitll.langtest.shared.User.Kind, String, boolean, int, String)
+   * @param id
+   * @param kind
+   * @param passwordH
+   * @param emailH
+   */
   private void updateUser(long id, User.Kind kind, String passwordH, String emailH) {
     try {
       if (passwordH == null) {
         logger.error("Got null password Hash?", new Exception("empty password hash"));
       }
-      logger.debug("update user #" +id);
+      logger.debug("update user #" +id + " kind " + kind);
 
       Connection connection = getConnection();
       PreparedStatement statement = connection.prepareStatement(
@@ -316,7 +323,7 @@ public class UserDAO extends DAO {
    * @return
    */
   public User getUser(String id, String passwordHash) {
-    logger.debug("getting user with id/email " + id + " and pass " +passwordHash);
+    logger.debug("getUser getting user with id '" + id + "' and pass " +passwordHash);
     String sql = "SELECT * from " +
         USERS +
         " where " +
@@ -328,7 +335,10 @@ public class UserDAO extends DAO {
 
     User userWhere = getUserWhere(-1, sql);
     if (userWhere == null) {
+      logger.debug("getUser no user with id '" + id + "' and pass " +passwordHash);
+
       userWhere = getUserByID(id);
+      logger.debug("getUser user with id '" + id + "' and empty or different pass is " +userWhere);
     }
     return userWhere;
   }
