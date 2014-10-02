@@ -24,6 +24,11 @@ import java.util.Collections;
  */
 public class ModalInfoDialog {
   private final KeyPressHelper enterKeyButtonHelper = new KeyPressHelper();
+  private int messageHeading = 5;
+
+  public ModalInfoDialog(String title, String message) {
+    this(title, message, null);
+  }
 
   public ModalInfoDialog(String title, String message, HiddenHandler handler) {
     this(title, Collections.singleton(message), null, handler);
@@ -33,7 +38,7 @@ public class ModalInfoDialog {
     final Modal modal = new Modal(true);
     modal.setTitle(title);
     for (String m : messages) {
-      Heading w = new Heading(4);
+      Heading w = new Heading(messageHeading);
       w.setText(m);
       modal.add(w);
     }
