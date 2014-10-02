@@ -19,6 +19,8 @@ public class EmailHelper {
 
   private static final String RP = "rp";
   private static final String NP_SERVER = "np.ll.mit.edu";
+  public static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
+  public static final String CLOSING = "Regards, Administrator";
   private final String language;
   private final UserDAO userDAO;
   private final MailSupport mailSupport;
@@ -51,7 +53,7 @@ public class EmailHelper {
       String message = "Hi " + valid.getUserID() + ",<br/>" +
           "Your user name is " + valid.getUserID() + "." +
           "<br/><br/>" +
-          "Regards, Administrator";
+          CLOSING;
       sendEmail(url // baseURL
           ,
           email, // destination email
@@ -97,7 +99,7 @@ public class EmailHelper {
       String message = "Hi " + user + ",<br/><br/>" +
           "Click the link below to change your password." +
           "<br/><br/>" +
-          "Regards, Administrator";
+          CLOSING;
 
       url = trimURL(url);
       sendEmail(url + "?" + RP + "=" + hash,
@@ -137,9 +139,9 @@ public class EmailHelper {
    */
   public Long enableCDUser(String token, String emailR, String url) {
     User userWhereEnabledReq = userDAO.getUserWhereEnabledReq(token);
-    Long userID = null;
+    Long userID;
     if (userWhereEnabledReq == null) {
-      logger.debug("user id '" + userID + "' for " + token);
+      logger.debug("user id null for " + token);
       userID = null;
     } else {
       userID = userWhereEnabledReq.getId();
@@ -157,34 +159,46 @@ public class EmailHelper {
         User userWhere = userDAO.getUserWhere(userID);
         url = trimURL(url);
 
-        logger.debug("Sending user email... link is " + url);
+        logger.debug("Sending enable CD User email...");
         String userID1 = userWhere.getUserID();
         sendUserApproval(url, email, userID1);
 
         // send ack to everyone, so they don't ahve to
+        String subject = "Content Developer approved for " + userID1 + " for " + language;
         for (int i = 0; i < approvers.size(); i++) {
           String tamas = approvers.get(i);
           String approvalEmailAddress = emails.get(i);
-         // String message = getEmailApproval(userID1, tamas);
+
+          String message = getApprovalAck(userID1, tamas);
+          // String message = getEmailApproval(userID1, tamas);
           mailSupport.sendEmail(NP_SERVER,
               approvalEmailAddress,
-              "gordon.vidaver@ll.mit.edu",
-              "Content Developer approved for " + userID1 + " for " + language,
-              "Hi " +
-                  tamas + ",<br/><br/>" +
-                  "User '" + userID1 +
-                  "' is now an active content developer for " + language +
-                  "." + "<br/>" +
-                  "Regards, Administrator"
+              MY_EMAIL,
+              subject,
+              message
           );
         }
+        mailSupport.sendEmail(NP_SERVER,
+            MY_EMAIL,
+            MY_EMAIL,
+            subject,
+            getApprovalAck(userID1, "Gordon")
+        );
       }
       return (b ? userID : -1);
     }
   }
 
+  private String getApprovalAck(String userID1, String tamas) {
+    return "Hi " +
+        tamas + ",<br/><br/>" +
+        "User '" + userID1 +
+        "' is now an active content developer for " + language +
+        "." + "<br/><br/>" +
+        CLOSING;
+  }
+
   /**
-   *
    * @param url
    * @param email
    * @param userID1
@@ -196,7 +210,8 @@ public class EmailHelper {
         "You have been approved to be a content developer for " + language + "." +
         "<br/>Click on the link below to log in." +
         "<br/><br/>" +
-        "Regards, Administrator";
+        CLOSING;
+
     sendEmail(url, // baseURL
         email, // destination email
         "Account approved", // subject
@@ -208,11 +223,11 @@ public class EmailHelper {
   /**
    * User needs to be approved before account is activated.
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(String, String, String, mitll.langtest.shared.User.Kind, String, String, boolean, int, String)
    * @param url
    * @param email
    * @param user
    * @param mailSupport
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(String, String, String, mitll.langtest.shared.User.Kind, String, String, boolean, int, String)
    */
   public void addContentDeveloper(String url, String email, User user, MailSupport mailSupport) {
     url = trimURL(url);
@@ -224,7 +239,7 @@ public class EmailHelper {
     for (int i = 0; i < approvers.size(); i++) {
       String tamas = approvers.get(i);
       String approvalEmailAddress = emails.get(i);
-      String message = getEmailApproval(userID1, tamas);
+      String message = getEmailApproval(userID1, tamas, email);
       sendApprovalEmail(url, email, userID1, hash, message, approvalEmailAddress, mailSupport);
     }
   }
@@ -235,34 +250,33 @@ public class EmailHelper {
             "er" +
             "=" + rot13(email),
         approvalEmailAddress,
-        "gordon.vidaver@ll.mit.edu",
+        MY_EMAIL,
         "Content Developer approval for " + userID1 + " for " + language,
         message,
         "Click to approve" // link text
     );
   }
 
-  private String getEmailApproval(String userID1, String tamas) {
+  private String getEmailApproval(String userID1, String tamas, String email) {
     return "Hi " +
         tamas + ",<br/><br/>" +
-        "User '" + userID1 +
-        "' would like to be a content developer for " + language +
+        "User <b>" + userID1 +
+        "</b> with email <b>" + email + "</b><br/>" +
+        " would like to be a content developer for " + language +
         "." + "<br/>" +
 
         "Click the link to allow them." +
         "<br/><br/>" +
-        "Regards, Administrator";
+        CLOSING;
   }
 
   private String trimURL(String url) {
     if (url.contains("127.0.0.1")) { // just for testing
       return "http://127.0.0.1:8888/LangTest.html?gwt.codesvr=127.0.0.1:9997";
-    }
-    else {
+    } else {
       return url.split("\\?")[0].split("\\#")[0];
     }
   }
-
 
   private String rot13(String val) {
     StringBuilder builder = new StringBuilder();
