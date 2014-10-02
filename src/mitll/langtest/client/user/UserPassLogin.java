@@ -21,8 +21,9 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.HidePopupTextBox;
-import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.KeyPressHelper;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
@@ -66,30 +67,39 @@ public class UserPassLogin extends UserDialog {
   private static final String SEND = "Send";
   private static final String SIGN_UP = "Sign Up";
   private static final String ARE_YOU_A = "Please choose : Are you a";
-  private static final String STUDENT = "Student";
-  private static final String TEACHER = "Teacher";
+  private static final String STUDENT = "Student or ";
+  private static final String TEACHER = "Teacher?";
   //private static final String CONTENT_DEVELOPER = "Content Developer";
   private static final String SIGN_UP_WIDTH = "266px";
   private static final int BULLET_MARGIN = 25;
   private static final String CURRENT_USER_TOOLTIP = "Current users who don't have a password and email should sign up below.";
-  private static final String CURRENT_USER = "Are you a current user without a password?";
+//  private static final String CURRENT_USER = "Are you a current user without a password?";
   private static final String RECORD_AUDIO_HEADING = "Recording audio/Quality Control";
   private static final int WAIT_FOR_READING_APPROVAL = 4000;
   private static final String PLEASE_CHECK = "Please check";
 //  private static final String RECORD_REFERENCE_AUDIO = "Record Reference Audio?";
   private static final String RECORD_REFERENCE_AUDIO = "Are you an assigned reference audio recorder?";
+  public static final String SHOWN_HELLO = "shownHello";
+  private static final String ENTER_YOUR_EMAIL = "Enter your email to get your username.";
+  private static final int EMAIL_POPUP_DELAY = 4000;
   //private static final String PLEASE_ENTER_A_PASSWORD1 = "Please enter a password.";
-  private final UserManager userManager;
-  private final KeyPressHelper enterKeyButtonHelper;
+  private UserManager userManager;
+  private KeyPressHelper enterKeyButtonHelper;
+  private final KeyStorage keyStorage;
   private FormField user;
   private FormField signUpUser;
   private FormField signUpEmail;
   private FormField signUpPassword;
   private FormField password;
   private boolean signInHasFocus = true;
-  private final EventRegistration eventRegistration;
+  private EventRegistration eventRegistration;
   private Button signIn;
 
+  public UserPassLogin(LangTestDatabaseAsync service, PropertyHandler props) {
+    super(service,props);
+    keyStorage = new KeyStorage(props.getLanguage(), 1000000);
+
+  }
   /**
    * @param service
    * @param props
@@ -98,7 +108,10 @@ public class UserPassLogin extends UserDialog {
    * @see mitll.langtest.client.LangTest#showLogin
    */
   public UserPassLogin(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, EventRegistration eventRegistration) {
-    super(service, props);
+    this(service, props);
+
+   // keyStorage = new KeyStorage(props.getLanguage(), 1000000);
+    checkWelcome();
 
     this.userManager = userManager;
     this.eventRegistration = eventRegistration;
@@ -116,6 +129,36 @@ public class UserPassLogin extends UserDialog {
         }
       }
     };
+  }
+
+  public void checkWelcome() {
+    if (!hasShownWelcome()) {
+      keyStorage.storeValue(SHOWN_HELLO,"yes");
+      showWelcome();
+    }
+  }
+
+  public boolean hasShownWelcome() {
+    return keyStorage.hasValue(SHOWN_HELLO);
+  }
+
+  private void showWelcome() {
+    new ModalInfoDialog("Welcome to Classroom!","<h3>Classroom has been updated.</h3>\n" + "<br/>" +
+        "If you are an existing user of Classroom (either as a student, teacher or audio recorder), " +
+        "you will need to use the <b>\"Sign Up\"</b> box to add a password and an email address to your account.<br/>" +
+        "<br/>" +
+        "If you were using Classroom for recording of course audio, check the box asking if you are a " +
+        "<b>reference audio recorder</b>.<br/>" +
+        "<br/>Once you have submitted this form, LTEA personnel will approve your account. " +
+        "You will receive an email once it's approved.  " +
+        "You will not be able to access Classroom " +
+        //"for recording or quality control " +
+        "until approval is granted.<br/>" +
+     //   "<br/>" +
+   //     "If you a teacher or student with a pre-existing user name, please use the \"Sign Up\" form to add a user name and password.  Then select your appropriate role.  No approval is required to activate your account.<br/>" +
+        "<br/>" +
+        "Once you \"sign up\", the site will remember your login information on this computer for up to one year.  " +
+        "You will need to login with your username and password again if you access Classroom from a different machine.<br/>");
   }
 
   /**
@@ -281,35 +324,44 @@ public class UserPassLogin extends UserDialog {
     hp.add(getSignInButton());
     fieldset.add(hp);
 
+    Panel hp2 = getForgotRow();
+
+    fieldset.add(hp2);
+
+    getFocusOnField(user);
+
+    return signInForm;
+  }
+
+  private Panel getForgotRow() {
     Panel hp2 = new HorizontalPanel();
 
     Anchor forgotUser = getForgotUser();
+    forgotUser.addStyleName("topFiveMargin");
     hp2.add(forgotUser);
     forgotUser.addStyleName("leftTenMargin");
 
     Anchor forgotPassword = getForgotPassword();
     hp2.add(forgotPassword);
-    fieldset.add(hp2);
+    forgotPassword.addStyleName("topFiveMargin");
 
     forgotPassword.addStyleName("leftFiveMargin");
-    Panel hp3 = new HorizontalPanel();
-    //final Heading w = new Heading(6, "Current user but no password?");
-    HTML w = new HTML(CURRENT_USER);
-    w.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
-    hp3.add(w);
-    final Icon child = new Icon(IconType.QUESTION_SIGN);
-    hp3.add(child);
-    child.addStyleName("topFiveMargin");
-    child.addStyleName("leftFiveMargin");
-    w.addStyleName("leftTenMargin");
 
-    new TooltipHelper().addTooltip(w,     CURRENT_USER_TOOLTIP);
-    new TooltipHelper().addTooltip(child, CURRENT_USER_TOOLTIP);
+    Button help = new Button("Help");
+    help.addStyleName("leftTenMargin");
+    help.getElement().getStyle().setMarginTop(-5, Style.Unit.PX);
+    help.setType(ButtonType.PRIMARY);
+    help.setIcon(IconType.QUESTION_SIGN);
 
-    fieldset.add(hp3);
-    getFocusOnField(user);
+    help.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        showWelcome();
+      }
+    });
+    hp2.add(help);
 
-    return signInForm;
+    return hp2;
   }
 
   private Form getSignInForm() {
@@ -436,7 +488,7 @@ public class UserPassLogin extends UserDialog {
               public void onSuccess(Boolean result) {
                 String heading = result ? CHECK_EMAIL : "Unknown email";
                 String message = result ? PLEASE_CHECK_YOUR_EMAIL : user.box.getText() + " doesn't have that email. Check for a typo?";
-                setupPopover(sendEmail, heading, message, Placement.LEFT, 5000, new MyPopover() {
+                setupPopover(sendEmail, heading, message, Placement.LEFT, EMAIL_POPUP_DELAY, new MyPopover() {
                   boolean isFirst = true;
 
                   @Override
@@ -450,7 +502,7 @@ public class UserPassLogin extends UserDialog {
                     //System.out.println("got hide !" + new Date()
                     //);
                   }
-                });
+                }, false);
               }
             });
           }
@@ -513,7 +565,7 @@ public class UserPassLogin extends UserDialog {
                 } else {
                   eventRegistration.logEvent(sendUsernameEmail,"send username link","N/A","valid email request ");
 
-                  setupPopover(sendUsernameEmail, CHECK_EMAIL, PLEASE_CHECK_YOUR_EMAIL, Placement.LEFT, 5000, new MyPopover() {
+                  setupPopover(sendUsernameEmail, CHECK_EMAIL, PLEASE_CHECK_YOUR_EMAIL, Placement.LEFT, EMAIL_POPUP_DELAY, new MyPopover() {
                     boolean isFirst = true;
 
                     @Override
@@ -525,7 +577,7 @@ public class UserPassLogin extends UserDialog {
                         sendUsernamePopup.hide(); // TODO : ugly
                       }
                     }
-                  });
+                  }, false);
                 }
               }
             });
@@ -533,7 +585,7 @@ public class UserPassLogin extends UserDialog {
         });
         eventRegistration.register(sendUsernameEmail, "N/A", "send username");
 
-        makePopup(sendUsernamePopup, emailEntry, sendUsernameEmail, "Enter your email to get your username.");
+        makePopup(sendUsernamePopup, emailEntry, sendUsernameEmail, ENTER_YOUR_EMAIL);
         sendUsernamePopup.showRelativeTo(forgotUsername);
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           public void execute() {
@@ -599,14 +651,6 @@ public class UserPassLogin extends UserDialog {
 
     contentDevCheckbox = new CheckBox(RECORD_REFERENCE_AUDIO);
 
-    String html = "Click here if you want to record reference audio or review current audio.<br/>" +
-        "After you click sign up, " +
-        "LTEA personnel will approve your account.<br/>" +
-        "You will receive an email once it's approved.<br/>" +
-        "You will not be able to access Classroom for recording or QC until approval is granted.";
-
-    setupPopover(contentDevCheckbox, RECORD_AUDIO_HEADING,html,Placement.LEFT, true);
-
     contentDevCheckbox.setVisible(false);
     contentDevCheckbox.addStyleName("leftTenMargin");
     contentDevCheckbox.addClickHandler(new ClickHandler() {
@@ -616,6 +660,23 @@ public class UserPassLogin extends UserDialog {
         registrationInfo.setVisible(contentDevCheckbox.getValue());
       }
     });
+
+  /*  contentDevCheckbox.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        getRecordAudioPopover();
+
+      }
+    });*/
+
+ /*   contentDevCheckbox.adds(new MouseOverHandler() {
+      @Override
+      public void onMouseOver(MouseOverEvent event) {
+        getRecordAudioPopover();
+      }
+    });*/
+    getRecordAudioPopover();
+
     contentDevCheckbox.getElement().getStyle().setPaddingBottom(10, Style.Unit.PX);
     fieldset.add(contentDevCheckbox);
 
@@ -625,14 +686,25 @@ public class UserPassLogin extends UserDialog {
     return form;
   }
 
+  private void getRecordAudioPopover() {
+    String html = "Click here if you have been assigned to record reference audio or do quality control on current audio.<br/>" +
+        "After you click sign up, " +
+        "LTEA personnel will approve your account.<br/>" +
+        "You will receive an email once it's approved.<br/>" +
+        "You will not be able to access Classroom until approval is granted.";
+
+    setupPopover(contentDevCheckbox, RECORD_AUDIO_HEADING,html, Placement.LEFT, 5000, true);
+  }
+
   private Panel getRolesChoices() {
     Panel roles = new HorizontalPanel();
     roles.addStyleName("leftTenMargin");
 
     roles.add(studentChoice);
-    HTML or = new HTML("or");
-    roles.add(or);
-    or.addStyleName("leftFiveMargin");
+   // HTML or = new HTML("or");
+   // or.getElement().getStyle().setFontSize(14, Style.Unit.PT  );
+   // roles.add(or);
+   // or.addStyleName("leftFiveMargin");
    // studentChoice.addStyleName("leftFiveMargin");
     roles.add(teacherChoice);
   //  teacherChoice.addStyleName("topFiveMargin");
@@ -657,7 +729,7 @@ public class UserPassLogin extends UserDialog {
       }
     });
 
-    addTooltip(teacherChoice,"Teachers have the option of recording reference audio.");
+   // addTooltip(teacherChoice,"Teachers have the option of recording reference audio.");
 
     return roles;
   }
@@ -912,7 +984,6 @@ public class UserPassLogin extends UserDialog {
     left.add(w2);
     w2.getElement().getStyle().setPaddingBottom(24, Style.Unit.PX);
     w2.getElement().getStyle().setTextAlign(Style.TextAlign.LEFT);
- //   Heading w1 = new Heading(subSize, FIRST_BULLET);//, "Speak your answers. Compete with your friends.");
     Widget w1 = new HTML(FIRST_BULLET);//, "Speak your answers. Compete with your friends.");
     Panel h = new HorizontalPanel();
     h.add(new Image(LangTest.LANGTEST_IMAGES + "NewProF2_48x48.png"));
@@ -920,16 +991,9 @@ public class UserPassLogin extends UserDialog {
     configure(h);
 
     left.add(h);
-   // w1.getElement().getStyle().setMarginTop(20, Style.Unit.PX);
-  //  w1.getElement().getStyle().setFontSize(21, Style.Unit.PT);
     w1.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
     configure(w1);
 
-    //Node child2 = w1.getElement().getChild(1);
-
-    //com.google.gwt.dom.client.Element as = com.google.gwt.dom.client.Element.as(child2);
-    //as.getStyle().setFontSize(16, Style.Unit.PX);
-    //Heading w = new Heading(subSize, SECOND_BULLET);//, "Compare yourself to a native speaker.");
     Widget w = new HTML(SECOND_BULLET);
 
     h = new HorizontalPanel();
@@ -938,19 +1002,11 @@ public class UserPassLogin extends UserDialog {
     configure(h);
 
     left.add(h);
-  //  w.getElement().getStyle().setMarginTop(20, Style.Unit.PX);
-   // w.getElement().getStyle().setFontSize(21, Style.Unit.PT);
     w.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
     configure(w);
 
-    //child2 = w.getElement().getChild(1);
-    //as = com.google.gwt.dom.client.Element.as(child2);
-    //as.getStyle().setPaddingLeft(2, Style.Unit.PX);
-    //as.getStyle().setFontSize(16, Style.Unit.PX);
-    //Widget w3 = new Heading(subSize, THIRD_BULLET);
     Widget w3 = new HTML(THIRD_BULLET);
     left.add(w3);
-
 
     h = new HorizontalPanel();
     h.add(new Image(LangTest.LANGTEST_IMAGES + "listIcon_48x48_transparent.png"));
@@ -961,8 +1017,6 @@ public class UserPassLogin extends UserDialog {
 
     w3.getElement().getStyle().setMarginTop(-1, Style.Unit.PX);
     configure(w3);
-
-
   }
 
   private void configure(Panel h) {
