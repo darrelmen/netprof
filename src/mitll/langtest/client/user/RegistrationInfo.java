@@ -2,12 +2,14 @@ package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.Fieldset;
 import com.github.gwtbootstrap.client.ui.RadioButton;
+import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Created by go22670 on 8/22/14.
@@ -24,7 +26,7 @@ class RegistrationInfo extends BasicDialog {
   private RadioButton female = new RadioButton(GENDER_GROUP, "Female");
   private Panel genders;
 
-  public RegistrationInfo(Fieldset toAddTo) {
+  public RegistrationInfo(ComplexWidget toAddTo) {
     genders = new HorizontalPanel();
     genders.add(male);
     female.addStyleName("leftFiveMargin");
@@ -33,12 +35,10 @@ class RegistrationInfo extends BasicDialog {
 
     male.addStyleName("topFiveMargin");
     female.addStyleName("topFiveMargin");
-    //  group.add(group1);
     toAddTo.add(genders);
-    //  genderGroup = group;
-    ageEntryGroup = addControlFormFieldWithPlaceholder(toAddTo, false, 2, 2, YOUR_AGE);
+    ageEntryGroup = addDecoratedControlFormFieldWithPlaceholder(toAddTo, false, 2, 2,YOUR_AGE);//,"Enter age between " + UserDialog.MIN_AGE + " and " + UserDialog.MAX_AGE + ".");
     ageEntryGroup.box.setWidth("88px");
-    genders.add(ageEntryGroup.box);
+    genders.add(ageEntryGroup.getGroup());
 
     dialectGroup = getDialect(toAddTo);
   }
@@ -78,9 +78,14 @@ class RegistrationInfo extends BasicDialog {
     return male.getValue();
   }
 
+
   public FormField getAgeEntryGroup() {
     return ageEntryGroup;
   }
+
+/*  public Widget getAgeEntryGroup() {
+    return ageEntryGroup;
+  }*/
 
   public FormField getDialectGroup() {
     return dialectGroup;
