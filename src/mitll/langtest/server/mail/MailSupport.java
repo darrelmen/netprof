@@ -24,7 +24,10 @@ public class MailSupport {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getMailSupport()
    */
   public MailSupport(boolean debugEmail) {
-    this.debugEmail = debugEmail;
+
+    this.debugEmail = true;
+
+
   }
 
   public void sendEmail(String serverName, String to, String replyTo, String subject, String message) {
