@@ -190,7 +190,9 @@ public class Navigation implements RequiresResize {
       @Override
       public void onResize() {
         super.onResize();
-        statsFlashcardFactory.onResize();
+        if (statsFlashcardFactory != null) {
+          statsFlashcardFactory.onResize();
+        }
       }
 
       @Override
