@@ -13,7 +13,7 @@ public class KeyStorage {
   private int user;
 
   /**
-   * @see mitll.langtest.client.user.StudentDialog#setDefaultControlValues(int)
+   * @see mitll.langtest.client.user.UserPassLogin#UserPassLogin(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.PropertyHandler)
    * @param language
    * @param user
    */
@@ -52,6 +52,8 @@ public class KeyStorage {
       return "";
     }
   }
+
+  public boolean hasValue(String name) { return !getValue(name).isEmpty(); }
 
   public void removeValue(String name) {
     if (Storage.isLocalStorageSupported()) {
