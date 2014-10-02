@@ -18,8 +18,8 @@ import mitll.langtest.client.PropertyHandler;
 public abstract class UserDialog extends BasicDialog {
   protected static final int USER_ID_MAX_LENGTH = 35;
 
-  static final int MIN_AGE = 12;
-  static final int MAX_AGE = 90;
+  public static final int MIN_AGE = 12;
+  public static final int MAX_AGE = 90;
   static final int TEST_AGE = 100;
   final PropertyHandler props;
   final LangTestDatabaseAsync service;
@@ -42,5 +42,9 @@ public abstract class UserDialog extends BasicDialog {
 
   protected void markError(FormField dialectGroup, String message) {
     markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP);
+  }
+
+  protected void markErrorBlur(FormField dialectGroup, String message) {
+    markErrorBlur(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP);
   }
 }
