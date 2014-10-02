@@ -40,7 +40,7 @@ public class UserManager {
   private static final String USER_ID = "userID";
   private static final String USER_CHOSEN_ID = "userChosenID";
   private static final String AUDIO_TYPE = "audioType";
-  private static final String LOGIN_TYPE = "loginType";
+  //private static final String LOGIN_TYPE = "loginType";
 
   private final LangTestDatabaseAsync service;
   private final UserNotification userNotification;
@@ -272,15 +272,7 @@ public class UserManager {
       }
       return Integer.parseInt(sid);
     } else if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      String sid = localStorageIfSupported.getItem(getUserIDCookie());
-
-      //System.out.println("user id cookie for " +getUserIDCookie() + " is " + sid);
- /*     if (sid != null && !sid.equals("" + NO_USER_SET)) {
-        boolean expired = checkUserExpired(sid);
-        if (expired) checkLogin();
-        sid = localStorageIfSupported.getItem(getUserIDCookie());
-      }*/
+      String sid = getUserFromStorage();
       return (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
     } else {
       return (int) userID;
@@ -288,15 +280,20 @@ public class UserManager {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#checkLogin();
    * @return
+   * @see mitll.langtest.client.LangTest#checkLogin();
    */
   public boolean isUserExpired() {
-    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-    String sid = localStorageIfSupported.getItem(getUserIDCookie());
+    String sid = getUserFromStorage();
 
     //System.out.println("user id cookie for " +getUserIDCookie() + " is " + sid);
-    return (sid == null || sid.equals("" + NO_USER_SET)) || checkUserExpired(sid);
+    return (sid == null || sid.equals("" + NO_USER_SET)) || Storage.getLocalStorageIfSupported().getItem(UserPassLogin.SHOWN_HELLO) == null ||
+        checkUserExpired(sid);
+  }
+
+  private String getUserFromStorage() {
+    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+    return localStorageIfSupported.getItem(getUserIDCookie());
   }
 
   /**
@@ -326,9 +323,11 @@ public class UserManager {
   private String getAudioType() {
     return appTitle + ":" + AUDIO_TYPE;
   }
+/*
   private String getLoginType() {
     return appTitle + ":" + LOGIN_TYPE;
   }
+*/
   private String getExpires() {
     return appTitle + ":" + "expires";
   }
@@ -391,41 +390,6 @@ public class UserManager {
   }
 
   /**
-   * TODO : move cookie manipulation to separate class
-   *
-   * @param sessionID    from database
-   * @param audioType
-   * @param userChosenID
-   * @see StudentDialog#addUser
-   */
-/*  void storeUser(long sessionID, String audioType, String userChosenID, PropertyHandler.LOGIN_TYPE userType) {
-    System.out.println("storeUser : user now " + sessionID + " audio type '" + audioType +"' id " +userChosenID + " type " +userType);
-    final long DURATION = getUserSessionDuration();
-    long futureMoment = getUserSessionEnd(DURATION);
-    if (USE_COOKIE) {
-      Date expires = new Date(futureMoment);
-      Cookies.setCookie("sid", "" + sessionID, expires);
-    } else if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-
-      localStorageIfSupported.setItem(getUserIDCookie(), "" + sessionID);
-      localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
-      rememberUserSessionEnd(localStorageIfSupported, futureMoment);
-      localStorageIfSupported.setItem(getAudioType(), "" + audioType);
-      localStorageIfSupported.setItem(getLoginType(), "" + userType);
-      System.out.println("storeUser : user now " + sessionID + " / " + getUser() + " audio '" + audioType+"' expires in " + (DURATION/1000) + " seconds");
-      userNotification.rememberAudioType(audioType);
-
-      getPermissionsAndSetUser((int)sessionID);
-
-    } else {  // not sure what we could possibly do here...
-      userID = sessionID;
-      this.userChosenID = userChosenID;
-    //  userNotification.gotUser(sessionID);
-    }
-  }*/
-
-  /**
    * @see mitll.langtest.client.user.UserPassLogin#storeUser(mitll.langtest.shared.User)
    * @param user
    * @param audioType
@@ -453,7 +417,6 @@ public class UserManager {
     }
   }
 
-
   /**
    * @see #userExpired(String)
    * @param futureMoment
@@ -464,17 +427,6 @@ public class UserManager {
       rememberUserSessionEnd(localStorageIfSupported, futureMoment);
     }
   }
-
-/*
-  private void updateUserSessionExpires() {
-    final long DURATION = getUserSessionDuration();
-    long futureMoment = getUserSessionEnd(DURATION);
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      rememberUserSessionEnd(localStorageIfSupported, futureMoment);
-    }
-  }
-*/
 
   /**
    * @see #storeUser(long, String, String, mitll.langtest.client.PropertyHandler.LOGIN_TYPE)
