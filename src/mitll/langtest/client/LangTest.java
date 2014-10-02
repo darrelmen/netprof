@@ -286,10 +286,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   private void populateRootPanel() {
-    RootPanel.get().clear();   // necessary?
-
-    Container verticalContainer = new FluidContainer();
-    verticalContainer.getElement().setId("root_vertical_container");
+    Container verticalContainer = getRootContainer();
 
     // header/title line
     // first row ---------------
@@ -301,25 +298,34 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
+  private Container getRootContainer() {
+    RootPanel.get().clear();   // necessary?
+
+    Container verticalContainer = new FluidContainer();
+    verticalContainer.getElement().setId("root_vertical_container");
+    return verticalContainer;
+  }
+
   private void populateBelowHeader(Container verticalContainer, Panel firstRow) {
     // third row ---------------
 
-    Panel exerciseListContainer = new SimplePanel();
+/*    Panel exerciseListContainer = new SimplePanel();
     exerciseListContainer.addStyleName("floatLeft");
-    exerciseListContainer.getElement().setId("exerciseListContainer");
+    exerciseListContainer.getElement().setId("exerciseListContainer");*/
 
     // set up center right panel, initially with flash record panel
-    Panel currentExerciseVPanel = new FlowPanel();
-    currentExerciseVPanel.getElement().setId("currentExercisePanel");
+
 
     if (showOnlyOneExercise()) {
+      Panel currentExerciseVPanel = new FlowPanel();
+      currentExerciseVPanel.getElement().setId("currentExercisePanel");
       RootPanel.get().add(getHeadstart(currentExerciseVPanel));
     } else {
-      currentExerciseVPanel.addStyleName("floatLeftList");
+    //  currentExerciseVPanel.addStyleName("floatLeftList");
       RootPanel.get().add(verticalContainer);
-    }
+   // }
 
-    if (!showOnlyOneExercise()) {
+   // if (!showOnlyOneExercise()) {
       /**
        * {@link #makeFlashContainer}
        */
@@ -331,11 +337,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     firstRow.add(navigation.getNav());
 
-    if (SHOW_STATUS) {
+/*    if (SHOW_STATUS) {
       DivWidget w = new DivWidget();
       w.getElement().setId("status");
       verticalContainer.add(w);
-    }
+    }*/
   }
 
   private Container getHeadstart(Panel currentExerciseVPanel) {
@@ -354,12 +360,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   @Override
   public void showLogin() {
  //   System.out.println("show login!");
-    RootPanel.get().clear();   // necessary?
-    Container verticalContainer = new FluidContainer();
-    verticalContainer.getElement().setId("login_container");
-
-    // header/title line
-    // first row ---------------
+    Container verticalContainer = getRootContainer();
     showLogin(verticalContainer, makeFirstTwoRows(verticalContainer));
   }
 
@@ -768,7 +769,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param user
    */
   public void gotUser(User user) {
-
+    if (navigation == null) {
+      populateRootPanel();
+    }
     long userID= -1;
     if (user != null) userID = user.getId();
 
