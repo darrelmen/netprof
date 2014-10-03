@@ -192,7 +192,7 @@ public class UserManager {
   private void addAnonymousUser() {
     System.out.println("UserManager.addAnonymousUser : adding anonymous user");
 
-    service.addUser("anonymous", "", "", User.Kind.ANONYMOUS, Window.Location.getHref(), "", true, 0, "unknown", new AsyncCallback<User>() {
+    service.addUser("anonymous", "", "", User.Kind.ANONYMOUS, Window.Location.getHref(), "", true, 0, "unknown", false, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
 
