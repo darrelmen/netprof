@@ -1,7 +1,7 @@
 package mitll.langtest.client.user;
 
-import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.TextBox;
@@ -91,7 +91,7 @@ public class BasicDialog {
   }
 
 
-  protected ControlGroup addControlGroupEntryNoLabel(Widget widget) {
+/*  protected ControlGroup addControlGroupEntryNoLabel(Widget widget) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
     widget.addStyleName("leftFiveMargin");
@@ -99,7 +99,7 @@ public class BasicDialog {
     userGroup.add(widget);
     //dialogBox.add(userGroup);
     return userGroup;
-  }
+  }*/
 
 
   /**
@@ -330,6 +330,10 @@ public class BasicDialog {
     markErrorBlurFocus(focusWidget, focusWidget, "Try Again", message, Placement.RIGHT);
   }
 
+  void markErrorBlur(FocusWidget focusWidget, String message, Placement placement) {
+    markErrorBlurFocus(focusWidget, focusWidget, "Try Again", message, placement);
+  }
+
   void markErrorBlur(Button button, String message) {
     markErrorBlurFocus(button, button, "Try Again", message, Placement.RIGHT);
   }
@@ -341,6 +345,7 @@ public class BasicDialog {
   void markErrorBlur(Button button, String heading, String message, Placement placement) {
     markErrorBlurFocus(button, button, heading, message, placement);
   }
+
   Popover markErrorBlur(FocusWidget button, String heading, String message, Placement placement) {
     return markErrorBlurFocus(button, button, heading, message, placement);
   }
@@ -432,6 +437,10 @@ public class BasicDialog {
     final Popover popover = new Popover();
     configurePopup(popover, w, heading, message, placement, isHTML);
 
+    requestFocus(w);
+  }
+
+  private void requestFocus(final Focusable w) {
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         w.setFocus(true);
@@ -440,8 +449,11 @@ public class BasicDialog {
   }
 
   private void configurePopup(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML) {
-    logger.info("configurePopup : triggering popover on " + w.getElement().getId() + " with " + heading +"/"+message + " " + placement);
+    logger.info("configurePopup : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
 
+    if (w instanceof Focusable) {
+      requestFocus((Focusable)w);
+    }
     simplePopover(popover, w, heading, message, placement, isHTML);
     popover.show();
   }
@@ -506,7 +518,7 @@ public class BasicDialog {
       popover.setHtml(true);
       popover.setPlacement(Placement.LEFT);
       popover.setWidget(widget);
-   //   popover.setShowDelay(600);
+      //   popover.setShowDelay(600);
       popover.setTrigger(Trigger.HOVER);
       popover.setAnimation(false);
     }
