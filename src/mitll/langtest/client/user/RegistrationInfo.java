@@ -36,7 +36,8 @@ class RegistrationInfo extends BasicDialog {
     male.addStyleName("topFiveMargin");
     female.addStyleName("topFiveMargin");
     toAddTo.add(genders);
-    ageEntryGroup = addDecoratedControlFormFieldWithPlaceholder(toAddTo, false, 2, 2,YOUR_AGE);//,"Enter age between " + UserDialog.MIN_AGE + " and " + UserDialog.MAX_AGE + ".");
+  //  ageEntryGroup = addDecoratedControlFormFieldWithPlaceholder(toAddTo, false, 2, 2, YOUR_AGE);
+    ageEntryGroup = addControlFormFieldWithPlaceholder(toAddTo, false, 2, 2, YOUR_AGE);
     ageEntryGroup.box.setWidth("88px");
     genders.add(ageEntryGroup.getGroup());
 
