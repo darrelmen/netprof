@@ -25,11 +25,19 @@ public class MailSupport {
    */
   public MailSupport(boolean debugEmail) {
 
-    this.debugEmail = true;
-
+    this.debugEmail = debugEmail;
+// TODO : gah! fix the property!
 
   }
 
+  /**
+   * @see mitll.langtest.server.database.EmailHelper#enableCDUser(String, String, String)
+   * @param serverName
+   * @param to
+   * @param replyTo
+   * @param subject
+   * @param message
+   */
   public void sendEmail(String serverName, String to, String replyTo, String subject, String message) {
     sendEmail(serverName, null, to, replyTo, subject, message, null);
   }
@@ -42,7 +50,8 @@ public class MailSupport {
    * @param subject
    * @param message
    * @param linkText
-   * @see mitll.langtest.server.LangTestDatabaseImpl#sendEmail(String, String, String, String, String)
+   * @see mitll.langtest.server.database.EmailHelper#sendApprovalEmail(String, String, String, String, String, String, MailSupport)
+   * @see mitll.langtest.server.database.EmailHelper#sendEmail
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(String, String, String, mitll.langtest.shared.User.Kind, String, String)
    */
   public void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message, String linkText) {
