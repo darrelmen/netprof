@@ -470,7 +470,7 @@ public class UserDAO extends DAO {
    *
    * @return
    */
-  public List<User> getUsers() { return getUsers("SELECT * from users;");  }
+  public List<User> getUsers() { return getUsers("SELECT * from users order by " +ID+ " ASC");  }
 
   /**
    * @return
