@@ -14,6 +14,8 @@ import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -44,7 +46,7 @@ public class UserPassLogin extends UserDialog {
   private static final int MIN_LENGTH_USER_ID = 4;
 
   private static final int MIN_PASSWORD = 4;
-  private static final int MIN_EMAIL = 13;
+  private static final int MIN_EMAIL = 10;
   private static final int LEFT_SIDE_WIDTH = 483;
   private static final String SIGN_UP_SUBTEXT = "Sign up";//Or never entered a password?";//password and email";
   private static final String PLEASE_ENTER_YOUR_PASSWORD = "Please enter your password.";
@@ -153,7 +155,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   private void showWelcome() {
-    new ModalInfoDialog("Welcome to Classroom!", "<h3>Classroom has been updated.</h3>\n" + "<br/>" +
+    new ModalInfoDialog("Welcome to Classroom!", "<h3>Classroom has been updated.</h3>" + //"<br/>" +
         getLoginInfo());
   }
 
@@ -674,7 +676,9 @@ public class UserPassLogin extends UserDialog {
 
     fieldset.add(getRolesChoices());
 
-    contentDevCheckbox = new CheckBox(RECORD_REFERENCE_AUDIO);
+    SafeHtmlBuilder builder = new SafeHtmlBuilder();
+      builder.appendHtmlConstant(RECORD_REFERENCE_AUDIO);
+    contentDevCheckbox = new CheckBox(builder.toSafeHtml());
 
     contentDevCheckbox.setVisible(false);
     contentDevCheckbox.addStyleName("leftTenMargin");
@@ -827,7 +831,8 @@ public class UserPassLogin extends UserDialog {
       @Override
       public void onBlur(BlurEvent event) {
         if (!isValidAge(registrationInfo.getAgeEntryGroup())) {
-          registrationInfo.getAgeEntryGroup().markError(AGE_ERR_MSG);
+        //  registrationInfo.getAgeEntryGroup().markError(AGE_ERR_MSG);
+          markErrorBlur(registrationInfo.getAgeEntryGroup().box, AGE_ERR_MSG, Placement.TOP);
         }
       }
     });
@@ -872,9 +877,12 @@ public class UserPassLogin extends UserDialog {
         if (userBox.getValue().length() < MIN_LENGTH_USER_ID) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "short user id '" +userBox.getValue()+ "'");
           markErrorBlur(signUpUser, PLEASE_ENTER_A_LONGER_USER_ID);
-        } else if (signUpEmail.box.getValue().length() < MIN_EMAIL) {
+        } else if (signUpEmail.box.getValue().isEmpty()) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "short email");
           markErrorBlur(signUpEmail, "Please enter your email.");
+      //  } else if (signUpEmail.box.getValue().length() < MIN_EMAIL) {
+     //     eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "short email");
+     //     markErrorBlur(signUpEmail, "Please enter your email.");
         } else if (!isValidEmail(signUpEmail.box.getValue())) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "invalid email");
           markErrorBlur(signUpEmail, VALID_EMAIL);
@@ -889,10 +897,9 @@ public class UserPassLogin extends UserDialog {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't check gender");
         } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && !isValidAge(registrationInfo.getAgeEntryGroup())) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in age ");
-/*          markErrorBlur(registrationInfo.getAgeEntryGroup().group, registrationInfo.getAgeEntryGroup().box, "",
-              "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".");*/
+          markErrorBlur(registrationInfo.getAgeEntryGroup().box, AGE_ERR_MSG,Placement.TOP);
 
-          registrationInfo.getAgeEntryGroup().markError(AGE_ERR_MSG);
+       //   registrationInfo.getAgeEntryGroup().markError(AGE_ERR_MSG);
 
         } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && registrationInfo.getDialectGroup().getText().isEmpty()) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in dialect ");
