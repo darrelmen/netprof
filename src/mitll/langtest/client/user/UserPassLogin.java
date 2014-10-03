@@ -14,7 +14,6 @@ import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -26,7 +25,6 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.HidePopupTextBox;
 import mitll.langtest.client.custom.KeyStorage;
-import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.instrumentation.EventRegistration;
@@ -46,7 +44,7 @@ public class UserPassLogin extends UserDialog {
   private static final int MIN_LENGTH_USER_ID = 4;
 
   private static final int MIN_PASSWORD = 4;
-  private static final int MIN_EMAIL = 10;
+ // private static final int MIN_EMAIL = 10;
   private static final int LEFT_SIDE_WIDTH = 483;
   private static final String SIGN_UP_SUBTEXT = "Sign up";//Or never entered a password?";//password and email";
   private static final String PLEASE_ENTER_YOUR_PASSWORD = "Please enter your password.";
@@ -145,9 +143,9 @@ public class UserPassLogin extends UserDialog {
     if (!hasShownWelcome()) {
       keyStorage.storeValue(SHOWN_HELLO, "yes");
       showWelcome();
-    } else {
+    } ///else {
       //logger.info("---- we've shown the welcome screen\n\n");
-    }
+    //}
   }
 
   public boolean hasShownWelcome() {
@@ -155,7 +153,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   private void showWelcome() {
-    new ModalInfoDialog("Welcome to Classroom!", "<h3>Classroom has been updated.</h3>" + //"<br/>" +
+    new ModalInfoDialog("Welcome to Classroom!", "<h3>Classroom has been updated.</h3>" +
         getLoginInfo());
   }
 
@@ -167,9 +165,11 @@ public class UserPassLogin extends UserDialog {
     return "If you are an existing user of Classroom (either as a student, teacher or audio recorder), " +
         "you will need to use the <b>\"Sign Up\"</b> box to add a password and an email address to your account. " +
         " Your email is only used if you ever forget your password.<br/><br/>" +
-        "If you were using Classroom for recording of course audio, check the box asking if you are a " +
-        "<b>reference audio recorder</b>.<br/>" +
-        "<br/>Once you have submitted this form, LTEA personnel will approve your account. " +
+        "If you were using Classroom for <u>recording of course audio</u>, check the box asking if you are a " +
+        "<b>reference audio recorder</b>." +
+        //"<br/>" +
+        //"<br/>" +
+        " Once you have submitted this form, LTEA personnel will approve your account. " +
         "You will receive an email once it's approved.  " +
         "You will not be able to access Classroom " +
         //"for recording or quality control " +
