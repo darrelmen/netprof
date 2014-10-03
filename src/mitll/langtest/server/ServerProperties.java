@@ -87,19 +87,16 @@ public class ServerProperties {
 
   private ServerProperties(ServletContext servletContext, String configDir, String configFile) {
     String dateFromManifest = getDateFromManifest(servletContext);
-    readProperties(configDir, configFile, dateFromManifest);
-  }
-
-  private void readProperties(String configDir, String configFile, String dateFromManifest) {
     if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
     readProps(configDir, configFile, dateFromManifest);
+    if (isDebugEMail()) logger.info("using debug email....");
   }
 
-  public void readPropertiesFile(ServletContext servletContext, String configDir) {
+/*  public void readPropertiesFile(ServletContext servletContext, String configDir) {
     String configFile = servletContext.getInitParameter("configFile");
     String dateFromManifest = getDateFromManifest(servletContext);
     readProps(configDir,configFile,dateFromManifest);
-  }
+  }*/
 
   private void readProps(String configDir, String configFile, String dateFromManifest) {
     String configFileFullPath = configDir + File.separator + configFile;
