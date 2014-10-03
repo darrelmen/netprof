@@ -466,13 +466,13 @@ public class Navigation implements RequiresResize {
   private void showPracticeTab() {
     if (practiceTab != null) {
       checkAndMaybeClearTab(PRACTICE);
-      System.out.println("\n\n\n\n ------- showPracticeTab make practice tab  - " + practiceTab.getContent());
+     // System.out.println(" ------- showPracticeTab make practice tab  - " + practiceTab.getContent());
       practiceHelper.showNPF(practiceTab, PRACTICE);
       practiceHelper.setContentPanel(practiceTab.getContent());
       practiceHelper.hideList();
     }
     else {
-      System.err.println("\n\n\n\n ------- showPracticeTab make practice tab  - " + practiceTab);
+      //System.err.println(" ------- showPracticeTab make practice tab  - " + practiceTab);
 
     }
   }
