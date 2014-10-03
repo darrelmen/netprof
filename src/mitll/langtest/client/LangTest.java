@@ -507,8 +507,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (isAdmin) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
-          downloadFailedAlert();
+//          downloadFailedAlert();
+          logException(caught);
         }
+
         public void onSuccess() {
           resultManager = new ResultManager(service, props.getNameForAnswer());
         }
@@ -516,8 +518,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
-          downloadFailedAlert();
+          logException(caught);
+          //downloadFailedAlert();
         }
+
         public void onSuccess() {
           monitoringManager = new MonitoringManager(service, props);
         }
@@ -525,7 +529,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  // TODO : why is this not called?
   private void loadVisualizationPackages() {
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       @Override
@@ -792,7 +795,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     long userID= -1;
     if (user != null) userID = user.getId();
 
-    logger.info("gotUser : userID " +userID);
+    logger.info("gotUser : userID " + userID);
 
     flashcard.setUserName(getGreeting());
     if (userID != lastUser) {
@@ -989,7 +992,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void stopRecording(WavCallback wavCallback) {
     long now = System.currentTimeMillis();
-    logger.info("stopRecording : time recording in UI " + (now -then) + " millis");
+    logger.info("stopRecording : time recording in UI " + (now - then) + " millis");
 
     flashRecordPanel.stopRecording(wavCallback);
   }
