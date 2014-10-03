@@ -341,15 +341,15 @@ public class BasicDialog {
   void markErrorBlur(Button button, String heading, String message, Placement placement) {
     markErrorBlurFocus(button, button, heading, message, placement);
   }
-  void markErrorBlur(FocusWidget button, String heading, String message, Placement placement) {
-    markErrorBlurFocus(button, button, heading, message, placement);
+  Popover markErrorBlur(FocusWidget button, String heading, String message, Placement placement) {
+    return markErrorBlurFocus(button, button, heading, message, placement);
   }
 
-  void markErrorBlurFocus(Widget widget, HasBlurHandlers dialect, String heading, String message, Placement placement) {
+  Popover markErrorBlurFocus(Widget widget, HasBlurHandlers dialect, String heading, String message, Placement placement) {
     // System.out.println("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
     // dialect.setFocus(true);
 //    setupPopover(dialect, header, message, placement);
-    setupPopoverBlurNoControl(widget, dialect, heading, message, placement, new MyPopover());
+    return setupPopoverBlurNoControl(widget, dialect, heading, message, placement, new MyPopover());
   }
 
   void markError(Widget dialect, String header, String message, Placement placement) {
@@ -408,6 +408,8 @@ public class BasicDialog {
     hasBlurHandlers.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
+        logger.info("got blur, dismissing popover, with no control.");
+
         popover.dontFireAgain();
       }
     });
