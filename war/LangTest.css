@@ -1094,3 +1094,8 @@ body .btn-toolbar > .btn-group > .btn.active {
     background-position: center;
     text-shadow: none;
 }
+
+.login-label {
+    font-weight: bold;
+    font-size: 1.2em;
+}
