@@ -51,17 +51,20 @@ import mitll.langtest.shared.*;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
+  private Logger logger = Logger.getLogger("LangTest");
+
   public static final String LANGTEST_IMAGES = "langtest/images/";
   private static final String DIVIDER = "|";
   private static final int MAX_EXCEPTION_STRING = 300;
   private static final int MAX_CACHE_SIZE = 100;
   private static final int NO_USER_INITIAL = -2;
-  private static final boolean SHOW_STATUS = false;
+ // private static final boolean SHOW_STATUS = false;
   private static final String PLEASE_ALLOW_ACCESS_TO_THE_MICROPHONE = "Please allow access to the microphone.";
   private static final String TRY_AGAIN = "Try Again";
 
@@ -106,9 +109,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           long now = System.currentTimeMillis();
           String message = "onModuleLoad.getProperties : (failure) took " + (now - then) + " millis";
 
-          System.out.println(message);
+          logger.info(message);
           if (!caught.getMessage().trim().equals("0")) {
-            System.out.println("Exception " + caught.getMessage() + " " + caught + " " + caught.getClass() + " " + caught.getCause());
+            logger.info("Exception " + caught.getMessage() + " " + caught + " " + caught.getClass() + " " + caught.getCause());
             Window.alert("Couldn't contact server.  Please check your network connection. (getProperties)");
             logMessageOnServer(message);
           }
@@ -227,7 +230,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     ImageResponse ifPresent = imageCache.getIfPresent(key);
     if (ifPresent != null) {
-      //System.out.println("getImage for key " + key+ " found  " + ifPresent);
+      //logger.info("getImage for key " + key+ " found  " + ifPresent);
       ifPresent.req = -1;
       client.onSuccess(ifPresent);
     } else {
@@ -236,14 +239,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
        /*   if (!caught.getMessage().trim().equals("0")) {
             Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
           }*/
-          System.out.println("message " + caught.getMessage() + " " + caught);
+          logger.info("message " + caught.getMessage() + " " + caught);
           logException(caught);
           client.onFailure(caught);
         }
 
         public void onSuccess(ImageResponse result) {
           imageCache.put(key, result);
-          //System.out.println("getImage storing key " + key+ " now  " + imageCache.size() + " cached.");
+          //logger.info("getImage storing key " + key+ " now  " + imageCache.size() + " cached.");
 
           client.onSuccess(result);
         }
@@ -293,7 +296,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Panel firstRow = makeFirstTwoRows(verticalContainer);
 
     if (!showLogin(verticalContainer, firstRow)) {
-      //System.out.println("populate below header...");
+      logger.info("populate below header...");
       populateBelowHeader(verticalContainer, firstRow);
     }
   }
@@ -357,11 +360,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return verticalContainer2;
   }
 
+  /**
+   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(int)
+   * @see mitll.langtest.client.user.UserManager#login()
+   */
   @Override
   public void showLogin() {
- //   System.out.println("show login!");
-    Container verticalContainer = getRootContainer();
-    showLogin(verticalContainer, makeFirstTwoRows(verticalContainer));
+   logger.info("show login!");
+ /*   Container verticalContainer = getRootContainer();
+    showLogin(verticalContainer, makeFirstTwoRows(verticalContainer));*/
+
+    populateRootPanel();
   }
 
   private String staleToken = "";
@@ -378,7 +387,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     final String resetPassToken = props.getResetPassToken();
     if (!resetPassToken.isEmpty() && !resetPassToken.equals(staleToken)) {
-      System.out.println("showLogin token '" + resetPassToken + "' for password reset");
+      logger.info("showLogin token '" + resetPassToken + "' for password reset");
 
       staleToken = resetPassToken;
       service.getUserIDForToken(resetPassToken, new AsyncCallback<Long>() {
@@ -388,11 +397,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         @Override
         public void onSuccess(Long result) {
           if (result == null || result < 0) {
-            System.out.println("token '" + resetPassToken + "' is stale. Showing normal view");
+            logger.info("token '" + resetPassToken + "' is stale. Showing normal view");
             populateBelowHeader(verticalContainer,firstRow);
           }
           else {
-            UserPassLogin userPassLogin = new UserPassLogin(service, getProps(), userManager, eventRegistration);
+        //    UserPassLogin userPassLogin = new UserPassLogin(service, getProps(), userManager, eventRegistration);
+            ResetPassword userPassLogin = new ResetPassword(service, getProps(), eventRegistration);
             Panel content = userPassLogin.getResetPassword(resetPassToken);
             firstRow.add(content);
             content.getElement().setId("ResetPassswordContent");
@@ -410,7 +420,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     final String cdToken = props.getCdEnableToken();
     if (!cdToken.isEmpty() && !cdToken.equals(staleToken)) {
-      System.out.println("showLogin token '" + resetPassToken + "' for enabling cd user");
+      logger.info("showLogin token '" + resetPassToken + "' for enabling cd user");
 
       handleCDToken(verticalContainer, firstRow, cdToken, props.getEmailRToken());
       return true;
@@ -418,6 +428,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     boolean show = userManager.isUserExpired() || userManager.getUserID() == null;
     if (show) {
+      logger.info("user is not valid : " + userManager.isUserExpired() +" / " +userManager.getUserID());
+
       Panel content = new UserPassLogin(service, getProps(), userManager, eventRegistration).getContent();
       firstRow.add(content);
       content.getElement().setId("UserPassLogin");
@@ -427,6 +439,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       flashcard.setCogVisible(false);
       return true;
     }
+    logger.info("user is valid...");
 
     flashcard.setCogVisible(true);
     return false;
@@ -442,7 +455,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void onSuccess(Long result) {
         staleToken = cdToken;
         if (result == null || result < 0) {
-          System.out.println("handleCDToken enable - token " + cdToken + " is stale. Showing normal view");
+          logger.info("handleCDToken enable - token " + cdToken + " is stale. Showing normal view");
           populateBelowHeader(verticalContainer, firstRow);
         } else {
           firstRow.add(new Heading(2, "OK, content developer has been approved."));
@@ -517,7 +530,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       @Override
       public void run() {
-        //System.out.println("\tloaded VisualizationUtils...");
+        //logger.info("\tloaded VisualizationUtils...");
         logMessageOnServer("loaded VisualizationUtils.");
       }
     }, ColumnChart.PACKAGE, LineChart.PACKAGE);
@@ -632,7 +645,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     FlashRecordPanelHeadless.setMicPermission(new MicPermission() {
       public void gotPermission() {
-        System.out.println(new Date() + " : makeFlashContainer - got permission!");
+        logger.info(" : makeFlashContainer - got permission!");
         hideFlash();
         checkLogin();
       }
@@ -663,7 +676,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
 
       public void noRecordingMethodAvailable() {
-        System.out.println(new Date() + " : makeFlashContainer - no way to record");
+        logger.info(" : makeFlashContainer - no way to record");
         hideFlash();
         new ModalInfoDialog("Can't record audio", "Recording audio is not supported.", new HiddenHandler() {
           @Override
@@ -698,11 +711,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void reallySetFactory() {
     int childCount = firstRow.getElement().getChildCount();
 
-    //System.out.println("reallySetFactory root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
+    logger.info("reallySetFactory root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
     if (childCount > 0) {
       Node child = firstRow.getElement().getChild(0);
       Element as = Element.as(child);
       if (as.getId().contains("Login")) {
+        logger.info("reallySetFactory found login...");
         populateRootPanel();
       }
     }
@@ -726,7 +740,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void removeAndReloadFlash() {
-    System.out.println(new Date() + " : removeAndReloadFlash - reloading...");
+    logger.info(" : removeAndReloadFlash - reloading...");
 
     firstRow.remove(flashRecordPanel);
     flashRecordPanel.removeFlash();
@@ -748,7 +762,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @seex #getLogout()
    */
   private void resetState() {
-//    System.out.println("resetState");
+//    logger.info("resetState");
     History.newItem(""); // clear history!
     userManager.clearUser();
     lastUser = NO_USER_INITIAL;
@@ -769,13 +783,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param user
    */
   public void gotUser(User user) {
-    if (navigation == null) {
+    reallySetFactory();
+   /* if (navigation == null) {
+      logger.info("gotUser : no nav so making it..,");
+
       populateRootPanel();
-    }
+    }*/
     long userID= -1;
     if (user != null) userID = user.getId();
 
-    System.out.println("gotUser : userID " +userID);
+    logger.info("gotUser : userID " +userID);
 
     flashcard.setUserName(getGreeting());
     if (userID != lastUser) {
@@ -783,7 +800,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
     }
     else {
-      System.out.println("ignoring got user for current user " + userID);
+      logger.info("ignoring got user for current user " + userID);
       navigation.refreshInitialState();
     }
     if (userID > -1) {
@@ -799,10 +816,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   private void configureUIGivenUser(long userID) {
-    System.out.println("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser +
+    logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser +
         " audio type " + getAudioType() + " perms " + getPermissions());
     reallySetFactory();
-//    System.out.println("\tconfigureUIGivenUser : " + userID + " get exercises...");
+//    logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
 
     navigation.showInitialState();
 
@@ -817,14 +834,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   // TODO : refactor all this into mode objects that decide whether we need flash or not, etc.
   private void checkInitFlash() {
     if (!flashRecordPanel.gotPermission()) {
-      System.out.println("checkInitFlash : initFlash - no permission yet");
+      logger.info("checkInitFlash : initFlash - no permission yet");
 
       if (flashRecordPanel.initFlash()) {
         checkLogin();
       }
     }
     else {
-      System.out.println("checkInitFlash : initFlash - has permission");
+      logger.info("checkInitFlash : initFlash - has permission");
       checkLogin();
     }
   }
@@ -873,7 +890,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void checkLogin() {
     //console("checkLogin");
-    //System.out.println("checkLogin -- ");
+    //logger.info("checkLogin -- ");
     userManager.isUserExpired();
     userManager.checkLogin();
   }
@@ -972,7 +989,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void stopRecording(WavCallback wavCallback) {
     long now = System.currentTimeMillis();
-    System.out.println("stopRecording : time recording in UI " + (now -then) + " millis");
+    logger.info("stopRecording : time recording in UI " + (now -then) + " millis");
 
     flashRecordPanel.stopRecording(wavCallback);
   }
@@ -997,7 +1014,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void addKeyListener(KeyPressHelper.KeyListener listener) {
     keyPressHelper.addKeyHandler(listener);
     if (keyPressHelper.getSize() > 2) {
-      System.out.println("addKeyListener " + listener.getName() + " key press handler now " + keyPressHelper);
+      logger.info("addKeyListener " + listener.getName() + " key press handler now " + keyPressHelper);
     }
   }
 
