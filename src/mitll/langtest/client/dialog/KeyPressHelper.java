@@ -9,6 +9,7 @@ import com.google.gwt.user.client.Event;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,6 +19,8 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class KeyPressHelper {
+  private Logger logger = Logger.getLogger("KeyPressHelper");
+
   private final boolean removeOnEnter;
   private HandlerRegistration keyHandler;
   private final Map<String, KeyListener> listeners = new HashMap<String, KeyListener>();
@@ -64,7 +67,8 @@ public class KeyPressHelper {
                                                        }
                                                      }
                                                    });
-    //System.out.println("addKeyHandler made click handler " + keyHandler);
+
+    logger.info("addKeyHandler made click handler " + keyHandler);
   }
 
   public int getSize() {
@@ -109,7 +113,7 @@ public class KeyPressHelper {
 
   private void gotEvent(NativeEvent ne, boolean isKeyDown) {
     for (KeyListener keyPressHandler : listeners.values()) {
-      //   System.out.println("KeyPressHelper " + keyPressHandler + " getting " + ne + " down " +isKeyDown);
+     // logger.info("KeyPressHelper " + keyPressHandler + " getting " + ne + " down " +isKeyDown);
       keyPressHandler.gotPress(ne, isKeyDown);
     }
   }
@@ -127,6 +131,7 @@ public class KeyPressHelper {
     //System.out.println("EnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
     // }
     if (keyHandler != null) {
+      logger.info("KeyPressHelper : removeKeyHandler : " + keyHandler);
       keyHandler.removeHandler();
       keyHandler = null;
     }
