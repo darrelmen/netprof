@@ -153,10 +153,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                             long userListID, int userID, String role, boolean onlyUnrecordedByMe,
                                             boolean onlyExamples, boolean incorrectFirstOrder) {
     Collection<CommonExercise> exercises;
-    logger.debug("getExerciseIds : getting exercise ids for " +
+
+    logger.debug("getExerciseIds : (" + serverProps.getLanguage()+ ") " +
+        "getting exercise ids for " +
         " config " + relativeConfigDir +
-        " prefix " + prefix +
-        " and user list id " + userListID + " user " + userID + " role " + role + " filter " + onlyUnrecordedByMe + " only examples " + onlyExamples);
+        " prefix '" + prefix +
+        "' and user list id " + userListID + " user " + userID + " role " + role +
+        " filter " + onlyUnrecordedByMe + " only examples " + onlyExamples);
 
     try {
       UserList userListByID = userListID != -1 ? db.getUserListByID(userListID) : null;
@@ -235,7 +238,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       Set<String> recordedForUser = db.getAudioDAO().getRecordedBy(userID);
       boolean isMale = db.getUserDAO().isMale(userID);
       List<CommonExercise> copy = new ArrayList<CommonExercise>();
-      logger.debug("recorded already " + recordedForUser.size() + " checking " + exercises.size());
+     // logger.debug("recorded already " + recordedForUser.size() + " checking " + exercises.size());
       // filter
       for (CommonExercise exercise : exercises) {
         if (!recordedForUser.contains(exercise.getID())) {
@@ -270,7 +273,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           }
         }
       }
-      logger.debug("to be recorded " + copy.size() + " from " + exercises.size());
+    //  logger.debug("to be recorded " + copy.size() + " from " + exercises.size());
 
       return copy;
     }
@@ -439,7 +442,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     ExerciseListWrapper exerciseListWrapper = new ExerciseListWrapper(reqID, exerciseShells, firstExercise);
-    logger.debug("returning " + exerciseListWrapper);
+    //logger.debug("returning " + exerciseListWrapper);
     return exerciseListWrapper;
   }
 
