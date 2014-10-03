@@ -504,7 +504,7 @@ public class BasicDialog {
       popover.setHtml(true);
       popover.setPlacement(Placement.LEFT);
       popover.setWidget(widget);
-      popover.setShowDelay(600);
+   //   popover.setShowDelay(600);
       popover.setTrigger(Trigger.HOVER);
       popover.setAnimation(false);
     }
@@ -589,7 +589,7 @@ public class BasicDialog {
       return group;
     }
 
-    public Widget getWidget() {
+    public FocusWidget getWidget() {
       return box;
     }
 
