@@ -107,12 +107,14 @@ public class UserDAO extends DAO {
    * @param isMale
    * @param age
    * @param dialect
-   * @return
+   * @return null if existing, valid user (email and password)
    * @see mitll.langtest.server.database.DatabaseImpl#addUser(javax.servlet.http.HttpServletRequest, int, String, int, String, String, String, java.util.Collection)
    */
   public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String ipAddr, boolean isMale, int age, String dialect) {
     User userByID = getUserByID(userID);
     if (userByID != null && kind != User.Kind.ANONYMOUS) {
+      // user exists!
+
       if (userByID.getEmailHash() != null && userByID.getPasswordHash() != null &&
           !userByID.getEmailHash().isEmpty() && !userByID.getPasswordHash().isEmpty()) {
         logger.debug("addUser : user " +userID +" is an existing user.");
@@ -211,6 +213,8 @@ public class UserDAO extends DAO {
   }
 
   /**
+   * Will set the permissions according to the user kind.
+   *
    * @see #addUser(String, String, String, mitll.langtest.shared.User.Kind, String, boolean, int, String)
    * @param id
    * @param kind
@@ -229,13 +233,16 @@ public class UserDAO extends DAO {
           "UPDATE " + USERS + " SET " +
               KIND + "=?," +
               PASS + "=?," +
-              EMAIL + "=?" +
+              EMAIL + "=?," +
+              PERMISSIONS + "=?"+
               " WHERE " +
               ID + "=?");
       int i = 1;
       statement.setString(i++, kind.toString());
       statement.setString(i++, passwordH);
       statement.setString(i++, emailH);
+      String kind1 = kind == User.Kind.CONTENT_DEVELOPER ? CD_PERMISSIONS.toString() : EMPTY_PERM.toString();
+      statement.setString(i++, kind1);
       statement.setLong(i++, id);
 
       int i1 = statement.executeUpdate();
