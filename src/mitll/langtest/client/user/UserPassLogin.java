@@ -24,6 +24,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.HidePopupTextBox;
 import mitll.langtest.client.custom.KeyStorage;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.instrumentation.EventRegistration;
@@ -140,11 +141,10 @@ public class UserPassLogin extends UserDialog {
 
   public void checkWelcome() {
     if (!hasShownWelcome()) {
-      keyStorage.storeValue(SHOWN_HELLO,"yes");
+      keyStorage.storeValue(SHOWN_HELLO, "yes");
       showWelcome();
-    }
-    else {
-      logger.info("---- we've shown the welcome screen\n\n");
+    } else {
+      //logger.info("---- we've shown the welcome screen\n\n");
     }
   }
 
@@ -163,8 +163,8 @@ public class UserPassLogin extends UserDialog {
 
   private String getLoginInfo() {
     return "If you are an existing user of Classroom (either as a student, teacher or audio recorder), " +
-        "you will need to use the <b>\"Sign Up\"</b> box to add a password and an email address to your account.<br/>" +
-        "<br/>" +
+        "you will need to use the <b>\"Sign Up\"</b> box to add a password and an email address to your account. " +
+        " Your email is only used if you ever forget your password.<br/><br/>" +
         "If you were using Classroom for recording of course audio, check the box asking if you are a " +
         "<b>reference audio recorder</b>.<br/>" +
         "<br/>Once you have submitted this form, LTEA personnel will approve your account. " +
@@ -685,6 +685,15 @@ public class UserPassLogin extends UserDialog {
         registrationInfo.setVisible(contentDevCheckbox.getValue());
       }
     });
+    contentDevCheckbox.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        if (studentOrTeacherPopover != null) {
+          logger.info("hiding student/teacher popover!");
+          studentOrTeacherPopover.hide();
+        }
+      }
+    });
 
     getRecordAudioPopover();
 
@@ -769,6 +778,9 @@ public class UserPassLogin extends UserDialog {
       }
     });
 
+    // TODO : this competes with the warning for existing users.
+   // new TooltipHelper().addTooltip(emailBox,"Your email is only used to reset your password or recover your username.");
+
 /*    emailBox.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
@@ -846,6 +858,7 @@ public class UserPassLogin extends UserDialog {
 
   private final RadioButton studentChoice = new RadioButton("ROLE_CHOICE", STUDENT);
   private final RadioButton teacherChoice = new RadioButton("ROLE_CHOICE", TEACHER);
+  private Popover studentOrTeacherPopover;
 
   private Button getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
     signUp = new Button(SIGN_UP);
@@ -870,7 +883,7 @@ public class UserPassLogin extends UserDialog {
           markErrorBlur(signUpPassword, signUpPassword.box.getValue().isEmpty() ? PLEASE_ENTER_A_PASSWORD :
               "Please enter a password at least " + MIN_PASSWORD + " characters long.");
         } else if (selectedRole == User.Kind.UNSET) {
-          markErrorBlur(studentChoice,"Please choose","Please select either student or teacher.", Placement.LEFT);
+          studentOrTeacherPopover = markErrorBlur(studentChoice, "Please choose", "Please select either student or teacher.", Placement.LEFT);
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't check role");
         } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && !registrationInfo.checkValidGender()) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't check gender");
@@ -919,7 +932,7 @@ public class UserPassLogin extends UserDialog {
     signUp.setEnabled(false);
 
     service.addUser(user, passH, emailH, kind, Window.Location.getHref(), email,
-        gender.equalsIgnoreCase("male"), age1, dialect, new AsyncCallback<User>() {
+        gender.equalsIgnoreCase("male"), age1, dialect, isCD, new AsyncCallback<User>() {
           @Override
           public void onFailure(Throwable caught) {
             eventRegistration.logEvent(signUp, "signing up", "N/A", "Couldn't contact server...?");
@@ -1126,11 +1139,12 @@ public class UserPassLogin extends UserDialog {
     });
 
     // if they had permissions before, they were a teacher
+/*
     if (!result.getPermissions().isEmpty()) {
       teacherChoice.setValue(true);
       teacherChoice.fireEvent(new KeyPressHelper.ButtonClickEvent());
-
     }
+*/
   }
 
   /**
