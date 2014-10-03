@@ -38,7 +38,7 @@ public interface LangTestDatabase extends RemoteService {
   // @deprecated
  // long addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, Collection<User.Permission> permissions);
 
-  User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale, int age, String dialect);
+  User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale, int age, String dialect, boolean isCD);
 
   List<User> getUsers();
 //  int userExists(String login);
