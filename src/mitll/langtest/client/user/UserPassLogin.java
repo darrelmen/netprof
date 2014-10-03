@@ -36,8 +36,8 @@ import java.util.logging.Logger;
  * Created by go22670 on 8/11/14.
  */
 public class UserPassLogin extends UserDialog {
-  public static final String MAGIC_PASS = Md5Hash.getHash("adm!n");
   private Logger logger = Logger.getLogger("UserPassLogin");
+  public static final String MAGIC_PASS = Md5Hash.getHash("adm!n");
   public static final String CURRENT_USERS = "Current users should add an email and password.";
 
   private static final int MIN_LENGTH_USER_ID = 4;
@@ -60,12 +60,6 @@ public class UserPassLogin extends UserDialog {
   private static final String SECOND_BULLET = "Record your voice and get feedback on your pronunciation.";//"Get feedback on your pronunciation";
   private static final String THIRD_BULLET = "Create and share vocab lists for study and review.";//"Make your own lists of words to study later or to share.";
   private static final String PLEASE_ENTER_A_PASSWORD = "Please enter a password";
-  private static final String PLEASE_ENTER_A_LONGER_PASSWORD = "Please enter a longer password";
-  private static final String PLEASE_ENTER_THE_SAME_PASSWORD = "Please enter the same password";
-  private static final String PASSWORD_HAS_BEEN_CHANGED = "Password has been changed";
-  private static final String SUCCESS = "Success";
-  private static final String CHANGE_PASSWORD = "Change Password";
-  private static final String CHOOSE_A_NEW_PASSWORD = "Choose a new password";
   private static final String FORGOT_PASSWORD = "Forgot password?";
   private static final String ENTER_A_USER_NAME = "Enter a user name.";
   private static final String CHECK_EMAIL = "Check Email";
@@ -106,12 +100,11 @@ public class UserPassLogin extends UserDialog {
   private EventRegistration eventRegistration;
   private Button signIn;
 
-  public UserPassLogin(LangTestDatabaseAsync service, PropertyHandler props) {
+/*  public UserPassLogin(LangTestDatabaseAsync service, PropertyHandler props) {
     super(service,props);
     keyStorage = new KeyStorage(props.getLanguage(), 1000000);
- //   logger.info("testing logger--->\n");
-   // GWT.log("evil");
-  }
+  }*/
+
   /**
    * @param service
    * @param props
@@ -120,7 +113,10 @@ public class UserPassLogin extends UserDialog {
    * @see mitll.langtest.client.LangTest#showLogin
    */
   public UserPassLogin(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, EventRegistration eventRegistration) {
-    this(service, props);
+    //this(service, props);
+    super(service,props);
+    keyStorage = new KeyStorage(props.getLanguage(), 1000000);
+
 
     checkWelcome();
 
@@ -146,6 +142,9 @@ public class UserPassLogin extends UserDialog {
     if (!hasShownWelcome()) {
       keyStorage.storeValue(SHOWN_HELLO,"yes");
       showWelcome();
+    }
+    else {
+      logger.info("---- we've shown the welcome screen\n\n");
     }
   }
 
@@ -198,7 +197,7 @@ public class UserPassLogin extends UserDialog {
     getRightLogin(leftAndRight);
     return container;
   }
-
+/*
   public Panel getResetPassword(final String token) {
     Panel container = new DivWidget();
     DivWidget child = new DivWidget();
@@ -230,9 +229,20 @@ public class UserPassLogin extends UserDialog {
     Heading w = new Heading(3, CHOOSE_A_NEW_PASSWORD);
     fieldset.add(w);
     w.addStyleName("leftFiveMargin");
-    final FormField firstPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
+    final FormField firstPassword  = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
     final FormField secondPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
 
+    getChangePasswordButton(token, fieldset, firstPassword, secondPassword);
+    right.add(rightDiv);
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        firstPassword.getWidget().setFocus(true);
+      }
+    });
+    return container;
+  }
+
+  private void getChangePasswordButton(final String token, Fieldset fieldset, final FormField firstPassword, final FormField secondPassword) {
     final Button changePassword = new Button(CHANGE_PASSWORD);
     changePassword.getElement().setId("changePassword");
     eventRegistration.register(changePassword);
@@ -257,8 +267,6 @@ public class UserPassLogin extends UserDialog {
         } else {
           changePassword.setEnabled(false);
           enterKeyButtonHelper.removeKeyHandler();
-
-//          System.out.println("getResetPassword : changing password for " + token);
           service.changePFor(token, Md5Hash.getHash(first), new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -296,15 +304,7 @@ public class UserPassLogin extends UserDialog {
     changePassword.addStyleName("leftFiveMargin");
 
     changePassword.setType(ButtonType.PRIMARY);
-    right.add(rightDiv);
-
-    return container;
-  }
-
-  private String trimURL(String url) {
-    if (url.contains("127.0.0.1")) return url.split("#")[0];
-    else return url.split("\\?")[0].split("#")[0];
-  }
+  }*/
 
   private void getRightLogin(Panel leftAndRight) {
     DivWidget right = new DivWidget();
