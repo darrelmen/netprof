@@ -123,7 +123,7 @@ public interface LangTestDatabaseAsync {
 
   void userExists(String login, String passwordH, AsyncCallback<User> async);
 
-  void addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale, int age, String dialect, AsyncCallback<User> async);
+  void addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale, int age, String dialect, boolean isCD, AsyncCallback<User> async);
 
   void resetPassword(String userid, String text, String url, AsyncCallback<Boolean> asyncCallback);
 
