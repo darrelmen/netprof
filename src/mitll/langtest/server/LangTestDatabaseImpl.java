@@ -11,8 +11,8 @@ import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.EmailHelper;
-import mitll.langtest.server.database.SectionHelper;
+import mitll.langtest.server.mail.EmailHelper;
+import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.mail.MailSupport;
@@ -1561,9 +1561,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (serverProps.doRecoTest() || serverProps.doRecoTest2()) {
       new RecoTest(this, serverProps, pathHelper, audioFileHelper);
     }
-    if (!serverProps.dataCollectMode && !serverProps.isArabicTextDataCollect()) {
+    //if (!serverProps.dataCollectMode && !serverProps.isArabicTextDataCollect()) {
       db.preloadExercises();
-    }
+   // }
 
     db.getUserListManager().setStateOnExercises();
   }
