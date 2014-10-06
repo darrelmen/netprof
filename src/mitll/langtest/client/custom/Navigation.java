@@ -602,25 +602,19 @@ public class Navigation implements RequiresResize {
         recorderHelper.showNPF(recorderTab, "record_audio");
       } else if (value.equals(RECORD_EXAMPLE)) {
         recordExampleHelper.showNPF(recordExampleTab, "record_example_audio");
-      } else if (value.equals(CONTENT) && markDefectsTab != null) {
+      } else if (value.equals(MARK_DEFECTS) && markDefectsTab != null) {
         markDefectsHelper.showNPF(markDefectsTab, CONTENT1);
       } else if (value.equals(PRACTICE) && practiceTab != null) {
-    /*    practiceHelper.showNPF(practiceTab, PRACTICE);
-        practiceHelper.hideList();*/
         showPracticeTab();
       } else {
         System.out.println("got unknown value '" + value+ "'");
+        showPracticeTab();
       }
     }
     else {
       System.err.println("selectPreviousTab : found value  '" + value + "' " +
           " but I only know about tabs : " + nameToIndex.keySet());
- //     final String chapterNameToUse = getChapterName();
-
-//      tabPanel.selectTab(getSafeTabIndexFor(chapterNameToUse));
-//      selectPreviousTab(PRACTICE);
       showPracticeTab();
-
     }
 
   }
