@@ -36,7 +36,7 @@ public class Flashcard implements RequiresResize {
   private Image collab;
   private HTML userNameWidget;
   private final String nameForAnswer;
-  private final boolean adminView;
+  //private final boolean adminView;
   private Paragraph subtitle;
   private HTML browserInfo;
   private Panel qc,recordAudio;
@@ -48,7 +48,7 @@ public class Flashcard implements RequiresResize {
   public Flashcard(PropertyHandler props) {
     this.nameForAnswer = props.getNameForAnswer() + "s";
     isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
-    adminView = props.isAdminView();
+    //adminView = props.isAdminView();
   }
 
   /**
@@ -125,7 +125,7 @@ public class Flashcard implements RequiresResize {
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("UsernameContainer");
     userNameWidget = getUserNameWidget(userName);
-    if (!isAnonymous || adminView) {
+    if (!isAnonymous /*|| adminView*/) {
       hp.add(userNameWidget);
     }
     hp.add(qc = new SimplePanel());
@@ -138,7 +138,7 @@ public class Flashcard implements RequiresResize {
     widget1.addClickHandler(logoutClickHandler);
     cogMenu.add(widget1);
 
-    if (!isAnonymous || adminView) {
+    if (!isAnonymous/* || adminView*/) {
       hp.add(cogMenu);
     }
 
