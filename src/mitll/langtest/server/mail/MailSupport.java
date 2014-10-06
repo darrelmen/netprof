@@ -19,6 +19,7 @@ public class MailSupport {
   private static final int MAIL_PORT = 1025;
   private static final String MAIL_SMTP_HOST = "mail.smtp.host";
   private static final String MAIL_DEBUG = "mail.debug";
+  private static final String MAIL_SMTP_PORT = "mail.smtp.port";
   private final boolean debugEmail;
 
   /**
@@ -63,9 +64,7 @@ public class MailSupport {
     String body = getHTMLEmail(linkText, message, baseURL);
 
     String fromEmail = "admin@" + serverName;
-    normalFullEmail(fromEmail, fromEmail, replyTo, toAddresses,
-        subject,
-        body);
+    normalFullEmail(fromEmail, fromEmail, replyTo, toAddresses, subject, body);
   }
 
   private String getHTMLEmail(String linkText, String message, String link2) {
@@ -183,10 +182,9 @@ public class MailSupport {
       props.put(MAIL_SMTP_HOST, LOCALHOST);
       props.put(MAIL_DEBUG, "" + debugEmail);
 
-      // TODO : Remove me!
       if (debugEmail) {
-        props.put("mail.smtp.port", MAIL_PORT);
-        logger.debug("using port " + MAIL_PORT);
+        props.put(MAIL_SMTP_PORT, MAIL_PORT);
+        logger.debug("Testing : using port " + MAIL_PORT);
       }
 
       Session session = Session.getDefaultInstance(props, null);
