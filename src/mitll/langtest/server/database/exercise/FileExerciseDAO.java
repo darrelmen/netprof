@@ -1,5 +1,6 @@
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.exercise;
 
+import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.shared.CommonExercise;
@@ -35,6 +36,7 @@ import java.util.regex.Pattern;
  * Date: 10/8/12
  * Time: 3:35 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated hasn't been used in a long time
  */
 public class FileExerciseDAO implements ExerciseDAO {
   private static final Logger logger = Logger.getLogger(FileExerciseDAO.class);
@@ -139,7 +141,7 @@ public class FileExerciseDAO implements ExerciseDAO {
 
   /**
    *
-   * @see DatabaseImpl#getExercises(boolean, String)
+   * @see mitll.langtest.server.database.DatabaseImpl#getExercises(boolean, String)
    * @param lessonPlanFile
    * @param doImages
    * @param dontExpectHeader
@@ -287,7 +289,7 @@ public class FileExerciseDAO implements ExerciseDAO {
   }
 
   /**
-   * @see DatabaseImpl#getExercises(boolean, String)
+   * @see mitll.langtest.server.database.DatabaseImpl#getExercises(boolean, String)
    * @param installPath
    * @param lessonPlanFile
    */
