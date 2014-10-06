@@ -15,7 +15,7 @@ public class ExerciseFormatter {
   public static final String CONTEXT = "Context:";
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, String, String, String, String, String, boolean, String)
+   * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise(String, String, String, String, String, String, boolean, String)
    * @see mitll.langtest.shared.custom.UserExercise#toExercise()
    * @param foreignPhrase
    * @param translit
