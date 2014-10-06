@@ -20,7 +20,7 @@ public class SectionNode implements IsSerializable {
   public SectionNode() {}   // required for serialization
 
   /**
-   * @see mitll.langtest.server.database.SectionHelper#addChildren(java.util.List, SectionNode, java.util.Map)
+   * @see mitll.langtest.server.database.exercise.SectionHelper#addChildren(java.util.List, SectionNode, java.util.Map)
    * @param type
    * @param name
    */
