@@ -1,10 +1,10 @@
-package mitll.langtest.server.database;
+package mitll.langtest.server.mail;
 
 import com.google.gwt.util.tools.shared.Md5Utils;
 import com.google.gwt.util.tools.shared.StringUtils;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.mail.MailSupport;
+import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
