@@ -1,4 +1,4 @@
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.shared.CommonExercise;
 import org.apache.log4j.Logger;
@@ -94,7 +94,7 @@ public class ILRMapping {
   }
 
   /**
-   * @see mitll.langtest.server.database.FileExerciseDAO#readExercises(String, String, String, java.io.InputStream)
+   * @see mitll.langtest.server.database.exercise.FileExerciseDAO#readExercises(String, String, String, java.io.InputStream)
    * @param exid
    * @param e
    */
@@ -115,7 +115,7 @@ public class ILRMapping {
 
   private BufferedReader getReader(String lessonPlanFile) throws FileNotFoundException, UnsupportedEncodingException {
     FileInputStream resourceAsStream = new FileInputStream(lessonPlanFile);
-    return new BufferedReader(new InputStreamReader(resourceAsStream,SQLExerciseDAO.ENCODING));
+    return new BufferedReader(new InputStreamReader(resourceAsStream, SQLExerciseDAO.ENCODING));
   }
 
   private Set<String> getMappedExercises() {
