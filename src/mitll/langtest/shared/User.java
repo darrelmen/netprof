@@ -21,7 +21,6 @@ public class User extends MiniUser {
   private boolean enabled;
   private boolean admin;
   private int numResults;
- // private Demographics demographics;
   private float rate = 0.0f;
   private boolean complete;
   private float completePercent;
@@ -79,7 +78,7 @@ public class User extends MiniUser {
   public User(long id, int age, int gender, int experience, String ipaddr, String passwordH,
               String nativeLang, String dialect, String userID, boolean enabled, boolean isAdmin,
               Collection<Permission> permissions, Kind userKind, String emailHash) {
-    super(id,age,gender, userID);
+    super(id, age, gender, userID, isAdmin);
     this.experience = experience;
     this.ipaddr = ipaddr;
     this.passwordHash = passwordH;
@@ -119,23 +118,9 @@ public class User extends MiniUser {
    */
   public void setNumResults(int numResults) { this.numResults = numResults; }
 
-/*
-  public Demographics getDemographics() {
-    return demographics;
-  }
-*/
-
   public boolean isAdmin() {
     return admin;
   }
-
-  /**
-   * @see mitll.langtest.server.database.DatabaseImpl#joinWithDLIUsers(java.util.List)
-   * @paramx demographics
-   */
-/*  public void setDemographics(Demographics demographics) {
-    this.demographics = demographics;
-  }*/
 
   public void setRate(float rate) {
     this.rate = rate;
@@ -203,7 +188,6 @@ public class User extends MiniUser {
   public String toString() {
     return "user " + getId() +  "/" + getUserID() +
         " is a " + getGender() + " age " + getAge() +
-       // " native lang = " + getNativeLang() +
         " dialect " + getDialect() +
         " emailH " + getEmailHash() +
         " passH " + getPasswordHash() +
