@@ -17,6 +17,8 @@ public class MailSupport {
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String LOCALHOST = "localhost";
   private static final int MAIL_PORT = 1025;
+  private static final String MAIL_SMTP_HOST = "mail.smtp.host";
+  private static final String MAIL_DEBUG = "mail.debug";
   private final boolean debugEmail;
 
   /**
@@ -24,14 +26,13 @@ public class MailSupport {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getMailSupport()
    */
   public MailSupport(boolean debugEmail) {
-
     this.debugEmail = debugEmail;
-// TODO : gah! fix the property!
-
+    logger.warn("\n\n\ndebug is " + debugEmail);
+    // TODO : gah! fix the property!
   }
 
   /**
-   * @see mitll.langtest.server.database.EmailHelper#enableCDUser(String, String, String)
+   * @see EmailHelper#enableCDUser(String, String, String)
    * @param serverName
    * @param to
    * @param replyTo
@@ -50,9 +51,8 @@ public class MailSupport {
    * @param subject
    * @param message
    * @param linkText
-   * @see mitll.langtest.server.database.EmailHelper#sendApprovalEmail(String, String, String, String, String, String, MailSupport)
-   * @see mitll.langtest.server.database.EmailHelper#sendEmail
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(String, String, String, mitll.langtest.shared.User.Kind, String, String)
+   * @see EmailHelper#sendApprovalEmail(String, String, String, String, String, String, MailSupport)
+   * @see EmailHelper#sendEmail
    */
   public void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message, String linkText) {
     List<String> toAddresses = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<String>();
@@ -139,6 +139,7 @@ public class MailSupport {
    * @param message
    * @see mitll.langtest.server.LangTestDatabaseImpl#logAndNotifyServerException(Exception)
    * @see mitll.langtest.server.LangTestDatabaseImpl#logMessage(String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#sendEmail(String, String)
    */
   public void email(String receiver, String subject, String message) {
     normalEmail(RECIPIENT_NAME, receiver, new ArrayList<String>(), subject, message, LOCALHOST);
@@ -148,8 +149,8 @@ public class MailSupport {
                            String subject, String message, String email_server) {
     try {
       Properties props = new Properties();
-      props.put("mail.smtp.host", email_server);
-      props.put("mail.debug", "" + debugEmail);
+      props.put(MAIL_SMTP_HOST, email_server);
+      props.put(MAIL_DEBUG, "" + debugEmail);
       Session session = Session.getDefaultInstance(props, null);
       // logger.debug("sending email to " + recipientEmail);
       Message msg = makeMessage(session, recipientName, recipientEmail, ccEmails, subject, message);
@@ -179,8 +180,8 @@ public class MailSupport {
                                String subject, String message) {
     try {
       Properties props = new Properties();
-      props.put("mail.smtp.host", LOCALHOST);
-      props.put("mail.debug", "" + debugEmail);
+      props.put(MAIL_SMTP_HOST, LOCALHOST);
+      props.put(MAIL_DEBUG, "" + debugEmail);
 
       // TODO : Remove me!
       if (debugEmail) {
@@ -219,6 +220,17 @@ public class MailSupport {
   }
 */
 
+  /**
+   * @see #normalEmail(String, String, java.util.List, String, String, String)
+   * @param session
+   * @param recipientName
+   * @param recipientEmail
+   * @param ccEmails
+   * @param subject
+   * @param message
+   * @return
+   * @throws Exception
+   */
   private Message makeMessage(Session session,
                               String recipientName, String recipientEmail,
                               List<String> ccEmails,
@@ -248,13 +260,13 @@ public class MailSupport {
     logger.info("Sending from " + senderEmail + " " + senderName + " to " + recipientEmails + " sub " + subject + " " + message);
     msg.setFrom(new InternetAddress(senderEmail, senderName));
     for (String receiver : recipientEmails) {
-      logger.info("\tSending  to " + receiver);
+      //logger.info("\tSending  to " + receiver);
       msg.addRecipient(Message.RecipientType.TO, new InternetAddress(receiver));
     }
     msg.setSubject(subject);
     msg.setText(message);
     msg.addHeader("Content-Type", "text/html");
-    logger.info("Session is " + session + " message " + msg);
+    //logger.info("Session is " + session + " message " + msg);
     addReplyTo(replyToEmail, msg);
     return msg;
   }
