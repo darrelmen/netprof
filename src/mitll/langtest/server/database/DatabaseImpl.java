@@ -6,6 +6,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.custom.*;
+import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
@@ -61,7 +62,7 @@ public class DatabaseImpl implements Database {
   private String lessonPlanFile;
   private final boolean isWordPairs;
   private boolean useFile;
-  private final boolean isFlashcard;
+//  private final boolean isFlashcard;
   private String language = "";
   private final boolean doImages;
   private final String configDir;
@@ -110,7 +111,7 @@ public class DatabaseImpl implements Database {
     this.isWordPairs = serverProps.isWordPairs();
     this.doImages = serverProps.doImages();
     this.language = serverProps.getLanguage();
-    this.isFlashcard = serverProps.isFlashcard();
+  //  this.isFlashcard = serverProps.isFlashcard();
     this.serverProps = serverProps;
     this.lessonPlanFile = serverProps.getLessonPlan();
     this.useFile = lessonPlanFile != null;
@@ -254,7 +255,7 @@ public class DatabaseImpl implements Database {
    */
   private ExerciseDAO makeExerciseDAO(boolean useFile) {
     return useFile ?
-        new FileExerciseDAO(mediaDir, language, isFlashcard, absConfigDir, serverProps.getMappingFile()) :
+        new FileExerciseDAO(mediaDir, language, true, absConfigDir, serverProps.getMappingFile()) :
         new SQLExerciseDAO(this, mediaDir, absConfigDir, serverProps);
   }
 
@@ -602,7 +603,7 @@ public class DatabaseImpl implements Database {
   /**
    * @param user
    * @return
-   * @see mitll.langtest.server.database.ImportCourseExamples#copyUser(DatabaseImpl, java.util.Map, java.util.Map, long)
+   * @see mitll.langtest.server.database.importExport.ImportCourseExamples#copyUser(DatabaseImpl, java.util.Map, java.util.Map, long)
    */
   public long addUser(User user) {
     long l;
