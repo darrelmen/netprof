@@ -3,7 +3,6 @@ package mitll.langtest.shared;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -77,7 +76,7 @@ public interface CommonExercise extends CommonShell {
   // super nice to remove these... and make read only
 
   /**
-   * @see mitll.langtest.server.database.SectionHelper#addExerciseToLesson(CommonExercise, String, String)
+   * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson(CommonExercise, String, String)
    * @param unit
    * @param value
    */
