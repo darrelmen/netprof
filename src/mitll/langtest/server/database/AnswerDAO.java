@@ -17,7 +17,7 @@ import java.util.Collection;
  */
 public class AnswerDAO {
   private static final Logger logger = Logger.getLogger(AnswerDAO.class);
-  public static final String AVP_SKIP = "avp_skip";
+  //public static final String AVP_SKIP = "avp_skip";
 
   private final Database database;
   private final ResultDAO resultDAO;
@@ -182,7 +182,7 @@ public class AnswerDAO {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(int, long, String, String, int, int, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
    * @param id
    */
   public void changeAnswer(long id, float score) {
@@ -214,11 +214,11 @@ public class AnswerDAO {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#setAVPSkip(java.util.Collection)
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#setAVPSkip(java.util.Collection)
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#getRepeatButton()
-   * @param ids
+   * @paramx ids
    */
-  public void changeType(Collection<Long> ids) {
+/*  public void changeType(Collection<Long> ids) {
     if (ids.isEmpty()) return;
     Connection connection = getConnection();
     try {
@@ -248,15 +248,15 @@ public class AnswerDAO {
     } finally {
       database.closeConnection(connection);
     }
-  }
+  }*/
 
-  private String getInList(Collection<Long> ids) {
+/*  private String getInList(Collection<Long> ids) {
     StringBuilder b = new StringBuilder();
     for (Long id : ids) b.append(id).append(",");
     String list = b.toString();
     list = list.substring(0, Math.max(0, list.length() - 1));
     return list;
-  }
+  }*/
 
   private String copyStringChar(String plan) { return new String(plan.toCharArray());  }
 }
