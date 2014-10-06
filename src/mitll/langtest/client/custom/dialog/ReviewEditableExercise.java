@@ -197,7 +197,10 @@ public class ReviewEditableExercise extends EditableExercise {
 
   private String getUserTitle(MiniUser user) {
     return (user.isMale() ? MALE : FEMALE)+
-      (controller.getProps().isAdminView() ?" (" + user.getUserID() + ")" :"") +
+      (
+         // controller.getProps().isAdminView()
+        user.isAdmin()
+          ?" (" + user.getUserID() + ")" :"") +
       " age " + user.getAge();
   }
 
