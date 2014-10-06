@@ -1,7 +1,9 @@
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.AudioDAO;
+import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListManager;
@@ -77,7 +79,7 @@ public class ExcelImport implements ExerciseDAO {
    * @param relativeConfigDir
    * @param userListManager
    * @param addDefects
-   * @see DatabaseImpl#makeDAO
+   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
    */
   public ExcelImport(String file, String mediaDir, String relativeConfigDir, ServerProperties serverProps,
                      UserListManager userListManager,
@@ -93,9 +95,9 @@ public class ExcelImport implements ExerciseDAO {
       logger.warn("\n\n\nhuh? install path " + this.installPath.getAbsolutePath() + " doesn't exist???");
     }
     // turn off missing fast/slow for classroom
-    boolean missingExists = serverProps.isClassroomMode() || getMissing(relativeConfigDir, "missingSlow.txt", missingSlowSet);
-    missingExists &= serverProps.isClassroomMode() || getMissing(relativeConfigDir, "missingFast.txt", missingFastSet);
-    shouldHaveRefAudio = missingExists && !serverProps.isClassroomMode();
+   // boolean missingExists = serverProps.isClassroomMode() || getMissing(relativeConfigDir, "missingSlow.txt", missingSlowSet);
+   // missingExists &= serverProps.isClassroomMode() || getMissing(relativeConfigDir, "missingFast.txt", missingFastSet);
+    shouldHaveRefAudio = true;//missingExists && !serverProps.isClassroomMode();
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
     this.language = serverProps.getLanguage();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
@@ -501,14 +503,14 @@ public class ExcelImport implements ExerciseDAO {
             }
           }
           if (english.length() == 0) {
-            if (serverProps.isClassroomMode()) {
+            //if (serverProps.isClassroomMode()) {
               //english = "NO ENGLISH";    // DON'T DO THIS - it messes up the indexing.
               fieldToDefect.put("english", "missing english");
-            }
+           // }
             //logger.info("-------- > for row " + next.getRowNum() + " english is blank ");
-            else {
-              englishSkipped++;
-            }
+           // else {
+           //   englishSkipped++;
+           // }
           }
           if (gotHeader && english.length() > 0) {
             if (inMergedRow) logger.info("got merged row ------------ ");
@@ -585,10 +587,10 @@ public class ExcelImport implements ExerciseDAO {
     logStatistics(id, semis, skipped, englishSkipped, deleted);
 
     // put the skips at the end
-    if (serverProps.isClassroomMode()) {
+   // if (serverProps.isClassroomMode()) {
       Collection<CommonExercise> commonExercises = readFromSheetSkips(sheet, id);
       exercises.addAll(commonExercises);
-    }
+  //  }
     return exercises;
   }
 
@@ -688,14 +690,14 @@ public class ExcelImport implements ExerciseDAO {
           //logger.info("for row " + next.getRowNum() + " english = " + english + " in merged " + inMergedRow + " last row " + lastRowValues.size());
 
           if (english.length() == 0) {
-            if (serverProps.isClassroomMode()) {
+           /// if (serverProps.isClassroomMode()) {
               //english = "NO ENGLISH";    // DON'T DO THIS - it messes up the indexing.
               fieldToDefect.put("english", "missing english");
-            }
+           // }
             //logger.info("-------- > for row " + next.getRowNum() + " english is blank ");
-            else {
-              englishSkipped++;
-            }
+           // else {
+           //   englishSkipped++;
+           // }
           }
           if (gotHeader && english.length() > 0) {
             if (skipSemicolons && (foreignLanguagePhrase.contains(";") || translit.contains(";"))) {
