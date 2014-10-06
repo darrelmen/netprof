@@ -85,7 +85,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
   public Exercise() {}     // required for serialization
 
   /**
-   * @see mitll.langtest.server.database.SQLExerciseDAO#getExercise
+   * @see mitll.langtest.server.database.exercise.SQLExerciseDAO#getExercise
    * @param id
    * @param content
    * @param promptInEnglish
@@ -103,7 +103,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
   }
 
   /**
-   * @see mitll.langtest.server.database.FileExerciseDAO#getSimpleExerciseForLine(String, int)
+   * @see mitll.langtest.server.database.exercise.FileExerciseDAO#getSimpleExerciseForLine(String, int)
    * @param plan
    * @param id
    * @param content
@@ -121,7 +121,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
   }
 
   /**
-   * @see mitll.langtest.server.database.FileExerciseDAO#getFlashcardExercise(int, String, String, String, String)
+   * @see mitll.langtest.server.database.exercise.FileExerciseDAO#getFlashcardExercise(int, String, String, String, String)
    * @param plan
    * @param id
    * @param content
@@ -137,7 +137,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
   }
 
   /**
-   * @see mitll.langtest.server.database.FileExerciseDAO#getExerciseForLine(String)
+   * @see mitll.langtest.server.database.exercise.FileExerciseDAO#getExerciseForLine(String)
    * @param plan
    * @param id
    * @param content
@@ -184,7 +184,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
    * @param question
    * @param answer
    * @param alternateAnswers
-   * @see mitll.langtest.server.database.SQLExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
+   * @see mitll.langtest.server.database.exercise.SQLExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
    */
   public void addQuestion(String lang, String question, String answer, List<String> alternateAnswers) {
     QAPair pair = new QAPair(question, answer, alternateAnswers);
@@ -220,7 +220,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
   }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, boolean, String, boolean)
+   * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise(String, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, boolean, String, boolean)
    * @param sentenceRefs
    */
   public void setRefSentences(List<String> sentenceRefs) {
@@ -270,7 +270,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
 
   public void setContent(String content) { this.content = content;  }
   /**
-   * @see mitll.langtest.server.database.ExcelImport#getExercise
+   * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    * @param englishSentence
    */
   public void setEnglishSentence(String englishSentence) {
