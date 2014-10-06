@@ -20,7 +20,7 @@ public class PropertyHandler {
   private static final String BKG_COLOR_FOR_REF1 = "bkgColorForRef";
   private static final String DEMO_MODE = "demo";
   private static final String RECORD_TIMEOUT = "recordTimeout";
-  private static final String ADMIN_VIEW = "adminView";
+  //private static final String ADMIN_VIEW = "adminView";
   private static final String NAME_FOR_ITEM = "nameForItem";
   private static final String NAME_FOR_ANSWER = "nameForAnswer";
   private static final String NAME_FOR_RECORDER = "nameForRecorder";
@@ -30,13 +30,13 @@ public class PropertyHandler {
 
   private static final String LANGUAGE = "language";
   private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
-  private static final String SCREEN_PORTION = "screenPortion";
+ // private static final String SCREEN_PORTION = "screenPortion";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
   private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
   private static final String EXERCISE_TITLE = "exercise_title";
-  private static final String ADMIN_PARAM = "admin";
+  //private static final String ADMIN_PARAM = "admin";
   private static final String TURK_PARAM = "turk";
   private static final String NUM_GRADES_TO_COLLECT_PARAM = NUM_GRADES_TO_COLLECT;
 
@@ -46,35 +46,33 @@ public class PropertyHandler {
   private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
   private static final String LOGIN_TYPE_PARAM = "loginType";
   private static final String SHOW_FLASHCARD_ANSWER = "showFlashcardAnswer";
-  private static final String FLASHCARD_TEXT_RESPONSE = "flashcardTextResponse";
   private static final String ALLOW_PLUS_IN_URL = "allowPlusInURL";
   private static final String SHOW_SPECTROGRAM = "spectrogram";
+
+  /**
+   * @see mitll.langtest.server.mail.EmailHelper#RP
+   */
   private static final String RP = "rp";
   private static final String CD = "cd";
   private static final String ER = "er";
+
   private static final String CLICK_AND_HOLD = "clickAndHold";
   private static final String SHOW_CONTEXT = "showContext";
-  public static final String QUIET_AUDIO_OK = "quietAudioOK";
-  private boolean spectrogram = false;
+  private static final String QUIET_AUDIO_OK = "quietAudioOK";
+  private static final String SHOW_WELCOME = "showWelcome";
   private static final String NO_MODEL = "noModel";
-  // private static final String INSTRUMENT = "instrument";
+
+
+  public enum LOGIN_TYPE { ANONYMOUS, STUDENT }
+
+
+  private boolean spectrogram = false;
   private boolean clickAndHold = true;
   private boolean quietAudioOK;
   private boolean showContext = true;
+
   private String resetPassToken = "";
   private String cdEnableToken = "", emailRToken = "";
-
-  public boolean doClickAndHold() { return clickAndHold; }
-
-  public boolean isQuietAudioOK() {
-    return quietAudioOK;
-  }
-
-  public boolean showContextButton() {
-    return showContext;
-  }
-
-  public enum LOGIN_TYPE { ANONYMOUS, STUDENT }
 
   private final Map<String, String> props;
 
@@ -83,7 +81,8 @@ public class PropertyHandler {
   private String exercise_title;
   private String appTitle = DLI_LANGUAGE_TESTING;
   private boolean demoMode;
-  private boolean adminView = false;
+  //private boolean adminView = false;
+  private boolean showWelcome = true;// default value
   private boolean logClientMessages = false;
   private int numGradesToCollect = NUM_GRADES_TO_COLLECT_DEFAULT;
   private String nameForItem = "Item";
@@ -91,7 +90,6 @@ public class PropertyHandler {
   private String nameForRecorder = "Speaker";
   private String language = "";
   private boolean dialog = false;
-  //private boolean timedGame = false;
 
   private String releaseDate;
   private String turkID = "";
@@ -99,7 +97,7 @@ public class PropertyHandler {
   private int recordTimeout = DEFAULT_TIMEOUT;
 
   private String splashTitle;
-  private float screenPortion = 1.0f;
+ // private float screenPortion = 1.0f;
   private boolean rightAlignContent;
 
   // do we bind the record key to space -- problematic if we have text entry anywhere else on the page, say in a search
@@ -132,7 +130,7 @@ public class PropertyHandler {
       else if (key.equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = getBoolean(value);
       else if (key.equals(DEMO_MODE)) demoMode = getBoolean(value);
       else if (key.equals(RECORD_TIMEOUT)) recordTimeout = getInt(value, DEFAULT_TIMEOUT, RECORD_TIMEOUT);
-      else if (key.equals(ADMIN_VIEW)) adminView = getBoolean(value);
+      else if (key.equals(SHOW_WELCOME)) showWelcome = getBoolean(value);
       else if (key.equals(NAME_FOR_ITEM)) nameForItem = value;
       else if (key.equals(NAME_FOR_ANSWER)) nameForAnswer = value;
       else if (key.equals(NAME_FOR_RECORDER)) nameForRecorder = value;
@@ -214,14 +212,6 @@ public class PropertyHandler {
       this.exercise_title = DEFAULT_EXERCISE;
     }
 
-    String screenPortionParam =  Window.Location.getParameter("screenPortion");
-    if (screenPortionParam != null) {
-      try {
-        screenPortion = Float.parseFloat(screenPortionParam);
-      } catch (NumberFormatException e) {
-        e.printStackTrace();
-      }
-    }
     boolean grading = this.isGrading() || (isGrading != null && !isGrading.equals("false"));
     setGrading(grading);
     // get audio repeats
@@ -233,10 +223,10 @@ public class PropertyHandler {
       demoMode = !demoParam.equals("false");
     }
 
-    String adminParam = Window.Location.getParameter(ADMIN_PARAM);
+/*    String adminParam = Window.Location.getParameter(ADMIN_PARAM);
     if (adminParam != null) {
       adminView = !adminParam.equals("false");
-    }
+    }*/
 
     String turkParam = Window.Location.getParameter(TURK_PARAM);
     if (turkParam != null) {
@@ -276,7 +266,6 @@ public class PropertyHandler {
   /**
    * @see mitll.langtest.client.LangTest#modeSelect()
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
-   * @seex mitll.langtest.client.LangTest#setFactory
    *
    * @return
    */
@@ -290,6 +279,11 @@ public class PropertyHandler {
     return bkgColorForRef;
   }
 
+  /**
+   *
+   * For headstart integration.
+   * @return
+   */
   public String getExercise_title() {
     return exercise_title;
   }
@@ -302,9 +296,9 @@ public class PropertyHandler {
     return demoMode;
   }
 
-  public boolean isAdminView() {
+/*  public boolean isAdminView() {
     return adminView;
-  }
+  }*/
 
   public String getTurkID() { return  turkID; }
 
@@ -314,10 +308,6 @@ public class PropertyHandler {
 
   public int getRecordTimeout() {  return recordTimeout;  }
 
-  public float getScreenPortion() {
-    return screenPortion;
-  }
-
   public String getNameForItem() { return nameForItem; }
   public String getNameForAnswer() { return nameForAnswer; }
   public String getNameForRecorder() { return nameForRecorder; }
@@ -326,6 +316,10 @@ public class PropertyHandler {
     return logClientMessages;
   }
 
+  /**
+   * Sorry Jennifer! I think somehow we lost the connection here...
+   * @return
+   */
   public boolean hasDialog(){
 	  return dialog;
   }
@@ -369,5 +363,53 @@ public class PropertyHandler {
   }
   public String getEmailRToken() {
     return emailRToken;
+  }
+
+  public boolean doClickAndHold() { return clickAndHold; }
+
+  public boolean isQuietAudioOK() {
+    return quietAudioOK;
+  }
+
+  public boolean showContextButton() {
+    return showContext;
+  }
+
+  public boolean shouldShowWelcome() { return showWelcome; }
+
+  /**
+   * TODO : Consider rewording for other customers...
+   * @return
+   */
+  public String getHelpMessage() {
+    return "If you are an existing user of Classroom (either as a student, teacher or audio recorder), " +
+        "you will need to use the <b>\"Sign Up\"</b> box to add a password and an email address to your account. " +
+        " Your email is only used if you ever forget your password.<br/><br/>" +
+        "If you were using Classroom for <u>recording of course audio</u>, check the box asking if you are a " +
+        "<b>reference audio recorder</b>." +
+        //"<br/>" +
+        //"<br/>" +
+        " Once you have submitted this form, LTEA personnel will approve your account. " +
+        "You will receive an email once it's approved.  " +
+        "You will not be able to access Classroom " +
+        //"for recording or quality control " +
+        "until approval is granted.<br/>" +
+        //   "<br/>" +
+        //     "If you a teacher or student with a pre-existing user name, please use the \"Sign Up\" form to add a user name and password.  Then select your appropriate role.  No approval is required to activate your account.<br/>" +
+        "<br/>" +
+        "Once you \"Sign up\", the site will remember your login information on this computer for up to one year.  " +
+        "You will need to login with your username and password again if you access Classroom from a different machine.<br/>";
+  }
+
+  /**
+   * TODO : Consider rewording for other customers...
+   * @return
+   */
+  public String getRecordAudioPopoverText() {
+    return "Click here if you have been assigned to record reference audio or do quality control.<br/>" +
+        "After you click sign up, " +
+        "LTEA personnel will approve your account.<br/>" +
+        "You will receive an email once it's approved.<br/>" +
+        "You will not be able to access Classroom until approval is granted.";
   }
 }
