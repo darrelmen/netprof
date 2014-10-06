@@ -1,6 +1,8 @@
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.AudioDAO;
+import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.shared.CommonExercise;
@@ -26,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * @deprecated this hasn't been used in a long time
+ */
 public class SQLExerciseDAO implements ExerciseDAO {
   private static final Logger logger = Logger.getLogger(SQLExerciseDAO.class);
 
@@ -42,7 +47,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
   private final ILRMapping ilrMapping;
 
   /**
-   * @see DatabaseImpl#makeExerciseDAO(boolean)
+   * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO(boolean)
    * @param database
    * @param mediaDir
    * @param configDir
