@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.Result;
