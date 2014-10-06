@@ -309,26 +309,21 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return verticalContainer;
   }
 
+  /**
+   * @param verticalContainer
+   * @param firstRow          where we put the flash permission window if it gets shown
+   * @see #handleCDToken(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, String)
+   * @see #populateRootPanel()
+   * @see #showLogin()
+   */
   private void populateBelowHeader(Container verticalContainer, Panel firstRow) {
-    // third row ---------------
-
-/*    Panel exerciseListContainer = new SimplePanel();
-    exerciseListContainer.addStyleName("floatLeft");
-    exerciseListContainer.getElement().setId("exerciseListContainer");*/
-
-    // set up center right panel, initially with flash record panel
-
-
     if (showOnlyOneExercise()) {
       Panel currentExerciseVPanel = new FlowPanel();
       currentExerciseVPanel.getElement().setId("currentExercisePanel");
       RootPanel.get().add(getHeadstart(currentExerciseVPanel));
     } else {
-    //  currentExerciseVPanel.addStyleName("floatLeftList");
       RootPanel.get().add(verticalContainer);
-   // }
 
-   // if (!showOnlyOneExercise()) {
       /**
        * {@link #makeFlashContainer}
        */
@@ -366,25 +361,26 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   @Override
   public void showLogin() {
-   logger.info("show login!");
- /*   Container verticalContainer = getRootContainer();
-    showLogin(verticalContainer, makeFirstTwoRows(verticalContainer));*/
-
+//    logger.info("show login!");
     populateRootPanel();
   }
 
   private String staleToken = "";
 
   /**
+   * So we have three different views here : the login page, the reset password page, and the content developer
+   * enabled feedback page.
+   *
    * @see #showLogin()
    * @see #populateRootPanel()
    * @param verticalContainer
    * @param firstRow
-   * @return
+   * @return false if we didn't do either of the special pages and should do the normal navigation view
    */
   private boolean showLogin(final Container verticalContainer, final Panel firstRow) {
     final EventRegistration eventRegistration = this;
 
+    // check if we're here as a result of resetting a password
     final String resetPassToken = props.getResetPassToken();
     if (!resetPassToken.isEmpty() && !resetPassToken.equals(staleToken)) {
       logger.info("showLogin token '" + resetPassToken + "' for password reset");
@@ -401,13 +397,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
             populateBelowHeader(verticalContainer,firstRow);
           }
           else {
-        //    UserPassLogin userPassLogin = new UserPassLogin(service, getProps(), userManager, eventRegistration);
             ResetPassword userPassLogin = new ResetPassword(service, getProps(), eventRegistration);
             Panel content = userPassLogin.getResetPassword(resetPassToken);
             firstRow.add(content);
             content.getElement().setId("ResetPassswordContent");
-            verticalContainer.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
-            verticalContainer.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
+            clearPadding(verticalContainer);
           }
         }
       });
@@ -418,6 +412,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       return true;
     }
 
+    // are we here to enable a CD user?
     final String cdToken = props.getCdEnableToken();
     if (!cdToken.isEmpty() && !cdToken.equals(staleToken)) {
       logger.info("showLogin token '" + resetPassToken + "' for enabling cd user");
@@ -426,6 +421,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       return true;
     }
 
+    // are we here to show the login screen?
     boolean show = userManager.isUserExpired() || userManager.getUserID() == null;
     if (show) {
       logger.info("user is not valid : " + userManager.isUserExpired() +" / " +userManager.getUserID());
@@ -433,8 +429,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       Panel content = new UserPassLogin(service, getProps(), userManager, eventRegistration).getContent();
       firstRow.add(content);
       content.getElement().setId("UserPassLogin");
-      verticalContainer.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
-      verticalContainer.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
+      clearPadding(verticalContainer);
       RootPanel.get().add(verticalContainer);
       flashcard.setCogVisible(false);
       return true;
@@ -446,22 +441,23 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void handleCDToken(final Container verticalContainer, final Panel firstRow, final String cdToken, String emailR) {
-    service.enableCDUser(cdToken, emailR, Window.Location.getHref(), new AsyncCallback<Long>() {
+    service.enableCDUser(cdToken, emailR, Window.Location.getHref(), new AsyncCallback<String>() {
       @Override
       public void onFailure(Throwable caught) {
       }
 
       @Override
-      public void onSuccess(Long result) {
+      public void onSuccess(String result) {
         staleToken = cdToken;
-        if (result == null || result < 0) {
+        if (result == null /*|| result < 0*/) {
           logger.info("handleCDToken enable - token " + cdToken + " is stale. Showing normal view");
           populateBelowHeader(verticalContainer, firstRow);
         } else {
-          firstRow.add(new Heading(2, "OK, content developer has been approved."));
+          firstRow.add(new Heading(2, "OK, content developer <b>" +result +
+              "</b> has been approved."));
+          firstRow.addStyleName("leftFiveMargin");
           // content.getElement().setId("ResetPassswordContent");
-          verticalContainer.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
-          verticalContainer.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
+          clearPadding(verticalContainer);
 
           Timer t = new Timer() {
             @Override
@@ -477,6 +473,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     RootPanel.get().add(verticalContainer);
     flashcard.setCogVisible(false);
+  }
+
+  private void clearPadding(Container verticalContainer) {
+    verticalContainer.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
+    verticalContainer.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
   }
 
   private String trimURL(String url) {
