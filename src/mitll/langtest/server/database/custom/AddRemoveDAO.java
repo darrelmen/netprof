@@ -96,13 +96,13 @@ public class AddRemoveDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#getRawExercises()
+   * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
    * @return
    */
   public Set<String> getAdds() { return getIds(ADD); }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#getRawExercises()
+   * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
    * @return
    */
   public Set<String> getRemoves() {  return getIds(REMOVE); }
