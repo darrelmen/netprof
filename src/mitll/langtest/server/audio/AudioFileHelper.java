@@ -4,7 +4,6 @@ import com.google.common.io.Files;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -360,7 +359,7 @@ public class AudioFileHelper {
                                      int reqid,
                                      File file, AudioCheck.ValidityAndDur validity, String url, boolean doFlashcard) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
-    if (serverProps.isFlashcard() || doFlashcard) {
+    if (doFlashcard) {
       makeASRScoring();
       autoCRT.getFlashcardAnswer(exercise, file, audioAnswer);
       return audioAnswer;
