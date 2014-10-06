@@ -62,8 +62,8 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   public static final int DEFAULT_MALE_ID = -2;
   public static final int DEFAULT_FEMALE_ID = -3;
-  private static final MiniUser DEFAULT_MALE   = new MiniUser(DEFAULT_MALE_ID,   30, 0, "Male");
-  private static final MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, "Female");
+  private static final MiniUser DEFAULT_MALE   = new MiniUser(DEFAULT_MALE_ID,   30, 0, "Male", false);
+  private static final MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, "Female", false);
 
   private Set<String> incorrectFields;
   private List<RequiresResize> toResize;
@@ -505,9 +505,12 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   private String getUserTitle(MiniUser user) {
-    return (user.isMale() ? "Male" :"Female")+
-      (controller.getProps().isAdminView() ?" (" + user.getUserID() + ")" :"") +
-      " age " + user.getAge();
+    return (user.isMale() ? "Male" : "Female") +
+        (
+            //controller.getProps().isAdminView()
+            user.isAdmin()
+                ? " (" + user.getUserID() + ")" : "") +
+        " age " + user.getAge();
   }
 
   /**
