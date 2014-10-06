@@ -49,7 +49,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#getExercise
+   * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    * @param s
    * @deprecated - try to avoid this
    */
@@ -68,7 +68,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#addOldSchoolAudio(String, Exercise)
+   * @see mitll.langtest.server.database.exercise.ExcelImport#addOldSchoolAudio(String, Exercise)
    * @param ref
    * @param user
    */
@@ -396,7 +396,7 @@ public class AudioExercise extends ExerciseShell {
   public Map<String, String> getUnitToValue() { return unitToValue; }
 
   /**
-   * @see mitll.langtest.server.database.SectionHelper#addExerciseToLesson
+   * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
    * @param unit
    * @param value
    */
