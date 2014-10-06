@@ -133,5 +133,5 @@ public interface LangTestDatabaseAsync {
 
   void changePFor(String token, String first, AsyncCallback<Boolean> asyncCallback);
 
-  void enableCDUser(String cdToken, String emailR, String url, AsyncCallback<Long> asyncCallback);
+  void enableCDUser(String cdToken, String emailR, String url, AsyncCallback<String> asyncCallback);
 }
