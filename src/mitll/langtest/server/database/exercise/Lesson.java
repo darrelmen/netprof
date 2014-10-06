@@ -1,4 +1,4 @@
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.shared.CommonExercise;
 
