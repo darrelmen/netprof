@@ -706,7 +706,7 @@ public class UserListManager {
   public boolean listExists(long id) {  return userListDAO.getWhere(id, false) != null; }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#addDefects
+   * @see mitll.langtest.server.database.exercise.ExcelImport#addDefects
    * @param exerciseID
    * @param field
    * @param comment
