@@ -1,5 +1,6 @@
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.exercise;
 
+import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.shared.CommonExercise;
