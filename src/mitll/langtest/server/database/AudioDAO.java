@@ -69,7 +69,7 @@ public class AudioDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#setAudioDAO(AudioDAO)
+   * @see mitll.langtest.server.database.exercise.ExcelImport#setAudioDAO(AudioDAO)
    * @return
    */
   public Map<String, List<AudioAttribute>> getExToAudio() {
@@ -390,7 +390,7 @@ public class AudioDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.ImportCourseExamples#copyAudio
+   * @see mitll.langtest.server.database.importExport.ImportCourseExamples#copyAudio
    */
   public long add(Result result, int userid, String path) {
     try {
