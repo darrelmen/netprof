@@ -41,7 +41,7 @@ public interface ExerciseController extends EventRegistration {
   boolean useBkgColorForRef();
 
   int getRecordTimeout();
-  boolean isGrading();
+ // boolean isGrading();
   boolean isLogClientMessages();
   String getAudioType();
   Collection<User.Permission> getPermissions();
