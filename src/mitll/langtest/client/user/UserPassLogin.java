@@ -19,7 +19,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.ui.TextBox;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
@@ -37,9 +36,9 @@ import java.util.logging.Logger;
  * Created by go22670 on 8/11/14.
  */
 public class UserPassLogin extends UserDialog {
-  private Logger logger = Logger.getLogger("UserPassLogin");
-  public static final String MAGIC_PASS = Md5Hash.getHash("adm!n");
-  public static final String CURRENT_USERS = "Current users should add an email and password.";
+  private final Logger logger = Logger.getLogger("UserPassLogin");
+  private static final String MAGIC_PASS = Md5Hash.getHash("adm!n");
+  private static final String CURRENT_USERS = "Current users should add an email and password.";
 
   private static final int MIN_LENGTH_USER_ID = 4;
 
@@ -85,12 +84,12 @@ public class UserPassLogin extends UserDialog {
   public static final String SHOWN_HELLO = "shownHello";
   private static final String ENTER_YOUR_EMAIL = "Enter your email to get your username.";
   private static final int EMAIL_POPUP_DELAY = 4000;
-  public static final String USER_EXISTS = "User exists already, please sign in or choose a different name.";
-  public static final String HELP = "Help";
-  public static final String AGE_ERR_MSG = "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".";
+  private static final String USER_EXISTS = "User exists already, please sign in or choose a different name.";
+  private static final String HELP = "Help";
+  private static final String AGE_ERR_MSG = "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".";
   //private static final String PLEASE_ENTER_A_PASSWORD1 = "Please enter a password.";
-  private UserManager userManager;
-  private KeyPressHelper enterKeyButtonHelper;
+  private final UserManager userManager;
+  private final KeyPressHelper enterKeyButtonHelper;
   private final KeyStorage keyStorage;
   private FormField user;
   private FormField signUpUser;
@@ -98,13 +97,8 @@ public class UserPassLogin extends UserDialog {
   private FormField signUpPassword;
   private FormField password;
   private boolean signInHasFocus = true;
-  private EventRegistration eventRegistration;
+  private final EventRegistration eventRegistration;
   private Button signIn;
-
-/*  public UserPassLogin(LangTestDatabaseAsync service, PropertyHandler props) {
-    super(service,props);
-    keyStorage = new KeyStorage(props.getLanguage(), 1000000);
-  }*/
 
   /**
    * @param service
@@ -139,14 +133,14 @@ public class UserPassLogin extends UserDialog {
     };
   }
 
-  public void checkWelcome() {
-    if (!hasShownWelcome()) {
+  void checkWelcome() {
+    if (!hasShownWelcome() && props.shouldShowWelcome()) {
       keyStorage.storeValue(SHOWN_HELLO, "yes");
       showWelcome();
     }
   }
 
-  public boolean hasShownWelcome() {
+  boolean hasShownWelcome() {
     return keyStorage.hasValue(SHOWN_HELLO);
   }
 
@@ -159,25 +153,7 @@ public class UserPassLogin extends UserDialog {
     new ModalInfoDialog("Login options",    getLoginInfo());
   }
 
-  private String getLoginInfo() {
-    return "If you are an existing user of Classroom (either as a student, teacher or audio recorder), " +
-        "you will need to use the <b>\"Sign Up\"</b> box to add a password and an email address to your account. " +
-        " Your email is only used if you ever forget your password.<br/><br/>" +
-        "If you were using Classroom for <u>recording of course audio</u>, check the box asking if you are a " +
-        "<b>reference audio recorder</b>." +
-        //"<br/>" +
-        //"<br/>" +
-        " Once you have submitted this form, LTEA personnel will approve your account. " +
-        "You will receive an email once it's approved.  " +
-        "You will not be able to access Classroom " +
-        //"for recording or quality control " +
-        "until approval is granted.<br/>" +
-        //   "<br/>" +
-        //     "If you a teacher or student with a pre-existing user name, please use the \"Sign Up\" form to add a user name and password.  Then select your appropriate role.  No approval is required to activate your account.<br/>" +
-        "<br/>" +
-        "Once you \"Sign up\", the site will remember your login information on this computer for up to one year.  " +
-        "You will need to login with your username and password again if you access Classroom from a different machine.<br/>";
-  }
+  private String getLoginInfo() { return props.getHelpMessage(); }
 
   /**
    * @see mitll.langtest.client.LangTest#showLogin()
@@ -358,15 +334,6 @@ public class UserPassLogin extends UserDialog {
           });
         }
       }});
-  }
-
-  private ControlGroup makeUserId() {
-    TextBox uidBox = new TextBox();
-    uidBox.setTabIndex(2);
-  //  uidBox.addKeyPressHandler(uiHandler);
-    DecoratedFields uidField = new DecoratedFields("User ID", uidBox);
-    uidField.getLabel().addStyleName("login-label");
-    return uidField.getCtrlGroup();
   }
 
   private DecoratedPopupPanel resetEmailPopup;
@@ -601,12 +568,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   private void getRecordAudioPopover() {
-    String html = "Click here if you have been assigned to record reference audio or do quality control.<br/>" +
-        "After you click sign up, " +
-        "LTEA personnel will approve your account.<br/>" +
-        "You will receive an email once it's approved.<br/>" +
-        "You will not be able to access Classroom until approval is granted.";
-
+    String html = props.getRecordAudioPopoverText();
     addPopover(contentDevCheckbox, RECORD_AUDIO_HEADING, html);
   }
 
