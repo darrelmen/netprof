@@ -7,9 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -38,8 +36,11 @@ public class ServerProperties {
   //private static final String SECOND_DATABASE = "secondDatabase";
   //private static final String H2_STUDENT_ANSWERS_DATABASE_DEFAULT = "h2StudentAnswers";
   private static final String READ_FROM_FILE = "readFromFile";
-  private static final String FLASHCARD = "flashcard";
+//  private static final String FLASHCARD = "flashcard";
   private static final String LANGUAGE = "language";
+  /**
+   * @deprecated
+   */
   private static final String WORDPAIRS = "wordPairs";
   private static final String AUTOCRT = "autocrt";
   private static final String MEDIA_DIR = "mediaDir";
@@ -51,8 +52,7 @@ public class ServerProperties {
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
   private static final String EMAIL_ADDRESS = "emailAddress";
-  private static final String DEFAULT_EMAIL = "gordon.vidaver@ll.mit.edu";
-  private static final String DLI_APPROVAL_EMAILS = "gordon.vidaver@ll.mit.edu";
+  //private static final String DLI_APPROVAL_EMAILS = "gordon.vidaver@ll.mit.edu";
   private static final String AUDIO_OFFSET = "audioOffset";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
   private static final String CLASSROOM_MODE = "classroomMode";
@@ -63,18 +63,28 @@ public class ServerProperties {
   private static final String TIER_INDEX = "tierIndex";
   private static final String VLR_PARLE_PILOT_ITEMS_TXT = "vlr-parle-pilot-items.txt";
   private static final String QUIET_AUDIO_OK = "quietAudioOK";
-  private static final String APPROVAL_EMAIL = "approvalEmail";
+
+  public static final String CONFIG_FILE = "configFile";
 
   private Properties props = new Properties();
 
   // --Commented out by Inspection (10/6/14, 1:20 PM):private boolean dataCollectMode;
   private double minPronScore;
+
+  // just for automated testing
   private boolean quietAudioOK;
 
-  // public ServerProperties() {}
+  private static final String APPROVAL_EMAIL = "approvalEmail";
+  private static final String DEFAULT_EMAIL = "gordon.vidaver@ll.mit.edu";
+  private static final String APPROVERS = "approvers";
+  private static final String APPROVER_EMAILS = "approverEmails";
+  private static final List<String> DLI_APPROVERS = Arrays.asList("Tamas", "Alex", "David", "Sandy");
+  private static final List<String> DLI_EMAILS = Arrays.asList("tamas.g.marius.civ@mail.mil", "alexandra.cohen@dliflc.edu", "david.randolph@dliflc.edu", "sandra.wagner@dliflc.edu");
+  private List<String> approvers = DLI_APPROVERS;
+  private List<String> approverEmails = DLI_EMAILS;
 
   public ServerProperties(ServletContext servletContext, String configDir) {
-    this(servletContext, configDir, servletContext.getInitParameter("configFile"));
+    this(servletContext, configDir, servletContext.getInitParameter(CONFIG_FILE));
   }
 
   public ServerProperties(String configDir, String configFile) {
@@ -85,14 +95,8 @@ public class ServerProperties {
     String dateFromManifest = getDateFromManifest(servletContext);
     if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
     readProps(configDir, configFile, dateFromManifest);
-    if (isDebugEMail()) logger.info("using debug email....");
+//    if (isDebugEMail()) logger.info("using debug email....");
   }
-
-/*  public void readPropertiesFile(ServletContext servletContext, String configDir) {
-    String configFile = servletContext.getInitParameter("configFile");
-    String dateFromManifest = getDateFromManifest(servletContext);
-    readProps(configDir,configFile,dateFromManifest);
-  }*/
 
   private void readProps(String configDir, String configFile, String dateFromManifest) {
     String configFileFullPath = configDir + File.separator + configFile;
@@ -142,10 +146,6 @@ public class ServerProperties {
   public boolean isDebugEMail() {
     return getDefaultFalse(DEBUG_EMAIL);
   }
-
-/*  public boolean isFlashcard() {
-    return getDefaultFalse(FLASHCARD);
-  }*/
 
   public boolean isWordPairs() {
     return getDefaultFalse(WORDPAIRS);
@@ -271,13 +271,14 @@ public class ServerProperties {
    * The config web.xml file.
    * <p/>
    * Note that this will only ever be called once.
+   * TODO : remember to set the approvers and approver emails properties for new customers
+   * TODO : also you may want to set the welcome message to OFF
+   * {@link mitll.langtest.client.PropertyHandler#SHOW_WELCOME}
    *
    * @param dateFromManifest
    * @see
    */
   private void readProperties(String dateFromManifest) {
- //   dataCollectMode = getDefaultFalse(DATA_COLLECT_MODE);
-
     if (dateFromManifest != null && dateFromManifest.length() > 0) {
       props.setProperty("releaseDate", dateFromManifest);
     }
@@ -294,6 +295,12 @@ public class ServerProperties {
         e1.printStackTrace();
       }
     }
+
+    String property = props.getProperty(APPROVERS);
+    if (property != null) approvers = Arrays.asList(property.split(","));
+
+    property = props.getProperty(APPROVER_EMAILS);
+    if (property != null) approverEmails = Arrays.asList(property.split(","));
   }
 
   private boolean getDefaultFalse(String param) {
@@ -316,7 +323,19 @@ public class ServerProperties {
     return "";
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#writeAudioFile(String, String, String, mitll.langtest.shared.CommonExercise, int, int, int, boolean, String, boolean, boolean, boolean)
+   * @return
+   */
   public boolean isQuietAudioOK() {
     return quietAudioOK;
+  }
+
+  public List<String> getApprovers() {
+    return approvers;
+  }
+
+  public List<String> getApproverEmails() {
+    return approverEmails;
   }
 }
