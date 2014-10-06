@@ -12,6 +12,7 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
   private int age;
   private int gender;
   private String userID;
+  private boolean isAdmin;
 
   public MiniUser() {
   } // for serialization
@@ -21,22 +22,27 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
    * @param age
    * @param gender
    * @param userID
+   * @param isAdmin
    */
-  public MiniUser(long id, int age, int gender, String userID) {
+  public MiniUser(long id, int age, int gender, String userID, boolean isAdmin) {
     this.id = id;
     this.age = age;
     this.gender = gender;
     this.userID = userID;
+    this.isAdmin = isAdmin;
   }
 
   public boolean isDefault() { return id < 0; }
 
   /**
+   * It seems strange to copy the string here, but I think it will help the RPC code not try to serialize
+   * the User this object is made from.
+   *
    * @see mitll.langtest.server.database.UserDAO#getMiniUsers()
    * @param user
    */
   public MiniUser(User user) {
-    this(user.getId(), user.getAge(), user.getGender(), new String(user.getUserID()));
+    this(user.getId(), user.getAge(), user.getGender(), new String(user.getUserID()), user.isAdmin());
   }
 
   public boolean isMale() {
@@ -78,7 +84,14 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
     this.userID = userID;
   }
 
+  public boolean isAdmin() {
+    return isAdmin;
+  }
+
   public String toString() {
-    return "mini-user " + id + " : " + age + " yr old " + (isMale() ? "male":"female");
+    return "mini-user " + id + " : " + age + " yr old " +
+        (isMale() ? "male" : "female") +
+        (isAdmin() ? "ADMIN" : "")
+        ;
   }
 }
