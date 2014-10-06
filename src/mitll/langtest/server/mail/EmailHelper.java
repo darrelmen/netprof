@@ -17,18 +17,24 @@ import java.util.List;
 public class EmailHelper {
   private static final Logger logger = Logger.getLogger(EmailHelper.class);
 
-  private static final String RP = "rp";
   private static final String NP_SERVER = "np.ll.mit.edu";
-  public static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
-  public static final String CLOSING = "Regards, Administrator";
+  private static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
+  private static final String CLOSING = "Regards, Administrator";
+  private static final String GORDON = "Gordon";
+
+  private static final String RP = "rp";
+  private static final String CD = "cd";
+  private static final String ER = "er";
+
+  private static final String PASSWORD_RESET = "Password Reset";
+  private static final String RESET_PASSWORD = "Reset Password";
+  private static final String REPLY_TO = "admin@" + NP_SERVER;
+
   private final String language;
   private final UserDAO userDAO;
   private final MailSupport mailSupport;
   private ServerProperties serverProperties;
-  PathHelper pathHelper;
-  private static final String REPLY_TO = "admin@" + NP_SERVER;
-
-//  private static final String REPLY_TO = "admin@" + NP_SERVER;
+  private PathHelper pathHelper;
 
   public EmailHelper(ServerProperties serverProperties, UserDAO userDAO, MailSupport mailSupport, PathHelper pathHelper) {
     this.language = serverProperties.getLanguage();
@@ -42,9 +48,12 @@ public class EmailHelper {
     return StringUtils.toHexString(Md5Utils.getMd5Digest(toHash.getBytes()));
   }
 
-  private static final List<String> approvers = Arrays.asList("Tamas", "Alex", "David", "Sandy");
-  private static final List<String> emails = Arrays.asList("tamas.g.marius.civ@mail.mil", "alexandra.cohen@dliflc.edu", "david.randolph@dliflc.edu", "sandra.wagner@dliflc.edu");
-
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#forgotUsername(String, String, String)
+   * @param email
+   * @param url
+   * @param valid
+   */
   public void getUserNameEmail(String email, String url, User valid) {
     url = trimURL(url);
 
@@ -63,20 +72,6 @@ public class EmailHelper {
       );
     }
   }
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#enableCDUser(String, String, String)
-   * @param url
-   * @param email
-   * @param userWhere
-   */
-/*  public void enableCDEmail(String url, String email, User userWhere) {
-    url = trimURL(url);
-    email = rot13(email);
-
-    logger.debug("Sending user email... link is " + url);
-    sendUserApproval(url, email, userWhere.getUserID());
-  }*/
 
   /**
    * @param user
@@ -104,9 +99,9 @@ public class EmailHelper {
       url = trimURL(url);
       sendEmail(url + "?" + RP + "=" + hash,
           email,
-          "Password Reset",
+          PASSWORD_RESET,
           message,
-          "Reset Password" // link text
+          RESET_PASSWORD // link text
       );
 
       //logger.debug("key map is " +keyToUser);
@@ -137,7 +132,7 @@ public class EmailHelper {
    * @return
    * @see mitll.langtest.client.LangTest#handleCDToken
    */
-  public Long enableCDUser(String token, String emailR, String url) {
+  public String enableCDUser(String token, String emailR, String url) {
     User userWhereEnabledReq = userDAO.getUserWhereEnabledReq(token);
     Long userID;
     if (userWhereEnabledReq == null) {
@@ -153,6 +148,7 @@ public class EmailHelper {
       return null;
     } else {
       boolean b = userDAO.enableUser(userID);
+      String userID1 = null;
       if (b) {
         userDAO.clearKey(userID, false);
 
@@ -160,17 +156,20 @@ public class EmailHelper {
         url = trimURL(url);
 
         logger.debug("Sending enable CD User email...");
-        String userID1 = userWhere.getUserID();
+        userID1 = userWhere.getUserID();
         sendUserApproval(url, email, userID1);
 
         // send ack to everyone, so they don't ahve to
         String subject = "Content Developer approved for " + userID1 + " for " + language;
+
+        List<String> approvers = serverProperties.getApprovers();
+        List<String> emails = serverProperties.getApproverEmails();
+
         for (int i = 0; i < approvers.size(); i++) {
           String tamas = approvers.get(i);
           String approvalEmailAddress = emails.get(i);
 
           String message = getApprovalAck(userID1, tamas);
-          // String message = getEmailApproval(userID1, tamas);
           mailSupport.sendEmail(NP_SERVER,
               approvalEmailAddress,
               MY_EMAIL,
@@ -182,10 +181,10 @@ public class EmailHelper {
             MY_EMAIL,
             MY_EMAIL,
             subject,
-            getApprovalAck(userID1, "Gordon")
+            getApprovalAck(userID1, GORDON)
         );
       }
-      return (b ? userID : -1);
+      return (b ? userID1 : null);
     }
   }
 
@@ -227,7 +226,7 @@ public class EmailHelper {
    * @param email
    * @param user
    * @param mailSupport
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(String, String, String, mitll.langtest.shared.User.Kind, String, String, boolean, int, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(String, String, String, mitll.langtest.shared.User.Kind, String, String, boolean, int, String, boolean)
    */
   public void addContentDeveloper(String url, String email, User user, MailSupport mailSupport) {
     url = trimURL(url);
@@ -235,7 +234,8 @@ public class EmailHelper {
     String toHash = userID1 + "_" + System.currentTimeMillis();
     String hash = getHash(toHash);
     userDAO.addKey(user.getId(), false, hash);
-
+    List<String> approvers = serverProperties.getApprovers();
+    List<String> emails = serverProperties.getApproverEmails();
     for (int i = 0; i < approvers.size(); i++) {
       String tamas = approvers.get(i);
       String approvalEmailAddress = emails.get(i);
@@ -246,11 +246,13 @@ public class EmailHelper {
 
   private void sendApprovalEmail(String url, String email, String userID1, String hash, String message, String approvalEmailAddress, MailSupport mailSupport) {
     mailSupport.sendEmail(NP_SERVER,
-        url + "?cd=" + hash + "&" +
-            "er" +
-            "=" + rot13(email),
+        url + "?" +
+            CD +
+            "=" + hash + "&" +  // content developer token
+            ER +
+            "=" + rot13(email), // email encoding
         approvalEmailAddress,
-        MY_EMAIL,
+        serverProperties.getApprovalEmailAddress(),
         "Content Developer approval for " + userID1 + " for " + language,
         message,
         "Click to approve" // link text
