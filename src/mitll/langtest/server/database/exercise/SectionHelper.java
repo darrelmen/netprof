@@ -1,4 +1,4 @@
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.SectionNode;
@@ -218,7 +218,7 @@ public class SectionHelper {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesFromFiltered(java.util.Map, mitll.langtest.shared.custom.UserList)
-   * @see ExcelImport#getRawExercises()
+   * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
    * @param where
    */
   public void addExercise(CommonExercise where) {
@@ -231,7 +231,7 @@ public class SectionHelper {
   }
 
   /**
-   * @see ExcelImport#recordUnitChapterWeek
+   * @see mitll.langtest.server.database.exercise.ExcelImport#recordUnitChapterWeek
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesFromFiltered(java.util.Map, mitll.langtest.shared.custom.UserList)
    * @param exercise
    * @param type
@@ -296,7 +296,7 @@ public class SectionHelper {
   }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#readFromSheet(org.apache.poi.ss.usermodel.Sheet)
+   * @see mitll.langtest.server.database.exercise.ExcelImport#readFromSheet(org.apache.poi.ss.usermodel.Sheet)
    * @param predefinedTypeOrder
    */
   public void setPredefinedTypeOrder(List<String> predefinedTypeOrder) {
@@ -313,7 +313,7 @@ public class SectionHelper {
   }
 
   /**
-   * @see ExcelImport#recordUnitChapterWeek
+   * @see mitll.langtest.server.database.exercise.ExcelImport#recordUnitChapterWeek
    * @param pairs
    */
   public void addAssociations(Collection<Pair> pairs) {
