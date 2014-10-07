@@ -12,13 +12,12 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.pretest.PretestGauge;
 import mitll.langtest.client.scoring.ScoreListener;
 import mitll.langtest.client.sound.PlayAudioWidget;
-import mitll.langtest.shared.ScoreAndPath;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.*;
@@ -30,7 +29,7 @@ import java.util.*;
  */
 public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private static final int NUM_TO_SHOW = 5;
-  private static final String INSTRUCTIONS = "Your speech is scored by a speech recognizer trained on speech from many native speakers. " +
+  public static final String INSTRUCTIONS = "Your speech is scored by a speech recognizer trained on speech from many native speakers. " +
       "The recognizer generates scores for each word and phonetic unit (see the color-coded transcript for details).";
   private static final String WARNING = "Repeat the phrase exactly as it is written. " +
       "<b>Saying something different or adding/omitting words could result in incorrect scores.</b>";
@@ -45,9 +44,9 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
   private final PretestGauge ASRGauge;
   private final Panel phoneList;
-  private final List<ScoreAndPath> scores2 = new ArrayList<ScoreAndPath>();
+  private final List<CorrectAndScore> scores2 = new ArrayList<CorrectAndScore>();
   private final SimplePanel scoreHistoryPanel;
-  private final SimpleColumnChart chart = new SimpleColumnChart();
+  //private final SimpleColumnChart chart = new SimpleColumnChart();
   private float classAvg = 0f;
   private String refAudio;
   private final ExerciseController controller;
@@ -90,7 +89,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     Panel gaugePanel = new FlowPanel();
     gaugePanel.setHeight("100%");
     gaugePanel.setWidth("100%");
-    ASRGauge = new PretestGauge("ASR_" + parent, "ASR", INSTRUCTIONS, null);
+    ASRGauge = new PretestGauge("ASR_" + parent);
     gaugePanel.add(ASRGauge);
 
     gaugeCaptionPanel.add(gaugePanel);
@@ -141,7 +140,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     float zeroToHundred = hydecScore * 100f;
     setASRGaugeValue(Math.min(100.0f, zeroToHundred));
     updatePhoneAccuracy(score.getPhoneScores());
-    addScore(new ScoreAndPath(hydecScore, path));
+    addScore(new CorrectAndScore(hydecScore, path));
     scoreHistoryPanel.clear();
     showChart(showOnlyOneExercise);
     addPlayer();
@@ -152,7 +151,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   }-*/;
 
   @Override
-  public void addScore(ScoreAndPath hydecScore) {
+  public void addScore(CorrectAndScore hydecScore) {
     scores2.add(hydecScore);
   }
 
@@ -178,14 +177,14 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   @Override
   public void showChart(boolean showOnlyOneExercise) {
     VerticalPanel vp = new VerticalPanel();
-    List<ScoreAndPath> scoreAndPaths = scores2;
+    List<CorrectAndScore> scoreAndPaths = scores2;
 
     if (scores2.size() > NUM_TO_SHOW) {
       scoreAndPaths = scores2.subList(scores2.size() - NUM_TO_SHOW, scores2.size());
     }
 
     TooltipHelper tooltipHelper = new TooltipHelper();
-    for (ScoreAndPath scoreAndPath : scoreAndPaths) {
+    for (CorrectAndScore scoreAndPath : scoreAndPaths) {
       int i = scores2.indexOf(scoreAndPath);
       Panel hp = getAudioAndScore(tooltipHelper, scoreAndPath, "Score #" + (i + 1),i);
       vp.add(hp);
@@ -204,7 +203,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   }
 
   private Panel getRefAudio() {
-    Widget audioWidget = getAudioWidget(new ScoreAndPath(classAvg, refAudio), PLAY_REFERENCE);
+    Widget audioWidget = getAudioWidget(new CorrectAndScore(classAvg, refAudio), PLAY_REFERENCE);
     makeChildGreen(audioWidget);
 
     Panel hp = new HorizontalPanel();
@@ -217,12 +216,12 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
   private Panel getClassAverage(TooltipHelper tooltipHelper, boolean addLeftMargin) {
     String prefix = /*classAvg < 0.001f ? "No Class Avg Yet" :*/ "Class Avg";
-    ScoreAndPath scoreAndPath = new ScoreAndPath(classAvg, "");
+    CorrectAndScore scoreAndPath = new CorrectAndScore(classAvg, "");
     // if (classAvg < 0.001f) {
 //      classAvg = 1f;
     // }
     // else {
-    prefix += " " + toPercent(scoreAndPath) + "%";
+    prefix += " " + scoreAndPath.getPercentScore() + "%";
     // }
     //System.out.println("class avg " + classAvg);
 
@@ -249,7 +248,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    * @return
    * @see #showChart(boolean)
    */
-  private Panel getAudioAndScore(TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath, String title,
+  private Panel getAudioAndScore(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath, String title,
                                  int i) {
     Widget w = getAudioWidget(scoreAndPath, title);
    // if (false) {
@@ -318,7 +317,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     new TooltipHelper().createAddTooltip(w, DOWNLOAD_YOUR_RECORDING, Placement.LEFT);
   }
 
-  private Anchor getAudioWidget(ScoreAndPath scoreAndPath, String title) {
+  private Anchor getAudioWidget(CorrectAndScore scoreAndPath, String title) {
     return new PlayAudioWidget().getAudioWidgetWithEventRecording(scoreAndPath.getPath(), title,
         exerciseID, controller);
   }
@@ -331,30 +330,29 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    * @return
    * @see #getAudioAndScore
    */
-  private Widget makeRow(TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath) {
-    Widget row = new DivWidget();
-    int iScore = toPercent(scoreAndPath);
+  private Widget makeRow(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath) {
+    Widget row = getRow(scoreAndPath);
+    int iScore = scoreAndPath.getPercentScore();
     row.setWidth(Math.max(3, iScore) + "px");
-    row.setHeight(HEIGHT + "px");
-    row.getElement().getStyle().setBackgroundColor(chart.getColor(scoreAndPath.getScore()));
-    row.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
+
     tooltipHelper.createAddTooltip(row, "Score" + (" " + iScore + "%"), Placement.BOTTOM);
     return row;
   }
 
-  private int toPercent(ScoreAndPath scoreAndPath) {
-    return (int) (100f * scoreAndPath.getScore());
-  }
-
-  private Widget makeRow2(TooltipHelper tooltipHelper, ScoreAndPath scoreAndPath, String prefix) {
-    Widget row = new DivWidget();
-    int iScore = toPercent(scoreAndPath);
+  private Widget makeRow2(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath, String prefix) {
+    Widget row = getRow(scoreAndPath);
+    int iScore = scoreAndPath.getPercentScore();
     row.setWidth(iScore + "px");
-    row.setHeight(HEIGHT + "px");
-    row.getElement().getStyle().setBackgroundColor(chart.getColor(scoreAndPath.getScore()));
-    row.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
 
     tooltipHelper.createAddTooltip(row, prefix, Placement.BOTTOM);
+    return row;
+  }
+
+  private Widget getRow(CorrectAndScore scoreAndPath) {
+    Widget row = new DivWidget();
+    row.setHeight(HEIGHT + "px");
+    row.getElement().getStyle().setBackgroundColor(SimpleColumnChart.getColor(scoreAndPath.getScore()));
+    row.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
     return row;
   }
 
@@ -407,7 +405,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     p.add(left);
     HTML child = new HTML(phone);
     Float score = phoneAccuracies.get(phone);
-    p.getElement().getStyle().setBackgroundColor(chart.getColor(score));
+    p.getElement().getStyle().setBackgroundColor(SimpleColumnChart.getColor(score));
     float x = score * 100.0f;
     child.setTitle(((int) x) + "%");
     p.add(child);
