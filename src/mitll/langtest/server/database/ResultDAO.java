@@ -183,10 +183,7 @@ public class ResultDAO extends DAO {
       idToEx.put(exercise.getID(),exercise);
     }
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
-    if (true) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
-/*    for (CorrectAndScore exerciseCorrectAndScore : results) {
-      logger.debug("Got " + exerciseCorrectAndScore);
-    }*/
+    if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
     List<ExerciseCorrectAndScore> sortedResults = getSortedAVPHistory(results, allIds);
 
     List<CommonExercise> commonExercises = new ArrayList<CommonExercise>(exercises.size());
