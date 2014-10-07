@@ -2,30 +2,17 @@ package mitll.langtest.client.exercise;
 
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
-import com.google.gwt.user.cellview.client.SimplePager;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,30 +21,21 @@ import java.util.Set;
  * Time: 7:49 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingContainer {
+public class PagingContainer extends SimplePagingContainer<CommonShell> {
   private static final int MAX_LENGTH_ID = 35;
-  private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
-  private static final int VERTICAL_SLOP = 35;
-
-  private ListDataProvider<CommonShell> dataProvider;
   private static final boolean DEBUG = false;
-  private static final int ID_LINE_WRAP_LENGTH = 20;
-  private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 390;
-  private static final float MAX_PAGES = 2f;
-  private static final int MIN_PAGE_SIZE = 3;
-  private static final float DEFAULT_PAGE_SIZE = 15f;
-  private CellTable<CommonShell> table;
-  private final ExerciseController controller;
-  private int verticalUnaccountedFor = 100;
   private final Map<String,CommonShell> idToExercise = new HashMap<String, CommonShell>();
 
-  /**
-   * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer()
-   * @param controller
-   * @param verticalUnaccountedFor
-   */
+  public PagingContainer(ExerciseController controller) {
+    super(controller);
+  }
+    /**
+     * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer()
+     * @param controller
+     * @param verticalUnaccountedFor
+     */
   public PagingContainer(ExerciseController controller, int verticalUnaccountedFor) {
-    this.controller = controller;
+    this(controller);
     this.verticalUnaccountedFor = verticalUnaccountedFor;
   }
 
@@ -125,72 +103,7 @@ public class PagingContainer {
     return clickedExerciseID;
   }*/
 
-  public interface TableResources extends CellTable.Resources {
-    /**
-     * The styles applied to the table.
-     */
-    interface TableStyle extends CellTable.Style {
-    }
-
-    @Override
-    @Source({CellTable.Style.DEFAULT_CSS, "ExerciseCellTableStyleSheet.css"})
-    TableStyle cellTableStyle();
-  }
-
-  public interface RTLTableResources extends CellTable.Resources {
-    /**
-     * The styles applied to the table.
-     */
-    interface TableStyle extends CellTable.Style {
-    }
-
-    @Override
-    @Source({CellTable.Style.DEFAULT_CSS, "RTLExerciseCellTableStyleSheet.css"})
-    TableStyle cellTableStyle();
-  }
-
-  /**
-   * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager(PagingContainer)
-   * @return
-   */
-  public Panel getTableWithPager() {
-    makeCellTable();
-
-    // Create a data provider.
-    this.dataProvider = new ListDataProvider<CommonShell>() {
-      @Override
-      protected void updateRowData(int start, List<CommonShell> values) {
-        super.updateRowData(start, values);
-
-        //System.out.println("updateRowData " + start);
-      }
-    };
-
-    // Connect the table to the data provider.
-    dataProvider.addDataDisplay(table);
-
-    // Create a SimplePager.
-    final SimplePager pager = new SimplePager();
-
-    // Set the cellList as the display.
-    pager.setDisplay(table);
-
-    Panel column = new FlowPanel();
-    column.add(pager);
-    column.add(table);
-/*    Scheduler.get().scheduleDeferred(new Command() {
-      @Override
-      public void execute() {
-        pager.getImages();
-      }
-    });*/
-
-//    /pager.getWidget();
-    //System.out.println("pager " + pager);
-    return column;
-  }
-
-/*  private List<Image> getImgTags(Node child) {
+  /*  private List<Image> getImgTags(Node child) {
     NodeList<Node> childNodes = child.getChildNodes();
     List<Image> images = new ArrayList<Image>();
     for (int j = 0; j < childNodes.getLength(); j++) {
@@ -218,64 +131,26 @@ public class PagingContainer {
     }
   }*/
 
-  private void makeCellTable() {
-    CellTable.Resources o = chooseResources();
-
-    this.table = makeCellTable(o);
-
-    configureTable();
-  }
-
-  private CellTable.Resources chooseResources() {
-    CellTable.Resources o;
-
-    if (controller.isRightAlignContent()) {   // so when we truncate long entries, the ... appears on the correct end
-      o = GWT.create(RTLTableResources.class);
-    } else {
-      o = GWT.create(TableResources.class);
-    }
-    return o;
-  }
-
-  public com.github.gwtbootstrap.client.ui.CellTable<CommonShell> makeBootstrapCellTable(com.github.gwtbootstrap.client.ui.CellTable.Resources resources) {
+  /*  public com.github.gwtbootstrap.client.ui.CellTable<CommonShell> makeBootstrapCellTable(com.github.gwtbootstrap.client.ui.CellTable.Resources resources) {
     com.github.gwtbootstrap.client.ui.CellTable<CommonShell> bootstrapCellTable = createBootstrapCellTable(resources);
     this.table = bootstrapCellTable;
     configureTable();
 
     return bootstrapCellTable;
-  }
-
-  private SingleSelectionModel<CommonShell> selectionModel;
-  private void configureTable() {
-    table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
-    table.setWidth("100%");
-    table.setHeight("auto");
-
-    // Add a selection model to handle user selection.
-    selectionModel = new SingleSelectionModel<CommonShell>();
-    table.setSelectionModel(selectionModel);
-    // we don't want to listen for changes in the selection model, since that happens on load too -- we just want clicks
-
-    addColumnsToTable();
-  }
+  }*/
 
   public CommonShell getCurrentSelection() { return selectionModel.getSelectedObject(); }
 
-  private CellTable<CommonShell> makeCellTable(CellTable.Resources o) {
-    int pageSize = PAGE_SIZE;
-    return new CellTable<CommonShell>(pageSize, o);
-  }
-
-  private com.github.gwtbootstrap.client.ui.CellTable<CommonShell> createBootstrapCellTable(com.github.gwtbootstrap.client.ui.CellTable.Resources o) {
+  /*  private com.github.gwtbootstrap.client.ui.CellTable<CommonShell> createBootstrapCellTable(com.github.gwtbootstrap.client.ui.CellTable.Resources o) {
      int pageSize = PAGE_SIZE;
     return new com.github.gwtbootstrap.client.ui.CellTable<CommonShell>(pageSize, o);
-  }
+  }*/
 
-  private void addColumnsToTable() {
+  protected void addColumnsToTable() {
     //System.out.println("addColumnsToTable : completed " + controller.showCompleted() +  " now " + getCompleted().size());
 
-    Column<CommonShell, SafeHtml> id2 = getExerciseIdColumn2(true);
-    table.addColumn(id2);
+    Column<CommonShell, SafeHtml> id2 = getExerciseIdColumn2();
+    addColumn(id2);
 
     // this would be better, but want to consume clicks
   /*  TextColumn<ExerciseShell> id2 = new TextColumn<ExerciseShell>() {
@@ -289,13 +164,15 @@ public class PagingContainer {
     };*/
   }
 
-/*  private int mouseX;
-  private int mouseY;
-  private String clickedExerciseID = "";*/
+  @Override
+  protected void addSelectionModel() {
+    selectionModel = new SingleSelectionModel<CommonShell>();
+    table.setSelectionModel(selectionModel);
+  }
 
-  private Column<CommonShell, SafeHtml> getExerciseIdColumn2(final boolean consumeClicks) {
+  private Column<CommonShell, SafeHtml> getExerciseIdColumn2() {
 
-    return new Column<CommonShell, SafeHtml>(new MySafeHtmlCell(consumeClicks)) {
+    return new Column<CommonShell, SafeHtml>(new MySafeHtmlCell(true)) {
 
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, CommonShell object, NativeEvent event) {
@@ -376,84 +253,10 @@ public class PagingContainer {
 
   protected void gotClickOnItem(final CommonShell e) {}
 
-  /**
-   * @seex mitll.langtest.client.grading.GradedExerciseList#loadFirstExercise()
-   * @return
-   */
-/*  public CommonShell selectFirst() {
-    if (getList().isEmpty()) return null;
-    return selectItem(0);
-  }*/
-
-/*  public boolean isFirst(CommonShell test) {
-    return getList().isEmpty() || getList().get(0).getID().equals(test.getID());
-  }*/
-
-/*  public boolean isLast(CommonShell test) {
-    List<CommonShell> list = getList();
-    return list.isEmpty() || list.get(list.size()-1).getID().equals(test.getID());
-  }*/
-
-  /**
-   *
-   * @return true if on last item
-   */
-/*  public boolean loadNext() {
-    if (current == null) {
-      return true;
-    }
-    else {
-      List<CommonShell> list = getList();
-      int index = list.indexOf(current);
-      if (index == list.size()-1) return false;
-      CommonShell t = selectItem(index + 1);
-      gotClickOnItem(t);
-
-      return index + 1 == list.size() - 1;
-    }
-  }
-
-  public boolean loadPrev() {
-    if (current == null) {
-      return true;
-    }
-    else {
-      List<CommonShell> list = getList();
-      int index = list.indexOf(current);
-      if (index == 0) return false;
-      CommonShell t = selectItem(index-1);
-      gotClickOnItem(t);
-
-      return index -1 == 0;
-    }
-  }*/
-
-  /**
-   * @seex #selectFirst()
-   * @paramx index
-   * @return
-   */
-/*  private CommonShell selectItem(int index) {
-    CommonShell first = getList().get(index);
-
-    table.getSelectionModel().setSelected(first, true);
-    table.redraw();
-    onResize(first);
-    return first;
-  }*/
-
+  @Override
   public void clear() {
-    List<CommonShell> list = getList();
-    list.clear();
+    super.clear();
     idToExercise.clear();
-
-    table.setRowCount(list.size());
-
-  }
-
-  public void flush() {
-    dataProvider.flush();
-    table.setRowCount(getList().size());
   }
 
   public CommonShell byID(String id) { return idToExercise.get(id); }
@@ -480,62 +283,24 @@ public class PagingContainer {
 
   public Set<String> getKeys() { return idToExercise.keySet(); }
 
-  /**
-   * @seex #selectItem(int)
-   * @see mitll.langtest.client.list.PagingExerciseList#onResize()
-   * @param currentExercise
-   */
-  public void onResize(CommonShell currentExercise) {
-    //System.out.println("PagingContainer : onResize");
-
-    int numRows = getNumTableRowsGivenScreenHeight();
-    if (table.getPageSize() != numRows) {
-      table.setPageSize(numRows);
-      table.redraw();
-      if (currentExercise != null) {
-        markCurrentExercise(currentExercise.getID());
-      }
+  protected void markCurrent(CommonShell currentExercise) {
+    if (currentExercise != null) {
+      markCurrentExercise(currentExercise.getID());
     }
   }
 
-  private static final boolean debug = false;
-  private int getNumTableRowsGivenScreenHeight() {
-    int header = getTableHeaderHeight();
-    int pixelsAbove = header + verticalUnaccountedFor;
-    if (table.getElement().getAbsoluteTop() > 0) {
-      pixelsAbove = table.getElement().getAbsoluteTop() + VERTICAL_SLOP;
-    }
-    int leftOver = Window.getClientHeight() - pixelsAbove;
+  protected float adjustVerticalRatio(float ratio) {
+    if (dataProvider != null && getList() != null && !getList().isEmpty()) {
+      CommonShell toLoad = getList().get(0);
 
-    if (debug) System.out.println("getNumTableRowsGivenScreenHeight Got on resize window height " + Window.getClientHeight() +
-       " header " + header + " result = " + leftOver + "( vert unaccount " +
-       verticalUnaccountedFor+ " vs absolute top " + table.getElement().getAbsoluteTop()+ " pix above " + pixelsAbove+
-       ")");
-
-    float rawRatio = ((float) leftOver) / (float) heightOfCellTableWith15Rows();
-    float tableRatio = Math.min(MAX_PAGES, rawRatio);
-    float ratio = DEFAULT_PAGE_SIZE * tableRatio;
-
-    if (debug) System.out.println("getNumTableRowsGivenScreenHeight : left over " + leftOver + " raw " + rawRatio +
-      " table ratio " + tableRatio + " ratio " + ratio);
-
-    if (dataProvider != null && getList() != null) {
-      if (!getList().isEmpty()) {
-        CommonShell toLoad = getList().get(0);
-
-        if (toLoad.getID().length() > ID_LINE_WRAP_LENGTH) {
-          ratio /= 2; // hack for long ids
-        }
+      if (toLoad.getID().length() > ID_LINE_WRAP_LENGTH) {
+        ratio /= 2; // hack for long ids
       }
     }
-    int rows = Math.max(MIN_PAGE_SIZE, (int)Math.floor(ratio));
 
-    if (debug) System.out.println("getNumTableRowsGivenScreenHeight : rows " + rows);
-    return rows;
+    return ratio;
   }
 
-  private int heightOfCellTableWith15Rows() { return HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;  }
-  private int getTableHeaderHeight() { return controller.getHeightOfTopRows(); }
 
   public void markCurrentExercise(String itemID) {
     if (getList() == null || getList().isEmpty()) return;
@@ -571,7 +336,20 @@ public class PagingContainer {
     table.redraw();
   }
 
-  private List<CommonShell> getList() { return dataProvider.getList();  }
+  /**
+   * @see mitll.langtest.client.list.PagingExerciseList#onResize()
+   * @param currentExercise
+   */
+  public void onResize(CommonShell currentExercise) {
+    //System.out.println("PagingContainer : onResize");
+
+    int numRows = getNumTableRowsGivenScreenHeight();
+    if (table.getPageSize() != numRows) {
+      table.setPageSize(numRows);
+      table.redraw();
+      markCurrent(currentExercise);
+    }
+  }
 
   private static class MySafeHtmlCell extends SafeHtmlCell {
     private final boolean consumeClicks;
@@ -587,49 +365,4 @@ public class PagingContainer {
       return events;
     }
   }
-
-/*  private class MySimplePager extends SimplePager {
-    public void getImages() {
-      for (int i = 0; i < getWidget().getElement().getChildCount(); i++) {
-        Node child = getWidget().getElement().getChild(i);
-        List<Image> imgTags = getImgTags(child);
-        System.out.println("getImages child " + i + " " + child + " " + imgTags.size());
-        for (final Image image : imgTags) {
-          System.out.println("\tgetImages add click handler " + i + " " + image );
-
-          image.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-              try {
-                String context = "pager button " + image.getElement().getPropertyString("aria-label");
-
-                System.out.println("image " + image + " " + context);
-
-                controller.logEvent(image, "pager", "unk", context);
-              } catch (Exception e) {
-                e.printStackTrace();
-              }
-            }
-          });
-        }
-      }
-    }
- *//*   @Override
-    protected Widget getWidget() {
-      Widget widget = super.getWidget();
-      for (int i = 0; i < widget.getElement().getChildCount(); i++) {
-        Node child = widget.getElement().getChild(i);
-      //  System.out.println("child " + i + " " + child);
-        getImgTags(child);
-      }
-      return widget;
-    }*//*
-
- *//*   @Override
-    public String toString() {
-      String s = super.toString();
-     // getWidget();
-      return s;
-    }*//*
-  }*/
 }
