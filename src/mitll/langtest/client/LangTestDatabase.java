@@ -45,6 +45,11 @@ public interface LangTestDatabase extends RemoteService {
   AudioAnswer writeAudioFile(String base64EncodedString, String exercise, int question, int user,
                              int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash);
 
+ // List<MonitorResult> getResults(Map<String,String> unitToValue, long userid, String exerciseID);
+
+  Collection<String> getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which);
+
+
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID);
 
   PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, String exerciseID);
@@ -76,7 +81,8 @@ public interface LangTestDatabase extends RemoteService {
 
   boolean forgotUsername(String emailH, String email, String url);
 
-  List<Result> getResults(int start, int end, String sortInfo);
+//  List<Result> getResults(int start, int end, String sortInfo);
+  ResultAndTotal getResults(int start, int end, String sortInfo,Map<String, String> unitToValue, long userid, String flText, int req);
 
   Map<String,Number> getResultStats();
 
