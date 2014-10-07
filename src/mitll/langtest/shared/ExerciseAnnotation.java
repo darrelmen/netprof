@@ -10,11 +10,20 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * To change this template use File | Settings | File Templates.
  */
 public class ExerciseAnnotation implements IsSerializable {
-  public String status;
-  public String comment;
+  private String status;
+  private String comment;
+
   public ExerciseAnnotation(){}
   public ExerciseAnnotation(String status, String comment) { this.status = status; this.comment = comment; }
-  public boolean isCorrect() { return status.equals("correct"); }
+  public boolean isCorrect() { return getStatus().equals("correct"); }
 
-  public String toString() { return "Anno status=" +status + " : '" + comment +"'"; }
+  public String getStatus() {
+    return status;
+  }
+
+  public String getComment() {
+    return comment;
+  }
+
+  public String toString() { return "Anno status=" + getStatus() + " : '" + getComment() +"'"; }
 }
