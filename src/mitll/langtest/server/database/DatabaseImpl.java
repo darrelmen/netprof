@@ -149,7 +149,7 @@ public class DatabaseImpl implements Database {
    */
   private void initializeDAOs(PathHelper pathHelper) {
 //    logger.debug("initializeDAOs ---");
-    userDAO = new UserDAO(this);
+    userDAO = new UserDAO(this, serverProps);
     UserListDAO userListDAO = new UserListDAO(this, userDAO);
     addRemoveDAO = new AddRemoveDAO(this);
 
