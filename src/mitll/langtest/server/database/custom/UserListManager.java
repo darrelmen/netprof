@@ -297,7 +297,7 @@ public class UserListManager {
   /**
    * TODO : expensive -- could just be a query against your own lists and/or against visited lists...
    * @see mitll.langtest.server.LangTestDatabaseImpl#getListsForUser
-   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
+   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    * @param userid
    * @param listsICreated
    * @param visitedLists
@@ -413,7 +413,7 @@ public class UserListManager {
    * @see mitll.langtest.client.custom.Navigation#viewReview
    * @see #markCorrectness(String, boolean, long)
    * @return
-   * @param typeOrder
+   * @param typeOrder used by sorter to sort first in unit & chapter order
    */
   public UserList getDefectList(Collection<String> typeOrder) {
     Set<String> defectIds = new HashSet<String>();
@@ -433,13 +433,15 @@ public class UserListManager {
   }
 
   /**
-   * @see
+   * @see #getAttentionList(java.util.Collection)
+   * @see #getCommentedList(java.util.Collection)
+   * @see #getDefectList(java.util.Collection)
    * @param allKnown
    * @param name
    * @param description
    * @param ids
    * @param userListMaginID
-   * @param typeOrder
+   * @param typeOrder used by sorter to sort first in unit & chapter order
    * @return
    */
   private UserList getReviewList(List<CommonUserExercise> allKnown, String name, String description,
@@ -522,7 +524,7 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
+   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    * @see mitll.langtest.server.LangTestDatabaseImpl#addItemToUserList(long, mitll.langtest.shared.custom.UserExercise)
    * @param userListID
    * @param userExercise
@@ -533,7 +535,7 @@ public class UserListManager {
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#reallyCreateNewItem
    * @see #addItemToUserList(long, mitll.langtest.shared.custom.UserExercise)
-   * @see mitll.langtest.client.custom.NewUserExercise#afterValidForeignPhrase
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    * @param userListID
    * @param userExercise
    * @param mediaDir
@@ -596,7 +598,7 @@ public class UserListManager {
     // copy the annotations
     for (Map.Entry<String, ExerciseAnnotation> pair : userExercise.getFieldToAnnotation().entrySet()) {
       ExerciseAnnotation value = pair.getValue();
-      addAnnotation(assignedID, pair.getKey(), value.status, value.comment, userExercise.getCreator());
+      addAnnotation(assignedID, pair.getKey(), value.getStatus(), value.getComment(), userExercise.getCreator());
     }
 
     userExercise.setTooltip();
@@ -667,6 +669,7 @@ public class UserListManager {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserListName(long)
    * @param id
    * @param typeOrder
    * @return
@@ -703,7 +706,7 @@ public class UserListManager {
   public boolean listExists(long id) {  return userListDAO.getWhere(id, false) != null; }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#addDefects
+   * @see mitll.langtest.server.database.exercise.ExcelImport#addDefects
    * @param exerciseID
    * @param field
    * @param comment
@@ -744,7 +747,7 @@ public class UserListManager {
     if (exercise != null) {
       Map<String, ExerciseAnnotation> latestByExerciseID = annotationDAO.getLatestByExerciseID(exercise.getID());
       for (Map.Entry<String, ExerciseAnnotation> pair : latestByExerciseID.entrySet()) {
-        exercise.addAnnotation(pair.getKey(), pair.getValue().status, pair.getValue().comment);
+        exercise.addAnnotation(pair.getKey(), pair.getValue().getStatus(), pair.getValue().getComment());
       }
     }
     else {
@@ -755,7 +758,7 @@ public class UserListManager {
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed
    * @see #addAnnotation(String, String, String, String, long)
-   * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed
+   * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed
    * @param id
    * @param state
    * @param creatorID
@@ -838,7 +841,7 @@ public class UserListManager {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed(String, boolean, long)
-   * @see mitll.langtest.client.custom.QCNPFExercise#markReviewed
+   * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed
    * @param id
    * @param correct
    * @param userID
