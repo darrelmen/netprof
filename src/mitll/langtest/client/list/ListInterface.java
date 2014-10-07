@@ -9,6 +9,9 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 
+import java.util.Collection;
+import java.util.Map;
+
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -17,13 +20,14 @@ import mitll.langtest.shared.STATE;
  * To change this template use File | Settings | File Templates.
  */
 public interface ListInterface extends RequiresResize {
+  void removeHistoryListener();
+
   /**
-   * @see mitll.langtest.client.LangTest#setFactory
+   * @see mitll.langtest.client.LangTest#reallySetFactory()
    * @param factory
    * @param user
-   * @param expectedGrades
    */
-  void setFactory(ExercisePanelFactory factory, UserManager user, int expectedGrades);
+  void setFactory(ExercisePanelFactory factory, UserManager user);
 
     /**
      * @see mitll.langtest.client.LangTest#gotUser(long)
@@ -76,7 +80,7 @@ public interface ListInterface extends RequiresResize {
    */
   void clear();
 
-  int getPercentComplete();
+ // int getPercentComplete();
 
   int getComplete();
 
@@ -86,14 +90,18 @@ public interface ListInterface extends RequiresResize {
   void removeCurrentExercise();
 
   /**
-   * @see mitll.langtest.client.custom.NPFHelper#makeExerciseList(com.google.gwt.user.client.ui.Panel, String)
+   * @see mitll.langtest.client.custom.content.NPFHelper#makeExerciseList(com.google.gwt.user.client.ui.Panel, String)
    */
   void reloadExercises();
   void addExercise(CommonShell es);
 
+  //List<CommonShell> rememberExercises(List<CommonShell> result);
+
   CommonShell simpleRemove(String id);
 
   int getSize();
+
+  boolean isPendingReq();
 
   void hide();
   void show();
@@ -109,4 +117,6 @@ public interface ListInterface extends RequiresResize {
   void setInstance(String instance);
   void setShuffle(boolean doShuffle);
   void simpleSetShuffle(boolean doShuffle);
+
+  void reload(Map<String, Collection<String>> typeToSection);
 }
