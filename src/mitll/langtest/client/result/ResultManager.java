@@ -175,7 +175,7 @@ public class ResultManager extends PagerTable {
         @Override
         public void requestSuggestions(final Request request, final Callback callback) {
           final Map<String, String> unitToValue = getUnitToValue();
-          System.out.println(new Date() + " requestSuggestions got request for " + type + " : " + unitToValue);
+          //System.out.println(new Date() + " requestSuggestions got request for " + type + " : " + unitToValue);
           service.getResultAlternatives(unitToValue, getUserID(), getText(), type, new AsyncCallback<Collection<String>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -203,7 +203,7 @@ public class ResultManager extends PagerTable {
     userIDSuggest = new Typeahead(new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
-        System.out.println(new Date() + " requestSuggestions got request for userid " + getUnitToValue() + " " + getText() + " " + getUserID());
+        //System.out.println(new Date() + " requestSuggestions got request for userid " + getUnitToValue() + " " + getText() + " " + getUserID());
 
         service.getResultAlternatives(getUnitToValue(), getUserID(), getText(), MonitorResult.USERID, new AsyncCallback<Collection<String>>() {
           @Override
@@ -231,7 +231,7 @@ public class ResultManager extends PagerTable {
     textSuggest = new Typeahead(new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
-        System.out.println(new Date() + " requestSuggestions got request for txt " + getUnitToValue() + " " + getText() + " " + getUserID());
+        //System.out.println(new Date() + " requestSuggestions got request for txt " + getUnitToValue() + " " + getText() + " " + getUserID());
 
         service.getResultAlternatives(getUnitToValue(), getUserID(), getText(), MonitorResult.TEXT, new AsyncCallback<Collection<String>>() {
           @Override
@@ -480,8 +480,10 @@ public class ResultManager extends PagerTable {
           @Override
           public void onSuccess(final ResultAndTotal result) {
             if (result.req < req - 1) {
+/*
               System.out.println("->>getResults ignoring response " + result.req + " vs " + req +
                   " --->req " + unitToValue + " user " + userID + " text '" + text + "' : got back " + result.results.size() + " of total " + result.numTotal);
+*/
             } else {
               System.out.println("--->getResults req " + result.req +
                   " " + unitToValue + " user " + userID + " text '" + text + "' : got back " + result.results.size() + " of total " + result.numTotal);
