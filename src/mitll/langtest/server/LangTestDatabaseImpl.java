@@ -644,7 +644,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     if (byID != null) {
-      logger.debug("returning exercise " + byID.getID());
+      logger.debug("returning (" + language + ") exercise " + byID.getID());
     }
     else {
       logger.info("couldn't find exercise with id '" +id+  "'");
