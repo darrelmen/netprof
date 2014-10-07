@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.ScoreAndPath;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -208,7 +208,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.CommonExercise)
    * @param score
    */
-  public void addScore(ScoreAndPath score) {  scoreListener.addScore(score); }
+  public void addScore(CorrectAndScore score) {  scoreListener.addScore(score); }
 
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.CommonExercise)
@@ -286,7 +286,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @see #addClickHandlers
    */
   private class TranscriptEventClickHandler extends MyClickHandler {
-    UIObject widget;
+    final UIObject widget;
     /**
      * @see mitll.langtest.client.scoring.ScoringAudioPanel#addClickHandlers
      * @param type
