@@ -290,16 +290,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     for (CommonExercise exercise : copy) {
       ensureMP3s(exercise);
-      JSONObject ex = new JSONObject();
-      ex.put("id", exercise.getID());
-      ex.put("fl", exercise.getForeignLanguage());
-      ex.put("tl", exercise.getTransliteration());
-      ex.put("en", exercise.getEnglish());
-      ex.put("ct", exercise.getContext());
-      AudioAttribute latestContext = exercise.getLatestContext();
-      ex.put("ctref", latestContext == null ? "NO" : latestContext.getAudioRef());
-      ex.put("ref", exercise.hasRefAudio() ? exercise.getRefAudio() : "NO");
-      exercises.add(ex);
+      exercises.add(getJsonForExercise(exercise));
     }
     return exercises;
   }
