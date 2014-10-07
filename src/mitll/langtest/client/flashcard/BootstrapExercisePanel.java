@@ -1,31 +1,19 @@
 package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.ButtonGroup;
-import com.github.gwtbootstrap.client.ui.ButtonToolbar;
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Paragraph;
-import com.github.gwtbootstrap.client.ui.ProgressBar;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.DecoratedPopupPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.custom.MyFlashcardExercisePanelFactory;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
@@ -33,6 +21,9 @@ import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
+
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -61,16 +52,16 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @param endListener
    * @param instance
    * @param exerciseList
-   * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#StatsPracticePanel(mitll.langtest.shared.CommonExercise)
+   * @see StatsFlashcardFactory.StatsPracticePanel#StatsPracticePanel
    *
    */
   public BootstrapExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service,
                                 final ExerciseController controller, boolean addKeyBinding,
                                 final ControlState controlState,
-                                MyFlashcardExercisePanelFactory.MySoundFeedback soundFeedback,
+                                StatsFlashcardFactory.MySoundFeedback soundFeedback,
                                 SoundFeedback.EndListener endListener,
-                                String instance, ListInterface  exerciseList) {
-    super(e,service,controller,addKeyBinding,controlState,soundFeedback,endListener,instance, exerciseList);
+                                String instance, ListInterface exerciseList) {
+    super(e, service, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
   }
 
   /**
@@ -146,15 +137,24 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     }
     scoreFeedbackRow = new DivWidget();
     scoreFeedbackRow.addStyleName("bottomFiveMargin");
+    scoreFeedbackRow.setHeight("52px");
     toAddTo.add(scoreFeedbackRow);
   }
 
   private RecordButtonPanel answerWidget;
   private Widget button;
 
+  /**
+   *
+   * @param e
+   * @param service
+   * @param controller
+   * @return
+   * @see #addRecordingAndFeedbackWidgets(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel)
+   */
   private Widget getAnswerAndRecordButtonRow(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller) {
     //System.out.println("BootstrapExercisePanel.getAnswerAndRecordButtonRow = " + instance);
-    RecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, 1, addKeyBinding, instance);
+    RecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, addKeyBinding, instance);
     this.answerWidget = answerWidget;
     button = answerWidget.getRecordButton();
 
@@ -162,15 +162,13 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
   }
 
   @Override
-  protected DivWidget getFinalWidgets() {
-    DivWidget finalWidgets = super.getFinalWidgets();
-    finalWidgets.setVisible(false);
-    return finalWidgets;
+  protected void setClickToFlipHeight(DivWidget clickToFlipContainer) {
+    clickToFlipContainer.setHeight("12px");
   }
 
   @Override
-  protected Panel getCardContent() {
-    return new DivWidget();
+  protected void setMarginTop(HTML clickToFlip, Widget icon) {
+    icon.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
   }
 
   /**
@@ -208,7 +206,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @return
    */
   private Panel getRecoOutputRow() {
-    recoOutput = new Heading(3, "Answer");
+    recoOutput = new Heading(3, "");
     recoOutput.addStyleName("cardHiddenText2");   // same color as background so text takes up space but is invisible
     recoOutput.getElement().getStyle().setColor("#ffffff");
 
@@ -217,11 +215,6 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     recoOutputContainer.addStyleName("alignCenter");
 
     recoOutputRow.add(new Column(12, recoOutputContainer));
-
-/*    recoOutput = new Heading(3, "Answer");
-    recoOutput.addStyleName("cardHiddenText");   // same color as background so text takes up space but is invisible
-    recoOutput.getElement().getStyle().setProperty("color", "#ebebec");*/
-
     recoOutputContainer.add(recoOutput);
     recoOutputRow.getElement().setId("recoOutputRow");
 
@@ -232,39 +225,65 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @param exercise
    * @param service
    * @param controller
-   * @param index
    * @param addKeyBinding
    * @param instance
    * @return
    * @see #getAnswerAndRecordButtonRow(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
    */
   RecordButtonPanel getAnswerWidget(final CommonExercise exercise, LangTestDatabaseAsync service,
-                                    ExerciseController controller, final int index, final boolean addKeyBinding, String instance) {
-    return new FlashcardRecordButtonPanel(this, service, controller, exercise, index, "avp", instance) {
+                                    ExerciseController controller, final boolean addKeyBinding, String instance) {
+    return new FlashcardRecordButtonPanel(this, service, controller, exercise, 1, instance) {
       @Override
       protected RecordButton makeRecordButton(final ExerciseController controller, String buttonTitle) {
        // System.out.println("makeRecordButton : using " + instance);
-        return new FlashcardRecordButton(controller.getRecordTimeout(), this, true, addKeyBinding, controller, BootstrapExercisePanel.this.instance) {
+        final FlashcardRecordButton widgets = new FlashcardRecordButton(controller.getRecordTimeout(), this, true,
+            addKeyBinding, controller,
+            BootstrapExercisePanel.this.instance) {
           @Override
           protected void start() {
-            controller.logEvent(this, "AVP_RecordButton", exercise.getID(), "Start_Recording");
+            controller.logEvent(this, "AVP_RecordButton", exercise, "Start_Recording");
             super.start();
             recordingStarted();
           }
 
           @Override
           public void stop() {
-            controller.logEvent(this, "AVP_RecordButton", exercise.getID(), "Stop_Recording");
+            controller.logEvent(this, "AVP_RecordButton", exercise, "Stop_Recording");
             super.stop();
           }
+
+          @Override
+          protected void gotLeftArrow() {
+            exerciseList.loadPrev();
+          }
+
+          @Override
+          protected void gotRightArrow() {
+            if (!exerciseList.isPendingReq()) {
+              gotClickOnNext();
+            }
+          }
+
+          @Override
+          protected boolean shouldIgnoreKeyPress() {
+            return super.shouldIgnoreKeyPress() || otherReasonToIgnoreKeyPress();
+          }
         };
+
+       // widgets.getElement().setId("FlashcardRecordButton");
+
+        // without this, the arrow keys may go to the chapter selector
+        Scheduler.get().scheduleDeferred(new Command() {
+          public void execute() {
+            widgets.setFocus(true);
+          }
+        });
+        return widgets;
       }
     };
   }
 
-  protected void recordingStarted() {
-
-  }
+  protected void recordingStarted() {}
 
   /**
    * Show progress bar with score percentage, colored by score.
@@ -274,19 +293,18 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @see
    */
   void showPronScoreFeedback(double score) {
-    scoreFeedbackRow.add(showScoreFeedback("Score ", score));
+    scoreFeedbackRow.add(showScoreFeedback(score));
   }
 
 
   /**
-   * @param pronunciationScore
    * @param score
    * @seex #showCRTFeedback(Double, mitll.langtest.client.sound.SoundFeedback, String, boolean)
    * @paramx centerVertically
    * @paramx useShortWidth
    * @see BootstrapExercisePanel#showPronScoreFeedback(double)
    */
-  private ProgressBar showScoreFeedback(String pronunciationScore, double score) {
+  private ProgressBar showScoreFeedback(double score) {
     if (score < 0) score = 0;
     double percent = 100 * score;
 
@@ -294,18 +312,13 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     int percent1 = (int) percent;
     scoreFeedback.setPercent(percent1 < 40 ? 40 : percent1);   // just so the words will show up
 
-    scoreFeedback.setText(pronunciationScore + (int) percent + "%");
+    scoreFeedback.setText("Score " + (int) percent + "%");
     scoreFeedback.setVisible(true);
     scoreFeedback.setColor(
       score > 0.8 ? ProgressBarBase.Color.SUCCESS :
         score > 0.6 ? ProgressBarBase.Color.DEFAULT :
           score > 0.4 ? ProgressBarBase.Color.WARNING : ProgressBarBase.Color.DANGER);
 
-/*    if (centerVertically) {
-      DOM.setStyleAttribute(scoreFeedback.getElement(), "marginTop", "18px");
-      DOM.setStyleAttribute(scoreFeedback.getElement(), "marginBottom", "10px");
-    }
-    DOM.setStyleAttribute(scoreFeedback.getElement(), "marginLeft", "10px");*/
     return scoreFeedback;
   }
 
@@ -315,7 +328,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#receivedAudioAnswer
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer
    * @param result
    */
   public void receivedAudioAnswer(final AudioAnswer result) {
@@ -326,16 +339,22 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
 
     boolean badAudioRecording = result.getValidity() != AudioAnswer.Validity.OK;
     System.out.println("receivedAudioAnswer: correct " + correct + " pron score : " + score +
-      " has ref " + hasRefAudio + " bad audio " + badAudioRecording + " result " + result);
+        " has ref " + hasRefAudio + " bad audio " + badAudioRecording + " result " + result);
 
     String feedback = "";
     if (badAudioRecording) {
+      controller.logEvent(button, "Button", exercise.getID(), "bad recording");
+      putBackText();
       showPopup(result.getValidity().getPrompt(), button);
       initRecordButton();
       clearFeedback();
     } else if (correct) {
+      controller.logEvent(button, "Button", exercise.getID(), "correct response - score " + Math.round(score * 100f));
+
       showCorrectFeedback(score);
     } else {   // incorrect!!
+      controller.logEvent(button, "Button", exercise.getID(), "incorrect response - score " + Math.round(score * 100f));
+
       feedback = showIncorrectFeedback(result, score, hasRefAudio);
     }
     if (!badAudioRecording && (correct || !hasRefAudio)) {
@@ -363,13 +382,20 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     t.schedule(HIDE_DELAY);
   }
 
+  /**
+   *
+   * @param score
+   * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
+   */
   private void showCorrectFeedback(double score) {
     showPronScoreFeedback(score);
+    showOtherText();
     getSoundFeedback().queueSong(SoundFeedback.CORRECT);
   }
 
   /**
    * If there's reference audio, play it and wait for it to finish.
+   * What to do when the user says the wrong word.
    *
    * @param result
    * @param score
@@ -380,7 +406,9 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     if (result.isSaidAnswer()) { // if they said the right answer, but poorly, show pron score
       showPronScoreFeedback(score);
     }
-   // System.out.println("showIncorrectFeedback : result " + result + " score " + score + " has ref " + hasRefAudio);
+    showOtherText();
+
+    // System.out.println("showIncorrectFeedback : result " + result + " score " + score + " has ref " + hasRefAudio);
 
     String correctPrompt = getCorrectDisplay();
     if (hasRefAudio) {
@@ -393,7 +421,9 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
         }
       } else {
         playIncorrect();
-        goToNextAfter(1000);
+        int delay = 1000;
+     //   if (controlState.isEnglish() || controlState.isForeign()) delay = DELAY_MILLIS_LONG;
+        goToNextAfter(delay);
       }
     } else {
       tryAgain();
@@ -401,13 +431,24 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
 
     if (controller.getProps().isDemoMode()) {
       correctPrompt = "Heard: " + result.getDecodeOutput() + "<p>" + correctPrompt;
+      Heading recoOutput = getRecoOutput();
+      if (recoOutput != null && controlState.isAudioFeedbackOn()) {
+        recoOutput.setText(correctPrompt);
+        recoOutput.getElement().getStyle().setColor("#000000");
+      }
     }
-    Heading recoOutput = getRecoOutput();
-    if (recoOutput != null && controlState.isAudioFeedbackOn()) {
-      recoOutput.setText(correctPrompt);
-      DOM.setStyleAttribute(recoOutput.getElement(), "color", "#000000");
-    }
+
     return correctPrompt;
+  }
+
+  private void showOtherText() {
+    if (controlState.isEnglish()) showForeign();
+    else if (controlState.isForeign()) showEnglish();
+  }
+
+  private void putBackText() {
+    if (controlState.isEnglish()) showEnglish();
+    else if (controlState.isForeign()) showForeign();
   }
 
   private void playIncorrect() {
@@ -420,26 +461,29 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @param path
    */
   private void playRefAndGoToNext(String path) {
-    path = getPath(path);
-
-    getSoundFeedback().queueSong(path, new SoundFeedback.EndListener() {
+    getSoundFeedback().queueSong(getPath(path), new SoundFeedback.EndListener() {
       @Override
       public void songStarted() {
+        Widget widget = isSiteEnglish() ? english : foreign;
+        widget.addStyleName(PLAYING_AUDIO_HIGHLIGHT);
         endListener.songStarted();
       }
 
       @Override
       public void songEnded() {
         endListener.songEnded();
+       // removePlayingHighlight(textWidget);
         loadNext();
       }
     });
   }
 
-
+  /**
+   * @see #cancelTimer()
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#recordingStarted()
+   */
   protected void removePlayingHighlight() {
-    final Widget textWidget = isSiteEnglish() ? english : foreign;
-    textWidget.removeStyleName("playingAudioHighlight");
+    removePlayingHighlight(isSiteEnglish() ? english : foreign);
   }
 
   /**
@@ -496,7 +540,11 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
         incorrectDelay += delay;
         System.out.println("nextAfterDelay Delay is " + incorrectDelay + " len " + feedback.length());
       }
-      t.schedule(controller.getProps().isDemoMode() ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : incorrectDelay);
+      int delayMillis = controller.getProps().isDemoMode() ? LONG_DELAY_MILLIS : correct ? DELAY_MILLIS : incorrectDelay;
+      if (correct && (controlState.isEnglish() || controlState.isForeign())) {
+        delayMillis *= 2;
+      }
+      t.schedule(delayMillis);
     } else {
       System.out.println("doing nextAfterDelay : correct " + correct + " feedback " + feedback);
 
@@ -510,11 +558,20 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     }
   }
 
+  /**
+   *
+   * @param delay
+   * @see #goToNextAfter(int)
+   * @see #nextAfterDelay(boolean, String)
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#nextAfterDelay(boolean, String)
+   */
   protected void loadNextOnTimer(final int delay) {
+    System.out.println("loadNextOnTimer ----> load next on " + delay);
+
     if (!preventFutureTimerUse) {
-     // if (delay > 100) {
-     //   System.out.println("loadNextOnTimer ----> load next on " + delay);
-     // }
+      if (delay > 100) {
+        System.out.println("loadNextOnTimer ----> load next on " + delay);
+      }
       Timer t = new Timer() {
         @Override
         public void run() {
@@ -524,9 +581,9 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
       };
       currentTimer = t;
       t.schedule(delay);
-    } else {
-      System.out.println("\n\n\n----> ignoring next ");
-    }
+    } //else {
+      //System.out.println("\n\n\n----> ignoring next ");
+    //}
   }
 
   private boolean preventFutureTimerUse = false;
@@ -543,6 +600,44 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    */
   protected void loadNext() {
    // System.out.println("loadNext after " + exercise.getID());
-    controller.getExerciseList().loadNextExercise(exercise);
+ //   controller.getExerciseList().loadNextExercise(exercise);
+  }
+
+  @Override
+  DivWidget getFirstRow(ExerciseController controller) {
+    DivWidget firstRow = super.getFirstRow(controller);
+    List<CorrectAndScore> scores = exercise.getScores();
+    if (!scores.isEmpty()) {
+      DivWidget historyDiv = new DivWidget();
+      historyDiv.getElement().setId("historyDiv");
+      //historyDiv.setWidth("50%");
+      firstRow.add(historyDiv);
+      String history = SetCompleteDisplay.getScoreHistory(scores);
+      String s = "<span style='float:right;" +
+          //   "margin-right:-10px;" +
+          "'>" + history + "&nbsp;" + Math.round(getAvgScore(scores)) +
+          "</span>";
+
+      historyDiv.add(new HTML(s));
+    }
+    else {
+      System.out.println("scores are empty??? for " + exercise);
+    }
+    return firstRow;
+  }
+
+  private float getAvgScore(List<CorrectAndScore> toUse) {
+    if (toUse.isEmpty()) return 0f;
+
+    float c = 0;
+    float n = 0;
+    if (toUse.size() > 5) toUse = toUse.subList(toUse.size() - 5, toUse.size());
+    for (CorrectAndScore correctAndScore : toUse) {
+      if (correctAndScore.getScore() > 0) {
+        c += (float) correctAndScore.getPercentScore();
+        n++;
+      }
+    }
+    return n > 0f ? c / n : 0f;
   }
 }
