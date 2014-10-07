@@ -1,6 +1,6 @@
 package mitll.langtest.client.scoring;
 
-import mitll.langtest.shared.ScoreAndPath;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
 
 /**
@@ -14,7 +14,7 @@ public interface ScoreListener {
   void gotScore(PretestScore score, boolean showOnlyOneExercise, String path);
   int getOffsetWidth();
 
-  void addScore(ScoreAndPath hydecScore);
+  void addScore(CorrectAndScore hydecScore);
 
   /**
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#setClassAvg(float)
