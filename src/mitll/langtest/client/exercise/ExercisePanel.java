@@ -5,28 +5,12 @@ import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.ProvidesResize;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.CommonExercise;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Note that for text input answers, the user is prevented from cut-copy-paste.<br></br>
@@ -39,23 +23,19 @@ import java.util.Set;
  * Time: 1:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExercisePanel extends VerticalPanel implements
-  BusyPanel, ExerciseQuestionState, PostAnswerProvider, ProvidesResize, RequiresResize {
-  private static final String THREE_SPACES = "&nbsp;&nbsp;&nbsp;";
-  private static final String THE_FOREIGN_LANGUAGE = " the foreign language";
-  private static final String ENGLISH = "English";
-  private static final String TYPE_YOUR_ANSWER_IN = "Type your answer in ";
+public abstract class ExercisePanel extends VerticalPanel implements
+  BusyPanel, PostAnswerProvider, ProvidesResize, RequiresResize {
   private static final int CONTENT_SCROLL_HEIGHT = 220;
   private static final String PROMPT = "Read the following text and answer the question or questions below.";
   private final List<Widget> answers = new ArrayList<Widget>();
   private final Set<Widget> completed = new HashSet<Widget>();
   protected CommonExercise exercise = null;
   protected final ExerciseController controller;
-  protected final LangTestDatabaseAsync service;
+  private final LangTestDatabaseAsync service;
   private final NavigationHelper navigationHelper;
   protected final ListInterface exerciseList;
   private final Map<Integer,Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
-  protected String message;
+  protected final String message;
 
   /**
    * @see ExercisePanelFactory#getExercisePanel
@@ -90,7 +70,7 @@ public class ExercisePanel extends VerticalPanel implements
     }
     add(hp);
 
-    addQuestions(e, service, controller, 1);
+    addQuestions(e, service, controller);
 
     // add next and prev buttons
     add(navigationHelper);
@@ -112,7 +92,7 @@ public class ExercisePanel extends VerticalPanel implements
   private Widget getQuestionContent(CommonExercise e) {
     String content = getExerciseContent(e);
 
-    HTML maybeRTLContent = getMaybeRTLContent(content, true);
+    HTML maybeRTLContent = getMaybeRTLContent(content);
     maybeRTLContent.addStyleName("rightTenMargin");
     maybeRTLContent.addStyleName("topMargin");
     if (content.length() > 200) {
@@ -134,17 +114,16 @@ public class ExercisePanel extends VerticalPanel implements
   /**
    * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
    * @param content
-   * @param requireAlignment
    * @return
    */
-  protected HTML getMaybeRTLContent(String content, boolean requireAlignment) {
+  protected HTML getMaybeRTLContent(String content) {
     boolean rightAlignContent = controller.isRightAlignContent();
     HasDirection.Direction direction =
-      requireAlignment && rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
+      true && rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
 
     HTML html = new HTML(content, direction);
     html.setWidth("100%");
-    if (requireAlignment && rightAlignContent) {
+    if (true && rightAlignContent) {
       html.addStyleName("rightAlign");
     }
 
@@ -159,7 +138,7 @@ public class ExercisePanel extends VerticalPanel implements
   }
 
   private boolean isPashto() {
-    return getLanguage().equalsIgnoreCase("Pashto");
+    return controller.getLanguage().equalsIgnoreCase("Pashto");
   }
 
   public void onResize() {}
@@ -179,10 +158,9 @@ public class ExercisePanel extends VerticalPanel implements
    * @param e
    * @param service
    * @param controller used in subclasses for audio control
-   * @param questionNumber
    */
-  private void addQuestions(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller, int questionNumber) {
-      add(getQuestionPanel(e, service, controller, questionNumber
+  private void addQuestions(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller) {
+      add(getQuestionPanel(e, service, controller, 1
       ));
   }
 
@@ -216,32 +194,33 @@ public class ExercisePanel extends VerticalPanel implements
    * @paramx e
    */
   protected void addQuestionPrompt(Panel vp) {
-    HTML prompt = new HTML(getQuestionPrompt(true));
+    HTML prompt = new HTML(getQuestionPrompt());
     prompt.getElement().setId("questionPrompt");
     prompt.addStyleName("marginBottomTen");
     vp.add(prompt);
   }
 
-  protected String getQuestionPrompt(boolean promptInEnglish) {
-    return getWrittenPrompt(promptInEnglish);
+  protected String getQuestionPrompt() {
+    //return getWrittenPrompt(true);
+    return "";
   }
 
-  protected String getWrittenPrompt(boolean promptInEnglish) {
+/*  protected String getWrittenPrompt(boolean promptInEnglish) {
     return THREE_SPACES +
         TYPE_YOUR_ANSWER_IN +(promptInEnglish ? ENGLISH : getLanguage()) +" :";
-  }
+  }*/
 
-  private String getLanguage() {
+ /* private String getLanguage() {
     String language = controller.getLanguage();
     return (language == null || language.length() == 0) ? THE_FOREIGN_LANGUAGE : language;
-  }
+  }*/
 
-  @Override
+/*  @Override
   protected void onUnload() {
     super.onUnload();
    // System.out.println("onUnload : doing unload of prev/next handler " +keyHandler);
     navigationHelper.removeKeyHandler();
-  }
+  }*/
 
   /**
    * Record answers at the server.  For our purposes, add a row to the result table and possibly post
@@ -254,7 +233,7 @@ public class ExercisePanel extends VerticalPanel implements
    * @param completedExercise
    */
   @Override
-  public void postAnswers(final ExerciseController controller, final CommonExercise completedExercise) {
+  public abstract void postAnswers(final ExerciseController controller, final CommonExercise completedExercise); /*{
     int i = 1;
     int user = controller.getUser();
     final Set<Widget> incomplete = new HashSet<Widget>();
@@ -282,7 +261,7 @@ public class ExercisePanel extends VerticalPanel implements
             if (incomplete.isEmpty()) {
               System.out.println("ExercisePanel.loadNextExercise " + completedExercise.getID());
 
-              exerciseList.loadNextExercise(completedExercise/*.getID()*/);
+              exerciseList.loadNextExercise(completedExercise*//*.getID()*//*);
             }
             else {
               System.out.println("ExercisePanel.postAnswers " + incomplete.size() + " incomplete...");
@@ -293,9 +272,9 @@ public class ExercisePanel extends VerticalPanel implements
         );
       }
     }
-  }
+  }*/
 
-  private void showPopup(String toShow) {
+/*  private void showPopup(String toShow) {
     final PopupPanel popupImage = new PopupPanel(true);
     popupImage.add(new HTML(toShow));
     popupImage.showRelativeTo(navigationHelper.getNext());
@@ -304,7 +283,7 @@ public class ExercisePanel extends VerticalPanel implements
       public void run() { popupImage.hide(); }
     };
     t.schedule(3000);
-  }
+  }*/
 
   protected Widget getAnswerWidget(final CommonExercise exercise, final LangTestDatabaseAsync service,
                                    ExerciseController controller, final int index) { return null; }
