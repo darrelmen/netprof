@@ -47,7 +47,6 @@ public class ExcelImport implements ExerciseDAO {
   private static final Logger logger = Logger.getLogger(ExcelImport.class);
   public static final String FAST_WAV = "Fast" + ".wav";
   public static final String SLOW_WAV = "Slow" + ".wav";
-  //private static final boolean INCLUDE_ENGLISH_SEMI_AS_DEFECT = false;
 
   private List<CommonExercise> exercises = null;
   private final Map<String, CommonExercise> idToExercise = new HashMap<String, CommonExercise>();
@@ -95,9 +94,7 @@ public class ExcelImport implements ExerciseDAO {
       logger.warn("\n\n\nhuh? install path " + this.installPath.getAbsolutePath() + " doesn't exist???");
     }
     // turn off missing fast/slow for classroom
-   // boolean missingExists = serverProps.isClassroomMode() || getMissing(relativeConfigDir, "missingSlow.txt", missingSlowSet);
-   // missingExists &= serverProps.isClassroomMode() || getMissing(relativeConfigDir, "missingFast.txt", missingFastSet);
-    shouldHaveRefAudio = true;//missingExists && !serverProps.isClassroomMode();
+    shouldHaveRefAudio = false;
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
     this.language = serverProps.getLanguage();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
@@ -106,7 +103,6 @@ public class ExcelImport implements ExerciseDAO {
     this.unitIndex = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
     this.weekIndex = serverProps.getUnitChapterWeek()[2];
-
 //    logger.debug("unit " + unitIndex + " chapter " +chapterIndex + " week " +weekIndex);
   }
 
@@ -117,7 +113,7 @@ public class ExcelImport implements ExerciseDAO {
    * @param missing
    * @return
    */
-  public boolean getMissing(String relativeConfigDir, String file, Set<String> missing) {
+/*  public boolean getMissing(String relativeConfigDir, String file, Set<String> missing) {
     File missingSlow = new File(relativeConfigDir, file);
     if (missingSlow.exists()) {
       try {
@@ -141,7 +137,7 @@ public class ExcelImport implements ExerciseDAO {
       //logger.debug("Can't find " + file + " under " + relativeConfigDir + " abs path " + missingSlow.getAbsolutePath());
     }
     return missingSlow.exists();
-  }
+  }*/
 
   @Override
   public SectionHelper getSectionHelper() {
