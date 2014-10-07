@@ -18,7 +18,7 @@ public class ControlState {
   public static final String ENGLISH = "english";
   public static final String FOREIGN = "foreign";
   public static final String BOTH = "both";
-  private String showState = ENGLISH; // english/foreign/both
+  private String showState = BOTH; // english/foreign/both - default
 
   private KeyStorage storage = null;
   private final int id;
@@ -31,7 +31,7 @@ public class ControlState {
   public boolean isForeign() { return showState.equals(FOREIGN);}
 
   /**
-   * @see BootstrapExercisePanel#BootstrapExercisePanel
+   * @see StatsFlashcardFactory#StatsFlashcardFactory(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, String, mitll.langtest.shared.custom.UserList)
    * @param storage
    */
   public void setStorage(KeyStorage storage) {
@@ -40,6 +40,7 @@ public class ControlState {
     String showState1 = storage.getValue(SHOW_STATE);
     if (showState1.equals(FOREIGN)) showState = FOREIGN;
     else if (showState1.equals(BOTH)) showState = BOTH;
+    else if (showState1.equals(ENGLISH)) showState = ENGLISH;
 
     String audioOnKey = storage.getValue(AUDIO_ON);
     audioOn = audioOnKey.equalsIgnoreCase(TRUE_VALUE);
@@ -76,10 +77,12 @@ public class ControlState {
       storage.storeValue(slot, Boolean.toString(shuffleOn));
     }
   }
+/*
 
   public String getShowState() {
     return showState;
   }
+*/
 
   public boolean isAudioOn() {
     return audioOn;
