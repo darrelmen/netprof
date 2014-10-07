@@ -12,6 +12,8 @@ import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
+import java.util.Date;
+
 /**
  * Handles storing cookies for users, etc. IF user ids are stored as cookies.
  * <p/>
@@ -28,10 +30,10 @@ public class UserManager {
   private static final long HOUR_IN_MILLIS = 1000 * 60 * 60;
 
   private static final int DAY_HOURS = 24;
-  private static final int WEEK_HOURS = DAY_HOURS * 7;
+  private static final long WEEK_HOURS = DAY_HOURS * 7;
   //private static final int ONE_YEAR = 24 * 365;
 
-  private static final int EXPIRATION_HOURS = 52*WEEK_HOURS;
+  private static final long EXPIRATION_HOURS = 52*WEEK_HOURS * HOUR_IN_MILLIS;
  // private static final int SHORT_EXPIRATION_HOURS = DAY_HOURS;
 //  private static final int FOREVER_HOURS = ONE_YEAR;
 
@@ -53,10 +55,10 @@ public class UserManager {
   private final PropertyHandler props;
 
   /**
-   * @see mitll.langtest.client.LangTest#onModuleLoad2()
    * @param lt
    * @param service
    * @param props
+   * @see mitll.langtest.client.LangTest#onModuleLoad2()
    */
   public UserManager(UserNotification lt, LangTestDatabaseAsync service, PropertyHandler props) {
     this.userNotification = lt;
@@ -105,8 +107,8 @@ public class UserManager {
     }
   }
 
-  private native static void consoleLog( String message) /*-{
-      console.log( "UserManager:" + message );
+  private native static void consoleLog(String message) /*-{
+      console.log("UserManager:" + message);
   }-*/;
 
 
@@ -148,7 +150,7 @@ public class UserManager {
    *
    * Legacy people must get approval.
    *
-   * @see #storeUser(long, String, String, mitll.langtest.client.PropertyHandler.LOGIN_TYPE)
+   * @see #storeUser
    * @param result
    */
   private void gotNewUser(User result) {
@@ -299,9 +301,9 @@ public class UserManager {
   }
 
   /**
-   * @see #isUserExpired()
    * @param sid
    * @return
+   * @see #isUserExpired()
    */
   private boolean checkUserExpired(String sid) {
     boolean expired = false;
@@ -314,14 +316,17 @@ public class UserManager {
 
   /**
    * Need these to be prefixed by app title so if we switch webapps, we don't get weird user ids
+   *
    * @return
    */
   private String getUserIDCookie() {
     return appTitle + ":" + USER_ID;
   }
+
   private String getUserChosenID() {
     return appTitle + ":" + USER_CHOSEN_ID;
   }
+
   private String getAudioType() {
     return appTitle + ":" + AUDIO_TYPE;
   }
@@ -330,18 +335,19 @@ public class UserManager {
     return appTitle + ":" + LOGIN_TYPE;
   }
 */
+
   private String getExpires() {
     return appTitle + ":" + "expires";
   }
 
   /**
-   * @see #getUser()
    * @param sid
+   * @see #getUser()
    */
   private boolean userExpired(String sid) {
     String expires = getExpiresCookie();
     if (expires == null) {
-      System.out.println("checkExpiration : no expires item?");
+      System.out.println("userExpired : checkExpiration : no expires item?");
     } else {
       try {
         long expirationDate = Long.parseLong(expires);
@@ -354,7 +360,7 @@ public class UserManager {
         }
 
         if (expirationDate < System.currentTimeMillis()) {
-          System.out.println("checkExpiration : " + sid + " has expired.");
+          System.out.println("userExpired : checkExpiration : " + sid + " has expired : " + new Date(expirationDate));
           return true;
         }
       } catch (NumberFormatException e) {
@@ -364,6 +370,10 @@ public class UserManager {
     return false;
   }
 
+  /**
+   * @return
+   * @see #userExpired(String)
+   */
   private String getExpiresCookie() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     return localStorageIfSupported.getItem(getExpires());
@@ -420,8 +430,8 @@ public class UserManager {
   }
 
   /**
-   * @see #userExpired(String)
    * @param futureMoment
+   * @see #userExpired(String)
    */
   private void rememberUserSessionEnd(long futureMoment) {
     if (Storage.isLocalStorageSupported()) {
@@ -431,13 +441,19 @@ public class UserManager {
   }
 
   /**
-   * @see #storeUser(long, String, String, mitll.langtest.client.PropertyHandler.LOGIN_TYPE)
-   * @see #rememberUserSessionEnd(long)
    * @param localStorageIfSupported
    * @param futureMoment
+   * @see #storeUser
+   * @see #rememberUserSessionEnd(long)
    */
   private void rememberUserSessionEnd(Storage localStorageIfSupported, long futureMoment) {
+
     localStorageIfSupported.setItem(getExpires(), "" + futureMoment);
+
+    String expires = getExpiresCookie();
+
+    long expirationDate = Long.parseLong(expires);
+    System.out.println("rememberUserSessionEnd : user will expire on " + new Date(expirationDate));
   }
 
   private long getUserSessionEnd() {
@@ -450,10 +466,13 @@ public class UserManager {
 
   /**
    * If we have lots of students moving through stations quickly, we want to auto logout once a day, once an hour?
-   * @return
+   * <p/>
+   * Egyptian should never time out -- for anonymous students
+   *
+   * @return one year for anonymous
    */
   private long getUserSessionDuration() {
-    //boolean useShortExpiration = loginType.equals(PropertyHandler.LOGIN_TYPE.STUDENT);
-    return HOUR_IN_MILLIS * EXPIRATION_HOURS;//(useShortExpiration ? SHORT_EXPIRATION_HOURS : EXPIRATION_HOURS);
+    long mult = loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS) ? 52 : 4;
+    return EXPIRATION_HOURS * mult;
   }
 }
