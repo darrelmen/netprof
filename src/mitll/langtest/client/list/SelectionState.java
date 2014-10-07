@@ -1,11 +1,6 @@
 package mitll.langtest.client.list;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
 * Created with IntelliJ IDEA.
@@ -75,24 +70,25 @@ public class SelectionState {
       if (part.contains("=")) {
         String[] segments = part.split("=");
         if (debug) System.out.println("\tpart " + part + " : " + Arrays.asList(segments));
+        if (segments.length >1) {
+          String type = segments[0].trim();
+          String section = segments[1].trim();
 
-        String type = segments[0].trim();
-        String section = segments[1].trim();
-
-        if (type.equals("#item") || type.equals("item")) {
-          setItem(section);
-        } else {
-          String[] split = section.split(",");
-          List<String> sections = Arrays.asList(split);
-
-          if (sections.isEmpty()) {
-            System.err.println("\t\tparseToken : part " + part + " is badly formed ");
+          if (type.equals("#item") || type.equals("item")) {
+            setItem(section);
           } else {
-            if (debug) System.out.println("\t\tparseToken : add " + type + " : " + sections);
-            if (type.equals(INSTANCE)) instance = section;
-            else add(type, sections);
+            String[] split = section.split(",");
+            List<String> sections = Arrays.asList(split);
+
+            if (sections.isEmpty()) {
+              System.err.println("\t\tparseToken : part " + part + " is badly formed ");
+            } else {
+              if (debug) System.out.println("\t\tparseToken : add " + type + " : " + sections);
+              if (type.equals(INSTANCE)) instance = section;
+              else add(type, sections);
+            }
+            if (debug) System.out.println("\tparseToken : part " + part + " : " + type + "->" + section);
           }
-          if (debug) System.out.println("\tparseToken : part " + part + " : " + type + "->" + section);
         }
       } else if (part.length() > 0) {
         System.err.println("parseToken skipping part '" + part + "'");
