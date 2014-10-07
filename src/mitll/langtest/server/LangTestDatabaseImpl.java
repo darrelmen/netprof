@@ -17,6 +17,8 @@ import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
+import mitll.langtest.server.trie.TextEntityValue;
+import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -51,6 +53,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public static final String DATABASE_REFERENCE = "databaseReference";
   private static final int SLOW_EXERCISE_EMAIL = 2000;
   public static final String ENGLISH = "English";
+  public static final int MAX = 30;
 
   private DatabaseImpl db;
   private AudioFileHelper audioFileHelper;
@@ -1248,29 +1251,272 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   // Results ---------------------
 
   /**
+   * Sometimes we type faster than we can respond, so we can throw away stale requests.
+   *
+   * Filter results by search criteria -- unit->value map (e.g. chapter=5), userid, and foreign language text
+   * @param req - to echo back -- so that if we get an old request we can discard it
+   * @param sortInfo - encoding which fields we want to sort, and ASC/DESC choice
    * @return
-   * @see mitll.langtest.client.result.ResultManager#showResults()
+   * @see mitll.langtest.client.result.ResultManager#createProvider(int, com.google.gwt.user.cellview.client.CellTable)
    */
   @Override
-  public List<Result> getResults(int start, int end, String sortInfo) {
-    List<Result> results = db.getResultsWithGrades();
+  public ResultAndTotal getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, long userid, String flText, int req) {
+    List<MonitorResult> results = getResults(unitToValue, userid, flText);
     if (!results.isEmpty()) {
-      String[] columns = sortInfo.split(",");
-      Comparator<Result> comparator = results.get(0).getComparator(Arrays.asList(columns));
-      Collections.sort(results, comparator);
+      Comparator<MonitorResult> comparator = results.get(0).getComparator(Arrays.asList(sortInfo.split(",")));
+      try {
+        Collections.sort(results, comparator);
+      } catch (Exception e) {
+        logger.error("Doing " + sortInfo + " " + unitToValue +" " + userid + " " + flText + " " + start +"-" + end +
+            " Got " +e,e);
+        //throw e;
+      }
     }
-    List<Result> resultList = results.subList(start, end);
-    return new ArrayList<Result>(resultList);
+    int n = results.size();
+    int min = Math.min(end, n);
+    if (start > min) {
+      logger.debug("original req from " + start + " to " + end);
+      start = 0;
+    }
+    List<MonitorResult> resultList = results.subList(start, min);
+    return new ResultAndTotal(new ArrayList<MonitorResult>(resultList), n, req);
+  }
+
+  @Override
+  public int getNumResults() {
+    return db.getResultDAO().getNumResults();
+  }
+
+  private List<MonitorResult> getResults(Map<String, String> unitToValue, long userid, String flText) {
+    Collection<MonitorResult> results = db.getMonitorResults();
+    //logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText);
+
+    Trie<MonitorResult> trie;
+
+    for (String type : getTypeOrder()) {
+      if (unitToValue.containsKey(type)) {
+
+       // logger.debug("getResults making trie for " + type);
+        // make trie from results
+        trie = new Trie<MonitorResult>();
+
+        trie.startMakingNodes();
+        for (MonitorResult result : results) {
+          String s = result.getUnitToValue().get(type);
+          if (s != null) {
+            trie.addEntryToTrie(new ResultWrapper(s, result));
+          }
+        }
+        trie.endMakingNodes();
+
+        results = trie.getMatchesLC(unitToValue.get(type));
+      }
+    }
+
+    if (userid > -1) { // asking for userid
+      // make trie from results
+//      logger.debug("making trie for userid " + userid);
+
+      trie = new Trie<MonitorResult>();
+      trie.startMakingNodes();
+      for (MonitorResult result : results) {
+        trie.addEntryToTrie(new ResultWrapper(Long.toString(result.getUserid()), result));
+      }
+      trie.endMakingNodes();
+
+      results = trie.getMatchesLC(Long.toString(userid));
+    }
+
+    // must be asking for text
+    if (flText != null && !flText.isEmpty()) { // asking for text
+      trie = new Trie<MonitorResult>();
+      trie.startMakingNodes();
+ //     logger.debug("searching over " + results.size());
+      for (MonitorResult result : results) {
+         trie.addEntryToTrie(new ResultWrapper(result.getForeignText().trim(), result));
+      }
+      trie.endMakingNodes();
+
+      results = trie.getMatchesLC(flText);
+    }
+    logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText + " returning " + results.size() + " results...");
+    return new ArrayList<MonitorResult>(results);
   }
 
   /**
+   * Respond to type ahead.
+   *
+   * @param unitToValue
+   * @param userid
+   * @param flText
+   * @param which
    * @return
-   * @see mitll.langtest.client.result.ResultManager#showResults()
    */
   @Override
-  public int getNumResults() {
-    return db.getNumResults();
+  public Collection<String> getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which) {
+    Collection<MonitorResult> results = db.getMonitorResults();
+
+    logger.debug("getResultAlternatives request " + unitToValue + " " + userid + " " + flText + " :'" + which + "'");
+
+    Collection<String> matches = new TreeSet<String>();
+    Trie<MonitorResult> trie;
+
+    for (String type : getTypeOrder()) {
+      if (unitToValue.containsKey(type)) {
+
+    //    logger.debug("getResultAlternatives making trie for " + type);
+        // make trie from results
+        trie = new Trie<MonitorResult>();
+
+        trie.startMakingNodes();
+        for (MonitorResult result : results) {
+          String s = result.getUnitToValue().get(type);
+          if (s != null) {
+            trie.addEntryToTrie(new ResultWrapper(s, result));
+          }
+        }
+        trie.endMakingNodes();
+
+        String s = unitToValue.get(type);
+        Collection<MonitorResult> matchesLC = trie.getMatchesLC(s);
+
+        // stop!
+        if (which.equals(type)) {
+  //        logger.debug("\tmatch for " + type);
+
+          boolean allInt = true;
+          for (MonitorResult result : matchesLC) {
+            String e = result.getUnitToValue().get(type);
+            if (allInt) {
+              try {
+                Integer.parseInt(e);
+              } catch (NumberFormatException e1) {
+                allInt = false;
+              }
+            }
+            matches.add(e);
+          }
+
+          if (allInt) {
+            List<String> sorted = new ArrayList<String>(matches);
+            Collections.sort(sorted, new Comparator<String>() {
+              @Override
+              public int compare(String o1, String o2) {
+                return compareTwoMaybeInts(o1, o2);
+              }
+            });
+            return sorted;
+          }
+
+//          logger.debug("returning " + matches);
+
+          return matches;
+        } else {
+          results = matchesLC;
+        }
+      }
+    }
+
+    if (userid > -1) { // asking for userid
+      // make trie from results
+
+      logger.debug("making trie for userid " + userid);
+
+      trie = new Trie<MonitorResult>();
+      trie.startMakingNodes();
+      for (MonitorResult result : results) {
+        trie.addEntryToTrie(new ResultWrapper(Long.toString(result.getUserid()), result));
+      }
+      trie.endMakingNodes();
+
+      Set<Long> imatches = new TreeSet<Long>();
+      Collection<MonitorResult> matchesLC = trie.getMatchesLC(Long.toString(userid));
+
+      // stop!
+      if (which.equals(MonitorResult.USERID)) {
+        for (MonitorResult result : matchesLC) {
+          imatches.add(result.getUserid());
+        }
+        //logger.debug("returning " + imatches);
+
+        for (Long m : imatches) matches.add(Long.toString(m));
+        matches = getLimitedSizeList(matches);
+        return matches;
+      } else {
+        results = matchesLC;
+      }
+    }
+
+    // must be asking for text
+    trie = new Trie<MonitorResult>();
+    trie.startMakingNodes();
+    //logger.debug("searching over " + results.size());
+    for (MonitorResult result : results) {
+      trie.addEntryToTrie(new ResultWrapper(result.getForeignText(), result));
+    }
+    trie.endMakingNodes();
+
+    Collection<MonitorResult> matchesLC = trie.getMatchesLC(flText);
+
+    for (MonitorResult result : matchesLC) {
+      matches.add(result.getForeignText().trim());
+    }
+    //logger.debug("returning text " + matches);
+
+    return getLimitedSizeList(matches);
   }
+
+  private Collection<String> getLimitedSizeList(Collection<String> matches) {
+    if (matches.size() > MAX) {
+      List<String> matches2 = new ArrayList<String>();
+      int nn = 0;
+      for (String match : matches) {
+        if (nn++ < MAX) {
+          matches2.add(match);
+        }
+      }
+      matches = matches2;
+    }
+    return matches;
+  }
+
+
+  protected int compareTwoMaybeInts(String id1, String id2) {
+    int comp;
+    try {   // this could be slow
+      int i = Integer.parseInt(id1);
+      int j = Integer.parseInt(id2);
+      comp = i - j;
+    } catch (NumberFormatException e) {
+      comp = id1.compareTo(id2);
+    }
+    return comp;
+  }
+
+  private static class ResultWrapper implements TextEntityValue<MonitorResult> {
+    private final String value;
+    private final MonitorResult e;
+
+    public ResultWrapper(String value, MonitorResult e) {
+      this.value = value;
+      this.e = e;
+    }
+
+    @Override
+    public MonitorResult getValue() {
+      return e;
+    }
+
+    @Override
+    public String getNormalizedValue() {
+      return value;
+    }
+
+    public String toString() {
+      return "result " + e.getId() + " : " + value;
+    }
+  }
+
 
   /**
    * Record an answer entry in the database.<br></br>
