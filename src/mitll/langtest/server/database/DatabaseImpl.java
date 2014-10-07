@@ -13,7 +13,6 @@ import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
-import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import org.apache.log4j.Logger;
@@ -769,10 +768,10 @@ public class DatabaseImpl implements Database {
    */
   public List<MonitorResult> getMonitorResults() {
     List<MonitorResult> monitorResults = resultDAO.getMonitorResults();
-    return getMonitorResults(monitorResults);
+    return getMonitorResultsWithText(monitorResults);
   }
 
-  private List<MonitorResult> getMonitorResults(List<MonitorResult> monitorResults) {
+  public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults) {
     Map<String, CommonExercise> join = new HashMap<String, CommonExercise>();
 
     for (CommonExercise exercise : getExercises()) {
