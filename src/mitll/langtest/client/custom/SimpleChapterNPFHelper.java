@@ -4,6 +4,8 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.custom.content.NPFHelper;
+import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.WaveformExercisePanel;
@@ -29,15 +31,16 @@ class SimpleChapterNPFHelper implements RequiresResize {
 
   protected final UserFeedback feedback;
   protected PagingExerciseList npfExerciseList;
-  ListInterface predefinedContentList;
+  private final ListInterface predefinedContentList;
+  private DivWidget contentPanel;
 
   /**
-   * @see Navigation#Navigation
-   * @see Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
    * @param service
    * @param feedback
    * @param userManager
    * @param controller
+   * @see Navigation#Navigation
+   * @see Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
    */
   public SimpleChapterNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
                                 ExerciseController controller,
@@ -52,21 +55,22 @@ class SimpleChapterNPFHelper implements RequiresResize {
     this.flexListLayout = getMyListLayout(service, feedback, userManager, controller, outer);
   }
 
-  protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                                           UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
+  protected NPFHelper.FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
+                                                     UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
     return new MyFlexListLayout(service, feedback, userManager, controller, outer);
   }
 
   /**
    * Add npf widget to content of a tab - here marked tabAndContent
+   *
+   * @param tabAndContent in this tab
+   * @param instanceName  flex, review, etc.
    * @see Navigation#addPracticeTab()
    * @see Navigation#addTabs(com.google.gwt.user.client.ui.Panel)
    * @see mitll.langtest.client.custom.Navigation#selectPreviousTab(String)
-   * @param tabAndContent in this tab
-   * @param instanceName flex, review, etc.
    */
   public void showNPF(TabAndContent tabAndContent, String instanceName) {
-    //System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " loadExercises " + loadExercises);
+    System.out.println(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
@@ -81,7 +85,8 @@ class SimpleChapterNPFHelper implements RequiresResize {
     listContent.addStyleName("userListBackground");
   }
 
-  private FlexListLayout flexListLayout;
+  private final NPFHelper.FlexListLayout flexListLayout;
+
   /**
    * Make the instance name uses the unique id for the list.
    *
@@ -95,13 +100,24 @@ class SimpleChapterNPFHelper implements RequiresResize {
     return widgets;
   }
 
-  public void hideList() { npfExerciseList.hide(); }
+  public ListInterface getExerciseList() {
+    return npfExerciseList;
+  }
+
+  /**
+   * @see Navigation#addPracticeTab()
+   * @see mitll.langtest.client.custom.Navigation#selectPreviousTab(String)
+   */
+  public void hideList() {
+    npfExerciseList.hide();
+  }
 
   /**
    * This is important - this is where the actual content is chosen.
-   * @see mitll.langtest.client.exercise.WaveformExercisePanel
+   *
    * @param exerciseList
    * @return
+   * @see mitll.langtest.client.exercise.WaveformExercisePanel
    */
   protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
     return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
@@ -119,14 +135,12 @@ class SimpleChapterNPFHelper implements RequiresResize {
   }
 
   protected void tellOtherListExerciseDirty(CommonExercise e) {
-    if (e.getID().equals(predefinedContentList.getCurrentExerciseID())) {
-      System.out.println( "WaveformExercisePanel.reloading "+ e.getID());
+    if (predefinedContentList != null && e.getID().equals(predefinedContentList.getCurrentExerciseID())) {
+      System.out.println("WaveformExercisePanel.reloading " + e.getID());
 
       predefinedContentList.loadExercise(e.getID());
-    }
-    else {
-      System.out.println( "WaveformExercisePanel.not reloading "+ e.getID());
-
+    } else {
+      System.out.println("WaveformExercisePanel.not reloading " + e.getID());
     }
   }
 
@@ -141,10 +155,21 @@ class SimpleChapterNPFHelper implements RequiresResize {
     }
   }
 
-  protected static class MyFlexListLayout extends FlexListLayout {
+  public void setContentPanel(DivWidget contentPanel) {
+    System.out.println("SimpleChapterNPFHelper.setContentPanel : got " + contentPanel);
+
+    this.contentPanel = contentPanel;
+  }
+
+  public DivWidget getContentPanel() {
+    return contentPanel;
+  }
+
+  protected static class MyFlexListLayout extends NPFHelper.FlexListLayout {
     private final SimpleChapterNPFHelper outer;
 
-    public MyFlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
+    public MyFlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
+                            ExerciseController controller, SimpleChapterNPFHelper outer) {
       super(service, feedback, userManager, controller);
       this.outer = outer;
     }
