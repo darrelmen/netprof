@@ -130,6 +130,18 @@ public class ResultDAO extends DAO {
     return new ArrayList<MonitorResult>();
   }
 
+  public List<MonitorResult> getMonitorResultsByID(String id) {
+    try {
+      String sql = "SELECT * FROM " + RESULTS + " WHERE " + Database.EXID + "='" + id +"'";
+      return getMonitorResultsSQL(sql);
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+
+    return new ArrayList<MonitorResult>();
+  }
+
+
   /**
    * For a set of exercise ids, find the results for each and make a map of user->results
    * Then for each user's results, make a list of sessions representing a sequence of grouped results
@@ -274,11 +286,14 @@ public class ResultDAO extends DAO {
 
   /**
    * TODO : inefficient - better ways to do this in h2
+   *
+   *
    * @see #getSessionsForUserIn2(java.util.Collection, long, long, java.util.Collection)
    * @param ids
    * @param matchAVP
    * @param userid
    * @return
+   * @see #attachScoreHistory(long, mitll.langtest.shared.CommonExercise, boolean)
    */
   private List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, long userid) {
     try {
@@ -287,7 +302,9 @@ public class ResultDAO extends DAO {
       String sql = getCSSelect() + " FROM " + RESULTS + " WHERE " +
           USERID + "=" + userid + " AND " +
           VALID + "=true" + " AND " +
-          AUDIO_TYPE + (matchAVP ? "=" : "<>") + "'avp'" + " AND " +
+          //    AUDIO_TYPE + (matchAVP ? "=" : "<>") + "'avp'" +
+          AUDIO_TYPE + (matchAVP ? "" : " NOT ") + " LIKE " + "'avp*'" +
+          " AND " +
           Database.EXID + " in (" + list + ")";
 
       Connection connection = database.getConnection(this.getClass().toString());
@@ -295,7 +312,7 @@ public class ResultDAO extends DAO {
 
       List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement);
 
-   //   logger.debug("getResultsForExIDInForUser for  " +sql+ " got\n\t" + scores.size());
+      //   logger.debug("getResultsForExIDInForUser for  " +sql+ " got\n\t" + scores.size());
       return scores;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -328,9 +345,13 @@ public class ResultDAO extends DAO {
     return getMonitorResultsForQuery(connection, statement);
   }
 
+  /**
+   * @see mitll.langtest.server.database.AnswerDAO#addAnswerToTable(java.sql.Connection, int, String, String, int, String, String, boolean, boolean, boolean, String, int, boolean, float, String)
+   */
   public synchronized void invalidateCachedResults() {
     cachedResultsForQuery = null;
     cachedResultsForQuery2 = null;
+    cachedMonitorResultsForQuery = null;
   }
 
   public int getNumResults() {
@@ -767,23 +788,18 @@ public class ResultDAO extends DAO {
 
     int numColumns = getNumColumns(connection, RESULTS);
     if (numColumns == 8) {
-      //logger.info(RESULTS + " table had num columns = " + numColumns);
       addColumnToTable(connection);
     }
     if (numColumns <= 11) {//!columnExists(connection,RESULTS, AUDIO_TYPE)) {
-      //logger.info(RESULTS + " table had num columns = " + numColumns);
       addTypeColumnToTable(connection);
     }
     if (numColumns < 12) {
-      //logger.info(RESULTS + " table had num columns = " + numColumns);
       addDurationColumnToTable(connection);
     }
     if (numColumns < 14) {
-      //logger.info(RESULTS + " table had num columns = " + numColumns);
       addFlashcardColumnsToTable(connection);
     }
     if (numColumns < 15) {
-      //logger.info(RESULTS + " table had num columns = " + numColumns);
       addStimulus(connection);
     }
 
