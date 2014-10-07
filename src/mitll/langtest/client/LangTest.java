@@ -1,11 +1,7 @@
 package mitll.langtest.client;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Column;
-import com.github.gwtbootstrap.client.ui.Container;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Tab;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
@@ -16,6 +12,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -24,23 +21,15 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
-import mitll.langtest.client.custom.CommentNPFExercise;
 import mitll.langtest.client.custom.Navigation;
-import mitll.langtest.client.custom.QCNPFExercise;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.KeyPressHelper;
@@ -49,50 +38,35 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.Flashcard;
 import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventLogger;
+import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.instrumentation.EventTable;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
 import mitll.langtest.client.result.ResultManager;
-import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
-import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.client.user.UserManager;
-import mitll.langtest.client.user.UserNotification;
-import mitll.langtest.client.user.UserTable;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.ImageResponse;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.StartupInfo;
-import mitll.langtest.shared.User;
+import mitll.langtest.client.user.*;
+import mitll.langtest.shared.*;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
+  private Logger logger = Logger.getLogger("LangTest");
+
   public static final String LANGTEST_IMAGES = "langtest/images/";
   private static final String DIVIDER = "|";
-  private static final String NEW_PRO_F2_PNG = "NewProF2.png";
   private static final int MAX_EXCEPTION_STRING = 300;
   private static final int MAX_CACHE_SIZE = 100;
   private static final int NO_USER_INITIAL = -2;
-  private static final boolean SHOW_STATUS = false;
-  private static final boolean SHOW_EXCEPTION_TO_USER = false;
-
-  /**
-   * @see #makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel)
-   */
-  private ListInterface exerciseList;
+ // private static final boolean SHOW_STATUS = false;
+  private static final String PLEASE_ALLOW_ACCESS_TO_THE_MICROPHONE = "Please allow access to the microphone.";
+  private static final String TRY_AGAIN = "Try Again";
 
   private UserManager userManager;
   private ResultManager resultManager;
@@ -109,14 +83,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Flashcard flashcard;
 
   private Panel headerRow;
-  private FluidRow secondRow;
   private Panel firstRow;
 
   private StartupInfo startupInfo;
 
   private Navigation navigation;
   private EventLogger buttonFactory;
-  private KeyPressHelper keyPressHelper = new KeyPressHelper(false,true);
+  private final KeyPressHelper keyPressHelper = new KeyPressHelper(false,true);
 
   /**
    * Make an exception handler that displays the exception.
@@ -136,9 +109,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           long now = System.currentTimeMillis();
           String message = "onModuleLoad.getProperties : (failure) took " + (now - then) + " millis";
 
-          System.out.println(message);
+          logger.info(message);
           if (!caught.getMessage().trim().equals("0")) {
-            System.out.println("Exception " + caught.getMessage() + " " + caught + " " + caught.getClass() + " " + caught.getCause());
+            logger.info("Exception " + caught.getMessage() + " " + caught + " " + caught.getClass() + " " + caught.getCause());
             Window.alert("Couldn't contact server.  Please check your network connection. (getProperties)");
             logMessageOnServer(message);
           }
@@ -167,13 +140,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void dealWithExceptions() {
     GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
       public void onUncaughtException(Throwable throwable) {
-        String exceptionAsString = logException(throwable);
+        /*String exceptionAsString =*/ logException(throwable);
 
-        if (SHOW_EXCEPTION_TO_USER) {
+ /*       if (SHOW_EXCEPTION_TO_USER) {
           if (exceptionAsString.length() > 0) {
             new ExceptionHandlerDialog().showExceptionInDialog(browserCheck, exceptionAsString);
           }
-        }
+        }*/
       }
     });
   }
@@ -196,7 +169,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public void logMessageOnServer(String message, String prefix) {
     int user = userManager != null ? userManager.getUser() : -1;
-    String exerciseID = exerciseList != null ? exerciseList.getCurrentExerciseID() : "Unknown";
+    String exerciseID = "Unknown";
     String suffix = " browser " + browserCheck.getBrowserAndVersion() +
       " : " + message;
     logMessageOnServer(prefix +
@@ -257,7 +230,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     ImageResponse ifPresent = imageCache.getIfPresent(key);
     if (ifPresent != null) {
-      //System.out.println("getImage for key " + key+ " found  " + ifPresent);
+      //logger.info("getImage for key " + key+ " found  " + ifPresent);
       ifPresent.req = -1;
       client.onSuccess(ifPresent);
     } else {
@@ -266,14 +239,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
        /*   if (!caught.getMessage().trim().equals("0")) {
             Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
           }*/
-          System.out.println("message " + caught.getMessage() + " " + caught);
+          logger.info("message " + caught.getMessage() + " " + caught);
           logException(caught);
           client.onFailure(caught);
         }
 
         public void onSuccess(ImageResponse result) {
           imageCache.put(key, result);
-          //System.out.println("getImage storing key " + key+ " now  " + imageCache.size() + " cached.");
+          //logger.info("getImage storing key " + key+ " now  " + imageCache.size() + " cached.");
 
           client.onSuccess(result);
         }
@@ -281,112 +254,76 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  private Cache<String, ImageResponse> imageCache = CacheBuilder.newBuilder()
+  private final Cache<String, ImageResponse> imageCache = CacheBuilder.newBuilder()
     .maximumSize(MAX_CACHE_SIZE)
     .expireAfterWrite(7, TimeUnit.DAYS)
     .build();
 
   /**
-   * Use DockLayout to put a header at the top, exercise list on the left, and eventually
-   * the current exercise in the center.  There is also a status on line on the bottom.
    *
-   * Initially the flash record player is put in the center of the DockLayout
    */
   private void onModuleLoad2() {
     setupSoundManager();
 
-    //if (props.doInstrumentation()) { // basically always true
-      buttonFactory = new ButtonFactory(service, props);
-    //}
+    buttonFactory = new ButtonFactory(service, props);
 
     userManager = new UserManager(this, service, props);
-
-    checkAdmin();
 
     RootPanel.get().getElement().getStyle().setPaddingTop(2, Style.Unit.PX);
 
     addResizeHandler();
 
-    if (shouldCollectAudio()) {
-      makeFlashContainer();
-    }
+    makeFlashContainer();
 
     populateRootPanel();
 
     setPageTitle();
     browserCheck.checkForCompatibleBrowser();
 
-    if (props.isAdminView()) {
-      loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
-    }
+    loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
   }
+
 
   /**
    * @see #onModuleLoad2()
    * @return
    */
-  private Panel populateRootPanel() {
-    Container verticalContainer = new FluidContainer();
-    verticalContainer.getElement().setId("root_vertical_container");
+  private void populateRootPanel() {
+    Container verticalContainer = getRootContainer();
 
     // header/title line
     // first row ---------------
-    verticalContainer.add(headerRow = makeHeaderRow());
-    headerRow.getElement().setId("headerRow");
+    Panel firstRow = makeFirstTwoRows(verticalContainer);
 
-    Panel firstRow = new DivWidget();
-    verticalContainer.add(firstRow);
-    this.firstRow = firstRow;
-    firstRow.getElement().setId("firstRow");
-
-    // second row ---------------
-    secondRow = new FluidRow();
-    secondRow.getElement().setId("secondRow");
-
-    // third row ---------------
-
-    Panel exerciseListContainer = new SimplePanel();
-    exerciseListContainer.addStyleName("floatLeft");
-    exerciseListContainer.getElement().setId("exerciseListContainer");
-
-    Panel thirdRow = new HorizontalPanel();
-    thirdRow.add(exerciseListContainer);   // left side of third row is exercise list
-    thirdRow.getElement().setId("thirdRow");
-    thirdRow.setWidth("100%");
-    thirdRow.addStyleName("trueInlineStyle");
-
-    Panel bothSecondAndThird = new FlowPanel();
-    bothSecondAndThird.getElement().setId("secondAndThirdRowContainer");
-    bothSecondAndThird.add(secondRow);
-    bothSecondAndThird.add(thirdRow);
-
-    // set up center right panel, initially with flash record panel
-    Panel currentExerciseVPanel = new FlowPanel();
-    currentExerciseVPanel.getElement().setId("currentExercisePanel");
-
-    makeExerciseList(secondRow, exerciseListContainer, currentExerciseVPanel);
-
-    RootPanel.get().clear();   // necessary?
-    if (showOnlyOneExercise()) {
-      // show fancy lace background image
-      currentExerciseVPanel.addStyleName("body");
-      currentExerciseVPanel.getElement().getStyle().setBackgroundImage("url(" + LANGTEST_IMAGES + "levantine_window_bg.jpg" + ")");
-      currentExerciseVPanel.addStyleName("noMargin");
-
-      Container verticalContainer2 = new FluidContainer();
-      verticalContainer2.getElement().setId("root_vertical_container");
-      verticalContainer2.add(flashRecordPanel);
-      verticalContainer2.add(currentExerciseVPanel);
-      RootPanel.get().add(verticalContainer2);
-
-    } else {
-      currentExerciseVPanel.addStyleName("floatLeftList");
-      thirdRow.add(currentExerciseVPanel);     // right side of third row is exercise panel
-      RootPanel.get().add(verticalContainer);
+    if (!showLogin(verticalContainer, firstRow)) {
+      logger.info("populate below header...");
+      populateBelowHeader(verticalContainer, firstRow);
     }
+  }
 
-    if (shouldCollectAudio() && !showOnlyOneExercise()
-        ) {
+  private Container getRootContainer() {
+    RootPanel.get().clear();   // necessary?
+
+    Container verticalContainer = new FluidContainer();
+    verticalContainer.getElement().setId("root_vertical_container");
+    return verticalContainer;
+  }
+
+  /**
+   * @param verticalContainer
+   * @param firstRow          where we put the flash permission window if it gets shown
+   * @see #handleCDToken(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, String)
+   * @see #populateRootPanel()
+   * @see #showLogin()
+   */
+  private void populateBelowHeader(Container verticalContainer, Panel firstRow) {
+    if (showOnlyOneExercise()) {
+      Panel currentExerciseVPanel = new FlowPanel();
+      currentExerciseVPanel.getElement().setId("currentExercisePanel");
+      RootPanel.get().add(getHeadstart(currentExerciseVPanel));
+    } else {
+      RootPanel.get().add(verticalContainer);
+
       /**
        * {@link #makeFlashContainer}
        */
@@ -394,30 +331,187 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     modeSelect();
 
-    navigation = new Navigation(service, userManager, this, exerciseList, this);
+    navigation = new Navigation(service, userManager, this, this);
 
-    if (getProps().isClassroomMode()) {
-      firstRow.add(navigation.getNav(bothSecondAndThird));
-    }
-    else {
-      firstRow.add(bothSecondAndThird); // TODO : would this ever happen?
-    }
+    firstRow.add(navigation.getNav());
 
-    if (SHOW_STATUS) {
+/*    if (SHOW_STATUS) {
       DivWidget w = new DivWidget();
       w.getElement().setId("status");
       verticalContainer.add(w);
-    }
-
-    return bothSecondAndThird;
+    }*/
   }
 
-  private void checkAdmin() {
-    if (props.isAdminView() || props.isGrading()) {
+  private Container getHeadstart(Panel currentExerciseVPanel) {
+    // show fancy lace background image
+    currentExerciseVPanel.addStyleName("body");
+    currentExerciseVPanel.getElement().getStyle().setBackgroundImage("url(" + LANGTEST_IMAGES + "levantine_window_bg.jpg" + ")");
+    currentExerciseVPanel.addStyleName("noMargin");
+
+    Container verticalContainer2 = new FluidContainer();
+    verticalContainer2.getElement().setId("root_vertical_container");
+    verticalContainer2.add(flashRecordPanel);
+    verticalContainer2.add(currentExerciseVPanel);
+    return verticalContainer2;
+  }
+
+  /**
+   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(int)
+   * @see mitll.langtest.client.user.UserManager#login()
+   */
+  @Override
+  public void showLogin() {
+//    logger.info("show login!");
+    populateRootPanel();
+  }
+
+  private String staleToken = "";
+
+  /**
+   * So we have three different views here : the login page, the reset password page, and the content developer
+   * enabled feedback page.
+   *
+   * @see #showLogin()
+   * @see #populateRootPanel()
+   * @param verticalContainer
+   * @param firstRow
+   * @return false if we didn't do either of the special pages and should do the normal navigation view
+   */
+  private boolean showLogin(final Container verticalContainer, final Panel firstRow) {
+    final EventRegistration eventRegistration = this;
+
+    // check if we're here as a result of resetting a password
+    final String resetPassToken = props.getResetPassToken();
+    if (!resetPassToken.isEmpty() && !resetPassToken.equals(staleToken)) {
+      logger.info("showLogin token '" + resetPassToken + "' for password reset");
+
+      staleToken = resetPassToken;
+      service.getUserIDForToken(resetPassToken, new AsyncCallback<Long>() {
+        @Override
+        public void onFailure(Throwable caught) {}
+
+        @Override
+        public void onSuccess(Long result) {
+          if (result == null || result < 0) {
+            logger.info("token '" + resetPassToken + "' is stale. Showing normal view");
+            populateBelowHeader(verticalContainer,firstRow);
+          }
+          else {
+            ResetPassword userPassLogin = new ResetPassword(service, getProps(), eventRegistration);
+            Panel content = userPassLogin.getResetPassword(resetPassToken);
+            firstRow.add(content);
+            content.getElement().setId("ResetPassswordContent");
+            clearPadding(verticalContainer);
+          }
+        }
+      });
+
+      RootPanel.get().add(verticalContainer);
+      flashcard.setCogVisible(false);
+
+      return true;
+    }
+
+    // are we here to enable a CD user?
+    final String cdToken = props.getCdEnableToken();
+    if (!cdToken.isEmpty() && !cdToken.equals(staleToken)) {
+      logger.info("showLogin token '" + resetPassToken + "' for enabling cd user");
+
+      handleCDToken(verticalContainer, firstRow, cdToken, props.getEmailRToken());
+      return true;
+    }
+
+    // are we here to show the login screen?
+    boolean show = userManager.isUserExpired() || userManager.getUserID() == null;
+    if (show) {
+      logger.info("user is not valid : " + userManager.isUserExpired() +" / " +userManager.getUserID());
+
+      Panel content = new UserPassLogin(service, getProps(), userManager, eventRegistration).getContent();
+      firstRow.add(content);
+      content.getElement().setId("UserPassLogin");
+      clearPadding(verticalContainer);
+      RootPanel.get().add(verticalContainer);
+      flashcard.setCogVisible(false);
+      return true;
+    }
+    logger.info("user is valid...");
+
+    flashcard.setCogVisible(true);
+    return false;
+  }
+
+  private void handleCDToken(final Container verticalContainer, final Panel firstRow, final String cdToken, String emailR) {
+    service.enableCDUser(cdToken, emailR, Window.Location.getHref(), new AsyncCallback<String>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(String result) {
+        staleToken = cdToken;
+        if (result == null /*|| result < 0*/) {
+          logger.info("handleCDToken enable - token " + cdToken + " is stale. Showing normal view");
+          populateBelowHeader(verticalContainer, firstRow);
+        } else {
+          firstRow.add(new Heading(2, "OK, content developer <b>" +result +
+              "</b> has been approved."));
+          firstRow.addStyleName("leftFiveMargin");
+          // content.getElement().setId("ResetPassswordContent");
+          clearPadding(verticalContainer);
+
+          Timer t = new Timer() {
+            @Override
+            public void run() {
+              Window.Location.replace(trimURL(Window.Location.getHref()));
+              Window.Location.reload();
+            }
+          };
+          t.schedule(3000);
+        }
+      }
+    });
+
+    RootPanel.get().add(verticalContainer);
+    flashcard.setCogVisible(false);
+  }
+
+  private void clearPadding(Container verticalContainer) {
+    verticalContainer.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
+    verticalContainer.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
+  }
+
+  private String trimURL(String url) {
+    if (url.contains("127.0.0.1")) return url;
+    else return url.split("\\?")[0].split("\\#")[0];
+  }
+
+  /**
+   * @see #populateRootPanel()
+   * @param verticalContainer
+   * @return
+   */
+  private Panel makeFirstTwoRows(Container verticalContainer) {
+    verticalContainer.add(headerRow = makeHeaderRow());
+    headerRow.getElement().setId("headerRow");
+
+    Panel firstRow = new DivWidget();
+    verticalContainer.add(firstRow);
+    this.firstRow = firstRow;
+    firstRow.getElement().setId("firstRow");
+    return firstRow;
+  }
+
+  /**
+   * @see #onModuleLoad2
+   */
+  private void checkAdmin(boolean isAdmin) {
+    if (isAdmin) {
       final LangTest outer = this;
+
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
+//          downloadFailedAlert();
+          logException(caught);
         }
 
         public void onSuccess() {
@@ -427,7 +521,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
+          logException(caught);
+          //downloadFailedAlert();
         }
 
         public void onSuccess() {
@@ -437,42 +532,27 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  /**
-   * Supports different flavors of exercise list -- Paging, Grading, and vanilla.
-   *
-   * @see #populateRootPanel()
-   */
-  private ListInterface makeExerciseList(FluidRow secondRow, Panel exerciseListContainer, Panel currentExerciseVPanel) {
-    this.exerciseList = new ExerciseListLayout(props).makeExerciseList(secondRow, exerciseListContainer, this, currentExerciseVPanel, service, this);
-    reallySetFactory();
-    return exerciseList;
-  }
-
   private void loadVisualizationPackages() {
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       @Override
       public void run() {
-        System.out.println("\tloaded VisualizationUtils...");
+        //logger.info("\tloaded VisualizationUtils...");
         logMessageOnServer("loaded VisualizationUtils.");
       }
     }, ColumnChart.PACKAGE, LineChart.PACKAGE);
   }
 
-  private boolean shouldCollectAudio() {
-    return props.isCollectAudio() || props.isGoodwaveMode() ;
-  }
-
   /**
-   * @see #onModuleLoad2()
    * @return
+   * @see #populateRootPanel()
    */
   private Panel makeHeaderRow() {
-    flashcard = new Flashcard(props,this);
-    Widget title = flashcard.makeNPFHeaderRow(props.getSplash(), props.isClassroomMode(), getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
-        (props.isAdminView()) ? new UsersClickHandler() : null,
-        (props.isAdminView()) ? new ResultsClickHandler() : null,
-        (props.isAdminView()) ? new MonitoringClickHandler() : null,
-        (props.isAdminView()) ? new EventsClickHandler() : null
+    flashcard = new Flashcard(props);
+    Widget title = flashcard.makeNPFHeaderRow(props.getSplash(), true, getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
+        new UsersClickHandler(),
+        new ResultsClickHandler(),
+        new MonitoringClickHandler(),
+        new EventsClickHandler()
     );
 
     headerRow = new FluidRow();
@@ -485,37 +565,26 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void setPageTitle() {
     String appTitle = props.getAppTitle();
-    setTitle(appTitle);
+    Window.setTitle(appTitle + " : " + "Learn pronunciation and practice vocabulary.");
 
     Element element = DOM.getElementById("favicon");   // set the page title to be consistent
-
     if (element != null) {
-      element.setAttribute("href", LANGTEST_IMAGES + "NewProF1_48x48.png");
-    }
-  }
-
-  private void setTitle(String appTitle) {
-    Element elementById = DOM.getElementById("title-tag");   // set the page title to be consistent
-    if (elementById != null) {
-      elementById.setInnerText(appTitle);
+       element.setAttribute("href", LANGTEST_IMAGES + "NewProF1_48x48.png");
     }
   }
 
   /**
-   * @seex #doDataCollectAdminView()
    * @see #makeHeaderRow()
    * @return
    */
   private HTML getReleaseStatus() {
     browserCheck.getBrowserAndVersion();
-
     return new HTML(getInfoLine());
   }
 
   private String getInfoLine() {
     String releaseDate = props.getReleaseDate() != null ? " " + props.getReleaseDate() : "";
     return "<span><font size=-2>" +
-      //browserCheck.browser + " " +
       browserCheck.ver +
       releaseDate + (flashRecordPanel.usingWebRTC() ? " Flashless recording" : "")+
       "</font></span>";
@@ -530,9 +599,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void addResizeHandler() {
     Window.addResizeHandler(new ResizeHandler() {
       public void onResize(ResizeEvent event) {
-        if (exerciseList != null) {
-          exerciseList.onResize();
-        }
         if (navigation != null) navigation.onResize();
         if (flashcard != null) {
           flashcard.onResize();
@@ -541,17 +607,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
   }
 
-  public float getScreenPortion() {
-    return props.getScreenPortion();
-  }
-
-  public int getHeightOfTopRows() {
-    return headerRow.getOffsetHeight() + secondRow.getOffsetHeight();
-  }
+  public int getHeightOfTopRows() { return headerRow.getOffsetHeight();  }
 
   @Override
   public int getLeftColumnWidth() {
-    return exerciseList.getWidget().getOffsetWidth();
+    return 225;
   }
 
   /**
@@ -568,6 +628,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    *
    * If in goodwave (pronunciation scoring) mode or auto crt mode, skip the user login.
    * @see #onModuleLoad2()
+   * @see #resetState()
    */
   private void modeSelect() {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -590,7 +651,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     FlashRecordPanelHeadless.setMicPermission(new MicPermission() {
       public void gotPermission() {
-        System.out.println(new Date() + " : makeFlashContainer - got permission!");
+        logger.info(" : makeFlashContainer - got permission!");
         hideFlash();
         checkLogin();
       }
@@ -607,21 +668,21 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           showingPlugInNotice = true;
           List<String> messages = Arrays.asList("If you want to record audio, ", "plug in or enable your mic and reload the page.");
           new ModalInfoDialog("Plug in microphone", messages, null,
-            new HiddenHandler() {
-              @Override
-              public void onHidden(HiddenEvent hiddenEvent) {
-                hideFlash();
-                checkLogin();
+              new HiddenHandler() {
+                @Override
+                public void onHidden(HiddenEvent hiddenEvent) {
+                  hideFlash();
+                  checkLogin();
 
-                flashcard.setSplash("RECORDING DISABLED");
+                  flashcard.setSplash();
+                }
               }
-            }
           );
         }
       }
 
       public void noRecordingMethodAvailable() {
-        System.out.println(new Date() + " : makeFlashContainer - no way to record");
+        logger.info(" : makeFlashContainer - no way to record");
         hideFlash();
         new ModalInfoDialog("Can't record audio", "Recording audio is not supported.", new HiddenHandler() {
           @Override
@@ -630,12 +691,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           }
         });
 
-        flashcard.setSplash("RECORDING DISABLED");
+        flashcard.setSplash();
       }
     });
   }
 
-  public void hideFlash() {
+  void hideFlash() {
     flashRecordPanel.hide();
     flashRecordPanel.hide2(); // must be a separate call!
   }
@@ -643,23 +704,27 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   /**
    * This determines which kind of exercise we're going to do.
    *
-   * @see #gotUser(long)
+   * Two things determine what kind of UI is shown - what kind of user has logged in (students get basic view, content developers see more tabs)
+   * And whether the ability to record audio is there -- if flash, whether permission has been granted or is allowed via
+   * configuration.  If webrtc (in browser) recording, whether permission has been granted or not.  Also, there are
+   * physical considerations - is there a mic available at all?  Or is there a flashblocker preventing flash from running?
+   *
+   * So we want to configure the UI after login and after the recording state has been settled.
+   *
+   * @see #gotUser
+   * @see #configureUIGivenUser(long) (long)
    */
   private void reallySetFactory() {
-    if (props.isClassroomMode()) {
-      exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this, exerciseList, 1.0f) {
-        @Override
-        public Panel getExercisePanel(CommonExercise e) {
-          boolean reviewer = permissions.contains(User.Permission.QUALITY_CONTROL);
-          if (reviewer) {
-            return new QCNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
-          } else {
-            return new CommentNPFExercise(e, controller, exerciseList, 1.0f, false, "classroom");
-          }
-        }
-      }, userManager, 1);
-    } else {
-      exerciseList.setFactory(new GoodwaveExercisePanelFactory(service, this, this, exerciseList, getScreenPortion()), userManager, 1);
+    int childCount = firstRow.getElement().getChildCount();
+
+    logger.info("reallySetFactory root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
+    if (childCount > 0) {
+      Node child = firstRow.getElement().getChild(0);
+      Element as = Element.as(child);
+      if (as.getId().contains("Login")) {
+        logger.info("reallySetFactory found login...");
+        populateRootPanel();
+      }
     }
   }
 
@@ -667,10 +732,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Show a popup telling how unhappy we are with the user's choice not to allow mic recording.
    *
    * Remove the flash player that was there, put in a new one, again, and ask the user again for permission.
-   *
+   * @see #makeFlashContainer()
+   * @deprecated fall back to in browswer recording
    */
   private void showPopupOnDenial() {
-    new ModalInfoDialog("Try Again", "Please allow access to the microphone.",
+    new ModalInfoDialog(TRY_AGAIN, PLEASE_ALLOW_ACCESS_TO_THE_MICROPHONE,
       new HiddenHandler() {
         @Override
         public void onHidden(HiddenEvent hiddenEvent) {
@@ -680,7 +746,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void removeAndReloadFlash() {
-    System.out.println(new Date() + " : removeAndReloadFlash - reloading...");
+    logger.info(" : removeAndReloadFlash - reloading...");
 
     firstRow.remove(flashRecordPanel);
     flashRecordPanel.removeFlash();
@@ -689,7 +755,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     flashRecordPanel.initFlash();
   }
 
-  public String getGreeting() {
+  /**
+   * @see #gotUser
+   * @see #makeHeaderRow()
+   * @return
+   */
+  private String getGreeting() {
     return userManager.getUserID() == null ? "" : (""+  userManager.getUserID());
   }
 
@@ -697,11 +768,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @seex #getLogout()
    */
   private void resetState() {
-    System.out.println("got resetState");
+//    logger.info("resetState");
     History.newItem(""); // clear history!
     userManager.clearUser();
-    exerciseList.removeCurrentExercise();
-    exerciseList.clear();
     lastUser = NO_USER_INITIAL;
     modeSelect();
   }
@@ -715,39 +784,54 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Only get the exercises if the user has accepted mic access.
    *
    * @see #makeFlashContainer
-   * @see UserManager#login
+   * @see UserManager#gotNewUser(mitll.langtest.shared.User)
    * @see UserManager#storeUser
-   * @param userID
+   * @param user
    */
-  public void gotUser(long userID) {
+  public void gotUser(User user) {
+    reallySetFactory();
+   /* if (navigation == null) {
+      logger.info("gotUser : no nav so making it..,");
+
+      populateRootPanel();
+    }*/
+    long userID= -1;
+    if (user != null) userID = user.getId();
+
+    logger.info("gotUser : userID " + userID);
+
     flashcard.setUserName(getGreeting());
-    doEverythingAfterFactory(userID);
-    logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
+    if (userID != lastUser) {
+      configureUIGivenUser(userID);
+      logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
+    }
+    else {
+      logger.info("ignoring got user for current user " + userID);
+      navigation.refreshInitialState();
+    }
+    if (userID > -1) {
+      flashcard.setCogVisible(true);
+      checkAdmin(user.isAdmin());
+      flashcard.setVisibleAdmin(user.isAdmin());
+    }
   }
 
-  private boolean doEverythingAfterFactory(long userID) {
-    System.out.println("doEverythingAfterFactory : user changed - new " + userID + " vs last " + lastUser +
+  /**
+   * @see #gotUser
+   * @param userID
+   * @return
+   */
+  private void configureUIGivenUser(long userID) {
+    logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser +
         " audio type " + getAudioType() + " perms " + getPermissions());
     reallySetFactory();
+//    logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
 
-    if (getPermissions().contains(User.Permission.QUALITY_CONTROL)) {
-      exerciseList.setInstance(User.Permission.QUALITY_CONTROL.toString());
-    } else {
-      exerciseList.setInstance("flex");
-    }
-
-    boolean askedForExercises = exerciseList.getExercises(userID);
-    if (!askedForExercises && (lastUser != userID) && lastUser != NO_USER_INITIAL) {
-      //System.out.println("\tdoEverythingAfterFactory : " + userID + " initially list and user now " + userID);
-
-      exerciseList.reload();
-    }
     navigation.showInitialState();
 
     lastUser = userID;
     flashcard.setBrowserInfo(getInfoLine());
     flashcard.reflectPermissions(getPermissions());
-    return true;
   }
 
   /**
@@ -755,35 +839,27 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   // TODO : refactor all this into mode objects that decide whether we need flash or not, etc.
   private void checkInitFlash() {
-    if (shouldCollectAudio() && !flashRecordPanel.gotPermission()) {
-      System.out.println("checkInitFlash : initFlash");
+    if (!flashRecordPanel.gotPermission()) {
+      logger.info("checkInitFlash : initFlash - no permission yet");
 
       if (flashRecordPanel.initFlash()) {
         checkLogin();
       }
     }
     else {
-      gotMicPermission();
-
+      logger.info("checkInitFlash : initFlash - has permission");
       checkLogin();
     }
   }
 
-  public boolean gotMicPermission() {
-    boolean gotPermission = flashRecordPanel != null && flashRecordPanel.gotPermission();
-    System.out.println("checkInitFlash : skip init flash, just checkLogin (got permission = " + gotPermission + ")");
-    return gotPermission;
-  }
+  @Override
+  public EventLogger getButtonFactory() { return buttonFactory; }
 
   @Override
-  public EventLogger getButtonFactory() {
-    return buttonFactory;
-  }
+  public void register(Button button) { buttonFactory.register(this, button, "N/A");  }
 
   @Override
-  public void register(Button button, String exid) {
-    buttonFactory.register(this, button, exid);
-  }
+  public void register(Button button, String exid) {  buttonFactory.register(this, button, exid);  }
 
   @Override
   public void register(Button button, String exid, String context) {
@@ -793,6 +869,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   @Override
   public void registerWidget(HasClickHandlers clickable, UIObject uiObject, String exid, String context) {
     buttonFactory.registerWidget(clickable, uiObject, exid, context, getUser());
+  }
+
+  @Override
+  public void logEvent(UIObject button, String widgetType, CommonShell ex, String context) {
+    buttonFactory.logEvent(button, widgetType, ex.getID(), context, getUser());
   }
 
   @Override
@@ -815,26 +896,34 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void checkLogin() {
     //console("checkLogin");
+    //logger.info("checkLogin -- ");
     userManager.isUserExpired();
     userManager.checkLogin();
   }
 
+  /**
+   * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(String)
+   */
   public void checkUser() {
     if (userManager.isUserExpired()) {
       checkLogin();
     }
   }
-
+/*
   private void console(String message) {
     int ieVersion = BrowserCheck.getIEVersion();
     if (ieVersion == -1 || ieVersion > 9) {
       consoleLog(message);
     }
-  }
+  }*/
+/*
 
-  private native static void consoleLog( String message) /*-{
+  private native static void consoleLog( String message) */
+/*-{
       console.log( "LangTest:" + message );
-  }-*/;
+  }-*//*
+;
+*/
 
   @Override
   public void rememberAudioType(String audioType) {  this.audioType = audioType;  }
@@ -854,12 +943,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
   private boolean isReviewMode() { return audioType.equals(Result.AUDIO_TYPE_REVIEW); }
 
-  private Set<User.Permission> permissions = new HashSet<User.Permission>();
+  private final Set<User.Permission> permissions = new HashSet<User.Permission>();
 
   /**
    * When we login, we ask for permissions for the user from the server.
    *
-   * @see mitll.langtest.client.user.StudentDialog#makePermissions()
    * @see mitll.langtest.client.user.UserManager#login()
    * @param permission
    * @param on
@@ -877,21 +965,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public int getUser() { return userManager.getUser(); }
   public PropertyHandler getProps() { return props; }
+
   public boolean useBkgColorForRef() {  return props.isBkgColorForRef(); }
+
   public int getRecordTimeout() {  return props.getRecordTimeout(); }
-  public boolean isCollectAudio() {  return props.isCollectAudio(); }
-  public boolean isMinimalUI() {  return props.isMinimalUI(); }
   public boolean isGrading() {  return props.isGrading(); }
   public boolean isLogClientMessages() {  return props.isLogClientMessages(); }
   public String getLanguage() {  return props.getLanguage(); }
-  public boolean isPromptBeforeNextItem() {  return props.isPromptBeforeNextItem(); }
   public boolean isRightAlignContent() {  return props.isRightAlignContent(); }
 
-  public boolean isGoodwaveMode() {  return props.isGoodwaveMode(); }
   public LangTestDatabaseAsync getService() { return service; }
   public UserFeedback getFeedback() { return this; }
 
-  private long then, now;
+  private long then;
   // recording methods...
   /**
    * Recording interface
@@ -908,8 +994,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    */
   public void stopRecording(WavCallback wavCallback) {
-    now = System.currentTimeMillis();
-    System.out.println("stopRecording : time recording in UI " + (now-then) + " millis");
+    long now = System.currentTimeMillis();
+    logger.info("stopRecording : time recording in UI " + (now - then) + " millis");
 
     flashRecordPanel.stopRecording(wavCallback);
   }
@@ -918,28 +1004,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Recording interface
    */
 
-  public SoundManagerAPI getSoundManager() {
-    return soundManager;
-  }
+  public SoundManagerAPI getSoundManager() { return soundManager;  }
 
   public void showErrorMessage(String title, String msg) {
     DialogHelper dialogHelper = new DialogHelper(false);
     dialogHelper.showErrorMessage(title, msg);
     logMessageOnServer("Showing error message", title + " : " + msg);
   }
-
-  @Override
-  public void showProgress() {
-    showProgress(exerciseList);
-  }
-
-  private void showProgress(ListInterface exerciseList) {
-/*    if (progressBar != null) {
-      //progressBar.showAdvance(exerciseList);
-    }*/
-  }
-
-  public ListInterface getExerciseList() { return exerciseList; }
 
   /**
    * @see mitll.langtest.client.recorder.FlashcardRecordButton#FlashcardRecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, String)
@@ -949,25 +1020,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void addKeyListener(KeyPressHelper.KeyListener listener) {
     keyPressHelper.addKeyHandler(listener);
     if (keyPressHelper.getSize() > 2) {
-      System.out.println("addKeyListener " + listener.getName() +
-        " key press handler now " + keyPressHelper);
+      logger.info("addKeyListener " + listener.getName() + " key press handler now " + keyPressHelper);
     }
   }
 
   @Override
-  public boolean isRecordingEnabled() {
-    return flashRecordPanel.gotPermission();
-  }
+  public boolean isRecordingEnabled() {  return flashRecordPanel.gotPermission();  }
 
   @Override
-  public boolean usingFlashRecorder() {
-    return flashRecordPanel.usingFlash();
-  }
+  public boolean usingFlashRecorder() {  return flashRecordPanel.usingFlash();  }
 
   private class LogoutClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
       logEvent("No widget", "UserLoging", "N/A", "User Logout by " + lastUser);
-
       resetState();
     }
   }
@@ -976,9 +1041,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     public void onClick(ClickEvent event) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
+          downloadFailedAlert();
         }
-
         public void onSuccess() {
           new UserTable(props).showUsers(service);
         }
@@ -990,9 +1054,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     public void onClick(ClickEvent event) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
+          downloadFailedAlert();
         }
-
         public void onSuccess() {
           new EventTable().show(service);
         }
@@ -1004,9 +1067,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     public void onClick(ClickEvent event) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
+          downloadFailedAlert();
         }
-
         public void onSuccess() {
           resultManager.showResults();
         }
@@ -1018,13 +1080,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     public void onClick(ClickEvent event) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
-          Window.alert("Code download failed");
+          downloadFailedAlert();
         }
-
         public void onSuccess() {
           monitoringManager.showResults();
         }
       });
     }
   }
+
+  private void downloadFailedAlert() {  Window.alert("Code download failed");  }
 }
