@@ -1,7 +1,7 @@
 package mitll.langtest.client.scoring;
 
-import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.RadioButton;
@@ -31,12 +31,8 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
-import mitll.langtest.shared.MiniUser;
-import mitll.langtest.shared.ScoreAndPath;
+import mitll.langtest.shared.*;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.*;
 
@@ -46,13 +42,13 @@ import java.util.*;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize {
+public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
   private static final String REFERENCE = "";
   private static final String RECORD_YOURSELF = "Record";
   private static final String RELEASE_TO_STOP = "Release";
   public static final int HEADING_FOR_UNIT_LESSON = 4;
-  private static final String CORRECT = "correct";
-  private static final String INCORRECT = "incorrect";
+  public static final String CORRECT = "correct";
+  public static final String INCORRECT = "incorrect";
   public static final String DEFAULT_SPEAKER = "Default Speaker";
   private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
   private final ListInterface listContainer;
@@ -199,7 +195,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   private void showRecordingHistory(CommonExercise exercise, ScoringAudioPanel answerWidget, String refAudio) {
     answerWidget.setRefAudio(refAudio);
-    for (ScoreAndPath score : exercise.getScores()) {
+    for (CorrectAndScore score : exercise.getScores()) {
       answerWidget.addScore(score);
     }
     answerWidget.setClassAvg(exercise.getAvgScore());
@@ -329,16 +325,18 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   /**
    * @param commentToPost
    * @param field
-   * @see mitll.langtest.client.custom.QCNPFExercise#makeCommentEntry(String, mitll.langtest.shared.ExerciseAnnotation)
+   * @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, mitll.langtest.shared.ExerciseAnnotation)
    */
-  protected void addIncorrectComment(final String commentToPost, final String field) {
+  @Override
+  public void addIncorrectComment(final String commentToPost, final String field) {
 /*    System.out.println(new Date() + " : post to server " + exercise.getID() +
       " field " + field + " commentLabel '" + commentToPost + "' is incorrect");*/
     addAnnotation(field, INCORRECT, commentToPost);
   }
 
-  protected void addCorrectComment(final String field) {
-    //  System.out.println(new Date() + " : post to server " + exercise.getID() + " field " + field + " is correct");
+  @Override
+  public void addCorrectComment(final String field) {
+  //  System.out.println(new Date() + " : post to server " + exercise.getID() + " field " + field + " is correct");
     addAnnotation(field, CORRECT, "");
   }
 
@@ -359,13 +357,12 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   /**
    * @param label
    * @param value
-   * @param withWrap
    * @param includeLabel
    * @return
-   * @see mitll.langtest.client.custom.CommentNPFExercise#getEntry
-   * @see mitll.langtest.client.custom.QCNPFExercise#getEntry
+   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getEntry
+   * @see mitll.langtest.client.qc.QCNPFExercise#getEntry
    */
-  protected Panel getContentWidget(String label, String value, boolean withWrap, boolean includeLabel) {
+  protected Panel getContentWidget(String label, String value, boolean includeLabel) {
     //System.out.println("label " + label + " value " + value);
     Panel nameValueRow = new FlowPanel();
     nameValueRow.getElement().setId("nameValueRow_" + label);
@@ -378,7 +375,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
 
     InlineHTML englishPhrase = new InlineHTML(value, WordCountDirectionEstimator.get().estimateDirection(value));
-    englishPhrase.addStyleName(withWrap ? "Instruction-data-with-wrap" : "Instruction-data");
+    englishPhrase.addStyleName("Instruction-data-with-wrap");
     if (label.contains("Meaning")) {
       englishPhrase.addStyleName("englishFont");
     }
@@ -390,7 +387,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   /**
    * @return
-   * @see mitll.langtest.client.custom.QCNPFExercise#populateCommentRow
+   * @see mitll.langtest.client.qc.QCNPFExercise#populateCommentRow
    */
   protected Label getCommentLabel() {
     final Label commentLabel = new Label("comment?");
@@ -414,7 +411,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @see #addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.CommonExercise)
    */
   private ScoringAudioPanel getAnswerWidget(LangTestDatabaseAsync service, final ExerciseController controller, float screenPortion) {
-    ScoringAudioPanel widgets = new ASRRecordAudioPanel(service, 1, controller);
+    ScoringAudioPanel widgets = new ASRRecordAudioPanel(service, controller);
     widgets.addScoreListener(scorePanel);
     answerAudio = widgets;
     answerAudio.setScreenPortion(screenPortion);
@@ -435,13 +432,12 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     /**
      * @param service
-     * @param index
      * @param controller
      * @see GoodwaveExercisePanel#getAnswerWidget
      */
-    public ASRRecordAudioPanel(LangTestDatabaseAsync service, int index, ExerciseController controller) {
+    public ASRRecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller) {
       super(exercise.getForeignLanguage(), service, controller, scorePanel, REFERENCE, exercise.getID());
-      this.index = index;
+      this.index = 1;
       getElement().setId("ASRRecordAudioPanel");
     }
 
@@ -513,7 +509,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         DivWidget south = new DivWidget();
         south.add(getDownloadAnchor());
         downloadContainer.add(south);
-
         downloadContainer.setVisible(false);
         downloadContainer.addStyleName("leftFiveMargin");
 
