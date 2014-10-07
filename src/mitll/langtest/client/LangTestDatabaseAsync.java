@@ -4,7 +4,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.flashcard.AVPHistoryForList;
+import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -17,20 +17,17 @@ import java.util.Map;
  * The async counterpart of <code>LangTestDatabase</code>.
  */
 public interface LangTestDatabaseAsync {
-  void addTextAnswer(int usedID, CommonExercise exercise, int questionID, String answer, String answerType, AsyncCallback<Void> async);
-  void userExists(String login, AsyncCallback<Integer> async);
-  void addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, Collection<User.Permission> permissions, AsyncCallback<Long> async);
   void getUsers(AsyncCallback<List<User>> async);
   void getUserBy(long id, AsyncCallback<User> async);
 
-  void writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
+  void writeAudioFile(String base64EncodedString, String exercise, int question, int user,
                       int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash, AsyncCallback<AudioAnswer> async);
 
   void getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, String exerciseID, AsyncCallback<PretestScore> async);
 
   void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID, AsyncCallback<ImageResponse> async);
 
-  void getExercise(String id, long userID, AsyncCallback<CommonExercise> async);
+  void getExercise(String id, long userID, boolean isFlashcardReq, AsyncCallback<CommonExercise> async);
 
   void getUserToResultCount(AsyncCallback<Map<User, Integer>> async);
 
@@ -43,11 +40,6 @@ public interface LangTestDatabaseAsync {
   void getResultPerExercise(AsyncCallback<Map<String, Map<String, Integer>>> async);
 
   void getSessions(AsyncCallback<List<Session>> async);
-
-/*
-  void getMonitorResults(AsyncCallback<Collection<MonitorResult>> async);
-*/
-
 
   void getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, long userid, String flText, int req, AsyncCallback<ResultAndTotal> async);
 
@@ -62,7 +54,7 @@ public interface LangTestDatabaseAsync {
   void getGradeCountPerExercise(AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>> async);
 
   void getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID,
-                      int userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples, AsyncCallback<ExerciseListWrapper> async);
+                      int userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples, boolean incorrectFirstOrder, AsyncCallback<ExerciseListWrapper> async);
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
@@ -96,15 +88,13 @@ public interface LangTestDatabaseAsync {
 
   void deleteItem(String exid, AsyncCallback<Boolean> async);
 
-  void getUserHistoryForList(long userid, Collection<String> ids, long latestResultID, AsyncCallback<List<AVPHistoryForList>> async);
+  void getUserHistoryForList(long userid, Collection<String> ids, long latestResultID, Map<String, Collection<String>> typeToSection, long userListID, AsyncCallback<AVPScoreReport> async);
 
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, AsyncCallback<Void> async);
 
   void getEvents(AsyncCallback<List<Event>> async);
 
   void markState(String id, STATE state, long creatorID, AsyncCallback<Void> async);
-
-  void setAVPSkip(Collection<Long> ids, AsyncCallback<Void> async);
 
   void getReviewLists(AsyncCallback<List<UserList>> async);
 
@@ -129,9 +119,21 @@ public interface LangTestDatabaseAsync {
                     String identifier,
                     int reqid, AsyncCallback<AudioAnswer> async);
 
-  void getNumResults(AsyncCallback<Integer> async);
+  void userExists(String login, String passwordH, AsyncCallback<User> async);
 
- // void getResults(Map<String, String> unitToValue, long userid, String exerciseID, AsyncCallback<List<MonitorResult>> async);
+  void addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale, int age, String dialect, boolean isCD, AsyncCallback<User> async);
+
+  void resetPassword(String userid, String text, String url, AsyncCallback<Boolean> asyncCallback);
+
+  void forgotUsername(String emailH, String email, String url, AsyncCallback<Boolean> async);
+
+  void getUserIDForToken(String token, AsyncCallback<Long> async);
+
+  void changePFor(String token, String first, AsyncCallback<Boolean> asyncCallback);
+
+  void enableCDUser(String cdToken, String emailR, String url, AsyncCallback<String> asyncCallback);
+
+  void getNumResults(AsyncCallback<Integer> async);
 
   void getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which, AsyncCallback<Collection<String>> async);
 }
