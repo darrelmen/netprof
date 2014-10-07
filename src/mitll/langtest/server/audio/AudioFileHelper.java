@@ -4,7 +4,6 @@ import com.google.common.io.Files;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -38,6 +37,7 @@ public class AudioFileHelper {
   private AutoCRT autoCRT;
   private final DatabaseImpl db;
   private final LangTestDatabaseImpl langTestDatabase;
+  private boolean checkedLTS = false;
 
   /**
    * @see mitll.langtest.server.ScoreServlet#getAudioFileHelper()
@@ -52,6 +52,27 @@ public class AudioFileHelper {
     this.serverProps = serverProperties;
     this.db = db;
     this.langTestDatabase = langTestDatabase;
+  }
+
+  public void checkLTS(List<CommonExercise> exercises) {
+    synchronized (this) {
+      if (!checkedLTS) {
+        checkedLTS = true;
+        int count = 0;
+        for (CommonExercise exercise : exercises) {
+          boolean validForeignPhrase = checkLTS(exercise.getForeignLanguage());
+          if (!validForeignPhrase) {
+            if (count < 10) {
+              logger.error("huh? for " + exercise.getID() + " we can't parse " + exercise.getID() + " " + exercise.getEnglish() + " fl " + exercise.getForeignLanguage());
+            }
+            count++;
+          }
+        }
+        if (count > 0) {
+          logger.error("huh? out of " + exercises.size() + " LTS fails on " + count);
+        }
+      }
+    }
   }
 
   /**
@@ -338,7 +359,7 @@ public class AudioFileHelper {
                                      int reqid,
                                      File file, AudioCheck.ValidityAndDur validity, String url, boolean doFlashcard) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
-    if (serverProps.isFlashcard() || doFlashcard) {
+    if (doFlashcard) {
       makeASRScoring();
       autoCRT.getFlashcardAnswer(exercise, file, audioAnswer);
       return audioAnswer;
