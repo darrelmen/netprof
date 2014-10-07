@@ -12,7 +12,9 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public interface UserNotification {
-  void gotUser(long userID);
+  void showLogin();
+
+  void gotUser(User user);
   void rememberAudioType(String audioType);
   void setPermission(User.Permission permission, boolean on);
   Collection<User.Permission> getPermissions();
