@@ -49,7 +49,7 @@ public class UserList extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.client.custom.EditItem#makeListOfOnlyYourItems(UserList)
+   * @see mitll.langtest.client.custom.dialog.EditItem#makeListOfOnlyYourItems(UserList)
    * @param ul
    */
   public UserList(UserList ul) {
