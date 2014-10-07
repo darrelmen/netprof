@@ -1,7 +1,8 @@
 package mitll.langtest.shared;
 
+import mitll.langtest.shared.flashcard.CorrectAndScore;
+
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,12 @@ public interface CommonExercise extends CommonShell {
   String getSlowAudioRef();
 
   Collection<AudioAttribute> getAudioAttributes();
+
+  /**
+   * @see mitll.langtest.server.DatabaseServlet#getJsonForExercise(CommonExercise)
+   * @see mitll.langtest.server.ScoreServlet#getJsonArray(java.util.List)
+   * @return
+   */
   AudioAttribute getLatestContext();
   AudioAttribute getRecordingsBy(long userID, boolean regularSpeed);
   AudioAttribute getRecordingsBy(long userID, String speed);
@@ -65,12 +72,11 @@ public interface CommonExercise extends CommonShell {
   ExerciseAnnotation getAnnotation(String field);
 
   Exercise toExercise();
-  CommonUserExercise toCommonUserExercise();
 
   // super nice to remove these... and make read only
 
   /**
-   * @see mitll.langtest.server.database.SectionHelper#addExerciseToLesson(CommonExercise, String, String)
+   * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson(CommonExercise, String, String)
    * @param unit
    * @param value
    */
@@ -78,18 +84,22 @@ public interface CommonExercise extends CommonShell {
 
   void addAnnotation(String field, String status, String comment);
 
-  Date getModifiedDate();
+  long getModifiedDateTimestamp();
 
   Collection<String> getFields();
   boolean removeAudio(AudioAttribute audioAttribute);
   String getCombinedTooltip();
   void setTooltip();
 
-  void setScores(Collection<ScoreAndPath> scoreTotal);
-  Collection<ScoreAndPath> getScores();
+  /**
+   * @see mitll.langtest.server.database.ResultDAO#attachScoreHistory(long, CommonExercise, boolean)
+   * @param scoreTotal
+   */
+  void setScores(List<CorrectAndScore> scoreTotal);
+  List<CorrectAndScore> getScores();
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotationsAndAudio(long, CommonExercise)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotationsAndAudio
    * @param v
    */
   void setAvgScore(float v);
