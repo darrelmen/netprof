@@ -506,6 +506,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void checkAdmin(boolean isAdmin) {
     if (isAdmin) {
+      final LangTest outer = this;
+
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
 //          downloadFailedAlert();
@@ -513,7 +515,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         }
 
         public void onSuccess() {
-          resultManager = new ResultManager(service, props.getNameForAnswer());
+          resultManager = new ResultManager(service, outer, props.getNameForAnswer(), props, getStartupInfo().getTypeOrder(), outer);
         }
       });
 
