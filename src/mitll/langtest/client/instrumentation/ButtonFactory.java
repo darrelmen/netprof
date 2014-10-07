@@ -17,7 +17,7 @@ import mitll.langtest.client.exercise.ExerciseController;
  */
 public class ButtonFactory implements EventLogger {
   private final LangTestDatabaseAsync service;
-  private PropertyHandler props;
+  private final PropertyHandler props;
 
   public ButtonFactory(LangTestDatabaseAsync service, PropertyHandler props) {
     this.service = service;
@@ -38,7 +38,7 @@ public class ButtonFactory implements EventLogger {
     button.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        logEvent(button, "button",exid, context, userid);
+        logEvent(button, "button", exid, context, userid);
       }
     });
   }
@@ -49,7 +49,7 @@ public class ButtonFactory implements EventLogger {
       @Override
       public void onClick(ClickEvent event) {
         String widgetType = uiObject.getClass().toString();
-        widgetType = widgetType.substring(widgetType.lastIndexOf(".")+1);
+        widgetType = widgetType.substring(widgetType.lastIndexOf(".") + 1);
         logEvent(uiObject, widgetType, exid, context, userid);
       }
     });
@@ -58,32 +58,37 @@ public class ButtonFactory implements EventLogger {
   @Override
   public void logEvent(final UIObject button, String widgetType, String exid, String context, long userid) {
     final String id = button.getElement().getId();
-    logEvent(id, widgetType,exid, context, userid);
+    logEvent(id, widgetType, exid, context, userid);
   }
 
   @Override
   public void logEvent(final Tab tab, String widgetType, String exid, String context, long userid) {
     final String id = tab.asWidget().getElement().getId();
-    logEvent(id, widgetType,exid, context, userid);
+    logEvent(id, widgetType, exid, context, userid);
   }
 
   @Override
-  public void logEvent(final String widgetID, String widgetType, String exid, String context, long userid) {
-   // System.out.println("logEvent event for " + widgetID + " " + widgetType + " exid " + exid + " context " + context + " user " + userid);
+  public void logEvent(final String widgetID, final String widgetType, final String exid, final String context, final long userid) {
+    // System.out.println("logEvent event for " + widgetID + " " + widgetType + " exid " + exid + " context " + context + " user " + userid);
 
-    service.logEvent(widgetID, widgetType, exid, context, userid, props.getTurkID(), new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        if (!caught.getMessage().trim().equals("0")) {
-         // System.err.println("FAILED to send event for " + widgetID + " message '" + caught.getMessage() +"'");
-          caught.printStackTrace();
-        }
-      }
+    com.google.gwt.core.client.Scheduler.get().scheduleDeferred(new com.google.gwt.core.client.Scheduler.ScheduledCommand() {
+      public void execute() {
+        service.logEvent(widgetID, widgetType, exid, context, userid, props.getTurkID(), new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            if (!caught.getMessage().trim().equals("0")) {
+              // System.err.println("FAILED to send event for " + widgetID + " message '" + caught.getMessage() +"'");
+              caught.printStackTrace();
+            }
+          }
 
-      @Override
-      public void onSuccess(Void result) {
-        //System.out.println("sent event for " + widgetID);
+          @Override
+          public void onSuccess(Void result) {
+            //System.out.println("sent event for " + widgetID);
+          }
+        });
       }
     });
+
   }
 }
