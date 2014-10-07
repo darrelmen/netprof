@@ -26,11 +26,7 @@ public class MailSupport {
    * @param debugEmail
    * @see mitll.langtest.server.LangTestDatabaseImpl#getMailSupport()
    */
-  public MailSupport(boolean debugEmail) {
-    this.debugEmail = debugEmail;
-    logger.warn("\n\n\ndebug is " + debugEmail);
-    // TODO : gah! fix the property!
-  }
+  public MailSupport(boolean debugEmail) { this.debugEmail = debugEmail;  }
 
   /**
    * @see EmailHelper#enableCDUser(String, String, String)
