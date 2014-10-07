@@ -8,7 +8,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import mitll.langtest.server.database.FileExerciseDAO;
+import mitll.langtest.server.database.exercise.FileExerciseDAO;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 
