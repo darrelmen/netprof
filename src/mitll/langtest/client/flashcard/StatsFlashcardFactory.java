@@ -98,7 +98,6 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
         public void listChanged(List<CommonShell> items, String selectionID) {
           StatsFlashcardFactory.this.selectionID = selectionID;
           allExercises = items;
-          //originalExercises = items;
       //    System.out.println("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
           reset();
         }
@@ -353,53 +352,13 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       contentPanel.addStyleName("noWidthCenterPractice");
     //  System.out.println("showFeedbackCharts ---- \n\n\n");
 
-      //container = completeDisplay.showFeedbackCharts(result, exToScore, getCorrect(), getIncorrect(), allExercises.size());
       HorizontalPanel widgets = new HorizontalPanel();
       container = widgets;
       scoreHistory = completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
       scoreHistory.add(getButtonsBelowScoreHistory());
       widgets.add(scoreHistory);
       completeDisplay.addLeftAndRightCharts(result, exToScore, getCorrect(), getIncorrect(), allExercises.size(),widgets);
-
-
-/*      Panel leftRight = new HorizontalPanel();
-      leftRight.getElement().setId("setCompleteDisplayLeftRight");
-      leftRight.addStyleName("floatLeft");*/
       belowContentDiv.add(container);
-
-
-  //    leftRight.add(scoreHistory);
-
-    //  Panel child = getButtonsBelowScoreHistory();
-
-
-      //DivWidget right = new DivWidget();
-     // right.getElement().setId("setCompleteDisplayLeftRight_rightside");
-
-     // right.add(container);
-     // right.addStyleName("floatRight");
-     // leftRight.add(right);
-
-
-     /* Panel leftRight = new HorizontalPanel();
-      leftRight.getElement().setId("setCompleteDisplayLeftRight");
-      leftRight.addStyleName("floatLeft");
-      belowContentDiv.add(leftRight);
-
-      scoreHistory = completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
-
-      leftRight.add(scoreHistory);
-
-      Panel child = getButtonsBelowScoreHistory();
-
-      scoreHistory.add(child);
-
-      DivWidget right = new DivWidget();
-      right.getElement().setId("setCompleteDisplayLeftRight_rightside");
-
-      right.add(container);
-      right.addStyleName("floatRight");
-      leftRight.add(right);*/
     }
 
     private Panel getButtonsBelowScoreHistory() {
@@ -439,12 +398,6 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
      * @see #getIncorrectListButton()
      */
     protected void doIncorrectFirst() {
-      /*abortPlayback();
-      belowContentDiv.clear();
-      belowContentDiv.add(getSkipToEnd());
-      belowContentDiv.add(getStartOver());
-      setMainContentVisible(true);
-      */
       showFlashcardDisplay();
 
       currentExercise = null;
@@ -612,12 +565,6 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       controller.register(startOver, N_A);
       return startOver;
     }
-
-/*
-    protected void startOverInOrder() {
-      startOver();
-    }
-*/
 
     protected void abortPlayback() {
       cancelTimer();
