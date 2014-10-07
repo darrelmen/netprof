@@ -64,7 +64,7 @@ public class MonitoringSupport {
       idToCount.put(u,0);
     }
     for (Result r : results) {
-      User user = idToUser.get(r.userid);
+      User user = idToUser.get(r.getUserid());
       Integer c = idToCount.get(user);
       if (c != null) {
         idToCount.put(user, c + 1);
@@ -167,14 +167,14 @@ public class MonitoringSupport {
     Map<String, Set<Long>> keyToUsers = new HashMap<String, Set<Long>>();
     List<Result> results = getResults();
     for (Result r : results) {
-      String key = r.id + "/" + r.qid;
+      String key = r.getId() + "/" + r.getQid();
       Set<Long> usersForResult = keyToUsers.get(key);
 
       if (usersForResult == null) {
         keyToUsers.put(key, usersForResult = new HashSet<Long>());
       }
-      if (!usersForResult.contains(r.userid)) {
-        usersForResult.add(r.userid);
+      if (!usersForResult.contains(r.getUserid())) {
+        usersForResult.add(r.getUserid());
         Integer c = idToCount.get(key);
         if (c == null) {
           idToCount.put(key, 1);
@@ -198,9 +198,9 @@ public class MonitoringSupport {
 
     int total = 0;
     for (Result r : results) {
-      String key = r.id + "/" + r.qid;
+      String key = r.getId() + "/" + r.getQid();
 
-      List<Grade> grades = idToGrade.get(r.uniqueID);
+      List<Grade> grades = idToGrade.get(r.getUniqueID());
       if (grades == null) {
         //logger.warn("no grade for result " + key);
       }
@@ -242,7 +242,7 @@ public class MonitoringSupport {
    // logger.debug("results " + results.size() + ","+(isMale ? "male":"female") + " users num = " + userMap.size());
     SortedSet<String> resultKeys = new TreeSet<String>();
     for (Result r : results) {
-      if (userMap.containsKey(r.userid)) {   // filter for just results by males or females
+      if (userMap.containsKey(r.getUserid())) {   // filter for just results by males or females
         String key = r.getID();
         resultKeys.add(key);
         Set<Long> usersForResult = keyToUsers.get(key);
@@ -250,8 +250,8 @@ public class MonitoringSupport {
         if (usersForResult == null) {
           keyToUsers.put(key, usersForResult = new HashSet<Long>());
         }
-        if (!usersForResult.contains(r.userid)) {
-          usersForResult.add(r.userid);
+        if (!usersForResult.contains(r.getUserid())) {
+          usersForResult.add(r.getUserid());
           Integer c = idToCount.get(key);
           int value = (c == null) ? 1 : c+1;
           idToCount.put(key, value);
@@ -334,7 +334,7 @@ public class MonitoringSupport {
     SimpleDateFormat df = new SimpleDateFormat("MM-dd-yy");
     Map<String,Integer> dayToCount = new HashMap<String, Integer>();
     for (Result r : results) {
-      Date date = new Date(r.timestamp);
+      Date date = new Date(r.getTimestamp());
       String day = df.format(date);
       Integer c = dayToCount.get(day);
       if (c == null) {
@@ -354,7 +354,7 @@ public class MonitoringSupport {
     SimpleDateFormat df = new SimpleDateFormat("HH");
     Map<String,Integer> dayToCount = new HashMap<String, Integer>();
     for (Result r : results) {
-      Date date = new Date(r.timestamp);
+      Date date = new Date(r.getTimestamp());
       String day = df.format(date);
       Integer c = dayToCount.get(day);
       if (c == null) {
@@ -587,14 +587,16 @@ public class MonitoringSupport {
     int badDur = 0;
     int maxWarns = 0;
     for (Result r : results) {
-      total += r.durationInMillis;
-      if (r.durationInMillis > 0) {
+      total += r.getDurationInMillis();
+      if (r.getDurationInMillis() > 0) {
         count++;
-      } else if (r.spoken /*|| r.audioType.equals(Result.AUDIO_TYPE_UNSET)*/) {
-        if (r.answer.endsWith(".wav")) {
+      } else if (true
+          //r.spoken /*|| r.audioType.equals(Result.AUDIO_TYPE_UNSET)*/
+          ) {
+        if (r.getAnswer().endsWith(".wav")) {
           badDur++;
           if (maxWarns++ < 10) {
-            logger.info("possible bad audio result " + r + " path " + r.answer);
+            logger.info("possible bad audio result " + r + " path " + r.getAnswer());
           }
         }
       }
@@ -615,12 +617,12 @@ public class MonitoringSupport {
     Map<Integer, Integer> resultIDToExp = new HashMap<Integer, Integer>();
     Set<Long> unknownUsers = new HashSet<Long>();
     for (Result r : results) {
-      User user = idToUser.get(r.userid);
+      User user = idToUser.get(r.getUserid());
       if (user == null) {
-        unknownUsers.add(r.userid);
+        unknownUsers.add(r.getUserid());
         //System.err.println("unknown user " + r.userid);
       }
-      else resultIDToExp.put(r.uniqueID, user.getExperience());
+      else resultIDToExp.put(r.getUniqueID(), user.getExperience());
     }
 
     logger.warn("getResultStats : found " + unknownUsers.size() + " unknown users : " + unknownUsers);
