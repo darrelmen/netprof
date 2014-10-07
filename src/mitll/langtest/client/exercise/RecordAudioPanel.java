@@ -45,7 +45,7 @@ public class RecordAudioPanel extends AudioPanel {
    * @param index
    * @param showSpectrogram
    * @param audioType
-   * @see mitll.langtest.client.custom.NewUserExercise.CreateFirstRecordAudioPanel#CreateFirstRecordAudioPanel(mitll.langtest.shared.CommonExercise, com.google.gwt.user.client.ui.Panel, boolean)
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#CreateFirstRecordAudioPanel(mitll.langtest.shared.CommonExercise, com.google.gwt.user.client.ui.Panel, boolean)
    * @see mitll.langtest.client.exercise.WaveformExercisePanel#getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
    */
   public RecordAudioPanel(CommonExercise exercise, ExerciseController controller, Panel widgets,
