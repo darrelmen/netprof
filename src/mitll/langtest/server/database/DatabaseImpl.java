@@ -47,7 +47,6 @@ public class DatabaseImpl implements Database {
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
   private UserDAO userDAO;
-  //private DLIUserDAO dliUserDAO;
   private ResultDAO resultDAO;
   private AudioDAO audioDAO;
   private AnswerDAO answerDAO;
@@ -63,7 +62,6 @@ public class DatabaseImpl implements Database {
   private String lessonPlanFile;
   private final boolean isWordPairs;
   private boolean useFile;
-//  private final boolean isFlashcard;
   private String language = "";
   private final boolean doImages;
   private final String configDir;
@@ -742,20 +740,6 @@ public class DatabaseImpl implements Database {
     }
   }
 
-/*  Collection<User> joinWithDLIUsers(List<User> users) {
-    List<DLIUser> users1 = dliUserDAO.getUsers();
-    Map<Long, User> userMap = userDAO.getMap(users);
-
-    for (DLIUser dliUser : users1) {
-      User user = userMap.get(dliUser.getUserID());
-      if (user != null) {
-        user.setDemographics(dliUser);
-      }
-    }
-    //if (users1.isEmpty()) logger.info("no dli users.");
-    return userMap.values();
-  }*/
-
   public List<Result> getResultsWithGrades() {
     List<Result> results = resultDAO.getResults();
 /*    Map<Integer,Result> idToResult = new HashMap<Integer, Result>();
@@ -777,11 +761,19 @@ public class DatabaseImpl implements Database {
   public int getNumResults() {
     return resultDAO.getNumResults();
   }
-  public List<MonitorResult> getMonitorResults() {
-   // return resultDAO.getMonitorResults();
 
+  /**
+   * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultAlternatives(java.util.Map, long, String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(java.util.Map, long, String)
+   */
+  public List<MonitorResult> getMonitorResults() {
     List<MonitorResult> monitorResults = resultDAO.getMonitorResults();
-    Map<String,CommonExercise> join = new HashMap<String, CommonExercise>();
+    return getMonitorResults(monitorResults);
+  }
+
+  private List<MonitorResult> getMonitorResults(List<MonitorResult> monitorResults) {
+    Map<String, CommonExercise> join = new HashMap<String, CommonExercise>();
 
     for (CommonExercise exercise : getExercises()) {
       String id = exercise.getID();
@@ -798,15 +790,14 @@ public class DatabaseImpl implements Database {
     int n = 0;
     for (MonitorResult result : monitorResults) {
       String id = result.getId();
-       if (id.contains("\\/")) id = id.substring(0,id.length()-2);
+      if (id.contains("\\/")) id = id.substring(0, id.length() - 2);
       CommonExercise exercise = join.get(id);
       if (exercise == null) {
         if (n < 200) logger.error("couldn't find " + result);
         n++;
         result.setUnitToValue(EMPTY_MAP);
         result.setForeignText("");
-      }
-      else {
+      } else {
         result.setUnitToValue(exercise.getUnitToValue());
         result.setForeignText(exercise.getForeignLanguage());
       }
@@ -960,12 +951,6 @@ public class DatabaseImpl implements Database {
       logger.error("got " + e, e);
     }
   }
-
-/*
-  public void addDLIUser(DLIUser dliUser) throws Exception {
-    dliUserDAO.addUser(dliUser);
-  }
-*/
 
   public UserListManager getUserListManager() {
     return userListManager;
