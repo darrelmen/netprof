@@ -166,7 +166,6 @@ public class ResultDAO extends DAO {
       sessions.addAll(c);
     }
 
-    // List<Result> results = userToAnswers.get(userid);
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
     if (true) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
 
@@ -268,7 +267,6 @@ public class ResultDAO extends DAO {
         AUDIO_TYPE + (matchAVP?"=":"<>") + "'avp'" +" AND " +
           Database.EXID + " in (" + list + ")" +
           " order by " + Database.TIME + " asc";
-      //List<Result> resultsSQL = getResultsSQL(sql);
 
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(sql);
