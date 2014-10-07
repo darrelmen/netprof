@@ -1,14 +1,9 @@
 package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.shared.custom.UserExercise;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Representation of a individual item of work the user sees.  Could be a pronunciation exercise or a question(s)
@@ -22,23 +17,23 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class Exercise extends AudioExercise implements CommonExercise {
-  private static final ArrayList<String> EMPTY_LIST = new ArrayList<String>();
-
-  public enum EXERCISE_TYPE implements IsSerializable { RECORD, TEXT_RESPONSE, REPEAT, REPEAT_FAST_SLOW, MULTI_REF }
   public static final String EN = "en";
   public static final String FL = "fl";
-  private static final boolean DEBUG = false;
+  private static final int MAX_TOOLTIP_LENGTH = 15;
+  //private static final boolean DEBUG = false;
   private String plan;
   private String content;
-  private EXERCISE_TYPE type = EXERCISE_TYPE.RECORD;
   private boolean promptInEnglish = true;
-  private Map<String,List<QAPair>> langToQuestion = null;
+
+  // don't serialize
+  private transient Map<String,List<QAPair>> langToQuestion = null;
+
   private String englishSentence;
   private String meaning, context;
   private List<String> refSentences = new ArrayList<String>();
   private List<String> translitSentences = new ArrayList<String>();
   private STATE state;
-  private Collection<ScoreAndPath> scores;
+  private List<CorrectAndScore> scores;
   private float avgScore;
 
   public static class QAPair implements IsSerializable {
@@ -90,7 +85,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
   public Exercise() {}     // required for serialization
 
   /**
-   * @see mitll.langtest.server.database.SQLExerciseDAO#getExercise
+   * @see mitll.langtest.server.database.exercise.SQLExerciseDAO#getExercise
    * @param id
    * @param content
    * @param promptInEnglish
@@ -103,13 +98,12 @@ public class Exercise extends AudioExercise implements CommonExercise {
     super(id, tooltip);
     this.plan = plan;
     this.setContent(content);
-    this.setType(recordAudio ? EXERCISE_TYPE.RECORD : EXERCISE_TYPE.TEXT_RESPONSE);
     this.setPromptInEnglish(promptInEnglish);
     this.context = context;
   }
 
   /**
-   * @see mitll.langtest.server.database.FileExerciseDAO#getSimpleExerciseForLine(String, int)
+   * @see mitll.langtest.server.database.exercise.FileExerciseDAO#getSimpleExerciseForLine(String, int)
    * @param plan
    * @param id
    * @param content
@@ -124,11 +118,10 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.setContent(content);
     setRefAudio(audioRef);
     this.refSentences.add(sentenceRef);
-    this.setType(EXERCISE_TYPE.REPEAT);
   }
 
   /**
-   * @see mitll.langtest.server.database.FileExerciseDAO#getFlashcardExercise(int, String, String, String, String)
+   * @see mitll.langtest.server.database.exercise.FileExerciseDAO#getFlashcardExercise(int, String, String, String, String)
    * @param plan
    * @param id
    * @param content
@@ -141,11 +134,10 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.plan = plan;
     this.setContent(content);
     this.refSentences = sentenceRefs;
-    this.setType(EXERCISE_TYPE.RECORD);
   }
 
   /**
-   * @see mitll.langtest.server.database.FileExerciseDAO#getExerciseForLine(String)
+   * @see mitll.langtest.server.database.exercise.FileExerciseDAO#getExerciseForLine(String)
    * @param plan
    * @param id
    * @param content
@@ -154,7 +146,6 @@ public class Exercise extends AudioExercise implements CommonExercise {
    */
   public Exercise(String plan, String id, String content, String sentenceRef, String tooltip) {
     this(plan, id, content, null, sentenceRef, tooltip);
-    this.setType(EXERCISE_TYPE.REPEAT_FAST_SLOW);
   }
 
   public void setTooltip() {
@@ -173,8 +164,8 @@ public class Exercise extends AudioExercise implements CommonExercise {
    */
   public String getCombinedTooltip() {
     String refSentence = getRefSentence();
-    if (refSentence.length() > 15) {
-      refSentence = refSentence.substring(0, 15);
+    if (refSentence.length() > MAX_TOOLTIP_LENGTH) {
+      refSentence = refSentence.substring(0, MAX_TOOLTIP_LENGTH);
     }
     boolean refSentenceEqualsTooltip = getTooltip().trim().equals(getRefSentence().trim());
     String combined = refSentenceEqualsTooltip ? getTooltip() : getTooltip() + (refSentence.isEmpty() ? "": " / " + refSentence);
@@ -182,16 +173,18 @@ public class Exercise extends AudioExercise implements CommonExercise {
     return combined;
   }
 
+/*
   public void addQuestion() {
     addQuestion(FL, "Please record the sentence above.", "", EMPTY_LIST);
   }
+*/
 
   /**
    * @param lang
    * @param question
    * @param answer
    * @param alternateAnswers
-   * @see mitll.langtest.server.database.SQLExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
+   * @see mitll.langtest.server.database.exercise.SQLExerciseDAO#getExercise(String, String, net.sf.json.JSONObject)
    */
   public void addQuestion(String lang, String question, String answer, List<String> alternateAnswers) {
     QAPair pair = new QAPair(question, answer, alternateAnswers);
@@ -217,8 +210,6 @@ public class Exercise extends AudioExercise implements CommonExercise {
   public String getPlan() { return plan; }
 
   public String getContent() { return content; }
-  private EXERCISE_TYPE getType() { return type; }
-  private boolean isRepeat() { return type == EXERCISE_TYPE.REPEAT || type == EXERCISE_TYPE.REPEAT_FAST_SLOW; }
 
   public String getRefSentence() {
     StringBuilder builder = new StringBuilder();
@@ -229,7 +220,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
   }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#getExercise(String, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, boolean, String, boolean)
+   * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise(String, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, boolean, String, boolean)
    * @param sentenceRefs
    */
   public void setRefSentences(List<String> sentenceRefs) {
@@ -249,27 +240,37 @@ public class Exercise extends AudioExercise implements CommonExercise {
 
   /**
    * @return
+   * @see mitll.langtest.server.database.Export#populateIdToExportMap(Exercise)
    */
   public List<QAPair> getQuestions() {
     List<QAPair> qaPairs = langToQuestion == null ? new ArrayList<QAPair>() : langToQuestion.get(isPromptInEnglish() ? EN : FL);
     return qaPairs == null ? new ArrayList<QAPair>() : qaPairs;
   }
 
+  /**
+   * @see mitll.langtest.server.database.Export#addPredefinedAnswers(Exercise, boolean, java.util.Map)
+   * @return
+   */
   public List<QAPair> getEnglishQuestions() {
     List<QAPair> qaPairs = langToQuestion == null ? new ArrayList<QAPair>() : langToQuestion.get(EN);
     return qaPairs == null ? new ArrayList<QAPair>() : qaPairs;
   }
+
+  /**
+   *
+   * @return
+   * @see mitll.langtest.server.database.Export#addPredefinedAnswers(Exercise, boolean, java.util.Map)
+   */
   public List<QAPair> getForeignLanguageQuestions() {
     List<QAPair> qaPairs = langToQuestion == null ? new ArrayList<QAPair>() : langToQuestion.get(FL);
     return qaPairs == null ? new ArrayList<QAPair>() : qaPairs;
   }
 
   public String getEnglish() {  return englishSentence;  }
-  public void setType(EXERCISE_TYPE type) { this.type = type;  }
 
   public void setContent(String content) { this.content = content;  }
   /**
-   * @see mitll.langtest.server.database.ExcelImport#getExercise
+   * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    * @param englishSentence
    */
   public void setEnglishSentence(String englishSentence) {
@@ -314,13 +315,8 @@ public class Exercise extends AudioExercise implements CommonExercise {
   }
 
   @Override
-  public CommonUserExercise toCommonUserExercise() {
-    return new UserExercise(this);
-  }
-
-  @Override
-  public Date getModifiedDate() {
-    return null;
+  public long getModifiedDateTimestamp() {
+    return 0;
   }
 
   @Override
@@ -333,12 +329,12 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.state = state;
   }
 
-  public Collection<ScoreAndPath> getScores() {
+  public List<CorrectAndScore> getScores() {
     return scores;
   }
 
   @Override
-  public void setScores(Collection<ScoreAndPath> scores) { this.scores = scores; }
+  public void setScores(List<CorrectAndScore> scores) { this.scores = scores; }
 
   public float getAvgScore() {
     return avgScore;
@@ -348,35 +344,27 @@ public class Exercise extends AudioExercise implements CommonExercise {
   }
 
   public String toString() {
-    String moreAboutQuestions = DEBUG ? " : " +  getQuestionToString() : "";
-    String questionInfo = langToQuestion == null ? " no questions" : " num questions " + langToQuestion.size() + moreAboutQuestions;
+    //  String moreAboutQuestions = DEBUG ? " : " +  getQuestionToString() : "";
+    //  String questionInfo = langToQuestion == null ? " no questions" : " num questions " + langToQuestion.size() + moreAboutQuestions;
 
-    if (isRepeat() || getType() == EXERCISE_TYPE.MULTI_REF) {
-      Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
+    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
 
-      // warn about attr that have no user
-      StringBuilder builder = new StringBuilder();
-      for (AudioAttribute attr:audioAttributes1) {
-        if (attr.getUser() == null) {
-          builder.append("\t").append(attr.toString()).append("\n");
-        }
+    // warn about attr that have no user
+    StringBuilder builder = new StringBuilder();
+    for (AudioAttribute attr:audioAttributes1) {
+      if (attr.getUser() == null) {
+        builder.append("\t").append(attr.toString()).append("\n");
       }
+    }
 
-      return "Exercise " + type + " " +id +  " content bytes = " + content.length() + " english '" + getEnglish() +
-          "' ref sentence '" + getRefSentence() +"' audio count = " + audioAttributes1.size()+
+    return "Exercise " + id +  " content bytes = " + content.length() + " english '" + getEnglish() +
+        "' ref sentence '" + getRefSentence() +"' audio count = " + audioAttributes1.size()+
         (builder.toString().isEmpty() ? "":" \n\tmissing user audio " + builder.toString()) +
-        " : " + questionInfo +
+        //    " : " + questionInfo +
         " unit->lesson " + getUnitToValue();
-    }
-    else {
-      return "Exercise " + getType() + " " + id + " " + (isPromptInEnglish() ?"english":"foreign")+
-          " : content bytes = " + content.length() + (DEBUG ? " content : " +content : "")+
-          " ref '" + getRefSentence() + "' translit '" + getTransliteration()+ "'"+
-        questionInfo;
-    }
   }
 
-  private String getQuestionToString() {
+/*  private String getQuestionToString() {
     String questions = "";
     if (langToQuestion != null) {
       for (Map.Entry<String, List<QAPair>> pair : langToQuestion.entrySet()) {
@@ -388,5 +376,5 @@ public class Exercise extends AudioExercise implements CommonExercise {
       }
     }
     return questions;
-  }
+  }*/
 }
