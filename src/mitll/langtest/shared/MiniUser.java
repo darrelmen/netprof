@@ -3,15 +3,16 @@ package mitll.langtest.shared;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
+ * Much of the time the UI doesn't need to know a lot about a user so just send the little it needs.
+ *
  * Created by GO22670 on 4/9/2014.
  */
 public class MiniUser implements IsSerializable, Comparable<MiniUser> {
   private long id;
   private int age;
   private int gender;
-  private String nativeLang;
-  private String dialect;
   private String userID;
+  private boolean isAdmin;
 
   public MiniUser() {
   } // for serialization
@@ -21,24 +22,27 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
    * @param age
    * @param gender
    * @param userID
+   * @param isAdmin
    */
-  public MiniUser(long id, int age, int gender, String nativeLang, String dialect, String userID) {
+  public MiniUser(long id, int age, int gender, String userID, boolean isAdmin) {
     this.id = id;
     this.age = age;
     this.gender = gender;
-    this.nativeLang = nativeLang;
-    this.dialect = dialect;
     this.userID = userID;
+    this.isAdmin = isAdmin;
   }
 
   public boolean isDefault() { return id < 0; }
 
   /**
+   * It seems strange to copy the string here, but I think it will help the RPC code not try to serialize
+   * the User this object is made from.
+   *
    * @see mitll.langtest.server.database.UserDAO#getMiniUsers()
    * @param user
    */
   public MiniUser(User user) {
-    this(user.getId(), user.getAge(), user.getGender(), user.getNativeLang(), user.getDialect(), user.getUserID());
+    this(user.getId(), user.getAge(), user.getGender(), new String(user.getUserID()), user.isAdmin());
   }
 
   public boolean isMale() {
@@ -72,14 +76,6 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
     return age;
   }
 
-  public String getNativeLang() {
-    return nativeLang;
-  }
-
-  public String getDialect() {
-    return dialect;
-  }
-
   public String getUserID() {
     return userID;
   }
@@ -88,7 +84,14 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
     this.userID = userID;
   }
 
+  public boolean isAdmin() {
+    return isAdmin;
+  }
+
   public String toString() {
-    return "mini-user " + id + " age " + age + " gender " + gender + " native " + nativeLang + " dialect " + dialect;
+    return "mini-user " + id + " : " + age + " yr old " +
+        (isMale() ? "male" : "female") +
+        (isAdmin() ? "ADMIN" : "")
+        ;
   }
 }
