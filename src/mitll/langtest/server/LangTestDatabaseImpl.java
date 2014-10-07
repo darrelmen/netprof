@@ -685,7 +685,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     if (audioAttributes.isEmpty()) {
-      logger.warn("ensureMP3s : no ref audio for " + byID);
+      logger.warn("ensureMP3s : (" +serverProps.getLanguage() + ") no ref audio for " + byID);
     }
   }
 
@@ -1274,7 +1274,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       } catch (Exception e) {
         logger.error("Doing " + sortInfo + " " + unitToValue +" " + userid + " " + flText + " " + start +"-" + end +
             " Got " +e,e);
-        //throw e;
       }
     }
     int n = results.size();
@@ -1300,7 +1299,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       isNumber = true;
     } catch (NumberFormatException e) {
     }
-    Collection<MonitorResult> results = isNumber ? db.getResultDAO().getMonitorResultsByID(flText) : db.getMonitorResults();
+    if (isNumber) {
+      List<MonitorResult> monitorResultsByID = db.getMonitorResultsWithText(db.getResultDAO().getMonitorResultsByID(flText));
+      logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText + " returning " + monitorResultsByID.size() + " results...");
+      return monitorResultsByID;
+    }
+
+    Collection<MonitorResult> results = db.getMonitorResults();
 
     Trie<MonitorResult> trie;
 
@@ -1353,17 +1358,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       results = trie.getMatchesLC(flText);
     }
-/*    if (results.isEmpty()) {
-      try {
-        int id = Integer.parseInt(flText);
-        CommonExercise exercise = getExercise(prefix, userID, incorrectFirst);
-        if (exercise != null) exercisesForState = Collections.singletonList(exercise);
-      } catch (NumberFormatException e) {
-
-      }
-    }*/
     logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText + " returning " + results.size() + " results...");
     return new ArrayList<MonitorResult>(results);
+  }
+
+  private Collection<MonitorResult> getMonitorResults(String flText) {
+    boolean isNumber = false;
+    try {
+      Integer.parseInt(flText);
+      isNumber = true;
+    } catch (NumberFormatException e) {
+    }
+    return isNumber ? db.getResultDAO().getMonitorResultsByID(flText) : db.getMonitorResults();
   }
 
   /**
@@ -1474,16 +1480,28 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     // must be asking for text
     trie = new Trie<MonitorResult>();
     trie.startMakingNodes();
-    //logger.debug("searching over " + results.size());
+    //logger.debug("text searching over " + results.size());
     for (MonitorResult result : results) {
       trie.addEntryToTrie(new ResultWrapper(result.getForeignText(), result));
+      trie.addEntryToTrie(new ResultWrapper(result.getId(), result));
     }
     trie.endMakingNodes();
 
     Collection<MonitorResult> matchesLC = trie.getMatchesLC(flText);
+    //logger.debug("matchesLC for '" +flText+  "' " + matchesLC);
 
-    for (MonitorResult result : matchesLC) {
-      matches.add(result.getForeignText().trim());
+    boolean isNumber = false;
+    try {
+      Integer.parseInt(flText);
+      isNumber = true;
+    } catch (NumberFormatException e) {
+    }
+
+    if (isNumber) {
+      for (MonitorResult result : matchesLC) {   matches.add(result.getId().trim());    }
+    }
+    else {
+      for (MonitorResult result : matchesLC) {   matches.add(result.getForeignText().trim());    }
     }
     //logger.debug("returning text " + matches);
 
