@@ -15,7 +15,14 @@ public class SimpleColumnChart {
 /*  private static final float HALF = 2f;
   public static final float GRAPH_MAX = 100f;*/
 
-  public Widget getChart(boolean showOnlyOneExercise, List<Float> scores, int height, float classAvg) {
+  /**
+   *
+   * @param showOnlyOneExercise
+   * @param scores
+   * @param height
+   * @return
+   */
+/*  public Widget getChart(boolean showOnlyOneExercise, List<Float> scores, int height) {
     Chart chart = new Chart()
       .setType(Series.Type.COLUMN)
       .setChartTitleText("")
@@ -41,9 +48,9 @@ public class SimpleColumnChart {
         .setPoints(single);
       chart.addSeries(series);
     }
-/*    chart.getYAxis().setPlotBands(
+*//*    chart.getYAxis().setPlotBands(
       getAvgScore(classAvg*100,chart)
-    );*/
+    );*//*
 
     chart.getYAxis().setAxisTitleText("")
       .setMin(0)
@@ -51,7 +58,7 @@ public class SimpleColumnChart {
 
     chart.getXAxis().setAllowDecimals(false).setLabels(new XAxisLabels().setEnabled(false));
     return chart;
-  }
+  }*/
 
 /*  private <T extends SetScore> PlotBand getAvgScore(float avg, Chart chart) {
     return getPlotBand(avg, chart, "#2031ff", LeaderboardPlot.AVERAGE);
@@ -108,7 +115,7 @@ public class SimpleColumnChart {
    * @param score
    * @return color in # hex rgb format
    */
-  public String getColor(float score) {
+  public static String getColor(float score) {
     if (score > 1.0) score = 1.0f;
     if (score < 0f)  score = 0f;
     int red   = (int)Math.max(0,(255f - (Math.max(0, score-0.5)*2f*255f)));
@@ -119,7 +126,7 @@ public class SimpleColumnChart {
     //return new Color(red, green, blue, BKG_ALPHA);
   }
 
-  private String getHexNumber(int number){
+  private static String getHexNumber(int number){
     String hexString = Integer.toHexString(number).toUpperCase();
 
     if(hexString.length() == 0){
