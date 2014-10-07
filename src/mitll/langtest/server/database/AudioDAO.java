@@ -69,7 +69,7 @@ public class AudioDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#setAudioDAO(AudioDAO)
+   * @see mitll.langtest.server.database.exercise.ExcelImport#setAudioDAO(AudioDAO)
    * @return
    */
   public Map<String, List<AudioAttribute>> getExToAudio() {
@@ -324,6 +324,7 @@ public class AudioDAO extends DAO {
     return getResultsForQuery(connection, statement);
   }
 
+  int c = 0;
   /**
    * Get a list of audio attributes for this Query.
    *
@@ -365,7 +366,9 @@ public class AudioDAO extends DAO {
         user);
 
       if (user == null) {
-        logger.warn("can't find user " + userID+ " for " + audioAttr + " in " + miniUsers.keySet());
+        if (c++ < 20) {
+          logger.warn("can't find user " + userID + " for " + audioAttr + " in " + miniUsers.keySet());
+        }
       }
       results.add(audioAttr);
     }
@@ -387,7 +390,7 @@ public class AudioDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.ImportCourseExamples#copyAudio
+   * @see mitll.langtest.server.database.importExport.ImportCourseExamples#copyAudio
    */
   public long add(Result result, int userid, String path) {
     try {
