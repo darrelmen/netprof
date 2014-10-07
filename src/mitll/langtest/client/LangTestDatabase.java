@@ -5,7 +5,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.flashcard.AVPHistoryForList;
+import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -25,30 +25,30 @@ import java.util.Map;
 public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
-  ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID, int userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples);
+  ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection,
+                                     String prefix, long userListID, int userID, String role,
+                                     boolean onlyUnrecordedByMe, boolean onlyExamples, boolean incorrectFirstOrder);
 
-  CommonExercise getExercise(String id, long userID);
+  CommonExercise getExercise(String id, long userID, boolean isFlashcardReq);
 
   void markAudioDefect(AudioAttribute audioAttribute, String exid);
   void markGender(AudioAttribute attr, boolean isMale);
   // user DAO
-  long addUser(int age, String gender, int experience, String nativeLang, String dialect, String userID, Collection<User.Permission> permissions);
+
+  User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale, int age, String dialect, boolean isCD);
 
   List<User> getUsers();
-  int userExists(String login);
+  User userExists(String login, String passwordH);
   User getUserBy(long id);
 
   // answer DAO
-  void addTextAnswer(int userID, CommonExercise exercise, int questionID, String answer, String answerType);
-
-  int getNumResults();
+  AudioAnswer writeAudioFile(String base64EncodedString, String exercise, int question, int user,
+                             int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash);
 
  // List<MonitorResult> getResults(Map<String,String> unitToValue, long userid, String exerciseID);
 
   Collection<String> getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which);
 
-  AudioAnswer writeAudioFile(String base64EncodedString, String plan, String exercise, int question, int user,
-                             int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash);
 
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID);
 
@@ -73,6 +73,15 @@ public interface LangTestDatabase extends RemoteService {
   Map<String, Map<String, Integer>> getResultPerExercise();
   List<Session> getSessions();
 
+  int getNumResults();
+
+  boolean changePFor(String token, String first);
+
+  long getUserIDForToken(String token);
+
+  boolean forgotUsername(String emailH, String email, String url);
+
+//  List<Result> getResults(int start, int end, String sortInfo);
   ResultAndTotal getResults(int start, int end, String sortInfo,Map<String, String> unitToValue, long userid, String flText, int req);
 
   Map<String,Number> getResultStats();
@@ -82,8 +91,9 @@ public interface LangTestDatabase extends RemoteService {
   Map<Integer, Map<String, Map<String, Integer>>> getGradeCountPerExercise();
 
   void logMessage(String message);
+  void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID);
 
-  List<AVPHistoryForList> getUserHistoryForList(long userid, Collection<String> ids, long latestResultID);
+  AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID, Map<String, Collection<String>> typeToSection, long userListID);
 
   StartupInfo getStartupInfo();
   long addUserList(long userid, String name, String description, String dliClass, boolean isPublic);
@@ -105,7 +115,7 @@ public interface LangTestDatabase extends RemoteService {
   void markReviewed(String exid, boolean isCorrect, long creatorID);
   void markState(String id, STATE state, long creatorID);
 
-  void setAVPSkip(Collection<Long> ids);
+ // void setAVPSkip(Collection<Long> ids);
 
   void setExerciseState(String id, STATE state, long userID);
 
@@ -115,6 +125,8 @@ public interface LangTestDatabase extends RemoteService {
   boolean deleteItemFromList(long listid, String exid);
   boolean deleteItem(String exid);
 
-  void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID);
   List<Event> getEvents();
+
+  boolean resetPassword(String userid, String text, String url);
+  String enableCDUser(String cdToken, String emailR, String url);
 }
