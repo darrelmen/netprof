@@ -22,6 +22,13 @@ public class AVPHistoryForList implements IsSerializable {
   private List<UserScore> scores = new ArrayList<UserScore>();
 
   public AVPHistoryForList() {}
+
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList(long, java.util.Collection, long)
+   * @param scores
+   * @param userID
+   * @param useCorrect when false get score percentages true for percentage correct
+   */
   public AVPHistoryForList(List<Session> scores, long userID, boolean useCorrect) {
     this.useCorrect = useCorrect;
     numScores = scores.size();
@@ -126,7 +133,7 @@ public class AVPHistoryForList implements IsSerializable {
 
     /**
      * Is this the score for the current session?
-     * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#bold(mitll.langtest.shared.flashcard.AVPHistoryForList.UserScore, String)
+     * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#bold(mitll.langtest.shared.flashcard.AVPHistoryForList.UserScore, String)
      * @return
      */
     public boolean isCurrent() {
@@ -137,7 +144,7 @@ public class AVPHistoryForList implements IsSerializable {
       return index;
     }
 
-    public String toString() { return "id " + index + " by " + user + " " + getScore() + (isCurrent() ? " current! " : ""); }
+    public String toString() { return "id " + index + " by " + user + " " + ((int)getScore()) + (isCurrent() ? " current! " : ""); }
   }
 
   public String toString() {
