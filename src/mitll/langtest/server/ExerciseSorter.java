@@ -3,6 +3,7 @@ package mitll.langtest.server;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
+import mitll.langtest.shared.custom.UserExercise;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -34,7 +35,7 @@ public class ExerciseSorter {
       boolean allPredef = true;
       // first check if we have a homogenous predefined exercise list
       for (CommonExercise commonExercise : toSort) {
-        if (!commonExercise.toCommonUserExercise().isPredefined()) {
+        if (!new UserExercise(commonExercise).isPredefined()) {
           allPredef = false;
           break;
         }
