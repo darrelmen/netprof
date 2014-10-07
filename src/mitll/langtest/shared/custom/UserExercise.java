@@ -7,10 +7,10 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
-import mitll.langtest.shared.ScoreAndPath;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 
-import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,15 +32,15 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   private long creator;
   private boolean isPredef;
   private boolean isOverride;
-  private Date modifiedDate;
-  private Collection<ScoreAndPath> scores;
+  private long modifiedTimestamp;
+  private List<CorrectAndScore> scores;
   private float avgScore;
   private static final int MAX_TOOLTIP_LENGTH = 15;
 
   public UserExercise() {}  // just for serialization
 
   /**
-   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
+   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    * @param shell
    * @param creator
    */
@@ -53,8 +53,8 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   /**
    * Tooltip is the english phrase, but if it's empty, use the foreign language.
    *
-   * @see mitll.langtest.client.custom.EditItem#createNewItem(long)
-   * @see mitll.langtest.client.custom.EditItem#getNewItem() (long)
+   * @see mitll.langtest.client.custom.dialog.EditItem#createNewItem(long)
+   * @see mitll.langtest.client.custom.dialog.EditItem#getNewItem() (long)
    * @param uniqueID
    * @param exerciseID
    * @param creator
@@ -84,23 +84,23 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @param transliteration
    * @param context
    * @param isOverride
-   * @param modifiedDate
+   * @param modifiedTimestamp
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
                       String transliteration, String context,
                       boolean isOverride,
-                      Map<String, String> unitToValue, Date modifiedDate
+                      Map<String, String> unitToValue, long modifiedTimestamp
   ) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage, transliteration);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
-    this.modifiedDate = modifiedDate;
+    this.modifiedTimestamp = modifiedTimestamp;
     this.context = context;
   }
 
   /**
    * @param exercise
-   * @see mitll.langtest.client.custom.NPFExercise#populateListChoices
+   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   public UserExercise(CommonExercise exercise) {
     super(exercise.getID());
@@ -124,7 +124,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   }
 
   /**
-   * @see mitll.langtest.client.custom.NewUserExercise#addNew
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#addNew
    * @deprecated ideally we shouldn't have to do this
    * @return
    */
@@ -143,7 +143,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     if (slowSpeed != null) {
       imported.addAudio(slowSpeed);
     }
-    imported.setType(Exercise.EXERCISE_TYPE.REPEAT_FAST_SLOW);
     imported.setEnglishSentence(getEnglish());
     imported.setTranslitSentence(getTransliteration());
     imported.setUnitToValue(getUnitToValue());
@@ -220,7 +219,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   public long getUniqueID() { return uniqueID; }
 
   /**
-   * @see mitll.langtest.client.custom.NewUserExercise#grabInfoFromFormAndStuffInfoExercise()
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#grabInfoFromFormAndStuffInfoExercise()
    * @param english
    */
   public void setEnglish(String english) { this.english = english;  }
@@ -242,22 +241,22 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   public UserExercise toUserExercise() {  return this;  }
 
   /**
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#getCreateButton(UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getCreateButton(UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
    * @return
    */
   public boolean checkPredef() {  return !getID().startsWith(CUSTOM_PREFIX);  }
 
   @Override
-  public Date getModifiedDate() {
-    return modifiedDate;
+  public long getModifiedDateTimestamp() {
+    return modifiedTimestamp;
   }
 
-  public Collection<ScoreAndPath> getScores() {
+  public List<CorrectAndScore> getScores() {
     return scores;
   }
 
   @Override
-  public void setScores(Collection<ScoreAndPath> scores) {
+  public void setScores(List<CorrectAndScore> scores) {
     this.scores = scores;
   }
 
@@ -282,6 +281,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
       "' audio attr (" + getAudioAttributes().size() +
       ") :" + getAudioAttributes() + " unit/lesson " + getUnitToValue() +
       " state " + getState()+"/" +getSecondState()+
-      " modified " + modifiedDate;
+      " modified " + modifiedTimestamp;
   }
 }
