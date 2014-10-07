@@ -36,7 +36,6 @@ public class ServerProperties {
   //private static final String SECOND_DATABASE = "secondDatabase";
   //private static final String H2_STUDENT_ANSWERS_DATABASE_DEFAULT = "h2StudentAnswers";
   private static final String READ_FROM_FILE = "readFromFile";
-//  private static final String FLASHCARD = "flashcard";
   private static final String LANGUAGE = "language";
   /**
    * @deprecated
@@ -59,7 +58,6 @@ public class ServerProperties {
   private static final String INCLUDE_FEEDBACK = "includeFeedback";
   private static final String MAPPING_FILE = "mappingFile";
   private static final String NO_MODEL = "noModel";
-  // private static final String USE_MODEL_DICTIONARY = "useDictionary";
   private static final String TIER_INDEX = "tierIndex";
   private static final String VLR_PARLE_PILOT_ITEMS_TXT = "vlr-parle-pilot-items.txt";
   private static final String QUIET_AUDIO_OK = "quietAudioOK";
@@ -78,10 +76,13 @@ public class ServerProperties {
   private static final String DEFAULT_EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String APPROVERS = "approvers";
   private static final String APPROVER_EMAILS = "approverEmails";
+  private static final String ADMINS = "admins";
   private static final List<String> DLI_APPROVERS = Arrays.asList("Tamas", "Alex", "David", "Sandy");
   private static final List<String> DLI_EMAILS = Arrays.asList("tamas.g.marius.civ@mail.mil", "alexandra.cohen@dliflc.edu", "david.randolph@dliflc.edu", "sandra.wagner@dliflc.edu");
+  private static final Set<String> ADMINLIST = new HashSet<String>(Arrays.asList("swade", "gvidaver", "tmarius", "acohen", "drandolph", "djones","jmelot","rbudd","jray","jwilliams","pgatewood"));
   private List<String> approvers = DLI_APPROVERS;
   private List<String> approverEmails = DLI_EMAILS;
+  private Set<String> admins = ADMINLIST;
 
   public ServerProperties(ServletContext servletContext, String configDir) {
     this(servletContext, configDir, servletContext.getInitParameter(CONFIG_FILE));
@@ -301,6 +302,9 @@ public class ServerProperties {
 
     property = props.getProperty(APPROVER_EMAILS);
     if (property != null) approverEmails = Arrays.asList(property.split(","));
+
+    property = props.getProperty(ADMINS);
+    if (property != null) admins = new HashSet<String>(Arrays.asList(property.split(",")));
   }
 
   private boolean getDefaultFalse(String param) {
@@ -337,5 +341,13 @@ public class ServerProperties {
 
   public List<String> getApproverEmails() {
     return approverEmails;
+  }
+
+  /**
+   * @see mitll.langtest.server.database.UserDAO#UserDAO
+   * @return
+   */
+  public Set<String> getAdmins() {
+    return admins;
   }
 }
