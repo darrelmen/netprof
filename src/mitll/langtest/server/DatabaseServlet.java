@@ -126,6 +126,11 @@ public class DatabaseServlet extends HttpServlet {
     inputStream.close();
   }
 
+  /**
+   * Make json for an exercise
+   * @param exercise
+   * @return
+   */
   protected JSONObject getJsonForExercise(CommonExercise exercise) {
     JSONObject ex = new JSONObject();
     ex.put("id", exercise.getID());
