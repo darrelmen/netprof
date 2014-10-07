@@ -59,75 +59,9 @@ public class ResultDAO extends DAO {
     super(database);
   }
 
-/*  private List<SimpleResult> getSimpleResults(String whereClause) {
-    try {
-      String sql = "SELECT " +
-        ID + ", " +
-        USERID + ", " +
-        Database.EXID + ", " +
-        QID +
-        " FROM " +
-        RESULTS + whereClause;
-      Connection connection = database.getConnection();
-      PreparedStatement statement = connection.prepareStatement(sql);
-      List<SimpleResult> simpleResultsForQuery = getSimpleResultsForQuery(connection, statement);
-//      logger.debug("for sql " + sql  + " found " + simpleResultsForQuery.size() + " results");
-      return simpleResultsForQuery;
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return new ArrayList<SimpleResult>();
-  }*/
-
-  /**
-   * Get a list of Results for this Query.
-   *
-   * @param connection
-   * @param statement
-   * @return
-   * @throws SQLException
-   */
-/*
-  private List<SimpleResult> getSimpleResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
-    ResultSet rs = statement.executeQuery();
-    List<SimpleResult> results = new ArrayList<SimpleResult>();
-    while (rs.next()) {
-      int uniqueID = rs.getInt(ID);
-      long userID = rs.getLong(USERID);
-      String exid = rs.getString(Database.EXID);
-      int qid = rs.getInt(QID);
-
-      SimpleResult e = new SimpleResult(uniqueID, exid, qid, userID);
-      results.add(e);
-    }
-    rs.close();
-    statement.close();
-    database.closeConnection(connection);
-
-    return results;
-  }
-*/
-
-/*  public static class SimpleResult {
-    public final int uniqueID;
-    public final String id;
-    private final int qid;
-    public final long userid;
-
-    public SimpleResult(int uniqueID, String id, int qid, long userid) {
-      this.uniqueID = uniqueID;
-      this.id = id;
-      this.qid = qid;
-      this.userid = userid;
-    }
-
-    public String getID() {
-      return id + "/" + qid;
-    }
-  }*/
-
   private List<Result> cachedResultsForQuery = null;
   private List<CorrectAndScore> cachedResultsForQuery2 = null;
+  private List<MonitorResult> cachedMonitorResultsForQuery = null;
 
   /**
    * Pulls the list of results out of the database.
@@ -162,7 +96,7 @@ public class ResultDAO extends DAO {
           return cachedResultsForQuery2;
         }
       }
-      String sql = getCSSelect()+ " FROM " + RESULTS;
+      String sql = getCSSelect() + " FROM " + RESULTS;
       List<CorrectAndScore> resultsForQuery = getScoreResultsSQL(sql);
 
       synchronized (this) {
@@ -173,6 +107,27 @@ public class ResultDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return new ArrayList<CorrectAndScore>();
+  }
+
+  public List<MonitorResult> getMonitorResults() {
+    try {
+      synchronized (this) {
+        if (cachedMonitorResultsForQuery != null) {
+          return cachedMonitorResultsForQuery;
+        }
+      }
+      String sql = "SELECT * FROM " + RESULTS + ";";
+      List<MonitorResult> resultsForQuery = getMonitorResultsSQL(sql);
+
+      synchronized (this) {
+        cachedMonitorResultsForQuery = resultsForQuery;
+      }
+      return resultsForQuery;
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+
+    return new ArrayList<MonitorResult>();
   }
 
   /**
@@ -366,6 +321,12 @@ public class ResultDAO extends DAO {
 
     return getResultsForQuery(connection, statement);
   }
+  private List<MonitorResult> getMonitorResultsSQL(String sql) throws SQLException {
+    Connection connection = database.getConnection(this.getClass().toString());
+    PreparedStatement statement = connection.prepareStatement(sql);
+
+    return getMonitorResultsForQuery(connection, statement);
+  }
 
   public synchronized void invalidateCachedResults() {
     cachedResultsForQuery = null;
@@ -408,26 +369,57 @@ public class ResultDAO extends DAO {
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       String answer = rs.getString(ANSWER);
       boolean valid = rs.getBoolean(VALID);
-      boolean flq = rs.getBoolean(FLQ);
-      boolean spoken = rs.getBoolean(SPOKEN);
+     // boolean flq = rs.getBoolean(FLQ);
+    //  boolean spoken = rs.getBoolean(SPOKEN);
 
       String type = rs.getString(AUDIO_TYPE);
       int dur = rs.getInt(DURATION);
 
       boolean correct = rs.getBoolean(CORRECT);
       float pronScore = rs.getFloat(PRON_SCORE);
-      String stimulus = rs.getString(STIMULUS);
+      //String stimulus = rs.getString(STIMULUS);
 
       Result result = new Result(uniqueID, userID, //id
         plan, // plan
         exid, // id
         qid, // qid
-        answer, // answer
+        trimPathForWebPage2(answer), // answer
         valid, // valid
         timestamp.getTime(),
-        flq, spoken, type, dur, correct, pronScore);
-      result.setStimulus(stimulus);
-      trimPathForWebPage(result);
+        //flq, spoken,
+          type, dur, correct, pronScore);
+//      result.setStimulus(stimulus);
+      results.add(result);
+    }
+    finish(connection, statement, rs);
+
+    return results;
+  }
+
+  private List<MonitorResult> getMonitorResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+    ResultSet rs = statement.executeQuery();
+    List<MonitorResult> results = new ArrayList<MonitorResult>();
+    while (rs.next()) {
+      int uniqueID = rs.getInt(ID);
+      long userID = rs.getLong(USERID);
+      String exid = rs.getString(Database.EXID);
+      Timestamp timestamp = rs.getTimestamp(Database.TIME);
+      String answer = rs.getString(ANSWER);
+      boolean valid = rs.getBoolean(VALID);
+      String type = rs.getString(AUDIO_TYPE);
+      int dur = rs.getInt(DURATION);
+
+      boolean correct = rs.getBoolean(CORRECT);
+      float pronScore = rs.getFloat(PRON_SCORE);
+
+      MonitorResult result = new MonitorResult(uniqueID, userID, //id
+          // plan
+          exid, // id
+          // qid
+          trimPathForWebPage2(answer), // answer
+          valid, // valid
+          timestamp.getTime(),
+          type, dur, correct, pronScore);
       results.add(result);
     }
     finish(connection, statement, rs);
@@ -470,10 +462,17 @@ public class ResultDAO extends DAO {
     return results;
   }
 
+/*
   private void trimPathForWebPage(Result r) {
     int answer = r.answer.indexOf(PathHelper.ANSWERS);
     if (answer == -1) return;
     r.answer = r.answer.substring(answer);
+  }
+*/
+
+  private String trimPathForWebPage2(String path) {
+    int answer = path.indexOf(PathHelper.ANSWERS);
+     return (answer == -1) ? path : path.substring(answer);
   }
 
   /**
@@ -935,15 +934,15 @@ public class ResultDAO extends DAO {
     Map<Long, User> userMap = userDAO.getUserMap();
 
     for (Result r : results) {
-      if (r.valid && r.audioType.equals(typeToUse)) {
-        User user = userMap.get(r.userid);
+      if (r.isValid() && r.getAudioType().equals(typeToUse)) {
+        User user = userMap.get(r.getUserid());
         if (user != null && user.getExperience() == 240) {    // only natives!
-          Map<String, Result> results1 = userToResult.get(r.userid);
+          Map<String, Result> results1 = userToResult.get(r.getUserid());
           if (results1 == null)
-            userToResult.put(r.userid, results1 = new HashMap<String, Result>());
-          Result result = results1.get(r.id);
-          if (result == null || (r.timestamp > result.timestamp)) {
-            results1.put(r.id, r);
+            userToResult.put(r.getUserid(), results1 = new HashMap<String, Result>());
+          Result result = results1.get(r.getId());
+          if (result == null || (r.getTimestamp() > result.getTimestamp())) {
+            results1.put(r.getId(), r);
           }
         }
       }
@@ -984,8 +983,13 @@ public class ResultDAO extends DAO {
     cellStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss"));
     Row headerRow = sheet.createRow(rownum++);
 
-    List<String> columns = Arrays.asList(ID, USERID, Database.EXID, "qid", Database.TIME, "answer",
-      "valid", "grades", FLQ, SPOKEN, AUDIO_TYPE, DURATION, CORRECT, PRON_SCORE, STIMULUS);
+    List<String> columns = Arrays.asList(ID, USERID, Database.EXID,
+        //"qid",
+        Database.TIME, "answer",
+      "valid",
+        //"grades", FLQ, SPOKEN,
+        AUDIO_TYPE, DURATION, CORRECT, PRON_SCORE//, STIMULUS
+    );
 
     for (int i = 0; i < columns.size(); i++) {
       Cell headerCell = headerRow.createCell(i);
@@ -996,37 +1000,37 @@ public class ResultDAO extends DAO {
       Row row = sheet.createRow(rownum++);
       int j = 0;
       Cell cell = row.createCell(j++);
-      cell.setCellValue(result.uniqueID);
+      cell.setCellValue(result.getUniqueID());
       cell = row.createCell(j++);
-      cell.setCellValue(result.userid);
+      cell.setCellValue(result.getUserid());
       cell = row.createCell(j++);
-      cell.setCellValue(result.id);
+      cell.setCellValue(result.getId());
+ //     cell = row.createCell(j++);
+  //    cell.setCellValue(result.qid);
       cell = row.createCell(j++);
-      cell.setCellValue(result.qid);
-      cell = row.createCell(j++);
-      cell.setCellValue(new Date(result.timestamp));
+      cell.setCellValue(new Date(result.getTimestamp()));
       cell.setCellStyle(cellStyle);
 
       cell = row.createCell(j++);
-      cell.setCellValue(result.answer);
+      cell.setCellValue(result.getAnswer());
       cell = row.createCell(j++);
-      cell.setCellValue(result.valid);
+      cell.setCellValue(result.isValid());
+     // cell = row.createCell(j++);
+     // cell.setCellValue(result.getGradeInfo());
+      //cell = row.createCell(j++);
+     // cell.setCellValue(result.flq);
+    //  cell = row.createCell(j++);
+     // cell.setCellValue(result.spoken);
+     // cell = row.createCell(j++);
+      cell.setCellValue(result.getAudioType());
       cell = row.createCell(j++);
-      cell.setCellValue(result.getGradeInfo());
-      cell = row.createCell(j++);
-      cell.setCellValue(result.flq);
-      cell = row.createCell(j++);
-      cell.setCellValue(result.spoken);
-      cell = row.createCell(j++);
-      cell.setCellValue(result.audioType);
-      cell = row.createCell(j++);
-      cell.setCellValue(result.durationInMillis);
+      cell.setCellValue(result.getDurationInMillis());
       cell = row.createCell(j++);
       cell.setCellValue(result.isCorrect());
       cell = row.createCell(j++);
       cell.setCellValue(result.getPronScore());
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getStimulus());
+/*      cell = row.createCell(j++);
+      cell.setCellValue(result.getStimulus());*/
     }
     now = System.currentTimeMillis();
     if (now-then > 100) {
