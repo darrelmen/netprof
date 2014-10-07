@@ -9,11 +9,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
@@ -27,6 +23,9 @@ public class UserTable extends PagerTable {
   private static final int PAGE_SIZE = 5;
  // private static final boolean INCLUDE_EXPERIENCE = false;
   public static final String USER_ID = "User ID";
+  public static final int PAGE_SIZE1 = 5;
+  public static final int INSET_PERCENT = 40;
+  public static final String IP_PREFIX = "127.0.0.1/Mozilla/5.0 ";
 
   private Widget lastTable = null;
   private Button closeButton;
@@ -41,7 +40,7 @@ public class UserTable extends PagerTable {
   }
 
   void showDialog(final LangTestDatabaseAsync service) {
-    // Create the popup dialog box
+    // Create the resetEmailPopup dialog box
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("Registered Users");
 
@@ -54,8 +53,8 @@ public class UserTable extends PagerTable {
 
     final VerticalPanel dialogVPanel = new VerticalPanel();
 
-    int left = (Window.getClientWidth()) / 20;
-    int top = (Window.getClientHeight()) / 20;
+    int left = (Window.getClientWidth()) / INSET_PERCENT;
+    int top = (Window.getClientHeight()) / INSET_PERCENT;
     dialogBox.setPopupPosition(left, top);
 
     service.getUsers(new AsyncCallback<List<User>>() {
@@ -71,7 +70,7 @@ public class UserTable extends PagerTable {
           dialogVPanel.remove(closeButton);
         }
 
-        Widget table = getTable(result, service);
+        Widget table = getTable(result);
         dialogVPanel.add(new Anchor(getURL2()));
         dialogVPanel.add(table);
         dialogVPanel.add(closeButton);
@@ -103,7 +102,7 @@ public class UserTable extends PagerTable {
     return sb.toSafeHtml();
   }
 
-  private Widget getTable(List<User> result, final LangTestDatabaseAsync service) {
+  private Widget getTable(List<User> result) {
     final CellTable<User> table = new CellTable<User>();
     table.setPageSize(PAGE_SIZE);
     int width = (int) (Window.getClientWidth() * 0.9);
@@ -118,8 +117,6 @@ public class UserTable extends PagerTable {
     table.addColumn(id, "ID");
 
     addUserIDColumns(table);
-
-    //addLanguage(table);
 
     TextColumn<User> dialect = new TextColumn<User>() {
       @Override
@@ -148,11 +145,11 @@ public class UserTable extends PagerTable {
     gender.setSortable(true);
     table.addColumn(gender, "Gender");
 
-    addExperience(table);
+    //addExperience(table);
 
     TextColumn<User> perm = new TextColumn<User>() {
       @Override
-      public String getValue(User contact) { return "" + contact.getPermissions(); }
+      public String getValue(User contact) { return "" + contact.getPermissions().toString().replaceAll("QUALITY_CONTROL","QC"); }
     };
     perm.setSortable(true);
     table.addColumn(perm, "Permissions");
@@ -190,6 +187,9 @@ public class UserTable extends PagerTable {
         int at = ipaddr1.lastIndexOf("at");
 
         ipaddr1 = at == -1 ? "" : ipaddr1.substring(0, at);
+        if (ipaddr1.startsWith(IP_PREFIX)) {
+          ipaddr1 = ipaddr1.substring(IP_PREFIX.length());
+        }
         return ipaddr1;
       }
     };
@@ -205,6 +205,31 @@ public class UserTable extends PagerTable {
     };
     date.setSortable(true);
     table.addColumn(date, "Time");
+
+
+    TextColumn<User> kind = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return (contact.getUserKind() == User.Kind.CONTENT_DEVELOPER ? "C_DEVELOPER" : contact.getUserKind().toString());
+      }
+    };
+    table.addColumn(kind, "Type");
+
+    TextColumn<User> emailH = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return contact.getEmailHash() == null ? "NO" : "YES";
+      }
+    };
+    table.addColumn(emailH, "Email?");
+
+    TextColumn<User> passH = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return contact.getPasswordHash() == null ? "NO" : "YES";
+      }
+    };
+    table.addColumn(passH, "Pass?");
 
     // Create a data provider.
     ListDataProvider<User> dataProvider = new ListDataProvider<User>();
@@ -245,7 +270,7 @@ public class UserTable extends PagerTable {
 
     // Create a SimplePager.
     // return getPagerAndTable(table, table, 10, 10);
-    return getOldSchoolPagerAndTable(table, table, 10, 10);
+    return getOldSchoolPagerAndTable(table, table, PAGE_SIZE1, PAGE_SIZE1);
   }
 
 /*  private void addLanguage(CellTable<User> table) {
