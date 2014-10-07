@@ -9,6 +9,7 @@ import com.google.gwt.user.client.Event;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,9 +19,11 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class KeyPressHelper {
+  private Logger logger = Logger.getLogger("KeyPressHelper");
+
   private final boolean removeOnEnter;
   private HandlerRegistration keyHandler;
-  private Map<String,KeyListener> listeners = new HashMap<String, KeyListener>();
+  private final Map<String, KeyListener> listeners = new HashMap<String, KeyListener>();
 
   /**
    * @see mitll.langtest.client.dialog.ModalInfoDialog
@@ -30,13 +33,18 @@ public class KeyPressHelper {
   }
 
   /**
-   * @see mitll.langtest.client.custom.CreateListDialog#doCreate(com.google.gwt.user.client.ui.Panel)
    * @param removeOnEnter
+   * @see mitll.langtest.client.custom.dialog.CreateListDialog#doCreate(com.google.gwt.user.client.ui.Panel)
    */
   public KeyPressHelper(boolean removeOnEnter) {
     this.removeOnEnter = removeOnEnter;
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest
+   * @param removeOnPress
+   * @param hearAllEvents
+   */
   public KeyPressHelper(boolean removeOnPress, boolean hearAllEvents) {
     this(removeOnPress);
     makeKeyHandler();
@@ -44,25 +52,28 @@ public class KeyPressHelper {
 
   public void addKeyHandler(final Button button) {
     keyHandler = Event.addNativePreviewHandler(new
-                                                 Event.NativePreviewHandler() {
+                                                   Event.NativePreviewHandler() {
 
-                                                   @Override
-                                                   public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                                                     NativeEvent ne = event.getNativeEvent();
-                                                     int keyCode = ne.getKeyCode();
-                                                     boolean isEnter = keyCode == KeyCodes.KEY_ENTER;
-                                                     if (isEnter && event.getTypeInt() == 512 &&
-                                                       "[object KeyboardEvent]".equals(ne.getString())) {
-                                                       ne.preventDefault();
-                                                       ne.stopPropagation();
-                                                       userHitEnterKey(button);
+                                                     @Override
+                                                     public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                                                       NativeEvent ne = event.getNativeEvent();
+                                                       int keyCode = ne.getKeyCode();
+                                                       boolean isEnter = keyCode == KeyCodes.KEY_ENTER;
+                                                       if (isEnter && event.getTypeInt() == 512 &&
+                                                           "[object KeyboardEvent]".equals(ne.getString())) {
+                                                         ne.preventDefault();
+                                                         ne.stopPropagation();
+                                                         userHitEnterKey(button);
+                                                       }
                                                      }
-                                                   }
-                                                 });
-    //System.out.println("addKeyHandler made click handler " + keyHandler);
+                                                   });
+
+    logger.info("addKeyHandler made click handler " + keyHandler);
   }
 
-  public int getSize() { return listeners.size(); }
+  public int getSize() {
+    return listeners.size();
+  }
 
   public void addKeyHandler(KeyListener handler) {
     listeners.put(handler.getName(), handler);
@@ -73,18 +84,18 @@ public class KeyPressHelper {
 
   protected void makeKeyHandler() {
     keyHandler = Event.addNativePreviewHandler(new
-                                                 Event.NativePreviewHandler() {
+                                                   Event.NativePreviewHandler() {
 
-                                                   @Override
-                                                   public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                                                     NativeEvent ne = event.getNativeEvent();
-                                                     int typeInt = event.getTypeInt();
+                                                     @Override
+                                                     public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                                                       NativeEvent ne = event.getNativeEvent();
+                                                       int typeInt = event.getTypeInt();
 
-                                                     if ((typeInt == 0x00080 || // keydown
-                                                       typeInt == 0x00200) // keyup
-                                                       &&
-                                                       "[object KeyboardEvent]".equals(ne.getString())) {
-   /*                                                    if (false) {
+                                                       if ((typeInt == 0x00080 || // keydown
+                                                           typeInt == 0x00200) // keyup
+                                                           &&
+                                                           "[object KeyboardEvent]".equals(ne.getString())) {
+                                               /*     if (false) {
                                                          System.out.println(new Date() +
                                                            " : getNextAndPreviousButtons - key handler : " + keyHandler +
                                                            " Got " + event + " type int " +
@@ -93,20 +104,16 @@ public class KeyPressHelper {
                                                            " source " + event.getSource());
                                                        }*/
 
-                                                       gotEvent(ne, typeInt == 0x00080);
+
+                                                         gotEvent(ne, typeInt == 0x00080);
+                                                       }
                                                      }
-                                                   }
-                                                 });
-  }
-
-  public boolean removeKeyHandler(String name) {
-    KeyListener remove = listeners.remove(name);
-
-    return remove != null;
+                                                   });
   }
 
   private void gotEvent(NativeEvent ne, boolean isKeyDown) {
     for (KeyListener keyPressHandler : listeners.values()) {
+     // logger.info("KeyPressHelper " + keyPressHandler + " getting " + ne + " down " +isKeyDown);
       keyPressHandler.gotPress(ne, isKeyDown);
     }
   }
@@ -121,23 +128,31 @@ public class KeyPressHelper {
     if (keyHandler == null) {
       System.err.println("\nEnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
     } //else {
-      //System.out.println("EnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
-   // }
+    //System.out.println("EnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
+    // }
     if (keyHandler != null) {
+      logger.info("KeyPressHelper : removeKeyHandler : " + keyHandler);
       keyHandler.removeHandler();
       keyHandler = null;
     }
   }
 
-  private void userHitEnterKey(Button button) {
+  public boolean removeKeyHandler(String name) {
+    KeyListener remove = listeners.remove(name);
+    return remove != null;
+  }
+
+  public void userHitEnterKey(Button button) {
     //System.out.println("\tEnterKeyButtonHelper.userHitEnterKey " + keyHandler);
     if (removeOnEnter) removeKeyHandler();
     button.fireEvent(new ButtonClickEvent());
   }
 
-  private class ButtonClickEvent extends ClickEvent {
+  public static class ButtonClickEvent extends ClickEvent {
         /*To call click() function for Programmatic equivalent of the user clicking the button.*/
   }
 
-  public String toString() { return "KeyPressHelper : " + listeners; }
+  public String toString() {
+    return "KeyPressHelper : " + listeners;
+  }
 }

@@ -49,7 +49,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#getExercise
+   * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    * @param s
    * @deprecated - try to avoid this
    */
@@ -62,11 +62,13 @@ public class AudioExercise extends ExerciseShell {
 
   public void addAudio(AudioAttribute audioAttribute) {
     if (audioAttribute == null) throw new IllegalArgumentException("adding null audio?");
-    audioAttributes.put(audioAttribute.getKey(),audioAttribute);
+    else {
+      audioAttributes.put(audioAttribute.getKey(), audioAttribute);
+    }
   }
 
   /**
-   * @see mitll.langtest.server.database.ExcelImport#addOldSchoolAudio(String, Exercise)
+   * @see mitll.langtest.server.database.exercise.ExcelImport#addOldSchoolAudio(String, Exercise)
    * @param ref
    * @param user
    */
@@ -90,22 +92,22 @@ public class AudioExercise extends ExerciseShell {
     return null;
   }
 
-  public Collection<AudioAttribute> getAudioAtSpeed(boolean isRegular) {
+/*  public Collection<AudioAttribute> getAudioAtSpeed(boolean isRegular) {
     return getAudioAtSpeed(isRegular ? REGULAR : SLOW);
-  }
+  }*/
 
   /**
    * @see mitll.langtest.server.database.AudioExport#writeFolderContents
-   * @param value
+   * @paramx value
    * @return
    */
-  private Collection<AudioAttribute> getAudioAtSpeed(String value) {
+/*  private Collection<AudioAttribute> getAudioAtSpeed(String value) {
     List<AudioAttribute> ret = new ArrayList<AudioAttribute>();
     for (AudioAttribute audio : getAudioAttributes()) {
       if (audio.matches(SPEED, value)) ret.add(audio);
     }
     return ret;
-  }
+  }*/
 
   public boolean hasRefAudio() {
     return !audioAttributes.isEmpty();
@@ -115,6 +117,10 @@ public class AudioExercise extends ExerciseShell {
     return audioAttributes.values();
   }
 
+  /**
+   * @see mitll.langtest.server.DatabaseServlet#getJsonForExercise(CommonExercise)
+   * @return
+   */
   public AudioAttribute getLatestContext() {
     long maleTime = 0;
     AudioAttribute latest = null;
@@ -217,7 +223,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#makeAudioRow()
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#makeAudioRow()
    * List of audio is sorted to show regular before slow.
    *
    * @param isMale
@@ -334,7 +340,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#makeAudioRow()
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#makeAudioRow()
    * @param malesMap
    * @return
    */
@@ -390,11 +396,12 @@ public class AudioExercise extends ExerciseShell {
   public Map<String, String> getUnitToValue() { return unitToValue; }
 
   /**
-   * @see mitll.langtest.server.database.SectionHelper#addExerciseToLesson
+   * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
    * @param unit
    * @param value
    */
   public void addUnitToValue(String unit, String value) {
+    if (value == null) return;
     if (value.isEmpty()) {
       System.out.println("addUnitToValue " + unit + " value " + value);
     }
