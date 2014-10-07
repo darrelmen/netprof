@@ -41,11 +41,6 @@ public class ExerciseListLayout {
 
     addExerciseListOnLeftSide(exerciseListContainer);
 
-    boolean hideExerciseList = (props.isMinimalUI() && !props.isGrading()) && !props.isAdminView();
-    if (hideExerciseList) {
-      exerciseList.hide();
-    }
-
     return exerciseList;
   }
 
@@ -65,7 +60,7 @@ public class ExerciseListLayout {
     String instance = hasQC ? User.Permission.QUALITY_CONTROL.toString() : "flex";
 
     return new FlexSectionExerciseList(secondRow, currentExerciseVPanel, service, feedback,
-       false, props.showExercisesInOrder(), controller, true, instance);
+        controller, instance, false);
   }
 
   /**
