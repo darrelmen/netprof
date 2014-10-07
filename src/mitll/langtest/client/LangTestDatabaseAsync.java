@@ -41,9 +41,12 @@ public interface LangTestDatabaseAsync {
 
   void getSessions(AsyncCallback<List<Session>> async);
 
-  void getNumResults(AsyncCallback<Integer> async);
+/*
+  void getMonitorResults(AsyncCallback<Collection<MonitorResult>> async);
+*/
 
-  void getResults(int start, int end, String sortInfo, AsyncCallback<List<Result>> async);
+
+  void getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, long userid, String flText, int req, AsyncCallback<ResultAndTotal> async);
 
   void getResultStats(AsyncCallback<Map<String, Number>> async);
 
@@ -134,4 +137,10 @@ public interface LangTestDatabaseAsync {
   void changePFor(String token, String first, AsyncCallback<Boolean> asyncCallback);
 
   void enableCDUser(String cdToken, String emailR, String url, AsyncCallback<String> asyncCallback);
+
+  void getNumResults(AsyncCallback<Integer> async);
+
+ // void getResults(Map<String, String> unitToValue, long userid, String exerciseID, AsyncCallback<List<MonitorResult>> async);
+
+  void getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which, AsyncCallback<Collection<String>> async);
 }
