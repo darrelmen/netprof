@@ -12,6 +12,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.User;
 
 import java.util.Collection;
@@ -41,6 +42,8 @@ public class Flashcard implements RequiresResize {
   private HTML browserInfo;
   private Panel qc,recordAudio;
   private Dropdown cogMenu;
+//  private final boolean adminView;
+  //EventRegistration eventRegistration;
 
   /**
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
@@ -49,6 +52,7 @@ public class Flashcard implements RequiresResize {
     this.nameForAnswer = props.getNameForAnswer() + "s";
     isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
     //adminView = props.isAdminView();
+  //  this.eventRegistration = eventRegistration;
   }
 
   /**
