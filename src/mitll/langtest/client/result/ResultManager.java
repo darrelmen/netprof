@@ -86,7 +86,6 @@ public class ResultManager extends PagerTable {
     this.service = s;
     this.feedback = feedback;
     this.nameForAnswer = nameForAnswer;
-    //textResponse = propertyHandler.isFlashcardTextResponse();
     this.typeOrder = typeOrder;
     this.eventRegistration = eventRegistration;
   }
@@ -220,6 +219,7 @@ public class ResultManager extends PagerTable {
     });
 
     TextBox w = new TextBox();
+
     userIDSuggest.setWidget(w);
     addCallbacks(userIDSuggest);
     w.getElement().setId("TextBox_userIDSuggest");
@@ -248,6 +248,7 @@ public class ResultManager extends PagerTable {
       }
     });
     TextBox w1 = new TextBox();
+    w1.setPlaceholder("Word (type or paste) or Item ID");
     w1.setDirectionEstimator(true);
     textSuggest.setWidget(w1);
     configureTextBox(w1);
