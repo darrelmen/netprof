@@ -1,7 +1,6 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.grade.CountAndGradeID;
 import mitll.langtest.shared.grade.Grade;
 import org.apache.log4j.Logger;
 
@@ -9,25 +8,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Stored and retrieves grades from the database.
+ * @deprecated we don't really support grading in classroom right now
  */
 public class GradeDAO extends DAO {
   private static final String SELECT_PREFIX = "SELECT id, exerciseID, resultID, grade, grader, gradeType, gradeIndex from grades where exerciseID";
   private static final Logger logger = Logger.getLogger(GradeDAO.class);
 
   private static final String GRADES = "grades";
-  private final boolean debug = false;
+ // private final boolean debug = false;
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
 
@@ -36,6 +28,19 @@ public class GradeDAO extends DAO {
     this.userDAO = userDAO;
     this.resultDAO = resultDAO;
   }
+
+/*  public class CountAndGradeID implements IsSerializable {
+    public int count;
+    public int resultCount;
+    public long gradeID;
+
+    public CountAndGradeID() {}
+    public CountAndGradeID(int c, int resultCount, long g) {
+      this.count = c;
+      this.resultCount = resultCount;
+      this.gradeID = g;
+    }
+  }*/
 
   /**
    *
@@ -60,7 +65,7 @@ public class GradeDAO extends DAO {
    * @see DatabaseImpl#changeGrade(mitll.langtest.shared.grade.Grade)
    * @param toChange
    */
-  public void changeGrade(Grade toChange) {
+/*  public void changeGrade(Grade toChange) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement;
@@ -84,7 +89,7 @@ public class GradeDAO extends DAO {
     } catch (Exception e) {
       e.printStackTrace();
     }
-  }
+  }*/
 
   /**
    * @see DatabaseImpl#addGrade(String, mitll.langtest.shared.grade.Grade)
@@ -92,9 +97,9 @@ public class GradeDAO extends DAO {
    * @param toAdd
    * @return
    */
-  public CountAndGradeID addGradeEasy(String exerciseID, Grade toAdd) {
+/*  public CountAndGradeID addGradeEasy(String exerciseID, Grade toAdd) {
     return addGrade(toAdd.resultID, exerciseID, toAdd.grade, toAdd.id, true, toAdd.grader, toAdd.gradeType, toAdd.gradeIndex);
-  }
+  }*/
 
   /**
    * If a grade already exists, update the value.
@@ -110,7 +115,7 @@ public class GradeDAO extends DAO {
    * @return
    * @see DatabaseImpl#addGrade(String, mitll.langtest.shared.grade.Grade)
    */
-  private CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct,
+/*  private CountAndGradeID addGrade(int resultID, String exerciseID, int grade, long gradeID, boolean correct,
                                    int grader, String gradeType, int gradeIndex) {
     long id = 0;
     try {
@@ -150,7 +155,7 @@ public class GradeDAO extends DAO {
       e.printStackTrace();
     }
     return new CountAndGradeID(getCount(), resultDAO.getNumResults(), id);
-  }
+  }*/
 
 /*  private boolean gradeExists(int resultID, String grader, long gradeID) {
     boolean val = false;
@@ -187,12 +192,12 @@ public class GradeDAO extends DAO {
    * @param exerciseID
    * @return
    */
-  public GradesAndIDs getResultIDsForExercise(String exerciseID) {
+/*  public GradesAndIDs getResultIDsForExercise(String exerciseID) {
     String sql = SELECT_PREFIX +
       "='" + exerciseID + "'";
 
     return getGradesForSQL(sql);
-  }
+  }*/
 
   /**
    * @see DatabaseImpl#getExercisesGradeBalancing(boolean, boolean)
@@ -208,7 +213,7 @@ public class GradeDAO extends DAO {
    * @param toExclude
    * @return
    */
-  public GradesAndIDs getAllGradesExcluding(Collection<String> toExclude) {
+  private GradesAndIDs getAllGradesExcluding(Collection<String> toExclude) {
     StringBuilder b = new StringBuilder();
     for (String id : toExclude) b.append("'").append(id).append("'").append(",");
     String list = b.toString();
@@ -290,9 +295,11 @@ public class GradeDAO extends DAO {
    * @see #addGrade
    * @return
    */
+/*
   private int getCount() {
     return getCount(GRADES);
   }
+*/
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
