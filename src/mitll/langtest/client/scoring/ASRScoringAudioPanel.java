@@ -24,7 +24,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
   private boolean useScoreToColorBkg = true;
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel#ASRRecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, int, mitll.langtest.client.exercise.ExerciseController)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel#ASRRecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
    * @param refSentence
    * @param service
    * @param gaugePanel
@@ -93,9 +93,9 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
 
     service.getASRScoreForAudio(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, exerciseID, new AsyncCallback<PretestScore>() {
       public void onFailure(Throwable caught) {
-        if (!caught.getMessage().trim().equals("0")) {
-          Window.alert("Server error -- couldn't contact server.");
-        }
+        //if (!caught.getMessage().trim().equals("0")) {
+        //  Window.alert("Server error -- couldn't contact server.");
+        //}
         wordTranscript.image.setVisible(false);
         phoneTranscript.image.setVisible(false);
       }
