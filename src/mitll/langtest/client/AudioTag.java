@@ -5,7 +5,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 /**
  * Use an mp3 audio reference and either WAV or WEBM.
- *
+ * <p/>
  * User: go22670
  * Date: 8/22/12
  * Time: 3:26 PM
@@ -18,24 +18,30 @@ public class AudioTag {
   private static final String PRELOAD_HINT = "auto";
   public static final String COMPRESSED_TYPE = "mp3";//"ogg";//"mp3";
 
+  public SafeHtml getAudioTag(String result) {
+    return getAudioTag(result, true);
+  }
+
   /**
-   * @see mitll.langtest.client.result.ResultManager#addColumnsToTable(boolean, java.util.Collection, int, int, com.google.gwt.user.cellview.client.CellTable)
    * @param result
    * @return
+   * @see mitll.langtest.client.result.ResultManager#addColumnsToTable(boolean, java.util.Collection, int, int, com.google.gwt.user.cellview.client.CellTable)
    */
-  public SafeHtml getAudioTag(String result) {
+  public SafeHtml getAudioTag(String result, boolean includeControls) {
     result = ensureForwardSlashes(result);
     String firstSource = INCLUDE_ALTERNATE_AUDIO ?
         "<source type=\"audio/" + (INCLUDE_ALTERNATE_COMPRESSED ? ALTERNATE_TYPE : "wav") + "\" " +
-           "src=\"" + (INCLUDE_ALTERNATE_COMPRESSED ? result.replace(".wav", "." +ALTERNATE_TYPE) : result) + "\">" +
-        "</source>\n" : "";
+            "src=\"" + (INCLUDE_ALTERNATE_COMPRESSED ? result.replace(".wav", "." + ALTERNATE_TYPE) : result) + "\">" +
+            "</source>\n" : "";
     String secondSource = "<source type=\"audio/" +
         COMPRESSED_TYPE +
         "\" src=\"" + result.replace(".wav", "." +
         COMPRESSED_TYPE) + "\"></source>\n";
 
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<audio preload=\"" + PRELOAD_HINT + "\" controls=\"controls\" tabindex=\"0\">\n" +
+    sb.appendHtmlConstant("<audio preload=\"" + PRELOAD_HINT + "\" " +
+        (includeControls ? "controls=\"controls\" " : "") +
+        "tabindex=\"0\">\n" +
         firstSource +
         secondSource +
         "Your browser does not support the audio tag.\n" +
@@ -43,5 +49,7 @@ public class AudioTag {
     return sb.toSafeHtml();
   }
 
-  public String ensureForwardSlashes(String wavPath) {  return wavPath.replaceAll("\\\\", "/"); }
+  public String ensureForwardSlashes(String wavPath) {
+    return wavPath.replaceAll("\\\\", "/");
+  }
 }
