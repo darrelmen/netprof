@@ -505,6 +505,7 @@ fieldset > legend {
     word-break: keep-all;
     white-space: normal;
     font-family: sans-serif;
+    line-height: 1;
 }
 
 .blueColor {
@@ -623,7 +624,7 @@ fieldset > legend {
 
 .bigFont {
     font-size: 1.8em;
-    letter-spacing: 0.4em;
+/*    letter-spacing: 0.4em; */
     padding-top: 19px;
 }
 
@@ -1007,7 +1008,12 @@ body>.dropdown-popup .nav-list>li.active>a  {
 }
 
 .dontSelect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
     -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .progressBar {
@@ -1020,6 +1026,48 @@ body>.dropdown-popup .nav-list>li.active>a  {
 .centerPractice {
     width: 800px;
     margin: 0 auto;
+}
+
+.noWidthCenterPractice {
+    margin: 0 auto;
+}
+
+.loginPage {
+    margin: -154px -228px 0 -418px;
+    top: 290px;
+    width: 838px;
+    left: 50%;
+    position: absolute;
+}
+
+.resetPage {
+    margin: -154px -228px 0 -418px;
+    top: 290px;
+    width: 838px;
+    left: 32%;
+    position: absolute;
+}
+
+.loginPageBack {
+    position: fixed;
+    width: 200%;
+    height: 200%;
+    left: -50%;
+    background: rgba(173, 216, 230, 0.61);
+}
+
+.formRounded {
+    /*margin-top: 2px;*/
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
+    padding: 5px 5px 5px 5px;
+}
+
+.signUp {
+    border-bottom: 1px solid #E1E8ED;
+    margin-left: 11px;
+    margin-top: 0;
+    padding-top: 0;
 }
 
 body .btn-success.active {
@@ -1047,3 +1095,7 @@ body .btn-toolbar > .btn-group > .btn.active {
     text-shadow: none;
 }
 
+.login-label {
+    font-weight: bold;
+    font-size: 1.2em;
+}
