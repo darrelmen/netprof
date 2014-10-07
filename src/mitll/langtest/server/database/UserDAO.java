@@ -587,6 +587,7 @@ public class UserDAO extends DAO {
       if (perms != null) {
         perms = perms.replaceAll("\\[", "").replaceAll("\\]", "");
         for (String perm : perms.split(",")) {
+          perm = perm.trim();
           try {
             if (!perm.isEmpty()) {
               permissions.add(User.Permission.valueOf(perm));
