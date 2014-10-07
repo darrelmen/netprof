@@ -79,7 +79,7 @@ public class ServerProperties {
   private static final String ADMINS = "admins";
   private static final List<String> DLI_APPROVERS = Arrays.asList("Tamas", "Alex", "David", "Sandy");
   private static final List<String> DLI_EMAILS = Arrays.asList("tamas.g.marius.civ@mail.mil", "tamas.marius@dliflc.edu","alexandra.cohen@dliflc.edu", "david.randolph@dliflc.edu", "sandra.wagner@dliflc.edu");
-  private static final Set<String> ADMINLIST = new HashSet<String>(Arrays.asList("swade", "gvidaver", "tmarius", "acohen", "drandolph", "swagner", "djones", "jmelot", "rbudd", "jray", "jwilliams", "pgatewood"));
+  private static final Set<String> ADMINLIST = new HashSet<String>(Arrays.asList("swade", "gvidaver", "tmarius", "acohen", "drandolph", "swagner", "gmarkovic", "djones", "jmelot", "rbudd", "jray", "jwilliams", "pgatewood"));
   private List<String> approvers = DLI_APPROVERS;
   private List<String> approverEmails = DLI_EMAILS;
   private Set<String> admins = ADMINLIST;
