@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.ExerciseSorter;
 import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.MiniUser;
@@ -65,6 +66,18 @@ public class AudioExport {
     writeToStream(copy, audioDAO, installPath, relPath, prefix, typeOrder, language1, out, typeToSection.isEmpty());
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#writeZip(java.io.OutputStream, long)
+   * @param out
+   * @param prefix
+   * @param sectionHelper
+   * @param exercisesForSelectionState
+   * @param language1
+   * @param audioDAO
+   * @param installPath
+   * @param relPath
+   * @throws Exception
+   */
   public void writeZip(OutputStream out,
                        String prefix,
                        SectionHelper sectionHelper,
@@ -80,6 +93,14 @@ public class AudioExport {
     writeToStream(copy, audioDAO, installPath, relPath, prefix, typeOrder, language1, out, false);
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#writeZip(java.io.OutputStream)
+   * @param out
+   * @param sectionHelper
+   * @param exercisesForSelectionState
+   * @param installPath
+   * @throws Exception
+   */
   public void writeZipJustOneAudio(OutputStream out,
                                    SectionHelper sectionHelper,
                                    Collection<? extends CommonExercise> exercisesForSelectionState,
@@ -90,6 +111,12 @@ public class AudioExport {
     writeToStreamJustOneAudio(copy, installPath, out );
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getPrefix(java.util.Map)
+   * @param sectionHelper
+   * @param typeToSection
+   * @return
+   */
   public String getPrefix(SectionHelper sectionHelper,Map<String, Collection<String>> typeToSection) {
     return getPrefix(typeToSection, sectionHelper.getTypeOrder());
   }
