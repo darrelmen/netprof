@@ -1,20 +1,14 @@
 package mitll.langtest.client.recorder;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExerciseQuestionState;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
 
@@ -35,7 +29,6 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   private final LangTestDatabaseAsync service;
   private final ExerciseController controller;
   private final CommonExercise exercise;
-  private final ExerciseQuestionState questionState;
   private final int index;
   private int reqid = 0;
   private Panel panel;
@@ -47,15 +40,14 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
    *
-   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#FlashcardRecordButtonPanel(mitll.langtest.client.flashcard.AudioAnswerListener, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.CommonExercise, int, String, String)
+   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#FlashcardRecordButtonPanel(mitll.langtest.client.flashcard.AudioAnswerListener, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.CommonExercise, int, String)
    */
   protected RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
-                              final CommonExercise exercise, final ExerciseQuestionState questionState, final int index,
+                              final CommonExercise exercise, final int index,
                               boolean doFlashcardAudio, String audioType, String recordButtonTitle){
     this.service = service;
     this.controller = controller;
     this.exercise = exercise;
-    this.questionState = questionState;
     this.index = index;
     this.doFlashcardAudio = doFlashcardAudio;
     layoutRecordButton(recordButton = makeRecordButton(controller,recordButtonTitle));
@@ -143,8 +135,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
 
     final int len = base64EncodedWavFile.length();
     service.writeAudioFile(base64EncodedWavFile,
-      "plan",
-      exercise.getID(),
+        exercise.getID(),
       index,
       controller.getUser(),
       reqid,
@@ -173,7 +164,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
             return;
           }
           recordButton.setEnabled(true);
-          receivedAudioAnswer(result, questionState, outer);
+          receivedAudioAnswer(result, outer);
 
           long now = System.currentTimeMillis();
           long diff = now - then;
@@ -204,9 +195,6 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   protected String getAudioType() { return controller.getAudioType();  }
 
   public Widget getRecordButton() { return recordButton; }
- public Button getActualRecordButton() { return recordButton; }
- /*  public void setRecordButtonEnabled(boolean val) { recordButton.setEnabled(val); }*/
-
-  protected void receivedAudioAnswer(AudioAnswer result, final ExerciseQuestionState questionState, final Panel outer) {}
+  protected void receivedAudioAnswer(AudioAnswer result, final Panel outer) {}
   protected void receivedAudioFailure() {}
 }
