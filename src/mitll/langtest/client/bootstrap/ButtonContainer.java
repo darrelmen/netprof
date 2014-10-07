@@ -2,13 +2,7 @@ package mitll.langtest.client.bootstrap;
 
 import com.github.gwtbootstrap.client.ui.Button;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -22,7 +16,7 @@ class ButtonContainer {
   private final Set<Button> enabled = new HashSet<Button>();
   private final Set<Button> disabled = new HashSet<Button>();
   private final Map<String, Collection<Button>> nameToButton = new HashMap<String, Collection<Button>>();
-  boolean debug = false;
+  private final boolean debug = false;
 
   public void add(Button b, String name) {
     buttons.add(b);
