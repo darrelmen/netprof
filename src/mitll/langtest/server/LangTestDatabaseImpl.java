@@ -611,7 +611,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     if (byID == null) {
-      logger.error("getExercise : huh? couldn't find exercise with id " + id + " when examining " + exercises.size() + " items");
+      logger.error("getExercise : huh? couldn't find exercise with id '" + id + "' when examining " + exercises.size() + " items");
     } else {
       then2 = System.currentTimeMillis();
       addAnnotationsAndAudio(userID, byID, isFlashcardReq);
@@ -643,7 +643,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.debug(message);
     }
 
-    logger.debug("returning " + byID);
+    if (byID != null) {
+      logger.debug("returning exercise " + byID.getID());
+    }
+    else {
+      logger.info("couldn't find exercise with id '" +id+  "'");
+    }
     return byID;
   }
 
@@ -1288,8 +1293,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private List<MonitorResult> getResults(Map<String, String> unitToValue, long userid, String flText) {
-    Collection<MonitorResult> results = db.getMonitorResults();
     //logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText);
+    boolean isNumber = false;
+    try {
+      Integer.parseInt(flText);
+      isNumber = true;
+    } catch (NumberFormatException e) {
+    }
+    Collection<MonitorResult> results = isNumber ? db.getResultDAO().getMonitorResultsByID(flText) : db.getMonitorResults();
 
     Trie<MonitorResult> trie;
 
@@ -1333,12 +1344,24 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       trie.startMakingNodes();
  //     logger.debug("searching over " + results.size());
       for (MonitorResult result : results) {
-         trie.addEntryToTrie(new ResultWrapper(result.getForeignText().trim(), result));
+        String foreignText = result.getForeignText();
+        if (foreignText != null) {
+          trie.addEntryToTrie(new ResultWrapper(foreignText.trim(), result));
+        }
       }
       trie.endMakingNodes();
 
       results = trie.getMatchesLC(flText);
     }
+/*    if (results.isEmpty()) {
+      try {
+        int id = Integer.parseInt(flText);
+        CommonExercise exercise = getExercise(prefix, userID, incorrectFirst);
+        if (exercise != null) exercisesForState = Collections.singletonList(exercise);
+      } catch (NumberFormatException e) {
+
+      }
+    }*/
     logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText + " returning " + results.size() + " results...");
     return new ArrayList<MonitorResult>(results);
   }
@@ -1351,12 +1374,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param flText
    * @param which
    * @return
+   * @see mitll.langtest.client.result.ResultManager#populateTable(int, com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.DialogBox, com.github.gwtbootstrap.client.ui.Button)
    */
   @Override
   public Collection<String> getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which) {
     Collection<MonitorResult> results = db.getMonitorResults();
 
-    logger.debug("getResultAlternatives request " + unitToValue + " " + userid + " " + flText + " :'" + which + "'");
+    logger.debug("getResultAlternatives request " + unitToValue + " userid=" + userid + " fl '" + flText + "' :'" + which + "'");
 
     Collection<String> matches = new TreeSet<String>();
     Trie<MonitorResult> trie;
