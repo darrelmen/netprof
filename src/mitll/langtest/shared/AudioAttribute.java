@@ -31,7 +31,9 @@ public class AudioAttribute implements IsSerializable {
   private long userid;
   private long timestamp;
   private long duration;
-  private Map<String, String> attributes;
+
+  // 9/24/14 : setting it here may stop intermittent gwt rpc exceptions
+  private Map<String, String> attributes = new HashMap<String, String>();
   private boolean hasBeenPlayed;
 
   public AudioAttribute() {}
@@ -68,9 +70,9 @@ public class AudioAttribute implements IsSerializable {
       String[] split = type.split("=");
       addAttribute(split[0], split[1]);
     }
-    else {
-      attributes = new HashMap<String, String>();
-    }
+    //else {
+    //  attributes = new HashMap<String, String>();
+   // }
   }
 
   protected AudioAttribute(String audioRef) {
@@ -142,7 +144,7 @@ public class AudioAttribute implements IsSerializable {
   }
 
   public void addAttribute(String name, String value) {
-    if (attributes == null) attributes = new HashMap<String, String>();
+    //if (attributes == null) attributes = new HashMap<String, String>();
     if (attributes.containsKey(name)) {
       String s = attributes.get(name);
       if (!s.equals(REGULAR)) System.out.println("replacing value at " + name + " was " + s + " now " + value);
@@ -187,7 +189,7 @@ public class AudioAttribute implements IsSerializable {
   public long getUserid() { return userid; }
 
   /**
-   * @see mitll.langtest.client.custom.QCNPFExercise#addTabsForUsers(CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
+   * @see mitll.langtest.client.qc.QCNPFExercise#addTabsForUsers(CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
    * @see mitll.langtest.client.custom.ReviewEditableExercise#addTabsForUsers(CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
    * @return
    */
