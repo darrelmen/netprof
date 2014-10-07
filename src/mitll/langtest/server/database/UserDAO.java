@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
@@ -57,11 +58,18 @@ public class UserDAO extends DAO {
   public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 30, 0, "default", false);
   public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, 0, "Male", false);
   public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, "Female", false);
-  private static final List<String> admins = Arrays.asList("swade", "gvidaver", "tmarius", "acohen", "drandolph", "djones");
 
-  public UserDAO(Database database) {
+ private  Collection<String> admins;
+
+  /**
+   *
+   * @param database
+   * @param serverProperties
+   */
+  public UserDAO(Database database, ServerProperties serverProperties) {
     super(database);
     try {
+      admins = serverProperties.getAdmins();
       createUserTable(database);
 
       defectDetector = userExists(DEFECT_DETECTOR);
@@ -108,7 +116,7 @@ public class UserDAO extends DAO {
    * @param age
    * @param dialect
    * @return null if existing, valid user (email and password)
-   * @see mitll.langtest.server.database.DatabaseImpl#addUser(javax.servlet.http.HttpServletRequest, int, String, int, String, String, String, java.util.Collection)
+   * @see mitll.langtest.server.database.DatabaseImpl#addUser
    */
   public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String ipAddr, boolean isMale, int age, String dialect) {
     User userByID = getUserByID(userID);
@@ -662,9 +670,8 @@ public class UserDAO extends DAO {
   /**
    * @param users
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#joinWithDLIUsers(java.util.List)
    */
-  public Map<Long, User> getMap(List<User> users) {
+  private Map<Long, User> getMap(List<User> users) {
     Map<Long, User> idToUser = new HashMap<Long, User>();
     for (User u : users) {
       idToUser.put(u.getId(), u);
