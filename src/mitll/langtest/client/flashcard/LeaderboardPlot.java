@@ -19,7 +19,7 @@ public class LeaderboardPlot {
   public static final float GRAPH_MAX = 100f;
 
   /**
-   * @see mitll.langtest.client.custom.MyFlashcardExercisePanelFactory.StatsPracticePanel#makeChart(int, int, mitll.langtest.shared.flashcard.AVPHistoryForList)
+   * @see StatsFlashcardFactory.StatsPracticePanel#makeChart(int, int, mitll.langtest.shared.flashcard.AVPHistoryForList)
    * @param historyForList
    * @param title
    * @param subtitle
@@ -178,7 +178,8 @@ public class LeaderboardPlot {
   }
 
   private static class Range {
-    float from,to;
+    final float from;
+    final float to;
     public Range(float from, float to) {
       this.from = from;
       this.to = to;
