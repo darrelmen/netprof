@@ -1,62 +1,58 @@
 package mitll.langtest.client.flashcard;
 
-import com.github.gwtbootstrap.client.ui.Dropdown;
-import com.github.gwtbootstrap.client.ui.Icon;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Image;
-import com.github.gwtbootstrap.client.ui.NavLink;
-import com.github.gwtbootstrap.client.ui.Paragraph;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.AttachEvent;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.User;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 /**
  * Does fancy font sizing depending on available width...
  */
 public class Flashcard implements RequiresResize {
-  private static final String PRONUNCIATION_FEEDBACK = "PRONUNCIATION FEEDBACK";
+  private static final String PRONUNCIATION_FEEDBACK = "Classroom";//NetProF";//"PRONUNCIATION FEEDBACK";
   private static final double MAX_FONT_EM = 1.7d;
   private static final int SLOP = 55;
   private static final String NEW_PRO_F1_PNG = "NewProF1.png";
+  private static final String RECORDING_DISABLED = "RECORDING DISABLED";
+  private static final int MIN_SCREEN_WIDTH = 1100;
+  private static final String LOG_OUT = "Log Out";
+  private static final double MIN_RATIO = 0.7;
+  private static final int min = 720;
+
   private final boolean isAnonymous;
   private Paragraph appName;
   private Image flashcardImage;
   private Image collab;
-  private static final int min = 720;
   private HTML userNameWidget;
   private final String nameForAnswer;
-  private final boolean adminView;
-  Paragraph subtitle;
-  HTML browserInfo;
-  Panel qc,recordAudio;
-  EventRegistration eventRegistration;
+  //private final boolean adminView;
+  private Paragraph subtitle;
+  private HTML browserInfo;
+  private Panel qc,recordAudio;
+  private Dropdown cogMenu;
+//  private final boolean adminView;
+  //EventRegistration eventRegistration;
 
   /**
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
    */
-  public Flashcard(PropertyHandler props, EventRegistration eventRegistration) {
+  public Flashcard(PropertyHandler props) {
     this.nameForAnswer = props.getNameForAnswer() + "s";
     isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
-    adminView = props.isAdminView();
-    this.eventRegistration = eventRegistration;
+    //adminView = props.isAdminView();
+  //  this.eventRegistration = eventRegistration;
   }
 
   /**
@@ -70,16 +66,14 @@ public class Flashcard implements RequiresResize {
                                 ClickHandler results,
                                 ClickHandler monitoring,
                                 ClickHandler events) {
-    return getHeaderRow(splashText, isBeta,NEW_PRO_F1_PNG, PRONUNCIATION_FEEDBACK, userName, browserInfo, logoutClickHandler,
-      users, results, monitoring,events, new ArrayList<User.Permission>());
+    return getHeaderRow(splashText, isBeta, userName, browserInfo, logoutClickHandler,
+      users, results, monitoring,events);
   }
 
   /**
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
    * @param splashText
    * @param isBeta
-   * @param appIcon
-   * @param appTitle
    * @param userName
    * @param browserInfo
    * @param logoutClickHandler
@@ -87,18 +81,17 @@ public class Flashcard implements RequiresResize {
    * @param results
    * @param monitoring
    * @param events
-   * @param permissions
    * @return
    */
   public Panel getHeaderRow(String splashText,
-                            boolean isBeta, String appIcon, String appTitle, String userName,
+                            boolean isBeta, String userName,
                             HTML browserInfo,
                             ClickHandler logoutClickHandler,
+
                             ClickHandler users,
                             ClickHandler results,
                             ClickHandler monitoring,
-                            ClickHandler events,
-                            Collection<User.Permission> permissions) {
+                            ClickHandler events) {
     HorizontalPanel headerRow = new HorizontalPanel();
     headerRow.setWidth("100%");
     headerRow.addStyleName("headerBackground");
@@ -111,7 +104,8 @@ public class Flashcard implements RequiresResize {
     flashcard.addStyleName("inlineBlockStyle");
     flashcard.addStyleName("headerBackground");
     flashcard.addStyleName("leftAlign");
-    appName = new Paragraph("<span>" + appTitle + "</span>" +(isBeta?("<span><font color='yellow'>" + "&nbsp;BETA" + "</font></span>"):""));
+    String betaMark = isBeta ? ("<span><font color='yellow'>" + "&nbsp;BETA" + "</font></span>") : "";
+    appName = new Paragraph("<span>" + Flashcard.PRONUNCIATION_FEEDBACK + "</span>" + betaMark);
     appName.addStyleName("bigFont");
 
     flashcard.add(appName);
@@ -121,7 +115,7 @@ public class Flashcard implements RequiresResize {
 
       flashcard.add(subtitle);
 
-    flashcardImage = new Image(LangTest.LANGTEST_IMAGES + appIcon);
+    flashcardImage = new Image(LangTest.LANGTEST_IMAGES + Flashcard.NEW_PRO_F1_PNG);
     flashcardImage.addStyleName("floatLeft");
     flashcardImage.addStyleName("rightFiveMargin");
     iconLeftHeader.add(flashcardImage);
@@ -135,27 +129,21 @@ public class Flashcard implements RequiresResize {
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("UsernameContainer");
     userNameWidget = getUserNameWidget(userName);
-    if (!isAnonymous || adminView) {
+    if (!isAnonymous /*|| adminView*/) {
       hp.add(userNameWidget);
     }
+    hp.add(qc = new SimplePanel());
+    hp.add(recordAudio = new SimplePanel());
 
-    //if (permissions.contains(User.Permission.QUALITY_CONTROL)) {
-      hp.add(qc = new SimplePanel());
-    //}
-
-    //if (permissions.contains(User.Permission.RECORD_AUDIO)) {
-      hp.add(recordAudio = new SimplePanel());
-    //}
-
-    // add log out/admin options menu
-    Dropdown menu = makeMenu(users, results, monitoring,events);
-    menu.addStyleName("cogStyle");
-    NavLink widget1 = new NavLink("Log Out");
+    // add log out/admin options cogMenu
+    cogMenu = makeMenu(users, results, monitoring, events);
+    cogMenu.addStyleName("cogStyle");
+    NavLink widget1 = new NavLink(LOG_OUT);
     widget1.addClickHandler(logoutClickHandler);
-    menu.add(widget1);
+    cogMenu.add(widget1);
 
-    if (!isAnonymous || adminView) {
-      hp.add(menu);
+    if (!isAnonymous/* || adminView*/) {
+      hp.add(cogMenu);
     }
 
     browserInfo.addStyleName("leftFiveMargin");
@@ -197,8 +185,29 @@ public class Flashcard implements RequiresResize {
     }
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#gotUser(mitll.langtest.shared.User)
+   * @see mitll.langtest.client.LangTest#handleCDToken(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, String)
+   * @see mitll.langtest.client.LangTest#showLogin(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel)
+   *
+   * @param val
+   */
+  public void setCogVisible(boolean val) {
+    cogMenu.setVisible(val);
+    userNameWidget.setVisible(val);
+  }
+
+  /**
+   * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
+   * @param v
+   */
   public void setBrowserInfo(String v) { browserInfo.setHTML(v);}
 
+  /**
+   * @see #getHeaderRow(String, boolean, String, String, String, com.google.gwt.user.client.ui.HTML, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler)
+   * @param userName
+   * @return
+   */
   private HTML getUserNameWidget(String userName) {
     userNameWidget = new HTML(userName);
     userNameWidget.getElement().setId("Username");
@@ -209,6 +218,7 @@ public class Flashcard implements RequiresResize {
     return userNameWidget;
   }
 
+  NavLink userC, resultsC, monitoringC, eventsC;
   /**
    * @see #getHeaderRow
    * @param users
@@ -222,42 +232,38 @@ public class Flashcard implements RequiresResize {
     w.setIcon(IconType.COG);
     w.setIconSize(IconSize.LARGE);
 
-    if (users != null) {
-      NavLink widget2 = new NavLink("Users");
-      widget2.addClickHandler(users);
-      eventRegistration.registerWidget(widget2,widget2,"N/A","show user list");
-      w.add(widget2);
-    }
+    userC = new NavLink("Users");
+    userC.addClickHandler(users);
+    w.add(userC);
 
-    if (results != null) {
-      NavLink widget2 = new NavLink(nameForAnswer.substring(0,1).toUpperCase()+nameForAnswer.substring(1));
-      widget2.addClickHandler(results);
-      eventRegistration.registerWidget(widget2,widget2,"N/A","show recordings");
-      w.add(widget2);
-    }
+    resultsC = new NavLink(nameForAnswer.substring(0, 1).toUpperCase() + nameForAnswer.substring(1));
+    resultsC.addClickHandler(results);
+    w.add(resultsC);
 
-    if (monitoring != null) {
-      NavLink widget2 = new NavLink("Monitoring");
-      widget2.addClickHandler(monitoring);
-      eventRegistration.registerWidget(widget2,widget2,"N/A","show monitoring");
-      w.add(widget2);
-    }
-    if (events != null) {
-      NavLink widget2 = new NavLink("Events");
-      widget2.addClickHandler(events);
-      eventRegistration.registerWidget(widget2,widget2,"N/A","show events");
+    monitoringC = new NavLink("Monitoring");
+    monitoringC.addClickHandler(monitoring);
+    w.add(monitoringC);
 
-      w.add(widget2);
-    }
+    eventsC = new NavLink("Events");
+    eventsC.addClickHandler(events);
+    w.add(eventsC);
+
     return w;
   }
 
+  public void setVisibleAdmin(boolean visibleAdmin) {
+    userC.setVisible(visibleAdmin);
+    resultsC.setVisible(visibleAdmin);
+    monitoringC.setVisible(visibleAdmin);
+    eventsC.setVisible(visibleAdmin);
+  }
+
   /**
-   * @see mitll.langtest.client.LangTest#gotUser(long)
+   * @see mitll.langtest.client.LangTest#gotUser
    * @param name
    */
   public void setUserName(String name) {  this.userNameWidget.setText(name);  }
-  public void setSplash(String name) {  this.subtitle.setText(name);
+  public void setSplash() {  this.subtitle.setText(RECORDING_DISABLED);
 
     subtitle.removeStyleName("subtitleForeground");
     subtitle.addStyleName("subtitleNoRecordingForeground");
@@ -265,13 +271,11 @@ public class Flashcard implements RequiresResize {
 
   @Override
   public void onResize() {
-      int clientWidth = Window.getClientWidth();
-
-      if (clientWidth < 1100) {
-        setFontWidth();
-      } else {
-        DOM.setStyleAttribute(appName.getElement(), "fontSize", MAX_FONT_EM + "em");
-      }
+    if (Window.getClientWidth() < MIN_SCREEN_WIDTH) {
+      setFontWidth();
+    } else {
+      appName.getElement().getStyle().setFontSize(MAX_FONT_EM, Style.Unit.EM);
+    }
   }
 
   private void setFontWidth() {
@@ -287,10 +291,8 @@ public class Flashcard implements RequiresResize {
     ratio *= 10;
     ratio = Math.floor(ratio);
     ratio /= 10;
-    if (ratio < 0.7) ratio = 0.7;
+    if (ratio < MIN_RATIO) ratio = MIN_RATIO;
     if (ratio > MAX_FONT_EM) ratio =  MAX_FONT_EM;
-    String fontsize = ratio + "em";
-  //  System.out.println("setFontWidth : Setting font size to " + fontsize);
-    DOM.setStyleAttribute(appName.getElement(), "fontSize", fontsize);
+    appName.getElement().getStyle().setFontSize(ratio, Style.Unit.EM);
   }
 }

@@ -4,23 +4,23 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.Typeahead;
-import com.github.gwtbootstrap.client.ui.base.*;
-import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.event.dom.client.*;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.*;
+import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.NoSelectionModel;
+import com.google.gwt.view.client.RangeChangeEvent;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
@@ -65,7 +65,6 @@ public class ResultManager extends PagerTable {
   public static final String CLOSE = "Close";
   public static final int MAX_TO_SHOW = 15;
 
-  private final boolean textResponse;
   private final EventRegistration eventRegistration;
   protected int pageSize = PAGE_SIZE;
   protected final LangTestDatabaseAsync service;
@@ -78,7 +77,6 @@ public class ResultManager extends PagerTable {
 
   /**
    * @param s
-   * @param feedback
    * @param nameForAnswer
    * @param eventRegistration
    * @see mitll.langtest.client.LangTest#onModuleLoad2
@@ -88,7 +86,6 @@ public class ResultManager extends PagerTable {
     this.service = s;
     this.feedback = feedback;
     this.nameForAnswer = nameForAnswer;
-    textResponse = propertyHandler.isFlashcardTextResponse();
     this.typeOrder = typeOrder;
     this.eventRegistration = eventRegistration;
   }
@@ -177,7 +174,7 @@ public class ResultManager extends PagerTable {
         @Override
         public void requestSuggestions(final Request request, final Callback callback) {
           final Map<String, String> unitToValue = getUnitToValue();
-          System.out.println(new Date() + " requestSuggestions got request for " + type + " : " + unitToValue);
+          //System.out.println(new Date() + " requestSuggestions got request for " + type + " : " + unitToValue);
           service.getResultAlternatives(unitToValue, getUserID(), getText(), type, new AsyncCallback<Collection<String>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -205,11 +202,12 @@ public class ResultManager extends PagerTable {
     userIDSuggest = new Typeahead(new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
-        System.out.println(new Date() + " requestSuggestions got request for userid " + getUnitToValue() + " " + getText() + " " + getUserID());
+        //System.out.println(new Date() + " requestSuggestions got request for userid " + getUnitToValue() + " " + getText() + " " + getUserID());
 
         service.getResultAlternatives(getUnitToValue(), getUserID(), getText(), MonitorResult.USERID, new AsyncCallback<Collection<String>>() {
           @Override
-          public void onFailure(Throwable caught) {}
+          public void onFailure(Throwable caught) {
+          }
 
           @Override
           public void onSuccess(Collection<String> result) {
@@ -221,6 +219,7 @@ public class ResultManager extends PagerTable {
     });
 
     TextBox w = new TextBox();
+
     userIDSuggest.setWidget(w);
     addCallbacks(userIDSuggest);
     w.getElement().setId("TextBox_userIDSuggest");
@@ -232,7 +231,7 @@ public class ResultManager extends PagerTable {
     textSuggest = new Typeahead(new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
-        System.out.println(new Date() + " requestSuggestions got request for txt " + getUnitToValue() + " " + getText() + " " + getUserID());
+        //System.out.println(new Date() + " requestSuggestions got request for txt " + getUnitToValue() + " " + getText() + " " + getUserID());
 
         service.getResultAlternatives(getUnitToValue(), getUserID(), getText(), MonitorResult.TEXT, new AsyncCallback<Collection<String>>() {
           @Override
@@ -249,6 +248,7 @@ public class ResultManager extends PagerTable {
       }
     });
     TextBox w1 = new TextBox();
+    w1.setPlaceholder("Word (type or paste) or Item ID");
     w1.setDirectionEstimator(true);
     textSuggest.setWidget(w1);
     configureTextBox(w1);
@@ -270,9 +270,13 @@ public class ResultManager extends PagerTable {
     callback.onSuggestionsReady(request, new SuggestOracle.Response(suggestions));
   }
 
-  private void configureTextBox(final TextBox w) { w.addKeyUpHandler(getKeyUpHandler(w));  }
+  private void configureTextBox(final TextBox w) {
+    w.addKeyUpHandler(getKeyUpHandler(w));
+  }
 
-  private void addCallbacks(final Typeahead user) { user.setUpdaterCallback(getUpdaterCallback());  }
+  private void addCallbacks(final Typeahead user) {
+    user.setUpdaterCallback(getUpdaterCallback());
+  }
 
   /**
    * NOTE : we need both a redraw on key up and one on selection!
@@ -477,8 +481,10 @@ public class ResultManager extends PagerTable {
           @Override
           public void onSuccess(final ResultAndTotal result) {
             if (result.req < req - 1) {
+/*
               System.out.println("->>getResults ignoring response " + result.req + " vs " + req +
                   " --->req " + unitToValue + " user " + userID + " text '" + text + "' : got back " + result.results.size() + " of total " + result.numTotal);
+*/
             } else {
               System.out.println("--->getResults req " + result.req +
                   " " + unitToValue + " user " + userID + " text '" + text + "' : got back " + result.results.size() + " of total " + result.numTotal);
@@ -577,38 +583,36 @@ public class ResultManager extends PagerTable {
   protected void addResultColumn(CellTable<MonitorResult> table) {
     addNoWrapColumn(table);
 
-    if (!textResponse) {
-      TextColumn<MonitorResult> audioType = new TextColumn<MonitorResult>() {
-        @Override
-        public String getValue(MonitorResult answer) {
-          return answer.getAudioType().equals("avp") ? "flashcard" : answer.getAudioType();
-        }
-      };
-      audioType.setSortable(true);
-      table.addColumn(audioType, AUDIO_TYPE);
-      colToField.put(audioType, AUDIO_TYPE1);
+    TextColumn<MonitorResult> audioType = new TextColumn<MonitorResult>() {
+      @Override
+      public String getValue(MonitorResult answer) {
+        return answer.getAudioType().equals("avp") ? "flashcard" : answer.getAudioType();
+      }
+    };
+    audioType.setSortable(true);
+    table.addColumn(audioType, AUDIO_TYPE);
+    colToField.put(audioType, AUDIO_TYPE1);
 
-      TextColumn<MonitorResult> dur = new TextColumn<MonitorResult>() {
-        @Override
-        public String getValue(MonitorResult answer) {
-          float secs = ((float) answer.getDurationInMillis()) / 1000f;
-          return "" + roundToHundredth(secs);
-        }
-      };
-      dur.setSortable(true);
-      table.addColumn(dur, DURATION_SEC);
-      colToField.put(dur, DURATION_IN_MILLIS);
+    TextColumn<MonitorResult> dur = new TextColumn<MonitorResult>() {
+      @Override
+      public String getValue(MonitorResult answer) {
+        float secs = ((float) answer.getDurationInMillis()) / 1000f;
+        return "" + roundToHundredth(secs);
+      }
+    };
+    dur.setSortable(true);
+    table.addColumn(dur, DURATION_SEC);
+    colToField.put(dur, DURATION_IN_MILLIS);
 
-      TextColumn<MonitorResult> valid = new TextColumn<MonitorResult>() {
-        @Override
-        public String getValue(MonitorResult answer) {
-          return "" + answer.isValid();
-        }
-      };
-      valid.setSortable(true);
-      table.addColumn(valid, "Valid");
-      colToField.put(valid, VALID);
-    }
+    TextColumn<MonitorResult> valid = new TextColumn<MonitorResult>() {
+      @Override
+      public String getValue(MonitorResult answer) {
+        return "" + answer.isValid();
+      }
+    };
+    valid.setSortable(true);
+    table.addColumn(valid, "Valid");
+    colToField.put(valid, VALID);
 
     TextColumn<MonitorResult> correct = new TextColumn<MonitorResult>() {
       @Override
