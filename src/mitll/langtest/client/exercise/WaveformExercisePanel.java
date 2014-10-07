@@ -187,12 +187,11 @@ public class WaveformExercisePanel extends ExercisePanel {
   }
 
   /**
-   * @param promptInEnglish
    * @return
    * @seex ExercisePanel#addQuestionPrompt(com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.Exercise)
    */
   @Override
-  protected String getQuestionPrompt(boolean promptInEnglish) {
+  protected String getQuestionPrompt() {
     return "";
   }
 
