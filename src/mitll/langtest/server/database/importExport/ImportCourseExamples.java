@@ -42,6 +42,12 @@ public class ImportCourseExamples {
     importExamples(language, destinationH2);
   }
 
+  protected static void importCourseExamplesLevantine() {
+    String language = "levantine";
+    String destinationH2 = "npfLevantine";
+    importExamples(language, destinationH2);
+  }
+
   private static void importExamples(String language, String destinationH2) {
     String configDir = "war/config/" + language;
     String importH2 = language;
@@ -52,16 +58,16 @@ public class ImportCourseExamples {
   }
 
   private static void importExamples(String configDir, String importH2, String destinationH2, String destAudioDir, String candidateAudioDir) {
-    DatabaseImpl russianCourseExamples = makeDatabaseImpl(importH2, configDir);
-    ResultDAO resultDAO1 = russianCourseExamples.getResultDAO();
+    DatabaseImpl courseExamples = makeDatabaseImpl(importH2, configDir);
+    ResultDAO resultDAO1 = courseExamples.getResultDAO();
     System.out.println("got num results " + resultDAO1.getNumResults());
-    Map<Long, Map<String, Result>> userToResultsRegular = resultDAO1.getUserToResults(true, russianCourseExamples.getUserDAO());
-  //  Map<Long, Map<String, Result>> userToResultsRegular = resultDAO1.getUserToResults(Result.AUDIO_TYPE_FAST_AND_SLOW, russianCourseExamples.getUserDAO());
+    Map<Long, Map<String, Result>> userToResultsRegular = resultDAO1.getUserToResults(true, courseExamples.getUserDAO());
+  //  Map<Long, Map<String, Result>> userToResultsRegular = resultDAO1.getUserToResults(Result.AUDIO_TYPE_FAST_AND_SLOW, courseExamples.getUserDAO());
     System.out.println("regular speed got users " + userToResultsRegular.size() + " keys " + userToResultsRegular.keySet());
 
     //  System.out.println("got " + result);
 
-    Map<Long, Map<String, Result>> userToResultsSlow = resultDAO1.getUserToResults(false, russianCourseExamples.getUserDAO());
+    Map<Long, Map<String, Result>> userToResultsSlow = resultDAO1.getUserToResults(false, courseExamples.getUserDAO());
     System.out.println("slow speed    got users " + userToResultsSlow.size() + " keys " + userToResultsSlow.keySet());
 
     // so now we have the latest audio
@@ -70,7 +76,7 @@ public class ImportCourseExamples {
     // copy users to real database
 
     DatabaseImpl npfRussian = makeDatabaseImpl(destinationH2, configDir);
-    Map<Long, User> userMap = russianCourseExamples.getUserDAO().getUserMap();
+    Map<Long, User> userMap = courseExamples.getUserDAO().getUserMap();
     Map<Long, Long> oldToNew = new HashMap<Long, Long>();
 
     for (long userid : userToResultsRegular.keySet()) {
@@ -130,15 +136,15 @@ public class ImportCourseExamples {
       for (Result r : exIdToResult.values()) {
         if (count %  100 == 0) {
           logger.debug("\tcount " + count +
-            " result = " + r.uniqueID + " for " + r.getID() + " type " + r.getAudioType() + " path " + r.answer);
+            " result = " + r.getUniqueID() + " for " + r.getID() + " type " + r.getAudioType() + " path " + r.getAnswer());
         }
 
-        audioDAO.add(r, oldToNew.get(r.userid).intValue(), "bestAudio/" + r.answer);
+        audioDAO.add(r, oldToNew.get(r.getUserid()).intValue(), "bestAudio/" + r.getAnswer());
 
         try {
-          File destFile = new File(destAudioDir, r.answer);
+          File destFile = new File(destAudioDir, r.getAnswer());
           destFile.getParentFile().mkdirs();
-          File srcFile = new File(candidateAudioDir, r.answer);
+          File srcFile = new File(candidateAudioDir, r.getAnswer());
           if (!srcFile.exists() && bad++ < 20) {
             logger.error("can't find " + srcFile.getAbsolutePath());
           } else {
@@ -159,6 +165,7 @@ public class ImportCourseExamples {
 
   public static void main(String []arg){
     //importCourseExamplesJapanese();
-    importCourseExamplesKorean();
+   // importCourseExamplesKorean();
+    importCourseExamplesLevantine();
   }
 }
