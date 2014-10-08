@@ -270,8 +270,6 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
           }
         };
 
-       // widgets.getElement().setId("FlashcardRecordButton");
-
         // without this, the arrow keys may go to the chapter selector
         Scheduler.get().scheduleDeferred(new Command() {
           public void execute() {
