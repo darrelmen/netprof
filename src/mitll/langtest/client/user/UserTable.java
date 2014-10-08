@@ -145,8 +145,6 @@ public class UserTable extends PagerTable {
     gender.setSortable(true);
     table.addColumn(gender, "Gender");
 
-    //addExperience(table);
-
     TextColumn<User> perm = new TextColumn<User>() {
       @Override
       public String getValue(User contact) { return "" + contact.getPermissions().toString().replaceAll("QUALITY_CONTROL","QC"); }
@@ -230,6 +228,14 @@ public class UserTable extends PagerTable {
       }
     };
     table.addColumn(passH, "Pass?");
+
+    TextColumn<User> device = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return contact.getDevice();
+      }
+    };
+    table.addColumn(device, "Device");
 
     // Create a data provider.
     ListDataProvider<User> dataProvider = new ListDataProvider<User>();
