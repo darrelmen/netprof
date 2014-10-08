@@ -596,7 +596,7 @@ public class ASRScoring extends Scoring {
       HTKDictionary htkDictionary = new HTKDictionary(dictFile);
       long now = System.currentTimeMillis();
       int size = htkDictionary.size(); // force read from lazy val
-      if (now - then > 100) {
+      if (now - then > 300) {
         logger.info("for " + languageProperty +
             " read dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
       }
