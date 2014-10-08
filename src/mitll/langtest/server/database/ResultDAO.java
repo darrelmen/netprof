@@ -261,7 +261,9 @@ public class ResultDAO extends DAO {
 
       String sql = getCSSelect()+ " FROM " + RESULTS + " WHERE " +
         VALID + "=true" + " AND " +
-        AUDIO_TYPE + (matchAVP?"=":"<>") + "'avp'" +" AND " +
+        //AUDIO_TYPE + (matchAVP?"=":"<>") + "'avp'" +" AND " +
+          getAVPClause(matchAVP) +" AND " +
+
           Database.EXID + " in (" + list + ")" +
           " order by " + Database.TIME + " asc";
 
@@ -298,7 +300,7 @@ public class ResultDAO extends DAO {
           USERID + "=" + userid + " AND " +
           VALID + "=true" + " AND " +
           //    AUDIO_TYPE + (matchAVP ? "=" : "<>") + "'avp'" +
-          AUDIO_TYPE + (matchAVP ? "" : " NOT ") + " LIKE " + "'avp*'" +
+          getAVPClause(matchAVP) +
           " AND " +
           Database.EXID + " in (" + list + ")";
 
@@ -307,12 +309,18 @@ public class ResultDAO extends DAO {
 
       List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement);
 
-      //   logger.debug("getResultsForExIDInForUser for  " +sql+ " got\n\t" + scores.size());
+      if (debug) {
+        logger.debug("getResultsForExIDInForUser for  " +sql+ " got\n\t" + scores.size());
+      }
       return scores;
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
     return new ArrayList<CorrectAndScore>();
+  }
+
+  private String getAVPClause(boolean matchAVP) {
+    return AUDIO_TYPE + (matchAVP ? "" : " NOT ") + " LIKE " + "'avp%'";
   }
 
   private String getCSSelect() {
@@ -470,7 +478,7 @@ public class ResultDAO extends DAO {
       float pronScore = rs.getFloat(PRON_SCORE);
       String path = rs.getString(ANSWER);
 
-      CorrectAndScore result = new CorrectAndScore(uniqueID, userid, id, correct, pronScore, timestamp.getTime(), path);
+      CorrectAndScore result = new CorrectAndScore(uniqueID, userid, id, correct, pronScore, timestamp.getTime(), trimPathForWebPage2(path));
       results.add(result);
     }
     finish(connection, statement, rs);
@@ -478,17 +486,9 @@ public class ResultDAO extends DAO {
     return results;
   }
 
-/*
-  private void trimPathForWebPage(Result r) {
-    int answer = r.answer.indexOf(PathHelper.ANSWERS);
-    if (answer == -1) return;
-    r.answer = r.answer.substring(answer);
-  }
-*/
-
   private String trimPathForWebPage2(String path) {
     int answer = path.indexOf(PathHelper.ANSWERS);
-     return (answer == -1) ? path : path.substring(answer);
+    return (answer == -1) ? path : path.substring(answer);
   }
 
   /**
