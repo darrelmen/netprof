@@ -76,7 +76,7 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#checkLogin()
    */
   public void checkLogin() {
-    System.out.println("loginType " + loginType);
+    //System.out.println("loginType " + loginType);
     if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
       anonymousLogin();
     } else {
@@ -194,7 +194,7 @@ public class UserManager {
   private void addAnonymousUser() {
     System.out.println("UserManager.addAnonymousUser : adding anonymous user");
 
-    service.addUser("anonymous", "", "", User.Kind.ANONYMOUS, Window.Location.getHref(), "", true, 0, "unknown", false, new AsyncCallback<User>() {
+    service.addUser("anonymous", "", "", User.Kind.ANONYMOUS, Window.Location.getHref(), "", true, 0, "unknown", false, "browser", new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
 
