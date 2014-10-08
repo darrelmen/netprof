@@ -117,12 +117,6 @@ public class AudioAnswer implements IsSerializable {
     return reqid;
   }
 
-/*
-  public void setReqid(int reqid) {
-    this.reqid = reqid;
-  }
-*/
-
   public String getPath() { return path; }
 
   public void setPath(String path) { this.path = path;  }
@@ -151,9 +145,7 @@ public class AudioAnswer implements IsSerializable {
     this.audioAttribute = audioAttribute;
   }
 
-  public PretestScore getPretestScore() {
-    return pretestScore;
-  }
+  public PretestScore getPretestScore() {  return pretestScore;  }
 
   /**
    * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment(String, String, String, int)
