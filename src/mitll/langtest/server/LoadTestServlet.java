@@ -128,8 +128,6 @@ public class LoadTestServlet extends DatabaseServlet {
         }
       } else if (queryString.startsWith(IMAGE_FOR_AUDIO)) {
         //  ?imageForAudio=1&audioFile=....
-
-
         String[] split1 = queryString.split("&");
         String first = split1[0];
         //  logger.debug("first " + first);
