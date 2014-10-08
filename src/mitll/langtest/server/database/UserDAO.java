@@ -132,7 +132,6 @@ public class UserDAO extends DAO {
     User userByID = getUserByID(userID);
     if (userByID != null && kind != User.Kind.ANONYMOUS) {
       // user exists!
-
       if (userByID.getEmailHash() != null && userByID.getPasswordHash() != null &&
           !userByID.getEmailHash().isEmpty() && !userByID.getPasswordHash().isEmpty()) {
         logger.debug("addUser : user " + userID + " is an existing user.");
@@ -182,7 +181,7 @@ public class UserDAO extends DAO {
       // there are much better ways of doing this...
       long max = 0;
       for (User u : getUsers()) if (u.getId() > max) max = u.getId();
-      logger.info("addUser : max is " + max + " new user '" + userID + "' age " + age + " gender " + gender + " pass " + passwordH);
+//      logger.info("addUser : max is " + max + " new user '" + userID + "' age " + age + " gender " + gender + " pass " + passwordH);
       if (passwordH == null) new Exception().printStackTrace();
 
       Connection connection = database.getConnection(this.getClass().toString());
@@ -369,10 +368,15 @@ public class UserDAO extends DAO {
 
     User userWhere = getUserWhere(-1, sql);
     if (userWhere == null) {
-      logger.debug("getUser no user with id '" + id + "' and pass " + passwordHash);
+/*
+      logger.debug("getUser sql '" +sql+
+          "' " +
+          " no user with id '" + id + "' and pass " + passwordHash);
+*/
 
       userWhere = getUserByID(id);
-      logger.debug("getUser user with id '" + id + "' and empty or different pass is " + userWhere);
+      logger.debug("getUser user with id '" + id + "' pass " + passwordHash +
+          " and empty or different pass is " + userWhere);
     }
     return userWhere;
   }
@@ -561,17 +565,15 @@ public class UserDAO extends DAO {
     return users.iterator().next();
   }
 
-  User getUserWhere(long userid, String sql) {
+  private User getUserWhere(long userid, String sql) {
     List<User> users = getUsers(sql);
     if (users.isEmpty()) {
       if (userid > 0) {
-        logger.warn("no user with id " + userid);
+        logger.warn("for " + sql +
+            " no user with id '" + userid +"'");
       }
       return null;
     }
-    // else if (users.size() > 1) {
-    //    logger.warn("huh? " + users.size() + " with  id " + userid);
-    //  }
 
     return users.iterator().next();
   }
