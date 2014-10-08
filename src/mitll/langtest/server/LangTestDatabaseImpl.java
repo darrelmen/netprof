@@ -1164,12 +1164,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param age
    * @param dialect   @return null if existing user
    * @param isCD
+   * @param device
    * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, mitll.langtest.shared.User.Kind)
    */
   @Override
   public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email,
-                      boolean isMale, int age, String dialect, boolean isCD) {
-    User user = db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind, isMale, age, dialect);
+                      boolean isMale, int age, String dialect, boolean isCD, String device) {
+    User user = db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind, isMale, age, dialect, "browser");
     if (user != null && !user.isEnabled()) { // user = null means existing user.
       logger.debug("user " + userID +"/" +user+
           " wishes to be a content developer. Asking for approval...");
