@@ -143,9 +143,9 @@ public class AutoCRT {
    * @param audioFile
    * @param answer
    */
-  public void getFlashcardAnswer(CommonExercise commonExercise, File audioFile, AudioAnswer answer) {
+  public PretestScore getFlashcardAnswer(CommonExercise commonExercise, File audioFile, AudioAnswer answer) {
     List<String> foregroundSentences = getRefSentences(commonExercise);
-    getFlashcardAnswer(audioFile, foregroundSentences, answer);
+    PretestScore flashcardAnswer = getFlashcardAnswer(audioFile, foregroundSentences, answer);
 
     // log what happened
     if (answer.isCorrect()) {
@@ -155,11 +155,12 @@ public class AutoCRT {
     }
     else {
       int length = foregroundSentences.isEmpty() ? 0 : foregroundSentences.iterator().next().length();
-      logger.info("incorrect response for exercise #" +commonExercise.getID() +
+      logger.info("getFlashcardAnswer : incorrect response for exercise #" +commonExercise.getID() +
           " reco sentence was '" + answer.getDecodeOutput() + "'(" +answer.getDecodeOutput().length()+
           ") vs " + "'"+foregroundSentences +"'(" + length +
           ") pron score was " + answer.getScore());
     }
+    return flashcardAnswer;
   }
 
   /**
