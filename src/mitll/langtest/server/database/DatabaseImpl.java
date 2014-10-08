@@ -558,6 +558,10 @@ public class DatabaseImpl implements Database {
     getExercises(useFile, lessonPlanFile);
   }
 
+  public User addUser(String userID, String passwordH, String emailH, String deviceType, String device) {
+    return addAndGetUser(userID, passwordH, emailH, User.Kind.STUDENT, true, 89, "unk", deviceType, device);
+  }
+
   /**
    * @param request
    * @param userID
@@ -574,6 +578,10 @@ public class DatabaseImpl implements Database {
   public User addUser(HttpServletRequest request, String userID, String passwordH, String emailH, User.Kind kind,
                       boolean isMale, int age, String dialect, String device) {
     String ip = getIPInfo(request);
+    return addAndGetUser(userID, passwordH, emailH, kind, isMale, age, dialect, device, ip);
+  }
+
+  private User addAndGetUser(String userID, String passwordH, String emailH, User.Kind kind, boolean isMale, int age, String dialect, String device, String ip) {
     User user = userDAO.addUser(userID, passwordH, emailH, kind, ip, isMale, age, dialect, device);
     if (user != null) {
       userListManager.createFavorites(user.getId());
