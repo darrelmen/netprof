@@ -566,12 +566,12 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#nextAfterDelay(boolean, String)
    */
   protected void loadNextOnTimer(final int delay) {
-    System.out.println("loadNextOnTimer ----> load next on " + delay);
+    //System.out.println("loadNextOnTimer ----> load next on " + delay);
 
     if (!preventFutureTimerUse) {
-      if (delay > 100) {
-        System.out.println("loadNextOnTimer ----> load next on " + delay);
-      }
+      //if (delay > 100) {
+      //  System.out.println("loadNextOnTimer ----> load next on " + delay);
+     // }
       Timer t = new Timer() {
         @Override
         public void run() {
@@ -598,10 +598,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
   /**
    * @see #nextAfterDelay(boolean, String)
    */
-  protected void loadNext() {
-   // System.out.println("loadNext after " + exercise.getID());
- //   controller.getExerciseList().loadNextExercise(exercise);
-  }
+  protected void loadNext() {}
 
   @Override
   DivWidget getFirstRow(ExerciseController controller) {
@@ -610,19 +607,17 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     if (!scores.isEmpty()) {
       DivWidget historyDiv = new DivWidget();
       historyDiv.getElement().setId("historyDiv");
-      //historyDiv.setWidth("50%");
       firstRow.add(historyDiv);
       String history = SetCompleteDisplay.getScoreHistory(scores);
       String s = "<span style='float:right;" +
-          //   "margin-right:-10px;" +
           "'>" + history + "&nbsp;" + Math.round(getAvgScore(scores)) +
           "</span>";
 
       historyDiv.add(new HTML(s));
     }
-    else {
-      System.out.println("scores are empty??? for " + exercise);
-    }
+    //else {
+    //  System.out.println("scores are empty??? for " + exercise);
+    //}
     return firstRow;
   }
 
