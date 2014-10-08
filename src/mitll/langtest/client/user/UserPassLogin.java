@@ -36,6 +36,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 8/11/14.
  */
 public class UserPassLogin extends UserDialog {
+  public static final String MALE = "male";
   private final Logger logger = Logger.getLogger("UserPassLogin");
   private static final String MAGIC_PASS = Md5Hash.getHash("adm!n");
   private static final String CURRENT_USERS = "Current users should add an email and password.";
@@ -767,7 +768,7 @@ public class UserPassLogin extends UserDialog {
     String emailH = Md5Hash.getHash(email);
 
     boolean isCD = kind == User.Kind.CONTENT_DEVELOPER;
-    String gender = isCD ? registrationInfo.isMale() ? "male":"female" : "male";
+    String gender = isCD ? registrationInfo.isMale() ? MALE :"female" : MALE;
     String age = isCD ? registrationInfo.getAgeEntryGroup().getText() : "";
     int age1 = isCD ? Integer.parseInt(age) : 0;
     String dialect = isCD ? registrationInfo.getDialectGroup().getText() : "unk";
@@ -775,7 +776,7 @@ public class UserPassLogin extends UserDialog {
     signUp.setEnabled(false);
 
     service.addUser(user, passH, emailH, kind, Window.Location.getHref(), email,
-        gender.equalsIgnoreCase("male"), age1, dialect, isCD, new AsyncCallback<User>() {
+        gender.equalsIgnoreCase(MALE), age1, dialect, isCD, "browser", new AsyncCallback<User>() {
           @Override
           public void onFailure(Throwable caught) {
             eventRegistration.logEvent(signUp, "signing up", "N/A", "Couldn't contact server...?");
