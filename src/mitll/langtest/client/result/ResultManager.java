@@ -43,7 +43,7 @@ import java.util.*;
  */
 public class ResultManager extends PagerTable {
   private static final int PAGE_SIZE = 12;
-  protected static final String TIMESTAMP = "timestamp";
+  private static final String TIMESTAMP = "timestamp";
   private static final String CORRECT = "Correct";
   private static final String PRO_F_SCORE = "ProFScore";
   private static final String DURATION_SEC = "Duration (Sec)";
@@ -51,7 +51,6 @@ public class ResultManager extends PagerTable {
   private static final String USER_ID = "User";// ID";
   private static final String DESC = "DESC";
   private static final String ASC = "ASC";
-
 
   private static final String ANSWER = "answer";
   private static final String USERID = MonitorResult.USERID;
@@ -62,18 +61,16 @@ public class ResultManager extends PagerTable {
   private static final String DURATION_IN_MILLIS = MonitorResult.DURATION_IN_MILLIS;
   private static final String AUDIO_TYPE1 = MonitorResult.AUDIO_TYPE;
   private static final String PRON_SCORE = MonitorResult.PRON_SCORE;
-  public static final String CLOSE = "Close";
-  public static final int MAX_TO_SHOW = 15;
+  private static final String CLOSE = "Close";
+  private static final int MAX_TO_SHOW = 12;
 
   private final EventRegistration eventRegistration;
-  protected int pageSize = PAGE_SIZE;
-  protected final LangTestDatabaseAsync service;
-  protected final UserFeedback feedback;
+  private final LangTestDatabaseAsync service;
   private final AudioTag audioTag = new AudioTag();
   private final String nameForAnswer;
   private final Map<Column<?, ?>, String> colToField = new HashMap<Column<?, ?>, String>();
   private Collection<String> typeOrder;
-  int req = 0;
+  private int req = 0;
 
   /**
    * @param s
@@ -81,10 +78,9 @@ public class ResultManager extends PagerTable {
    * @param eventRegistration
    * @see mitll.langtest.client.LangTest#onModuleLoad2
    */
-  public ResultManager(LangTestDatabaseAsync s, UserFeedback feedback, String nameForAnswer,
-                       PropertyHandler propertyHandler, Collection<String> typeOrder, EventRegistration eventRegistration) {
+  public ResultManager(LangTestDatabaseAsync s, String nameForAnswer,
+                       Collection<String> typeOrder, EventRegistration eventRegistration) {
     this.service = s;
-    this.feedback = feedback;
     this.nameForAnswer = nameForAnswer;
     this.typeOrder = typeOrder;
     this.eventRegistration = eventRegistration;
@@ -288,8 +284,7 @@ public class ResultManager extends PagerTable {
     return new KeyUpHandler() {
       @Override
       public void onKeyUp(KeyUpEvent event) {
-        System.out.println(new Date() + w.getId() + " KeyUpEvent event " + event + " item " + w.getText() + " " + w.getValue());
-        //System.out.println("--> onKeyUp REDRAW ");
+     //   System.out.println(new Date() + w.getId() + " KeyUpEvent event " + event + " item " + w.getText() + " " + w.getValue());
         redraw();
       }
     };
@@ -301,9 +296,7 @@ public class ResultManager extends PagerTable {
       public String onSelection(SuggestOracle.Suggestion selectedSuggestion) {
         String replacementString = selectedSuggestion.getReplacementString();
         System.out.println("UpdaterCallback " +//user.getId() +
-            " got update " +
-            " " +
-            "--- > " + replacementString);
+            " got update " +" " + "--- > " + replacementString);
 
         // NOTE : we need both a redraw on key up and one on selection!
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -658,7 +651,7 @@ public class ResultManager extends PagerTable {
   }
 
   private Panel getPagerAndTable(CellTable<MonitorResult> table) {
-    return getOldSchoolPagerAndTable(table, table, pageSize, 1000);
+    return getOldSchoolPagerAndTable(table, table, PAGE_SIZE, 1000);
   }
 
   private static class MySuggestion implements SuggestOracle.Suggestion {
