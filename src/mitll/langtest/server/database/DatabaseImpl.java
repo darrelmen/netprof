@@ -560,25 +560,6 @@ public class DatabaseImpl implements Database {
 
   /**
    * @param request
-   * @param age
-   * @param gender
-   * @param experience
-   * @param nativeLang
-   * @param dialect
-   * @param userID
-   * @param permissions
-   * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(int, String, int, String, String, String, java.util.Collection)
-   */
- /* public long addUser(HttpServletRequest request,
-                      int age, String gender, int experience,
-                      String nativeLang, String dialect, String userID, Collection<User.Permission> permissions) {
-    String ip = getIPInfo(request);
-    return addUser(age, gender, experience, ip, nativeLang, dialect, userID, permissions);
-  }*/
-
-  /**
-   * @param request
    * @param userID
    * @param passwordH
    * @param emailH
@@ -586,12 +567,14 @@ public class DatabaseImpl implements Database {
    * @param isMale
    * @param age
    * @param dialect
+   * @param device
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
-  public User addUser(HttpServletRequest request, String userID, String passwordH, String emailH, User.Kind kind, boolean isMale, int age, String dialect) {
+  public User addUser(HttpServletRequest request, String userID, String passwordH, String emailH, User.Kind kind,
+                      boolean isMale, int age, String dialect, String device) {
     String ip = getIPInfo(request);
-    User user = userDAO.addUser(userID, passwordH, emailH, kind, ip, isMale, age, dialect);
+    User user = userDAO.addUser(userID, passwordH, emailH, kind, ip, isMale, age, dialect, device);
     if (user != null) {
       userListManager.createFavorites(user.getId());
     }
@@ -609,7 +592,7 @@ public class DatabaseImpl implements Database {
       logger.debug("addUser " + user);
       l = userDAO.addUser(user.getAge(), user.getGender() == 0 ? UserDAO.MALE : UserDAO.FEMALE,
           user.getExperience(), user.getIpaddr(), user.getNativeLang(), user.getDialect(), user.getUserID(), false,
-          user.getPermissions(), User.Kind.STUDENT, "", "");
+          user.getPermissions(), User.Kind.STUDENT, "", "", "");
     }
     return l;
   }
@@ -627,12 +610,13 @@ public class DatabaseImpl implements Database {
    * @param ipAddr      user agent info
    * @param dialect     speaker dialect
    * @param permissions
+   * @param device
    * @return assigned id
    */
   public long addUser(int age, String gender, int experience, String ipAddr,
-                      String nativeLang, String dialect, String userID, Collection<User.Permission> permissions) {
+                      String nativeLang, String dialect, String userID, Collection<User.Permission> permissions, String device) {
     logger.debug("addUser " + userID);
-    long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false, permissions, User.Kind.STUDENT, "", "");
+    long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false, permissions, User.Kind.STUDENT, "", "", device);
     userListManager.createFavorites(l);
     return l;
   }
