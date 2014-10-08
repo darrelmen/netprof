@@ -27,20 +27,13 @@ public class User extends MiniUser {
   private Kind userKind;
   private String nativeLang;
   private String dialect;
-
-  public String getNativeLang() {
-    return nativeLang;
-  }
-
-  public String getDialect() {
-    return dialect;
-  }
+  private String device;
+  private Collection<Permission> permissions;
 
   public static enum Kind implements IsSerializable { UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ANONYMOUS }
 
   public static enum Permission implements IsSerializable { QUALITY_CONTROL, RECORD_AUDIO }
 
-  private Collection<Permission> permissions;
 
   public User() {} // for serialization
 
@@ -57,7 +50,7 @@ public class User extends MiniUser {
    */
   public User(long id, int age, int gender, int experience, String ipaddr, String password,
               boolean enabled, Collection<Permission> permissions) {
-     this(id,age,gender,experience,ipaddr,password, NOT_SET, NOT_SET, NOT_SET, enabled,false, permissions, Kind.STUDENT, "");
+     this(id,age,gender,experience,ipaddr,password, NOT_SET, NOT_SET, NOT_SET, enabled,false, permissions, Kind.STUDENT, "", "");
   }
 
   /**
@@ -74,10 +67,11 @@ public class User extends MiniUser {
    * @param permissions
    * @param userKind
    * @param emailHash
+   * @param device
    */
   public User(long id, int age, int gender, int experience, String ipaddr, String passwordH,
               String nativeLang, String dialect, String userID, boolean enabled, boolean isAdmin,
-              Collection<Permission> permissions, Kind userKind, String emailHash) {
+              Collection<Permission> permissions, Kind userKind, String emailHash, String device) {
     super(id, age, gender, userID, isAdmin);
     this.experience = experience;
     this.ipaddr = ipaddr;
@@ -89,6 +83,7 @@ public class User extends MiniUser {
     this.permissions = permissions;
     this.nativeLang = nativeLang;
     this.dialect = dialect;
+    this.device = device;
   }
 
   public Collection<Permission> getPermissions() {
@@ -178,6 +173,18 @@ public class User extends MiniUser {
     this.enabled = enabled;
   }
 
+  public String getNativeLang() {
+    return nativeLang;
+  }
+
+  public String getDialect() {
+    return dialect;
+  }
+
+  public String getDevice() {
+    return device;
+  }
+
   public String toStringShort() {
     return "user " + getId() +  "/" + getUserID() +
         " is a " + getGender() + " age " + getAge() +
@@ -192,6 +199,6 @@ public class User extends MiniUser {
         " emailH " + getEmailHash() +
         " passH " + getPasswordHash() +
         " kind " + getUserKind()+
-        " perms " + getPermissions();
+        " perms " + getPermissions() + " device " + getDevice();
   }
 }
