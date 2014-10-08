@@ -101,9 +101,7 @@ public class AudioConversion {
     if (!file.exists()) {
       System.err.println("writeAudioFile : huh? can't find " + file.getAbsolutePath());
     }
-    AudioCheck.ValidityAndDur valid = isValid(file);
-
-    return valid;
+    return isValid(file);
   }
 
   /**
@@ -140,7 +138,7 @@ public class AudioConversion {
    * @param file
    * @return
    */
-  private AudioCheck.ValidityAndDur isValid(File file) {
+  public AudioCheck.ValidityAndDur isValid(File file) {
     try {
       AudioCheck.ValidityAndDur validityAndDur = audioCheck.checkWavFile(file);
       return validityAndDur;
