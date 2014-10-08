@@ -33,6 +33,7 @@ import java.util.*;
 @SuppressWarnings("serial")
 public class ScoreServlet extends DatabaseServlet {
   private static final Logger logger = Logger.getLogger(ScoreServlet.class);
+  public static final String REQUEST = "request";
   private JSONObject chapters, nestedChapters;
   public static final String LOAD_TESTING = "loadTesting";
   private static final String ADD_USER = "addUser";
@@ -126,11 +127,12 @@ public class ScoreServlet extends DatabaseServlet {
     logger.debug("ScoreServlet.doPost : Request " + request.getQueryString() + " path " + pathInfo +
         " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
 
+    getAudioFileHelper();
+
     configureResponse(response);
 
     JSONObject jsonObject = new JSONObject();
-    // String queryString = request.getQueryString();
-    String requestType = request.getHeader("request");
+    String requestType = request.getHeader(REQUEST);
 
     if (requestType != null) {
       if (requestType.startsWith(ADD_USER)) {
@@ -141,7 +143,6 @@ public class ScoreServlet extends DatabaseServlet {
         String emailH = request.getHeader("emailH");
         String deviceType = request.getHeader("deviceType");
 
-
         logger.debug("req " + deviceType + " " + device);
         User user1 = db.addUser(user, passwordH, emailH, deviceType, device);
 
@@ -150,18 +151,36 @@ public class ScoreServlet extends DatabaseServlet {
         } else {
           jsonObject.put("userid", user1.getId());
         }
-      } else {
-        jsonObject.put("ERROR", "unknown req " + requestType);
+      }
+      else if (requestType.startsWith("align") || requestType.startsWith("decode")) {
+        //jsonObject = getJsonForParts(request, requestType);
+        boolean isMultipart = ServletFileUpload.isMultipartContent(request);
 
+        if (isMultipart) {
+          logger.debug("got " + request.getParts().size() + " parts isMultipart " + isMultipart);
+          jsonObject = getJsonForParts(request,requestType);
+        } else {
+          jsonObject = getJsonForAudio(request,requestType);
+        }
+      }
+      else if (requestType.startsWith("event") ) {
+        // log event
+        String user = request.getHeader("user");
+        String device = request.getHeader("device");
+        String deviceType = request.getHeader("deviceType");
+        String context = request.getHeader("context");
+      }
+      else {
+        jsonObject.put("ERROR", "unknown req " + requestType);
       }
     } else {
       boolean isMultipart = ServletFileUpload.isMultipartContent(request);
 
       if (isMultipart) {
         logger.debug("got " + request.getParts().size() + " parts isMultipart " + isMultipart);
-        jsonObject = getJsonForParts(request);
+        jsonObject = getJsonForParts(request,null);
       } else {
-        jsonObject = getJsonForAudio(request);
+        jsonObject = getJsonForAudio(request,null);
       }
     }
 
@@ -181,8 +200,9 @@ public class ScoreServlet extends DatabaseServlet {
    *
    * @param request
    * @return
+   * @see #doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  private JSONObject getJsonForParts(HttpServletRequest request) {
+  private JSONObject getJsonForParts(HttpServletRequest request, String requestType) {
     long then = System.currentTimeMillis();
 
     // boolean isMultipart = ServletFileUpload.isMultipartContent(request);
@@ -213,21 +233,45 @@ public class ScoreServlet extends DatabaseServlet {
       bufferedReader.close();
       logger.debug("word is " + word);
 
-
       next = iterator.next();
       name = next.getName();
 
-      logger.debug("got " + name + " " + next.getContentType() + " " + next.getFieldName() + " " + next.isInMemory() + " " + next.getSize());
+      logger.debug("Scoring : got " + name + " " + next.getContentType() + " " + next.getFieldName() + " " + next.isInMemory() + " " + next.getSize());
 
-
-      File tempDir = Files.createTempDir();
+     /* File tempDir = Files.createTempDir();
       File saveFile = new File(tempDir + File.separator + "MyAudioFile.wav");
       // opens input stream of the request for reading data
       writeToFile(next.getInputStream(), saveFile);
       long now = System.currentTimeMillis();
-      logger.debug("took " + (now - then) + " millis to parse request and write the file");
+      logger.debug("took " + (now - then) + " millis to parse request and write the file");*/
       //    logger.debug("wrote to file " + saveFile.getAbsolutePath());
-      return getJsonForWordAndAudio(word, saveFile);
+
+      if (requestType != null) {
+        String user = request.getHeader("user");
+        String exerciseID = request.getHeader("exercise");
+
+        logger.debug("got request " + requestType + " for user " + user + " exercise " + exerciseID);
+        int i = -1;
+        try {
+          i = Integer.parseInt(user);
+        } catch (NumberFormatException e) {
+          logger.error("expecting a number for user id " + user);
+        }
+        String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, 0, i);
+        File saveFile = new File(wavPath);
+        writeToFile(next.getInputStream(), saveFile);
+
+        return getJsonForAudioForUser(exerciseID, i, requestType.equalsIgnoreCase("decode"), wavPath, saveFile);
+      } else {
+        File tempDir = Files.createTempDir();
+        File saveFile = new File(tempDir + File.separator + "MyAudioFile.wav");
+        // opens input stream of the request for reading data
+        writeToFile(next.getInputStream(), saveFile);
+        long now = System.currentTimeMillis();
+        logger.debug("took " + (now - then) + " millis to parse request and write the file");
+
+        return getJsonForWordAndAudio(word, saveFile);
+      }
 
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -369,16 +413,36 @@ public class ScoreServlet extends DatabaseServlet {
    * @throws IOException
    * @see #doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  private JSONObject getJsonForAudio(HttpServletRequest request) throws IOException {
+  private JSONObject getJsonForAudio(HttpServletRequest request, String requestType) throws IOException {
     // Gets file name for HTTP header
-    String fileName = request.getHeader("fileName");
-    String word = request.getHeader("word");
-    boolean isFlashcard = request.getHeader("flashcard") != null;
 
-    File tempDir = Files.createTempDir();
-    File saveFile = new File(tempDir + File.separator + fileName);
+    if (requestType != null) {
+      String user = request.getHeader("user");
+      String exerciseID = request.getHeader("exercise");
 
-    // prints out all header values
+      logger.debug("getJsonForAudio got request " + requestType + " for user " + user + " exercise " + exerciseID);
+      int i = -1;
+      try {
+        i = Integer.parseInt(user);
+      } catch (NumberFormatException e) {
+        logger.error("expecting a number for user id " + user);
+      }
+      String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, 0, i);
+      File saveFile = new File(wavPath);
+    //  writeToFile(next.getInputStream(), saveFile);
+
+      writeToOutputStream(request, saveFile);
+      return getJsonForAudioForUser(exerciseID, i, requestType.equalsIgnoreCase("decode"), wavPath, saveFile);
+    }
+    else {
+      String fileName = request.getHeader("fileName");
+      String word = request.getHeader("word");
+      boolean isFlashcard = request.getHeader("flashcard") != null;
+
+      File tempDir = Files.createTempDir();
+      File saveFile = new File(tempDir + File.separator + fileName);
+
+      // prints out all header values
 /*    logger.debug("===== Begin headers =====");
     Enumeration<String> names = request.getHeaderNames();
     while (names.hasMoreElements()) {
@@ -387,14 +451,52 @@ public class ScoreServlet extends DatabaseServlet {
     }
     logger.debug("===== End headers =====\n");*/
 
-    // opens input stream of the request for reading data
-    writeToOutputStream(request, saveFile);
+      // opens input stream of the request for reading data
+      writeToOutputStream(request, saveFile);
 
-    if (isFlashcard) {
-      return getJsonForWordAndAudioFlashcard(word, saveFile);
-    } else {
-      return getJsonForWordAndAudio(word, saveFile);
+      if (isFlashcard) {
+        return getJsonForWordAndAudioFlashcard(word, saveFile);
+      } else {
+        return getJsonForWordAndAudio(word, saveFile);
+      }
     }
+  }
+
+  private JSONObject getJsonForAudioForUser(String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile) {
+    long then = System.currentTimeMillis();
+    CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
+
+    JSONObject jsonForScore = new JSONObject();
+    if (exercise1 == null) {
+      jsonForScore.put("valid", "bad_exercise_id");
+
+    } else {
+      AudioAnswer answer;
+
+      if (!doFlashcard) {
+        PretestScore asrScoreForAudio = getASRScoreForAudio(wavPath, exercise1.getRefSentence(), exerciseID);
+        answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore());
+        answer.setPretestScore(asrScoreForAudio);
+      } else {
+        answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, -1);
+      }
+      long now = System.currentTimeMillis();
+      PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
+      float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
+      logger.debug("score flashcard " + doFlashcard +
+          " exercise id " + exerciseID + " took " + (now - then) +
+          " millis for " + saveFile.getName() + " = " + hydecScore);
+
+      if (answer.isValid()) {
+        jsonForScore = getJsonForScore(pretestScore);
+        if (doFlashcard) {
+          jsonForScore.put("isCorrect", answer.isCorrect());
+          jsonForScore.put("saidWord", answer.isSaidAnswer());
+        }
+      }
+      jsonForScore.put("valid", answer.getValidity().toString());
+    }
+    return jsonForScore;
   }
 
   private JSONObject getJsonForWordAndAudio(String word, File saveFile) {
@@ -410,6 +512,13 @@ public class ScoreServlet extends DatabaseServlet {
     return getJsonForScore(book);
   }
 
+  /**
+   *
+   * @param word
+   * @param saveFile
+   * @return
+   * @see #getJsonForAudio
+   */
   private JSONObject getJsonForWordAndAudioFlashcard(String word, File saveFile) {
     logger.debug("File written to: " + saveFile.getAbsolutePath());
 
@@ -423,9 +532,24 @@ public class ScoreServlet extends DatabaseServlet {
 
     JSONObject jsonForScore = getJsonForScore(scoreAndAnswer.score);
     jsonForScore.put("isCorrect", scoreAndAnswer.answer.isCorrect());
-    jsonForScore.put("saidWord", scoreAndAnswer.answer.isSaidAnswer());
+    jsonForScore.put("saidWord",  scoreAndAnswer.answer.isSaidAnswer());
 
     return jsonForScore;
+  }
+
+  /**
+   * TODO : add in devicetype and device pass through
+   *
+   * @param exerciseID
+   * @param user
+   * @param doFlashcard
+   * @param wavPath
+   * @param file
+   * @return
+   */
+  private AudioAnswer getAnswer(String exerciseID, int user, boolean doFlashcard, String wavPath, File file, float score) {
+    CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
+    return audioFileHelper.getAnswer(exerciseID, exercise1, user, doFlashcard, wavPath, file, "iPad", "12345", score);
   }
 
   private void writeToOutputStream(HttpServletRequest request, File saveFile) throws IOException {
@@ -500,6 +624,8 @@ public class ScoreServlet extends DatabaseServlet {
       serverProps = db.getServerProps();
       // logger.debug("configDir " + configDir);
       audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, null);
+
+      makeAutoCRT(audioFileHelper);
     }
     return audioFileHelper;
   }
@@ -540,6 +666,19 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
+   * TODO : this is wacky -- have to do this for alignment but not for decoding
+   * @param testAudioFile
+   * @param sentence
+   * @param exerciseID
+   * @return
+   */
+  private PretestScore getASRScoreForAudio(String testAudioFile, String sentence,
+                                          String exerciseID) {
+    return audioFileHelper.getASRScoreForAudio(1, testAudioFile, sentence, 128, 128, false,
+        false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID);
+  }
+
+  /**
    * @param audioFileHelper
    * @param testAudioFile
    * @param sentence
@@ -556,18 +695,7 @@ public class ScoreServlet extends DatabaseServlet {
     }
 
     try {
-      AutoCRTScoring crtScoring = new AutoCRTScoring() {
-        @Override
-        public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences) {
-          return audioFileHelper.getASRScoreForAudio(testAudioFile, lmSentences);
-        }
-
-        @Override
-        public Collection<String> getValidPhrases(Collection<String> phrases) {
-          return audioFileHelper.getValidPhrases(phrases);
-        }
-      };
-      audioFileHelper.makeAutoCRT(relativeConfigDir, crtScoring);
+      makeAutoCRT(audioFileHelper);
       asrScoreForAudio = audioFileHelper.getFlashcardAnswer(testAudioFile, sentence);
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -576,20 +704,32 @@ public class ScoreServlet extends DatabaseServlet {
     return asrScoreForAudio;
   }
 
+  private void makeAutoCRT(final AudioFileHelper audioFileHelper) {
+    AutoCRTScoring crtScoring = new AutoCRTScoring() {
+      @Override
+      public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences) {
+        return audioFileHelper.getASRScoreForAudio(testAudioFile, lmSentences);
+      }
+
+      @Override
+      public Collection<String> getValidPhrases(Collection<String> phrases) {
+        return audioFileHelper.getValidPhrases(phrases);
+      }
+    };
+    audioFileHelper.makeAutoCRT(relativeConfigDir, crtScoring);
+  }
 
   /**
    * @param db
    * @return
    * @see LangTestDatabaseImpl#init()
    */
-  private String setInstallPath(DatabaseImpl db) {
+  private void setInstallPath(DatabaseImpl db) {
     String lessonPlanFile = getLessonPlan();
     if (!new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
     db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile, serverProps.getLanguage(), true,
         relativeConfigDir + File.separator + serverProps.getMediaDir());
-
-    return lessonPlanFile;
   }
 
   private String getLessonPlan() {
