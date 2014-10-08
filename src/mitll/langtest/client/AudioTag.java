@@ -25,7 +25,7 @@ public class AudioTag {
   /**
    * @param result
    * @return
-   * @see mitll.langtest.client.result.ResultManager#addColumnsToTable(boolean, java.util.Collection, int, int, com.google.gwt.user.cellview.client.CellTable)
+   * @see mitll.langtest.client.result.ResultManager#addColumnsToTable
    */
   public SafeHtml getAudioTag(String result, boolean includeControls) {
     result = ensureForwardSlashes(result);
