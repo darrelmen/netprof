@@ -1619,6 +1619,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * A low overhead way of doing alignment.
+   *
+   * Useful for conversational dialogs.
+   *
    * @param base64EncodedString
    * @param textToAlign
    * @param identifier
