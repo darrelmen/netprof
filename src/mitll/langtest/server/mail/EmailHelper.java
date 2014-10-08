@@ -8,7 +8,6 @@ import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -89,7 +88,7 @@ public class EmailHelper {
       logger.debug("resetPassword for " + user + " sending reset password email.");
       String toHash = user + "_" + System.currentTimeMillis();
       String hash = getHash(toHash);
-      userDAO.addKey(validUserAndEmail.getId(), true, hash);
+      userDAO.updateKey(validUserAndEmail.getId(), true, hash);
 
       String message = "Hi " + user + ",<br/><br/>" +
           "Click the link below to change your password." +
@@ -233,7 +232,7 @@ public class EmailHelper {
     String userID1 = user.getUserID();
     String toHash = userID1 + "_" + System.currentTimeMillis();
     String hash = getHash(toHash);
-    userDAO.addKey(user.getId(), false, hash);
+    userDAO.updateKey(user.getId(), false, hash);
     List<String> approvers = serverProperties.getApprovers();
     List<String> emails = serverProperties.getApproverEmails();
     for (int i = 0; i < approvers.size(); i++) {
