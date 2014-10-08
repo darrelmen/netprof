@@ -185,17 +185,19 @@ public class AudioDAO extends DAO {
 
   private void attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir, AudioConversion audioConversion, AudioAttribute attr) {
     firstExercise.addAudio(attr);
+  //   logger.debug("\trelativeConfigDir '" + relativeConfigDir + "'");
+
     if (attr.getAudioRef() == null) logger.error("huh? no audio ref for " + attr + " under " + firstExercise);
     else if (!audioConversion.exists(attr.getAudioRef(), installPath)) {
-      //   logger.debug("\twas '" + attr.getAudioRef() + "'");
+     //    logger.debug("\twas '" + attr.getAudioRef() + "'");
       attr.setAudioRef(relativeConfigDir + File.separator + attr.getAudioRef());
-      //   logger.debug("\tnow '" + attr.getAudioRef() + "'");
+     //    logger.debug("\tnow '" + attr.getAudioRef() + "'");
     }
   }
 
   private List<AudioAttribute> getAudioAttributes(String exid) {
     try {
-      String sql = "SELECT * FROM " + AUDIO + " WHERE " +Database.EXID +"='" + exid+ "' AND "+DEFECT +"=false";
+      String sql = "SELECT * FROM " + AUDIO + " WHERE " + Database.EXID + "='" + exid + "' AND " + DEFECT + "=false";
       List<AudioAttribute> resultsSQL = getResultsSQL(sql);
       Set<String> paths = new HashSet<String>();
 
@@ -207,9 +209,9 @@ public class AudioDAO extends DAO {
             ret.add(audioAttribute);
           paths.add(audioRef);
         }
-        else {
+      //  else {
           //logger.info("skipping duplicate audio attr " + audioAttribute + " for " + exid);
-        }
+      //  }
       }
       return ret;
     } catch (Exception ee) {
