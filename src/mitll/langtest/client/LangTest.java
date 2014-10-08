@@ -59,6 +59,7 @@ import java.util.logging.Logger;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private Logger logger = Logger.getLogger("LangTest");
 
+  private static final String UNKNOWN = "unknown";
   public static final String LANGTEST_IMAGES = "langtest/images/";
   private static final String DIVIDER = "|";
   private static final int MAX_EXCEPTION_STRING = 300;
@@ -69,8 +70,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final String TRY_AGAIN = "Try Again";
 
   private UserManager userManager;
-  private ResultManager resultManager;
-  private MonitoringManager monitoringManager;
   private FlashRecordPanelHeadless flashRecordPanel;
 
   private long lastUser = NO_USER_INITIAL;
@@ -92,6 +91,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private final KeyPressHelper keyPressHelper = new KeyPressHelper(false,true);
 
   /**
+   * This gets called first.
+   *
    * Make an exception handler that displays the exception.
    */
   public void onModuleLoad() {
@@ -162,16 +163,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     else {
       lastWasStackOverflow = isStackOverflow;
     }
-    String prefix = "got browser exception : ";
-    logMessageOnServer(exceptionAsString, prefix);
+    logMessageOnServer(exceptionAsString, "got browser exception : ");
     return exceptionAsString;
   }
 
   public void logMessageOnServer(String message, String prefix) {
     int user = userManager != null ? userManager.getUser() : -1;
     String exerciseID = "Unknown";
-    String suffix = " browser " + browserCheck.getBrowserAndVersion() +
-      " : " + message;
+    String suffix = " browser " + browserCheck.getBrowserAndVersion() + " : " + message;
     logMessageOnServer(prefix +
       "user #" + user +
       " exercise " + exerciseID +
@@ -181,7 +180,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (toSend.length() > MAX_EXCEPTION_STRING) {
       toSend = toSend.substring(0, MAX_EXCEPTION_STRING)+"...";
     }
-    getButtonFactory().logEvent("unknown","unknown",exerciseID,toSend,user);
+    getButtonFactory().logEvent(UNKNOWN, UNKNOWN,exerciseID,toSend,user);
   }
 
   private void logMessageOnServer(String message) {
@@ -360,10 +359,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.user.UserManager#login()
    */
   @Override
-  public void showLogin() {
-//    logger.info("show login!");
-    populateRootPanel();
-  }
+  public void showLogin() {  populateRootPanel();  }
 
   private String staleToken = "";
 
@@ -440,6 +436,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return false;
   }
 
+  /**
+   * Reload window after showing content developer has been approved.
+   * <p/>
+   * Mainly something Tamas would see.
+   *
+   * @param verticalContainer
+   * @param firstRow
+   * @param cdToken
+   * @param emailR
+   */
   private void handleCDToken(final Container verticalContainer, final Panel firstRow, final String cdToken, String emailR) {
     service.enableCDUser(cdToken, emailR, Window.Location.getHref(), new AsyncCallback<String>() {
       @Override
@@ -453,10 +459,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           logger.info("handleCDToken enable - token " + cdToken + " is stale. Showing normal view");
           populateBelowHeader(verticalContainer, firstRow);
         } else {
-          firstRow.add(new Heading(2, "OK, content developer <b>" +result +
-              "</b> has been approved."));
+          firstRow.add(new Heading(2, "OK, content developer <u>" + result + "</u> has been approved."));
           firstRow.addStyleName("leftFiveMargin");
-          // content.getElement().setId("ResetPassswordContent");
           clearPadding(verticalContainer);
 
           Timer t = new Timer() {
@@ -501,37 +505,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return firstRow;
   }
 
-  /**
-   * @see #onModuleLoad2
-   */
-  private void checkAdmin(boolean isAdmin) {
-    if (isAdmin) {
-      final LangTest outer = this;
-
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-//          downloadFailedAlert();
-          logException(caught);
-        }
-
-        public void onSuccess() {
-          resultManager = new ResultManager(service, outer, props.getNameForAnswer(), props, getStartupInfo().getTypeOrder(), outer);
-        }
-      });
-
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          logException(caught);
-          //downloadFailedAlert();
-        }
-
-        public void onSuccess() {
-          monitoringManager = new MonitoringManager(service, props);
-        }
-      });
-    }
-  }
-
   private void loadVisualizationPackages() {
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       @Override
@@ -564,8 +537,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Set the page title and favicon.
    */
   private void setPageTitle() {
-    String appTitle = props.getAppTitle();
-    Window.setTitle(appTitle + " : " + "Learn pronunciation and practice vocabulary.");
+    Window.setTitle(props.getAppTitle() + " : " + "Learn pronunciation and practice vocabulary.");
 
     Element element = DOM.getElementById("favicon");   // set the page title to be consistent
     if (element != null) {
@@ -666,7 +638,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void noMicAvailable() {
         if (!showingPlugInNotice) {
           showingPlugInNotice = true;
-          List<String> messages = Arrays.asList("If you want to record audio, ", "plug in or enable your mic and reload the page.");
+          List<String> messages = Arrays.asList("If you want to record audio, ",
+              "plug in or enable your mic and reload the page.");
           new ModalInfoDialog("Plug in microphone", messages, null,
               new HiddenHandler() {
                 @Override
@@ -702,22 +675,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * This determines which kind of exercise we're going to do.
-   *
-   * Two things determine what kind of UI is shown - what kind of user has logged in (students get basic view, content developers see more tabs)
-   * And whether the ability to record audio is there -- if flash, whether permission has been granted or is allowed via
-   * configuration.  If webrtc (in browser) recording, whether permission has been granted or not.  Also, there are
-   * physical considerations - is there a mic available at all?  Or is there a flashblocker preventing flash from running?
-   *
-   * So we want to configure the UI after login and after the recording state has been settled.
-   *
    * @see #gotUser
    * @see #configureUIGivenUser(long) (long)
    */
   private void reallySetFactory() {
     int childCount = firstRow.getElement().getChildCount();
 
-    logger.info("reallySetFactory root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
+    //logger.info("reallySetFactory root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
     if (childCount > 0) {
       Node child = firstRow.getElement().getChild(0);
       Element as = Element.as(child);
@@ -765,7 +729,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @seex #getLogout()
+   * @see mitll.langtest.client.LangTest.LogoutClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
    */
   private void resetState() {
 //    logger.info("resetState");
@@ -790,11 +754,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void gotUser(User user) {
     reallySetFactory();
-   /* if (navigation == null) {
-      logger.info("gotUser : no nav so making it..,");
-
-      populateRootPanel();
-    }*/
     long userID= -1;
     if (user != null) userID = user.getId();
 
@@ -811,8 +770,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     if (userID > -1) {
       flashcard.setCogVisible(true);
-      checkAdmin(user.isAdmin());
-      flashcard.setVisibleAdmin(user.isAdmin());
+      flashcard.setVisibleAdmin(user.isAdmin() || props.isAdminView());
     }
   }
 
@@ -983,7 +941,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Recording interface
    */
   public void startRecording() {
-
     then = System.currentTimeMillis();
     flashRecordPanel.recordOnClick();
   }
@@ -1064,12 +1021,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private class ResultsClickHandler implements ClickHandler {
+    EventRegistration outer = LangTest.this;
     public void onClick(ClickEvent event) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
         public void onSuccess() {
+          ResultManager resultManager = new ResultManager(service, props.getNameForAnswer(), getStartupInfo().getTypeOrder(), outer);
           resultManager.showResults();
         }
       });
@@ -1083,7 +1042,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           downloadFailedAlert();
         }
         public void onSuccess() {
-          monitoringManager.showResults();
+          new MonitoringManager(service, props).showResults();
         }
       });
     }
