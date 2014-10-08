@@ -41,7 +41,7 @@ public class DAO {
   /**
    * @see mitll.langtest.server.database.custom.UserListVisitorJoinDAO#createUserListTable(Database)
    * @param table
-   * @return
+   * @return column names, all lower case
    */
   protected Collection<String> getColumns(String table) {
     Set<String> columns = new HashSet<String>();
