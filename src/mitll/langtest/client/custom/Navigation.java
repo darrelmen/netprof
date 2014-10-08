@@ -54,7 +54,7 @@ import java.util.*;
  */
 public class Navigation implements RequiresResize {
   private static final String CHAPTERS = "Learn Pronunciation";
-  private static final String CONTENT = CHAPTERS;
+//  private static final String CONTENT = CHAPTERS;
   private static final String YOUR_LISTS = "Study Your Lists";
   private static final String STUDY_LISTS = "Study Lists and Favorites";
   private static final String OTHERS_LISTS = "Study Visited Lists";
@@ -82,7 +82,6 @@ public class Navigation implements RequiresResize {
   private static final int SUBTAB_EDIT_INDEX = 2;
 
   private static final String EDIT_ITEM = "editItem";
- // public static final String LEARN1 = "learn";
   private static final String LEARN = "learn";
   private static final String RECORD_AUDIO = "Record Audio";
   private static final String RECORD_EXAMPLE = "Record In-context Audio";
@@ -248,31 +247,21 @@ public class Navigation implements RequiresResize {
     };
   }
 
-  /**
-   * @return
-   * @paramz secondAndThird
-   * @see mitll.langtest.client.LangTest#populateRootPanel()
-   */
-  public Widget getNav(/*final Panel secondAndThird*/) {  return getTabPanel(/*secondAndThird*/);  }
-
   private TabPanel tabPanel;
   private TabAndContent yourStuff, othersStuff, studyLists;
   private TabAndContent browse, chapters, create;
   private TabAndContent review, recorderTab, recordExampleTab, markDefectsTab, practiceTab;
   private final List<TabAndContent> tabs = new ArrayList<TabAndContent>();
- // private Panel chapterContent;
 
   /**
    * @see #getNav
-   * @paramx contentForChaptersTab
    * @return
+   * @see mitll.langtest.client.LangTest#populateRootPanel()
    */
-  private Panel getTabPanel(/*Panel contentForChaptersTab*/) {
+  public Widget getNav() {
     tabPanel = new TabPanel();
     tabPanel.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     tabPanel.getElement().setId("tabPanel");
-
-  //  this.chapterContent = contentForChaptersTab;
 
     // so we can know when chapters is revealed and tell it to update it's lists
     tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
@@ -306,25 +295,20 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @paramz contentForChaptersTab the standard npf content
    * @return
    * @see #showInitialState()
    */
-  private void addTabs(/*Panel contentForChaptersTab*/) {
+  private void addTabs() {
     tabPanel.clear();
     tabs.clear();
     nameToTab.clear();
     nameToIndex.clear();
 
-    boolean isQualityControl = isQC();
     addPracticeTab();
 
     // chapter tab
-//    if (!isQualityControl) {
-    final String chapterNameToUse = CHAPTERS;//getChapterName();
-    //  chapters = makeFirstLevelTab(tabPanel, isQualityControl ? IconType.FLAG : IconType.LIGHTBULB, chapterNameToUse);
+    final String chapterNameToUse = CHAPTERS;
     chapters = makeFirstLevelTab(tabPanel, IconType.LIGHTBULB, chapterNameToUse);
-   // chapters.getContent().add(contentForChaptersTab);
     chapters.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -333,7 +317,6 @@ public class Navigation implements RequiresResize {
         logEvent(chapters, chapterNameToUse);
       }
     });
-    //  }
 
     studyLists = makeFirstLevelTab(tabPanel, IconType.FOLDER_CLOSE, STUDY_LISTS);
     final TabPanel w = new TabPanel();
@@ -349,8 +332,7 @@ public class Navigation implements RequiresResize {
       }
     });
 
-    if (isQualityControl) {
-      //String chapterNameToUse2  =  MARK_DEFECTS;
+    if (isQC()) {
       markDefectsTab = makeFirstLevelTab(tabPanel, IconType.FLAG, MARK_DEFECTS);
       markDefectsTab.getContent().getElement().setId("content_contentPanel");
       markDefectsTab.getTab().addClickHandler(new ClickHandler() {
@@ -361,7 +343,6 @@ public class Navigation implements RequiresResize {
           logEvent(recorderTab, MARK_DEFECTS);
         }
       });
-      //addPracticeTab();
 
       review = makeFirstLevelTab(tabPanel, IconType.EDIT, FIX_DEFECTS);
       review.getContent().getElement().setId("viewReview_contentPanel");
@@ -471,10 +452,10 @@ public class Navigation implements RequiresResize {
       practiceHelper.setContentPanel(practiceTab.getContent());
       practiceHelper.hideList();
     }
-    else {
+//    else {
       //System.err.println(" ------- showPracticeTab make practice tab  - " + practiceTab);
 
-    }
+  //  }
   }
 
   private boolean isQC() {  return controller.getPermissions().contains(User.Permission.QUALITY_CONTROL); }
@@ -511,7 +492,7 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see #getTabPanel
+   * @see #getNav()
    * @see #showMyLists(boolean, boolean)
    * @see #deleteList(com.github.gwtbootstrap.client.ui.Button, mitll.langtest.shared.custom.UserList, boolean)
    * @see #clickOnYourLists(long)
@@ -527,15 +508,13 @@ public class Navigation implements RequiresResize {
    * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
    */
   public void showInitialState() {
-    final int user = userManager.getUser();
-
-    addTabs(/*chapterContent*/);
+    addTabs();
 
 /*    System.out.println("showInitialState show initial state for " + user +
         " : getting user lists " + controller.isReviewMode());*/
     String value = storage.getValue(CLICKED_TAB);
     if (value.isEmpty()) {   // no previous tab
-      service.getListsForUser(user, true, true, new AsyncCallback<Collection<UserList>>() {
+      service.getListsForUser(userManager.getUser(), true, true, new AsyncCallback<Collection<UserList>>() {
         @Override
         public void onFailure(Throwable caught) {}
 
@@ -558,7 +537,7 @@ public class Navigation implements RequiresResize {
         }
       });
     } else {
-      System.out.println("previous selection was " + value);
+      //System.out.println("previous selection was " + value);
       selectPreviousTab(value);
     }
   }
@@ -566,11 +545,6 @@ public class Navigation implements RequiresResize {
   public void refreshInitialState() {
     String value = storage.getValue(CLICKED_TAB);
     if (value.isEmpty()) {   // no previous tab
-   /*   checkAndMaybeClearTab(PRACTICE);
-      practiceHelper.setContentPanel(practiceTab.getContent());
-      practiceHelper.showNPF(practiceTab, PRACTICE);
-      practiceHelper.hideList();*/
-
       showPracticeTab();
     }
     else {
@@ -677,7 +651,7 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see Navigation#getTabPanel
+   * @see mitll.langtest.client.custom.Navigation#getNav()
    * @see Navigation#getListOperations(mitll.langtest.shared.custom.UserList, String)
    * @param tabPanel
    * @param iconType
@@ -729,13 +703,13 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see #getTabPanel
+   * @see #getNav()
    * @param contentPanel
    */
   private void viewReview(final Panel contentPanel) {
     final Panel child = getContentChild(contentPanel);
 
-    System.out.println("------> viewReview : reviewLessons for " + userManager.getUser());
+//    System.out.println("------> viewReview : reviewLessons for " + userManager.getUser());
 
     service.getReviewLists(new AsyncCallback<List<UserList>>() {
       @Override
@@ -1089,8 +1063,6 @@ public class Navigation implements RequiresResize {
       } else if (subTab.equals(PRACTICE1)) {
         tabPanel.selectTab(SUBTAB_PRACTICE_INDEX);
         clickOnTab(practiceTab);
-      //  avpHelper.showNPF(ul, practiceTab, PRACTICE1, true);
-
         avpHelper.setContentPanel(practiceTab.getContent());
         avpHelper.showNPF(ul, practiceTab, PRACTICE1, true);
       } else if (subTab.equals(EDIT_ITEM)) {
@@ -1129,7 +1101,6 @@ public class Navigation implements RequiresResize {
    */
   private void setScrollPanelWidth(ScrollPanel row) {
     if (row != null) {
-      //row.setWidth((Window.getClientWidth() * 0.95) + "px");
       row.setHeight((Window.getClientHeight() * 0.7) + "px");
     }
   }
@@ -1184,7 +1155,7 @@ public class Navigation implements RequiresResize {
             @Override
             public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
               super.postAnswers(controller, completedExercise);
-              //tellOtherListExerciseDirty(e);
+              tellOtherListExerciseDirty(e);
             }
           };
         }
