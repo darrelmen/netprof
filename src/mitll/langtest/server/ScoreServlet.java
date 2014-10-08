@@ -1,14 +1,13 @@
 package mitll.langtest.server;
 
 import com.google.common.io.Files;
-import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -36,6 +35,8 @@ public class ScoreServlet extends DatabaseServlet {
   private static final Logger logger = Logger.getLogger(ScoreServlet.class);
   private JSONObject chapters, nestedChapters;
   public static final String LOAD_TESTING = "loadTesting";
+  private static final String ADD_USER = "addUser";
+  private static final String HAS_USER = "hasUser";
 
   /**
    * Remembers chapters from previous requests...
@@ -48,30 +49,66 @@ public class ScoreServlet extends DatabaseServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     String pathInfo = request.getPathInfo();
-    logger.debug("ScoreServlet.doPost : Request " + request.getQueryString() + " path " + pathInfo +
+    logger.debug("ScoreServlet.doGet : Request " + request.getQueryString() + " path " + pathInfo +
         " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
 
-    response.setContentType("application/json; charset=UTF-8");
-    response.setCharacterEncoding("UTF-8");
+    configureResponse(response);
 
     getAudioFileHelper();
     String queryString = request.getQueryString();
 
-    JSONObject toReturn;
-    if (chapters == null) {
-      chapters = getJsonChapters();
-    }
-    toReturn = chapters;
-    if (queryString != null && queryString.startsWith("nestedChapters")) {
-      if (nestedChapters == null) {
-        nestedChapters = getJsonNestedChapters();
+    JSONObject toReturn = new JSONObject();
+    try {
+      if (queryString != null) {
+        if (queryString.startsWith("nestedChapters")) {
+          if (nestedChapters == null) {
+            nestedChapters = getJsonNestedChapters();
+          }
+          toReturn = nestedChapters;
+        } else if (queryString.startsWith(HAS_USER)) {
+
+          String[] split1 = queryString.split("&");
+          if (split1.length != 2) {
+            toReturn.put("ERROR", "expecting two query parameters");
+          } else {
+            String first = split1[0];
+            String user = first.split("=")[1];
+
+            String second = split1[1];
+            String passwordH = second.split("=")[1];
+
+            logger.debug("hasUser " + user + " pass " + passwordH);
+            User userFound = db.getUserDAO().getUser(user, passwordH);
+            toReturn.put("userid", userFound == null ? -1 : userFound.getId());
+            toReturn.put("passwordCorrect",
+                userFound == null ? "false" : userFound.getPasswordHash().equalsIgnoreCase(passwordH));
+          }
+        } else {
+          toReturn.put("ERROR", "unknown req " + queryString);
+
+        }
+      } else {
+        if (chapters == null) {
+          chapters = getJsonChapters();
+        }
+        toReturn = chapters;
+        //toReturn.put("ERROR", "null req");
       }
-      toReturn = nestedChapters;
+    } catch (Exception e) {
+      e.printStackTrace();
     }
 
-    PrintWriter writer = response.getWriter();
-    writer.println(toReturn.toString());
-    writer.close();
+
+    try {
+      PrintWriter writer = response.getWriter();
+      String x = toReturn.toString();
+      logger.debug("Reply " + x);
+      writer.println(x);
+      writer.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
   }
 
 
@@ -89,23 +126,54 @@ public class ScoreServlet extends DatabaseServlet {
     logger.debug("ScoreServlet.doPost : Request " + request.getQueryString() + " path " + pathInfo +
         " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
 
-    response.setContentType("application/json; charset=UTF-8");
-    response.setCharacterEncoding("UTF-8");
+    configureResponse(response);
 
-    boolean isMultipart = ServletFileUpload.isMultipartContent(request);
+    JSONObject jsonObject = new JSONObject();
+    // String queryString = request.getQueryString();
+    String requestType = request.getHeader("request");
 
-    JSONObject jsonObject;
-    if (isMultipart) {
-      logger.debug("got " + request.getParts().size() + " parts isMultipart " + isMultipart);
-      jsonObject = getJsonForParts(request);
+    if (requestType != null) {
+      if (requestType.startsWith(ADD_USER)) {
+
+        String user = request.getHeader("user");
+        String device = request.getHeader("device");
+        String passwordH = request.getHeader("passwordH");
+        String emailH = request.getHeader("emailH");
+        String deviceType = request.getHeader("deviceType");
+
+
+        logger.debug("req " + deviceType + " " + device);
+        User user1 = db.addUser(user, passwordH, emailH, deviceType, device);
+
+        if (user1 == null) {
+          jsonObject.put("ExistingUserName", "");
+        } else {
+          jsonObject.put("userid", user1.getId());
+        }
+      } else {
+        jsonObject.put("ERROR", "unknown req " + requestType);
+
+      }
     } else {
-      jsonObject = getJsonForAudio(request);
+      boolean isMultipart = ServletFileUpload.isMultipartContent(request);
+
+      if (isMultipart) {
+        logger.debug("got " + request.getParts().size() + " parts isMultipart " + isMultipart);
+        jsonObject = getJsonForParts(request);
+      } else {
+        jsonObject = getJsonForAudio(request);
+      }
     }
 
     PrintWriter writer = response.getWriter();
     writer.println(jsonObject.toString());
 
     writer.close();
+  }
+
+  private void configureResponse(HttpServletResponse response) {
+    response.setContentType("application/json; charset=UTF-8");
+    response.setCharacterEncoding("UTF-8");
   }
 
   /**
@@ -134,7 +202,7 @@ public class ScoreServlet extends DatabaseServlet {
       List<FileItem> items = upload.parseRequest(request);
       Iterator<FileItem> iterator = items.iterator();
       FileItem next = iterator.next();
-      String name = next.getName();
+      String name;// = next.getName();
 
       // logger.debug("got name " + name);
 
@@ -274,7 +342,6 @@ public class ScoreServlet extends DatabaseServlet {
     Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToValues);
 
     List<CommonExercise> copy = new ArrayList<CommonExercise>(exercisesForState);
-
     new ExerciseSorter(db.getSectionHelper().getTypeOrder()).sortByTooltip(copy);
 
     return getJsonArray(copy);
@@ -282,6 +349,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * This is the json that describes an individual entry.
+   *
    * @param copy
    * @return
    */
@@ -295,6 +363,12 @@ public class ScoreServlet extends DatabaseServlet {
     return exercises;
   }
 
+  /**
+   * @param request
+   * @return
+   * @throws IOException
+   * @see #doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   */
   private JSONObject getJsonForAudio(HttpServletRequest request) throws IOException {
     // Gets file name for HTTP header
     String fileName = request.getHeader("fileName");
@@ -433,7 +507,7 @@ public class ScoreServlet extends DatabaseServlet {
   private DatabaseImpl getDatabase() {
     DatabaseImpl db = null;
 
-    Object databaseReference = getServletContext().getAttribute("databaseReference");
+    Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
     if (databaseReference != null) {
       db = (DatabaseImpl) databaseReference;
       logger.debug("found existing database reference " + db + " under " + getServletContext());
