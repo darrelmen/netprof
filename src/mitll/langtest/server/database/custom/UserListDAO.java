@@ -105,7 +105,7 @@ public class UserListDAO extends DAO {
 
     try {
       // there are much better ways of doing this...
-      logger.info("add :userList " + userList);
+//      logger.info("add :userList " + userList);
 
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
