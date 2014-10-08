@@ -182,9 +182,11 @@ public class UserTable extends PagerTable {
       @Override
       public String getValue(User contact) {
         String ipaddr1 = contact.getIpaddr();
+
+      //  System.out.println("got " + ipaddr1);
         int at = ipaddr1.lastIndexOf("at");
 
-        ipaddr1 = at == -1 ? "" : ipaddr1.substring(0, at);
+        ipaddr1 = at == -1 ? ipaddr1: ipaddr1.substring(0, at);
         if (ipaddr1.startsWith(IP_PREFIX)) {
           ipaddr1 = ipaddr1.substring(IP_PREFIX.length());
         }
