@@ -350,7 +350,7 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#addUser(int, String, int, String, String, String, String, java.util.Collection)
+   * @see mitll.langtest.server.database.DatabaseImpl#addUser(int, String, int, String, String, String, String, java.util.Collection, String)
    * @param userid
    * @return
    */
