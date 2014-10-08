@@ -36,7 +36,7 @@ public class PropertyHandler {
   private static final String GRADING = GRADING_PROP;
   private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
   private static final String EXERCISE_TITLE = "exercise_title";
-  //private static final String ADMIN_PARAM = "admin";
+  private static final String ADMIN_PARAM = "admin";
   private static final String TURK_PARAM = "turk";
   private static final String NUM_GRADES_TO_COLLECT_PARAM = NUM_GRADES_TO_COLLECT;
 
@@ -61,6 +61,7 @@ public class PropertyHandler {
   private static final String QUIET_AUDIO_OK = "quietAudioOK";
   private static final String SHOW_WELCOME = "showWelcome";
   private static final String NO_MODEL = "noModel";
+  private boolean adminView;
 
 
   public enum LOGIN_TYPE { ANONYMOUS, STUDENT }
@@ -223,10 +224,10 @@ public class PropertyHandler {
       demoMode = !demoParam.equals("false");
     }
 
-/*    String adminParam = Window.Location.getParameter(ADMIN_PARAM);
+    String adminParam = Window.Location.getParameter(ADMIN_PARAM);
     if (adminParam != null) {
       adminView = !adminParam.equals("false");
-    }*/
+    }
 
     String turkParam = Window.Location.getParameter(TURK_PARAM);
     if (turkParam != null) {
@@ -296,9 +297,7 @@ public class PropertyHandler {
     return demoMode;
   }
 
-/*  public boolean isAdminView() {
-    return adminView;
-  }*/
+  public boolean isAdminView() {  return adminView;  }
 
   public String getTurkID() { return  turkID; }
 
