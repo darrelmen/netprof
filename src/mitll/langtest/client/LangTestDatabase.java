@@ -35,7 +35,7 @@ public interface LangTestDatabase extends RemoteService {
   void markGender(AudioAttribute attr, boolean isMale);
   // user DAO
 
-  User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale, int age, String dialect, boolean isCD);
+  User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale, int age, String dialect, boolean isCD, String device);
 
   List<User> getUsers();
   User userExists(String login, String passwordH);
