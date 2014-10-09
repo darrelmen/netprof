@@ -21,6 +21,7 @@ public class MonitorResult implements IsSerializable {
   public static final String DURATION_IN_MILLIS = "durationInMillis";
   public static final String CORRECT = "correct";
   public static final String PRON_SCORE = "pronScore";
+  public static final String DEVICE = "device";
   public static final String TEXT = "text";
 
   private int uniqueID;
@@ -36,13 +37,15 @@ public class MonitorResult implements IsSerializable {
   private int durationInMillis;
   private boolean correct;
   private float pronScore;
+  private String device;
   private Map<String, String> unitToValue;
 
   public MonitorResult() {
   }
 
   public MonitorResult(int uniqueID, long userid, String id, String answer,
-                       boolean valid, long timestamp, String answerType, int durationInMillis, boolean correct, float pronScore) {
+                       boolean valid, long timestamp, String answerType, int durationInMillis,
+                       boolean correct, float pronScore, String device) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.id = id;
@@ -53,6 +56,7 @@ public class MonitorResult implements IsSerializable {
     this.durationInMillis = durationInMillis;
     this.correct = correct;
     this.pronScore = pronScore;
+    this.device = device;
   }
 
   public int getUniqueID() {
@@ -180,6 +184,13 @@ public class MonitorResult implements IsSerializable {
             if (comp != 0) return getComp(asc, comp);
           }
 
+          if (o1.device != null) {
+            if (field.equals(DEVICE)) {
+              comp = o1.device.compareTo(o2.device);
+            }
+            if (comp != 0) return getComp(asc, comp);
+          }
+
           // duration
           if (field.equals(DURATION_IN_MILLIS)) {
             comp = o1.durationInMillis < o2.durationInMillis ? -1 : o1.durationInMillis > o2.durationInMillis ? +1 : 0;
@@ -234,12 +245,16 @@ public class MonitorResult implements IsSerializable {
     }
   }
 
+  public String getDevice() {
+    return device;
+  }
+
   @Override
   public String toString() {
     return "MonitorResult #" + uniqueID + "\t\tby user " + userid + "\texid " + id + " " +
         " at " + new Date(timestamp) +
         "  ans " + answer +
-        " " + " audioType : " + audioType +
+        " " + " audioType : " + audioType + " device " + device+
         " valid " + valid + " " + (correct ? "correct" : "incorrect") + " score " + pronScore;
   }
 }
