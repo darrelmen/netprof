@@ -48,6 +48,8 @@ public class ResultDAO extends DAO {
   static final String CORRECT = "correct";
   static final String PRON_SCORE = "pronscore";
   static final String STIMULUS = "stimulus";
+  static final String DEVICE_TYPE = "deviceType";  // iPad, iPhone, browser, etc.
+  static final String DEVICE = "device"; // device id, or browser type
 
   private final boolean debug = false;
 
@@ -116,7 +118,7 @@ public class ResultDAO extends DAO {
           return cachedMonitorResultsForQuery;
         }
       }
-      String sql = "SELECT * FROM " + RESULTS + ";";
+      String sql = "SELECT * FROM " + RESULTS;
       List<MonitorResult> resultsForQuery = getMonitorResultsSQL(sql);
 
       synchronized (this) {
@@ -349,7 +351,7 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.AnswerDAO#addAnswerToTable(java.sql.Connection, int, String, String, int, String, String, boolean, boolean, boolean, String, int, boolean, float, String)
+   * @see mitll.langtest.server.database.AnswerDAO#addAnswerToTable
    */
   public synchronized void invalidateCachedResults() {
     cachedResultsForQuery = null;
@@ -411,7 +413,7 @@ public class ResultDAO extends DAO {
         valid, // valid
         timestamp.getTime(),
         //flq, spoken,
-          type, dur, correct, pronScore);
+          type, dur, correct, pronScore, "browser");
 //      result.setStimulus(stimulus);
       results.add(result);
     }
@@ -435,6 +437,8 @@ public class ResultDAO extends DAO {
 
       boolean correct = rs.getBoolean(CORRECT);
       float pronScore = rs.getFloat(PRON_SCORE);
+      String dtype = rs.getString(DEVICE_TYPE);
+      String device = dtype == null ? "Unk" : dtype.equals("browser") ? rs.getString(DEVICE) : (dtype + "/" + rs.getString(DEVICE));
 
       MonitorResult result = new MonitorResult(uniqueID, userID, //id
           // plan
@@ -443,7 +447,7 @@ public class ResultDAO extends DAO {
           trimPathForWebPage2(answer), // answer
           valid, // valid
           timestamp.getTime(),
-          type, dur, correct, pronScore);
+          type, dur, correct, pronScore, device);
       results.add(result);
     }
     finish(connection, statement, rs);
@@ -797,6 +801,10 @@ public class ResultDAO extends DAO {
     if (numColumns < 15) {
       addStimulus(connection);
     }
+    if (!getColumns(RESULTS).contains(DEVICE_TYPE.toLowerCase())) {
+      addVarchar(connection,RESULTS,DEVICE_TYPE);
+      addVarchar(connection,RESULTS,DEVICE);
+    }
 
     database.closeConnection(connection);
 
@@ -840,7 +848,9 @@ public class ResultDAO extends DAO {
       DURATION + " INT," +
       CORRECT + " BOOLEAN," +
       PRON_SCORE + " FLOAT," +
-      STIMULUS + " CLOB" +
+        STIMULUS + " CLOB," +
+        DEVICE_TYPE + " VARCHAR," +
+        DEVICE + " VARCHAR" +
       ")");
     statement.execute();
     statement.close();
