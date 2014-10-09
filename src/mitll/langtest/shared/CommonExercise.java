@@ -10,7 +10,7 @@ import java.util.Map;
  * Created by GO22670 on 3/20/2014.
  */
 public interface CommonExercise extends CommonShell {
-  String getPlan();
+  //String getPlan();
 
   String getEnglish();
 
@@ -61,8 +61,6 @@ public interface CommonExercise extends CommonShell {
   Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale);
   void addAudio(AudioAttribute audioAttribute);
 
-  Map<String, String> getUnitToValue();
-
   CommonShell getShell();
 
   CommonShell getShellCombinedTooltip();
@@ -71,9 +69,15 @@ public interface CommonExercise extends CommonShell {
 
   ExerciseAnnotation getAnnotation(String field);
 
+  /**
+   * @see mitll.langtest.server.database.Export#getExports
+   * @return
+   */
   Exercise toExercise();
 
   // super nice to remove these... and make read only
+
+  Map<String, String> getUnitToValue();
 
   /**
    * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson(CommonExercise, String, String)
