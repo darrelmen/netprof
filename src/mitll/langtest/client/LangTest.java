@@ -554,6 +554,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return new HTML(getInfoLine());
   }
 
+  public String getBrowserInfo() { return browserCheck.getBrowserAndVersion();}
+
   private String getInfoLine() {
     String releaseDate = props.getReleaseDate() != null ? " " + props.getReleaseDate() : "";
     return "<span><font size=-2>" +
