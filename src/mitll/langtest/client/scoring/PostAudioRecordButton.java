@@ -62,32 +62,35 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   /**
    * @see mitll.langtest.client.recorder.RecordButton#stop()
    */
-  public void stopRecording() {  controller.stopRecording(new WavCallback() {
+  public void stopRecording() {
+    controller.stopRecording(new WavCallback() {
       @Override
       public void getBase64EncodedWavFile(String bytes) {
         postAudioFile(bytes);
       }
-    });  }
+    });
+  }
 
   private void postAudioFile(String base64EncodedWavFile) {
     reqid++;
     final long then = System.currentTimeMillis();
-   // System.out.println("PostAudioRecordButton.postAudioFile : " +  getAudioType());
+    // System.out.println("PostAudioRecordButton.postAudioFile : " +  getAudioType());
 
     service.writeAudioFile(base64EncodedWavFile,
         exercise.getID(),
-      index,
-      controller.getUser(),
-      reqid,
-      true,
-      getAudioType(),
-      false, recordInResults,
-      shouldAddToAudioTable(), controller.usingFlashRecorder(), new AsyncCallback<AudioAnswer>() {
-        public void onFailure(Throwable caught) {
-          long now = System.currentTimeMillis();
-          System.out.println("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
+        index,
+        controller.getUser(),
+        reqid,
+        true,
+        getAudioType(),
+        false, recordInResults,
+        shouldAddToAudioTable(), controller.usingFlashRecorder(), "browser", controller.getBrowserInfo(),
+        new AsyncCallback<AudioAnswer>() {
+          public void onFailure(Throwable caught) {
+            long now = System.currentTimeMillis();
+            System.out.println("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
 
-          logMessage("failed to post audio for " + controller.getUser() + " exercise " + exercise.getID());
+            logMessage("failed to post audio for " + controller.getUser() + " exercise " + exercise.getID());
           showPopup(AudioAnswer.Validity.INVALID.getPrompt());
         }
 
