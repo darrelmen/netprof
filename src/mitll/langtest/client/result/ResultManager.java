@@ -45,7 +45,7 @@ public class ResultManager extends PagerTable {
   private static final int PAGE_SIZE = 12;
   private static final String TIMESTAMP = "timestamp";
   private static final String CORRECT = "Correct";
-  private static final String PRO_F_SCORE = "ProFScore";
+  private static final String PRO_F_SCORE = "Score";//ProFScore";
   private static final String DURATION_SEC = "Duration (Sec)";
   private static final String AUDIO_TYPE = "Audio Type";
   private static final String USER_ID = "User";// ID";
@@ -61,6 +61,7 @@ public class ResultManager extends PagerTable {
   private static final String DURATION_IN_MILLIS = MonitorResult.DURATION_IN_MILLIS;
   private static final String AUDIO_TYPE1 = MonitorResult.AUDIO_TYPE;
   private static final String PRON_SCORE = MonitorResult.PRON_SCORE;
+  private static final String DEVICE = MonitorResult.DEVICE;
   private static final String CLOSE = "Close";
   private static final int MAX_TO_SHOW = 12;
 
@@ -626,6 +627,16 @@ public class ResultManager extends PagerTable {
     pronScore.setSortable(true);
     table.addColumn(pronScore, PRO_F_SCORE);
     colToField.put(pronScore, PRON_SCORE);
+
+    TextColumn<MonitorResult> type = new TextColumn<MonitorResult>() {
+      @Override
+      public String getValue(MonitorResult answer) {
+        return answer.getDevice();
+      }
+    };
+    type.setSortable(true);
+    table.addColumn(type, DEVICE);
+    colToField.put(type, DEVICE);
   }
 
   private void addNoWrapColumn(CellTable<MonitorResult> table) {
