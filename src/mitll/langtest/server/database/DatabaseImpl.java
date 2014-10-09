@@ -799,24 +799,23 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * Creates the result table if it's not there.
    *
-   * @param userID
-   * @param e
-   * @param questionID
-   * @param answer
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addTextAnswer
+   * @paramx userID
+   * @paramx e
+   * @paramx questionID
+   * @paramx answer
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#addTextAnswer
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
    */
-  public void addAnswer(int userID, CommonExercise e, int questionID, String answer, String answerType) {
+/*  public void addAnswer(int userID, CommonExercise e, int questionID, String answer, String answerType) {
     addAnswer(userID, e, questionID, answer, true, answerType);
   }
 
   private void addAnswer(int userID, CommonExercise e, int questionID, String answer, boolean correct, String answerType) {
-    answerDAO.addAnswer(userID, e, questionID, answer, "",
-        true,//!e.isPromptInEnglish(),
-        false, answerType, correct, 0);
-  }
+   answerDAO.addAnswer(userID, e, questionID, answer, "",
+        //!e.isPromptInEnglish(),
+        answerType, true, 0, deviceType, device);
+  }*/
 
   public AnswerDAO getAnswerDAO() {
     return answerDAO;
@@ -824,26 +823,28 @@ public class DatabaseImpl implements Database {
 
   /**
    * @param userID
-   * @param plan
    * @param exerciseID
    * @param questionID
    * @param audioFile
    * @param valid
-   * @param flq
-   * @param spoken
    * @param audioType
    * @param durationInMillis
    * @param correct
    * @param score
    * @param recordedWithFlash
+   * @param deviceType
+   * @param device
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
-  public long addAudioAnswer(int userID, String plan, String exerciseID, int questionID,
+  public long addAudioAnswer(int userID, String exerciseID, int questionID,
                              String audioFile,
-                             boolean valid, boolean flq, boolean spoken,
-                             String audioType, int durationInMillis, boolean correct, float score, boolean recordedWithFlash) {
-    return answerDAO.addAnswer(this, userID, plan, exerciseID, questionID, "", audioFile, valid, flq, spoken, audioType + (recordedWithFlash ? "" : "_by_WebRTC"),
-        durationInMillis, correct, score, "");
+                             boolean valid,
+                             String audioType, int durationInMillis, boolean correct, float score,
+                             boolean recordedWithFlash, String deviceType, String device) {
+    return answerDAO.addAnswer(this, userID, exerciseID, questionID, "", audioFile, valid,
+        audioType + (recordedWithFlash ? "" : "_by_WebRTC"),
+        durationInMillis, correct, score, deviceType, device);
   }
 
   public int userExists(String login) {
