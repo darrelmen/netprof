@@ -28,6 +28,7 @@ public interface ExerciseController extends EventRegistration {
   UserFeedback getFeedback();
  // ListInterface getExerciseList();
  // void showProgress();
+  String getBrowserInfo();
 
   int getUser();
 
