@@ -138,13 +138,14 @@ public class ScoreServlet extends DatabaseServlet {
     JSONObject jsonObject = new JSONObject();
     String requestType = request.getHeader(REQUEST);
 
+    String deviceType = request.getHeader("deviceType");
+    String device = request.getHeader("device");
+
     if (requestType != null) {
       if (requestType.startsWith(ADD_USER)) {
         String user = request.getHeader("user");
-        String device = request.getHeader("device");
         String passwordH = request.getHeader("passwordH");
         String emailH = request.getHeader("emailH");
-        String deviceType = request.getHeader("deviceType");
 
         logger.debug("req " + deviceType + " " + device);
         User user1 = db.addUser(user, passwordH, emailH, deviceType, device);
@@ -162,13 +163,11 @@ public class ScoreServlet extends DatabaseServlet {
           logger.debug("got " + request.getParts().size() + " parts isMultipart " + isMultipart);
           jsonObject = getJsonForParts(request, requestType);
         } else {
-          jsonObject = getJsonForAudio(request, requestType);
+          jsonObject = getJsonForAudio(request, requestType, deviceType, device);
         }
       } else if (requestType.startsWith("event")) {
         // log event
         String user = request.getHeader("user");
-        String device = request.getHeader("device");
-        String deviceType = request.getHeader("deviceType");
         String context = request.getHeader("context");
 
         // TODO : fill in call to event logging
@@ -182,7 +181,7 @@ public class ScoreServlet extends DatabaseServlet {
         logger.debug("got " + request.getParts().size() + " parts isMultipart " + isMultipart);
         jsonObject = getJsonForParts(request, null);
       } else {
-        jsonObject = getJsonForAudio(request, null);
+        jsonObject = getJsonForAudio(request, null, deviceType, device);
       }
     }
 
@@ -240,6 +239,8 @@ public class ScoreServlet extends DatabaseServlet {
       if (requestType != null) {
         String user = request.getHeader("user");
         String exerciseID = request.getHeader("exercise");
+        String deviceType = request.getHeader("deviceType");
+        String device = request.getHeader("device");
 
         logger.debug("got request " + requestType + " for user " + user + " exercise " + exerciseID);
         int i = -1;
@@ -252,7 +253,7 @@ public class ScoreServlet extends DatabaseServlet {
         File saveFile = new File(wavPath);
         writeToFile(next.getInputStream(), saveFile);
 
-        return getJsonForAudioForUser(exerciseID, i, isDecode(requestType), wavPath, saveFile);
+        return getJsonForAudioForUser(exerciseID, i, isDecode(requestType), wavPath, saveFile, deviceType, device);
       } else {
         File tempDir = Files.createTempDir();
         File saveFile = new File(tempDir + File.separator + "MyAudioFile.wav");
@@ -400,11 +401,13 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * @param request
-   * @return
+   * @param deviceType
+   *@param device @return
    * @throws IOException
    * @see #doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  private JSONObject getJsonForAudio(HttpServletRequest request, String requestType) throws IOException {
+  private JSONObject getJsonForAudio(HttpServletRequest request, String requestType,
+                                     String deviceType, String device) throws IOException {
     // Gets file name for HTTP header
 
     if (requestType != null) {
@@ -421,7 +424,7 @@ public class ScoreServlet extends DatabaseServlet {
       String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, 0, i);
       File saveFile = new File(wavPath);
       writeToOutputStream(request, saveFile);
-      return getJsonForAudioForUser(exerciseID, i, isDecode(requestType), wavPath, saveFile);
+      return getJsonForAudioForUser(exerciseID, i, isDecode(requestType), wavPath, saveFile, deviceType, device);
     } else {
       String fileName = request.getHeader("fileName");
       String word = request.getHeader("word");
@@ -454,7 +457,8 @@ public class ScoreServlet extends DatabaseServlet {
     return requestType.equalsIgnoreCase("decode");
   }
 
-  private JSONObject getJsonForAudioForUser(String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile) {
+  private JSONObject getJsonForAudioForUser(String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile,
+                                            String deviceType, String device) {
     long then = System.currentTimeMillis();
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
 
@@ -467,10 +471,10 @@ public class ScoreServlet extends DatabaseServlet {
 
       if (!doFlashcard) {
         PretestScore asrScoreForAudio = getASRScoreForAudio(wavPath, exercise1.getRefSentence(), exerciseID);
-        answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore());
+        answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(), deviceType, device);
         answer.setPretestScore(asrScoreForAudio);
       } else {
-        answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, -1);
+        answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, -1, deviceType, device);
       }
       long now = System.currentTimeMillis();
       PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
@@ -536,11 +540,13 @@ public class ScoreServlet extends DatabaseServlet {
    * @param doFlashcard
    * @param wavPath
    * @param file
-   * @return
+   * @param deviceType
+   *@param device @return
    */
-  private AudioAnswer getAnswer(String exerciseID, int user, boolean doFlashcard, String wavPath, File file, float score) {
+  private AudioAnswer getAnswer(String exerciseID, int user, boolean doFlashcard, String wavPath, File file, float score,
+                                String deviceType, String device) {
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
-    return audioFileHelper.getAnswer(exerciseID, exercise1, user, doFlashcard, wavPath, file, "iPad", "12345", score);
+    return audioFileHelper.getAnswer(exerciseID, exercise1, user, doFlashcard, wavPath, file, deviceType, device, score);
   }
 
   private void writeToOutputStream(HttpServletRequest request, File saveFile) throws IOException {
