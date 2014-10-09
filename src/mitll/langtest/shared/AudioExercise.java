@@ -126,8 +126,6 @@ public class AudioExercise extends ExerciseShell {
     AudioAttribute latest = null;
     for (AudioAttribute audioAttribute : getAudioAttributes()) {
       if (audioAttribute.getAudioType().startsWith("context")) {
-
-
         if (audioAttribute.getTimestamp() > maleTime) {
           latest = audioAttribute;
           maleTime = audioAttribute.getTimestamp();
@@ -179,7 +177,6 @@ public class AudioExercise extends ExerciseShell {
    */
   public AudioAttribute getRecordingsBy(long userID, boolean regularSpeed) {
     List<AudioAttribute> recordingsBy = getRecordingsBy(userID);
-   // boolean hasRecordings = !recordingsBy.isEmpty();
 
     for (AudioAttribute attr : recordingsBy) {
       if (attr.isRegularSpeed() && regularSpeed || (attr.isSlow() && !regularSpeed)) {
@@ -187,7 +184,6 @@ public class AudioExercise extends ExerciseShell {
       }
     }
 
-    //return hasRecordings && regularSpeed ? recordingsBy.iterator().next() : null;
     return null;
   }
 
