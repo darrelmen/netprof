@@ -34,10 +34,12 @@ import java.util.*;
 public class ScoreServlet extends DatabaseServlet {
   private static final Logger logger = Logger.getLogger(ScoreServlet.class);
   public static final String REQUEST = "request";
+  public static final String NESTED_CHAPTERS = "nestedChapters";
   private JSONObject chapters, nestedChapters;
   public static final String LOAD_TESTING = "loadTesting";
   private static final String ADD_USER = "addUser";
   private static final String HAS_USER = "hasUser";
+  private boolean debug = true;
 
   /**
    * Remembers chapters from previous requests...
@@ -61,7 +63,7 @@ public class ScoreServlet extends DatabaseServlet {
     JSONObject toReturn = new JSONObject();
     try {
       if (queryString != null) {
-        if (queryString.startsWith("nestedChapters")) {
+        if (queryString.startsWith(NESTED_CHAPTERS)) {
           if (nestedChapters == null) {
             nestedChapters = getJsonNestedChapters();
           }
@@ -99,19 +101,21 @@ public class ScoreServlet extends DatabaseServlet {
       e.printStackTrace();
     }
 
-
     try {
       PrintWriter writer = response.getWriter();
       String x = toReturn.toString();
-      logger.debug("Reply " + x);
+      if (x.length() > 1000) {
+        logger.debug("Reply " + x.substring(0,1000));
+      }
+      else {
+        logger.debug("Reply " +x);
+      }
       writer.println(x);
       writer.close();
     } catch (IOException e) {
       e.printStackTrace();
     }
-
   }
-
 
   /**
    * TODO : Is handling a multi-part request slow?
@@ -136,7 +140,6 @@ public class ScoreServlet extends DatabaseServlet {
 
     if (requestType != null) {
       if (requestType.startsWith(ADD_USER)) {
-
         String user = request.getHeader("user");
         String device = request.getHeader("device");
         String passwordH = request.getHeader("passwordH");
@@ -151,26 +154,25 @@ public class ScoreServlet extends DatabaseServlet {
         } else {
           jsonObject.put("userid", user1.getId());
         }
-      }
-      else if (requestType.startsWith("align") || requestType.startsWith("decode")) {
+      } else if (requestType.startsWith("align") || requestType.startsWith("decode")) {
         //jsonObject = getJsonForParts(request, requestType);
         boolean isMultipart = ServletFileUpload.isMultipartContent(request);
 
         if (isMultipart) {
           logger.debug("got " + request.getParts().size() + " parts isMultipart " + isMultipart);
-          jsonObject = getJsonForParts(request,requestType);
+          jsonObject = getJsonForParts(request, requestType);
         } else {
-          jsonObject = getJsonForAudio(request,requestType);
+          jsonObject = getJsonForAudio(request, requestType);
         }
-      }
-      else if (requestType.startsWith("event") ) {
+      } else if (requestType.startsWith("event")) {
         // log event
         String user = request.getHeader("user");
         String device = request.getHeader("device");
         String deviceType = request.getHeader("deviceType");
         String context = request.getHeader("context");
-      }
-      else {
+
+        // TODO : fill in call to event logging
+      } else {
         jsonObject.put("ERROR", "unknown req " + requestType);
       }
     } else {
@@ -178,9 +180,9 @@ public class ScoreServlet extends DatabaseServlet {
 
       if (isMultipart) {
         logger.debug("got " + request.getParts().size() + " parts isMultipart " + isMultipart);
-        jsonObject = getJsonForParts(request,null);
+        jsonObject = getJsonForParts(request, null);
       } else {
-        jsonObject = getJsonForAudio(request,null);
+        jsonObject = getJsonForAudio(request, null);
       }
     }
 
@@ -222,9 +224,6 @@ public class ScoreServlet extends DatabaseServlet {
       List<FileItem> items = upload.parseRequest(request);
       Iterator<FileItem> iterator = items.iterator();
       FileItem next = iterator.next();
-      String name;// = next.getName();
-
-      // logger.debug("got name " + name);
 
       logger.debug("got " + next.getContentType() + " " + next.getFieldName() + " " + next.getString() + " " + next.isInMemory() + " " + next.getSize());
       InputStream inputStream = next.getInputStream();
@@ -234,17 +233,9 @@ public class ScoreServlet extends DatabaseServlet {
       logger.debug("word is " + word);
 
       next = iterator.next();
-      name = next.getName();
+      String name = next.getName();
 
       logger.debug("Scoring : got " + name + " " + next.getContentType() + " " + next.getFieldName() + " " + next.isInMemory() + " " + next.getSize());
-
-     /* File tempDir = Files.createTempDir();
-      File saveFile = new File(tempDir + File.separator + "MyAudioFile.wav");
-      // opens input stream of the request for reading data
-      writeToFile(next.getInputStream(), saveFile);
-      long now = System.currentTimeMillis();
-      logger.debug("took " + (now - then) + " millis to parse request and write the file");*/
-      //    logger.debug("wrote to file " + saveFile.getAbsolutePath());
 
       if (requestType != null) {
         String user = request.getHeader("user");
@@ -261,7 +252,7 @@ public class ScoreServlet extends DatabaseServlet {
         File saveFile = new File(wavPath);
         writeToFile(next.getInputStream(), saveFile);
 
-        return getJsonForAudioForUser(exerciseID, i, requestType.equalsIgnoreCase("decode"), wavPath, saveFile);
+        return getJsonForAudioForUser(exerciseID, i, isDecode(requestType), wavPath, saveFile);
       } else {
         File tempDir = Files.createTempDir();
         File saveFile = new File(tempDir + File.separator + "MyAudioFile.wav");
@@ -316,10 +307,10 @@ public class ScoreServlet extends DatabaseServlet {
     return new BufferedReader(new InputStreamReader(resourceAsStream, ENCODING));
   }
 
-
   /**
    * @return
    * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @deprecated - we do nested chapters now
    */
   private JSONObject getJsonChapters() {
     JSONObject jsonObject = new JSONObject();
@@ -347,7 +338,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
 
-//    logger.debug("got " + sectionNodes);
+   logger.debug("getJsonNestedChapters got " + sectionNodes);
     for (SectionNode node : sectionNodes) {
       typeToValues.put(node.getType(), Collections.singletonList(node.getName()));
       JSONObject jsonForNode = getJsonForNode(node, typeToValues);
@@ -401,7 +392,7 @@ public class ScoreServlet extends DatabaseServlet {
     JSONArray exercises = new JSONArray();
 
     for (CommonExercise exercise : copy) {
-      ensureMP3s(exercise);
+      if (!debug) ensureMP3s(exercise);
       exercises.add(getJsonForExercise(exercise));
     }
     return exercises;
@@ -429,12 +420,9 @@ public class ScoreServlet extends DatabaseServlet {
       }
       String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, 0, i);
       File saveFile = new File(wavPath);
-    //  writeToFile(next.getInputStream(), saveFile);
-
       writeToOutputStream(request, saveFile);
-      return getJsonForAudioForUser(exerciseID, i, requestType.equalsIgnoreCase("decode"), wavPath, saveFile);
-    }
-    else {
+      return getJsonForAudioForUser(exerciseID, i, isDecode(requestType), wavPath, saveFile);
+    } else {
       String fileName = request.getHeader("fileName");
       String word = request.getHeader("word");
       boolean isFlashcard = request.getHeader("flashcard") != null;
@@ -460,6 +448,10 @@ public class ScoreServlet extends DatabaseServlet {
         return getJsonForWordAndAudio(word, saveFile);
       }
     }
+  }
+
+  private boolean isDecode(String requestType) {
+    return requestType.equalsIgnoreCase("decode");
   }
 
   private JSONObject getJsonForAudioForUser(String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile) {
@@ -513,7 +505,6 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   *
    * @param word
    * @param saveFile
    * @return
@@ -532,7 +523,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     JSONObject jsonForScore = getJsonForScore(scoreAndAnswer.score);
     jsonForScore.put("isCorrect", scoreAndAnswer.answer.isCorrect());
-    jsonForScore.put("saidWord",  scoreAndAnswer.answer.isSaidAnswer());
+    jsonForScore.put("saidWord", scoreAndAnswer.answer.isSaidAnswer());
 
     return jsonForScore;
   }
@@ -580,7 +571,7 @@ public class ScoreServlet extends DatabaseServlet {
     return jsonObject;
   }
 
-  private JSONObject getJsonForScoreFlashcard(PretestScore book) {
+ /* private JSONObject getJsonForScoreFlashcard(PretestScore book) {
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("score", book.getHydecScore());
 
@@ -604,7 +595,7 @@ public class ScoreServlet extends DatabaseServlet {
       jsonObject.put(pair.getKey().toString(), value1);
     }
     return jsonObject;
-  }
+  }*/
 
   private DatabaseImpl db;
   private AudioFileHelper audioFileHelper;
@@ -667,13 +658,14 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * TODO : this is wacky -- have to do this for alignment but not for decoding
+   *
    * @param testAudioFile
    * @param sentence
    * @param exerciseID
    * @return
    */
   private PretestScore getASRScoreForAudio(String testAudioFile, String sentence,
-                                          String exerciseID) {
+                                           String exerciseID) {
     return audioFileHelper.getASRScoreForAudio(1, testAudioFile, sentence, 128, 128, false,
         false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID);
   }
@@ -722,7 +714,7 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * @param db
    * @return
-   * @see LangTestDatabaseImpl#init()
+   * @see #getJsonNestedChapters()
    */
   private void setInstallPath(DatabaseImpl db) {
     String lessonPlanFile = getLessonPlan();
