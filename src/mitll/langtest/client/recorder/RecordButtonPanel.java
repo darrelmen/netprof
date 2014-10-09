@@ -132,7 +132,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     final long then = System.currentTimeMillis();
     reqid++;
    // List<Integer> compressed = LZW.compress(base64EncodedWavFile);
-
+    String device = controller.getBrowserInfo();
     final int len = base64EncodedWavFile.length();
     service.writeAudioFile(base64EncodedWavFile,
         exercise.getID(),
@@ -142,7 +142,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
       false,
       audioType,
       doFlashcardAudio,
-      true, false, controller.usingFlashRecorder(), new AsyncCallback<AudioAnswer>() {
+      true, false, controller.usingFlashRecorder(), "browser", device, new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
           controller.logException(caught);
           if (tries > 0) {
