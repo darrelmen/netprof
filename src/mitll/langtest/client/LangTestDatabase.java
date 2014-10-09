@@ -43,7 +43,7 @@ public interface LangTestDatabase extends RemoteService {
 
   // answer DAO
   AudioAnswer writeAudioFile(String base64EncodedString, String exercise, int question, int user,
-                             int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash);
+                             int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash, String deviceType, String device);
 
  // List<MonitorResult> getResults(Map<String,String> unitToValue, long userid, String exerciseID);
 
