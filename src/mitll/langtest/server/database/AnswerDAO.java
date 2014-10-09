@@ -9,7 +9,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.Collection;
 
 /**
  * Does writing to the results table.
@@ -32,18 +31,17 @@ public class AnswerDAO {
    * @param questionID
    * @param answer
    * @param audioFile
-   * @param flq
-   * @param spoken
    * @param audioType
    * @param correct
    * @param pronScore
+   * @param deviceType
+   * @param device
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
    */
   public void addAnswer(int userID, CommonExercise e, int questionID, String answer, String audioFile,
-                        boolean flq, boolean spoken, String audioType, boolean correct, float pronScore) {
-    String plan = "plan";//e.getPlan();
+                        String audioType, boolean correct, float pronScore, String deviceType, String device) {
     String id = e.getID();
-    addAnswer(database,userID, plan, id, questionID, answer, audioFile, true,  flq, spoken, audioType, 0, correct, pronScore, "");
+    addAnswer(database,userID, id, questionID, answer, audioFile, true, audioType, 0, correct, pronScore, deviceType, device);
   }
 
   /**
@@ -65,27 +63,27 @@ public class AnswerDAO {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
+   * @see #addAnswer(Database, int, String, int, String, String, boolean, String, int, boolean, float, String, String)
    * @param database
    * @param userID
-   * @param plan
    * @param id
    * @param questionID
    * @param answer
    * @param audioFile
    * @param valid
-   * @param spoken
    * @param correct
    * @param pronScore
-   * @param stimulus
+   * @param deviceType
+   * @param device
    */
-  public long addAnswer(Database database, int userID, String plan, String id, int questionID, String answer,
-                        String audioFile, boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis,
-                        boolean correct, float pronScore, String stimulus) {
+  public long addAnswer(Database database, int userID, String id, int questionID, String answer,
+                        String audioFile, boolean valid, String audioType, int durationInMillis,
+                        boolean correct, float pronScore, String deviceType, String device) {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
-      long newid = addAnswerToTable(connection, userID, plan, id, questionID, answer, audioFile, valid, flq, spoken,
-          audioType, durationInMillis, correct, pronScore, stimulus);
+      long newid = addAnswerToTable(connection, userID, id, questionID, answer, audioFile, valid,
+          audioType, durationInMillis, correct, pronScore, deviceType, device);
       long now = System.currentTimeMillis();
       if (now - then > 100) System.out.println("took " + (now - then) + " millis to record answer.");
       return newid;
@@ -106,7 +104,6 @@ public class AnswerDAO {
    *
    * @param connection
    * @param userid
-   * @param plan
    * @param id
    * @param questionID
    * @param answer
@@ -114,14 +111,15 @@ public class AnswerDAO {
    * @param valid
    * @param correct
    * @param pronScore
-   * @param stimulus
-   * @throws java.sql.SQLException
-   * @see #addAnswer(Database, int, String, String, int, String, String, boolean, boolean, boolean, String, int, boolean, float, String)
+   * @param deviceType
+   * @param device
+   *  @throws java.sql.SQLException
+   * @see #addAnswer(Database, int, String, int, String, String, boolean, String, int, boolean, float, String, String)
    */
-  private long addAnswerToTable(Connection connection, int userid, String plan, String id, int questionID,
+  private long addAnswerToTable(Connection connection, int userid, String id, int questionID,
                                 String answer, String audioFile,
-                                boolean valid, boolean flq, boolean spoken, String audioType, int durationInMillis,
-                                boolean correct, float pronScore, String stimulus) throws SQLException {
+                                boolean valid, String audioType, int durationInMillis,
+                                boolean correct, float pronScore, String deviceType, String device) throws SQLException {
   //  logger.debug("adding answer for exid #" + id + " correct " + correct + " score " + pronScore + " audio type " +audioType + " answer " + answer);
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO results(" +
@@ -138,8 +136,10 @@ public class AnswerDAO {
       ResultDAO.DURATION + "," +
       ResultDAO.CORRECT + "," +
       ResultDAO.PRON_SCORE + "," +
-      ResultDAO.STIMULUS +
-      ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+        ResultDAO.STIMULUS +"," +
+        ResultDAO.DEVICE_TYPE +"," +
+        ResultDAO.DEVICE +
+      ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
     int i = 1;
 
@@ -147,22 +147,23 @@ public class AnswerDAO {
     String answerInserted = isAudioAnswer ? audioFile : answer;
 
     statement.setInt(i++, userid);
-    statement.setString(i++, copyStringChar(plan));
+    statement.setString(i++, "plan"/*copyStringChar(plan)*/);
     statement.setString(i++, copyStringChar(id));
     statement.setInt(i++, questionID);
     statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
     statement.setString(i++, copyStringChar(answerInserted));
     statement.setBoolean(i++, valid);
-    statement.setBoolean(i++, flq);
-    statement.setBoolean(i++, spoken);
+    statement.setBoolean(i++, true);
+    statement.setBoolean(i++, true);
     statement.setString(i++, copyStringChar(audioType));
     statement.setInt(i++, durationInMillis);
 
     statement.setBoolean(i++, correct);
     statement.setFloat(i++, pronScore);
-    statement.setString(i++, stimulus);
+    statement.setString(i++, "");
+    statement.setString(i++, deviceType);
+    statement.setString(i++, device);
 
-    //logger.info("valid is " +valid + " for " +statement);
     resultDAO.invalidateCachedResults();
 
     statement.executeUpdate();
