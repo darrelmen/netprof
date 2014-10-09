@@ -1,13 +1,11 @@
 package mitll.langtest.server;
 
 import mitll.langtest.server.audio.AudioConversion;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import java.io.*;
 
@@ -78,8 +76,7 @@ public class DatabaseServlet extends HttpServlet {
       }
       String filePath = audioConversion.ensureWriteMP3(wavFile, parent, false);
       return new File(filePath).exists();
-    }
-    else {
+    } else {
       return false;
     }
   }
@@ -105,7 +102,9 @@ public class DatabaseServlet extends HttpServlet {
     return pathHelper.getInstallPath() + File.separator + "config" + File.separator + config;
   }
 
-  protected void ensureMP3s(CommonExercise byID) {  ensureMP3(byID, pathHelper, configDir);  }
+  protected void ensureMP3s(CommonExercise byID) {
+    ensureMP3(byID, pathHelper, configDir);
+  }
 
   protected void writeToFile(InputStream inputStream, File saveFile) throws IOException {
     // opens an output stream for writing file
@@ -128,6 +127,7 @@ public class DatabaseServlet extends HttpServlet {
 
   /**
    * Make json for an exercise
+   *
    * @param exercise
    * @return
    */
@@ -141,6 +141,53 @@ public class DatabaseServlet extends HttpServlet {
     AudioAttribute latestContext = exercise.getLatestContext();
     ex.put("ctref", latestContext == null ? "NO" : latestContext.getAudioRef());
     ex.put("ref", exercise.hasRefAudio() ? exercise.getRefAudio() : "NO");
+
+    addLatestRefs(exercise, ex);
+
     return ex;
+  }
+
+  /**
+   * Male/female reg/slow speed
+   * @param exercise
+   * @param ex
+   */
+  private void addLatestRefs(CommonExercise exercise, JSONObject ex) {
+    String mr = null, ms = null, fr = null, fs = null;
+    long mrt = 0, mst = 0, frt = 0, fst = 0;
+    for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
+      long timestamp = audioAttribute.getTimestamp();
+
+      if (audioAttribute.isMale()) {
+        if (audioAttribute.isRegularSpeed()) {
+          if (timestamp > mrt) {
+            mrt = timestamp;
+            mr = audioAttribute.getAudioRef();
+          }
+        } else if (audioAttribute.isSlow()) {
+          if (timestamp > mst) {
+            mst = timestamp;
+            ms = audioAttribute.getAudioRef();
+          }
+        }
+      } else {
+        if (audioAttribute.isRegularSpeed()) {
+          if (timestamp > frt) {
+            frt = timestamp;
+            fr = audioAttribute.getAudioRef();
+          }
+        } else if (audioAttribute.isSlow()) {
+          if (timestamp > fst) {
+            fst = timestamp;
+            fs = audioAttribute.getAudioRef();
+          }
+        }
+      }
+    }
+    // male regular speed reference audio (m.r.r.)
+    ex.put("mrr", mr == null ? "NO" : mr);
+    ex.put("msr", ms == null ? "NO" : ms);
+    ex.put("frr", fr == null ? "NO" : fr);
+    ex.put("fsr", fs == null ? "NO" : fs);
   }
 }
