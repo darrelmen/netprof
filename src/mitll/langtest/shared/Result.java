@@ -35,13 +35,14 @@ public class Result implements IsSerializable {
   private int durationInMillis;
   private boolean correct;
   private float pronScore;
- // private String stimulus;
+  // private String stimulus;
+  private String device;
 
   public static final String AUDIO_TYPE_UNSET = "unset";
   public static final String AUDIO_TYPE_REGULAR = "regular";
   public static final String AUDIO_TYPE_SLOW = "slow";
   public static final String AUDIO_TYPE_FAST_AND_SLOW = "fastAndSlow";
-  public static final String AUDIO_TYPE_DEMO = "demo";
+ // public static final String AUDIO_TYPE_DEMO = "demo";
   public static final String AUDIO_TYPE_PRACTICE = "practice";
   public static final String AUDIO_TYPE_REVIEW = "review";
   public static final String AUDIO_TYPE_RECORDER = "recorder";
@@ -53,23 +54,20 @@ public class Result implements IsSerializable {
    * @param userid
    * @param plan
    * @param id
-   * @paramx qid
    * @param answer
    * @param valid
    * @param timestamp
-   * @paramx flq
-   * @paramx spoken
    * @param answerType
    * @param durationInMillis
    * @param correct
    * @param pronScore
+   * @param device
    */
   public Result(int uniqueID, long userid, String plan, String id,
                 int qid,
                 String answer,
                 boolean valid, long timestamp,
-                //boolean flq, boolean spoken,
-                String answerType, int durationInMillis, boolean correct, float pronScore) {
+                String answerType, int durationInMillis, boolean correct, float pronScore, String device) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.plan = plan;
@@ -78,12 +76,11 @@ public class Result implements IsSerializable {
     this.answer = answer;
     this.valid = valid;
     this.timestamp = timestamp;
-    //this.flq = flq;
-    //this.spoken = spoken;
     this.audioType = answerType == null || answerType.length() == 0 ? AUDIO_TYPE_UNSET : answerType;
     this.durationInMillis = durationInMillis;
     this.correct = correct;
     this.pronScore = pronScore;
+    this.device = device;
   }
 
   /**
@@ -156,14 +153,16 @@ public class Result implements IsSerializable {
     return durationInMillis;
   }
 
+  public String getDevice() {
+    return device;
+  }
+
   @Override
   public String toString() {
     return "Result #" + getUniqueID() + "\t\tby user " + getUserid() + "\texid " + getId() + " " +
-        //(flq ? "flq" : "english") +
         " at " + new Date(getTimestamp())+
         "  ans " + getAnswer() +
-        //" " + (spoken ? "spoken" : "written") +
-        " audioType : " + getAudioType() +
+        " audioType : " + getAudioType() +" device " + device+
         " valid " + isValid() + " " + (isCorrect() ? "correct":"incorrect") + " score " + getPronScore();
   }
 }
