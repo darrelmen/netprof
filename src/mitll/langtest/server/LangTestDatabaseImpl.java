@@ -882,9 +882,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param answer
    * @see mitll.langtest.client.exercise.ExercisePanel#postAnswers
    */
-  public void addTextAnswer(int userID, CommonExercise exercise, int questionID, String answer, String answerType) {
+/*  public void addTextAnswer(int userID, CommonExercise exercise, int questionID, String answer, String answerType) {
     db.addAnswer(userID, exercise, questionID, answer, answerType);
-  }
+  }*/
 
   // Users ---------------------
 
@@ -1581,18 +1581,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param recordInResults     if true, record in results table -- only when recording in a learn or practice tab
    * @param addToAudioTable     if true, add to audio table -- only when recording reference audio for an item.
    * @param recordedWithFlash   mark if we recorded it using flash recorder or webrtc
-   * @return AudioAnswer object with information about the audio on the server, including if audio is valid (not too short, etc.)
+   * @param deviceType
+   *@param device @return AudioAnswer object with information about the audio on the server, including if audio is valid (not too short, etc.)
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    */
   @Override
   public AudioAnswer writeAudioFile(String base64EncodedString, String exercise, int questionID,
                                     int user, int reqid, boolean flq, String audioType, boolean doFlashcard,
-                                    boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash) {
+                                    boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash,
+                                    String deviceType, String device) {
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exercise);  // allow custom items to mask out non-custom items
 
-    AudioAnswer audioAnswer = audioFileHelper.writeAudioFile(base64EncodedString, "plan", exercise, exercise1, questionID, user, reqid,
-        flq, audioType, doFlashcard, recordInResults, recordedWithFlash);
+    AudioAnswer audioAnswer = audioFileHelper.writeAudioFile(base64EncodedString, exercise, exercise1, questionID, user, reqid,
+        audioType, doFlashcard, recordInResults, recordedWithFlash, deviceType, device);
 
     if (addToAudioTable && audioAnswer.isValid()) {
       AudioAttribute attribute = addToAudioTable(user, audioType, exercise1, exercise, audioAnswer);
