@@ -21,7 +21,9 @@ public interface LangTestDatabaseAsync {
   void getUserBy(long id, AsyncCallback<User> async);
 
   void writeAudioFile(String base64EncodedString, String exercise, int question, int user,
-                      int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash, AsyncCallback<AudioAnswer> async);
+                      int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults,
+                      boolean addToAudioTable, boolean recordedWithFlash, String deviceType, String device,
+                      AsyncCallback<AudioAnswer> async);
 
   void getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, String exerciseID, AsyncCallback<PretestScore> async);
 
