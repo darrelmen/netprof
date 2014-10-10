@@ -303,7 +303,7 @@ public class UserListManagerTest {
   private long getUser(String test2) {
     long l = database.userExists(test2);
     if (l == -1) {
-      l = database.addUser(89, "male", 1, "", ENGLISH, "boston", test2, new ArrayList<User.Permission>());
+      l = database.addUser(89, "male", 1, "", ENGLISH, "boston", test2, new ArrayList<User.Permission>(), "browser");
     }
     return l;
   }
