@@ -1,5 +1,6 @@
 package mitll.langtest.client.sound;
 
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Anchor;
 import mitll.langtest.client.AudioTag;
@@ -10,6 +11,10 @@ import mitll.langtest.client.instrumentation.EventRegistration;
  * Created by go22670 on 7/25/14.
  */
 public class PlayAudioWidget {
+
+  public static native void addPlayer() /*-{
+      $wnd.basicMP3Player.init();
+  }-*/;
 
   /**
    * Super simple audio widget
@@ -35,7 +40,7 @@ public class PlayAudioWidget {
    * Log with the exercise it's associated with.
    * @param path
    * @param title
-   * @param exerciseID
+   * @param exerciseID - just
    * @param eventRegistration - base class of ExerciseController
    * @return
    */
@@ -53,6 +58,13 @@ public class PlayAudioWidget {
    * @return
    */
   public Anchor getAudioWidget(String path, String title) {
+    SafeHtml html = getAudioTagHTML(path, title);
+    Anchor anchor = new Anchor(html);
+    anchor.getElement().setId("PlayAudioWidget_"+title);
+    return anchor;
+  }
+
+  public static SafeHtml getAudioTagHTML(String path, String title) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<a href=\"" +
         ensureForwardSlashes(path).replace(".wav", "." + AudioTag.COMPRESSED_TYPE) +
@@ -63,11 +75,9 @@ public class PlayAudioWidget {
         title +
         "</a>");
 
-    Anchor anchor = new Anchor(sb.toSafeHtml());
-    anchor.getElement().setId("PlayAudioWidget_"+title);
-    return anchor;
+    return sb.toSafeHtml();
   }
 
-  private String ensureForwardSlashes(String wavPath) {  return wavPath.replaceAll("\\\\", "/"); }
+  private static String ensureForwardSlashes(String wavPath) {  return wavPath.replaceAll("\\\\", "/"); }
 
 }
