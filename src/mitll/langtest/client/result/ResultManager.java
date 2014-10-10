@@ -26,6 +26,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.list.TypeAhead;
+import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.MonitorResult;
@@ -67,7 +68,7 @@ public class ResultManager extends PagerTable {
 
   private final EventRegistration eventRegistration;
   private final LangTestDatabaseAsync service;
-  private final AudioTag audioTag = new AudioTag();
+  //private final AudioTag audioTag = new AudioTag();
   private final String nameForAnswer;
   private final Map<Column<?, ?>, String> colToField = new HashMap<Column<?, ?>, String>();
   private Collection<String> typeOrder;
@@ -85,6 +86,7 @@ public class ResultManager extends PagerTable {
     this.nameForAnswer = nameForAnswer;
     this.typeOrder = typeOrder;
     this.eventRegistration = eventRegistration;
+    PlayAudioWidget.addPlayer();
   }
 
   private Map<String, Typeahead> typeToSuggest = new HashMap<String, Typeahead>();
@@ -425,7 +427,8 @@ public class ResultManager extends PagerTable {
       public SafeHtml getValue(MonitorResult answer) {
         String answer1 = answer.getAnswer();
         if (answer1.endsWith(".wav")) {
-          return audioTag.getAudioTag(answer1);
+          //return audioTag.getAudioTag(answer1);
+          return PlayAudioWidget.getAudioTagHTML(answer1,"answer_to_"+answer.getId() + "_by_"+answer.getUserid()+"_"+answer.getUniqueID());
         } else {
           SafeHtmlBuilder sb = new SafeHtmlBuilder();
           sb.appendHtmlConstant(answer1);
