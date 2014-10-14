@@ -31,7 +31,7 @@ public class MailSupport {
   public MailSupport(boolean debugEmail, boolean testEmail) {
     this.debugEmail = debugEmail;
     this.testEmail = testEmail;
-    if (testEmail) logger.debug("using test email");
+    if (testEmail) logger.debug("\n\n\n--->using test email");
   }
 
   /**
@@ -182,14 +182,23 @@ public class MailSupport {
     try {
       Properties props = new Properties();
       props.put(MAIL_SMTP_HOST, LOCALHOST);
-      props.put(MAIL_DEBUG, "" + debugEmail);
+      props.put(MAIL_DEBUG, "" + (debugEmail || testEmail));
 
       if (testEmail) {
-        props.put(MAIL_SMTP_PORT, MAIL_PORT);
+        props.put(MAIL_SMTP_PORT, ""+MAIL_PORT);
         logger.debug("Testing : using port " + MAIL_PORT);
       }
+//      logger.debug("props " + props);
 
       Session session = Session.getDefaultInstance(props, null);
+
+  //    logger.debug("session props " + session.getProperties());
+      String property = session.getProperty(MAIL_SMTP_PORT);
+      if (testEmail && property == null) {
+      //  logger.warn("\n\n\nsetting mail port " + MAIL_PORT);
+        session.getProperties().setProperty(MAIL_SMTP_PORT, ""+MAIL_PORT);
+      }
+
       Message msg = makeHTMLMessage(session,
           senderName, senderEmail, replyToEmail, recipientEmails,
           subject, message);
