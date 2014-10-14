@@ -338,7 +338,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     final double score = result.getScore();
 
     boolean badAudioRecording = result.getValidity() != AudioAnswer.Validity.OK;
-    System.out.println("receivedAudioAnswer: correct " + correct + " pron score : " + score +
+    System.out.println("BootstrapExercisePanel.receivedAudioAnswer: correct " + correct + " pron score : " + score +
         " has ref " + hasRefAudio + " bad audio " + badAudioRecording + " result " + result);
 
     String feedback = "";
@@ -346,6 +346,8 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
       controller.logEvent(button, "Button", exercise.getID(), "bad recording");
       putBackText();
       if (!realRecordButton.checkAndShowTooLoud(result.getValidity())) {
+        System.out.println("\n\n\nreceivedAudioAnswer: show popup for " + result.getValidity());
+        //new Exception().printStackTrace();
         showPopup(result.getValidity().getPrompt(), button);
       }
       initRecordButton();
@@ -370,6 +372,8 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @see #receivedAudioAnswer
    */
   private void showPopup(String html, Widget button) {
+    //System.out.println("BootstrapExercisePanel: showing popup : " + html);
+
     final PopupPanel pleaseWait = new DecoratedPopupPanel();
     pleaseWait.setAutoHideEnabled(true);
     pleaseWait.add(new HTML(html));
@@ -410,7 +414,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     }
     showOtherText();
 
-    // System.out.println("showIncorrectFeedback : result " + result + " score " + score + " has ref " + hasRefAudio);
+    System.out.println("showIncorrectFeedback : result " + result + " score " + score + " has ref " + hasRefAudio);
 
     String correctPrompt = getCorrectDisplay();
     if (hasRefAudio) {
@@ -424,7 +428,6 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
       } else {
         playIncorrect();
         int delay = 1000;
-     //   if (controlState.isEnglish() || controlState.isForeign()) delay = DELAY_MILLIS_LONG;
         goToNextAfter(delay);
       }
     } else {
