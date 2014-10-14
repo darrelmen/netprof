@@ -64,6 +64,19 @@ public class PropertyHandler {
   public static final String SIGN_UP = "Sign Up";
   private boolean adminView;
 
+  public String getTooLoudMessage() {
+
+    return "If your recording is too loud, please follow the following steps to adjust your microphone level settings in Windows on your MacBook: <br/>" +
+        "1.\tClick on ‘Control Panel’<br/>" +
+        "2.\tSelect ‘Sound’<br/>" +
+        "3.\tClick on ‘Recording’<br/>" +
+        "4.\tDouble-Click on the microphone symbol to open a settings window<br/>" +
+        "5.\tSelect the ‘Levels’ tab<br/>" +
+        "6.\tMove the ‘Microphone Boost’ slider to the lowest level<br/>" +
+        "7.\tMove the ‘Microphone’ level to 90% <br/>" +
+        "8.\tClick OK<br/>";
+  }
+
 
   public enum LOGIN_TYPE { ANONYMOUS, STUDENT }
 
