@@ -13,6 +13,8 @@ import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
 
+import java.util.logging.Logger;
+
 /**
  * This binds a record button with the act of posting recorded audio to the server.
  *
@@ -22,6 +24,8 @@ import mitll.langtest.shared.CommonExercise;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class PostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
+  private Logger logger = Logger.getLogger("PostAudioRecordButton");
+
   private boolean validAudio = false;
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
   private final int index;
@@ -43,7 +47,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    */
   public PostAudioRecordButton(CommonExercise exercise, final ExerciseController controller, LangTestDatabaseAsync service,
                                int index, boolean recordInResults, String recordButtonTitle, String stopButtonTitle) {
-    super(controller.getRecordTimeout(), controller.getProps().doClickAndHold(), recordButtonTitle, stopButtonTitle);
+    super(controller.getRecordTimeout(), controller.getProps().doClickAndHold(), recordButtonTitle, stopButtonTitle, controller.getProps());
     setRecordingListener(this);
     this.index = index;
     this.exercise = exercise;
@@ -74,7 +78,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private void postAudioFile(String base64EncodedWavFile) {
     reqid++;
     final long then = System.currentTimeMillis();
-    // System.out.println("PostAudioRecordButton.postAudioFile : " +  getAudioType());
+    // logger.info("PostAudioRecordButton.postAudioFile : " +  getAudioType());
 
     service.writeAudioFile(base64EncodedWavFile,
         exercise.getID(),
@@ -88,7 +92,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
         new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
             long now = System.currentTimeMillis();
-            System.out.println("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
+            logger.info("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
 
             logMessage("failed to post audio for " + controller.getUser() + " exercise " + exercise.getID());
           showPopup(AudioAnswer.Validity.INVALID.getPrompt());
@@ -115,9 +119,10 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
           long now = System.currentTimeMillis();
           long roundtrip = now - then;
 
-          System.out.println("PostAudioRecordButton : Got audio answer " + result);
+          logger.info("PostAudioRecordButton : Got audio answer " + result + "platform is " + getPlatform());
+          //showTooLoud();
           if (result.getReqid() != reqid) {
-            System.out.println("ignoring old response " + result);
+            logger.info("ignoring old response " + result);
             return;
           }
           if (result.getValidity() == AudioAnswer.Validity.OK ||
@@ -166,17 +171,11 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
   protected void useInvalidResult(AudioAnswer result) {
     controller.logEvent(this, "recordButton", getExercise().getID(), "invalid recording " + result.getValidity());
-    if (getPlatform().contains("Windows") && result.getValidity() == AudioAnswer.Validity.TOO_LOUD) {
-
-    }
+    logger.info("platform is " + getPlatform());
+    checkAndShowTooLoud(result.getValidity());
   }
-
-  private static native String getPlatform() /*-{
-      return window.navigator.platform;
-  }-*/;
 
   public abstract void useResult(AudioAnswer result);
 
   public boolean hasValidAudio() { return validAudio; }
-
 }
