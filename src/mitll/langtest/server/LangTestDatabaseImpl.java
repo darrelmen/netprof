@@ -1213,6 +1213,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.LangTest#handleCDToken
    */
   public String enableCDUser(String token, String emailR, String url) {
+    logger.info("enabling token " + token + " for email " + emailR + " and url " +url);
+
     return getEmailHelper().enableCDUser(token, emailR, url);
   }
 
@@ -1838,7 +1840,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private MailSupport getMailSupport() {
-    return new MailSupport(serverProps.isDebugEMail());
+    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEMail());
   }
 
   @Override
