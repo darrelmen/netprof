@@ -1226,7 +1226,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public long getUserIDForToken(String token) {
     User user = db.getUserDAO().getUserWhereResetKey(token);
-    return (user == null) ? -1 : user.getId();
+    long l = (user == null) ? -1 : user.getId();
+    logger.info("for token " +  token + " got user id " + l);
+    return l;
   }
 
   @Override
@@ -1840,7 +1842,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private MailSupport getMailSupport() {
-    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEMail());
+    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail());
   }
 
   @Override
