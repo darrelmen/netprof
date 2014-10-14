@@ -420,7 +420,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // are we here to show the login screen?
     boolean show = userManager.isUserExpired() || userManager.getUserID() == null;
     if (show) {
-      logger.info("user is not valid : " + userManager.isUserExpired() +" / " +userManager.getUserID());
+      logger.info("user is not valid : user expired " + userManager.isUserExpired() +" / " +userManager.getUserID());
 
       Panel content = new UserPassLogin(service, getProps(), userManager, eventRegistration).getContent();
       firstRow.add(content);
@@ -447,6 +447,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param emailR
    */
   private void handleCDToken(final Container verticalContainer, final Panel firstRow, final String cdToken, String emailR) {
+    logger.info("enabling token " + cdToken + " for email " + emailR);
     service.enableCDUser(cdToken, emailR, Window.Location.getHref(), new AsyncCallback<String>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -455,7 +456,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       @Override
       public void onSuccess(String result) {
         staleToken = cdToken;
-        if (result == null /*|| result < 0*/) {
+        if (result == null) {
           logger.info("handleCDToken enable - token " + cdToken + " is stale. Showing normal view");
           populateBelowHeader(verticalContainer, firstRow);
         } else {
