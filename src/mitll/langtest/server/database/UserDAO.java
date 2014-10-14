@@ -81,7 +81,7 @@ public class UserDAO extends DAO {
     try {
       admins = serverProperties.getAdmins();
       language = serverProperties.getLanguage();
-      createUserTable(database);
+      createTable(database);
 
       defectDetector = userExists(DEFECT_DETECTOR);
       if (defectDetector == -1) {
@@ -417,7 +417,7 @@ public class UserDAO extends DAO {
     return val;
   }
 
-  public void createUserTable(Database database) throws Exception {
+  public void createTable(Database database) throws Exception {
     Connection connection = database.getConnection(this.getClass().toString());
 
     try {
@@ -431,14 +431,11 @@ public class UserDAO extends DAO {
           "password VARCHAR, " +
           "nativeLang VARCHAR, " +
           "dialect VARCHAR, " +
-          USER_ID +
-          " VARCHAR, " +
+          USER_ID + " VARCHAR, " +
           "timestamp TIMESTAMP AS CURRENT_TIMESTAMP, " +
           "enabled BOOLEAN, " +
-          RESET_PASSWORD_KEY +
-          " VARCHAR, " +
-          ENABLED_REQ_KEY +
-          " VARCHAR, " +
+          RESET_PASSWORD_KEY + " VARCHAR, " +
+          ENABLED_REQ_KEY + " VARCHAR, " +
           PERMISSIONS + " VARCHAR, " +
           KIND + " VARCHAR, " +
           PASS + " VARCHAR, " +
@@ -555,9 +552,7 @@ public class UserDAO extends DAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUserBy(long)
    */
   public User getUserWhere(long userid) {
-    String sql = "SELECT * from users where " +
-        ID +
-        "=" + userid + ";";
+    String sql = "SELECT * from users where " + ID + "=" + userid + ";";
     List<User> users = getUsers(sql);
     if (users.isEmpty()) {
       if (userid > 0) {
@@ -580,7 +575,9 @@ public class UserDAO extends DAO {
       return null;
     }
 
-    return users.iterator().next();
+    User next = users.iterator().next();
+    logger.debug("For " + userid + " found " +next);
+    return next;
   }
 
   private List<User> getUsers(String sql) {
@@ -647,13 +644,14 @@ public class UserDAO extends DAO {
           // last
           rs.getString(NATIVE_LANG), // native
           rs.getString(DIALECT), // dialect
-          userID, // dialect
+          userID,
 
           rs.getBoolean(ENABLED) || (userKind1 != User.Kind.CONTENT_DEVELOPER),
           isAdmin,
           permissions,
           userKind1,
-          email, device);
+          email,
+          device, "", "");
 
       users.add(newUser);
 
@@ -829,7 +827,6 @@ public class UserDAO extends DAO {
               " WHERE " +
               ID + "=?");
       int i = 1;
-      statement.setString(i++, key);
       statement.setString(i++, key);
       statement.setLong(i++, userid);
       int i1 = statement.executeUpdate();
