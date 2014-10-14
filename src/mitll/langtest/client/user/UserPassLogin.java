@@ -372,7 +372,7 @@ public class UserPassLogin extends UserDialog {
               public void onSuccess(Boolean result) {
                 String heading = result ? CHECK_EMAIL : "Unknown email";
                 String message = result ? PLEASE_CHECK_YOUR_EMAIL : user.box.getText() + " doesn't have that email. Check for a typo?";
-                setupPopover(sendEmail, heading, message, Placement.LEFT, EMAIL_POPUP_DELAY, new MyPopover() {
+                setupPopover(sendEmail, heading, message, Placement.LEFT, EMAIL_POPUP_DELAY, new MyPopover(false) {
                   boolean isFirst = true;
 
                   @Override
