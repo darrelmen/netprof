@@ -80,15 +80,18 @@ public class EmailHelper {
    * @see mitll.langtest.client.user.UserPassLogin#getForgotPassword()
    */
   public boolean resetPassword(String user, String email, String url) {
-    logger.debug("resetPassword for " + user);
+    logger.debug(serverProperties.getLanguage() +" resetPassword for " + user + " url " + url);
 
-    User validUserAndEmail = userDAO.isValidUserAndEmail(user, getHash(email));
+    String hash1 = getHash(email);
+    User validUserAndEmail = userDAO.isValidUserAndEmail(user, hash1);
 
     if (validUserAndEmail != null) {
       logger.debug("resetPassword for " + user + " sending reset password email.");
       String toHash = user + "_" + System.currentTimeMillis();
       String hash = getHash(toHash);
-      userDAO.updateKey(validUserAndEmail.getId(), true, hash);
+      if (!userDAO.updateKey(validUserAndEmail.getId(), true, hash)) {
+        logger.error("huh? couldn't add the reset password key to " + validUserAndEmail);
+      }
 
       String message = "Hi " + user + ",<br/><br/>" +
           "Click the link below to change your password." +
@@ -103,10 +106,9 @@ public class EmailHelper {
           RESET_PASSWORD // link text
       );
 
-      //logger.debug("key map is " +keyToUser);
       return true;
     } else {
-      logger.debug("couldn't find user " + user + " and email " + email);
+      logger.error(serverProperties.getLanguage() + " couldn't find user " + user + " and email " + email + " " + hash1);
       String message = "User " + user + " with email " + email + " tried to reset password - but they're not valid.";
       String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
       logger.debug(prefixedMessage);
@@ -135,11 +137,11 @@ public class EmailHelper {
     User userWhereEnabledReq = userDAO.getUserWhereEnabledReq(token);
     Long userID;
     if (userWhereEnabledReq == null) {
-      logger.debug("user id null for " + token);
+      logger.debug("enableCDUser user id null for " + token + " email " + emailR + " url " + url);
       userID = null;
     } else {
       userID = userWhereEnabledReq.getId();
-      logger.debug("user id '" + userID + "' for " + token + " vs " + userWhereEnabledReq.getId());
+      logger.debug("enableCDUser user id '" + userID + "' for " + token + " vs " + userWhereEnabledReq.getId());
     }
     String email = rot13(emailR);
 
@@ -154,7 +156,7 @@ public class EmailHelper {
         User userWhere = userDAO.getUserWhere(userID);
         url = trimURL(url);
 
-        logger.debug("Sending enable CD User email...");
+        logger.debug("Sending enable CD User email for " + userID + " and " +userWhere);
         userID1 = userWhere.getUserID();
         sendUserApproval(url, email, userID1);
 
@@ -182,6 +184,9 @@ public class EmailHelper {
             subject,
             getApprovalAck(userID1, GORDON)
         );
+      }
+      else {
+        logger.debug("NOT sending enable CD User email for " + userID);
       }
       return (b ? userID1 : null);
     }
@@ -225,14 +230,16 @@ public class EmailHelper {
    * @param email
    * @param user
    * @param mailSupport
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser(String, String, String, mitll.langtest.shared.User.Kind, String, String, boolean, int, String, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
   public void addContentDeveloper(String url, String email, User user, MailSupport mailSupport) {
     url = trimURL(url);
     String userID1 = user.getUserID();
     String toHash = userID1 + "_" + System.currentTimeMillis();
     String hash = getHash(toHash);
-    userDAO.updateKey(user.getId(), false, hash);
+    if (!userDAO.updateKey(user.getId(), false, hash)) {
+      logger.error("huh? couldn't add the CD update key to " + user);
+    }
     List<String> approvers = serverProperties.getApprovers();
     List<String> emails = serverProperties.getApproverEmails();
     for (int i = 0; i < approvers.size(); i++) {
