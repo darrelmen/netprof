@@ -98,22 +98,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
           showPopup(AudioAnswer.Validity.INVALID.getPrompt());
         }
 
-        /**
-         * Feedback for when audio isn't valid for some reason.
-         * @param toShow
-         */
-        private void showPopup(String toShow) {
-          final PopupPanel popupImage = new PopupPanel(true);
-          popupImage.add(new HTML(toShow));
-          popupImage.showRelativeTo(getOuter());
-          Timer t = new Timer() {
-            @Override
-            public void run() {
-              popupImage.hide();
-            }
-          };
-          t.schedule(3000);
-        }
 
         public void onSuccess(AudioAnswer result) {
           long now = System.currentTimeMillis();
@@ -131,7 +115,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
             useResult(result);
           } else {
             validAudio = false;
-            showPopup(result.getValidity().getPrompt());
             useInvalidResult(result);
           }
           if (controller.isLogClientMessages() || roundtrip > LOG_ROUNDTRIP_THRESHOLD) {
@@ -171,8 +154,27 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
   protected void useInvalidResult(AudioAnswer result) {
     controller.logEvent(this, "recordButton", getExercise().getID(), "invalid recording " + result.getValidity());
-    logger.info("platform is " + getPlatform());
-    checkAndShowTooLoud(result.getValidity());
+    logger.info("useInvalidResult platform is " + getPlatform());
+    if (!checkAndShowTooLoud(result.getValidity())) {
+      showPopup(result.getValidity().getPrompt());
+    }
+  }
+
+  /**
+   * Feedback for when audio isn't valid for some reason.
+   * @param toShow
+   */
+  private void showPopup(String toShow) {
+    final PopupPanel popupImage = new PopupPanel(true);
+    popupImage.add(new HTML(toShow));
+    popupImage.showRelativeTo(getOuter());
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        popupImage.hide();
+      }
+    };
+    t.schedule(3000);
   }
 
   public abstract void useResult(AudioAnswer result);
