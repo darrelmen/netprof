@@ -161,6 +161,8 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
           useResult(result);
         } else {
           validAudio = false;
+          new Exception().printStackTrace();
+
           showPopup(result.getValidity().getPrompt());
           useInvalidResult(result);
         }
@@ -171,9 +173,11 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
     };
   }
 
+/*
   protected boolean shouldAddToAudioTable() {
     return false;
   }
+*/
 
   protected String getAudioType() {
     return controller.getAudioType();
