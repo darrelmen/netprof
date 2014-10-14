@@ -24,8 +24,12 @@ public class UserTable extends PagerTable {
  // private static final boolean INCLUDE_EXPERIENCE = false;
   public static final String USER_ID = "User ID";
   public static final int PAGE_SIZE1 = 5;
-  public static final int INSET_PERCENT = 40;
+  public static final int INSET_PERCENT = 50;
   public static final String IP_PREFIX = "127.0.0.1/Mozilla/5.0 ";
+  public static final String PERMISSIONS = "Perm.";//issions";
+  public static final String QUALITY_CONTROL = "QUALITY_CONTROL";
+  public static final String RECORD_AUDIO = "RECORD_AUDIO";
+  public static final String C_DEVELOPER = "CONTENT";//_DEVELOPER";
 
   private Widget lastTable = null;
   private Button closeButton;
@@ -54,7 +58,7 @@ public class UserTable extends PagerTable {
     final VerticalPanel dialogVPanel = new VerticalPanel();
 
     int left = (Window.getClientWidth()) / INSET_PERCENT;
-    int top = (Window.getClientHeight()) / INSET_PERCENT;
+    int top  = (Window.getClientHeight()) / INSET_PERCENT;
     dialogBox.setPopupPosition(left, top);
 
     service.getUsers(new AsyncCallback<List<User>>() {
@@ -147,10 +151,10 @@ public class UserTable extends PagerTable {
 
     TextColumn<User> perm = new TextColumn<User>() {
       @Override
-      public String getValue(User contact) { return "" + contact.getPermissions().toString().replaceAll("QUALITY_CONTROL","QC"); }
+      public String getValue(User contact) { return "" + contact.getPermissions().toString().replaceAll(QUALITY_CONTROL, "QC").replaceAll(RECORD_AUDIO,"RECORD"); }
     };
     perm.setSortable(true);
-    table.addColumn(perm, "Permissions");
+    table.addColumn(perm, PERMISSIONS);
 
     TextColumn<User> complete = new TextColumn<User>() {
       @Override
@@ -210,7 +214,7 @@ public class UserTable extends PagerTable {
     TextColumn<User> kind = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
-        return (contact.getUserKind() == User.Kind.CONTENT_DEVELOPER ? "C_DEVELOPER" : contact.getUserKind().toString());
+        return (contact.getUserKind() == User.Kind.CONTENT_DEVELOPER ? C_DEVELOPER : contact.getUserKind().toString());
       }
     };
     table.addColumn(kind, "Type");
@@ -238,6 +242,14 @@ public class UserTable extends PagerTable {
       }
     };
     table.addColumn(device, "Device");
+
+    TextColumn<User> enabled = new TextColumn<User>() {
+      @Override
+      public String getValue(User contact) {
+        return contact.isEnabled() ? "Yes":"No";
+      }
+    };
+    table.addColumn(enabled, "Enabled");
 
     // Create a data provider.
     ListDataProvider<User> dataProvider = new ListDataProvider<User>();
@@ -279,49 +291,6 @@ public class UserTable extends PagerTable {
     // Create a SimplePager.
     // return getPagerAndTable(table, table, 10, 10);
     return getOldSchoolPagerAndTable(table, table, PAGE_SIZE1, PAGE_SIZE1);
-  }
-
-/*  private void addLanguage(CellTable<User> table) {
-    TextColumn<User> lang = new TextColumn<User>() {
-      @Override
-      public String getValue(User contact) {
-        return "" + contact.getNativeLang();
-      }
-    };
-    lang.setSortable(true);
-    table.addColumn(lang, "Lang");
-  }*/
-
-/*  private void addExperience(CellTable<User> table) {
-    TextColumn<User> experience = new TextColumn<User>() {
-      @Override
-      public String getValue(User contact) {
-        int experience1 = contact.getExperience();
-        String exp = "" + experience1 + " months";
-        if (contact.getDemographics() != null) {
-          exp = contact.getDemographics().toString();
-        }
-        String prefix = "user id " + contact.getId() + " has ";
-        if (exp.startsWith(prefix)) {
-          exp = exp.substring(prefix.length());
-        }
-        return exp;
-      }
-    };
-    experience.setSortable(true);
-    table.addColumn(experience, "Experience");
-  }*/
-
-  private void addExperience(CellTable<User> table) {
-    TextColumn<User> experience = new TextColumn<User>() {
-      @Override
-      public String getValue(User contact) {
-        int experience1 = contact.getExperience();
-        return experience1 + " months";
-      }
-    };
-    experience.setSortable(true);
-    table.addColumn(experience, "Experience");
   }
 
   private float roundToHundredth(double totalHours) { return ((float) ((Math.round(totalHours * 100)))) / 100f;  }
