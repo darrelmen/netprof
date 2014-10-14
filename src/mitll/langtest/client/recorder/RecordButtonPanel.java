@@ -55,7 +55,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   }
 
   protected RecordButton makeRecordButton(ExerciseController controller, String buttonTitle) {
-    return new RecordButton(controller.getRecordTimeout(), this, false);
+    return new RecordButton(controller.getRecordTimeout(), this, false, controller.getProps());
   }
 
   public void flip(boolean first) {
@@ -195,6 +195,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   protected String getAudioType() { return controller.getAudioType();  }
 
   public Widget getRecordButton() { return recordButton; }
+  public RecordButton getRealRecordButton() { return recordButton; }
   protected void receivedAudioAnswer(AudioAnswer result, final Panel outer) {}
   protected void receivedAudioFailure() {}
 }
