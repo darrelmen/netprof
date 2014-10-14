@@ -143,6 +143,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
 
   private RecordButtonPanel answerWidget;
   private Widget button;
+  private RecordButton realRecordButton;
 
   /**
    *
@@ -157,6 +158,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     RecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, addKeyBinding, instance);
     this.answerWidget = answerWidget;
     button = answerWidget.getRecordButton();
+    realRecordButton = answerWidget.getRealRecordButton();
 
     return getRecordButtonRow(button);
   }
@@ -343,7 +345,9 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     if (badAudioRecording) {
       controller.logEvent(button, "Button", exercise.getID(), "bad recording");
       putBackText();
-      showPopup(result.getValidity().getPrompt(), button);
+      if (!realRecordButton.checkAndShowTooLoud(result.getValidity())) {
+        showPopup(result.getValidity().getPrompt(), button);
+      }
       initRecordButton();
       clearFeedback();
     } else if (correct) {
