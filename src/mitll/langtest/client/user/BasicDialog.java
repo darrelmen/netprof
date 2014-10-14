@@ -457,23 +457,44 @@ public class BasicDialog {
     logger.info("configurePopup : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
 
     if (w instanceof Focusable) {
-      requestFocus((Focusable)w);
+      requestFocus((Focusable) w);
     }
+    showPopover(popover, w, heading, message, placement, isHTML);
+  }
+
+  public void showPopover(Widget w, String heading, String message, Placement placement) {
+    showPopover(new Popover(), w, heading, message, placement, true);
+  }
+
+  public void showPopover(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML) {
     simplePopover(popover, w, heading, message, placement, isHTML);
     popover.show();
   }
 
-  void simplePopover(Widget w, String heading, String message, Placement placement, boolean isHTML) {
+/*  void simplePopover(Widget w, String heading, String message, Placement placement, boolean isHTML) {
     simplePopover(new Popover(), w, heading, message, placement, isHTML);
-  }
+  }*/
 
   private void simplePopover(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML) {
+    logger.info("simplePopover : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
     popover.setWidget(w);
     popover.setHtml(isHTML);
     popover.setText(message);
-    popover.setHeading(heading);
+    if (heading != null) {
+
+      logger.info("simplePopover : set heading " + heading);
+
+      popover.setHeading(heading);
+    }
     popover.setPlacement(placement);
+
+    popover.setTrigger(Trigger.HOVER);
+    popover.setAnimation(false);
     popover.reconfigure();
+    if (heading == null) {
+      popover.getWidget().getElement().removeAttribute("data-original-title");
+    }
+
   }
 
   protected FormField addControlFormFieldWithPlaceholder(Panel dialogBox, boolean isPassword, int minLength, int maxLength, String hint) {
