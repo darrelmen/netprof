@@ -79,7 +79,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
    */
   public SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
                                      String recordButtonTitle, String stopButtonTitle, String textToAlign, String identifier) {
-    super(controller.getRecordTimeout(), true, recordButtonTitle, stopButtonTitle);
+    super(controller.getRecordTimeout(), true, recordButtonTitle, stopButtonTitle, controller.getProps());
     setRecordingListener(this);
     this.controller = controller;
     this.service = service;
@@ -90,9 +90,11 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
     getElement().getStyle().setMarginBottom(1, Style.Unit.PX);
   }
 
+/*
   public void registerForEvents(String identifier) {
     controller.register(this, identifier);
   }
+*/
 
   /**
    * @see mitll.langtest.client.recorder.RecordButton#stop()
