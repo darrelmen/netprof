@@ -51,7 +51,7 @@ public class FlashcardRecordButton extends RecordButton {
    */
   public FlashcardRecordButton(int delay, RecordingListener recordingListener, boolean warnNotASpace,
                                boolean addKeyBinding, ExerciseController controller, final String instance) {
-    super(delay, recordingListener, true);
+    super(delay, recordingListener, true, controller.getProps());
 
     if (addKeyBinding) {
       addKeyListener(controller, instance);
@@ -95,7 +95,7 @@ public class FlashcardRecordButton extends RecordButton {
       @Override
       public void gotPress(NativeEvent ne, boolean isKeyDown) {
         if (isKeyDown) {
-          checkKeyDown(ne,this);
+          checkKeyDown(ne/*,this*/);
         } else {
           checkKeyUp(ne);
         }
@@ -108,7 +108,9 @@ public class FlashcardRecordButton extends RecordButton {
     controller.addKeyListener(listener);
   }
 
-  protected void checkKeyDown(NativeEvent event, KeyPressHelper.KeyListener listener) {
+  private void checkKeyDown(NativeEvent event
+  //    , KeyPressHelper.KeyListener listener
+  ) {
     if (!shouldIgnoreKeyPress()) {
       boolean isSpace = checkIsSpace(event);
       //System.out.println("checkKeyDown got key press...");
