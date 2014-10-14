@@ -483,7 +483,7 @@ public class ScoreServlet extends DatabaseServlet {
           " exercise id " + exerciseID + " took " + (now - then) +
           " millis for " + saveFile.getName() + " = " + hydecScore);
 
-      if (answer.isValid()) {
+      if (answer != null && answer.isValid()) {
         jsonForScore = getJsonForScore(pretestScore);
         if (doFlashcard) {
           jsonForScore.put("isCorrect", answer.isCorrect());
