@@ -21,12 +21,18 @@ public class MailSupport {
   private static final String MAIL_DEBUG = "mail.debug";
   private static final String MAIL_SMTP_PORT = "mail.smtp.port";
   private final boolean debugEmail;
+  private final boolean testEmail;
 
   /**
    * @param debugEmail
+   * @param testEmail
    * @see mitll.langtest.server.LangTestDatabaseImpl#getMailSupport()
    */
-  public MailSupport(boolean debugEmail) { this.debugEmail = debugEmail;  }
+  public MailSupport(boolean debugEmail, boolean testEmail) {
+    this.debugEmail = debugEmail;
+    this.testEmail = testEmail;
+    if (testEmail) logger.debug("using test email");
+  }
 
   /**
    * @see EmailHelper#enableCDUser(String, String, String)
@@ -178,7 +184,7 @@ public class MailSupport {
       props.put(MAIL_SMTP_HOST, LOCALHOST);
       props.put(MAIL_DEBUG, "" + debugEmail);
 
-      if (debugEmail) {
+      if (testEmail) {
         props.put(MAIL_SMTP_PORT, MAIL_PORT);
         logger.debug("Testing : using port " + MAIL_PORT);
       }
@@ -251,7 +257,7 @@ public class MailSupport {
                                   String subject, String message) throws Exception {
     Message msg = new MimeMessage(session);
 
-    logger.info("Sending from " + senderEmail + " " + senderName + " to " + recipientEmails + " sub " + subject + " " + message);
+    logger.info("Sending from " + senderEmail + " " + senderName + " to " + recipientEmails + " sub " + subject);// + " " + message);
     msg.setFrom(new InternetAddress(senderEmail, senderName));
     for (String receiver : recipientEmails) {
       //logger.info("\tSending  to " + receiver);
