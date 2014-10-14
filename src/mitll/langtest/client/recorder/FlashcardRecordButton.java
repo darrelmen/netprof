@@ -1,5 +1,6 @@
 package mitll.langtest.client.recorder;
 
+import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.NativeEvent;
@@ -39,6 +40,7 @@ public class FlashcardRecordButton extends RecordButton {
   private boolean warnUserWhenNotSpace = true;
   private final boolean addKeyBinding;
   private final ExerciseController controller;
+  Tooltip tooltip ;
 
   /**
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton
@@ -76,7 +78,7 @@ public class FlashcardRecordButton extends RecordButton {
 
     getElement().setId("FlashcardRecordButton_" + instance);
 
-    new TooltipHelper().addTooltip(this, addKeyBinding ? NO_SPACE_WARNING : PROMPT);
+    tooltip = new TooltipHelper().addTooltip(this, addKeyBinding ? NO_SPACE_WARNING : PROMPT);
 
 //    System.out.println("FlashcardRecordButton : using " + getElement().getId());
   }
@@ -196,6 +198,9 @@ public class FlashcardRecordButton extends RecordButton {
   private void warnNotASpace() { showPopup(NO_SPACE_WARNING);  }
 
   private void showPopup(String html) {
+  //  System.out.println("\n\n\nFlashcardRecordButton: showing popup : " + html);
+
+
     final PopupPanel pleaseWait = new DecoratedPopupPanel();
     pleaseWait.setAutoHideEnabled(true);
     pleaseWait.add(new HTML(html));
@@ -235,6 +240,12 @@ public class FlashcardRecordButton extends RecordButton {
     super.initRecordButton();
     setText(addKeyBinding ? SPACE_BAR : PROMPT);
     setType(ButtonType.PRIMARY);
+  }
 
+  public void removeTooltip() {
+    if (tooltip != null) {
+      tooltip.remove(this);
+//      tooltip.reconfigure();
+    }
   }
 }
