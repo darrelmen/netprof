@@ -29,6 +29,7 @@ import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 2/10/14.
@@ -38,6 +39,8 @@ import java.util.*;
  * TODO : review table...?
  */
 public class StatsFlashcardFactory extends ExercisePanelFactory implements RequiresResize {
+  private Logger logger = Logger.getLogger("StatsFlashcardFactory");
+
   private static final String REMAINING = "Remaining";
   private static final String INCORRECT = "Incorrect";
   private static final String CORRECT = "Correct";
@@ -260,39 +263,38 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
      * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, com.google.gwt.user.client.ui.Panel)
      */
     public void receivedAudioAnswer(final AudioAnswer result) {
-      //System.out.println("StatsPracticePanel.receivedAudioAnswer: result " + result);
+      System.out.println("StatsPracticePanel.receivedAudioAnswer: result " + result);
 
-      if (result.getValidity() != AudioAnswer.Validity.OK) {
-        super.receivedAudioAnswer(result);
-        return;
-      }
-      resultIDs.add(result.getResultID());
-      exToScore.put(exercise.getID(), result.getScore());
-      exToCorrect.put(exercise.getID(), result.isCorrect());
+      if (result.getValidity() == AudioAnswer.Validity.OK) {
+        resultIDs.add(result.getResultID());
+        exToScore.put(exercise.getID(), result.getScore());
+        exToCorrect.put(exercise.getID(), result.isCorrect());
 
-      StringBuilder builder = new StringBuilder();
-      StringBuilder builder2 = new StringBuilder();
-      for (Map.Entry<String, Boolean> pair : exToCorrect.entrySet()) {
-        if (pair.getValue()) {
-          builder.append(pair.getKey()).append(",");
-        } else {
-          builder2.append(pair.getKey()).append(",");
+        StringBuilder builder = new StringBuilder();
+        StringBuilder builder2 = new StringBuilder();
+        for (Map.Entry<String, Boolean> pair : exToCorrect.entrySet()) {
+          if (pair.getValue()) {
+            builder.append(pair.getKey()).append(",");
+          } else {
+            builder2.append(pair.getKey()).append(",");
+          }
         }
+        sticky.storeCorrect(builder);
+        sticky.storeIncorrect(builder2);
+
+        StringBuilder builder3 = new StringBuilder();
+        for (Map.Entry<String, Double> pair : exToScore.entrySet()) {
+          builder3.append(pair.getKey()).append("=").append(pair.getValue()).append(",");
+        }
+        sticky.storeScore(builder3);
+
+        setStateFeedback();
+
+        latestResultID = result.getResultID();
+        //System.out.println("\tStatsPracticePanel.receivedAudioAnswer: latest now " + latestResultID);
+      } else {
+        logger.info("got invalid result " + result);
       }
-      sticky.storeCorrect(builder);
-      sticky.storeIncorrect(builder2);
-
-      StringBuilder builder3 = new StringBuilder();
-      for (Map.Entry<String, Double> pair : exToScore.entrySet()) {
-        builder3.append(pair.getKey()).append("=").append(pair.getValue()).append(",");
-      }
-      sticky.storeScore(builder3);
-
-      setStateFeedback();
-
-      latestResultID = result.getResultID();
-      //System.out.println("\tStatsPracticePanel.receivedAudioAnswer: latest now " + latestResultID);
-
       super.receivedAudioAnswer(result);
     }
 
@@ -650,9 +652,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     private void setStateFeedback() {
       int totalCorrect = getCorrect();
       int totalIncorrect = getIncorrect();
-      int remaining = allExercises.size()
-          //- skipped.size()
-          - totalCorrect - totalIncorrect;
+      int remaining = allExercises.size() - totalCorrect - totalIncorrect;
       remain.setText(remaining + "");
       incorrectBox.setText(totalIncorrect + "");
       correctBox.setText(totalCorrect + "");
