@@ -36,27 +36,27 @@ import java.util.logging.Logger;
  * Created by go22670 on 8/11/14.
  */
 public class UserPassLogin extends UserDialog {
-  public static final String MALE = "male";
   private final Logger logger = Logger.getLogger("UserPassLogin");
+
+  private static final String MALE = "male";
   private static final String MAGIC_PASS = Md5Hash.getHash("adm!n");
   private static final String CURRENT_USERS = "Current users should add an email and password.";
 
   private static final int MIN_LENGTH_USER_ID = 4;
 
   private static final int MIN_PASSWORD = 4;
- // private static final int MIN_EMAIL = 10;
   private static final int LEFT_SIDE_WIDTH = 483;
-  private static final String SIGN_UP_SUBTEXT = "Sign up";//Or never entered a password?";//password and email";
+  private static final String SIGN_UP_SUBTEXT = "Sign up";
   private static final String PLEASE_ENTER_YOUR_PASSWORD = "Please enter your password.";
   private static final String BAD_PASSWORD = "Wrong password - have you signed up?";
   private static final String PASSWORD = "Password";
   private static final String USERNAME = "Username";
-  private static final String SIGN_IN = "Sign In";
+  private static final String SIGN_IN = "Log In";
   private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer user id.";
   private static final String VALID_EMAIL = "Please enter a valid email address.";
   private static final String PLEASE_WAIT = "Please wait";
   //private static final String INITIAL_PROMPT = "<b>Classroom</b> allows you to practice your vocabulary and learn pronunciation.";//"Learn how to pronounce words and practice vocabulary.";
-  private static final String INITIAL_PROMPT = "Practice vocabulary and learn pronunciation.";//"Learn how to pronounce words and practice vocabulary.";
+  private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
   private static final String FIRST_BULLET = "Practice vocabulary with audio flashcards.";//"Do flashcards to learn or review vocabulary";
   private static final String SECOND_BULLET = "Record your voice and get feedback on your pronunciation.";//"Get feedback on your pronunciation";
   private static final String THIRD_BULLET = "Create and share vocab lists for study and review.";//"Make your own lists of words to study later or to share.";
@@ -72,23 +72,20 @@ public class UserPassLogin extends UserDialog {
   private static final String ARE_YOU_A = "Please choose : Are you a";
   private static final String STUDENT = "Student or ";
   private static final String TEACHER = "Teacher?";
-  //private static final String CONTENT_DEVELOPER = "Content Developer";
   private static final String SIGN_UP_WIDTH = "266px";
   private static final int BULLET_MARGIN = 25;
-  //private static final String CURRENT_USER_TOOLTIP = "Current users who don't have a password and email should sign up below.";
-//  private static final String CURRENT_USER = "Are you a current user without a password?";
   private static final String RECORD_AUDIO_HEADING = "Recording audio/Quality Control";
   private static final int WAIT_FOR_READING_APPROVAL = 3000;
   private static final String PLEASE_CHECK = "Please check";
-//  private static final String RECORD_REFERENCE_AUDIO = "Record Reference Audio?";
   private static final String RECORD_REFERENCE_AUDIO = "Are you an assigned reference audio recorder?";
-  public static final String SHOWN_HELLO = "shownHello";
   private static final String ENTER_YOUR_EMAIL = "Enter your email to get your username.";
   private static final int EMAIL_POPUP_DELAY = 4000;
   private static final String USER_EXISTS = "User exists already, please sign in or choose a different name.";
   private static final String HELP = "Help";
   private static final String AGE_ERR_MSG = "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".";
-  //private static final String PLEASE_ENTER_A_PASSWORD1 = "Please enter a password.";
+
+  public static final String SHOWN_HELLO = "shownHello";
+
   private final UserManager userManager;
   private final KeyPressHelper enterKeyButtonHelper;
   private final KeyStorage keyStorage;
@@ -146,7 +143,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   private void showWelcome() {
-    new ModalInfoDialog("Welcome to Classroom!", "<h3>Classroom has been updated.</h3>" +
+    new ModalInfoDialog("Welcome to Classroom!", "<h4>Classroom has been updated.</h4>" +
         getLoginInfo());
   }
 
@@ -488,8 +485,17 @@ public class UserPassLogin extends UserDialog {
     return text.toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
   }
 
-  private void makePopup(DecoratedPopupPanel commentPopup, HidePopupTextBox commentEntryText, Button okButton, String prompt) {
-    VerticalPanel vp = new VerticalPanel();
+  /**
+   *
+   * @param commentPopup
+   * @param commentEntryText
+   * @param okButton
+   * @param prompt
+   * @see #getForgotPassword()
+   * @see #getForgotUser()
+   */
+  private void makePopup(Panel commentPopup, Widget commentEntryText, Widget okButton, String prompt) {
+    Panel vp = new VerticalPanel();
     Panel w = new Heading(6, prompt);
     vp.add(w);
     w.addStyleName("bottomFiveMargin");
