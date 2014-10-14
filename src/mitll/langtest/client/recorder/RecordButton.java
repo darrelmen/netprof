@@ -4,8 +4,12 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.StyleHelper;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Timer;
+import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.user.BasicDialog;
+import mitll.langtest.shared.AudioAnswer;
 
 /**
  * Basically a click handler and a timer to click stop recording, if the user doesn't.
@@ -35,6 +39,7 @@ public class RecordButton extends Button {
   protected boolean mouseDown = false;
 
   private RecordingListener recordingListener;
+  PropertyHandler propertyHandler;
 
   public static interface RecordingListener {
     void startRecording();
@@ -49,11 +54,13 @@ public class RecordButton extends Button {
    * @param doClickAndHold
    * @param buttonText
    * @param stopButtonText
+   * @param propertyHandler
    */
-  protected RecordButton(int delay, boolean doClickAndHold, String buttonText, String stopButtonText) {
+  protected RecordButton(int delay, boolean doClickAndHold, String buttonText, String stopButtonText, PropertyHandler propertyHandler) {
     super(buttonText);
     RECORD = buttonText;
     STOP = stopButtonText;
+    this.propertyHandler = propertyHandler;
     //if (STOP.equalsIgnoreCase("stop")) new Exception().printStackTrace();
     this.doClickAndHold = doClickAndHold;
 /*    if (doClickAndHold) {
@@ -72,9 +79,10 @@ public class RecordButton extends Button {
    * @param delay
    * @param recordingListener
    * @param doClickAndHold
+   * @param propertyHandler
    */
-  public RecordButton(int delay, RecordingListener recordingListener, boolean doClickAndHold) {
-    this(delay, doClickAndHold, RECORD1, STOP1);
+  public RecordButton(int delay, RecordingListener recordingListener, boolean doClickAndHold, PropertyHandler propertyHandler) {
+    this(delay, doClickAndHold, RECORD1, STOP1, propertyHandler);
     this.setRecordingListener(recordingListener);
   }
 
@@ -94,7 +102,7 @@ public class RecordButton extends Button {
   private class ButtonClickEvent extends ClickEvent {}
 
   /**
-   * @see #RecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean)
+   * @see #RecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean, mitll.langtest.client.PropertyHandler)
    * @param recordingListener
    */
   protected void setRecordingListener(RecordingListener recordingListener) { this.recordingListener = recordingListener;  }
@@ -257,5 +265,34 @@ public class RecordButton extends Button {
     if (recordTimer != null) {
       recordTimer.cancel();
     }
+  }
+
+
+  protected static native String getPlatform() /*-{
+      return window.navigator.platform;
+  }-*/;
+
+  /**
+   *
+   * @param validity
+   * @return true if showed the popup
+   */
+  public boolean checkAndShowTooLoud(AudioAnswer.Validity validity) {
+    if (getPlatform().contains("Windows") && validity == AudioAnswer.Validity.TOO_LOUD) {
+      showTooLoud();
+      return true;
+    }
+    else return false;
+  }
+
+  //private Popover popover;
+  protected void showTooLoud() {
+    //if (popover == null) {
+    //  popover =
+    new BasicDialog().markErrorBlurFocus(this, this, "Audio Too Loud", propertyHandler.getTooLoudMessage(), Placement.RIGHT, true);
+    // }
+    // else {
+    //   popover.show();
+    // }
   }
 }
