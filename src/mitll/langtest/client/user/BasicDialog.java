@@ -240,7 +240,7 @@ public class BasicDialog {
   protected void markErrorBlur(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement right) {
     dialectGroup.setType(ControlGroupType.ERROR);
     dialect.setFocus(true);
-    setupPopoverBlur(dialect, header, message, right, new MyPopover(), dialectGroup);
+    setupPopoverBlur(dialect, header, message, right, new MyPopover(false), dialectGroup);
   }
 /*
   boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max) {
@@ -319,49 +319,54 @@ public class BasicDialog {
     setupPopoverThatHidesItself(widget, header, message, placement);
   }
 
-  void markError(Widget dialect, String message) {
+/*  void markError(Widget dialect, String message) {
     // System.out.println("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
     // dialect.setFocus(true);
 //    setupPopover(dialect, header, message, placement);
     setupPopoverThatHidesItself(dialect, "Error", message, Placement.RIGHT);
-  }
+  }*/
 
+/*
   void markErrorBlur(FocusWidget focusWidget, String message) {
     markErrorBlurFocus(focusWidget, focusWidget, "Try Again", message, Placement.RIGHT);
   }
+*/
 
   void markErrorBlur(FocusWidget focusWidget, String message, Placement placement) {
-    markErrorBlurFocus(focusWidget, focusWidget, "Try Again", message, placement);
+    markErrorBlurFocus(focusWidget, focusWidget, "Try Again", message, placement, false);
   }
 
   void markErrorBlur(Button button, String message) {
-    markErrorBlurFocus(button, button, "Try Again", message, Placement.RIGHT);
+    markErrorBlurFocus(button, button, "Try Again", message, Placement.RIGHT, false);
   }
-
+/*
   void markErrorBlur(Button button, String message, Placement placement) {
     markErrorBlurFocus(button, button, "Try Again", message, placement);
-  }
+  }*/
 
   void markErrorBlur(Button button, String heading, String message, Placement placement) {
-    markErrorBlurFocus(button, button, heading, message, placement);
+    markErrorBlurFocus(button, button, heading, message, placement, false);
   }
 
   Popover markErrorBlur(FocusWidget button, String heading, String message, Placement placement) {
-    return markErrorBlurFocus(button, button, heading, message, placement);
+    return markErrorBlurFocus(button, button, heading, message, placement, false);
   }
 
-  Popover markErrorBlurFocus(Widget widget, HasBlurHandlers dialect, String heading, String message, Placement placement) {
+  public Popover markErrorBlurFocus(Widget widget, HasBlurHandlers dialect, String heading, String message,
+                                    Placement placement, boolean showOnlyOnce) {
     // System.out.println("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
     // dialect.setFocus(true);
 //    setupPopover(dialect, header, message, placement);
-    return setupPopoverBlurNoControl(widget, dialect, heading, message, placement, new MyPopover());
+    return setupPopoverBlurNoControl(widget, dialect, heading, message, placement, new MyPopover(showOnlyOnce));
   }
 
+/*
   void markError(Widget dialect, String header, String message, Placement placement) {
     // System.out.println("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
     Widget widget = dialect;
     setupPopoverThatHidesItself(widget, header, message, placement);
   }
+*/
 
   private void setupPopoverThatHidesItself(final Widget w, String heading, final String message, Placement placement) {
     System.out.println("\tsetupPopoverThatHidesItself triggering popover on '" + w.getTitle() + "' with " + heading + "/" + message);
@@ -374,7 +379,7 @@ public class BasicDialog {
   }
 
   protected Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis, boolean isHTML) {
-    final MyPopover popover = new MyPopover();
+    final MyPopover popover = new MyPopover(false);
 
     return setupPopover(w, heading, message, placement, delayMillis, popover, isHTML);
   }
@@ -407,7 +412,7 @@ public class BasicDialog {
     return popover;
   }
 
-  protected Popover setupPopoverBlurNoControl(Widget widget, HasBlurHandlers hasBlurHandlers, String heading, String message, Placement placement, final MyPopover popover) {
+  private Popover setupPopoverBlurNoControl(Widget widget, HasBlurHandlers hasBlurHandlers, String heading, String message, Placement placement, final MyPopover popover) {
     configurePopup(popover, widget, heading, message, placement, true);
 
     hasBlurHandlers.addBlurHandler(new BlurHandler() {
@@ -471,19 +476,6 @@ public class BasicDialog {
     popover.reconfigure();
   }
 
-/*  ListBox getGenderBox() {
-    List<String> values = Arrays.asList("GENDER", MALE, FEMALE);
-    return getListBox(values);
-  }*/
-
-/*  protected ListBox getListBox(List<String> values) {
-    final ListBox genderBox = new ListBox(false);
-    for (String s : values) {
-      genderBox.addItem(s);
-    }
-    return genderBox;
-  }*/
-
   protected FormField addControlFormFieldWithPlaceholder(Panel dialogBox, boolean isPassword, int minLength, int maxLength, String hint) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
     user.setMaxLength(maxLength);
@@ -491,13 +483,13 @@ public class BasicDialog {
     return getFormField(dialogBox, user, minLength);
   }
 
-  protected FormField addDecoratedControlFormFieldWithPlaceholder(Panel dialogBox, boolean isPassword,
+/*  protected FormField addDecoratedControlFormFieldWithPlaceholder(Panel dialogBox, boolean isPassword,
                                                                   int minLength, int maxLength, String hint) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
     user.setMaxLength(maxLength);
     user.setPlaceholder(hint);
     return getDecoratedFormField(dialogBox, user, minLength);
-  }
+  }*/
 
 /*
   protected FormField addControlFormFieldWithPlaceholder(boolean isPassword, int minLength, int maxLength, String hint) {
@@ -532,7 +524,7 @@ public class BasicDialog {
     return new FormField(user, userGroup, minLength);
   }
 
-  private FormField getDecoratedFormField(Panel dialogBox, TextBox user, int minLength/*, String helpMsg*/) {
+/*  private FormField getDecoratedFormField(Panel dialogBox, TextBox user, int minLength*//*, String helpMsg*//*) {
     //  final ControlGroup userGroup = addControlGroupEntryNoLabel(dialogBox, user);
     DecoratedFields decoratedFields = new DecoratedFields(null, user, null, null);
     ControlGroup ctrlGroup = decoratedFields.getCtrlGroup();
@@ -541,18 +533,56 @@ public class BasicDialog {
     dialogBox.add(ctrlGroup);
 
     return new FormField(user, ctrlGroup, minLength, decoratedFields);
-  }
+  }*/
 
-  protected boolean highlightIntegerBox(FormField ageEntryGroup) {
+/*  protected boolean highlightIntegerBox(FormField ageEntryGroup) {
     return highlightIntegerBox(ageEntryGroup, UserDialog.MIN_AGE, UserDialog.MAX_AGE + 1, UserDialog.TEST_AGE);
-  }
+  }*/
+//static int pid = 0;
 
   protected static class MyPopover extends Popover {
+  //  boolean wasShown = false;
+   // boolean showOnlyOnce = false;
+   // boolean disabled = false;
+  //  int id = pid++;
+
+    public MyPopover() {
+      //  this.showOnlyOnce = showOnlyOnce;
+    }
+    public MyPopover(boolean showOnlyOnce) {
+    //  this.showOnlyOnce = showOnlyOnce;
+    }
     public void dontFireAgain() {
+    //  System.out.println(this + " dontFireAgain ...");
+
       hide();
       setTrigger(Trigger.MANUAL);
       reconfigure();
     }
+
+/*    @Override
+    public void show() {
+      super.show();
+      wasShown = true;
+      System.out.println(this + " got show...");
+    }
+
+    @Override
+    public void hide() {
+      super.hide();
+      System.out.println(this + " got hide...");
+      if (wasShown && showOnlyOnce && !disabled) {
+        System.out.println(this + " \tdisabling...");
+        disabled = true;
+        wasShown = false;
+        dontFireAgain();
+      }
+      else {
+        System.out.println(this + " not disabling...");
+
+      }
+    }
+    public String toString() { return "Popover #"+id;}*/
   }
 
   protected static class FormField {
@@ -560,7 +590,7 @@ public class BasicDialog {
     public final ControlGroup group;
     public Widget rightSide;
     DecoratedFields decoratedFields;
-    String errMsg;
+   // String errMsg;
 
     public FormField(final TextBoxBase box, final ControlGroup group, final int minLength) {
       this.box = box;
@@ -577,15 +607,17 @@ public class BasicDialog {
       this.group = group;
     }
 
-    public FormField(final TextBoxBase box, final ControlGroup group, final int minLength, DecoratedFields decoratedFields) {
+/*    public FormField(final TextBoxBase box, final ControlGroup group, final int minLength, DecoratedFields decoratedFields) {
       this(box, group, minLength);
       this.decoratedFields = decoratedFields;
       //  this.errMsg = errMsg;
-    }
+    }*/
 
+/*
     public void markError(String errMsg) {
       decoratedFields.setError(errMsg);
     }
+*/
 
     public void setVisible(boolean visible) {
       group.setVisible(visible);
