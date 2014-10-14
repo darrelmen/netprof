@@ -68,7 +68,7 @@ public class KeyPressHelper {
                                                      }
                                                    });
 
-    logger.info("addKeyHandler made click handler " + keyHandler);
+    //logger.info("addKeyHandler made key handler " + keyHandler);
   }
 
   public int getSize() {
@@ -95,16 +95,6 @@ public class KeyPressHelper {
                                                            typeInt == 0x00200) // keyup
                                                            &&
                                                            "[object KeyboardEvent]".equals(ne.getString())) {
-                                               /*     if (false) {
-                                                         System.out.println(new Date() +
-                                                           " : getNextAndPreviousButtons - key handler : " + keyHandler +
-                                                           " Got " + event + " type int " +
-                                                           typeInt + " assoc " + event.getAssociatedType() +
-                                                           " native " + event.getNativeEvent() +
-                                                           " source " + event.getSource());
-                                                       }*/
-
-
                                                          gotEvent(ne, typeInt == 0x00080);
                                                        }
                                                      }
