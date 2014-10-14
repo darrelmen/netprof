@@ -25,11 +25,11 @@ public class ServerProperties {
   private static final Logger logger = Logger.getLogger(ServerProperties.class);
 
   private static final String DEBUG_EMAIL = "debugEmail";
+  private static final String TEST_EMAIL = "testEmail";
   private static final String DOIMAGES = "doimages";
   private static final String USE_SCORE_CACHE = "useScoreCache";
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
- // private static final String DATA_COLLECT_MODE = "dataCollect";
   private static final String H2_DATABASE = "h2Database";
   private static final String H2_DATABASE_DEFAULT = "vlr-parle";
   //private static final String H2_STUDENT_ANSWERS_DATABASE = "h2StudentAnswers";
@@ -146,6 +146,9 @@ public class ServerProperties {
 
   public boolean isDebugEMail() {
     return getDefaultFalse(DEBUG_EMAIL);
+  }
+  public boolean isTestEMail() {
+    return getDefaultFalse(TEST_EMAIL);
   }
 
   public boolean isWordPairs() {
