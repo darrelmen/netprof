@@ -178,8 +178,8 @@ public class DatabaseImpl implements Database {
     }
 
     try {
-      userDAO.createUserTable(this);
-      // dliUserDAO.createUserTable(this);
+      userDAO.createTable(this);
+      // dliUserDAO.createTable(this);
       userListManager.setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
