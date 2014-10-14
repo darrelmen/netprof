@@ -5,6 +5,7 @@ import com.github.gwtbootstrap.client.ui.base.StyleHelper;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Timer;
 import mitll.langtest.client.PropertyHandler;
@@ -29,6 +30,7 @@ public class RecordButton extends Button {
   private static final int PERIOD_MILLIS = 500;
   public static final String RECORD1 = "Record      ";
   public static final String STOP1 = "Recording...";
+  public static final String WINDOWS = "Win32";
   private final String RECORD;
   private final String STOP;
 
@@ -278,18 +280,29 @@ public class RecordButton extends Button {
    * @return true if showed the popup
    */
   public boolean checkAndShowTooLoud(AudioAnswer.Validity validity) {
-    if (getPlatform().contains("Windows") && validity == AudioAnswer.Validity.TOO_LOUD) {
+    if (
+        getPlatform().contains(WINDOWS) && validity == AudioAnswer.Validity.TOO_LOUD) {
       showTooLoud();
       return true;
     }
     else return false;
   }
 
-  //private Popover popover;
+  public void removeTooltip() {}
+    //private Popover popover;
   protected void showTooLoud() {
     //if (popover == null) {
     //  popover =
-    new BasicDialog().markErrorBlurFocus(this, this, "Audio Too Loud", propertyHandler.getTooLoudMessage(), Placement.RIGHT, true);
+    final RecordButton widget = this;
+    removeTooltip();
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+
+        new BasicDialog().showPopover(widget,
+            null,
+            propertyHandler.getTooLoudMessage(), Placement.RIGHT);
+      }
+    });
     // }
     // else {
     //   popover.show();
