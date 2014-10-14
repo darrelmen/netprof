@@ -147,7 +147,7 @@ public class ServerProperties {
   public boolean isDebugEMail() {
     return getDefaultFalse(DEBUG_EMAIL);
   }
-  public boolean isTestEMail() {
+  public boolean isTestEmail() {
     return getDefaultFalse(TEST_EMAIL);
   }
 
