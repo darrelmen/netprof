@@ -61,6 +61,7 @@ public class PropertyHandler {
   private static final String QUIET_AUDIO_OK = "quietAudioOK";
   private static final String SHOW_WELCOME = "showWelcome";
   private static final String NO_MODEL = "noModel";
+  public static final String SIGN_UP = "Sign Up";
   private boolean adminView;
 
 
@@ -381,7 +382,7 @@ public class PropertyHandler {
    * @return
    */
   public String getHelpMessage() {
-    return "If you are an existing user of Classroom (either as a student, teacher or audio recorder), " +
+/*    return "If you are an existing user of Classroom (either as a student, teacher or audio recorder), " +
         "you will need to use the <b>\"Sign Up\"</b> box to add a password and an email address to your account. " +
         " Your email is only used if you ever forget your password.<br/><br/>" +
         "If you were using Classroom for <u>recording of course audio</u>, check the box asking if you are a " +
@@ -398,6 +399,27 @@ public class PropertyHandler {
         "<br/>" +
         "Once you \"Sign up\", the site will remember your login information on this computer for up to one year.  " +
         "You will need to login with your username and password again if you access Classroom from a different machine.<br/>";
+    */
+    return //"Classroom has been updated.\n" +
+        "If you are a first-time user of this site, or an existing user of an earlier version of Classroom " +
+            "(either as a student, teacher, or audio recorder), you will need to use the " +
+            "\"" +
+            SIGN_UP +
+            "\" box to add a password and an email address to your account. " +
+            "Your email is only used if you ever forget your password.<br/>" +
+            "<br/>" +
+            "If you are a teacher assigned to record <u>course material</u> - check the box next to " +
+            "‘<i>assigned reference audio recorder</i>.’" +
+            " Once you have submitted this form, LTEA personnel will approve your account. " +
+            "You will receive an email once it's approved. " +
+            "You will not be able to access Classroom until approval is granted. " +
+            "Students do not need approval to access the site.<br/>" +
+            "<br/>" +
+            "<b>Students and Teachers</b>: After you register, use the ’Login’ box to access the site. <br/>" +
+            //"Teachers who are not <i>audio recorders</i>: After you register, use the ’Login’ box to access the site. <br/>" +
+            "<b>Teachers who are <i>audio recorders</i></b>: After you register and get approval, use the ‘Login’ box to access the site. <br/><br/>" +
+            "The site will remember your login information on this computer for up to one year. " +
+            "You will need to login with your username and password again if you access Classroom from a different machine.<br/>";
   }
 
   /**
