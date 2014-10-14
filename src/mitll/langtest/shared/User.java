@@ -28,6 +28,8 @@ public class User extends MiniUser {
   private String nativeLang;
   private String dialect;
   private String device;
+  private String resetKey;
+  private String cdKey;
   private Collection<Permission> permissions;
 
   public static enum Kind implements IsSerializable { UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ANONYMOUS }
@@ -38,7 +40,7 @@ public class User extends MiniUser {
   public User() {} // for serialization
 
   /**
-   * @see mitll.langtest.server.database.UserDAO#getUsers()
+   * @see mitll.langtest.server.database.custom.UserListManager#getQCUser()
    * @param id
    * @param age
    * @param gender
@@ -50,7 +52,7 @@ public class User extends MiniUser {
    */
   public User(long id, int age, int gender, int experience, String ipaddr, String password,
               boolean enabled, Collection<Permission> permissions) {
-     this(id,age,gender,experience,ipaddr,password, NOT_SET, NOT_SET, NOT_SET, enabled,false, permissions, Kind.STUDENT, "", "");
+     this(id,age,gender,experience,ipaddr,password, NOT_SET, NOT_SET, NOT_SET, enabled,false, permissions, Kind.STUDENT, "", "", "", "");
   }
 
   /**
@@ -68,10 +70,12 @@ public class User extends MiniUser {
    * @param userKind
    * @param emailHash
    * @param device
+   * @param resetPassKey
+   * @param cdEnableKey
    */
   public User(long id, int age, int gender, int experience, String ipaddr, String passwordH,
               String nativeLang, String dialect, String userID, boolean enabled, boolean isAdmin,
-              Collection<Permission> permissions, Kind userKind, String emailHash, String device) {
+              Collection<Permission> permissions, Kind userKind, String emailHash, String device, String resetPassKey, String cdEnableKey) {
     super(id, age, gender, userID, isAdmin);
     this.experience = experience;
     this.ipaddr = ipaddr;
@@ -84,6 +88,8 @@ public class User extends MiniUser {
     this.nativeLang = nativeLang;
     this.dialect = dialect;
     this.device = device;
+    this.resetKey = resetPassKey;
+    this.cdKey = cdEnableKey;
   }
 
   public Collection<Permission> getPermissions() {
@@ -199,6 +205,10 @@ public class User extends MiniUser {
         " emailH " + getEmailHash() +
         " passH " + getPasswordHash() +
         " kind " + getUserKind()+
-        " perms " + getPermissions() + " device " + getDevice();
+        " perms " + getPermissions() +
+        " device " + getDevice() +
+        " reset " + resetKey +
+        " cdenable " + cdKey
+        ;
   }
 }
