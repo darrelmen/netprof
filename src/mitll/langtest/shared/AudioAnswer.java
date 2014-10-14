@@ -122,6 +122,7 @@ public class AudioAnswer implements IsSerializable {
   public void setPath(String path) { this.path = path;  }
 
   public Validity getValidity() {
+//    new Exception().printStackTrace();
     return validity;
   }
 
