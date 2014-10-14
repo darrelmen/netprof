@@ -143,8 +143,10 @@ public class UserPassLogin extends UserDialog {
   }
 
   private void showWelcome() {
-    new ModalInfoDialog("Welcome to Classroom!", "<h4>Classroom has been updated.</h4>" +
+    Modal modal = new ModalInfoDialog().getModal("Welcome to Classroom!", "<h4>Classroom has been updated.</h4>" +
         getLoginInfo());
+    modal.setMaxHeigth((600) + "px");
+    modal.show();
   }
 
   private void showWelcome2() {
@@ -641,8 +643,7 @@ public class UserPassLogin extends UserDialog {
       }
     });
 
-    // TODO : this competes with the warning for existing users.
-   // new TooltipHelper().addTooltip(emailBox,"Your email is only used to reset your password or recover your username.");
+    // TODO : this competes with the warning for existing users - don't add a tooltip
 
     return emailBox;
   }
