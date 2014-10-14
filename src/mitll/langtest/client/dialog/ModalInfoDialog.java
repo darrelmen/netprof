@@ -1,7 +1,6 @@
 package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
@@ -25,7 +24,10 @@ import java.util.Collections;
  */
 public class ModalInfoDialog {
   private final KeyPressHelper enterKeyButtonHelper = new KeyPressHelper();
-  private int messageHeading = 5;
+
+  //private int messageHeading = 5;
+  public ModalInfoDialog() {
+  }
 
   public ModalInfoDialog(String title, String message) {
     this(title, message, null);
@@ -36,16 +38,29 @@ public class ModalInfoDialog {
   }
 
   public ModalInfoDialog(String title, Collection<String> messages, Widget widget, HiddenHandler handler) {
+    final Modal modal = getModal(title, messages, widget, handler);
+    modal.show();
+  }
+
+  public Modal getModal(String title, String message, Widget widget, HiddenHandler handler) {
+    return getModal(title, Collections.singleton(message), widget, handler);
+  }
+
+  public Modal getModal(String title, String message) {
+    return getModal(title, Collections.singleton(message), null, null);
+  }
+
+  public Modal getModal(String title, Collection<String> messages, Widget widget, HiddenHandler handler) {
     final Modal modal = new Modal(true);
     modal.setTitle(title);
     for (String m : messages) {
-     // Heading w = new Heading(messageHeading);
+      // Heading w = new Heading(messageHeading);
       HTML w = new HTML(m);
-   //   w.setText(m);
+      //   w.setText(m);
       modal.add(w);
     }
     if (widget != null) modal.add(widget);
-    modal.add(new Heading(4));
+    //modal.add(new Heading(4));
 
     final Button begin = getOKButton(modal);
     begin.addStyleName("floatRight");
@@ -62,7 +77,7 @@ public class ModalInfoDialog {
         enterKeyButtonHelper.removeKeyHandler();
       }
     });
-    modal.show();
+    return modal;
   }
 
   public Button getOKButton(final Modal modal) {
