@@ -14,10 +14,7 @@ public class TooltipHelper {
    * @param tip
    * @return
    */
-  public Tooltip addTooltip(Widget w, String tip) {
-    //System.out.println("Add tooltip " + tip + " to " + w.getElement().getId());
-    return createAddTooltip(w, tip, Placement.RIGHT);
-  }
+  public Tooltip addTooltip(Widget w, String tip) { return createAddTooltip(w, tip, Placement.RIGHT);  }
 
   /**
    * @see mitll.langtest.client.custom.exercise.NPFExercise#makeAddToList(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController)
@@ -27,6 +24,7 @@ public class TooltipHelper {
    * @return
    */
   public Tooltip createAddTooltip(Widget widget, String tip, Placement placement) {
+   // System.out.println("Add tooltip " + tip + " to " + widget.getElement().getId() + " place " + placement);
     Tooltip tooltip = new Tooltip();
     tooltip.setWidget(widget);
     tooltip.setText(tip);
