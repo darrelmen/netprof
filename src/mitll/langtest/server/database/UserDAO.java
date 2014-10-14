@@ -34,6 +34,7 @@ public class UserDAO extends DAO {
   private static final String RESET_PASSWORD_KEY = "resetPasswordKey";
   private static final String ENABLED_REQ_KEY = "enabledReqKey";
   private static final String NATIVE_LANG = "nativeLang";
+  private String language;
   // public static final String USER_ID = "userID";
   private long defectDetector;
 
@@ -79,6 +80,7 @@ public class UserDAO extends DAO {
     super(database);
     try {
       admins = serverProperties.getAdmins();
+      language = serverProperties.getLanguage();
       createUserTable(database);
 
       defectDetector = userExists(DEFECT_DETECTOR);
@@ -134,12 +136,12 @@ public class UserDAO extends DAO {
       // user exists!
       if (userByID.getEmailHash() != null && userByID.getPasswordHash() != null &&
           !userByID.getEmailHash().isEmpty() && !userByID.getPasswordHash().isEmpty()) {
-        logger.debug("addUser : user " + userID + " is an existing user.");
+        logger.debug(language + " : addUser : user " + userID + " is an existing user.");
         return null; // existing user!
       } else {
         updateUser(userByID.getId(), kind, passwordH, emailH);
         User userWhere = getUserWhere(userByID.getId());
-        logger.debug("addUser : returning updated user " + userWhere);
+        logger.debug(language + " : addUser : returning updated user " + userWhere);
         return userWhere;
       }
     } else {
@@ -147,7 +149,7 @@ public class UserDAO extends DAO {
       boolean enabled = (kind != User.Kind.CONTENT_DEVELOPER) || isAdmin(userID);
       long l = addUser(age, isMale ? MALE : FEMALE, 0, ipAddr, "", dialect, userID, enabled, perms, kind, passwordH, emailH, device);
       User userWhere = getUserWhere(l);
-      logger.debug("addUser : added new user " + userWhere);
+      logger.debug(language + " : addUser : added new user " + userWhere);
 
       return userWhere;
     }
@@ -177,12 +179,12 @@ public class UserDAO extends DAO {
   public long addUser(int age, String gender, int experience, String ipAddr,
                       String nativeLang, String dialect, String userID, boolean enabled, Collection<User.Permission> permissions,
                       User.Kind kind, String passwordH, String emailH, String device) {
+    if (passwordH == null) new Exception().printStackTrace();
     try {
       // there are much better ways of doing this...
       long max = 0;
       for (User u : getUsers()) if (u.getId() > max) max = u.getId();
 //      logger.info("addUser : max is " + max + " new user '" + userID + "' age " + age + " gender " + gender + " pass " + passwordH);
-      if (passwordH == null) new Exception().printStackTrace();
 
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
@@ -246,7 +248,7 @@ public class UserDAO extends DAO {
       if (passwordH == null) {
         logger.error("Got null password Hash?", new Exception("empty password hash"));
       }
-      logger.debug("update user #" + id + " kind " + kind);
+      logger.debug(language + " : update user #" + id + " kind " + kind);
 
       Connection connection = getConnection();
       PreparedStatement statement = connection.prepareStatement(
@@ -354,7 +356,7 @@ public class UserDAO extends DAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#userExists(String, String)
    */
   public User getUser(String id, String passwordHash) {
-    logger.debug("getUser getting user with id '" + id + "' and pass " + passwordHash);
+    logger.debug(language + " : getUser getting user with id '" + id + "' and pass " + passwordHash);
     String sql = "SELECT * from " +
         USERS +
         " where " +
@@ -375,7 +377,7 @@ public class UserDAO extends DAO {
 */
 
       userWhere = getUserByID(id);
-      logger.debug("getUser user with id '" + id + "' pass " + passwordHash +
+      logger.debug(language + " : getUser user with id '" + id + "' pass " + passwordHash +
           " and empty or different pass is " + userWhere);
     }
     return userWhere;
@@ -530,6 +532,11 @@ public class UserDAO extends DAO {
     return getUserWhere(-1, sql);
   }
 
+  /**
+   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String)
+   * @param resetKey
+   * @return
+   */
   public User getUserWhereEnabledReq(String resetKey) {
     String sql = "SELECT * from users where " +
         ENABLED_REQ_KEY +
@@ -554,13 +561,12 @@ public class UserDAO extends DAO {
     List<User> users = getUsers(sql);
     if (users.isEmpty()) {
       if (userid > 0) {
-        logger.warn("no user with id " + userid);
+        logger.warn(language + " : no user with id " + userid);
       }
       return null;
+    } else if (users.size() > 1) {
+      logger.warn(language + " : huh? " + users.size() + " with  id " + userid);
     }
-    // else if (users.size() > 1) {
-    //    logger.warn("huh? " + users.size() + " with  id " + userid);
-    //  }
 
     return users.iterator().next();
   }
@@ -569,8 +575,7 @@ public class UserDAO extends DAO {
     List<User> users = getUsers(sql);
     if (users.isEmpty()) {
       if (userid > 0) {
-        logger.warn("for " + sql +
-            " no user with id '" + userid +"'");
+        logger.warn(language + " : for " + sql + " no user with id '" + userid +"'");
       }
       return null;
     }
@@ -613,7 +618,7 @@ public class UserDAO extends DAO {
               permissions.add(User.Permission.valueOf(perm));
             }
           } catch (IllegalArgumentException e) {
-            logger.warn("huh, for user " + userid +
+            logger.warn(language + " : huh, for user " + userid +
                 " perm '" + perm +
                 "' is not a permission?");
           }
@@ -630,14 +635,7 @@ public class UserDAO extends DAO {
       String userID = rs.getString(USER_ID);
       String email = rs.getString(EMAIL);
       String device = rs.getString(DEVICE);
-
-/*      if (email != null) {
-        logger.debug("User " + id + "/" + userID + " pass " + password + " email " + email);
-      }*/
       User.Kind userKind1 = userKind == null ? User.Kind.UNSET : User.Kind.valueOf(userKind);
-      // if (userKind1 == User.Kind.UNSET) {
-      //   logger.debug("for user " + id + " kind is " + userKind);
-      // }
 
       User newUser = new User(id, //id
           rs.getInt(AGE), // age
@@ -645,7 +643,6 @@ public class UserDAO extends DAO {
           rs.getInt(EXPERIENCE), // exp
           rs.getString(IPADDR), // ip
           password, // password
-
           // first
           // last
           rs.getString(NATIVE_LANG), // native
@@ -772,13 +769,13 @@ public class UserDAO extends DAO {
       wb.write(out);
       now = System.currentTimeMillis();
       if (now - then > 100) {
-        logger.warn("toXLSX : took " + (now - then) + " millis to write excel to output stream ");
+        logger.warn(language + " : toXLSX : took " + (now - then) + " millis to write excel to output stream ");
       }
       out.close();
       wb.dispose();
     } catch (IOException e) {
       logger.error("got " + e, e);
-      database.logEvent("unk", "toXLSX: " + e.toString(), 0);
+      database.logEvent("unk", "(" +language+ ") toXLSX: " + e.toString(), 0);
 
     }
   }
@@ -789,10 +786,6 @@ public class UserDAO extends DAO {
 
   public boolean changePassword(Long remove, String passwordH) {
     try {
-      if (passwordH == null) {
-        new Exception().printStackTrace();
-      }
-
       Connection connection = getConnection();
       PreparedStatement statement;
 
@@ -818,26 +811,36 @@ public class UserDAO extends DAO {
     return false;
   }
 
-  public boolean updateKey(Long remove, boolean resetKey, String key) {
+  /**
+   *
+   * @param userid
+   * @param resetKey
+   * @param key
+   * @return
+   * @see #clearKey(Long, boolean)
+   */
+  public boolean updateKey(Long userid, boolean resetKey, String key) {
     try {
       Connection connection = getConnection();
+      String s = resetKey ? RESET_PASSWORD_KEY : ENABLED_REQ_KEY;
       PreparedStatement statement = connection.prepareStatement(
           "UPDATE " + USERS + " SET " +
-              (resetKey ? RESET_PASSWORD_KEY : ENABLED_REQ_KEY) + "=?" +
+              s + "=?" +
               " WHERE " +
               ID + "=?");
       int i = 1;
       statement.setString(i++, key);
-      statement.setLong(i++, remove);
+      statement.setString(i++, key);
+      statement.setLong(i++, userid);
       int i1 = statement.executeUpdate();
 
       statement.close();
       database.closeConnection(connection);
-
+      logger.debug("for " + language + " update " + key + "/" +s+ " for " + userid);
       return i1 != 0;
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
-      database.logEvent("unk", "clearKey user: " + remove + " " + ee.toString(), 0);
+      database.logEvent("unk", "clearKey user: " + userid + " " + ee.toString(), 0);
     }
     return false;
   }
@@ -850,27 +853,5 @@ public class UserDAO extends DAO {
    */
   public boolean clearKey(Long remove, boolean resetKey) {
     return updateKey(remove, resetKey, "");
-/*    try {
-      Connection connection = getConnection();
-      PreparedStatement statement;
-
-      statement = connection.prepareStatement(
-          "UPDATE " + USERS + " SET " +
-              (resetKey ? RESET_PASSWORD_KEY : ENABLED_REQ_KEY) + "=''" +
-              " WHERE " +
-              ID + "=?");
-      int i = 1;
-      statement.setLong(i++, remove);
-      int i1 = statement.executeUpdate();
-
-      statement.close();
-      database.closeConnection(connection);
-
-      return i1 != 0;
-    } catch (Exception ee) {
-      logger.error("Got " + ee, ee);
-      database.logEvent("unk", "clearKey user: " + remove + " " +ee.toString(), 0);
-    }
-    return false;*/
   }
 }
