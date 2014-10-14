@@ -10,6 +10,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
 import java.util.Collection;
@@ -38,13 +39,33 @@ public class ModalInfoDialog {
     final Modal modal = new Modal(true);
     modal.setTitle(title);
     for (String m : messages) {
-      Heading w = new Heading(messageHeading);
-      w.setText(m);
+     // Heading w = new Heading(messageHeading);
+      HTML w = new HTML(m);
+   //   w.setText(m);
       modal.add(w);
     }
     if (widget != null) modal.add(widget);
     modal.add(new Heading(4));
 
+    final Button begin = getOKButton(modal);
+    begin.addStyleName("floatRight");
+    modal.add(begin);
+
+    if (handler != null) {
+      System.out.println("\tModalInfoDialog.added hidden handler ");
+
+      modal.addHiddenHandler(handler);
+    }
+    modal.addHiddenHandler(new HiddenHandler() {
+      @Override
+      public void onHidden(HiddenEvent hiddenEvent) {
+        enterKeyButtonHelper.removeKeyHandler();
+      }
+    });
+    modal.show();
+  }
+
+  public Button getOKButton(final Modal modal) {
     final Button begin = new Button("OK");
     begin.setType(ButtonType.PRIMARY);
     begin.setEnabled(true);
@@ -65,19 +86,6 @@ public class ModalInfoDialog {
         modal.hide();
       }
     });
-    modal.add(begin);
-
-    if (handler != null) {
-      System.out.println("\tModalInfoDialog.added hidden handler ");
-
-      modal.addHiddenHandler(handler);
-    }
-    modal.addHiddenHandler(new HiddenHandler() {
-      @Override
-      public void onHidden(HiddenEvent hiddenEvent) {
-        enterKeyButtonHelper.removeKeyHandler();
-      }
-    });
-    modal.show();
+    return begin;
   }
 }
