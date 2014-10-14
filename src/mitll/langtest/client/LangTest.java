@@ -361,7 +361,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   @Override
   public void showLogin() {  populateRootPanel();  }
 
-  private String staleToken = "";
+  //private String staleToken = "";
 
   /**
    * So we have three different views here : the login page, the reset password page, and the content developer
@@ -378,39 +378,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     // check if we're here as a result of resetting a password
     final String resetPassToken = props.getResetPassToken();
-    if (!resetPassToken.isEmpty() && !resetPassToken.equals(staleToken)) {
-      logger.info("showLogin token '" + resetPassToken + "' for password reset");
-
-      staleToken = resetPassToken;
-      service.getUserIDForToken(resetPassToken, new AsyncCallback<Long>() {
-        @Override
-        public void onFailure(Throwable caught) {}
-
-        @Override
-        public void onSuccess(Long result) {
-          if (result == null || result < 0) {
-            logger.info("token '" + resetPassToken + "' is stale. Showing normal view");
-            populateBelowHeader(verticalContainer,firstRow);
-          }
-          else {
-            ResetPassword userPassLogin = new ResetPassword(service, getProps(), eventRegistration);
-            Panel content = userPassLogin.getResetPassword(resetPassToken);
-            firstRow.add(content);
-            content.getElement().setId("ResetPassswordContent");
-            clearPadding(verticalContainer);
-          }
-        }
-      });
-
-      RootPanel.get().add(verticalContainer);
-      flashcard.setCogVisible(false);
-
+    if (!resetPassToken.isEmpty()/* && !resetPassToken.equals(staleToken)*/) {
+      handleResetPass(verticalContainer, firstRow, eventRegistration, resetPassToken);
       return true;
     }
 
     // are we here to enable a CD user?
     final String cdToken = props.getCdEnableToken();
-    if (!cdToken.isEmpty() && !cdToken.equals(staleToken)) {
+    if (!cdToken.isEmpty()
+        //&& !cdToken.equals(staleToken)
+        ) {
       logger.info("showLogin token '" + resetPassToken + "' for enabling cd user");
 
       handleCDToken(verticalContainer, firstRow, cdToken, props.getEmailRToken());
@@ -436,6 +413,37 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return false;
   }
 
+  private void handleResetPass(final Container verticalContainer, final Panel firstRow, final EventRegistration eventRegistration, final String resetPassToken) {
+    logger.info("showLogin token '" + resetPassToken + "' for password reset");
+
+    // staleToken = resetPassToken;
+    service.getUserIDForToken(resetPassToken, new AsyncCallback<Long>() {
+      @Override
+      public void onFailure(Throwable caught) {}
+
+      @Override
+      public void onSuccess(Long result) {
+        if (result == null || result < 0) {
+          logger.info("token '" + resetPassToken + "' is stale. Showing normal view");
+          trimURL();
+
+          populateBelowHeader(verticalContainer,firstRow);
+        //  trimURLAndReload();
+        }
+        else {
+          ResetPassword userPassLogin = new ResetPassword(service, getProps(), eventRegistration);
+          Panel content = userPassLogin.getResetPassword(resetPassToken);
+          firstRow.add(content);
+          content.getElement().setId("ResetPassswordContent");
+          clearPadding(verticalContainer);
+        }
+      }
+    });
+
+    RootPanel.get().add(verticalContainer);
+    flashcard.setCogVisible(false);
+  }
+
   /**
    * Reload window after showing content developer has been approved.
    * <p/>
@@ -455,23 +463,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
       @Override
       public void onSuccess(String result) {
-        staleToken = cdToken;
+     //   staleToken = cdToken;
         if (result == null) {
           logger.info("handleCDToken enable - token " + cdToken + " is stale. Showing normal view");
+          trimURL();
           populateBelowHeader(verticalContainer, firstRow);
+//          trimURLAndReload();
+
         } else {
           firstRow.add(new Heading(2, "OK, content developer <u>" + result + "</u> has been approved."));
           firstRow.addStyleName("leftFiveMargin");
           clearPadding(verticalContainer);
+          trimURLAndReload();
 
-          Timer t = new Timer() {
-            @Override
-            public void run() {
-              Window.Location.replace(trimURL(Window.Location.getHref()));
-              Window.Location.reload();
-            }
-          };
-          t.schedule(3000);
         }
       }
     });
@@ -480,13 +484,30 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     flashcard.setCogVisible(false);
   }
 
+  public void trimURLAndReload() {
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        trimURL();
+        Window.Location.reload();
+      }
+    };
+    t.schedule(3000);
+  }
+
+  public void trimURL() {
+    Window.Location.replace(trimURL(Window.Location.getHref()));
+  }
+
   private void clearPadding(Container verticalContainer) {
     verticalContainer.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
     verticalContainer.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
   }
 
   private String trimURL(String url) {
-    if (url.contains("127.0.0.1")) return url;
+    if (url.contains("127.0.0.1")) {
+      return "http://127.0.0.1:8888/LangTest.html?gwt.codesvr=127.0.0.1:9997";
+    }
     else return url.split("\\?")[0].split("\\#")[0];
   }
 
