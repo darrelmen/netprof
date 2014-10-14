@@ -124,7 +124,7 @@ public class EmailHelper {
         REPLY_TO,
         subject,
         message,
-        linkText// link text
+        linkText
     );
   }
 
@@ -132,12 +132,13 @@ public class EmailHelper {
    * @param token
    * @return
    * @see mitll.langtest.client.LangTest#handleCDToken
+   * @see mitll.langtest.server.LangTestDatabaseImpl#enableCDUser(String, String, String)
    */
   public String enableCDUser(String token, String emailR, String url) {
     User userWhereEnabledReq = userDAO.getUserWhereEnabledReq(token);
     Long userID;
     if (userWhereEnabledReq == null) {
-      logger.debug("enableCDUser user id null for " + token + " email " + emailR + " url " + url);
+      logger.debug("enableCDUser user id null for token " + token + " email " + emailR + " url " + url);
       userID = null;
     } else {
       userID = userWhereEnabledReq.getId();
