@@ -329,7 +329,10 @@ public class ServerProperties {
     if (property != null) admins = new HashSet<String>(Arrays.asList(property.split(",")));
 
     property = props.getProperty(REPORT_EMAILS);
-    if (property != null) reportEmails = Arrays.asList(property.split(","));
+    if (property != null) {
+      if (property.trim().isEmpty()) reportEmails = Collections.emptyList();
+      else reportEmails = Arrays.asList(property.split(","));
+    }
   }
 
   private boolean getDefaultFalse(String param) {
