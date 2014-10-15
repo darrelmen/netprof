@@ -29,6 +29,7 @@ import java.util.*;
 public class ResultDAO extends DAO {
   private static final Logger logger = Logger.getLogger(ResultDAO.class);
 
+  private static final Map<String,String> EMPTY_MAP = new HashMap<String,String>();
   private static final int MINUTE = 60 * 1000;
   private static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
 
@@ -130,6 +131,25 @@ public class ResultDAO extends DAO {
     }
 
     return new ArrayList<MonitorResult>();
+  }
+
+  public void addUnitAndChapterToResults(List<MonitorResult> monitorResults, Map<String, CommonExercise> join) {
+    int n = 0;
+    for (MonitorResult result : monitorResults) {
+      String id = result.getId();
+      if (id.contains("\\/")) id = id.substring(0, id.length() - 2);
+      CommonExercise exercise = join.get(id);
+      if (exercise == null) {
+        if (n < 200) logger.error("couldn't find " + result);
+        n++;
+        result.setUnitToValue(EMPTY_MAP);
+        result.setForeignText("");
+      } else {
+        result.setUnitToValue(exercise.getUnitToValue());
+        result.setForeignText(exercise.getForeignLanguage());
+      }
+    }
+    if (n > 0) logger.warn("huh? skipped " + n + " out of " + monitorResults.size());
   }
 
   public List<MonitorResult> getMonitorResultsByID(String id) {
