@@ -356,7 +356,7 @@ public class UserDAO extends DAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#userExists(String, String)
    */
   public User getUser(String id, String passwordHash) {
-    logger.debug(language + " : getUser getting user with id '" + id + "' and pass " + passwordHash);
+    logger.debug(language + " : getUser getting user with id '" + id + "' and pass '" + passwordHash +"'");
     String sql = "SELECT * from " +
         USERS +
         " where " +
