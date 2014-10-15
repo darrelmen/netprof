@@ -1915,31 +1915,28 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public void doReport() {
     Calendar calendar = new GregorianCalendar();
     int i = calendar.get(Calendar.DAY_OF_WEEK);
-    if (i == Calendar.MONDAY) {
-
+    List<String> reportEmails = serverProps.getReportEmails();
+    if (i == Calendar.MONDAY && !reportEmails.isEmpty()) {
       File test = new File("reports");
       if (!test.exists()) test.mkdirs();
-
       String message = db.doReport();
       SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
-
-      //FileOutputStream fileOutputStream = new FileOutputStream("test2.html");
       String today = simpleDateFormat2.format(new Date());
-      String fileName = "report_" + today +
-          ".html";
-      if (new File(fileName).exists()) {
+      String fileName = "report_" + today + ".html";
+      File file = new File(test,fileName);
+      //logger.debug("checking file  " + file.getAbsolutePath());
+      if (file.exists()) {
         logger.debug("already did report for " + today);
       } else {
         try {
-          BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+          BufferedWriter writer = new BufferedWriter(new FileWriter(file));
           writer.write(message);
           writer.close();
-          for (String dest : serverProps.getReportEmails()) {
+          for (String dest : reportEmails) {
             getMailSupport().sendEmail(EmailHelper.NP_SERVER, dest, EmailHelper.MY_EMAIL, "Weekly Usage Report for " + serverProps.getLanguage(), message);
           }
         } catch (IOException e) {
-
-
+          logger.error("got "+e,e);
         }
       }
 
