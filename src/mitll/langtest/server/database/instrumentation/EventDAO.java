@@ -1,5 +1,6 @@
 package mitll.langtest.server.database.instrumentation;
 
+import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.UserDAO;
@@ -38,16 +39,19 @@ public class EventDAO extends DAO {
   private static final String WIDGETTYPE = "widgettype";
   private static final String HITID = "hitid";
   private static final String EXERCISEID = "exerciseid";
+  private static final String EVENTS = "Events";
   private final UserDAO userDAO;
+  private LogAndNotify logAndNotify;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
    * @param database
    * @param userDAO
    */
-  public EventDAO(Database database, UserDAO userDAO) {
+  public EventDAO(Database database, UserDAO userDAO, LogAndNotify logAndNotify) {
     super(database);
     this.userDAO = userDAO;
+    this.logAndNotify = logAndNotify;
     try {
       createTable(database);
       createIndex(database, WIDGETTYPE, EVENT);
@@ -81,11 +85,9 @@ public class EventDAO extends DAO {
       EXERCISEID + " VARCHAR, " +
       "context VARCHAR, " +
       "widgetid VARCHAR, " +
-      WIDGETTYPE +
-      " VARCHAR, " +
+      WIDGETTYPE + " VARCHAR, " +
       "modified TIMESTAMP, " +
-      HITID +
-      " VARCHAR, " +
+      HITID + " VARCHAR, " +
       "FOREIGN KEY(" +
       CREATORID +
       ") REFERENCES " +
@@ -98,29 +100,26 @@ public class EventDAO extends DAO {
 
 
   /**
-   * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p/>
    * Uses return generated keys to get the user id
    *
    * @see mitll.langtest.server.database.DatabaseImpl#logEvent(String, String, String, String, long, String)
    */
-  public void add(Event event) throws SQLException {
+  public boolean add(Event event) throws SQLException {
     Connection connection = getConnection();
+    boolean val = true;
     try {
       // there are much better ways of doing this...
 
       PreparedStatement statement = connection.prepareStatement(
           "INSERT INTO " + EVENT +
               "(" +
-              CREATORID +
-              "," +
-              EXERCISEID +
-              ",context," +
-              "widgetid," +
-              WIDGETTYPE +
-              "," +
-              HITID +
-              "," +
+              CREATORID + "," +
+              EXERCISEID +"," +
+              "context" + "," +
+              "widgetid" + "," +
+              WIDGETTYPE + "," +
+              HITID + "," +
               "modified) " +
               "VALUES(?,?,?,?,?,?,?);");
       int i = 1;
@@ -142,27 +141,28 @@ public class EventDAO extends DAO {
 
       int j = statement.executeUpdate();
 
-      if (j != 1)
+      if (j != 1) {
         logger.error("huh? didn't insert row for ");// + grade + " grade for " + resultID + " and " + grader + " and " + gradeID + " and " + gradeType);
-
+        val = false;
+      }
       statement.close();
 
-      //logger.debug("now " + getCount(EVENT) + " and event is " + event);
     } catch (SQLException ee) {
-      logger.error("got " + ee, ee);
-      throw ee;
+      logger.error("trying to add event " + event + " got " + ee, ee);
+      logAndNotify.logAndNotifyServerException(ee);
+      val = false;
     } finally {
       database.closeConnection(connection);
     }
+    return val;
   }
 
   public List<Event> getAll() {
     try {
-      String sql = "SELECT * from " + EVENT;
-
-      return getEvents(sql);
+      return getEvents("SELECT * from " + EVENT);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
+      logAndNotify.logAndNotifyServerException(ee);
     }
     return Collections.emptyList();
   }
@@ -220,7 +220,7 @@ public class EventDAO extends DAO {
     return lists;
   }
 
-  private static final List<String> COLUMNS2 = Arrays.asList("id", "type", "exercise", "context", "userid", "timestamp","time_millis", "hitID");
+  private static final List<String> COLUMNS2 = Arrays.asList("id", "type", "exercise", "context", "userid", "timestamp", "time_millis", "hitID");
 
   /**
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
@@ -238,7 +238,7 @@ public class EventDAO extends DAO {
     //Workbook wb = new XSSFWorkbook();
     SXSSFWorkbook wb = new SXSSFWorkbook(1000); // keep 100 rows in memory, exceeding rows will be flushed to disk
 
-    Sheet sheet = wb.createSheet("Events");
+    Sheet sheet = wb.createSheet(EVENTS);
     int rownum = 0;
     Row headerRow = sheet.createRow(rownum++);
     for (int i = 0; i < COLUMNS2.size(); i++) {
@@ -294,6 +294,7 @@ public class EventDAO extends DAO {
       wb.dispose();
     } catch (IOException e) {
       logger.error("got " +e,e);
+      logAndNotify.logAndNotifyServerException(e);
     }
   }
 
