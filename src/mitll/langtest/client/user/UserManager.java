@@ -319,23 +319,13 @@ public class UserManager {
    *
    * @return
    */
-  private String getUserIDCookie() {
-    return appTitle + ":" + USER_ID;
-  }
-
+  private String getUserIDCookie() { return appTitle + ":" + USER_ID;  }
   private String getUserChosenID() {
     return appTitle + ":" + USER_CHOSEN_ID;
   }
-
   private String getAudioType() {
     return appTitle + ":" + AUDIO_TYPE;
   }
-/*
-  private String getLoginType() {
-    return appTitle + ":" + LOGIN_TYPE;
-  }
-*/
-
   private String getExpires() {
     return appTitle + ":" + "expires";
   }
