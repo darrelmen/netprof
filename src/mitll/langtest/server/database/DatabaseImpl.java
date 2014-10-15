@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -43,6 +44,7 @@ public class DatabaseImpl implements Database {
   private static final int LOG_THRESHOLD = 10;
 //  public static final Map<String,String> EMPTY_MAP = new HashMap<String,String>();
   private static final String UNKNOWN = "unknown";
+  public static final int MIN_MILLIS = (1000 * 60);
 
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
@@ -165,7 +167,7 @@ public class DatabaseImpl implements Database {
         new ReviewedDAO(this, ReviewedDAO.SECOND_STATE),
         pathHelper);
 
-    eventDAO = new EventDAO(this, userDAO);
+    eventDAO = new EventDAO(this, userDAO, logAndNotify);
 
     Connection connection1 = getConnection();
     try {
@@ -702,16 +704,26 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  public void logEvent(String id, String widgetType, String exid, String context, long userid) {
+  /**
+   * @see mitll.langtest.server.ScoreServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @param id
+   * @param widgetType
+   * @param exid
+   * @param context
+   * @param userid
+   * @return
+   */
+  public boolean logEvent(String id, String widgetType, String exid, String context, long userid) {
     try {
-      eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, UNKNOWN));
+      return eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, UNKNOWN));
     } catch (SQLException e) {
       logAndNotify(e);
     }
+    return false;
   }
 
-  public void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID) throws SQLException {
-    eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, hitID));
+  public boolean logEvent(String id, String widgetType, String exid, String context, long userid, String hitID) throws SQLException {
+    return eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, hitID));
   }
 
   public void logAndNotify(Exception e) {
@@ -1064,6 +1076,360 @@ public class DatabaseImpl implements Database {
   public String getPrefix(Map<String, Collection<String>> typeToSection) {
     return new AudioExport().getPrefix(getSectionHelper(), typeToSection);
   }
+
+  public String doReport() {
+    List<User> users = getUserDAO().getUsers();
+
+    Calendar calendar = new GregorianCalendar();
+    Date january1st = getJanuaryFirst(calendar);
+
+    int ytd = 0;
+
+    SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM/dd/yy h:mm aaa");
+    Map<Integer,Integer> monthToCount = new TreeMap<Integer, Integer>();
+    Map<Integer,Integer> weekToCount = new TreeMap<Integer, Integer>();
+    for (User user : users) {
+      try {
+        if (user.getTimestamp().isEmpty()) continue;
+        Date parse = simpleDateFormat2.parse(user.getTimestamp());
+        if (parse.getTime() > january1st.getTime()) {
+          ytd++;
+
+          calendar.setTime(parse);
+          int month = calendar.get(Calendar.MONTH);
+          Integer integer = monthToCount.get(month);
+          monthToCount.put(month, (integer == null) ? 1 : integer + 1);
+
+          int w = calendar.get(Calendar.WEEK_OF_YEAR);
+          Integer integer2 = weekToCount.get(w);
+
+          weekToCount.put(w,(integer2 == null) ? 1 : integer2+1);
+        }
+        else {
+       //   logger.debug("NO time " +user.getTimestamp() + " " + parse);
+        }
+      } catch (ParseException e) {
+        e.printStackTrace();
+      }
+    }
+//    logger.debug("ytd " +ytd);
+//    logger.debug("month " +monthToCount);
+//    logger.debug("week " +weekToCount);
+
+    StringBuilder builder = new StringBuilder();
+    String users1 = "New Users";
+    builder.append("<html><head><body>" +
+        //"<div style=\"width:100%\">" +"<div style=\"position: relative; width:25%\">"+
+        //"\n<table>" +  "<tr><td>"+
+        getYTD(ytd, users1) +
+            //"</td>" +  "<td>\n"+
+       // "</div>"+"<div style=\"position: relative; width:25%\">"+
+        getMC(monthToCount, "month", "New Users") +
+           //"</td><td>"+
+        //"</div>"+"<div style=\"position: relative; width:25%\">"+
+        getWC(weekToCount, "week", "New Users")
+        // +        "</td></tr></table>"
+
+        //    +"</div>"+"</div>"
+    );
+    getResults(builder);
+    getEvents(builder);
+
+    builder.append("</body></head></html>");
+    return builder.toString();
+  }
+
+  private String getYTD(int ytd, String users1) {
+    return "<table>" +
+        "<tr>" +
+        "<th>" +
+        users1 +
+        " YTD</th>" + "</tr>" +
+        "<tr>" +
+        "<td>" + ytd +
+        "</td>" + "</tr>" +
+        "</table><br/>\n";
+  }
+
+/*  private String getMC(Map<Integer, ?> monthToCount, String unit) {
+    String count = "Count";
+    return getMC(monthToCount, unit, count);
+  }*/
+
+  private String getMC(Map<Integer, ?> monthToCount, String unit, String count) {
+    String s = "";
+    for (Map.Entry<Integer,?> pair : monthToCount.entrySet()) {
+      Object value = pair.getValue();
+      if (value instanceof Collection<?>) {
+        value = ((Collection<?>) value).size();
+      }
+      Integer key = pair.getKey();
+      String month = getMonth(key);
+      s += "<tr><td>"+ month +"</td><td>"+ value +"</td></tr>";
+    }
+    return "<table>" +
+        "<tr>" +
+        "<th>" +
+        unit +
+        "</th>" +
+        "<th>" + count + "</th>" +
+        "</tr>" +
+        s +
+        "</table><br/>\n";
+  }
+
+  private String getWC(Map<?, ?> monthToCount, String unit) {
+    String count = "Count";
+    return getWC(monthToCount, unit, count);
+  }
+
+  private String getWC(Map<?, ?> monthToCount, String unit, String count) {
+    String s = "";
+    for (Map.Entry<?,?> pair : monthToCount.entrySet()) {
+      Object value = pair.getValue();
+      if (value instanceof Collection<?>) {
+        value = ((Collection<?>) value).size();
+      }
+      s += "<tr><td>"+pair.getKey() +"</td><td>"+ value +"</td></tr>";
+    }
+    return "<table>" +
+        "<tr>" +
+        "<th>" +
+        unit +
+        "</th>" +
+        "<th>" + count + "</th>" +
+        "</tr>" +
+        s +
+        "</table><br/>\n";
+  }
+
+  private void getResults(StringBuilder builder) {
+    Calendar calendar = new GregorianCalendar();
+    Date january1st = getJanuaryFirst(calendar);
+
+    int ytd = 0;
+
+    List<Result> results = getResultDAO().getResults();
+    Map<Integer, Integer> monthToCount = new TreeMap<Integer, Integer>();
+    Map<Integer, Integer> weekToCount = new TreeMap<Integer, Integer>();
+    for (Result result : results) {
+      if (result.getTimestamp() > january1st.getTime()) {
+        ytd++;
+        calendar.setTimeInMillis(result.getTimestamp());
+        int month = calendar.get(Calendar.MONTH);
+    //    String month1 = getMonth(i);
+        Integer integer = monthToCount.get(month);
+        monthToCount.put(month, (integer == null) ? 1 : integer + 1);
+
+        int w = calendar.get(Calendar.WEEK_OF_YEAR);
+        Integer integer2 = weekToCount.get(w);
+
+        weekToCount.put(w, (integer2 == null) ? 1 : integer2 + 1);
+      }
+    }
+  //  logger.debug("ytd " + ytd);
+  //  logger.debug("month " + monthToCount);
+  //  logger.debug("week " + weekToCount);
+
+    builder.append(getYTD(ytd, "Recordings") +
+        getMC(monthToCount, "month", "Recordings") +
+        getWC(weekToCount, "week", "Recordings"));
+  }
+
+  private Date getJanuaryFirst(Calendar calendar) {
+    int year = calendar.get(Calendar.YEAR);
+   // logger.debug("year " + year);
+    calendar.set(Calendar.YEAR, year);
+    calendar.set(Calendar.DAY_OF_YEAR, 1);
+    Date january1st = calendar.getTime();
+ //   logger.debug("jan first " + january1st);
+    return january1st;
+  }
+
+
+  private void getEvents(StringBuilder builder) {
+    Calendar calendar = new GregorianCalendar();
+    Date january1st = getJanuaryFirst(calendar);
+
+    int ytd = 0;
+
+    List<Event> all = getEventDAO().getAll();
+    Map<Integer, Set<Long>> monthToCount = new TreeMap<Integer, Set<Long>>();
+
+    Map<Integer, Map<Long,Set<Event>>> monthToCount2 = new TreeMap<Integer, Map<Long,Set<Event>>>();
+    Map<Integer, Map<Long,Set<Event>>> weekToCount2 = new TreeMap<Integer, Map<Long,Set<Event>>>();
+
+    Map<Integer, Set<Long>> weekToCount = new TreeMap<Integer, Set<Long>>();
+
+    for (Event event : all) {
+      if (event.getTimestamp() > january1st.getTime()) {
+        ytd++;
+        calendar.setTimeInMillis(event.getTimestamp());
+
+        // months
+        int month = calendar.get(Calendar.MONTH);
+       // String month1 = getMonth(i);
+        long creatorID = event.getCreatorID();
+        Set<Long> users = monthToCount.get(month);
+        if (users == null) {
+          monthToCount.put(month, users = new HashSet<Long>());
+        }
+        users.add(creatorID);
+
+
+        Map<Long, Set<Event>> userToEvents = monthToCount2.get(month);
+        if (userToEvents == null) {
+          monthToCount2.put(month, userToEvents = new HashMap<Long, Set<Event>>());
+        }
+        Set<Event> events = userToEvents.get(creatorID);
+        if (events == null) userToEvents.put(creatorID, events = new TreeSet<Event>());
+        events.add(event);
+
+        // weeks
+
+        int w = calendar.get(Calendar.WEEK_OF_YEAR);
+        Set<Long> users2 = weekToCount.get(w);
+        if (users2 == null) {
+          weekToCount.put(w, users2 = new HashSet<Long>());
+        }
+        users2.add(creatorID);
+
+        userToEvents = weekToCount2.get(w);
+        if (userToEvents == null) {
+          weekToCount2.put(w, userToEvents = new HashMap<Long, Set<Event>>());
+        }
+        events = userToEvents.get(creatorID);
+
+        if (events == null) userToEvents.put(creatorID, events = new TreeSet<Event>());
+        events.add(event);
+      }
+    }
+    //logger.debug("ytd " + ytd);
+
+   // logger.debug("month " + monthToCount);
+   // logger.debug("week " + weekToCount);
+
+    builder.append(//getYTD(ytd, "Active Users") +
+        getMC(monthToCount, "month", "# Active Users") +
+            getWC(weekToCount, "week", "# Active Users"));
+
+    Map<Integer, Long> monthToDur = getMonthToDur(monthToCount2);
+  //  logger.debug("month to dur " + monthToDur);
+    long total = 0;
+    for (Long v : monthToDur.values()) total += v;
+
+    Map<Integer, Long> weekToDur = getWeekToDur(weekToCount2);
+    //logger.debug("week to dur " + weekToDur);
+
+    builder.append(getYTD(Math.round(total / (60)), "Total time on task (hours)") +
+        getMC(monthToDur, "month", "Time on Task Minutes") +
+        getWC(weekToDur, "week",   "Time on Task Minutes"));
+  }
+
+  /**
+   *
+   * @param monthToCount2
+   * @return in minutes
+   */
+  private Map<Integer, Long> getMonthToDur(Map<Integer, Map<Long, Set<Event>>> monthToCount2) {
+    Map<Integer,Long> monthToDur = new TreeMap<Integer, Long>();
+    for (Map.Entry<Integer, Map<Long, Set<Event>>> monthToUserToEvents : monthToCount2.entrySet()) {
+      Integer month = monthToUserToEvents.getKey();
+      //logger.debug("month " + month);
+
+      Map<Long, Set<Event>> userToEvents = monthToUserToEvents.getValue();
+
+      for (Map.Entry<Long, Set<Event>> eventsForUser : userToEvents.entrySet()) {
+        Long user = eventsForUser.getKey();
+        //logger.debug("\tuser " + user);
+        long start = 0;
+        long dur = 0;
+        // long begin = 0;
+        long last = 0;
+        for (Event event : eventsForUser.getValue()) {
+          long now = event.getTimestamp();
+          //     if (user == INTTEST) {
+          //     logger.debug("Event " + event);
+          //  }
+          if (start == 0) {
+            start = now;
+          }
+          else if (now - last > 1000*300) {
+            dur += (last-start)/ MIN_MILLIS;
+            start = now;
+          }
+
+          last = now;
+        }
+        dur += (last-start)/ MIN_MILLIS;
+//        if (user == INTTEST) {
+        //        logger.debug("dur " + dur);
+        //     }
+        Long aLong = monthToDur.get(month);
+        monthToDur.put(month,aLong == null ? dur : aLong + dur);
+      }
+    }
+    return monthToDur;
+  }
+
+  private Map<Integer, Long> getWeekToDur(Map<Integer, Map<Long, Set<Event>>> weekToCount) {
+    Map<Integer,Long> weekToDur = new TreeMap<Integer, Long>();
+    for (Map.Entry<Integer, Map<Long, Set<Event>>> weekToUserToEvents : weekToCount.entrySet()) {
+      Integer week = weekToUserToEvents.getKey();
+      //logger.debug("week " + week);
+
+      Map<Long, Set<Event>> userToEvents = weekToUserToEvents.getValue();
+
+      for (Map.Entry<Long, Set<Event>> eventsForUser : userToEvents.entrySet()) {
+        Long user = eventsForUser.getKey();
+        //logger.debug("\tuser " + user);
+        long start = 0;
+        long dur = 0;
+        // long begin = 0;
+        long last = 0;
+        for (Event event : eventsForUser.getValue()) {
+          long now = event.getTimestamp();
+   /*       if (user == INTTEST) {
+            logger.debug("Event " + event);
+          }
+      */    if (start == 0) {
+            start = now;
+          }
+          else if (now - last > 1000*300) {
+            dur += (last-start)/MIN_MILLIS;
+            start = now;
+          }
+
+          last = now;
+        }
+        dur += (last-start)/MIN_MILLIS;
+//        if (user == INTTEST) {
+        //        logger.debug("dur " + dur);
+        //     }
+        Long aLong = weekToDur.get(week);
+        weekToDur.put(week,aLong == null ? dur : aLong + dur);
+      }
+    }
+    return weekToDur;
+  }
+
+
+  private String getMonth(int i) {
+    return Arrays.asList("JANUARY",
+        "FEBRUARY",
+        "MARCH",
+        "APRIL",
+        "MAY",
+        "JUNE",
+        "JULY",
+        "AUGUST",
+        "SEPTEMBER",
+        "OCTOBER",
+        "NOVEMBER",
+        "DECEMBER",
+        "UNDECEMBER").get(i);
+  }
+
 
   public String toString() {
     return "Database : " + this.getClass().toString();
