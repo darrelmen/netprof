@@ -548,7 +548,7 @@ public class UserDAO extends DAO {
 
   /**
    * @param userid
-   * @return
+   * @return null if no user with that id else the user object
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUserBy(long)
    */
   public User getUserWhere(long userid) {
