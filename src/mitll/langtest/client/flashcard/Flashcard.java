@@ -21,7 +21,7 @@ import java.util.Collection;
  * Does fancy font sizing depending on available width...
  */
 public class Flashcard implements RequiresResize {
-  private static final String PRONUNCIATION_FEEDBACK = "Classroom";//NetProF";//"PRONUNCIATION FEEDBACK";
+  private static final String PRONUNCIATION_FEEDBACK = "NetProF – Networked Pronunciation Feedback";//"Classroom";//NetProF";//"PRONUNCIATION FEEDBACK";
   private static final double MAX_FONT_EM = 1.7d;
   private static final int SLOP = 55;
   private static final String NEW_PRO_F1_PNG = "NewProF1.png";
@@ -37,13 +37,10 @@ public class Flashcard implements RequiresResize {
   private Image collab;
   private HTML userNameWidget;
   private final String nameForAnswer;
-  //private final boolean adminView;
   private Paragraph subtitle;
   private HTML browserInfo;
   private Panel qc,recordAudio;
   private Dropdown cogMenu;
-//  private final boolean adminView;
-  //EventRegistration eventRegistration;
 
   /**
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
@@ -51,8 +48,6 @@ public class Flashcard implements RequiresResize {
   public Flashcard(PropertyHandler props) {
     this.nameForAnswer = props.getNameForAnswer() + "s";
     isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
-    //adminView = props.isAdminView();
-  //  this.eventRegistration = eventRegistration;
   }
 
   /**
@@ -83,7 +78,7 @@ public class Flashcard implements RequiresResize {
    * @param events
    * @return
    */
-  public Panel getHeaderRow(String splashText,
+  private Panel getHeaderRow(String splashText,
                             boolean isBeta, String userName,
                             HTML browserInfo,
                             ClickHandler logoutClickHandler,
@@ -129,7 +124,7 @@ public class Flashcard implements RequiresResize {
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("UsernameContainer");
     userNameWidget = getUserNameWidget(userName);
-    if (!isAnonymous /*|| adminView*/) {
+    if (!isAnonymous) {
       hp.add(userNameWidget);
     }
     hp.add(qc = new SimplePanel());
@@ -142,7 +137,7 @@ public class Flashcard implements RequiresResize {
     widget1.addClickHandler(logoutClickHandler);
     cogMenu.add(widget1);
 
-    if (!isAnonymous/* || adminView*/) {
+    if (!isAnonymous) {
       hp.add(cogMenu);
     }
 
@@ -204,7 +199,7 @@ public class Flashcard implements RequiresResize {
   public void setBrowserInfo(String v) { browserInfo.setHTML(v);}
 
   /**
-   * @see #getHeaderRow(String, boolean, String, String, String, com.google.gwt.user.client.ui.HTML, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler, com.google.gwt.event.dom.client.ClickHandler)
+   * @see #getHeaderRow
    * @param userName
    * @return
    */
@@ -218,7 +213,8 @@ public class Flashcard implements RequiresResize {
     return userNameWidget;
   }
 
-  NavLink userC, resultsC, monitoringC, eventsC;
+  private NavLink userC, resultsC, monitoringC, eventsC;
+
   /**
    * @see #getHeaderRow
    * @param users
