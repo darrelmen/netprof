@@ -285,7 +285,12 @@ public class AudioFileHelper {
   }
 
   public File getPostedFileLoc() {
-    String wavPath = pathHelper.getWavPathUnder("postedAudio");
+    String postedAudio = "postedAudio";
+    return getPathUnder(postedAudio);
+  }
+
+  public File getPathUnder(String postedAudio) {
+    String wavPath = pathHelper.getWavPathUnder(postedAudio);
     return pathHelper.getAbsoluteFile(wavPath);
   }
 
