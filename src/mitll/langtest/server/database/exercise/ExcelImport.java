@@ -1014,7 +1014,7 @@ public class ExcelImport implements ExerciseDAO {
             }
           } else {
             c++;
-            if (c < 15) {
+            if (c < 5) {
               logger.warn("file " + test.getAbsolutePath() + " does not exist - " + audio.getAudioRef());
               if (c < 2) {
                 logger.warn("installPath " + installPath + "mediaDir " + mediaDir +" mediaDir1 " + mediaDir1);
