@@ -41,7 +41,8 @@ import java.util.*;
 public class DatabaseImpl implements Database {
   private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
   private static final int LOG_THRESHOLD = 10;
-  public static final Map<String,String> EMPTY_MAP = new HashMap<String,String>();
+//  public static final Map<String,String> EMPTY_MAP = new HashMap<String,String>();
+  private static final String UNKNOWN = "unknown";
 
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
@@ -692,31 +693,34 @@ public class DatabaseImpl implements Database {
     return new Pair(idToCount, idToUniqueCount);
   }
 
-  public void logEvent(String id, String widgetID, String exid, String context, long userid, String hitID) throws SQLException {
-    eventDAO.add(new Event(id, widgetID, exid, context, userid, -1, hitID));
-  }
-
   public void logEvent(String exid, String context, long userid) {
     if (context.length() > 100) context = context.substring(0, 100).replace("\n", " ");
     try {
-      logEvent("unknown", "server", exid, context, userid, "unknown");
+      logEvent(UNKNOWN, "server", exid, context, userid, UNKNOWN);
     } catch (SQLException e) {
       logAndNotify(e);
     }
+  }
+
+  public void logEvent(String id, String widgetType, String exid, String context, long userid) {
+    try {
+      eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, UNKNOWN));
+    } catch (SQLException e) {
+      logAndNotify(e);
+    }
+  }
+
+  public void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID) throws SQLException {
+    eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, hitID));
   }
 
   public void logAndNotify(Exception e) {
     logAndNotify.logAndNotifyServerException(e);
   }
 
-  public List<Event> getEvents() {
-    return eventDAO.getAll();
-  }
-
   public EventDAO getEventDAO() {
     return eventDAO;
   }
-
   public AudioDAO getAudioDAO() {
     return audioDAO;
   }
@@ -764,58 +768,25 @@ public class DatabaseImpl implements Database {
   }
 
   public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults) {
+    Map<String, CommonExercise> join = getIdToExerciseMap();
+    resultDAO.addUnitAndChapterToResults(monitorResults, join);
+    return monitorResults;
+  }
+
+  private Map<String, CommonExercise> getIdToExerciseMap() {
     Map<String, CommonExercise> join = new HashMap<String, CommonExercise>();
 
     for (CommonExercise exercise : getExercises()) {
       String id = exercise.getID();
-      // if (id.contains("\\/")) id = id.substring(0,id.length()-2);
       join.put(id, exercise);
     }
 
     for (CommonExercise exercise : userExerciseDAO.getAll()) {
       String id = exercise.getID();
-      // if (id.contains("\\/")) id = id.substring(0,id.length()-2);
       join.put(id, exercise);
     }
-
-    int n = 0;
-    for (MonitorResult result : monitorResults) {
-      String id = result.getId();
-      if (id.contains("\\/")) id = id.substring(0, id.length() - 2);
-      CommonExercise exercise = join.get(id);
-      if (exercise == null) {
-        if (n < 200) logger.error("couldn't find " + result);
-        n++;
-        result.setUnitToValue(EMPTY_MAP);
-        result.setForeignText("");
-      } else {
-        result.setUnitToValue(exercise.getUnitToValue());
-        result.setForeignText(exercise.getForeignLanguage());
-      }
-    }
-    if (n > 0) logger.warn("huh? skipped " + n + " out of " + monitorResults.size());
-
-    return monitorResults;
+    return join;
   }
-
-  /**
-   *
-   * @paramx userID
-   * @paramx e
-   * @paramx questionID
-   * @paramx answer
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#addTextAnswer
-   * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
-   */
-/*  public void addAnswer(int userID, CommonExercise e, int questionID, String answer, String answerType) {
-    addAnswer(userID, e, questionID, answer, true, answerType);
-  }
-
-  private void addAnswer(int userID, CommonExercise e, int questionID, String answer, boolean correct, String answerType) {
-   answerDAO.addAnswer(userID, e, questionID, answer, "",
-        //!e.isPromptInEnglish(),
-        answerType, true, 0, deviceType, device);
-  }*/
 
   public AnswerDAO getAnswerDAO() {
     return answerDAO;
