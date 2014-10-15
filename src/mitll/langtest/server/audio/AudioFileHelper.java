@@ -123,12 +123,12 @@ public class AudioFileHelper {
     boolean isValid = validity.validity == AudioAnswer.Validity.OK || (serverProps.isQuietAudioOK() && validity.validity == AudioAnswer.Validity.TOO_QUIET);
     return getAudioAnswer(exerciseID, exercise1, questionID, user, reqid, audioType, doFlashcard, recordInResults,
         recordedWithFlash, wavPath, file, validity, isValid
-            , deviceType, device
+        , deviceType, device
     );
   }
 
   /**
-   * @see mitll.langtest.server.ScoreServlet#getAnswer(String, int, boolean, String, java.io.File, float)
+   * @see mitll.langtest.server.ScoreServlet#getAnswer
    * @param exerciseID
    * @param exercise1
    * @param user
@@ -155,6 +155,26 @@ public class AudioFileHelper {
         ;
   }
 
+  /**
+   * @see #getAnswer(String, mitll.langtest.shared.CommonExercise, int, boolean, String, java.io.File, String, String, float)
+   * @see #writeAudioFile(String, String, mitll.langtest.shared.CommonExercise, int, int, int, String, boolean, boolean, boolean, String, String)
+   * @param exerciseID
+   * @param exercise1
+   * @param questionID
+   * @param user
+   * @param reqid
+   * @param audioType
+   * @param doFlashcard
+   * @param recordInResults
+   * @param recordedWithFlash
+   * @param wavPath
+   * @param file
+   * @param validity
+   * @param isValid
+   * @param deviceType
+   * @param device
+   * @return
+   */
   private AudioAnswer getAudioAnswer(String exerciseID, CommonExercise exercise1,
                                      int questionID,
                                      int user,
@@ -249,24 +269,32 @@ public class AudioFileHelper {
    * @return
    */
   public AudioAnswer getAlignment(String base64EncodedString, String textToAlign, String identifier, int reqid) {
-    String wavPath = pathHelper.getWavPathUnder("postedAudio");
-    File file = pathHelper.getAbsoluteFile(wavPath);
+    File file = getPostedFileLoc();
+    AudioAnswer audioAnswer = getAudioAnswer(base64EncodedString, reqid, file);
 
-    AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
-    boolean isValid = validity.validity == AudioAnswer.Validity.OK;
-    AudioAnswer audioAnswer = new AudioAnswer(pathHelper.ensureForwardSlashes(wavPath), validity.validity, reqid, validity.durationInMillis);
-
-    logger.debug("writing to " + file.getAbsolutePath() + " answer " + audioAnswer);
-
-    if (isValid) {
+    if (audioAnswer.isValid()) {
       PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, file.getAbsolutePath(), textToAlign, -1, -1, false,
           false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), identifier);
 
       audioAnswer.setPretestScore(asrScoreForAudio);
     } else {
-      logger.warn("got invalid audio file (" + validity + ") identifier " + identifier + " file " + file.getAbsolutePath());
+      logger.warn("got invalid audio file (" + audioAnswer.getValidity() + ") identifier " + identifier + " file " + file.getAbsolutePath());
     }
 
+    return audioAnswer;
+  }
+
+  public File getPostedFileLoc() {
+    String wavPath = pathHelper.getWavPathUnder("postedAudio");
+    return pathHelper.getAbsoluteFile(wavPath);
+  }
+
+  public AudioAnswer getAudioAnswer(String base64EncodedString, int reqid, File file) {
+    AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
+    // boolean isValid = validity.validity == AudioAnswer.Validity.OK;
+    AudioAnswer audioAnswer = new AudioAnswer(pathHelper.ensureForwardSlashes(pathHelper.getWavPathUnder("postedAudio")), validity.validity, reqid, validity.durationInMillis);
+
+    logger.debug("writing to " + file.getAbsolutePath() + " answer " + audioAnswer);
     return audioAnswer;
   }
 
