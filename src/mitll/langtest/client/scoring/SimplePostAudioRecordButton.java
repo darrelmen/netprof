@@ -90,23 +90,15 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
     getElement().getStyle().setMarginBottom(1, Style.Unit.PX);
   }
 
-/*
-  public void registerForEvents(String identifier) {
-    controller.register(this, identifier);
-  }
-*/
-
   /**
    * @see mitll.langtest.client.recorder.RecordButton#stop()
    */
-  public void stopRecording() {
-    controller.stopRecording(new WavCallback() {
+  public void stopRecording() { controller.stopRecording(new WavCallback() {
       @Override
       public void getBase64EncodedWavFile(String bytes) {
         postAudioFile(bytes);
       }
-    });
-  }
+    }); }
 
   protected void postAudioFile(String base64EncodedWavFile) {
     reqid++;
