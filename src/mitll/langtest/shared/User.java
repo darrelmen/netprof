@@ -207,8 +207,8 @@ public class User extends MiniUser {
         " kind " + getUserKind()+
         " perms " + getPermissions() +
         " device " + getDevice() +
-        " reset " + resetKey +
-        " cdenable " + cdKey
+        " reset '" + resetKey + "'" +
+        " cdenable '" + cdKey + "'"
         ;
   }
 }
