@@ -45,8 +45,6 @@ public interface LangTestDatabase extends RemoteService {
   AudioAnswer writeAudioFile(String base64EncodedString, String exercise, int question, int user,
                              int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash, String deviceType, String device);
 
- // List<MonitorResult> getResults(Map<String,String> unitToValue, long userid, String exerciseID);
-
   Collection<String> getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which);
 
 
@@ -114,8 +112,6 @@ public interface LangTestDatabase extends RemoteService {
   void addAnnotation(String exerciseID, String field, String status, String comment, long userID);
   void markReviewed(String exid, boolean isCorrect, long creatorID);
   void markState(String id, STATE state, long creatorID);
-
- // void setAVPSkip(Collection<Long> ids);
 
   void setExerciseState(String id, STATE state, long userID);
 
