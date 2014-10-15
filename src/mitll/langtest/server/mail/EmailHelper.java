@@ -16,8 +16,8 @@ import java.util.List;
 public class EmailHelper {
   private static final Logger logger = Logger.getLogger(EmailHelper.class);
 
-  private static final String NP_SERVER = "np.ll.mit.edu";
-  private static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
+  public static final String NP_SERVER = "np.ll.mit.edu";
+  public static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String CLOSING = "Regards, Administrator";
   private static final String GORDON = "Gordon";
 
