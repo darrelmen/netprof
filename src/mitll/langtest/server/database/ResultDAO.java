@@ -33,14 +33,14 @@ public class ResultDAO extends DAO {
   private static final int MINUTE = 60 * 1000;
   private static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
 
-  public static final String ID = "id";
+  private static final String ID = "id";
   private static final String USERID = "userid";
   private static final String PLAN = "plan";
   private static final String QID = "qid";
   private static final String ANSWER = "answer";
   private static final String VALID = "valid";
 
-  public static final String RESULTS = "results";
+  private static final String RESULTS = "results";
 
   static final String FLQ = "flq";
   static final String SPOKEN = "spoken";
@@ -92,7 +92,7 @@ public class ResultDAO extends DAO {
     return new ArrayList<Result>();
   }
 
-  public List<CorrectAndScore> getCorrectAndScores() {
+  List<CorrectAndScore> getCorrectAndScores() {
     try {
       synchronized (this) {
         if (cachedResultsForQuery2 != null) {
@@ -189,7 +189,7 @@ public class ResultDAO extends DAO {
     }
 
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
-    if (true) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
+    if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
 
     List<ExerciseCorrectAndScore> sortedResults = getSortedAVPHistory(results, allIds);
     if (debug) logger.debug("found " + sessions.size() + " sessions for " + ids);
@@ -221,7 +221,7 @@ public class ResultDAO extends DAO {
    * @param allIds
    * @return
    */
-  protected List<ExerciseCorrectAndScore> getSortedAVPHistory(List<CorrectAndScore> results, Collection<String> allIds) {
+  List<ExerciseCorrectAndScore> getSortedAVPHistory(List<CorrectAndScore> results, Collection<String> allIds) {
     SortedMap<String,ExerciseCorrectAndScore> idToScores = new TreeMap<String, ExerciseCorrectAndScore>();
     if (results != null) {
       for (CorrectAndScore r : results) {
@@ -352,7 +352,6 @@ public class ResultDAO extends DAO {
 
   /**
    * @see #getResults()
-   * @seex #getResultsForExIDIn
    * @param sql
    * @return
    * @throws SQLException
@@ -402,6 +401,7 @@ public class ResultDAO extends DAO {
    * @param statement
    * @return
    * @throws SQLException
+   * @see #getResultsSQL(String)
    */
   private List<Result> getResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
@@ -968,7 +968,7 @@ public class ResultDAO extends DAO {
     return getUserToResults(typeToUse, userDAO);
   }
 
-  public Map<Long, Map<String, Result>> getUserToResults(String typeToUse, UserDAO userDAO) {
+  Map<Long, Map<String, Result>> getUserToResults(String typeToUse, UserDAO userDAO) {
     List<Result> results = getResults();
     Map<Long,Map<String,Result>> userToResult = new HashMap<Long, Map<String, Result>>();
 
