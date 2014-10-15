@@ -1,5 +1,6 @@
 package mitll.langtest.server;
 
+import Utils.EmailSupport;
 import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
 import com.google.common.io.Files;
@@ -11,10 +12,10 @@ import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.mail.EmailHelper;
-import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.trie.TextEntityValue;
@@ -33,10 +34,13 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -1093,6 +1097,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return b;
   }
 
+  /**
+   * @see mitll.langtest.client.instrumentation.ButtonFactory#logEvent(String, String, String, String, long)
+   * @param id
+   * @param widgetType
+   * @param exid
+   * @param context
+   * @param userid
+   * @param hitID
+   */
   @Override
   public void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID) {
     try {
@@ -1162,7 +1175,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param email
    * @param isMale
    * @param age
-   * @param dialect   @return null if existing user
+   * @param dialect
+   * @return null if existing user
    * @param isCD
    * @param device
    * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, mitll.langtest.shared.User.Kind)
@@ -1197,6 +1211,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getUsers();
   }
 
+  /**
+   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(int)
+   * @param id
+   * @return
+   */
   @Override
   public User getUserBy(long id) { return db.getUserDAO().getUserWhere(id);  }
 
@@ -1719,9 +1738,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  void makeAutoCRT() {
-    audioFileHelper.makeAutoCRT(relativeConfigDir, this);
-  }
+  void makeAutoCRT() {  audioFileHelper.makeAutoCRT(relativeConfigDir, this);  }
 
   @Override
   public Map<User, Integer> getUserToResultCount() {
@@ -1877,6 +1894,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.destroy();
   }
 
+  /**
+   * Reco test option lets you run through and score all the reference audio -- if you want to see model performance
+   *
+   */
   @Override
   public void init() {
     this.pathHelper = new PathHelper(getServletContext());
@@ -1886,11 +1907,45 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (serverProps.doRecoTest() || serverProps.doRecoTest2()) {
       new RecoTest(this, serverProps, pathHelper, audioFileHelper);
     }
-    //if (!serverProps.dataCollectMode && !serverProps.isArabicTextDataCollect()) {
-      db.preloadExercises();
-   // }
-
+    db.preloadExercises();
     db.getUserListManager().setStateOnExercises();
+    doReport();
+  }
+
+  public void doReport() {
+    Calendar calendar = new GregorianCalendar();
+    int i = calendar.get(Calendar.DAY_OF_WEEK);
+    if (i == Calendar.MONDAY) {
+
+      File test = new File("reports");
+      if (!test.exists()) test.mkdirs();
+
+      String message = db.doReport();
+      SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
+
+      //FileOutputStream fileOutputStream = new FileOutputStream("test2.html");
+      String today = simpleDateFormat2.format(new Date());
+      String fileName = "report_" + today +
+          ".html";
+      if (new File(fileName).exists()) {
+        logger.debug("already did report for " + today);
+      } else {
+        try {
+          BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+          writer.write(message);
+          writer.close();
+          for (String dest : serverProps.getReportEmails()) {
+            getMailSupport().sendEmail(EmailHelper.NP_SERVER, dest, EmailHelper.MY_EMAIL, "Weekly Usage Report for " + serverProps.getLanguage(), message);
+          }
+        } catch (IOException e) {
+
+
+        }
+      }
+
+    } else {
+      logger.debug("not sending email report since not Monday");
+    }
   }
 
   /**
