@@ -37,6 +37,7 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String NESTED_CHAPTERS = "nestedChapters";
   public static final String ALIGN = "align";
   public static final String DECODE = "decode";
+  public static final String SCORE = "score";
   private JSONObject chapters, nestedChapters;
   public static final String LOAD_TESTING = "loadTesting";
   private static final String ADD_USER = "addUser";
@@ -445,7 +446,7 @@ public class ScoreServlet extends DatabaseServlet {
       File saveFile = new File(wavPath);
       writeToOutputStream(request, saveFile);
       return getJsonForAudioForUser(exerciseID, i, isDecode(requestType), wavPath, saveFile, deviceType, device);
-    } else {
+    } else {   // for backwards compatibility
       String fileName = request.getHeader("fileName");
       String word = request.getHeader("word");
       boolean isFlashcard = request.getHeader("flashcard") != null;
@@ -473,10 +474,20 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
-  private boolean isDecode(String requestType) {
-    return requestType.equalsIgnoreCase("decode");
-  }
+  private boolean isDecode(String requestType) { return requestType.equalsIgnoreCase("decode");  }
 
+  /**
+   * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
+   * @see #getJsonForParts(javax.servlet.http.HttpServletRequest, String)
+   * @param exerciseID
+   * @param user
+   * @param doFlashcard
+   * @param wavPath
+   * @param saveFile
+   * @param deviceType
+   * @param device
+   * @return
+   */
   private JSONObject getJsonForAudioForUser(String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile,
                                             String deviceType, String device) {
     long then = System.currentTimeMillis();
@@ -507,14 +518,22 @@ public class ScoreServlet extends DatabaseServlet {
         jsonForScore = getJsonForScore(pretestScore);
         if (doFlashcard) {
           jsonForScore.put("isCorrect", answer.isCorrect());
-          jsonForScore.put("saidWord", answer.isSaidAnswer());
+          jsonForScore.put("saidWord",  answer.isSaidAnswer());
         }
       }
-      jsonForScore.put("valid", answer.getValidity().toString());
+      jsonForScore.put("valid", answer == null ? "invalid" : answer.getValidity().toString());
     }
     return jsonForScore;
   }
 
+  /**
+   * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
+   * @see #getJsonForParts(javax.servlet.http.HttpServletRequest, String)
+   * @param word
+   * @param saveFile
+   * @return
+   * @deprecated we should move toward the API that records the audio in the results table
+   */
   private JSONObject getJsonForWordAndAudio(String word, File saveFile) {
     logger.debug("File written to: " + saveFile.getAbsolutePath());
 
@@ -522,8 +541,7 @@ public class ScoreServlet extends DatabaseServlet {
     long then = System.currentTimeMillis();
     PretestScore book = getASRScoreForAudio(audioFileHelper, saveFile.getAbsolutePath(), word);
     long now = System.currentTimeMillis();
-    logger.debug("score for '" + word + "' took " + (now - then) +
-        " millis for " + saveFile.getName() + " = " + book);
+    logger.debug("score for '" + word + "' took " + (now - then) + " millis for " + saveFile.getName() + " = " + book);
 
     return getJsonForScore(book);
   }
@@ -533,6 +551,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @param saveFile
    * @return
    * @see #getJsonForAudio
+   * @deprecated we should move toward the API that records the audio in the results table
    */
   private JSONObject getJsonForWordAndAudioFlashcard(String word, File saveFile) {
     logger.debug("File written to: " + saveFile.getAbsolutePath());
@@ -553,7 +572,6 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * TODO : add in devicetype and device pass through
    *
    * @param exerciseID
    * @param user
@@ -561,7 +579,9 @@ public class ScoreServlet extends DatabaseServlet {
    * @param wavPath
    * @param file
    * @param deviceType
-   *@param device @return
+   * @param device
+   * @return
+   * @see #getJsonForAudioForUser(String, int, boolean, String, java.io.File, String, String)
    */
   private AudioAnswer getAnswer(String exerciseID, int user, boolean doFlashcard, String wavPath, File file, float score,
                                 String deviceType, String device) {
@@ -576,7 +596,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   private JSONObject getJsonForScore(PretestScore book) {
     JSONObject jsonObject = new JSONObject();
-    jsonObject.put("score", book.getHydecScore());
+    jsonObject.put(SCORE, book.getHydecScore());
 
     for (Map.Entry<NetPronImageType, List<TranscriptSegment>> pair : book.getsTypeToEndTimes().entrySet()) {
       List<TranscriptSegment> value = pair.getValue();
@@ -587,7 +607,7 @@ public class ScoreServlet extends DatabaseServlet {
         object.put("event", segment.getEvent());
         object.put("start", segment.getStart());
         object.put("end", segment.getEnd());
-        object.put("score", segment.getScore());
+        object.put(SCORE, segment.getScore());
 
         value1.add(object);
       }
@@ -639,7 +659,6 @@ public class ScoreServlet extends DatabaseServlet {
 
       db = getDatabase();
       serverProps = db.getServerProps();
-      // logger.debug("configDir " + configDir);
       audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, null);
 
       makeAutoCRT(audioFileHelper);
