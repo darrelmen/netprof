@@ -1173,8 +1173,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     User user = db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind, isMale, age, dialect, "browser");
     if (user != null && !user.isEnabled()) { // user = null means existing user.
       logger.debug("user " + userID +"/" +user+
-          " wishes to be a content developer. Asking for approval...");
+          " wishes to be a content developer. Asking for approval.");
       getEmailHelper().addContentDeveloper(url, email, user, getMailSupport());
+    }
+    else if (user == null) {
+      logger.debug("no user found for id " +userID);
+    }
+    else {
+      logger.debug("user " + userID +"/" +user+ " is enabled.");
     }
     return user;
   }
@@ -1586,7 +1592,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param addToAudioTable     if true, add to audio table -- only when recording reference audio for an item.
    * @param recordedWithFlash   mark if we recorded it using flash recorder or webrtc
    * @param deviceType
-   *@param device @return AudioAnswer object with information about the audio on the server, including if audio is valid (not too short, etc.)
+   * @param device
+   * @return AudioAnswer object with information about the audio on the server, including if audio is valid (not too short, etc.)
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    */
@@ -1649,6 +1656,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     return audioAnswer;
   }
+
+/*  public AudioAnswer getAnswer(String base64EncodedString,
+                               String textToAlign,
+                               String identifier,
+                               int reqid,
+                               int user, boolean doFlashcard, float score,
+                                String deviceType, String device) {
+    //CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
+
+   // String wavPath = pathHelper.getWavPathUnder("postedAudio");
+   // File file = pathHelper.getAbsoluteFile(wavPath);
+
+    //AudioAnswer audioAnswer = audioFileHelper.getAlignment(base64EncodedString, textToAlign, identifier, reqid);
+    File file = audioFileHelper.getPostedFileLoc();
+    AudioAnswer audioAnswer = audioFileHelper.getAudioAnswer(base64EncodedString, reqid, file);
+    //AudioAnswer audioAnswer = audioFileHelper.getAlignment(base64EncodedString, textToAlign, identifier, reqid);
+
+    return audioFileHelper.getAnswer(exerciseID, exercise1, user, doFlashcard, wavPath, file, deviceType, device, score);
+  }*/
 
   /**
    * Remember this audio as reference audio for this exercise, and possibly clear the APRROVED (inspected) state
