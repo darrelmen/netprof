@@ -62,15 +62,40 @@ public class ServerProperties {
   private static final String CONFIG_FILE = "configFile";
 
   private static final String APPROVAL_EMAIL = "approvalEmail";
-  private static final String DEFAULT_EMAIL = "gordon.vidaver@ll.mit.edu";
+  public static final String GORDON_VIDAVER = "gordon.vidaver@ll.mit.edu";
+  private static final String DEFAULT_EMAIL = GORDON_VIDAVER;
   private static final String APPROVERS = "approvers";
   private static final String APPROVER_EMAILS = "approverEmails";
   private static final String ADMINS = "admins";
-  private static final List<String> DLI_APPROVERS = Arrays.asList("Tamas", "Alex", "David", "Sandy", "Gordon");
-  private static final List<String> DLI_EMAILS = Arrays.asList("tamas.g.marius.civ@mail.mil", "tamas.marius@dliflc.edu",
-      "alexandra.cohen@dliflc.edu", "david.randolph@dliflc.edu", "sandra.wagner@dliflc.edu", "gordon.vidaver@ll.mit.edu");
+
+  private static final List<String> DLI_APPROVERS = Arrays.asList(
+      "Tamas",
+      "Tamas",
+      "Alex",
+      "David",
+      "Sandy",
+      "Gordon");
+
+  public static final String TAMAS_1 = "tamas.g.marius.civ@mail.mil";
+  public static final String TAMAS_2 = "tamas.marius@dliflc.edu";
+  private static final List<String> DLI_EMAILS = Arrays.asList(
+      TAMAS_1,
+      TAMAS_2,
+      "alexandra.cohen@dliflc.edu",
+      "david.randolph@dliflc.edu",
+      "sandra.wagner@dliflc.edu",
+      GORDON_VIDAVER);
+
   private static final Set<String> ADMINLIST = new HashSet<String>(Arrays.asList("swade", "gvidaver", "tmarius", "acohen",
       "drandolph", "swagner", "gmarkovic", "djones", "jmelot", "rbudd", "jray", "jwilliams", "pgatewood"));
+
+  /**
+   * Set this property for non-DLI deployments.
+   */
+  private static final String REPORT_EMAILS = "reportEmails";
+
+  private List<String> REPORT_DEFAULT = Arrays.asList(ServerProperties.TAMAS_1, ServerProperties.TAMAS_2, ServerProperties.GORDON_VIDAVER);
+  private List<String> reportEmails = REPORT_DEFAULT;
 
   private List<String> approvers = DLI_APPROVERS;
   private List<String> approverEmails = DLI_EMAILS;
@@ -97,6 +122,11 @@ public class ServerProperties {
     readProps(configDir, configFile, dateFromManifest);
   }
 
+  /**
+   * @param configDir
+   * @param configFile
+   * @param dateFromManifest
+   */
   private void readProps(String configDir, String configFile, String dateFromManifest) {
     String configFileFullPath = configDir + File.separator + configFile;
     if (!new File(configFileFullPath).exists()) {
@@ -267,6 +297,7 @@ public class ServerProperties {
    * TODO : also you may want to set the welcome message to OFF
    * {@link mitll.langtest.client.PropertyHandler#SHOW_WELCOME}
    *
+   * Here's where we can over-ride default values.
    * @param dateFromManifest
    * @see
    */
@@ -296,6 +327,9 @@ public class ServerProperties {
 
     property = props.getProperty(ADMINS);
     if (property != null) admins = new HashSet<String>(Arrays.asList(property.split(",")));
+
+    property = props.getProperty(REPORT_EMAILS);
+    if (property != null) reportEmails = Arrays.asList(property.split(","));
   }
 
   private boolean getDefaultFalse(String param) {
@@ -340,5 +374,9 @@ public class ServerProperties {
    */
   public Set<String> getAdmins() {
     return admins;
+  }
+
+  public List<String> getReportEmails() {
+    return reportEmails;
   }
 }
