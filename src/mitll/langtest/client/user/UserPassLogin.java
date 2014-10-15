@@ -187,6 +187,12 @@ public class UserPassLogin extends UserDialog {
     rightDiv.add(getSignUpForm());
   }
 
+  /**
+   *
+   * @param signInForm
+   * @return
+   * @see #getRightLogin(com.google.gwt.user.client.ui.Panel)
+   */
   private Form populateSignInForm(Form signInForm) {
     Fieldset fieldset = new Fieldset();
     signInForm.add(fieldset);
@@ -199,7 +205,6 @@ public class UserPassLogin extends UserDialog {
       public void onFocus(FocusEvent event) {
         signInHasFocus = true;
         eventRegistration.logEvent(user.box, "PasswordBox", "N/A", "focus in password field");
-
       }
     });
 
@@ -806,7 +811,7 @@ public class UserPassLogin extends UserDialog {
                 storeUser(result);
               } else {
                 eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result) +
-                    "but waiting for approval from Tamas.");
+                    " but waiting for approval from Tamas.");
                 markErrorBlur(signUp, "Wait for approval", "You will get an approval message by email.", Placement.TOP);
                 Timer t = new Timer() {
                   @Override
