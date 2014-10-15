@@ -197,24 +197,6 @@ public class EventDAO extends DAO {
     return Collections.emptyList();
   }
 
-
-
-  /**
-   * Pulls the list of users out of the database.
-   *
-   * @return
-   */
-/*  public List<Event> getAllBy(long userid) {
-    try {
-      String sql = "SELECT * from " + EVENT + " where " + CREATORID +"="+userid;
-
-      return getEvents(sql);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return Collections.emptyList();
-  }*/
-
   private List<Event> getEvents(String sql) throws SQLException {
     Connection connection = getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
@@ -234,7 +216,6 @@ public class EventDAO extends DAO {
       );
     }
 
-    //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
     finish(connection, statement, rs);
     return lists;
   }
