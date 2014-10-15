@@ -45,16 +45,13 @@ public class ServerProperties {
   private static final String MEDIA_DIR = "mediaDir";
   private static final String RECO_TEST = "recoTest";
   private static final String RECO_TEST2 = "recoTest2";
-  // --Commented out by Inspection (10/6/14, 1:20 PM):private static final String ARABIC_TEXT_DATA_COLLECT = "arabicTextDataCollect";
   private static final String MIN_PRON_SCORE = "minPronScore";
   private static final String MIN_PRON_SCORE_DEFAULT = "0.20";
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
   private static final String EMAIL_ADDRESS = "emailAddress";
-  //private static final String DLI_APPROVAL_EMAILS = "gordon.vidaver@ll.mit.edu";
   private static final String AUDIO_OFFSET = "audioOffset";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
-  private static final String CLASSROOM_MODE = "classroomMode";
   private static final String INCLUDE_FEEDBACK = "includeFeedback";
   private static final String MAPPING_FILE = "mappingFile";
   private static final String NO_MODEL = "noModel";
@@ -62,27 +59,29 @@ public class ServerProperties {
   private static final String VLR_PARLE_PILOT_ITEMS_TXT = "vlr-parle-pilot-items.txt";
   private static final String QUIET_AUDIO_OK = "quietAudioOK";
 
-  public static final String CONFIG_FILE = "configFile";
-
-  private Properties props = new Properties();
-
-  // --Commented out by Inspection (10/6/14, 1:20 PM):private boolean dataCollectMode;
-  private double minPronScore;
-
-  // just for automated testing
-  private boolean quietAudioOK;
+  private static final String CONFIG_FILE = "configFile";
 
   private static final String APPROVAL_EMAIL = "approvalEmail";
   private static final String DEFAULT_EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String APPROVERS = "approvers";
   private static final String APPROVER_EMAILS = "approverEmails";
   private static final String ADMINS = "admins";
-  private static final List<String> DLI_APPROVERS = Arrays.asList("Tamas", "Alex", "David", "Sandy");
-  private static final List<String> DLI_EMAILS = Arrays.asList("tamas.g.marius.civ@mail.mil", "tamas.marius@dliflc.edu","alexandra.cohen@dliflc.edu", "david.randolph@dliflc.edu", "sandra.wagner@dliflc.edu");
-  private static final Set<String> ADMINLIST = new HashSet<String>(Arrays.asList("swade", "gvidaver", "tmarius", "acohen", "drandolph", "swagner", "gmarkovic", "djones", "jmelot", "rbudd", "jray", "jwilliams", "pgatewood"));
+  private static final List<String> DLI_APPROVERS = Arrays.asList("Tamas", "Alex", "David", "Sandy", "Gordon");
+  private static final List<String> DLI_EMAILS = Arrays.asList("tamas.g.marius.civ@mail.mil", "tamas.marius@dliflc.edu",
+      "alexandra.cohen@dliflc.edu", "david.randolph@dliflc.edu", "sandra.wagner@dliflc.edu", "gordon.vidaver@ll.mit.edu");
+  private static final Set<String> ADMINLIST = new HashSet<String>(Arrays.asList("swade", "gvidaver", "tmarius", "acohen",
+      "drandolph", "swagner", "gmarkovic", "djones", "jmelot", "rbudd", "jray", "jwilliams", "pgatewood"));
+
   private List<String> approvers = DLI_APPROVERS;
   private List<String> approverEmails = DLI_EMAILS;
   private Set<String> admins = ADMINLIST;
+
+  private Properties props = new Properties();
+
+  private double minPronScore;
+
+  // just for automated testing
+  private boolean quietAudioOK;
 
   public ServerProperties(ServletContext servletContext, String configDir) {
     this(servletContext, configDir, servletContext.getInitParameter(CONFIG_FILE));
@@ -96,7 +95,6 @@ public class ServerProperties {
     String dateFromManifest = getDateFromManifest(servletContext);
     if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
     readProps(configDir, configFile, dateFromManifest);
-//    if (isDebugEMail()) logger.info("using debug email....");
   }
 
   private void readProps(String configDir, String configFile, String dateFromManifest) {
@@ -168,7 +166,7 @@ public class ServerProperties {
   }
 
   public String getLanguage() {
-    return props.getProperty(LANGUAGE, "English");
+    return props.getProperty(LANGUAGE);
   }
 
   //specify this in  in config file like: tierIndex=5,4,-1. That
@@ -199,22 +197,12 @@ public class ServerProperties {
     return minPronScore;
   }
 
-// --Commented out by Inspection START (10/6/14, 1:20 PM):
-//  public boolean isArabicTextDataCollect() {
-//    return getDefaultFalse(ARABIC_TEXT_DATA_COLLECT);
-//  }
-// --Commented out by Inspection STOP (10/6/14, 1:20 PM)
-
   public boolean usePredefinedTypeOrder() {
     return getDefaultFalse(USE_PREDEFINED_TYPE_ORDER);
   }
 
   public boolean shouldSkipSemicolonEntries() {
     return getDefaultTrue(SKIP_SEMICOLONS);
-  }
-
-  public boolean isClassroomMode() {
-    return getDefaultFalse(CLASSROOM_MODE);
   }
 
   public boolean isNoModel() {
