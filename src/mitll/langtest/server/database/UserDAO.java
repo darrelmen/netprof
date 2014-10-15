@@ -450,7 +450,7 @@ public class UserDAO extends DAO {
 
       Set<String> expected = new HashSet<String>();
       expected.addAll(Arrays.asList(ID, AGE, GENDER, EXPERIENCE,
-          IPADDR, "nativelang", DIALECT, USER_ID, "timestamp", ENABLED));
+          IPADDR, "nativelang", DIALECT, USER_ID.toLowerCase(), "timestamp", ENABLED));
       expected.removeAll(getColumns(USERS));
       if (!expected.isEmpty()) logger.info("adding columns for " + expected);
       for (String missing : expected) {
