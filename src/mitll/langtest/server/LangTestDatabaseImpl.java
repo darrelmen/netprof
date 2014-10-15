@@ -1103,7 +1103,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public List<Event> getEvents() {
-    return db.getEvents();
+    return db.getEventDAO().getAll();
   }
 
   /**
