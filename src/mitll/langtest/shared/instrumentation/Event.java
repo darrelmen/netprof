@@ -1,7 +1,9 @@
 package mitll.langtest.shared.instrumentation;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.client.instrumentation.EventRegistration;
 
+import java.util.Comparator;
 import java.util.Date;
 
 /**
@@ -11,7 +13,7 @@ import java.util.Date;
  * Time: 11:35 AM
  * To change this template use File | Settings | File Templates.
  */
-public class Event implements IsSerializable {
+public class Event implements IsSerializable, Comparable<Event> {
   private String widgetID;
   private String widgetType;
   private String exerciseID;
@@ -64,6 +66,11 @@ public class Event implements IsSerializable {
 
   public String getHitID() {
     return hitID;
+  }
+
+  @Override
+  public int compareTo(Event o) {
+    return timestamp < o.timestamp ? -1 :  timestamp > o.timestamp ? +1 :0;
   }
 
   public String toString() {
