@@ -458,24 +458,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     logger.info("enabling token " + cdToken + " for email " + emailR);
     service.enableCDUser(cdToken, emailR, Window.Location.getHref(), new AsyncCallback<String>() {
       @Override
-      public void onFailure(Throwable caught) {
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(String result) {
-     //   staleToken = cdToken;
         if (result == null) {
           logger.info("handleCDToken enable - token " + cdToken + " is stale. Showing normal view");
           trimURL();
           populateBelowHeader(verticalContainer, firstRow);
-//          trimURLAndReload();
-
         } else {
           firstRow.add(new Heading(2, "OK, content developer <u>" + result + "</u> has been approved."));
           firstRow.addStyleName("leftFiveMargin");
           clearPadding(verticalContainer);
           trimURLAndReload();
-
         }
       }
     });
