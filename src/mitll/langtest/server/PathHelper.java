@@ -115,7 +115,7 @@ public class PathHelper {
     return getWavPath(tomcatWriteDirectory, planAndTestPath);
   }
 
-  public File getFileForWavPathUnder(String planAndTestPath) { return getAbsoluteFile(getWavPath(getTomcatDir(), planAndTestPath)); }
+ // public File getFileForWavPathUnder(String planAndTestPath) { return getAbsoluteFile(getWavPath(getTomcatDir(), planAndTestPath)); }
   public String getWavPathUnder(String planAndTestPath) { return getWavPath(getTomcatDir(), planAndTestPath); }
 
   private String getWavPath(String tomcatWriteDirectory, String planAndTestPath) {
