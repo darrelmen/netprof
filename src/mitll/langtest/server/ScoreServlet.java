@@ -35,6 +35,8 @@ public class ScoreServlet extends DatabaseServlet {
   private static final Logger logger = Logger.getLogger(ScoreServlet.class);
   public static final String REQUEST = "request";
   public static final String NESTED_CHAPTERS = "nestedChapters";
+  public static final String ALIGN = "align";
+  public static final String DECODE = "decode";
   private JSONObject chapters, nestedChapters;
   public static final String LOAD_TESTING = "loadTesting";
   private static final String ADD_USER = "addUser";
@@ -155,7 +157,7 @@ public class ScoreServlet extends DatabaseServlet {
         } else {
           jsonObject.put("userid", user1.getId());
         }
-      } else if (requestType.startsWith("align") || requestType.startsWith("decode")) {
+      } else if (requestType.startsWith(ALIGN) || requestType.startsWith(DECODE)) {
         //jsonObject = getJsonForParts(request, requestType);
         boolean isMultipart = ServletFileUpload.isMultipartContent(request);
 
@@ -169,8 +171,26 @@ public class ScoreServlet extends DatabaseServlet {
         // log event
         String user = request.getHeader("user");
         String context = request.getHeader("context");
-
-        // TODO : fill in call to event logging
+        String exid = request.getHeader("exid");
+        String widgetid = request.getHeader("widget");
+        String widgetType = request.getHeader("widgetType");
+        long userid = 0;
+        try {
+          userid = Long.parseLong(user);
+        } catch (NumberFormatException e) {
+          logger.warn("couldn't parse event userid " +user);
+          userid = -1;
+        }
+        if (db.getUserDAO().getUserWhere(userid) == null) {
+          jsonObject.put("ERROR","unknown user " + userid);
+        }
+        else {
+          if (widgetid == null) {
+            db.logEvent(exid == null ? "N/A" : exid, context, userid);
+          } else {
+            db.logEvent(widgetid, widgetType, exid == null ? "N/A" : exid, context, userid);
+          }
+        }
       } else {
         jsonObject.put("ERROR", "unknown req " + requestType);
       }
