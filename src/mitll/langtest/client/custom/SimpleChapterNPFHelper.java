@@ -156,14 +156,15 @@ class SimpleChapterNPFHelper implements RequiresResize {
   }
 
   public void setContentPanel(DivWidget contentPanel) {
-    System.out.println("SimpleChapterNPFHelper.setContentPanel : got " + contentPanel);
-
+  //  System.out.println("SimpleChapterNPFHelper.setContentPanel : got " + contentPanel);
     this.contentPanel = contentPanel;
   }
 
+/*
   public DivWidget getContentPanel() {
     return contentPanel;
   }
+*/
 
   protected static class MyFlexListLayout extends NPFHelper.FlexListLayout {
     private final SimpleChapterNPFHelper outer;
