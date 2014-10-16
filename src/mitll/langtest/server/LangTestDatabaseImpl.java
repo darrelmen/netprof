@@ -1,6 +1,5 @@
 package mitll.langtest.server;
 
-import Utils.EmailSupport;
 import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
 import com.google.common.io.Files;
@@ -1912,6 +1911,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     doReport();
   }
 
+  /**
+   * TODO : remove the ref audio results from results table.
+   */
   public void doReport() {
     Calendar calendar = new GregorianCalendar();
     int i = calendar.get(Calendar.DAY_OF_WEEK);
