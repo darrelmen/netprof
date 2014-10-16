@@ -140,7 +140,7 @@ public class ResultDAO extends DAO {
       if (id.contains("\\/")) id = id.substring(0, id.length() - 2);
       CommonExercise exercise = join.get(id);
       if (exercise == null) {
-        if (n < 200) logger.error("couldn't find " + result);
+        if (n < 200) logger.error("addUnitAndChapterToResults : for exid " + id + " couldn't find " + result);
         n++;
         result.setUnitToValue(EMPTY_MAP);
         result.setForeignText("");
@@ -149,7 +149,7 @@ public class ResultDAO extends DAO {
         result.setForeignText(exercise.getForeignLanguage());
       }
     }
-    if (n > 0) logger.warn("huh? skipped " + n + " out of " + monitorResults.size());
+    if (n > 0) logger.warn("addUnitAndChapterToResults : skipped " + n + " out of " + monitorResults.size());
   }
 
   public List<MonitorResult> getMonitorResultsByID(String id) {
