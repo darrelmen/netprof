@@ -70,11 +70,12 @@ public class AudioAttribute implements IsSerializable {
       String[] split = type.split("=");
       addAttribute(split[0], split[1]);
     }
-    //else {
-    //  attributes = new HashMap<String, String>();
-   // }
   }
 
+  /**
+   * @see mitll.langtest.shared.AudioExercise#setRefAudio(String)
+   * @param audioRef
+   */
   protected AudioAttribute(String audioRef) {
     this.audioRef = audioRef;
     if (audioRef == null) throw new IllegalArgumentException("huh audio ref is null?");
@@ -184,13 +185,18 @@ public class AudioAttribute implements IsSerializable {
   }
 
   public MiniUser getUser() { return user; }
+
+  /**
+   * @see mitll.langtest.client.qc.QCNPFExercise#getGenderGroup(mitll.langtest.client.custom.tabs.RememberTabAndContent, AudioAttribute, com.github.gwtbootstrap.client.ui.Button, java.util.List)
+   * @param user
+   */
   public void setUser(MiniUser user) { this.user = user;  }
 
   public long getUserid() { return userid; }
 
   /**
    * @see mitll.langtest.client.qc.QCNPFExercise#addTabsForUsers(CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
-   * @see mitll.langtest.client.custom.ReviewEditableExercise#addTabsForUsers(CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#addTabsForUsers(CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
    * @return
    */
   public boolean isHasBeenPlayed() {
