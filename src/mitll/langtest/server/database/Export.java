@@ -74,8 +74,8 @@ public class Export {
     logger.debug("populateMapOfExerciseIdToResults : got " +results.size() + " results");
 
     for (Result r : results) {
-      List<Result> res = exerciseToResult.get(r.getId());
-      if (res == null) exerciseToResult.put(r.getId(), res = new ArrayList<Result>());
+      List<Result> res = exerciseToResult.get(r.getExerciseID());
+      if (res == null) exerciseToResult.put(r.getExerciseID(), res = new ArrayList<Result>());
       res.add(r);
     }
     return exerciseToResult;
