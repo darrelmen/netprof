@@ -1,5 +1,6 @@
 package mitll.langtest.server;
 
+import Utils.EmailSupport;
 import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
 import com.google.common.io.Files;
@@ -1918,20 +1919,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Calendar calendar = new GregorianCalendar();
     int i = calendar.get(Calendar.DAY_OF_WEEK);
     List<String> reportEmails = serverProps.getReportEmails();
+    SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
+    String today = simpleDateFormat2.format(new Date());
+
     if (i == Calendar.MONDAY && !reportEmails.isEmpty()) {
-      File test = new File("reports");
-      if (!test.exists()) test.mkdirs();
-      String message = db.doReport();
-      SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
-      String today = simpleDateFormat2.format(new Date());
-      String fileName = "report_" + today + ".html";
-      File file = new File(test,fileName);
+      File file = getReportFile(today);
       //logger.debug("checking file  " + file.getAbsolutePath());
       if (file.exists()) {
         logger.debug("already did report for " + today);
       } else {
         try {
           BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+          String message = db.doReport();
           writer.write(message);
           writer.close();
           for (String dest : reportEmails) {
@@ -1941,10 +1940,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           logger.error("got "+e,e);
         }
       }
-
     } else {
       logger.debug("not sending email report since not Monday");
     }
+
+    if (today.equals("10_17_14")) { // testing
+      getMailSupport().sendEmail(EmailHelper.NP_SERVER, EmailHelper.MY_EMAIL, EmailHelper.MY_EMAIL, "Weekly Usage Report for " + serverProps.getLanguage(), db.doReport());
+    }
+  }
+
+  public File getReportFile(String today) {
+    File test = new File("reports");
+    if (!test.exists()) test.mkdirs();
+    String fileName = "report_" + today + ".html";
+    return new File(test,fileName);
   }
 
   /**
