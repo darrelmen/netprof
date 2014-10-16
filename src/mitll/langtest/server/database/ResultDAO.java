@@ -981,9 +981,10 @@ public class ResultDAO extends DAO {
           Map<String, Result> results1 = userToResult.get(r.getUserid());
           if (results1 == null)
             userToResult.put(r.getUserid(), results1 = new HashMap<String, Result>());
-          Result result = results1.get(r.getId());
+          String exerciseID = r.getExerciseID();
+          Result result = results1.get(exerciseID);
           if (result == null || (r.getTimestamp() > result.getTimestamp())) {
-            results1.put(r.getId(), r);
+            results1.put(exerciseID, r);
           }
         }
       }
@@ -1045,9 +1046,7 @@ public class ResultDAO extends DAO {
       cell = row.createCell(j++);
       cell.setCellValue(result.getUserid());
       cell = row.createCell(j++);
-      cell.setCellValue(result.getId());
- //     cell = row.createCell(j++);
-  //    cell.setCellValue(result.qid);
+      cell.setCellValue(result.getExerciseID());
       cell = row.createCell(j++);
       cell.setCellValue(new Date(result.getTimestamp()));
       cell.setCellStyle(cellStyle);
@@ -1056,13 +1055,6 @@ public class ResultDAO extends DAO {
       cell.setCellValue(result.getAnswer());
       cell = row.createCell(j++);
       cell.setCellValue(result.isValid());
-     // cell = row.createCell(j++);
-     // cell.setCellValue(result.getGradeInfo());
-      //cell = row.createCell(j++);
-     // cell.setCellValue(result.flq);
-    //  cell = row.createCell(j++);
-     // cell.setCellValue(result.spoken);
-     // cell = row.createCell(j++);
       cell.setCellValue(result.getAudioType());
       cell = row.createCell(j++);
       cell.setCellValue(result.getDurationInMillis());
@@ -1070,8 +1062,6 @@ public class ResultDAO extends DAO {
       cell.setCellValue(result.isCorrect());
       cell = row.createCell(j++);
       cell.setCellValue(result.getPronScore());
-/*      cell = row.createCell(j++);
-      cell.setCellValue(result.getStimulus());*/
     }
     now = System.currentTimeMillis();
     if (now-then > 100) {
