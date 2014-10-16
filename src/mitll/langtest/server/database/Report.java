@@ -1,6 +1,5 @@
 package mitll.langtest.server.database;
 
-import com.google.gwt.media.client.Audio;
 import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.Result;
@@ -21,6 +20,7 @@ public class Report {
   public static final int SAMPLE = 50;
   public static final String BEST_AUDIO = "bestAudio";
   public static final int LENGTH = BEST_AUDIO.length();
+  public static final int TEN_SECONDS = 1000 * 10;
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
   private final EventDAO eventDAO;
@@ -87,8 +87,8 @@ public class Report {
 
         //    +"</div>"+"</div>"
     );
-    getResults(builder);
     getEvents(builder);
+    getResults(builder);
 
     builder.append("</body></head></html>");
     return builder.toString();
@@ -167,57 +167,59 @@ public class Report {
     int ytd = 0;
 
     List<Result> results = resultDAO.getResults();
+    Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
+
     Map<Integer, Integer> monthToCount = new TreeMap<Integer, Integer>();
     Map<Integer, Integer> weekToCount = new TreeMap<Integer, Integer>();
 
-//    Set<String> audioMap = getAudioMap();
-
-    Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
-    logger.debug("found " + exToAudio.size() + " ref audio entries.");
-    if (!exToAudio.isEmpty()) {
-      Iterator<AudioAttribute> iterator = exToAudio.values().iterator().next().iterator();
-      try {
-        for (int i = 0; i < SAMPLE; i++) {
-          logger.debug("e.g. " + iterator.next());
-        }
-      } catch (Exception e) {
-
-      }
-    }
-
-    int refSkip = 0;
-    int c = 0;
+    List<Result> refAudio = new ArrayList<Result>();
     for (Result result : results) {
       if (result.getTimestamp() > january1st.getTime()) {
-//        String normalize = normalize2(result.getAnswer()) + "_by_" +result.getUserid();
-  //      if (c++ < SAMPLE) {
-    //      logger.debug("result path "+normalize);
-      //  }
         boolean skip = isRefAudioResult(exToAudio, result);
-
         if (skip) {
-          refSkip++;
+          refAudio.add(result);
         } else {
           ytd++;
-          calendar.setTimeInMillis(result.getTimestamp());
-          int month = calendar.get(Calendar.MONTH);
-          Integer integer = monthToCount.get(month);
-          monthToCount.put(month, (integer == null) ? 1 : integer + 1);
-
-          int w = calendar.get(Calendar.WEEK_OF_YEAR);
-          Integer integer2 = weekToCount.get(w);
-
-          weekToCount.put(w, (integer2 == null) ? 1 : integer2 + 1);
+          tallyByMonthAndWeek(calendar, monthToCount, weekToCount, result);
         }
       }
     }
     //  logger.debug("ytd " + ytd);
     //  logger.debug("month " + monthToCount);
     //  logger.debug("week " + weekToCount);
-    logger.debug("ref " + refSkip);
-    builder.append(getYTD(ytd, "Recordings") +
-        getMC(monthToCount, "month", "Recordings") +
-        getWC(weekToCount, "week", "Recordings"));
+   // logger.debug("ref " + refSkip);
+    String recordings = "Recordings";
+    builder.append(getYTD(ytd, recordings) +
+        getMC(monthToCount, "month", recordings) +
+        getWC(weekToCount, "week", recordings));
+
+    monthToCount = new TreeMap<Integer, Integer>();
+    weekToCount = new TreeMap<Integer, Integer>();
+    ytd =0;
+    for (Result result : refAudio) {
+      if (result.getTimestamp() > january1st.getTime()) {
+        ytd++;
+        tallyByMonthAndWeek(calendar, monthToCount, weekToCount, result);
+      }
+    }
+
+    String refAudioRecs = "Ref Audio Recordings";
+    builder.append(getYTD(ytd, refAudioRecs) +
+        getMC(monthToCount, "month", refAudioRecs) +
+        getWC(weekToCount, "week", refAudioRecs));
+
+  }
+
+  private void tallyByMonthAndWeek(Calendar calendar, Map<Integer, Integer> monthToCount, Map<Integer, Integer> weekToCount, Result result) {
+    calendar.setTimeInMillis(result.getTimestamp());
+    int month = calendar.get(Calendar.MONTH);
+    Integer integer = monthToCount.get(month);
+    monthToCount.put(month, (integer == null) ? 1 : integer + 1);
+
+    int w = calendar.get(Calendar.WEEK_OF_YEAR);
+    Integer integer2 = weekToCount.get(w);
+
+    weekToCount.put(w, (integer2 == null) ? 1 : integer2 + 1);
   }
 
   private boolean isRefAudioResult(Map<String, List<AudioAttribute>> exToAudio, Result result) {
@@ -345,12 +347,30 @@ public class Report {
     long total = 0;
     for (Long v : monthToDur.values()) total += v;
 
+    total /= MIN_MILLIS;
+
     Map<Integer, Long> weekToDur = getWeekToDur(weekToCount2);
     //logger.debug("week to dur " + weekToDur);
 
-    builder.append(getYTD(Math.round(total / (60)), "Total time on task (hours)") +
-        getMC(monthToDur, "month", "Time on Task Minutes") +
-        getWC(weekToDur, "week", "Time on Task Minutes"));
+    getMinMap(monthToDur);
+
+    builder.append(getYTD(Math.round(total / 60), "Total time on task (hours)") +
+        getMC(getMinMap(monthToDur), "month", "Time on Task Minutes") +
+        getWC(getMinMap(weekToDur),  "week", "Time on Task Minutes"));
+  }
+
+  private Map<Integer, Long> getMinMap(Map<Integer, Long> monthToDur) {
+    Map<Integer, Long> copy = new TreeMap<Integer, Long>();
+    for (Map.Entry<Integer, Long> pair : monthToDur.entrySet()) {
+      long value = pair.getValue() / MIN_MILLIS;
+      if (value == 0) {
+        //logger.debug("huh? " +pair.getKey() + " " + pair.getValue());
+        value = 1;
+      }
+      copy.put(pair.getKey(), value);
+    }
+
+    return copy;
   }
 
   /**
@@ -372,25 +392,53 @@ public class Report {
         long dur = 0;
         // long begin = 0;
         long last = 0;
+        Event sevent = null, levent = null;
         for (Event event : eventsForUser.getValue()) {
+      /*    if (eventsForUser.getKey() > 36) {
+            logger.debug("event " +event);
+          }*/
           long now = event.getTimestamp();
           //     if (user == INTTEST) {
           //     logger.debug("Event " + event);
           //  }
           if (start == 0) {
             start = now;
+            sevent = event;
           } else if (now - last > 1000 * 300) {
-            dur += (last - start) / MIN_MILLIS;
+            long session = (last - start);
+            if (session == 0) {
+/*              logger.warn("huh " +last + " " + start);
+              logger.warn("huh sevent " +sevent);
+              logger.warn("huh levent " +levent);
+              logger.warn("huh event " +event);*/
+              session = TEN_SECONDS;
+            }
+            dur += session;
             start = now;
+            sevent = event;
           }
 
           last = now;
+          levent = event;
         }
-        dur += (last - start) / MIN_MILLIS;
+        long session = (last - start);
+        if (session == 0) {
+/*
+          logger.warn("huh 2 " +last + " " + start);
+          logger.warn("huh 2 sevent " +sevent);
+          logger.warn("huh 2 levent " +levent);
+*/
+         // logger.warn("huh event " +event);
+          session = TEN_SECONDS;
+
+        }
+        dur += session;
 //        if (user == INTTEST) {
         //        logger.debug("dur " + dur);
         //     }
         Long aLong = monthToDur.get(month);
+
+      //  dur /= MIN_MILLIS;
         monthToDur.put(month, aLong == null ? dur : aLong + dur);
       }
     }
@@ -421,13 +469,21 @@ public class Report {
           if (start == 0) {
             start = now;
           } else if (now - last > 1000 * 300) {
-            dur += (last - start) / MIN_MILLIS;
+            long session = last - start;
+            if (session == 0) {
+              session = TEN_SECONDS;
+            }
+            dur += session;// / MIN_MILLIS;
             start = now;
           }
 
           last = now;
         }
-        dur += (last - start) / MIN_MILLIS;
+        long session = last - start;
+        if (session == 0) {
+          session = TEN_SECONDS;
+        }
+        dur += session;// / MIN_MILLIS;
 //        if (user == INTTEST) {
         //        logger.debug("dur " + dur);
         //     }
