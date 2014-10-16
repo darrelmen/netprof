@@ -101,7 +101,7 @@ public class AudioDAO extends DAO {
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getResultsWithGrades()
    */
-  private List<AudioAttribute> getAudioAttributes() {
+  public List<AudioAttribute> getAudioAttributes() {
     try {
       String sql = "SELECT * FROM " + AUDIO + " WHERE " +DEFECT +"=false";
       return getResultsSQL(sql);
@@ -472,7 +472,7 @@ public class AudioDAO extends DAO {
    * @see #add(mitll.langtest.shared.Result, int, String)
    */
   private long add(Connection connection, Result result, int userid, String audioRef) throws SQLException {
-    String exerciseID = result.getId();
+    String exerciseID = result.getExerciseID();
     long timestamp = result.getTimestamp();
     String audioType = result.getAudioType();
     int durationInMillis = result.getDurationInMillis();
