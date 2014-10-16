@@ -167,7 +167,7 @@ public class MonitoringSupport {
     Map<String, Set<Long>> keyToUsers = new HashMap<String, Set<Long>>();
     List<Result> results = getResults();
     for (Result r : results) {
-      String key = r.getId() + "/" + r.getQid();
+      String key = r.getID();//getExerciseID() + "/" + r.getQid();
       Set<Long> usersForResult = keyToUsers.get(key);
 
       if (usersForResult == null) {
@@ -198,7 +198,7 @@ public class MonitoringSupport {
 
     int total = 0;
     for (Result r : results) {
-      String key = r.getId() + "/" + r.getQid();
+      String key = r.getID();//.getId() + "/" + r.getQid();
 
       List<Grade> grades = idToGrade.get(r.getUniqueID());
       if (grades == null) {
