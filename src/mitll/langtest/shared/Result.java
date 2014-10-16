@@ -87,7 +87,7 @@ public class Result implements IsSerializable {
    * Compound key of exercise id and question id within that exercise.
    * @return
    */
-  public String getID() {  return getId() + "/" + qid;  }
+  public String getID() {  return getExerciseID() + "/" + qid;  }
 
   public String getAudioType() {
     return audioType;
@@ -129,9 +129,7 @@ public class Result implements IsSerializable {
     return userid;
   }
 
-  public String getId() {
-    return id;
-  }
+  public String getExerciseID() { return id;  }
 
   public int getQid() {
     return qid;
@@ -159,7 +157,7 @@ public class Result implements IsSerializable {
 
   @Override
   public String toString() {
-    return "Result #" + getUniqueID() + "\t\tby user " + getUserid() + "\texid " + getId() + " " +
+    return "Result #" + getUniqueID() + "\t\tby user " + getUserid() + "\texid " + getExerciseID() + " " +
         " at " + new Date(getTimestamp())+
         "  ans " + getAnswer() +
         " audioType : " + getAudioType() +" device " + device+
