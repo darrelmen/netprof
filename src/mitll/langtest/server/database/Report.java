@@ -225,12 +225,14 @@ public class Report {
   private boolean isRefAudioResult(Map<String, List<AudioAttribute>> exToAudio, Result result) {
     boolean skip = false;
     List<AudioAttribute> audioAttributes = exToAudio.get(result.getExerciseID());
-    for (AudioAttribute audioAttribute : audioAttributes) {
-      if (audioAttribute.getDuration() == result.getDurationInMillis()) {
-        long userid = result.getUserid();
-        if (audioAttribute.getUser().getId() == userid) {
-          skip = true;
-          break;
+    if (audioAttributes != null) {
+      for (AudioAttribute audioAttribute : audioAttributes) {
+        if (audioAttribute.getDuration() == result.getDurationInMillis()) {
+          long userid = result.getUserid();
+          if (audioAttribute.getUser().getId() == userid) {
+            skip = true;
+            break;
+          }
         }
       }
     }
