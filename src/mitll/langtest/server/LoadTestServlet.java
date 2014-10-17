@@ -159,7 +159,7 @@ public class LoadTestServlet extends DatabaseServlet {
       db = (LoadTesting) databaseReference;
       //   logger.debug("found existing reference " + db + " under " + getServletContext());
     } else {
-      logger.error("huh? no existing db reference?");
+      logger.error("huh? no existing load test reference?");
     }
     return db;
   }
