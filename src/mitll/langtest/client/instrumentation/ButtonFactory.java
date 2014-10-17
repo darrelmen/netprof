@@ -11,11 +11,15 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.exercise.ExerciseController;
 
+import java.util.logging.Logger;
+
 /**
  * Does event logging for widgets -- calls service to log event.
  * Created by GO22670 on 3/24/2014.
  */
 public class ButtonFactory implements EventLogger {
+  private Logger logger = Logger.getLogger("ButtonFactory");
+
   private final LangTestDatabaseAsync service;
   private final PropertyHandler props;
 
@@ -67,28 +71,40 @@ public class ButtonFactory implements EventLogger {
     logEvent(id, widgetType, exid, context, userid);
   }
 
+  /**
+   * Somehow this has service being null sometimes?
+   * @param widgetID
+   * @param widgetType
+   * @param exid
+   * @param context
+   * @param userid
+   */
   @Override
   public void logEvent(final String widgetID, final String widgetType, final String exid, final String context, final long userid) {
     // System.out.println("logEvent event for " + widgetID + " " + widgetType + " exid " + exid + " context " + context + " user " + userid);
 
-    com.google.gwt.core.client.Scheduler.get().scheduleDeferred(new com.google.gwt.core.client.Scheduler.ScheduledCommand() {
-      public void execute() {
-        service.logEvent(widgetID, widgetType, exid, context, userid, props.getTurkID(), new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            if (!caught.getMessage().trim().equals("0")) {
-              // System.err.println("FAILED to send event for " + widgetID + " message '" + caught.getMessage() +"'");
-              caught.printStackTrace();
+    try {
+      com.google.gwt.core.client.Scheduler.get().scheduleDeferred(new com.google.gwt.core.client.Scheduler.ScheduledCommand() {
+        public void execute() {
+          service.logEvent(widgetID, widgetType, exid, context, userid, props.getTurkID(), new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              if (!caught.getMessage().trim().equals("0")) {
+                // System.err.println("FAILED to send event for " + widgetID + " message '" + caught.getMessage() +"'");
+                caught.printStackTrace();
+              }
             }
-          }
 
-          @Override
-          public void onSuccess(Void result) {
-            //System.out.println("sent event for " + widgetID);
-          }
-        });
-      }
-    });
+            @Override
+            public void onSuccess(Void result) {
+              //System.out.println("sent event for " + widgetID);
+            }
+          });
+        }
+      });
+    } catch (Exception e) {
+      logger.warning("Got " +e);
+    }
 
   }
 }
