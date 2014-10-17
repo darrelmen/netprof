@@ -88,7 +88,7 @@ public class ASRScoring extends Scoring {
     makeDecoder();
   }
 
-  private String languageProperty;
+  private final String languageProperty;
 
   /**
    * @see #ASRScoring(String, java.util.Map, mitll.langtest.server.LangTestDatabaseImpl)
@@ -572,7 +572,7 @@ public class ASRScoring extends Scoring {
 
     Scores scoresFromHydec = getScoresFromHydec(testAudio, sentence, configFile);
     double hydecScore = scoresFromHydec.hydecScore;
-    if (/*hydecScore != -1 ||*/ hydecScore > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
+    if (hydecScore > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
       try {
         //logger.debug("deleting " + tmpDir + " since score is " +hydecScore);
         FileUtils.deleteDirectory(new File(tmpDir));
