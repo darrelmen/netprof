@@ -1985,18 +1985,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Object loadTesting = servletContext.getAttribute(ScoreServlet.LOAD_TESTING);
     if (loadTesting != null) {
       logger.warn("huh? found existing reference " + loadTesting);
-    } else {
-      servletContext.setAttribute(ScoreServlet.LOAD_TESTING, (LoadTesting) this);
     }
+    //else {
+      servletContext.setAttribute(ScoreServlet.LOAD_TESTING, (LoadTesting) this);
+    //}
   }
 
   private void shareDB(ServletContext servletContext) {
     Object databaseReference = servletContext.getAttribute(DATABASE_REFERENCE);
     if (databaseReference != null) {
       logger.warn("huh? found existing database reference " + databaseReference);
-    } else {
+    } //else {
       servletContext.setAttribute(DATABASE_REFERENCE, db);
-    }
+    //}
   }
 
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
