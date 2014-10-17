@@ -79,12 +79,12 @@ public class DatabaseImpl implements Database {
    * @param pathHelper
    * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
    */
-  public DatabaseImpl(String configDir, String configFile, String dbName, PathHelper pathHelper, boolean mustAlreadyExist) {
+/*  public DatabaseImpl(String configDir, String configFile, String dbName, PathHelper pathHelper, boolean mustAlreadyExist) {
     this(configDir, "", dbName, new ServerProperties(configDir, configFile), pathHelper, mustAlreadyExist, null);
     this.lessonPlanFile = serverProps.getLessonPlan();
     this.useFile = lessonPlanFile != null;
     addDefects = false;
-  }
+  }*/
 
   /**
    * @param configDir
@@ -101,7 +101,7 @@ public class DatabaseImpl implements Database {
     long then = System.currentTimeMillis();
     connection = new H2Connection(configDir, dbName, mustAlreadyExist);
     long now = System.currentTimeMillis();
-    if (now - then > 1000)
+    if (now - then > 300)
       logger.info("took " + (now - then) + " millis to open database for " + serverProps.getLanguage());
 
     absConfigDir = configDir;
@@ -110,7 +110,6 @@ public class DatabaseImpl implements Database {
     this.isWordPairs = serverProps.isWordPairs();
     this.doImages = serverProps.doImages();
     this.language = serverProps.getLanguage();
-  //  this.isFlashcard = serverProps.isFlashcard();
     this.serverProps = serverProps;
     this.lessonPlanFile = serverProps.getLessonPlan();
     this.useFile = lessonPlanFile != null;
@@ -132,7 +131,7 @@ public class DatabaseImpl implements Database {
 
     initializeDAOs(pathHelper);
     now = System.currentTimeMillis();
-    if (now - then > 1000) {
+    if (now - then > 300) {
       logger.info("took " + (now - then) + " millis to initialize DAOs for " + serverProps.getLanguage());
     }
 
@@ -154,7 +153,6 @@ public class DatabaseImpl implements Database {
 
     userExerciseDAO = new UserExerciseDAO(this);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
-    //dliUserDAO = new DLIUserDAO(this);
     resultDAO = new ResultDAO(this);
     audioDAO = new AudioDAO(this, userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
