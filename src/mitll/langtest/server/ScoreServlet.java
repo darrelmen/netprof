@@ -271,7 +271,9 @@ public class ScoreServlet extends DatabaseServlet {
           logger.error("expecting a number for user id " + user);
         }
         String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, 0, i);
-        File saveFile = new File(wavPath);
+        //File saveFile = new File(wavPath);
+        File saveFile = pathHelper.getAbsoluteFile(wavPath);
+
         writeToFile(next.getInputStream(), saveFile);
 
         return getJsonForAudioForUser(exerciseID, i, isDecode(requestType), wavPath, saveFile, deviceType, device);
@@ -423,7 +425,8 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * @param request
    * @param deviceType
-   *@param device @return
+   * @param device
+   * @return
    * @throws IOException
    * @see #doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
@@ -443,7 +446,9 @@ public class ScoreServlet extends DatabaseServlet {
         logger.error("expecting a number for user id " + user);
       }
       String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, 0, i);
-      File saveFile = new File(wavPath);
+      //File saveFile = new File(wavPath);
+      File saveFile = pathHelper.getAbsoluteFile(wavPath);
+
       writeToOutputStream(request, saveFile);
       return getJsonForAudioForUser(exerciseID, i, isDecode(requestType), wavPath, saveFile, deviceType, device);
     } else {   // for backwards compatibility
