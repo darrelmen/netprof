@@ -57,7 +57,7 @@ public class LTSFactory {
   }
 
   /**
-   * @see mitll.langtest.server.scoring.ASRScoring#ASRScoring(String, java.util.Map, corpus.HTKDictionary)
+   * @see mitll.langtest.server.scoring.ASRScoring#ASRScoring
    * @param language
    * @return
    */
@@ -71,10 +71,4 @@ public class LTSFactory {
     return letterToSoundClass;
   }
 
-  private static class EmptyLTS extends LTS {
-    @Override
-    public String[][] process(String word) {
-      return new String[0][];
-    }
-  }
 }
