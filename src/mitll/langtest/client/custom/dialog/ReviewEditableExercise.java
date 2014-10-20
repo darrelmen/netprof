@@ -79,6 +79,7 @@ public class ReviewEditableExercise extends EditableExercise {
       itemMarker, changedUserExercise, originalList, exerciseList, predefinedContent, npfHelper);
     this.exerciseList = exerciseList;
     this.predefinedContentList = predefinedContent;
+    if (predefinedContentList == null) new Exception().printStackTrace();
   }
 
   private List<RememberTabAndContent> tabs;
@@ -524,7 +525,9 @@ public class ReviewEditableExercise extends EditableExercise {
 
         @Override
         public void onSuccess(Void result) {
-          predefinedContentList.reload();
+          if (predefinedContentList != null) {
+            predefinedContentList.reload();
+          }
           exerciseList.forgetExercise(id);
         }
       });
