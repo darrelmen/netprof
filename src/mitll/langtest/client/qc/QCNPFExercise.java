@@ -412,8 +412,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   /**
    * TODO : this may be undone if someone deletes the audio cut - since this essentially masks out old score
    * default audio.
-   *
+   * <p/>
    * TODO:  add list of all audio by this user.
+   *
    * @param tabAndContent
    * @param audio
    * @param next
@@ -435,20 +436,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     onButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        onButton.setEnabled(false);
-
-        service.markGender(audio, true, new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            onButton.setEnabled(true);
-          }
-
-          @Override
-          public void onSuccess(Void result) {
-            audio.setUser(DEFAULT_MALE);
-            showGenderChange(onButton, tabAndContent, allByUser, next);
-          }
-        });
+        markGender(DEFAULT_MALE, onButton, audio, tabAndContent, allByUser, next);
       }
     });
 
@@ -457,23 +445,31 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     offButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        offButton.setEnabled(false);
-        service.markGender(audio, false, new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            offButton.setEnabled(true);
-          }
-
-          @Override
-          public void onSuccess(Void result) {
-            audio.setUser(DEFAULT_FEMALE);
-            showGenderChange(offButton, tabAndContent, allByUser, next);
-          }
-        });
+        markGender(DEFAULT_FEMALE, offButton, audio, tabAndContent, allByUser, next);
       }
     });
 
     return w;
+  }
+
+  public void markGender(final MiniUser defaultFemale, final Button offButton,
+                         final AudioAttribute audio, final RememberTabAndContent tabAndContent,
+                         final List<AudioAttribute> allByUser, final Button next) {
+    offButton.setEnabled(false);
+   // final MiniUser prev = audio.getUser();
+    service.markGender(audio, false, new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        offButton.setEnabled(true);
+//        audio.setUser(prev);
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+        audio.setUser(defaultFemale);
+        showGenderChange(offButton, tabAndContent, allByUser, next);
+      }
+    });
   }
 
   protected void showGenderChange(Button onButton, RememberTabAndContent tabAndContent, List<AudioAttribute> allByUser, Button next) {
@@ -486,10 +482,14 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     StringBuilder builder = new StringBuilder();
     AudioAttribute last = allByUser.get(allByUser.size() - 1);
     for (AudioAttribute audioAttribute : allByUser) {
-      builder.append(audioAttribute.getUser().isDefault() ? GoodwaveExercisePanel.DEFAULT_SPEAKER : audioAttribute.isMale() ? "Male":"Female");
+      builder.append(isGenericDefault(audioAttribute) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : audioAttribute.isMale() ? "Male":"Female");
       if (audioAttribute != last) builder.append("/");
     }
     return builder.toString();
+  }
+
+  private boolean isGenericDefault(AudioAttribute audioAttribute) {
+    return audioAttribute.getUser().getId() == -1;
   }
 
   private Button makeGroupButton(ButtonGroup buttonGroup,String title) {
@@ -501,14 +501,14 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   private String getUserTitle(int me, MiniUser user) {
-    return (user.isDefault()) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : (user.getId() == me) ? "by You (" +user.getUserID()+ ")" : getUserTitle(user);
+    return
+         user.getId() == -1 ? GoodwaveExercisePanel.DEFAULT_SPEAKER :
+        (user.getId() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
   }
 
   private String getUserTitle(MiniUser user) {
     return (user.isMale() ? "Male" : "Female") +
-        (
-            //controller.getProps().isAdminView()
-            user.isAdmin()
+        (user.isAdmin()
                 ? " (" + user.getUserID() + ")" : "") +
         " age " + user.getAge();
   }
