@@ -120,15 +120,27 @@ public class AudioDAO extends DAO {
   public void attachAudio(CommonExercise firstExercise,  String installPath, String relativeConfigDir) {
     List<AudioAttribute> audioAttributes = getAudioAttributes(firstExercise.getID());
 
-/*    logger.debug("\tfound " + audioAttributes.size() + " for " + firstExercise.getID());
-    for (AudioAttribute attribute : audioAttributes) logger.debug("audio " + attribute);*/
+    //logger.debug("\tattachAudio : found " + audioAttributes.size() + " for " + firstExercise.getID());
+/*    for (AudioAttribute attribute : audioAttributes) {
+      logger.debug("\t\tattachAudio : exid " + firstExercise.getID() + " audio " + attribute);
+    }*/
+/*
+    for (AudioAttribute attribute : firstExercise.getAudioAttributes()) {
+      logger.debug("\t\tattachAudio on ex : exid " + firstExercise.getID() + " audio " + attribute);
+    }*/
 
     attachAudio(firstExercise, installPath, relativeConfigDir, audioAttributes);
+
+/*    for (AudioAttribute attribute : firstExercise.getAudioAttributes()) {
+      logger.debug("\t\tattachAudio : after on ex exid " + firstExercise.getID() + " audio " + attribute);
+    }*/
   }
 
   /**
    * Complicated, but separates old school "Default Speaker" audio into a second pile.
    * If we've already added an audio attribute with the path for a default speaker, then we remove it.
+   *
+   *  TODO : why would we want to skip adding audio from the initial path set?
    *
    * @see mitll.langtest.server.database.AudioExport#writeFolderContents(java.util.zip.ZipOutputStream, java.util.List, AudioDAO, String, String, String, boolean)
    * @see #attachAudio(mitll.langtest.shared.CommonExercise, String, String, java.util.List)
@@ -137,49 +149,58 @@ public class AudioDAO extends DAO {
    * @param relativeConfigDir
    * @param audioAttributes
    */
-  public void attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir, List<AudioAttribute> audioAttributes) {
+  public void attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir,
+                          List<AudioAttribute> audioAttributes) {
     AudioConversion audioConversion = new AudioConversion();
 
     List<AudioAttribute> defaultAudio = new ArrayList<AudioAttribute>();
     Set<String> audioPaths = new HashSet<String>();
     Set<String> initialPaths = new HashSet<String>();
 
+    // get all the audio on the exercise initially
     for (AudioAttribute initial : firstExercise.getAudioAttributes()) {
-      //logger.debug("predef audio " +initial + " for " + firstExercise.getID());
+     // logger.debug("predef audio " +initial + " for " + firstExercise.getID());
       initialPaths.add(initial.getAudioRef());
     }
 
     for (AudioAttribute attr : audioAttributes) {
-      if (initialPaths.contains(attr.getAudioRef())) {
-    //    logger.debug("skipping " + attr + " on " +firstExercise);
-      }
-      else {
-        if (attr.getUser().isDefault()) {
+      //if (initialPaths.contains(attr.getAudioRef())) {
+      //  logger.debug("skipping " + attr + " on " +firstExercise);
+      //}
+      //else {
+        if (attr.getUser().isUnknownDefault()) {
           defaultAudio.add(attr);
         } else {
           audioPaths.add(attr.getAudioRef());
           attachAudio(firstExercise, installPath, relativeConfigDir, audioConversion, attr);
          // logger.debug("\tadding path '" + attr.getAudioRef() + "' " + attr + " to " + firstExercise.getID());
         }
-      }
+      //}
     }
+
     for (AudioAttribute attr : defaultAudio) {
       if (!audioPaths.contains(attr.getAudioRef())) {
         attachAudio(firstExercise, installPath, relativeConfigDir, audioConversion, attr);
       }
     }
+
     List<AudioAttribute> toRemove = new ArrayList<AudioAttribute>();
     for (AudioAttribute attr: firstExercise.getAudioAttributes()) {
-     //logger.debug("\treviewing " + attr + " : " + attr.getUser().isDefault());
-      if (attr.getUser().isDefault() && audioPaths.contains(attr.getAudioRef())) {
+    // logger.debug("\treviewing " + attr + " : is default? " + attr.getUser().isUnknownDefault());
+      if (attr.getUser().isUnknownDefault() && audioPaths.contains(attr.getAudioRef())) {
         toRemove.add(attr);
       }
     }
-/*    if (!toRemove.isEmpty()) {
-      logger.debug("removing  " + toRemove.size());
-    }*/
+
+    //if (!toRemove.isEmpty()) {
+    //  logger.debug("\tremoving  " + toRemove.size());
+    //}
+
     for (AudioAttribute attr : toRemove) {
       if (!firstExercise.removeAudio(attr)) logger.warn("huh? didn't remove " + attr);
+      //else {
+     //   logger.debug("\tremoving " +attr);
+    //  }
     }
   }
 
@@ -219,6 +240,18 @@ public class AudioDAO extends DAO {
     }
     return new ArrayList<AudioAttribute>();
   }
+
+/*  private AudioAttribute getAudioAttribute(int id) {
+    try {
+      String sql = "SELECT * FROM " + AUDIO + " WHERE " + ID + "=" + id;
+      List<AudioAttribute> resultsSQL = getResultsSQL(sql);
+      return resultsSQL.isEmpty() ? null : resultsSQL.iterator().next();
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    return null;
+  }*/
+
 
   public Set<String> getRecordedBy(long userid) {
     User user = userDAO.getUserMap().get(userid);
@@ -267,7 +300,7 @@ public class AudioDAO extends DAO {
 
   /**
    * Items that are recorded must have both regular and slow speed audio.
-   * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState(int, String, java.util.Collection)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState
    * @param userid
    * @return
    */
@@ -499,7 +532,7 @@ public class AudioDAO extends DAO {
       new Exception().printStackTrace();
     }
     try {
-      logger.debug("addOrUpdate " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
+      logger.debug("addOrUpdate userid = " + userid + " audio ref " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
       Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + AUDIO + " " +
           "SET " + USERID + "=? "+
@@ -526,14 +559,16 @@ public class AudioDAO extends DAO {
       }
       else {
         List<AudioAttribute> audioAttributes = getAudioAttributes(exerciseID);
-        //logger.debug("for  " +exerciseID + " found " + audioAttributes);
+        logger.debug("for  " +exerciseID + " found " + audioAttributes);
 
         for (AudioAttribute audioAttribute : audioAttributes) {
-          //logger.debug("\tfor  " +audioAttribute + " against " + userid + "/" + audioType );
+         logger.debug("\tfor  " +audioAttribute + " against " + userid + "/" + audioType );
           if (audioAttribute.getUserid() == userid && audioAttribute.getAudioType().equalsIgnoreCase(audioType)) {
-            //logger.debug("\tfound  " +audioAttribute + " for " + userid + "/" + audioType );
-            audioAttr = audioAttribute;
-            break;
+            logger.debug("\t\tfound  " +audioAttribute + " for " + userid + "/" + audioType );
+            if (audioAttr == null) {
+              audioAttr = audioAttribute;
+            }
+            //break;
           }
         }
       }
@@ -546,6 +581,40 @@ public class AudioDAO extends DAO {
     }
     return null;
   }
+
+/*  public void updateUser(int attrID, int userid) {
+    if (isBadUser(userid)) {
+      logger.error("huh? userid is " +userid);
+      new Exception().printStackTrace();
+    }
+    try {
+      logger.debug("updateUser userid = " + userid + " for audio attr # " + attrID);
+      Connection connection = database.getConnection(this.getClass().toString());
+      String sql = "UPDATE " + AUDIO + " " +
+          "SET " + USERID + "=? " +
+          "WHERE " +
+          ID + "=?";
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      int ii = 1;
+
+      statement.setInt(ii++, userid);
+      statement.setInt(ii++, attrID);
+
+      int i = statement.executeUpdate();
+
+      AudioAttribute audioAttribute1 = getAudioAttribute(attrID);
+      if (audioAttribute1.getUserid() != userid) {
+        logger.error("huh? after user id change, not the right userid " + audioAttribute1.getUserid() + " expected " + userid);
+      }
+
+      finish(connection, statement);
+
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
+  }*/
+
 
   /**
    * Why does this have to be so schizo? add or update -- should just choose
@@ -692,7 +761,7 @@ public class AudioDAO extends DAO {
    * @param audioType at this speed
    * @return > 0 if audio was marked defective
    * @see mitll.langtest.server.database.DatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
-   * @see mitll.langtest.client.custom.EditableExercise#postEditItem
+   * @see mitll.langtest.client.custom.dialog.EditableExercise#postEditItem
    */
   private int markDefect(int userid, String exerciseID, String audioType) {
     try {
