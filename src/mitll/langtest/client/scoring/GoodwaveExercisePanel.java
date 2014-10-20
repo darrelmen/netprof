@@ -35,6 +35,7 @@ import mitll.langtest.shared.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * User: GO22670
@@ -43,6 +44,8 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
+  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
+
   private static final String REFERENCE = "";
   private static final String RECORD_YOURSELF = "Record";
   private static final String RELEASE_TO_STOP = "Release";
@@ -664,7 +667,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       rightSide.getElement().setId("beforePlayWidget_verticalPanel");
       rightSide.addStyleName("leftFiveMargin");
       Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
-
+      logger.info("for ex " + exercise.getID() + " found " + audioAttributes);
       if (audioAttributes.isEmpty()) {
         addNoRefAudioWidget(rightSide);
         return rightSide;
@@ -672,11 +675,15 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         // add gender choices
         Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true);
 
-        // System.out.println("getAfterPlayWidget.males  " + malesMap);
+        //System.out.println("getAfterPlayWidget.males  " + malesMap);
+
         Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false);
 
         //System.out.println("getAfterPlayWidget.females  " + femalesMap);
+
         Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
+
+        //System.out.println("getAfterPlayWidget.defaultUserAudio  " + defaultUserAudio);
 
         List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
         boolean maleEmpty = maleUsers.isEmpty();
@@ -703,6 +710,15 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       }
     }
 
+    /**
+     *
+     * @param rightSide
+     * @param malesMap
+     * @param femalesMap
+     * @param defaultAudioSet
+     * @return
+     * @see #getAfterPlayWidget()
+     */
     private Widget getGenderChoices(final Panel rightSide,
                                     final Map<MiniUser, List<AudioAttribute>> malesMap,
                                     final Map<MiniUser, List<AudioAttribute>> femalesMap,
@@ -713,8 +729,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       ButtonGroup buttonGroup = new ButtonGroup();
       buttonGroup.setToggle(ToggleType.RADIO);
       w.add(buttonGroup);
-
-      boolean first = true;
 
       List<String> choices = new ArrayList<String>();
 
@@ -728,6 +742,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         choices.add("Default");
       }
 
+      boolean first = true;
       for (final String choice : choices) {
         Button choice1 = getChoice(choice, first, new ClickHandler() {
           @Override
