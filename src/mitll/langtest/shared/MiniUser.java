@@ -33,6 +33,7 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
   }
 
   public boolean isDefault() { return id < 0; }
+  public boolean isUnknownDefault() { return id == -1; }
 
   /**
    * It seems strange to copy the string here, but I think it will help the RPC code not try to serialize
