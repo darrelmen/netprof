@@ -23,6 +23,7 @@ public class SLFFile {
    */
   public static final String UNKNOWN_MODEL = "UNKNOWNMODEL";
   private static final String SMALL_LM_SLF = ASRScoring.SMALL_LM_SLF;
+  private static final String ENCODING = "UTF8";
 
   private static final String UNKNOWN_MODEL_BIAS = "-1.20";
   /**
@@ -34,7 +35,8 @@ public class SLFFile {
   public String createSimpleSLFFile(Collection<String> lmSentences, String tmpDir) {
     String slfFile = tmpDir + File.separator + SMALL_LM_SLF;
     try {
-      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(slfFile), FileExerciseDAO.ENCODING));
+      BufferedWriter writer = new BufferedWriter(
+          new OutputStreamWriter(new FileOutputStream(slfFile), ENCODING));
       writer.write("VERSION=1.0\n");
 
       int linkCount = 0;
