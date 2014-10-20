@@ -10,8 +10,6 @@ import java.util.Map;
  * Created by GO22670 on 3/20/2014.
  */
 public interface CommonExercise extends CommonShell {
-  //String getPlan();
-
   String getEnglish();
 
   String getMeaning();
