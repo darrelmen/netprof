@@ -17,9 +17,9 @@ import java.util.*;
 public class Report {
   private static final Logger logger = Logger.getLogger(Report.class);
   public static final int MIN_MILLIS = (1000 * 60);
-  public static final int SAMPLE = 50;
+ // public static final int SAMPLE = 50;
   public static final String BEST_AUDIO = "bestAudio";
-  public static final int LENGTH = BEST_AUDIO.length();
+ // public static final int LENGTH = BEST_AUDIO.length();
   public static final int TEN_SECONDS = 1000 * 10;
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
@@ -33,6 +33,12 @@ public class Report {
     this.audioDAO = audioDAO;
   }
 
+  /**
+   * @see DatabaseImpl#doReport()
+   * @see mitll.langtest.server.LangTestDatabaseImpl#doReport()
+   *
+   * @return
+   */
   public String doReport() {
     List<User> users = userDAO.getUsers();
 
