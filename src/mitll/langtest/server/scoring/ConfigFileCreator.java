@@ -1,10 +1,12 @@
 package mitll.langtest.server.scoring;
 
+import corpus.EnglishLTS;
 import corpus.LTS;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.log4j.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,7 +16,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class ConfigFileCreator {
- // private static Logger logger = Logger.getLogger(ConfigFileCreator.class);
+  private static Logger logger = Logger.getLogger(ConfigFileCreator.class);
 
   private final String platform = Utils.package$.MODULE$.platform();
   private final Map<String, String> properties;
@@ -46,7 +48,7 @@ public class ConfigFileCreator {
 
   private static final String DEFAULT_MODELS_DIR = "models.dli-levantine";
 
-  public ConfigFileCreator(Map<String, String> properties,LTS letterToSoundClass, String scoringDir) {
+  public ConfigFileCreator(Map<String, String> properties, LTS letterToSoundClass, String scoringDir) {
     this.properties = properties;
     this.letterToSoundClass = letterToSoundClass;
     this.scoringDir = scoringDir;
@@ -78,7 +80,11 @@ public class ConfigFileCreator {
       kv.put(LM_TO_USE, tmpDir + File.separator +File.separator + SMALL_LM_SLF); // hack! TODO hack replace
       if (letterToSoundClass != null) {
         String value = letterToSoundClass.getClass().toString();
-        // logger.info("setting lts to " + value);
+        if (value.endsWith("EmptyLTS")) {
+          value = EnglishLTS.class.toString();
+          logger.info("mapping empty lts to " + value);
+        }
+        logger.info("setting lts to " + value);
         kv.put(LTS_CLASS, value);
       }
 
@@ -101,7 +107,7 @@ public class ConfigFileCreator {
     //logger.debug("getHydecConfigFile : tmpDir is " + tmpDir);
 
     String pathToConfigTemplate = scoringDir + File.separator + "configurations" + File.separator + cfgTemplate;
-    //logger.debug("template config is at " + pathToConfigTemplate + " map is " + kv);
+    logger.debug("template config is at " + pathToConfigTemplate + " map is " + kv);
     new FileReplace().doTemplateReplace(pathToConfigTemplate, configFile, kv);
     return configFile;
   }
