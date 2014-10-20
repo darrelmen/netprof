@@ -35,7 +35,6 @@ public class UserDAO extends DAO {
   private static final String ENABLED_REQ_KEY = "enabledReqKey";
   private static final String NATIVE_LANG = "nativeLang";
   private String language;
-  // public static final String USER_ID = "userID";
   private long defectDetector;
 
   private static final String ID = "id";
