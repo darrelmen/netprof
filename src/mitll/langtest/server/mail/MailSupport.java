@@ -31,7 +31,7 @@ public class MailSupport {
   public MailSupport(boolean debugEmail, boolean testEmail) {
     this.debugEmail = debugEmail;
     this.testEmail = testEmail;
-    if (testEmail) logger.debug("\n\n\n--->using test email");
+    //if (testEmail) logger.debug("\n\n\n--->using test email");
   }
 
   /**
