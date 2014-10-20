@@ -82,7 +82,9 @@ public class ASRScoring extends Scoring {
    * @param langTestDatabase
    */
   public ASRScoring(String deployPath, Map<String, String> properties, LangTestDatabaseImpl langTestDatabase) {
-    this(deployPath, properties, (HTKDictionary)null);
+    this(deployPath, properties
+    //    , (HTKDictionary)null
+    );
     this.langTestDatabase = langTestDatabase;
     readDictionary();
     makeDecoder();
@@ -94,9 +96,11 @@ public class ASRScoring extends Scoring {
    * @see #ASRScoring(String, java.util.Map, mitll.langtest.server.LangTestDatabaseImpl)
    * @param deployPath
    * @param properties
-   * @param dict
+   * @paramx dict
    */
-  private ASRScoring(String deployPath, Map<String, String> properties, HTKDictionary dict) {
+  private ASRScoring(String deployPath, Map<String, String> properties
+  //    , HTKDictionary dict
+  ) {
     super(deployPath);
     lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
@@ -106,9 +110,9 @@ public class ASRScoring extends Scoring {
 
     isMandarin = language.equalsIgnoreCase("mandarin");
     this.letterToSoundClass = new LTSFactory().getLTSClass(language);
-    this.htkDictionary = dict;
+   // this.htkDictionary = dict;
     makeDecoder();
-    if (dict != null) logger.debug("htkDictionary size is " + dict.size());
+   // if (dict != null) logger.debug("htkDictionary size is " + dict.size());
     this.configFileCreator = new ConfigFileCreator(properties, letterToSoundClass, scoringDir);
   }
 
@@ -134,6 +138,7 @@ public class ASRScoring extends Scoring {
    * @param lts
    * @param foreignLanguagePhrase
    * @return
+   * @see #checkLTS(String)
    */
   private boolean checkLTS(LTS lts, String foreignLanguagePhrase) {
     SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
@@ -572,7 +577,7 @@ public class ASRScoring extends Scoring {
 
     Scores scoresFromHydec = getScoresFromHydec(testAudio, sentence, configFile);
     double hydecScore = scoresFromHydec.hydecScore;
-    if (hydecScore > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
+    if (hydecScore > lowScoreThresholdKeepTempDir && false) {   // keep really bad scores for now
       try {
         //logger.debug("deleting " + tmpDir + " since score is " +hydecScore);
         FileUtils.deleteDirectory(new File(tmpDir));
@@ -583,6 +588,9 @@ public class ASRScoring extends Scoring {
     return scoresFromHydec;
   }
 
+  /**
+   * @see #ASRScoring(String, java.util.Map, mitll.langtest.server.LangTestDatabaseImpl)
+   */
   private void readDictionary() { htkDictionary = makeDict(); }
 
   /**
@@ -596,10 +604,10 @@ public class ASRScoring extends Scoring {
       HTKDictionary htkDictionary = new HTKDictionary(dictFile);
       long now = System.currentTimeMillis();
       int size = htkDictionary.size(); // force read from lazy val
-      if (now - then > 300) {
+      //if (now - then > 300) {
         logger.info("for " + languageProperty +
             " read dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
-      }
+      //}
       return htkDictionary;
     }
     else {
@@ -619,7 +627,7 @@ public class ASRScoring extends Scoring {
     sentence = sentence.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ");
     long then = System.currentTimeMillis();
 
-    //logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " )");
+    logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with LTS " + letterToSoundClass);
 
     try {
       Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut =
