@@ -80,11 +80,11 @@ public class ConfigFileCreator {
       kv.put(LM_TO_USE, tmpDir + File.separator +File.separator + SMALL_LM_SLF); // hack! TODO hack replace
       if (letterToSoundClass != null) {
         String value = letterToSoundClass.getClass().toString();
-        if (value.endsWith("EmptyLTS")) {
-          value = EnglishLTS.class.toString();
-          logger.info("mapping empty lts to " + value);
-        }
-        logger.info("setting lts to " + value);
+        //if (value.endsWith("EmptyLTS")) {
+        //  value = EnglishLTS.class.toString();
+        //  logger.info("mapping empty lts to " + value);
+       // }
+      //  logger.info("setting lts to " + value);
         kv.put(LTS_CLASS, value);
       }
 
@@ -107,7 +107,7 @@ public class ConfigFileCreator {
     //logger.debug("getHydecConfigFile : tmpDir is " + tmpDir);
 
     String pathToConfigTemplate = scoringDir + File.separator + "configurations" + File.separator + cfgTemplate;
-    logger.debug("template config is at " + pathToConfigTemplate + " map is " + kv);
+    //logger.debug("template config is at " + pathToConfigTemplate + " map is " + kv);
     new FileReplace().doTemplateReplace(pathToConfigTemplate, configFile, kv);
     return configFile;
   }
