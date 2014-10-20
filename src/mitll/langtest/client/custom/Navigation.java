@@ -44,6 +44,7 @@ import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -53,6 +54,8 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class Navigation implements RequiresResize {
+  private Logger logger = Logger.getLogger("Navigation");
+
   private static final String CHAPTERS = "Learn Pronunciation";
 //  private static final String CONTENT = CHAPTERS;
   private static final String YOUR_LISTS = "Study Your Lists";
@@ -159,6 +162,7 @@ public class Navigation implements RequiresResize {
 
     practiceHelper = makePracticeHelper(service, userManager, controller, feedback);
     ListInterface exerciseList = npfHelper.getExerciseList();
+    logger.info("exercise list is " + exerciseList);
     reviewItem = new NPFHelper.ReviewItemHelper(service, feedback, userManager, controller, exerciseList, npfHelper);
     editItem = new EditItem(service, userManager, controller, exerciseList, feedback, npfHelper);
   }
