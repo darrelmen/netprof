@@ -40,12 +40,7 @@ public class LTSFactory {
   // TODO : what about Japanese, Korean, ...?
 
   private static final Map<String,LTS> languageToLTS = new HashMap<String,LTS>();
-  private static final LTS unknown = new LTS() {
-    @Override
-    public String[][] process(String word) {
-      return new String[0][];
-    }
-  };
+  private static final LTS unknown = new EmptyLTS();
 
   public LTSFactory() {
     languageToLTS.put(ARABIC.toLowerCase(), new ModernStandardArabicLTS());
@@ -74,5 +69,12 @@ public class LTSFactory {
       letterToSoundClass = unknown;
     }
     return letterToSoundClass;
+  }
+
+  private static class EmptyLTS extends LTS {
+    @Override
+    public String[][] process(String word) {
+      return new String[0][];
+    }
   }
 }
