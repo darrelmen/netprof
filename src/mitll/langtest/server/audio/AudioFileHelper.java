@@ -326,8 +326,9 @@ public class AudioFileHelper {
       List<String> unk = new ArrayList<String>();
       unk.add(SLFFile.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
       String vocab = asrScoring.getUsedTokens(lmSentences, unk);
-      //logger.debug("getASRScoreForAudio : vocab " + vocab);
-      return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, 128, 128, false, true, tmpDir, serverProps.useScoreCache(), "");
+      logger.debug("getASRScoreForAudio : vocab " + vocab);
+      return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, 128, 128, false, true, tmpDir,
+          serverProps.useScoreCache(), "");
     }
   }
 
