@@ -30,6 +30,7 @@ import mitll.langtest.shared.ExerciseFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -39,6 +40,8 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class CommentNPFExercise extends NPFExercise {
+  private Logger logger = Logger.getLogger("CommentNPFExercise");
+
   private static final String NO_REFERENCE_AUDIO = "No reference audio";
   private static final String M = "M";
   private static final String F = "F";
@@ -226,7 +229,7 @@ public class CommentNPFExercise extends NPFExercise {
     long maleTime = 0, femaleTime = 0;
     for (AudioAttribute audioAttribute : e.getAudioAttributes()) {
       if (audioAttribute.getAudioType().startsWith("context")) {
-        if (audioAttribute.getUser().isDefault()) {
+        if (audioAttribute.getUser().getId() == -1) {
           defaultAudio = audioAttribute;
         } else if (audioAttribute.getUser().isMale()) {
           if (audioAttribute.getTimestamp() > maleTime) {
@@ -255,7 +258,10 @@ public class CommentNPFExercise extends NPFExercise {
       List<String> choices = new ArrayList<String>();
       if (maleAudio != null) choices.add(M);
       if (femaleAudio != null) choices.add(F);
-      if (defaultAudio != null) choices.add("Default"); //better not happen
+      if (defaultAudio != null) {
+        logger.info("Adding default choice since found " + defaultAudio);
+        choices.add("Default"); //better not happen
+      }
 
       hp.add(getShowGroup(choices));
     }
