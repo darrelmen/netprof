@@ -21,12 +21,16 @@ import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.custom.UserList;
 
+import java.util.logging.Logger;
+
 /**
  * Creates a dialog that lets you edit an item
  *
 * Created by GO22670 on 3/28/2014.
 */
 class EditableExercise extends NewUserExercise {
+  private Logger logger = Logger.getLogger("EditableExercise");
+
   public static final int LABEL_WIDTH = 105;
   private final HTML englishAnno = new HTML();
   private final HTML translitAnno = new HTML();
@@ -63,6 +67,8 @@ class EditableExercise extends NewUserExercise {
     this.originalList = originalList;
     this.exerciseList = exerciseList;
     this.predefinedContentList = predefinedContent;
+    if (predefinedContentList == null) new Exception().printStackTrace();
+
     this.npfHelper = npfHelper;
   }
 
@@ -232,7 +238,7 @@ class EditableExercise extends NewUserExercise {
    */
   @Override
   protected void afterValidForeignPhrase(final UserList ul, final ListInterface exerciseList, final Panel toAddTo, boolean onClick) {
-    System.out.println("EditItem.afterValidForeignPhrase : exercise id " + newUserExercise.getID());
+    logger.info("EditItem.afterValidForeignPhrase : exercise id " + newUserExercise.getID());
     checkForForeignChange();
 
     postChangeIfDirty(exerciseList, onClick);
@@ -245,7 +251,7 @@ class EditableExercise extends NewUserExercise {
 
   private void postChangeIfDirty(ListInterface exerciseList, boolean onClick) {
     if (foreignChanged() || translitChanged() || englishChanged() || refAudioChanged() || slowRefAudioChanged() || onClick) {
-      System.out.println("postChangeIfDirty:  change " + foreignChanged() + translitChanged() + englishChanged() + refAudioChanged() + slowRefAudioChanged());
+      logger.info("postChangeIfDirty:  change " + foreignChanged() + translitChanged() + englishChanged() + refAudioChanged() + slowRefAudioChanged());
       reallyChange(exerciseList, onClick);
     }
   }
@@ -288,7 +294,7 @@ class EditableExercise extends NewUserExercise {
   private boolean foreignChanged() {
     boolean b = !foreignLang.box.getText().equals(originalForeign);
     if (b)
-      System.out.println("foreignChanged : foreign " + foreignLang.box.getText() + " != original " + originalForeign);
+      logger.info("foreignChanged : foreign " + foreignLang.box.getText() + " != original " + originalForeign);
 
     return b;
   }
@@ -325,7 +331,7 @@ class EditableExercise extends NewUserExercise {
    * @param buttonClicked
    */
   private void postEditItem(final ListInterface pagingContainer, final boolean buttonClicked) {
-    System.out.println("postEditItem : edit item " + buttonClicked);
+    logger.info("postEditItem : edit item " + buttonClicked);
 
     grabInfoFromFormAndStuffInfoExercise();
 
@@ -340,7 +346,7 @@ class EditableExercise extends NewUserExercise {
         originalTransliteration = newUserExercise.getTransliteration();
         originalRefAudio = newUserExercise.getRefAudio();
         originalSlowRefAudio = newUserExercise.getSlowAudioRef();
-       // System.out.println("postEditItem : onSuccess " + newUserExercise.getTooltip());
+       // logger.info("postEditItem : onSuccess " + newUserExercise.getTooltip());
 
         doAfterEditComplete(pagingContainer, buttonClicked);
       }
@@ -355,19 +361,23 @@ class EditableExercise extends NewUserExercise {
    * @param buttonClicked
    */
   void doAfterEditComplete(ListInterface pagingContainer, boolean buttonClicked) {
-    System.out.println("doAfterEditComplete : change tooltip " + buttonClicked + " id " + predefinedContentList.getCurrentExerciseID());
+    if (predefinedContentList != null) {
+      logger.info("doAfterEditComplete : change tooltip " + buttonClicked + " id " + predefinedContentList.getCurrentExerciseID());
+    }
 
     changeTooltip(pagingContainer);
-    predefinedContentList.reloadWith(predefinedContentList.getCurrentExerciseID());
+    if (predefinedContentList != null) {
+      predefinedContentList.reloadWith(predefinedContentList.getCurrentExerciseID());
+    }
   }
 
   private void changeTooltip(ListInterface pagingContainer) {
     CommonShell byID = pagingContainer.byID(newUserExercise.getID());
     if (byID == null) {
-      System.err.println("changeTooltip : huh? can't find exercise with id " + newUserExercise.getID());
+      logger.warning("changeTooltip : huh? can't find exercise with id " + newUserExercise.getID());
     } else {
       byID.setTooltip(newUserExercise.getCombinedTooltip());
-      System.out.println("changeTooltip : for " + newUserExercise.getID() + " now " + byID.getTooltip());
+      logger.info("changeTooltip : for " + newUserExercise.getID() + " now " + byID.getTooltip());
 
       pagingContainer.redraw();   // show change to tooltip!
     }
@@ -383,7 +393,7 @@ class EditableExercise extends NewUserExercise {
    */
   @Override
   public void setFields(CommonExercise newUserExercise) {
-    //System.out.println("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
+    //logger.info("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
 
     // english
     english.box.setText(originalEnglish = newUserExercise.getEnglish());
