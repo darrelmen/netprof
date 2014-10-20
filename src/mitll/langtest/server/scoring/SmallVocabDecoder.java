@@ -24,6 +24,12 @@ public class SmallVocabDecoder {
   private HTKDictionary htkDictionary;
 
   public SmallVocabDecoder() {}
+
+  /**
+   *
+   * @param htkDictionary
+   * @see ASRScoring#makeDecoder()
+   */
   public SmallVocabDecoder(HTKDictionary htkDictionary) {
     this.htkDictionary = htkDictionary;
   }
@@ -93,24 +99,29 @@ public class SmallVocabDecoder {
     return all;
   }
 
-
+  /**
+   *
+   * @param phrase
+   * @return
+   * @see mitll.langtest.server.scoring.ASRScoring#checkLTS(corpus.LTS, String)
+   */
   public String segmentation(String phrase){  return longest_prefix(phrase, 0);  }
 
-  private String longest_prefix(String phrase, int i){
-    if(i == phrase.length())
+  private String longest_prefix(String phrase, int i) {
+    if (i == phrase.length())
       return "";
     String prefix = phrase.substring(0, phrase.length() - i);
     if (inDict(prefix)) {
-      if(i == 0)
+      if (i == 0)
         return phrase;
-      String rest = longest_prefix(phrase.substring(phrase.length()-i, phrase.length()), 0);
-      if(rest.length() > 0)
+      String rest = longest_prefix(phrase.substring(phrase.length() - i, phrase.length()), 0);
+      if (rest.length() > 0)
         return prefix + " " + rest;
     }
     //else {
     //logger.debug("dict doesn't contain " + prefix);
     //}
-    return longest_prefix(phrase, i+1);
+    return longest_prefix(phrase, i + 1);
   }
 
   private boolean inDict(String token) {
