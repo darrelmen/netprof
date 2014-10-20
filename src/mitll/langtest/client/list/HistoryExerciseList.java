@@ -342,7 +342,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    */
   protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix) {
     lastReqID++;
-    if (DEBUG || true) {
+    if (DEBUG) {
       System.out.println("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
         "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID +
         " instance " + getInstance() + " user " + controller.getUser() + " unrecorded " + getUnrecorded() +
