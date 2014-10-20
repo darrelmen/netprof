@@ -32,7 +32,6 @@ class SimpleChapterNPFHelper implements RequiresResize {
   protected final UserFeedback feedback;
   protected PagingExerciseList npfExerciseList;
   private final ListInterface predefinedContentList;
-  private DivWidget contentPanel;
 
   /**
    * @param service
@@ -157,7 +156,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
 
   public void setContentPanel(DivWidget contentPanel) {
   //  System.out.println("SimpleChapterNPFHelper.setContentPanel : got " + contentPanel);
-    this.contentPanel = contentPanel;
+  //  DivWidget contentPanel1 = contentPanel;
   }
 
 /*
