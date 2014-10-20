@@ -69,7 +69,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
    * @see mitll.langtest.client.custom.Navigation#selectPreviousTab(String)
    */
   public void showNPF(TabAndContent tabAndContent, String instanceName) {
-    System.out.println(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
+   // System.out.println(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
