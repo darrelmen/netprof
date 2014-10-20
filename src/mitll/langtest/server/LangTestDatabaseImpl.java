@@ -1,6 +1,5 @@
 package mitll.langtest.server;
 
-import Utils.EmailSupport;
 import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
 import com.google.common.io.Files;
@@ -476,6 +475,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     then = now;
     attachAudio(firstExercise);
 
+    //for (AudioAttribute audioAttribute : firstExercise.getAudioAttributes()) logger.debug("\t addAnnotationsAndAudio ex " + firstExercise.getID()+ " audio " + audioAttribute);
+
     now = System.currentTimeMillis();
     if (now - then > 40) {
       logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to attach audio to exercise " + firstExercise.getID());
@@ -499,6 +500,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (now - then > 40) {
       logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to attach score history to exercise " + firstExercise.getID());
     }
+
+   // for (AudioAttribute audioAttribute : firstExercise.getAudioAttributes()) logger.debug("\t addAnnotationsAndAudio ret ex " + firstExercise.getID()+ " audio " + audioAttribute);
+
   }
 
   /**
@@ -516,8 +520,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.CommonExercise, boolean)
    */
   private void attachAudio(CommonExercise firstExercise) {
-    String installPath = pathHelper.getInstallPath();
-    db.getAudioDAO().attachAudio(firstExercise, installPath, relativeConfigDir);
+    db.getAudioDAO().attachAudio(firstExercise, pathHelper.getInstallPath(), relativeConfigDir);
   }
 
   /**
@@ -583,7 +586,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     CommonShell shell = exercises.get(0);
 
     return getExercise(shell.getID(), user.getId(), false);
-
   }
 
   private ExerciseListWrapper getExerciseIDs(int userID) {
@@ -627,13 +629,30 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       //logger.debug("getExercise : returning " + byID);
       ensureMP3s(byID);
+
+     // for (AudioAttribute audioAttribute : byID.getAudioAttributes()) logger.debug("\t addAnnotationsAndAudio after ensure mp3 ex " + byID.getID()+ " audio " + audioAttribute);
+
       now = System.currentTimeMillis();
       if (now - then2 > 100) {
         logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to ensure there are mp3s for exercise " + id);
       }
     }
+    checkPerformance(id, then);
+
+    if (byID != null) {
+      //logger.debug("returning (" + language + ") exercise " + byID.getID());
+    }
+    else {
+      logger.info("couldn't find exercise with id '" +id+  "'");
+    }
+    return byID;
+  }
+
+  public void checkPerformance(String id, long then) {
+    long now;
     now = System.currentTimeMillis();
     long diff = now - then;
+    String language = serverProps.getLanguage();
 
     ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
     String threadInfo = threadGroup.getName() + " = " + threadGroup.activeCount();
@@ -646,14 +665,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     } else if (diff > 5) {
       logger.debug(message);
     }
-
-    if (byID != null) {
-      //logger.debug("returning (" + language + ") exercise " + byID.getID());
-    }
-    else {
-      logger.info("couldn't find exercise with id '" +id+  "'");
-    }
-    return byID;
   }
 
   protected void sendEmailWhenSlow(String id, String language, long diff, String threadInfo) {
@@ -1164,6 +1175,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public void markGender(AudioAttribute attr, boolean isMale) {
     db.getAudioDAO().addOrUpdateUser(isMale ? UserDAO.DEFAULT_MALE_ID : UserDAO.DEFAULT_FEMALE_ID, attr);
+
+    String exid = attr.getExid();
+    CommonExercise byID = db.getCustomOrPredefExercise(exid);
+    if (byID == null) {
+      logger.error("couldn't find exercise " + exid);
+      logAndNotifyServerException(new Exception("couldn't find exercise " + exid));
+    }
+    else {
+      byID.getAudioAttributes().clear();
+      attachAudio(byID);
+     // for (AudioAttribute audioAttribute : byID.getAudioAttributes()) logger.debug("after gender change, now " + audioAttribute);
+    }
+    db.getSectionHelper().refreshExercise(byID);
+
   }
 
   /**
