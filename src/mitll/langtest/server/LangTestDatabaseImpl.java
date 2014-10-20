@@ -1932,13 +1932,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (serverProps.doRecoTest() || serverProps.doRecoTest2()) {
       new RecoTest(this, serverProps, pathHelper, audioFileHelper);
     }
-    db.preloadExercises();
+    try {
+      db.preloadExercises();
+    } catch (Exception e) {
+      logger.error("couldn't load database " +e,e);
+    }
     db.getUserListManager().setStateOnExercises();
     doReport();
   }
 
   /**
-   * TODO : remove the ref audio results from results table.
+   * Sends a usage report to the email list at property {@link ServerProperties#getReportEmails()}.
+   * Sends it out first thing every monday.
+   * Subject disambiguates between multiple sites for the same language.
+   * Also writes the report out to the report directory... TODO : necessary?
    */
   public void doReport() {
     Calendar calendar = new GregorianCalendar();
@@ -1947,6 +1954,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
     String today = simpleDateFormat2.format(new Date());
 
+    String site = getServletContext().getRealPath("");
+    logger.debug("Site real path " + site);
+    String suffix = "";
+    if (site != null && site.contains("npfClassroom")) {
+      site = site.substring(site.indexOf("npfClassroom"));
+      suffix = " at " + site;
+    }
+    String subject = "Weekly Usage Report for " + serverProps.getLanguage() + suffix;
     if (i == Calendar.MONDAY && !reportEmails.isEmpty()) {
       File file = getReportFile(today);
       //logger.debug("checking file  " + file.getAbsolutePath());
@@ -1959,7 +1974,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           writer.write(message);
           writer.close();
           for (String dest : reportEmails) {
-            getMailSupport().sendEmail(EmailHelper.NP_SERVER, dest, EmailHelper.MY_EMAIL, "Weekly Usage Report for " + serverProps.getLanguage(), message);
+            getMailSupport().sendEmail(EmailHelper.NP_SERVER, dest, EmailHelper.MY_EMAIL,
+                subject, message);
           }
         } catch (IOException e) {
           logger.error("got "+e,e);
@@ -1969,8 +1985,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.debug("not sending email report since not Monday");
     }
 
-    if (today.equals("10_17_14")) { // testing
-      getMailSupport().sendEmail(EmailHelper.NP_SERVER, EmailHelper.MY_EMAIL, EmailHelper.MY_EMAIL, "Weekly Usage Report for " + serverProps.getLanguage(), db.doReport());
+    if (today.equals("10_19_14")) { // testing
+      getMailSupport().sendEmail(EmailHelper.NP_SERVER, EmailHelper.MY_EMAIL, EmailHelper.MY_EMAIL, subject, db.doReport());
     }
   }
 
