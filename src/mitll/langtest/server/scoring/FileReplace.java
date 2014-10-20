@@ -31,7 +31,11 @@ public class FileReplace {
       while ((line = reader.readLine()) != null) {
         String replaced = line;
         for (Map.Entry<String, String> kv : replaceMap.entrySet()) {
-          replaced = replaced.replaceAll(kv.getKey(),kv.getValue());
+          try {
+            replaced = replaced.replaceAll(kv.getKey(),kv.getValue());
+          } catch (Exception e) {
+            logger.error("got " +e + " replacing '" + kv.getKey() + "' with '" + kv.getValue() + "'",e);
+          }
         }
         writer.write(replaced +"\n");
       }
