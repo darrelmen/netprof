@@ -362,7 +362,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
 
-   logger.debug("getJsonNestedChapters got " + sectionNodes);
+   //logger.debug("getJsonNestedChapters got " + sectionNodes);
     for (SectionNode node : sectionNodes) {
       typeToValues.put(node.getType(), Collections.singletonList(node.getName()));
       JSONObject jsonForNode = getJsonForNode(node, typeToValues);
