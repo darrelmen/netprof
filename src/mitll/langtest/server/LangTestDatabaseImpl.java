@@ -94,9 +94,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (!message1.contains("Broken Pipe")) {
       String message = "Server Exception : " + ExceptionUtils.getStackTrace(e);
       String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
-      logger.debug(prefixedMessage);
       String subject = "Server Exception on " + pathHelper.getInstallPath();
       sendEmail(subject, prefixedMessage);
+
+      logger.debug(prefixedMessage);
     }
   }
 
@@ -1934,11 +1935,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     try {
       db.preloadExercises();
+      db.getUserListManager().setStateOnExercises();
+      doReport();
     } catch (Exception e) {
       logger.error("couldn't load database " +e,e);
     }
-    db.getUserListManager().setStateOnExercises();
-    doReport();
   }
 
   /**
@@ -1966,7 +1967,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       File file = getReportFile(today);
       //logger.debug("checking file  " + file.getAbsolutePath());
       if (file.exists()) {
-        logger.debug("already did report for " + today);
+        logger.debug("already did report for " + today + " : " + file.getAbsolutePath());
       } else {
         try {
           BufferedWriter writer = new BufferedWriter(new FileWriter(file));
@@ -1990,11 +1991,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  public File getReportFile(String today) {
-    File test = new File("reports");
-    if (!test.exists()) test.mkdirs();
+  private File getReportFile(String today) {
+    File reports = pathHelper.getAbsoluteFile("reports");
+    //File test = new File("reports");
+    if (!reports.exists()) {
+      logger.debug("making dir " + reports.getAbsolutePath());
+      reports.mkdirs();
+    }
+    else {
+      logger.debug("reports dir exists at " + reports.getAbsolutePath());
+    }
     String fileName = "report_" + today + ".html";
-    return new File(test,fileName);
+    return new File(reports,fileName);
   }
 
   /**
