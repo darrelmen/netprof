@@ -10,6 +10,7 @@ import corpus.ModernStandardArabicLTS;
 import corpus.PashtoLTS;
 import corpus.UrduLTS;
 import corpus.SudaneseLTS;
+import corpus.EmptyLTS;
 import org.apache.log4j.Logger;
 
 import java.util.HashMap;
