@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -153,7 +152,7 @@ public class DatabaseImpl implements Database {
 
     userExerciseDAO = new UserExerciseDAO(this);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
-    resultDAO = new ResultDAO(this);
+    resultDAO = new ResultDAO(this, logAndNotify);
     audioDAO = new AudioDAO(this, userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
     gradeDAO = new GradeDAO(this, userDAO, resultDAO);
