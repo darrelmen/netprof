@@ -150,6 +150,8 @@ public class ASRScoring extends Scoring {
     try {
       int i = 0;
       for (String token : tokens) {
+        if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL))
+          return true;
         if (isMandarin) {
           String segmentation = smallVocabDecoder.segmentation(token.trim());
           if (segmentation.isEmpty()) {
@@ -384,7 +386,7 @@ public class ASRScoring extends Scoring {
     Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
 
     if (isMandarin) {
-      sentence = getSegmented(sentence.trim());
+      sentence = SLFFile.UNKNOWN_MODEL + " " +getSegmented(sentence.trim()); //segmentaton method will filter out the UNK model
     }
     if (scores == null) {
       scores = calcScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir);
