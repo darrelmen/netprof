@@ -1,26 +1,23 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.MonitorResult;
+import mitll.langtest.shared.Result;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.monitoring.Session;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.DataFormat;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * Create, drop, alter, read from the results table.
@@ -29,7 +26,7 @@ import java.util.*;
 public class ResultDAO extends DAO {
   private static final Logger logger = Logger.getLogger(ResultDAO.class);
 
-  private static final Map<String,String> EMPTY_MAP = new HashMap<String,String>();
+  private static final Map<String, String> EMPTY_MAP = new HashMap<String, String>();
   private static final int MINUTE = 60 * 1000;
   private static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
 
@@ -51,15 +48,18 @@ public class ResultDAO extends DAO {
   static final String STIMULUS = "stimulus";
   static final String DEVICE_TYPE = "deviceType";  // iPad, iPhone, browser, etc.
   static final String DEVICE = "device"; // device id, or browser type
+  private LogAndNotify logAndNotify;
 
   private final boolean debug = false;
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
    * @param database
+   * @param logAndNotify
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
    */
-  public ResultDAO(Database database) {
+  public ResultDAO(Database database, LogAndNotify logAndNotify) {
     super(database);
+    this.logAndNotify = logAndNotify;
   }
 
   private List<Result> cachedResultsForQuery = null;
@@ -87,7 +87,7 @@ public class ResultDAO extends DAO {
       }
       return resultsForQuery;
     } catch (Exception ee) {
-      logger.error("got " + ee, ee);
+      logException(ee);
     }
     return new ArrayList<Result>();
   }
@@ -107,7 +107,7 @@ public class ResultDAO extends DAO {
       }
       return resultsForQuery;
     } catch (Exception ee) {
-      logger.error("got " + ee, ee);
+      logException(ee);
     }
     return new ArrayList<CorrectAndScore>();
   }
@@ -127,7 +127,7 @@ public class ResultDAO extends DAO {
       }
       return resultsForQuery;
     } catch (Exception ee) {
-      logger.error("got " + ee, ee);
+      logException(ee);
     }
 
     return new ArrayList<MonitorResult>();
@@ -154,10 +154,10 @@ public class ResultDAO extends DAO {
 
   public List<MonitorResult> getMonitorResultsByID(String id) {
     try {
-      String sql = "SELECT * FROM " + RESULTS + " WHERE " + Database.EXID + "='" + id +"'";
+      String sql = "SELECT * FROM " + RESULTS + " WHERE " + Database.EXID + "='" + id + "'";
       return getMonitorResultsSQL(sql);
     } catch (Exception ee) {
-      logger.error("got " + ee, ee);
+      logException(ee);
     }
 
     return new ArrayList<MonitorResult>();
@@ -169,11 +169,11 @@ public class ResultDAO extends DAO {
    * Then for each user's results, make a list of sessions representing a sequence of grouped results
    * A session will have statistics - # correct, avg pronunciation score, maybe duration, etc.
    *
-   * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
    * @param ids
    * @param latestResultID
    * @return
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
    */
   public SessionsAndScores getSessionsForUserIn2(Collection<String> ids, long latestResultID, long userid,
                                                  Collection<String> allIds) {
@@ -199,10 +199,10 @@ public class ResultDAO extends DAO {
 
   public List<CommonExercise> getExercisesSortedIncorrectFirst(Collection<CommonExercise> exercises, long userid) {
     List<String> allIds = new ArrayList<String>();
-    Map<String,CommonExercise> idToEx = new HashMap<String, CommonExercise>();
+    Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
     for (CommonExercise exercise : exercises) {
       allIds.add(exercise.getID());
-      idToEx.put(exercise.getID(),exercise);
+      idToEx.put(exercise.getID(), exercise);
     }
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
     if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
@@ -216,13 +216,13 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see #getSessionsForUserIn2(java.util.Collection, long, long, java.util.Collection)
    * @param results
    * @param allIds
    * @return
+   * @see #getSessionsForUserIn2(java.util.Collection, long, long, java.util.Collection)
    */
   List<ExerciseCorrectAndScore> getSortedAVPHistory(List<CorrectAndScore> results, Collection<String> allIds) {
-    SortedMap<String,ExerciseCorrectAndScore> idToScores = new TreeMap<String, ExerciseCorrectAndScore>();
+    SortedMap<String, ExerciseCorrectAndScore> idToScores = new TreeMap<String, ExerciseCorrectAndScore>();
     if (results != null) {
       for (CorrectAndScore r : results) {
         String id = r.getId();
@@ -233,7 +233,9 @@ public class ResultDAO extends DAO {
         correctAndScores.add(r);
       }
     }
-    for (ExerciseCorrectAndScore exerciseCorrectAndScore  : idToScores.values()) { exerciseCorrectAndScore.sort(); }
+    for (ExerciseCorrectAndScore exerciseCorrectAndScore : idToScores.values()) {
+      exerciseCorrectAndScore.sort();
+    }
 
     for (String id : allIds) {
       if (!idToScores.containsKey(id)) idToScores.put(id, new ExerciseCorrectAndScore(id));
@@ -246,6 +248,7 @@ public class ResultDAO extends DAO {
   public static class SessionsAndScores {
     List<Session> sessions;
     List<ExerciseCorrectAndScore> sortedResults;
+
     public SessionsAndScores(List<Session> sessions, List<ExerciseCorrectAndScore> sortedResults) {
       this.sessions = sessions;
       this.sortedResults = sortedResults;
@@ -253,8 +256,10 @@ public class ResultDAO extends DAO {
   }
 
   public void attachScoreHistory(long userID, CommonExercise firstExercise, boolean isFlashcardRequest) {
-    List<CorrectAndScore> resultsForExercise = getResultsForExIDInForUser(Collections.singleton(firstExercise.getID()), isFlashcardRequest, userID);
+    Set<String> singleton = Collections.singleton(firstExercise.getID());
+    List<CorrectAndScore> resultsForExercise = getResultsForExIDInForUser(singleton, isFlashcardRequest, userID);
 
+    //logger.debug("score history " + resultsForExercise);
     int total = 0;
     float scoreTotal = 0f;
     for (CorrectAndScore r : resultsForExercise) {
@@ -271,20 +276,20 @@ public class ResultDAO extends DAO {
   /**
    * Only take avp audio type and *valid* audio.
    *
-   * @see #getSessionsForUserIn2
    * @param ids
    * @param matchAVP
    * @return
+   * @see #getSessionsForUserIn2
    */
 
   private List<CorrectAndScore> getResultsForExIDIn(Collection<String> ids, boolean matchAVP) {
     try {
       String list = getInList(ids);
 
-      String sql = getCSSelect()+ " FROM " + RESULTS + " WHERE " +
-        VALID + "=true" + " AND " +
-        //AUDIO_TYPE + (matchAVP?"=":"<>") + "'avp'" +" AND " +
-          getAVPClause(matchAVP) +" AND " +
+      String sql = getCSSelect() + " FROM " + RESULTS + " WHERE " +
+          VALID + "=true" + " AND " +
+          //AUDIO_TYPE + (matchAVP?"=":"<>") + "'avp'" +" AND " +
+          getAVPClause(matchAVP) + " AND " +
 
           Database.EXID + " in (" + list + ")" +
           " order by " + Database.TIME + " asc";
@@ -294,24 +299,28 @@ public class ResultDAO extends DAO {
 
       List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement);
 
-      if (debug) logger.debug("getResultsForExIDIn for  " +sql+ " got\n\t" + scores.size());
+      if (debug) logger.debug("getResultsForExIDIn for  " + sql + " got\n\t" + scores.size());
       return scores;
     } catch (Exception ee) {
-      logger.error("got " + ee, ee);
+      logException(ee);
     }
     return new ArrayList<CorrectAndScore>();
+  }
+
+  private void logException(Exception ee) {
+    logger.error("got " + ee, ee);
+    logAndNotify.logAndNotifyServerException(ee);
   }
 
 
   /**
    * TODO : inefficient - better ways to do this in h2
    *
-   *
-   * @see #getSessionsForUserIn2(java.util.Collection, long, long, java.util.Collection)
    * @param ids
    * @param matchAVP
    * @param userid
    * @return
+   * @see #getSessionsForUserIn2(java.util.Collection, long, long, java.util.Collection)
    * @see #attachScoreHistory(long, mitll.langtest.shared.CommonExercise, boolean)
    */
   private List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, long userid) {
@@ -319,24 +328,25 @@ public class ResultDAO extends DAO {
       String list = getInList(ids);
 
       String sql = getCSSelect() + " FROM " + RESULTS + " WHERE " +
-          USERID + "=" + userid + " AND " +
+          USERID + "=? AND " +
           VALID + "=true" + " AND " +
-          //    AUDIO_TYPE + (matchAVP ? "=" : "<>") + "'avp'" +
           getAVPClause(matchAVP) +
           " AND " +
           Database.EXID + " in (" + list + ")";
 
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(sql);
+      statement.setLong(1, userid);
 
       List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement);
 
       if (debug) {
-        logger.debug("getResultsForExIDInForUser for  " +sql+ " got\n\t" + scores.size());
+        logger.debug("getResultsForExIDInForUser for  " + sql + " got\n\t" + scores.size());
       }
       return scores;
     } catch (Exception ee) {
-      logger.error("got " + ee, ee);
+      logger.error("exception getting results for user " + userid + " and ids " + ids);
+      logException(ee);
     }
     return new ArrayList<CorrectAndScore>();
   }
@@ -351,10 +361,10 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see #getResults()
    * @param sql
    * @return
    * @throws SQLException
+   * @see #getResults()
    */
   private List<Result> getResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
@@ -362,6 +372,7 @@ public class ResultDAO extends DAO {
 
     return getResultsForQuery(connection, statement);
   }
+
   private List<MonitorResult> getMonitorResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
@@ -389,7 +400,7 @@ public class ResultDAO extends DAO {
       }
       finish(connection, statement, rs);
     } catch (Exception ee) {
-      logger.error("got " + ee, ee);
+      logException(ee);
     }
     return numResults;
   }
@@ -415,8 +426,8 @@ public class ResultDAO extends DAO {
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       String answer = rs.getString(ANSWER);
       boolean valid = rs.getBoolean(VALID);
-     // boolean flq = rs.getBoolean(FLQ);
-    //  boolean spoken = rs.getBoolean(SPOKEN);
+      // boolean flq = rs.getBoolean(FLQ);
+      //  boolean spoken = rs.getBoolean(SPOKEN);
 
       String type = rs.getString(AUDIO_TYPE);
       int dur = rs.getInt(DURATION);
@@ -426,13 +437,13 @@ public class ResultDAO extends DAO {
       //String stimulus = rs.getString(STIMULUS);
 
       Result result = new Result(uniqueID, userID, //id
-        plan, // plan
-        exid, // id
-        qid, // qid
-        trimPathForWebPage2(answer), // answer
-        valid, // valid
-        timestamp.getTime(),
-        //flq, spoken,
+          plan, // plan
+          exid, // id
+          qid, // qid
+          trimPathForWebPage2(answer), // answer
+          valid, // valid
+          timestamp.getTime(),
+          //flq, spoken,
           type, dur, correct, pronScore, "browser");
 //      result.setStimulus(stimulus);
       results.add(result);
@@ -483,7 +494,6 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   *
    * @param connection
    * @param statement
    * @return
@@ -493,8 +503,12 @@ public class ResultDAO extends DAO {
   private List<CorrectAndScore> getScoreResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
     List<CorrectAndScore> results = new ArrayList<CorrectAndScore>();
+
+    //logger.debug("getScoreResultsForQuery");
+
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
+      //logger.debug("Got " + uniqueID);
       long userid = rs.getInt(USERID);
       String id = rs.getString(Database.EXID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
@@ -619,7 +633,6 @@ public class ResultDAO extends DAO {
     return new ArrayList<Result>();
 
   }*/
-
   private String getInList(Collection<String> toExclude) {
     StringBuilder b = new StringBuilder();
     for (String id : toExclude) b.append("'").append(id).append("'").append(",");
@@ -638,7 +651,7 @@ public class ResultDAO extends DAO {
    * @return list of duration and numAnswer pairs
    */
   public SessionInfo getSessions() {
-   // List<Result> results = getResults();
+    // List<Result> results = getResults();
 
     Map<Long, List<CorrectAndScore>> userToAnswers = populateUserToAnswers(getCorrectAndScores());
     List<Session> sessions = new ArrayList<Session>();
@@ -715,9 +728,9 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see #getSessionsForUserIn2
    * @param answersForUser
    * @return
+   * @see #getSessionsForUserIn2
    */
   private List<Session> partitionIntoSessions2(List<CorrectAndScore> answersForUser, Collection<String> ids, long latestResultID) {
     Session s = null;
@@ -745,13 +758,13 @@ public class ResultDAO extends DAO {
       s.setScore(id1, r.getScore());
 
       if (r.getUniqueID() == latestResultID) {
-        logger.debug("\tpartitionIntoSessions2 found current session " +s);
+        logger.debug("\tpartitionIntoSessions2 found current session " + s);
 
         s.setLatest(true);
       }
 
       expected.remove(id1);
-     // logger.debug("\tpartitionIntoSessions2 expected now " + expected.size() + " session " + s);
+      // logger.debug("\tpartitionIntoSessions2 expected now " + expected.size() + " session " + s);
 
       lastTimestamp = timestamp;
     }
@@ -774,7 +787,9 @@ public class ResultDAO extends DAO {
     }
   }
 
-  private void sortByTime(List<CorrectAndScore> answersForUser) { Collections.sort(answersForUser); }
+  private void sortByTime(List<CorrectAndScore> answersForUser) {
+    Collections.sort(answersForUser);
+  }
 
   private void removeShortSessions(List<Session> sessions) {
     Iterator<Session> iter = sessions.iterator();
@@ -822,15 +837,15 @@ public class ResultDAO extends DAO {
       addStimulus(connection);
     }
     if (!getColumns(RESULTS).contains(DEVICE_TYPE.toLowerCase())) {
-      addVarchar(connection,RESULTS,DEVICE_TYPE);
-      addVarchar(connection,RESULTS,DEVICE);
+      addVarchar(connection, RESULTS, DEVICE_TYPE);
+      addVarchar(connection, RESULTS, DEVICE);
     }
 
     database.closeConnection(connection);
 
-    createIndex(database,Database.EXID,RESULTS);
-    createIndex(database,VALID,RESULTS);
-    createIndex(database,AUDIO_TYPE,RESULTS);
+    createIndex(database, Database.EXID, RESULTS);
+    createIndex(database, VALID, RESULTS);
+    createIndex(database, AUDIO_TYPE, RESULTS);
 
     // enrichResults();
     //removeValidDefault(connection);
@@ -849,29 +864,29 @@ public class ResultDAO extends DAO {
    * @throws SQLException
    */
   private void createTable(Connection connection) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
-      RESULTS +
-      " (" +
+    PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " +
+        RESULTS +
+        " (" +
         ID +
         " IDENTITY, " +
         USERID +
         " INT, " +
-      "plan VARCHAR, " +
-      Database.EXID + " VARCHAR, " +
-      "qid INT," +
-      Database.TIME + " TIMESTAMP, " +// " AS CURRENT_TIMESTAMP," +
-      "answer CLOB," +
-      "valid BOOLEAN," +
-      FLQ + " BOOLEAN," +
-      SPOKEN + " BOOLEAN," +
-      AUDIO_TYPE + " VARCHAR," +
-      DURATION + " INT," +
-      CORRECT + " BOOLEAN," +
-      PRON_SCORE + " FLOAT," +
+        "plan VARCHAR, " +
+        Database.EXID + " VARCHAR, " +
+        "qid INT," +
+        Database.TIME + " TIMESTAMP, " +// " AS CURRENT_TIMESTAMP," +
+        "answer CLOB," +
+        "valid BOOLEAN," +
+        FLQ + " BOOLEAN," +
+        SPOKEN + " BOOLEAN," +
+        AUDIO_TYPE + " VARCHAR," +
+        DURATION + " INT," +
+        CORRECT + " BOOLEAN," +
+        PRON_SCORE + " FLOAT," +
         STIMULUS + " CLOB," +
         DEVICE_TYPE + " VARCHAR," +
         DEVICE + " VARCHAR" +
-      ")");
+        ")");
     statement.execute();
     statement.close();
   }
@@ -895,9 +910,9 @@ public class ResultDAO extends DAO {
 
     try {
       statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
-        AUDIO_TYPE +
-        " " +
-        "VARCHAR");
+          AUDIO_TYPE +
+          " " +
+          "VARCHAR");
       statement.execute();
       statement.close();
     } catch (SQLException e) {
@@ -908,7 +923,7 @@ public class ResultDAO extends DAO {
   private void removeTimeDefault(Connection connection) throws SQLException {
     //logger.info("removing time default value - current_timestamp steps on all values with NOW.");
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ALTER COLUMN " + Database.TIME +
-      " DROP DEFAULT");
+        " DROP DEFAULT");
     statement.execute();
     statement.close();
   }
@@ -916,9 +931,9 @@ public class ResultDAO extends DAO {
   private void addDurationColumnToTable(Connection connection) {
     try {
       PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
-        DURATION +
-        " " +
-        "INT");
+          DURATION +
+          " " +
+          "INT");
       statement.execute();
       statement.close();
     } catch (SQLException e) {
@@ -929,9 +944,9 @@ public class ResultDAO extends DAO {
   private void addFlashcardColumnsToTable(Connection connection) {
     try {
       PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
-        CORRECT +
-        " " +
-        "BOOLEAN");
+          CORRECT +
+          " " +
+          "BOOLEAN");
       statement.execute();
       statement.close();
     } catch (SQLException e) {
@@ -940,9 +955,9 @@ public class ResultDAO extends DAO {
 
     try {
       PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
-        PRON_SCORE +
-        " " +
-        "FLOAT");
+          PRON_SCORE +
+          " " +
+          "FLOAT");
       statement.execute();
       statement.close();
     } catch (SQLException e) {
@@ -953,9 +968,9 @@ public class ResultDAO extends DAO {
   private void addStimulus(Connection connection) {
     try {
       PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
-        STIMULUS +
-        " " +
-        "CLOB");
+          STIMULUS +
+          " " +
+          "CLOB");
       statement.execute();
       statement.close();
     } catch (SQLException e) {
@@ -963,14 +978,14 @@ public class ResultDAO extends DAO {
     }
   }
 
-  public Map<Long,Map<String,Result>> getUserToResults(boolean isRegular, UserDAO userDAO) {
+  public Map<Long, Map<String, Result>> getUserToResults(boolean isRegular, UserDAO userDAO) {
     String typeToUse = isRegular ? Result.AUDIO_TYPE_REGULAR : Result.AUDIO_TYPE_SLOW;
     return getUserToResults(typeToUse, userDAO);
   }
 
   Map<Long, Map<String, Result>> getUserToResults(String typeToUse, UserDAO userDAO) {
     List<Result> results = getResults();
-    Map<Long,Map<String,Result>> userToResult = new HashMap<Long, Map<String, Result>>();
+    Map<Long, Map<String, Result>> userToResult = new HashMap<Long, Map<String, Result>>();
 
     Map<Long, User> userMap = userDAO.getUserMap();
 
@@ -993,8 +1008,8 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    * @param out
+   * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   public void writeExcelToStream(List<Result> results, OutputStream out) {
     SXSSFWorkbook wb = writeExcel(results);
@@ -1002,8 +1017,8 @@ public class ResultDAO extends DAO {
     try {
       wb.write(out);
       long now2 = System.currentTimeMillis();
-      if (now2-then > 100) {
-        logger.warn("toXLSX : took " + (now2-then) + " millis to write excel to output stream ");
+      if (now2 - then > 100) {
+        logger.warn("toXLSX : took " + (now2 - then) + " millis to write excel to output stream ");
       }
       out.close();
       wb.dispose();
@@ -1028,7 +1043,7 @@ public class ResultDAO extends DAO {
     List<String> columns = Arrays.asList(ID, USERID, Database.EXID,
         //"qid",
         Database.TIME, "answer",
-      "valid",
+        "valid",
         //"grades", FLQ, SPOKEN,
         AUDIO_TYPE, DURATION, CORRECT, PRON_SCORE//, STIMULUS
     );
@@ -1064,8 +1079,8 @@ public class ResultDAO extends DAO {
       cell.setCellValue(result.getPronScore());
     }
     now = System.currentTimeMillis();
-    if (now-then > 100) {
-      logger.warn("toXLSX : took " + (now-then) + " millis to add " + rownum + " rows to sheet, or " + (now-then)/rownum + " millis/row");
+    if (now - then > 100) {
+      logger.warn("toXLSX : took " + (now - then) + " millis to add " + rownum + " rows to sheet, or " + (now - then) / rownum + " millis/row");
     }
     return wb;
   }
