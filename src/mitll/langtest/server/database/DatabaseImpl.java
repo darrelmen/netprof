@@ -8,6 +8,7 @@ import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.custom.*;
 import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.database.instrumentation.EventDAO;
+import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -1072,8 +1073,8 @@ public class DatabaseImpl implements Database {
     return new AudioExport().getPrefix(getSectionHelper(), typeToSection);
   }
 
-  public String doReport() {
-    return new Report(userDAO,resultDAO,eventDAO,audioDAO).doReport();
+  public void doReport(ServerProperties serverProps, String site,MailSupport mailSupport, PathHelper pathHelper) {
+    new Report(userDAO,resultDAO,eventDAO,audioDAO).doReport(serverProps,site,mailSupport,pathHelper);
   }
 
   public String toString() {
