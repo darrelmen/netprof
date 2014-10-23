@@ -627,6 +627,7 @@ public class ASRScoring extends Scoring {
    */
   private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
     sentence = sentence.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ");
+
     long then = System.currentTimeMillis();
 
     logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with LTS " + letterToSoundClass);
