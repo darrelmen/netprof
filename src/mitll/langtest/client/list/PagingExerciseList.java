@@ -1,17 +1,10 @@
 package mitll.langtest.client.list;
 
-import com.github.gwtbootstrap.client.ui.base.TextBox;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -22,6 +15,7 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Show exercises with a cell table that can handle thousands of rows.
@@ -33,12 +27,13 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class PagingExerciseList extends ExerciseList {
+  private Logger logger = Logger.getLogger("PagingExerciseList");
+
   protected final ExerciseController controller;
   protected PagingContainer pagingContainer;
   private final boolean showTypeAhead;
 
-  private TextBox typeAhead = new TextBox();
-  //private String lastTypeAheadValue = "";
+  private TypeAhead typeAhead;
   protected long userListID = -1;
   private int unaccountedForVertical = 160;
   private boolean unrecorded;
@@ -101,8 +96,8 @@ public class PagingExerciseList extends ExerciseList {
     scheduleWaitTimer();
 
     lastReqID++;
-    System.out.println("PagingExerciseList.loadExercises : looking for " +
-      "'" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());
+    logger.info("PagingExerciseList.loadExercises : looking for " +
+        "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
     service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID,
       controller.getUser(), getRole(), getUnrecorded(), isOnlyExamples(), incorrectFirstOrder, new SetExercisesCallback(""));
   }
@@ -112,19 +107,6 @@ public class PagingExerciseList extends ExerciseList {
    * @return
    */
   protected String getPrefix() { return typeAhead.getText(); }
-
-/*  private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
-    final ControlGroup userGroup = new ControlGroup();
-    userGroup.addStyleName("leftFiveMargin");
-
-    Controls controls = new Controls();
-    userGroup.add(new ControlLabel("Search"));
-    controls.add(user);
-    userGroup.add(controls);
-
-    dialogBox.add(userGroup);
-    return userGroup;
-  }*/
 
   /**
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
@@ -143,8 +125,7 @@ public class PagingExerciseList extends ExerciseList {
 
   @Override
   protected CommonShell findFirstExercise() {
-     //System.out.println("findFirstExercise : completed " + controller.showCompleted());
-
+     //logger.info("findFirstExercise : completed " + controller.showCompleted());
     return controller.showCompleted() ? getFirstNotCompleted() : super.findFirstExercise();
   }
 
@@ -167,13 +148,13 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList(com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, boolean, mitll.langtest.client.exercise.ExerciseController, String, boolean)
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList
    * @param v
    */
   public void setUnaccountedForVertical(int v) {
     unaccountedForVertical = v;
     pagingContainer.setUnaccountedForVertical(v);
-    //System.out.println("setUnaccountedForVertical : vert " + v + " for " +getElement().getId());
+    //logger.info("setUnaccountedForVertical : vert " + v + " for " +getElement().getId());
   }
 
   protected void addTableWithPager(PagingContainer pagingContainer) {
@@ -195,7 +176,7 @@ public class PagingExerciseList extends ExerciseList {
    */
   protected void addTypeAhead(Panel column) {
     if (showTypeAhead) {
-      new TypeAhead(column, waitCursor, "Search", true) {
+      typeAhead = new TypeAhead(column, waitCursor, "Search", true) {
         @Override
         public void gotTypeAheadEntry(String text) {
           controller.logEvent(getTypeAhead(), "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
@@ -223,7 +204,7 @@ public class PagingExerciseList extends ExerciseList {
   @Override
   protected void gotExercises(boolean success) {
 //    long now = System.currentTimeMillis();
-    // System.out.println("took " + (now - then) + " millis");
+    // logger.info("took " + (now - then) + " millis");
     if (waitTimer != null) {
       waitTimer.cancel();
     }
@@ -231,14 +212,15 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   protected void showEmptySelection() {
-    showPopup("No items match the selection and search.", "Try clearing one of your selections or changing the search.", typeAhead);
+  //  logger.info("showing no items match relative to " + typeAhead.getWidget().getElement().getId());
+    showPopup("No items match the selection and search.", "Try clearing one of your selections or changing the search.", typeAhead.getWidget());
     createdPanel = new SimplePanel();
     createdPanel.getElement().setId("placeHolderWhenNoExercises");
   }
 
   private void showPopup(String toShow,String toShow2, Widget over) {
     final PopupPanel popupImage = new PopupPanel(true);
-    VerticalPanel vp = new VerticalPanel();
+    Panel vp = new VerticalPanel();
     vp.add(new HTML(toShow));
     vp.add(new HTML(toShow2));
     popupImage.add(vp);
@@ -290,7 +272,7 @@ public class PagingExerciseList extends ExerciseList {
   public List<CommonShell> rememberExercises(List<CommonShell> result) {
     inOrderResult = result;
     if (doShuffle) {
-      System.out.println(getInstance() +" : rememberExercises - shuffling " + result.size() + " items");
+      logger.info(getInstance() + " : rememberExercises - shuffling " + result.size() + " items");
 
       result = new ArrayList<CommonShell>(result);
       Shuffler.shuffle(result);
@@ -341,14 +323,14 @@ public class PagingExerciseList extends ExerciseList {
   @Override
   public void addExercise(CommonShell es) {
 /*    if (pagingContainer.getSize() < 5) {
-      System.out.println(getInstance() +" : addExercise adding " + es.getID() + " state " + es.getState() + "/" + es.getSecondState());
+      logger.info(getInstance() +" : addExercise adding " + es.getID() + " state " + es.getState() + "/" + es.getSecondState());
     }*/
     pagingContainer.addExercise(es);
   }
   public void addExerciseAfter(CommonShell after,CommonShell es) { pagingContainer.addExerciseAfter(after, es);  }
 
   public CommonShell forgetExercise(String id) {
-   // System.out.println("PagingExerciseList.forgetExercise " + id + " on " + getElement().getId() + " ul " +userListID);
+   // logger.info("PagingExerciseList.forgetExercise " + id + " on " + getElement().getId() + " ul " +userListID);
     CommonShell es = byID(id);
     if (es != null) {
       return removeExercise(es);
