@@ -1418,16 +1418,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return new ArrayList<MonitorResult>(results);
   }
 
-  private Collection<MonitorResult> getMonitorResults(String flText) {
-    boolean isNumber = false;
-    try {
-      Integer.parseInt(flText);
-      isNumber = true;
-    } catch (NumberFormatException e) {
-    }
-    return isNumber ? db.getResultDAO().getMonitorResultsByID(flText) : db.getMonitorResults();
-  }
-
   /**
    * Respond to type ahead.
    *
