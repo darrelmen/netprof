@@ -24,15 +24,15 @@ public class TypeAhead {
   private TextBox typeAhead = new TextBox();
   private String lastTypeAheadValue = "";
 
-  //private Timer waitTimer = null;
-  //private SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
   private SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
 
-  public TypeAhead(boolean hasFirstFocus) {
-    makeTypeAhead();
-    checkFocus(hasFirstFocus);
-  }
-
+  /**
+   * @see mitll.langtest.client.list.PagingExerciseList#addTypeAhead(com.google.gwt.user.client.ui.Panel)
+   * @param column
+   * @param waitCursor
+   * @param title
+   * @param hasFirstFocus
+   */
   public TypeAhead(Panel column, Image waitCursor, String title, boolean hasFirstFocus) {
     makeTypeAhead();
 
@@ -50,6 +50,9 @@ public class TypeAhead {
       });
     }
   }
+
+  public String getText() { return typeAhead.getText(); }
+  public Widget getWidget() { return typeAhead; }
 
   private void makeTypeAhead() {
     getTypeAhead().getElement().setId("ExerciseList_TypeAhead");
@@ -72,7 +75,6 @@ public class TypeAhead {
     flow.add(waitCursor);
     configureWaitCursor(waitCursor);
 
-    //addControlGroupEntry(column, title, flow);
     return getControlGroup(title, flow);
   }
 
@@ -82,13 +84,6 @@ public class TypeAhead {
   }
 
   public void gotTypeAheadEntry(String text) {}
-
-/*  private ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget user) {
-    final ControlGroup userGroup = getControlGroup(label, user);
-
-    dialogBox.add(userGroup);
-    return userGroup;
-  }*/
 
   public ControlGroup getControlGroup(String label) {
     return getControlGroup(label, getTypeAhead());
