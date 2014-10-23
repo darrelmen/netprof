@@ -156,13 +156,12 @@ public class CommentNPFExercise extends NPFExercise {
     int i = context.indexOf(toFind);
     int end = i + toFind.length();
     if (i > -1) {
-      log("marking underline from " + i + " to " + end + " for '" + toFind +
-          "' in '" + trim + "'");
+      //log("marking underline from " + i + " to " + end + " for '" + toFind +  "' in '" + trim + "'");
       context = context.substring(0, i) + "<u>" + context.substring(i, end) + "</u>" + context.substring(end);
     } else {
-      log("NOT marking underline from " + i + " to " + end);
-      log("trim   " + trim + " len " + trim.length());
-      log("toFind " + toFind + " len " + trim.length());
+      //log("NOT marking underline from " + i + " to " + end);
+      //log("trim   " + trim + " len " + trim.length());
+      //log("toFind " + toFind + " len " + trim.length());
 
       List<String> tokens = getTokens(trim);
       int startToken;
@@ -176,8 +175,7 @@ public class CommentNPFExercise extends NPFExercise {
           builder.append(context.substring(startToken, endToken = startToken + token.length()));
           builder.append("</u>");
         } else {
-          log("from " + endToken + " couldn't find token '" + token + "' len " + token.length() + " in '" + context +
-              "'");
+          //log("from " + endToken + " couldn't find token '" + token + "' len " + token.length() + " in '" + context + "'");
         }
       }
       builder.append(context.substring(endToken));
@@ -187,6 +185,7 @@ public class CommentNPFExercise extends NPFExercise {
     return context;
   }
 
+/*
   private void log(String message) {
     System.out.println(message);
     console(message);
@@ -199,9 +198,12 @@ public class CommentNPFExercise extends NPFExercise {
     }
   }
 
-  private native static void consoleLog(String message) /*-{
+  private native static void consoleLog(String message) */
+/*-{
       console.log("LangTest:" + message);
-  }-*/;
+  }-*//*
+;
+*/
 
 
   private List<String> getTokens(String sentence) {
