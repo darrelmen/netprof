@@ -329,10 +329,6 @@ public class PropertyHandler {
     return logClientMessages;
   }
 
-  /**
-   * Sorry Jennifer! I think somehow we lost the connection here...
-   * @return
-   */
   public boolean hasDialog(){
 	  return dialog;
   }
