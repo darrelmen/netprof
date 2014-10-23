@@ -1418,16 +1418,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return new ArrayList<MonitorResult>(results);
   }
 
-  private Collection<MonitorResult> getMonitorResults(String flText) {
-    boolean isNumber = false;
-    try {
-      Integer.parseInt(flText);
-      isNumber = true;
-    } catch (NumberFormatException e) {
-    }
-    return isNumber ? db.getResultDAO().getMonitorResultsByID(flText) : db.getMonitorResults();
-  }
-
   /**
    * Respond to type ahead.
    *
@@ -1917,7 +1907,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public void destroy() {
     super.destroy();
-    db.destroy();
+    db.destroy(); // TODO : redundant with h2 shutdown hook?
   }
 
   /**
@@ -1936,73 +1926,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     try {
       db.preloadExercises();
       db.getUserListManager().setStateOnExercises();
-      doReport();
+      db.doReport(serverProps, getServletContext().getRealPath(""), getMailSupport(), pathHelper);
     } catch (Exception e) {
       logger.error("couldn't load database " +e,e);
     }
-  }
-
-  /**
-   * Sends a usage report to the email list at property {@link ServerProperties#getReportEmails()}.
-   * Sends it out first thing every monday.
-   * Subject disambiguates between multiple sites for the same language.
-   * Also writes the report out to the report directory... TODO : necessary?
-   */
-  public void doReport() {
-    Calendar calendar = new GregorianCalendar();
-    int i = calendar.get(Calendar.DAY_OF_WEEK);
-    List<String> reportEmails = serverProps.getReportEmails();
-    SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
-    String today = simpleDateFormat2.format(new Date());
-
-    String site = getServletContext().getRealPath("");
-    logger.debug("Site real path " + site);
-    String suffix = "";
-    if (site != null && site.contains("npfClassroom")) {
-      site = site.substring(site.indexOf("npfClassroom"));
-      suffix = " at " + site;
-    }
-    String subject = "Weekly Usage Report for " + serverProps.getLanguage() + suffix;
-    if (i == Calendar.MONDAY && !reportEmails.isEmpty()) {
-      File file = getReportFile(today);
-      //logger.debug("checking file  " + file.getAbsolutePath());
-      if (file.exists()) {
-        logger.debug("already did report for " + today + " : " + file.getAbsolutePath());
-      } else {
-        try {
-          BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-          String message = db.doReport();
-          writer.write(message);
-          writer.close();
-          for (String dest : reportEmails) {
-            getMailSupport().sendEmail(EmailHelper.NP_SERVER, dest, EmailHelper.MY_EMAIL,
-                subject, message);
-          }
-        } catch (IOException e) {
-          logger.error("got "+e,e);
-        }
-      }
-    } else {
-      logger.debug("not sending email report since not Monday");
-    }
-
-    if (today.equals("10_19_14")) { // testing
-      getMailSupport().sendEmail(EmailHelper.NP_SERVER, EmailHelper.MY_EMAIL, EmailHelper.MY_EMAIL, subject, db.doReport());
-    }
-  }
-
-  private File getReportFile(String today) {
-    File reports = pathHelper.getAbsoluteFile("reports");
-    //File test = new File("reports");
-    if (!reports.exists()) {
-      logger.debug("making dir " + reports.getAbsolutePath());
-      reports.mkdirs();
-    }
-    else {
-      logger.debug("reports dir exists at " + reports.getAbsolutePath());
-    }
-    String fileName = "report_" + today + ".html";
-    return new File(reports,fileName);
   }
 
   /**
@@ -2033,20 +1960,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private void shareLoadTesting(ServletContext servletContext) {
     Object loadTesting = servletContext.getAttribute(ScoreServlet.LOAD_TESTING);
     if (loadTesting != null) {
-      logger.warn("huh? found existing reference " + loadTesting);
+      logger.debug("hmm... found existing load testing reference " + loadTesting);
     }
-    //else {
-      servletContext.setAttribute(ScoreServlet.LOAD_TESTING, (LoadTesting) this);
-    //}
+    servletContext.setAttribute(ScoreServlet.LOAD_TESTING, this);
   }
 
   private void shareDB(ServletContext servletContext) {
     Object databaseReference = servletContext.getAttribute(DATABASE_REFERENCE);
     if (databaseReference != null) {
-      logger.warn("huh? found existing database reference " + databaseReference);
-    } //else {
-      servletContext.setAttribute(DATABASE_REFERENCE, db);
-    //}
+      logger.debug("hmm... foundexisting database reference " + databaseReference);
+    }
+
+    servletContext.setAttribute(DATABASE_REFERENCE, db);
   }
 
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
