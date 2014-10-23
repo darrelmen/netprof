@@ -1,12 +1,20 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.instrumentation.EventDAO;
+import mitll.langtest.server.mail.EmailHelper;
+import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.instrumentation.Event;
 import org.apache.log4j.Logger;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -16,11 +24,12 @@ import java.util.*;
  */
 public class Report {
   private static final Logger logger = Logger.getLogger(Report.class);
-  public static final int MIN_MILLIS = (1000 * 60);
- // public static final int SAMPLE = 50;
-  public static final String BEST_AUDIO = "bestAudio";
- // public static final int LENGTH = BEST_AUDIO.length();
-  public static final int TEN_SECONDS = 1000 * 10;
+
+  private static final String NP_SERVER = EmailHelper.NP_SERVER;
+  private static final String MY_EMAIL = EmailHelper.MY_EMAIL;
+
+  private static final int MIN_MILLIS = (1000 * 60);
+  private static final int TEN_SECONDS = 1000 * 10;
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
   private final EventDAO eventDAO;
@@ -34,12 +43,70 @@ public class Report {
   }
 
   /**
+   * Sends a usage report to the email list at property {@link mitll.langtest.server.ServerProperties#getReportEmails()}.
+   * Sends it out first thing every monday.
+   * Subject disambiguates between multiple sites for the same language.
+   * Also writes the report out to the report directory... TODO : necessary?
+   */
+  public void doReport(ServerProperties serverProps, String site, MailSupport mailSupport,
+                       PathHelper pathHelper) {
+    Calendar calendar = new GregorianCalendar();
+    int i = calendar.get(Calendar.DAY_OF_WEEK);
+    List<String> reportEmails = serverProps.getReportEmails();
+    SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
+    String today = simpleDateFormat2.format(new Date());
+
+    logger.debug("Site real path " + site);
+    String suffix = "";
+    if (site != null && site.contains("npfClassroom")) {
+      site = site.substring(site.indexOf("npfClassroom"));
+      suffix = " at " + site;
+    }
+    String subject = "Weekly Usage Report for " + serverProps.getLanguage() + suffix;
+    if (i == Calendar.MONDAY && !reportEmails.isEmpty()) {
+      File file = getReportFile(pathHelper,today);
+      //logger.debug("checking file " + file.getAbsolutePath());
+      if (file.exists()) {
+        logger.debug("already did report for " + today + " : " + file.getAbsolutePath());
+      } else {
+        try {
+          BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+          String message = doReport();
+          writer.write(message);
+          writer.close();
+          for (String dest : reportEmails) {
+            mailSupport.sendEmail(NP_SERVER, dest, MY_EMAIL,   subject, message);
+          }
+        } catch (IOException e) {
+          logger.error("got "+e,e);
+        }
+      }
+    } else {
+      logger.debug("not sending email report since not Monday");
+    }
+  }
+
+  private File getReportFile(PathHelper pathHelper, String today) {
+    File reports = pathHelper.getAbsoluteFile("reports");
+    //File test = new File("reports");
+    if (!reports.exists()) {
+      logger.debug("making dir " + reports.getAbsolutePath());
+      reports.mkdirs();
+    }
+    else {
+      logger.debug("reports dir exists at " + reports.getAbsolutePath());
+    }
+    String fileName = "report_" + today + ".html";
+    return new File(reports,fileName);
+  }
+
+  /**
    * @see DatabaseImpl#doReport()
    * @see mitll.langtest.server.LangTestDatabaseImpl#doReport()
    *
    * @return
    */
-  public String doReport() {
+  private String doReport() {
     List<User> users = userDAO.getUsers();
 
     Calendar calendar = new GregorianCalendar();
@@ -193,7 +260,7 @@ public class Report {
     //  logger.debug("ytd " + ytd);
     //  logger.debug("month " + monthToCount);
     //  logger.debug("week " + weekToCount);
-   // logger.debug("ref " + refSkip);
+    // logger.debug("ref " + refSkip);
     String recordings = "Recordings";
     builder.append(getYTD(ytd, recordings) +
         getMC(monthToCount, "month", recordings) +
@@ -436,7 +503,7 @@ public class Report {
           logger.warn("huh 2 sevent " +sevent);
           logger.warn("huh 2 levent " +levent);
 */
-         // logger.warn("huh event " +event);
+          // logger.warn("huh event " +event);
           session = TEN_SECONDS;
 
         }
@@ -446,7 +513,7 @@ public class Report {
         //     }
         Long aLong = monthToDur.get(month);
 
-      //  dur /= MIN_MILLIS;
+        //  dur /= MIN_MILLIS;
         monthToDur.put(month, aLong == null ? dur : aLong + dur);
       }
     }
@@ -518,5 +585,4 @@ public class Report {
         "DECEMBER",
         "UNDECEMBER").get(i);
   }
-
 }
