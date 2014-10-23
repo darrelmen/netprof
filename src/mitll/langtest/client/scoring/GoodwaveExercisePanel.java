@@ -15,6 +15,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
+import com.google.gwt.media.client.Audio;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -657,6 +658,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     /**
      * Add choices to control which audio cut is chosen/gets played.
      *
+     * Be careful not to assume all audio associated with an item is either fast or slow speed audio.
+     * It could be context sentence audio.
+     *
      * @return
      * @see AudioPanel#addWidgets
      */
@@ -666,9 +670,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
       rightSide.getElement().setId("beforePlayWidget_verticalPanel");
       rightSide.addStyleName("leftFiveMargin");
-      Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
-      logger.info("for ex " + exercise.getID() + " found " + audioAttributes);
-      if (audioAttributes.isEmpty()) {
+      boolean foundSpeed = exercise.getRegularSpeed() != null || exercise.getSlowSpeed() != null;
+      if (!foundSpeed) {
         addNoRefAudioWidget(rightSide);
         return rightSide;
       } else {
@@ -694,6 +697,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         if (!maleEmpty || !femaleEmpty || !defaultUserAudio.isEmpty()) {
           container = getGenderChoices(rightSide, malesMap, femalesMap, defaultUserAudio);
         }
+        Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
+        logger.info("getAfterPlayWidget : for ex " + exercise.getID() + " found " + audioAttributes);
+
+        // first choice here is for default audio (where we don't know the gender)
         final Collection<AudioAttribute> initialAudioChoices = maleEmpty ?
             femaleEmpty ? audioAttributes : femalesMap.get(femaleUsers.get(0)) : malesMap.get(maleUsers.get(0));
         //System.out.println("getAfterPlayWidget.initialAudioChoices  " + initialAudioChoices);
@@ -810,13 +817,15 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         if (audioAttribute.isRegularSpeed()) {
           regular = radio;
           regAttr = audioAttribute;
-        } else {
+        } else if (audioAttribute.isSlow()) {  // careful not to get context sentence audio ...
           slow = radio;
           slowAttr = audioAttribute;
         }
       }
 
       if (regular != null) {
+        //System.out.println("addRegularAndSlow regular " + regular);
+
         addAudioRadioButton(vp, regular);
         final AudioAttribute innerRegAttr = regAttr;
         final RadioButton innerRegular = regular;
@@ -830,6 +839,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         regular.setValue(true);
       }
       if (slow != null) {
+        //System.out.println("addRegularAndSlow slow " + slow);
         addAudioRadioButton(vp, slow);
         final AudioAttribute innerSlowAttr = slowAttr;
         final RadioButton innerSlow = slow;
@@ -861,6 +871,11 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         System.err.println("huh? no attribute ");
     }
 
+    /**
+     *
+     * @param vp
+     * @see #getAfterPlayWidget()
+     */
     protected void addNoRefAudioWidget(Panel vp) {
       vp.add(new Label(NO_REFERENCE_AUDIO));
     }
@@ -875,7 +890,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     private void showAudio(AudioAttribute audioAttribute) {
       doPause();    // if the audio is playing, stop it
-      // System.out.println("GoodwaveExercisePanel.showAudio " +audioAttribute);
       getImagesForPath(audioAttribute.getAudioRef());
     }
   }
