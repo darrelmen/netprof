@@ -195,7 +195,8 @@ public class DownloadServlet extends DatabaseServlet {
       db.usersToXLSX(response.getOutputStream());
     } else if (encodedFileName.toLowerCase().contains("results")) {
       response.setHeader("Content-Disposition", "attachment; filename=results");
-      db.getResultDAO().writeExcelToStream(db.getResultsWithGrades(), response.getOutputStream());
+    //  db.getResultDAO().writeExcelToStream(db.getResultsWithGrades(), response.getOutputStream());
+      db.getResultDAO().writeExcelToStream(db.getMonitorResults(), db.getSectionHelper().getTypeOrder(), response.getOutputStream());
     } else if (encodedFileName.toLowerCase().contains("events")) {
       response.setHeader("Content-Disposition", "attachment; filename=events");
       db.getEventDAO().toXLSX(response.getOutputStream());
