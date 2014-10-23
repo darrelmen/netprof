@@ -401,46 +401,6 @@ public class ResultManager extends PagerTable {
   }
 
   /**
-   * @param table
-   * @return
-   * @seex #getResultCellTable
-   * @seex #getAsyncTable(int)
-   */
-
-  private TextColumn<MonitorResult> addColumnsToTable(CellTable<MonitorResult> table) {
-    TextColumn<MonitorResult> id = addUserPlanExercise(table);
-
-    final AbstractCell<SafeHtml> progressCell = new AbstractCell<SafeHtml>("click") {
-      @Override
-      public void render(Context context, SafeHtml value, SafeHtmlBuilder sb) {
-        if (value != null) {
-          sb.append(value);
-        }
-      }
-    };
-    Column<MonitorResult, SafeHtml> audioFile = new Column<MonitorResult, SafeHtml>(progressCell) {
-      @Override
-      public SafeHtml getValue(MonitorResult answer) {
-        String answer1 = answer.getAnswer();
-        if (answer1.endsWith(".wav")) {
-          return audioTag.getAudioTag(answer1);
-        //  return PlayAudioWidget.getAudioTagHTML(answer1,"answer_to_"+answer.getId() + "_by_"+answer.getUserid()+"_"+answer.getUniqueID());
-        } else {
-          SafeHtmlBuilder sb = new SafeHtmlBuilder();
-          sb.appendHtmlConstant(answer1);
-          return sb.toSafeHtml();
-        }
-      }
-    };
-    audioFile.setSortable(true);
-
-    table.addColumn(audioFile, nameForAnswer);
-    colToField.put(audioFile, ANSWER);
-    addResultColumn(table);
-    return id;
-  }
-
-  /**
    * Deals with out of order requests, or where the requests outpace the responses
    *
    * @param numResults
@@ -498,6 +458,11 @@ public class ResultManager extends PagerTable {
     return dataProvider;
   }
 
+  /**
+   * @see #createProvider(int, com.google.gwt.user.cellview.client.CellTable)
+   * @param table
+   * @return
+   */
   private StringBuilder getColumnSortedState(CellTable<MonitorResult> table) {
     final ColumnSortList sortList = table.getColumnSortList();
     StringBuilder builder = new StringBuilder();
@@ -510,6 +475,47 @@ public class ResultManager extends PagerTable {
       builder.append(TIMESTAMP + "_" + DESC);
     }
     return builder;
+  }
+
+
+  /**
+   * @param table
+   * @return
+   * @seex #getResultCellTable
+   * @seex #getAsyncTable(int)
+   */
+
+  private TextColumn<MonitorResult> addColumnsToTable(CellTable<MonitorResult> table) {
+    TextColumn<MonitorResult> id = addUserPlanExercise(table);
+
+    final AbstractCell<SafeHtml> progressCell = new AbstractCell<SafeHtml>("click") {
+      @Override
+      public void render(Context context, SafeHtml value, SafeHtmlBuilder sb) {
+        if (value != null) {
+          sb.append(value);
+        }
+      }
+    };
+    Column<MonitorResult, SafeHtml> audioFile = new Column<MonitorResult, SafeHtml>(progressCell) {
+      @Override
+      public SafeHtml getValue(MonitorResult answer) {
+        String answer1 = answer.getAnswer();
+        if (answer1.endsWith(".wav")) {
+          return audioTag.getAudioTag(answer1);
+          //  return PlayAudioWidget.getAudioTagHTML(answer1,"answer_to_"+answer.getId() + "_by_"+answer.getUserid()+"_"+answer.getUniqueID());
+        } else {
+          SafeHtmlBuilder sb = new SafeHtmlBuilder();
+          sb.appendHtmlConstant(answer1);
+          return sb.toSafeHtml();
+        }
+      }
+    };
+    audioFile.setSortable(true);
+
+    table.addColumn(audioFile, nameForAnswer);
+    colToField.put(audioFile, ANSWER);
+    addResultColumn(table);
+    return id;
   }
 
   /**
