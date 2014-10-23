@@ -23,12 +23,9 @@ import com.google.gwt.view.client.NoSelectionModel;
 import com.google.gwt.view.client.RangeChangeEvent;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.list.TypeAhead;
-import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.client.table.PagerTable;
-import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.ResultAndTotal;
 
@@ -64,7 +61,7 @@ public class ResultManager extends PagerTable {
   private static final String PRON_SCORE = MonitorResult.PRON_SCORE;
   private static final String DEVICE = MonitorResult.DEVICE;
   private static final String CLOSE = "Close";
-  private static final int MAX_TO_SHOW = 12;
+  private static final int MAX_TO_SHOW = PAGE_SIZE;
 
   private final EventRegistration eventRegistration;
   private final LangTestDatabaseAsync service;
@@ -181,7 +178,7 @@ public class ResultManager extends PagerTable {
 
             @Override
             public void onSuccess(Collection<String> result) {
-              System.out.println(new Date() + " request for " + type + " : " + unitToValue + " yielded " + result.size());
+             // System.out.println(new Date() + " request for " + type + " : " + unitToValue + " yielded " + result.size());
               makeSuggestionResponse(result, callback, request);
             }
           });
@@ -298,8 +295,7 @@ public class ResultManager extends PagerTable {
       @Override
       public String onSelection(SuggestOracle.Suggestion selectedSuggestion) {
         String replacementString = selectedSuggestion.getReplacementString();
-        System.out.println("UpdaterCallback " +//user.getId() +
-            " got update " +" " + "--- > " + replacementString);
+        //System.out.println("UpdaterCallback " + " got update " +" " + "--- > " + replacementString);
 
         // NOTE : we need both a redraw on key up and one on selection!
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -547,12 +543,13 @@ public class ResultManager extends PagerTable {
     table.addColumn(exercise, "Exercise");
     colToField.put(exercise, ID);
 
-    TextColumn<MonitorResult> fl = new TextColumn<MonitorResult>() {
+    Column<MonitorResult,SafeHtml> fl = new Column<MonitorResult, SafeHtml>(new SafeHtmlCell()) {
       @Override
-      public String getValue(MonitorResult answer) {
-        return answer.getForeignText();
+      public SafeHtml getValue(MonitorResult answer) {
+        return getNoWrapContent(answer.getForeignText());
       }
     };
+
     fl.setSortable(true);
     table.addColumn(fl, "Text");
     colToField.put(fl, TEXT);
@@ -604,7 +601,7 @@ public class ResultManager extends PagerTable {
     TextColumn<MonitorResult> valid = new TextColumn<MonitorResult>() {
       @Override
       public String getValue(MonitorResult answer) {
-        return "" + answer.isValid();
+        return answer.isValid() ? "Yes":"No";
       }
     };
     valid.setSortable(true);
@@ -614,7 +611,7 @@ public class ResultManager extends PagerTable {
     TextColumn<MonitorResult> correct = new TextColumn<MonitorResult>() {
       @Override
       public String getValue(MonitorResult answer) {
-        return "" + answer.isCorrect();
+        return answer.isCorrect() ? "Yes":"No";
       }
     };
     correct.setSortable(true);
@@ -631,20 +628,20 @@ public class ResultManager extends PagerTable {
     table.addColumn(pronScore, PRO_F_SCORE);
     colToField.put(pronScore, PRON_SCORE);
 
-    TextColumn<MonitorResult> type = new TextColumn<MonitorResult>() {
+    Column<MonitorResult,SafeHtml> type = new Column<MonitorResult, SafeHtml>(new SafeHtmlCell()) {
       @Override
-      public String getValue(MonitorResult answer) {
-        return answer.getDevice();
+      public SafeHtml getValue(MonitorResult answer) {
+        return getNoWrapContent(answer.getDevice());
       }
     };
+
     type.setSortable(true);
     table.addColumn(type, DEVICE);
     colToField.put(type, DEVICE);
   }
 
   private void addNoWrapColumn(CellTable<MonitorResult> table) {
-    Column<MonitorResult, SafeHtml> dateCol = getDateColumn(table);
-    colToField.put(dateCol, TIMESTAMP);
+    colToField.put(getDateColumn(table), TIMESTAMP);
   }
 
   private Column<MonitorResult, SafeHtml> getDateColumn(CellTable<MonitorResult> table) {
