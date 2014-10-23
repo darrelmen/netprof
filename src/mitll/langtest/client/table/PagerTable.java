@@ -1,6 +1,7 @@
 package mitll.langtest.client.table;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.SimplePager;
@@ -49,11 +50,17 @@ public class PagerTable {
     return vPanel;
   }
 
+  DateTimeFormat format = DateTimeFormat.getFormat("MMM dd h:mm:ss a z ''yy");
   protected SafeHtml getSafeHTMLForTimestamp(long timestamp) {
+    String noWrapContent = format.format(new Date(timestamp));
+    return getNoWrapContent(noWrapContent);
+  }
+
+  protected SafeHtml getNoWrapContent(String noWrapContent) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
-      new Date(timestamp)+
-      "</span>" );
+        noWrapContent +
+        "</span>" );
 
     sb.appendHtmlConstant("</div>");
     return sb.toSafeHtml();
