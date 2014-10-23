@@ -1,5 +1,7 @@
 package mitll.langtest.server.database;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.cellview.client.TextColumn;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.shared.CommonExercise;
@@ -1008,11 +1010,109 @@ public class ResultDAO extends DAO {
   }
 
   /**
+   *
+   * @param typeOrder
    * @param out
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public void writeExcelToStream(List<Result> results, OutputStream out) {
-    SXSSFWorkbook wb = writeExcel(results);
+  public void writeExcelToStream(List<MonitorResult> results, List<String> typeOrder, OutputStream out) {
+    SXSSFWorkbook wb = writeExcel(results, typeOrder);
+    writeToStream(out, wb);
+  }
+
+  private SXSSFWorkbook writeExcel(List<MonitorResult> results,  List<String> typeOrder
+  ) {
+    long now;
+    long then = System.currentTimeMillis();
+
+    SXSSFWorkbook wb = new SXSSFWorkbook(10000); // keep 100 rows in memory, exceeding rows will be flushed to disk
+    Sheet sheet = wb.createSheet("Results");
+    int rownum = 0;
+    CellStyle cellStyle = wb.createCellStyle();
+    DataFormat dataFormat = wb.createDataFormat();
+
+    cellStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss 'yy"));
+    //DateTimeFormat format = DateTimeFormat.getFormat("MMM dd h:mm:ss a z ''yy");
+    Row headerRow = sheet.createRow(rownum++);
+
+    List<String> columns = new ArrayList<String>(Arrays.asList(
+        USERID, "Exercise", "Text"));
+
+
+    for (final String type : typeOrder) {
+      columns.add(type);
+    }
+
+    List<String> columns2 = Arrays.asList(
+        "Recording",
+        Database.TIME,
+        AUDIO_TYPE,
+        DURATION,
+        "Valid",
+        CORRECT, PRON_SCORE, "Device"
+    );
+
+    columns.addAll(columns2);
+
+    for (int i = 0; i < columns.size(); i++) {
+      Cell headerCell = headerRow.createCell(i);
+      headerCell.setCellValue(columns.get(i));
+    }
+
+    for (MonitorResult result : results) {
+      Row row = sheet.createRow(rownum++);
+      int j = 0;
+      Cell cell = row.createCell(j++);
+      cell.setCellValue(result.getUserid());
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getId());
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getForeignText());
+
+      for (String type : typeOrder) {
+        cell = row.createCell(j++);
+        cell.setCellValue(result.getUnitToValue().get(type));
+      }
+
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getAnswer());
+
+      cell = row.createCell(j++);
+      cell.setCellValue(new Date(result.getTimestamp()));
+      cell.setCellStyle(cellStyle);
+
+      cell = row.createCell(j++);
+      String audioType = result.getAudioType();
+      cell.setCellValue(audioType.equals("avp")?"flashcard": audioType);
+
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getDurationInMillis());
+
+      cell = row.createCell(j++);
+      cell.setCellValue(result.isValid() ? "Yes" : "No");
+
+      cell = row.createCell(j++);
+      cell.setCellValue(result.isCorrect() ? "Yes" : "No");
+
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getPronScore());
+
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getDevice());
+    }
+    now = System.currentTimeMillis();
+    if (now - then > 100) {
+      logger.warn("toXLSX : took " + (now - then) + " millis to add " + rownum + " rows to sheet, or " + (now - then) / rownum + " millis/row");
+    }
+    return wb;
+  }
+
+  public void writeExcelToStreamOld(List<Result> results, OutputStream out) {
+    SXSSFWorkbook wb = writeExcelOld(results);
+    writeToStream(out, wb);
+  }
+
+  private void writeToStream(OutputStream out, SXSSFWorkbook wb) {
     long then = System.currentTimeMillis();
     try {
       wb.write(out);
@@ -1027,7 +1127,7 @@ public class ResultDAO extends DAO {
     }
   }
 
-  private SXSSFWorkbook writeExcel(List<Result> results) {
+  private SXSSFWorkbook writeExcelOld(List<Result> results) {
     long now;
     long then = System.currentTimeMillis();
 
@@ -1042,7 +1142,8 @@ public class ResultDAO extends DAO {
 
     List<String> columns = Arrays.asList(ID, USERID, Database.EXID,
         //"qid",
-        Database.TIME, "answer",
+        Database.TIME,
+        "answer",
         "valid",
         //"grades", FLQ, SPOKEN,
         AUDIO_TYPE, DURATION, CORRECT, PRON_SCORE//, STIMULUS
@@ -1070,6 +1171,7 @@ public class ResultDAO extends DAO {
       cell.setCellValue(result.getAnswer());
       cell = row.createCell(j++);
       cell.setCellValue(result.isValid());
+      cell = row.createCell(j++);
       cell.setCellValue(result.getAudioType());
       cell = row.createCell(j++);
       cell.setCellValue(result.getDurationInMillis());
