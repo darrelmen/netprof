@@ -106,7 +106,7 @@ public class Report {
    *
    * @return
    */
-  private String doReport() {
+  public String doReport() {
     List<User> users = userDAO.getUsers();
 
     Calendar calendar = new GregorianCalendar();
