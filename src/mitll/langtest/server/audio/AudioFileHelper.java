@@ -405,7 +405,7 @@ public class AudioFileHelper {
    * @param answer
    */
   public PretestScore getFlashcardAnswer(CommonExercise e, File audioFile, AudioAnswer answer) {
-    return this.autoCRT.getFlashcardAnswer(e, audioFile, answer);
+    return this.autoCRT.getFlashcardAnswer(e, audioFile, answer, this.serverProps.getLanguage());
   }
 
   private String removeSuffix(String audioFile) {
@@ -491,7 +491,7 @@ public class AudioFileHelper {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
     if (doFlashcard) {
       makeASRScoring();
-      PretestScore flashcardAnswer = autoCRT.getFlashcardAnswer(exercise, file, audioAnswer);
+      PretestScore flashcardAnswer = autoCRT.getFlashcardAnswer(exercise, file, audioAnswer, serverProps.getLanguage());
       audioAnswer.setPretestScore(flashcardAnswer);
       return audioAnswer;
     }
@@ -507,7 +507,7 @@ public class AudioFileHelper {
   public ScoreAndAnswer getFlashcardAnswer(File file, String wordOrPhrase) {
     makeASRScoring();
     AudioAnswer audioAnswer = new AudioAnswer();
-    PretestScore flashcardAnswer = autoCRT.getFlashcardAnswer(file, wordOrPhrase, audioAnswer);
+    PretestScore flashcardAnswer = autoCRT.getFlashcardAnswer(file, wordOrPhrase, audioAnswer, serverProps.getLanguage());
     return new ScoreAndAnswer(flashcardAnswer, audioAnswer);
   }
 
