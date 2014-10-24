@@ -59,9 +59,9 @@ public class Navigation implements RequiresResize {
   private static final String CHAPTERS = "Learn Pronunciation";
 //  private static final String CONTENT = CHAPTERS;
   private static final String YOUR_LISTS = "Study Your Lists";
-  private static final String STUDY_LISTS = "Study Lists and Favorites";
+  private static final String STUDY_LISTS = "Study Lists";// and Favorites";
   private static final String OTHERS_LISTS = "Study Visited Lists";
-  private static final String PRACTICE = "Do Flashcards";
+  private static final String PRACTICE = "Vocabulary Flashcards"; // "Do Flashcards";
   public static final String REVIEW = "review";
   public static final String COMMENT = "comment";
   private static final String ATTENTION = "attention";
@@ -299,6 +299,8 @@ public class Navigation implements RequiresResize {
   }
 
   /**
+   * Defines order of tabs...
+   *
    * @return
    * @see #showInitialState()
    */
@@ -307,8 +309,6 @@ public class Navigation implements RequiresResize {
     tabs.clear();
     nameToTab.clear();
     nameToIndex.clear();
-
-    addPracticeTab();
 
     // chapter tab
     final String chapterNameToUse = CHAPTERS;
@@ -321,6 +321,8 @@ public class Navigation implements RequiresResize {
         logEvent(chapters, chapterNameToUse);
       }
     });
+
+    addPracticeTab();
 
     studyLists = makeFirstLevelTab(tabPanel, IconType.FOLDER_CLOSE, STUDY_LISTS);
     final TabPanel w = new TabPanel();
