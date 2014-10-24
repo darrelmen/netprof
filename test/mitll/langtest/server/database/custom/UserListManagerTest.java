@@ -1,6 +1,7 @@
 package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonUserExercise;
@@ -40,7 +41,7 @@ public class UserListManagerTest {
     logger.debug("config dir " + parent);
     logger.debug("config     " + file.getName());
     test = "test";
-    database = new DatabaseImpl(parent, file.getName(), test, new PathHelper("war"), false);
+    database = new DatabaseImpl(parent, file.getName(), test, new ServerProperties(parent,file.getName()),new PathHelper("war"), false,null);
     logger.debug("made " +database);
     database.setInstallPath(".", parent +File.separator+database.getServerProps().getLessonPlan(),"english",true,".");
 
