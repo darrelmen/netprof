@@ -1074,7 +1074,11 @@ public class DatabaseImpl implements Database {
   }
 
   public void doReport(ServerProperties serverProps, String site,MailSupport mailSupport, PathHelper pathHelper) {
-    new Report(userDAO,resultDAO,eventDAO,audioDAO).doReport(serverProps,site,mailSupport,pathHelper);
+    getReport().doReport(serverProps, site, mailSupport, pathHelper);
+  }
+
+  public Report getReport() {
+    return new Report(userDAO,resultDAO,eventDAO,audioDAO);
   }
 
   public String toString() {
