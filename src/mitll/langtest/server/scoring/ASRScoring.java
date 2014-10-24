@@ -56,7 +56,7 @@ public class ASRScoring extends Scoring {
 
   public static final String SMALL_LM_SLF = "smallLM.slf";
 
-  private SmallVocabDecoder svDecoderHelper = null;
+  private static SmallVocabDecoder svDecoderHelper = null;
   private LangTestDatabaseImpl langTestDatabase;
 
   /**
@@ -188,7 +188,7 @@ public class ASRScoring extends Scoring {
    * @param longPhrase
    * @return
    */
-  private String getSegmented(String longPhrase) {
+  public static String getSegmented(String longPhrase) {
     Collection<String> tokens = svDecoderHelper.getTokens(longPhrase);
     StringBuilder builder = new StringBuilder();
     for (String token : tokens) {
