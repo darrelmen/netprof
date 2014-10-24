@@ -72,7 +72,7 @@ public class UserListManagerTest {
 
   @Test
   public void doReport() {
-    String x = database.doReport();
+    String x = database.getReport().doReport();
     System.out.println(x);
     try {
       //FileOutputStream fileOutputStream = new FileOutputStream("test2.html");
