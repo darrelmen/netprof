@@ -311,14 +311,14 @@ public class Navigation implements RequiresResize {
     nameToIndex.clear();
 
     // chapter tab
-    final String chapterNameToUse = CHAPTERS;
-    chapters = makeFirstLevelTab(tabPanel, IconType.LIGHTBULB, chapterNameToUse);
+    //final String chapterNameToUse = CHAPTERS;
+    chapters = makeFirstLevelTab(tabPanel, IconType.LIGHTBULB, CHAPTERS);
     chapters.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(chapterNameToUse);
+        checkAndMaybeClearTab(CHAPTERS);
         learnHelper.showNPF(chapters, LEARN);
-        logEvent(chapters, chapterNameToUse);
+        logEvent(chapters, CHAPTERS);
       }
     });
 
@@ -529,7 +529,7 @@ public class Navigation implements RequiresResize {
           if (result.size() == 1 && // if only one empty list - one you've created
               result.iterator().next().isEmpty()) {
             // choose default tab to show
-            selectPreviousTab(PRACTICE);
+            showDefaultInitialTab();
           } else {
             boolean foundCreated = false;
             for (UserList ul : result) {
@@ -551,11 +551,18 @@ public class Navigation implements RequiresResize {
   public void refreshInitialState() {
     String value = storage.getValue(CLICKED_TAB);
     if (value.isEmpty()) {   // no previous tab
-      showPracticeTab();
+      showDefaultInitialTab();
     }
     else {
       selectPreviousTab(value);
     }
+  }
+
+  public void showDefaultInitialTab() {
+    //showPracticeTab();
+
+    checkAndMaybeClearTab(CHAPTERS);
+    learnHelper.showNPF(chapters, LEARN);
   }
 
   /**
@@ -588,13 +595,13 @@ public class Navigation implements RequiresResize {
         showPracticeTab();
       } else {
         System.out.println("got unknown value '" + value+ "'");
-        showPracticeTab();
+        showDefaultInitialTab();
       }
     }
     else {
       System.err.println("selectPreviousTab : found value  '" + value + "' " +
           " but I only know about tabs : " + nameToIndex.keySet());
-      showPracticeTab();
+      showDefaultInitialTab();
     }
 
   }
