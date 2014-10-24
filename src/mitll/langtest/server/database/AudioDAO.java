@@ -155,13 +155,13 @@ public class AudioDAO extends DAO {
 
     List<AudioAttribute> defaultAudio = new ArrayList<AudioAttribute>();
     Set<String> audioPaths = new HashSet<String>();
-    Set<String> initialPaths = new HashSet<String>();
+    //Set<String> initialPaths = new HashSet<String>();
 
     // get all the audio on the exercise initially
-    for (AudioAttribute initial : firstExercise.getAudioAttributes()) {
+    //for (AudioAttribute initial : firstExercise.getAudioAttributes()) {
      // logger.debug("predef audio " +initial + " for " + firstExercise.getID());
-      initialPaths.add(initial.getAudioRef());
-    }
+   //   initialPaths.add(initial.getAudioRef());
+   // }
 
     for (AudioAttribute attr : audioAttributes) {
       //if (initialPaths.contains(attr.getAudioRef())) {
