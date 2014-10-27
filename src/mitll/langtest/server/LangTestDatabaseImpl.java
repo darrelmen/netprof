@@ -1347,6 +1347,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getResultDAO().getNumResults();
   }
 
+  /**
+   * @see #getResults(int, int, String, java.util.Map, long, String, int)
+   * @param unitToValue
+   * @param userid
+   * @param flText
+   * @return
+   */
   private List<MonitorResult> getResults(Map<String, String> unitToValue, long userid, String flText) {
     //logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText);
     boolean isNumber = false;
