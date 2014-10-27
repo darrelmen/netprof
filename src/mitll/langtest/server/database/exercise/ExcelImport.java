@@ -914,7 +914,7 @@ public class ExcelImport implements ExerciseDAO {
       addOldSchoolAudio(refAudioIndex, imported);
     }
 
-    attachAudio(id, imported);
+    int i = attachAudio(id, imported);
 
     return imported;
   }
@@ -973,15 +973,18 @@ public class ExcelImport implements ExerciseDAO {
   int c = 0;
 
   /**
+   * Make sure every audio file we attach is a valid audio file -- it's really where it says it's supposed to be.
+   *
    * TODO : rationalize media path -- don't force hack on bestAudio replacement
    * Why does it sometimes have the config dir on the front?
    * @param id
    * @param imported
    * @see #getExercise(String, String, String, String, String, String, boolean, String, boolean)
    */
-  private void attachAudio(String id, Exercise imported) {
+  private int attachAudio(String id, Exercise imported) {
     //String mediaDir1 = mediaDir.replaceAll("bestAudio","");
     //logger.debug("media dir " + mediaDir1);
+    int missing = 0;
     if (exToAudio.containsKey(id) || exToAudio.containsKey(id + "/1") || exToAudio.containsKey(id + "/2")) {
       List<AudioAttribute> audioAttributes = exToAudio.get(id);
 
@@ -1013,6 +1016,7 @@ public class ExcelImport implements ExerciseDAO {
               audioPaths.add(child);
             }
           } else {
+            missing++;
             c++;
             if (c < 5) {
               logger.warn("file " + test.getAbsolutePath() + " does not exist - " + audio.getAudioRef());
@@ -1027,6 +1031,7 @@ public class ExcelImport implements ExerciseDAO {
     } else {
      // logger.debug("can't find '" + id + "' in " + exToAudio.keySet().size() + " keys, e.g. " + exToAudio.keySet().iterator().next());
     }
+    return missing;
   }
 
   /**
