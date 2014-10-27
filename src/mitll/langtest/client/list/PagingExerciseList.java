@@ -7,6 +7,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
@@ -219,17 +220,7 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   private void showPopup(String toShow,String toShow2, Widget over) {
-    final PopupPanel popupImage = new PopupPanel(true);
-    Panel vp = new VerticalPanel();
-    vp.add(new HTML(toShow));
-    vp.add(new HTML(toShow2));
-    popupImage.add(vp);
-    popupImage.showRelativeTo(over);
-    Timer t = new Timer() {
-      @Override
-      public void run() { popupImage.hide(); }
-    };
-    t.schedule(3000);
+    new PopupHelper().showPopup(toShow,toShow2,over);
   }
 
   /**
