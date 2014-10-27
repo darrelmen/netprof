@@ -11,6 +11,8 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
+import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
@@ -110,7 +112,6 @@ public class UserPassLogin extends UserDialog {
     super(service,props);
     keyStorage = new KeyStorage(props.getLanguage(), 1000000);
 
-
     checkWelcome();
 
     this.userManager = userManager;
@@ -131,20 +132,25 @@ public class UserPassLogin extends UserDialog {
     };
   }
 
-  void checkWelcome() {
+  private void checkWelcome() {
     if (!hasShownWelcome() && props.shouldShowWelcome()) {
       keyStorage.storeValue(SHOWN_HELLO, "yes");
       showWelcome();
     }
   }
 
-  boolean hasShownWelcome() {
+  private boolean hasShownWelcome() {
     return keyStorage.hasValue(SHOWN_HELLO);
   }
 
   private void showWelcome() {
     Modal modal = new ModalInfoDialog().getModal("Welcome to Classroom!", "<h4>Classroom has been updated.</h4>" +
-        getLoginInfo());
+        getLoginInfo(), null, new HiddenHandler() {
+      @Override
+      public void onHidden(HiddenEvent hiddenEvent) {
+        setFocusOnUserID();
+      }
+    });
     modal.setMaxHeigth((600) + "px");
     modal.show();
   }
@@ -219,7 +225,7 @@ public class UserPassLogin extends UserDialog {
 
     fieldset.add(hp2);
 
-    getFocusOnField(user);
+    setFocusOnUserID();
 
     return signInForm;
   }
@@ -299,9 +305,7 @@ public class UserPassLogin extends UserDialog {
     user.box.addStyleName("topMargin");
     user.box.addStyleName("rightFiveMargin");
     user.box.getElement().setId("Username_Box_SignIn");
-    user.box.setFocus(true);
     user.box.setWidth(SIGN_UP_WIDTH);
-
 
     user.box.addFocusHandler(new FocusHandler() {
       @Override
@@ -513,10 +517,12 @@ public class UserPassLogin extends UserDialog {
     commentPopup.add(vp);
   }
 
-  private void getFocusOnField(final FormField user) {
+  private void setFocusOnUserID() { setFocusOn(user.box); }
+
+  private void setFocusOn(final FocusWidget widget) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        user.box.setFocus(true);
+        widget.setFocus(true);
       }
     });
   }
@@ -984,7 +990,7 @@ public class UserPassLogin extends UserDialog {
   private void copyInfoToSignUp(User result) {
     signUpUser.box.setText(result.getUserID());
     signUpPassword.box.setText(password.getText());
-    getFocusOnField(signUpEmail);
+    setFocusOn(signUpEmail.getWidget());
     eventRegistration.logEvent(signIn, "sign in", "N/A", "copied info to sign up form");
 
     markErrorBlur(signUpEmail, "Add info", CURRENT_USERS, Placement.TOP);
