@@ -775,6 +775,12 @@ public class DatabaseImpl implements Database {
     return getMonitorResultsWithText(monitorResults);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(java.util.Map, long, String)
+   * @see #getMonitorResults()
+   * @param monitorResults
+   * @return
+   */
   public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults) {
     Map<String, CommonExercise> join = getIdToExerciseMap();
     resultDAO.addUnitAndChapterToResults(monitorResults, join);
@@ -1074,7 +1080,11 @@ public class DatabaseImpl implements Database {
   }
 
   public void doReport(ServerProperties serverProps, String site,MailSupport mailSupport, PathHelper pathHelper) {
-    new Report(userDAO,resultDAO,eventDAO,audioDAO).doReport(serverProps,site,mailSupport,pathHelper);
+    getReport().doReport(serverProps, site, mailSupport, pathHelper);
+  }
+
+  public Report getReport() {
+    return new Report(userDAO,resultDAO,eventDAO,audioDAO);
   }
 
   public String toString() {
