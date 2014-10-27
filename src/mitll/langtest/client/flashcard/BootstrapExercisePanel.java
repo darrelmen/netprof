@@ -13,6 +13,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.recorder.FlashcardRecordButton;
@@ -371,22 +372,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @param html
    * @see #receivedAudioAnswer
    */
-  private void showPopup(String html, Widget button) {
-    //System.out.println("BootstrapExercisePanel: showing popup : " + html);
-
-    final PopupPanel pleaseWait = new DecoratedPopupPanel();
-    pleaseWait.setAutoHideEnabled(true);
-    pleaseWait.add(new HTML(html));
-    pleaseWait.showRelativeTo(button);
-
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        pleaseWait.hide();
-      }
-    };
-    t.schedule(HIDE_DELAY);
-  }
+  private void showPopup(String html, Widget button) { new PopupHelper().showPopup(html,button,HIDE_DELAY);  }
 
   /**
    *
