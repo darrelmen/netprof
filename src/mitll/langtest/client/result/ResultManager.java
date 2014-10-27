@@ -23,6 +23,7 @@ import com.google.gwt.view.client.NoSelectionModel;
 import com.google.gwt.view.client.RangeChangeEvent;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.list.TypeAhead;
 import mitll.langtest.client.table.PagerTable;
@@ -30,6 +31,7 @@ import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.ResultAndTotal;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Show a dialog with all the results we've collected so far.
@@ -40,13 +42,15 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class ResultManager extends PagerTable {
+  private Logger logger = Logger.getLogger("ResultManager");
+
   private static final int PAGE_SIZE = 12;
   private static final String TIMESTAMP = "timestamp";
   private static final String CORRECT = "Correct";
-  private static final String PRO_F_SCORE = "Score";//ProFScore";
+  private static final String PRO_F_SCORE = "Score";
   private static final String DURATION_SEC = "Duration (Sec)";
   private static final String AUDIO_TYPE = "Audio Type";
-  private static final String USER_ID = "User";// ID";
+  private static final String USER_ID = "User";
   private static final String DESC = "DESC";
   private static final String ASC = "ASC";
 
@@ -170,7 +174,7 @@ public class ResultManager extends PagerTable {
         @Override
         public void requestSuggestions(final Request request, final Callback callback) {
           final Map<String, String> unitToValue = getUnitToValue();
-          //System.out.println(new Date() + " requestSuggestions got request for " + type + " : " + unitToValue);
+          //logger.info(" requestSuggestions got request for " + type + " : " + unitToValue);
           service.getResultAlternatives(unitToValue, getUserID(), getText(), type, new AsyncCallback<Collection<String>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -178,7 +182,7 @@ public class ResultManager extends PagerTable {
 
             @Override
             public void onSuccess(Collection<String> result) {
-             // System.out.println(new Date() + " request for " + type + " : " + unitToValue + " yielded " + result.size());
+             // logger.info(" request for " + type + " : " + unitToValue + " yielded " + result.size());
               makeSuggestionResponse(result, callback, request);
             }
           });
@@ -198,7 +202,7 @@ public class ResultManager extends PagerTable {
     userIDSuggest = new Typeahead(new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
-        //System.out.println(new Date() + " requestSuggestions got request for userid " + getUnitToValue() + " " + getText() + " " + getUserID());
+        //logger.info(" requestSuggestions got request for userid " + getUnitToValue() + " " + getText() + " " + getUserID());
 
         service.getResultAlternatives(getUnitToValue(), getUserID(), getText(), MonitorResult.USERID, new AsyncCallback<Collection<String>>() {
           @Override
@@ -207,7 +211,7 @@ public class ResultManager extends PagerTable {
 
           @Override
           public void onSuccess(Collection<String> result) {
-            System.out.println(new Date() + " requestSuggestions got request for userid " + getUnitToValue() + " " + getText() + " " + getUserID() + " yielded " + result.size());
+            //logger.info(" requestSuggestions got request for userid " + getUnitToValue() + " " + getText() + " " + getUserID() + " yielded " + result.size());
             makeSuggestionResponse(result, callback, request);
           }
         });
@@ -227,7 +231,7 @@ public class ResultManager extends PagerTable {
     textSuggest = new Typeahead(new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
-        //System.out.println(new Date() + " requestSuggestions got request for txt " + getUnitToValue() + " " + getText() + " " + getUserID());
+        //logger.info(" requestSuggestions got request for txt " + getUnitToValue() + " " + getText() + " " + getUserID());
 
         service.getResultAlternatives(getUnitToValue(), getUserID(), getText(), MonitorResult.TEXT, new AsyncCallback<Collection<String>>() {
           @Override
@@ -236,7 +240,7 @@ public class ResultManager extends PagerTable {
 
           @Override
           public void onSuccess(Collection<String> result) {
-            System.out.println(new Date() + " requestSuggestions got request for text " + getUnitToValue() + " " + getText() + " " + getUserID() + " yielded " + result.size());
+            //logger.info(" requestSuggestions got request for text " + getUnitToValue() + " " + getText() + " " + getUserID() + " yielded " + result.size());
             makeSuggestionResponse(result, callback, request);
 
           }
@@ -284,7 +288,7 @@ public class ResultManager extends PagerTable {
     return new KeyUpHandler() {
       @Override
       public void onKeyUp(KeyUpEvent event) {
-     //   System.out.println(new Date() + w.getId() + " KeyUpEvent event " + event + " item " + w.getText() + " " + w.getValue());
+     //   logger.info(w.getId() + " KeyUpEvent event " + event + " item " + w.getText() + " " + w.getValue());
         redraw();
       }
     };
@@ -295,12 +299,12 @@ public class ResultManager extends PagerTable {
       @Override
       public String onSelection(SuggestOracle.Suggestion selectedSuggestion) {
         String replacementString = selectedSuggestion.getReplacementString();
-        //System.out.println("UpdaterCallback " + " got update " +" " + "--- > " + replacementString);
+        //logger.info("UpdaterCallback " + " got update " +" " + "--- > " + replacementString);
 
         // NOTE : we need both a redraw on key up and one on selection!
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           public void execute() {
-            //System.out.println("--> onSelection REDRAW ");
+            //logger.info("--> onSelection REDRAW ");
             redraw();
           }
         });
@@ -324,14 +328,19 @@ public class ResultManager extends PagerTable {
 
     else {
       TextBox widget = (TextBox) textSuggest.getWidget();
-      //    System.out.println("checking " + widget.getElement().getId() + " " + widget.getText() +" " + widget.getValue());
+      //    logger.info("checking " + widget.getElement().getId() + " " + widget.getText() +" " + widget.getValue());
       return widget.getValue();
     }
   }
 
   private long getUserID() {
     String textFromTypeahead = getTextFromTypeahead(userIDSuggest);
-    return userIDSuggest == null ? -1 : textFromTypeahead.isEmpty() ? -1 : Long.parseLong(textFromTypeahead);
+    try {
+      return userIDSuggest == null ? -1 : textFromTypeahead.isEmpty() ? -1 : Long.parseLong(textFromTypeahead);
+    } catch (NumberFormatException e) {
+      new PopupHelper().showPopup("Please enter a number",userIDSuggest.getWidget());
+    }
+    return -1;
   }
 
   private Map<String, String> getUnitToValue() {
@@ -415,7 +424,7 @@ public class ResultManager extends PagerTable {
         final int start = display.getVisibleRange().getStart();
         int end = start + display.getVisibleRange().getLength();
         end = end >= numResults ? numResults : end;
-        //System.out.println("asking for " + start +"->" + end);
+        //logger.info("asking for " + start +"->" + end);
 
         StringBuilder builder = getColumnSortedState(table);
         final Map<String, String> unitToValue = getUnitToValue();
@@ -424,7 +433,7 @@ public class ResultManager extends PagerTable {
         final String text = getText();
 
         int val = req++;
-        System.out.println("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
+       // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
         service.getResults(start, end, builder.toString(), unitToValue, userID, text, val, new AsyncCallback<ResultAndTotal>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -435,13 +444,13 @@ public class ResultManager extends PagerTable {
           public void onSuccess(final ResultAndTotal result) {
             if (result.req < req - 1) {
 /*
-              System.out.println("->>getResults ignoring response " + result.req + " vs " + req +
+              logger.info("->>getResults ignoring response " + result.req + " vs " + req +
                   " --->req " + unitToValue + " user " + userID + " text '" + text + "' : got back " + result.results.size() + " of total " + result.numTotal);
 */
             } else {
-              System.out.println("--->getResults req " + result.req +
+ /*             logger.info("--->getResults req " + result.req +
                   " " + unitToValue + " user " + userID + " text '" + text + "' : got back " + result.results.size() + " of total " + result.numTotal);
-
+*/
               final int numTotal = result.numTotal;
               cellTable.setRowCount(numTotal, true);
               updateRowData(start, result.results);
