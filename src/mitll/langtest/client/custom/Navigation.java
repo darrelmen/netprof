@@ -80,9 +80,9 @@ public class Navigation implements RequiresResize {
   private static final String CHAPTERS = "Learn Pronunciation";
 //  private static final String CONTENT = CHAPTERS;
   private static final String YOUR_LISTS = "Study Your Lists";
-  private static final String STUDY_LISTS = "Study Lists and Favorites";
+  private static final String STUDY_LISTS = "Study Lists";// and Favorites";
   private static final String OTHERS_LISTS = "Study Visited Lists";
-  private static final String PRACTICE = "Do Flashcards";
+  private static final String PRACTICE = "Audio Flashcards"; // "Do Flashcards";
   public static final String REVIEW = "review";
   public static final String COMMENT = "comment";
   private static final String ATTENTION = "attention";
@@ -325,6 +325,8 @@ public class Navigation implements RequiresResize {
   }
 
   /**
+   * Defines order of tabs...
+   *
    * @return
    * @see #showInitialState()
    */
@@ -334,20 +336,21 @@ public class Navigation implements RequiresResize {
     nameToTab.clear();
     nameToIndex.clear();
 
-    addPracticeTab();
     addDialogTab();
 
-    // chapter tab
-    final String chapterNameToUse = CHAPTERS;
-    chapters = makeFirstLevelTab(tabPanel, IconType.LIGHTBULB, chapterNameToUse);
+    // learn tab
+
+    chapters = makeFirstLevelTab(tabPanel, IconType.LIGHTBULB, CHAPTERS);
     chapters.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(chapterNameToUse);
+        checkAndMaybeClearTab(CHAPTERS);
         learnHelper.showNPF(chapters, LEARN);
-        logEvent(chapters, chapterNameToUse);
+        logEvent(chapters, CHAPTERS);
       }
     });
+
+    addPracticeTab();
 
     studyLists = makeFirstLevelTab(tabPanel, IconType.FOLDER_CLOSE, STUDY_LISTS);
     final TabPanel w = new TabPanel();
@@ -569,7 +572,7 @@ public class Navigation implements RequiresResize {
           if (result.size() == 1 && // if only one empty list - one you've created
               result.iterator().next().isEmpty()) {
             // choose default tab to show
-            selectPreviousTab(PRACTICE);
+            showDefaultInitialTab();
           } else {
             boolean foundCreated = false;
             for (UserList ul : result) {
@@ -591,11 +594,18 @@ public class Navigation implements RequiresResize {
   public void refreshInitialState() {
     String value = storage.getValue(CLICKED_TAB);
     if (value.isEmpty()) {   // no previous tab
-      showPracticeTab();
+      showDefaultInitialTab();
     }
     else {
       selectPreviousTab(value);
     }
+  }
+
+  public void showDefaultInitialTab() {
+    //showPracticeTab();
+
+    checkAndMaybeClearTab(CHAPTERS);
+    learnHelper.showNPF(chapters, LEARN);
   }
 
   /**
@@ -630,13 +640,13 @@ public class Navigation implements RequiresResize {
         showPracticeTab();
       } else {
         System.out.println("got unknown value '" + value+ "'");
-        showPracticeTab();
+        showDefaultInitialTab();
       }
     }
     else {
       System.err.println("selectPreviousTab : found value  '" + value + "' " +
           " but I only know about tabs : " + nameToIndex.keySet());
-      showPracticeTab();
+      showDefaultInitialTab();
     }
 
   }
