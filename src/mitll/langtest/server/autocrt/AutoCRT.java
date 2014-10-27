@@ -9,6 +9,7 @@ import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
+import mitll.langtest.server.scoring.ASRScoring;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -143,9 +144,9 @@ public class AutoCRT {
    * @param audioFile
    * @param answer
    */
-  public PretestScore getFlashcardAnswer(CommonExercise commonExercise, File audioFile, AudioAnswer answer) {
-    List<String> foregroundSentences = getRefSentences(commonExercise);
-    PretestScore flashcardAnswer = getFlashcardAnswer(audioFile, foregroundSentences, answer);
+  public PretestScore getFlashcardAnswer(CommonExercise commonExercise, File audioFile, AudioAnswer answer, String language) {
+    List<String> foregroundSentences = getRefSentences(commonExercise, language);
+    PretestScore flashcardAnswer = getFlashcardAnswer(audioFile, foregroundSentences, answer, language);
 
     // log what happened
     if (answer.isCorrect()) {
@@ -172,8 +173,8 @@ public class AutoCRT {
    * @param answer
    * @return
    */
-  public PretestScore getFlashcardAnswer(File audioFile, String foregroundSentence, AudioAnswer answer) {
-    return getFlashcardAnswer(audioFile, getRefs(Collections.singletonList(foregroundSentence)), answer);
+  public PretestScore getFlashcardAnswer(File audioFile, String foregroundSentence, AudioAnswer answer, String language) {
+    return getFlashcardAnswer(audioFile, getRefs(Collections.singletonList(foregroundSentence), language), answer, language);
   }
 
   /**
@@ -193,7 +194,7 @@ public class AutoCRT {
    * @param answer            holds the score, whether it was correct, the decode output, and whether one of the possible sentences
    * @return PretestScore word/phone alignment with scores
    */
-  private PretestScore getFlashcardAnswer(File audioFile, List<String> possibleSentences, AudioAnswer answer) {
+  private PretestScore getFlashcardAnswer(File audioFile, List<String> possibleSentences, AudioAnswer answer, String language) {
     List<String> foreground = new ArrayList<String>();
     for (String ref : possibleSentences) {
       String e1 = removePunct(ref);
@@ -247,17 +248,22 @@ public class AutoCRT {
    * @param other
    * @return
    */
-  private List<String> getRefSentences(CommonExercise other) {
+  private List<String> getRefSentences(CommonExercise other, String language) {
     List<String> refSentences = new ArrayList<String>();
     String foreignLanguage = other.getForeignLanguage();
     refSentences.add(foreignLanguage);
-    return getRefs(refSentences);
+    return getRefs(refSentences, language);
   }
 
-  private List<String> getRefs(List<String> refSentences) {
+  private List<String> getRefs(List<String> refSentences, String language) {
     List<String> refs = new ArrayList<String>();
     for (String ref : refSentences) {
-      refs.add(ref.trim().toUpperCase());
+      if (language.equalsIgnoreCase("mandarin") && !ref.trim().equalsIgnoreCase(SLFFile.UNKNOWN_MODEL)){
+    	  refs.add(ASRScoring.getSegmented(ref.trim().toUpperCase())); //we want this to be a space-separated sentence
+      }
+      else{
+    	  refs.add(ref.trim().toUpperCase());
+      }
     }
     return refs;
   }
