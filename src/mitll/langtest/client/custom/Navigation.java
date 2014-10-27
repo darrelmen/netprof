@@ -3,35 +3,20 @@ package mitll.langtest.client.custom;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.*;
-import com.github.gwtbootstrap.client.ui.Image;
-import com.github.gwtbootstrap.client.ui.ListBox;
-import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.InlineLabel;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseDownEvent;
-import com.google.gwt.event.dom.client.MouseDownHandler;
-import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.google.gwt.event.dom.client.MouseUpHandler;
-import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-
-import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.contextPractice.DialogWindow;
@@ -47,18 +32,13 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.WaveformExercisePanel;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
-import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
-import mitll.langtest.client.scoring.SimplePostAudioRecordButton;
-import mitll.langtest.client.sound.AudioControl;
-import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.User;
@@ -237,12 +217,12 @@ public class Navigation implements RequiresResize {
               protected CommonShell findFirstExercise() {
                 String currentExerciseID = statsFlashcardFactory.getCurrentExerciseID();
                 if (currentExerciseID != null && !currentExerciseID.trim().isEmpty()) {
-                  System.out.println("findFirstExercise ---> found previous state current ex = " + currentExerciseID);
+                  logger.info("findFirstExercise ---> found previous state current ex = " + currentExerciseID);
 
                   CommonShell shell = byID(currentExerciseID);
 
                   if (shell == null) {
-                    System.err.println("huh? can't find " + currentExerciseID);
+                    logger.warning("huh? can't find " + currentExerciseID);
                     return super.findFirstExercise();
                   }
                   else {
@@ -268,7 +248,7 @@ public class Navigation implements RequiresResize {
 
           @Override
           protected void styleBottomRow(Panel bottomRow) {
-        //    System.out.println("-----\n\n Adding style to " + bottomRow.getElement().getId());
+        //    logger.info("-----\n\n Adding style to " + bottomRow.getElement().getId());
             bottomRow.addStyleName("centerPractice");
             outerBottomRow = bottomRow;
           }
@@ -299,23 +279,23 @@ public class Navigation implements RequiresResize {
       public void onShow(TabPanel.ShowEvent showEvent) {
         TabLink target = showEvent.getTarget();
         String targetName = target == null ? "" : target.toString();
- /*       System.out.println("got shown event : '" +showEvent + "'\n" +
+ /*       logger.info("got shown event : '" +showEvent + "'\n" +
             "\ntarget " + target +
             " ' target name '" + targetName+ "'");*/
 
         boolean wasChapters = targetName.contains(CHAPTERS);
-        Panel createdPanel = learnHelper != null && learnHelper.getExerciseList() != null ? learnHelper.getExerciseList().getCreatedPanel() : null;
+        Panel createdPanel = learnHelper.getExerciseList() != null ? learnHelper.getExerciseList().getCreatedPanel() : null;
         boolean hasCreated = createdPanel != null;
-        // System.out.println("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "' hasCreated " + hasCreated);
+        // logger.info("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "' hasCreated " + hasCreated);
         if (hasCreated && wasChapters && (createdPanel instanceof GoodwaveExercisePanel)) {
-       //   System.out.println("\taddShowHandler got chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
+       //   logger.info("\taddShowHandler got chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
           ((GoodwaveExercisePanel) createdPanel).wasRevealed();
         } else {
-     /*     System.out.println("\taddShowHandler ignoring target " + targetName);
-          System.out.println("\taddShowHandler ignoring target " + learnHelper);
-          System.out.println("\taddShowHandler ignoring target " + learnHelper.getExerciseList());
+     /*     logger.info("\taddShowHandler ignoring target " + targetName);
+          logger.info("\taddShowHandler ignoring target " + learnHelper);
+          logger.info("\taddShowHandler ignoring target " + learnHelper.getExerciseList());
           if (learnHelper.getExerciseList() != null) {
-            System.out.println("\taddShowHandler ignoring target " + learnHelper.getExerciseList().getCreatedPanel());
+            logger.info("\taddShowHandler ignoring target " + learnHelper.getExerciseList().getCreatedPanel());
           }*/
         }
       }
@@ -482,13 +462,13 @@ public class Navigation implements RequiresResize {
   private void showPracticeTab() {
     if (practiceTab != null) {
       checkAndMaybeClearTab(PRACTICE);
-     // System.out.println(" ------- showPracticeTab make practice tab  - " + practiceTab.getContent());
+     // logger.info(" ------- showPracticeTab make practice tab  - " + practiceTab.getContent());
       practiceHelper.showNPF(practiceTab, PRACTICE);
       practiceHelper.setContentPanel(practiceTab.getContent());
       practiceHelper.hideList();
     }
 //    else {
-      //System.err.println(" ------- showPracticeTab make practice tab  - " + practiceTab);
+      //logger.warning(" ------- showPracticeTab make practice tab  - " + practiceTab);
 
   //  }
   }
@@ -519,7 +499,7 @@ public class Navigation implements RequiresResize {
   private final Map<String, Integer> nameToIndex = new HashMap<String, Integer>();
 
   private TabAndContent makeFirstLevelTab(TabPanel tabPanel, IconType iconType, String label) {
-    //System.out.println("makeFirstLevelTab " + label);
+    //logger.info("makeFirstLevelTab " + label);
     TabAndContent tabAndContent = makeTab(tabPanel, iconType, label);
     nameToIndex.put(label, tabs.size());
     tabs.add(tabAndContent);
@@ -535,7 +515,7 @@ public class Navigation implements RequiresResize {
 
   private void checkAndMaybeClearTab(String value) {
     //String value1 = storage.getValue(CLICKED_TAB);
-    //System.out.println("checkAndMaybeClearTab " + value1 + " vs "+value + " clearing " + CLICKED_USER_LIST);
+    //logger.info("checkAndMaybeClearTab " + value1 + " vs "+value + " clearing " + CLICKED_USER_LIST);
     storage.removeValue(CLICKED_USER_LIST);
     storage.storeValue(CLICKED_TAB, value);
   }
@@ -559,7 +539,7 @@ public class Navigation implements RequiresResize {
   public void showInitialState() {
     addTabs();
 
-/*    System.out.println("showInitialState show initial state for " + user +
+/*    logger.info("showInitialState show initial state for " + user +
         " : getting user lists " + controller.isReviewMode());*/
     String value = storage.getValue(CLICKED_TAB);
     if (value.isEmpty()) {   // no previous tab
@@ -586,7 +566,7 @@ public class Navigation implements RequiresResize {
         }
       });
     } else {
-      //System.out.println("previous selection was " + value);
+      //logger.info("previous selection was " + value);
       selectPreviousTab(value);
     }
   }
@@ -599,13 +579,6 @@ public class Navigation implements RequiresResize {
     else {
       selectPreviousTab(value);
     }
-  }
-
-  public void showDefaultInitialTab() {
-    //showPracticeTab();
-
-    checkAndMaybeClearTab(CHAPTERS);
-    learnHelper.showNPF(chapters, LEARN);
   }
 
   /**
@@ -639,16 +612,30 @@ public class Navigation implements RequiresResize {
       } else if (value.equals(PRACTICE) && practiceTab != null) {
         showPracticeTab();
       } else {
-        System.out.println("got unknown value '" + value+ "'");
+        logger.info("got unknown value '" + value + "'");
         showDefaultInitialTab();
       }
     }
     else {
-      System.err.println("selectPreviousTab : found value  '" + value + "' " +
+      logger.warning("selectPreviousTab : found value  '" + value + "' " +
           " but I only know about tabs : " + nameToIndex.keySet());
       showDefaultInitialTab();
     }
 
+  }
+
+  /**
+   * What to do when we don't know which tab to select
+   * Right now show the learn pronunciation tab.
+   */
+  private void showDefaultInitialTab() {
+    checkAndMaybeClearTab(CHAPTERS);
+    learnHelper.showNPF(chapters, LEARN);
+
+    TabAndContent tabAndContent = nameToTab.get(CHAPTERS);
+    Integer tabIndex = nameToIndex.get(CHAPTERS);
+    tabPanel.selectTab(tabIndex);
+    clickOnTab(tabAndContent);
   }
 
   /**
@@ -658,7 +645,7 @@ public class Navigation implements RequiresResize {
    */
   private void showMyLists(boolean onlyCreated, boolean onlyVisited) {
     String value = storage.getValue(CLICKED_TAB);
-//    System.out.println("showMyLists " + value + " created " + onlyCreated + " visited " + onlyVisited);
+//    logger.info("showMyLists " + value + " created " + onlyCreated + " visited " + onlyVisited);
     if (!value.isEmpty()) {
       if (value.equals(YOUR_LISTS)) {
         onlyCreated = true;
@@ -699,11 +686,11 @@ public class Navigation implements RequiresResize {
    */
   private void clickOnTab(final TabAndContent toUse) {
     if (toUse == null) {
-      System.err.println("huh? toUse is nulll???\n\n");
+      logger.warning("huh? toUse is nulll???\n\n");
     } else if (toUse.getTab() == null) {
-      System.err.println("huh? toUse has a null tab? " + toUse);
+      logger.warning("huh? toUse has a null tab? " + toUse);
     } else {
-   //   System.out.println("click on tab " + toUse);
+   //   logger.info("click on tab " + toUse);
       toUse.getTab().fireEvent(new ButtonClickEvent());
     }
   }
@@ -752,14 +739,15 @@ public class Navigation implements RequiresResize {
     listScrollPanel = new ScrollPanel();
 
     if (getAll) {
-      // System.out.println("viewLessons----> getAll = " + getAll);
+      // logger.info("viewLessons----> getAll = " + getAll);
       service.getUserListsForText("", controller.getUser(),
           new UserListCallback(this, contentPanel, child, listScrollPanel, LESSONS + "_All", false, true, userManager, onlyMine));
     } else {
-      // System.out.println("viewLessons for " + userManager.getUser());
+      // logger.info("viewLessons for " + userManager.getUser());
       service.getListsForUser(userManager.getUser(), onlyMine,
           onlyVisited,
-          new UserListCallback(this, contentPanel, child, listScrollPanel, LESSONS + (onlyMine ? "_Mine":"_Others"), onlyMine, false, userManager, onlyMine));
+          new UserListCallback(this, contentPanel, child, listScrollPanel,
+              LESSONS + (onlyMine ? "_Mine":"_Others"), onlyMine, false, userManager, onlyMine));
     }
   }
 
@@ -770,7 +758,7 @@ public class Navigation implements RequiresResize {
   private void viewReview(final Panel contentPanel) {
     final Panel child = getContentChild(contentPanel);
 
-//    System.out.println("------> viewReview : reviewLessons for " + userManager.getUser());
+//    logger.info("------> viewReview : reviewLessons for " + userManager.getUser());
 
     service.getReviewLists(new AsyncCallback<List<UserList>>() {
       @Override
@@ -778,9 +766,10 @@ public class Navigation implements RequiresResize {
 
       @Override
       public void onSuccess(List<UserList> reviewLists) {
-        System.out.println("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + reviewLists);
+        logger.info("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + reviewLists);
 
-        new UserListCallback(Navigation.this, contentPanel, child, new ScrollPanel(), REVIEW, false, false, userManager, false).onSuccess(reviewLists);
+        new UserListCallback(Navigation.this, contentPanel, child,
+            new ScrollPanel(), REVIEW, false, false, userManager, false).onSuccess(reviewLists);
       }
     });
   }
@@ -816,8 +805,8 @@ public class Navigation implements RequiresResize {
    * @param contentPanel
    */
   void showList(final UserList ul, Panel contentPanel, final String instanceName) {
-    //System.out.println("showList " + ul + " instance " + instanceName);
-    //  if (!ul.isEmpty()) System.out.println("\tfirst" + ul.getExercises().iterator().next());
+    //logger.info("showList " + ul + " instance " + instanceName);
+    //  if (!ul.isEmpty()) logger.info("\tfirst" + ul.getExercises().iterator().next());
     controller.logEvent(contentPanel,"Tab","UserList_"+ul.getID(),"Show List");
 
     String previousList = storage.getValue(CLICKED_USER_LIST);
@@ -825,7 +814,7 @@ public class Navigation implements RequiresResize {
 
     // if select a new list, clear the subtab selection
     if (previousList != null && !previousList.equals(currentValue)) {
-      //System.out.println("\tshowList " +previousList + " vs " + currentValue);
+      //logger.info("\tshowList " +previousList + " vs " + currentValue);
 
       storage.removeValue(SUB_TAB);
     }
@@ -954,14 +943,15 @@ public class Navigation implements RequiresResize {
     boolean created = createdByYou(ul) || instanceName.equals(REVIEW) || instanceName.equals(COMMENT);
 
     final TabPanel tabPanel = new TabPanel();
-    System.out.println("getListOperations : '" + instanceName + " for list " +ul);
+    logger.info("getListOperations : '" + instanceName + " for list " + ul);
     final boolean isReview = instanceName.equals(REVIEW);
     final boolean isComment = instanceName.equals(COMMENT);
     final boolean isAttention = instanceName.equals(ATTENTION);
     final String instanceName1 = isReview ? REVIEW : isComment ? COMMENT : isAttention ? ATTENTION : LEARN;
 
     // add learn tab
-    String learnTitle = isReview ? POSSIBLE_DEFECTS : isComment ? ITEMS_WITH_COMMENTS : isAttention ? "Items for LL" : LEARN_PRONUNCIATION;
+    String learnTitle = isReview ? POSSIBLE_DEFECTS :
+        isComment ? ITEMS_WITH_COMMENTS : isAttention ? "Items for LL" : LEARN_PRONUNCIATION;
     final TabAndContent learn = makeTab(tabPanel, isReview ? IconType.EDIT_SIGN : IconType.LIGHTBULB, learnTitle);
     final boolean isNormalList = !isReview && !isComment && !isAttention;
     learn.getTab().addClickHandler(new ClickHandler() {
@@ -983,7 +973,7 @@ public class Navigation implements RequiresResize {
         @Override
         public void onClick(ClickEvent event) {
           storage.storeValue(SUB_TAB, PRACTICE1);
-        //   System.out.println("getListOperations : got click on practice " + fpractice.getContent());
+        //   logger.info("getListOperations : got click on practice " + fpractice.getContent());
           avpHelper.setContentPanel(fpractice.getContent());
           avpHelper.showNPF(ul, fpractice, PRACTICE1, true);
           controller.logEvent(fpractice.getTab(), "Tab", "UserList_" + ul.getID(), PRACTICE1);
@@ -1051,7 +1041,8 @@ public class Navigation implements RequiresResize {
     }
   }
 
-  private void showLearnTab(TabAndContent learnTab, UserList ul, String instanceName1, boolean isReview, boolean isComment, boolean isAttention) {
+  private void showLearnTab(TabAndContent learnTab, UserList ul, String instanceName1, boolean isReview,
+                            boolean isComment, boolean isAttention) {
     showLearnTab(isReview || isComment || isAttention, ul, learnTab, instanceName1);
   }
 
@@ -1065,11 +1056,11 @@ public class Navigation implements RequiresResize {
    */
   private void showLearnTab(boolean isReview, UserList ul, TabAndContent learn, String instanceName1) {
     if (isReview) {
-      //System.out.println("showLearnTab : onClick using defect helper " + instanceName1 + " and " +ul);
+      //logger.info("showLearnTab : onClick using defect helper " + instanceName1 + " and " +ul);
       defectHelper.showNPF(ul, learn, instanceName1, false);
     }
     else {
-      //System.out.println("showLearnTab : onClick using npf helper " + instanceName1 + " and " +ul);
+      //logger.info("showLearnTab : onClick using npf helper " + instanceName1 + " and " +ul);
       npfHelper.showNPF(ul, learn, instanceName1, true);
     }
   }
@@ -1082,7 +1073,8 @@ public class Navigation implements RequiresResize {
    * @param isReview
    * @param isComment
    */
-  private void showEditReviewOrComment(UserList ul, boolean isNormalList, TabAndContent finalEditItem, boolean isReview, boolean isComment) {
+  private void showEditReviewOrComment(UserList ul, boolean isNormalList, TabAndContent finalEditItem,
+                                       boolean isReview, boolean isComment) {
     boolean reviewOrComment = isReview || isComment;
     if (reviewOrComment) {
       reviewItem.showNPF(ul, finalEditItem, (isReview ? REVIEW : COMMENT) + "_edit", false);
@@ -1110,9 +1102,10 @@ public class Navigation implements RequiresResize {
                                                 TabAndContent practiceTab,
                                                 TabAndContent editTab,
                                                 UserList ul, String instanceName1,
-                                                boolean isReview, boolean isComment, boolean isAttention, boolean isNormalList) {
+                                                boolean isReview, boolean isComment, boolean isAttention,
+                                                boolean isNormalList) {
     String subTab = storage.getValue(SUB_TAB);
-    //System.out.println("selectPreviouslyClickedSubTab : subtab " + subTab);
+    //logger.info("selectPreviouslyClickedSubTab : subtab " + subTab);
 
     boolean chosePrev = false;
     if (subTab != null) {
@@ -1177,7 +1170,7 @@ public class Navigation implements RequiresResize {
         if (result) {
           refreshViewLessons(onlyMyLists, false);
         } else {
-          System.err.println("---> did not do deleteList " + ul.getUniqueID());
+          logger.warning("---> did not do deleteList " + ul.getUniqueID());
         }
       }
     });
@@ -1201,7 +1194,8 @@ public class Navigation implements RequiresResize {
   private class RecorderNPFHelper extends SimpleChapterNPFHelper {
     final boolean doNormalRecording;
 
-    public RecorderNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller, boolean doNormalRecording) {
+    public RecorderNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
+                             ExerciseController controller, boolean doNormalRecording) {
       super(service, feedback, userManager, controller, learnHelper.getExerciseList());
       this.doNormalRecording = doNormalRecording;
     }
@@ -1211,7 +1205,7 @@ public class Navigation implements RequiresResize {
       return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
         @Override
         public Panel getExercisePanel(final CommonExercise e) {
-          //System.out.println("getting exercise for " + e.getID() + " normal rec " +doNormalRecording);
+          //logger.info("getting exercise for " + e.getID() + " normal rec " +doNormalRecording);
           return new WaveformExercisePanel(e, service, controller, exerciseList, doNormalRecording) {
             @Override
             public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
