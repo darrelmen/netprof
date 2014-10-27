@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
@@ -165,16 +166,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @param toShow
    */
   private void showPopup(String toShow) {
-    final PopupPanel popupImage = new PopupPanel(true);
-    popupImage.add(new HTML(toShow));
-    popupImage.showRelativeTo(getOuter());
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        popupImage.hide();
-      }
-    };
-    t.schedule(3000);
+    new PopupHelper().showPopup(toShow,getOuter(),3000);
   }
 
   public abstract void useResult(AudioAnswer result);
