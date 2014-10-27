@@ -88,7 +88,7 @@ public class SmallDatabaseImpl implements Database {
 
     try {
       UserDAO userDAO = new UserDAO(this, null);
-      userDAO.createUserTable(this);
+      userDAO.createTable(this);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
