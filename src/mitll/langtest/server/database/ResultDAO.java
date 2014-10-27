@@ -135,14 +135,23 @@ public class ResultDAO extends DAO {
     return new ArrayList<MonitorResult>();
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getMonitorResultsWithText(java.util.List)
+   * @param monitorResults
+   * @param join
+   */
   public void addUnitAndChapterToResults(List<MonitorResult> monitorResults, Map<String, CommonExercise> join) {
     int n = 0;
+    Set<String> unknownIDs = new HashSet<String>();
     for (MonitorResult result : monitorResults) {
       String id = result.getId();
       if (id.contains("\\/")) id = id.substring(0, id.length() - 2);
       CommonExercise exercise = join.get(id);
       if (exercise == null) {
-        if (n < 200) logger.error("addUnitAndChapterToResults : for exid " + id + " couldn't find " + result);
+        if (n < 5) {
+          logger.error("addUnitAndChapterToResults : for exid " + id + " couldn't find " + result);
+        }
+        unknownIDs.add(id);
         n++;
         result.setUnitToValue(EMPTY_MAP);
         result.setForeignText("");
@@ -151,7 +160,9 @@ public class ResultDAO extends DAO {
         result.setForeignText(exercise.getForeignLanguage());
       }
     }
-    if (n > 0) logger.warn("addUnitAndChapterToResults : skipped " + n + " out of " + monitorResults.size());
+    if (n > 0) {
+      logger.warn("addUnitAndChapterToResults : skipped " + n + " out of " + monitorResults.size() + " bad join ids = " +unknownIDs);
+    }
   }
 
   public List<MonitorResult> getMonitorResultsByID(String id) {
