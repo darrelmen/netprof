@@ -10,6 +10,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.PopupPanel;
+import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -197,23 +198,10 @@ public class FlashcardRecordButton extends RecordButton {
    */
   private void warnNotASpace() { showPopup(NO_SPACE_WARNING);  }
 
-  private void showPopup(String html) {
+  private void showPopup(String html) { new PopupHelper().showPopup(html); }
   //  System.out.println("\n\n\nFlashcardRecordButton: showing popup : " + html);
 
 
-    final PopupPanel pleaseWait = new DecoratedPopupPanel();
-    pleaseWait.setAutoHideEnabled(true);
-    pleaseWait.add(new HTML(html));
-    pleaseWait.center();
-
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        pleaseWait.hide();
-      }
-    };
-    t.schedule(HIDE_DELAY);
-  }
 
   protected boolean showInitialRecordImage() {
     showFirstRecordImage();
