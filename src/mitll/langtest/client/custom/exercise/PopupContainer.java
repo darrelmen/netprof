@@ -5,13 +5,15 @@ import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.*;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.PopupHelper;
 
 /**
  * Created by go22670 on 9/8/14.
  */
 public class PopupContainer {
+
+  private final PopupHelper popupHelper = new PopupHelper();
 
   /**
    * @param commentEntryText
@@ -91,18 +93,7 @@ public class PopupContainer {
   }*/
 
   public void showPopup(String html, Widget target) {
-    Widget content = new HTML(html);
-    final PopupPanel pleaseWait = new DecoratedPopupPanel();
-    pleaseWait.setAutoHideEnabled(true);
-    pleaseWait.add(content);
-    pleaseWait.showRelativeTo(target);
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        pleaseWait.hide();
-      }
-    };
-    t.schedule(2000);
+    popupHelper.showPopup(html, target);
   }
 
   /**
