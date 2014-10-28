@@ -106,45 +106,15 @@ public class ExcelImport implements ExerciseDAO {
 //    logger.debug("unit " + unitIndex + " chapter " +chapterIndex + " week " +weekIndex);
   }
 
-  /**
-   * @deprecated we include items with missing audio now
-   * @param relativeConfigDir
-   * @param file
-   * @param missing
-   * @return
-   */
-/*  public boolean getMissing(String relativeConfigDir, String file, Set<String> missing) {
-    File missingSlow = new File(relativeConfigDir, file);
-    if (missingSlow.exists()) {
-      try {
-        BufferedReader reader = new BufferedReader(new FileReader(missingSlow));
-        String line;
-        while ((line = reader.readLine()) != null) {
-          String trim = line.trim();
-          if (trim.length() > 0) {
-            missing.add(trim);
-          }
-        }
-        reader.close();
-
-        logger.debug("Read from " + missingSlow.getAbsolutePath() + " and found " + missing.size());
-
-      } catch (Exception e) {
-        logger.error("Reading " + missingSlow.getAbsolutePath() + " Got  " + e, e);
-      }
-
-    } else {
-      //logger.debug("Can't find " + file + " under " + relativeConfigDir + " abs path " + missingSlow.getAbsolutePath());
-    }
-    return missingSlow.exists();
-  }*/
-
   @Override
-  public SectionHelper getSectionHelper() {
-    return sectionHelper;
-  }
+  public SectionHelper getSectionHelper() { return sectionHelper;  }
 
   private Map<String, List<AudioAttribute>> exToAudio;
+
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO(boolean, String, boolean, String, String)
+   * @param audioDAO
+   */
   @Override
   public void setAudioDAO(AudioDAO audioDAO) {  exToAudio = audioDAO.getExToAudio();  }
 
@@ -1029,7 +999,7 @@ public class ExcelImport implements ExerciseDAO {
       }
       //logger.debug("added " + c + " to " + id);
     } else {
-     // logger.debug("can't find '" + id + "' in " + exToAudio.keySet().size() + " keys, e.g. " + exToAudio.keySet().iterator().next());
+    // logger.debug("can't find '" + id + "' in " + exToAudio.keySet().size() + " keys, e.g. '" + exToAudio.keySet().iterator().next() +"'");
     }
     return missing;
   }
