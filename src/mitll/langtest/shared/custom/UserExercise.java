@@ -149,11 +149,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     imported.setFieldToAnnotation(getFieldToAnnotation());
     imported.setContext(getContext());
   }
-/*
-  @Override
-  public String getPlan() {
-    return "plan";
-  }*/
 
   @Override
   public String getEnglish() { return english; }
