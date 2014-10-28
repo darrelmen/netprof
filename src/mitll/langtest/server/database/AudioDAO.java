@@ -88,10 +88,11 @@ public class AudioDAO extends DAO {
         audioAttributes.add(audio);
         paths.add(audioRef);
       }
-      else {
-//        logger.warn("skipping " +audioRef + " on " + exid);
-      }
+  //    else {
+       //logger.warn("skipping " +audioRef + " on " + exid);
+    //  }
     }
+//    logger.debug("map size is " + exToAudio.size());
     return exToAudio;
   }
 
@@ -407,6 +408,8 @@ public class AudioDAO extends DAO {
       }
       results.add(audioAttr);
     }
+
+    //logger.debug("found " + results.size() + " audio attributes");
     finish(connection, statement, rs);
 
     return results;
