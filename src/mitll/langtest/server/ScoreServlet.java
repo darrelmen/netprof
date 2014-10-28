@@ -4,10 +4,7 @@ import com.google.common.io.Files;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.scoring.AutoCRTScoring;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.SectionNode;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -352,10 +349,17 @@ public class ScoreServlet extends DatabaseServlet {
     return jsonObject;
   }
 
+  /**
+   * TODO: join against audio dao ex->audio map again...
+   * to get user exercise audio!
+   *
+   * @return
+   */
   private JSONObject getJsonNestedChapters() {
     JSONObject jsonObject = new JSONObject();
     setInstallPath(db);
     db.getExercises();
+
     JSONArray jsonArray = new JSONArray();
 
     List<SectionNode> sectionNodes = db.getSectionHelper().getSectionNodes();
@@ -415,7 +419,14 @@ public class ScoreServlet extends DatabaseServlet {
   private JSONArray getJsonArray(List<CommonExercise> copy) {
     JSONArray exercises = new JSONArray();
 
+    Map<String, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
+    String installPath = pathHelper.getInstallPath();
+
     for (CommonExercise exercise : copy) {
+      List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
+      if (audioAttributes != null) {
+        db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
+      }
       if (!debug) ensureMP3s(exercise);
       exercises.add(getJsonForExercise(exercise));
     }
@@ -448,34 +459,30 @@ public class ScoreServlet extends DatabaseServlet {
       String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, 0, i);
       //File saveFile = new File(wavPath);
       File saveFile = pathHelper.getAbsoluteFile(wavPath);
+      new File(saveFile.getParent()).mkdirs();
 
       writeToOutputStream(request, saveFile);
       return getJsonForAudioForUser(exerciseID, i, isDecode(requestType), wavPath, saveFile, deviceType, device);
     } else {   // for backwards compatibility
-      String fileName = request.getHeader("fileName");
-      String word = request.getHeader("word");
-      boolean isFlashcard = request.getHeader("flashcard") != null;
-
-      File tempDir = Files.createTempDir();
-      File saveFile = new File(tempDir + File.separator + fileName);
-
-      // prints out all header values
-/*    logger.debug("===== Begin headers =====");
-    Enumeration<String> names = request.getHeaderNames();
-    while (names.hasMoreElements()) {
-      String headerName = names.nextElement();
-      System.out.println(headerName + " = " + request.getHeader(headerName));
+      return handleRequestWithNoType(request);
     }
-    logger.debug("===== End headers =====\n");*/
+  }
 
-      // opens input stream of the request for reading data
-      writeToOutputStream(request, saveFile);
+  private JSONObject handleRequestWithNoType(HttpServletRequest request) throws IOException {
+    String fileName = request.getHeader("fileName");
+    String word = request.getHeader("word");
+    boolean isFlashcard = request.getHeader("flashcard") != null;
 
-      if (isFlashcard) {
-        return getJsonForWordAndAudioFlashcard(word, saveFile);
-      } else {
-        return getJsonForWordAndAudio(word, saveFile);
-      }
+    File tempDir = Files.createTempDir();
+    File saveFile = new File(tempDir + File.separator + fileName);
+
+    // opens input stream of the request for reading data
+    writeToOutputStream(request, saveFile);
+
+    if (isFlashcard) {
+      return getJsonForWordAndAudioFlashcard(word, saveFile);
+    } else {
+      return getJsonForWordAndAudio(word, saveFile);
     }
   }
 
@@ -594,6 +601,12 @@ public class ScoreServlet extends DatabaseServlet {
     return audioFileHelper.getAnswer(exerciseID, exercise1, user, doFlashcard, wavPath, file, deviceType, device, score);
   }
 
+  /**
+   * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
+   * @param request
+   * @param saveFile
+   * @throws IOException
+   */
   private void writeToOutputStream(HttpServletRequest request, File saveFile) throws IOException {
     InputStream inputStream = request.getInputStream();
     writeToFile(inputStream, saveFile);
