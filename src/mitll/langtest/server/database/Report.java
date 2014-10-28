@@ -64,7 +64,7 @@ public class Report {
     }
     String subject = "Weekly Usage Report for " + serverProps.getLanguage() + suffix;
     if (i == Calendar.MONDAY && !reportEmails.isEmpty()) {
-      File file = getReportFile(pathHelper,today);
+      File file = getReportFile(pathHelper, today);
       //logger.debug("checking file " + file.getAbsolutePath());
       if (file.exists()) {
         logger.debug("already did report for " + today + " : " + file.getAbsolutePath());
@@ -75,10 +75,10 @@ public class Report {
           writer.write(message);
           writer.close();
           for (String dest : reportEmails) {
-            mailSupport.sendEmail(NP_SERVER, dest, MY_EMAIL,   subject, message);
+            mailSupport.sendEmail(NP_SERVER, dest, MY_EMAIL, subject, message);
           }
         } catch (IOException e) {
-          logger.error("got "+e,e);
+          logger.error("got " + e, e);
         }
       }
     } else {
@@ -88,23 +88,20 @@ public class Report {
 
   private File getReportFile(PathHelper pathHelper, String today) {
     File reports = pathHelper.getAbsoluteFile("reports");
-    //File test = new File("reports");
     if (!reports.exists()) {
-      logger.debug("making dir " + reports.getAbsolutePath());
+      // logger.debug("making dir " + reports.getAbsolutePath());
       reports.mkdirs();
-    }
-    else {
-      logger.debug("reports dir exists at " + reports.getAbsolutePath());
+    } else {
+      // logger.debug("reports dir exists at " + reports.getAbsolutePath());
     }
     String fileName = "report_" + today + ".html";
-    return new File(reports,fileName);
+    return new File(reports, fileName);
   }
 
   /**
+   * @return
    * @see DatabaseImpl#doReport()
    * @see mitll.langtest.server.LangTestDatabaseImpl#doReport()
-   *
-   * @return
    */
   public String doReport() {
     List<User> users = userDAO.getUsers();
@@ -268,7 +265,7 @@ public class Report {
 
     monthToCount = new TreeMap<Integer, Integer>();
     weekToCount = new TreeMap<Integer, Integer>();
-    ytd =0;
+    ytd = 0;
     for (Result result : refAudio) {
       if (result.getTimestamp() > january1st.getTime()) {
         ytd++;
@@ -431,7 +428,7 @@ public class Report {
 
     builder.append(getYTD(Math.round(total / 60), "Total time on task (hours)") +
         getMC(getMinMap(monthToDur), "month", "Time on Task Minutes") +
-        getWC(getMinMap(weekToDur),  "week", "Time on Task Minutes"));
+        getWC(getMinMap(weekToDur), "week", "Time on Task Minutes"));
   }
 
   private Map<Integer, Long> getMinMap(Map<Integer, Long> monthToDur) {
