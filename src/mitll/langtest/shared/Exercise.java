@@ -20,7 +20,6 @@ public class Exercise extends AudioExercise implements CommonExercise {
   public static final String EN = "en";
   public static final String FL = "fl";
   private static final int MAX_TOOLTIP_LENGTH = 15;
-  //private static final boolean DEBUG = false;
   private String plan;
   private String content;
   private boolean promptInEnglish = true;
