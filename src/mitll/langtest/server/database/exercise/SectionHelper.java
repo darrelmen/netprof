@@ -212,6 +212,7 @@ public class SectionHelper {
     }
   }
 
+  @Deprecated
   public Pair addUnitToLesson(CommonExercise exercise, String unitName) { return addExerciseToLesson(exercise, unitType, unitName);}
   public Pair addChapterToLesson(CommonExercise exercise, String unitName) { return addExerciseToLesson(exercise, chapterType, unitName);}
   public Pair addWeekToLesson(CommonExercise exercise, String unitName) { return addExerciseToLesson(exercise, weekType, unitName);}
