@@ -145,7 +145,6 @@ public class AudioAttribute implements IsSerializable {
   }
 
   public void addAttribute(String name, String value) {
-    //if (attributes == null) attributes = new HashMap<String, String>();
     if (attributes.containsKey(name)) {
       String s = attributes.get(name);
       if (!s.equals(REGULAR)) System.out.println("replacing value at " + name + " was " + s + " now " + value);
