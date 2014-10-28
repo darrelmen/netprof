@@ -155,29 +155,33 @@ public class DatabaseServlet extends HttpServlet {
   private void addLatestRefs(CommonExercise exercise, JSONObject ex) {
     String mr = null, ms = null, fr = null, fs = null;
     long mrt = 0, mst = 0, frt = 0, fst = 0;
+    if (exercise.getID().equals("5554")) {
+      logger.debug("ex  " + exercise);
+      logger.debug("\taudio  " + exercise.getAudioAttributes());
+    }
     for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
       long timestamp = audioAttribute.getTimestamp();
 
       if (audioAttribute.isMale()) {
         if (audioAttribute.isRegularSpeed()) {
-          if (timestamp > mrt) {
+          if (timestamp >= mrt) {
             mrt = timestamp;
             mr = audioAttribute.getAudioRef();
           }
         } else if (audioAttribute.isSlow()) {
-          if (timestamp > mst) {
+          if (timestamp >= mst) {
             mst = timestamp;
             ms = audioAttribute.getAudioRef();
           }
         }
       } else {
         if (audioAttribute.isRegularSpeed()) {
-          if (timestamp > frt) {
+          if (timestamp >= frt) {
             frt = timestamp;
             fr = audioAttribute.getAudioRef();
           }
         } else if (audioAttribute.isSlow()) {
-          if (timestamp > fst) {
+          if (timestamp >= fst) {
             fst = timestamp;
             fs = audioAttribute.getAudioRef();
           }
