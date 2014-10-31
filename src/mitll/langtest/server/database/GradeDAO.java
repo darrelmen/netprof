@@ -214,10 +214,7 @@ public class GradeDAO extends DAO {
    * @return
    */
   private GradesAndIDs getAllGradesExcluding(Collection<String> toExclude) {
-    StringBuilder b = new StringBuilder();
-    for (String id : toExclude) b.append("'").append(id).append("'").append(",");
-    String list = b.toString();
-    list = list.substring(0,Math.max(0,list.length()-1));
+    String list = getInList(toExclude);
 
     String sql = SELECT_PREFIX +" not in (" + list + ")";
 
