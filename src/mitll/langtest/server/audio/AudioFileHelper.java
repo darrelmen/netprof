@@ -8,11 +8,15 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.Export;
+import mitll.langtest.server.database.PhoneDAO;
+import mitll.langtest.server.database.WordDAO;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
@@ -201,6 +205,28 @@ public class AudioFileHelper {
       long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
           isValid, audioType, validity.durationInMillis, answer.isCorrect(), (float) answer.getScore(), recordedWithFlash, deviceType, device);
       answer.setResultID(answerID);
+
+      List<TranscriptSegment> words = answer.getPretestScore().getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
+      List<TranscriptSegment> phones = answer.getPretestScore().getsTypeToEndTimes().get(NetPronImageType.PHONE_TRANSCRIPT);
+      if (words != null) {
+        int windex = 0;
+        int pindex = 0;
+        for (TranscriptSegment segment : words) {
+          String event = segment.getEvent();
+          if (!event.equals(SLFFile.UNKNOWN_MODEL) && !event.equals("sil")) {
+            long wid = db.getWordDAO().addWord(new WordDAO.Word(answerID, event, windex++, segment.getScore()));
+
+            for (TranscriptSegment pseg : phones) {
+              if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
+                String pevent = pseg.getEvent();
+                if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals("sil")) {
+                  db.getPhoneDAO().addPhone(new PhoneDAO.Phone(answerID, wid, pevent, pindex++, pseg.getScore()));
+                }
+              }
+            }
+          }
+        }
+      }
     }
     logger.debug("writeAudioFile answer " + answer);
     return answer;
@@ -210,9 +236,9 @@ public class AudioFileHelper {
    *
    * @param exerciseID
    * @param exercise1
-   * @paramx questionID
+   * @param questionID
    * @param user
-   * @paramx reqid
+   * @param reqid
    * @param audioType
    * @param doFlashcard
    * @param recordInResults
