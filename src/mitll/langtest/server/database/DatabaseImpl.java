@@ -497,6 +497,58 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * For all the exercises in a chapter
+
+   Get latest results
+   Get phones for latest
+
+   //Score phones
+   Sort phone scores – asc
+
+   Map phone->example
+
+   Join phone->word
+
+   Sort word by score asc
+   * @return
+   */
+/*
+  public JSONObject getJsonPhoneReport(long userid,
+                                       Map<String, Collection<String>> typeToSection) {
+    Collection<CommonExercise> exercisesForState = getSectionHelper().getExercisesForSelectionState(typeToSection);
+    resultDAO.getUserToResults()
+    List<String> allIDs = new ArrayList<String>();
+    Map<String, String> idToFL = new HashMap<String, String>();
+    for (CommonExercise exercise : exercisesForState) {
+      String id = exercise.getID();
+      allIDs.add(id);
+      idToFL.put(id, exercise.getForeignLanguage());
+    }
+
+    JSONObject container = new JSONObject();
+    JSONArray scores = new JSONArray();
+    for (ExerciseCorrectAndScore ex : resultDAO.getExerciseCorrectAndScores(userid, allIDs, idToFL)) {
+      //logger.debug("for " + ex);
+      JSONObject exAndScores = new JSONObject();
+      exAndScores.put("ex", ex.getId());
+      exAndScores.put("s", Integer.toString(ex.getAvgScorePercent()));
+
+      JSONArray history = new JSONArray();
+
+      for (CorrectAndScore cs : ex.getCorrectAndScoresLimited()) {
+        history.add(cs.isCorrect() ? "Y" : "N");
+      }
+      exAndScores.put("h", history);
+
+      scores.add(exAndScores);
+    }
+    container.put("scores", scores);
+
+    return container;
+  }
+*/
+
+  /**
    * does all average calc on server
    *
    * @return
