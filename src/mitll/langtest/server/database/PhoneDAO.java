@@ -1,15 +1,14 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.LogAndNotify;
+import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -185,6 +184,75 @@ public class PhoneDAO extends DAO {
     }
     return Collections.emptyList();
   }*/
+
+  public Map<String, Float> getWorstPhones(long userid, List<String> exids) throws SQLException {
+    String sql = "select results.exid,results.time,  phone.* from results, phone where results.id = phone.rid AND " +
+      ResultDAO.RESULTS+"."+ResultDAO.USERID +"="+userid+ " AND " + ResultDAO.RESULTS +"."+ Database.EXID+ " in (" +getInList(exids)+
+        ")"+
+        " order by results.exid, results.time desc";
+
+    Connection connection = getConnection();
+    PreparedStatement statement = connection.prepareStatement(sql);
+    ResultSet rs = statement.executeQuery();
+
+    long currentRID = -1;
+    Map<String,List<Float>> phoneToScores = new HashMap<String, List<Float>>();
+
+    String currentExercise = "";
+    while (rs.next()) {
+      String exid = rs.getString(1);
+
+      long rid = rs.getLong("RID");
+      if (!exid.equals(currentExercise)) {
+        currentRID = rid;
+        currentExercise = exid;
+      }
+
+      String phone = rs.getString(PHONE);
+      if (currentRID == rid) {
+        List<Float> scores = phoneToScores.get(phone);
+        if (scores == null) phoneToScores.put(phone, scores = new ArrayList<Float>());
+        scores.add(rs.getFloat(SCORE));
+      }
+      //else {
+        //logger.debug("skipping " + exid + " " + rid + " phone " + phone);
+     // }
+    }
+    finish(connection, statement, rs);
+
+    logger.debug("phoneToScores " + phoneToScores);
+
+    final Map<String,Float> phoneToAvg = new HashMap<String, Float>();
+    for (Map.Entry<String,List<Float>> pair : phoneToScores.entrySet()) {
+      String phone = pair.getKey();
+      float total = 0f;
+      List<Float> scores = pair.getValue();
+      for (Float f : scores) total+= f;
+      total /= ((float) scores.size());
+
+      phoneToAvg.put(phone,total);
+    }
+
+    //logger.debug("phoneToAvg " + phoneToAvg);
+
+    List<String> sorted = new ArrayList<String>(phoneToAvg.keySet());
+    Collections.sort(sorted,new Comparator<String>() {
+      @Override
+      public int compare(String o1, String o2) {
+        Float first = phoneToAvg.get(o1);
+        Float second = phoneToAvg.get(o2);
+        return first < second ? -1 : second > first ? +1 : 0;
+      }
+    });
+
+//    logger.debug("sorted " + sorted);
+
+    Map<String, Float> phoneToAvgSorted = new LinkedHashMap<String, Float>();
+    for (String phone : sorted) phoneToAvgSorted.put(phone,phoneToAvg.get(phone));
+  //  logger.debug("phoneToAvgSorted " + phoneToAvgSorted);
+
+    return phoneToAvgSorted;
+  }
 
   private List<Phone> getPhones(String sql) throws SQLException {
     Connection connection = getConnection();
