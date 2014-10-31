@@ -17,14 +17,29 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
 
   public CorrectAndScore() {}
 
+  /**
+   * @see mitll.langtest.client.gauge.ASRScorePanel#gotScore(mitll.langtest.shared.scoring.PretestScore, boolean, String)
+   * @param score
+   * @param path
+   */
   public CorrectAndScore(float score, String path) {
     this.score = score;
     this.path = path;
   }
 
-  public CorrectAndScore(int uniqueID, long userid, String id, boolean correct, float score, long timestamp, String path) {
+  /**
+   * @see mitll.langtest.server.database.ResultDAO#getScoreResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
+   * @param uniqueID
+   * @param userid
+   * @param exerciseID
+   * @param correct
+   * @param score
+   * @param timestamp
+   * @param path
+   */
+  public CorrectAndScore(int uniqueID, long userid, String exerciseID, boolean correct, float score, long timestamp, String path) {
     this.uniqueID = uniqueID;
-    this.id = id;
+    this.id = exerciseID;
     this.userid = userid;
     this.correct = correct;
     this.score = score;
