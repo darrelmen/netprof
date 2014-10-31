@@ -1,6 +1,5 @@
 package mitll.langtest.server.database;
 
-import com.mongodb.util.JSON;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -53,6 +52,8 @@ public class DatabaseImpl implements Database {
   private ExerciseDAO exerciseDAO = null;
   private UserDAO userDAO;
   private ResultDAO resultDAO;
+  private WordDAO wordDAO;
+  private PhoneDAO phoneDAO;
   private AudioDAO audioDAO;
   private AnswerDAO answerDAO;
   private GradeDAO gradeDAO;
@@ -159,6 +160,8 @@ public class DatabaseImpl implements Database {
     userExerciseDAO = new UserExerciseDAO(this);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
     resultDAO = new ResultDAO(this, logAndNotify);
+    wordDAO = new WordDAO(this, logAndNotify);
+    phoneDAO = new PhoneDAO(this, logAndNotify);
     audioDAO = new AudioDAO(this, userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
     gradeDAO = new GradeDAO(this, userDAO, resultDAO);
@@ -776,6 +779,9 @@ public class DatabaseImpl implements Database {
   public AudioDAO getAudioDAO() {
     return audioDAO;
   }
+
+  public WordDAO getWordDAO() { return wordDAO;  }
+  public PhoneDAO getPhoneDAO() { return phoneDAO;  }
 
   private static class Pair {
     final Map<Long, Integer> idToCount;
