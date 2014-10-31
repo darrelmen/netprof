@@ -14,14 +14,16 @@ import java.sql.Timestamp;
  * Does writing to the results table.
  * Reading, etc. happens in {@link ResultDAO} - might be a little confusing... :)
  */
-public class AnswerDAO {
+public class AnswerDAO extends DAO {
   private static final Logger logger = Logger.getLogger(AnswerDAO.class);
   //public static final String AVP_SKIP = "avp_skip";
 
-  private final Database database;
   private final ResultDAO resultDAO;
 
-  public AnswerDAO(Database database, ResultDAO resultDAO) { this.database = database; this.resultDAO = resultDAO; }
+  public AnswerDAO(Database database, ResultDAO resultDAO) {
+    super(database);
+    this.resultDAO = resultDAO;
+  }
 
   /**
    *
@@ -75,6 +77,7 @@ public class AnswerDAO {
    * @param pronScore
    * @param deviceType
    * @param device
+   * @return id of new row in result table
    */
   public long addAnswer(Database database, int userID, String id, int questionID, String answer,
                         String audioFile, boolean valid, String audioType, int durationInMillis,
@@ -168,14 +171,7 @@ public class AnswerDAO {
 
     statement.executeUpdate();
 
-    ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
-
-    long newID = -1;
-    if (rs.next()) {
-      newID = rs.getLong(1);
-    } else {
-      logger.error("huh? no key was generated?");
-    }
+    long newID = getGeneratedKey(statement);
 
     statement.close();
 
