@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import com.mongodb.util.JSON;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -14,8 +15,12 @@ import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -450,7 +455,46 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * TODOx : do all average calc on server!
+   * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @param userid
+   * @param typeToSection
+   * @return
+   */
+  public JSONObject getJsonScoreHistory(long userid,
+                                        Map<String, Collection<String>> typeToSection) {
+    Collection<CommonExercise> exercisesForState = getSectionHelper().getExercisesForSelectionState(typeToSection);
+    List<String> allIDs = new ArrayList<String>();
+    Map<String, String> idToFL = new HashMap<String, String>();
+    for (CommonExercise exercise : exercisesForState) {
+      String id = exercise.getID();
+      allIDs.add(id);
+      idToFL.put(id, exercise.getForeignLanguage());
+    }
+
+    JSONObject container = new JSONObject();
+    JSONArray scores = new JSONArray();
+    for (ExerciseCorrectAndScore ex : resultDAO.getExerciseCorrectAndScores(userid, allIDs, idToFL)) {
+      //logger.debug("for " + ex);
+      JSONObject exAndScores = new JSONObject();
+      exAndScores.put("ex", ex.getId());
+      exAndScores.put("s", Integer.toString(ex.getAvgScorePercent()));
+
+      JSONArray history = new JSONArray();
+
+      for (CorrectAndScore cs : ex.getCorrectAndScoresLimited()) {
+        history.add(cs.isCorrect() ? "Y" : "N");
+      }
+      exAndScores.put("h", history);
+
+      scores.add(exAndScores);
+    }
+    container.put("scores", scores);
+
+    return container;
+  }
+
+  /**
+   * does all average calc on server
    *
    * @return
    * @paramx listid
@@ -458,10 +502,10 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    */
   public AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
-                                              Collection<String> allIDs) {
+                                              Collection<String> allIDs, Map<String, String> idToFL) {
     logger.debug("getUserHistoryForList " + userid + " and " + ids.size() + " ids, latest " + latestResultID);
 
-    ResultDAO.SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid, allIDs);
+    ResultDAO.SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid, allIDs,idToFL);
     List<Session> sessionsForUserIn2 = sessionsAndScores.sessions;
 
     Map<Long, User> userMap = userDAO.getUserMap();
