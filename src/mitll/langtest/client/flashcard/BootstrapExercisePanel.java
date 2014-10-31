@@ -591,6 +591,11 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    */
   protected void loadNext() {}
 
+  /**
+   * @see FlashcardPanel#FlashcardPanel
+   * @param controller
+   * @return
+   */
   @Override
   DivWidget getFirstRow(ExerciseController controller) {
     DivWidget firstRow = super.getFirstRow(controller);
