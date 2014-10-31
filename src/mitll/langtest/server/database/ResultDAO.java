@@ -1,8 +1,5 @@
 package mitll.langtest.server.database;
 
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.user.cellview.client.TextColumn;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.shared.CommonExercise;
@@ -41,7 +38,7 @@ public class ResultDAO extends DAO {
   private static final String ANSWER = "answer";
   private static final String VALID = "valid";
 
-  private static final String RESULTS = "results";
+  public static final String RESULTS = "results";
 
   static final String FLQ = "flq";
   static final String SPOKEN = "spoken";
