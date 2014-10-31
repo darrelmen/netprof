@@ -178,6 +178,18 @@ public class DAO {
     database.closeConnection(connection);
   }
 
+  protected long getGeneratedKey(PreparedStatement statement) throws SQLException {
+    ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
+
+    long newID = -1;
+    if (rs.next()) {
+      newID = rs.getLong(1);
+    } //else {
+      //AnswerDAO.logger.error("huh? no key was generated?");
+    //}
+    return newID;
+  }
+
   protected Connection getConnection() {
     return database.getConnection(this.getClass().toString());
   }
