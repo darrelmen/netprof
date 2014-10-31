@@ -147,12 +147,8 @@ public class UserExerciseDAO extends DAO {
       if (j != 1)
         logger.error("huh? didn't insert row for ");// + grade + " grade for " + resultID + " and " + grader + " and " + gradeID + " and " + gradeType);
 
-      ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
-      if (rs.next()) {
-        id = rs.getLong(1);
-      } else {
-        logger.error("huh? no key was generated?");
-      }
+      id = getGeneratedKey(statement);
+      if (id == -1) {  logger.error("huh? no key was generated?");  }
       //logger.debug("unique id = " + id);
 
       userExercise.setUniqueID(id);
