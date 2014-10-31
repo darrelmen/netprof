@@ -35,6 +35,7 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String ALIGN = "align";
   public static final String DECODE = "decode";
   public static final String SCORE = "score";
+  public static final String CHAPTER_HISTORY = "chapterHistory";
   private JSONObject chapters, nestedChapters;
   public static final String LOAD_TESTING = "loadTesting";
   private static final String ADD_USER = "addUser";
@@ -69,7 +70,6 @@ public class ScoreServlet extends DatabaseServlet {
           }
           toReturn = nestedChapters;
         } else if (queryString.startsWith(HAS_USER)) {
-
           String[] split1 = queryString.split("&");
           if (split1.length != 2) {
             toReturn.put("ERROR", "expecting two query parameters");
@@ -86,9 +86,57 @@ public class ScoreServlet extends DatabaseServlet {
             toReturn.put("passwordCorrect",
                 userFound == null ? "false" : userFound.getPasswordHash().equalsIgnoreCase(passwordH));
           }
+        } else if (queryString.startsWith("exerciseHistory")) {
+          String[] split1 = queryString.split("&");
+          if (split1.length != 2) {
+            toReturn.put("ERROR", "expecting two query parameters");
+          } else {
+            String first = split1[0];
+            String user = first.split("=")[1];
+
+            String second = split1[1];
+            String exercise = second.split("=")[1];
+
+            logger.debug("exerciseHistory " + user + " pass " + exercise);
+            try {
+              long l = Long.parseLong(user);
+              toReturn = db.getResultDAO().getHistoryAsJson(l, exercise);
+            } catch (NumberFormatException e) {
+              toReturn.put("ERROR","User id should be a number");
+            }
+          }
+        } else if (queryString.startsWith(CHAPTER_HISTORY) || queryString.startsWith("request=" + CHAPTER_HISTORY)) {
+          queryString = queryString.substring(queryString.indexOf(CHAPTER_HISTORY) + CHAPTER_HISTORY.length());
+          String[] split1 = queryString.split("&");
+          if (split1.length < 2) {
+            toReturn.put("ERROR", "expecting at least two query parameters");
+          } else {
+            String user = "";
+            Map<String,Collection<String>> selection = new TreeMap<String, Collection<String>>();
+            for (String param : split1) {
+              //logger.debug("param '" +param+               "'");
+              String[] split = param.split("=");
+              if (split.length == 2) {
+                String key   = split[0];
+                String value = split[1];
+                if (key.equals("user")) {
+                  user = value;
+                } else {
+                  selection.put(key, Collections.singleton(value));
+                }
+              }
+            }
+
+            //logger.debug("chapterHistory " + user + " selection " + selection);
+            try {
+              long l = Long.parseLong(user);
+              toReturn = db.getJsonScoreHistory(l, selection);
+            } catch (NumberFormatException e) {
+              toReturn.put("ERROR","User id should be a number");
+            }
+          }
         } else {
           toReturn.put("ERROR", "unknown req " + queryString);
-
         }
       } else {
         if (chapters == null) {
@@ -291,36 +339,6 @@ public class ScoreServlet extends DatabaseServlet {
 
     return new JSONObject();
   }
-
-/*  private JSONObject getJsonForAudioParts(HttpServletRequest request) {
-    try {
-      String word = "";
-      File saveFile = null;
-      File tempDir = Files.createTempDir();
-      for (Part part : request.getParts()) {
-        if (part.getName().equalsIgnoreCase("word")) {
-          InputStream inputStream = part.getInputStream();
-          BufferedReader bufferedReader = getBufferedReader(inputStream);
-          word = bufferedReader.readLine();
-          bufferedReader.close();
-          logger.debug("word is " + word);
-        } else if (part.getName().equalsIgnoreCase("audio")) {
-          saveFile = new File(tempDir + File.separator+ "MyAudioFile.wav");
-          // opens input stream of the request for reading data
-          writeToFile(part.getInputStream(), saveFile);
-          logger.debug("wrote to file " + saveFile.getAbsolutePath());
-        }
-      }
-
-      return getJsonForWordAndAudio(word, saveFile);
-
-    } catch (IOException e) {
-      logger.error("got " +e,e);
-    } catch (ServletException e) {
-      logger.error("got " + e, e);
-    }
-    return new JSONObject();
-  }*/
 
   private static final String ENCODING = "UTF8";
 
