@@ -653,32 +653,6 @@ public class ScoreServlet extends DatabaseServlet {
     return jsonObject;
   }
 
- /* private JSONObject getJsonForScoreFlashcard(PretestScore book) {
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("score", book.getHydecScore());
-
-    for (Map.Entry<NetPronImageType, List<TranscriptSegment>> pair : book.getsTypeToEndTimes().entrySet()) {
-      List<TranscriptSegment> value = pair.getValue();
-      JSONArray value1 = new JSONArray();
-      //logger.debug("got " + pair.getKey() + " with " + value.size() + " now " + jsonObject);
-
-      for (TranscriptSegment segment : value) {
-        JSONObject object = new JSONObject();
-        // logger.debug("\tgot " + pair.getKey() + " with " + value1.size() + " now " + jsonObject);
-        object.put("event", segment.getEvent());
-        object.put("start", segment.getStart());
-        object.put("end", segment.getEnd());
-        object.put("score", segment.getScore());
-
-        value1.add(object);
-        //logger.debug("\tobject " + object);
-      }
-
-      jsonObject.put(pair.getKey().toString(), value1);
-    }
-    return jsonObject;
-  }*/
-
   private DatabaseImpl db;
   private AudioFileHelper audioFileHelper;
 
