@@ -850,12 +850,9 @@ public class AudioDAO extends DAO {
 
     statement.executeUpdate();
 
-    ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
 
-    long newID = -1;
-    if (rs.next()) {
-      newID = rs.getLong(1);
-    } else {
+    long newID = getGeneratedKey(statement);
+    if (newID == -1) {
       logger.error("addAudio : huh? no key was generated?");
     }
 
