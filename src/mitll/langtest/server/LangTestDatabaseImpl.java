@@ -1874,9 +1874,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @param userid
+   * @param userid who's asking?
+   * @param ids items the user has actually practiced/recorded audio for
    * @param latestResultID
-   * @param typeToSection
+   * @param typeToSection indicates the unit and chapter(s) we're asking about
+   * @param userListID if we're asking about a list and not predef items
    * @return
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
    */
@@ -1887,15 +1889,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     UserList userListByID = userListID != -1 ? db.getUserListByID(userListID) : null;
     List<String> allIDs = new ArrayList<String>();
+    Map<String, String> idToFL = new HashMap<String, String>();
     if (userListByID != null) {
-      for (CommonExercise exercise : userListByID.getExercises()) allIDs.add(exercise.getID());
+      for (CommonExercise exercise : userListByID.getExercises()) {
+        String id = exercise.getID();
+        allIDs.add(id);
+        idToFL.put(id, exercise.getForeignLanguage());
+      }
     } else {
       Collection<CommonExercise> exercisesForState = (typeToSection == null || typeToSection.isEmpty()) ? getExercises() :
           db.getSectionHelper().getExercisesForSelectionState(typeToSection);
-      for (CommonExercise exercise : exercisesForState) allIDs.add(exercise.getID());
+
+      for (CommonExercise exercise : exercisesForState) {
+        String id = exercise.getID();
+        allIDs.add(id);
+        idToFL.put(id, exercise.getForeignLanguage());
+      }
     }
     //logger.debug("for " + typeToSection + " found " + allIDs.size());
-    return db.getUserHistoryForList(userid, ids, latestResultID, allIDs);
+    return db.getUserHistoryForList(userid, ids, latestResultID, allIDs, idToFL);
   }
 
   public void logMessage(String message) {

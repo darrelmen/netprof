@@ -16,6 +16,10 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
 
   public ExerciseCorrectAndScore() {}
 
+  /**
+   * @see mitll.langtest.server.database.ResultDAO#getSortedAVPHistory(java.util.List, java.util.Collection)
+   * @param id
+   */
   public ExerciseCorrectAndScore(String id) {
     this.id = id;
   }
@@ -27,17 +31,31 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
     } else if (isEmpty()) return -1;
     else if (o.isEmpty()) return +1;
     else { // neither is empty
-      int myI = getDiff();
-      int oI = o.getDiff();
-      int i = myI < oI ? -1 : myI > oI ? +1 : 0;
-      if (i == 0) {
-        float myScore = getAvgScore();
-        float otherScore = o.getAvgScore();
+      return compScores(o);
+    }
+  }
 
-        return myScore < otherScore ? -1 : myScore > otherScore ? +1 : getId().compareTo(o.getId());
-      } else {
-        return i;
-      }
+  public int compareTo(ExerciseCorrectAndScore o,String fl, String otherFL) {
+    if (isEmpty() && o.isEmpty()) {
+      return fl.compareTo(otherFL);
+    } else if (isEmpty()) return -1;
+    else if (o.isEmpty()) return +1;
+    else { // neither is empty
+      return compScores(o);
+    }
+  }
+
+  private int compScores(ExerciseCorrectAndScore o) {
+    int myI = getDiff();
+    int oI = o.getDiff();
+    int i = myI < oI ? -1 : myI > oI ? +1 : 0;
+    if (i == 0) {
+      float myScore = getAvgScore();
+      float otherScore = o.getAvgScore();
+
+      return myScore < otherScore ? -1 : myScore > otherScore ? +1 : getId().compareTo(o.getId());
+    } else {
+      return i;
     }
   }
 
@@ -45,8 +63,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
 
   private int getNumCorrect() {
     int c = 0;
-    List<CorrectAndScore> toUse = getCorrectAndScores();
-    if (toUse.size() > MAX_TO_USE) toUse = toUse.subList(toUse.size() - MAX_TO_USE, toUse.size());
+    List<CorrectAndScore> toUse = getCorrectAndScoresLimited();
     for (CorrectAndScore correctAndScore : toUse) {
       if (correctAndScore.isCorrect()) c++;
     }
@@ -55,8 +72,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
 
   private int getNumIncorrect() {
     int c = 0;
-    List<CorrectAndScore> toUse = getCorrectAndScores();
-    if (toUse.size() > MAX_TO_USE) toUse = toUse.subList(toUse.size() - MAX_TO_USE, toUse.size());
+    List<CorrectAndScore> toUse = getCorrectAndScoresLimited();
     for (CorrectAndScore correctAndScore : toUse) {
       if (!correctAndScore.isCorrect()) c++;
     }
@@ -66,8 +82,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
 
   private int getDiff() {
     int c = 0;
-    List<CorrectAndScore> toUse = getCorrectAndScores();
-    if (toUse.size() > MAX_TO_USE) toUse = toUse.subList(toUse.size() - MAX_TO_USE, toUse.size());
+    List<CorrectAndScore> toUse = getCorrectAndScoresLimited();
     for (CorrectAndScore correctAndScore : toUse) {
       if (correctAndScore.isCorrect()) c++;
       else c--;
@@ -91,8 +106,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
 
     float c = 0f;
     float n = 0f;
-    List<CorrectAndScore> toUse = getCorrectAndScores();
-    if (toUse.size() > MAX_TO_USE) toUse = toUse.subList(toUse.size() - MAX_TO_USE, toUse.size());
+    List<CorrectAndScore> toUse = getCorrectAndScoresLimited();
     for (CorrectAndScore correctAndScore : toUse) {
       if (correctAndScore.getScore() > 0f) {
         c += correctAndScore.getScore();
@@ -100,6 +114,12 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
       }
     }
     return n > 0f ? (c / n) : 0f;
+  }
+
+  public List<CorrectAndScore> getCorrectAndScoresLimited() {
+    List<CorrectAndScore> toUse = getCorrectAndScores();
+    if (toUse.size() > MAX_TO_USE) toUse = toUse.subList(toUse.size() - MAX_TO_USE, toUse.size());
+    return toUse;
   }
 
   public int getAvgScorePercent() {
@@ -118,9 +138,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
     return id;
   }
 
-  public List<CorrectAndScore> getCorrectAndScores() {
-    return correctAndScores;
-  }
+  public List<CorrectAndScore> getCorrectAndScores() { return correctAndScores;  }
 
   public String toString() {
     StringBuilder builder = new StringBuilder();
@@ -129,7 +147,6 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
       else builder.append("-");
     }
 
-    return "id " + id + " " + builder + " correct " + getNumCorrect() + "/" + getNumIncorrect() +
-        " score " + (int) getAvgScore();
+    return "id " + id + " " + builder + " correct " + getNumCorrect() + "/" + getNumIncorrect() + " score " + (int) getAvgScore();
   }
 }
