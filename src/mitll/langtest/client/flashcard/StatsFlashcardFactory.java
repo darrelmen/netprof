@@ -299,6 +299,8 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     }
 
     /**
+     * Ask for history for those items that were actually practiced.
+     *
      * @see #getSkipToEnd()
      * @see #gotClickOnNext()
      * @see #loadNext()
