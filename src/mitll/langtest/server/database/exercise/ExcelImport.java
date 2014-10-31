@@ -55,8 +55,8 @@ public class ExcelImport implements ExerciseDAO {
   private final SectionHelper sectionHelper = new SectionHelper();
   private final boolean debug = false;
   private String mediaDir,mediaDir1;
-  private final Set<String> missingSlowSet = new HashSet<String>();
-  private final Set<String> missingFastSet = new HashSet<String>();
+  //private final Set<String> missingSlowSet = new HashSet<String>();
+  //private final Set<String> missingFastSet = new HashSet<String>();
   private boolean shouldHaveRefAudio = false;
   private boolean usePredefinedTypeOrder;
   private final String language;
@@ -912,7 +912,7 @@ public class ExcelImport implements ExerciseDAO {
     String fastAudioRef = parentPath + FAST_WAV;
     String slowAudioRef = parentPath + SLOW_WAV;
 
-    if (!missingFastSet.contains(audioDir)) {
+    //if (!missingFastSet.contains(audioDir)) {
       File test = new File(fastAudioRef);
       boolean exists = test.exists();
       if (!exists) {
@@ -922,10 +922,10 @@ public class ExcelImport implements ExerciseDAO {
       if (exists) {
         imported.addAudioForUser(ensureForwardSlashes(fastAudioRef), UserDAO.DEFAULT_USER);
       }
-    }
-    if (!missingSlowSet.contains(audioDir)) {
-      File test = new File(slowAudioRef);
-      boolean exists = test.exists();
+    //}
+    //if (!missingSlowSet.contains(audioDir)) {
+      test = new File(slowAudioRef);
+      exists = test.exists();
       if (!exists) {
         test = new File(installPath, slowAudioRef);
         exists = test.exists();
@@ -936,7 +936,7 @@ public class ExcelImport implements ExerciseDAO {
       // else {
       //logger.debug("missing slow " + test.getAbsolutePath());
       // }
-    }
+    //}
   }
 
   private int missingExerciseCount = 0;
@@ -1011,8 +1011,10 @@ public class ExcelImport implements ExerciseDAO {
    * @return
    */
   private String findBest(String refAudioIndex) {
-    String best = "";
-    for (String recording : refAudioIndex.split("\\s+")) {
+   // String best = "";
+    String[] split = refAudioIndex.split("\\s+");
+    return (split.length == 0) ? "" : split[0];
+/*    for (String recording : split) {
       if (!missingFastSet.contains(recording) && !missingSlowSet.contains(recording)) {
         best = recording;
         break;
@@ -1020,7 +1022,7 @@ public class ExcelImport implements ExerciseDAO {
         best = recording;
       }
     }
-    return best;
+    return best;*/
   }
 
   private String ensureForwardSlashes(String wavPath) {
