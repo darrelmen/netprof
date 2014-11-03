@@ -77,7 +77,7 @@
 
     <context-param>
         <param-name>config</param-name>
-        <param-value>mandarinClassroom</param-value>
+        <param-value>egyptian</param-value>
     </context-param>
 
     <context-param>
