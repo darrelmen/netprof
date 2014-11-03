@@ -18,12 +18,15 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -202,34 +205,91 @@ public class AudioFileHelper {
         new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
 
     if (recordInResults) {
+      JSONObject json = getJson(answer);
+
       long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
-          isValid, audioType, validity.durationInMillis, answer.isCorrect(), (float) answer.getScore(), recordedWithFlash, deviceType, device);
+          isValid, audioType, validity.durationInMillis, answer.isCorrect(), (float) answer.getScore(), recordedWithFlash, deviceType, device, json.toString());
       answer.setResultID(answerID);
 
-      List<TranscriptSegment> words = answer.getPretestScore().getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
-      List<TranscriptSegment> phones = answer.getPretestScore().getsTypeToEndTimes().get(NetPronImageType.PHONE_TRANSCRIPT);
-      if (words != null) {
-        int windex = 0;
-        int pindex = 0;
-        for (TranscriptSegment segment : words) {
-          String event = segment.getEvent();
-          if (!event.equals(SLFFile.UNKNOWN_MODEL) && !event.equals("sil")) {
-            long wid = db.getWordDAO().addWord(new WordDAO.Word(answerID, event, windex++, segment.getScore()));
+      recordWordAndPhoneInfo(answer, answerID);
+    }
+    logger.debug("writeAudioFile answer " + answer);
+    return answer;
+  }
 
-            for (TranscriptSegment pseg : phones) {
-              if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
-                String pevent = pseg.getEvent();
-                if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals("sil")) {
-                  db.getPhoneDAO().addPhone(new PhoneDAO.Phone(answerID, wid, pevent, pindex++, pseg.getScore()));
-                }
+  private void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
+    PretestScore pretestScore = answer.getPretestScore();
+    List<TranscriptSegment> words  = pretestScore == null ? null : pretestScore.getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
+    List<TranscriptSegment> phones = pretestScore == null ? null : pretestScore.getsTypeToEndTimes().get(NetPronImageType.PHONE_TRANSCRIPT);
+    if (words != null) {
+      int windex = 0;
+      int pindex = 0;
+
+      for (TranscriptSegment segment : words) {
+        String event = segment.getEvent();
+        if (!event.equals(SLFFile.UNKNOWN_MODEL) && !event.equals("sil")) {
+          long wid = db.getWordDAO().addWord(new WordDAO.Word(answerID, event, windex++, segment.getScore()));
+          for (TranscriptSegment pseg : phones) {
+            if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
+              String pevent = pseg.getEvent();
+              if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals("sil")) {
+                db.getPhoneDAO().addPhone(new PhoneDAO.Phone(answerID, wid, pevent, pindex++, pseg.getScore()));
               }
             }
           }
         }
       }
     }
-    logger.debug("writeAudioFile answer " + answer);
-    return answer;
+  }
+
+  /**
+   * We skip sils, since we wouldn't want to show them to the user.
+   * @param answer
+   * @return
+   */
+  private JSONObject getJson(AudioAnswer answer) {
+    PretestScore pretestScore = answer.getPretestScore();
+    JSONObject jsonObject = new JSONObject();
+    if (pretestScore != null) {
+      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getsTypeToEndTimes();
+      List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
+      List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
+      if (words != null) {
+        int windex = 0;
+        int pindex = 0;
+        JSONArray jsonWords = new JSONArray();
+        JSONArray jsonPhones = new JSONArray();
+
+        for (TranscriptSegment segment : words) {
+          String event = segment.getEvent();
+          if (!event.equals(SLFFile.UNKNOWN_MODEL) && !event.equals("sil")) {
+            JSONObject wordJson = new JSONObject();
+            wordJson.put("id", Integer.toString(windex - 1));
+            wordJson.put("w", event);
+            wordJson.put("s", Float.toString(segment.getScore()));
+            jsonWords.add(wordJson);
+
+            for (TranscriptSegment pseg : phones) {
+              if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
+                String pevent = pseg.getEvent();
+                if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals("sil")) {
+                  JSONObject phoneJson = new JSONObject();
+                  phoneJson.put("id", Integer.toString(pindex - 1));
+                  phoneJson.put("p", pevent);
+                  phoneJson.put("s", Float.toString(pseg.getScore()));
+
+                  jsonPhones.add(phoneJson);
+                }
+              }
+            }
+          }
+        }
+
+        jsonObject.put("words", jsonWords);
+        jsonObject.put("phones", jsonPhones);
+      }
+    }
+    return jsonObject;
   }
 
   /**
@@ -277,7 +337,7 @@ public class AudioFileHelper {
 
     if (recordInResults) {
       long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
-          isValid, audioType, validity.durationInMillis, true, score, recordedWithFlash, deviceType, device);
+          isValid, audioType, validity.durationInMillis, true, score, recordedWithFlash, deviceType, device, getJson(answer).toString());
       answer.setResultID(answerID);
     }
     logger.debug("writeAudioFile answer " + answer);
