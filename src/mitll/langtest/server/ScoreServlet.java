@@ -368,8 +368,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * TODO: join against audio dao ex->audio map again...
-   * to get user exercise audio!
+   * join against audio dao ex->audio map again to get user exercise audio! {@link #getJsonArray(java.util.List)}
    *
    * @return
    */
@@ -430,6 +429,9 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * This is the json that describes an individual entry.
+   *
+   * Makes sure to attach audio to exercises (this is especially important for userexercises that mask out
+   * exercises with new reference audio).
    *
    * @param copy
    * @return
