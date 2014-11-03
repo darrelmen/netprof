@@ -35,7 +35,9 @@ public class ResultDAO extends DAO {
   public static final String USERID = "userid";
   private static final String PLAN = "plan";
   private static final String QID = "qid";
-  private static final String ANSWER = "answer";
+  public static final String ANSWER = "answer";
+  public static final String SCORE_JSON = "scoreJson";
+  public static final String WITH_FLASH = "withFlash";
   private static final String VALID = "valid";
 
   public static final String RESULTS = "results";
@@ -253,7 +255,7 @@ public class ResultDAO extends DAO {
    * @param results
    * @param allIds
    * @return
-   * @see #getSessionsForUserIn2(java.util.Collection, long, long, java.util.Collection)
+   * @seex #getSessionsForUserIn2(java.util.Collection, long, long, java.util.Collection)
    */
 /*  private List<ExerciseCorrectAndScore> getSortedAVPHistoryOld(List<CorrectAndScore> results, Collection<String> allIds) {
     List<ExerciseCorrectAndScore> sortedResults = getExerciseCorrectAndScores(results, allIds);
@@ -905,9 +907,17 @@ public class ResultDAO extends DAO {
     if (numColumns < 15) {
       addStimulus(connection);
     }
-    if (!getColumns(RESULTS).contains(DEVICE_TYPE.toLowerCase())) {
+    Collection<String> columns = getColumns(RESULTS);
+    if (!columns.contains(DEVICE_TYPE.toLowerCase())) {
       addVarchar(connection, RESULTS, DEVICE_TYPE);
       addVarchar(connection, RESULTS, DEVICE);
+    }
+
+    if (!columns.contains(SCORE_JSON.toLowerCase())) {
+      addVarchar(connection, RESULTS, SCORE_JSON);
+    }
+    if (!columns.contains(WITH_FLASH)) {
+      addBoolean(connection, RESULTS, WITH_FLASH);
     }
 
     database.closeConnection(connection);
@@ -915,10 +925,6 @@ public class ResultDAO extends DAO {
     createIndex(database, Database.EXID, RESULTS);
     createIndex(database, VALID, RESULTS);
     createIndex(database, AUDIO_TYPE, RESULTS);
-
-    // enrichResults();
-    //removeValidDefault(connection);
-    // addValidDefault(connection);
   }
 
   /**
