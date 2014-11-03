@@ -36,12 +36,12 @@ public class AudioConversion {
   private static final String WINDOWS_SOX_BIN_DIR = "C:\\Users\\go22670\\sox-14-3-2";
   public static final String SIXTEEN_K_SUFFIX = "_16K";
   public static final String FILE_MISSING = "FILE_MISSING";
-  private File oggEncoder;
+ // private File oggEncoder;
   private final AudioCheck audioCheck = new AudioCheck();
   private static final boolean DEBUG = false;
 
   public AudioConversion() {
-    String os = getOS();
+/*    String os = getOS();
     if (os.equals("linux")) {
       File oggEnc = new File(LINUX_SOX_BIN_DIR_2, "oggenc");
       if (!oggEnc.exists()) {
@@ -58,9 +58,10 @@ public class AudioConversion {
     } else if (os.equals("macos")) {
       File oggEnc = new File("bin" + File.separator + "macos", "oggenc");
       setOggEncoder(os, oggEnc);
-    }
+    }*/
   }
 
+/*
   private void setOggEncoder(String os, File oggEnc) {
     if (!oggEnc.exists()) {
       logger.error("huh? " + os +
@@ -70,7 +71,9 @@ public class AudioConversion {
       oggEncoder = oggEnc;
     }
   }
+*/
 
+/*
 
   private String getOS() {
     String property = System.getProperty("os.name").toLowerCase();
@@ -80,6 +83,7 @@ public class AudioConversion {
         .getProperty("os.arch").contains("64") ? "linux64"
         : "linux" : "linux";
   }
+*/
 
 
   /**
@@ -204,11 +208,11 @@ public class AudioConversion {
     return name1.substring(0, name1.length() - 4);
   }
 
-  private boolean writeOGG(String pathToWav) {
+/*  private boolean writeOGG(String pathToWav) {
     String oggFile = pathToWav.replace(".wav",".ogg");
     return oggEncoder != null && convertFileAndCheck(oggEncoder.getAbsolutePath(), pathToWav, oggFile);
 
-  }
+  }*/
 
   /**
    * Remember to resample wav to 48K before doing lame on it.
@@ -225,13 +229,13 @@ public class AudioConversion {
   public String ensureWriteMP3(String pathToWav, String realContextPath, boolean overwrite) {
     if (pathToWav == null || pathToWav.equals("null")) throw new IllegalArgumentException("huh? path is null");
 
-    if (AudioTag.COMPRESSED_TYPE.equals("ogg")) {
+/*    if (AudioTag.COMPRESSED_TYPE.equals("ogg")) {
       writeOGG(pathToWav);
       return pathToWav;
     }
-    else {
+    else {*/
       return writeMP3(pathToWav, realContextPath, overwrite);
-    }
+  //  }
   }
 
   /**
@@ -325,7 +329,7 @@ public class AudioConversion {
 
   private File getAbsolute(String filePath, String realContextPath) {
     File file = new File(realContextPath, filePath);
-    assert(file.exists());
+//    assert(file.exists());
     return file;
   }
 
