@@ -388,6 +388,7 @@ Mĕiguo   m e3 i3 g u3 o3
 Mĕiguo   m e3 i3 g u4 o4
 Mĕiguó   m e3 i3 g u2 o2
 Mĕitiān   m e3 i3 t i1 a1 n
+Měi   m e3 i3
 Měiguo   m e3 i3 g u1 o1
 Měiguo   m e3 i3 g u2 o2
 Měiguo   m e3 i3 g u3 o3
@@ -721,14 +722,14 @@ Xībianr   x i1 b i4 a4 n r
 Xībiān   x i1 b i1 a1 n
 Xībiānr   x i1 b i1 a1 n r
 Xībānyá   x i1 b a1 n y a2
-Xīngqīsì   x i1 ng q i1 s i4
-Xīngqīsān   x i1 ng q i1 s a1 n
 Xīn   x i1 n
 Xīngqī   x i1 ng q i1
 Xīngqīer   x i1 ng q i1 e1 r
 Xīngqījǐ   x i1 ng q i1 j i3
 Xīngqīliù   x i1 ng q i1 l i4 u4
 Xīngqīrì   x i1 ng q i1 r i4
+Xīngqīsì   x i1 ng q i1 s i4
+Xīngqīsān   x i1 ng q i1 s a1 n
 Xīngqītiān   x i1 ng q i1 t i1 a1 n
 Xīngqīwǔ   x i1 ng q i1 w u3
 Xīngqīyī   x i1 ng q i1 y i1
@@ -851,7 +852,6 @@ Zhīdaole   zh i1 d a4 o4 l e2
 Zhīdào   zh i1 d a4 o4
 Zhĭ   zh i3
 Zhōng   zh o1 ng
-Měi   m e3 i3
 ZhōngMěi   zh o1 ng m e3 i3
 Zhōngfàn   zh o1 ng f a4 n
 Zhōngguo   zh o1 ng g u1 o1
@@ -1620,14 +1620,14 @@ xībianr   x i1 b i4 a4 n r
 xībiān   x i1 b i1 a1 n
 xībiānr   x i1 b i1 a1 n r
 xībānyá   x i1 b a1 n y a2
-xīngqīsì   x i1 ng q i1 s i4
-xīngqīsān   x i1 ng q i1 s a1 n
 xīn   x i1 n
 xīngqī   x i1 ng q i1
 xīngqīer   x i1 ng q i1 e1 r
 xīngqījǐ   x i1 ng q i1 j i3
 xīngqīliù   x i1 ng q i1 l i4 u4
 xīngqīrì   x i1 ng q i1 r i4
+xīngqīsì   x i1 ng q i1 s i4
+xīngqīsān   x i1 ng q i1 s a1 n
 xīngqītiān   x i1 ng q i1 t i1 a1 n
 xīngqīwǔ   x i1 ng q i1 w u3
 xīngqīyī   x i1 ng q i1 y i1
@@ -2853,6 +2853,7 @@ zǎoshang   z a3 o3 sh a4 ng
 乌兹别克人                          w u1 z i1 b i2 e2 k e4 r e2 n
 乌兹别克斯坦                         w u1 z i1 b i2 e2 k e4 s i1 t a3 n
 乌拉圭                            w u1 l a1 g u1 i1
+乌贼                            w u1 z e2 i2 
 乌鲁木齐                           w u1 l u3 m u4 q i2
 乍看                             zh a4 k a4 n
 乎                              h u1
@@ -3692,6 +3693,7 @@ zǎoshang   z a3 o3 sh a4 ng
 佛家                             f o2 j i1 a1
 佛山                             f o2 sh a1 n
 佛教                             f o2 j i4 a4 o4
+佛法                            f o2 f a3 
 佛罗伦萨                           f o2 l u2 o2 l u2 n s a4
 佛罗里达                           f u2 l u2 o2 l i3 d a2
 佛罗里达州                          f o2 l u2 o2 l i3 d a2 zh o1 u1
@@ -3833,6 +3835,7 @@ zǎoshang   z a3 o3 sh a4 ng
 俄联邦                            e2 l i2 a2 n b a1 ng
 俊                              j uu4 n
 俊                              z u4 n
+俊俏                             j u4 n q i4 a4 o4
 俑                              y o3 ng
 俗                              s u2
 俗称                             s u2 ch e1 ng
@@ -3963,6 +3966,7 @@ zǎoshang   z a3 o3 sh a4 ng
 倡导                             ch a4 ng d a3 o3
 倡议                             ch a4 ng y i4
 倡议书                            ch a4 ng y i4 sh u1
+倦怠                            j u4 a4 n d a4 i4 
 倪                              n i2
 债                              zh a4 i4
 债券                             zh a4 i4 q uu4 a4 n
@@ -4064,6 +4068,7 @@ zǎoshang   z a3 o3 sh a4 ng
 傲慢                             a4 o4 m a4 n
 傻气                             sh a3 q i4
 像                              x i4 a4 ng
+僧人                             s e1 ng r e2 n
 僵局                             j i1 a1 ng j uu2
 僵持                             j i1 a1 ng ch i2
 儒                              r u2
@@ -4635,6 +4640,7 @@ zǎoshang   z a3 o3 sh a4 ng
 决战                             j uu2 e2 zh a4 n
 决策                             j uu2 e2 c e4
 决策者                            j uu2 e2 c e4 zh e3
+决裂                            j u2 e2 l i4 e4 
 决议                             j uu2 e2 y i4
 决赛                             j uu2 e2 s a4 i4
 况且                             k u4 a4 ng q i3 e3
@@ -4681,6 +4687,7 @@ zǎoshang   z a3 o3 sh a4 ng
 减轻                             j i3 a3 n q i1 ng
 减速                             j i3 a3 n s u4
 凑合                             c o4 u4 h e1
+凑数                            c o4 u4 sh u4 
 凝                              n i2 ng
 凝聚                             n i2 ng j uu4
 凝聚力                            n i2 ng j uu4 l i4
@@ -5008,6 +5015,7 @@ zǎoshang   z a3 o3 sh a4 ng
 制造业                            zh i4 z a4 o4 y e4
 制造厂                            zh i4 z a4 o4 ch a3 ng
 制造商                            zh i4 z a4 o4 sh a1 ng
+刷洗                            sh u1 a1 x i3 
 券                              q uu4 a4 n
 刹                              ch a4
 刹                              sh a1
@@ -5713,6 +5721,7 @@ zǎoshang   z a3 o3 sh a4 ng
 压缩                             y a1 s u1 o1
 压路机                            y a1 l u4 j i1
 压迫                             y a1 p o4
+厌倦                             y a4 n j u4 a4 n
 厌恶                             y a4 n w u4
 厕所                             c e4 s u3 o3
 厘米                             l i2 m i3
@@ -5749,6 +5758,7 @@ zǎoshang   z a3 o3 sh a4 ng
 厦门市                            x i4 a4 m e2 n sh i4
 厨师                             ch u2 sh i1
 厨房                             ch u2 f a2 ng
+厨艺                            ch u2 y i4 
 去                              q uu4
 去世                             q uu4 sh i4
 去台人员                           q uu4 t a2 i2 r e2 n y uu2 a2 n
@@ -5994,6 +6004,7 @@ zǎoshang   z a3 o3 sh a4 ng
 口粮                             k o3 u3 l i2 a2 ng
 口腔                             k o3 u3 q i1 a1 ng
 口袋                             k o3 u3 d a4 i4
+口诀                             k o3 u3 j u2 e2
 古                              g u3
 古书                             g u3 sh u1
 古今                             g u3 j i1 n
@@ -6138,6 +6149,7 @@ zǎoshang   z a3 o3 sh a4 ng
 司长                             s i1 zh a3 ng
 司马                             s i1 m a3
 叹息                             t a4 n x i1
+叹气                            t a4 n q i4 
 叽里呱啦                           j i1 l i3 g u1 l a1
 吃                              ch i1
 吃                              j i2
@@ -6330,6 +6342,7 @@ zǎoshang   z a3 o3 sh a4 ng
 君王                             j uu1 n w a2 ng
 君臣                             j uu1 n ch e2 n
 吞吐                             t u1 n t u3
+吞没                             t u1 n m o4
 吞食                             t u1 n sh i2
 吟                              y i2 n
 否                              f o3 u3
@@ -6632,10 +6645,12 @@ zǎoshang   z a3 o3 sh a4 ng
 啊                              a2
 啊                              a3
 啊                              a4
+啜泣                            ch u4 o4 q i4 
 啤                              p i2
 啤酒                             p i2 j i3 u3
 啤酒厂                            p i2 j i3 u3 ch a3 ng
 啥                              sh a2
+啼哭                            t i2 k u1 
 喂                              w e2 i2
 喂                              w e4 i4
 善                              sh a4 n
@@ -6643,6 +6658,7 @@ zǎoshang   z a3 o3 sh a4 ng
 善意                             sh a4 n y i4
 善有善报                           sh a4 n y o3 u3 sh a4 n b a4 o4
 善良                             sh a4 n l i2 a2 ng
+喇叭                             l a3 b a4
 喇嘛                             l a3 m a4
 喉咙                             h o2 u2 l o2 ng
 喉舌                             h o2 u2 sh e2
@@ -6651,6 +6667,7 @@ zǎoshang   z a3 o3 sh a4 ng
 喋喋不休                           d i2 e2 d i2 e2 b u4 x i1 u1
 喔                              o1
 喔                              w o2
+喘气                            ch u3 a3 n q i4 
 喜                              x i3
 喜事                             x i3 sh i4
 喜庆                             x i3 q i4 ng
@@ -6662,6 +6679,7 @@ zǎoshang   z a3 o3 sh a4 ng
 喜糖                             x i3 t a2 ng
 喜闻乐见                           x i3 w e2 n l e4 j i4 a4 n
 喜马拉雅山                          x i3 m a3 l a1 y a3 sh a1 n
+喜鹊                             x i3 q u4 e4
 喝                              h e1
 喝                              h e4
 喝酒                             h e1 j i3 u3
@@ -6785,6 +6803,7 @@ zǎoshang   z a3 o3 sh a4 ng
 困                              k u4 n
 困境                             k u4 n j i4 ng
 困扰                             k u4 n r a3 o3
+困窘                            k u4 n j i3 o3 ng 
 困难                             k u4 n n a1 n
 围                              w e2 i2
 围剿                             w e2 i2 j i3 a3 o3
@@ -6934,6 +6953,7 @@ zǎoshang   z a3 o3 sh a4 ng
 土气                             t u3 q i4
 土法                             t u3 f a3
 土洋结合                           t u3 y a2 ng j i2 e2 h e2
+土炕                             t u3 k a4 ng
 土耳其                            t u3 e3 r q i2
 土耳其石                           t u3 e3 r q i2 sh i2
 土著                             t u3 zh u4
@@ -7427,6 +7447,7 @@ zǎoshang   z a3 o3 sh a4 ng
 夜班                             y e4 b a1 n
 夜间                             y e4 j i1 a1 n
 够                              g o4 u4
+够呛                            g o4 u4 q i4 a4 ng 
 夥                              h u3 o3
 夥伴                             h u3 o3 b a4 n
 大                              d a4
@@ -7446,6 +7467,7 @@ zǎoshang   z a3 o3 sh a4 ng
 大众汽车                           d a4 zh o4 ng q i4 ch e1
 大会                             d a4 h u4 i4
 大体                             d a4 t i3
+大佛                             d a4 f o2
 大作                             d a4 z u4 o4
 大使                             d a4 sh i3
 大使馆                            d a4 sh i3 g u3 a3 n
@@ -7489,6 +7511,7 @@ zǎoshang   z a3 o3 sh a4 ng
 大大                             d a4 d a4
 大大小小                           d a4 d a4 x i3 a3 o3 x i3 a3 o3
 大夫                             d a4 i4 f u1
+大妈                             d a4 m a1
 大学                             d a4 x uu2 e2
 大学生                            d a4 x uu2 e2 sh e1 ng
 大宗                             d a4 z o1 ng
@@ -7501,6 +7524,7 @@ zǎoshang   z a3 o3 sh a4 ng
 大屠杀                            d a4 t u2 sh a1
 大山                             d a4 sh a1 n
 大屿山                            d a4 y uu3 sh a1 n
+大帅                            d a4 sh u4 a4 i4 
 大师                             d a4 sh i1
 大幅                             d a4 f u2
 大幅度                            d a4 f u2 d u4
@@ -7568,6 +7592,7 @@ zǎoshang   z a3 o3 sh a4 ng
 大致                             d a4 zh i4
 大英                             d a4 y i1 ng
 大藏经                            d a4 z a4 ng j i1 ng
+大虾                            d a4 x i1 a1 
 大街                             d a4 j i1 e1
 大西洋                            d a4 x i1 y a2 ng
 大要                             d a4 y a4 o4
@@ -7671,6 +7696,7 @@ zǎoshang   z a3 o3 sh a4 ng
 失修                             sh i1 x i1 u1
 失去                             sh i1 q uu4
 失学                             sh i1 x uu2 e2
+失宠                            sh i1 ch o3 ng 
 失控                             sh i1 k o4 ng
 失效                             sh i1 x i4 a4 o4
 失望                             sh i1 w a4 ng
@@ -7705,6 +7731,7 @@ zǎoshang   z a3 o3 sh a4 ng
 夹克                             j i1 a1 k e4
 夹击                             j i1 a1 j i1
 夹杂                             j i1 a1 z a2
+夹袄                            j i2 a2 a3 o3 
 夺                              d u2 o2
 夺取                             d u2 o2 q uu3
 夺得                             d u2 o2 d e2
@@ -7837,6 +7864,7 @@ zǎoshang   z a3 o3 sh a4 ng
 妇联                             f u4 l i2 a2 n
 妈妈                             m a1 m a2
 妍                              y a2 n
+妖怪                            y a1 o1 g u4 a4 i4 
 妙                              m i4 a4 o4
 妙语连珠                           m i4 a4 o4 y uu4 l i2 a2 n zh u1
 妥协                             t u3 o3 x i2 e2
@@ -7896,6 +7924,7 @@ zǎoshang   z a3 o3 sh a4 ng
 娃娃                             w a2 w a3
 娄底                             l o2 u2 d i3
 娅                              y a4
+娇气                             j i1 a1 o1 q i4
 娇艳                             j i1 a1 o1 y a4 n
 娘                              n i2 a2 ng
 娘家                             n i2 a2 ng j i3 a4
@@ -7906,6 +7935,7 @@ zǎoshang   z a3 o3 sh a4 ng
 娶                              q uu3
 娶妻                             q uu3 q i1
 娼                              ch a1 ng
+婆娑                            p o2 s u1 o1 
 婆婆                             p o2 p o3
 婆家                             p o2 j i3 a4
 婉言                             w a3 n y a2 n
@@ -8250,6 +8280,7 @@ zǎoshang   z a3 o3 sh a4 ng
 家庭妇女                           j i1 a1 t i2 ng f u4 n u3 uu3
 家教                             j i1 a1 j i4 a4 o4
 家族                             j i1 a1 z u2
+家父                            j i1 a1 f u4 
 家用                             j i1 a1 y o4 ng
 家用电器                           j i1 a1 y o4 ng d i4 a4 n q i4
 家用电脑                           j i1 a1 y o4 ng d i4 a4 n n a3 o3
@@ -8302,6 +8333,7 @@ zǎoshang   z a3 o3 sh a4 ng
 密西西比州                          m i4 x i1 x i1 b i3 zh o1 u1
 密西西比河                          m i4 x i1 x i1 b i3 h e2
 密集                             m i4 j i2
+寇贼                            k o4 u4 z e2 i2 
 富                              f u4
 富人                             f u4 r e2 n
 富余                             f u4 y uu1
@@ -8533,6 +8565,7 @@ zǎoshang   z a3 o3 sh a4 ng
 尸                              sh i1
 尸体                             sh i1 t i3
 尹                              y i3 n
+尺寸                             ch i3 c u4 n
 尺度                             ch i3 d u4
 尼                              n i2
 尼克                             n i2 k e4
@@ -8624,6 +8657,7 @@ zǎoshang   z a3 o3 sh a4 ng
 屡教不改                           l u3 uu3 j i4 a4 o4 b u4 g a3 i3
 屡禁不止                           l u3 uu3 j i4 n b u4 zh i3
 屡遭                             l u3 uu3 z a1 o1
+履历                             l u3 uu3 l i4
 履行                             l u3 uu3 x i2 ng
 屯                              t u2 n
 屯                              zh u1 n
@@ -8636,6 +8670,7 @@ zǎoshang   z a3 o3 sh a4 ng
 山坡                             sh a1 n p o1
 山寨                             sh a1 n zh a4 i4
 山岭                             sh a1 n l i3 ng
+山峦                             sh a1 n l u2 a2 n
 山峰                             sh a1 n f e1 ng
 山庄                             sh a1 n zh u1 a1 ng
 山村                             sh a1 n c u1 n
@@ -8656,6 +8691,7 @@ zǎoshang   z a3 o3 sh a4 ng
 岁月                             s u4 i4 y uu4 e4
 岂不                             q i3 b u4
 岐山                             q i2 sh a1 n
+岑寂                            c e2 n j i4 
 岗                              g a3 ng
 岗位                             g a3 ng w e4 i4
 岛                              d a3 o3
@@ -8861,6 +8897,7 @@ zǎoshang   z a3 o3 sh a4 ng
 布隆迪                            b u4 l o2 ng d i2
 布雷                             b u4 l e2 i2
 布鲁塞尔                           b u4 l u3 s a4 i4 e3 r
+帅哥                            sh u4 a4 i4 g e1 
 帆船                             f a1 n ch u2 a2 n
 师                              sh i1
 师傅                             sh i1 f u2
@@ -9097,6 +9134,7 @@ zǎoshang   z a3 o3 sh a4 ng
 庄园                             zh u1 a1 ng y uu2 a2 n
 庄子                             zh u1 a1 ng z i3
 庄河                             zh u1 a1 ng h e2
+庄稼                             zh u1 a1 ng j i2 a2
 庄稼地                            zh u1 a1 ng j i2 a3 d i4
 庆                              q i4 ng
 庆典                             q i4 ng d i3 a3 n
@@ -9660,6 +9698,7 @@ zǎoshang   z a3 o3 sh a4 ng
 态                              t a4 i4
 态势                             t a4 i4 sh i4
 态度                             t a4 i4 d u1
+怂恿                             s o3 ng y o3 ng
 怅望                             ch a4 ng w a4 ng
 怎么                             z e3 n m e4
 怎么办                            z e3 n m e4 b a4 n
@@ -9706,6 +9745,7 @@ zǎoshang   z a3 o3 sh a4 ng
 性行为                            x i4 ng x i2 ng w e2 i2
 性质                             x i4 ng zh i4
 怨天尤人                           y uu4 a4 n t i1 a1 n y o2 u2 r e2 n
+怨言                             y u4 a4 n y a2 n
 总                              z o3 ng
 总之                             z o3 ng zh i1
 总书记                            z o3 ng sh u1 j i2
@@ -9752,6 +9792,7 @@ zǎoshang   z a3 o3 sh a4 ng
 总领事                            z o3 ng l i3 ng sh i4
 总领事馆                           z o3 ng l i3 ng sh i4 g u3 a3 n
 总额                             z o3 ng e2
+恋人                             l i4 a4 n r e2 n
 恋爱                             l i4 a4 n a4 i4
 恐吓                             k o3 ng h e4
 恐怕                             k o3 ng p a4
@@ -9831,6 +9872,7 @@ zǎoshang   z a3 o3 sh a4 ng
 惊愕                             j i1 ng e4
 惊慌失措                           j i1 ng h u1 a1 ng sh i1 c u4 o4
 惊讶                             j i1 ng y a4
+惊醒                             j i1 ng x i3 ng
 惜                              x i1
 惠                              h u4 i4
 惠东县                            h u4 i4 d o1 ng x i4 a4 n
@@ -9872,6 +9914,7 @@ zǎoshang   z a3 o3 sh a4 ng
 愈发                             y uu4 f a1
 愈演愈烈                           y uu4 y a3 n y uu4 l i4 e4
 愉快                             y uu2 k u4 a4 i4
+愉悦                             y u2 y u4 e4
 意                              y i4
 意义                             y i4 y i4
 意向                             y i4 x i4 a4 ng
@@ -9942,6 +9985,7 @@ zǎoshang   z a3 o3 sh a4 ng
 憨厚                             h a1 n h o2 u3
 懂                              d o3 ng
 懂得                             d o3 ng d e4
+懒汉                             l a3 n h a4 n
 戈                              g e1
 戈兰高地                           g e1 l a2 n g a1 o1 d i4
 戈壁                             g e1 b i4
@@ -10285,6 +10329,7 @@ zǎoshang   z a3 o3 sh a4 ng
 抓紧                             zh u1 a1 j i3 n
 抓药                             zh u1 a1 y a4 o4
 抓获                             zh u1 a1 h u4 o4
+抓贼                            zh u1 a1 z e2 i2 
 投                              t o2 u2
 投产                             t o2 u2 ch a3 n
 投亲靠友                           t o2 u2 q i1 n k a4 o4 y o3 u3
@@ -10527,6 +10572,7 @@ zǎoshang   z a3 o3 sh a4 ng
 拨款                             b o1 k u3 a3 n
 择                              z e2
 择优                             z e2 y o1 u1
+括号                            k u4 o4 h a4 o4 
 拮据                             j i2 e2 j uu1
 拱                              g o3 ng
 拳头                             q uu2 a2 n t o3 u4
@@ -10534,6 +10580,8 @@ zǎoshang   z a3 o3 sh a4 ng
 拳手                             q uu2 a2 n sh o3 u3
 拳术                             q uu2 a2 n sh u4
 拼命                             p i1 n m i4 ng
+拼版                            p i1 n b a3 n 
+拽住                            zh u4 a4 i4 zh u4 
 拾取                             sh i2 q uu3
 拿                              n a2
 拿出                             n a2 ch u1
@@ -10704,6 +10752,7 @@ zǎoshang   z a3 o3 sh a4 ng
 掌握                             zh a3 ng w o4
 掏                              t a1 o1
 掏出                             t a1 o1 ch u1
+掐花                            q i1 a1 h u1 a1 
 排                              p a2 i2
 排他                             p a2 i2 t a1
 排出                             p a2 i2 ch u1
@@ -10904,6 +10953,7 @@ zǎoshang   z a3 o3 sh a4 ng
 摊派                             t a1 n p a4 i4
 摊牌                             t a1 n p a2 i2
 摔                              sh u1 a1 i1
+摔跤                             sh u1 a1 i1 j i1 a1 o1
 摘                              zh a1 i1
 摘取                             zh a1 i1 q uu3
 摘录                             zh a1 i1 l u4
@@ -10926,6 +10976,7 @@ zǎoshang   z a3 o3 sh a4 ng
 摸索                             m o1 s u2 o3
 撇                              p i1 e1
 撇                              p i3 e3
+撇捺                            p i3 e3 n a4 
 撑                              ch e1 ng
 撑腰                             ch e1 ng y a1 o1
 撒                              s a1
@@ -12185,6 +12236,7 @@ zǎoshang   z a3 o3 sh a4 ng
 构想                             g o4 u4 x i3 a3 ng
 构成                             g o4 u4 ch e2 ng
 构筑                             g o4 u4 zh u4
+枇杷                            p i2 p a3 
 析                              x i1
 枕头                             zh e3 n t o4 u1
 林                              l i2 n
@@ -12207,6 +12259,7 @@ zǎoshang   z a3 o3 sh a4 ng
 果树                             g u3 o3 sh u4
 果然                             g u3 o3 r a2 n
 果皮                             g u3 o3 p i2
+果酱                            g u3 o3 j i4 a4 ng 
 枝                              zh i1
 枝城                             zh i1 ch e2 ng
 枝江                             zh i1 j i1 a1 ng
@@ -12453,6 +12506,7 @@ zǎoshang   z a3 o3 sh a4 ng
 森                              s e1 n
 森林                             s e1 n l i2 n
 森然                             s e1 n r a2 n
+棱角                            l e2 ng j i3 a3 o3 
 棵                              k e1
 椅                              y i3
 椅子                             y i3 z i4
@@ -12503,6 +12557,7 @@ zǎoshang   z a3 o3 sh a4 ng
 橄榄球                            g a3 n l a3 n q i2 u2
 橘                              j uu2
 橡胶                             x i4 a4 ng j i1 a1 o1
+橱柜                            ch u2 g u4 i4 
 橱窗                             ch u2 ch u1 a1 ng
 檀香山                            t a2 n x i1 a1 ng sh a1 n
 欠                              q i4 a4 n
@@ -12845,6 +12900,7 @@ zǎoshang   z a3 o3 sh a4 ng
 气温                             q i4 w e1 n
 气色                             q i4 s e4
 气节                             q i4 j i2 e2
+气虚                             q i4 x u1
 气象                             q i4 x i4 a4 ng
 气象台                            q i4 x i4 a4 ng t a2 i2
 气象局                            q i4 x i4 a4 ng j uu2
@@ -12886,6 +12942,7 @@ zǎoshang   z a3 o3 sh a4 ng
 水源                             sh u3 i3 y uu2 a2 n
 水灾                             sh u3 i3 z a1 i1
 水獭                             sh u3 i3 t a3
+水瓮                            sh u3 i3 w e4 ng 
 水田                             sh u3 i3 t i2 a2 n
 水电                             sh u3 i3 d i4 a4 n
 水电工                            sh u3 i3 d i4 a4 n g o1 ng
@@ -13645,6 +13702,7 @@ zǎoshang   z a3 o3 sh a4 ng
 源流                             y uu2 a2 n l i2 u2
 源源不断                           y uu2 a2 n y uu2 a2 n b u4 d u4 a4 n
 源远流长                           y uu2 a2 n y uu3 a3 n l i2 u2 ch a2 ng
+溜走                             l i1 u1 z o3 u3
 溪                              x i1
 溪口                             x i1 k o3 u3
 溪谷                             x i1 g u3
@@ -13761,6 +13819,7 @@ zǎoshang   z a3 o3 sh a4 ng
 濒临                             b i1 n l i2 n
 濒于                             b i1 n y uu2
 濒危                             b i1 n w e1 i1
+瀑布                             p u4 b u4
 灌                              g u4 a4 n
 灌区                             g u4 a4 n q uu1
 灌溉                             g u4 a4 n g a4 i4
@@ -13973,6 +14032,7 @@ zǎoshang   z a3 o3 sh a4 ng
 爆炸性                            b a4 o4 zh a4 x i4 ng
 爆破                             b a4 o4 p o4
 爆竹                             b a4 o4 zh u2
+爪子                            zh u3 a3 z i4 
 爬上                             p a2 sh a4 ng
 爬山                             p a2 sh a1 n
 爱                              a4 i4
@@ -14014,6 +14074,7 @@ zǎoshang   z a3 o3 sh a4 ng
 牙买加                            y a2 m a3 i3 j i1 a1
 牙刷                             y a2 sh u1 a1
 牙膏                             y a2 g a1 o1
+牙齿                             y a2 ch i3
 牛                              n i2 u2
 牛仔                             n i2 u2 z a3 i3
 牛仔布                            n i2 u2 z a3 i3 b u4
@@ -14119,6 +14180,7 @@ zǎoshang   z a3 o3 sh a4 ng
 狂                              k u2 a2 ng
 狂热                             k u2 a2 ng r e4
 狂言                             k u2 a2 ng y a2 n
+狐狸                             h u2 l i3
 狒狒                             f e4 i4 f e4 i4
 狗                              g o3 u3
 狙击                             j uu1 j i1
@@ -14395,6 +14457,7 @@ zǎoshang   z a3 o3 sh a4 ng
 用途                             y o4 ng t u2
 用量                             y o4 ng l i4 a4 ng
 用餐                             y o4 ng c a1 n
+甩手                            sh u3 a3 i3 sh o3 u3 
 甩掉                             sh u3 a3 i3 d i4 a4 o4
 田                              t i2 a2 n
 田间                             t i2 a2 n j i1 a1 n
@@ -14520,6 +14583,7 @@ zǎoshang   z a3 o3 sh a4 ng
 疑问                             y i2 w e4 n
 疗效                             l i2 a2 o2 x i4 a4 o4
 疗法                             l i2 a2 o2 f a3
+疟疾                             n u4 uu4 e4 j i2
 疫情                             y i4 q i2 ng
 疫苗                             y i4 m i2 a2 o2
 疮疤                             ch u1 a1 ng b a1
@@ -14555,6 +14619,7 @@ zǎoshang   z a3 o3 sh a4 ng
 瘦肉                             sh o4 u4 r o4 u4
 瘫                              t a1 n
 瘫痪                             t a1 n h u4 a4 n
+瘸腿                            q u2 e2 t u3 i3 
 瘾                              y i3 n
 癌                              a2 i2
 癌症                             a2 i2 zh e4 ng
@@ -14676,6 +14741,7 @@ zǎoshang   z a3 o3 sh a4 ng
 盗版                             d a4 o4 b a3 n
 盗用                             d a4 o4 y o4 ng
 盗窃                             d a4 o4 q i4 e4
+盗贼                            d a4 o4 z e2 i2 
 盘                              p a2 n
 盘剥                             p a2 n b o1
 盘县                             p a2 n x i4 a4 n
@@ -14855,6 +14921,7 @@ zǎoshang   z a3 o3 sh a4 ng
 眼界                             y a3 n j i4 e4
 眼皮                             y a3 n p i2
 眼看                             y a3 n k a4 n
+眼眶                             y a3 n k u4 a4 ng
 眼睛                             y a3 n j i4 ng
 眼见为实                           y a3 n j i4 a4 n w e2 i2 sh i2
 眼镜                             y a3 n j i4 ng
@@ -14962,6 +15029,7 @@ zǎoshang   z a3 o3 sh a4 ng
 研讨会                            y a2 n t a3 o3 h u4 i4
 砖                              zh u1 a1 n
 砖头                             zh u1 a1 n t o2 u3
+砝码                             f a3 m a3
 破                              p o4
 破产                             p o4 ch a3 n
 破伤风                            p o4 sh a1 ng f e1 ng
@@ -15009,6 +15077,7 @@ zǎoshang   z a3 o3 sh a4 ng
 碗柜                             w a3 n g u4 i4
 碘                              d i3 a3 n
 碟                              d i2 e2
+碧绿                             b i4 l u4 uu4
 碰到                             p e4 ng d a4 o4
 碰见                             p e4 ng j i4 a4 n
 碰钉子                            p e4 ng d i1 ng z i2
@@ -15025,6 +15094,7 @@ zǎoshang   z a3 o3 sh a4 ng
 磨                              m o4
 磨合                             m o2 h e2
 磨擦                             m o2 c a1
+磨蹭                            m o2 c e3 ng 
 磨难                             m o2 n a4 n
 磷                              l i2 n
 磷肥                             l i2 n f e2 i2
@@ -15073,6 +15143,7 @@ zǎoshang   z a3 o3 sh a4 ng
 祖                              z u3
 祖先                             z u3 x i1 a1 n
 祖国                             z u3 g u2 o2
+祖父                             z u3 f u4
 祖祖辈辈                           z u3 z u3 b e4 i4 b e4 i4
 祖鲁                             z u3 l u3
 祝                              zh u4
@@ -15432,6 +15503,7 @@ zǎoshang   z a3 o3 sh a4 ng
 第二轮                            d i4 e4 r l u2 n
 第五                             d i4 w u3
 第纳尔                            d i4 n a4 e3 r
+笸箩                            p o3 l u2 o2 
 笼                              l o2 ng
 笼                              l o3 ng
 笼罩                             l o3 ng zh a4 o4
@@ -15484,6 +15556,7 @@ zǎoshang   z a3 o3 sh a4 ng
 简历                             j i3 a3 n l i4
 简报                             j i3 a3 n b a4 o4
 简朴                             j i3 a3 n p u3
+简略                            j i3 a3 n l uu4 e4 
 简直                             j i3 a3 n zh i2
 简短                             j i3 a3 n d u3 a3 n
 简称                             j i3 a3 n ch e1 ng
@@ -15496,6 +15569,7 @@ zǎoshang   z a3 o3 sh a4 ng
 算                              s u4 a4 n
 算了                             s u4 a4 n l e1
 算是                             s u4 a4 n sh i4
+算账                             s u4 a4 n zh a4 ng
 管                              g u3 a3 n
 管制                             g u3 a3 n zh i4
 管委会                            g u3 a3 n w e3 i3 h u4 i4
@@ -15506,6 +15580,7 @@ zǎoshang   z a3 o3 sh a4 ng
 管线                             g u3 a3 n x i4 a4 n
 管辖                             g u3 a3 n x i2 a2
 管道                             g u3 a3 n d a4 o4
+箩筐                             l u2 o2 k u1 a1 ng
 箭                              j i4 a4 n
 箱                              x i1 a1 ng
 箱子                             x i1 a1 ng z i2
@@ -15521,6 +15596,7 @@ zǎoshang   z a3 o3 sh a4 ng
 簿                              b u4
 籍                              j i2
 米                              m i3
+米尺                            m i3 ch i3 
 米拉                             m i3 l a1
 米歇尔                            m i3 x i1 e1 e3 r
 米饭                             m i3 f a4 n
@@ -16017,6 +16093,7 @@ zǎoshang   z a3 o3 sh a4 ng
 罚                              f a2
 罚款                             f a2 k u3 a3 n
 罢工                             b a4 g o1 ng
+罩子                             zh a4 o4 z i3
 罩衣                             zh a4 o4 y i1
 罪                              z u4 i4
 罪大恶极                           z u4 i4 d a4 e4 j i2
@@ -16116,11 +16193,13 @@ zǎoshang   z a3 o3 sh a4 ng
 老公                             l a3 o3 g o1 ng
 老公                             l a3 o3 g o4 ng
 老化                             l a3 o3 h u4 a4
+老叟                            l a3 o3 s o3 u3 
 老城                             l a3 o3 ch e2 ng
 老外                             l a3 o3 w a4 i4
 老大爷                            l a3 o3 d a4 y e2
 老太太                            l a3 o3 t a4 i4 t a1 i2
 老头                             l a3 o3 t o2 u2
+老婆                             l a3 o3 p o2
 老子                             l a3 o3 z i3
 老字号                            l a3 o3 z i4 h a4 o4
 老实                             l a3 o3 sh i4
@@ -16136,6 +16215,7 @@ zǎoshang   z a3 o3 sh a4 ng
 老朋友                            l a3 o3 p e2 ng y o3 u4
 老板                             l a3 o3 b a3 n
 老汉                             l a3 o3 h a4 n
+老爷                             l a3 o3 y e4
 老百姓                            l a3 o3 b a3 i3 x i4 ng
 老皇历                            l a3 o3 h u2 a2 ng l i4
 老话                             l a3 o3 h u4 a4
@@ -16162,6 +16242,7 @@ zǎoshang   z a3 o3 sh a4 ng
 而已                             e2 r y i3
 而是                             e2 r sh i4
 而言                             e2 r y a2 n
+耍滑                            sh u3 a3 h u2 a2 
 耐                              n a4 i4
 耐克                             n a4 i4 k e4
 耐心                             n a4 i4 x i1 n
@@ -16179,10 +16260,13 @@ zǎoshang   z a3 o3 sh a4 ng
 耳                              e3 r
 耳光                             e3 r g u1 a1 ng
 耳听为虚                           e3 r y i3 n w e2 i2 x uu1
+耳垂                            e3 r ch u2 i2 
 耳目                             e3 r m u4
+耳穴                            e3 r x u4 e4 
 耶                              y e1
 耶                              y e2
 耶路撒冷                           y e1 l u4 s a1 l e3 ng
+耷拉                            d a1 l a2 
 耸立                             s o3 ng l i4
 耻                              ch i3
 耻辱                             ch i3 r u3
@@ -16528,6 +16612,7 @@ zǎoshang   z a3 o3 sh a4 ng
 致谢                             zh i4 x i4 e4
 致贺                             zh i4 h e4
 致辞                             zh i4 c i2
+舅舅                             j i4 u4 j i1 u1
 舆论                             y uu2 l u4 n
 舆论界                            y uu2 l u4 n j i4 e4
 舍                              sh e3
@@ -16657,10 +16742,13 @@ zǎoshang   z a3 o3 sh a4 ng
 花生                             h u1 a1 sh e1 ng
 花甲                             h u1 a1 j i3 a3
 花花公子                           h u1 a1 h u1 a1 g o1 ng z i3
+花蕊                            h u1 a1 r u3 i3 
 花费                             h u1 a1 f e4 i4
 花都                             h u1 a1 d u1
 芳                              f a1 ng
 苍凉                             c a1 ng l i2 a2 ng
+苍穹				c a1 ng q i2 o2 ng 
+苍茫                             c a1 ng m a2 ng
 苏                              s u1
 苏丹                             s u1 d a1 n
 苏伊士运河                          s u1 y i1 sh i4 y uu4 n h e2
@@ -16716,6 +16804,7 @@ zǎoshang   z a3 o3 sh a4 ng
 范围                             f a4 n w e2 i2
 范斯坦                            f a4 n s i1 t a3 n
 范畴                             f a4 n ch o2 u2
+茄子                             q i2 e2 z i3
 茗                              m i2 ng
 茧                              j i3 a3 n
 茨                              c i2
@@ -16808,6 +16897,7 @@ zǎoshang   z a3 o3 sh a4 ng
 菜肴                             c a4 i4 y a2 o2
 菜蔬                             c a4 i4 sh u1
 菠菜                             b o1 c a4 i4
+菩萨                             p u2 s a4
 菱                              l i2 ng
 菲                              f e1 i1
 菲                              f e3 i3
@@ -16883,6 +16973,7 @@ zǎoshang   z a3 o3 sh a4 ng
 葫芦                             h u2 l u3
 葬                              z a4 ng
 葬礼                             z a4 ng l i3
+葱茏                            c o1 ng l o2 ng 
 葱郁                             c o1 ng y uu4
 蒂                              d i4
 蒋                              j i3 a3 ng
@@ -16921,6 +17012,7 @@ zǎoshang   z a3 o3 sh a4 ng
 蕴含                             y uu4 n h a2 n
 蕴藏                             y uu4 n c a2 ng
 蕴藏量                            y uu4 n c a2 ng l i4 a4 ng
+蕹菜                            w e4 ng c a4 i4 
 蕾                              l e3 i3
 薄                              b a2 o2
 薄                              b o2
@@ -16948,6 +17040,7 @@ zǎoshang   z a3 o3 sh a4 ng
 虚拟                             x uu1 n i3
 虚拟现实                           x uu1 n i3 x i4 a4 n sh i2
 虚无主义                           x uu1 w u2 zh u3 y i4
+虚浮                            x u1 f u2 
 虞                              y uu2
 虫                              ch o2 ng
 虫草                             ch o2 ng c a3 o3
@@ -16970,6 +17063,7 @@ zǎoshang   z a3 o3 sh a4 ng
 蜀                              sh u3
 蜂拥                             f e1 ng y o1 ng
 蜂窝煤炉                           f e1 ng w o1 m e2 i2 l u2
+蜡笔                             l a4 b i3
 蝉联                             ch a2 n l i2 a2 n
 蝣                              y o2 u2
 蝶                              d i2 e2
@@ -16980,6 +17074,7 @@ zǎoshang   z a3 o3 sh a4 ng
 融合                             r o2 ng h e2
 融洽                             r o2 ng q i4 a4
 融资                             r o2 ng z i1
+螺栓                             l u2 o2 sh u1 a1 n
 蠢                              ch u3 n
 血                              x uu4 e4
 血压                             x uu4 e4 y a1
@@ -17092,6 +17187,7 @@ zǎoshang   z a3 o3 sh a4 ng
 被服                             b e4 i4 f u2
 被禁                             b e4 i4 j i4 n
 被绑                             b e4 i4 b a3 ng
+被褥                             b e4 i4 r u4
 被誉为                            b e4 i4 y uu4 w e2 i2
 被迫                             b e4 i4 p o4
 袭                              x i2
@@ -17112,6 +17208,7 @@ zǎoshang   z a3 o3 sh a4 ng
 装有                             zh u1 a1 ng y o3 u3
 装机                             zh u1 a1 ng j i1
 装满                             zh u1 a1 ng m a3 n
+装潢                             zh u1 a1 ng h u2 a2 ng
 装甲                             zh u1 a1 ng j i3 a3
 装甲车                            zh u1 a1 ng j i3 a3 ch e1
 装置                             zh u1 a1 ng zh i4
@@ -17500,6 +17597,7 @@ zǎoshang   z a3 o3 sh a4 ng
 诛                              zh u1
 话                              h u4 a4
 话别                             h u4 a4 b i2 e2
+话剧                             h u4 a4 j u4
 话说                             h u4 a4 sh u1 o1
 话说回来                           h u4 a4 sh u1 o1 h u2 i2 l a3 i4
 话音                             h u4 a4 y i1 n
@@ -17526,6 +17624,7 @@ zǎoshang   z a3 o3 sh a4 ng
 诱人                             y o4 u4 r e2 n
 诱导                             y o4 u4 d a3 o3
 诱惑                             y o4 u4 h u4 o4
+诱饵                             y o4 u4 e3 r
 诱骗                             y o4 u4 p i4 a4 n
 说                              sh u1 o1
 说                              sh u4 i4
@@ -17541,6 +17640,7 @@ zǎoshang   z a3 o3 sh a4 ng
 说法                             sh u1 o1 f a3
 说话                             sh u1 o1 h u4 a4
 说说                             sh u1 o1 sh u2 o3
+说谎				sh u1 o1 h u3 a3 ng 
 说起                             sh u1 o1 q i3
 说起来                            sh u1 o1 q i3 l a2 i2
 诵                              s o4 ng
@@ -17635,6 +17735,7 @@ zǎoshang   z a3 o3 sh a4 ng
 谦虚                             q i1 a1 n x uu1
 谨                              j i3 n
 谨慎                             j i3 n sh e4 n
+谬误                            m i4 u4 w u4 
 谭                              t a2 n
 谱写                             p u3 x i3 e3
 谴责                             q i3 a3 n z e2
@@ -17658,6 +17759,7 @@ zǎoshang   z a3 o3 sh a4 ng
 贝                              b e4 i4
 贝克尔                            b e4 i4 k e4 e3 r
 贝叶经                            b e4 i4 y e4 j i1 ng
+贝壳                             b e4 i4 k e2
 贝多芬                            b e4 i4 d u1 o1 f e1 n
 贝尔                             b e4 i4 e3 r
 贝尔法斯特                          b e4 i4 e3 r f a3 s i1 t e4
@@ -17798,6 +17900,9 @@ zǎoshang   z a3 o3 sh a4 ng
 贺礼                             h e4 l i3
 贺龙                             h e4 l o2 ng
 贻误                             y i2 w u4
+贼人				z e2 i2 r e2 n 
+贼眼				z e2 i2 y a3 n 
+贼赃                            z e2 i2 z a1 ng 
 贾                              g u3
 贾                              j i3 a3
 贾庆林                            j i3 a3 q i4 ng l i2 n
@@ -17973,6 +18078,7 @@ zǎoshang   z a3 o3 sh a4 ng
 足迹                             z u2 j i4
 跃                              y uu4 e4
 跃居                             y uu4 e4 j uu1
+跄踉                            q i4 a4 ng l i4 a4 ng 
 跋涉                             b a2 sh e4
 跌落                             d i1 e1 l u4 o4
 跑                              p a2 o2
@@ -18021,6 +18127,7 @@ zǎoshang   z a3 o3 sh a4 ng
 踊跃                             y o3 ng y uu4 e4
 踌躇满志                           ch o2 u2 ch u2 m a3 n zh i4
 踏上                             t a4 sh a4 ng
+踏步                             t a4 b u4
 踏踏实实                           t a1 t a1 sh i2 sh i2
 踢                              t i1
 踣                              b o2
@@ -18435,6 +18542,7 @@ zǎoshang   z a3 o3 sh a4 ng
 迟缓                             ch i2 h u3 a3 n
 迟顿                             ch i2 d u4 n
 迢                              t i2 a2 o2
+迥异                             j i3 o3 ng y i4
 迪                              d i2
 迪斯尼                            d i2 s i1 n i2
 迫                              p o4
@@ -18621,6 +18729,7 @@ zǎoshang   z a3 o3 sh a4 ng
 遍地开花                           b i4 a4 n d i4 k a1 i1 h u1 a1
 遍布                             b i4 a4 n b u4
 遏制                             e4 zh i4
+遐迩                            x i2 a2 e3 r 
 道                              d a4 o4
 道义                             d a4 o4 y i4
 道出                             d a4 o4 ch u1
@@ -18778,6 +18887,7 @@ zǎoshang   z a3 o3 sh a4 ng
 酒楼                             j i3 u3 l o2 u2
 酒泉地区                           j i3 u3 q uu2 a2 n d i4 q uu1
 酒泉市                            j i3 u3 q uu2 a2 n sh i4
+酒酿				j i3 u3 n i4 a4 ng 
 酒龄                             j i3 u3 l i2 ng
 酗酒                             x uu4 j i3 u3
 酚                              f e1 n
@@ -18790,6 +18900,7 @@ zǎoshang   z a3 o3 sh a4 ng
 酸雨                             s u1 a1 n y uu3
 酿造                             n i4 a4 ng z a4 o4
 醇                              ch u2 n
+醉汉                            z u4 i4 h a4 n 
 醋                              c u4
 醒目                             x i3 ng m u4
 采                              c a3 i3
@@ -19004,6 +19115,7 @@ zǎoshang   z a3 o3 sh a4 ng
 链                              l i4 a4 n
 链接                             l i4 a4 n j i1 e1
 链条                             l i4 a4 n t i2 a2 o2
+铿锵                             k e1 ng q i1 a1 ng
 销                              x i1 a1 o1
 销售                             x i1 a1 o1 sh o4 u4
 销售额                            x i1 a1 o1 sh o4 u4 e2
@@ -19038,10 +19150,12 @@ zǎoshang   z a3 o3 sh a4 ng
 键盘                             j i4 a4 n p a2 n
 锰                              m e3 ng
 锻炼                             d u4 a4 n l i4 a4 n
+镂空                             l o4 u4 k o1 ng
 镇                              zh e4 n
 镇住                             zh e4 n zh u4
 镇压                             zh e4 n y a1
 镇海                             zh e4 n h a3 i3
+镊子				n i4 e4 z i1 
 镌刻                             j uu1 a1 n k e4
 镍                              n i4 e4
 镜头                             j i4 ng t o2 u2
@@ -19155,6 +19269,7 @@ zǎoshang   z a3 o3 sh a4 ng
 阁下                             g e2 x i4 a4
 阅卷                             y uu4 e4 j uu4 a4 n
 阅览室                            y uu4 e4 l a3 n sh i4
+阅读                             y u4 e4 d u2
 阅读理解                           y uu4 e4 d u2 l i3 j i3 e3
 阐明                             ch a3 n m i2 ng
 阐述                             ch a3 n sh u4
@@ -19216,6 +19331,7 @@ zǎoshang   z a3 o3 sh a4 ng
 阿卡                             a1 k a3
 阿司匹林                           a1 s i1 p i3 l i2 n
 阿塞拜疆                           a1 s a4 i4 b a4 i4 j i1 a1 ng
+阿姨                             a1 y i2
 阿富汗                            a1 f u4 h a4 n
 阿尔及利亚                          a1 e3 r j i2 l i4 y a4
 阿尔及尔                           a1 e3 r j i2 e3 r
@@ -19376,6 +19492,7 @@ zǎoshang   z a3 o3 sh a4 ng
 难过                             n a2 n g u4 o4
 难道                             n a2 n d a4 o4
 难题                             n a2 n t i2
+雀跃                            q u4 e4 y u4 e4 
 雁                              y a4 n
 雄                              x i2 o2 ng
 雄厚                             x i2 o2 ng h o4 u4
@@ -19461,6 +19578,7 @@ zǎoshang   z a3 o3 sh a4 ng
 霓                              n i2
 霖                              l i2 n
 霜冻                             sh u1 a1 ng d o4 ng
+霜降                             sh u1 a1 ng j i4 a4 ng
 霞                              x i2 a2
 露                              l o4 u4
 露                              l u4
@@ -19565,6 +19683,7 @@ zǎoshang   z a3 o3 sh a4 ng
 韩城市                            h a2 n ch e2 ng sh i4
 韩宾                             h a2 n b i1 n
 韩日                             h a2 n r i4
+韭菜                            j i3 u3 c a4 i4 
 音                              y i1 n
 音乐                             y i1 n y uu4 e4
 音乐会                            y i1 n y uu4 e4 h u4 i4
@@ -19672,6 +19791,7 @@ zǎoshang   z a3 o3 sh a4 ng
 频频                             p i2 n p i2 n
 颖                              y i3 ng
 颗                              k e1
+颗粒                             k e1 l i4
 题                              t i2
 题材                             t i2 c a2 i2
 题目                             t i2 m u4
@@ -19762,6 +19882,7 @@ zǎoshang   z a3 o3 sh a4 ng
 饲                              s i4
 饲养                             s i4 y a3 ng
 饲料                             s i4 l i4 a4 o4
+饶恕                             r a2 o2 sh u4
 饶有兴趣                           r a2 o2 y o3 u3 x i4 ng q uu4
 饺子                             j i3 a3 o3 z i4
 饼                              b i3 ng
@@ -19980,9 +20101,11 @@ zǎoshang   z a3 o3 sh a4 ng
 高额                             g a1 o1 e2
 高飞                             g a1 o1 f e1 i1
 高龄                             g a1 o1 l i2 ng
+鬓角                            b i4 n j i3 a3 o3 
 鬼                              g u3 i3
 魅力                             m e4 i4 l i4
 魏                              w e4 i4
+魔力                             m o2 l i4
 魔方                             m o2 f a1 ng
 魔术                             m o2 sh u4
 鱼                              y uu2
@@ -19990,6 +20113,7 @@ zǎoshang   z a3 o3 sh a4 ng
 鱼肉百姓                           y uu2 r o4 u4 b a3 i3 x i4 ng
 鲁                              l u3
 鲁宾                             l u3 b i1 n
+鲁莽                             l u3 m a3 ng
 鲅鱼圈                            b a4 y uu2 q uu1 a1 n
 鲍                              b a4 o4
 鲜                              x i1 a1 n
@@ -20105,6 +20229,7 @@ zǎoshang   z a3 o3 sh a4 ng
 齐王                             q i2 w a2 ng
 齐聚一堂                           q i2 j uu4 y i1 t a2 ng
 龋                              q uu3
+龌龊                             w o4 ch u4 o4
 龙                              l o2 ng
 龙井茶                            l o2 ng j i3 ng ch a2
 龙华                             l o2 ng h u2 a2
