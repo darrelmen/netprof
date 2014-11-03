@@ -512,41 +512,31 @@ public class DatabaseImpl implements Database {
    Sort word by score asc
    * @return
    */
-/*
-  public JSONObject getJsonPhoneReport(long userid,
-                                       Map<String, Collection<String>> typeToSection) {
-    Collection<CommonExercise> exercisesForState = getSectionHelper().getExercisesForSelectionState(typeToSection);
-    resultDAO.getUserToResults()
-    List<String> allIDs = new ArrayList<String>();
-    Map<String, String> idToFL = new HashMap<String, String>();
+  public JSONObject getJsonPhoneReport(long userid, Map<String, Collection<String>> typeToValues) {
+    Collection<CommonExercise> exercisesForState = getSectionHelper().getExercisesForSelectionState(typeToValues);
+
+    long then = System.currentTimeMillis();
+    Map<String, List<AudioAttribute>> exToAudio = getAudioDAO().getExToAudio();
+    long now = System.currentTimeMillis();
+
+    if (now-then > 500) logger.warn("took " + (now-then) + " millis to get ex->audio map");
+
+    List<String> ids = new ArrayList<String>();
+    Map<String, String> idToRef = new HashMap<String, String>();
     for (CommonExercise exercise : exercisesForState) {
-      String id = exercise.getID();
-      allIDs.add(id);
-      idToFL.put(id, exercise.getForeignLanguage());
-    }
-
-    JSONObject container = new JSONObject();
-    JSONArray scores = new JSONArray();
-    for (ExerciseCorrectAndScore ex : resultDAO.getExerciseCorrectAndScores(userid, allIDs, idToFL)) {
-      //logger.debug("for " + ex);
-      JSONObject exAndScores = new JSONObject();
-      exAndScores.put("ex", ex.getId());
-      exAndScores.put("s", Integer.toString(ex.getAvgScorePercent()));
-
-      JSONArray history = new JSONArray();
-
-      for (CorrectAndScore cs : ex.getCorrectAndScoresLimited()) {
-        history.add(cs.isCorrect() ? "Y" : "N");
+      List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
+      if (audioAttributes != null) {
+        getAudioDAO().attachAudio(exercise, installPath, configDir, audioAttributes);
       }
-      exAndScores.put("h", history);
-
-      scores.add(exAndScores);
+      String id = exercise.getID();
+      ids.add(id);
+      idToRef.put(id, exercise.getRefAudio());
     }
-    container.put("scores", scores);
 
-    return container;
+    JSONObject object = getPhoneDAO().getWorstPhonesJson(userid, ids, idToRef);
+    //logger.debug("JSON " + object);
+    return object;
   }
-*/
 
   /**
    * does all average calc on server
