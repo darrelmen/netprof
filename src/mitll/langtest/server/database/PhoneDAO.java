@@ -169,26 +169,28 @@ public class PhoneDAO extends DAO {
     return Collections.emptyList();
   }
 
-/*  public List<Event> getAllForUserAndExercise(long userid, String exid) {
-    try {
-      String sql = "SELECT * from " + PHONE + " where " +
-        WIDGETTYPE +
-        "='qcPlayAudio' AND " +
-        CREATORID +"="+userid + " and " +
-        EXERCISEID + "='" +exid+
-        "'";
+  /**
+   *
+   * @param userid
+   * @param exids
+   * @return
+   * @throws SQLException
+   */
+  public Map<String, List<WordAndScore>> getWorstPhones(long userid, List<String> exids, Map<String, String> idToRef) throws SQLException {
+    String sql = "select " +
+        "results.exid," +
+        "results.answer," +
+        "results.time,  " +
+        "word.seq, " +
+        "word.word, " +
+        "word.score, " +
+        "phone.* " +
 
-      return getEvents(sql);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return Collections.emptyList();
-  }*/
-
-  public Map<String, Float> getWorstPhones(long userid, List<String> exids) throws SQLException {
-    String sql = "select results.exid,results.time,  phone.* from results, phone where results.id = phone.rid AND " +
+        " from " +
+        "results, phone, word " +
+        "where results.id = phone.rid AND " +
       ResultDAO.RESULTS+"."+ResultDAO.USERID +"="+userid+ " AND " + ResultDAO.RESULTS +"."+ Database.EXID+ " in (" +getInList(exids)+
-        ")"+
+        ")"+" AND phone.wid = word.id "+
         " order by results.exid, results.time desc";
 
     Connection connection = getConnection();
@@ -199,8 +201,15 @@ public class PhoneDAO extends DAO {
     Map<String,List<Float>> phoneToScores = new HashMap<String, List<Float>>();
 
     String currentExercise = "";
+    Map<String,List<WordAndScore>> phoneToWordAndScore= new HashMap<String, List<WordAndScore>>();
     while (rs.next()) {
-      String exid = rs.getString(1);
+      int i = 1;
+      String exid = rs.getString(i++);
+      String audioAnswer = rs.getString(i++);
+      i++;
+      int wseq = rs.getInt(i++);
+      String word = rs.getString(i++);
+      float wscore = rs.getFloat(i++);
 
       long rid = rs.getLong("RID");
       if (!exid.equals(currentExercise)) {
@@ -213,6 +222,12 @@ public class PhoneDAO extends DAO {
         List<Float> scores = phoneToScores.get(phone);
         if (scores == null) phoneToScores.put(phone, scores = new ArrayList<Float>());
         scores.add(rs.getFloat(SCORE));
+
+        List<WordAndScore> wordAndScores = phoneToWordAndScore.get(phone);
+        if (wordAndScores == null) {
+          phoneToWordAndScore.put(phone,wordAndScores = new ArrayList<WordAndScore>());
+        }
+        wordAndScores.add(new WordAndScore(word,wscore,rid, wseq, audioAnswer, idToRef.get(exid)));
       }
       //else {
         //logger.debug("skipping " + exid + " " + rid + " phone " + phone);
@@ -248,10 +263,28 @@ public class PhoneDAO extends DAO {
 //    logger.debug("sorted " + sorted);
 
     Map<String, Float> phoneToAvgSorted = new LinkedHashMap<String, Float>();
-    for (String phone : sorted) phoneToAvgSorted.put(phone,phoneToAvg.get(phone));
-  //  logger.debug("phoneToAvgSorted " + phoneToAvgSorted);
+    for (String phone : sorted) phoneToAvgSorted.put(phone, phoneToAvg.get(phone));
+    //  logger.debug("phoneToAvgSorted " + phoneToAvgSorted);
 
-    return phoneToAvgSorted;
+    for (List<WordAndScore> words : phoneToWordAndScore.values()) {
+      Collections.sort(words);
+    }
+
+    Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = new LinkedHashMap<String, List<WordAndScore>>();
+
+    for (String phone : sorted) {
+      List<WordAndScore> value = phoneToWordAndScore.get(phone);
+      phoneToWordAndScoreSorted.put(phone, value);
+    }
+
+    logger.debug("phone->words " + phoneToWordAndScore);
+
+    return phoneToWordAndScoreSorted;
+  }
+
+  public static class PhoneScoreInfo {
+    Map<String,List<WordAndScore>> phoneToWordAndScore;
+    Map<String, Float> phoneToAvgSorted;
   }
 
   private List<Phone> getPhones(String sql) throws SQLException {
@@ -274,5 +307,30 @@ public class PhoneDAO extends DAO {
 
     finish(connection, statement, rs);
     return lists;
+  }
+
+  public static class WordAndScore implements Comparable<WordAndScore> {
+    String word;
+    float score;
+    long resultID;
+    int wseq;
+    String answerAudio;
+    String refAudio;
+
+    public WordAndScore(String word, float score, long resultID, int wseq, String answerAudio, String refAudio) {
+      this.word = word;
+      this.score = score;
+      this.resultID = resultID;
+      this.wseq = wseq;
+      this.answerAudio = answerAudio;
+      this.refAudio = refAudio;
+    }
+
+    @Override
+    public int compareTo(WordAndScore o) {
+      return score < o.score ? -1 : score > o.score ? +1 : 0;
+    }
+
+    public String toString() { return "#" + wseq +" : " + word +" s " + score + " res " + resultID + " answer " + answerAudio + " ref " +refAudio; }
   }
 }
