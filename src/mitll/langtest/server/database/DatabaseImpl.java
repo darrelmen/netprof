@@ -921,6 +921,7 @@ public class DatabaseImpl implements Database {
    * @param recordedWithFlash
    * @param deviceType
    * @param device
+   * @param scoreJson
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
@@ -928,10 +929,10 @@ public class DatabaseImpl implements Database {
                              String audioFile,
                              boolean valid,
                              String audioType, int durationInMillis, boolean correct, float score,
-                             boolean recordedWithFlash, String deviceType, String device) {
+                             boolean recordedWithFlash, String deviceType, String device, String scoreJson) {
     return answerDAO.addAnswer(this, userID, exerciseID, questionID, "", audioFile, valid,
-        audioType + (recordedWithFlash ? "" : "_by_WebRTC"),
-        durationInMillis, correct, score, deviceType, device);
+        audioType,// + (recordedWithFlash ? "" : "_by_WebRTC"),
+        durationInMillis, correct, score, deviceType, device, scoreJson, recordedWithFlash);
   }
 
   public int userExists(String login) {
