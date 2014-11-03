@@ -23,6 +23,7 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -258,38 +259,53 @@ public class AudioFileHelper {
         int windex = 0;
         int pindex = 0;
         JSONArray jsonWords = new JSONArray();
-        JSONArray jsonPhones = new JSONArray();
+//        JSONArray jsonPhones = new JSONArray();
 
         for (TranscriptSegment segment : words) {
           String event = segment.getEvent();
           if (!event.equals(SLFFile.UNKNOWN_MODEL) && !event.equals("sil")) {
             JSONObject wordJson = new JSONObject();
-            wordJson.put("id", Integer.toString(windex - 1));
+            String wid = Integer.toString(windex++);
+            wordJson.put("id", wid);
             wordJson.put("w", event);
-            wordJson.put("s", Float.toString(segment.getScore()));
-            jsonWords.add(wordJson);
+            wordJson.put("s", Float.toString(round(segment.getScore())));
+
+            JSONArray jsonPhones = new JSONArray();
 
             for (TranscriptSegment pseg : phones) {
               if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
                 String pevent = pseg.getEvent();
                 if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals("sil")) {
                   JSONObject phoneJson = new JSONObject();
-                  phoneJson.put("id", Integer.toString(pindex - 1));
+                  phoneJson.put("id", Integer.toString(pindex++));
+                  //phoneJson.put("wid", wid);
                   phoneJson.put("p", pevent);
-                  phoneJson.put("s", Float.toString(pseg.getScore()));
+                  phoneJson.put("s", Float.toString(round(pseg.getScore())));
 
                   jsonPhones.add(phoneJson);
                 }
               }
             }
+            wordJson.put("phones", jsonPhones);
+
+            jsonWords.add(wordJson);
           }
         }
 
         jsonObject.put("words", jsonWords);
-        jsonObject.put("phones", jsonPhones);
+        //jsonObject.put("phones", jsonPhones);
       }
     }
     return jsonObject;
+  }
+
+  public static float round(float d) {
+    return round(d,3);
+  }
+  public static float round(float d, int decimalPlace) {
+    BigDecimal bd = new BigDecimal(Float.toString(d));
+    bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+    return bd.floatValue();
   }
 
   /**
