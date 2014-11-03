@@ -916,7 +916,7 @@ public class ResultDAO extends DAO {
     if (!columns.contains(SCORE_JSON.toLowerCase())) {
       addVarchar(connection, RESULTS, SCORE_JSON);
     }
-    if (!columns.contains(WITH_FLASH)) {
+    if (!columns.contains(WITH_FLASH.toLowerCase())) {
       addBoolean(connection, RESULTS, WITH_FLASH);
     }
 
