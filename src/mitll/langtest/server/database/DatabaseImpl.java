@@ -497,6 +497,48 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * For all the exercises in a chapter
+
+   Get latest results
+   Get phones for latest
+
+   //Score phones
+   Sort phone scores – asc
+
+   Map phone->example
+
+   Join phone->word
+
+   Sort word by score asc
+   * @return
+   */
+  public JSONObject getJsonPhoneReport(long userid, Map<String, Collection<String>> typeToValues) {
+    Collection<CommonExercise> exercisesForState = getSectionHelper().getExercisesForSelectionState(typeToValues);
+
+    long then = System.currentTimeMillis();
+    Map<String, List<AudioAttribute>> exToAudio = getAudioDAO().getExToAudio();
+    long now = System.currentTimeMillis();
+
+    if (now-then > 500) logger.warn("took " + (now-then) + " millis to get ex->audio map");
+
+    List<String> ids = new ArrayList<String>();
+    Map<String, String> idToRef = new HashMap<String, String>();
+    for (CommonExercise exercise : exercisesForState) {
+      List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
+      if (audioAttributes != null) {
+        getAudioDAO().attachAudio(exercise, installPath, configDir, audioAttributes);
+      }
+      String id = exercise.getID();
+      ids.add(id);
+      idToRef.put(id, exercise.getRefAudio());
+    }
+
+    JSONObject object = getPhoneDAO().getWorstPhonesJson(userid, ids, idToRef);
+    //logger.debug("JSON " + object);
+    return object;
+  }
+
+  /**
    * does all average calc on server
    *
    * @return
@@ -869,6 +911,7 @@ public class DatabaseImpl implements Database {
    * @param recordedWithFlash
    * @param deviceType
    * @param device
+   * @param scoreJson
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
@@ -876,10 +919,10 @@ public class DatabaseImpl implements Database {
                              String audioFile,
                              boolean valid,
                              String audioType, int durationInMillis, boolean correct, float score,
-                             boolean recordedWithFlash, String deviceType, String device) {
+                             boolean recordedWithFlash, String deviceType, String device, String scoreJson) {
     return answerDAO.addAnswer(this, userID, exerciseID, questionID, "", audioFile, valid,
-        audioType + (recordedWithFlash ? "" : "_by_WebRTC"),
-        durationInMillis, correct, score, deviceType, device);
+        audioType,// + (recordedWithFlash ? "" : "_by_WebRTC"),
+        durationInMillis, correct, score, deviceType, device, scoreJson, recordedWithFlash);
   }
 
   public int userExists(String login) {
