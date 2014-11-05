@@ -5,7 +5,6 @@ import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
@@ -27,7 +26,7 @@ public class AnswerDAO extends DAO {
 
   /**
    *
-   * @see DatabaseImpl#addAnswer(int, mitll.langtest.shared.CommonExercise, int, String, boolean, String)
+   * @see DatabaseImpl#addAnswer
    * @param userID
    * @param e
    * @param questionID
@@ -40,11 +39,13 @@ public class AnswerDAO extends DAO {
    * @param device
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
    */
+/*
   public void addAnswer(int userID, CommonExercise e, int questionID, String answer, String audioFile,
                         String audioType, boolean correct, float pronScore, String deviceType, String device) {
     String id = e.getID();
-    addAnswer(database,userID, id, questionID, answer, audioFile, true, audioType, 0, correct, pronScore, deviceType, device);
+    addAnswer(database,userID, id, questionID, answer, audioFile, true, audioType, 0, correct, pronScore, deviceType, device, scoreJson, recordedWithFlash);
   }
+*/
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
@@ -65,7 +66,7 @@ public class AnswerDAO extends DAO {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
-   * @see #addAnswer(Database, int, String, int, String, String, boolean, String, int, boolean, float, String, String)
+   * @see #addAnswer(Database, int, String, int, String, String, boolean, String, int, boolean, float, String, String, String, boolean)
    * @param database
    * @param userID
    * @param id
@@ -77,16 +78,18 @@ public class AnswerDAO extends DAO {
    * @param pronScore
    * @param deviceType
    * @param device
-   * @return id of new row in result table
+   * @param scoreJson
+   * @param withFlash
+   *  @return id of new row in result table
    */
   public long addAnswer(Database database, int userID, String id, int questionID, String answer,
                         String audioFile, boolean valid, String audioType, int durationInMillis,
-                        boolean correct, float pronScore, String deviceType, String device) {
+                        boolean correct, float pronScore, String deviceType, String device, String scoreJson, boolean withFlash) {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
       long newid = addAnswerToTable(connection, userID, id, questionID, answer, audioFile, valid,
-          audioType, durationInMillis, correct, pronScore, deviceType, device);
+          audioType, durationInMillis, correct, pronScore, deviceType, device, scoreJson, withFlash);
       long now = System.currentTimeMillis();
       if (now - then > 100) System.out.println("took " + (now - then) + " millis to record answer.");
       return newid;
@@ -116,16 +119,21 @@ public class AnswerDAO extends DAO {
    * @param pronScore
    * @param deviceType
    * @param device
-   *  @throws java.sql.SQLException
-   * @see #addAnswer(Database, int, String, int, String, String, boolean, String, int, boolean, float, String, String)
+   * @param scoreJson
+   * @param withFlash
+   * @throws java.sql.SQLException
+   * @see #addAnswer(Database, int, String, int, String, String, boolean, String, int, boolean, float, String, String, String, boolean)
    */
   private long addAnswerToTable(Connection connection, int userid, String id, int questionID,
                                 String answer, String audioFile,
                                 boolean valid, String audioType, int durationInMillis,
-                                boolean correct, float pronScore, String deviceType, String device) throws SQLException {
+                                boolean correct, float pronScore, String deviceType, String device, String scoreJson,
+                                boolean withFlash) throws SQLException {
   //  logger.debug("adding answer for exid #" + id + " correct " + correct + " score " + pronScore + " audio type " +audioType + " answer " + answer);
 
-    PreparedStatement statement = connection.prepareStatement("INSERT INTO results(" +
+    PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
+        ResultDAO.RESULTS +
+        "(" +
       "userid," +
       "plan," +
       Database.EXID + "," +
@@ -141,8 +149,10 @@ public class AnswerDAO extends DAO {
       ResultDAO.PRON_SCORE + "," +
         ResultDAO.STIMULUS +"," +
         ResultDAO.DEVICE_TYPE +"," +
-        ResultDAO.DEVICE +
-      ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+        ResultDAO.DEVICE +"," +
+        ResultDAO.SCORE_JSON +"," +
+        ResultDAO.WITH_FLASH +
+      ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
     int i = 1;
 
@@ -166,6 +176,8 @@ public class AnswerDAO extends DAO {
     statement.setString(i++, "");
     statement.setString(i++, deviceType);
     statement.setString(i++, device);
+    statement.setString(i++, scoreJson);
+    statement.setBoolean(i++, withFlash);
 
     resultDAO.invalidateCachedResults();
 
