@@ -1,15 +1,19 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.LogAndNotify;
+import mitll.langtest.server.PathHelper;
+import mitll.langtest.shared.Result;
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,6 +23,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class PhoneDAO extends DAO {
+  private static final int MAX_EXAMPLES = 30;
   private static final Logger logger = Logger.getLogger(PhoneDAO.class);
 
   private static final String PHONE = "phone";
@@ -170,21 +175,194 @@ public class PhoneDAO extends DAO {
     return Collections.emptyList();
   }
 
-/*  public List<Event> getAllForUserAndExercise(long userid, String exid) {
+  public JSONObject getWorstPhonesJson(long userid, List<String> exids, Map<String, String> idToRef) {
+    JSONObject jsonObject = new JSONObject();
     try {
-      String sql = "SELECT * from " + PHONE + " where " +
-        WIDGETTYPE +
-        "='qcPlayAudio' AND " +
-        CREATORID +"="+userid + " and " +
-        EXERCISEID + "='" +exid+
-        "'";
+      Map<String, List<WordAndScore>> worstPhones = getWorstPhones(userid, exids, idToRef);
+      Map<Long,String> resToAnswer = new HashMap<Long, String>();
+      Map<Long,String> resToRef = new HashMap<Long, String>();
+      Map<Long,String> resToResult = new HashMap<Long, String>();
 
-      return getEvents(sql);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
+      JSONObject phones = new JSONObject();
+
+      for (Map.Entry<String,List<WordAndScore>> pair : worstPhones.entrySet()) {
+        List<WordAndScore> value = pair.getValue();
+        JSONArray words = new JSONArray();
+
+        int count = 0;
+        for (WordAndScore wordAndScore : value) {
+          JSONObject word = new JSONObject();
+          word.put("wid",Integer.toString(wordAndScore.wseq));
+          word.put("seq",Integer.toString(wordAndScore.seq));
+          word.put("w",wordAndScore.word);
+          word.put("s",Float.toString(round(wordAndScore.score)));
+          word.put("result",Long.toString(wordAndScore.resultID));
+          resToAnswer.put(wordAndScore.resultID,wordAndScore.answerAudio);
+          resToRef.put(wordAndScore.resultID,wordAndScore.refAudio);
+          resToResult.put(wordAndScore.resultID,wordAndScore.scoreJson);
+          words.add(word);
+
+          if (count++ >MAX_EXAMPLES) {
+            break;
+          }
+        }
+        phones.put(pair.getKey(), words);
+      }
+
+      jsonObject.put("phones",phones);
+      JSONArray order = new JSONArray();
+      for (String phone : worstPhones.keySet()) order.add(phone);
+      jsonObject.put("order",order);
+
+      JSONObject results = new JSONObject();
+      for (Map.Entry<Long, String> pair : resToAnswer.entrySet()) {
+        JSONObject result = new JSONObject();
+
+        Long key = pair.getKey();
+        result.put("answer",pair.getValue());
+        result.put("ref",resToRef.get(key));
+        result.put("result",resToResult.get(key));
+
+        results.put(Long.toString(key), result);
+      }
+      jsonObject.put("results",results);
+    } catch (SQLException e) {
+      logger.error("Got " +e,e);
     }
-    return Collections.emptyList();
-  }*/
+    return jsonObject;
+  }
+
+  public static float round(float d) {
+    return round(d,3);
+  }
+  public static float round(float d, int decimalPlace) {
+    BigDecimal bd = new BigDecimal(Float.toString(d));
+    bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+    return bd.floatValue();
+  }
+
+  /**
+   *
+   * @param userid
+   * @param exids
+   * @return
+   * @throws SQLException
+   */
+  public Map<String, List<WordAndScore>> getWorstPhones(long userid, List<String> exids, Map<String, String> idToRef) throws SQLException {
+    String sql = "select " +
+        "results.exid," +
+        "results.answer," +
+        "results." +ResultDAO.SCORE_JSON+ "," +
+        "results.time,  " +
+        "word.seq, " +
+        "word.word, " +
+        "word.score, " +
+        "phone.* " +
+
+        " from " +
+        "results, phone, word " +
+        "where results.id = phone.rid AND " +
+      ResultDAO.RESULTS+"."+ResultDAO.USERID +"="+userid+ " AND " + ResultDAO.RESULTS +"."+ Database.EXID+ " in (" +getInList(exids)+
+        ")"+" AND phone.wid = word.id "+
+        " order by results.exid, results.time desc";
+
+    Connection connection = getConnection();
+    PreparedStatement statement = connection.prepareStatement(sql);
+    ResultSet rs = statement.executeQuery();
+
+    long currentRID = -1;
+    Map<String,List<Float>> phoneToScores = new HashMap<String, List<Float>>();
+
+    String currentExercise = "";
+    Map<String,List<WordAndScore>> phoneToWordAndScore= new HashMap<String, List<WordAndScore>>();
+    while (rs.next()) {
+      int i = 1;
+      String exid = rs.getString(i++);
+      String audioAnswer = rs.getString(i++);
+      String scoreJson = rs.getString(i++);
+      i++;
+      int wseq = rs.getInt(i++);
+      String word = rs.getString(i++);
+      float wscore = rs.getFloat(i++);
+
+      long rid = rs.getLong("RID");
+      if (!exid.equals(currentExercise)) {
+        currentRID = rid;
+        currentExercise = exid;
+      }
+
+      if (currentRID == rid) {
+        String phone = rs.getString(PHONE);
+        int seq = rs.getInt(SEQ);
+        List<Float> scores = phoneToScores.get(phone);
+        if (scores == null) phoneToScores.put(phone, scores = new ArrayList<Float>());
+        scores.add(rs.getFloat(SCORE));
+
+        List<WordAndScore> wordAndScores = phoneToWordAndScore.get(phone);
+        if (wordAndScores == null) {
+          phoneToWordAndScore.put(phone,wordAndScores = new ArrayList<WordAndScore>());
+        }
+        wordAndScores.add(new WordAndScore(word,wscore,rid, wseq,seq, trimPathForWebPage(audioAnswer), idToRef.get(exid), scoreJson));
+      }
+      //else {
+        //logger.debug("skipping " + exid + " " + rid + " phone " + phone);
+     // }
+    }
+    finish(connection, statement, rs);
+
+    logger.debug("phoneToScores " + phoneToScores);
+
+    final Map<String,Float> phoneToAvg = new HashMap<String, Float>();
+    for (Map.Entry<String,List<Float>> pair : phoneToScores.entrySet()) {
+      String phone = pair.getKey();
+      float total = 0f;
+      List<Float> scores = pair.getValue();
+      for (Float f : scores) total+= f;
+      total /= ((float) scores.size());
+
+      phoneToAvg.put(phone,total);
+    }
+
+    //logger.debug("phoneToAvg " + phoneToAvg);
+
+    List<String> sorted = new ArrayList<String>(phoneToAvg.keySet());
+    Collections.sort(sorted,new Comparator<String>() {
+      @Override
+      public int compare(String o1, String o2) {
+        Float first = phoneToAvg.get(o1);
+        Float second = phoneToAvg.get(o2);
+        return first < second ? -1 : second > first ? +1 : 0;
+      }
+    });
+
+  //  logger.debug("sorted " + sorted);
+
+    Map<String, Float> phoneToAvgSorted = new LinkedHashMap<String, Float>();
+    for (String phone : sorted) phoneToAvgSorted.put(phone, phoneToAvg.get(phone));
+    //  logger.debug("phoneToAvgSorted " + phoneToAvgSorted);
+
+    for (List<WordAndScore> words : phoneToWordAndScore.values()) {
+      Collections.sort(words);
+    }
+
+    Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = new LinkedHashMap<String, List<WordAndScore>>();
+
+    for (String phone : sorted) {
+      List<WordAndScore> value = phoneToWordAndScore.get(phone);
+      phoneToWordAndScoreSorted.put(phone, value);
+    }
+
+    //logger.debug("phone->words " + phoneToWordAndScore);
+
+    return phoneToWordAndScoreSorted;
+  }
+/*
+
+  public static class PhoneScoreInfo {
+    Map<String,List<WordAndScore>> phoneToWordAndScore;
+    Map<String, Float> phoneToAvgSorted;
+  }
+*/
 
   private List<Phone> getPhones(String sql) throws SQLException {
     Connection connection = getConnection();
@@ -206,5 +384,51 @@ public class PhoneDAO extends DAO {
 
     finish(connection, statement, rs);
     return lists;
+  }
+
+  private String trimPathForWebPage(String path) {
+    int answer = path.indexOf(PathHelper.ANSWERS);
+    return (answer == -1) ? path : path.substring(answer);
+  }
+
+
+  public static class WordAndScore implements Comparable<WordAndScore> {
+    int wseq;
+    int seq;
+    String word;
+    float score;
+    long resultID;
+    String answerAudio;
+    String refAudio;
+    String scoreJson;
+
+    /**
+     * @see #getWorstPhones(long, java.util.List, java.util.Map)
+     * @param word
+     * @param score
+     * @param resultID
+     * @param wseq which word in phrase
+     * @param seq which phoneme in phrase (not in word)
+     * @param answerAudio
+     * @param refAudio
+     * @param scoreJson
+     */
+    public WordAndScore(String word, float score, long resultID, int wseq, int seq, String answerAudio, String refAudio, String scoreJson) {
+      this.word = word;
+      this.score = score;
+      this.resultID = resultID;
+      this.wseq = wseq;
+      this.seq = seq;
+      this.answerAudio = answerAudio;
+      this.refAudio = refAudio;
+      this.scoreJson = scoreJson;
+    }
+
+    @Override
+    public int compareTo(WordAndScore o) {
+      return score < o.score ? -1 : score > o.score ? +1 : 0;
+    }
+
+    public String toString() { return "#" + wseq +" : " + word +" s " + score + " res " + resultID + " answer " + answerAudio + " ref " +refAudio; }
   }
 }
