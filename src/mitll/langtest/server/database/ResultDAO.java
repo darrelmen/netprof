@@ -32,10 +32,12 @@ public class ResultDAO extends DAO {
   private static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
 
   private static final String ID = "id";
-  private static final String USERID = "userid";
+  public static final String USERID = "userid";
   private static final String PLAN = "plan";
   private static final String QID = "qid";
-  private static final String ANSWER = "answer";
+  public static final String ANSWER = "answer";
+  public static final String SCORE_JSON = "scoreJson";
+  public static final String WITH_FLASH = "withFlash";
   private static final String VALID = "valid";
 
   public static final String RESULTS = "results";
@@ -253,7 +255,7 @@ public class ResultDAO extends DAO {
    * @param results
    * @param allIds
    * @return
-   * @see #getSessionsForUserIn2(java.util.Collection, long, long, java.util.Collection)
+   * @seex #getSessionsForUserIn2(java.util.Collection, long, long, java.util.Collection)
    */
 /*  private List<ExerciseCorrectAndScore> getSortedAVPHistoryOld(List<CorrectAndScore> results, Collection<String> allIds) {
     List<ExerciseCorrectAndScore> sortedResults = getExerciseCorrectAndScores(results, allIds);
@@ -711,35 +713,6 @@ public class ResultDAO extends DAO {
   }*/
 
   /**
-   * @param toExclude
-   * @return
-   * @seex DatabaseImpl#getNextUngradedExerciseQuick(java.util.Collection, int, boolean, boolean, boolean)
-   */
-/*  public Collection<Result> getResultExcludingExercises(Collection<String> toExclude) {
-    // select results.* from results where results.exid not in ('ac-R0P-006','ac-LOP-001','ac-L0P-013')
-    try {
-      Connection connection = database.getConnection();
-
-      String list = getInList(toExclude);
-      String sql = "SELECT * FROM results WHERE EXID NOT IN (" + list + ")";
-
-      PreparedStatement statement = connection.prepareStatement(sql);
-      return getResultsForQuery(connection, statement);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return new ArrayList<Result>();
-
-  }*/
-  private String getInList(Collection<String> toExclude) {
-    StringBuilder b = new StringBuilder();
-    for (String id : toExclude) b.append("'").append(id).append("'").append(",");
-    String list = b.toString();
-    list = list.substring(0, Math.max(0, list.length() - 1));
-    return list;
-  }
-
-  /**
    * Determine sessions per user.  If two consecutive items are more than {@link #SESSION_GAP} seconds
    * apart, then we've reached a session boundary.
    * Remove all sessions that have just one answer - must be test sessions.
@@ -934,9 +907,17 @@ public class ResultDAO extends DAO {
     if (numColumns < 15) {
       addStimulus(connection);
     }
-    if (!getColumns(RESULTS).contains(DEVICE_TYPE.toLowerCase())) {
+    Collection<String> columns = getColumns(RESULTS);
+    if (!columns.contains(DEVICE_TYPE.toLowerCase())) {
       addVarchar(connection, RESULTS, DEVICE_TYPE);
       addVarchar(connection, RESULTS, DEVICE);
+    }
+
+    if (!columns.contains(SCORE_JSON.toLowerCase())) {
+      addVarchar(connection, RESULTS, SCORE_JSON);
+    }
+    if (!columns.contains(WITH_FLASH.toLowerCase())) {
+      addBoolean(connection, RESULTS, WITH_FLASH);
     }
 
     database.closeConnection(connection);
@@ -944,10 +925,6 @@ public class ResultDAO extends DAO {
     createIndex(database, Database.EXID, RESULTS);
     createIndex(database, VALID, RESULTS);
     createIndex(database, AUDIO_TYPE, RESULTS);
-
-    // enrichResults();
-    //removeValidDefault(connection);
-    // addValidDefault(connection);
   }
 
   /**
