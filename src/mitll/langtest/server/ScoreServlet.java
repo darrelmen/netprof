@@ -36,6 +36,7 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String DECODE = "decode";
   public static final String SCORE = "score";
   public static final String CHAPTER_HISTORY = "chapterHistory";
+  public static final String PHONE_REPORT = "phoneReport";
   private JSONObject chapters, nestedChapters;
   public static final String LOAD_TESTING = "loadTesting";
   private static final String ADD_USER = "addUser";
@@ -131,6 +132,36 @@ public class ScoreServlet extends DatabaseServlet {
             try {
               long l = Long.parseLong(user);
               toReturn = db.getJsonScoreHistory(l, selection);
+            } catch (NumberFormatException e) {
+              toReturn.put("ERROR","User id should be a number");
+            }
+          }
+        } else if (queryString.startsWith(PHONE_REPORT) || queryString.startsWith("request=" + PHONE_REPORT)) {
+          queryString = queryString.substring(queryString.indexOf(PHONE_REPORT) + PHONE_REPORT.length());
+          String[] split1 = queryString.split("&");
+          if (split1.length < 2) {
+            toReturn.put("ERROR", "expecting at least two query parameters");
+          } else {
+            String user = "";
+            Map<String,Collection<String>> selection = new TreeMap<String, Collection<String>>();
+            for (String param : split1) {
+              //logger.debug("param '" +param+               "'");
+              String[] split = param.split("=");
+              if (split.length == 2) {
+                String key   = split[0];
+                String value = split[1];
+                if (key.equals("user")) {
+                  user = value;
+                } else {
+                  selection.put(key, Collections.singleton(value));
+                }
+              }
+            }
+
+            //logger.debug("chapterHistory " + user + " selection " + selection);
+            try {
+              long l = Long.parseLong(user);
+              toReturn = db.getJsonPhoneReport(l, selection);
             } catch (NumberFormatException e) {
               toReturn.put("ERROR","User id should be a number");
             }
@@ -368,8 +399,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * TODO: join against audio dao ex->audio map again...
-   * to get user exercise audio!
+   * join against audio dao ex->audio map again to get user exercise audio! {@link #getJsonArray(java.util.List)}
    *
    * @return
    */
@@ -430,6 +460,9 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * This is the json that describes an individual entry.
+   *
+   * Makes sure to attach audio to exercises (this is especially important for userexercises that mask out
+   * exercises with new reference audio).
    *
    * @param copy
    * @return
