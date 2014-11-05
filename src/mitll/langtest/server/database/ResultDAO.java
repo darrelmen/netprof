@@ -452,7 +452,7 @@ public class ResultDAO extends DAO {
   }
 
   private String getAVPClause(boolean matchAVP) {
-    return AUDIO_TYPE + (matchAVP ? "" : " NOT ") + " LIKE " + "'avp%'";
+    return "("+AUDIO_TYPE + (matchAVP ? "" : " NOT ") + " LIKE " + "'avp%'" +" OR "+AUDIO_TYPE + (matchAVP ? "=" : "<>") + " 'flashcard' "+")";
   }
 
   private String getCSSelect() {
