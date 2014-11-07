@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import com.google.gwt.dev.Link;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.shared.Result;
@@ -178,7 +179,9 @@ public class PhoneDAO extends DAO {
   public JSONObject getWorstPhonesJson(long userid, List<String> exids, Map<String, String> idToRef) {
     JSONObject jsonObject = new JSONObject();
     try {
-      Map<String, List<WordAndScore>> worstPhones = getWorstPhones(userid, exids, idToRef);
+      PhoneReport worstPhonesAndScore = getWorstPhones(userid, exids, idToRef);
+
+      Map<String, List<WordAndScore>> worstPhones = worstPhonesAndScore.phoneToWordAndScoreSorted;
       Map<Long,String> resToAnswer = new HashMap<Long, String>();
       Map<Long,String> resToRef = new HashMap<Long, String>();
       Map<Long,String> resToResult = new HashMap<Long, String>();
@@ -226,16 +229,17 @@ public class PhoneDAO extends DAO {
         results.put(Long.toString(key), result);
       }
       jsonObject.put("results",results);
+      jsonObject.put("phoneScore",Integer.toString(worstPhonesAndScore.overallPercent));
     } catch (SQLException e) {
       logger.error("Got " +e,e);
     }
     return jsonObject;
   }
 
-  public static float round(float d) {
+  private static float round(float d) {
     return round(d,3);
   }
-  public static float round(float d, int decimalPlace) {
+  private static float round(float d, int decimalPlace) {
     BigDecimal bd = new BigDecimal(Float.toString(d));
     bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
     return bd.floatValue();
@@ -248,11 +252,12 @@ public class PhoneDAO extends DAO {
    * @return
    * @throws SQLException
    */
-  public Map<String, List<WordAndScore>> getWorstPhones(long userid, List<String> exids, Map<String, String> idToRef) throws SQLException {
+  private PhoneReport getWorstPhones(long userid, List<String> exids, Map<String, String> idToRef) throws SQLException {
     String sql = "select " +
         "results.exid," +
         "results.answer," +
         "results." +ResultDAO.SCORE_JSON+ "," +
+        "results." +ResultDAO.PRON_SCORE+ "," +
         "results.time,  " +
         "word.seq, " +
         "word.word, " +
@@ -266,6 +271,8 @@ public class PhoneDAO extends DAO {
         ")"+" AND phone.wid = word.id "+
         " order by results.exid, results.time desc";
 
+    logger.debug("getWorstPhones query is " + sql);
+
     Connection connection = getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
@@ -275,11 +282,14 @@ public class PhoneDAO extends DAO {
 
     String currentExercise = "";
     Map<String,List<WordAndScore>> phoneToWordAndScore= new HashMap<String, List<WordAndScore>>();
+    float totalScore = 0;
+    float totalItems = 0;
     while (rs.next()) {
       int i = 1;
       String exid = rs.getString(i++);
       String audioAnswer = rs.getString(i++);
       String scoreJson = rs.getString(i++);
+      float pronScore = rs.getFloat(i++);
       i++;
       int wseq = rs.getInt(i++);
       String word = rs.getString(i++);
@@ -289,6 +299,9 @@ public class PhoneDAO extends DAO {
       if (!exid.equals(currentExercise)) {
         currentRID = rid;
         currentExercise = exid;
+        //logger.debug("adding " + exid + " score " + pronScore);
+        totalScore += pronScore;
+        totalItems++;
       }
 
       if (currentRID == rid) {
@@ -309,6 +322,10 @@ public class PhoneDAO extends DAO {
      // }
     }
     finish(connection, statement, rs);
+
+    float overallScore = totalScore/totalItems;
+    int percentOverall = (int) (100f*round(overallScore,2));
+    logger.debug("score " +overallScore + " items " +totalItems + " percent " +percentOverall);
 
     logger.debug("phoneToScores " + phoneToScores);
 
@@ -354,15 +371,17 @@ public class PhoneDAO extends DAO {
 
     //logger.debug("phone->words " + phoneToWordAndScore);
 
-    return phoneToWordAndScoreSorted;
+    return new PhoneReport(percentOverall,phoneToWordAndScoreSorted);
   }
-/*
 
-  public static class PhoneScoreInfo {
-    Map<String,List<WordAndScore>> phoneToWordAndScore;
-    Map<String, Float> phoneToAvgSorted;
+  private static class PhoneReport {
+    int overallPercent;
+    Map<String, List<WordAndScore>> phoneToWordAndScoreSorted;
+    public PhoneReport(int overallPercent, Map<String,List<WordAndScore>> phoneToWordAndScoreSorted) {
+      this.overallPercent = overallPercent;
+      this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
+    }
   }
-*/
 
   private List<Phone> getPhones(String sql) throws SQLException {
     Connection connection = getConnection();
