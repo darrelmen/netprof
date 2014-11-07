@@ -476,6 +476,7 @@ public class DatabaseImpl implements Database {
 
     JSONObject container = new JSONObject();
     JSONArray scores = new JSONArray();
+    int correct = 0, incorrect = 0;
     for (ExerciseCorrectAndScore ex : resultDAO.getExerciseCorrectAndScores(userid, allIDs, idToFL)) {
       //logger.debug("for " + ex);
       JSONObject exAndScores = new JSONObject();
@@ -484,14 +485,22 @@ public class DatabaseImpl implements Database {
 
       JSONArray history = new JSONArray();
 
-      for (CorrectAndScore cs : ex.getCorrectAndScoresLimited()) {
+      boolean lastCorrect = false;
+      List<CorrectAndScore> correctAndScoresLimited = ex.getCorrectAndScoresLimited();
+      for (CorrectAndScore cs : correctAndScoresLimited) {
         history.add(cs.isCorrect() ? "Y" : "N");
+        lastCorrect = cs.isCorrect();
+      }
+      if (!correctAndScoresLimited.isEmpty()) {
+        if (lastCorrect) correct++; else incorrect++;
       }
       exAndScores.put("h", history);
 
       scores.add(exAndScores);
     }
     container.put("scores", scores);
+    container.put("lastCorrect", Integer.toString(correct));
+    container.put("lastIncorrect", Integer.toString(incorrect));
 
     return container;
   }
