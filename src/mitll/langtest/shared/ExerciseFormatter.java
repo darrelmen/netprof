@@ -13,6 +13,7 @@ public class ExerciseFormatter {
   public static final String TRANSLITERATION = "Transliteration:";
   public static final String TRANSLATION = "Translation:";
   public static final String CONTEXT = "Context:";
+  public static final String CONTEXT_TRANSLATION = "Context Translation: ";
 
   /**
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise(String, String, String, String, String, String, boolean, String)
@@ -24,8 +25,8 @@ public class ExerciseFormatter {
    * @param language
    * @return
    */
-  public static String getContent(String foreignPhrase, String translit, String english, String meaning, String context, String language) {
-    return getContent(foreignPhrase, translit, english, meaning, context,
+  public static String getContent(String foreignPhrase, String translit, String english, String meaning, String context, String contextTranslation, String language) {
+    return getContent(foreignPhrase, translit, english, meaning, context, contextTranslation,
       language.equalsIgnoreCase("english"),
       language.equalsIgnoreCase("urdu"),
       language.equalsIgnoreCase("pashto"));
@@ -33,7 +34,7 @@ public class ExerciseFormatter {
 
   public static String getContent(String foreignPhrase, String translit, String english, String meaning,
                                   boolean isEnglish, boolean isUrdu, boolean isPashto) {
-    return getContent(foreignPhrase, translit, english, meaning, "", isEnglish, isUrdu, isPashto);
+    return getContent(foreignPhrase, translit, english, meaning, "", "", isEnglish, isUrdu, isPashto);
   }
 
   /**
@@ -50,7 +51,7 @@ public class ExerciseFormatter {
    * @return
    */
   private static String getContent(String foreignPhrase, String translit, String english, String meaning, String context,
-                                  boolean isEnglish, boolean isUrdu, boolean isPashto) {
+                                  String contextTranslation, boolean isEnglish, boolean isUrdu, boolean isPashto) {
     String arabicHTML = getArabic(foreignPhrase, isUrdu, isPashto, false);
     String translitHTML = translit.length() > 0 ? getSpanWrapper(TRANSLITERATION, translit, false) : "";
 
@@ -60,12 +61,15 @@ public class ExerciseFormatter {
     String meaningHTML = (isEnglish && meaning.length() > 0) ? getSpanWrapper(ENGLISH_PROMPT, meaning, false) : "";
 
     String contextHTML = (context.length() > 0) ? getSpanWrapper(CONTEXT, "\""+ context + "\"", false) : "";
+    
+    String contextTranslationHTML = (contextTranslation.length() > 0) ? getSpanWrapper(CONTEXT_TRANSLATION, "\""+ contextTranslation + "\"", false) : "";
 
     return arabicHTML +
       translitHTML +
       translationHTML +
       meaningHTML +
-      contextHTML;
+      contextHTML +
+      contextTranslationHTML;
   }
 
   private static String getSpanWrapper(String rowTitle, String english, boolean includePrompt) {
