@@ -429,6 +429,7 @@ public class UserExerciseDAO extends DAO {
           rs.getString("foreignLanguage"),
           rs.getString(TRANSLITERATION),
           "",         // TODO complete fill in of context!
+          "",         // TODO complete fill in of contextTranslation!
           rs.getBoolean(OVERRIDE),
           unitToValue,
           date.getTime()
