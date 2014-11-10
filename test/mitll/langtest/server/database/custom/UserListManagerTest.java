@@ -3,12 +3,13 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.PhoneDAO;
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonUserExercise;
+import mitll.langtest.shared.Result;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.instrumentation.Event;
-import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -44,10 +45,10 @@ public class UserListManagerTest {
     String parent = file.getParent();
     logger.debug("config dir " + parent);
     logger.debug("config     " + file.getName());
-    test = "forMe2";
-    database = new DatabaseImpl(parent, file.getName(), test, new ServerProperties(parent,file.getName()),new PathHelper("war"), false,null);
-    logger.debug("made " +database);
-    database.setInstallPath(".", parent +File.separator+database.getServerProps().getLessonPlan(),english,true,".");
+    test = "mandarin";
+    database = new DatabaseImpl(parent, file.getName(), test, new ServerProperties(parent, file.getName()), new PathHelper("war"), false, null);
+    logger.debug("made " + database);
+    database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(), english, true, ".");
 
     database.getExercises();
   }
@@ -61,21 +62,21 @@ public class UserListManagerTest {
   @Test
   public void testSorted() {
     Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
-    typeToValues.put("Lesson",Arrays.asList("1"));
+    typeToValues.put("Lesson", Arrays.asList("2"));
     int userid = 1;
-    database.getJsonPhoneReport(userid,typeToValues);
-    database.getJsonScoreHistory(userid,typeToValues);
+    database.getJsonPhoneReport(userid, typeToValues);
+   // database.getJsonScoreHistory(userid, typeToValues);
   }
 
   @Test
   public void testQuery() {
-    database.getResultDAO().attachScoreHistory(1,database.getExercise("1"),true);
+    database.getResultDAO().attachScoreHistory(1, database.getExercise("1"), true);
 
     List<String> strings = Arrays.asList("1", "2", "3", "4", "5");
-    ArrayList<CommonExercise> commonExercises = new ArrayList<CommonExercise>();
+    List<CommonExercise> commonExercises = new ArrayList<CommonExercise>();
     for (String id : strings) commonExercises.add(database.getExercise(id));
     List<CommonExercise> exercisesSortedIncorrectFirst = database.getResultDAO().getExercisesSortedIncorrectFirst(commonExercises, 1);
-    logger.debug("got " +exercisesSortedIncorrectFirst);
+    logger.debug("got " + exercisesSortedIncorrectFirst);
 
   }
 
@@ -98,24 +99,23 @@ public class UserListManagerTest {
     String format = simpleDateFormat.format(new Date());
     if (format.equals("1")) {
       logger.debug("it's monday");
-    }
-    else logger.debug("it's " +format);
-   // reported = true;
+    } else logger.debug("it's " + format);
+    // reported = true;
     List<User> users = database.getUserDAO().getUsers();
 
     Calendar calendar = new GregorianCalendar();
-    int year       = calendar.get(Calendar.YEAR);
+    int year = calendar.get(Calendar.YEAR);
     logger.debug("year " + year);
     calendar.set(Calendar.YEAR, year);
     calendar.set(Calendar.DAY_OF_YEAR, 1);
     Date january1st = calendar.getTime();
-    logger.debug("jan first " +january1st);
+    logger.debug("jan first " + january1st);
 
     int ytd = 0;
 
     SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM/dd/yy h:mm aaa");
-    Map<String,Integer> monthToCount = new TreeMap<String, Integer>();
-    Map<Integer,Integer> weekToCount = new TreeMap<Integer, Integer>();
+    Map<String, Integer> monthToCount = new TreeMap<String, Integer>();
+    Map<Integer, Integer> weekToCount = new TreeMap<Integer, Integer>();
     for (User user : users) {
       try {
         if (user.getTimestamp().isEmpty()) continue;
@@ -127,23 +127,22 @@ public class UserListManagerTest {
           int i = calendar.get(Calendar.MONTH);
           String month1 = getMonth(i);
           Integer integer = monthToCount.get(month1);
-          monthToCount.put(month1,(integer == null) ? 1 : integer+1);
+          monthToCount.put(month1, (integer == null) ? 1 : integer + 1);
 
           int w = calendar.get(Calendar.WEEK_OF_YEAR);
           Integer integer2 = weekToCount.get(w);
 
-          weekToCount.put(w,(integer2 == null) ? 1 : integer2+1);
-        }
-        else {
-          logger.debug("NO time " +user.getTimestamp() + " " + parse);
+          weekToCount.put(w, (integer2 == null) ? 1 : integer2 + 1);
+        } else {
+          logger.debug("NO time " + user.getTimestamp() + " " + parse);
         }
       } catch (ParseException e) {
         e.printStackTrace();
       }
     }
-    logger.debug("ytd " +ytd);
-    logger.debug("month " +monthToCount);
-    logger.debug("week " +weekToCount);
+    logger.debug("ytd " + ytd);
+    logger.debug("month " + monthToCount);
+    logger.debug("week " + weekToCount);
 
     getResults();
     getEvents();
@@ -199,8 +198,8 @@ public class UserListManagerTest {
     List<Event> all = database.getEventDAO().getAll();
     Map<String, Set<Long>> monthToCount = new TreeMap<String, Set<Long>>();
 
-    Map<String, Map<Long,Set<Event>>> monthToCount2 = new TreeMap<String, Map<Long,Set<Event>>>();
-    Map<Integer, Map<Long,Set<Event>>> weekToCount2 = new TreeMap<Integer, Map<Long,Set<Event>>>();
+    Map<String, Map<Long, Set<Event>>> monthToCount2 = new TreeMap<String, Map<Long, Set<Event>>>();
+    Map<Integer, Map<Long, Set<Event>>> weekToCount2 = new TreeMap<Integer, Map<Long, Set<Event>>>();
 
     Map<Integer, Set<Long>> weekToCount = new TreeMap<Integer, Set<Long>>();
 
@@ -260,7 +259,7 @@ public class UserListManagerTest {
   }
 
   private Map<String, Long> getMonthToDur(Map<String, Map<Long, Set<Event>>> monthToCount2) {
-    Map<String,Long> monthToDur = new TreeMap<String, Long>();
+    Map<String, Long> monthToDur = new TreeMap<String, Long>();
     for (Map.Entry<String, Map<Long, Set<Event>>> monthToUserToEvents : monthToCount2.entrySet()) {
       String month = monthToUserToEvents.getKey();
       //logger.debug("month " + month);
@@ -272,36 +271,35 @@ public class UserListManagerTest {
         //logger.debug("\tuser " + user);
         long start = 0;
         long dur = 0;
-       // long begin = 0;
+        // long begin = 0;
         long last = 0;
         for (Event event : eventsForUser.getValue()) {
           long now = event.getTimestamp();
-     //     if (user == INTTEST) {
-       //     logger.debug("Event " + event);
-        //  }
+          //     if (user == INTTEST) {
+          //     logger.debug("Event " + event);
+          //  }
           if (start == 0) {
             start = now;
-          }
-          else if (now - last > 1000*300) {
-            dur += (last-start)/1000;
+          } else if (now - last > 1000 * 300) {
+            dur += (last - start) / 1000;
             start = now;
           }
 
           last = now;
         }
-        dur += (last-start)/1000;
+        dur += (last - start) / 1000;
 //        if (user == INTTEST) {
-  //        logger.debug("dur " + dur);
-   //     }
+        //        logger.debug("dur " + dur);
+        //     }
         Long aLong = monthToDur.get(month);
-        monthToDur.put(month,aLong == null ? dur : aLong + dur);
+        monthToDur.put(month, aLong == null ? dur : aLong + dur);
       }
     }
     return monthToDur;
   }
 
   private Map<Integer, Long> getWeekToDur(Map<Integer, Map<Long, Set<Event>>> weekToCount) {
-    Map<Integer,Long> weekToDur = new TreeMap<Integer, Long>();
+    Map<Integer, Long> weekToDur = new TreeMap<Integer, Long>();
     for (Map.Entry<Integer, Map<Long, Set<Event>>> weekToUserToEvents : weekToCount.entrySet()) {
       Integer week = weekToUserToEvents.getKey();
       logger.debug("week " + week);
@@ -320,20 +318,19 @@ public class UserListManagerTest {
 
           if (start == 0) {
             start = now;
-          }
-          else if (now - last > 1000*300) {
-            dur += (last-start)/1000;
+          } else if (now - last > 1000 * 300) {
+            dur += (last - start) / 1000;
             start = now;
           }
 
           last = now;
         }
-        dur += (last-start)/1000;
+        dur += (last - start) / 1000;
 //        if (user == INTTEST) {
         //        logger.debug("dur " + dur);
         //     }
         Long aLong = weekToDur.get(week);
-        weekToDur.put(week,aLong == null ? dur : aLong + dur);
+        weekToDur.put(week, aLong == null ? dur : aLong + dur);
       }
     }
     return weekToDur;
@@ -382,9 +379,9 @@ public class UserListManagerTest {
     List<User> users = database.getUsers();
     long user;
     //if (users.isEmpty()) {
-      users = addAndGetUsers("test22");
+    users = addAndGetUsers("test22");
     //}
-    user = users.get(users.size()-1).getId();
+    user = users.get(users.size() - 1).getId();
     logger.debug("Got user " + user);
     UserListManager userListManager = database.getUserListManager();
 
@@ -435,7 +432,7 @@ public class UserListManagerTest {
 
     long visitor = getUser("visitor");
     int size = database.getUsers().size();
-    assertTrue("size is " +size,size >= 2);
+    assertTrue("size is " + size, size >= 2);
 
     Collection<UserList> listsForUser = userListManager.getListsForUser(visitor, false, false);
     assertTrue(!listsForUser.contains(test));  // haven't visited yet, shouldn't see it
@@ -472,7 +469,7 @@ public class UserListManagerTest {
 
     long visitor = getUser("visitor");
     int size = database.getUsers().size();
-    assertTrue("size was " +size,size == 2);
+    assertTrue("size was " + size, size == 2);
 
     userListManager.addVisitor(testList.getUniqueID(), visitor);
 
@@ -509,7 +506,7 @@ public class UserListManagerTest {
     UserListManager userListManager = database.getUserListManager();
 
     long listid = addListCheck(owner.getId(), userListManager, "test");
-    logger.debug("list id " +listid);
+    logger.debug("list id " + listid);
     UserList testList = userListManager.getUserListByID(listid, new ArrayList<String>());
     assertTrue(userListManager.getUserListsForText("", -1).contains(testList));
 
@@ -527,10 +524,10 @@ public class UserListManagerTest {
     List<CommonExercise> exercises1 = database.getExercises();
     assertTrue(!exercises1.isEmpty());
     CommonExercise exercise = database.getCustomOrPredefExercise(next.getID());
-    assertNotNull("huh? no exercise by id " + next.getID()+"?",exercise);
+    assertNotNull("huh? no exercise by id " + next.getID() + "?", exercise);
 
     String englishSentence = exercise.getEnglish();
-    assertNotNull("huh? exercise " + exercise + " has no english?",englishSentence);
+    assertNotNull("huh? exercise " + exercise + " has no english?", englishSentence);
     assertTrue("english is " + englishSentence, englishSentence.equals(ENGLISH));
     assertTrue(exercise.getTooltip().equals(ENGLISH));
 
@@ -539,7 +536,7 @@ public class UserListManagerTest {
     assertTrue(!next.getTooltip().isEmpty());
     assertTrue(next.getTooltip().equals(CHANGED));
 
-    userListManager.editItem(next.toUserExercise(),false, "");
+    userListManager.editItem(next.toUserExercise(), false, "");
 
     testList = userListManager.getUserListByID(listid, new ArrayList<String>());
     next = testList.getExercises().iterator().next();
@@ -573,11 +570,12 @@ public class UserListManagerTest {
     }
     return english;
   }
+
   private int userExerciseCount = 0;
 
   private UserExercise createNewItem(long userid) {
     int uniqueID = userExerciseCount++;
-    return new UserExercise(uniqueID, UserExercise.CUSTOM_PREFIX+uniqueID, userid, " ", "", "");
+    return new UserExercise(uniqueID, UserExercise.CUSTOM_PREFIX + uniqueID, userid, " ", "", "");
   }
 
   /**
