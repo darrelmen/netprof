@@ -15,6 +15,8 @@ public interface CommonExercise extends CommonShell {
   String getMeaning();
 
   String getContext();
+  
+  String getContextTranslation();
 
   String getForeignLanguage();
   String getRefSentence();
@@ -108,4 +110,5 @@ public interface CommonExercise extends CommonShell {
    */
   void setAvgScore(float v);
   float getAvgScore();
+
 }
