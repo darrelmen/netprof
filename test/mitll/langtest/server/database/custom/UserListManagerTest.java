@@ -3,13 +3,12 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonUserExercise;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.User;
+import mitll.langtest.server.database.PhoneDAO;
+import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.instrumentation.Event;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -40,22 +39,32 @@ public class UserListManagerTest {
   public static void setup() {
     logger.debug("setup called");
 
-    File file = new File("war" + File.separator + "config" + File.separator + ENGLISH + File.separator + "quizlet.properties");
+    String english = "mandarin";
+    File file = new File("war" + File.separator + "config" + File.separator + english + File.separator + "quizlet.properties");
     String parent = file.getParent();
     logger.debug("config dir " + parent);
     logger.debug("config     " + file.getName());
-    test = "test";
+    test = "forMe2";
     database = new DatabaseImpl(parent, file.getName(), test, new ServerProperties(parent,file.getName()),new PathHelper("war"), false,null);
     logger.debug("made " +database);
-    database.setInstallPath(".", parent +File.separator+database.getServerProps().getLessonPlan(),"english",true,".");
+    database.setInstallPath(".", parent +File.separator+database.getServerProps().getLessonPlan(),english,true,".");
 
     database.getExercises();
   }
 
-  private static DatabaseImpl makeDatabaseImpl(String configDir) {
+/*  private static DatabaseImpl makeDatabaseImpl(String configDir) {
     ServerProperties serverProps = new ServerProperties(configDir, "quizlet.properties");
     String h2Database = serverProps.getH2Database();
     return new DatabaseImpl(configDir, configDir, h2Database, serverProps, null, true, null);
+  }*/
+
+  @Test
+  public void testSorted() {
+    Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
+    typeToValues.put("Lesson",Arrays.asList("1"));
+    int userid = 1;
+    database.getJsonPhoneReport(userid,typeToValues);
+    database.getJsonScoreHistory(userid,typeToValues);
   }
 
   @Test
@@ -579,14 +588,9 @@ public class UserListManagerTest {
     UserListManager userListManager = database.getUserListManager();
     UserList reviewList = userListManager.getDefectList(new ArrayList<String>());
     //userListManager.getReviewedExercises();
-
-
     //UserExercise english = addExercise(owner, userListManager, listid, testList);
-
     //boolean b = userListManager.deleteItemFromList(listid, english.getID());
-   // assertTrue(b);
-
-
+    // assertTrue(b);
     //    userListManager.markApproved();
   }
 
