@@ -228,7 +228,7 @@ public class SQLExerciseDAO implements ExerciseDAO {
   private CommonExercise getExercise(String plan, String exid, JSONObject obj) {
     //String tip = "Item #"+exid; // TODO : have more informative tooltip
     String tip = exid; // TODO : have more informative tooltip
-    Exercise exercise = new Exercise(plan, exid, "", false, false, tip, "");
+    Exercise exercise = new Exercise(plan, exid, "", false, false, tip, "", "");
 
     String content = getContent(obj,exercise);
 
