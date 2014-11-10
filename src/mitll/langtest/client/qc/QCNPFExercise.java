@@ -47,6 +47,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   public static final String TRANSLITERATION = "transliteration";
   public static final String ENGLISH = "english";
   public static final String CONTEXT = "context";
+  public static final String CONTEXT_TRANSLATION = "context translation";
 
   private static final String REF_AUDIO = "refAudio";
   private static final String APPROVED = "Approve Item";
