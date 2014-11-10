@@ -334,7 +334,7 @@
     <!-- Makes a jar of just the .class files and the javascript, so you can overlay it on an active webapp -->
     <target depends="build" name="patch">
         <jar destfile="npPatch.war" basedir="war"
-             excludes="bestAudio/**,bestAudioCM/**,bestAudioRussian/**,WEB-INF/web.xml,WEB-INF/lib/pronz.jar,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+             excludes="bestAudio/**,bestAudioCM/**,bestAudioRussian/**,WEB-INF/web.xml,WEB-INF/lib/pronz*.jar,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -391,8 +391,6 @@
             <classpath>
                 <pathelement location="src"/>
                 <path refid="LangTest.classpath"/>
-    <!--            <pathelement location="${gwt.lib}/validation-api-1.0.0.GA.jar" />
-                <pathelement location="${gwt.lib}/validation-api-1.0.0.GA-sources.jar" />-->
             </classpath>
             <!-- add jvmarg -Xss16M or similar if you see a StackOverflowError -->
             <jvmarg value="-Xmx512M"/>
@@ -400,6 +398,7 @@
             <arg value="war"/>
             <arg line="-style"/>
 
+            <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
             <arg value="OBF"/>
 <!--
             <arg value="PRETTY"/>
@@ -410,10 +409,9 @@
             <arg value="-compileReport"/>
 -->
 
-
-  <!--          <arg line="-logLevel"/>
-            <arg value="DEBUG"/>-->
-            <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
+<!--        <arg line="-logLevel"/>
+            <arg value="DEBUG"/>
+-->
             <arg line="${gwt.args}"/>
             <arg value="mitll.langtest.LangTest"/>
         </java>
