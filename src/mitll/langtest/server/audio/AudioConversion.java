@@ -282,7 +282,7 @@ public class AudioConversion {
   /**
    * sox normalize to -3db -- thanks Paul!
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#normalizeLevel(mitll.langtest.shared.AudioAnswer)
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#normalizeLevel
    * @see mitll.langtest.server.audio.PathWriter#getPermanentAudioPath(mitll.langtest.server.PathHelper, java.io.File, String, boolean, String)
    * @param absolutePathToWav
    */
