@@ -28,7 +28,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
   private transient Map<String,List<QAPair>> langToQuestion = null;
 
   private String englishSentence;
-  private String meaning, context;
+  private String meaning, context, contextTranslation;
   private List<String> refSentences = new ArrayList<String>();
   private List<String> translitSentences = new ArrayList<String>();
   private STATE state;
@@ -93,12 +93,13 @@ public class Exercise extends AudioExercise implements CommonExercise {
    * @param context
    */
   public Exercise(String plan, String id, String content, boolean promptInEnglish, boolean recordAudio, String tooltip,
-                  String context) {
+                  String context, String contextTranslation) {
     super(id, tooltip);
     this.plan = plan;
     this.setContent(content);
     this.setPromptInEnglish(promptInEnglish);
     this.context = context;
+    this.contextTranslation = contextTranslation;
   }
 
   /**
@@ -300,6 +301,11 @@ public class Exercise extends AudioExercise implements CommonExercise {
   public String getContext() {
     return context;
   }
+  
+  @Override
+  public String getContextTranslation() {
+    return contextTranslation;
+  }
 
   /**
    * @see mitll.langtest.shared.custom.UserExercise#copyFields(Exercise)  - only
@@ -307,6 +313,10 @@ public class Exercise extends AudioExercise implements CommonExercise {
    */
   public void setContext(String context) {
     this.context = context;
+  }
+  
+  public void setContextTranslation(String contextTranslation){
+	this.contextTranslation = contextTranslation;
   }
 
   public Exercise toExercise() {
