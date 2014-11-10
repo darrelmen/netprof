@@ -138,6 +138,7 @@ public class DatabaseServlet extends HttpServlet {
     ex.put("tl", exercise.getTransliteration());
     ex.put("en", exercise.getEnglish());
     ex.put("ct", exercise.getContext());
+    ex.put("ctr", exercise.getContextTranslation());
     AudioAttribute latestContext = exercise.getLatestContext();
     ex.put("ctref", latestContext == null ? "NO" : latestContext.getAudioRef());
     ex.put("ref", exercise.hasRefAudio() ? exercise.getRefAudio() : "NO");

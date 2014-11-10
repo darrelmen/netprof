@@ -124,14 +124,22 @@ public class CommentNPFExercise extends NPFExercise {
 
   private Panel getContext(CommonExercise e) {
     String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
+    String contextTranslation = e.getContextTranslation() != null && !e.getContextTranslation().trim().isEmpty() ? e.getContextTranslation() : "";
 
     if (!context.isEmpty()) {
+      Panel hp = new HorizontalPanel();
+      Panel vp = new VerticalPanel();
+      addGenderChoices(e, hp);
       context = highlightVocabItemInContext(e, context);
       Widget entry = getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, context);
-      Panel hp = new HorizontalPanel();
-      addGenderChoices(e, hp);
+      vp.add(entry);
 
-      hp.add(entry);
+      if(!contextTranslation.isEmpty()){
+         Widget translationEntry = getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION, contextTranslation);
+         vp.add(translationEntry);
+      }
+      hp.add(vp);
+
       // hp.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
       // toAddTo.add(hp);
       return hp;
