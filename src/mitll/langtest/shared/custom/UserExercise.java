@@ -28,6 +28,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   private String foreignLanguage;
   private String transliteration;
   private String context;
+  private String contextTranslation;
 
   private long creator;
   private boolean isPredef;
@@ -83,11 +84,12 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @param foreignLanguage
    * @param transliteration
    * @param context
+   * @param contextTranslation
    * @param isOverride
    * @param modifiedTimestamp
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
-                      String transliteration, String context,
+                      String transliteration, String context, String contextTranslation,
                       boolean isOverride,
                       Map<String, String> unitToValue, long modifiedTimestamp
   ) {
@@ -96,6 +98,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     this.isOverride = isOverride;
     this.modifiedTimestamp = modifiedTimestamp;
     this.context = context;
+    this.contextTranslation = contextTranslation;
   }
 
   /**
@@ -114,6 +117,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     setState(exercise.getState());
     setSecondState(exercise.getSecondState());
     setContext(exercise.getContext());
+    setContextTranslation(exercise.getContextTranslation());
     copyAudio(exercise);
   }
 
@@ -148,6 +152,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     imported.setUnitToValue(getUnitToValue());
     imported.setFieldToAnnotation(getFieldToAnnotation());
     imported.setContext(getContext());
+    imported.setContextTranslation(getContextTranslation());
   }
 
   @Override
@@ -228,6 +233,10 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   @Override
   public String getContext() { return context;  }
   private void setContext(String context) { this.context = context; }
+  
+  @Override
+  public String getContextTranslation() { return contextTranslation; }
+  private void setContextTranslation(String contextTranslation) {this.contextTranslation = contextTranslation; }
 
   @Override
   public boolean isPredefined() {  return isPredef;  }
@@ -272,6 +281,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
       " : English '" + getEnglish() + "', " +
       "foreign language '" + getForeignLanguage() + "'" + " (" + getTransliteration() + ") " +
       "context '" + getContext()+ "' " +
+      "contextTranslation '" + getContextTranslation() + "' "+
       "tooltip '" + getTooltip() +
       "' audio attr (" + getAudioAttributes().size() +
       ") :" + getAudioAttributes() + " unit/lesson " + getUnitToValue() +
