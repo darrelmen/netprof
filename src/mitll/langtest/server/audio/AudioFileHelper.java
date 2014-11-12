@@ -211,8 +211,6 @@ public class AudioFileHelper {
       long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
           isValid, audioType, validity.durationInMillis, answer.isCorrect(), (float) answer.getScore(), recordedWithFlash, deviceType, device, json.toString());
       answer.setResultID(answerID);
-      System.out.println(answerID);
-      System.out.println("THAT WAS THE ID FOLKS");
 
       recordWordAndPhoneInfo(answer, answerID);
     }
