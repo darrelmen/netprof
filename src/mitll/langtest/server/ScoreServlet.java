@@ -478,7 +478,7 @@ public class ScoreServlet extends DatabaseServlet {
       if (audioAttributes != null) {
         db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
       }
-      if (!debug) ensureMP3s(exercise);
+      //if (!debug) ensureMP3s(exercise);
       exercises.add(getJsonForExercise(exercise));
     }
     return exercises;
@@ -649,7 +649,11 @@ public class ScoreServlet extends DatabaseServlet {
   private AudioAnswer getAnswer(String exerciseID, int user, boolean doFlashcard, String wavPath, File file, float score,
                                 String deviceType, String device) {
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
-    return audioFileHelper.getAnswer(exerciseID, exercise1, user, doFlashcard, wavPath, file, deviceType, device, score);
+
+    AudioAnswer answer = audioFileHelper.getAnswer(exerciseID, exercise1, user, doFlashcard, wavPath, file, deviceType, device, score);
+    ensureMP3(answer.getPath());
+
+    return answer;
   }
 
   /**
@@ -659,10 +663,15 @@ public class ScoreServlet extends DatabaseServlet {
    * @throws IOException
    */
   private void writeToOutputStream(HttpServletRequest request, File saveFile) throws IOException {
-    InputStream inputStream = request.getInputStream();
-    writeToFile(inputStream, saveFile);
+    writeToFile(request.getInputStream(), saveFile);
   }
 
+  /**
+   *
+   * @param book
+   * @return
+   * @see #getJsonForAudioForUser
+   */
   private JSONObject getJsonForScore(PretestScore book) {
     JSONObject jsonObject = new JSONObject();
     jsonObject.put(SCORE, book.getHydecScore());
