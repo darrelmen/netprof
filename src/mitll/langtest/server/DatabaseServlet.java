@@ -57,8 +57,19 @@ public class DatabaseServlet extends HttpServlet {
     return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProperties, pathHelper, true);
   }*/
 
-  protected boolean ensureMP3(CommonExercise byID, PathHelper pathHelper, String configDir) {
+  /**
+   * @see #ensureMP3s
+   * @param byID
+   * @param pathHelper
+   * @param configDir
+   * @return
+   */
+  private boolean ensureMP3(CommonExercise byID, PathHelper pathHelper, String configDir) {
     return ensureMP3(byID.getRefAudio(), pathHelper, configDir);
+  }
+
+  protected void ensureMP3(String wavFile) {
+    ensureMP3(wavFile, pathHelper, configDir);
   }
 
   private boolean ensureMP3(String wavFile, PathHelper pathHelper, String configDir) {
@@ -102,6 +113,10 @@ public class DatabaseServlet extends HttpServlet {
     return pathHelper.getInstallPath() + File.separator + "config" + File.separator + config;
   }
 
+  /**
+   * @see mitll.langtest.server.ScoreServlet#getJsonArray
+   * @param byID
+   */
   protected void ensureMP3s(CommonExercise byID) {
     ensureMP3(byID, pathHelper, configDir);
   }
@@ -113,14 +128,12 @@ public class DatabaseServlet extends HttpServlet {
 
   protected void copyToOutput(InputStream inputStream, OutputStream outputStream) throws IOException {
     byte[] buffer = new byte[BUFFER_SIZE];
-    int bytesRead = -1;
-    // logger.debug("Receiving data...");
+    int bytesRead;
 
     while ((bytesRead = inputStream.read(buffer)) != -1) {
       outputStream.write(buffer, 0, bytesRead);
     }
 
-    // System.out.println("Data received.");
     outputStream.close();
     inputStream.close();
   }
