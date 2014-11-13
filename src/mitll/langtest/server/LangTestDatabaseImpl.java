@@ -734,6 +734,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param wavFile
    * @return true if mp3 file exists
    * @see #ensureMP3s(mitll.langtest.shared.CommonExercise)
+   * @see #writeAudioFile
    */
   private boolean ensureMP3(String wavFile) {
     if (wavFile != null) {
