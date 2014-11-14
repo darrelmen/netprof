@@ -59,6 +59,17 @@ public class UserListManagerTest {
     return new DatabaseImpl(configDir, configDir, h2Database, serverProps, null, true, null);
   }*/
 
+
+  @Test
+  public void testReport() {
+    Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
+    typeToValues.put("Lesson", Arrays.asList("2"));
+    int userid = 1;
+    database.getReport();
+    // database.getJsonScoreHistory(userid, typeToValues);
+  }
+
+
   @Test
   public void testSorted() {
     Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
