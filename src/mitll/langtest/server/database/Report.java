@@ -243,17 +243,25 @@ public class Report {
     Map<Integer, Integer> weekToCount = new TreeMap<Integer, Integer>();
 
     List<Result> refAudio = new ArrayList<Result>();
+    int invalid = 0;
     for (Result result : results) {
-      if (result.getTimestamp() > january1st.getTime()) {
-        boolean skip = isRefAudioResult(exToAudio, result);
-        if (skip) {
-          refAudio.add(result);
-        } else {
-          ytd++;
-          tallyByMonthAndWeek(calendar, monthToCount, weekToCount, result);
+      if (result.isValid()) {
+        if (result.getTimestamp() > january1st.getTime()) {
+          boolean skip = isRefAudioResult(exToAudio, result);
+          if (skip) {
+            refAudio.add(result);
+          } else {
+            ytd++;
+            tallyByMonthAndWeek(calendar, monthToCount, weekToCount, result);
+          }
         }
       }
+      else {
+        invalid++;
+      }
     }
+    logger.debug("got " + invalid + " recordings");
+
     //  logger.debug("ytd " + ytd);
     //  logger.debug("month " + monthToCount);
     //  logger.debug("week " + weekToCount);
