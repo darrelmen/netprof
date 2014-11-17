@@ -269,7 +269,7 @@ public class PhoneDAO extends DAO {
         ")" + " AND phone.wid = word.id " +
         " order by results.exid, results.time desc";
 
-    logger.debug("getWorstPhones query is " + sql);
+    //logger.debug("getWorstPhones query is " + sql);
 
     Connection connection = getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
