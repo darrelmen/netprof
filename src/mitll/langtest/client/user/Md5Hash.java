@@ -40,4 +40,13 @@ public class Md5Hash {
     return toHexString(Md5Hash.getMd5Digest(toHash.getBytes()));
 
   }
+  public static void main(String []arg) {
+    String bueller = getHash("bueller");
+    System.out.println("hash " + bueller + " " + bueller.length());
+    String first = "074036D6CAEB34B3A23BEA17A449B05C";
+    System.out.println("hash " + first + " " + first.length());
+
+     first = "398E13BF1B80EC28F41E73AB791E276B";
+    System.out.println("hash " + first + " " + first.length());
+  }
 }
