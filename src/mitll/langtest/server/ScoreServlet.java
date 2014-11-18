@@ -218,7 +218,9 @@ public class ScoreServlet extends DatabaseServlet {
     String requestType = request.getHeader(REQUEST);
 
     String deviceType = request.getHeader("deviceType");
+    if (deviceType == null) deviceType = "unk";
     String device = request.getHeader("device");
+    if (device == null) device = "unk";
 
     if (requestType != null) {
       if (requestType.startsWith(ADD_USER)) {
