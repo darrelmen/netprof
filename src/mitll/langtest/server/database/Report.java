@@ -285,7 +285,6 @@ public class Report {
     builder.append(getYTD(ytd, refAudioRecs) +
         getMC(monthToCount, "month", refAudioRecs) +
         getWC(weekToCount, "week", refAudioRecs));
-
   }
 
   private void tallyByMonthAndWeek(Calendar calendar, Map<Integer, Integer> monthToCount, Map<Integer, Integer> weekToCount, Result result) {
