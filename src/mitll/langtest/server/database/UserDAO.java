@@ -453,15 +453,6 @@ public class UserDAO extends DAO {
       expected.removeAll(getColumns(USERS));
       if (!expected.isEmpty()) logger.info("adding columns for " + expected);
       for (String missing : expected) {
- /*       if (missing.equalsIgnoreCase(NATIVE_LANG)) {
-          addVarcharColumn(connection, NATIVE_LANG);
-        }
-        if (missing.equalsIgnoreCase(DIALECT)) {
-          addVarcharColumn(connection, DIALECT);
-        }
-        if (missing.equalsIgnoreCase(USER_ID)) {
-          addVarcharColumn(connection, USER_ID);
-        }*/
         if (missing.equalsIgnoreCase("timestamp")) {
           addColumn(connection, "timestamp", "TIMESTAMP AS CURRENT_TIMESTAMP");
         }
