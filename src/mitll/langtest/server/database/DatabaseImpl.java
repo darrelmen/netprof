@@ -655,6 +655,16 @@ public class DatabaseImpl implements Database {
     getExercises(useFile, lessonPlanFile);
   }
 
+  /**
+   *
+   * @param userID
+   * @param passwordH
+   * @param emailH
+   * @param deviceType
+   * @param device
+   * @return
+   * @see mitll.langtest.server.ScoreServlet#doPost
+   */
   public User addUser(String userID, String passwordH, String emailH, String deviceType, String device) {
     return addAndGetUser(userID, passwordH, emailH, User.Kind.STUDENT, true, 89, "unk", deviceType, device);
   }
