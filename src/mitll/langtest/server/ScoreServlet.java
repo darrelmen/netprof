@@ -1,8 +1,11 @@
 package mitll.langtest.server;
 
 import com.google.common.io.Files;
+import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.mail.EmailHelper;
+import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -37,10 +40,12 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String SCORE = "score";
   public static final String CHAPTER_HISTORY = "chapterHistory";
   public static final String PHONE_REPORT = "phoneReport";
+  public static final String EXERCISE_HISTORY = "exerciseHistory";
   private JSONObject chapters, nestedChapters;
   public static final String LOAD_TESTING = "loadTesting";
   private static final String ADD_USER = "addUser";
   private static final String HAS_USER = "hasUser";
+  private static final String FORGOT_USERNAME = "forgotUsername";
   private boolean debug = true;
 
   /**
@@ -87,7 +92,17 @@ public class ScoreServlet extends DatabaseServlet {
             toReturn.put("passwordCorrect",
                 userFound == null ? "false" : userFound.getPasswordHash().equalsIgnoreCase(passwordH));
           }
-        } else if (queryString.startsWith("exerciseHistory")) {
+        } else if (queryString.startsWith(FORGOT_USERNAME)) {
+          String[] split1 = queryString.split("&");
+          if (split1.length != 1) {
+            toReturn.put("ERROR", "expecting one query parameter");
+          } else {
+            String first = split1[0];
+            String emailFromDevice = first.split("=")[1];
+            boolean valid = forgotUsername(emailFromDevice);
+            toReturn.put("valid", valid);
+          }
+        } else if (queryString.startsWith(EXERCISE_HISTORY)) {
           String[] split1 = queryString.split("&");
           if (split1.length != 2) {
             toReturn.put("ERROR", "expecting two query parameters");
@@ -194,6 +209,26 @@ public class ScoreServlet extends DatabaseServlet {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  private boolean forgotUsername(String email) {
+    String emailH = Md5Hash.getHash(email);
+    User valid = db.getUserDAO().isValidEmail(emailH);
+    if (valid != null) {
+      getEmailHelper().getUserNameEmailDevice(email, valid);
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  private EmailHelper getEmailHelper() {
+    return new EmailHelper(serverProps, db.getUserDAO(),getMailSupport(),pathHelper);
+  }
+
+  private MailSupport getMailSupport() {
+    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail());
   }
 
   /**
