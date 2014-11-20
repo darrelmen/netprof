@@ -4,7 +4,9 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.PopupHelper;
 
@@ -12,7 +14,6 @@ import mitll.langtest.client.PopupHelper;
  * Created by go22670 on 9/8/14.
  */
 public class PopupContainer {
-
   private final PopupHelper popupHelper = new PopupHelper();
 
   /**
@@ -53,6 +54,9 @@ public class PopupContainer {
   }
 
   /**
+   * TODO : somehow the textEntry box loses focus when it's presented inside of another modal???
+   * Maybe that's a bad thing to do???
+   *
    * @see mitll.langtest.client.custom.exercise.CommentBox#configureCommentButton(com.github.gwtbootstrap.client.ui.Button, boolean, com.google.gwt.user.client.ui.PopupPanel, String, com.github.gwtbootstrap.client.ui.TextBox)
    * @param popupButton
    * @param popup
@@ -69,28 +73,23 @@ public class PopupContainer {
         if (visible) {// fix for bug that Wade found -- if we click off of popup, it dismisses it,
           // but if that click is on the button, it would immediately shows it again
           //System.out.println("popup visible " + visible);
-          //popupAboutToBeHidden();
           popup.hide();
         } else {
-          //popupAboutToBeShown();
-
+          popup.getElement().getStyle().setZIndex(1100);
           popup.showRelativeTo(popupButton);
-          textEntry.setFocus(true);
+//          textEntry.setFocus(true);
+
+          Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            public void execute() {
+              textEntry.setFocus(true);
+            }
+          });
+
           tooltip.hide();
         }
-
-        //makeANewList(textEntry);
       }
-
-
     });
   }
-/*  protected void popupAboutToBeHidden() {
-
-  }
-  protected void popupAboutToBeShown() {
-
-  }*/
 
   public void showPopup(String html, Widget target) {
     popupHelper.showPopup(html, target);
