@@ -24,6 +24,7 @@ import java.util.Map;
  * Created by go22670 on 9/8/14.
  */
 public class CommentBox extends PopupContainer {
+  private static final String COMMENT_BUTTON_GROUP_NEW = "comment-button-group-new";
   private final CommonExercise exercise;
   private final CommentAnnotator commentAnnotator;
   private final EventRegistration registration;
@@ -47,11 +48,12 @@ public class CommentBox extends PopupContainer {
    * @param content    to wrap
    * @param annotation to get current comment from
    * @return three part widget -- content, comment button, and clear button
-   * @seex #getEntry(String, String, String, mitll.langtest.shared.ExerciseAnnotation)
+   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getEntry
    * @see mitll.langtest.client.flashcard.FlashcardPanel#getFirstRow(mitll.langtest.client.exercise.ExerciseController)
    */
   public Widget getEntry(String field, Widget content, ExerciseAnnotation annotation) {
     final Button commentButton = new Button();
+    //commentButton.getElement().setId("commentButton_for_"+field);
 
     if (field.endsWith(AudioTag.COMPRESSED_TYPE)) {
       field = field.replaceAll("." + AudioTag.COMPRESSED_TYPE, ".wav");
@@ -79,6 +81,7 @@ public class CommentBox extends PopupContainer {
     // content on left side, comment button on right
 
     Panel row = new HorizontalPanel();
+    row.getElement().setId("comment_and_clear_container_for_"+field);
     if (content != null) row.add(content);
     row.add(commentButton);
     row.add(clearButton);
@@ -207,12 +210,9 @@ public class CommentBox extends PopupContainer {
 
   private final Map<String, String> fieldToComment = new HashMap<String, String>();
 
-  private void showQC(UIObject qcCol) {
-    qcCol.addStyleName("comment-button-group-new");
-  }
-
+  private void showQC(UIObject qcCol)           { qcCol.addStyleName(COMMENT_BUTTON_GROUP_NEW);  }
   private void showQCHasComment(UIObject child) {
-    child.removeStyleName("comment-button-group-new");
+    child.removeStyleName(COMMENT_BUTTON_GROUP_NEW);
   }
 
   /**
