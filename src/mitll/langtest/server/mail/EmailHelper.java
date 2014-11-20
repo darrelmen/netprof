@@ -72,6 +72,21 @@ public class EmailHelper {
     }
   }
 
+  public void getUserNameEmailDevice(String email, User valid) {
+    logger.debug("Sending user email...");
+    String message = "Hi " + valid.getUserID() + ",<br/>" +
+        "Your user name is " + valid.getUserID() + "." +
+        "<br/><br/>" +
+        CLOSING;
+    sendEmail(null // baseURL
+        ,
+        email, // destination email
+        "Your user name", // subject
+        message,
+        null // link text
+    );
+  }
+
   /**
    * @param user
    * @param email
