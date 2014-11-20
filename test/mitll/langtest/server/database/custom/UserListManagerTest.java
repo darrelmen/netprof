@@ -40,12 +40,12 @@ public class UserListManagerTest {
   public static void setup() {
     logger.debug("setup called");
 
-    String english = "mandarin";
+    String english = "egyptian";//"mandarin";
     File file = new File("war" + File.separator + "config" + File.separator + english + File.separator + "quizlet.properties");
     String parent = file.getParent();
     logger.debug("config dir " + parent);
     logger.debug("config     " + file.getName());
-    test = "mandarin";
+    test = "npfClassroomEgyptian";// "mandarin";
     database = new DatabaseImpl(parent, file.getName(), test, new ServerProperties(parent, file.getName()), new PathHelper("war"), false, null);
     logger.debug("made " + database);
     database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(), english, true, ".");
@@ -64,11 +64,11 @@ public class UserListManagerTest {
   public void testReport() {
     Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
     typeToValues.put("Lesson", Arrays.asList("2"));
-    int userid = 1;
-    database.getReport();
-    // database.getJsonScoreHistory(userid, typeToValues);
-  }
+   // database.getReport();
 
+    database.doReport(new PathHelper("war"));
+
+  }
 
   @Test
   public void testSorted() {
@@ -93,7 +93,7 @@ public class UserListManagerTest {
 
   @Test
   public void doReport() {
-    String x = database.getReport().doReport();
+    String x = "";//database.getReport().doReport();
     System.out.println(x);
     try {
       //FileOutputStream fileOutputStream = new FileOutputStream("test2.html");

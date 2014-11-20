@@ -23,6 +23,7 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -1191,12 +1192,27 @@ public class DatabaseImpl implements Database {
     return new AudioExport().getPrefix(getSectionHelper(), typeToSection);
   }
 
-  public void doReport(ServerProperties serverProps, String site,MailSupport mailSupport, PathHelper pathHelper) {
-    getReport().doReport(serverProps, site, mailSupport, pathHelper);
+  /**
+   * @param serverProps
+   * @param site
+   * @param mailSupport
+   * @param pathHelper
+   * @see mitll.langtest.server.LangTestDatabaseImpl#init
+   */
+  public void doReport(ServerProperties serverProps, String site, MailSupport mailSupport, PathHelper pathHelper) {
+    new Report(userDAO, resultDAO, eventDAO, audioDAO).doReport(serverProps, site, mailSupport, pathHelper);
   }
 
-  public Report getReport() {
-    return new Report(userDAO,resultDAO,eventDAO,audioDAO);
+  public void doReport(PathHelper pathHelper) {
+    try {
+      new Report(userDAO, resultDAO, eventDAO, audioDAO).writeReport(pathHelper);
+    } catch (IOException e) {
+      logger.error("got " +e);
+    }
+  }
+
+  public Map<Long, Map<String, Integer>> getUserToDayToRecordings() {
+    return new Report(userDAO, resultDAO, eventDAO, audioDAO).getUserToDayToRecordings(null);
   }
 
   public String toString() {
