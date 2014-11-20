@@ -123,10 +123,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
   }
 
-  protected void addBelowPlaybackWidget(CommonExercise e, Panel toAddTo) {
-
-
-  }
+  protected void addBelowPlaybackWidget(CommonExercise e, Panel toAddTo) {}
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller,
                                                  final ListInterface listContainer, boolean addKeyHandler) {
@@ -698,7 +695,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
           container = getGenderChoices(rightSide, malesMap, femalesMap, defaultUserAudio);
         }
         Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
-        logger.info("getAfterPlayWidget : for ex " + exercise.getID() + " found " + audioAttributes);
+        //logger.info("getAfterPlayWidget : for ex " + exercise.getID() + " found " + audioAttributes);
 
         // first choice here is for default audio (where we don't know the gender)
         final Collection<AudioAttribute> initialAudioChoices = maleEmpty ?
