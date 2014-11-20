@@ -23,9 +23,8 @@ public class Md5Hash {
     return md5.digest();
   }
 
-
-  private static char[] HEX_CHARS = new char[] {
-      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+  private static char[] HEX_CHARS =
+      new char[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
   private static String toHexString(byte[] bytes) {
     char[] hexString = new char[2 * bytes.length];
     int j = 0;
@@ -40,7 +39,7 @@ public class Md5Hash {
     return toHexString(Md5Hash.getMd5Digest(toHash.getBytes()));
 
   }
-  public static void main(String []arg) {
+/*  public static void main(String []arg) {
     String bueller = getHash("bueller");
     System.out.println("hash " + bueller + " " + bueller.length());
     String first = "074036D6CAEB34B3A23BEA17A449B05C";
@@ -48,5 +47,5 @@ public class Md5Hash {
 
      first = "398E13BF1B80EC28F41E73AB791E276B";
     System.out.println("hash " + first + " " + first.length());
-  }
+  }*/
 }
