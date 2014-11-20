@@ -79,6 +79,24 @@ public class CommentNPFExercise extends NPFExercise {
     entry.addStyleName("floatLeft");
     row.add(entry);
 
+    addContextButton(e, row);
+
+    column.add(row);
+
+    String translitSentence = e.getTransliteration();
+    if (!translitSentence.isEmpty() && !translitSentence.equals("N/A")) {
+      column.add(getEntry(e, QCNPFExercise.TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, translitSentence));
+    }
+
+    String english = e.getMeaning() != null && !e.getMeaning().trim().isEmpty() ? e.getMeaning() : e.getEnglish();
+    if (!english.isEmpty() && !english.equals("N/A")) {
+      column.add(getEntry(e, QCNPFExercise.ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, english));
+    }
+
+    return column;
+  }
+
+  private void addContextButton(final CommonExercise e, DivWidget row) {
     String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
 
     if (!context.isEmpty() && controller.getProps().showContextButton()) {
@@ -101,25 +119,6 @@ public class CommentNPFExercise extends NPFExercise {
 
       row.add(show);
     }
-
-    column.add(row);
-
-    String translitSentence = e.getTransliteration();
-    if (!translitSentence.isEmpty() && !translitSentence.equals("N/A")) {
-      column.add(getEntry(e, QCNPFExercise.TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, translitSentence));
-    }
-
-    String english = e.getMeaning() != null && !e.getMeaning().trim().isEmpty() ? e.getMeaning() : e.getEnglish();
-    if (!english.isEmpty() && !english.equals("N/A")) {
-      column.add(getEntry(e, QCNPFExercise.ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, english));
-    }
-
-    return column;
-  }
-
-  @Override
-  protected void addBelowPlaybackWidget(CommonExercise e, Panel toAddTo) {
-    //addContext(e,toAddTo);
   }
 
   private Panel getContext(CommonExercise e) {
@@ -134,9 +133,9 @@ public class CommentNPFExercise extends NPFExercise {
       Widget entry = getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, context);
       vp.add(entry);
 
-      if(!contextTranslation.isEmpty()){
-         Widget translationEntry = getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION, contextTranslation);
-         vp.add(translationEntry);
+      if (!contextTranslation.isEmpty()) {
+        Widget translationEntry = getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION, contextTranslation);
+        vp.add(translationEntry);
       }
       hp.add(vp);
 
