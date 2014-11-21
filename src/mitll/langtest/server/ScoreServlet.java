@@ -46,6 +46,8 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String ADD_USER = "addUser";
   private static final String HAS_USER = "hasUser";
   private static final String FORGOT_USERNAME = "forgotUsername";
+  private static final String RESET_PASS = "resetPassword";
+  private static final String SET_PASSWORD = "setPassword";
   private boolean debug = true;
 
   /**
@@ -102,6 +104,32 @@ public class ScoreServlet extends DatabaseServlet {
             boolean valid = forgotUsername(emailFromDevice);
             toReturn.put("valid", valid);
           }
+        } else if (queryString.startsWith(RESET_PASS)) {
+          String[] split1 = queryString.split("&");
+          if (split1.length != 2) {
+            toReturn.put("ERROR", "expecting two query parameters");
+          } else {
+            String first = split1[0];
+            String user = first.split("=")[1];
+
+            String second = split1[1];
+            String emailFromDevice = second.split("=")[1];
+            String token = resetPassword(user, emailFromDevice);
+            toReturn.put("token", token);
+          }
+        } else if (queryString.startsWith(SET_PASSWORD)) {
+          String[] split1 = queryString.split("&");
+          if (split1.length != 2) {
+            toReturn.put("ERROR", "expecting two query parameters");
+          } else {
+            String first = split1[0];
+            String token = first.split("=")[1];
+
+            String second = split1[1];
+            String passwordH = second.split("=")[1];
+            boolean valid = changePFor(token, passwordH);
+            toReturn.put("valid", valid);
+          }
         } else if (queryString.startsWith(EXERCISE_HISTORY)) {
           String[] split1 = queryString.split("&");
           if (split1.length != 2) {
@@ -118,7 +146,7 @@ public class ScoreServlet extends DatabaseServlet {
               long l = Long.parseLong(user);
               toReturn = db.getResultDAO().getHistoryAsJson(l, exercise);
             } catch (NumberFormatException e) {
-              toReturn.put("ERROR","User id should be a number");
+              toReturn.put("ERROR", "User id should be a number");
             }
           }
         } else if (queryString.startsWith(CHAPTER_HISTORY) || queryString.startsWith("request=" + CHAPTER_HISTORY)) {
@@ -128,12 +156,12 @@ public class ScoreServlet extends DatabaseServlet {
             toReturn.put("ERROR", "expecting at least two query parameters");
           } else {
             String user = "";
-            Map<String,Collection<String>> selection = new TreeMap<String, Collection<String>>();
+            Map<String, Collection<String>> selection = new TreeMap<String, Collection<String>>();
             for (String param : split1) {
               //logger.debug("param '" +param+               "'");
               String[] split = param.split("=");
               if (split.length == 2) {
-                String key   = split[0];
+                String key = split[0];
                 String value = split[1];
                 if (key.equals("user")) {
                   user = value;
@@ -148,7 +176,7 @@ public class ScoreServlet extends DatabaseServlet {
               long l = Long.parseLong(user);
               toReturn = db.getJsonScoreHistory(l, selection);
             } catch (NumberFormatException e) {
-              toReturn.put("ERROR","User id should be a number");
+              toReturn.put("ERROR", "User id should be a number");
             }
           }
         } else if (queryString.startsWith(PHONE_REPORT) || queryString.startsWith("request=" + PHONE_REPORT)) {
@@ -158,12 +186,12 @@ public class ScoreServlet extends DatabaseServlet {
             toReturn.put("ERROR", "expecting at least two query parameters");
           } else {
             String user = "";
-            Map<String,Collection<String>> selection = new TreeMap<String, Collection<String>>();
+            Map<String, Collection<String>> selection = new TreeMap<String, Collection<String>>();
             for (String param : split1) {
               //logger.debug("param '" +param+               "'");
               String[] split = param.split("=");
               if (split.length == 2) {
-                String key   = split[0];
+                String key = split[0];
                 String value = split[1];
                 if (key.equals("user")) {
                   user = value;
@@ -178,7 +206,7 @@ public class ScoreServlet extends DatabaseServlet {
               long l = Long.parseLong(user);
               toReturn = db.getJsonPhoneReport(l, selection);
             } catch (NumberFormatException e) {
-              toReturn.put("ERROR","User id should be a number");
+              toReturn.put("ERROR", "User id should be a number");
             }
           }
         } else {
@@ -199,10 +227,9 @@ public class ScoreServlet extends DatabaseServlet {
       PrintWriter writer = response.getWriter();
       String x = toReturn.toString();
       if (x.length() > 1000) {
-        logger.debug("Reply " + x.substring(0,1000));
-      }
-      else {
-        logger.debug("Reply " +x);
+        logger.debug("Reply " + x.substring(0, 1000));
+      } else {
+        logger.debug("Reply " + x);
       }
       writer.println(x);
       writer.close();
@@ -217,14 +244,47 @@ public class ScoreServlet extends DatabaseServlet {
     if (valid != null) {
       getEmailHelper().getUserNameEmailDevice(email, valid);
       return true;
+    } else {
+      return false;
     }
-    else {
+  }
+
+  public String resetPassword(String user, String email) {
+    logger.debug(serverProps.getLanguage() + " resetPassword for " + user);
+    String emailH = Md5Hash.getHash(email);
+    User validUserAndEmail = db.getUserDAO().isValidUserAndEmail(user, emailH);
+    //return  validUserAndEmail != null;
+
+    if (validUserAndEmail != null) {
+      String toHash = user + "_" + System.currentTimeMillis();
+      String hash = Md5Hash.getHash(toHash);
+      if (!db.getUserDAO().updateKey(validUserAndEmail.getId(), true, hash)) {
+        logger.error("huh? couldn't add the reset password key to " + validUserAndEmail);
+        return "ERROR";
+      } else {
+        return hash;
+      }
+    } else {
+      return "NOT_VALID";
+    }
+  }
+
+  public boolean changePFor(String token, String passwordH) {
+    User userWhereResetKey = db.getUserDAO().getUserWhereResetKey(token);
+    if (userWhereResetKey != null) {
+      db.getUserDAO().clearKey(userWhereResetKey.getId(), true);
+
+      if (!db.getUserDAO().changePassword(userWhereResetKey.getId(), passwordH)) {
+        logger.error("couldn't update user password for user " + userWhereResetKey);
+      }
+      return true;
+    } else {
       return false;
     }
   }
 
   private EmailHelper getEmailHelper() {
-    return new EmailHelper(serverProps, db.getUserDAO(),getMailSupport(),pathHelper);
+    return new EmailHelper(serverProps, db.getUserDAO(), getMailSupport(), pathHelper);
   }
 
   private MailSupport getMailSupport() {
@@ -292,13 +352,12 @@ public class ScoreServlet extends DatabaseServlet {
         try {
           userid = Long.parseLong(user);
         } catch (NumberFormatException e) {
-          logger.warn("couldn't parse event userid " +user);
+          logger.warn("couldn't parse event userid " + user);
           userid = -1;
         }
         if (db.getUserDAO().getUserWhere(userid) == null) {
-          jsonObject.put("ERROR","unknown user " + userid);
-        }
-        else {
+          jsonObject.put("ERROR", "unknown user " + userid);
+        } else {
           if (widgetid == null) {
             db.logEvent(exid == null ? "N/A" : exid, context, userid);
           } else {
@@ -451,7 +510,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
 
-   //logger.debug("getJsonNestedChapters got " + sectionNodes);
+    //logger.debug("getJsonNestedChapters got " + sectionNodes);
     for (SectionNode node : sectionNodes) {
       typeToValues.put(node.getType(), Collections.singletonList(node.getName()));
       JSONObject jsonForNode = getJsonForNode(node, typeToValues);
@@ -497,7 +556,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * This is the json that describes an individual entry.
-   *
+   * <p/>
    * Makes sure to attach audio to exercises (this is especially important for userexercises that mask out
    * exercises with new reference audio).
    *
@@ -574,11 +633,11 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
-  private boolean isDecode(String requestType) { return requestType.equalsIgnoreCase("decode");  }
+  private boolean isDecode(String requestType) {
+    return requestType.equalsIgnoreCase("decode");
+  }
 
   /**
-   * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
-   * @see #getJsonForParts(javax.servlet.http.HttpServletRequest, String)
    * @param exerciseID
    * @param user
    * @param doFlashcard
@@ -587,6 +646,8 @@ public class ScoreServlet extends DatabaseServlet {
    * @param deviceType
    * @param device
    * @return
+   * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
+   * @see #getJsonForParts(javax.servlet.http.HttpServletRequest, String)
    */
   private JSONObject getJsonForAudioForUser(String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile,
                                             String deviceType, String device) {
@@ -618,7 +679,7 @@ public class ScoreServlet extends DatabaseServlet {
         jsonForScore = getJsonForScore(pretestScore);
         if (doFlashcard) {
           jsonForScore.put("isCorrect", answer.isCorrect());
-          jsonForScore.put("saidWord",  answer.isSaidAnswer());
+          jsonForScore.put("saidWord", answer.isSaidAnswer());
         }
       }
       jsonForScore.put("valid", answer == null ? "invalid" : answer.getValidity().toString());
@@ -627,11 +688,11 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
-   * @see #getJsonForParts(javax.servlet.http.HttpServletRequest, String)
    * @param word
    * @param saveFile
    * @return
+   * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
+   * @see #getJsonForParts(javax.servlet.http.HttpServletRequest, String)
    * @deprecated we should move toward the API that records the audio in the results table
    */
   private JSONObject getJsonForWordAndAudio(String word, File saveFile) {
@@ -672,7 +733,6 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   *
    * @param exerciseID
    * @param user
    * @param doFlashcard
@@ -694,17 +754,16 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
    * @param request
    * @param saveFile
    * @throws IOException
+   * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
    */
   private void writeToOutputStream(HttpServletRequest request, File saveFile) throws IOException {
     writeToFile(request.getInputStream(), saveFile);
   }
 
   /**
-   *
    * @param book
    * @return
    * @see #getJsonForAudioForUser
