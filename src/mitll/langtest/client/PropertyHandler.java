@@ -345,7 +345,7 @@ public class PropertyHandler {
     return rightAlignContent;
   }
 
-  public LOGIN_TYPE getLoginType() { return loginType; }
+  public LOGIN_TYPE getLoginType() { return getExercise_title() != null ? LOGIN_TYPE.ANONYMOUS : loginType; }
 
   public boolean showFlashcardAnswer() {
     return showFlashcardAnswer;
