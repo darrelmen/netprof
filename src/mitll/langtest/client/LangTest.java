@@ -298,6 +298,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       logger.info("populate below header...");
       populateBelowHeader(verticalContainer, firstRow);
     }
+    else {
+      logger.info("showing login...");
+    }
   }
 
   private Container getRootContainer() {
@@ -319,8 +322,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (showOnlyOneExercise()) {
       Panel currentExerciseVPanel = new FlowPanel();
       currentExerciseVPanel.getElement().setId("currentExercisePanel");
+      logger.info("adding headstart current exercise");
       RootPanel.get().add(getHeadstart(currentExerciseVPanel));
     } else {
+      logger.info("adding normal container...");
+
       RootPanel.get().add(verticalContainer);
 
       /**
@@ -341,6 +347,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }*/
   }
 
+  /**
+   * @see #populateBelowHeader
+   * @param currentExerciseVPanel
+   * @return
+   */
   private Container getHeadstart(Panel currentExerciseVPanel) {
     // show fancy lace background image
     currentExerciseVPanel.addStyleName("body");
