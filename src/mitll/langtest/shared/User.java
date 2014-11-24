@@ -179,7 +179,13 @@ public class User extends MiniUser {
     this.enabled = enabled;
   }
 
-  public boolean hasResetKey() { return resetKey != null && !resetKey.isEmpty(); }
+  public boolean hasResetKey() {
+    return resetKey != null && !resetKey.isEmpty();
+  }
+
+  public String getResetKey() {
+    return resetKey;
+  }
 
   public String getNativeLang() {
     return nativeLang;
@@ -194,9 +200,9 @@ public class User extends MiniUser {
   }
 
   public String toStringShort() {
-    return "user " + getId() +  "/" + getUserID() +
+    return "user " + getId() + "/" + getUserID() +
         " is a " + getGender() + " age " + getAge() +
-        " kind " + getUserKind()+
+        " kind " + getUserKind() +
         " perms " + getPermissions();
   }
 
