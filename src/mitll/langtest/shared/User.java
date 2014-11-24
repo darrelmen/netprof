@@ -179,6 +179,8 @@ public class User extends MiniUser {
     this.enabled = enabled;
   }
 
+  public boolean hasResetKey() { return resetKey != null && !resetKey.isEmpty(); }
+
   public String getNativeLang() {
     return nativeLang;
   }
