@@ -109,11 +109,15 @@ public class EmailHelper {
       }
 
       String message = "Hi " + user + ",<br/><br/>" +
-          "Click the link below to change your password." +
-          "<br/><br/>" +
+          "Click the link below to reset your password." +
+          "<br/>" +
+          "In proFeedback, click the login button to enter a new password."+
+          "<br/>" +
           CLOSING;
 
       url = trimURL(url);
+      url = url.replaceAll("http","https");
+      logger.debug("url is " +url);
       sendEmail(url + "?" + RP + "=" + hash,
           email,
           PASSWORD_RESET,
