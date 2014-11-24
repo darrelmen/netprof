@@ -353,6 +353,7 @@ public class UserDAO extends DAO {
    * @param passwordHash
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#userExists(String, String)
+   * @see mitll.langtest.server.ScoreServlet#doGet
    */
   public User getUser(String id, String passwordHash) {
     logger.debug(language + " : getUser getting user with id '" + id + "' and pass '" + passwordHash +"'");
@@ -623,7 +624,7 @@ public class UserDAO extends DAO {
       String email = rs.getString(EMAIL);
       String device = rs.getString(DEVICE);
       User.Kind userKind1 = userKind == null ? User.Kind.UNSET : User.Kind.valueOf(userKind);
-
+      String resetKey = rs.getString(RESET_PASSWORD_KEY);
       User newUser = new User(id, //id
           rs.getInt(AGE), // age
           rs.getInt(GENDER), //gender
@@ -641,7 +642,9 @@ public class UserDAO extends DAO {
           permissions,
           userKind1,
           email,
-          device, "", "");
+          device,
+          resetKey,
+          "");
 
       users.add(newUser);
 
