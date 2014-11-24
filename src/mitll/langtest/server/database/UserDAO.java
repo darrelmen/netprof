@@ -794,6 +794,8 @@ public class UserDAO extends DAO {
       statement.close();
       database.closeConnection(connection);
 
+      User userByID = getUserWhere(remove);
+      logger.debug("after password set to " + passwordH+      " user now " +userByID);
       return i1 != 0;
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
