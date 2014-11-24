@@ -88,9 +88,12 @@ public class ScoreServlet extends DatabaseServlet {
             String second = split1[1];
             String passwordH = second.split("=")[1];
 
-            logger.debug("hasUser " + user + " pass " + passwordH);
             User userFound = db.getUserDAO().getUser(user, passwordH);
-            toReturn.put("userid", userFound == null ? -1 : userFound.getId());
+
+            logger.debug("hasUser " + user + " pass " + passwordH + " -> " + userFound);
+
+            toReturn.put("userid",   userFound == null ? -1 : userFound.getId());
+            toReturn.put("hasReset", userFound == null ? -1 : userFound.hasResetKey());
             toReturn.put("passwordCorrect",
                 userFound == null ? "false" : userFound.getPasswordHash().equalsIgnoreCase(passwordH));
           }
@@ -114,10 +117,33 @@ public class ScoreServlet extends DatabaseServlet {
 
             String second = split1[1];
             String emailFromDevice = second.split("=")[1];
-            String token = resetPassword(user, emailFromDevice);
+            String token = resetPassword(user, emailFromDevice, request.getRequestURL().toString());
             toReturn.put("token", token);
           }
-        } else if (queryString.startsWith(SET_PASSWORD)) {
+        } else if (queryString.startsWith("rp")) {
+          String[] split1 = queryString.split("&");
+          if (split1.length != 1) {
+            toReturn.put("ERROR", "expecting one query parameters");
+          } else {
+            String first = split1[0];
+            String token = first.split("=")[1];
+
+            // OK the real person clicked on their email link
+
+            long userIDForToken = getUserIDForToken(token);
+            if (userIDForToken == -1) {
+              // invalid/stale token
+              String rep = getHTML("Note : your password has already been reset. Please go back to proFeedback.");
+              reply(response,rep);
+              return;
+            }
+            else {
+              String rep = getHTML("OK, your password has been reset. Please go back to proFeedback.");
+              reply(response,rep);
+              return;
+            }
+          }
+        }  else if (queryString.startsWith(SET_PASSWORD)) {
           String[] split1 = queryString.split("&");
           if (split1.length != 2) {
             toReturn.put("ERROR", "expecting two query parameters");
@@ -223,9 +249,13 @@ public class ScoreServlet extends DatabaseServlet {
       e.printStackTrace();
     }
 
+    String x = toReturn.toString();
+    reply(response, x);
+  }
+
+  private void reply(HttpServletResponse response, String x) {
     try {
       PrintWriter writer = response.getWriter();
-      String x = toReturn.toString();
       if (x.length() > 1000) {
         logger.debug("Reply " + x.substring(0, 1000));
       } else {
@@ -236,6 +266,56 @@ public class ScoreServlet extends DatabaseServlet {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  private long getUserIDForToken(String token) {
+    User user = db.getUserDAO().getUserWhereResetKey(token);
+    long l = (user == null) ? -1 : user.getId();
+    logger.info("for token " +  token + " got user id " + l);
+    return l;
+  }
+
+  private String getHTML(String message) {
+
+    return "<html>" +
+        "<head>" +
+        "</head>" +
+
+        "<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>" +
+        "<div align=center>" +
+        "<table>" +
+        (message.length() > 0 ?
+            "<tr>" +
+                "    <td colspan=2 style='padding:.75pt .75pt .75pt .75pt'>\n" +
+                "    <p ><span style='font-size:13.0pt;font-family:\"Georgia\",\"serif\";\n" +
+                "    color:#333333'>" +
+                message +
+                "<p></p></span></p>\n" +
+                "    </td>" +
+                "</tr>" : "") +
+        "     <tr >\n" +
+        "      <td style='border:none;padding:10.5pt 10.5pt 10.5pt 10.5pt'>\n" +
+        "      <h1 style='margin-top:0in;margin-right:0in;margin-bottom:3.0pt;\n" + "      margin-left:0in'>" +
+        "<span style='font-size:12.5pt;font-family:\"Georgia\",\"serif\";\n" + "      font-weight:normal'>" +
+        "<p></p>" +
+        "</span>" +
+        "</h1>\n" +
+        "      </td>\n" +
+        "     </tr>" +
+
+        "   <tr>\n" +
+        "    <td style='padding:0in 0in 0in 0in'>\n" +
+        "    <p>" +
+        "<p></p></span>" +
+        "</p>\n" +
+        "    </td>\n" +
+        //     "    <td style='padding:.75pt .75pt .75pt .75pt'></td>\n" +
+        "   </tr>" +
+
+        "</table>" +
+        "</div>" +
+        "</body>" +
+        "</html>";
   }
 
   private boolean forgotUsername(String email) {
@@ -249,21 +329,25 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
-  public String resetPassword(String user, String email) {
+  public String resetPassword(String user, String email, String requestURL) {
     logger.debug(serverProps.getLanguage() + " resetPassword for " + user);
     String emailH = Md5Hash.getHash(email);
     User validUserAndEmail = db.getUserDAO().isValidUserAndEmail(user, emailH);
-    //return  validUserAndEmail != null;
 
     if (validUserAndEmail != null) {
-      String toHash = user + "_" + System.currentTimeMillis();
+      if (getEmailHelper().resetPassword(user, email, requestURL)) {
+        return "PASSWORD_EMAIL_SENT";
+      } else {
+        return "ERROR";
+      }
+/*      String toHash = user + "_" + System.currentTimeMillis();
       String hash = Md5Hash.getHash(toHash);
       if (!db.getUserDAO().updateKey(validUserAndEmail.getId(), true, hash)) {
         logger.error("huh? couldn't add the reset password key to " + validUserAndEmail);
         return "ERROR";
       } else {
         return hash;
-      }
+      }*/
     } else {
       return "NOT_VALID";
     }
