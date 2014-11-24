@@ -94,6 +94,7 @@ public class ScoreServlet extends DatabaseServlet {
 
             toReturn.put("userid",   userFound == null ? -1 : userFound.getId());
             toReturn.put("hasReset", userFound == null ? -1 : userFound.hasResetKey());
+            toReturn.put("token", userFound == null ? "" : userFound.getResetKey());
             toReturn.put("passwordCorrect",
                 userFound == null ? "false" : userFound.getPasswordHash().equalsIgnoreCase(passwordH));
           }
@@ -131,6 +132,8 @@ public class ScoreServlet extends DatabaseServlet {
             // OK the real person clicked on their email link
 
             long userIDForToken = getUserIDForToken(token);
+            response.setContentType("text/html");
+
             if (userIDForToken == -1) {
               // invalid/stale token
               String rep = getHTML("Note : your password has already been reset. Please go back to proFeedback.");
@@ -138,7 +141,7 @@ public class ScoreServlet extends DatabaseServlet {
               return;
             }
             else {
-              String rep = getHTML("OK, your password has been reset. Please go back to proFeedback.");
+              String rep = getHTML("OK, your password has been reset. Please go back to proFeedback and login.");
               reply(response,rep);
               return;
             }
@@ -275,6 +278,11 @@ public class ScoreServlet extends DatabaseServlet {
     return l;
   }
 
+  /**
+   * @see #doGet
+   * @param message
+   * @return
+   */
   private String getHTML(String message) {
 
     return "<html>" +
@@ -356,6 +364,7 @@ public class ScoreServlet extends DatabaseServlet {
   public boolean changePFor(String token, String passwordH) {
     User userWhereResetKey = db.getUserDAO().getUserWhereResetKey(token);
     if (userWhereResetKey != null) {
+      logger.debug("clearing key for " + userWhereResetKey);
       db.getUserDAO().clearKey(userWhereResetKey.getId(), true);
 
       if (!db.getUserDAO().changePassword(userWhereResetKey.getId(), passwordH)) {
@@ -363,6 +372,8 @@ public class ScoreServlet extends DatabaseServlet {
       }
       return true;
     } else {
+      logger.debug("NOT clearing key for " + token);
+
       return false;
     }
   }
