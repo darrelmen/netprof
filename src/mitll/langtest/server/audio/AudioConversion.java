@@ -36,55 +36,10 @@ public class AudioConversion {
   private static final String WINDOWS_SOX_BIN_DIR = "C:\\Users\\go22670\\sox-14-3-2";
   public static final String SIXTEEN_K_SUFFIX = "_16K";
   public static final String FILE_MISSING = "FILE_MISSING";
- // private File oggEncoder;
   private final AudioCheck audioCheck = new AudioCheck();
   private static final boolean DEBUG = false;
 
   public AudioConversion() {
-/*    String os = getOS();
-    if (os.equals("linux")) {
-      File oggEnc = new File(LINUX_SOX_BIN_DIR_2, "oggenc");
-      if (!oggEnc.exists()) {
-        oggEnc = new File(LINUX_SOX_BIN_DIR, "oggenc");
-        setOggEncoder(os, oggEnc);
-      }
-      else {
-        setOggEncoder(os, oggEnc);
-      }
-    } else if (os.equals("win")) {
-      File oggEnc = new File("bin" + File.separator + "win32", "oggenc2.exe");
-      setOggEncoder(os, oggEnc);
-
-    } else if (os.equals("macos")) {
-      File oggEnc = new File("bin" + File.separator + "macos", "oggenc");
-      setOggEncoder(os, oggEnc);
-    }*/
-  }
-
-/*
-  private void setOggEncoder(String os, File oggEnc) {
-    if (!oggEnc.exists()) {
-      logger.error("huh? " + os +
-          " can't find oggenc at " + oggEnc.getAbsolutePath());
-    }
-    else {
-      oggEncoder = oggEnc;
-    }
-  }
-*/
-
-/*
-
-  private String getOS() {
-    String property = System.getProperty("os.name").toLowerCase();
-    return property.contains("win") ? "win32" : property
-        .contains("mac") ? "macos"
-        : property.contains("linux") ? System
-        .getProperty("os.arch").contains("64") ? "linux64"
-        : "linux" : "linux";
-  }
-*/
-
 
   /**
    * Converts base 64 string into bytes and writes them to a file.
