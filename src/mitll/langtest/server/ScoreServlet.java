@@ -41,6 +41,9 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String CHAPTER_HISTORY = "chapterHistory";
   public static final String PHONE_REPORT = "phoneReport";
   public static final String EXERCISE_HISTORY = "exerciseHistory";
+  private static final String EXPECTING_TWO_QUERY_PARAMETERS = "expecting two query parameters";
+  private static final String ERROR = "ERROR";
+  private static final String EXPECTING_ONE_QUERY_PARAMETER = "expecting one query parameter";
   private JSONObject chapters, nestedChapters;
   public static final String LOAD_TESTING = "loadTesting";
   private static final String ADD_USER = "addUser";
@@ -80,7 +83,7 @@ public class ScoreServlet extends DatabaseServlet {
         } else if (queryString.startsWith(HAS_USER)) {
           String[] split1 = queryString.split("&");
           if (split1.length != 2) {
-            toReturn.put("ERROR", "expecting two query parameters");
+            toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
           } else {
             String first = split1[0];
             String user = first.split("=")[1];
@@ -101,7 +104,7 @@ public class ScoreServlet extends DatabaseServlet {
         } else if (queryString.startsWith(FORGOT_USERNAME)) {
           String[] split1 = queryString.split("&");
           if (split1.length != 1) {
-            toReturn.put("ERROR", "expecting one query parameter");
+            toReturn.put(ERROR, EXPECTING_ONE_QUERY_PARAMETER);
           } else {
             String first = split1[0];
             String emailFromDevice = first.split("=")[1];
@@ -111,7 +114,7 @@ public class ScoreServlet extends DatabaseServlet {
         } else if (queryString.startsWith(RESET_PASS)) {
           String[] split1 = queryString.split("&");
           if (split1.length != 2) {
-            toReturn.put("ERROR", "expecting two query parameters");
+            toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
           } else {
             String first = split1[0];
             String user = first.split("=")[1];
@@ -124,7 +127,7 @@ public class ScoreServlet extends DatabaseServlet {
         } else if (queryString.startsWith("rp")) {
           String[] split1 = queryString.split("&");
           if (split1.length != 1) {
-            toReturn.put("ERROR", "expecting one query parameters");
+            toReturn.put(ERROR, EXPECTING_ONE_QUERY_PARAMETER);
           } else {
             String first = split1[0];
             String token = first.split("=")[1];
@@ -136,12 +139,12 @@ public class ScoreServlet extends DatabaseServlet {
 
             if (userIDForToken == -1) {
               // invalid/stale token
-              String rep = getHTML("Note : your password has already been reset. Please go back to proFeedback.");
+              String rep = getHTML("Note : your password has already been reset. Please go back to proFeedback.","Password has already been reset");
               reply(response,rep);
               return;
             }
             else {
-              String rep = getHTML("OK, your password has been reset. Please go back to proFeedback and login.");
+              String rep = getHTML("OK, your password has been reset. Please go back to proFeedback and login.","Password has been reset");
               reply(response,rep);
               return;
             }
@@ -149,7 +152,7 @@ public class ScoreServlet extends DatabaseServlet {
         }  else if (queryString.startsWith(SET_PASSWORD)) {
           String[] split1 = queryString.split("&");
           if (split1.length != 2) {
-            toReturn.put("ERROR", "expecting two query parameters");
+            toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
           } else {
             String first = split1[0];
             String token = first.split("=")[1];
@@ -162,7 +165,7 @@ public class ScoreServlet extends DatabaseServlet {
         } else if (queryString.startsWith(EXERCISE_HISTORY)) {
           String[] split1 = queryString.split("&");
           if (split1.length != 2) {
-            toReturn.put("ERROR", "expecting two query parameters");
+            toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
           } else {
             String first = split1[0];
             String user = first.split("=")[1];
@@ -175,14 +178,14 @@ public class ScoreServlet extends DatabaseServlet {
               long l = Long.parseLong(user);
               toReturn = db.getResultDAO().getHistoryAsJson(l, exercise);
             } catch (NumberFormatException e) {
-              toReturn.put("ERROR", "User id should be a number");
+              toReturn.put(ERROR, "User id should be a number");
             }
           }
         } else if (queryString.startsWith(CHAPTER_HISTORY) || queryString.startsWith("request=" + CHAPTER_HISTORY)) {
           queryString = queryString.substring(queryString.indexOf(CHAPTER_HISTORY) + CHAPTER_HISTORY.length());
           String[] split1 = queryString.split("&");
           if (split1.length < 2) {
-            toReturn.put("ERROR", "expecting at least two query parameters");
+            toReturn.put(ERROR, "expecting at least two query parameters");
           } else {
             String user = "";
             Map<String, Collection<String>> selection = new TreeMap<String, Collection<String>>();
@@ -205,14 +208,14 @@ public class ScoreServlet extends DatabaseServlet {
               long l = Long.parseLong(user);
               toReturn = db.getJsonScoreHistory(l, selection);
             } catch (NumberFormatException e) {
-              toReturn.put("ERROR", "User id should be a number");
+              toReturn.put(ERROR, "User id should be a number");
             }
           }
         } else if (queryString.startsWith(PHONE_REPORT) || queryString.startsWith("request=" + PHONE_REPORT)) {
           queryString = queryString.substring(queryString.indexOf(PHONE_REPORT) + PHONE_REPORT.length());
           String[] split1 = queryString.split("&");
           if (split1.length < 2) {
-            toReturn.put("ERROR", "expecting at least two query parameters");
+            toReturn.put(ERROR, "expecting at least two query parameters");
           } else {
             String user = "";
             Map<String, Collection<String>> selection = new TreeMap<String, Collection<String>>();
@@ -235,19 +238,19 @@ public class ScoreServlet extends DatabaseServlet {
               long l = Long.parseLong(user);
               toReturn = db.getJsonPhoneReport(l, selection);
             } catch (NumberFormatException e) {
-              toReturn.put("ERROR", "User id should be a number");
+              toReturn.put(ERROR, "User id should be a number");
             }
           }
         } else {
-          toReturn.put("ERROR", "unknown req " + queryString);
+          toReturn.put(ERROR, "unknown req " + queryString);
         }
-      } else {
+      } /*else {
         if (chapters == null) {
           chapters = getJsonChapters();
         }
         toReturn = chapters;
         //toReturn.put("ERROR", "null req");
-      }
+      }*/
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -283,10 +286,12 @@ public class ScoreServlet extends DatabaseServlet {
    * @param message
    * @return
    */
-  private String getHTML(String message) {
-
+  private String getHTML(String message,String title) {
     return "<html>" +
         "<head>" +
+        "<title>" +
+        title +
+        "</title>"+
         "</head>" +
 
         "<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>" +
@@ -346,7 +351,7 @@ public class ScoreServlet extends DatabaseServlet {
       if (getEmailHelper().resetPassword(user, email, requestURL)) {
         return "PASSWORD_EMAIL_SENT";
       } else {
-        return "ERROR";
+        return ERROR;
       }
 /*      String toHash = user + "_" + System.currentTimeMillis();
       String hash = Md5Hash.getHash(toHash);
@@ -451,7 +456,7 @@ public class ScoreServlet extends DatabaseServlet {
           userid = -1;
         }
         if (db.getUserDAO().getUserWhere(userid) == null) {
-          jsonObject.put("ERROR", "unknown user " + userid);
+          jsonObject.put(ERROR, "unknown user " + userid);
         } else {
           if (widgetid == null) {
             db.logEvent(exid == null ? "N/A" : exid, context, userid);
@@ -460,7 +465,7 @@ public class ScoreServlet extends DatabaseServlet {
           }
         }
       } else {
-        jsonObject.put("ERROR", "unknown req " + requestType);
+        jsonObject.put(ERROR, "unknown req " + requestType);
       }
     } else {
       boolean isMultipart = ServletFileUpload.isMultipartContent(request);
@@ -573,7 +578,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    * @deprecated - we do nested chapters now
    */
-  private JSONObject getJsonChapters() {
+/*  private JSONObject getJsonChapters() {
     JSONObject jsonObject = new JSONObject();
     setInstallPath(db);
     db.getExercises();
@@ -587,7 +592,7 @@ public class ScoreServlet extends DatabaseServlet {
       jsonObject.put(node.getName(), exercises);
     }
     return jsonObject;
-  }
+  }*/
 
   /**
    * join against audio dao ex->audio map again to get user exercise audio! {@link #getJsonArray(java.util.List)}
