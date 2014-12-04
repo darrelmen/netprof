@@ -191,9 +191,6 @@ public class AudioExport {
       columns.add(language);
     }
     columns.add(english ? MEANING : TRANSLITERATION);
- /*   if (english) {
-      columns.add("Context");
-    }*/
     columns.addAll(typeOrder);
     columns.add("Context Sentence");
     columns.add("Context Translation");
@@ -343,7 +340,7 @@ public class AudioExport {
       AudioAttribute latestContext = ex.getLatestContext();
       if (latestContext != null) {
         String speed = latestContext.getSpeed();
-        String name = overallName + File.separator + "context_" + getUniqueName(ex, !isEnglish);
+        String name = overallName + File.separator +  getUniqueName(ex, !isEnglish) + "_context";
         copyAudio(zOut, names, name, speed == null ? "" : speed, installPath, audioConversion, latestContext, ex.getID());
         someAudio = true;
       }
