@@ -2,7 +2,6 @@ package mitll.langtest.server.audio;
 
 import audio.imagewriter.AudioConverter;
 import audio.tools.FileCopier;
-import mitll.langtest.client.AudioTag;
 import mitll.langtest.shared.AudioAnswer;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -39,7 +38,7 @@ public class AudioConversion {
   private final AudioCheck audioCheck = new AudioCheck();
   private static final boolean DEBUG = false;
 
-  public AudioConversion() {
+  public AudioConversion() {}
 
   /**
    * Converts base 64 string into bytes and writes them to a file.
