@@ -84,7 +84,9 @@ public class Exercise extends AudioExercise implements CommonExercise {
   public Exercise() {}     // required for serialization
 
   /**
+   * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    * @see mitll.langtest.server.database.exercise.SQLExerciseDAO#getExercise
+   *
    * @param id
    * @param content
    * @param promptInEnglish
@@ -314,9 +316,13 @@ public class Exercise extends AudioExercise implements CommonExercise {
   public void setContext(String context) {
     this.context = context;
   }
-  
+
+  /**
+   * @see mitll.langtest.shared.custom.UserExercise#copyFields
+   * @param contextTranslation
+   */
   public void setContextTranslation(String contextTranslation){
-	this.contextTranslation = contextTranslation;
+	  this.contextTranslation = contextTranslation;
   }
 
   public Exercise toExercise() {
