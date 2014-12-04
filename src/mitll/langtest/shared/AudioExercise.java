@@ -123,13 +123,13 @@ public class AudioExercise extends ExerciseShell {
    * @return
    */
   public AudioAttribute getLatestContext() {
-    long maleTime = 0;
+    long latestTime = 0;
     AudioAttribute latest = null;
     for (AudioAttribute audioAttribute : getAudioAttributes()) {
       if (audioAttribute.getAudioType().startsWith(CONTEXT)) {
-        if (audioAttribute.getTimestamp() > maleTime) {
+        if (audioAttribute.getTimestamp() >= latestTime) {
           latest = audioAttribute;
-          maleTime = audioAttribute.getTimestamp();
+          latestTime = audioAttribute.getTimestamp();
         }
       }
     }
@@ -210,7 +210,7 @@ public class AudioExercise extends ExerciseShell {
     return null;
   }
 
-  List<AudioAttribute> getRecordingsBy(long userID) {
+  private List<AudioAttribute> getRecordingsBy(long userID) {
     List<AudioAttribute> mine = new ArrayList<AudioAttribute>();
     for (AudioAttribute attr : getAudioAttributes()) {
       if (attr.getUser() != null) {
