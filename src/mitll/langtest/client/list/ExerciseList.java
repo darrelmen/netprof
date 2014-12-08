@@ -62,7 +62,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @param instance
    * @seex mitll.langtest.client.LangTest#makeExerciseList
    */
-  ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
+  protected ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                ExercisePanelFactory factory,
                ExerciseController controller,
                String instance, boolean incorrectFirst) {
@@ -151,8 +151,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
    */
   public void reload() {
-    System.out.println("ExerciseList.reload for user " + controller.getUser() + " instance " + instance + " id " + getElement().getId());
-    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, false,
+    int user1 = controller.getUser();
+    System.out.println("ExerciseList.reload for user " + user1);// + " instance " + instance + " id " + getElement().getId());
+    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, user1, getRole(), false, false,
         incorrectFirstOrder, new SetExercisesCallback(""));
   }
 
@@ -249,7 +250,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   protected String getRole() {
     String audioTypeRecorder = Result.AUDIO_TYPE_RECORDER;
-    return instance.startsWith("record") ? audioTypeRecorder : instance;
+    return instance == null || instance.startsWith("record") ? audioTypeRecorder : instance;
   }
 
   public String getInstance() {
