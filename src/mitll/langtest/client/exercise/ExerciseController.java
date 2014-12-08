@@ -26,8 +26,7 @@ import java.util.Collection;
 public interface ExerciseController extends EventRegistration {
   LangTestDatabaseAsync getService();
   UserFeedback getFeedback();
- // ListInterface getExerciseList();
- // void showProgress();
+
   String getBrowserInfo();
 
   int getUser();
@@ -42,7 +41,7 @@ public interface ExerciseController extends EventRegistration {
   boolean useBkgColorForRef();
 
   int getRecordTimeout();
- // boolean isGrading();
+
   boolean isLogClientMessages();
   String getAudioType();
   Collection<User.Permission> getPermissions();
