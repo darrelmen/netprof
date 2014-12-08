@@ -41,7 +41,6 @@ public class PagingExerciseList extends ExerciseList {
   private boolean onlyExamples;
 
   /**
-   * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList(com.github.gwtbootstrap.client.ui.FluidRow, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.user.UserFeedback, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
    * @param currentExerciseVPanel
    * @param service
    * @param feedback
