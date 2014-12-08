@@ -33,25 +33,48 @@ import java.util.*;
 @SuppressWarnings("serial")
 public class ScoreServlet extends DatabaseServlet {
   private static final Logger logger = Logger.getLogger(ScoreServlet.class);
-  public static final String REQUEST = "request";
-  public static final String NESTED_CHAPTERS = "nestedChapters";
-  public static final String ALIGN = "align";
-  public static final String DECODE = "decode";
-  public static final String SCORE = "score";
-  public static final String CHAPTER_HISTORY = "chapterHistory";
-  public static final String PHONE_REPORT = "phoneReport";
-  public static final String EXERCISE_HISTORY = "exerciseHistory";
+  private static final String REQUEST = "request";
+  private static final String NESTED_CHAPTERS = "nestedChapters";
+  private static final String ALIGN = "align";
+  private static final String DECODE = "decode";
+  private static final String SCORE = "score";
+  private static final String CHAPTER_HISTORY = "chapterHistory";
+  private static final String PHONE_REPORT = "phoneReport";
+  private static final String EXERCISE_HISTORY = "exerciseHistory";
   private static final String EXPECTING_TWO_QUERY_PARAMETERS = "expecting two query parameters";
   private static final String ERROR = "ERROR";
   private static final String EXPECTING_ONE_QUERY_PARAMETER = "expecting one query parameter";
-  private JSONObject chapters, nestedChapters;
+  private static final String EXISTING_USER_NAME = "ExistingUserName";
+  private static final String USER = "user";
+  private static final String PASSWORD_H = "passwordH";
+  private static final String EMAIL_H = "emailH";
+  private static final String USERID = "userid";
+  private static final String DEVICE_TYPE = "deviceType";
+  private static final String DEVICE = "device";
+  private static final String EVENT = "event";
+  private static final String CONTENT = "content";
+  private static final String HAS_MODEL = "hasModel";
+  private static final long REFRESH_CONTENT_INTERVAL = 12 * 60 * 60 * 1000l;
+  public static final String HAS_RESET = "hasReset";
+  public static final String TOKEN = "token";
+  public static final String PASSWORD_CORRECT = "passwordCorrect";
+  public static final String PASSWORD_EMAIL_SENT = "PASSWORD_EMAIL_SENT";
+  public static final String NOT_VALID = "NOT_VALID";
+  private JSONObject nestedChapters;
+  private long whenCached = -1;
+  private static final String ENCODING = "UTF8";
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#shareLoadTesting
+   */
   public static final String LOAD_TESTING = "loadTesting";
+
   private static final String ADD_USER = "addUser";
   private static final String HAS_USER = "hasUser";
   private static final String FORGOT_USERNAME = "forgotUsername";
   private static final String RESET_PASS = "resetPassword";
   private static final String SET_PASSWORD = "setPassword";
-  private boolean debug = true;
+  //private boolean debug = true;
 
   /**
    * Remembers chapters from previous requests...
@@ -76,8 +99,9 @@ public class ScoreServlet extends DatabaseServlet {
     try {
       if (queryString != null) {
         if (queryString.startsWith(NESTED_CHAPTERS)) {
-          if (nestedChapters == null) {
+          if (nestedChapters == null || (System.currentTimeMillis() - whenCached > REFRESH_CONTENT_INTERVAL)) {
             nestedChapters = getJsonNestedChapters();
+            whenCached = System.currentTimeMillis();
           }
           toReturn = nestedChapters;
         } else if (queryString.startsWith(HAS_USER)) {
@@ -95,10 +119,10 @@ public class ScoreServlet extends DatabaseServlet {
 
             logger.debug("hasUser " + user + " pass " + passwordH + " -> " + userFound);
 
-            toReturn.put("userid",   userFound == null ? -1 : userFound.getId());
-            toReturn.put("hasReset", userFound == null ? -1 : userFound.hasResetKey());
-            toReturn.put("token", userFound == null ? "" : userFound.getResetKey());
-            toReturn.put("passwordCorrect",
+            toReturn.put(USERID,   userFound == null ? -1 : userFound.getId());
+            toReturn.put(HAS_RESET, userFound == null ? -1 : userFound.hasResetKey());
+            toReturn.put(TOKEN, userFound == null ? "" : userFound.getResetKey());
+            toReturn.put(PASSWORD_CORRECT,
                 userFound == null ? "false" : userFound.getPasswordHash().equalsIgnoreCase(passwordH));
           }
         } else if (queryString.startsWith(FORGOT_USERNAME)) {
@@ -122,7 +146,7 @@ public class ScoreServlet extends DatabaseServlet {
             String second = split1[1];
             String emailFromDevice = second.split("=")[1];
             String token = resetPassword(user, emailFromDevice, request.getRequestURL().toString());
-            toReturn.put("token", token);
+            toReturn.put(TOKEN, token);
           }
         } else if (queryString.startsWith("rp")) {
           String[] split1 = queryString.split("&");
@@ -195,7 +219,7 @@ public class ScoreServlet extends DatabaseServlet {
               if (split.length == 2) {
                 String key = split[0];
                 String value = split[1];
-                if (key.equals("user")) {
+                if (key.equals(USER)) {
                   user = value;
                 } else {
                   selection.put(key, Collections.singleton(value));
@@ -225,7 +249,7 @@ public class ScoreServlet extends DatabaseServlet {
               if (split.length == 2) {
                 String key = split[0];
                 String value = split[1];
-                if (key.equals("user")) {
+                if (key.equals(USER)) {
                   user = value;
                 } else {
                   selection.put(key, Collections.singleton(value));
@@ -262,11 +286,11 @@ public class ScoreServlet extends DatabaseServlet {
   private void reply(HttpServletResponse response, String x) {
     try {
       PrintWriter writer = response.getWriter();
-      if (x.length() > 1000) {
-        logger.debug("Reply " + x.substring(0, 1000));
-      } else {
-        logger.debug("Reply " + x);
-      }
+//      if (x.length() > 1000) {
+//        logger.debug("Reply " + x.substring(0, 1000));
+//      } else {
+//        logger.debug("Reply " + x);
+//      }
       writer.println(x);
       writer.close();
     } catch (IOException e) {
@@ -342,31 +366,23 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
-  public String resetPassword(String user, String email, String requestURL) {
+  String resetPassword(String user, String email, String requestURL) {
     logger.debug(serverProps.getLanguage() + " resetPassword for " + user);
     String emailH = Md5Hash.getHash(email);
     User validUserAndEmail = db.getUserDAO().isValidUserAndEmail(user, emailH);
 
     if (validUserAndEmail != null) {
       if (getEmailHelper().resetPassword(user, email, requestURL)) {
-        return "PASSWORD_EMAIL_SENT";
+        return PASSWORD_EMAIL_SENT;
       } else {
         return ERROR;
       }
-/*      String toHash = user + "_" + System.currentTimeMillis();
-      String hash = Md5Hash.getHash(toHash);
-      if (!db.getUserDAO().updateKey(validUserAndEmail.getId(), true, hash)) {
-        logger.error("huh? couldn't add the reset password key to " + validUserAndEmail);
-        return "ERROR";
-      } else {
-        return hash;
-      }*/
     } else {
-      return "NOT_VALID";
+      return NOT_VALID;
     }
   }
 
-  public boolean changePFor(String token, String passwordH) {
+  boolean changePFor(String token, String passwordH) {
     User userWhereResetKey = db.getUserDAO().getUserWhereResetKey(token);
     if (userWhereResetKey != null) {
       logger.debug("clearing key for " + userWhereResetKey);
@@ -412,24 +428,24 @@ public class ScoreServlet extends DatabaseServlet {
     JSONObject jsonObject = new JSONObject();
     String requestType = request.getHeader(REQUEST);
 
-    String deviceType = request.getHeader("deviceType");
+    String deviceType = request.getHeader(DEVICE_TYPE);
     if (deviceType == null) deviceType = "unk";
-    String device = request.getHeader("device");
+    String device = request.getHeader(DEVICE);
     if (device == null) device = "unk";
 
     if (requestType != null) {
       if (requestType.startsWith(ADD_USER)) {
-        String user = request.getHeader("user");
-        String passwordH = request.getHeader("passwordH");
-        String emailH = request.getHeader("emailH");
+        String user = request.getHeader(USER);
+        String passwordH = request.getHeader(PASSWORD_H);
+        String emailH = request.getHeader(EMAIL_H);
 
         logger.debug("req " + deviceType + " " + device);
         User user1 = db.addUser(user, passwordH, emailH, deviceType, device);
 
         if (user1 == null) {
-          jsonObject.put("ExistingUserName", "");
+          jsonObject.put(EXISTING_USER_NAME, "");
         } else {
-          jsonObject.put("userid", user1.getId());
+          jsonObject.put(USERID, user1.getId());
         }
       } else if (requestType.startsWith(ALIGN) || requestType.startsWith(DECODE)) {
         //jsonObject = getJsonForParts(request, requestType);
@@ -441,20 +457,14 @@ public class ScoreServlet extends DatabaseServlet {
         } else {
           jsonObject = getJsonForAudio(request, requestType, deviceType, device);
         }
-      } else if (requestType.startsWith("event")) {
+      } else if (requestType.startsWith(EVENT)) {
         // log event
-        String user = request.getHeader("user");
+        String user = request.getHeader(USER);
         String context = request.getHeader("context");
         String exid = request.getHeader("exid");
         String widgetid = request.getHeader("widget");
         String widgetType = request.getHeader("widgetType");
-        long userid = 0;
-        try {
-          userid = Long.parseLong(user);
-        } catch (NumberFormatException e) {
-          logger.warn("couldn't parse event userid " + user);
-          userid = -1;
-        }
+        long userid = getUserFromParam2(user);
         if (db.getUserDAO().getUserWhere(userid) == null) {
           jsonObject.put(ERROR, "unknown user " + userid);
         } else {
@@ -482,6 +492,17 @@ public class ScoreServlet extends DatabaseServlet {
     writer.println(jsonObject.toString());
 
     writer.close();
+  }
+
+  private long getUserFromParam2(String user) {
+    long userid;
+    try {
+      userid = Long.parseLong(user);
+    } catch (NumberFormatException e) {
+      logger.warn("couldn't parse event userid " + user);
+      userid = -1;
+    }
+    return userid;
   }
 
   private void configureResponse(HttpServletResponse response) {
@@ -530,20 +551,14 @@ public class ScoreServlet extends DatabaseServlet {
       logger.debug("Scoring : got " + name + " " + next.getContentType() + " " + next.getFieldName() + " " + next.isInMemory() + " " + next.getSize());
 
       if (requestType != null) {
-        String user = request.getHeader("user");
+        String user = request.getHeader(USER);
         String exerciseID = request.getHeader("exercise");
-        String deviceType = request.getHeader("deviceType");
-        String device = request.getHeader("device");
+        String deviceType = request.getHeader(DEVICE_TYPE);
+        String device = request.getHeader(DEVICE);
 
         logger.debug("got request " + requestType + " for user " + user + " exercise " + exerciseID);
-        int i = -1;
-        try {
-          i = Integer.parseInt(user);
-        } catch (NumberFormatException e) {
-          logger.error("expecting a number for user id " + user);
-        }
+        int i = getUserFromParam(user);
         String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, 0, i);
-        //File saveFile = new File(wavPath);
         File saveFile = pathHelper.getAbsoluteFile(wavPath);
 
         writeToFile(next.getInputStream(), saveFile);
@@ -567,32 +582,19 @@ public class ScoreServlet extends DatabaseServlet {
     return new JSONObject();
   }
 
-  private static final String ENCODING = "UTF8";
+  private int getUserFromParam(String user) {
+    int i = -1;
+    try {
+      i = Integer.parseInt(user);
+    } catch (NumberFormatException e) {
+      logger.error("expecting a number for user id " + user);
+    }
+    return i;
+  }
 
   private BufferedReader getBufferedReader(InputStream resourceAsStream) throws UnsupportedEncodingException {
     return new BufferedReader(new InputStreamReader(resourceAsStream, ENCODING));
   }
-
-  /**
-   * @return
-   * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-   * @deprecated - we do nested chapters now
-   */
-/*  private JSONObject getJsonChapters() {
-    JSONObject jsonObject = new JSONObject();
-    setInstallPath(db);
-    db.getExercises();
-    List<SectionNode> sectionNodes = db.getSectionHelper().getSectionNodes();
-    for (SectionNode node : sectionNodes) {
-      Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
-      List<String> value = new ArrayList<String>();
-      value.add(node.getName());
-      typeToValues.put(node.getType(), value);
-      JSONArray exercises = getJsonForSelection(typeToValues);
-      jsonObject.put(node.getName(), exercises);
-    }
-    return jsonObject;
-  }*/
 
   /**
    * join against audio dao ex->audio map again to get user exercise audio! {@link #getJsonArray(java.util.List)}
@@ -600,29 +602,31 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    */
   private JSONObject getJsonNestedChapters() {
-    JSONObject jsonObject = new JSONObject();
     setInstallPath(db);
     db.getExercises();
 
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put(CONTENT, getContentAsJson());
+    jsonObject.put("version", "1.0");
+    jsonObject.put(HAS_MODEL, !db.getServerProps().isNoModel());
+
+    return jsonObject;
+  }
+
+  private JSONArray getContentAsJson() {
     JSONArray jsonArray = new JSONArray();
-
-    List<SectionNode> sectionNodes = db.getSectionHelper().getSectionNodes();
-
     Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
 
     //logger.debug("getJsonNestedChapters got " + sectionNodes);
-    for (SectionNode node : sectionNodes) {
-      typeToValues.put(node.getType(), Collections.singletonList(node.getName()));
+    for (SectionNode node : db.getSectionHelper().getSectionNodes()) {
+      String type = node.getType();
+      typeToValues.put(type, Collections.singletonList(node.getName()));
       JSONObject jsonForNode = getJsonForNode(node, typeToValues);
-      typeToValues.remove(node.getType());
+      typeToValues.remove(type);
 
       jsonArray.add(jsonForNode);
     }
-    jsonObject.put("content", jsonArray);
-    jsonObject.put("version", "1.0");
-    jsonObject.put("hasModel", !db.getServerProps().isNoModel());
-
-    return jsonObject;
+    return jsonArray;
   }
 
   private JSONObject getJsonForNode(SectionNode node, Map<String, Collection<String>> typeToValues) {
@@ -691,20 +695,13 @@ public class ScoreServlet extends DatabaseServlet {
   private JSONObject getJsonForAudio(HttpServletRequest request, String requestType,
                                      String deviceType, String device) throws IOException {
     // Gets file name for HTTP header
-
     if (requestType != null) {
-      String user = request.getHeader("user");
+      String user = request.getHeader(USER);
       String exerciseID = request.getHeader("exercise");
 
       logger.debug("getJsonForAudio got request " + requestType + " for user " + user + " exercise " + exerciseID);
-      int i = -1;
-      try {
-        i = Integer.parseInt(user);
-      } catch (NumberFormatException e) {
-        logger.error("expecting a number for user id " + user);
-      }
+      int i = getUserFromParam(user);
       String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, 0, i);
-      //File saveFile = new File(wavPath);
       File saveFile = pathHelper.getAbsoluteFile(wavPath);
       new File(saveFile.getParent()).mkdirs();
 
@@ -733,9 +730,7 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
-  private boolean isDecode(String requestType) {
-    return requestType.equalsIgnoreCase("decode");
-  }
+  private boolean isDecode(String requestType) { return "decode".equalsIgnoreCase(requestType); }
 
   /**
    * @param exerciseID
@@ -759,15 +754,7 @@ public class ScoreServlet extends DatabaseServlet {
       jsonForScore.put("valid", "bad_exercise_id");
 
     } else {
-      AudioAnswer answer;
-
-      if (!doFlashcard) {
-        PretestScore asrScoreForAudio = getASRScoreForAudio(wavPath, exercise1.getRefSentence(), exerciseID);
-        answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(), deviceType, device);
-        answer.setPretestScore(asrScoreForAudio);
-      } else {
-        answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, -1, deviceType, device);
-      }
+      AudioAnswer answer = getAudioAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, deviceType, device, exercise1);
       long now = System.currentTimeMillis();
       PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
       float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
@@ -779,12 +766,27 @@ public class ScoreServlet extends DatabaseServlet {
         jsonForScore = getJsonForScore(pretestScore);
         if (doFlashcard) {
           jsonForScore.put("isCorrect", answer.isCorrect());
-          jsonForScore.put("saidWord", answer.isSaidAnswer());
+          jsonForScore.put("saidWord",  answer.isSaidAnswer());
         }
       }
+      jsonForScore.put("exid", exerciseID);
       jsonForScore.put("valid", answer == null ? "invalid" : answer.getValidity().toString());
     }
     return jsonForScore;
+  }
+
+  private AudioAnswer getAudioAnswer(String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile,
+                                     String deviceType, String device, CommonExercise exercise1) {
+    AudioAnswer answer;
+
+    if (!doFlashcard) {
+      PretestScore asrScoreForAudio = getASRScoreForAudio(wavPath, exercise1.getRefSentence(), exerciseID);
+      answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(), deviceType, device);
+      answer.setPretestScore(asrScoreForAudio);
+    } else {
+      answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, -1, deviceType, device);
+    }
+    return answer;
   }
 
   /**
@@ -827,7 +829,8 @@ public class ScoreServlet extends DatabaseServlet {
 
     JSONObject jsonForScore = getJsonForScore(scoreAndAnswer.score);
     jsonForScore.put("isCorrect", scoreAndAnswer.answer.isCorrect());
-    jsonForScore.put("saidWord", scoreAndAnswer.answer.isSaidAnswer());
+    jsonForScore.put("saidWord",  scoreAndAnswer.answer.isSaidAnswer());
+    jsonForScore.put("exid", "unknown");
 
     return jsonForScore;
   }
@@ -867,6 +870,8 @@ public class ScoreServlet extends DatabaseServlet {
    * @param book
    * @return
    * @see #getJsonForAudioForUser
+   * @see #getJsonForWordAndAudio
+   * @see #getJsonForWordAndAudioFlashcard
    */
   private JSONObject getJsonForScore(PretestScore book) {
     JSONObject jsonObject = new JSONObject();
@@ -878,7 +883,7 @@ public class ScoreServlet extends DatabaseServlet {
 
       for (TranscriptSegment segment : value) {
         JSONObject object = new JSONObject();
-        object.put("event", segment.getEvent());
+        object.put(EVENT, segment.getEvent());
         object.put("start", segment.getStart());
         object.put("end", segment.getEnd());
         object.put(SCORE, segment.getScore());
@@ -966,16 +971,18 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * @param audioFileHelper
    * @param testAudioFile
-   * @param sentence
+   * @param sentence to decode
    * @return
    * @see #getJsonForWordAndAudioFlashcard(String, java.io.File)
    */
-  private AudioFileHelper.ScoreAndAnswer getFlashcardScore(final AudioFileHelper audioFileHelper, File testAudioFile, String sentence) {
+  private AudioFileHelper.ScoreAndAnswer getFlashcardScore(final AudioFileHelper audioFileHelper, File testAudioFile,
+                                                           String sentence) {
     // logger.debug("getASRScoreForAudio " +testAudioFile);
 
     AudioFileHelper.ScoreAndAnswer asrScoreForAudio = new AudioFileHelper.ScoreAndAnswer(new PretestScore(), new AudioAnswer());
     if (!audioFileHelper.checkLTS(sentence)) {
-      logger.error("couldn't decode the word '' since it's not in the dictionary or passes letter-to-sound.  E.g. english word with an arabic model.");
+      logger.error("couldn't decode the word '' since it's not in the dictionary or passes letter-to-sound.  " +
+          "E.g. english word with an arabic model.");
       return asrScoreForAudio;
     }
 
