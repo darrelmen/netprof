@@ -62,7 +62,8 @@ public class ServerProperties {
   private static final String CONFIG_FILE = "configFile";
 
   private static final String APPROVAL_EMAIL = "approvalEmail";
-  public static final String GORDON_VIDAVER = "gordon.vidaver@ll.mit.edu";
+  private static final String GORDON_VIDAVER = "gordon.vidaver@ll.mit.edu";
+  private static final String DOUG_JONES = "daj@ll.mit.edu";
   private static final String DEFAULT_EMAIL = GORDON_VIDAVER;
   private static final String APPROVERS = "approvers";
   private static final String APPROVER_EMAILS = "approverEmails";
@@ -94,7 +95,7 @@ public class ServerProperties {
    */
   private static final String REPORT_EMAILS = "reportEmails";
 
-  private List<String> REPORT_DEFAULT = Arrays.asList(ServerProperties.TAMAS_1, ServerProperties.TAMAS_2, ServerProperties.GORDON_VIDAVER);
+  private List<String> REPORT_DEFAULT = Arrays.asList(ServerProperties.TAMAS_1, ServerProperties.TAMAS_2, ServerProperties.GORDON_VIDAVER, ServerProperties.DOUG_JONES);
   private List<String> reportEmails = REPORT_DEFAULT;
 
   private List<String> approvers = DLI_APPROVERS;
@@ -379,7 +380,5 @@ public class ServerProperties {
     return admins;
   }
 
-  public List<String> getReportEmails() {
-    return reportEmails;
-  }
+  public List<String> getReportEmails() { return reportEmails;  }
 }
