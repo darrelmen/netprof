@@ -22,10 +22,19 @@ public class ButtonFactory implements EventLogger {
 
   private final LangTestDatabaseAsync service;
   private final PropertyHandler props;
+  private ExerciseController controller;
 
-  public ButtonFactory(LangTestDatabaseAsync service, PropertyHandler props) {
+  /**
+   *
+   * @param service
+   * @param props
+   * @param controller
+   * @see mitll.langtest.client.LangTest#onModuleLoad2
+   */
+  public ButtonFactory(LangTestDatabaseAsync service, PropertyHandler props, ExerciseController controller) {
     this.service = service;
     this.props = props;
+    this.controller = controller;
   }
 
   @Override
@@ -80,13 +89,15 @@ public class ButtonFactory implements EventLogger {
    * @param userid
    */
   @Override
-  public void logEvent(final String widgetID, final String widgetType, final String exid, final String context, final long userid) {
+  public void logEvent(final String widgetID, final String widgetType, final String exid, final String context,
+                       final long userid) {
     // System.out.println("logEvent event for " + widgetID + " " + widgetType + " exid " + exid + " context " + context + " user " + userid);
 
     try {
       com.google.gwt.core.client.Scheduler.get().scheduleDeferred(new com.google.gwt.core.client.Scheduler.ScheduledCommand() {
         public void execute() {
-          service.logEvent(widgetID, widgetType, exid, context, userid, props.getTurkID(), new AsyncCallback<Void>() {
+          service.logEvent(widgetID, widgetType, exid, context, userid, props.getTurkID(), controller.getBrowserInfo(),
+              new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
               if (!caught.getMessage().trim().equals("0")) {
@@ -105,6 +116,5 @@ public class ButtonFactory implements EventLogger {
     } catch (Exception e) {
       logger.warning("Got " +e);
     }
-
   }
 }
