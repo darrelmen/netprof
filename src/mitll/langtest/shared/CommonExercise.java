@@ -40,7 +40,7 @@ public interface CommonExercise extends CommonShell {
    * @see mitll.langtest.server.ScoreServlet#getJsonArray(java.util.List)
    * @return
    */
-  AudioAttribute getLatestContext();
+  AudioAttribute getLatestContext(boolean isMale);
   AudioAttribute getRecordingsBy(long userID, boolean regularSpeed);
   AudioAttribute getRecordingsBy(long userID, String speed);
   Collection<AudioAttribute> getByGender(boolean isMale);
