@@ -205,11 +205,11 @@ public class AnnotationDAO extends DAO {
   }
 
   /**
-   * @see #getAll(long)
-   * @see #getFieldToAnnotationMap(String)
    * @param sql
    * @return
    * @throws SQLException
+   * @see #getAll(long)
+   * @see #getFieldToAnnotationMap(String)
    */
   private List<UserAnnotation> getUserAnnotations(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
@@ -219,13 +219,13 @@ public class AnnotationDAO extends DAO {
 
     while (rs.next()) {
       lists.add(new UserAnnotation(
-          rs.getString(EXERCISEID),
-          rs.getString("field"),
-          rs.getString(STATUS),
-          rs.getString("comment"),
-          rs.getLong(CREATORID),
-          rs.getTimestamp("modified").getTime()
-      )
+              rs.getString(EXERCISEID),
+              rs.getString("field"),
+              rs.getString(STATUS),
+              rs.getString("comment"),
+              rs.getLong(CREATORID),
+              rs.getTimestamp("modified").getTime()
+          )
       );
     }
 
