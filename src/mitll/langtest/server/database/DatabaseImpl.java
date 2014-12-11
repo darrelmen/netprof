@@ -800,10 +800,10 @@ public class DatabaseImpl implements Database {
     return new Pair(idToCount, idToUniqueCount);
   }
 
-  public void logEvent(String exid, String context, long userid) {
+  public void logEvent(String exid, String context, long userid, String device) {
     if (context.length() > 100) context = context.substring(0, 100).replace("\n", " ");
     try {
-      logEvent(UNKNOWN, "server", exid, context, userid, UNKNOWN);
+      logEvent(UNKNOWN, "server", exid, context, userid, UNKNOWN, device);
     } catch (SQLException e) {
       logAndNotify(e);
     }
@@ -816,19 +816,21 @@ public class DatabaseImpl implements Database {
    * @param exid
    * @param context
    * @param userid
+   * @param device
    * @return
    */
-  public boolean logEvent(String id, String widgetType, String exid, String context, long userid) {
+  public boolean logEvent(String id, String widgetType, String exid, String context, long userid, String device) {
     try {
-      return eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, UNKNOWN));
+      //return eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, UNKNOWN, device));
+      return logEvent(id, widgetType, exid, context, userid, UNKNOWN, device);
     } catch (SQLException e) {
       logAndNotify(e);
     }
     return false;
   }
 
-  public boolean logEvent(String id, String widgetType, String exid, String context, long userid, String hitID) throws SQLException {
-    return eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, hitID));
+  public boolean logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device) throws SQLException {
+    return eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, hitID, device));
   }
 
   public void logAndNotify(Exception e) {
