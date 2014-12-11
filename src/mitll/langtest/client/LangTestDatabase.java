@@ -57,7 +57,7 @@ public interface LangTestDatabase extends RemoteService {
   AudioAnswer getAlignment(String base64EncodedString,
                            String textToAlign,
                            String identifier,
-                           int reqid);
+                           int reqid, String device);
 
   Map<User, Integer> getUserToResultCount();
 
@@ -89,6 +89,7 @@ public interface LangTestDatabase extends RemoteService {
   Map<Integer, Map<String, Map<String, Integer>>> getGradeCountPerExercise();
 
   void logMessage(String message);
+  void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device);
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID);
 
   AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID, Map<String, Collection<String>> typeToSection, long userListID);
