@@ -119,14 +119,16 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.DatabaseServlet#getJsonForExercise(CommonExercise)
    * @return
+   * @see mitll.langtest.server.DatabaseServlet#getJsonForExercise(CommonExercise)
    */
-  public AudioAttribute getLatestContext() {
+  public AudioAttribute getLatestContext(boolean isMale) {
     long latestTime = 0;
     AudioAttribute latest = null;
     for (AudioAttribute audioAttribute : getAudioAttributes()) {
-      if (audioAttribute.getAudioType().startsWith(CONTEXT)) {
+      if (audioAttribute.getAudioType().startsWith(CONTEXT) &&
+          ((isMale && audioAttribute.isMale()) || (!isMale && !audioAttribute.isMale()))
+          ) {
         if (audioAttribute.getTimestamp() >= latestTime) {
           latest = audioAttribute;
           latestTime = audioAttribute.getTimestamp();
