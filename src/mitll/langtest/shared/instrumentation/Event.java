@@ -21,6 +21,7 @@ public class Event implements IsSerializable, Comparable<Event> {
   private long creatorID;
   private long timestamp;
   private String hitID;
+  private String device;
 
   public Event() {}
 
@@ -29,9 +30,10 @@ public class Event implements IsSerializable, Comparable<Event> {
    * @param userID
    * @param timestamp
    * @param hitID
+   * @param device
    * @see mitll.langtest.server.database.custom.AnnotationDAO#getUserAnnotations(String)
    */
-  public Event(String widgetID, String widgetType, String exerciseID, String context, long userID, long timestamp, String hitID) {
+  public Event(String widgetID, String widgetType, String exerciseID, String context, long userID, long timestamp, String hitID, String device) {
     this.widgetID = widgetID;
     this.widgetType = widgetType;
     this.exerciseID = exerciseID;
@@ -39,6 +41,7 @@ public class Event implements IsSerializable, Comparable<Event> {
     this.creatorID = userID;
     this.timestamp = timestamp;
     this.hitID = hitID;
+    this.device = device;
   }
 
   public String getWidgetID() {
@@ -59,7 +62,7 @@ public class Event implements IsSerializable, Comparable<Event> {
   public void setTimestamp(long timestamp) {
     this.timestamp = timestamp;
   }
-
+  public String getDevice() { return device; }
   public String getWidgetType() {
     return widgetType;
   }
@@ -75,6 +78,6 @@ public class Event implements IsSerializable, Comparable<Event> {
 
   public String toString() {
     return "Event on " + getWidgetID() + " by " +  getCreatorID() + " at " + new Date(getTimestamp()) + " info " +
-      getExerciseID() + "/" + getContext() + " hit " + getHitID();
+      getExerciseID() + "/" + getContext() + " hit " + getHitID() + " from " +device;
   }
 }
