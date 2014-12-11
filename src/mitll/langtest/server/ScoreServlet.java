@@ -469,9 +469,9 @@ public class ScoreServlet extends DatabaseServlet {
           jsonObject.put(ERROR, "unknown user " + userid);
         } else {
           if (widgetid == null) {
-            db.logEvent(exid == null ? "N/A" : exid, context, userid);
+            db.logEvent(exid == null ? "N/A" : exid, context, userid, device);
           } else {
-            db.logEvent(widgetid, widgetType, exid == null ? "N/A" : exid, context, userid);
+            db.logEvent(widgetid, widgetType, exid == null ? "N/A" : exid, context, userid, device);
           }
         }
       } else {
