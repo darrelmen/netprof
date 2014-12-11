@@ -1107,6 +1107,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return b;
   }
 
+  @Override
+  public void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID) {
+    try {
+      db.logEvent(id, widgetType, exid, context, userid, hitID, "unknown browser");
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
+  }
+
   /**
    * @see mitll.langtest.client.instrumentation.ButtonFactory#logEvent(String, String, String, String, long)
    * @param id
@@ -1115,11 +1124,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param context
    * @param userid
    * @param hitID
+   * @param device
    */
   @Override
-  public void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID) {
+  public void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device) {
     try {
-      db.logEvent(id, widgetType, exid, context, userid, hitID);
+      db.logEvent(id, widgetType, exid, context, userid, hitID, device);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
@@ -1665,7 +1675,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
       logger.warn("huh? got zero length recording " + user + " " + exercise);
-      logEvent("audioRecording", "writeAudioFile", exercise, "Writing audio - got zero duration!", user, "unknown");
+      logEvent("audioRecording", "writeAudioFile", exercise, "Writing audio - got zero duration!", user, "unknown", device);
     }
     return audioAnswer;
   }
@@ -1691,6 +1701,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param textToAlign
    * @param identifier
    * @param reqid
+   * @param device
    * @return
    * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile(String)
    */
@@ -1698,12 +1709,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public AudioAnswer getAlignment(String base64EncodedString,
                                   String textToAlign,
                                   String identifier,
-                                  int reqid) {
+                                  int reqid, String device) {
     AudioAnswer audioAnswer = audioFileHelper.getAlignment(base64EncodedString, textToAlign, identifier, reqid);
 
     if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
       logger.warn("huh? got zero length recording " + identifier);
-      logEvent("audioRecording", "writeAudioFile", identifier, "Writing audio - got zero duration!", -1, "unknown");
+      logEvent("audioRecording", "writeAudioFile", identifier, "Writing audio - got zero duration!", -1, "unknown",device);
     }
     return audioAnswer;
   }
