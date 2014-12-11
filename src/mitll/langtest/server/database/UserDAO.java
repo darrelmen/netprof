@@ -34,6 +34,7 @@ public class UserDAO extends DAO {
   private static final String RESET_PASSWORD_KEY = "resetPasswordKey";
   private static final String ENABLED_REQ_KEY = "enabledReqKey";
   private static final String NATIVE_LANG = "nativeLang";
+  public static final String UNKNOWN = "unknown";
   private String language;
   private long defectDetector;
 
@@ -84,11 +85,11 @@ public class UserDAO extends DAO {
 
       defectDetector = userExists(DEFECT_DETECTOR);
       if (defectDetector == -1) {
-        defectDetector = addUser(89, MALE, 0, "", "unknown", "unknown", DEFECT_DETECTOR, false, new ArrayList<User.Permission>(), User.Kind.STUDENT, "", "", "");
+        defectDetector = addUser(89, MALE, 0, "", UNKNOWN, UNKNOWN, DEFECT_DETECTOR, false, new ArrayList<User.Permission>(), User.Kind.STUDENT, "", "", "");
       }
     } catch (Exception e) {
       logger.error("got " + e, e);
-      database.logEvent("unk", "create user table " + e.toString(), 0);
+      database.logEvent("unk", "create user table " + e.toString(), 0, UNKNOWN);
     }
   }
 
@@ -228,7 +229,7 @@ public class UserDAO extends DAO {
       return newID;
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
-      database.logEvent("unk", "adding user: " + ee.toString(), 0);
+      database.logEvent("unk", "adding user: " + ee.toString(), 0, device);
     }
     return 0;
   }
@@ -276,7 +277,7 @@ public class UserDAO extends DAO {
       }
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
-      database.logEvent("unk", "update user: " + ee.toString(), 0);
+      database.logEvent("unk", "update user: " + ee.toString(), 0, UNKNOWN);
     }
   }
 
@@ -304,7 +305,7 @@ public class UserDAO extends DAO {
       return i1 != 0;
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
-      database.logEvent("unk", "enableUser: " + ee.toString(), 0);
+      database.logEvent("unk", "enableUser: " + ee.toString(), 0, UNKNOWN);
     }
     return false;
   }
@@ -412,7 +413,7 @@ public class UserDAO extends DAO {
 
     } catch (Exception e) {
       logger.error("Got " + e, e);
-      database.logEvent(id, "userExists: " + e.toString(), 0);
+      database.logEvent(id, "userExists: " + e.toString(), 0, UNKNOWN);
     }
     return val;
   }
@@ -582,7 +583,7 @@ public class UserDAO extends DAO {
       return users;
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
-      database.logEvent("unk", "getUsers: " + ee.toString(), 0);
+      database.logEvent("unk", "getUsers: " + ee.toString(), 0, UNKNOWN);
     }
     return new ArrayList<User>();
   }
@@ -766,8 +767,7 @@ public class UserDAO extends DAO {
       wb.dispose();
     } catch (IOException e) {
       logger.error("got " + e, e);
-      database.logEvent("unk", "(" +language+ ") toXLSX: " + e.toString(), 0);
-
+      database.logEvent("unk", "(" +language+ ") toXLSX: " + e.toString(), 0, UNKNOWN);
     }
   }
 
@@ -799,7 +799,7 @@ public class UserDAO extends DAO {
       return i1 != 0;
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
-      database.logEvent("unk", "update user: " + ee.toString(), 0);
+      database.logEvent("unk", "update user: " + ee.toString(), 0, UNKNOWN);
     }
     return false;
   }
@@ -832,7 +832,7 @@ public class UserDAO extends DAO {
       return i1 != 0;
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
-      database.logEvent("unk", "clearKey user: " + userid + " " + ee.toString(), 0);
+      database.logEvent("unk", "clearKey user: " + userid + " " + ee.toString(), 0, UNKNOWN);
     }
     return false;
   }
