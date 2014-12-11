@@ -264,7 +264,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void onModuleLoad2() {
     setupSoundManager();
 
-    buttonFactory = new ButtonFactory(service, props);
+    buttonFactory = new ButtonFactory(service, props, this);
 
     userManager = new UserManager(this, service, props);
 
