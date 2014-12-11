@@ -96,7 +96,7 @@ public class EventTable extends PagerTable {
     table.setPageSize(PAGE_SIZE);
     int width = (int) (Window.getClientWidth() * 0.9);
     table.setWidth(width + "px");
-    /*TextColumn<Event> id =*/ addColumns(table);
+    addColumns(table);
 
     // Create a data provider.
     ListDataProvider<Event> dataProvider = new ListDataProvider<Event>();
@@ -113,10 +113,7 @@ public class EventTable extends PagerTable {
     table.setRowCount(list.size());
 
     // We know that the data is sorted alphabetically by default.
-//    table.getColumnSortList().push(id);
 
-    // Create a SimplePager.
-    // return getPagerAndTable(table, table, 10, 10);
     return getOldSchoolPagerAndTable(table, table, 10, 10);
   }
 
@@ -174,6 +171,15 @@ public class EventTable extends PagerTable {
     };
     hit.setSortable(true);
     table.addColumn(hit, "Hit ID");
+
+    TextColumn<Event> device = new TextColumn<Event>() {
+      @Override
+      public String getValue(Event contact) {
+        return "" +contact.getDevice();
+      }
+    };
+    device.setSortable(true);
+    table.addColumn(device, "Device");
 
     getDateColumn(table);
     return id;
