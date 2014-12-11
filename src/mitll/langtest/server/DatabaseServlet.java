@@ -152,8 +152,10 @@ public class DatabaseServlet extends HttpServlet {
     ex.put("en", exercise.getEnglish());
     ex.put("ct", exercise.getContext());
     ex.put("ctr", exercise.getContextTranslation());
-    AudioAttribute latestContext = exercise.getLatestContext();
-    ex.put("ctref", latestContext == null ? "NO" : latestContext.getAudioRef());
+    AudioAttribute latestContext = exercise.getLatestContext(true);
+    ex.put("ctmref", latestContext == null ? "NO" : latestContext.getAudioRef());
+    latestContext = exercise.getLatestContext(false);
+    ex.put("ctfref", latestContext == null ? "NO" : latestContext.getAudioRef());
     ex.put("ref", exercise.hasRefAudio() ? exercise.getRefAudio() : "NO");
 
     addLatestRefs(exercise, ex);
