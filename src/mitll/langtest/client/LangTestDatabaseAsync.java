@@ -92,7 +92,7 @@ public interface LangTestDatabaseAsync {
 
   void getUserHistoryForList(long userid, Collection<String> ids, long latestResultID, Map<String, Collection<String>> typeToSection, long userListID, AsyncCallback<AVPScoreReport> async);
 
-  void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, AsyncCallback<Void> async);
+  void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device, AsyncCallback<Void> async);
 
   void getEvents(AsyncCallback<List<Event>> async);
 
@@ -114,12 +114,13 @@ public interface LangTestDatabaseAsync {
    * @param textToAlign
    * @param identifier
    * @param reqid
+   * @param device
    * @param async
    */
   void getAlignment(String base64EncodedString,
                     String textToAlign,
                     String identifier,
-                    int reqid, AsyncCallback<AudioAnswer> async);
+                    int reqid, String device, AsyncCallback<AudioAnswer> async);
 
   void userExists(String login, String passwordH, AsyncCallback<User> async);
 
@@ -138,4 +139,7 @@ public interface LangTestDatabaseAsync {
   void getNumResults(AsyncCallback<Integer> async);
 
   void getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which, AsyncCallback<Collection<String>> async);
+
+  // just for backwards compatibility
+  void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, AsyncCallback<Void> async);
 }
