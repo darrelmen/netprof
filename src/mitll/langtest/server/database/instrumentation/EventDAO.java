@@ -40,6 +40,7 @@ public class EventDAO extends DAO {
   private static final String HITID = "hitid";
   private static final String EXERCISEID = "exerciseid";
   private static final String EVENTS = "Events";
+  public static final String DEVICE = "device";
   private final UserDAO userDAO;
   private LogAndNotify logAndNotify;
 
@@ -63,6 +64,9 @@ public class EventDAO extends DAO {
       Connection connection = database.getConnection(this.getClass().toString());
       if (!columns.contains(HITID)) {
         addVarchar(connection, EVENT, HITID);
+      }
+      if (!columns.contains(DEVICE)) {
+        addVarchar(connection, EVENT, DEVICE);
       }
 
       database.closeConnection(connection);
@@ -88,7 +92,8 @@ public class EventDAO extends DAO {
       WIDGETTYPE + " VARCHAR, " +
       "modified TIMESTAMP, " +
       HITID + " VARCHAR, " +
-      "FOREIGN KEY(" +
+        DEVICE + " VARCHAR, " +
+        "FOREIGN KEY(" +
       CREATORID +
       ") REFERENCES " +
       "USERS" +
@@ -103,7 +108,7 @@ public class EventDAO extends DAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see mitll.langtest.server.database.DatabaseImpl#logEvent(String, String, String, String, long, String)
+   * @see mitll.langtest.server.database.DatabaseImpl#logEvent(String, String, String, String, long, String, String)
    */
   public boolean add(Event event) throws SQLException {
     Connection connection = getConnection();
@@ -120,8 +125,9 @@ public class EventDAO extends DAO {
               "widgetid" + "," +
               WIDGETTYPE + "," +
               HITID + "," +
+              DEVICE + "," +
               "modified) " +
-              "VALUES(?,?,?,?,?,?,?);");
+              "VALUES(?,?,?,?,?,?,?,?);");
       int i = 1;
 
       long creatorID = event.getCreatorID();
@@ -137,6 +143,7 @@ public class EventDAO extends DAO {
       statement.setString(i++, event.getWidgetID());
       statement.setString(i++, event.getWidgetType());
       statement.setString(i++, event.getHitID());
+      statement.setString(i++, event.getDevice());
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
 
       int j = statement.executeUpdate();
@@ -211,8 +218,8 @@ public class EventDAO extends DAO {
           rs.getString("context"),
           rs.getLong(CREATORID),
           rs.getTimestamp("modified").getTime(),
-          rs.getString(HITID)
-          )
+          rs.getString(HITID),
+          rs.getString(DEVICE))
       );
     }
 
@@ -220,7 +227,7 @@ public class EventDAO extends DAO {
     return lists;
   }
 
-  private static final List<String> COLUMNS2 = Arrays.asList("id", "type", "exercise", "context", "userid", "timestamp", "time_millis", "hitID");
+  private static final List<String> COLUMNS2 = Arrays.asList("id", "type", "exercise", "context", "userid", "timestamp", "time_millis", "hitID", "device");
 
   /**
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
@@ -278,6 +285,9 @@ public class EventDAO extends DAO {
 
       cell = row.createCell(j++);
       cell.setCellValue(event.getHitID());
+
+      cell = row.createCell(j++);
+      cell.setCellValue(event.getDevice());
 
     }
     now = System.currentTimeMillis();
