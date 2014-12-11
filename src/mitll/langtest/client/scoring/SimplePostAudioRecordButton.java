@@ -3,11 +3,9 @@ package mitll.langtest.client.scoring;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PopupHelper;
@@ -108,7 +106,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
         textToAlign,
         identifier,
         reqid,
-        getAlignmentCallback());
+        controller.getBrowserInfo(), getAlignmentCallback());
   }
 
   protected AsyncCallback<AudioAnswer> getAlignmentCallback() {
