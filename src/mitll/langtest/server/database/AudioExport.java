@@ -337,11 +337,15 @@ public class AudioExport {
         }
       }
 
-      AudioAttribute latestContext = ex.getLatestContext();
+      AudioAttribute latestContext = ex.getLatestContext(true);
       if (latestContext != null) {
-        String speed = latestContext.getSpeed();
-        String name = overallName + File.separator +  getUniqueName(ex, !isEnglish) + "_context";
-        copyAudio(zOut, names, name, speed == null ? "" : speed, installPath, audioConversion, latestContext, ex.getID());
+        copyAudio(zOut, installPath, overallName, isEnglish, audioConversion, names, ex, latestContext);
+        someAudio = true;
+      }
+
+      latestContext = ex.getLatestContext(false);
+      if (latestContext != null) {
+        copyAudio(zOut, installPath, overallName, isEnglish, audioConversion, names, ex, latestContext);
         someAudio = true;
       }
 
@@ -357,6 +361,12 @@ public class AudioExport {
     if (diff > 1000) {
       logger.debug("took " + diff + " millis to export " + toWrite.size() + " items, num attached " + numAttach + " missing audio " + numMissing);
     }
+  }
+
+  private void copyAudio(ZipOutputStream zOut, String installPath, String overallName, boolean isEnglish, AudioConversion audioConversion, Set<String> names, CommonExercise ex, AudioAttribute latestContext) throws IOException {
+    String speed = latestContext.getSpeed();
+    String name = overallName + File.separator + getUniqueName(ex, !isEnglish) + "_context";
+    copyAudio(zOut, names, name, speed == null ? "" : speed, installPath, audioConversion, latestContext, ex.getID());
   }
 
   private MiniUser getMaxUser(Map<MiniUser, Integer> maleToCount) {
