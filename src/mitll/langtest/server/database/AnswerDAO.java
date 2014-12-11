@@ -25,48 +25,7 @@ public class AnswerDAO extends DAO {
   }
 
   /**
-   *
-   * @see DatabaseImpl#addAnswer
-   * @param userID
-   * @param e
-   * @param questionID
-   * @param answer
-   * @param audioFile
-   * @param audioType
-   * @param correct
-   * @param pronScore
-   * @param deviceType
-   * @param device
-   * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
-   */
-/*
-  public void addAnswer(int userID, CommonExercise e, int questionID, String answer, String audioFile,
-                        String audioType, boolean correct, float pronScore, String deviceType, String device) {
-    String id = e.getID();
-    addAnswer(database,userID, id, questionID, answer, audioFile, true, audioType, 0, correct, pronScore, deviceType, device, scoreJson, recordedWithFlash);
-  }
-*/
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
-   * @param userID
-   * @param plan
-   * @param exerciseID
-   * @param questionID
-   * @param stimulus
-   * @param answer
-   * @param answerType
-   * @param correct
-   * @param pronScore
-   */
-/*  public void addAnswer(int userID, String plan, String exerciseID, int questionID, String stimulus, String answer,
-                        String answerType, boolean correct, float pronScore) {
-    addAnswer(database, userID, plan, exerciseID, questionID, answer, "", true, false, false, answerType, 0, correct, pronScore, stimulus);
-  }*/
-
-  /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
-   * @see #addAnswer(Database, int, String, int, String, String, boolean, String, int, boolean, float, String, String, String, boolean)
    * @param database
    * @param userID
    * @param id
