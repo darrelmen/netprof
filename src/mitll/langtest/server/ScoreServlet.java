@@ -23,6 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.URLDecoder;
 import java.util.*;
 
 /**
@@ -94,10 +95,10 @@ public class ScoreServlet extends DatabaseServlet {
 
     getAudioFileHelper();
     String queryString = request.getQueryString();
-
     JSONObject toReturn = new JSONObject();
     try {
       if (queryString != null) {
+        queryString = URLDecoder.decode(queryString,"UTF-8");
         if (queryString.startsWith(NESTED_CHAPTERS)) {
           if (nestedChapters == null || (System.currentTimeMillis() - whenCached > REFRESH_CONTENT_INTERVAL)) {
             nestedChapters = getJsonNestedChapters();
