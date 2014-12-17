@@ -93,6 +93,7 @@ public class EmailHelper {
    * @param url
    * @return true if there's a user with this email
    * @see mitll.langtest.client.user.UserPassLogin#getForgotPassword()
+   * @see mitll.langtest.server.ScoreServlet#resetPassword
    */
   public boolean resetPassword(String user, String email, String url) {
     logger.debug(serverProperties.getLanguage() +" resetPassword for " + user + " url " + url);
@@ -116,7 +117,9 @@ public class EmailHelper {
           CLOSING;
 
       url = trimURL(url);
-      url = url.replaceAll("http","https");
+      if (!url.startsWith("https")) {
+        url = url.replaceAll("http", "https");
+      }
       logger.debug("url is " +url);
       sendEmail(url + "?" + RP + "=" + hash,
           email,
