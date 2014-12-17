@@ -75,6 +75,9 @@ public class AudioFileHelper {
             }
             count++;
           }
+          else {
+
+          }
         }
         if (count > 0) {
           logger.error("huh? out of " + exercises.size() + " LTS fails on " + count);
