@@ -82,9 +82,7 @@ public class ASRScoring extends Scoring {
    * @param langTestDatabase
    */
   public ASRScoring(String deployPath, Map<String, String> properties, LangTestDatabaseImpl langTestDatabase) {
-    this(deployPath, properties
-    //    , (HTKDictionary)null
-    );
+    this(deployPath, properties);
     this.langTestDatabase = langTestDatabase;
     readDictionary();
     makeDecoder();
@@ -98,9 +96,7 @@ public class ASRScoring extends Scoring {
    * @param properties
    * @paramx dict
    */
-  private ASRScoring(String deployPath, Map<String, String> properties
-  //    , HTKDictionary dict
-  ) {
+  private ASRScoring(String deployPath, Map<String, String> properties) {
     super(deployPath);
     lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
@@ -187,6 +183,8 @@ public class ASRScoring extends Scoring {
    * For chinese, maybe later other languages.
    * @param longPhrase
    * @return
+   * @see AutoCRT#getRefs
+   * @see mitll.langtest.server.scoring.ASRScoring#getScoreForAudio
    */
   public static String getSegmented(String longPhrase) {
     Collection<String> tokens = svDecoderHelper.getTokens(longPhrase);
