@@ -20,7 +20,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class SmallVocabDecoder {
-  private static final Logger logger = Logger.getLogger(ASRScoring.class);
+  private static final Logger logger = Logger.getLogger(SmallVocabDecoder.class);
   private HTKDictionary htkDictionary;
 
   public SmallVocabDecoder() {}
@@ -86,9 +86,14 @@ public class SmallVocabDecoder {
 
   public List<String> getTokens(String sentence) {
     List<String> all = new ArrayList<String>();
+   // logger.debug("initial " + sentence);
     sentence = sentence.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ");
+   // logger.debug("after  convert " + sentence);
 
     String trimmedSent = sentence.replaceAll("'", "").replaceAll("\\p{P}", " ").replaceAll("\\s+", " ").trim();
+
+   // logger.debug("after  trim " + trimmedSent);
+
     for (String untrimedToken : trimmedSent.split("\\p{Z}+")) { // split on spaces
       //String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
       String token = untrimedToken.trim();  // necessary?
