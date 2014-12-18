@@ -225,9 +225,12 @@ public class AutoCRT {
    * @return
    */
   private boolean isCorrect(List<String> answerSentences, String recoSentence) {
+   // logger.debug("iscorrect - answer " + answerSentences + " vs " + recoSentence);
+
     List<String> recoTokens = svd.getTokens(recoSentence);
     for (String answer : answerSentences) {
-      String converted = answer.replaceAll("-", " ").replaceAll("\\.", "").toLowerCase();
+      String converted = answer.replaceAll("-", " ").replaceAll("\\.\\.\\.", " ").replaceAll("\\.", "").replaceAll(":", "").toLowerCase();
+     // logger.debug("iscorrect - converted " + converted + " vs " + answer);
 
       List<String> answerTokens = svd.getTokens(converted);
       if (answerTokens.size() == recoTokens.size()) {
@@ -235,10 +238,13 @@ public class AutoCRT {
         for (int i = 0; i < answerTokens.size() && same; i++) {
           String s = answerTokens.get(i);
           String anotherString = recoTokens.get(i);
-          //logger.debug("comparing " + s + "" +s.length()+ " to " + anotherString  +""  +anotherString.length());
+      //    logger.debug("comparing '" + s + "' " +s.length()+ " to '" + anotherString  +"' "  +anotherString.length());
           same = s.equalsIgnoreCase(anotherString);
         }
         if (same) return true;
+      }
+      else {
+       // logger.debug("not same number of tokens " + answerTokens + " " + answerTokens.size() + " vs " + recoTokens + " " + recoTokens.size());
       }
     }
     return false;
@@ -291,7 +297,7 @@ public class AutoCRT {
     StringBuilder sb = new StringBuilder();
     for (String recoToken : recoSentence.split("\\s")) {
       if (goodTokens.contains(recoToken)) {
-        sb.append("<u>"+recoToken +"</u> ");
+        sb.append("<u>" + recoToken + "</u> ");
       } else if (badTokens.contains(recoToken)) {
         sb.append("<s>"+recoToken +"</s> ");
       } else sb.append(recoToken + " ");
@@ -343,8 +349,13 @@ public class AutoCRT {
     return tokens;
   }
 
+  /**
+   * Replace elipsis with space. Then remove all punct.
+   * @param t
+   * @return
+   */
   private String removePunct(String t) {
-    return t.replaceAll("\\p{P}","");
+    return t.replaceAll("\\.\\.\\."," ").replaceAll("\\p{P}","");
   }
 
   /**
