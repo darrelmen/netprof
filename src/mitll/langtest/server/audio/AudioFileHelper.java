@@ -149,25 +149,27 @@ public class AudioFileHelper {
    * @param deviceType
    * @param device
    * @param score
+   * @param reqid
    * @return
    */
   public AudioAnswer getAnswer(String exerciseID, CommonExercise exercise1, int user, boolean doFlashcard, String wavPath,
-                               File file, String deviceType, String device, float score) {
+                               File file, String deviceType, String device, float score, int reqid) {
     String audioType = doFlashcard ? "flashcard" : "learn";
     AudioCheck.ValidityAndDur validity = new AudioConversion().isValid(file);
     boolean isValid =
         validity.validity == AudioAnswer.Validity.OK ||
         (serverProps.isQuietAudioOK() && validity.validity == AudioAnswer.Validity.TOO_QUIET);
+
     return doFlashcard ?
-        getAudioAnswer(exerciseID, exercise1,0, user,0, audioType, doFlashcard, true, true, wavPath, file,
+        getAudioAnswer(exerciseID, exercise1,0, user, reqid, audioType, doFlashcard, true, true, wavPath, file,
             validity, isValid, deviceType, device) :
-        getAudioAnswer(exerciseID, exercise1,0, user,0, audioType, doFlashcard, true, true, wavPath, file,
+        getAudioAnswer(exerciseID, exercise1,0, user,reqid, audioType, doFlashcard, true, true, wavPath, file,
             validity, isValid, score, deviceType, device)
         ;
   }
 
   /**
-   * @see #getAnswer(String, mitll.langtest.shared.CommonExercise, int, boolean, String, java.io.File, String, String, float)
+   * @see #getAnswer(String, mitll.langtest.shared.CommonExercise, int, boolean, String, java.io.File, String, String, float, int)
    * @see #writeAudioFile(String, String, mitll.langtest.shared.CommonExercise, int, int, int, String, boolean, boolean, boolean, String, String)
    * @param exerciseID
    * @param exercise1
@@ -330,7 +332,7 @@ public class AudioFileHelper {
    * @param deviceType
    * @param device
    * @return
-   * @see #getAnswer(String, mitll.langtest.shared.CommonExercise, int, boolean, String, java.io.File, String, String, float)
+   * @see #getAnswer(String, mitll.langtest.shared.CommonExercise, int, boolean, String, java.io.File, String, String, float, int)
    */
   private AudioAnswer getAudioAnswer(String exerciseID, CommonExercise exercise1,
                                      int questionID,
