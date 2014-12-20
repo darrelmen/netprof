@@ -56,11 +56,13 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String CONTENT = "content";
   private static final String HAS_MODEL = "hasModel";
   private static final long REFRESH_CONTENT_INTERVAL = 12 * 60 * 60 * 1000l;
-  public static final String HAS_RESET = "hasReset";
-  public static final String TOKEN = "token";
-  public static final String PASSWORD_CORRECT = "passwordCorrect";
-  public static final String PASSWORD_EMAIL_SENT = "PASSWORD_EMAIL_SENT";
-  public static final String NOT_VALID = "NOT_VALID";
+  private static final String HAS_RESET = "hasReset";
+  private static final String TOKEN = "token";
+  private static final String PASSWORD_CORRECT = "passwordCorrect";
+  private static final String PASSWORD_EMAIL_SENT = "PASSWORD_EMAIL_SENT";
+  private static final String NOT_VALID = "NOT_VALID";
+  private static final String IS_CORRECT = "isCorrect";
+  private static final String SAID_WORD = "saidWord";
   private JSONObject nestedChapters;
   private long whenCached = -1;
   private static final String ENCODING = "UTF8";
@@ -465,6 +467,7 @@ public class ScoreServlet extends DatabaseServlet {
         String exid = request.getHeader("exid");
         String widgetid = request.getHeader("widget");
         String widgetType = request.getHeader("widgetType");
+
         long userid = getUserFromParam2(user);
         if (db.getUserDAO().getUserWhere(userid) == null) {
           jsonObject.put(ERROR, "unknown user " + userid);
@@ -556,15 +559,16 @@ public class ScoreServlet extends DatabaseServlet {
         String exerciseID = request.getHeader("exercise");
         String deviceType = request.getHeader(DEVICE_TYPE);
         String device = request.getHeader(DEVICE);
+        int reqid = getReqID(request);
 
-        logger.debug("got request " + requestType + " for user " + user + " exercise " + exerciseID);
+        logger.debug("got request " + requestType + " for user " + user + " exercise " + exerciseID + " req " + reqid);
         int i = getUserFromParam(user);
         String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, 0, i);
         File saveFile = pathHelper.getAbsoluteFile(wavPath);
 
         writeToFile(next.getInputStream(), saveFile);
 
-        return getJsonForAudioForUser(exerciseID, i, isDecode(requestType), wavPath, saveFile, deviceType, device);
+        return getJsonForAudioForUser(reqid, exerciseID, i, isDecode(requestType), wavPath, saveFile, deviceType, device);
       } else {
         File tempDir = Files.createTempDir();
         File saveFile = new File(tempDir + File.separator + "MyAudioFile.wav");
@@ -699,18 +703,33 @@ public class ScoreServlet extends DatabaseServlet {
     if (requestType != null) {
       String user = request.getHeader(USER);
       String exerciseID = request.getHeader("exercise");
-
-      logger.debug("getJsonForAudio got request " + requestType + " for user " + user + " exercise " + exerciseID);
+      int reqid = getReqID(request);
+      logger.debug("getJsonForAudio got request " + requestType + " for user " + user + " exercise " + exerciseID + " req " + reqid);
       int i = getUserFromParam(user);
       String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, 0, i);
       File saveFile = pathHelper.getAbsoluteFile(wavPath);
       new File(saveFile.getParent()).mkdirs();
 
       writeToOutputStream(request, saveFile);
-      return getJsonForAudioForUser(exerciseID, i, isDecode(requestType), wavPath, saveFile, deviceType, device);
+      return getJsonForAudioForUser(reqid,exerciseID, i, isDecode(requestType), wavPath, saveFile, deviceType, device);
     } else {   // for backwards compatibility
       return handleRequestWithNoType(request);
     }
+  }
+
+  private int getReqID(HttpServletRequest request) {
+    String reqid = request.getHeader("reqid");
+    logger.debug("got req id " + reqid);
+    if (reqid == null) reqid = "1";
+    try {
+      int req = Integer.parseInt(reqid);
+      logger.debug("returning req id " + req);
+
+      return req;
+    } catch (NumberFormatException e) {
+      logger.warn("Got parse error on reqid " + reqid);
+    }
+    return 1;
   }
 
   private JSONObject handleRequestWithNoType(HttpServletRequest request) throws IOException {
@@ -745,7 +764,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
    * @see #getJsonForParts(javax.servlet.http.HttpServletRequest, String)
    */
-  private JSONObject getJsonForAudioForUser(String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile,
+  private JSONObject getJsonForAudioForUser(int reqid, String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile,
                                             String deviceType, String device) {
     long then = System.currentTimeMillis();
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
@@ -755,7 +774,8 @@ public class ScoreServlet extends DatabaseServlet {
       jsonForScore.put("valid", "bad_exercise_id");
 
     } else {
-      AudioAnswer answer = getAudioAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, deviceType, device, exercise1);
+   //   logger.debug("Req = " +reqid);
+      AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, deviceType, device, exercise1);
       long now = System.currentTimeMillis();
       PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
       float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
@@ -766,26 +786,41 @@ public class ScoreServlet extends DatabaseServlet {
       if (answer != null && answer.isValid()) {
         jsonForScore = getJsonForScore(pretestScore);
         if (doFlashcard) {
-          jsonForScore.put("isCorrect", answer.isCorrect());
-          jsonForScore.put("saidWord",  answer.isSaidAnswer());
+          jsonForScore.put(IS_CORRECT, answer.isCorrect());
+          jsonForScore.put(SAID_WORD, answer.isSaidAnswer());
         }
       }
       jsonForScore.put("exid", exerciseID);
       jsonForScore.put("valid", answer == null ? "invalid" : answer.getValidity().toString());
+      jsonForScore.put("reqid", answer == null ? 1 : ""+answer.getReqid());
     }
     return jsonForScore;
   }
 
-  private AudioAnswer getAudioAnswer(String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile,
+  /**
+   *
+   * @param reqid
+   * @param exerciseID
+   * @param user
+   * @param doFlashcard
+   * @param wavPath
+   * @param saveFile
+   * @param deviceType
+   * @param device
+   * @param exercise1
+   * @return
+   * @see #getJsonForAudioForUser
+   */
+  private AudioAnswer getAudioAnswer(int reqid, String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile,
                                      String deviceType, String device, CommonExercise exercise1) {
     AudioAnswer answer;
 
-    if (!doFlashcard) {
-      PretestScore asrScoreForAudio = getASRScoreForAudio(wavPath, exercise1.getRefSentence(), exerciseID);
-      answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(), deviceType, device);
-      answer.setPretestScore(asrScoreForAudio);
+    if (doFlashcard) {
+      answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, -1, deviceType, device, reqid);
     } else {
-      answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, -1, deviceType, device);
+      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, wavPath, exercise1.getRefSentence(), exerciseID);
+      answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(), deviceType, device, reqid);
+      answer.setPretestScore(asrScoreForAudio);
     }
     return answer;
   }
@@ -829,8 +864,8 @@ public class ScoreServlet extends DatabaseServlet {
         " millis for " + saveFile.getName() + " = " + hydecScore);
 
     JSONObject jsonForScore = getJsonForScore(scoreAndAnswer.score);
-    jsonForScore.put("isCorrect", scoreAndAnswer.answer.isCorrect());
-    jsonForScore.put("saidWord",  scoreAndAnswer.answer.isSaidAnswer());
+    jsonForScore.put(IS_CORRECT, scoreAndAnswer.answer.isCorrect());
+    jsonForScore.put(SAID_WORD,  scoreAndAnswer.answer.isSaidAnswer());
     jsonForScore.put("exid", "unknown");
 
     return jsonForScore;
@@ -844,14 +879,15 @@ public class ScoreServlet extends DatabaseServlet {
    * @param file
    * @param deviceType
    * @param device
+   * @param reqid
    * @return
-   * @see #getJsonForAudioForUser(String, int, boolean, String, java.io.File, String, String)
+   * @see #getJsonForAudioForUser(int,String, int, boolean, String, java.io.File, String, String)
    */
   private AudioAnswer getAnswer(String exerciseID, int user, boolean doFlashcard, String wavPath, File file, float score,
-                                String deviceType, String device) {
+                                String deviceType, String device, int reqid) {
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
 
-    AudioAnswer answer = audioFileHelper.getAnswer(exerciseID, exercise1, user, doFlashcard, wavPath, file, deviceType, device, score);
+    AudioAnswer answer = audioFileHelper.getAnswer(exerciseID, exercise1, user, doFlashcard, wavPath, file, deviceType, device, score, reqid);
     ensureMP3(answer.getPath());
 
     return answer;
@@ -958,14 +994,16 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * TODO : this is wacky -- have to do this for alignment but not for decoding
    *
+   *
+   * @param reqid
    * @param testAudioFile
    * @param sentence
    * @param exerciseID
    * @return
    */
-  private PretestScore getASRScoreForAudio(String testAudioFile, String sentence,
+  private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                            String exerciseID) {
-    return audioFileHelper.getASRScoreForAudio(1, testAudioFile, sentence, 128, 128, false,
+    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, 128, 128, false,
         false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID);
   }
 
