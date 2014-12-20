@@ -61,7 +61,6 @@ public class Report {
     SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
     String today = simpleDateFormat2.format(new Date());
 
-    logger.debug("Site real path " + site);
     String suffix = "";
     if (site != null && site.contains("npfClassroom")) {
       site = site.substring(site.indexOf("npfClassroom"));
@@ -74,6 +73,7 @@ public class Report {
       if (file.exists()) {
         logger.debug("already did report for " + today + " : " + file.getAbsolutePath());
       } else {
+        logger.debug("Site real path " + site);
         try {
           String message = writeReport(file, pathHelper);
           for (String dest : reportEmails) {
