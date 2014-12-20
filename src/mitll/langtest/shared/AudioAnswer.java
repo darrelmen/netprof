@@ -50,6 +50,7 @@ public class AudioAnswer implements IsSerializable {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    * @param path
    * @param validity
    * @param reqid
