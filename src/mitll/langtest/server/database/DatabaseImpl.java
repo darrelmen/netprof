@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.ExerciseSorter;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -465,9 +466,10 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public JSONObject getJsonScoreHistory(long userid,
-                                        Map<String, Collection<String>> typeToSection) {
+                                        Map<String, Collection<String>> typeToSection, ExerciseSorter sorter) {
     Collection<CommonExercise> exercisesForState = getSectionHelper().getExercisesForSelectionState(typeToSection);
     List<String> allIDs = new ArrayList<String>();
+
     Map<String, String> idToFL = new HashMap<String, String>();
     for (CommonExercise exercise : exercisesForState) {
       String id = exercise.getID();
@@ -475,7 +477,19 @@ public class DatabaseImpl implements Database {
       idToFL.put(id, exercise.getForeignLanguage());
     }
 
-    JSONObject container = new JSONObject();
+/*
+    Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
+    for (CommonExercise exercise : exercisesForState) {
+      String id = exercise.getID();
+      allIDs.add(id);
+      idToEx.put(id, exercise);
+    }
+*/
+
+
+//    for (ExerciseCorrectAndScore ex : resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, sorter)) {
+
+      JSONObject container = new JSONObject();
     JSONArray scores = new JSONArray();
     int correct = 0, incorrect = 0;
     for (ExerciseCorrectAndScore ex : resultDAO.getExerciseCorrectAndScores(userid, allIDs, idToFL)) {
