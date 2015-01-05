@@ -9,9 +9,7 @@ import mitll.langtest.shared.Exercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -36,6 +34,9 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   private long modifiedTimestamp;
   private List<CorrectAndScore> scores;
   private float avgScore;
+  private transient Set<String> bagOfPhones = new HashSet<String>();
+  private transient List<String> firstPron = new ArrayList<String>();
+ // private transient List<List<String>> pronunciations = new ArrayList<List<String>>();
   private static final int MAX_TOOLTIP_LENGTH = 15;
 
   public UserExercise() {}  // just for serialization
@@ -266,6 +267,26 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
 
   public float getAvgScore() {
     return avgScore;
+  }
+
+  @Override
+  public Set<String> getBagOfPhones() {
+    return bagOfPhones;
+  }
+
+  @Override
+  public List<String> getFirstPron() {
+    return firstPron;
+  }
+
+  @Override
+  public void setBagOfPhones(Set<String> bagOfPhones) {
+    this.bagOfPhones = bagOfPhones;
+  }
+
+  @Override
+  public void setFirstPron(List<String> phones) {
+    this.firstPron = phones;
   }
 
   public void setAvgScore(float avgScore) {
