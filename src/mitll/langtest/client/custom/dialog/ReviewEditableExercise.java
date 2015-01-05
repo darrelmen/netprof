@@ -63,6 +63,7 @@ public class ReviewEditableExercise extends EditableExercise {
    * @param changedUserExercise
    * @param originalList
    * @param exerciseList
+   * @param predefinedContent - this should be a reference to the Learn tab exercise list, but it's not getting set.
    * @see mitll.langtest.client.custom.content.NPFHelper.ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
    */
   public ReviewEditableExercise(LangTestDatabaseAsync service,
@@ -79,7 +80,7 @@ public class ReviewEditableExercise extends EditableExercise {
       itemMarker, changedUserExercise, originalList, exerciseList, predefinedContent, npfHelper);
     this.exerciseList = exerciseList;
     this.predefinedContentList = predefinedContent;
-    if (predefinedContentList == null) new Exception().printStackTrace();
+//    if (predefinedContentList == null) new Exception().printStackTrace();
   }
 
   private List<RememberTabAndContent> tabs;
@@ -270,7 +271,9 @@ public class ReviewEditableExercise extends EditableExercise {
           @Override
           public void onSuccess(Void result) {
             widgets.getParent().setVisible(false);
-            predefinedContentList.reload();
+            if (predefinedContentList != null) {
+              predefinedContentList.reload();
+            }
             // TODO : need to update other lists too?
           }
         });
@@ -591,7 +594,10 @@ public class ReviewEditableExercise extends EditableExercise {
               getWaveform().setVisible(false);
               getPlayButton().setEnabled(false);
               if (comment != null) comment.setVisible(false);
-              predefinedContentList.reload();
+
+              if (predefinedContentList != null) {
+                predefinedContentList.reload();
+              }
               // TODO : need to update other lists too?
             }
           });
