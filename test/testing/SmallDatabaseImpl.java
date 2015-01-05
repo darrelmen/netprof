@@ -52,7 +52,7 @@ public class SmallDatabaseImpl implements Database {
 
 
   @Override
-  public void logEvent(String exid, String context, long userid) {
+  public void logEvent(String exid, String context, long userid, String device) {
 
   }
 
