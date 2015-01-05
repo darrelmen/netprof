@@ -67,7 +67,7 @@ class EditableExercise extends NewUserExercise {
     this.originalList = originalList;
     this.exerciseList = exerciseList;
     this.predefinedContentList = predefinedContent;
-    if (predefinedContentList == null) new Exception().printStackTrace();
+//    if (predefinedContentList == null) new Exception().printStackTrace();
 
     this.npfHelper = npfHelper;
   }
