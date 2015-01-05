@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.Collator;
 import java.util.*;
 
 /**
@@ -51,6 +52,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
   public static final String DATABASE_REFERENCE = "databaseReference";
+  public static final String AUDIO_FILE_HELPER_REFERENCE = "audioFileHelperReference";
   private static final int SLOW_EXERCISE_EMAIL = 2000;
   public static final String ENGLISH = "English";
   public static final int MAX = 30;
@@ -719,6 +721,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     audioFileHelper.checkLTS(exercises);
+    if (getServletContext().getAttribute(AUDIO_FILE_HELPER_REFERENCE) == null) {
+      shareAudioFileHelper(getServletContext());
+    }
     long now = System.currentTimeMillis();
     if (now - then > 200) {
       logger.info("took " + (now - then) + " millis to get the predef exercise list for " + serverProps.getLanguage());
@@ -1781,6 +1786,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
+  /**
+   * @see #getExercises
+   */
   void makeAutoCRT() {  audioFileHelper.makeAutoCRT(relativeConfigDir, this);  }
 
   @Override
@@ -1994,6 +2002,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db = makeDatabaseImpl(h2DatabaseFile);
     shareDB(servletContext);
     shareLoadTesting(servletContext);
+  //  shareAudioFileHelper(servletContext);
+
+   // logger.debug(AUDIO_FILE_HELPER_REFERENCE + " " + servletContext.getAttribute(AUDIO_FILE_HELPER_REFERENCE));
   }
 
   private void shareLoadTesting(ServletContext servletContext) {
@@ -2004,13 +2015,26 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     servletContext.setAttribute(ScoreServlet.LOAD_TESTING, this);
   }
 
+  /**
+   * @see #readProperties
+   * @param servletContext
+   */
   private void shareDB(ServletContext servletContext) {
     Object databaseReference = servletContext.getAttribute(DATABASE_REFERENCE);
     if (databaseReference != null) {
-      logger.debug("hmm... foundexisting database reference " + databaseReference);
+      logger.debug("hmm... found existing database reference " + databaseReference);
     }
 
     servletContext.setAttribute(DATABASE_REFERENCE, db);
+  }
+
+  private void shareAudioFileHelper(ServletContext servletContext) {
+    Object databaseReference = servletContext.getAttribute(AUDIO_FILE_HELPER_REFERENCE);
+    if (databaseReference != null) {
+      logger.debug("hmm... found existing reference " + databaseReference);
+    }
+
+    servletContext.setAttribute(AUDIO_FILE_HELPER_REFERENCE, audioFileHelper);
   }
 
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
@@ -2030,6 +2054,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile, serverProps.getLanguage(), useFile,
         relativeConfigDir + File.separator + serverProps.getMediaDir());
+
+    Locale[] availableLocales = Collator.getAvailableLocales();
+    for (Locale locale : availableLocales) {
+      logger.debug("locale " + locale);
+    }
 
     return lessonPlanFile;
   }
