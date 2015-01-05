@@ -2,6 +2,7 @@ package mitll.langtest.server.audio;
 
 import com.google.common.io.Files;
 import mitll.langtest.client.AudioTag;
+import mitll.langtest.server.ExerciseSorter;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -10,6 +11,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.Export;
 import mitll.langtest.server.database.PhoneDAO;
 import mitll.langtest.server.database.WordDAO;
+import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
@@ -24,10 +26,7 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -62,13 +61,22 @@ public class AudioFileHelper {
     this.langTestDatabase = langTestDatabase;
   }
 
+  private Map<String,Integer> phoneToCount;
+
+  /**
+   *
+   * @param exercises
+   */
   public void checkLTS(List<CommonExercise> exercises) {
     synchronized (this) {
       if (!checkedLTS) {
         checkedLTS = true;
         int count = 0;
+        makeASRScoring();
+
+        phoneToCount = new HashMap<String, Integer>();
         for (CommonExercise exercise : exercises) {
-          boolean validForeignPhrase = checkLTS(exercise.getForeignLanguage());
+          boolean validForeignPhrase = asrScoring.checkLTS(exercise.getForeignLanguage());
           if (!validForeignPhrase) {
             if (count < 10) {
               logger.error("huh? for " + exercise.getID() + " we can't parse " + exercise.getID() + " " + exercise.getEnglish() + " fl " + exercise.getForeignLanguage());
@@ -76,14 +84,35 @@ public class AudioFileHelper {
             count++;
           }
           else {
-
+            countPhones(exercise);
           }
         }
+
+/*        ExerciseSorter exerciseSorter = new ExerciseSorter(db.getSectionHelper().getTypeOrder());
+        exerciseSorter.getSortedByUnitThenPhone(exercises, false, phoneToCount);
+        int max = 0;
+        for (CommonExercise exercise : exercises) {
+          if (max++ < 3000)
+            logger.debug(exercise.getID() + "\t" + exercise.getUnitToValue()+" "+exercise.getForeignLanguage() + " " + exercise.getBagOfPhones() + " first  " + exercise.getFirstPron());
+        }*/
         if (count > 0) {
           logger.error("huh? out of " + exercises.size() + " LTS fails on " + count);
         }
       }
     }
+  }
+
+  private void countPhones(CommonExercise exercise) {
+    ASRScoring.PhoneInfo bagOfPhones = asrScoring.getBagOfPhones(exercise.getForeignLanguage());
+    exercise.setBagOfPhones(bagOfPhones.getPhoneSet());
+    exercise.setFirstPron(bagOfPhones.getFirstPron());
+
+    // for (String phone : bagOfPhones.getPhoneSet()) {
+    //  logger.debug(exercise.getID() + " " + exercise.getForeignLanguage()+ " pron " + bagOfPhones.getFirstPron());
+    for (String phone : bagOfPhones.getFirstPron()) {
+     Integer integer = getPhoneToCount().get(phone);
+     getPhoneToCount().put(phone, integer == null ? 1 : integer + 1);
+   }
   }
 
   /**
@@ -305,7 +334,7 @@ public class AudioFileHelper {
   }
 
   public static float round(float d) {
-    return round(d,3);
+    return round(d, 3);
   }
   public static float round(float d, int decimalPlace) {
     BigDecimal bd = new BigDecimal(Float.toString(d));
@@ -365,10 +394,8 @@ public class AudioFileHelper {
     return answer;
   }
 
-
-
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getAlignment(String, String, String, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getAlignment
    * @param base64EncodedString
    * @param textToAlign
    * @param identifier
@@ -616,6 +643,10 @@ public class AudioFileHelper {
     AudioAnswer audioAnswer = new AudioAnswer();
     PretestScore flashcardAnswer = autoCRT.getFlashcardAnswer(file, wordOrPhrase, audioAnswer, serverProps.getLanguage());
     return new ScoreAndAnswer(flashcardAnswer, audioAnswer);
+  }
+
+  public Map<String, Integer> getPhoneToCount() {
+    return phoneToCount;
   }
 
   public static class ScoreAndAnswer {
