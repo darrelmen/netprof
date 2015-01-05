@@ -1,7 +1,9 @@
 package mitll.langtest.server.database.custom;
 
+import mitll.langtest.server.ExerciseTrie;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonUserExercise;
@@ -40,17 +42,42 @@ public class UserListManagerTest {
   public static void setup() {
     logger.debug("setup called");
 
-    String english = "egyptian";//"mandarin";
+    // String english = "egyptian";//"mandarin";
+   // String english = "msa";//"mandarin";
+  //  String english = "english";//"mandarin";
+  //  String english = "mandarin";//"mandarin";
+    String english = "korean";//"mandarin";
     File file = new File("war" + File.separator + "config" + File.separator + english + File.separator + "quizlet.properties");
     String parent = file.getParent();
     logger.debug("config dir " + parent);
     logger.debug("config     " + file.getName());
-    test = "npfClassroomEgyptian";// "mandarin";
+   // test = "npfClassroomMSA";// "mandarin";
+   // test = "english";// "mandarin";
+    test = english;//"mandarin";// "mandarin";
     database = new DatabaseImpl(parent, file.getName(), test, new ServerProperties(parent, file.getName()), new PathHelper("war"), false, null);
     logger.debug("made " + database);
     database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(), english, true, ".");
 
-    database.getExercises();
+    List<CommonExercise> exercises = database.getExercises();
+
+    //makeAutoCRT();   // side effect of db.getExercises is to make the exercise DAO which is needed here...
+
+    getAudioFileHelper(new PathHelper("war"));
+    audioFileHelper.checkLTS(exercises);
+  }
+
+  static AudioFileHelper audioFileHelper;
+  private static AudioFileHelper getAudioFileHelper(PathHelper pathHelper) {
+    if (audioFileHelper == null) {
+     // setPaths();
+
+      //db = getDatabase();
+      ServerProperties serverProps = database.getServerProps();
+      audioFileHelper = new AudioFileHelper(pathHelper, serverProps, database, null);
+
+     // makeAutoCRT(audioFileHelper);
+    }
+    return audioFileHelper;
   }
 
 /*  private static DatabaseImpl makeDatabaseImpl(String configDir) {
@@ -63,7 +90,7 @@ public class UserListManagerTest {
   @Test
   public void testReport() {
     Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
-    typeToValues.put("Lesson", Arrays.asList("2"));
+    typeToValues.put("Lesson", Arrays.asList("1-1"));
    // database.getReport();
 
     database.doReport(new PathHelper("war"));
@@ -73,7 +100,7 @@ public class UserListManagerTest {
   @Test
   public void testSorted() {
     Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
-    typeToValues.put("Lesson", Arrays.asList("2"));
+    typeToValues.put("Lesson", Arrays.asList("1-1"));
     int userid = 1;
     database.getJsonPhoneReport(userid, typeToValues);
    // database.getJsonScoreHistory(userid, typeToValues);
