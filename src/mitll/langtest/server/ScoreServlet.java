@@ -233,7 +233,7 @@ public class ScoreServlet extends DatabaseServlet {
             //logger.debug("chapterHistory " + user + " selection " + selection);
             try {
               long l = Long.parseLong(user);
-              toReturn = db.getJsonScoreHistory(l, selection);
+              toReturn = db.getJsonScoreHistory(l, selection,new ExerciseSorter(db.getSectionHelper().getTypeOrder(),audioFileHelper.getPhoneToCount()));
             } catch (NumberFormatException e) {
               toReturn.put(ERROR, "User id should be a number");
             }
@@ -369,7 +369,7 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
-  String resetPassword(String user, String email, String requestURL) {
+  private String resetPassword(String user, String email, String requestURL) {
     logger.debug(serverProps.getLanguage() + " resetPassword for " + user);
     String emailH = Md5Hash.getHash(email);
     User validUserAndEmail = db.getUserDAO().isValidUserAndEmail(user, emailH);
@@ -385,7 +385,7 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
-  boolean changePFor(String token, String passwordH) {
+  private boolean changePFor(String token, String passwordH) {
     User userWhereResetKey = db.getUserDAO().getUserWhereResetKey(token);
     if (userWhereResetKey != null) {
       logger.debug("clearing key for " + userWhereResetKey);
@@ -659,6 +659,8 @@ public class ScoreServlet extends DatabaseServlet {
 
     List<CommonExercise> copy = new ArrayList<CommonExercise>(exercisesForState);
     new ExerciseSorter(db.getSectionHelper().getTypeOrder()).sortByTooltip(copy);
+
+//    new ExerciseSorter(db.getSectionHelper().getTypeOrder()).getSortedByUnitThenPhone(copy, false, audioFileHelper.getPhoneToCount(), false);
 
     return getJsonArray(copy);
   }
@@ -949,9 +951,9 @@ public class ScoreServlet extends DatabaseServlet {
 
       db = getDatabase();
       serverProps = db.getServerProps();
-      audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, null);
-
-      makeAutoCRT(audioFileHelper);
+     // audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, null);
+      audioFileHelper = getAudioFileHelperRef();
+      //makeAutoCRT(audioFileHelper);
     }
     return audioFileHelper;
   }
@@ -967,6 +969,19 @@ public class ScoreServlet extends DatabaseServlet {
       logger.error("huh? no existing db reference?");
     }
     return db;
+  }
+
+  private AudioFileHelper getAudioFileHelperRef() {
+    AudioFileHelper fileHelper = null;
+
+    Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.AUDIO_FILE_HELPER_REFERENCE);
+    if (databaseReference != null) {
+      fileHelper = (AudioFileHelper) databaseReference;
+      logger.debug("found existing audio file reference " + fileHelper + " under " + getServletContext());
+    } else {
+      logger.error("huh? no existing audio file reference?");
+    }
+    return fileHelper;
   }
 
   /**
@@ -1026,7 +1041,7 @@ public class ScoreServlet extends DatabaseServlet {
     }
 
     try {
-      makeAutoCRT(audioFileHelper);
+      //makeAutoCRT(audioFileHelper);
       asrScoreForAudio = audioFileHelper.getFlashcardAnswer(testAudioFile, sentence);
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -1035,7 +1050,7 @@ public class ScoreServlet extends DatabaseServlet {
     return asrScoreForAudio;
   }
 
-  private void makeAutoCRT(final AudioFileHelper audioFileHelper) {
+/*  private void makeAutoCRT(final AudioFileHelper audioFileHelper) {
     AutoCRTScoring crtScoring = new AutoCRTScoring() {
       @Override
       public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences) {
@@ -1048,7 +1063,7 @@ public class ScoreServlet extends DatabaseServlet {
       }
     };
     audioFileHelper.makeAutoCRT(relativeConfigDir, crtScoring);
-  }
+  }*/
 
   /**
    * @param db
