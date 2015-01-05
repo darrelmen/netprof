@@ -75,11 +75,11 @@ public class ASRScoring extends Scoring {
   private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
-   * @see mitll.langtest.server.audio.AudioFileHelper#makeASRScoring()
    * @param deployPath
    * @param properties
    * @param langTestDatabase
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
+   * @see mitll.langtest.server.audio.AudioFileHelper#makeASRScoring()
    */
   public ASRScoring(String deployPath, Map<String, String> properties, LangTestDatabaseImpl langTestDatabase) {
     this(deployPath, properties);
@@ -91,10 +91,10 @@ public class ASRScoring extends Scoring {
   private final String languageProperty;
 
   /**
-   * @see #ASRScoring(String, java.util.Map, mitll.langtest.server.LangTestDatabaseImpl)
    * @param deployPath
    * @param properties
    * @paramx dict
+   * @see #ASRScoring(String, java.util.Map, mitll.langtest.server.LangTestDatabaseImpl)
    */
   private ASRScoring(String deployPath, Map<String, String> properties) {
     super(deployPath);
@@ -106,9 +106,9 @@ public class ASRScoring extends Scoring {
 
     isMandarin = language.equalsIgnoreCase("mandarin");
     this.letterToSoundClass = new LTSFactory().getLTSClass(language);
-   // this.htkDictionary = dict;
+    // this.htkDictionary = dict;
     makeDecoder();
-   // if (dict != null) logger.debug("htkDictionary size is " + dict.size());
+    // if (dict != null) logger.debug("htkDictionary size is " + dict.size());
     this.configFileCreator = new ConfigFileCreator(properties, letterToSoundClass, scoringDir);
   }
 
@@ -118,22 +118,36 @@ public class ASRScoring extends Scoring {
     }
   }
 
-  public SmallVocabDecoder getSmallVocabDecoder() { return svDecoderHelper; }
+  public SmallVocabDecoder getSmallVocabDecoder() {
+    return svDecoderHelper;
+  }
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTS(String)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
    * @param foreignLanguagePhrase
    * @return
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTS(String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
    */
-  public boolean checkLTS(String foreignLanguagePhrase) { return checkLTS(letterToSoundClass, foreignLanguagePhrase); }
+  public boolean checkLTS(String foreignLanguagePhrase) {
+    return checkLTS(letterToSoundClass, foreignLanguagePhrase);
+  }
 
   /**
+   *
+   * @param foreignLanguagePhrase
+   * @return
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTS
+   */
+  public PhoneInfo getBagOfPhones(String foreignLanguagePhrase) {
+    return checkLTS2(letterToSoundClass, foreignLanguagePhrase);
+  }
+  /**
    * So chinese is special -- it doesn't do lts -- it just uses a dictionary
-   * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
+   *
    * @param lts
    * @param foreignLanguagePhrase
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
    * @see #checkLTS(String)
    */
   private boolean checkLTS(LTS lts, String foreignLanguagePhrase) {
@@ -157,14 +171,14 @@ public class ASRScoring extends Scoring {
         } else {
           String[][] process = lts.process(token);
           if (process == null || process.length == 0 || process[0].length == 0 ||
-            process[0][0].length() == 0 || (process.length == 1 && process[0].length == 1 && process[0][0].equals("aa"))) {
+              process[0][0].length() == 0 || (process.length == 1 && process[0].length == 1 && process[0][0].equals("aa"))) {
             boolean htkEntry = htkDictionary.contains(token);
             if (!htkEntry && !htkDictionary.isEmpty()) {
-              logger.warn("checkLTS with " + lts + "/" + languageProperty + " token #" +i+
-                " : '" + token + "' hash " + token.hashCode()+
-                " is invalid in " + foreignLanguagePhrase+
-                " and not in dictionary (" + htkDictionary.size()+
-                ")");
+              logger.warn("checkLTS with " + lts + "/" + languageProperty + " token #" + i +
+                  " : '" + token + "' hash " + token.hashCode() +
+                  " is invalid in " + foreignLanguagePhrase +
+                  " and not in dictionary (" + htkDictionary.size() +
+                  ")");
               return false;
             }
           }
@@ -172,18 +186,130 @@ public class ASRScoring extends Scoring {
         i++;
       }
     } catch (Exception e) {
-      logger.error("lts " + language + "/" + lts + " failed on '" + foreignLanguagePhrase +"'", e);
+      logger.error("lts " + language + "/" + lts + " failed on '" + foreignLanguagePhrase + "'", e);
       return false;
     }
-//    logger.debug("phrase '" +foreignLanguagePhrase+ "' is valid.");
+   // Collection<String> strings = checkLTS2(lts, foreignLanguagePhrase);
+
+   // logger.debug("phrase '" +foreignLanguagePhrase+ "' has bag of phones : " + strings);
     return true;
   }
+
+  int multiple = 0;
+  /**
+   * Might be n1 x n2 x n3 different possible combinations of pronunciations of a phrase
+   * Consider running ASR on all ref audio to get actual phone sequence.
+   *
+   * @param lts
+   * @param foreignLanguagePhrase
+   */
+  private PhoneInfo checkLTS2(LTS lts, String foreignLanguagePhrase) {
+    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
+    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
+
+    //List<List<String>> pronunciations = new ArrayList<List<String>>();
+    List<String> firstPron = new ArrayList<String>();
+    Set<String> uphones = new TreeSet<String>();
+
+    if (isMandarin) {
+      List<String> token2 = new ArrayList<String>();
+      for (String token : tokens) {
+        String segmentation = smallVocabDecoder.segmentation(token.trim());
+        if (segmentation.isEmpty()) {
+          logger.warn("no segmentation for " + foreignLanguagePhrase +  " token " + token);
+        }
+        else {
+          Collections.addAll(token2, segmentation.split(" "));
+        }
+      }
+  //    logger.debug("Tokens were " + tokens + " now " + token2);
+      tokens = token2;
+    }
+
+    for (String token : tokens) {
+      if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL))
+        return new PhoneInfo(firstPron,uphones) ;
+      // either lts can handle it or the dictionary can...
+
+      boolean htkEntry = htkDictionary.contains(token);
+      if (htkEntry) {
+        scala.collection.immutable.List<String[]> pronunciationList = htkDictionary.apply(token);
+        //   logger.debug("token " + pronunciationList);
+        scala.collection.Iterator iter = pronunciationList.iterator();
+        boolean first = true;
+        while (iter.hasNext()) {
+          Object next = iter.next();
+          //    logger.debug(next);
+
+          String[] tt = (String[]) next;
+          for (String t : tt) {
+            //logger.debug(t);
+            uphones.add(t);
+
+            if (first) {
+              firstPron.add(t);
+            }
+          }
+          if (!first) multiple++;
+          first = false;
+        }
+      } else {
+        String[][] process = lts.process(token);
+        //logger.debug("token " + token);
+        if (process != null) {
+
+          boolean first = true;
+          for (String[] onePronunciation : process) {
+            // each pronunciation
+  //          ArrayList<String> pronunciation = new ArrayList<String>();
+    //        pronunciations.add(pronunciation);
+            for (String phoneme : onePronunciation) {
+              //logger.debug("phoneme " +phoneme);
+      //        pronunciation.add(phoneme);
+              uphones.add(phoneme);
+
+              if (first) {
+                firstPron.add(phoneme);
+              }
+            }
+            if (!first) multiple++;
+            first = false;
+          }
+        }
+      }
+    }
+    //if (multiple % 1000 == 0) logger.debug("mult " + multiple);
+    return new PhoneInfo(firstPron,uphones);
+  }
+
+  public static class PhoneInfo {
+    private List<String> firstPron;
+    private Set<String> phoneSet;
+
+    public PhoneInfo(List<String> firstPron, Set<String> phoneSet) {
+      this.firstPron = firstPron;
+      this.phoneSet = phoneSet;
+    }
+
+    public String toString() {
+      return "Phones " + getPhoneSet() + " " + getFirstPron();
+    }
+
+    public List<String> getFirstPron() {
+      return firstPron;
+    }
+
+    public Set<String> getPhoneSet() {
+      return phoneSet;
+    }
+  }
+
 
   /**
    * For chinese, maybe later other languages.
    * @param longPhrase
    * @return
-   * @see AutoCRT#getRefs
+   * @seex AutoCRT#getRefs
    * @see mitll.langtest.server.scoring.ASRScoring#getScoreForAudio
    */
   public static String getSegmented(String longPhrase) {
