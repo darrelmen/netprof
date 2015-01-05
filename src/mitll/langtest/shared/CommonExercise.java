@@ -5,6 +5,7 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by GO22670 on 3/20/2014.
@@ -111,4 +112,9 @@ public interface CommonExercise extends CommonShell {
   void setAvgScore(float v);
   float getAvgScore();
 
+  Set<String> getBagOfPhones();
+  List<String> getFirstPron();
+
+  void setBagOfPhones(Set<String> bagOfPhones);
+  void setFirstPron(List<String> phones);
 }
