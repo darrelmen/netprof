@@ -1,11 +1,9 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.ExerciseSorter;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.MonitorResult;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.monitoring.Session;
@@ -17,6 +15,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.*;
+import java.text.Collator;
 import java.util.*;
 import java.util.Date;
 
@@ -247,10 +246,17 @@ public class ResultDAO extends DAO {
    */
   public List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(long userid, List<String> allIds, Map<String,String> idToFL) {
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
-    if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
+   // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
     return getSortedAVPHistory(results, allIds, idToFL);
   }
 
+
+  public List<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(long userid, List<String> allIds, Map<String,CommonExercise> idToEx,
+                                                                           ExerciseSorter sorter) {
+    List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
+    // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
+    return getSortedAVPHistoryByPhones(results, allIds, idToEx,sorter);
+  }
   /**
    * @param results
    * @param allIds
@@ -263,8 +269,17 @@ public class ResultDAO extends DAO {
     return sortedResults;
   }*/
 
+  /**
+   *
+   * @param results
+   * @param allIds
+   * @param idToFL
+   * @return
+   * @see #getExerciseCorrectAndScores
+   */
   private List<ExerciseCorrectAndScore> getSortedAVPHistory(List<CorrectAndScore> results, Collection<String> allIds,
                                                             final Map<String, String> idToFL) {
+
     List<ExerciseCorrectAndScore> sortedResults = getExerciseCorrectAndScores(results, allIds);
     Collections.sort(sortedResults, new Comparator<ExerciseCorrectAndScore>() {
       @Override
@@ -279,6 +294,22 @@ public class ResultDAO extends DAO {
     return sortedResults;
   }
 
+  private List<ExerciseCorrectAndScore> getSortedAVPHistoryByPhones(List<CorrectAndScore> results, Collection<String> allIds,
+                                                                    final Map<String, CommonExercise> idToEx, final ExerciseSorter sorter
+  ) {
+    List<ExerciseCorrectAndScore> sortedResults = getExerciseCorrectAndScores(results, allIds);
+    Collections.sort(sortedResults, new Comparator<ExerciseCorrectAndScore>() {
+      @Override
+      public int compare(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2) {
+        CommonExercise o1Ex = idToEx.get(o1.getId());
+        CommonExercise o2Ex = idToEx.get(o2.getId());
+        //  if (fl == null) fl = "";
+        //  if (otherFL == null) otherFL = "";
+        return sorter.phoneCompByFirst(o1Ex, o2Ex);
+      }
+    });
+    return sortedResults;
+  }
 
   private List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(List<CorrectAndScore> results, Collection<String> allIds) {
     SortedMap<String, ExerciseCorrectAndScore> idToScores = new TreeMap<String, ExerciseCorrectAndScore>();
@@ -422,8 +453,9 @@ public class ResultDAO extends DAO {
    * @return
    * @see #getSessionsForUserIn2
    * @see #attachScoreHistory(long, mitll.langtest.shared.CommonExercise, boolean)
+   * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory
    */
-  private List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, long userid) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, long userid) {
     try {
       String list = getInList(ids);
 
