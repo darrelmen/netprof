@@ -34,6 +34,9 @@ public class Exercise extends AudioExercise implements CommonExercise {
   private STATE state;
   private List<CorrectAndScore> scores;
   private float avgScore;
+  private transient Set<String> bagOfPhones = new HashSet<String>();
+  //private transient List<List<String>> pronunciations = new ArrayList<List<String>>();
+  private transient List<String> firstPron = new ArrayList<String>();
 
   public static class QAPair implements IsSerializable {
     private String question;
@@ -358,6 +361,30 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.avgScore = avgScore;
   }
 
+  @Override
+  public Set<String> getBagOfPhones() {
+    return bagOfPhones;
+  }
+
+  @Override
+  public void setBagOfPhones(Set<String> bagOfPhones) {
+    this.bagOfPhones = bagOfPhones;
+  }
+
+/*  public List<List<String>> getPronunciations() {
+    return pronunciations;
+  }*/
+
+  @Override
+  public List<String> getFirstPron() {
+    return firstPron;
+  }
+
+  @Override
+  public void setFirstPron(List<String> firstPron) {
+    this.firstPron = firstPron;
+  }
+
   public String toString() {
     //  String moreAboutQuestions = DEBUG ? " : " +  getQuestionToString() : "";
     //  String questionInfo = langToQuestion == null ? " no questions" : " num questions " + langToQuestion.size() + moreAboutQuestions;
@@ -378,18 +405,4 @@ public class Exercise extends AudioExercise implements CommonExercise {
         //    " : " + questionInfo +
         " unit->lesson " + getUnitToValue();
   }
-
-/*  private String getQuestionToString() {
-    String questions = "";
-    if (langToQuestion != null) {
-      for (Map.Entry<String, List<QAPair>> pair : langToQuestion.entrySet()) {
-        questions += pair.getKey() + " -> ";
-        int i =1;
-        for (QAPair qa : pair.getValue()) {
-          questions += "#"+ (i++) +" : "+qa.toString() + ", ";
-        }
-      }
-    }
-    return questions;
-  }*/
 }
