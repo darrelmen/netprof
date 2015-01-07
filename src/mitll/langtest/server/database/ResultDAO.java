@@ -15,6 +15,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.*;
+import java.text.CollationKey;
 import java.text.Collator;
 import java.util.*;
 import java.util.Date;
@@ -183,15 +184,16 @@ public class ResultDAO extends DAO {
    * A session will have statistics - # correct, avg pronunciation score, maybe duration, etc.
    *
    * @param ids only those items that were actually practiced (or scored)
-   * @param allIds all the item ids in the chapter or set of chapters that were covered
-   * @param userid who did them
    * @param latestResultID
+   * @param userid who did them
+   * @param allIds all the item ids in the chapter or set of chapters that were covered
+   * @param idToKey
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
    */
   public SessionsAndScores getSessionsForUserIn2(Collection<String> ids, long latestResultID, long userid,
-                                                 Collection<String> allIds, Map<String, String> idToFL) {
+                                                 Collection<String> allIds, Map<String, CollationKey> idToKey) {
     List<Session> sessions = new ArrayList<Session>();
     Map<Long, List<CorrectAndScore>> userToAnswers = populateUserToAnswers(getResultsForExIDIn(ids, true));
     if (debug) logger.debug("Got " + userToAnswers.size() + " user->answer map");
@@ -206,7 +208,7 @@ public class ResultDAO extends DAO {
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
     if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
 
-    List<ExerciseCorrectAndScore> sortedResults = getSortedAVPHistory(results, allIds, idToFL);
+    List<ExerciseCorrectAndScore> sortedResults = getSortedAVPHistory(results, allIds, idToKey);
     if (debug) logger.debug("found " + sessions.size() + " sessions for " + ids);
 
     return new SessionsAndScores(sessions, sortedResults);
@@ -216,20 +218,23 @@ public class ResultDAO extends DAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds(int, java.util.Map, String, long, int, String, boolean, boolean, boolean)
    * @param exercises
    * @param userid
+   * @param collator
    * @return
    */
-  public List<CommonExercise> getExercisesSortedIncorrectFirst(Collection<CommonExercise> exercises, long userid) {
+  public List<CommonExercise> getExercisesSortedIncorrectFirst(Collection<CommonExercise> exercises, long userid, Collator collator) {
     List<String> allIds = new ArrayList<String>();
     Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
-    Map<String,String> idToFL = new HashMap<String, String>();
+    Map<String,CollationKey> idToKey = new HashMap<String, CollationKey>();
     for (CommonExercise exercise : exercises) {
       String id = exercise.getID();
       allIds.add(id);
       idToEx.put(id, exercise);
-      idToFL.put(id,exercise.getForeignLanguage());
+    //  idToKey.put(id,exercise.getForeignLanguage());
+      CollationKey collationKey = collator.getCollationKey(exercise.getForeignLanguage());
+      idToKey.put(id, collationKey);
     }
 
-    List<ExerciseCorrectAndScore> sortedResults = getExerciseCorrectAndScores(userid, allIds, idToFL);
+    List<ExerciseCorrectAndScore> sortedResults = getExerciseCorrectAndScores(userid, allIds, idToKey);
 
     List<CommonExercise> commonExercises = new ArrayList<CommonExercise>(exercises.size());
     for (ExerciseCorrectAndScore score : sortedResults) {
@@ -239,17 +244,18 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory(long, java.util.Map)
+   * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory
+   * @see ResultDAO#getExercisesSortedIncorrectFirst
    * @param userid
    * @param allIds
+   * @param idToKey
    * @return
    */
-  public List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(long userid, List<String> allIds, Map<String,String> idToFL) {
+  public List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(long userid, List<String> allIds, Map<String, CollationKey> idToKey) {
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
    // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
-    return getSortedAVPHistory(results, allIds, idToFL);
+    return getSortedAVPHistory(results, allIds, idToKey);
   }
-
 
   public List<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(long userid, List<String> allIds, Map<String,CommonExercise> idToEx,
                                                                            ExerciseSorter sorter) {
@@ -273,29 +279,51 @@ public class ResultDAO extends DAO {
    *
    * @param results
    * @param allIds
-   * @param idToFL
+   * @param idToKey
    * @return
    * @see #getExerciseCorrectAndScores
    */
   private List<ExerciseCorrectAndScore> getSortedAVPHistory(List<CorrectAndScore> results, Collection<String> allIds,
-                                                            final Map<String, String> idToFL) {
-
+                                                            final Map<String, CollationKey> idToKey) {
     List<ExerciseCorrectAndScore> sortedResults = getExerciseCorrectAndScores(results, allIds);
     Collections.sort(sortedResults, new Comparator<ExerciseCorrectAndScore>() {
       @Override
       public int compare(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2) {
-        String fl = idToFL.get(o1.getId());
-        String otherFL = idToFL.get(o2.getId());
-      //  if (fl == null) fl = "";
-      //  if (otherFL == null) otherFL = "";
-        return o1.compareTo(o2, fl, otherFL);
+        CollationKey fl = idToKey.get(o1.getId());
+        CollationKey otherFL = idToKey.get(o2.getId());
+        return compareTo(o1,o2,fl,otherFL);
       }
     });
     return sortedResults;
   }
 
+  private int compareTo(ExerciseCorrectAndScore o1,ExerciseCorrectAndScore o2, CollationKey fl, CollationKey otherFL) {
+    if (o1.isEmpty() && o2.isEmpty()) {
+      return fl.compareTo(otherFL);
+    } else if (o1.isEmpty()) return -1;
+    else if (o2.isEmpty()) return +1;
+    else { // neither is empty
+      return compScores(o1,o2);
+    }
+  }
+
+  private int compScores(ExerciseCorrectAndScore o1,ExerciseCorrectAndScore o2) {
+    int myI = o1.getDiff();
+    int oI = o2.getDiff();
+    int i = myI < oI ? -1 : myI > oI ? +1 : 0;
+    if (i == 0) {
+      float myScore = o1.getAvgScore();
+      float otherScore = o2.getAvgScore();
+
+      return myScore < otherScore ? -1 : myScore > otherScore ? +1 : o1.getId().compareTo(o2.getId());
+    } else {
+      return i;
+    }
+  }
+
   private List<ExerciseCorrectAndScore> getSortedAVPHistoryByPhones(List<CorrectAndScore> results, Collection<String> allIds,
-                                                                    final Map<String, CommonExercise> idToEx, final ExerciseSorter sorter
+                                                                    final Map<String, CommonExercise> idToEx,
+                                                                    final ExerciseSorter sorter
   ) {
     List<ExerciseCorrectAndScore> sortedResults = getExerciseCorrectAndScores(results, allIds);
     Collections.sort(sortedResults, new Comparator<ExerciseCorrectAndScore>() {
