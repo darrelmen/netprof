@@ -6,7 +6,6 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -233,7 +232,7 @@ public class ScoreServlet extends DatabaseServlet {
             //logger.debug("chapterHistory " + user + " selection " + selection);
             try {
               long l = Long.parseLong(user);
-              toReturn = db.getJsonScoreHistory(l, selection,new ExerciseSorter(db.getSectionHelper().getTypeOrder(),audioFileHelper.getPhoneToCount()));
+              toReturn = db.getJsonScoreHistory(l, selection, getExerciseSorter(), audioFileHelper.getCollator());
             } catch (NumberFormatException e) {
               toReturn.put(ERROR, "User id should be a number");
             }
@@ -284,6 +283,10 @@ public class ScoreServlet extends DatabaseServlet {
 
     String x = toReturn.toString();
     reply(response, x);
+  }
+
+  private ExerciseSorter getExerciseSorter() {
+    return new ExerciseSorter(db.getSectionHelper().getTypeOrder(), audioFileHelper.getPhoneToCount(), audioFileHelper);
   }
 
   private void reply(HttpServletResponse response, String x) {
@@ -618,6 +621,10 @@ public class ScoreServlet extends DatabaseServlet {
     return jsonObject;
   }
 
+  /**
+   * @see #getJsonNestedChapters
+   * @return
+   */
   private JSONArray getContentAsJson() {
     JSONArray jsonArray = new JSONArray();
     Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
@@ -634,6 +641,12 @@ public class ScoreServlet extends DatabaseServlet {
     return jsonArray;
   }
 
+  /**
+   * @see #getContentAsJson
+   * @param node
+   * @param typeToValues
+   * @return
+   */
   private JSONObject getJsonForNode(SectionNode node, Map<String, Collection<String>> typeToValues) {
     JSONObject jsonForNode = new JSONObject();
     jsonForNode.put("type", node.getType());
@@ -654,11 +667,16 @@ public class ScoreServlet extends DatabaseServlet {
     return jsonForNode;
   }
 
+  /**
+   * @see #getJsonForNode
+   * @param typeToValues for this unit and chapter
+   * @return
+   */
   private JSONArray getJsonForSelection(Map<String, Collection<String>> typeToValues) {
     Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToValues);
 
     List<CommonExercise> copy = new ArrayList<CommonExercise>(exercisesForState);
-    new ExerciseSorter(db.getSectionHelper().getTypeOrder()).sortByTooltip(copy);
+    getExerciseSorter().sortByForeign(copy, getAudioFileHelper());
 
 //    new ExerciseSorter(db.getSectionHelper().getTypeOrder()).getSortedByUnitThenPhone(copy, false, audioFileHelper.getPhoneToCount(), false);
 
