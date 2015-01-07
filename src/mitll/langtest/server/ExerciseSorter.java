@@ -1,10 +1,12 @@
 package mitll.langtest.server;
 
+import mitll.langtest.server.scoring.CollationSort;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 import mitll.langtest.shared.custom.UserExercise;
 
+import java.text.Collator;
 import java.util.*;
 
 /**
@@ -13,14 +15,21 @@ import java.util.*;
 public class ExerciseSorter {
   private Collection<String> typeOrder;
   private Map<String, Integer> phoneToCount;
+//  private CollationSort collationSort;
 
   public ExerciseSorter(Collection<String> typeOrder) {
     this.typeOrder = typeOrder;
   }
 
-  public ExerciseSorter(Collection<String> typeOrder, Map<String, Integer> phoneToCount) {
+  /**
+   * @see mitll.langtest.server.ScoreServlet#doGet
+   * @param typeOrder
+   * @param phoneToCount
+   */
+  public ExerciseSorter(Collection<String> typeOrder, Map<String, Integer> phoneToCount, CollationSort collationSort) {
     this(typeOrder);
     this.phoneToCount = phoneToCount;
+  //  this.collationSort = collationSort;
   }
 
   /**
@@ -30,6 +39,7 @@ public class ExerciseSorter {
    * @param toSort
    * @param recordedLast
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
    */
   public void getSortedByUnitThenAlpha(List<? extends CommonExercise> toSort, final boolean recordedLast) {
     if (typeOrder.isEmpty()) {
@@ -213,10 +223,13 @@ public class ExerciseSorter {
     return i;
   }
 
+  public <T extends CommonExercise> void sortByForeign(List<T> exerciseShells, CollationSort sort) {  sort.sort(exerciseShells);  }
+
   /**
    * I.e. by the lexicographic order of the displayed words in the word list
-   *
+   * NOTE:  be careful to use collation order when it's not "english-foreign language"
    * @param exerciseShells
+   * @see
    */
   public <T extends CommonShell> void sortByTooltip(List<T> exerciseShells) {
     Collections.sort(exerciseShells, new Comparator<T>() {
@@ -232,5 +245,4 @@ public class ExerciseSorter {
     String id2 = o2.getTooltip();
     return id1.toLowerCase().compareTo(id2.toLowerCase());
   }
-
 }
