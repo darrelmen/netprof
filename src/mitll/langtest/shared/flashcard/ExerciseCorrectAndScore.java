@@ -35,7 +35,14 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
     }
   }
 
-  public int compareTo(ExerciseCorrectAndScore o,String fl, String otherFL) {
+  /**
+   * @see mitll.langtest.server.database.ResultDAO#getSortedAVPHistory
+   * @param o
+   * @param fl
+   * @param otherFL
+   * @return
+   */
+  public int compareTo(ExerciseCorrectAndScore o, String fl, String otherFL) {
     if (isEmpty() && o.isEmpty()) {
       return fl.compareTo(otherFL);
     } else if (isEmpty()) return -1;
@@ -59,7 +66,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
     }
   }
 
-  private boolean isEmpty() { return correctAndScores.isEmpty();  }
+  public boolean isEmpty() { return correctAndScores.isEmpty();  }
 
   private int getNumCorrect() {
     int c = 0;
@@ -80,7 +87,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
   }
 
 
-  private int getDiff() {
+  public int getDiff() {
     int c = 0;
     List<CorrectAndScore> toUse = getCorrectAndScoresLimited();
     for (CorrectAndScore correctAndScore : toUse) {
@@ -101,7 +108,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
     return c / (float) toUse.size();
   }*/
 
-  private float getAvgScore() {
+  public float getAvgScore() {
     if (isEmpty()) return 0f;
 
     float c = 0f;
