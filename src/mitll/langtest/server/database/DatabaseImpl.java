@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.CollationKey;
+import java.text.Collator;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -463,18 +465,21 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    * @param userid
    * @param typeToSection
+   * @param collator
    * @return
    */
   public JSONObject getJsonScoreHistory(long userid,
-                                        Map<String, Collection<String>> typeToSection, ExerciseSorter sorter) {
+                                        Map<String, Collection<String>> typeToSection, ExerciseSorter sorter, Collator collator) {
     Collection<CommonExercise> exercisesForState = getSectionHelper().getExercisesForSelectionState(typeToSection);
     List<String> allIDs = new ArrayList<String>();
 
-    Map<String, String> idToFL = new HashMap<String, String>();
+    Map<String, CollationKey> idToKey = new HashMap<String, CollationKey>();
     for (CommonExercise exercise : exercisesForState) {
       String id = exercise.getID();
       allIDs.add(id);
-      idToFL.put(id, exercise.getForeignLanguage());
+//      idToFL.put(id, exercise.getForeignLanguage());
+      CollationKey collationKey = collator.getCollationKey(exercise.getForeignLanguage());
+      idToKey.put(id, collationKey);
     }
 
 /*
@@ -486,13 +491,12 @@ public class DatabaseImpl implements Database {
     }
 */
 
-
 //    for (ExerciseCorrectAndScore ex : resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, sorter)) {
 
-      JSONObject container = new JSONObject();
+    JSONObject container = new JSONObject();
     JSONArray scores = new JSONArray();
     int correct = 0, incorrect = 0;
-    for (ExerciseCorrectAndScore ex : resultDAO.getExerciseCorrectAndScores(userid, allIDs, idToFL)) {
+    for (ExerciseCorrectAndScore ex : resultDAO.getExerciseCorrectAndScores(userid, allIDs, idToKey)) {
       //logger.debug("for " + ex);
       JSONObject exAndScores = new JSONObject();
       exAndScores.put("ex", ex.getId());
@@ -571,10 +575,10 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    */
   public AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
-                                              Collection<String> allIDs, Map<String, String> idToFL) {
+                                              Collection<String> allIDs, Map<String, CollationKey> idToKey) {
     logger.debug("getUserHistoryForList " + userid + " and " + ids.size() + " ids, latest " + latestResultID);
 
-    ResultDAO.SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid, allIDs,idToFL);
+    ResultDAO.SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid, allIDs, idToKey);
     List<Session> sessionsForUserIn2 = sessionsAndScores.sessions;
 
     Map<Long, User> userMap = userDAO.getUserMap();
