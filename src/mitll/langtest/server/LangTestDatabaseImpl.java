@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.CollationKey;
 import java.text.Collator;
 import java.util.*;
 
@@ -187,7 +188,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         // now sort : everything gets sorted the same way
         List<CommonExercise> commonExercises;
         if (incorrectFirstOrder) {
-          commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, userID);
+          commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, userID,  audioFileHelper.getCollator());
         } else {
           commonExercises = new ArrayList<CommonExercise>(exercises);
           new ExerciseSorter(getTypeOrder()).getSortedByUnitThenAlpha(commonExercises, role.equals(Result.AUDIO_TYPE_RECORDER));
@@ -408,7 +409,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<CommonExercise> copy;
 
     if (incorrectFirst) {
-      copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID);
+      copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, audioFileHelper.getCollator());
     } else {
       copy = new ArrayList<CommonExercise>(exercisesForState);
 
@@ -654,11 +655,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     long diff = now - then;
     String language = serverProps.getLanguage();
 
-    ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
-    String threadInfo = threadGroup.getName() + " = " + threadGroup.activeCount();
-    String message = "getExercise : (" + language + ") took " + diff + " millis to get exercise " + id + " : " + threadInfo;
+  //  ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
+   // String threadInfo = threadGroup.getName() + " = " + threadGroup.activeCount();
+    String message = "getExercise : (" + language + ") took " + diff + " millis to get exercise " + id;// + " : " + threadInfo;
     if (diff > SLOW_EXERCISE_EMAIL) {
-      logger.error(message + " thread count " + threadInfo);
+        ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
+       String threadInfo = threadGroup.getName() + " = " + threadGroup.activeCount();
+           logger.error(message + " thread count " + threadInfo);
       sendEmailWhenSlow(id, language, diff, threadInfo);
     } else if (diff > 1000) {
       logger.warn(message);
@@ -1917,25 +1920,36 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     UserList userListByID = userListID != -1 ? db.getUserListByID(userListID) : null;
     List<String> allIDs = new ArrayList<String>();
-    Map<String, String> idToFL = new HashMap<String, String>();
+ //   Map<String, String> idToFL = new HashMap<String, String>();
+
+
+    Map<String,CollationKey> idToKey = new HashMap<String, CollationKey>();
+
+      //  idToKey.put(id,exercise.getForeignLanguage());
+
+
+    Collator collator = audioFileHelper.getCollator();
     if (userListByID != null) {
       for (CommonExercise exercise : userListByID.getExercises()) {
-        String id = exercise.getID();
-        allIDs.add(id);
-        idToFL.put(id, exercise.getForeignLanguage());
+        populateCollatorMap(allIDs, idToKey, collator, exercise);
       }
     } else {
       Collection<CommonExercise> exercisesForState = (typeToSection == null || typeToSection.isEmpty()) ? getExercises() :
           db.getSectionHelper().getExercisesForSelectionState(typeToSection);
 
       for (CommonExercise exercise : exercisesForState) {
-        String id = exercise.getID();
-        allIDs.add(id);
-        idToFL.put(id, exercise.getForeignLanguage());
+        populateCollatorMap(allIDs, idToKey, collator, exercise);
       }
     }
     //logger.debug("for " + typeToSection + " found " + allIDs.size());
-    return db.getUserHistoryForList(userid, ids, latestResultID, allIDs, idToFL);
+    return db.getUserHistoryForList(userid, ids, latestResultID, allIDs, idToKey);
+  }
+
+  private void populateCollatorMap(List<String> allIDs, Map<String, CollationKey> idToKey, Collator collator, CommonExercise exercise) {
+    String id = exercise.getID();
+    allIDs.add(id);
+    CollationKey collationKey = collator.getCollationKey(exercise.getForeignLanguage());
+    idToKey.put(id,collationKey);
   }
 
   public void logMessage(String message) {
@@ -2054,11 +2068,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile, serverProps.getLanguage(), useFile,
         relativeConfigDir + File.separator + serverProps.getMediaDir());
-
-    Locale[] availableLocales = Collator.getAvailableLocales();
-    for (Locale locale : availableLocales) {
-      logger.debug("locale " + locale);
-    }
 
     return lessonPlanFile;
   }
