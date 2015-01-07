@@ -12,6 +12,7 @@ import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.SLFFile;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -25,6 +26,7 @@ import scala.Tuple2;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -46,7 +48,7 @@ import java.util.TreeSet;
  * Time: 11:16 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ASRScoring extends Scoring {
+public class ASRScoring extends Scoring implements CollationSort {
   private static final double KEEP_THRESHOLD = 0.3;
   private static final Logger logger = Logger.getLogger(ASRScoring.class);
   private static final boolean DEBUG = false;
@@ -73,6 +75,7 @@ public class ASRScoring extends Scoring {
    * If the score was below a threshold, or the magic -1, we keep it around for future study.
    */
   private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
+  private LTSFactory ltsFactory;
 
   /**
    * @param deployPath
@@ -86,6 +89,15 @@ public class ASRScoring extends Scoring {
     this.langTestDatabase = langTestDatabase;
     readDictionary();
     makeDecoder();
+  }
+
+  public <T extends CommonExercise> void sort(List<T> toSort) {
+    ltsFactory.sort(toSort);
+  }
+
+  @Override
+  public Collator getCollator() {
+    return ltsFactory.getCollator();
   }
 
   private final String languageProperty;
@@ -105,7 +117,8 @@ public class ASRScoring extends Scoring {
     String language = languageProperty != null ? languageProperty : "";
 
     isMandarin = language.equalsIgnoreCase("mandarin");
-    this.letterToSoundClass = new LTSFactory().getLTSClass(language);
+    ltsFactory = new LTSFactory(languageProperty);
+    this.letterToSoundClass = ltsFactory.getLTSClass(language);
     // this.htkDictionary = dict;
     makeDecoder();
     // if (dict != null) logger.debug("htkDictionary size is " + dict.size());
