@@ -14,6 +14,7 @@ import mitll.langtest.server.database.WordDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
+import mitll.langtest.server.scoring.CollationSort;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
@@ -26,6 +27,7 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.text.Collator;
 import java.util.*;
 
 /**
@@ -35,7 +37,7 @@ import java.util.*;
  * Time: 5:08 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AudioFileHelper {
+public class AudioFileHelper implements CollationSort {
   private static final Logger logger = Logger.getLogger(AudioFileHelper.class);
 
   private final PathHelper pathHelper;
@@ -45,6 +47,7 @@ public class AudioFileHelper {
   private final DatabaseImpl db;
   private final LangTestDatabaseImpl langTestDatabase;
   private boolean checkedLTS = false;
+  private Map<String,Integer> phoneToCount;
 
   /**
    * @see mitll.langtest.server.ScoreServlet#getAudioFileHelper()
@@ -61,8 +64,13 @@ public class AudioFileHelper {
     this.langTestDatabase = langTestDatabase;
   }
 
-  private Map<String,Integer> phoneToCount;
-
+  public <T extends CommonExercise> void sort(List<T> toSort) {
+    asrScoring.sort(toSort);
+  }
+  @Override
+  public Collator getCollator() {
+    return asrScoring.getCollator();
+  }
   /**
    *
    * @param exercises
@@ -87,13 +95,19 @@ public class AudioFileHelper {
             countPhones(exercise);
           }
         }
+/*
+        ExerciseSorter exerciseSorter = new ExerciseSorter(db.getSectionHelper().getTypeOrder());
+     //   exerciseSorter.getSortedByUnitThenPhone(exercises, false, phoneToCount,true);
+      //  exerciseSorter.getSortedByUnitThenPhone(exercises, false, phoneToCount,true);
 
-/*        ExerciseSorter exerciseSorter = new ExerciseSorter(db.getSectionHelper().getTypeOrder());
-        exerciseSorter.getSortedByUnitThenPhone(exercises, false, phoneToCount);
+        List<CommonExercise>  copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, 1, getCollator());
+
         int max = 0;
-        for (CommonExercise exercise : exercises) {
+        for (CommonExercise exercise : copy) {
           if (max++ < 3000)
-            logger.debug(exercise.getID() + "\t" + exercise.getUnitToValue()+" "+exercise.getForeignLanguage() + " " + exercise.getBagOfPhones() + " first  " + exercise.getFirstPron());
+            logger.debug(exercise.getID() + "\t" + exercise.getUnitToValue()+"\t"+exercise.getForeignLanguage() +
+                //" " + exercise.getBagOfPhones() +
+                " first \t" + exercise.getFirstPron());
         }*/
         if (count > 0) {
           logger.error("huh? out of " + exercises.size() + " LTS fails on " + count);
