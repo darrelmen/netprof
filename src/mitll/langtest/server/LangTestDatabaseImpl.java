@@ -57,6 +57,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final int SLOW_EXERCISE_EMAIL = 2000;
   public static final String ENGLISH = "English";
   public static final int MAX = 30;
+  public static final int SLOW_MILLIS = 40;
 
   private DatabaseImpl db;
   private AudioFileHelper audioFileHelper;
@@ -152,13 +153,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param onlyUnrecordedByMe
    * @param onlyExamples
    * @param incorrectFirstOrder
+   * @param onlyWithAudioAnno
    * @return
    * @see mitll.langtest.client.list.PagingExerciseList#loadExercises(String, String)
    */
   @Override
   public ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix,
                                             long userListID, int userID, String role, boolean onlyUnrecordedByMe,
-                                            boolean onlyExamples, boolean incorrectFirstOrder) {
+                                            boolean onlyExamples, boolean incorrectFirstOrder, boolean onlyWithAudioAnno) {
     Collection<CommonExercise> exercises;
 
     logger.debug("getExerciseIds : (" + serverProps.getLanguage()+ ") " +
@@ -166,7 +168,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         " config " + relativeConfigDir +
         " prefix '" + prefix +
         "' and user list id " + userListID + " user " + userID + " role " + role +
-        " filter " + onlyUnrecordedByMe + " only examples " + onlyExamples);
+        " filter " + onlyUnrecordedByMe + " only examples " + onlyExamples + " only with audio " + onlyWithAudioAnno);
 
     try {
       UserList userListByID = userListID != -1 ? db.getUserListByID(userListID) : null;
@@ -182,6 +184,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           exercises = getExercisesForSearch(prefix, userID, exercises, predefExercises);
         }
         exercises = filterByUnrecorded(userID, onlyUnrecordedByMe, onlyExamples, exercises);
+        exercises = filterByOnlyAudioAnno(onlyWithAudioAnno,exercises);
         int i = markRecordedState(userID, role, exercises, onlyExamples);
         //logger.debug("marked " +i + " as recorded");
 
@@ -200,6 +203,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         if (userListByID != null) {
           Collection<CommonExercise> exercisesForState = getExercisesFromFiltered(typeToSelection, userListByID);
           exercisesForState = filterByUnrecorded(userID, onlyUnrecordedByMe, onlyExamples, exercisesForState);
+          exercisesForState = filterByOnlyAudioAnno(onlyWithAudioAnno, exercisesForState);
 
           return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID, role, onlyExamples, incorrectFirstOrder);
         } else {
@@ -238,6 +242,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param onlyExamples       only example audio
    * @param exercises          to filter
    * @return exercises missing audio, what we want to record
+   * @see #getExerciseIds
+   * @see #getExercisesForSelectionState
    */
   private Collection<CommonExercise> filterByUnrecorded(long userID, boolean onlyUnrecordedByMe, boolean onlyExamples,
                                                         Collection<CommonExercise> exercises) {
@@ -285,6 +291,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       return copy;
     }
     return exercises;
+  }
+
+  private Collection<CommonExercise> filterByOnlyAudioAnno(boolean onlyAudioAnno,
+                                                           Collection<CommonExercise> exercises) {
+    if (onlyAudioAnno) {
+      Set<String> audioAnnos = db.getUserListManager().getAudioAnnos();
+
+      List<CommonExercise> copy = new ArrayList<CommonExercise>();
+      // logger.debug("recorded already " + recordedForUser.size() + " checking " + exercises.size());
+      // filter
+      for (CommonExercise exercise : exercises) {
+        if (audioAnnos.contains(exercise.getID())) copy.add(exercise);
+      }
+      logger.debug("filterByOnlyAudioAnno " + copy.size() + " from " + exercises.size());
+
+      return copy;
+    } else {
+      return exercises;
+    }
   }
 
   private Collection<CommonExercise> getExercisesFromFiltered(Map<String, Collection<String>> typeToSelection, UserList userListByID) {
@@ -368,6 +393,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                                             boolean onlyExamples, boolean incorrectFirst) {
     Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     exercisesForState = filterByUnrecorded(userID, onlyUnrecordedByMe, onlyExamples, exercisesForState);
+    //exercisesForState = filterByOnlyAudioAnno(forgotUsername(), exercisesForState);
 
     return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID, role, onlyExamples, incorrectFirst);
   }
@@ -470,7 +496,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     addAnnotations(firstExercise); // todo do this in a better way
     long now = System.currentTimeMillis();
-    if (now - then > 40) {
+    if (now - then > SLOW_MILLIS) {
       logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to add annotations to exercise " + firstExercise.getID());
     }
     then = now;
@@ -479,7 +505,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     //for (AudioAttribute audioAttribute : firstExercise.getAudioAttributes()) logger.debug("\t addAnnotationsAndAudio ex " + firstExercise.getID()+ " audio " + audioAttribute);
 
     now = System.currentTimeMillis();
-    if (now - then > 40) {
+    if (now - then > SLOW_MILLIS) {
       logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to attach audio to exercise " + firstExercise.getID());
     }
     then = now;
@@ -488,7 +514,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (userWhere != null && userWhere.getPermissions().contains(User.Permission.QUALITY_CONTROL)) {
       addPlayedMarkings(userID, firstExercise);
       now = System.currentTimeMillis();
-      if (now - then > 40) {
+      if (now - then > SLOW_MILLIS) {
         logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to add played markings to exercise " + firstExercise.getID());
       }
     }
@@ -498,7 +524,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     attachScoreHistory(userID, firstExercise, isFlashcardReq);
 
     now = System.currentTimeMillis();
-    if (now - then > 40) {
+    if (now - then > SLOW_MILLIS) {
       logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to attach score history to exercise " + firstExercise.getID());
     }
 
@@ -591,7 +617,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private ExerciseListWrapper getExerciseIDs(int userID) {
     Map<String, Collection<String>> objectObjectMap = Collections.emptyMap();
-    return getExerciseIds(0, objectObjectMap, "", -1, userID, "", false, false, false);
+    return getExerciseIds(0, objectObjectMap, "", -1, userID, "", false, false, false,false);
   }
 
   /**
