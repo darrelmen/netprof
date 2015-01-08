@@ -226,10 +226,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   }
 
   public void onResize() {
+   // logger.info("got onResize for" + instance);
     if (contentAudio != null) {
+    //  logger.info("got onResize  contentAudio for" + instance);
       contentAudio.onResize();
     }
     if (answerAudio != null) {
+   //   logger.info("got onResize answerAudio for" + instance);
       answerAudio.onResize();
     }
   }
