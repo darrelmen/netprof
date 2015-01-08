@@ -91,15 +91,16 @@ public class PagingExerciseList extends ExerciseList {
    * @see #addTypeAhead(com.google.gwt.user.client.ui.Panel)
    * @param selectionState
    * @param prefix
+   * @param onlyWithAudioAnno
    */
-  void loadExercises(String selectionState, String prefix) {
+  void loadExercises(String selectionState, String prefix, boolean onlyWithAudioAnno) {
     scheduleWaitTimer();
 
     lastReqID++;
     logger.info("PagingExerciseList.loadExercises : looking for " +
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
     service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID,
-      controller.getUser(), getRole(), getUnrecorded(), isOnlyExamples(), incorrectFirstOrder, new SetExercisesCallback(""));
+      controller.getUser(), getRole(), getUnrecorded(), isOnlyExamples(), incorrectFirstOrder, false, new SetExercisesCallback(""));
   }
 
   /**
@@ -157,10 +158,17 @@ public class PagingExerciseList extends ExerciseList {
     //logger.info("setUnaccountedForVertical : vert " + v + " for " +getElement().getId());
   }
 
+  /**
+   *  add left side components
+   * @param pagingContainer
+   */
   protected void addTableWithPager(PagingContainer pagingContainer) {
+    // row 1
     Panel column = new FlowPanel();
     add(column);
     addTypeAhead(column);
+
+    // row 2
     add(pagingContainer.getTableWithPager());
   }
 
@@ -171,7 +179,7 @@ public class PagingExerciseList extends ExerciseList {
 
   /**
    * Show wait cursor if the type ahead takes too long.
-   *
+   * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager
    * @param column
    */
   protected void addTypeAhead(Panel column) {
@@ -180,7 +188,7 @@ public class PagingExerciseList extends ExerciseList {
         @Override
         public void gotTypeAheadEntry(String text) {
           controller.logEvent(getTypeAhead(), "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
-          loadExercises(getHistoryToken(""), text);
+          loadExercises(getHistoryToken(""), text, false);
         }
       };
     }
@@ -370,7 +378,7 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   /**
-   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercisesUsingPrefix(java.util.Map, String)
+   * @see HistoryExerciseList#loadExercisesUsingPrefix(java.util.Map, String, boolean)
    * @return
    */
   public boolean getUnrecorded() { return unrecorded;  }
