@@ -322,25 +322,26 @@ public class HistoryExerciseList extends PagingExerciseList {
    */
   protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
     //System.out.println("HistoryExerciseList.loadExercises : instance " + getInstance() + " " + typeToSection + " and item '" + item + "'");
-    loadExercisesUsingPrefix(typeToSection, getPrefix());
+    loadExercisesUsingPrefix(typeToSection, getPrefix(), false);
   }
 
-  protected void loadExercises(String selectionState, String prefix) {
+  protected void loadExercises(String selectionState, String prefix, boolean onlyWithAudioAnno) {
     Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
 /*    System.out.println("HistoryExerciseList.loadExercises : looking for " +
       "'" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());*/
-    loadExercisesUsingPrefix(typeToSection, prefix);
+    loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno);
   }
 
   /**
    *
    * @param typeToSection
    * @param prefix
+   * @param onlyWithAudioAnno
    * @see #loadExercises(java.util.Map, String)
-   * @see #loadExercises(String, String)
+   * @see PagingExerciseList#loadExercises(String, String, boolean)
    * @see mitll.langtest.client.custom.content.NPFHelper.FlexListLayout.MyFlexSectionExerciseList#loadExercises(java.util.Map, String)
    */
-  protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix) {
+  protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno) {
     lastReqID++;
     if (DEBUG) {
       System.out.println("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
@@ -351,16 +352,16 @@ public class HistoryExerciseList extends PagingExerciseList {
     String selectionID = userListID + "_"+typeToSection.toString();
     scheduleWaitTimer();
     service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, controller.getUser(), getRole(),
-        getUnrecorded(), isOnlyExamples(), incorrectFirstOrder, new SetExercisesCallback(selectionID));
+        getUnrecorded(), isOnlyExamples(), incorrectFirstOrder, onlyWithAudioAnno, new SetExercisesCallback(selectionID));
   }
 
   @Override
   public void reload(Map<String, Collection<String>> typeToSection) {
-    loadExercisesUsingPrefix(typeToSection,"");
+    loadExercisesUsingPrefix(typeToSection,"", false);
   }
 
   /**
-   * @see PagingExerciseList#loadExercises(String, String)
+   * @see PagingExerciseList#loadExercises(String, String, boolean)
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    * @param token
    * @return object representing type=value pairs from history token
