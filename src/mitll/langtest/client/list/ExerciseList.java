@@ -24,6 +24,7 @@ import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.Result;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Handles left side of NetPron2 -- which exercise is the current one, highlighting, etc.
@@ -35,6 +36,8 @@ import java.util.*;
  */
 public abstract class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize,
   ValueChangeHandler<String> {
+  private Logger logger = Logger.getLogger("ExerciseList");
+
   private static final Map<String, Collection<String>> TYPE_TO_SELECTION = new HashMap<String, Collection<String>>();
   private static final int MAX_MSG_LEN = 200;
   protected boolean incorrectFirstOrder = false;
@@ -225,8 +228,15 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     Widget current = innerContainer.getWidget();
     if (current != null) {
       if (current instanceof RequiresResize) {
+        //logger.info("resizing right side for " + instance + " "+ current.getClass());
         ((RequiresResize) current).onResize();
       }
+      else {
+        logger.warning("huh?  right side is not resizable " + instance + " "+ current.getClass());
+      }
+    }
+    else {
+//      logger.warning("huh? no right side of exercise list");
     }
   }
 
