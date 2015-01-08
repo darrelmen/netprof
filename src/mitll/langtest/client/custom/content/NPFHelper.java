@@ -49,7 +49,6 @@ public class NPFHelper implements RequiresResize {
 
   protected final UserFeedback feedback;
   public PagingExerciseList npfExerciseList;
-  private Panel npfContentPanel;
   private final boolean showQC;
   DivWidget contentPanel;
 
@@ -69,7 +68,7 @@ public class NPFHelper implements RequiresResize {
     this.userManager = userManager;
     this.showQC = showQC;
   }
-
+  String instanceName;
   /**
    * Add npf widget to content of a tab - here marked tabAndContent
    * @see mitll.langtest.client.custom.Navigation#getListOperations
@@ -80,6 +79,7 @@ public class NPFHelper implements RequiresResize {
    */
   public void showNPF(UserList ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
     logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
+    this.instanceName = instanceName;
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
@@ -118,7 +118,6 @@ public class NPFHelper implements RequiresResize {
     if (loadExercises) {
       rememberAndLoadFirst(ul);
     }
-    setupContent(hp);
     return hp;
   }
 
@@ -145,7 +144,7 @@ public class NPFHelper implements RequiresResize {
     hp.add(left);
 
     // right side
-    npfContentPanel = getRightSideContent(ul, instanceName);
+    Panel npfContentPanel = getRightSideContent(ul, instanceName);
     hp.add(npfContentPanel);
 
     return hp;
@@ -184,12 +183,10 @@ public class NPFHelper implements RequiresResize {
    * @param ul
    */
   private void rememberAndLoadFirst(final UserList ul) {
-    System.out.println(getClass() + ".rememberAndLoadFirst : for " +ul);
+  //  System.out.println(getClass() + ".rememberAndLoadFirst : for " +ul);
     npfExerciseList.setUserListID(ul.getUniqueID());
     npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
   }
-
-  Panel setupContent(Panel hp) {  return npfContentPanel;  }
 
   /**
    * @see #makeNPFExerciseList
@@ -198,7 +195,6 @@ public class NPFHelper implements RequiresResize {
    * @return
    */
   PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
-    //System.out.println(getClass() + ".makeExerciseList : instanceName " + instanceName);
     return new PagingExerciseList(right, service, feedback, null, controller,
       true, instanceName, false) {
       @Override
@@ -239,16 +235,17 @@ public class NPFHelper implements RequiresResize {
     };
   }
 
-  /**
-   * @see #doNPF(mitll.langtest.shared.custom.UserList, String, boolean)
-   * @return
-   */
- // Panel getNpfContentPanel() { return npfContentPanel; }
-
   @Override
   public void onResize() {
-    logger.info("Got resize...");
-    if (npfContentPanel != null) {  npfExerciseList.onResize(); }
+//    logger.info("Got resize " + instanceName);
+    if (npfExerciseList != null) {
+//      logger.info("Got resize for " +npfExerciseList.getCreatedPanel().getClass());
+
+      npfExerciseList.onResize();
+    }
+    else {
+  //    logger.info("no exercise list " +instanceName + "  for " + getClass());
+    }
   }
 
   public void setContentPanel(DivWidget content) {
@@ -291,8 +288,6 @@ public class NPFHelper implements RequiresResize {
      * @return
      */
     public Panel doInternalLayout(UserList ul, String instanceName) {
-      //System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
-
       Panel twoRows = new FlowPanel();
       twoRows.getElement().setId("NPFHelper_twoRows");
 
@@ -404,8 +399,8 @@ public class NPFHelper implements RequiresResize {
 
       @Override
       protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
-        System.out.println(getClass() + ".loadExercises : instance " + getInstance() + " " + typeToSection +
-            " and item '" + item + "'" + " for list " + userListID);
+/*        System.out.println(getClass() + ".loadExercises : instance " + getInstance() + " " + typeToSection +
+            " and item '" + item + "'" + " for list " + userListID);*/
         loadExercisesUsingPrefix(typeToSection, getPrefix(), false);
       }
     }
