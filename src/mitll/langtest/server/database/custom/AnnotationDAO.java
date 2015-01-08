@@ -27,7 +27,9 @@ public class AnnotationDAO extends DAO {
   private static final String CREATORID = "creatorid";
   private static final String STATUS = "status";
   public static final String EXERCISEID = "exerciseid";
-  public static final String FIELD = "field";
+  public static final String FIELD1 = "field";
+  public static final String FIELD = FIELD1;
+  public static final String MODIFIED = "modified";
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
@@ -58,9 +60,11 @@ public class AnnotationDAO extends DAO {
         "uniqueid IDENTITY, " +
         CREATORID + " INT, " +
         EXERCISEID + " VARCHAR, " +
-        "field VARCHAR, " +
+        FIELD1 +
+        " VARCHAR, " +
         STATUS + " VARCHAR, " +
-        "modified TIMESTAMP, " +
+        MODIFIED +
+        " TIMESTAMP, " +
         "comment VARCHAR, " +
         "FOREIGN KEY(" +
         CREATORID +
@@ -74,6 +78,8 @@ public class AnnotationDAO extends DAO {
 
   void index(Database database) throws SQLException {
     createIndex(database, EXERCISEID, ANNOTATION);
+    createIndex(database, FIELD1, ANNOTATION);
+    createIndex(database, MODIFIED, ANNOTATION);
   }
 
   /**
@@ -166,66 +172,59 @@ public class AnnotationDAO extends DAO {
    * @return
    */
   public Set<String> getAudioAnnos() {
-    String sql = "SELECT " +
+/*    String sql = "SELECT " +
         EXERCISEID+ "," +
         FIELD+ "," +
         STATUS+
         " from " + ANNOTATION + " where " +
         FIELD +
-        " like'%.wav' order by field,modified desc";
+        " like'%.wav' order by field,modified desc";*/
+
+    String sql2 = "select a.exerciseid, a.field, a.status, r.MaxTime \n" +
+        "from (\n" +
+        "select exerciseid, field, MAX(modified) as MaxTime from annotation where field like'%.wav' group by exerciseid, field) r \n" +
+        "inner join annotation a on a.exerciseid = r.exerciseid AND a.modified = r.MaxTime order by a.exerciseid, a.field";
+
+    String sql3 = "select a.exerciseid, a.status, r.MaxTime \n" +
+        "from (\n" +
+        "select exerciseid, field, MAX(modified) as MaxTime from annotation where field like'%.wav' group by exerciseid, field) r \n" +
+        "inner join annotation a on a.exerciseid = r.exerciseid AND a.modified = r.MaxTime and a.status = 'incorrect' order by a.exerciseid, a.field";
     try {
       Connection connection = database.getConnection(this.getClass().toString());
-      PreparedStatement statement = connection.prepareStatement(sql);
+      PreparedStatement statement = connection.prepareStatement(sql3);
       ResultSet rs = statement.executeQuery();
-      Set<String> exids     = new HashSet<String>();
+//      Set<String> exids     = new HashSet<String>();
       Set<String> incorrect = new HashSet<String>();
-     // Map<String,Set<String>> exToFields = new HashMap<String, Set<String>>();
+//      Map<String,Set<String>> exToFieldsCorrect = new HashMap<String, Set<String>>();
+//      Map<String,Set<String>> exToFieldsIncorrect = new HashMap<String, Set<String>>();
 
       while (rs.next()) {
-        String exid = rs.getString(EXERCISEID);
-        String field = rs.getString(FIELD);
-        String status = rs.getString(STATUS);
+        int i =1;
+        String exid = rs.getString(i++);
+//        String field = rs.getString(i++);
+//        String status = rs.getString(i++);
 
-       // Set<String> fields = exToFields.get(exid);  if (fields == null) exToFields.put(exid, fields = new HashSet<String>());
+
 //        if (exid.contains("2595")) {
 //          logger.info("ex " + exid + " " + field + " " + status);
 //        }
-        if (status.charAt(0) == 'c') {
-//          if (!fields.remove(field)) {
-//            logger.warn("huh? couldn't remove " +field + " from " + exid);
+//        if (status.charAt(0) == 'c') {
+//          Set<String> fields = exToFields.get(exid);
+//          if (fields == null) exToFields.put(exid, fields = new HashSet<String>());
+//
+//          if (!incorrect.contains(exid)) {
+//            exids.add(exid);
 //          }
-          if (!incorrect.contains(exid)) {
-            exids.add(exid);
-//            if (exid.contains("2595")) {
-//              logger.info("correct ex " + exid + " " + field + " " + status);
-//            }
-          }
-        } else {
-          if (!exids.contains(exid)) {
-            incorrect.add(exid);
-//            if (exid.contains("2595")) {
-//              logger.info("incorrect ex " + exid + " " + field + " " + status);
-//            }
-          }
-        }
+//        } else {
+//          if (!exids.contains(exid)) {
+//            incorrect.add(exid);
+//          }
+//        }
+        incorrect.add(exid);
       }
 
       //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
       finish(connection, statement, rs);
-//rs
-//      for (Map.Entry<String, Set<String>> exToField : exToFields.entrySet()) {
-//
-//        Set<String> value = exToField.getValue();
-//        if (!value.isEmpty()) {
-//          String key = exToField.getKey();
-//          if (key.contains("2595")) {
-//            logger.info("ex " + key + " " + value);
-//          }
-//          exids.add(key);
-//        }
-//      }
-     // if (exids.contains("2595"))             logger.info("ex yes");
-
       return incorrect;
     } catch (SQLException e) {
       logger.error("got " + e, e);
@@ -298,7 +297,7 @@ public class AnnotationDAO extends DAO {
               rs.getString(STATUS),
               rs.getString("comment"),
               rs.getLong(CREATORID),
-              rs.getTimestamp("modified").getTime()
+              rs.getTimestamp(MODIFIED).getTime()
           )
       );
     }
