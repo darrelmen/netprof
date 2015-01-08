@@ -724,7 +724,6 @@ public class Navigation implements RequiresResize {
 
   
 /**
->>>>>>> jdialog
    * @see #viewBrowse()
    * @see #refreshViewLessons(boolean, boolean)
    * @param contentPanel
@@ -796,13 +795,15 @@ public class Navigation implements RequiresResize {
 
   @Override
   public void onResize() {
+  //  logger.info("got onResize");
     setScrollPanelWidth(listScrollPanel);
+    learnHelper.onResize();
     npfHelper.onResize();
     avpHelper.onResize();
     defectHelper.onResize();
     reviewItem.onResize();
     recorderHelper.onResize();
-    recorderHelper.onResize();
+    recordExampleHelper.onResize();
     editItem.onResize();
     markDefectsHelper.onResize();
     practiceHelper.onResize();
