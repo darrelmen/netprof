@@ -44,6 +44,7 @@ public class ChapterNPFHelper extends NPFHelper {
   protected Panel doInternalLayout(UserList ul, String instanceName) {
     Panel widgets = flexListLayout.doInternalLayout(ul, instanceName);
     npfExerciseList = flexListLayout.npfExerciseList;
+    this.instanceName = instanceName;
     return widgets;
   }
 
