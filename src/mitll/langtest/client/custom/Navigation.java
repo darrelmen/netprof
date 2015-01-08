@@ -23,6 +23,7 @@ import mitll.langtest.client.contextPractice.DialogWindow;
 import mitll.langtest.client.custom.content.AVPHelper;
 import mitll.langtest.client.custom.content.ChapterNPFHelper;
 import mitll.langtest.client.custom.content.NPFHelper;
+import mitll.langtest.client.custom.content.ReviewItemHelper;
 import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.custom.exercise.CommentNPFExercise;
@@ -110,7 +111,7 @@ public class Navigation implements RequiresResize {
   private final ChapterNPFHelper defectHelper;
   private final SimpleChapterNPFHelper recorderHelper, recordExampleHelper;
   private final SimpleChapterNPFHelper markDefectsHelper, learnHelper;
-  private final NPFHelper.ReviewItemHelper reviewItem;
+  private final ReviewItemHelper reviewItem;
 
   private final KeyStorage storage;
 
@@ -168,8 +169,10 @@ public class Navigation implements RequiresResize {
 
     practiceHelper = makePracticeHelper(service, userManager, controller, feedback);
     ListInterface exerciseList = npfHelper.getExerciseList();
-    logger.info("exercise list is " + exerciseList);
-    reviewItem = new NPFHelper.ReviewItemHelper(service, feedback, userManager, controller, exerciseList, npfHelper);
+    logger.info("Navigation : exercise list is " + exerciseList);
+    reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, exerciseList, npfHelper);
+    logger.info("Navigation : made review item helper " + reviewItem);
+
     editItem = new EditItem(service, userManager, controller, exerciseList, feedback, npfHelper);
   }
 
@@ -752,7 +755,9 @@ public class Navigation implements RequiresResize {
   }
 
   /**
+   * Return all the review lists -- defects (by teachers/QA), comments (by students), and attention LL.
    * @see #getNav()
+   * @see #addTabs
    * @param contentPanel
    */
   private void viewReview(final Panel contentPanel) {
@@ -774,6 +779,11 @@ public class Navigation implements RequiresResize {
     });
   }
 
+  /**
+   * @see #viewReview
+   * @param contentPanel
+   * @return
+   */
   private Panel getContentChild(Panel contentPanel) {
     contentPanel.clear();
     contentPanel.getElement().setId("defectReview_contentPanel");
@@ -1228,20 +1238,25 @@ public class Navigation implements RequiresResize {
           return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst) {
             @Override
             protected void addTableWithPager(PagingContainer pagingContainer) {
+              // row 1
               Panel column = new FlowPanel();
               add(column);
               addTypeAhead(column);
+
+              // row 2
               final CheckBox w = new CheckBox(SHOW_ONLY_UNRECORDED);
               w.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                   setUnrecorded(w.getValue());
                   scheduleWaitTimer();
-                  loadExercises(getHistoryToken(""), getTypeAheadText());
+                  loadExercises(getHistoryToken(""), getTypeAheadText(),false);
                 }
               });
               w.addStyleName("leftFiveMargin");
               add(w);
+
+              // row 3
               add(pagingContainer.getTableWithPager());
               setOnlyExamples(!doNormalRecording);
             }
