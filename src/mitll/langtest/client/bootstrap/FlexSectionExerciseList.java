@@ -59,7 +59,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @param controller
    * @param instance
    * @param incorrectFirst
-   * @see mitll.langtest.client.ExerciseListLayout#makeExerciseList
    * @see mitll.langtest.client.custom.content.NPFHelper.FlexListLayout.MyFlexSectionExerciseList#MyFlexSectionExerciseList(com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel, String, boolean)
    */
   public FlexSectionExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
