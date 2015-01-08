@@ -19,11 +19,9 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -55,8 +53,6 @@ public class ExcelImport implements ExerciseDAO {
   private final SectionHelper sectionHelper = new SectionHelper();
   private final boolean debug = false;
   private String mediaDir,mediaDir1;
-  //private final Set<String> missingSlowSet = new HashSet<String>();
-  //private final Set<String> missingFastSet = new HashSet<String>();
   private boolean shouldHaveRefAudio = false;
   private boolean usePredefinedTypeOrder;
   private final String language;
@@ -508,7 +504,7 @@ public class ExcelImport implements ExerciseDAO {
               String givenIndex = getCell(next, idIndex);
               String context = getCell(next, contextIndex);
               String contextTranslation = getCell(next, contextTranslationIndex);
-              checkForSemicolons(fieldToDefect, english, foreignLanguagePhrase, translit);
+              checkForSemicolons(fieldToDefect, foreignLanguagePhrase, translit);
 
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
@@ -679,7 +675,7 @@ public class ExcelImport implements ExerciseDAO {
               String givenIndex = getCell(next, idIndex);
               String context = getCell(next, contextIndex);
               String contextTranslation = getCell(next, contextTranslationIndex);
-              checkForSemicolons(fieldToDefect, english, foreignLanguagePhrase, translit);
+              checkForSemicolons(fieldToDefect, foreignLanguagePhrase, translit);
 
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
@@ -710,6 +706,7 @@ public class ExcelImport implements ExerciseDAO {
 
   private void logStatistics(int id, int semis, int skipped, int englishSkipped, int deleted) {
     logger.info("max exercise id = " + id);
+   // logger.info("missing audio files = " +c);
     if (skipped > 0) {
       logger.info("Skipped " + skipped + " entries with missing audio. " + getPercent(skipped, id));
     }
@@ -745,7 +742,7 @@ public class ExcelImport implements ExerciseDAO {
     }
   }
 
-  private void checkForSemicolons(Map<String, String> fieldToDefect, String english, String foreignLanguagePhrase, String translit) {
+  private void checkForSemicolons(Map<String, String> fieldToDefect, String foreignLanguagePhrase, String translit) {
     if (foreignLanguagePhrase.contains(";")) {
       fieldToDefect.put(QCNPFExercise.FOREIGN_LANGUAGE, "contains semicolon - should this item be split?");
     }
@@ -909,7 +906,7 @@ public class ExcelImport implements ExerciseDAO {
    *
    * @param refAudioIndex override place to look for audio
    * @param imported to attach audio to
-   * @see #getExercise(String, String, String, String, String, String, boolean, String, boolean)
+   * @see #getExercise(String, String, String, String, String, String, String, boolean, String, boolean)
    */
   private void addOldSchoolAudio(String refAudioIndex, Exercise imported) {
     String id = imported.getID();
@@ -955,11 +952,11 @@ public class ExcelImport implements ExerciseDAO {
   /**
    * Make sure every audio file we attach is a valid audio file -- it's really where it says it's supposed to be.
    *
-   * TODO : rationalize media path -- don't force hack on bestAudio replacement
+   * TODOx : rationalize media path -- don't force hack on bestAudio replacement
    * Why does it sometimes have the config dir on the front?
    * @param id
    * @param imported
-   * @see #getExercise(String, String, String, String, String, String, boolean, String, boolean)
+   * @see #getExercise(String, String, String, String, String, String,String, boolean, String, boolean)
    */
   private int attachAudio(String id, Exercise imported) {
     //String mediaDir1 = mediaDir.replaceAll("bestAudio","");
@@ -998,8 +995,8 @@ public class ExcelImport implements ExerciseDAO {
           } else {
             missing++;
             c++;
-            if (c < 5) {
-              logger.warn("file " + test.getAbsolutePath() + " does not exist - " + audio.getAudioRef());
+            if (c < 11) {
+              logger.warn("file " + test.getAbsolutePath() + " does not exist - \t" + audio.getAudioRef());
               if (c < 2) {
                 logger.warn("installPath " + installPath + "mediaDir " + mediaDir +" mediaDir1 " + mediaDir1);
               }
