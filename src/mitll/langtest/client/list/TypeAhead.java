@@ -21,10 +21,10 @@ import mitll.langtest.client.LangTest;
  * Created by go22670 on 9/25/14.
  */
 public class TypeAhead {
-  private TextBox typeAhead = new TextBox();
+  private final TextBox typeAhead = new TextBox();
   private String lastTypeAheadValue = "";
 
-  private SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
+  private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
 
   /**
    * @see mitll.langtest.client.list.PagingExerciseList#addTypeAhead(com.google.gwt.user.client.ui.Panel)
@@ -54,6 +54,9 @@ public class TypeAhead {
   public String getText() { return typeAhead.getText(); }
   public Widget getWidget() { return typeAhead; }
 
+  /**
+   * On key up, do something, like go get a new list given a search term.
+   */
   private void makeTypeAhead() {
     getTypeAhead().getElement().setId("ExerciseList_TypeAhead");
     getTypeAhead().setDirectionEstimator(true);   // automatically detect whether text is RTL
@@ -69,6 +72,12 @@ public class TypeAhead {
     });
   }
 
+  /**
+   * Subclass please.
+   * @param text
+   */
+  public void gotTypeAheadEntry(String text) {}
+
   private Widget getControlGroup(Image waitCursor, String title) {
     Panel flow = new HorizontalPanel();
     flow.add(getTypeAhead());
@@ -78,17 +87,23 @@ public class TypeAhead {
     return getControlGroup(title, flow);
   }
 
-  public void configureWaitCursor(Image waitCursor) {
+  private void configureWaitCursor(Image waitCursor) {
     waitCursor.getElement().getStyle().setMarginTop(-7, Style.Unit.PX);
     waitCursor.setUrl(white);
   }
 
-  public void gotTypeAheadEntry(String text) {}
-
+/*
   public ControlGroup getControlGroup(String label) {
     return getControlGroup(label, getTypeAhead());
   }
+*/
 
+  /**
+   * @see mitll.langtest.client.result.ResultManager#populateTable
+   * @param label
+   * @param user
+   * @return
+   */
   public static ControlGroup getControlGroup(String label, Widget user) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
