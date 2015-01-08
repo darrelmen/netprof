@@ -872,4 +872,8 @@ public class UserListManager {
   public void setPublicOnList(long userListID, boolean isPublic) {
     userListDAO.setPublicOnList(userListID, isPublic);
   }
+
+  public Set<String> getAudioAnnos() {
+    return annotationDAO.getAudioAnnos();
+  }
 }
