@@ -1,6 +1,6 @@
 package mitll.langtest.client.custom.content;
 
-import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
@@ -8,7 +8,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
-import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.dialog.ModalInfoDialog;
@@ -22,12 +21,12 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
-import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Lets you show a user list with a paging container...
@@ -38,6 +37,8 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class NPFHelper implements RequiresResize {
+  private Logger logger = Logger.getLogger("NPFHelper");
+
   protected static final String LIST_COMPLETE = "List complete!";
   protected static final String COMPLETE = "Complete";
   private boolean madeNPFContent = false;
@@ -78,7 +79,7 @@ public class NPFHelper implements RequiresResize {
    * @param loadExercises should we load exercises initially
    */
   public void showNPF(UserList ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
-    //System.out.println(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
+    logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
@@ -130,20 +131,21 @@ public class NPFHelper implements RequiresResize {
    */
   protected Panel doInternalLayout(UserList ul, String instanceName) {
     //System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
+    logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
 
+    // row 1
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("internalLayout_Row");
 
+    // left side
     Panel left = new SimplePanel();
     left.getElement().setId("internalLayout_LeftCol");
     left.addStyleName("floatLeft");
-
+    left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
     hp.add(left);
 
+    // right side
     npfContentPanel = getRightSideContent(ul, instanceName);
-
-    left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
-
     hp.add(npfContentPanel);
 
     return hp;
@@ -189,6 +191,12 @@ public class NPFHelper implements RequiresResize {
 
   Panel setupContent(Panel hp) {  return npfContentPanel;  }
 
+  /**
+   * @see #makeNPFExerciseList
+   * @param right
+   * @param instanceName
+   * @return
+   */
   PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
     //System.out.println(getClass() + ".makeExerciseList : instanceName " + instanceName);
     return new PagingExerciseList(right, service, feedback, null, controller,
@@ -238,86 +246,13 @@ public class NPFHelper implements RequiresResize {
  // Panel getNpfContentPanel() { return npfContentPanel; }
 
   @Override
-  public void onResize() { if (npfContentPanel != null) {  npfExerciseList.onResize(); } }
+  public void onResize() {
+    logger.info("Got resize...");
+    if (npfContentPanel != null) {  npfExerciseList.onResize(); }
+  }
 
   public void setContentPanel(DivWidget content) {
     this.contentPanel = content;
-  }
-
-  /**
-   * Created by GO22670 on 3/26/2014.
-   */
-  public static class ReviewItemHelper extends NPFHelper {
-    private FlexListLayout flexListLayout;
-    private final HasText itemMarker;
-    private final ListInterface predefinedContent;
-    private final NPFHelper npfHelper;
-
-    /**
-     * @see mitll.langtest.client.custom.Navigation#Navigation
-     * @param service
-     * @param feedback
-     * @param userManager
-     * @param controller
-     * @param predefinedContent
-     */
-    public ReviewItemHelper(final LangTestDatabaseAsync service, final UserFeedback feedback,
-                            final UserManager userManager, final ExerciseController controller,
-                            final ListInterface predefinedContent,
-                            NPFHelper npfHelper) {
-      super(service, feedback, userManager, controller, true);
-      this.itemMarker = null;
-      this.predefinedContent = predefinedContent;
-      this.npfHelper = npfHelper;
-    }
-
-    /**
-     * Left and right components
-     *
-     *
-     * @param ul
-     * @param instanceName
-     * @return
-     * @see #doNPF(mitll.langtest.shared.custom.UserList, String, boolean)
-     */
-    protected Panel doInternalLayout(final UserList ul, String instanceName) {
-      this.flexListLayout = new FlexListLayout(service,feedback,userManager,controller) {
-        @Override
-        protected ExercisePanelFactory getFactory(final PagingExerciseList pagingExerciseList, String instanceName) {
-          return new ExercisePanelFactory(service,feedback,controller,predefinedContent) {
-            @Override
-            public Panel getExercisePanel(CommonExercise exercise) {
-              ReviewEditableExercise reviewEditableExercise =
-                new ReviewEditableExercise(service, controller, itemMarker, new UserExercise(exercise), ul,
-                  pagingExerciseList, predefinedContent, npfHelper);
-              SimplePanel ignoredContainer = new SimplePanel();
-
-              Panel widgets = reviewEditableExercise.addNew(ul, ul,
-                npfExerciseList,
-                ignoredContainer);
-              reviewEditableExercise.setFields(exercise);
-
-              return widgets;
-            }
-          };
-        }
-      };
-
-      Panel widgets = flexListLayout.doInternalLayout(ul, instanceName);
-      npfExerciseList = flexListLayout.npfExerciseList;
-      return widgets;
-    }
-
-    @Override
-    public void onResize() {
-      if (flexListLayout != null) {
-        flexListLayout.onResize();
-      } else if (npfExerciseList != null) {
-        npfExerciseList.onResize();
-      } else {
-        //System.out.println("ReviewItemHelper.onResize : not sending resize event - flexListLayout is null?");
-      }
-    }
   }
 
   /**
@@ -333,7 +268,7 @@ public class NPFHelper implements RequiresResize {
 
     /**
      * @see ChapterNPFHelper#ChapterNPFHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, boolean)
-     * @see mitll.langtest.client.custom.content.NPFHelper.ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
+     * @see ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
      * @param service
      * @param feedback
      * @param userManager
@@ -350,7 +285,7 @@ public class NPFHelper implements RequiresResize {
 
     /**
      * @see ChapterNPFHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
-     * @see mitll.langtest.client.custom.content.NPFHelper.ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
+     * @see ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
      * @param ul
      * @param instanceName
      * @return
@@ -464,14 +399,14 @@ public class NPFHelper implements RequiresResize {
 
       @Override
       protected void noSectionsGetExercises(long userID) {
-        loadExercises(getHistoryToken(""), getPrefix());
+        loadExercises(getHistoryToken(""), getPrefix(),false);
       }
 
       @Override
       protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
         System.out.println(getClass() + ".loadExercises : instance " + getInstance() + " " + typeToSection +
             " and item '" + item + "'" + " for list " + userListID);
-        loadExercisesUsingPrefix(typeToSection, getPrefix());
+        loadExercisesUsingPrefix(typeToSection, getPrefix(), false);
       }
     }
   }
