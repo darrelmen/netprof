@@ -142,7 +142,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     System.out.println("ExerciseList.getExercises for user " + userID + " instance " + instance);
     lastReqID++;
     service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, false,
-        incorrectFirstOrder, new SetExercisesCallback(""));
+        incorrectFirstOrder, false, new SetExercisesCallback(""));
     return true;
   }
 
@@ -154,7 +154,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     int user1 = controller.getUser();
     System.out.println("ExerciseList.reload for user " + user1);// + " instance " + instance + " id " + getElement().getId());
     service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, user1, getRole(), false, false,
-        incorrectFirstOrder, new SetExercisesCallback(""));
+        incorrectFirstOrder, false, new SetExercisesCallback(""));
   }
 
   /**
@@ -167,7 +167,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   public void reloadWith(String id) {
     System.out.println("ExerciseList.reloadWith id = " + id + " for user " + controller.getUser() + " instance " + instance);
     service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, false,
-        incorrectFirstOrder, new SetExercisesCallbackWithID(id));
+        incorrectFirstOrder, false, new SetExercisesCallbackWithID(id));
   }
 
   /**
