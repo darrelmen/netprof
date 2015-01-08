@@ -64,7 +64,7 @@ public class ReviewEditableExercise extends EditableExercise {
    * @param originalList
    * @param exerciseList
    * @param predefinedContent - this should be a reference to the Learn tab exercise list, but it's not getting set.
-   * @see mitll.langtest.client.custom.content.NPFHelper.ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
+   * @see mitll.langtest.client.custom.content.ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
    */
   public ReviewEditableExercise(LangTestDatabaseAsync service,
                                 ExerciseController controller,
