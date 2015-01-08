@@ -11,11 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,7 +27,13 @@ public class AnnotationDAO extends DAO {
   private static final String CREATORID = "creatorid";
   private static final String STATUS = "status";
   public static final String EXERCISEID = "exerciseid";
+  public static final String FIELD = "field";
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
+   * @param database
+   * @param userDAO
+   */
   public AnnotationDAO(Database database, UserDAO userDAO) {
     super(database);
     try {
@@ -160,6 +162,78 @@ public class AnnotationDAO extends DAO {
   }
 
   /**
+   * TODO: Ought to be able to make a sql query that only returns the latest item for a exercise-field pair...
+   * @return
+   */
+  public Set<String> getAudioAnnos() {
+    String sql = "SELECT " +
+        EXERCISEID+ "," +
+        FIELD+ "," +
+        STATUS+
+        " from " + ANNOTATION + " where " +
+        FIELD +
+        " like'%.wav' order by field,modified desc";
+    try {
+      Connection connection = database.getConnection(this.getClass().toString());
+      PreparedStatement statement = connection.prepareStatement(sql);
+      ResultSet rs = statement.executeQuery();
+      Set<String> exids     = new HashSet<String>();
+      Set<String> incorrect = new HashSet<String>();
+     // Map<String,Set<String>> exToFields = new HashMap<String, Set<String>>();
+
+      while (rs.next()) {
+        String exid = rs.getString(EXERCISEID);
+        String field = rs.getString(FIELD);
+        String status = rs.getString(STATUS);
+
+       // Set<String> fields = exToFields.get(exid);  if (fields == null) exToFields.put(exid, fields = new HashSet<String>());
+//        if (exid.contains("2595")) {
+//          logger.info("ex " + exid + " " + field + " " + status);
+//        }
+        if (status.charAt(0) == 'c') {
+//          if (!fields.remove(field)) {
+//            logger.warn("huh? couldn't remove " +field + " from " + exid);
+//          }
+          if (!incorrect.contains(exid)) {
+            exids.add(exid);
+//            if (exid.contains("2595")) {
+//              logger.info("correct ex " + exid + " " + field + " " + status);
+//            }
+          }
+        } else {
+          if (!exids.contains(exid)) {
+            incorrect.add(exid);
+//            if (exid.contains("2595")) {
+//              logger.info("incorrect ex " + exid + " " + field + " " + status);
+//            }
+          }
+        }
+      }
+
+      //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
+      finish(connection, statement, rs);
+//rs
+//      for (Map.Entry<String, Set<String>> exToField : exToFields.entrySet()) {
+//
+//        Set<String> value = exToField.getValue();
+//        if (!value.isEmpty()) {
+//          String key = exToField.getKey();
+//          if (key.contains("2595")) {
+//            logger.info("ex " + key + " " + value);
+//          }
+//          exids.add(key);
+//        }
+//      }
+     // if (exids.contains("2595"))             logger.info("ex yes");
+
+      return incorrect;
+    } catch (SQLException e) {
+      logger.error("got " + e, e);
+    }
+    return new HashSet<String>();
+  }
+
+  /**
    * @see UserListManager#addAnnotations
    * @param exerciseID
    * @return
@@ -182,22 +256,22 @@ public class AnnotationDAO extends DAO {
   }
 
   private Map<String, ExerciseAnnotation> getFieldToAnnotationMap(List<UserAnnotation> lists) {
-    Map<String,UserAnnotation> fieldToAnno = new HashMap<String, UserAnnotation>();
+    Map<String, UserAnnotation> fieldToAnno = new HashMap<String, UserAnnotation>();
 
     for (UserAnnotation annotation : lists) {
-      UserAnnotation annotation1 = fieldToAnno.get(annotation.getField());
-      if (annotation1 == null) fieldToAnno.put(annotation.getField(),annotation);
-      else if (annotation1.getTimestamp() < annotation.getTimestamp()) {
-        fieldToAnno.put(annotation.getField(),annotation);
+      UserAnnotation prevAnnotation = fieldToAnno.get(annotation.getField());
+      if (prevAnnotation == null) fieldToAnno.put(annotation.getField(), annotation);
+      else if (prevAnnotation.getTimestamp() < annotation.getTimestamp()) {
+        fieldToAnno.put(annotation.getField(), annotation);
       }
     }
     if (lists.isEmpty()) {
       //logger.error("huh? no annotation with id " + unique);
       return Collections.emptyMap();
     } else {
-      Map<String,ExerciseAnnotation>  fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
+      Map<String, ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
       for (Map.Entry<String, UserAnnotation> pair : fieldToAnno.entrySet()) {
-        fieldToAnnotation.put(pair.getKey(),new ExerciseAnnotation(pair.getValue().getStatus(),pair.getValue().getComment()));
+        fieldToAnnotation.put(pair.getKey(), new ExerciseAnnotation(pair.getValue().getStatus(), pair.getValue().getComment()));
       }
       //logger.debug("field->anno " + fieldToAnno);
       return fieldToAnnotation;
@@ -220,7 +294,7 @@ public class AnnotationDAO extends DAO {
     while (rs.next()) {
       lists.add(new UserAnnotation(
               rs.getString(EXERCISEID),
-              rs.getString("field"),
+              rs.getString(FIELD),
               rs.getString(STATUS),
               rs.getString("comment"),
               rs.getLong(CREATORID),
@@ -237,7 +311,7 @@ public class AnnotationDAO extends DAO {
     /**
      *
      * @see mitll.langtest.server.database.custom.UserListManager#getCommentedList(java.util.Collection)
-     * @see mitll.langtest.server.database.custom.UserListManager#UserListManager(mitll.langtest.server.database.UserDAO, UserListDAO, UserListExerciseJoinDAO, AnnotationDAO, ReviewedDAO, mitll.langtest.server.PathHelper)
+     * @see mitll.langtest.server.database.custom.UserListManager#getAmmendedStateMap
      * @return
      */
   public Map<String,Long> getAnnotatedExerciseToCreator()  {
