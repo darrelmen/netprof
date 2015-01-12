@@ -169,9 +169,9 @@ public class Navigation implements RequiresResize {
 
     practiceHelper = makePracticeHelper(service, userManager, controller, feedback);
     ListInterface exerciseList = npfHelper.getExerciseList();
-    logger.info("Navigation : exercise list is " + exerciseList);
+    //logger.info("Navigation : exercise list is " + exerciseList);
     reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, exerciseList, npfHelper);
-    logger.info("Navigation : made review item helper " + reviewItem);
+   // logger.info("Navigation : made review item helper " + reviewItem);
 
     editItem = new EditItem(service, userManager, controller, exerciseList, feedback, npfHelper);
   }
@@ -307,6 +307,8 @@ public class Navigation implements RequiresResize {
     return tabPanel;    // TODO - consider how to tell panels when they are hidden by tab changes
   }
 
+  TabPanel subListTabPanel;
+
   /**
    * Defines order of tabs...
    *
@@ -336,15 +338,16 @@ public class Navigation implements RequiresResize {
     addPracticeTab();
 
     studyLists = makeFirstLevelTab(tabPanel, IconType.FOLDER_CLOSE, STUDY_LISTS);
-    final TabPanel w = new TabPanel();
-    studyLists.getContent().add(w);
-    addListTabs(w);
+    subListTabPanel = new TabPanel();
+    studyLists.getContent().add(subListTabPanel);
+
+    addListTabs(subListTabPanel);
+
     studyLists.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        clickOnTab(yourStuff);
-        w.selectTab(0);
-        refreshViewLessons(true, false);
+        checkAndMaybeClearTab(STUDY_LISTS);
+        showFirstUserListTab(subListTabPanel,0);
         logEvent(studyLists, STUDY_LISTS);
       }
     });
@@ -398,6 +401,16 @@ public class Navigation implements RequiresResize {
     }
   }
 
+  private void showFirstUserListTab(TabPanel w, int tab) {
+    clickOnTab(yourStuff);
+    w.selectTab(tab);
+    refreshViewLessons(true, false);
+  }
+
+  /**
+   * @see #addTabs
+   * @param tabPanel
+   */
   private void addListTabs(TabPanel tabPanel) {
     // your list tab
     yourStuff = makeTab(tabPanel, IconType.FOLDER_CLOSE, YOUR_LISTS);
@@ -517,7 +530,7 @@ public class Navigation implements RequiresResize {
   }
 
   private void checkAndMaybeClearTab(String value) {
-    //String value1 = storage.getValue(CLICKED_TAB);
+ //   String value1 = storage.getValue(CLICKED_TAB);
     //logger.info("checkAndMaybeClearTab " + value1 + " vs "+value + " clearing " + CLICKED_USER_LIST);
     storage.removeValue(CLICKED_USER_LIST);
     storage.storeValue(CLICKED_TAB, value);
@@ -525,7 +538,7 @@ public class Navigation implements RequiresResize {
 
   /**
    * @see #getNav()
-   * @see #showMyLists(boolean, boolean)
+   * @see #showMyLists
    * @see #deleteList(com.github.gwtbootstrap.client.ui.Button, mitll.langtest.shared.custom.UserList, boolean)
    * @see #clickOnYourLists(long)
    * @param onlyMine
@@ -564,7 +577,7 @@ public class Navigation implements RequiresResize {
                 break;
               }
             }
-            showMyLists(foundCreated, !foundCreated);
+            showMyLists(foundCreated, !foundCreated, subListTabPanel);
           }
         }
       });
@@ -590,20 +603,49 @@ public class Navigation implements RequiresResize {
   private void selectPreviousTab(String value) {
     TabAndContent tabAndContent = nameToTab.get(value);
     Integer tabIndex = nameToIndex.get(value);
+    String orig = value;
+    if (tabIndex == null) {
+      if (value.equals(OTHERS_LISTS) || value.equals(YOUR_LISTS) || value.equals(CREATE) || value.equals(BROWSE)) {
+        value = STUDY_LISTS;
+        tabIndex = nameToIndex.get(value);
+      }
+    }
     if (tabIndex != null) {
       tabPanel.selectTab(tabIndex);
       clickOnTab(tabAndContent);
 
       if (value.equals(YOUR_LISTS)) {
-        showMyLists(true, false);
+        showMyLists(true, false,subListTabPanel);
       } else if (value.equals(OTHERS_LISTS)) {
-        showMyLists(false, true);
+        showMyLists(false, true,subListTabPanel);
+      } else if (value.equals(STUDY_LISTS)/* || value.equals(OTHERS_LISTS) || value.equals(YOUR_LISTS)*/) {
+        //showMyLists(false, true);
+        clickOnTab(yourStuff);
+       // refreshViewLessons(true, false);
+        DivWidget content = studyLists.getContent();
+        Widget widget = content.getWidget(0);
+
+        int tab = orig.equals(YOUR_LISTS) ? 0 : orig.equals(OTHERS_LISTS) ? 1 :orig.equals(CREATE) ? 2: orig.equals(BROWSE) ? 3:0;
+      //  logger.info("Select tab " + tab + " orig " + orig);
+        showFirstUserListTab((TabPanel) widget, tab);
+        if (tab == 0) {
+          showMyLists(true, false,subListTabPanel);
+        }
+        else if (tab == 1) {
+          showMyLists(false, true,subListTabPanel);
+        }
+        else if (tab == 2) {
+          clickOnTab(create);
+        }
+        else {
+          viewBrowse(); // CHAPTERS
+        }
       } else if (value.equals(BROWSE)) {
         viewBrowse(); // CHAPTERS
       } else if (value.equals(FIX_DEFECTS)) {
         viewReview(review.getContent());
       } else if (value.equals(PRACTICE_DIALOG)) {
-    	dialogWindow.viewDialog(dialog.getContent());
+        dialogWindow.viewDialog(dialog.getContent());
       } else if (value.equals(CHAPTERS)) {
         learnHelper.showNPF(chapters, LEARN);
       } else if (value.equals(RECORD_AUDIO)) {
@@ -615,11 +657,10 @@ public class Navigation implements RequiresResize {
       } else if (value.equals(PRACTICE) && practiceTab != null) {
         showPracticeTab();
       } else {
-        logger.info("got unknown value '" + value + "'");
+        logger.info("selectPreviousTab got unknown value '" + value + "'");
         showDefaultInitialTab();
       }
-    }
-    else {
+    } else {
       logger.warning("selectPreviousTab : found value  '" + value + "' " +
           " but I only know about tabs : " + nameToIndex.keySet());
       showDefaultInitialTab();
@@ -646,9 +687,10 @@ public class Navigation implements RequiresResize {
    * @param onlyCreated
    * @param onlyVisited
    */
-  private void showMyLists(boolean onlyCreated, boolean onlyVisited) {
+  private void showMyLists(boolean onlyCreated, boolean onlyVisited, TabPanel tabPanel) {
     String value = storage.getValue(CLICKED_TAB);
-//    logger.info("showMyLists " + value + " created " + onlyCreated + " visited " + onlyVisited);
+  //  logger.info("showMyLists '" + value + "' created " + onlyCreated + " visited " + onlyVisited);
+
     if (!value.isEmpty()) {
       if (value.equals(YOUR_LISTS)) {
         onlyCreated = true;
@@ -659,7 +701,11 @@ public class Navigation implements RequiresResize {
         onlyVisited = true;
       }
     }
-    int tabToSelect = onlyCreated ? getSafeTabIndexFor(YOUR_LISTS) : getSafeTabIndexFor(OTHERS_LISTS);
+
+    int tabToSelect = onlyCreated ? 0:1;//getSafeTabIndexFor(YOUR_LISTS) : getSafeTabIndexFor(OTHERS_LISTS);
+
+  //  logger.info("Select tab " + tabToSelect + " only " + onlyCreated);
+
     tabPanel.selectTab(tabToSelect);
 
     TabAndContent toUse = onlyCreated ? yourStuff : othersStuff;
@@ -684,7 +730,7 @@ public class Navigation implements RequiresResize {
    * @see #clickOnYourLists(long)
    * @see #selectPreviouslyClickedSubTab(com.github.gwtbootstrap.client.ui.TabPanel, TabAndContent, TabAndContent, TabAndContent, mitll.langtest.shared.custom.UserList, String, boolean, boolean, boolean, boolean)
    * @see #selectPreviousTab(String)
-   * @see #showMyLists(boolean, boolean)
+   * @see #showMyLists
    * @param toUse
    */
   private void clickOnTab(final TabAndContent toUse) {
@@ -825,7 +871,7 @@ public class Navigation implements RequiresResize {
 
     // if select a new list, clear the subtab selection
     if (previousList != null && !previousList.equals(currentValue)) {
-      //logger.info("\tshowList " +previousList + " vs " + currentValue);
+    //  logger.info("\tshowList " +previousList + " vs " + currentValue + " remove " + SUB_TAB);
 
       storage.removeValue(SUB_TAB);
     }
@@ -1032,7 +1078,6 @@ public class Navigation implements RequiresResize {
    * @param isComment
    * @param isAttention
    * @param isNormalList
-   * @paramx editItem
    */
   private void selectTabGivenHistory(TabPanel tabPanel, TabAndContent learn, TabAndContent practice,
                                      TabAndContent edit,
