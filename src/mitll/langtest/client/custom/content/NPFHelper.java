@@ -140,12 +140,20 @@ public class NPFHelper implements RequiresResize {
     Panel left = new SimplePanel();
     left.getElement().setId("internalLayout_LeftCol");
     left.addStyleName("floatLeft");
-    left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
     hp.add(left);
 
     // right side
     Panel npfContentPanel = getRightSideContent(ul, instanceName);
     hp.add(npfContentPanel);
+
+    // this must come here!
+    if (npfExerciseList == null) {
+      logger.warning("huh? exercise list is null for " + instanceName + " and " +ul);
+    }
+    else {
+      left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
+    }
+
 
     return hp;
   }
