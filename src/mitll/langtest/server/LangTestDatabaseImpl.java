@@ -55,9 +55,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public static final String DATABASE_REFERENCE = "databaseReference";
   public static final String AUDIO_FILE_HELPER_REFERENCE = "audioFileHelperReference";
   private static final int SLOW_EXERCISE_EMAIL = 2000;
-  public static final String ENGLISH = "English";
-  public static final int MAX = 30;
-  public static final int SLOW_MILLIS = 40;
+  private static final String ENGLISH = "English";
+  private static final int MAX = 30;
+  private static final int SLOW_MILLIS = 40;
 
   private DatabaseImpl db;
   private AudioFileHelper audioFileHelper;
@@ -102,7 +102,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  public void sendEmail(String subject, String prefixedMessage) {
+  private void sendEmail(String subject, String prefixedMessage) {
     getMailSupport().email(serverProps.getEmailAddress(), subject, prefixedMessage);
   }
 
@@ -217,7 +217,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  protected Collection<CommonExercise> getExercisesForSearch(String prefix, int userID, Collection<CommonExercise> exercises, boolean predefExercises) {
+  private Collection<CommonExercise> getExercisesForSearch(String prefix, int userID, Collection<CommonExercise> exercises, boolean predefExercises) {
     long then = System.currentTimeMillis();
     ExerciseTrie trie = predefExercises ? fullTrie : new ExerciseTrie(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
     exercises = trie.getExercises(prefix);
@@ -675,7 +675,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return byID;
   }
 
-  public void checkPerformance(String id, long then) {
+  private void checkPerformance(String id, long then) {
     long now;
     now = System.currentTimeMillis();
     long diff = now - then;
@@ -696,7 +696,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  protected void sendEmailWhenSlow(String id, String language, long diff, String threadInfo) {
+  private void sendEmailWhenSlow(String id, String language, long diff, String threadInfo) {
     String hostName = null;
     try {
       hostName = InetAddress.getLocalHost().getHostName();
@@ -890,8 +890,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg, String exerciseID) {
+
+    long then = System.currentTimeMillis();
+
     PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
         false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID);
+    long timeToRunHydec = System.currentTimeMillis() - then;
+
+    logger.debug("getASRScoreForAudio : scoring exid " +exerciseID +
+        " sentence " +sentence.length()+" characters long and" + testAudioFile +
+        " got score " + asrScoreForAudio.getHydecScore() +
+        " and took " + timeToRunHydec + " millis");
+
     if (resultID > -1) {
       db.getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore());
     }
@@ -1617,8 +1627,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return matches;
   }
 
-
-  protected int compareTwoMaybeInts(String id1, String id2) {
+  private int compareTwoMaybeInts(String id1, String id2) {
     int comp;
     try {   // this could be slow
       int i = Integer.parseInt(id1);
@@ -2088,14 +2097,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @see LangTestDatabaseImpl#init()
    */
-  public String setInstallPath(boolean useFile, DatabaseImpl db) {
+  private void setInstallPath(boolean useFile, DatabaseImpl db) {
     String lessonPlanFile = getLessonPlan();
     if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
     db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile, serverProps.getLanguage(), useFile,
         relativeConfigDir + File.separator + serverProps.getMediaDir());
 
-    return lessonPlanFile;
+    //return lessonPlanFile;
   }
 
   private String getLessonPlan() {
