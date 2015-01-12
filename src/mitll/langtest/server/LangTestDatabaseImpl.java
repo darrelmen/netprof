@@ -898,7 +898,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     long timeToRunHydec = System.currentTimeMillis() - then;
 
     logger.debug("getASRScoreForAudio : scoring exid " +exerciseID +
-        " sentence " +sentence.length()+" characters long and" + testAudioFile +
+        " sentence " +sentence.length()+" characters long and " + testAudioFile +
         " got score " + asrScoreForAudio.getHydecScore() +
         " and took " + timeToRunHydec + " millis");
 
