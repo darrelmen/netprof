@@ -37,7 +37,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class NPFHelper implements RequiresResize {
-  private Logger logger = Logger.getLogger("NPFHelper");
+  Logger logger = Logger.getLogger("NPFHelper");
 
   protected static final String LIST_COMPLETE = "List complete!";
   protected static final String COMPLETE = "Complete";
@@ -264,6 +264,8 @@ public class NPFHelper implements RequiresResize {
    * Created by GO22670 on 3/28/2014.
    */
   public abstract static class FlexListLayout implements RequiresResize {
+    Logger logger = Logger.getLogger("FlexListLayout");
+
     public PagingExerciseList npfExerciseList;
     private final ExerciseController controller;
     private final LangTestDatabaseAsync service;
@@ -326,8 +328,13 @@ public class NPFHelper implements RequiresResize {
       FlexSectionExerciseList widgets = makeNPFExerciseList(topRow, currentExerciseVPanel, instanceName, uniqueID, incorrectFirst);
       npfExerciseList = widgets;
 
-      Widget exerciseListOnLeftSide = npfExerciseList.getExerciseListOnLeftSide(controller.getProps());
-      exerciseListContainer.add(exerciseListOnLeftSide);
+      if (npfExerciseList == null) {
+        logger.warning("huh? exercise list is null for " + instanceName + " and " +ul);
+      }
+      else {
+        Widget exerciseListOnLeftSide = npfExerciseList.getExerciseListOnLeftSide(controller.getProps());
+        exerciseListContainer.add(exerciseListOnLeftSide);
+      }
 
       widgets.addWidgets();
       return twoRows;
