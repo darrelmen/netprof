@@ -523,7 +523,7 @@ public class ASRScoring extends Scoring implements CollationSort {
     Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
 
     if (isMandarin) {
-      sentence = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") +getSegmented(sentence.trim()); //segmentaton method will filter out the UNK model
+      sentence = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") +getSegmented(sentence.trim()); // segmentation method will filter out the UNK model
     }
     if (scores == null) {
       scores = calcScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir);
