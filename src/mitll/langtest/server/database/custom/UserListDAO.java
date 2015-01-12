@@ -212,13 +212,12 @@ public class UserListDAO extends DAO {
       List<UserList> toReturn = new ArrayList<UserList>();
       for (UserList ul : userLists) {
         if (!ul.isEmpty()) {
-          logger.debug("getAllPublic : found userLists for " + userid + " : " +ul);
+          //logger.debug("getAllPublic : found userLists for " + userid + " : " +ul);
 
           toReturn.add(ul);
         }
         else {
-          logger.info("\tgetAllPublic : skipping for " + userid + " : " +ul);
-
+        //  logger.info("\tgetAllPublic : skipping for " + userid + " : " +ul);
         }
       }
    //   logger.debug("toReturn for " + userid + " : " +toReturn);
