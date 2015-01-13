@@ -33,6 +33,8 @@ public class Report {
   public static final String ACTIVE_USERS = "# Active Users";
   public static final String TIME_ON_TASK_MINUTES = "Time on Task Minutes ";
   public static final String TOTAL_TIME_ON_TASK_HOURS = "Total time on task (hours)";
+  public static final String MONTH = "month";
+  public static final String WEEK = "week";
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
   private final EventDAO eventDAO;
@@ -67,7 +69,10 @@ public class Report {
       suffix = " at " + site;
     }
     String subject = "Weekly Usage Report for " + serverProps.getLanguage() + suffix;
-    if (i == Calendar.MONDAY && !reportEmails.isEmpty()) {
+
+    // check if it's a monday
+    if (i == Calendar.MONDAY
+        && !reportEmails.isEmpty()) {
       File file = getReportFile(pathHelper, today);
       //logger.debug("checking file " + file.getAbsolutePath());
       if (file.exists()) {
@@ -183,22 +188,24 @@ public class Report {
         e.printStackTrace();
       }
     }
-    String users1 = "New Users (users enrolled after 10/8)";
+    String users1 = "New Users";// (users enrolled after 10/8)";
     builder.append("<html><head><body>" +
             getYTD(ytd, users1) +
-            getMC(monthToCount, "month", users1) +
-            getWC(weekToCount, "week", users1)
+            getMC(monthToCount, MONTH, users1) +
+            getWC(weekToCount, WEEK, users1)
     );
 
     return students;
   }
 
   private String getYTD(int ytd, String users1) {
+    int i = getCal().get(Calendar.YEAR);
     return "<table>" +
         "<tr>" +
         "<th>" +
         users1 +
-        " YTD</th>" + "</tr>" +
+        " YTD (" +i+
+        ")</th>" + "</tr>" +
         "<tr>" +
         "<td>" + ytd +
         "</td>" + "</tr>" +
@@ -273,7 +280,9 @@ public class Report {
 
   private Calendar getCal() {
     Calendar instance = Calendar.getInstance();
+    int i = instance.get(Calendar.YEAR);
     instance.clear();
+    instance.set(Calendar.YEAR,i);
     return instance;
   }
 
@@ -283,8 +292,8 @@ public class Report {
    */
   private Map<Long, Map<String, Integer>> getResults(StringBuilder builder, Set<Long> students, PathHelper pathHelper) {
     Calendar calendar = getCal();
-    Date january1st = getJanuaryFirst(calendar);
-
+    Date january1st = getJanuaryFirst( getCal());
+   // logger.debug("starting at " + january1st);
     int ytd = 0;
 
     List<Result> results = resultDAO.getResults();
@@ -360,9 +369,10 @@ public class Report {
     String recordings = "Recordings";
 
     builder.append("\n<br/><span>Valid student recordings</span>");
-    builder.append(getYTD(ytd, recordings) +
-        getMC(monthToCount, "month", recordings) +
-        getWC(weekToCount, "week", recordings));
+    builder.append(
+        getYTD(ytd, recordings) +
+        getMC(monthToCount, MONTH, recordings) +
+        getWC(weekToCount, WEEK, recordings));
 
     addRefAudio(builder, calendar, january1st, refAudio);
     return userToDayToCount;
@@ -381,9 +391,10 @@ public class Report {
     }
 
     String refAudioRecs = "Ref Audio Recordings";
-    builder.append(getYTD(ytd, refAudioRecs) +
-        getMC(monthToCount, "month", refAudioRecs) +
-        getWC(weekToCount, "week", refAudioRecs));
+    builder.append(
+        getYTD(ytd, refAudioRecs) +
+        getMC(monthToCount, MONTH, refAudioRecs) +
+        getWC(weekToCount, WEEK, refAudioRecs));
   }
 
   /**
@@ -487,8 +498,8 @@ public class Report {
     logger.debug("skipped  " + skipped + " events from teachers " + teachers);
 
     String activeUsers = ACTIVE_USERS;
-    builder.append(getMC(monthToCount, "month", activeUsers) +
-        getWC(weekToCount, "week", activeUsers));
+    builder.append(getMC(monthToCount, MONTH, activeUsers) +
+        getWC(weekToCount, WEEK, activeUsers));
     Map<Integer, Long> monthToDur = getMonthToDur(monthToCount2);
     long total = 0;
     for (Long v : monthToDur.values()) total += v;
@@ -502,8 +513,8 @@ public class Report {
 
     String timeOnTaskMinutes = TIME_ON_TASK_MINUTES;
     builder.append(getYTD(Math.round(total / 60), TOTAL_TIME_ON_TASK_HOURS) +
-        getMC(getMinMap(monthToDur), "month", timeOnTaskMinutes) +
-        getWC(getMinMap(weekToDur), "week", timeOnTaskMinutes));
+        getMC(getMinMap(monthToDur), MONTH, timeOnTaskMinutes) +
+        getWC(getMinMap(weekToDur), WEEK, timeOnTaskMinutes));
   }
 
   private boolean isValidUser(long creatorID) {

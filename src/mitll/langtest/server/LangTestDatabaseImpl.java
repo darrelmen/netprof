@@ -1723,18 +1723,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return audioAnswer;
   }
 
-/*
-  private void normalizeLevel(AudioAnswer audioAnswer) {
-    File absoluteFile = pathHelper.getAbsoluteFile(audioAnswer.getPath());
-    if (!absoluteFile.exists()) {
-      logger.error("huh? can't find " + absoluteFile + " audio file just posted.?");
-    } else {
-      //logger.debug("norm level for " + absoluteFile);
-      new AudioConversion().normalizeLevels(absoluteFile);
-    }
-  }
-*/
-
   /**
    * A low overhead way of doing alignment.
    *
