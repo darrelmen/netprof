@@ -62,6 +62,12 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String NOT_VALID = "NOT_VALID";
   private static final String IS_CORRECT = "isCorrect";
   private static final String SAID_WORD = "saidWord";
+
+  // Doug said to remove items with missing audio. 1/12/15
+  private static final boolean REMOVE_EXERCISES_WITH_MISSING_AUDIO = true;
+  public static final String START = "start";
+  public static final String END = "end";
+
   private JSONObject nestedChapters;
   private long whenCached = -1;
   private static final String ENCODING = "UTF8";
@@ -270,15 +276,9 @@ public class ScoreServlet extends DatabaseServlet {
         } else {
           toReturn.put(ERROR, "unknown req " + queryString);
         }
-      } /*else {
-        if (chapters == null) {
-          chapters = getJsonChapters();
-        }
-        toReturn = chapters;
-        //toReturn.put("ERROR", "null req");
-      }*/
+      }
     } catch (Exception e) {
-      e.printStackTrace();
+     logger.error("got " +e,e);
     }
 
     String x = toReturn.toString();
@@ -629,7 +629,6 @@ public class ScoreServlet extends DatabaseServlet {
     JSONArray jsonArray = new JSONArray();
     Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
 
-    //logger.debug("getJsonNestedChapters got " + sectionNodes);
     for (SectionNode node : db.getSectionHelper().getSectionNodes()) {
       String type = node.getType();
       typeToValues.put(type, Collections.singletonList(node.getName()));
@@ -676,6 +675,14 @@ public class ScoreServlet extends DatabaseServlet {
     Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToValues);
 
     List<CommonExercise> copy = new ArrayList<CommonExercise>(exercisesForState);
+
+    if (REMOVE_EXERCISES_WITH_MISSING_AUDIO) {
+      Iterator<CommonExercise> iterator = copy.iterator();
+      for (; iterator.hasNext(); ) {
+        CommonExercise next = iterator.next();
+        if (!next.hasRefAudio()) iterator.remove();
+      }
+    }
     getExerciseSorter().sortByForeign(copy, getAudioFileHelper());
 
 //    new ExerciseSorter(db.getSectionHelper().getTypeOrder()).getSortedByUnitThenPhone(copy, false, audioFileHelper.getPhoneToCount(), false);
@@ -941,8 +948,8 @@ public class ScoreServlet extends DatabaseServlet {
       for (TranscriptSegment segment : value) {
         JSONObject object = new JSONObject();
         object.put(EVENT, segment.getEvent());
-        object.put("start", segment.getStart());
-        object.put("end", segment.getEnd());
+        object.put(START, segment.getStart());
+        object.put(END, segment.getEnd());
         object.put(SCORE, segment.getScore());
 
         value1.add(object);
@@ -969,9 +976,7 @@ public class ScoreServlet extends DatabaseServlet {
 
       db = getDatabase();
       serverProps = db.getServerProps();
-     // audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, null);
       audioFileHelper = getAudioFileHelperRef();
-      //makeAutoCRT(audioFileHelper);
     }
     return audioFileHelper;
   }
@@ -1059,7 +1064,6 @@ public class ScoreServlet extends DatabaseServlet {
     }
 
     try {
-      //makeAutoCRT(audioFileHelper);
       asrScoreForAudio = audioFileHelper.getFlashcardAnswer(testAudioFile, sentence);
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -1067,21 +1071,6 @@ public class ScoreServlet extends DatabaseServlet {
 
     return asrScoreForAudio;
   }
-
-/*  private void makeAutoCRT(final AudioFileHelper audioFileHelper) {
-    AutoCRTScoring crtScoring = new AutoCRTScoring() {
-      @Override
-      public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences) {
-        return audioFileHelper.getASRScoreForAudio(testAudioFile, lmSentences);
-      }
-
-      @Override
-      public Collection<String> getValidPhrases(Collection<String> phrases) {
-        return audioFileHelper.getValidPhrases(phrases);
-      }
-    };
-    audioFileHelper.makeAutoCRT(relativeConfigDir, crtScoring);
-  }*/
 
   /**
    * @param db
