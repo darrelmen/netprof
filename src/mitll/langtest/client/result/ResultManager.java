@@ -48,7 +48,7 @@ public class ResultManager extends PagerTable {
   private static final String TIMESTAMP = "timestamp";
   private static final String CORRECT = "Correct";
   private static final String PRO_F_SCORE = "Score";
-  private static final String DURATION_SEC = "Duration (Sec)";
+  private static final String DURATION_SEC = "Dur (s)";
   private static final String AUDIO_TYPE = "Audio Type";
   private static final String USER_ID = "User";
   private static final String DESC = "DESC";
@@ -555,7 +555,7 @@ public class ResultManager extends PagerTable {
       }
     };
     exercise.setSortable(true);
-    table.addColumn(exercise, "Exercise");
+    table.addColumn(exercise, "Ex.");
     colToField.put(exercise, ID);
 
     Column<MonitorResult,SafeHtml> fl = new Column<MonitorResult, SafeHtml>(new SafeHtmlCell()) {
