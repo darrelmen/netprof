@@ -112,7 +112,7 @@ public class EmailHelper {
       String message = "Hi " + user + ",<br/><br/>" +
           "Click the link below to reset your password." +
           "<br/>" +
-          "In proFeedback, click the login button to enter a new password."+
+          "In NetProF, click the login button to enter a new password."+
           "<br/>" +
           CLOSING;
 
