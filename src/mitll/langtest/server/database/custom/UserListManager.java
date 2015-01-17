@@ -629,7 +629,7 @@ public class UserListManager {
       File fileRef = pathHelper.getAbsoluteFile(regularSpeed.getAudioRef());
 
       String fast = FAST + "_" + now + "_by_" + userExercise.getCreator() + ".wav";
-      String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite);
+      String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite, userExercise.getForeignLanguage());
       regularSpeed.setAudioRef(refAudio);
     //  logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
     }
@@ -640,7 +640,7 @@ public class UserListManager {
       File fileRef = pathHelper.getAbsoluteFile(slowSpeed.getAudioRef());
       String slow = SLOW + "_"+ now+"_by_" + userExercise.getCreator()+ ".wav";
 
-      String refAudio = getRefAudioPath(userExercise.getID(), fileRef, slow, overwrite);
+      String refAudio = getRefAudioPath(userExercise.getID(), fileRef, slow, overwrite, userExercise.getForeignLanguage());
       //logger.debug("fixAudioPaths : for exid " + userExercise.getID()+ " slow is " + refAudio + " size " + FileUtils.size(refAudio));
       slowSpeed.setAudioRef(refAudio);
     }
@@ -655,11 +655,12 @@ public class UserListManager {
    * @param fileRef
    * @param destFileName
    * @param overwrite
+   * @param title
    * @return new, permanent audio path
    * @see #fixAudioPaths(mitll.langtest.shared.custom.UserExercise, boolean, String)
    */
-  private String getRefAudioPath(String id, File fileRef, String destFileName, boolean overwrite) {
-    return new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, id);
+  private String getRefAudioPath(String id, File fileRef, String destFileName, boolean overwrite, String title) {
+    return new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, id, title);
   }
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
