@@ -15,7 +15,6 @@ import java.util.*;
 public class ExerciseSorter {
   private Collection<String> typeOrder;
   private Map<String, Integer> phoneToCount;
-//  private CollationSort collationSort;
 
   public ExerciseSorter(Collection<String> typeOrder) {
     this.typeOrder = typeOrder;
@@ -26,10 +25,9 @@ public class ExerciseSorter {
    * @param typeOrder
    * @param phoneToCount
    */
-  public ExerciseSorter(Collection<String> typeOrder, Map<String, Integer> phoneToCount, CollationSort collationSort) {
+  public ExerciseSorter(Collection<String> typeOrder, Map<String, Integer> phoneToCount) {
     this(typeOrder);
     this.phoneToCount = phoneToCount;
-  //  this.collationSort = collationSort;
   }
 
   /**
