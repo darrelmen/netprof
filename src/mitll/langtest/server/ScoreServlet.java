@@ -69,6 +69,7 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String END = "end";
 
   private JSONObject nestedChapters;
+  int contentLength = 0;
   private long whenCached = -1;
   private static final String ENCODING = "UTF8";
 
@@ -105,13 +106,24 @@ public class ScoreServlet extends DatabaseServlet {
     JSONObject toReturn = new JSONObject();
     try {
       if (queryString != null) {
-        queryString = URLDecoder.decode(queryString,"UTF-8");
+        queryString = URLDecoder.decode(queryString, "UTF-8");
         if (queryString.startsWith(NESTED_CHAPTERS)) {
           if (nestedChapters == null || (System.currentTimeMillis() - whenCached > REFRESH_CONTENT_INTERVAL)) {
             nestedChapters = getJsonNestedChapters();
+
+//            long then = System.currentTimeMillis();
+//            final byte[] content = nestedChapters.toString().getBytes("UTF-8");
+//            long now = System.currentTimeMillis();
+//            if (now - then > 20) logger.debug("Took " + (now - then) + " millis to determine content length of " + content.length);
+//
+//            contentLength = content.length;
             whenCached = System.currentTimeMillis();
           }
           toReturn = nestedChapters;
+
+          if (contentLength > 0) {
+            response.setContentLength(contentLength);
+          }
         } else if (queryString.startsWith(HAS_USER)) {
           String[] split1 = queryString.split("&");
           if (split1.length != 2) {
@@ -171,12 +183,12 @@ public class ScoreServlet extends DatabaseServlet {
 
             if (userIDForToken == -1) {
               // invalid/stale token
-              String rep = getHTML("Note : your password has already been reset. Please go back to proFeedback.","Password has already been reset");
+              String rep = getHTML("Note : your password has already been reset. Please go back to NetProF.","Password has already been reset");
               reply(response,rep);
               return;
             }
             else {
-              String rep = getHTML("OK, your password has been reset. Please go back to proFeedback and login.","Password has been reset");
+              String rep = getHTML("OK, your password has been reset. Please go back to NetProF and login.","Password has been reset");
               reply(response,rep);
               return;
             }
@@ -285,8 +297,17 @@ public class ScoreServlet extends DatabaseServlet {
     reply(response, x);
   }
 
+  /**
+   * Don't die if audio file helper is not available.
+   * @return
+   * @see #doGet
+   * @see #getJsonForSelection
+   */
   private ExerciseSorter getExerciseSorter() {
-    return new ExerciseSorter(db.getSectionHelper().getTypeOrder(), audioFileHelper.getPhoneToCount(), audioFileHelper);
+    List<String> typeOrder = db.getSectionHelper().getTypeOrder();
+
+    Map<String, Integer> phoneToCount = audioFileHelper == null ? new HashMap<String, Integer>() : audioFileHelper.getPhoneToCount();
+    return new ExerciseSorter(typeOrder, phoneToCount);
   }
 
   private void reply(HttpServletResponse response, String x) {
@@ -307,7 +328,7 @@ public class ScoreServlet extends DatabaseServlet {
   private long getUserIDForToken(String token) {
     User user = db.getUserDAO().getUserWhereResetKey(token);
     long l = (user == null) ? -1 : user.getId();
-    logger.info("for token " +  token + " got user id " + l);
+    logger.info("for token " + token + " got user id " + l);
     return l;
   }
 
@@ -423,29 +444,28 @@ public class ScoreServlet extends DatabaseServlet {
    */
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    String pathInfo = request.getPathInfo();
-    logger.debug("ScoreServlet.doPost : Request " + request.getQueryString() + " path " + pathInfo +
-        " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
+ //   String pathInfo = request.getPathInfo();
+//    logger.debug("ScoreServlet.doPost : Request " + request.getQueryString() + " path " + pathInfo +
+//        " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
 
     getAudioFileHelper();
 
     configureResponse(response);
 
-    JSONObject jsonObject = new JSONObject();
     String requestType = request.getHeader(REQUEST);
-
     String deviceType = request.getHeader(DEVICE_TYPE);
     if (deviceType == null) deviceType = "unk";
     String device = request.getHeader(DEVICE);
     if (device == null) device = "unk";
 
+    JSONObject jsonObject = new JSONObject();
     if (requestType != null) {
       if (requestType.startsWith(ADD_USER)) {
         String user = request.getHeader(USER);
         String passwordH = request.getHeader(PASSWORD_H);
         String emailH = request.getHeader(EMAIL_H);
 
-        logger.debug("req " + deviceType + " " + device);
+        logger.debug("doPost : Request " + requestType + " for " + deviceType + " user " +user);
         User user1 = db.addUser(user, passwordH, emailH, deviceType, device);
 
         if (user1 == null) {
@@ -456,6 +476,7 @@ public class ScoreServlet extends DatabaseServlet {
       } else if (requestType.startsWith(ALIGN) || requestType.startsWith(DECODE)) {
         //jsonObject = getJsonForParts(request, requestType);
         boolean isMultipart = ServletFileUpload.isMultipartContent(request);
+        logger.debug("doPost : Request " + requestType + " for " + deviceType);
 
         if (isMultipart) {
           logger.debug("got " + request.getParts().size() + " parts isMultipart " + isMultipart);
@@ -470,6 +491,8 @@ public class ScoreServlet extends DatabaseServlet {
         String exid = request.getHeader("exid");
         String widgetid = request.getHeader("widget");
         String widgetType = request.getHeader("widgetType");
+
+        logger.debug("doPost : Request " + requestType + " for " + deviceType + " user " + user + " " + exid);
 
         long userid = getUserFromParam2(user);
         if (db.getUserDAO().getUserWhere(userid) == null) {
@@ -527,7 +550,6 @@ public class ScoreServlet extends DatabaseServlet {
   private JSONObject getJsonForParts(HttpServletRequest request, String requestType) {
     long then = System.currentTimeMillis();
 
-    // boolean isMultipart = ServletFileUpload.isMultipartContent(request);
     // Create a factory for disk-based file items
     DiskFileItemFactory factory = new DiskFileItemFactory();
 
@@ -606,7 +628,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * join against audio dao ex->audio map again to get user exercise audio! {@link #getJsonArray(java.util.List)}
-   *
+   * @see #doGet
    * @return
    */
   private JSONObject getJsonNestedChapters() {
@@ -915,7 +937,7 @@ public class ScoreServlet extends DatabaseServlet {
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
 
     AudioAnswer answer = audioFileHelper.getAnswer(exerciseID, exercise1, user, doFlashcard, wavPath, file, deviceType, device, score, reqid);
-    ensureMP3(answer.getPath());
+    ensureMP3(answer.getPath(), exercise1.getForeignLanguage());
 
     return answer;
   }
