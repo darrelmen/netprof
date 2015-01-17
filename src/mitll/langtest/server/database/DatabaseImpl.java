@@ -469,7 +469,9 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public JSONObject getJsonScoreHistory(long userid,
-                                        Map<String, Collection<String>> typeToSection, ExerciseSorter sorter, Collator collator) {
+                                        Map<String, Collection<String>> typeToSection,
+                                        ExerciseSorter sorter,
+                                        Collator collator) {
     Collection<CommonExercise> exercisesForState = getSectionHelper().getExercisesForSelectionState(typeToSection);
     List<String> allIDs = new ArrayList<String>();
 
