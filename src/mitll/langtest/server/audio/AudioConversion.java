@@ -165,7 +165,6 @@ public class AudioConversion {
 /*  private boolean writeOGG(String pathToWav) {
     String oggFile = pathToWav.replace(".wav",".ogg");
     return oggEncoder != null && convertFileAndCheck(oggEncoder.getAbsolutePath(), pathToWav, oggFile);
-
   }*/
 
   /**
@@ -180,26 +179,28 @@ public class AudioConversion {
    * @param realContextPath
    * @param overwrite
    */
-  public String ensureWriteMP3(String pathToWav, String realContextPath, boolean overwrite) {
-    if (pathToWav == null || pathToWav.equals("null")) throw new IllegalArgumentException("huh? path is null");
 
-/*    if (AudioTag.COMPRESSED_TYPE.equals("ogg")) {
-      writeOGG(pathToWav);
-      return pathToWav;
-    }
-    else {*/
-      return writeMP3(pathToWav, realContextPath, overwrite);
-  //  }
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#ensureMP3
+   * @param pathToWav
+   * @param realContextPath
+   * @param overwrite
+   * @param title
+   * @return
+   */
+  public String ensureWriteMP3(String pathToWav, String realContextPath, boolean overwrite, String title) {
+    if (pathToWav == null || pathToWav.equals("null")) throw new IllegalArgumentException("huh? path is null");
+    return writeMP3(pathToWav, realContextPath, overwrite, title);
   }
 
   /**
-   * @see #ensureWriteMP3(String, String, boolean)
    * @param pathToWav
    * @param realContextPath
    * @param overwrite
    * @return
+   * @see #ensureWriteMP3
    */
-  private String writeMP3(String pathToWav, String realContextPath, boolean overwrite) {
+  private String writeMP3(String pathToWav, String realContextPath, boolean overwrite, String title) {
     File absolutePathToWav = getAbsoluteFile(pathToWav, realContextPath);
 
     String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav", ".mp3");
@@ -208,18 +209,12 @@ public class AudioConversion {
       if (DEBUG) logger.debug("writeMP3 : doing mp3 conversion for " + absolutePathToWav + " path " + pathToWav + " context " + realContextPath);
 
       try {
-        File tempFile = File.createTempFile("fortyEightK",".wav");
-       // logger.debug("sox conversion from " + absolutePathToWav + " to " + tempFile.getAbsolutePath());
-        ProcessBuilder soxFirst = new ProcessBuilder(getSox(),
-            absolutePathToWav.getAbsolutePath(), "-s", "-2", "-c", "1", "-q",tempFile.getAbsolutePath(), "rate", "48000");
-
-        new ProcessRunner().runProcess(soxFirst);
-
-        if (!tempFile.exists()) logger.error("didn't make " + tempFile);
+        File tempFile = convertTo48KWav(absolutePathToWav);
 
         String lamePath = getLame();
         if (DEBUG)  logger.debug("run lame on " + tempFile + " making " + mp3File);
-        if (!convertFileAndCheck(lamePath, tempFile.getAbsolutePath(), mp3File)) {
+
+        if (!convertFileAndCheck(lamePath, title, tempFile.getAbsolutePath(), mp3File)) {
           return FILE_MISSING;
         }
       } catch (IOException e) {
@@ -227,6 +222,18 @@ public class AudioConversion {
       }
     }
     return mp3File;
+  }
+
+  private File convertTo48KWav(File absolutePathToWav) throws IOException {
+    File tempFile = File.createTempFile("fortyEightK",".wav");
+    // logger.debug("sox conversion from " + absolutePathToWav + " to " + tempFile.getAbsolutePath());
+    ProcessBuilder soxFirst = new ProcessBuilder(getSox(),
+        absolutePathToWav.getAbsolutePath(), "-s", "-2", "-c", "1", "-q",tempFile.getAbsolutePath(), "rate", "48000");
+
+    new ProcessRunner().runProcess(soxFirst);
+
+    if (!tempFile.exists()) logger.error("didn't make " + tempFile);
+    return tempFile;
   }
 
   private String getSox() {
@@ -237,7 +244,7 @@ public class AudioConversion {
    * sox normalize to -3db -- thanks Paul!
    *
    * @seex mitll.langtest.server.LangTestDatabaseImpl#normalizeLevel
-   * @see mitll.langtest.server.audio.PathWriter#getPermanentAudioPath(mitll.langtest.server.PathHelper, java.io.File, String, boolean, String)
+   * @see PathWriter#getPermanentAudioPath(mitll.langtest.server.PathHelper, java.io.File, String, boolean, String, String)
    * @param absolutePathToWav
    */
   public void normalizeLevels(File absolutePathToWav) {
@@ -289,10 +296,10 @@ public class AudioConversion {
 
   /**
    * Use lame to write an mp3 file.
-   * @param pathToWav
+   * @paramx pathToWav
    * @see #convertBase64ToAudioFiles(String, java.io.File)
    */
-  private void writeMP3(String pathToWav) {
+/*  private void writeMP3(String pathToWav) {
     String mp3File = pathToWav.replace(".wav", ".mp3");
     String lamePath = getLame();
 
@@ -300,7 +307,7 @@ public class AudioConversion {
       "' mp3 '" + mp3File +
       "'");
     convertFileAndCheck(lamePath, pathToWav, mp3File);
-  }
+  }*/
 
   private String getLame() {
     String lamePath = LAME_PATH_WINDOWS;    // Windows
@@ -353,23 +360,27 @@ public class AudioConversion {
   }
 
   /**
-   * @see #ensureWriteMP3(String, String, boolean)
-   * @see #writeMP3(String)
+   * @see #ensureWriteMP3
+   * @see #writeMP3
    * @param lamePath
+   * @param title
    * @param pathToAudioFile
    * @param mp3File
    * @return
    */
-  private boolean convertFileAndCheck(String lamePath, String pathToAudioFile, String mp3File) {
+  private boolean convertFileAndCheck(String lamePath, String title, String pathToAudioFile, String mp3File) {
     if (DEBUG) logger.debug("convert " + pathToAudioFile + " to " + mp3File);
-    ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File);
+    // " --tt \""+title +"\" "
+    if (title.length() > 30) {
+      title = title.substring(0,30);
+    }
+    ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File,"--tt", ""+title+"");
     try {
       //logger.debug("running lame" + lameProc.command());
       new ProcessRunner().runProcess(lameProc);
-      //     System.out.println("convertFileAndCheck exited  lame" + lameProc);
     } catch (IOException e) {
-      System.err.println("Couldn't run " + lameProc);
-      logger.error("got " +e,e);
+    //  System.err.println("Couldn't run " + lameProc);
+      logger.error("for " +lameProc+ " got " +e,e);
     }
 
     File testMP3 = new File(mp3File);
@@ -381,12 +392,15 @@ public class AudioConversion {
         logger.error("didn't write MP3 : " + testMP3.getAbsolutePath() +
           " exe path " + lamePath +
           " command was " + lameProc.command());
-        //new Exception().printStackTrace();
+        try {
+          new ProcessRunner().runProcess(lameProc,true);
+        } catch (IOException e) {
+          logger.error("for " + lameProc + " got " +e,e);
+        }
+
       }
       return false;
-    }// else {
-      //logger.debug("Wrote to " + testMP3 + " length " + testMP3.getTotalSpace());
-   // }
+    }
     return true;
   }
 }
