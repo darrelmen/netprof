@@ -15,47 +15,12 @@ import java.io.*;
 public class DatabaseServlet extends HttpServlet {
   private static final Logger logger = Logger.getLogger(DatabaseServlet.class);
   private static final int BUFFER_SIZE = 4096;
-
-/*  protected DatabaseImpl readProperties() {
-    return readProperties(getServletContext());
-  }*/
-
-/*
-  private DatabaseImpl readProperties(ServletContext servletContext) {
-    PathHelper pathHelper = new PathHelper(getServletContext());
-
-    return getDatabase(servletContext, pathHelper);
-  }
-*/
+  private static final String NO = "NO";
 
   protected ServerProperties serverProps;
   protected String relativeConfigDir;
   protected String configDir;
   protected PathHelper pathHelper;
-
-/*  protected DatabaseImpl getDatabase(ServletContext servletContext, PathHelper pathHelper) {
-    String config = servletContext.getInitParameter("config");
-    String relativeConfigDir = "config" + File.separator + config;
-    String configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
-
-    ServerProperties serverProps = getServerProperties(servletContext, configDir);
-    this.serverProps = serverProps;
-    String h2DatabaseFile = serverProps.getH2Database();
-
-    return makeDatabaseImpl(h2DatabaseFile,configDir,relativeConfigDir,serverProps,pathHelper);
-  }*/
-
-/*  private ServerProperties getServerProperties(ServletContext servletContext, String configDir) {
-    ServerProperties serverProps = new ServerProperties();
-
-    serverProps.readPropertiesFile(servletContext, configDir);
-    return serverProps;
-  }*/
-
-/*  private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir, String relativeConfigDir, ServerProperties serverProperties,PathHelper pathHelper) {
-    //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
-    return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProperties, pathHelper, true);
-  }*/
 
   /**
    * @see #ensureMP3s
@@ -65,14 +30,19 @@ public class DatabaseServlet extends HttpServlet {
    * @return
    */
   private boolean ensureMP3(CommonExercise byID, PathHelper pathHelper, String configDir) {
-    return ensureMP3(byID.getRefAudio(), pathHelper, configDir);
+    return ensureMP3(byID.getRefAudio(), pathHelper, configDir, byID.getForeignLanguage());
   }
 
-  protected void ensureMP3(String wavFile) {
-    ensureMP3(wavFile, pathHelper, configDir);
+  /**
+   * @see mitll.langtest.server.ScoreServlet#getAnswer
+   * @param wavFile
+   * @param title
+   */
+  protected void ensureMP3(String wavFile, String title) {
+    ensureMP3(wavFile, pathHelper, configDir, title);
   }
 
-  private boolean ensureMP3(String wavFile, PathHelper pathHelper, String configDir) {
+  private boolean ensureMP3(String wavFile, PathHelper pathHelper, String configDir, String title) {
     if (wavFile != null) {
       String parent = pathHelper.getInstallPath();
       //logger.debug("ensureMP3 : wav " + wavFile + " under " + parent);
@@ -85,7 +55,7 @@ public class DatabaseServlet extends HttpServlet {
       if (!audioConversion.exists(wavFile, parent)) {
         logger.error("huh? can't find " + wavFile + " under " + parent);
       }
-      String filePath = audioConversion.ensureWriteMP3(wavFile, parent, false);
+      String filePath = audioConversion.ensureWriteMP3(wavFile, parent, false, title);
       return new File(filePath).exists();
     } else {
       return false;
@@ -96,7 +66,7 @@ public class DatabaseServlet extends HttpServlet {
     pathHelper = getPathHelper();
     String config = getServletContext().getInitParameter("config");
     this.relativeConfigDir = "config" + File.separator + config;
-    //logger.debug("rel " + relativeConfigDir);
+   // logger.debug("setPaths rel " + relativeConfigDir  + " pathHelper " + pathHelper);
     this.configDir = getConfigDir();
   }
 
@@ -153,10 +123,16 @@ public class DatabaseServlet extends HttpServlet {
     ex.put("ct", exercise.getContext());
     ex.put("ctr", exercise.getContextTranslation());
     AudioAttribute latestContext = exercise.getLatestContext(true);
-    ex.put("ctmref", latestContext == null ? "NO" : latestContext.getAudioRef());
+    if (latestContext != null) {
+      ensureMP3(latestContext.getAudioRef(), exercise.getContext());
+    }
+    ex.put("ctmref", latestContext == null ? NO : latestContext.getAudioRef());
     latestContext = exercise.getLatestContext(false);
-    ex.put("ctfref", latestContext == null ? "NO" : latestContext.getAudioRef());
-    ex.put("ref", exercise.hasRefAudio() ? exercise.getRefAudio() : "NO");
+    if (latestContext != null) {
+      ensureMP3(latestContext.getAudioRef(), exercise.getContext());
+    }
+    ex.put("ctfref", latestContext == null ? NO : latestContext.getAudioRef());
+    ex.put("ref", exercise.hasRefAudio() ? exercise.getRefAudio() : NO);
 
     addLatestRefs(exercise, ex);
 
@@ -171,10 +147,7 @@ public class DatabaseServlet extends HttpServlet {
   private void addLatestRefs(CommonExercise exercise, JSONObject ex) {
     String mr = null, ms = null, fr = null, fs = null;
     long mrt = 0, mst = 0, frt = 0, fst = 0;
-    if (exercise.getID().equals("5554")) {
-      logger.debug("ex  " + exercise);
-      logger.debug("\taudio  " + exercise.getAudioAttributes());
-    }
+
     for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
       long timestamp = audioAttribute.getTimestamp();
 
@@ -204,10 +177,28 @@ public class DatabaseServlet extends HttpServlet {
         }
       }
     }
+
     // male regular speed reference audio (m.r.r.)
-    ex.put("mrr", mr == null ? "NO" : mr);
-    ex.put("msr", ms == null ? "NO" : ms);
-    ex.put("frr", fr == null ? "NO" : fr);
-    ex.put("fsr", fs == null ? "NO" : fs);
+    String foreignLanguage = exercise.getForeignLanguage();
+
+    if (mr != null) {
+      ensureMP3(mr, foreignLanguage);
+    }
+    ex.put("mrr", mr == null ? NO : mr);
+
+    if (ms != null) {
+      ensureMP3(ms, foreignLanguage);
+    }
+    ex.put("msr", ms == null ? NO : ms);
+
+    if (fr != null) {
+      ensureMP3(fr, foreignLanguage);
+    }
+    ex.put("frr", fr == null ? NO : fr);
+
+    if (fs != null) {
+      ensureMP3(fs, foreignLanguage);
+    }
+    ex.put("fsr", fs == null ? NO : fs);
   }
 }
