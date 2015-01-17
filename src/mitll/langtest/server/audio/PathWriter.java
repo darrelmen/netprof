@@ -23,9 +23,10 @@ public class PathWriter {
    * @param destFileName
    * @param overwrite
    * @param id
+   * @param title
    * @return
    */
-  public String getPermanentAudioPath(PathHelper pathHelper, File fileRef, String destFileName, boolean overwrite, String id) {
+  public String getPermanentAudioPath(PathHelper pathHelper, File fileRef, String destFileName, boolean overwrite, String id, String title) {
     final File bestDir = pathHelper.getAbsoluteFile(BEST_AUDIO);
     if (!bestDir.exists() && !bestDir.mkdir()) {
       if (!bestDir.exists()) logger.warn("huh? couldn't make " + bestDir.getAbsolutePath());
@@ -52,12 +53,12 @@ public class PathWriter {
       logger.debug("getPermanentAudioPath : *not* normalizing levels for " + destination.getAbsolutePath());
 
     }
-    ensureMP3(pathHelper, s, overwrite);
+    ensureMP3(pathHelper, s, overwrite, title);
     return s;
   }
 
 
-  private void ensureMP3(PathHelper pathHelper, String wavFile, boolean overwrite) {
+  private void ensureMP3(PathHelper pathHelper, String wavFile, boolean overwrite, String title) {
     if (wavFile != null) {
       String parent = pathHelper.getInstallPath();
 
@@ -68,7 +69,7 @@ public class PathWriter {
       if (!audioConversion.exists(wavFile,parent)) {
         logger.error("can't find " + wavFile + " under "  +parent);
       }
-      audioConversion.ensureWriteMP3(wavFile, parent, overwrite);
+      audioConversion.ensureWriteMP3(wavFile, parent, overwrite, title);
     }
     else {
       logger.warn("not converting wav to mp3???\n\n\n");
