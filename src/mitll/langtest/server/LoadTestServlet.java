@@ -58,6 +58,8 @@ public class LoadTestServlet extends DatabaseServlet {
         " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
         */
 
+    getAudioFileHelper();
+
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
 
