@@ -723,7 +723,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private void ensureMP3s(CommonExercise byID) {
     Collection<AudioAttribute> audioAttributes = byID.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes) {
-      if (!ensureMP3(audioAttribute.getAudioRef())) {
+      if (!ensureMP3(audioAttribute.getAudioRef(), byID.getForeignLanguage())) {
         audioAttribute.setAudioRef(AudioConversion.FILE_MISSING);
       }
     }
@@ -763,11 +763,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    *
    * @param wavFile
+   * @param title
    * @return true if mp3 file exists
    * @see #ensureMP3s(mitll.langtest.shared.CommonExercise)
    * @see #writeAudioFile
    */
-  private boolean ensureMP3(String wavFile) {
+  private boolean ensureMP3(String wavFile, String title) {
     if (wavFile != null) {
       String parent = pathHelper.getInstallPath();
 
@@ -779,7 +780,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       if (!audioConversion.exists(wavFile, parent)) {
         logger.error("huh? can't find " + wavFile + " under " + parent);
       }
-      String s = audioConversion.ensureWriteMP3(wavFile, parent, false);
+      String s = audioConversion.ensureWriteMP3(wavFile, parent, false, title);
       return !(s.equals(AudioConversion.FILE_MISSING));
     }
     return false;
@@ -1714,7 +1715,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       // are speaking too softly or too loudly.
 
       // normalizeLevel(audioAnswer);
-      ensureMP3(audioAnswer.getPath());
+      ensureMP3(audioAnswer.getPath(), exercise1.getForeignLanguage());
     }
     if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
       logger.warn("huh? got zero length recording " + user + " " + exercise);
@@ -1784,7 +1785,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String exercise = exercise1 == null ? exerciseID : exercise1.getID();
     File fileRef = pathHelper.getAbsoluteFile(audioAnswer.getPath());
     String destFileName = audioType + "_" + System.currentTimeMillis() + "_by_" + user + ".wav";
-    String permanentAudioPath = new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise);
+    String permanentAudioPath = new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise, exercise1.getForeignLanguage());
     AudioAttribute audioAttribute =
         db.getAudioDAO().addOrUpdate(user, permanentAudioPath, exercise, System.currentTimeMillis(), audioType, audioAnswer.getDurationInMillis());
     audioAnswer.setPath(audioAttribute.getAudioRef());
@@ -2039,9 +2040,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db = makeDatabaseImpl(h2DatabaseFile);
     shareDB(servletContext);
     shareLoadTesting(servletContext);
-  //  shareAudioFileHelper(servletContext);
-
-   // logger.debug(AUDIO_FILE_HELPER_REFERENCE + " " + servletContext.getAttribute(AUDIO_FILE_HELPER_REFERENCE));
   }
 
   private void shareLoadTesting(ServletContext servletContext) {
@@ -2065,6 +2063,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     servletContext.setAttribute(DATABASE_REFERENCE, db);
   }
 
+  /**
+   * @see #getExercises
+   * @param servletContext
+   */
   private void shareAudioFileHelper(ServletContext servletContext) {
     Object databaseReference = servletContext.getAttribute(AUDIO_FILE_HELPER_REFERENCE);
     if (databaseReference != null) {
