@@ -168,14 +168,12 @@
       <excludeFolder url="file://$MODULE_DIR$/war/config/crtPashtoJune" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/dari" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/dataCollectAdmin" />
-      <excludeFolder url="file://$MODULE_DIR$/war/config/english" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/farsi" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/farsi/bestAudio" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/farsi2" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/first" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/flashcard" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/japanese" />
-      <excludeFolder url="file://$MODULE_DIR$/war/config/korean" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/levantine" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/mandarin" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/mandarinClassroom" />
@@ -188,6 +186,8 @@
       <excludeFolder url="file://$MODULE_DIR$/war/config/unitFlashcard" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/urdu" />
       <excludeFolder url="file://$MODULE_DIR$/war/images" />
+      <excludeFolder url="file://$MODULE_DIR$/war/js" />
+      <excludeFolder url="file://$MODULE_DIR$/war/langtest" />
       <excludeFolder url="file://$MODULE_DIR$/war/scoring/bin.linux64" />
       <excludeFolder url="file://$MODULE_DIR$/war/scoring/bin.macos" />
       <excludeFolder url="file://$MODULE_DIR$/war/scoring/bin.win32" />
@@ -413,5 +413,9 @@
     <orderEntry type="library" name="mail" level="project" />
     <orderEntry type="library" name="pronzCM" level="project" />
     <orderEntry type="library" name="hamcrest-core-1.3" level="project" />
+    <orderEntry type="library" name="ezmorph-1.0.6" level="project" />
+    <orderEntry type="library" name="commons-logging-1.1.1" level="project" />
+    <orderEntry type="library" name="commons-collections-3.2.1" level="project" />
+    <orderEntry type="library" name="commons-beanutils-1.8.0" level="project" />
   </component>
 </module>
