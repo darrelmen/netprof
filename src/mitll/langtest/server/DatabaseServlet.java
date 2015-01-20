@@ -16,6 +16,9 @@ public class DatabaseServlet extends HttpServlet {
   private static final Logger logger = Logger.getLogger(DatabaseServlet.class);
   private static final int BUFFER_SIZE = 4096;
   private static final String NO = "NO";
+  // not clear this is a big win currently - this enables us to rewrite the mp3s and possibly mark
+  // them with a title
+  private static final Boolean CHECK_FOR_MP3 = false;
 
   protected ServerProperties serverProps;
   protected String relativeConfigDir;
@@ -124,12 +127,12 @@ public class DatabaseServlet extends HttpServlet {
     ex.put("ctr", exercise.getContextTranslation());
     AudioAttribute latestContext = exercise.getLatestContext(true);
     if (latestContext != null) {
-      ensureMP3(latestContext.getAudioRef(), exercise.getContext());
+      if (CHECK_FOR_MP3) ensureMP3(latestContext.getAudioRef(), exercise.getContext());
     }
     ex.put("ctmref", latestContext == null ? NO : latestContext.getAudioRef());
     latestContext = exercise.getLatestContext(false);
     if (latestContext != null) {
-      ensureMP3(latestContext.getAudioRef(), exercise.getContext());
+      if (CHECK_FOR_MP3) ensureMP3(latestContext.getAudioRef(), exercise.getContext());
     }
     ex.put("ctfref", latestContext == null ? NO : latestContext.getAudioRef());
     ex.put("ref", exercise.hasRefAudio() ? exercise.getRefAudio() : NO);
@@ -182,22 +185,22 @@ public class DatabaseServlet extends HttpServlet {
     String foreignLanguage = exercise.getForeignLanguage();
 
     if (mr != null) {
-      ensureMP3(mr, foreignLanguage);
+      if (CHECK_FOR_MP3) ensureMP3(mr, foreignLanguage);
     }
     ex.put("mrr", mr == null ? NO : mr);
 
     if (ms != null) {
-      ensureMP3(ms, foreignLanguage);
+      if (CHECK_FOR_MP3) ensureMP3(ms, foreignLanguage);
     }
     ex.put("msr", ms == null ? NO : ms);
 
     if (fr != null) {
-      ensureMP3(fr, foreignLanguage);
+      if (CHECK_FOR_MP3) ensureMP3(fr, foreignLanguage);
     }
     ex.put("frr", fr == null ? NO : fr);
 
     if (fs != null) {
-      ensureMP3(fs, foreignLanguage);
+      if (CHECK_FOR_MP3) ensureMP3(fs, foreignLanguage);
     }
     ex.put("fsr", fs == null ? NO : fs);
   }
