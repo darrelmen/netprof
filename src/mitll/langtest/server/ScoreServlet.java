@@ -328,7 +328,7 @@ public class ScoreServlet extends DatabaseServlet {
   private long getUserIDForToken(String token) {
     User user = db.getUserDAO().getUserWhereResetKey(token);
     long l = (user == null) ? -1 : user.getId();
-    logger.info("for token " + token + " got user id " + l);
+    //logger.info("for token " + token + " got user id " + l);
     return l;
   }
 
@@ -1024,7 +1024,7 @@ public class ScoreServlet extends DatabaseServlet {
       fileHelper = (AudioFileHelper) databaseReference;
       logger.debug("found existing audio file reference " + fileHelper + " under " + getServletContext());
     } else {
-      logger.error("huh? no existing audio file reference?");
+      logger.error("huh? for " + db.getServerProps().getLanguage()+ " no existing audio file reference?");
     }
     return fileHelper;
   }
