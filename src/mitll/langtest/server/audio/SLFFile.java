@@ -9,36 +9,42 @@ import java.util.Collection;
 
 /**
  * Created by go22670 on 1/17/14.
+ * Writes an HTK SLF file similar to : <a href="http://www1.icsi.berkeley.edu/Speech/docs/HTKBook/node293_mn.html">Example</a>
+ * See <a href="http://www1.icsi.berkeley.edu/Speech/docs/HTKBook/node288_ct.html">SLF File Documentation</a>
  */
 public class SLFFile {
   //private static final Logger logger = Logger.getLogger(SLFFile.class);
 
-  /**
-   * Limit on vocabulary size -- too big and dcodr will run out of memory and segfault
-   */
   public static final String UNKNOWN_MODEL = "UNKNOWNMODEL";
-  private static final String SMALL_LM_SLF = ASRScoring.SMALL_LM_SLF;
   private static final String ENCODING = "UTF8";
 
-  private static final String UNKNOWN_MODEL_BIAS = "-1.20";
+ // private static final String UNKNOWN_MODEL_BIAS = "-1.40";
+  private static final String LINK_WEIGHT = "-1.00";
+  private static final float UNKNOWN_MODEL_BIAS_CONSTANT = 1.40f;
+
   /**
+   * Writes a file into the temp directory, with name {@link mitll.langtest.server.scoring.ASRScoring#SMALL_LM_SLF}
    * @see mitll.langtest.server.audio.AudioFileHelper#createSLFFile
    * @param lmSentences
    * @param tmpDir
    * @return
    */
   public String createSimpleSLFFile(Collection<String> lmSentences, String tmpDir) {
-    String slfFile = tmpDir + File.separator + SMALL_LM_SLF;
+    String slfFile = tmpDir + File.separator + ASRScoring.SMALL_LM_SLF;
+
+    String unknownModelBias = String.format("%.2f", UNKNOWN_MODEL_BIAS_CONSTANT);
+
     try {
-      BufferedWriter writer = new BufferedWriter(
-          new OutputStreamWriter(new FileOutputStream(slfFile), ENCODING));
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(slfFile), ENCODING));
       writer.write("VERSION=1.0\n");
 
       int linkCount = 0;
       StringBuilder nodesBuf = new StringBuilder();
+      // add silence nodes
       nodesBuf.append("I=0 W=<s>\n");
       nodesBuf.append("I=1 W=</s>\n");
       int newNodes = 2;
+
       StringBuilder linksBuf = new StringBuilder();
       Collection<String> sentencesToUse = new ArrayList<String>(lmSentences);
       sentencesToUse.add(UNKNOWN_MODEL);
@@ -53,7 +59,7 @@ public class SLFFile {
           int next = newNodes++;
           linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=" + next +
             " l=" +
-            (token.equals(UNKNOWN_MODEL) ? UNKNOWN_MODEL_BIAS : "-1.00") +
+            (token.equals(UNKNOWN_MODEL) ? unknownModelBias : LINK_WEIGHT) +
             "\n");
           nodesBuf.append("I=" +
             next +
@@ -63,7 +69,9 @@ public class SLFFile {
 
           start = next;
         }
-        linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=1" + " l=-1.00\n");
+        linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=1" + " l=" +
+            LINK_WEIGHT +
+            "\n");
       }
       writer.write("N=" + newNodes + " L=" + linkCount + "\n");
 
