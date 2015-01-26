@@ -25,16 +25,18 @@ public class PhoneDAO extends DAO {
   private static final Logger logger = Logger.getLogger(PhoneDAO.class);
 
   private static final String PHONE = "phone";
-  public static final String RID = "rid";
-  public static final String WID = "wid";
-  public static final String SEQ = "seq";
-  // public static final String SEQ = SEQ1;
-  public static final String SCORE = "score";
-  private LogAndNotify logAndNotify;
+  private static final String RID = "rid";
+  private static final String WID = "wid";
+  private static final String SEQ = "seq";
+  private static final String SCORE = "score";
+
+  private static final boolean DEBUG = false;
+
+  private final LogAndNotify logAndNotify;
 
   /**
    * @param database
-   * @paramx
+   * @param logAndNotify
    * @see DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
    */
   public PhoneDAO(Database database, LogAndNotify logAndNotify) {
@@ -53,11 +55,11 @@ public class PhoneDAO extends DAO {
 
   public static class Phone {
     long id;
-    long wid;
-    long rid;
-    String phone;
-    int seq;
-    float score;
+    final long wid;
+    final long rid;
+    final String phone;
+    final int seq;
+    final float score;
 
     public Phone(long id, long rid, long wid, String phone, int seq, float score) {
       this(rid, wid, phone, seq, score);
@@ -163,7 +165,7 @@ public class PhoneDAO extends DAO {
     return val;
   }
 
-  public List<Phone> getAll() {
+/*  public List<Phone> getAll() {
     try {
       return getPhones("SELECT * from " + PHONE);
     } catch (Exception ee) {
@@ -171,7 +173,7 @@ public class PhoneDAO extends DAO {
       logAndNotify.logAndNotifyServerException(ee);
     }
     return Collections.emptyList();
-  }
+  }*/
 
   public JSONObject getWorstPhonesJson(long userid, List<String> exids, Map<String, String> idToRef) {
     JSONObject jsonObject = new JSONObject();
@@ -182,6 +184,7 @@ public class PhoneDAO extends DAO {
       Map<Long, String> resToAnswer = new HashMap<Long, String>();
       Map<Long, String> resToRef = new HashMap<Long, String>();
       Map<Long, String> resToResult = new HashMap<Long, String>();
+      logger.debug("worstPhones phones are " + worstPhones.keySet());
 
       JSONObject phones = new JSONObject();
 
@@ -213,6 +216,7 @@ public class PhoneDAO extends DAO {
       JSONArray order = new JSONArray();
       for (String phone : worstPhones.keySet()) order.add(phone);
       jsonObject.put("order", order);
+      logger.debug("order phones are " + order);
 
       JSONObject results = new JSONObject();
       for (Map.Entry<Long, String> pair : resToAnswer.entrySet()) {
@@ -320,13 +324,19 @@ public class PhoneDAO extends DAO {
       // }
     }
     finish(connection, statement, rs);
+    List<WordAndScore> w = phoneToWordAndScore.get("w");
+    logger.debug("w is " +w);
 
-//    logger.debug("total items " + totalItems);
+    return getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems);
+  }
+
+  private PhoneReport getPhoneReport(Map<String, List<Float>> phoneToScores, Map<String, List<WordAndScore>> phoneToWordAndScore, float totalScore, float totalItems) {
+    if (DEBUG) logger.debug("total items " + totalItems);
     float overallScore = totalItems > 0 ? totalScore / totalItems : 0;
     int percentOverall = (int) (100f * round(overallScore, 2));
-//    logger.debug("score " + overallScore + " items " + totalItems + " percent " + percentOverall);
+    if (DEBUG) logger.debug("score " + overallScore + " items " + totalItems + " percent " + percentOverall);
 
-  //  logger.debug("phoneToScores " + phoneToScores);
+    if (DEBUG) logger.debug("phoneToScores " + phoneToScores.size() + " : " + phoneToScores);
 
     final Map<String, Float> phoneToAvg = new HashMap<String, Float>();
     for (Map.Entry<String, List<Float>> pair : phoneToScores.entrySet()) {
@@ -334,33 +344,37 @@ public class PhoneDAO extends DAO {
       float total = 0f;
       List<Float> scores = pair.getValue();
       for (Float f : scores) total += f;
-      total /= ((float) scores.size());
 
-      phoneToAvg.put(phone, total);
+      float avg = total / ((float) scores.size());
+      if (DEBUG) logger.debug("phone " + phone + " has " + total + " n " + scores.size() + " avg " + avg );
+      phoneToAvg.put(phone, avg);
     }
 
-//    logger.debug("phoneToAvg " + phoneToAvg);
+    if (DEBUG) logger.debug("phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
 
     List<String> sorted = new ArrayList<String>(phoneToAvg.keySet());
+
+    if (DEBUG)  logger.debug("before sorted " + sorted);
+
     Collections.sort(sorted, new Comparator<String>() {
       @Override
       public int compare(String o1, String o2) {
         Float first = phoneToAvg.get(o1);
         Float second = phoneToAvg.get(o2);
-        return first < second ? -1 : second > first ? +1 : 0;
+        return first.compareTo(second);
       }
     });
 
-  //  logger.debug("sorted " + sorted);
+    if (DEBUG) logger.debug("sorted " + sorted.size() + " " + sorted);
 
     Map<String, Float> phoneToAvgSorted = new LinkedHashMap<String, Float>();
-    for (String phone : sorted) phoneToAvgSorted.put(phone, phoneToAvg.get(phone));
-
-  //  logger.debug("phoneToAvgSorted " + phoneToAvgSorted);
-
-    for (List<WordAndScore> words : phoneToWordAndScore.values()) {
-      Collections.sort(words);
+    for (String phone : sorted) {
+      phoneToAvgSorted.put(phone, phoneToAvg.get(phone));
     }
+
+    if (DEBUG) logger.debug("phoneToAvgSorted " + phoneToAvgSorted.size() + " " + phoneToAvgSorted);
+
+    for (List<WordAndScore> words : phoneToWordAndScore.values()) {  Collections.sort(words); }
 
     Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = new LinkedHashMap<String, List<WordAndScore>>();
 
@@ -369,15 +383,20 @@ public class PhoneDAO extends DAO {
       phoneToWordAndScoreSorted.put(phone, value);
     }
 
-    //logger.debug("phone->words " + phoneToWordAndScore);
+    if (DEBUG) logger.debug("phone->words " + phoneToWordAndScore);
 
     return new PhoneReport(percentOverall, phoneToWordAndScoreSorted);
   }
 
   private static class PhoneReport {
-    int overallPercent;
-    Map<String, List<WordAndScore>> phoneToWordAndScoreSorted;
+    final int overallPercent;
+    final Map<String, List<WordAndScore>> phoneToWordAndScoreSorted;
 
+    /**
+     * @see #getWorstPhones
+     * @param overallPercent
+     * @param phoneToWordAndScoreSorted
+     */
     public PhoneReport(int overallPercent, Map<String, List<WordAndScore>> phoneToWordAndScoreSorted) {
       this.overallPercent = overallPercent;
       this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
@@ -413,14 +432,14 @@ public class PhoneDAO extends DAO {
 
 
   public static class WordAndScore implements Comparable<WordAndScore> {
-    int wseq;
-    int seq;
-    String word;
-    float score;
-    long resultID;
-    String answerAudio;
-    String refAudio;
-    String scoreJson;
+    final int wseq;
+    final int seq;
+    final String word;
+    final float score;
+    final long resultID;
+    final String answerAudio;
+    final String refAudio;
+    final String scoreJson;
 
     /**
      * @param word
@@ -450,7 +469,7 @@ public class PhoneDAO extends DAO {
     }
 
     public String toString() {
-      return "#" + wseq + " : " + word + " s " + score + " res " + resultID + " answer " + answerAudio + " ref " + refAudio;
+      return "#" + wseq + " : " + word + " s " + score + " res " + resultID;// + " answer " + answerAudio + " ref " + refAudio;
     }
   }
 }
