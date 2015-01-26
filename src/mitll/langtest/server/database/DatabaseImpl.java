@@ -80,7 +80,7 @@ public class DatabaseImpl implements Database {
   private final ServerProperties serverProps;
   private final LogAndNotify logAndNotify;
 
-  private boolean addDefects = true;
+  private final boolean addDefects = true;
 
   /**
    * Just for testing
@@ -877,9 +877,9 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  public List<Result> getResultsWithGrades() {
+/*  public List<Result> getResultsWithGrades() {
     List<Result> results = resultDAO.getResults();
-/*    Map<Integer,Result> idToResult = new HashMap<Integer, Result>();
+*//*    Map<Integer,Result> idToResult = new HashMap<Integer, Result>();
     for (Result r : results) {
       idToResult.put(r.getUniqueID(), r);
       r.clearGradeInfo();
@@ -891,13 +891,13 @@ public class DatabaseImpl implements Database {
       if (result != null) {
         result.addGrade(g);
       }
-    }*/
+    }*//*
     return results;
-  }
+  }*/
 
-  public int getNumResults() {
+/*  public int getNumResults() {
     return resultDAO.getNumResults();
-  }
+  }*/
 
   /**
    * @return
@@ -1233,9 +1233,11 @@ public class DatabaseImpl implements Database {
     }
   }
 
+/*
   public Map<Long, Map<String, Integer>> getUserToDayToRecordings() {
     return new Report(userDAO, resultDAO, eventDAO, audioDAO).getUserToDayToRecordings(null);
   }
+*/
 
   public String toString() {
     return "Database : " + this.getClass().toString();
