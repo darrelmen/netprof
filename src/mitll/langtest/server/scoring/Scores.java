@@ -15,19 +15,19 @@ import java.util.Map;
  *
  */
 public class Scores {
-  public float hydecScore;
+  public float hydraScore;
   public final Map<String, Map<String, Float>> eventScores ;
 
   public Scores() { eventScores = Collections.emptyMap(); }
   /**
    *
-   * @param hydecScore
+   * @param hydraScore
    * @param eventScores
    */
-  public Scores(float hydecScore, Map<String, Map<String, Float>> eventScores) {
-    this.hydecScore = hydecScore;
+  public Scores(float hydraScore, Map<String, Map<String, Float>> eventScores) {
+    this.hydraScore = hydraScore;
     this.eventScores = eventScores;
   }
 
-  public String toString() { return "Scores score " + hydecScore + " events " + eventScores; }
+  public String toString() { return "Scores score " + hydraScore + " events " + eventScores; }
 }
