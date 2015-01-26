@@ -24,6 +24,8 @@ import java.util.jar.Manifest;
 public class ServerProperties {
   private static final Logger logger = Logger.getLogger(ServerProperties.class);
 
+  private static final String WEBSERVICE_HOST_IP = "127.0.0.1";
+
   private static final String DEBUG_EMAIL = "debugEmail";
   private static final String TEST_EMAIL = "testEmail";
   private static final String DOIMAGES = "doimages";
@@ -143,6 +145,17 @@ public class ServerProperties {
     }
   }
 
+  public String getWebserviceIP() {
+    return props.getProperty("webserviceHostIP", WEBSERVICE_HOST_IP);
+  }
+
+  public int getWebservicePort() { 
+    int ip = Integer.parseInt(props.getProperty("webserviceHostPort", -1));
+    if(ip == 1)
+      logger.error("No webservice host port found.");
+    return ip;
+  }
+  
   /**
    * @return
    * @see LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
@@ -150,6 +163,7 @@ public class ServerProperties {
   public String getH2Database() {
     return props.getProperty(H2_DATABASE, H2_DATABASE_DEFAULT);
   }
+
 //  public String getH2StudentAnswersDatabase() { return props.getProperty(H2_STUDENT_ANSWERS_DATABASE, H2_STUDENT_ANSWERS_DATABASE_DEFAULT); }
 //  public String getSecondH2Database() { return props.getProperty(SECOND_DATABASE, "second"); }
 
