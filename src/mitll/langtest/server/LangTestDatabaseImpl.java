@@ -1,5 +1,6 @@
 package mitll.langtest.server;
 
+import mitll.langtest.server.audio.HTTPClient;
 import audio.image.ImageType;
 import audio.imagewriter.ImageWriter;
 import com.google.common.io.Files;
@@ -58,6 +59,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final String ENGLISH = "English";
   private static final int MAX = 30;
   private static final int SLOW_MILLIS = 40;
+  private static final String WEBSERVICE_LOCATION = "/var/lib/spray/";
 
   private DatabaseImpl db;
   private AudioFileHelper audioFileHelper;
@@ -65,6 +67,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String configDir;
   private ServerProperties serverProps;
   private PathHelper pathHelper;
+  private HTTPClient httpClient;
 
   /**
    * @param request
@@ -1999,7 +2002,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    */
   @Override
-  public void init() {
+  public void init() {    
     this.pathHelper = new PathHelper(getServletContext());
     readProperties(getServletContext());
     setInstallPath(serverProps.getUseFile(), db);
@@ -2013,7 +2016,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       db.doReport(serverProps, getServletContext().getRealPath(""), getMailSupport(), pathHelper);
     } catch (Exception e) {
       logger.error("couldn't load database " +e,e);
-    }
+    }    
+
+    // webservice setup
+    httpClient = new HTTPClient(serverProps.getWebserviceIP(), serverProps.getWebservicePort());
+
   }
 
   /**
@@ -2097,5 +2104,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private String getLessonPlan() {
     return configDir + File.separator + serverProps.getLessonPlan();
+  }
+
+  public HTTPClient getHTTPClient() {
+    return httpClient;
   }
 }
