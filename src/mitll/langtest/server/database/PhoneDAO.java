@@ -184,7 +184,7 @@ public class PhoneDAO extends DAO {
       Map<Long, String> resToAnswer = new HashMap<Long, String>();
       Map<Long, String> resToRef = new HashMap<Long, String>();
       Map<Long, String> resToResult = new HashMap<Long, String>();
-      logger.debug("worstPhones phones are " + worstPhones.keySet());
+      if (DEBUG) logger.debug("worstPhones phones are " + worstPhones.keySet());
 
       JSONObject phones = new JSONObject();
 
@@ -216,7 +216,7 @@ public class PhoneDAO extends DAO {
       JSONArray order = new JSONArray();
       for (String phone : worstPhones.keySet()) order.add(phone);
       jsonObject.put("order", order);
-      logger.debug("order phones are " + order);
+      if (DEBUG) logger.debug("order phones are " + order);
 
       JSONObject results = new JSONObject();
       for (Map.Entry<Long, String> pair : resToAnswer.entrySet()) {
@@ -403,7 +403,7 @@ public class PhoneDAO extends DAO {
     }
   }
 
-  private List<Phone> getPhones(String sql) throws SQLException {
+/*  private List<Phone> getPhones(String sql) throws SQLException {
     Connection connection = getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
@@ -423,7 +423,7 @@ public class PhoneDAO extends DAO {
 
     finish(connection, statement, rs);
     return lists;
-  }
+  }*/
 
   private String trimPathForWebPage(String path) {
     int answer = path.indexOf(PathHelper.ANSWERS);
