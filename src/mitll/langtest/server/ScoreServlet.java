@@ -1009,7 +1009,7 @@ public class ScoreServlet extends DatabaseServlet {
     Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
     if (databaseReference != null) {
       db = (DatabaseImpl) databaseReference;
-      logger.debug("found existing database reference " + db + " under " + getServletContext());
+     // logger.debug("found existing database reference " + db + " under " + getServletContext());
     } else {
       logger.error("huh? no existing db reference?");
     }
@@ -1022,7 +1022,7 @@ public class ScoreServlet extends DatabaseServlet {
     Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.AUDIO_FILE_HELPER_REFERENCE);
     if (databaseReference != null) {
       fileHelper = (AudioFileHelper) databaseReference;
-      logger.debug("found existing audio file reference " + fileHelper + " under " + getServletContext());
+     // logger.debug("found existing audio file reference " + fileHelper + " under " + getServletContext());
     } else {
       logger.error("huh? for " + db.getServerProps().getLanguage()+ " no existing audio file reference?");
     }
