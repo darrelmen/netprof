@@ -2,7 +2,6 @@ package mitll.langtest.server.audio;
 
 import com.google.common.io.Files;
 import mitll.langtest.client.AudioTag;
-import mitll.langtest.server.ExerciseSorter;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -11,7 +10,6 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.Export;
 import mitll.langtest.server.database.PhoneDAO;
 import mitll.langtest.server.database.WordDAO;
-import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.scoring.CollationSort;
@@ -481,7 +479,7 @@ public class AudioFileHelper implements CollationSort {
   }
 
   private String createSLFFile(Collection<String> lmSentences, String tmpDir) {
-    return new SLFFile().createSimpleSLFFile(lmSentences, tmpDir);
+    return new SLFFile().createSimpleSLFFile(lmSentences, tmpDir, serverProps.getUnknownModelBias());
   }
 
   /**
