@@ -1,5 +1,6 @@
 package mitll.langtest.server;
 
+import mitll.langtest.server.audio.SLFFile;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
@@ -58,6 +59,7 @@ public class ServerProperties {
   private static final String TIER_INDEX = "tierIndex";
   private static final String VLR_PARLE_PILOT_ITEMS_TXT = "vlr-parle-pilot-items.txt";
   private static final String QUIET_AUDIO_OK = "quietAudioOK";
+  private static final String UNKNOWN_MODEL_BIAS = "unknownModelBias";
 
   private static final String CONFIG_FILE = "configFile";
 
@@ -108,6 +110,7 @@ public class ServerProperties {
 
   // just for automated testing
   private boolean quietAudioOK;
+  private float unknownModelBias;
 
   public ServerProperties(ServletContext servletContext, String configDir) {
     this(servletContext, configDir, servletContext.getInitParameter(CONFIG_FILE));
@@ -320,6 +323,17 @@ public class ServerProperties {
       }
     }
 
+    try {
+      unknownModelBias = Float.parseFloat(props.getProperty(UNKNOWN_MODEL_BIAS, ""+SLFFile.UNKNOWN_MODEL_BIAS_CONSTANT));
+    } catch (NumberFormatException e) {
+      logger.error("Couldn't parse property " + UNKNOWN_MODEL_BIAS, e);
+      try {
+        unknownModelBias = SLFFile.UNKNOWN_MODEL_BIAS_CONSTANT;
+      } catch (NumberFormatException e1) {
+       logger.error(e1);
+      }
+    }
+
     String property = props.getProperty(APPROVERS);
     if (property != null) approvers = Arrays.asList(property.split(","));
 
@@ -381,4 +395,6 @@ public class ServerProperties {
   }
 
   public List<String> getReportEmails() { return reportEmails;  }
+
+  public float getUnknownModelBias() {  return unknownModelBias;  }
 }
