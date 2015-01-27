@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
@@ -30,6 +29,7 @@ import mitll.langtest.shared.ExerciseFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -121,6 +121,11 @@ public class CommentNPFExercise extends NPFExercise {
     }
   }
 
+  /**
+   * @see #addContextButton
+   * @param e
+   * @return
+   */
   private Panel getContext(CommonExercise e) {
     String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
     String contextTranslation = e.getContextTranslation() != null && !e.getContextTranslation().trim().isEmpty() ? e.getContextTranslation() : "";
@@ -231,28 +236,52 @@ public class CommentNPFExercise extends NPFExercise {
 ;
 */
 
+  /**
+   * For context audio!
+   *
+   * From all the reference audio recorded, show male and female, and default (unknown gender) audio.
+   * TODO : why show default audio if we have both male and female ???
+   * Choose latest recording, unless we have a preferred user id match.
+   *
+   * @param e
+   * @param hp
+   * @see #getContext
+   */
   private void addGenderChoices(CommonExercise e, Panel hp) {
-    String path;
+    // first, choose male and female voices
 
     long maleTime = 0, femaleTime = 0;
+    Set<Long> preferredUsers = controller.getProps().getPreferredVoices();
     for (AudioAttribute audioAttribute : e.getAudioAttributes()) {
       if (audioAttribute.getAudioType().startsWith("context")) {
-        if (audioAttribute.getUser().getId() == -1) {
+        long user = audioAttribute.getUser().getId();
+        if (user == -1) {
           defaultAudio = audioAttribute;
         } else if (audioAttribute.getUser().isMale()) {
           if (audioAttribute.getTimestamp() > maleTime) {
-            maleAudio = audioAttribute;
-            maleTime = audioAttribute.getTimestamp();
+            if (maleAudio == null || !preferredUsers.contains(maleAudio.getUser().getId())) {
+              maleAudio = audioAttribute;
+              maleTime = audioAttribute.getTimestamp();
+            }
           }
         } else if (audioAttribute.getTimestamp() > femaleTime) {
-          femaleAudio = audioAttribute;
-          femaleTime = audioAttribute.getTimestamp();
+          if (femaleAudio == null || !preferredUsers.contains(femaleAudio.getUser().getId())) {
+            femaleAudio = audioAttribute;
+            if (preferredUsers.contains(femaleAudio.getUser().getId()))
+              logger.info("found " + femaleAudio.getUser());
+
+            femaleTime = audioAttribute.getTimestamp();
+          }
         }
       }
     }
 
+    addPlayAndVoiceChoices(hp);
+  }
+
+  private void addPlayAndVoiceChoices(Panel hp) {
     AudioAttribute toUse = maleAudio != null ? maleAudio : femaleAudio != null ? femaleAudio : defaultAudio;
-    path = toUse == null ? null : toUse.getAudioRef();
+    String path = toUse == null ? null : toUse.getAudioRef();
     if (path != null) {
       //System.out.println("adding context play option " + path);
       contextPlay = new PlayAudioPanel(controller, path)
@@ -266,7 +295,7 @@ public class CommentNPFExercise extends NPFExercise {
       List<String> choices = new ArrayList<String>();
       if (maleAudio != null) choices.add(M);
       if (femaleAudio != null) choices.add(F);
-      if (defaultAudio != null) {
+      if (defaultAudio != null && maleAudio == null || femaleAudio == null) {
         logger.info("Adding default choice since found " + defaultAudio);
         choices.add("Default"); //better not happen
       }
