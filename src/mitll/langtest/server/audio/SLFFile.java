@@ -18,21 +18,23 @@ public class SLFFile {
   public static final String UNKNOWN_MODEL = "UNKNOWNMODEL";
   private static final String ENCODING = "UTF8";
 
- // private static final String UNKNOWN_MODEL_BIAS = "-1.40";
   private static final String LINK_WEIGHT = "-1.00";
-  private static final float UNKNOWN_MODEL_BIAS_CONSTANT = 1.40f;
+  public static final float UNKNOWN_MODEL_BIAS_CONSTANT = 1.40f;
 
   /**
+   * Unknown Model Bias Weight balances the likelihood between matching one of the decode words or the unknown model.
+   *
    * Writes a file into the temp directory, with name {@link mitll.langtest.server.scoring.ASRScoring#SMALL_LM_SLF}
    * @see mitll.langtest.server.audio.AudioFileHelper#createSLFFile
    * @param lmSentences
    * @param tmpDir
+   * @param unknownModelBiasWeight - a property you can set in the property file
    * @return
    */
-  public String createSimpleSLFFile(Collection<String> lmSentences, String tmpDir) {
+  public String createSimpleSLFFile(Collection<String> lmSentences, String tmpDir, float unknownModelBiasWeight) {
     String slfFile = tmpDir + File.separator + ASRScoring.SMALL_LM_SLF;
 
-    String unknownModelBias = String.format("%.2f", UNKNOWN_MODEL_BIAS_CONSTANT);
+    String unknownModelBias = String.format("%.2f", unknownModelBiasWeight);
 
     try {
       BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(slfFile), ENCODING));
