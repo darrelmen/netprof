@@ -29,6 +29,7 @@ public interface CommonExercise extends CommonShell {
   boolean hasRefAudio();
 
   String getRefAudio();
+  String getRefAudioWithPrefs(Set<Long> prefs);
 
   String getSlowAudioRef();
 
@@ -61,7 +62,7 @@ public interface CommonExercise extends CommonShell {
    * @param isMale
    * @return
    */
-  Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale);
+  Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Set<Long> preferredUsers);
   void addAudio(AudioAttribute audioAttribute);
 
   CommonShell getShell();
