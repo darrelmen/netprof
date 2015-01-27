@@ -33,9 +33,7 @@ public class User extends MiniUser {
   private Collection<Permission> permissions;
 
   public static enum Kind implements IsSerializable { UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ANONYMOUS }
-
   public static enum Permission implements IsSerializable { QUALITY_CONTROL, RECORD_AUDIO }
-
 
   public User() {} // for serialization
 
