@@ -70,6 +70,7 @@ public class ServerProperties {
   private static final String APPROVERS = "approvers";
   private static final String APPROVER_EMAILS = "approverEmails";
   private static final String ADMINS = "admins";
+  private static final String PREFERRED_VOICES = "preferredVoices";
 
   private static final List<String> DLI_APPROVERS = Arrays.asList(
       "Tamas",
@@ -111,6 +112,7 @@ public class ServerProperties {
   // just for automated testing
   private boolean quietAudioOK;
   private float unknownModelBias;
+  private Set<Long> preferredVoices = new HashSet<Long>();
 
   public ServerProperties(ServletContext servletContext, String configDir) {
     this(servletContext, configDir, servletContext.getInitParameter(CONFIG_FILE));
@@ -334,7 +336,20 @@ public class ServerProperties {
       }
     }
 
-    String property = props.getProperty(APPROVERS);
+    String property = props.getProperty(PREFERRED_VOICES);
+    if (property != null) {
+      for (String userid : property.split(",")) {
+        try {
+          preferredVoices.add(Long.parseLong(userid));
+          logger.info("pref users " + preferredVoices);
+        } catch (NumberFormatException e) {
+          logger.error("couldn't parse userid " + userid);
+        }
+      }
+    }
+
+
+    property = props.getProperty(APPROVERS);
     if (property != null) approvers = Arrays.asList(property.split(","));
 
     property = props.getProperty(APPROVER_EMAILS);
@@ -397,4 +412,8 @@ public class ServerProperties {
   public List<String> getReportEmails() { return reportEmails;  }
 
   public float getUnknownModelBias() {  return unknownModelBias;  }
+
+  public Set<Long> getPreferredVoices() {
+    return preferredVoices;
+  }
 }
