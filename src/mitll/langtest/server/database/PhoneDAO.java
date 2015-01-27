@@ -324,8 +324,6 @@ public class PhoneDAO extends DAO {
       // }
     }
     finish(connection, statement, rs);
-    List<WordAndScore> w = phoneToWordAndScore.get("w");
-    logger.debug("w is " +w);
 
     return getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems);
   }
