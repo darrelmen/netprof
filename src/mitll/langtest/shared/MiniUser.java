@@ -65,9 +65,7 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
     return new Long(id).hashCode();
   }
 
-  public int getGender() {
-    return gender;
-  }
+  public int getGender() { return gender;  }
 
   public long getId() {
     return id;
@@ -81,6 +79,10 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
     return userID;
   }
 
+  /**
+   * @see mitll.langtest.server.database.UserDAO#getUsers
+   * @param userID
+   */
   public void setUserID(String userID) {
     this.userID = userID;
   }
