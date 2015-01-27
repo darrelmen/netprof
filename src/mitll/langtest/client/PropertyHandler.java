@@ -2,7 +2,10 @@ package mitll.langtest.client;
 
 import com.google.gwt.user.client.Window;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,6 +15,8 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class PropertyHandler {
+  private Logger logger = Logger.getLogger("PropertyHandler");
+
   // property file property names
   private static final String GRADING_PROP = "grading";
   private static final String APP_TITLE = "appTitle";
@@ -61,11 +66,16 @@ public class PropertyHandler {
   private static final String QUIET_AUDIO_OK = "quietAudioOK";
   private static final String SHOW_WELCOME = "showWelcome";
   private static final String NO_MODEL = "noModel";
+  private static final String PREFERRED_VOICES = "preferredVoices";
+
   public static final String SIGN_UP = "Sign Up";
   private boolean adminView;
 
+  /**
+   * @see mitll.langtest.client.recorder.RecordButton#showTooLoud
+   * @return
+   */
   public String getTooLoudMessage() {
-
     return "If your recording is too loud, please follow the following steps to adjust your microphone level settings in Windows on your MacBook: <br/>" +
         "1.\tClick on ‘Control Panel’<br/>" +
         "2.\tSelect ‘Sound’<br/>" +
@@ -77,15 +87,15 @@ public class PropertyHandler {
         "8.\tClick OK<br/>";
   }
 
+  public Set<Long> getPreferredVoices() {  return preferredVoices;  }
 
   public enum LOGIN_TYPE { ANONYMOUS, STUDENT }
-
 
   private boolean spectrogram = false;
   private boolean clickAndHold = true;
   private boolean quietAudioOK;
   private boolean showContext = true;
-
+  private Set<Long> preferredVoices = new HashSet<Long>();
   private String resetPassToken = "";
   private String cdEnableToken = "", emailRToken = "";
 
@@ -112,7 +122,6 @@ public class PropertyHandler {
   private int recordTimeout = DEFAULT_TIMEOUT;
 
   private String splashTitle;
- // private float screenPortion = 1.0f;
   private boolean rightAlignContent;
 
   // do we bind the record key to space -- problematic if we have text entry anywhere else on the page, say in a search
@@ -162,6 +171,16 @@ public class PropertyHandler {
       else if (key.equals(DIALOG)) dialog = getBoolean(value);
       else if (key.equals(QUIET_AUDIO_OK)) quietAudioOK = getBoolean(value);
       else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
+      else if (key.equals(PREFERRED_VOICES)) {
+        for (String userid : value.split(",")) {
+          try {
+            preferredVoices.add(Long.parseLong(userid));
+            logger.info("pref users " + preferredVoices);
+          } catch (NumberFormatException e) {
+            logger.warning("couldn't parse userid " + userid);
+          }
+        }
+      }
       else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
