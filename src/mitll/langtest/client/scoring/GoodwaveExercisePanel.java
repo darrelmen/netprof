@@ -15,7 +15,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
-import com.google.gwt.media.client.Audio;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -676,11 +675,11 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         return rightSide;
       } else {
         // add gender choices
-        Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true);
+        Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true,controller.getProps().getPreferredVoices());
 
         //System.out.println("getAfterPlayWidget.males  " + malesMap);
 
-        Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false);
+        Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false,controller.getProps().getPreferredVoices());
 
         //System.out.println("getAfterPlayWidget.females  " + femalesMap);
 
