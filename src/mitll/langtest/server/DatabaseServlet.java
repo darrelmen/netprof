@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServlet;
 import java.io.*;
+import java.util.Set;
 
 /**
  * Created by GO22670 on 4/8/2014.
@@ -114,6 +115,8 @@ public class DatabaseServlet extends HttpServlet {
   /**
    * Make json for an exercise
    *
+   * Prefer recordings by voices on the preferred list.
+   *
    * @param exercise
    * @return
    */
@@ -135,7 +138,7 @@ public class DatabaseServlet extends HttpServlet {
       if (CHECK_FOR_MP3) ensureMP3(latestContext.getAudioRef(), exercise.getContext());
     }
     ex.put("ctfref", latestContext == null ? NO : latestContext.getAudioRef());
-    ex.put("ref", exercise.hasRefAudio() ? exercise.getRefAudio() : NO);
+    ex.put("ref", exercise.hasRefAudio() ? exercise.getRefAudioWithPrefs(serverProps.getPreferredVoices()) : NO);
 
     addLatestRefs(exercise, ex);
 
@@ -144,44 +147,62 @@ public class DatabaseServlet extends HttpServlet {
 
   /**
    * Male/female reg/slow speed
+   * Prefer voices on the preferred list.
+   *
    * @param exercise
    * @param ex
+   * @see #getJsonForExercise
    */
   private void addLatestRefs(CommonExercise exercise, JSONObject ex) {
     String mr = null, ms = null, fr = null, fs = null;
     long mrt = 0, mst = 0, frt = 0, fst = 0;
+    Set<Long> preferredVoices = serverProps.getPreferredVoices();
+    AudioAttribute mra = null, msa = null, fra = null, fsa = null;
 
     for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
       long timestamp = audioAttribute.getTimestamp();
-
+      //boolean isPrefVoice = preferredVoices.contains(audioAttribute.getUserid());
       if (audioAttribute.isMale()) {
         if (audioAttribute.isRegularSpeed()) {
           if (timestamp >= mrt) {
-            mrt = timestamp;
-            mr = audioAttribute.getAudioRef();
+            if (mra == null || !preferredVoices.contains(mra.getUserid())) {
+              mrt = timestamp;
+              mr = audioAttribute.getAudioRef();
+              mra = audioAttribute;
+            }
           }
         } else if (audioAttribute.isSlow()) {
           if (timestamp >= mst) {
-            mst = timestamp;
-            ms = audioAttribute.getAudioRef();
+            if (msa == null || !preferredVoices.contains(msa.getUserid())) {
+              mst = timestamp;
+              ms = audioAttribute.getAudioRef();
+              msa = audioAttribute;
+            }
           }
         }
       } else {
         if (audioAttribute.isRegularSpeed()) {
           if (timestamp >= frt) {
-            frt = timestamp;
-            fr = audioAttribute.getAudioRef();
+            if (fra == null || !preferredVoices.contains(fra.getUserid())) {
+              frt = timestamp;
+              fr = audioAttribute.getAudioRef();
+              fra = audioAttribute;
+            }
           }
         } else if (audioAttribute.isSlow()) {
           if (timestamp >= fst) {
-            fst = timestamp;
-            fs = audioAttribute.getAudioRef();
+            if (fsa == null || !preferredVoices.contains(fsa.getUserid())) {
+              fst = timestamp;
+              fs = audioAttribute.getAudioRef();
+              fsa = audioAttribute;
+            }
           }
         }
       }
     }
 
     // male regular speed reference audio (m.r.r.)
+    // we want the item text so we can label the mp3 with a title
     String foreignLanguage = exercise.getForeignLanguage();
 
     if (mr != null) {
