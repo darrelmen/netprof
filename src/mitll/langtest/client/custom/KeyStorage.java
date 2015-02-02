@@ -1,6 +1,7 @@
 package mitll.langtest.client.custom;
 
 import com.google.gwt.storage.client.Storage;
+import com.google.gwt.user.client.Window;
 import mitll.langtest.client.exercise.ExerciseController;
 
 /**
@@ -13,7 +14,7 @@ public class KeyStorage {
   private int user;
 
   /**
-   * @see mitll.langtest.client.user.UserPassLogin#UserPassLogin(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.PropertyHandler)
+   * @see mitll.langtest.client.user.UserPassLogin#UserPassLogin
    * @param language
    * @param user
    */
@@ -27,12 +28,21 @@ public class KeyStorage {
     this.controller = controller;
   }
 
+  boolean showedAlert = false;
   public void storeValue(String name, String toStore) {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
       String localStorageKey = getLocalStorageKey(name);
-      localStorageIfSupported.setItem(localStorageKey, toStore);
+      try {
+        localStorageIfSupported.setItem(localStorageKey, toStore);
+      } catch (Exception e) {
+        if (!showedAlert) {
+          Window.alert("Your web browser does not support storing settings locally. " +
+              "In Safari, the most common cause of this is using Private Browsing Mode. " +
+              "Some settings may not save or some features may not work properly for you.");
+        }
+      }
       if (debug) System.out.println("KeyStorage : (" + localStorageKey+
         ") storeValue " + name + "="+toStore + " : " + getValue(name));
     }
