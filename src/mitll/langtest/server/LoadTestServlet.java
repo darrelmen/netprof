@@ -578,14 +578,14 @@ public class LoadTestServlet extends DatabaseServlet {
     try {
       AutoCRTScoring crtScoring = new AutoCRTScoring() {
         @Override
-        public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences) {
-          return audioFileHelper.getASRScoreForAudio(testAudioFile, lmSentences);
+        public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, int firstPhoneLength) {
+          return audioFileHelper.getASRScoreForAudio(testAudioFile, lmSentences, 10);
         }
 
-        @Override
-        public Collection<String> getValidPhrases(Collection<String> phrases) {
-          return audioFileHelper.getValidPhrases(phrases);
-        }
+//        @Override
+//        public Collection<String> getValidPhrases(Collection<String> phrases) {
+//          return audioFileHelper.getValidPhrases(phrases);
+//        }
       };
       audioFileHelper.makeAutoCRT(relativeConfigDir, crtScoring);
       asrScoreForAudio = audioFileHelper.getFlashcardAnswer(testAudioFile, sentence);
