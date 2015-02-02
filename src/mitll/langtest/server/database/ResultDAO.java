@@ -215,7 +215,7 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds(int, java.util.Map, String, long, int, String, boolean, boolean, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
    * @param exercises
    * @param userid
    * @param collator
