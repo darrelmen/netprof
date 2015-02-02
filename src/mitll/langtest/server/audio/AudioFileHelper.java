@@ -199,12 +199,12 @@ public class AudioFileHelper implements CollationSort {
     AudioCheck.ValidityAndDur validity = new AudioConversion().isValid(file);
     boolean isValid =
         validity.validity == AudioAnswer.Validity.OK ||
-        (serverProps.isQuietAudioOK() && validity.validity == AudioAnswer.Validity.TOO_QUIET);
+            (serverProps.isQuietAudioOK() && validity.validity == AudioAnswer.Validity.TOO_QUIET);
 
     return doFlashcard ?
-        getAudioAnswer(exerciseID, exercise1,0, user, reqid, audioType, doFlashcard, true, true, wavPath, file,
+        getAudioAnswer(exerciseID, exercise1, 0, user, reqid, audioType, doFlashcard, true, true, wavPath, file,
             validity, isValid, deviceType, device) :
-        getAudioAnswer(exerciseID, exercise1,0, user,reqid, audioType, doFlashcard, true, true, wavPath, file,
+        getAudioAnswer(exerciseID, exercise1, 0, user, reqid, audioType, doFlashcard, true, true, wavPath, file,
             validity, isValid, score, deviceType, device)
         ;
   }
@@ -454,16 +454,22 @@ public class AudioFileHelper implements CollationSort {
    *
    * TODO : why even generate images here???
    *
-   * @see AutoCRT#getAutoCRTDecodeOutput
+   * @seex AutoCRT#getAutoCRTDecodeOutput
    * @see AutoCRT#getFlashcardAnswer
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(java.io.File, java.util.Collection)
+   * @see mitll.langtest.server.scoring.AutoCRTScoring#getASRScoreForAudio(java.io.File, java.util.Collection, int)
    * @param testAudioFile audio file to score
    * @param lmSentences to look for in the audio
+   * @param firstPhoneLength
    * @return PretestScore for audio
    */
-  public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences) {
+  public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, int firstPhoneLength) {
     String tmpDir = Files.createTempDir().getAbsolutePath();
-    String slfFile = createSLFFile(lmSentences, tmpDir);
+    // TODO : calculate a value between -1.2 and -1.6 or so based on phone length of the word...
+    float shortBias = firstPhoneLength < 4 ? -10.0f : 0.0f;
+    float toAdd = shortBias + -1.0f/((float) firstPhoneLength);
+    float unknownModelBiasWeight = SLFFile.UNKNOWN_MODEL_BIAS_CONSTANT + toAdd;
+   // logger.debug("bias for " + lmSentences + " length " +firstPhoneLength + " was " +toAdd + " total " +unknownModelBiasWeight);
+    String slfFile = createSLFFile(lmSentences, tmpDir, unknownModelBiasWeight);
     if (!new File(slfFile).exists()) {
       logger.error("couldn't make slf file?");
       return new PretestScore();
@@ -472,14 +478,21 @@ public class AudioFileHelper implements CollationSort {
       List<String> unk = new ArrayList<String>();
       unk.add(SLFFile.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
       String vocab = asrScoring.getUsedTokens(lmSentences, unk);
-      logger.debug("getASRScoreForAudio : vocab " + vocab + " from " + lmSentences);
+      //logger.debug("getASRScoreForAudio : vocab " + vocab + " from " + lmSentences);
       return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, 128, 128, false, true, tmpDir,
           serverProps.useScoreCache(), "");
     }
   }
 
-  private String createSLFFile(Collection<String> lmSentences, String tmpDir) {
-    return new SLFFile().createSimpleSLFFile(lmSentences, tmpDir, serverProps.getUnknownModelBias());
+  /**
+   * @see #getASRScoreForAudio
+   * @param lmSentences
+   * @param tmpDir
+   * @param unknownModelBiasWeight
+   * @return
+   */
+  private String createSLFFile(Collection<String> lmSentences, String tmpDir, float unknownModelBiasWeight) {
+    return new SLFFile().createSimpleSLFFile(lmSentences, tmpDir, unknownModelBiasWeight); //serverProps.getUnknownModelBias()
   }
 
   /**
@@ -487,10 +500,10 @@ public class AudioFileHelper implements CollationSort {
    * @param phrases
    * @return
    */
-  public Collection<String> getValidPhrases(Collection<String> phrases) {
+/*  public Collection<String> getValidPhrases(Collection<String> phrases) {
     makeASRScoring(); // TODO : evil
     return asrScoring.getValidPhrases(phrases);
-  }
+  }*/
 
   /**
    * For now, we don't use a ref audio file, since we aren't comparing against a ref audio file with the DTW/sv pathway.
@@ -653,7 +666,10 @@ public class AudioFileHelper implements CollationSort {
   public ScoreAndAnswer getFlashcardAnswer(File file, String wordOrPhrase) {
     makeASRScoring();
     AudioAnswer audioAnswer = new AudioAnswer();
-    PretestScore flashcardAnswer = autoCRT.getFlashcardAnswer(file, wordOrPhrase, audioAnswer, serverProps.getLanguage());
+    ASRScoring.PhoneInfo bagOfPhones = asrScoring.getBagOfPhones(wordOrPhrase);
+    int firstPronLength = bagOfPhones.getFirstPron().size();
+    PretestScore flashcardAnswer = autoCRT.getFlashcardAnswer(file, wordOrPhrase, audioAnswer, serverProps.getLanguage(),
+        firstPronLength);
     return new ScoreAndAnswer(flashcardAnswer, audioAnswer);
   }
 
@@ -696,9 +712,9 @@ public class AudioFileHelper implements CollationSort {
       Export export = db.getExport();
       autoCRT = new AutoCRT(export, crtScoring, pathHelper.getInstallPath(), relativeConfigDir,
         serverProps.getMinPronScore());
-      if (serverProps.isAutoCRT() && serverProps.isIncludeFeedback()) {
-        autoCRT.makeClassifier();
-      }
+//      if (serverProps.isAutoCRT() && serverProps.isIncludeFeedback()) {
+//        autoCRT.makeClassifier();
+//      }
     }
   }
   /**
