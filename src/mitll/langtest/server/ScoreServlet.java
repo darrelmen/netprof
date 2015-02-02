@@ -705,9 +705,9 @@ public class ScoreServlet extends DatabaseServlet {
         if (!next.hasRefAudio()) iterator.remove();
       }
     }
-    getExerciseSorter().sortByForeign(copy, getAudioFileHelper());
+  //  getExerciseSorter().sortByForeign(copy, getAudioFileHelper());
 
-//    new ExerciseSorter(db.getSectionHelper().getTypeOrder()).getSortedByUnitThenPhone(copy, false, audioFileHelper.getPhoneToCount(), false);
+    getExerciseSorter().sortedByPronLengthThenPhone(copy, audioFileHelper.getPhoneToCount());
 
     return getJsonArray(copy);
   }
@@ -1073,6 +1073,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @param sentence to decode
    * @return
    * @see #getJsonForWordAndAudioFlashcard(String, java.io.File)
+   * @deprecated - this is not in reference to an exercise
    */
   private AudioFileHelper.ScoreAndAnswer getFlashcardScore(final AudioFileHelper audioFileHelper, File testAudioFile,
                                                            String sentence) {
