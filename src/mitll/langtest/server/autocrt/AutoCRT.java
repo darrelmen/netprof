@@ -1,7 +1,7 @@
 package mitll.langtest.server.autocrt;
 
-import ag.experiment.AutoGradeExperiment;
-import mira.classifier.Classifier;
+//import ag.experiment.AutoGradeExperiment;
+//import mira.classifier.Classifier;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.Export;
 import mitll.langtest.server.scoring.AutoCRTScoring;
@@ -13,7 +13,7 @@ import mitll.langtest.server.scoring.ASRScoring;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.text.DecimalFormat;
+//import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -27,16 +27,16 @@ import java.util.*;
  */
 public class AutoCRT {
   private static final Logger logger = Logger.getLogger(AutoCRT.class);
-  private static final String SERIALIZED_CLASSIFIER = "serializedClassifier.ser";
+//  private static final String SERIALIZED_CLASSIFIER = "serializedClassifier.ser";
 
-  private static final double CORRECT_THRESHOLD = 0.499;
-  private static final boolean GET_MSA = false;
-  private static final boolean TESTING = false; // this doesn't really work
-  private Classifier<AutoGradeExperiment.Event> classifier = null;
-  private Map<String, Export.ExerciseExport> exerciseIDToExport;
-  private final String installPath;
-  private final String mediaDir;
-  private final Export exporter;
+ // private static final double CORRECT_THRESHOLD = 0.499;
+ // private static final boolean GET_MSA = false;
+ // private static final boolean TESTING = false; // this doesn't really work
+//  private Classifier<AutoGradeExperiment.Event> classifier = null;
+//  private Map<String, Export.ExerciseExport> exerciseIDToExport;
+ // private final String installPath;
+ // private final String mediaDir;
+//  private final Export exporter;
   private final AutoCRTScoring autoCRTScoring;
   private final double minPronScore;
 
@@ -49,9 +49,9 @@ public class AutoCRT {
    * @param minPronScore
    */
   public AutoCRT(Export exporter, AutoCRTScoring db, String installPath, String relativeConfigDir, double minPronScore) {
-    this.installPath = installPath;
-    this.mediaDir = relativeConfigDir;
-    this.exporter = exporter;
+    //this.installPath = installPath;
+    //this.mediaDir = relativeConfigDir;
+ //   this.exporter = exporter;
     this.autoCRTScoring = db;
     this.minPronScore = minPronScore;
   }
@@ -59,19 +59,21 @@ public class AutoCRT {
   /**
    * Get an auto crt reco output and score given an audio answer.
    *
+   * On this branch this isn't used - see newAutoCRT
+   *
    * @seex mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile(String, String, String, int, int, int, boolean, String, boolean)
    * @seex mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
    * @param exerciseID for this exercise
    * @param questionID and this question
-   * @param audioFile score this file (
+   * @paramx audioFile score this file (
    * @param answer mark decode output, correctness, and whether they said something in the set of expected sentences
    */
-  public void getAutoCRTDecodeOutput(String exerciseID, int questionID, File audioFile, AudioAnswer answer) {
+/*  public void getAutoCRTDecodeOutput(String exerciseID, int questionID, File audioFile, AudioAnswer answer) {
     PretestScore asrScoreForAudio = getScoreForAudio(exerciseID, questionID, audioFile);
     markCorrectnessOnAnswer(exerciseID, questionID, asrScoreForAudio, answer);
-  }
+  }*/
 
-  private void markCorrectnessOnAnswer(String exerciseID, int questionID, PretestScore asrScoreForAudio, AudioAnswer answer) {
+/*  private void markCorrectnessOnAnswer(String exerciseID, int questionID, PretestScore asrScoreForAudio, AudioAnswer answer) {
     String recoSentence = asrScoreForAudio.getRecoSentence();
     boolean lowPronScore = asrScoreForAudio.getHydecScore() < minPronScore;
     boolean matchedUnknown = recoSentence.equals(SLFFile.UNKNOWN_MODEL);
@@ -104,7 +106,7 @@ public class AutoCRT {
       answer.setCorrect(correct);
       answer.setSaidAnswer(!matchedUnknown);
     }
-  }
+  }*/
 
   /**
    * Do decoding on an audio file over a set of possible reco sentences and the UNKNOWN model.
@@ -112,13 +114,14 @@ public class AutoCRT {
    * The possible sentences are student responses collected previously (exported answers from the student h2 autoCRTScoring).
    * Filter out student answers that we can't decode given our dictionary (e.g. numbers "222").
    *
+   * @see #getAutoCRTDecodeOutput
    * @see #getExportedAnswers(String, int)
    * @param exerciseID for this exercise
    * @param questionID for this question
    * @param audioFile decode this file
    * @return the reco sentence and the score for this sentence
    */
-  private PretestScore getScoreForAudio(String exerciseID, int questionID, File audioFile) {
+/*  private PretestScore getScoreForAudio(String exerciseID, int questionID, File audioFile) {
     Collection<String> exportedAnswers = getExportedAnswers(exerciseID, questionID);
     exportedAnswers = autoCRTScoring.getValidPhrases(exportedAnswers);   // remove phrases that break hydec
     //logger.info("getAutoCRTDecodeOutput : got answers, num = " + exportedAnswers.size());
@@ -132,10 +135,10 @@ public class AutoCRT {
         " answers for exercise " + exerciseID + "/" + questionID);
     }
     return asrScoreForAudio;
-  }
+  }*/
 
   /**
-   * Allow multiple correct answers from synonym sentence list.
+   * Decode the phrase from the exercise in {@link mitll.langtest.shared.CommonExercise#getForeignLanguage}
    *
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @seex mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
@@ -145,8 +148,9 @@ public class AutoCRT {
    * @param answer
    */
   public PretestScore getFlashcardAnswer(CommonExercise commonExercise, File audioFile, AudioAnswer answer, String language) {
-    List<String> foregroundSentences = getRefSentences(commonExercise, language);
-    PretestScore flashcardAnswer = getFlashcardAnswer(audioFile, foregroundSentences, answer, language);
+    Collection<String> foregroundSentences = getRefSentences(commonExercise, language);
+    int firstPronLength = commonExercise.getFirstPron().size();
+    PretestScore flashcardAnswer = getFlashcardAnswer(audioFile, foregroundSentences, answer, firstPronLength);
 
     // log what happened
     if (answer.isCorrect()) {
@@ -171,10 +175,15 @@ public class AutoCRT {
    * @param audioFile
    * @param foregroundSentence
    * @param answer
+   * @param firstPronLength
    * @return
    */
-  public PretestScore getFlashcardAnswer(File audioFile, String foregroundSentence, AudioAnswer answer, String language) {
-    return getFlashcardAnswer(audioFile, getRefs(Collections.singletonList(foregroundSentence), language), answer, language);
+  public PretestScore getFlashcardAnswer(File audioFile, String foregroundSentence, AudioAnswer answer, String language,
+                                         int firstPronLength) {
+
+    Set<String> phraseToDecode = Collections.singleton(getPhraseToDecode(foregroundSentence, language));
+    return getFlashcardAnswer(audioFile,
+        phraseToDecode, answer, firstPronLength);
   }
 
   /**
@@ -187,21 +196,20 @@ public class AutoCRT {
    * <p/>
    * If you want to see what the decoder output was, that's in {@link mitll.langtest.shared.AudioAnswer#getDecodeOutput()}.
    *  For instance if you wanted to show that for debugging purposes.
-   * If you want to know whether the said the right word or not (which might have scored too low to be correct) see {@link mitll.langtest.shared.AudioAnswer#isSaidAnswer()}.
+   * If you want to know whether the said the right word or not (which might have scored too low to be correct)
+   * see {@link mitll.langtest.shared.AudioAnswer#isSaidAnswer()}.
    *
    * @param audioFile         to score against
    * @param possibleSentences any of these can match and we'd call this a correct response
-   * @param answer            holds the score, whether it was correct, the decode output, and whether one of the possible sentences
+   * @param answer            holds the score, whether it was correct, the decode output, and whether one of the
+   *                          possible sentences
+   * @param firstPronLength
    * @return PretestScore word/phone alignment with scores
    */
-  private PretestScore getFlashcardAnswer(File audioFile, List<String> possibleSentences, AudioAnswer answer, String language) {
-    List<String> foreground = new ArrayList<String>();
-    for (String ref : possibleSentences) {
-      String e1 = removePunct(ref);
-      foreground.add(e1);
-    }
-
-    PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, foreground);
+  private PretestScore getFlashcardAnswer(File audioFile, Collection<String> possibleSentences, AudioAnswer answer,
+                                          int firstPronLength) {
+    PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, removePunct(possibleSentences),
+        firstPronLength);
 
     String recoSentence =
       asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
@@ -209,7 +217,8 @@ public class AutoCRT {
     // logger.debug("recoSentence is " + recoSentence + "(" +recoSentence.length()+ ")");
 
     boolean isCorrect = isCorrect(possibleSentences, recoSentence);
-    double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : asrScoreForAudio.getHydecScore();
+    double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ?
+        -1 : asrScoreForAudio.getHydecScore();
     answer.setCorrect(isCorrect && scoreForAnswer > minPronScore);
     answer.setSaidAnswer(isCorrect);
     answer.setDecodeOutput(recoSentence);
@@ -217,14 +226,22 @@ public class AutoCRT {
     return asrScoreForAudio;
   }
 
-  private SmallVocabDecoder svd = new SmallVocabDecoder();
+  private List<String> removePunct(Collection<String> possibleSentences) {
+    List<String> foreground = new ArrayList<String>();
+    for (String ref : possibleSentences) {
+      foreground.add(removePunct(ref));
+    }
+    return foreground;
+  }
+
+  private final SmallVocabDecoder svd = new SmallVocabDecoder();
   /**
    * Convert dashes into spaces and remove periods, and other punct
    * @param answerSentences
    * @param recoSentence
    * @return
    */
-  private boolean isCorrect(List<String> answerSentences, String recoSentence) {
+  private boolean isCorrect(Collection<String> answerSentences, String recoSentence) {
    // logger.debug("iscorrect - answer " + answerSentences + " vs " + recoSentence);
 
     List<String> recoTokens = svd.getTokens(recoSentence);
@@ -243,35 +260,32 @@ public class AutoCRT {
         }
         if (same) return true;
       }
-      else {
+     // else {
        // logger.debug("not same number of tokens " + answerTokens + " " + answerTokens.size() + " vs " + recoTokens + " " + recoTokens.size());
-      }
+     // }
     }
     return false;
   }
 
   /**
+   * @see #getFlashcardAnswer
    * @param other
    * @return
    */
-  private List<String> getRefSentences(CommonExercise other, String language) {
-    List<String> refSentences = new ArrayList<String>();
-    String foreignLanguage = other.getForeignLanguage();
-    refSentences.add(foreignLanguage);
-    return getRefs(refSentences, language);
+  private Collection<String> getRefSentences(CommonExercise other, String language) {
+    return Collections.singleton(getPhraseToDecode(other.getForeignLanguage(),language));
   }
 
-  private List<String> getRefs(List<String> refSentences, String language) {
-    List<String> refs = new ArrayList<String>();
-    for (String ref : refSentences) {
-      if (language.equalsIgnoreCase("mandarin") && !ref.trim().equalsIgnoreCase(SLFFile.UNKNOWN_MODEL)){
-    	  refs.add(ASRScoring.getSegmented(ref.trim().toUpperCase())); //we want this to be a space-separated sentence
-      }
-      else{
-    	  refs.add(ref.trim().toUpperCase());
-      }
-    }
-    return refs;
+  /**
+   * Special rule for mandarin - break it up into characters
+   * @param rawRefSentence
+   * @param language
+   * @return
+   */
+  private String getPhraseToDecode(String rawRefSentence, String language) {
+    return language.equalsIgnoreCase("mandarin") && !rawRefSentence.trim().equalsIgnoreCase(SLFFile.UNKNOWN_MODEL) ?
+        ASRScoring.getSegmented(rawRefSentence.trim().toUpperCase()) :
+        rawRefSentence.trim().toUpperCase();
   }
 
   /**
@@ -283,7 +297,7 @@ public class AutoCRT {
    * @param recoSentence
    * @return to show to user
    */
-  private String getAnnotatedResponse(String exercise, int questionID, String recoSentence) {
+/*  private String getAnnotatedResponse(String exercise, int questionID, String recoSentence) {
     List<String> good = new ArrayList<String>();
     List<String> bad = new ArrayList<String>();
     for (Export.ResponseAndGrade resp : getExportForExercise(exercise, questionID).rgs) {
@@ -303,7 +317,7 @@ public class AutoCRT {
       } else sb.append(recoToken + " ");
     }
     return sb.toString().trim();
-  }
+  }*/
 
   /**
    * For this exercise and question, score the answer.<br></br>
@@ -312,11 +326,11 @@ public class AutoCRT {
    * @seex mitll.langtest.server.audio.AudioFileHelper#getScoreForAnswer(mitll.langtest.shared.Exercise, int, String)
    * @seex mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
    * @paramx e for this exercise
-   * @param questionID for this question (when multiple questions in an exercise)
-   * @param answer to score (correct->incorrect)
+   * @paramx questionID for this question (when multiple questions in an exercise)
+   * @paramx answer to score (correct->incorrect)
    * @return 0-1
    */
-  private double getScoreForExercise(String id, int questionID, String answer) {
+/*  private double getScoreForExercise(String id, int questionID, String answer) {
     if (TESTING) return 0.1;
     getClassifier();
     String key = id + "_" + questionID;
@@ -336,9 +350,9 @@ public class AutoCRT {
         "' in context of " + exerciseExport +" and took " +(now-then) + " millis");
       return score;
     }
-  }
+  }*/
 
-  private Set<String> getTokenSet(List<String> exportedAnswers) {
+/*  private Set<String> getTokenSet(List<String> exportedAnswers) {
     Set<String> tokens = new HashSet<String>();
     for (String l : exportedAnswers) {
       for (String t : l.split("\\s")) {
@@ -347,7 +361,7 @@ public class AutoCRT {
           tokens.add(tt.trim());
         }}}
     return tokens;
-  }
+  }*/
 
   /**
    * Replace elipsis with space. Then remove all punct.
@@ -359,52 +373,54 @@ public class AutoCRT {
   }
 
   /**
-   * @see #getAutoCRTDecodeOutput
+   * @seex #getAutoCRTDecodeOutput
    * @param id
    * @param questionID
    * @return
    */
-  private Collection<String> getExportedAnswers(String id, int questionID) {
-    getClassifier();
-    long then = System.currentTimeMillis();
+//  private Collection<String> getExportedAnswers(String id, int questionID) {
+//    getClassifier();
+//    long then = System.currentTimeMillis();
+//
+//    Set<String> answers = new TreeSet<String>();
+//    Export.ExerciseExport exportForExercise = getExportForExercise(id, questionID);
+//    if (exportForExercise != null) {
+//      for (Export.ResponseAndGrade resp : exportForExercise.rgs) {
+//        answers.add(resp.response);
+//      }
+//    }
+//
+//    long now = System.currentTimeMillis();
+//    if (now-then > 100) {
+//      logger.info("getExportedAnswers : took " + (now - then) + " millis to get " + answers.size() +
+//        " possible answers for exercise " + id);
+//    }
+//    return answers;
+//  }
 
-    Set<String> answers = new TreeSet<String>();
-    Export.ExerciseExport exportForExercise = getExportForExercise(id, questionID);
-    if (exportForExercise != null) {
-      for (Export.ResponseAndGrade resp : exportForExercise.rgs) {
-        answers.add(resp.response);
-      }
-    }
-
-    long now = System.currentTimeMillis();
-    if (now-then > 100) {
-      logger.info("getExportedAnswers : took " + (now - then) + " millis to get " + answers.size() +
-        " possible answers for exercise " + id);
-    }
-    return answers;
-  }
-
+/*
   private Export.ExerciseExport getExportForExercise(String id, int questionID) {
     return getExportForExercise(id + "_" + questionID);
   }
   private Export.ExerciseExport getExportForExercise(String key) {
     return exerciseIDToExport.get(key);
   }
+*/
 
-  public void makeClassifier() { getClassifier(); }
+ // public void makeClassifier() { getClassifier(); }
 
   /**
    * Make a classifier given the export date, which has answers and their grades.<br></br>
    * The export data also includes the answer key for each question.<br></br>
    * This uses Jacob's classifier.
-   * @see #getExportedAnswers(String, int)
+   * @seex #getExportedAnswers(String, int)
    * @see #getScoreForExercise(String, int, String)
    *
    * @see Export.ExerciseExport
    * @see AutoGradeExperiment
    * @return a mira classifier
    */
-  private Classifier<AutoGradeExperiment.Event> getClassifier() {
+/*  private Classifier<AutoGradeExperiment.Event> getClassifier() {
     if (classifier != null) return classifier;
 
     String configDir = (installPath != null ? installPath + File.separator : "") + mediaDir + File.separator;
@@ -433,15 +449,15 @@ public class AutoCRT {
         return classifier;
       }
     }
-  }
+  }*/
 
   /**
    * TODO : this is overkill - we should serialize/rehydrate the model without calling the svm load/save code directly
    * @param configDir
-   * @param serializedClassifier
+   * @paramx serializedClassifier
    * @return
    */
-  private Classifier<AutoGradeExperiment.Event> rehydrateClassifier(String configDir, File serializedClassifier) {
+/*  private Classifier<AutoGradeExperiment.Event> rehydrateClassifier(String configDir, File serializedClassifier) {
     logger.info("rehydrateClassifier : using previously calculated classifier.");
     long then = System.currentTimeMillis();
 
@@ -465,9 +481,9 @@ public class AutoCRT {
       logger.debug("rehydrateClassifier : took " + l + " seconds to rehydrate classifier");
     }
     return classifier;
-  }
+  }*/
 
-  private void readConfigFile(String configDir) {
+/*  private void readConfigFile(String configDir) {
     String[] args = new String[6];
 
     String config = configDir + "runAutoGradeWinNoBad.cfg";     // TODO use template for deploy/platform specific config
@@ -501,5 +517,5 @@ public class AutoCRT {
     for (Export.ExerciseExport exp : export) {
       exerciseIDToExport.put(exp.id, exp);
     }
-  }
+  }*/
 }
