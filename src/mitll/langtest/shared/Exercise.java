@@ -362,10 +362,12 @@ public class Exercise extends AudioExercise implements CommonExercise {
   }
 
   @Override
-  public Set<String> getBagOfPhones() {
-    return bagOfPhones;
-  }
+  public Set<String> getBagOfPhones() {  return bagOfPhones;  }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#countPhones
+   * @param bagOfPhones
+   */
   @Override
   public void setBagOfPhones(Set<String> bagOfPhones) {
     this.bagOfPhones = bagOfPhones;
