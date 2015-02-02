@@ -5,6 +5,7 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 import mitll.langtest.shared.custom.UserExercise;
+import org.apache.log4j.Logger;
 
 import java.text.Collator;
 import java.util.*;
@@ -13,6 +14,8 @@ import java.util.*;
  * Created by GO22670 on 4/30/2014.
  */
 public class ExerciseSorter {
+  private static final Logger logger = Logger.getLogger(ExerciseSorter.class);
+
   private Collection<String> typeOrder;
   private Map<String, Integer> phoneToCount;
 
@@ -21,9 +24,9 @@ public class ExerciseSorter {
   }
 
   /**
-   * @see mitll.langtest.server.ScoreServlet#doGet
    * @param typeOrder
    * @param phoneToCount
+   * @see mitll.langtest.server.ScoreServlet#doGet
    */
   public ExerciseSorter(Collection<String> typeOrder, Map<String, Integer> phoneToCount) {
     this(typeOrder);
@@ -122,44 +125,70 @@ public class ExerciseSorter {
     }
   }
 
-  public int phoneCompByFirst(CommonExercise o1, CommonExercise o2) {
-    return phoneCompFirst(o1,o2,phoneToCount);
+  public void sortedByPronLengthThenPhone(List<? extends CommonExercise> toSort,final Map<String, Integer> phoneToCount) {
+    Collections.sort(toSort, new Comparator<CommonExercise>() {
+      @Override
+      public int compare(CommonExercise o1, CommonExercise o2) {
+        // items in same chapter alphabetical by tooltip
+        return phoneCompFirst(o1, o2, phoneToCount);
+      }
+    });
   }
+
+
+    /**
+     * @param o1
+     * @param o2
+     * @return
+     * @see mitll.langtest.server.database.ResultDAO#getSortedAVPHistoryByPhones
+     */
+  public int phoneCompByFirst(CommonExercise o1, CommonExercise o2) {
+    return phoneCompFirst(o1, o2, phoneToCount);
+  }
+
   private int phoneCompFirst(CommonExercise o1, CommonExercise o2, final Map<String, Integer> phoneToCount) {
-    List<String> bagOfPhones1 = o1.getFirstPron();
-    List<String> bagOfPhones2 = o2.getFirstPron();
-    if (bagOfPhones1 == null && bagOfPhones2 != null) return +1;
-    if (bagOfPhones1 != null && bagOfPhones2 == null) return -1;
-    if (bagOfPhones1 == null && bagOfPhones2 == null) {
+    List<String> pron1 = o1.getFirstPron();
+    List<String> pron2 = o2.getFirstPron();
+    if (pron1 == null && pron2 != null) {
+      logger.warn("missing pron?");
+      return +1;
+    }
+    if (pron1 != null && pron2 == null) {
+      logger.warn("missing pron?");
+      return -1;
+    }
+    if (pron1 == null) {
+      logger.warn("missing pron?");
       return o1.getForeignLanguage().toLowerCase().compareTo(o2.getForeignLanguage().toLowerCase());
     }
-//    if (bagOfPhones2 == null) return +1;
+//    if (pron2 == null) return +1;
 
-    int o1Num = bagOfPhones1.size();
-    int o2Num = bagOfPhones2.size();
-
-    //  if (o1Num < o2Num) return -1;
-    //  else if (o1Num > o2Num) return +1;
-    //  else {
-
-    int n = Math.min(o1Num, o2Num);
-    for (int i = 0; i < n; i++) {
-      String a = bagOfPhones1.get(i);
-      String b = bagOfPhones2.get(i);
-      if (!a.equals(b)) {
-        Integer a1 = phoneToCount.get(a);
-        Integer b1 = phoneToCount.get(b);
-        if (a1 > b1) return -1;
-        else if (a1 < b1) return +1;
-        else return a.compareTo(b);
-      }
-    }
+    int o1Num = pron1.size();
+    int o2Num = pron2.size();
 
     if (o1Num < o2Num) return -1;
     else if (o1Num > o2Num) return +1;
     else {
-      return o1.getForeignLanguage().toLowerCase().compareTo(o2.getForeignLanguage().toLowerCase());
+
+      int n = Math.min(o1Num, o2Num);
+      for (int i = 0; i < n; i++) {
+        String a = pron1.get(i);
+        String b = pron2.get(i);
+        if (!a.equals(b)) {
+          Integer a1 = phoneToCount.get(a);
+          Integer b1 = phoneToCount.get(b);
+          int compt = a1.compareTo(b1);
+          if (compt != 0) return compt;
+          else return a.compareTo(b);
+        }
+      }
+      return 0;
     }
+//    if (o1Num < o2Num) return -1;
+//    else if (o1Num > o2Num) return +1;
+//    else {
+//      return o1.getForeignLanguage().toLowerCase().compareTo(o2.getForeignLanguage().toLowerCase());
+//    }
   }
 
   private int phoneComp(CommonExercise o1, CommonExercise o2, final Map<String, Integer> phoneToCount) {
@@ -221,11 +250,20 @@ public class ExerciseSorter {
     return i;
   }
 
-  public <T extends CommonExercise> void sortByForeign(List<T> exerciseShells, CollationSort sort) {  sort.sort(exerciseShells);  }
+  /**
+   * @see mitll.langtest.server.ScoreServlet#getJsonForSelection
+   * @param exerciseShells
+   * @param sort
+   * @param <T>
+   */
+  public <T extends CommonExercise> void sortByForeign(List<T> exerciseShells, CollationSort sort) {
+    sort.sort(exerciseShells);
+  }
 
   /**
    * I.e. by the lexicographic order of the displayed words in the word list
    * NOTE:  be careful to use collation order when it's not "english-foreign language"
+   *
    * @param exerciseShells
    * @see
    */
