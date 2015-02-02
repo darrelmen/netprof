@@ -453,11 +453,9 @@ public class ExcelImport implements ExerciseDAO {
           }
 
           String english = getCell(next, colIndex++).trim();
-          String foreignLanguagePhrase = getCell(next, colIndex).trim();
-          String translit = getCell(next, transliterationIndex);
-
           // remove starting or ending tics
-          foreignLanguagePhrase = cleanTics(foreignLanguagePhrase);
+          String foreignLanguagePhrase = cleanTics(getCell(next, colIndex).trim());
+          String translit = getCell(next, transliterationIndex);
 
           //logger.info("for row " + next.getRowNum() + " english = " + english + " in merged " + inMergedRow + " last row " + lastRowValues.size());
 
@@ -651,11 +649,9 @@ public class ExcelImport implements ExerciseDAO {
             logger.debug("got error reading delete strikeout at row " + next.getRowNum() + " for " +serverProps.getLanguage());
           }
           String english = getCell(next, colIndex++).trim();
-          String foreignLanguagePhrase = getCell(next, colIndex).trim();
-          String translit = getCell(next, transliterationIndex);
-
           // remove starting or ending tics
-          foreignLanguagePhrase = cleanTics(foreignLanguagePhrase);
+          String foreignLanguagePhrase = cleanTics(getCell(next, colIndex).trim());
+          String translit = getCell(next, transliterationIndex);
 
           //logger.info("for row " + next.getRowNum() + " english = " + english + " in merged " + inMergedRow + " last row " + lastRowValues.size());
 
