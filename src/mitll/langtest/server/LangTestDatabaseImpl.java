@@ -155,7 +155,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param incorrectFirstOrder
    * @param onlyWithAudioAnno
    * @return
-   * @see mitll.langtest.client.list.PagingExerciseList#loadExercises(String, String)
+   * @see mitll.langtest.client.list.PagingExerciseList#loadExercises
    */
   @Override
   public ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix,
@@ -194,7 +194,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, userID,  audioFileHelper.getCollator());
         } else {
           commonExercises = new ArrayList<CommonExercise>(exercises);
-          new ExerciseSorter(getTypeOrder()).getSortedByUnitThenAlpha(commonExercises, role.equals(Result.AUDIO_TYPE_RECORDER));
+          sortExercises(role, commonExercises);
         }
 
         return makeExerciseListWrapper(reqID, commonExercises, userID, role, onlyExamples, incorrectFirstOrder);
@@ -215,6 +215,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logAndNotifyServerException(e);
       return new ExerciseListWrapper();
     }
+  }
+
+  private void sortExercises(String role, List<CommonExercise> commonExercises) {
+     new ExerciseSorter(getTypeOrder()).getSortedByUnitThenAlpha(commonExercises, role.equals(Result.AUDIO_TYPE_RECORDER));
+    //new ExerciseSorter(getTypeOrder()).getSortedByUnitThenPhone(commonExercises, false, audioFileHelper.getPhoneToCount(), false);
   }
 
   private Collection<CommonExercise> getExercisesForSearch(String prefix, int userID, Collection<CommonExercise> exercises, boolean predefExercises) {
@@ -384,7 +389,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param onlyExamples
    * @param incorrectFirst
    * @return
-   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises(String, String)
+   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises
    * @see #getExerciseIds
    */
   private ExerciseListWrapper getExercisesForSelectionState(int reqID,
@@ -438,8 +443,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, audioFileHelper.getCollator());
     } else {
       copy = new ArrayList<CommonExercise>(exercisesForState);
-
-      new ExerciseSorter(getTypeOrder()).getSortedByUnitThenAlpha(copy, role.equals(Result.AUDIO_TYPE_RECORDER));
+      sortExercises(role, copy);
     }
 
     return makeExerciseListWrapper(reqID, copy, userID, role, onlyExamples, incorrectFirst);
@@ -661,7 +665,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       now = System.currentTimeMillis();
       if (now - then2 > 100) {
-        logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to ensure there are mp3s for exercise " + id);
+        if (warnMissingFile) {
+          logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis " +
+              "to ensure there are mp3s for exercise " + id);
+        }
       }
     }
     checkPerformance(id, then);
@@ -760,6 +767,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return exercises;
   }
 
+  private boolean warnMissingFile = true;
   /**
    *
    * @param wavFile
@@ -774,11 +782,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       AudioConversion audioConversion = new AudioConversion();
       if (!audioConversion.exists(wavFile, parent)) {
-        logger.warn("can't find " + wavFile + " under " + parent + " trying config... ");
+       if (warnMissingFile)  logger.warn("can't find " + wavFile + " under " + parent + " trying config... ");
         parent = configDir;
       }
       if (!audioConversion.exists(wavFile, parent)) {
-        logger.error("huh? can't find " + wavFile + " under " + parent);
+        if (warnMissingFile)   logger.error("huh? can't find " + wavFile + " under " + parent);
       }
       String s = audioConversion.ensureWriteMP3(wavFile, parent, false, title);
       return !(s.equals(AudioConversion.FILE_MISSING));
@@ -914,23 +922,24 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @param testAudioFile audio file to score
    * @param lmSentences   to look for in the audio
+   * @param firstPhoneLength
    * @return PretestScore for audio
-   * @see mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput
+   * @seez mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput
    * @see mitll.langtest.server.autocrt.AutoCRT#getFlashcardAnswer
    */
-  public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences) {
-    return audioFileHelper.getASRScoreForAudio(testAudioFile, lmSentences);
+  public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, int firstPhoneLength) {
+    return audioFileHelper.getASRScoreForAudio(testAudioFile, lmSentences, firstPhoneLength);
   }
 
   /**
    * @param phrases
    * @return
-   * @see mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput
+   * @seex mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput
    */
-  @Override
+/*  @Override
   public Collection<String> getValidPhrases(Collection<String> phrases) {
     return audioFileHelper.getValidPhrases(phrases);
-  }
+  }*/
 
   // Answers ---------------------
 
