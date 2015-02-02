@@ -107,8 +107,8 @@ public class UserPassLogin extends UserDialog {
    * @param eventRegistration
    * @see mitll.langtest.client.LangTest#showLogin
    */
-  public UserPassLogin(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager, EventRegistration eventRegistration) {
-    //this(service, props);
+  public UserPassLogin(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager,
+                       EventRegistration eventRegistration) {
     super(service,props);
     keyStorage = new KeyStorage(props.getLanguage(), 1000000);
 
