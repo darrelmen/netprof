@@ -18,8 +18,9 @@ public class SLFFile {
   public static final String UNKNOWN_MODEL = "UNKNOWNMODEL";
   private static final String ENCODING = "UTF8";
 
-  private static final String LINK_WEIGHT = "-1.00";
-  public static final float UNKNOWN_MODEL_BIAS_CONSTANT = 1.40f;
+ // private static final String LINK_WEIGHT = "-1.00";
+  public static final float EQUAL_LINK_CONSTANT = -1.00f;
+  public static final float UNKNOWN_MODEL_BIAS_CONSTANT = -1.20f;
 
   /**
    * Unknown Model Bias Weight balances the likelihood between matching one of the decode words or the unknown model.
@@ -35,6 +36,7 @@ public class SLFFile {
     String slfFile = tmpDir + File.separator + ASRScoring.SMALL_LM_SLF;
 
     String unknownModelBias = String.format("%.2f", unknownModelBiasWeight);
+    String linkWeight = String.format("%.2f", EQUAL_LINK_CONSTANT);
 
     try {
       BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(slfFile), ENCODING));
@@ -61,7 +63,7 @@ public class SLFFile {
           int next = newNodes++;
           linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=" + next +
             " l=" +
-            (token.equals(UNKNOWN_MODEL) ? unknownModelBias : LINK_WEIGHT) +
+            (token.equals(UNKNOWN_MODEL) ? unknownModelBias : linkWeight) +
             "\n");
           nodesBuf.append("I=" +
             next +
@@ -72,7 +74,7 @@ public class SLFFile {
           start = next;
         }
         linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=1" + " l=" +
-            LINK_WEIGHT +
+            linkWeight +
             "\n");
       }
       writer.write("N=" + newNodes + " L=" + linkCount + "\n");
