@@ -204,15 +204,16 @@ public class DownloadServlet extends DatabaseServlet {
     }
   }
 
+  /**
+   * @see #doGet
+   * @param response
+   */
   private void writeAllAudio(HttpServletResponse response) {
-    DatabaseImpl db = getDatabase();
-
     try {
-      db.writeZip(response.getOutputStream());
+      getDatabase().writeZip(response.getOutputStream());
     } catch (Exception e) {
       logger.error("Got " + e, e);
     }
-
   }
 
   private void writeUserList(HttpServletResponse response, DatabaseImpl db, String listid) {
