@@ -65,8 +65,14 @@ public class AudioFileHelper implements CollationSort {
   public <T extends CommonExercise> void sort(List<T> toSort) {
     asrScoring.sort(toSort);
   }
+
+  /**
+   * @see mitll.langtest.server.scoring.ASRScoring#getCollator
+   * @return
+   */
   @Override
   public Collator getCollator() {
+    makeASRScoring();
     return asrScoring.getCollator();
   }
   /**
