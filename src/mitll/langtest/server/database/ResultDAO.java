@@ -251,13 +251,15 @@ public class ResultDAO extends DAO {
    * @param idToKey
    * @return
    */
-  public List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(long userid, List<String> allIds, Map<String, CollationKey> idToKey) {
+  public List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(long userid, List<String> allIds,
+                                                                   Map<String, CollationKey> idToKey) {
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
    // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
     return getSortedAVPHistory(results, allIds, idToKey);
   }
 
-  public List<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(long userid, List<String> allIds, Map<String,CommonExercise> idToEx,
+  public List<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(long userid, List<String> allIds,
+                                                                           Map<String,CommonExercise> idToEx,
                                                                            ExerciseSorter sorter) {
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
     // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
@@ -291,36 +293,30 @@ public class ResultDAO extends DAO {
       public int compare(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2) {
         CollationKey fl = idToKey.get(o1.getId());
         CollationKey otherFL = idToKey.get(o2.getId());
-        return compareTo(o1,o2,fl,otherFL);
+        return compareTo(o1, o2, fl, otherFL);
       }
     });
     return sortedResults;
   }
 
-  private int compareTo(ExerciseCorrectAndScore o1,ExerciseCorrectAndScore o2, CollationKey fl, CollationKey otherFL) {
+  private int compareTo(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2, CollationKey fl, CollationKey otherFL) {
     if (o1.isEmpty() && o2.isEmpty()) {
       return fl.compareTo(otherFL);
     } else if (o1.isEmpty()) return -1;
     else if (o2.isEmpty()) return +1;
     else { // neither is empty
-      return compScores(o1,o2);
+      return compScores(o1, o2);
     }
   }
 
-  private int compScores(ExerciseCorrectAndScore o1,ExerciseCorrectAndScore o2) {
-    int myI = o1.getDiff();
-    int oI = o2.getDiff();
-    int i = myI < oI ? -1 : myI > oI ? +1 : 0;
-    if (i == 0) {
-      float myScore = o1.getAvgScore();
-      float otherScore = o2.getAvgScore();
-
-      return myScore < otherScore ? -1 : myScore > otherScore ? +1 : o1.getId().compareTo(o2.getId());
-    } else {
-      return i;
-    }
-  }
-
+  /**
+   * @see #getExerciseCorrectAndScoresByPhones
+   * @param results
+   * @param allIds
+   * @param idToEx
+   * @param sorter
+   * @return
+   */
   private List<ExerciseCorrectAndScore> getSortedAVPHistoryByPhones(List<CorrectAndScore> results, Collection<String> allIds,
                                                                     final Map<String, CommonExercise> idToEx,
                                                                     final ExerciseSorter sorter
@@ -331,12 +327,65 @@ public class ResultDAO extends DAO {
       public int compare(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2) {
         CommonExercise o1Ex = idToEx.get(o1.getId());
         CommonExercise o2Ex = idToEx.get(o2.getId());
-        //  if (fl == null) fl = "";
-        //  if (otherFL == null) otherFL = "";
-        return sorter.phoneCompByFirst(o1Ex, o2Ex);
+        return compareUsingPhones(o1, o2, o1Ex, o2Ex, sorter);
       }
     });
     return sortedResults;
+  }
+
+  private int compareUsingPhones(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2,
+                                 CommonExercise o1Ex, CommonExercise o2Ex, final ExerciseSorter sorter) {
+    if (o1.isEmpty() && o2.isEmpty()) {
+      return sorter.phoneCompByFirst(o1Ex, o2Ex);
+    } else if (o1.isEmpty()) return -1;
+    else if (o2.isEmpty()) return +1;
+    else { // neither is empty
+      return compScoresPhones(o1, o2, o1Ex, o2Ex, sorter);
+    }
+  }
+
+  /**
+   * @see #compareTo
+   * @param o1
+   * @param o2
+   * @return
+   */
+  private int compScores(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2) {
+    int myI = o1.getDiff();
+    int oI = o2.getDiff();
+    int i = myI < oI ? -1 : myI > oI ? +1 : 0;
+    if (i == 0) {
+      float myScore = o1.getAvgScore();
+      float otherScore = o2.getAvgScore();
+      int comp = new Float(myScore).compareTo(otherScore);
+      return comp == 0 ? o1.getId().compareTo(o2.getId()) : comp;
+    } else {
+      return i;
+    }
+  }
+
+  /**
+   * @see #compareUsingPhones
+   * @param o1
+   * @param o2
+   * @param o1Ex
+   * @param o2Ex
+   * @param sorter
+   * @return
+   */
+  private int compScoresPhones(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2,
+                               CommonExercise o1Ex, CommonExercise o2Ex, final ExerciseSorter sorter) {
+    int myI = o1.getDiff();
+    int oI = o2.getDiff();
+    int i = myI < oI ? -1 : myI > oI ? +1 : 0;
+    if (i == 0) {
+      float myScore = o1.getAvgScore();
+      float otherScore = o2.getAvgScore();
+      int comp = new Float(myScore).compareTo(otherScore);
+      return (comp == 0) ? sorter.phoneCompByFirst(o1Ex, o2Ex) : comp;
+    } else {
+      return i;
+    }
   }
 
   private List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(List<CorrectAndScore> results, Collection<String> allIds) {
@@ -1148,12 +1197,11 @@ public class ResultDAO extends DAO {
    * @param out
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public void writeExcelToStream(List<MonitorResult> results, List<String> typeOrder, OutputStream out) {
-    SXSSFWorkbook wb = writeExcel(results, typeOrder);
-    writeToStream(out, wb);
+  public void writeExcelToStream(Collection<MonitorResult> results, List<String> typeOrder, OutputStream out) {
+    writeToStream(out, writeExcel(results, typeOrder));
   }
 
-  private SXSSFWorkbook writeExcel(List<MonitorResult> results,  List<String> typeOrder
+  private SXSSFWorkbook writeExcel(Collection<MonitorResult> results,  List<String> typeOrder
   ) {
     long now;
     long then = System.currentTimeMillis();
@@ -1172,9 +1220,7 @@ public class ResultDAO extends DAO {
         USERID, "Exercise", "Text"));
 
 
-    for (final String type : typeOrder) {
-      columns.add(type);
-    }
+    for (final String type : typeOrder) {  columns.add(type);  }
 
     List<String> columns2 = Arrays.asList(
         "Recording",
