@@ -527,8 +527,8 @@ public class AudioExport {
   private void copyAudioSimple(ZipOutputStream zOut,
                                String realContextPath,
                                AudioConversion audioConversion, String audioRef, String title) throws IOException {
-    String s = audioConversion.ensureWriteMP3(audioRef, realContextPath, false, title);
-    File mp3 = new File(s);
+    String filePath = audioConversion.ensureWriteMP3(audioRef, realContextPath, false, title);
+    File mp3 = new File(filePath);
     if (mp3.exists()) {
       String name = audioRef.replaceAll(".wav", ".mp3");
       //logger.debug("copyAudioSimple : mp3 name is " + name);
