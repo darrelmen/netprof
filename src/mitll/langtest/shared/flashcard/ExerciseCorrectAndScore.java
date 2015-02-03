@@ -14,10 +14,11 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
   private List<CorrectAndScore> correctAndScores = new ArrayList<CorrectAndScore>();
   private String id;
 
+  // required for rpc
   public ExerciseCorrectAndScore() {}
 
   /**
-   * @see mitll.langtest.server.database.ResultDAO#getSortedAVPHistory(java.util.List, java.util.Collection)
+   * @see mitll.langtest.server.database.ResultDAO#getSortedAVPHistory
    * @param id
    */
   public ExerciseCorrectAndScore(String id) {
@@ -87,6 +88,10 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
   }
 
 
+  /**
+   * Difference in terms of # of correct over incorrect
+   * @return
+   */
   public int getDiff() {
     int c = 0;
     List<CorrectAndScore> toUse = getCorrectAndScoresLimited();
@@ -96,17 +101,6 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
     }
     return c;
   }
-
-/*  private float getAvgCorrect() {
-    if (isEmpty()) return 0f;
-    float c = 0;
-    List<CorrectAndScore> toUse = getCorrectAndScores();
-    if (toUse.size() > MAX_TO_USE) toUse = toUse.subList(toUse.size() - MAX_TO_USE, toUse.size());
-    for (CorrectAndScore correctAndScore : toUse) {
-      if (correctAndScore.isCorrect()) c++;
-    }
-    return c / (float) toUse.size();
-  }*/
 
   public float getAvgScore() {
     if (isEmpty()) return 0f;
