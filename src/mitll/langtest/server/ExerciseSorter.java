@@ -80,7 +80,7 @@ public class ExerciseSorter {
     }
   }
 
-  public void getSortedByUnitThenPhone(List<? extends CommonExercise> toSort, final boolean recordedLast,
+/*  public void getSortedByUnitThenPhone(List<? extends CommonExercise> toSort, final boolean recordedLast,
                                        final Map<String, Integer> phoneToCount, final boolean checkUnitAndChapter) {
     if (typeOrder.isEmpty()) {
       sortByTooltip(toSort);
@@ -123,7 +123,7 @@ public class ExerciseSorter {
         sortByTooltip(toSort);
       }
     }
-  }
+  }*/
 
   public void sortedByPronLengthThenPhone(List<? extends CommonExercise> toSort,final Map<String, Integer> phoneToCount) {
     Collections.sort(toSort, new Comparator<CommonExercise>() {
@@ -142,13 +142,23 @@ public class ExerciseSorter {
      * @return
      * @see mitll.langtest.server.database.ResultDAO#getSortedAVPHistoryByPhones
      */
-  public int phoneCompByFirst(CommonExercise o1, CommonExercise o2) {
-    return phoneCompFirst(o1, o2, phoneToCount);
-  }
+  public int phoneCompByFirst(CommonExercise o1, CommonExercise o2) { return phoneCompFirst(o1, o2, phoneToCount);  }
 
+  /**
+   * Compare and put shorter pronunciations before longer ones.
+   * When they are the same length, compare phones, and when you get to a difference, use their relative occurrence
+   * frequency, with rarer phones first.
+   * If the phones have the same frequency, compare the phone names (ideally this is unlikely).
+   * @param o1
+   * @param o2
+   * @param phoneToCount
+   * @return
+   */
   private int phoneCompFirst(CommonExercise o1, CommonExercise o2, final Map<String, Integer> phoneToCount) {
     List<String> pron1 = o1.getFirstPron();
     List<String> pron2 = o2.getFirstPron();
+
+    // these cases should never happen - really defensive
     if (pron1 == null && pron2 != null) {
       logger.warn("missing pron?");
       return +1;
@@ -166,10 +176,10 @@ public class ExerciseSorter {
     int o1Num = pron1.size();
     int o2Num = pron2.size();
 
-    if (o1Num < o2Num) return -1;
-    else if (o1Num > o2Num) return +1;
-    else {
-
+    int comp = new Integer(o1Num).compareTo(o2Num);
+    if (comp != 0) {
+      return comp;
+    } else {
       int n = Math.min(o1Num, o2Num);
       for (int i = 0; i < n; i++) {
         String a = pron1.get(i);
@@ -178,19 +188,14 @@ public class ExerciseSorter {
           Integer a1 = phoneToCount.get(a);
           Integer b1 = phoneToCount.get(b);
           int compt = a1.compareTo(b1);
-          if (compt != 0) return compt;
-          else return a.compareTo(b);
+          return compt == 0 ? a.compareTo(b) :compt;
         }
       }
       return 0;
     }
-//    if (o1Num < o2Num) return -1;
-//    else if (o1Num > o2Num) return +1;
-//    else {
-//      return o1.getForeignLanguage().toLowerCase().compareTo(o2.getForeignLanguage().toLowerCase());
-//    }
   }
 
+/*
   private int phoneComp(CommonExercise o1, CommonExercise o2, final Map<String, Integer> phoneToCount) {
     Set<String> bagOfPhones1 = o1.getBagOfPhones();
     int o1Num = bagOfPhones1.size();
@@ -227,7 +232,7 @@ public class ExerciseSorter {
 
       return o1.getForeignLanguage().toLowerCase().compareTo(o2.getForeignLanguage().toLowerCase());
     }
-  }
+  }*/
 
   private int getTypeOrder(CommonExercise o1, CommonExercise o2, int i) {
     for (String type : typeOrder) {
