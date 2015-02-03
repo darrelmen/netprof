@@ -479,26 +479,25 @@ public class DatabaseImpl implements Database {
     for (CommonExercise exercise : exercisesForState) {
       String id = exercise.getID();
       allIDs.add(id);
-//      idToFL.put(id, exercise.getForeignLanguage());
       CollationKey collationKey = collator.getCollationKey(exercise.getForeignLanguage());
       idToKey.put(id, collationKey);
     }
 
-/*
     Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
     for (CommonExercise exercise : exercisesForState) {
       String id = exercise.getID();
       allIDs.add(id);
       idToEx.put(id, exercise);
     }
-*/
 
-//    for (ExerciseCorrectAndScore ex : resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, sorter)) {
+    //List<ExerciseCorrectAndScore> exerciseCorrectAndScores = resultDAO.getExerciseCorrectAndScores(userid, allIDs, idToKey);
+    List<ExerciseCorrectAndScore> exerciseCorrectAndScores =
+        resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, sorter);
 
     JSONObject container = new JSONObject();
     JSONArray scores = new JSONArray();
     int correct = 0, incorrect = 0;
-    for (ExerciseCorrectAndScore ex : resultDAO.getExerciseCorrectAndScores(userid, allIDs, idToKey)) {
+    for (ExerciseCorrectAndScore ex : exerciseCorrectAndScores) {
       //logger.debug("for " + ex);
       JSONObject exAndScores = new JSONObject();
       exAndScores.put("ex", ex.getId());
@@ -1164,12 +1163,12 @@ public class DatabaseImpl implements Database {
         getSectionHelper().getExercisesForSelectionState(typeToSection);
     String language1 = getServerProps().getLanguage();
 
-    new AudioExport().writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, language1, getAudioDAO(), installPath, configDir);
+    new AudioExport().writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, language1,
+        getAudioDAO(), installPath, configDir);
   }
 
   public void writeZip(OutputStream out) throws Exception {
-    Collection<CommonExercise> exercisesForSelectionState = getExercises();
-    new AudioExport().writeZipJustOneAudio(out, getSectionHelper(), exercisesForSelectionState, installPath);
+    new AudioExport().writeZipJustOneAudio(out, getSectionHelper(), getExercises(), installPath);
   }
 
   /**
