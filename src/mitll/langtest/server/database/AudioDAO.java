@@ -234,29 +234,38 @@ public class AudioDAO extends DAO {
     return new ArrayList<AudioAttribute>();
   }
 
+  /**
+   * Get back the ids of exercises recorded by people who are the same gender as the userid.
+   *
+   * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded
+   * @param userid only used to determine the gender we should show
+   * @return ids with both regular and slow speed recordings
+   */
   public Set<String> getRecordedBy(long userid) {
     User user = userDAO.getUserMap().get(userid);
     boolean isMale = (user != null && user.isMale());
     Map<Long, User> userMap = userDAO.getUserMap(isMale);
     //logger.debug("found " + (isMale ? " male " : " female ") + " users : " + userMap.keySet());
     // find set of users of same gender
-    Set<String> validAudioAtReg = getAudioForGender(userMap, REGULAR);
-
+    Set<String> validAudioAtReg  = getAudioForGender(userMap, REGULAR);
     Set<String> validAudioAtSlow = getAudioForGender(userMap, SLOW);
-      /*boolean b =*/
     validAudioAtReg.retainAll(validAudioAtSlow);
     return validAudioAtReg;
   }
 
+  /**
+   * select count(distinct exid) from audio where audiotype='regular';
+
+   * @see #getRecordedBy
+   * @param userMap
+   * @param audioSpeed
+   * @return
+   */
   private Set<String> getAudioForGender(Map<Long, User> userMap, String audioSpeed) {
     Set<String> results = new HashSet<String>();
     try {
       Connection connection = database.getConnection(this.getClass().toString());
-      StringBuffer buffer = new StringBuffer();
-      for (long id : userMap.keySet()) {
-        buffer.append(id).append(",");
-      }
-      String s = buffer.toString();
+      String s = getInClause(userMap);
       if (!s.isEmpty()) s = s.substring(0, s.length() - 1);
       String sql = "SELECT * FROM " + AUDIO + " WHERE " +
           (s.isEmpty() ? "" : USERID + " IN (" + s + ") AND ") +
@@ -276,6 +285,104 @@ public class AudioDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return results;
+  }
+
+  /**
+   *
+   * @param userMap
+   * @param audioSpeed
+   * @return
+   */
+  private int getCountForGender(Map<Long, User> userMap, String audioSpeed) {
+    Set<Long> longs = userMap.keySet();
+
+    return getCountForGender(longs, audioSpeed);
+  }
+
+  /**
+   * select count(*) from (select count(*) from (select DISTINCT exid, audiotype from audio where length(exid) > 0 and audiotype='regular' OR audiotype='slow' and defect<>true) where length(exid) > 0 group by exid)
+
+   * @param userIds
+   * @param audioSpeed
+   * @return
+   */
+
+  public int getCountForGender(Set<Long> userIds, String audioSpeed) {
+    int count = -1;
+    //  Set<String> results = new HashSet<String>();
+    try {
+      Connection connection = database.getConnection(this.getClass().toString());
+      String s = getInClause(userIds);
+      if (!s.isEmpty()) s = s.substring(0, s.length() - 1);
+      String sql = "select count(distinct " +
+          Database.EXID +
+          ") from " +
+          AUDIO +
+          " WHERE " +
+          (s.isEmpty() ? "" : USERID + " IN (" + s + ") AND ") +
+          DEFECT + "<>true " +
+          " AND " + AUDIO_TYPE + "='" +
+          audioSpeed +
+          "' ";
+      PreparedStatement statement = connection.prepareStatement(sql);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        //String exid = rs.getString(Database.EXID);
+        count = rs.getInt(1);
+        break;
+      //  results.add(exid);
+      }
+      finish(connection, statement, rs);
+      logger.debug("for " +audioSpeed + " " + sql + " got " + count);
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    return count;
+  }
+
+  public int getCountBothSpeeds(Set<Long> userIds) {
+    int count = -1;
+    try {
+      Connection connection = database.getConnection(this.getClass().toString());
+      String s = getInClause(userIds);
+      if (!s.isEmpty()) s = s.substring(0, s.length() - 1);
+      String sql =
+          "select count(count1) from " +
+          " (select count(*) as count1 from " +
+          " (select DISTINCT exid, audiotype from " +
+          AUDIO +
+          " where length(exid) > 0 and audiotype='regular' OR audiotype='slow' and defect<>true " +
+          (s.isEmpty() ? "" : "AND " +USERID + " IN (" + s + ") ") +
+          ") where length(exid) > 0 group by exid) where count1 = 2";
+//        ;
+      PreparedStatement statement = connection.prepareStatement(sql);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        //String exid = rs.getString(Database.EXID);
+        count = rs.getInt(1);
+        break;
+        //  results.add(exid);
+      }
+      finish(connection, statement, rs);
+
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    logger.debug("both speeds " +count);
+    return count;
+  }
+
+  private String getInClause(Map<Long, User> userMap) {
+    Set<Long> longs = userMap.keySet();
+    return getInClause(longs);
+  }
+
+  private String getInClause(Set<Long> longs) {
+    StringBuffer buffer = new StringBuffer();
+    for (long id : longs) {
+      buffer.append(id).append(",");
+    }
+    return buffer.toString();
   }
 
 
@@ -403,8 +510,7 @@ public class AudioDAO extends DAO {
     ResultSet rs = statement.executeQuery();
     Set<String> results = new HashSet<String>();
     while (rs.next()) {
-      String exid = rs.getString(Database.EXID);
-      results.add(exid);
+      results.add(rs.getString(Database.EXID));
     }
     finish(connection, statement, rs);
 
@@ -650,7 +756,7 @@ public class AudioDAO extends DAO {
 
       AudioAttribute audioAttr = null;
       if (i == 0) {
-        logger.debug("\taddOrUpdate adding entry for  " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
+        logger.debug("\taddOrUpdate *adding* entry for  " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
 
         long l = addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
         audioAttr = getAudioAttribute((int) l, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
@@ -808,6 +914,7 @@ public class AudioDAO extends DAO {
     }
 
     logger.debug("addAudio : by " + userid + " for ex " + exerciseID + " type " + audioType + " ref " + audioRef);
+    int before = getCount(AUDIO);
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " + AUDIO +
         "(" +
@@ -832,15 +939,21 @@ public class AudioDAO extends DAO {
 
     statement.executeUpdate();
 
-
     long newID = getGeneratedKey(statement);
     if (newID == -1) {
       logger.error("addAudio : huh? no key was generated?");
+    }
+    else {
+      logger.debug("key was " + newID);
     }
 
     statement.close();
     connection.commit();
 
+    int after = getCount(AUDIO);
+    if (before == after) {
+      logger.error("huh? after adding " +after + " but before " +before);
+    }
     return newID;
   }
 
