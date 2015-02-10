@@ -418,7 +418,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       flashcard.setCogVisible(false);
       return true;
     }
-    logger.info("user is valid...");
+ //   logger.info("user is valid...");
 
     flashcard.setCogVisible(true);
     return false;
