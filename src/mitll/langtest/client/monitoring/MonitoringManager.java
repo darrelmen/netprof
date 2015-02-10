@@ -18,6 +18,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.monitoring.Session;
+import org.apache.log4j.Logger;
 
 import java.util.*;
 
@@ -30,6 +31,9 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class MonitoringManager {
+
+//  private static final Logger logger = Logger.getLogger(MonitoringManager.class);
+
   private static final int MIN = (60 * 1000);
   private static final int HOUR = (60 * MIN);
   private static final int MIN_COUNT_FOR_BROWSER = 10;
@@ -627,6 +631,8 @@ public class MonitoringManager {
 
   private List<String> getSortedKeys(Map<String, Integer> overall) {
     List<String> keys = new ArrayList<String>(overall.keySet());
+    List<String> strings = keys.subList(0, Math.min(200, keys.size()));
+    System.out.println("keys " +strings);
     sortKeysIntelligently(keys);
     return keys;
   }
@@ -757,19 +763,20 @@ public class MonitoringManager {
         vp.add(flex);
 
         float total = result.get("total");
-        Float male = result.get("male");
+     //   Float male = result.get("male");
 
-//        System.out.println("report " + result);
+      //  logger.debug("ref audio coverage " + result);
+        System.out.println("ref audio coverage " + result);
 
         int r = 0;
 
         flex.setHTML(r, 0, "<b>Reference Audio Type</b>");
-        flex.setHTML(r, 1, "<b>Male/Female Fast/Slow</b>");
-        flex.setHTML(r++, 2,"<b>%</b>");
+        flex.setHTML(r, 1, "<b>Male/Female</b>");
+        flex.setHTML(r++, 2,"<b>% (of " + ((int)total)+ ")</b>");
 
         flex.setHTML(r, 0, "Male " + answer);
         flex.setHTML(r, 1, result.get("male").intValue() + "");
-        flex.setHTML(r++, 2, getPercent(male, total) + "%");
+        flex.setHTML(r++, 2, getPercent(result.get("male"), total) + "%");
 
         flex.setHTML(r, 0, "Male regular speed " + answer);
         flex.setHTML(r, 1, ""+result.get("maleFast").intValue());
@@ -791,6 +798,13 @@ public class MonitoringManager {
         flex.setHTML(r, 1, ""+result.get("femaleSlow").intValue());
         flex.setHTML(r++, 2, getPercent(result.get("femaleSlow"), total) + "%");
 
+        flex.setHTML(r, 0, "Context Male " + answer);
+        flex.setHTML(r, 1, result.get("maleContext").intValue() + "");
+        flex.setHTML(r++, 2, getPercent(result.get("maleContext"), total) + "%");
+
+        flex.setHTML(r, 0, "Context Female " + answer);
+        flex.setHTML(r, 1, result.get("femaleContext").intValue() + "");
+        flex.setHTML(r++, 2, getPercent(result.get("femaleContext"), total) + "%");
         // do the next one...
         if (it != null) it.go();
       }
@@ -891,29 +905,42 @@ public class MonitoringManager {
         String r2 = split2[0];
         String q2 = split2[1];
 
-        int comp;
-        if (firstInt) {
-          comp = safeCompare(r1, r2);
-        } else comp = o1.compareTo(o2);
+        String suffix = "";
+        if (r1.contains("-")) {
+          String[] split1 = r1.split("-");
+          String s = split1[0];
+          suffix = split1[1];
 
-        if (comp != 0) return comp;
-        else {
-          return safeCompare(q1, q2);
+          r1 = s;
         }
+
+        String suffix2 = "";
+        if (r2.contains("-")) {
+          String[] split1 = r2.split("-");
+          String s = split1[0];
+          suffix2 = split1[1];
+          r2 = s;
+        }
+        int c1 = safeCompare(r1, r2);
+        if (c1 != 0) return c1;
+        else if ((!suffix.isEmpty() || !suffix2.isEmpty())) {
+          int i = safeCompare(suffix, suffix2);
+          return i == 0 ? safeCompare(q1, q2) : i;
+        }
+        //     int comp = safeCompare(r1, r2);
+        return c1 == 0 ? safeCompare(q1, q2) : c1;
       }
     });
   }
 
   private int safeCompare(String r1, String r2) {
-    int comp;
     try {
-      int i = Integer.parseInt(r1);
-      int j = Integer.parseInt(r2);
-      comp = i < j ? -1 : i > j ? +1 : 0;
+      int i1 = Integer.parseInt(r1);
+      int anotherInteger = Integer.parseInt(r2);
+      return new Integer(i1).compareTo(anotherInteger);
     } catch (NumberFormatException e) {
-      comp = r1.compareTo(r2);
+      return r1.compareTo(r2);
     }
-    return comp;
   }
 
   private void doResultByDayQuery(final Panel vp) {
