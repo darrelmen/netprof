@@ -22,6 +22,7 @@ public class AudioAttribute implements IsSerializable {
   public static final String SLOW = "slow";
   public static final String REGULAR = "regular";
   public static final String REGULAR_AND_SLOW = "regular and slow";
+  public static final String CONTEXT = "context";
 
   private MiniUser user;
 
@@ -140,9 +141,11 @@ public class AudioAttribute implements IsSerializable {
     return attributes.containsKey(name) && attributes.get(name).equals(value);
   }
 
-  public boolean isExampleSentence() {
-    return attributes.containsKey("context");
-  }
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded
+   * @return
+   */
+  public boolean isExampleSentence() { return attributes.containsKey(CONTEXT);  }
 
   public void addAttribute(String name, String value) {
     if (attributes.containsKey(name)) {
