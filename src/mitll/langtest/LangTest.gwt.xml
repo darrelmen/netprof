@@ -21,8 +21,6 @@
     <set-property name="gwt.logging.systemHandler" value="ENABLED" />
     <set-property name="gwt.logging.consoleHandler" value="ENABLED" />
     <set-property name="gwt.logging.developmentModeHandler" value="ENABLED" />
-    <set-property name="gwt.logging.popupHandler" value="DISABLED" />
-    <set-property name="gwt.logging.firebugHandler" value="DISABLED" />
     <set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED" />
 
 <!--
@@ -49,12 +47,6 @@
   <public path='public'/>
 
   <!-- These 3 scripts are necessary so that Flash Recording can work -->
-  <script src="js/jquery-1.10.2.min.js"/>
-  <script src="js/swfobject.js"/>
-  <script src="js/recorder.js"/>
 
-  <script src="js/gauge.js"/>
-
-  <script src="js/highcharts.js"/>
 
 </module>
