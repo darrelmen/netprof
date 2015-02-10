@@ -1,7 +1,6 @@
 package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -30,8 +29,6 @@ import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.exercise.PagingContainer;
-import mitll.langtest.client.exercise.WaveformExercisePanel;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -93,7 +90,6 @@ public class Navigation implements RequiresResize {
   private static final String RECORD_EXAMPLE = "Record In-context Audio";
   private static final String CONTENT1 = "content";
   public static final String CLASSROOM = "classroom";
-  private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
   public static final String MARK_DEFECTS1 = "markDefects";
 
   private final ExerciseController controller;
@@ -150,8 +146,6 @@ public class Navigation implements RequiresResize {
     dialogWindow = new DialogWindow(service, controller);
 
     defectHelper = new ChapterNPFHelper(service, feedback, userManager, controller, true);
-    recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller, true);
-    recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false);
 
     markDefectsHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller,
         learnHelper.getExerciseList()
@@ -169,11 +163,15 @@ public class Navigation implements RequiresResize {
 
     practiceHelper = makePracticeHelper(service, userManager, controller, feedback);
     ListInterface exerciseList = npfHelper.getExerciseList();
-    //logger.info("Navigation : exercise list is " + exerciseList);
+    logger.info("Navigation : exercise list is " + exerciseList);
     reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, exerciseList, npfHelper);
    // logger.info("Navigation : made review item helper " + reviewItem);
 
     editItem = new EditItem(service, userManager, controller, exerciseList, feedback, npfHelper);
+
+    recorderHelper = new RecorderNPFHelper(this, service, feedback, userManager, controller, true, exerciseList);
+    recordExampleHelper = new RecorderNPFHelper(this, service, feedback, userManager, controller, false, exerciseList);
+
   }
 
   /**
@@ -1247,69 +1245,4 @@ public class Navigation implements RequiresResize {
     return ul.getCreator().getId() == userManager.getUser();
   }
 
-  private class RecorderNPFHelper extends SimpleChapterNPFHelper {
-    final boolean doNormalRecording;
-
-    public RecorderNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
-                             ExerciseController controller, boolean doNormalRecording) {
-      super(service, feedback, userManager, controller, learnHelper.getExerciseList());
-      this.doNormalRecording = doNormalRecording;
-    }
-
-    @Override
-    protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
-      return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
-        @Override
-        public Panel getExercisePanel(final CommonExercise e) {
-          //logger.info("getting exercise for " + e.getID() + " normal rec " +doNormalRecording);
-          return new WaveformExercisePanel(e, service, controller, exerciseList, doNormalRecording) {
-            @Override
-            public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
-              super.postAnswers(controller, completedExercise);
-              tellOtherListExerciseDirty(e);
-            }
-          };
-        }
-      };
-    }
-
-    @Override
-    protected NPFHelper.FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                                                       UserManager userManager, ExerciseController controller,
-                                                       SimpleChapterNPFHelper outer) {
-      return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
-        @Override
-        protected FlexSectionExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
-                                                           boolean incorrectFirst) {
-          return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst) {
-            @Override
-            protected void addTableWithPager(PagingContainer pagingContainer) {
-              // row 1
-              Panel column = new FlowPanel();
-              add(column);
-              addTypeAhead(column);
-
-              // row 2
-              final CheckBox w = new CheckBox(SHOW_ONLY_UNRECORDED);
-              w.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                  setUnrecorded(w.getValue());
-                  scheduleWaitTimer();
-                  loadExercises(getHistoryToken(""), getTypeAheadText(),false);
-                }
-              });
-              w.addStyleName("leftFiveMargin");
-              add(w);
-
-              // row 3
-              add(pagingContainer.getTableWithPager());
-              setOnlyExamples(!doNormalRecording);
-            }
-          };
-
-        }
-      };
-    }
-  }
 }
