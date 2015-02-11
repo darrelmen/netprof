@@ -341,7 +341,8 @@ public class HistoryExerciseList extends PagingExerciseList {
    * @see PagingExerciseList#loadExercises(String, String, boolean)
    * @see mitll.langtest.client.custom.content.NPFHelper.FlexListLayout.MyFlexSectionExerciseList#loadExercises(java.util.Map, String)
    */
-  protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno) {
+  protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix,
+                                          boolean onlyWithAudioAnno) {
     lastReqID++;
     if (DEBUG) {
       System.out.println("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
