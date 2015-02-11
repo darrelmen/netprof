@@ -611,7 +611,6 @@ public class BasicDialog {
     public final ControlGroup group;
     public Widget rightSide;
     DecoratedFields decoratedFields;
-   // String errMsg;
 
     public FormField(final TextBoxBase box, final ControlGroup group, final int minLength) {
       this.box = box;
@@ -627,18 +626,6 @@ public class BasicDialog {
 
       this.group = group;
     }
-
-/*    public FormField(final TextBoxBase box, final ControlGroup group, final int minLength, DecoratedFields decoratedFields) {
-      this(box, group, minLength);
-      this.decoratedFields = decoratedFields;
-      //  this.errMsg = errMsg;
-    }*/
-
-/*
-    public void markError(String errMsg) {
-      decoratedFields.setError(errMsg);
-    }
-*/
 
     public void setVisible(boolean visible) {
       group.setVisible(visible);
