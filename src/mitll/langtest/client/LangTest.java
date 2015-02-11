@@ -785,7 +785,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void gotUser(User user) {
     reallySetFactory();
     long userID= -1;
-    if (user != null) userID = user.getId();
+    if (user != null) {
+      userID = user.getId();
+    }
 
     logger.info("gotUser : userID " + userID);
 
