@@ -161,7 +161,7 @@ public class DAO {
     database.closeConnection(connection);
   }
 
-  protected void finish(Connection connection, PreparedStatement statement, ResultSet rs) throws SQLException {
+  protected void finish(Connection connection, Statement statement, ResultSet rs) throws SQLException {
     rs.close();
     statement.close();
     database.closeConnection(connection);
