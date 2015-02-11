@@ -38,6 +38,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 8/11/14.
  */
 public class UserPassLogin extends UserDialog {
+  public static final boolean CHECK_AGE = false;
   private final Logger logger = Logger.getLogger("UserPassLogin");
 
   private static final String MALE = "male";
@@ -692,6 +693,7 @@ public class UserPassLogin extends UserDialog {
       }
     });
 
+    if (!CHECK_AGE) registrationInfo.hideAge();
     registrationInfo.getDialectGroup().box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
@@ -750,7 +752,7 @@ public class UserPassLogin extends UserDialog {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't check role");
         } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && !registrationInfo.checkValidGender()) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't check gender");
-        } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && !isValidAge(registrationInfo.getAgeEntryGroup())) {
+        } else if (CHECK_AGE && selectedRole == User.Kind.CONTENT_DEVELOPER && !isValidAge(registrationInfo.getAgeEntryGroup())) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in age ");
           markErrorBlur(registrationInfo.getAgeEntryGroup().box, AGE_ERR_MSG,Placement.TOP);
 
@@ -788,7 +790,7 @@ public class UserPassLogin extends UserDialog {
     boolean isCD = kind == User.Kind.CONTENT_DEVELOPER;
     String gender = isCD ? registrationInfo.isMale() ? MALE :"female" : MALE;
     String age = isCD ? registrationInfo.getAgeEntryGroup().getText() : "";
-    int age1 = isCD ? Integer.parseInt(age) : 0;
+    int age1 = isCD ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
     String dialect = isCD ? registrationInfo.getDialectGroup().getText() : "unk";
 
     signUp.setEnabled(false);
