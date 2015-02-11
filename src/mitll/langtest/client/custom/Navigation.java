@@ -169,8 +169,8 @@ public class Navigation implements RequiresResize {
 
     editItem = new EditItem(service, userManager, controller, exerciseList, feedback, npfHelper);
 
-    recorderHelper = new RecorderNPFHelper(this, service, feedback, userManager, controller, true, exerciseList);
-    recordExampleHelper = new RecorderNPFHelper(this, service, feedback, userManager, controller, false, exerciseList);
+    recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller, true, exerciseList);
+    recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false, exerciseList);
 
   }
 
