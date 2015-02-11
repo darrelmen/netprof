@@ -18,13 +18,13 @@ import java.util.*;
 public class LTSFactory implements CollationSort {
   private static final Logger logger = Logger.getLogger(LTSFactory.class);
 
-  private Language thisLanguage;
-  // known languages
+  private final Language thisLanguage;
 
+  // known languages
   public enum Language {
-    ARABIC, DARI, EGYPTIAN, ENGLISH, FARSI, JAPANESE, LEVANTINE, KOREAN, MANDARIN, MSA, PASHTO, RUSSIAN, SPANISH, SUDANESE, URDU
+    ARABIC, DARI, EGYPTIAN, ENGLISH, FARSI, JAPANESE, LEVANTINE, KOREAN, MANDARIN, MSA, PASHTO, RUSSIAN, SPANISH, SUDANESE,TAGALOG, URDU
   }
-  // TODO : what about Japanese, Korean, ...?
+  // TODO : what about Japanese, Korean, ... for LTS?
 
   private final Map<String, LTS> languageToLTS = new HashMap<String, LTS>();
   private final LTS unknown = new EmptyLTS();
@@ -33,7 +33,7 @@ public class LTSFactory implements CollationSort {
    * @param thisLanguage
    * @see ASRScoring#ASRScoring
    */
-  public LTSFactory(Language thisLanguage) {
+  private LTSFactory(Language thisLanguage) {
     this.thisLanguage = thisLanguage;
     languageToLTS.put(Language.ARABIC.name().toLowerCase(), new ModernStandardArabicLTS());
     languageToLTS.put(Language.DARI.name().toLowerCase(), new DariLTS());
@@ -47,15 +47,25 @@ public class LTSFactory implements CollationSort {
     languageToLTS.put(Language.PASHTO.name().toLowerCase(), new PashtoLTS());
     languageToLTS.put(Language.URDU.name().toLowerCase(), new UrduLTS());
     languageToLTS.put(Language.SUDANESE.name().toLowerCase(), new SudaneseLTS());
-    for (Language lang : Language.values()) {
+    languageToLTS.put(Language.TAGALOG.name().toLowerCase(), unknown);
+
+/*    for (Language lang : Language.values()) {
       getLocale(lang);
-    }
+    }*/
   }
 
+  /**
+   * @see mitll.langtest.server.scoring.ASRScoring#ASRScoring
+   * @param thisLanguage
+   */
   public LTSFactory(String thisLanguage) {
     this(Language.valueOf(thisLanguage.toUpperCase()));
   }
 
+  /**
+   * @see mitll.langtest.server.scoring.ASRScoring#getCollator
+   * @return
+   */
   @Override
   public Collator getCollator() {
     return Collator.getInstance(getLocale(thisLanguage));
@@ -79,7 +89,12 @@ public class LTSFactory implements CollationSort {
     });
   }
 
-  public Locale getLocale(Language lang) {
+  /**
+   * @see #getCollator
+   * @param lang
+   * @return
+   */
+  private Locale getLocale(Language lang) {
     Locale locale = Locale.ENGLISH;
     switch (lang) {
       case ARABIC:
@@ -120,6 +135,9 @@ public class LTSFactory implements CollationSort {
         break;
       case SUDANESE:
         locale = new Locale.Builder().setLanguage("ar").setRegion("sd").build();
+        break;
+      case TAGALOG:
+        locale = new Locale.Builder().setLanguage("tl").build();
         break;
       case URDU:
         locale = new Locale.Builder().setLanguage("ur").build();
