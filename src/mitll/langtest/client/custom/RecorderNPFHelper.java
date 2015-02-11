@@ -1,14 +1,11 @@
 package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -23,10 +20,7 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.monitoring.Session;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,9 +29,8 @@ import java.util.Map;
 class RecorderNPFHelper extends SimpleChapterNPFHelper {
   private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
 
-  //private Navigation navigation;
   final boolean doNormalRecording;
-  private String answer = "Answer";
+//  private String answer = "Answer";
   boolean added = false;
 
   /**
@@ -53,7 +46,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
     super(service, feedback, userManager, controller, exerciseList);
     //  this.navigation = navigation;
     this.doNormalRecording = doNormalRecording;
-    answer = controller.getProps().getNameForAnswer();
+    //answer = controller.getProps().getNameForAnswer();
   }
 
   @Override
@@ -69,13 +62,14 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
 
   @Override
   protected NPFHelper.FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                                                     UserManager userManager, ExerciseController controller,
+                                                     final UserManager userManager, ExerciseController controller,
                                                      SimpleChapterNPFHelper outer) {
     return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
       @Override
       protected FlexSectionExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
                                                          boolean incorrectFirst) {
         return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst) {
+           CheckBox filterOnly;
           @Override
           protected void addTableWithPager(PagingContainer pagingContainer) {
             // row 1
@@ -83,28 +77,41 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
             add(column);
             addTypeAhead(column);
 
+            System.out.println("\n-------- checking gender - " +userManager.isMale());
             // row 2
-            final CheckBox w = new CheckBox(SHOW_ONLY_UNRECORDED);
-            w.addClickHandler(new ClickHandler() {
+             filterOnly = new CheckBox(SHOW_ONLY_UNRECORDED);
+            filterOnly.addClickHandler(new ClickHandler() {
               @Override
               public void onClick(ClickEvent event) {
-                setUnrecorded(w.getValue());
+                setUnrecorded(filterOnly.getValue());
                 scheduleWaitTimer();
                 loadExercises(getHistoryToken(""), getTypeAheadText(), false);
               }
             });
-            w.addStyleName("leftFiveMargin");
-            add(w);
+            filterOnly.addStyleName("leftFiveMargin");
+            add(filterOnly);
 
             // row 3
             add(pagingContainer.getTableWithPager());
             setOnlyExamples(!doNormalRecording);
+          }
+
+          @Override
+          public boolean getExercises(long userID) {
+            System.out.println("\n-------- getExercises checking gender - " +userManager.isMale());
+
+            filterOnly.setText(setCheckboxTitle(userManager));
+            return super.getExercises(userID);
+          }
+          private String setCheckboxTitle(UserManager userManager) {
+            return SHOW_ONLY_UNRECORDED + (userManager.isMale() ? " by Males" : " by Females");
           }
         };
 
       }
     };
   }
+
 
 //
 //  public Widget getRecordingInfo() {
@@ -172,6 +179,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
   final FlexTable flex = new FlexTable();
   private Widget doMaleFemale() {
     flex.addStyleName("topMargin");
+    flex.setWidth("100%");  //try to force vertical layout
     // flex.setCellSpacing(8);
 //    flex.addStyleName("leftFifteenPercentMargin");
     //   flex.getElement().getStyle().setMarginLeft(3, Style.Unit.PCT);
