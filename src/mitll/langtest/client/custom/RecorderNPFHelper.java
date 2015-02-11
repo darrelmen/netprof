@@ -1,6 +1,7 @@
 package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -21,6 +22,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonExercise;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -30,7 +32,6 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
   private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
 
   final boolean doNormalRecording;
-//  private String answer = "Answer";
   boolean added = false;
 
   /**
@@ -41,12 +42,10 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
    * @param doNormalRecording
    * @see Navigation#Navigation
    */
-  public RecorderNPFHelper(Navigation navigation, LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
+  public RecorderNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
                            ExerciseController controller, boolean doNormalRecording, ListInterface exerciseList) {
     super(service, feedback, userManager, controller, exerciseList);
-    //  this.navigation = navigation;
     this.doNormalRecording = doNormalRecording;
-    //answer = controller.getProps().getNameForAnswer();
   }
 
   @Override
@@ -54,7 +53,6 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
     return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(final CommonExercise e) {
-        //logger.info("getting exercise for " + e.getID() + " normal rec " +doNormalRecording);
         return new MyWaveformExercisePanel(e, controller, exerciseList);
       }
     };
@@ -69,7 +67,8 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
       protected FlexSectionExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
                                                          boolean incorrectFirst) {
         return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst) {
-           CheckBox filterOnly;
+          CheckBox filterOnly;
+
           @Override
           protected void addTableWithPager(PagingContainer pagingContainer) {
             // row 1
@@ -77,9 +76,8 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
             add(column);
             addTypeAhead(column);
 
-            System.out.println("\n-------- checking gender - " +userManager.isMale());
             // row 2
-             filterOnly = new CheckBox(SHOW_ONLY_UNRECORDED);
+            filterOnly = new CheckBox(SHOW_ONLY_UNRECORDED);
             filterOnly.addClickHandler(new ClickHandler() {
               @Override
               public void onClick(ClickEvent event) {
@@ -97,12 +95,11 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
           }
 
           @Override
-          public boolean getExercises(long userID) {
-            System.out.println("\n-------- getExercises checking gender - " +userManager.isMale());
-
+          protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno) {
+            super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno);
             filterOnly.setText(setCheckboxTitle(userManager));
-            return super.getExercises(userID);
           }
+
           private String setCheckboxTitle(UserManager userManager) {
             return SHOW_ONLY_UNRECORDED + (userManager.isMale() ? " by Males" : " by Females");
           }
@@ -113,76 +110,10 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
   }
 
 
-//
-//  public Widget getRecordingInfo() {
-////    Widget label = new HTML();
-//    final FlexTable flex=  new FlexTable();
-//    // flex.setCellSpacing(8);
-//    flex.addStyleName("leftFifteenPercentMargin");
-//    service.get(new AsyncCallback<Map<String, Number>>() {
-//      @Override
-//      public void onFailure(Throwable caught) {
-//      }
-//
-//      @Override
-//      public void onSuccess(Map<String, Number> result) {
-//        Number total = result.get("totalHrs");
-//        final double totalHours = total.doubleValue();
-//        final double avgSecs = result.get("avgSecs").doubleValue();
-//        final int badRecordings = result.get("badRecordings").intValue();
-//
-//        service.getSessions(new AsyncCallback<List<Session>>() {
-//          @Override
-//          public void onFailure(Throwable caught) {
-//          }
-//
-//          @Override
-//          public void onSuccess(List<Session> sessions) {
-//            long totalTime = 0;
-//            long total = 0;
-//            long valid = sessions.size();
-//            Map<Long, Integer> rateToCount = new HashMap<Long, Integer>();
-//            for (Session s : sessions) {
-//              totalTime += s.duration;
-//              total += s.getNumAnswers();
-//
-//              Integer count = rateToCount.get(s.getSecAverage());
-//              if (count == null) rateToCount.put(s.getSecAverage(), s.getNumAnswers());
-//              else rateToCount.put(s.getSecAverage(), count + s.getNumAnswers());
-//            }
-//            int row = 0;
-//            int col = 0;
-//
-//            long hoursSpent = totalTime / HOUR;
-//            double dhoursSpent = (double) hoursSpent;
-//            flex.setText(row, col++, "Time spent");
-//            flex.setHTML(row, col++, "&nbsp;<b>" + hoursSpent + " hours " + (totalTime - hoursSpent * HOUR) / MIN + " mins</b>&nbsp;");
-//
-//            flex.setText(row, col++, "Audio collected");
-//            flex.setHTML(row, col++, "&nbsp;<b>" + roundToHundredth(totalHours) + " hours</b>&nbsp;");
-//
-//            if (dhoursSpent > 0) {
-//              flex.setText(row, col++, "Yield");
-//              flex.setHTML(row, col++, "&nbsp;<b>" + "" + Math.round((totalHours / dhoursSpent) * 100) + "%</b>&nbsp;");
-//            }
-//
-//            flex.setText(row, col++, "Total " + "Recordings");
-//            flex.setHTML(row, col++, "&nbsp;<b>" + "" + total + "</b>&nbsp;");
-//          }
-//        });
-//      }
-//    });
-//
-//    return flex;
-//  }
-
   final FlexTable flex = new FlexTable();
+
   private Widget doMaleFemale() {
     flex.addStyleName("topMargin");
-    flex.setWidth("100%");  //try to force vertical layout
-    // flex.setCellSpacing(8);
-//    flex.addStyleName("leftFifteenPercentMargin");
-    //   flex.getElement().getStyle().setMarginLeft(3, Style.Unit.PCT);
     getProgressInfo();
     return flex;
   }
@@ -190,28 +121,18 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
   private void getProgressInfo() {
     service.getMaleFemaleProgress(new AsyncCallback<Map<String, Float>>() {
       @Override
-      public void onFailure(Throwable caught) {
-
-      }
+      public void onFailure(Throwable caught) {}
 
       @Override
       public void onSuccess(Map<String, Float> result) {
-        //    vp.add(new HTML("<h2>Male/Female Reference Audio Coverage</h2>"));
-        //    FlexTable flex = new FlexTable();
-        //    vp.add(flex);
-
         float total = result.get("total");
-        //   Float male = result.get("male");
 
         //  logger.debug("ref audio coverage " + result);
-         System.out.println("\n\n\nref audio coverage " + result);
+//         System.out.println("\n\n\nref audio coverage " + result);
 
         int r = 0;
-
-        int row = 0;
         int col = 0;
 
-//        flex.setHTML(r, col++, "Progress");
         String sp = "&nbsp;";
         String p = "<b>";
         String s = "</b>" + sp;
@@ -264,19 +185,22 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
     public MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface exerciseList1) {
       super(e, service, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording);
       this.e = e;
-      //    add(doMaleFemale());
     }
 
     @Override
     protected void onLoad() {
       super.onLoad();
       if (!added) {
-        //  getParent().addStyleName("userNPFContentLightPadding");
-        ((Panel) getParent().getParent()).add(doMaleFemale());
+        DivWidget c = new DivWidget();
+        c.add(doMaleFemale());
+        c.setWidth("100%");
+        Widget parent = getParent().getParent();
+        parent.removeStyleName("floatLeft");
+        getParent().removeStyleName("floatLeft");
+        ((Panel) parent).add(c);
         added = true;
-      }
-      else {
-        System.out.println("get progress info...");
+      } else {
+//        System.out.println("get progress info...");
         getProgressInfo();
       }
     }
@@ -286,7 +210,5 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
       super.postAnswers(controller, completedExercise);
       tellOtherListExerciseDirty(e);
     }
-
-
   }
 }
