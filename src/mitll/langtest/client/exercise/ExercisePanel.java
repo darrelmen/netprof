@@ -31,7 +31,6 @@ public abstract class ExercisePanel extends VerticalPanel implements
   private final Set<Widget> completed = new HashSet<Widget>();
   protected CommonExercise exercise = null;
   protected final ExerciseController controller;
-  private final LangTestDatabaseAsync service;
   private final NavigationHelper navigationHelper;
   protected final ListInterface exerciseList;
   private final Map<Integer,Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
@@ -50,7 +49,7 @@ public abstract class ExercisePanel extends VerticalPanel implements
                        final ExerciseController controller, ListInterface exerciseList, String instructionMessage) {
     this.exercise = e;
     this.controller = controller;
-    this.service = service;
+  //  this.service = service;
     this.exerciseList = exerciseList;
     this.message = instructionMessage;
     this.navigationHelper = getNavigationHelper(controller);
