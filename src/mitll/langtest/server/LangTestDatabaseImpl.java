@@ -150,7 +150,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userListID
    * @param userID
    * @param role
-   * @param onlyUnrecordedByMe
+   * @param onlyRecorderByMatchingGender
    * @param onlyExamples
    * @param incorrectFirstOrder
    * @param onlyWithAudioAnno
@@ -159,16 +159,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix,
-                                            long userListID, int userID, String role, boolean onlyUnrecordedByMe,
+                                            long userListID, int userID, String role, boolean onlyRecorderByMatchingGender,
                                             boolean onlyExamples, boolean incorrectFirstOrder, boolean onlyWithAudioAnno) {
     Collection<CommonExercise> exercises;
 
     logger.debug("getExerciseIds : (" + serverProps.getLanguage()+ ") " +
-        "getting exercise ids for " +
+        "getting exercise ids for" +
         " config " + relativeConfigDir +
         " prefix '" + prefix +
         "' and user list id " + userListID + " user " + userID + " role " + role +
-        " filter " + onlyUnrecordedByMe + " only examples " + onlyExamples + " only with audio " + onlyWithAudioAnno);
+        " filter " + onlyRecorderByMatchingGender + " only examples " + onlyExamples + " only with audio " + onlyWithAudioAnno);
 
     try {
       UserList userListByID = userListID != -1 ? db.getUserListByID(userListID) : null;
@@ -183,7 +183,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           // now do a trie over matches
           exercises = getExercisesForSearch(prefix, userID, exercises, predefExercises);
         }
-        exercises = filterByUnrecorded(userID, onlyUnrecordedByMe, onlyExamples, exercises);
+        exercises = filterByUnrecorded(userID, onlyRecorderByMatchingGender, onlyExamples, exercises);
         exercises = filterByOnlyAudioAnno(onlyWithAudioAnno,exercises);
         int i = markRecordedState(userID, role, exercises, onlyExamples);
         //logger.debug("marked " +i + " as recorded");
@@ -202,12 +202,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         // builds unit-lesson hierarchy if non-empty type->selection over user list
         if (userListByID != null) {
           Collection<CommonExercise> exercisesForState = getExercisesFromFiltered(typeToSelection, userListByID);
-          exercisesForState = filterByUnrecorded(userID, onlyUnrecordedByMe, onlyExamples, exercisesForState);
+          exercisesForState = filterByUnrecorded(userID, onlyRecorderByMatchingGender, onlyExamples, exercisesForState);
           exercisesForState = filterByOnlyAudioAnno(onlyWithAudioAnno, exercisesForState);
 
           return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID, role, onlyExamples, incorrectFirstOrder);
         } else {
-          return getExercisesForSelectionState(reqID, typeToSelection, prefix, userID, role, onlyUnrecordedByMe, onlyExamples, incorrectFirstOrder);
+          return getExercisesForSelectionState(reqID, typeToSelection, prefix, userID, role, onlyRecorderByMatchingGender, onlyExamples, incorrectFirstOrder);
         }
       }
     } catch (Exception e) {
@@ -252,50 +252,35 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private Collection<CommonExercise> filterByUnrecorded(long userID, boolean onlyUnrecordedByMyGender, boolean onlyExamples,
                                                         Collection<CommonExercise> exercises) {
+    logger.warn("for " +userID + " only by same gender " + onlyUnrecordedByMyGender + " examples only " + onlyExamples + " from " + exercises.size());
+
     if (onlyUnrecordedByMyGender) {
-      Set<String> recordedBySameGender = db.getAudioDAO().getRecordedBy(userID);
-      boolean isMale = db.getUserDAO().isMale(userID);
-      List<CommonExercise> copy = new ArrayList<CommonExercise>();
-     // logger.debug("recorded already " + recordedBySameGender.size() + " checking " + exercises.size());
-      // filter
+      Set<String> recordedBySameGender = onlyExamples ? db.getAudioDAO().getWithContext(userID) : db.getAudioDAO().getRecordedBy(userID);
+      Set<String> allExercises = new HashSet<String>();
+
       for (CommonExercise exercise : exercises) {
-        if (!recordedBySameGender.contains(exercise.getID())) {
+        allExercises.add(exercise.getID().trim());
+      }
+      logger.debug("all exercises " + allExercises.size() + " removing " + recordedBySameGender.size());
+      allExercises.removeAll(recordedBySameGender);
+      logger.debug("after all exercises " + allExercises.size());
+
+      List<CommonExercise> copy = new ArrayList<CommonExercise>();
+      Set<String> seen = new HashSet<String>();
+      for (CommonExercise exercise : exercises) {
+        String trim = exercise.getID().trim();
+        if (allExercises.contains(trim)) {
+          if (seen.contains(trim)) logger.warn("saw " + trim + " " + exercise + " again!");
+          seen.add(trim);
           copy.add(exercise);
-        } else {
-          Collection<AudioAttribute> byGender = exercise.getByGender(isMale);
-          boolean hasReg = false;
-          boolean hasSlow = false;
-          boolean hasExample = false;
- /*         if (!byGender.isEmpty()) logger.debug("checking " + isMale + " ex " + exercise.getID()+
-            " has " + byGender.size() + " recordings");*/
-          for (AudioAttribute attr : byGender) {
-            if (attr.getUserid() != UserDAO.DEFAULT_USER_ID) {  // skip the default user
-              hasReg = hasReg || attr.isRegularSpeed();
-              hasSlow = hasSlow || attr.isSlow();
-              hasExample = attr.isExampleSentence();
-
-              if (onlyExamples) {
-                if (hasExample) break;
-              } else if (hasReg && hasSlow) {
-                break;
-              }
-            }
-          }
-
-          if (onlyExamples) {
-            if (!hasExample) {
-              copy.add(exercise);
-            }
-          } else if (!hasReg || !hasSlow) {
-            copy.add(exercise);
-          }
         }
       }
-    //  logger.debug("to be recorded " + copy.size() + " from " + exercises.size());
+      logger.debug("to be recorded " + copy.size() + " from " + exercises.size());
 
       return copy;
+    } else {
+      return exercises;
     }
-    return exercises;
   }
 
   private Collection<CommonExercise> filterByOnlyAudioAnno(boolean onlyAudioAnno,
@@ -1852,108 +1837,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public Map<String, Float> getMaleFemaleProgress() {
-    //List<CommonExercise> exercises = getExercises();
-    Map<String, Float> report = new HashMap<String, Float>();
+    Map<Long, User> userMapMales   = db.getUserDAO().getUserMap(true);
+    Map<Long, User> userMapFemales = db.getUserDAO().getUserMap(false);
 
     float total = getExercises().size();
-    float male = 0;
-    float female = 0;
-
-    float maleFast = 0;
-    float maleSlow = 0;
-
-    float femaleFast = 0;
-    float femaleSlow = 0;
-
-    float cmale = 0;
-    float cfemale = 0;
-
-    Map<Long, User> userMapMales = db.getUserDAO().getUserMap(true);
-    Map<Long, User> userMapFemales = db.getUserDAO().getUserMap(false);
-   // int regular = db.getAudioDAO().getCountForGender(userMapMales.keySet(), "regular");
-
-  /*  for (CommonExercise exercise : exercises) {
-      Collection<AudioAttribute> males = exercise.getByGender(true);
-      List<AudioAttribute> copy = new ArrayList<AudioAttribute>();
-      for (AudioAttribute attr : males) {
-        if (!attr.getUser().isDefault()) {
-          copy.add(attr);
-        }
-      }
-      males = copy;
-
-      Collection<AudioAttribute> females = exercise.getByGender(false);
-
-//      if (!males.isEmpty()) male++;
-//      if (!females.isEmpty()) female++;
-
-      AudioAttribute r = null, s = null;
-      for (AudioAttribute audioAttribute : males) {
-        if (!audioAttribute.isExampleSentence()) {
-          if (audioAttribute.isRegularSpeed()) r = audioAttribute;
-          if (audioAttribute.isSlow()) s = audioAttribute;
-        }
-      }
-      if (r != null) maleFast++;
-      if (s != null) maleSlow++;
-      if (r != null || s != null) {
-        male++;
-      }
-
-      r = null;
-      s = null;
-      for (AudioAttribute audioAttribute : females) {
-        if (!audioAttribute.isExampleSentence()) {
-          if (audioAttribute.isRegularSpeed()) r = audioAttribute;
-          if (audioAttribute.isSlow()) s = audioAttribute;
-        }
-      }
-      if (r != null) femaleFast++;
-      if (s != null) femaleSlow++;
-      if (r != null || s != null) {
-        female++;
-      }
-
-      r = null;
-      for (AudioAttribute audioAttribute : males) {
-        if (audioAttribute.isExampleSentence()) {
-          r = audioAttribute;
-          break;
-        }
-      }
-      if (r != null) cmale++;
-
-      r = null;
-      for (AudioAttribute audioAttribute : females) {
-        if (audioAttribute.isExampleSentence()) {
-          r = audioAttribute;
-          break;
-        }
-      }
-      if (r != null) cfemale++;
-    }*/
-
-    maleFast = db.getAudioDAO().getCountForGender(userMapMales.keySet(), "regular");
-    maleSlow = db.getAudioDAO().getCountForGender(userMapMales.keySet(), "slow");
-    male = db.getAudioDAO().getCountBothSpeeds(userMapMales.keySet());
-
-    femaleFast = db.getAudioDAO().getCountForGender(userMapFemales.keySet(), "regular");
-    femaleSlow = db.getAudioDAO().getCountForGender(userMapFemales.keySet(), "slow");
-    female = db.getAudioDAO().getCountBothSpeeds(userMapFemales.keySet());
-
-    cmale = db.getAudioDAO().getCountForGender(userMapMales.keySet(), "context=regular");
-    cfemale = db.getAudioDAO().getCountForGender(userMapFemales.keySet(), "context=regular");
-
-    report.put("total", total);
-    report.put("male", male);
-    report.put("female", female);
-    report.put("maleFast", maleFast);
-    report.put("maleSlow", maleSlow);
-    report.put("femaleFast", femaleFast);
-    report.put("femaleSlow", femaleSlow);
-    report.put("maleContext", cmale);
-    report.put("femaleContext", cfemale);
-    return report;
+    Set<String> uniqueIDs = new HashSet<String>();
+    for (CommonShell shell : getExercises()) uniqueIDs.add(shell.getID());
+    return db.getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs);
   }
 
   /**
