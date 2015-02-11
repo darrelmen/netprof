@@ -45,6 +45,11 @@ public class ExcelImport implements ExerciseDAO {
   private static final Logger logger = Logger.getLogger(ExcelImport.class);
   public static final String FAST_WAV = "Fast" + ".wav";
   public static final String SLOW_WAV = "Slow" + ".wav";
+  public static final String CONTEXT_TRANSLATION = "context translation";
+  public static final String TRANSLATION_OF_CONTEXT = "Translation of Context";
+  public static final String CONTEXT = "context";
+  public static final String MEANING = "meaning";
+  public static final String ID = "id";
 
   private List<CommonExercise> exercises = null;
   private final Map<String, CommonExercise> idToExercise = new HashMap<String, CommonExercise>();
@@ -360,6 +365,8 @@ public class ExcelImport implements ExerciseDAO {
 
     List<String> lastRowValues = new ArrayList<String>();
     Map<String, List<CommonExercise>> englishToExercises = new HashMap<String, List<CommonExercise>>();
+    Set<String> knownIds = new HashSet<String>();
+
     int semis = 0;
     int logging = 0;
     int skipped = 0;
@@ -395,13 +402,13 @@ public class ExcelImport implements ExerciseDAO {
               transliterationIndex = columns.indexOf(col);
             } else if (colNormalized.contains("weight")) {
               weightIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("meaning")) {
+            } else if (colNormalized.contains(MEANING)) {
               meaningIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("id")) {
+            } else if (colNormalized.contains(ID)) {
               idIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("context translation")) { //be careful of ordering wrt this and the next item
+            } else if (contextTransMatch(colNormalized)) { //be careful of ordering wrt this and the next item
               contextTranslationIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("context")) {
+            } else if (colNormalized.contains(CONTEXT)) {
               contextIndex = columns.indexOf(col);
             } else if (colNormalized.contains("audio_index")) {
               audioIndex = columns.indexOf(col);
@@ -445,12 +452,7 @@ public class ExcelImport implements ExerciseDAO {
           );
         } else {
           int colIndex = colIndexOffset;
-          boolean isDelete = false;
-          try {
-            isDelete = sheet.getWorkbook().getFontAt(next.getCell(colIndex).getCellStyle().getFontIndex()).getStrikeout();
-          } catch (Exception e) {
-            logger.debug("got error reading delete strikeout at row " + next.getRowNum() + " for " +serverProps.getLanguage());
-          }
+          boolean isDelete = isDeletedRow(sheet, next, colIndex);
 
           String english = getCell(next, colIndex++).trim();
           // remove starting or ending tics
@@ -514,10 +516,15 @@ public class ExcelImport implements ExerciseDAO {
                   (imported.hasRefAudio() || !shouldHaveRefAudio)) {  // skip items without ref audio, for now.
                 recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
 
-                // keep track of synonyms (or better term)
-                rememberExercise(exercises, englishToExercises, imported);
-                if (!fieldToDefect.isEmpty()) {
-                  idToDefectMap.put(imported.getID(), fieldToDefect);
+                if (knownIds.contains(imported.getID())) {
+                  logger.warn("found duplicate entry under " + imported.getID() + " " + imported);
+                }
+                else {
+                  knownIds.add(imported.getID());
+                  rememberExercise(exercises, englishToExercises, imported);
+                  if (!fieldToDefect.isEmpty()) {
+                    idToDefectMap.put(imported.getID(), fieldToDefect);
+                  }
                 }
               } else {
                 if (isDelete) {
@@ -551,11 +558,13 @@ public class ExcelImport implements ExerciseDAO {
     logStatistics(id, semis, skipped, englishSkipped, deleted);
 
     // put the skips at the end
-   // if (serverProps.isClassroomMode()) {
-      Collection<CommonExercise> commonExercises = readFromSheetSkips(sheet, id);
-      exercises.addAll(commonExercises);
-  //  }
+    Collection<CommonExercise> commonExercises = readFromSheetSkips(sheet, id);
+    exercises.addAll(commonExercises);
     return exercises;
+  }
+
+  private boolean contextTransMatch(String colNormalized) {
+    return colNormalized.contains(CONTEXT_TRANSLATION) || colNormalized.contains(TRANSLATION_OF_CONTEXT.toLowerCase());
   }
 
   private Collection<CommonExercise> readFromSheetSkips(Sheet sheet, int id) {
@@ -600,13 +609,13 @@ public class ExcelImport implements ExerciseDAO {
               colIndexOffset = columns.indexOf(col);
             } else if (colNormalized.contains("transliteration")) {
               transliterationIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("meaning")) {
+            } else if (colNormalized.contains(MEANING)) {
               meaningIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("id")) {
+            } else if (colNormalized.contains(ID)) {
               idIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("context")) {
+            } else if (colNormalized.contains(CONTEXT)) {
               contextIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("context translation")){
+            } else if (contextTransMatch(colNormalized)){
               contextTranslationIndex = columns.indexOf(col);
             } else if (colNormalized.contains("audio_index")) {
               audioIndex = columns.indexOf(col);
@@ -642,12 +651,7 @@ public class ExcelImport implements ExerciseDAO {
           );
         } else {
           int colIndex = colIndexOffset;
-          boolean isDelete = false;
-          try {
-            isDelete = sheet.getWorkbook().getFontAt(next.getCell(colIndex).getCellStyle().getFontIndex()).getStrikeout();
-          } catch (Exception e) {
-            logger.debug("got error reading delete strikeout at row " + next.getRowNum() + " for " +serverProps.getLanguage());
-          }
+          boolean isDelete = isDeletedRow(sheet, next, colIndex);
           String english = getCell(next, colIndex++).trim();
           // remove starting or ending tics
           String foreignLanguagePhrase = cleanTics(getCell(next, colIndex).trim());
@@ -698,6 +702,16 @@ public class ExcelImport implements ExerciseDAO {
     logStatistics(id, semis, skipped, englishSkipped, deleted);
     if (missingExerciseCount > 0) logger.debug("missing ex count " + missingExerciseCount);
     return exercises;
+  }
+
+  private boolean isDeletedRow(Sheet sheet, Row next, int colIndex) {
+    boolean isDelete = false;
+    try {
+      isDelete = sheet.getWorkbook().getFontAt(next.getCell(colIndex).getCellStyle().getFontIndex()).getStrikeout();
+    } catch (Exception e) {
+      logger.debug("got error reading delete strikeout at row " + next.getRowNum() + " for " +serverProps.getLanguage());
+    }
+    return isDelete;
   }
 
   private void logStatistics(int id, int semis, int skipped, int englishSkipped, int deleted) {
