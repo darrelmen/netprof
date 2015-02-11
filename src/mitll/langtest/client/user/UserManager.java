@@ -42,7 +42,6 @@ public class UserManager {
   private static final String USER_ID = "userID";
   private static final String USER_CHOSEN_ID = "userChosenID";
   private static final String AUDIO_TYPE = "audioType";
-  //private static final String LOGIN_TYPE = "loginType";
 
   private final LangTestDatabaseAsync service;
   private final UserNotification userNotification;
@@ -53,6 +52,7 @@ public class UserManager {
   private final PropertyHandler.LOGIN_TYPE loginType;
   private final String appTitle;
   private final PropertyHandler props;
+  private boolean isMale;
 
   /**
    * @param lt
@@ -167,6 +167,8 @@ public class UserManager {
         }
       }
       userNotification.gotUser(result);
+      isMale = result.isMale();
+     // System.out.println("\n\n\n------ is male " + isMale);
     }
     //console("getPermissionsAndSetUser.onSuccess : " + user);
   }
@@ -464,5 +466,9 @@ public class UserManager {
   private long getUserSessionDuration() {
     long mult = loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS) ? 52 : 4;
     return EXPIRATION_HOURS * mult;
+  }
+
+  public boolean isMale() {
+    return isMale;
   }
 }
