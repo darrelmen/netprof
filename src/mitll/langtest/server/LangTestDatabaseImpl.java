@@ -252,7 +252,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private Collection<CommonExercise> filterByUnrecorded(long userID, boolean onlyUnrecordedByMyGender, boolean onlyExamples,
                                                         Collection<CommonExercise> exercises) {
-    logger.warn("for " +userID + " only by same gender " + onlyUnrecordedByMyGender + " examples only " + onlyExamples + " from " + exercises.size());
+    logger.debug("for " +userID + " only by same gender " + onlyUnrecordedByMyGender + " examples only " + onlyExamples + " from " + exercises.size());
 
     if (onlyUnrecordedByMyGender) {
       Set<String> recordedBySameGender = onlyExamples ? db.getAudioDAO().getWithContext(userID) : db.getAudioDAO().getRecordedBy(userID);
@@ -261,9 +261,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       for (CommonExercise exercise : exercises) {
         allExercises.add(exercise.getID().trim());
       }
-      logger.debug("all exercises " + allExercises.size() + " removing " + recordedBySameGender.size());
+     // logger.debug("all exercises " + allExercises.size() + " removing " + recordedBySameGender.size());
       allExercises.removeAll(recordedBySameGender);
-      logger.debug("after all exercises " + allExercises.size());
+     // logger.debug("after all exercises " + allExercises.size());
 
       List<CommonExercise> copy = new ArrayList<CommonExercise>();
       Set<String> seen = new HashSet<String>();
@@ -275,7 +275,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           copy.add(exercise);
         }
       }
-      logger.debug("to be recorded " + copy.size() + " from " + exercises.size());
+     // logger.debug("to be recorded " + copy.size() + " from " + exercises.size());
 
       return copy;
     } else {
