@@ -250,13 +250,13 @@ public class AudioDAO extends DAO {
     //logger.debug("found " + (isMale ? " male " : " female ") + " users : " + userMap.keySet());
     // find set of users of same gender
     Set<String> validAudioAtReg = getAudioForGender(userMap, REGULAR);
-    logger.debug(" regular speed for " + userMap.keySet() + " " + validAudioAtReg.size());
+    //logger.debug(" regular speed for " + userMap.keySet() + " " + validAudioAtReg.size());
 
     Set<String> validAudioAtSlow = getAudioForGender(userMap, SLOW);
-    logger.debug(" slow speed for " + userMap.keySet() + " " + validAudioAtSlow.size());
+//    logger.debug(" slow speed for " + userMap.keySet() + " " + validAudioAtSlow.size());
 
     boolean b = validAudioAtReg.retainAll(validAudioAtSlow);
-    logger.debug("retain all " + b + " " + validAudioAtReg.size());
+  //  logger.debug("retain all " + b + " " + validAudioAtReg.size());
     return validAudioAtReg;
   }
 
@@ -308,7 +308,7 @@ public class AudioDAO extends DAO {
         if (trim.isEmpty()) logger.warn("huh? got empty exid");
         results.add(trim);
       }
-      logger.debug("for " + audioSpeed + " " + sql + " yielded " + results.size());
+  //    logger.debug("for " + audioSpeed + " " + sql + " yielded " + results.size());
       finish(connection, statement, rs);
 
     } catch (Exception ee) {
@@ -383,7 +383,7 @@ public class AudioDAO extends DAO {
         //  results.add(exid);
       }
       finish(connection, statement, rs);
-      logger.debug("for " + audioSpeed + "\t" + sql + " got " + results.size());
+//      logger.debug("for " + audioSpeed + "\t" + sql + " got " + results.size());
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -392,7 +392,6 @@ public class AudioDAO extends DAO {
 
   private int getCountBothSpeeds(Set<Long> userIds,
                                 Set<String> uniqueIDs) {
-//    int count = -1;
     Set<String> results = new HashSet<String>();
 
     try {
@@ -422,8 +421,6 @@ public class AudioDAO extends DAO {
         String id = rs.getString(1);
         if (uniqueIDs.contains(id)) {
           results.add(id);
-        } else {
-        //  logger.debug("skipping stale exid " + id);
         }
       }
       finish(connection, statement, rs);
