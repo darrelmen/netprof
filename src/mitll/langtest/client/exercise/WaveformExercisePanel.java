@@ -25,10 +25,8 @@ public class WaveformExercisePanel extends ExercisePanel {
   private static final String RECORD_PROMPT = "Record the word or phrase, first at normal speed, then again at slow speed.";
   private static final String RECORD_PROMPT2 = "Record the in-context sentence.";
   private static final String EXAMPLE_RECORD = "EXAMPLE_RECORD";
-  // private static final String IN_CONTEXT_SENTENCE = "In-context sentence";
   private boolean isBusy = false;
   private Collection<RecordAudioPanel> audioPanels;
-//  private final boolean doNormalRecording;
 
   /**
    * @param e
@@ -75,7 +73,6 @@ public class WaveformExercisePanel extends ExercisePanel {
   private boolean isExampleRecord() {
     return message.equals(EXAMPLE_RECORD);
   }
-
 
   private boolean isNormalRecord() { return !isExampleRecord(); }
 
@@ -160,7 +157,7 @@ public class WaveformExercisePanel extends ExercisePanel {
     w.getElement().setId("ItemHeading");
     return w;
   }
-
+/*
   public static class ResizableCaptionPanel extends CaptionPanel implements ProvidesResize, RequiresResize {
     public ResizableCaptionPanel(String name) {
       super(name);
@@ -172,8 +169,7 @@ public class WaveformExercisePanel extends ExercisePanel {
         ((RequiresResize) contentWidget).onResize();
       }
     }
-  }
-
+  }*/
 
   protected Widget getContentScroller(HTML maybeRTLContent) {
     return maybeRTLContent;
@@ -184,15 +180,6 @@ public class WaveformExercisePanel extends ExercisePanel {
     for (RecordAudioPanel ap : audioPanels) {
       ap.onResize();
     }
-  }
-
-  /**
-   * @return
-   * @seex ExercisePanel#addQuestionPrompt(com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.Exercise)
-   */
-  @Override
-  protected String getQuestionPrompt() {
-    return "";
   }
 
   /**
