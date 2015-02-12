@@ -47,6 +47,8 @@ public class AudioFileHelper implements CollationSort {
   private boolean checkedLTS = false;
   private Map<String,Integer> phoneToCount;
 
+  public enum Request { DECODE, ALIGN, RECORD };
+
   /**
    * @see mitll.langtest.server.ScoreServlet#getAudioFileHelper()
    * @param pathHelper
@@ -187,10 +189,11 @@ public class AudioFileHelper implements CollationSort {
 
   /**
    * @see mitll.langtest.server.ScoreServlet#getAnswer
+   * @param request
    * @param exerciseID
    * @param exercise1
    * @param user
-   * @param doFlashcard
+   * @param request
    * @param wavPath
    * @param file
    * @param deviceType
@@ -216,7 +219,7 @@ public class AudioFileHelper implements CollationSort {
   }
 
   /**
-   * @see #getAnswer(String, mitll.langtest.shared.CommonExercise, int, boolean, String, java.io.File, String, String, float, int)
+   * @see #getAnswer
    * @see #writeAudioFile(String, String, mitll.langtest.shared.CommonExercise, int, int, int, String, boolean, boolean, boolean, String, String)
    * @param exerciseID
    * @param exercise1
@@ -379,7 +382,7 @@ public class AudioFileHelper implements CollationSort {
    * @param deviceType
    * @param device
    * @return
-   * @see #getAnswer(String, mitll.langtest.shared.CommonExercise, int, boolean, String, java.io.File, String, String, float, int)
+   * @see #getAnswer(String, mitll.langtest.shared.CommonExercise, int, String, String, java.io.File, String, String, float, int)
    */
   private AudioAnswer getAudioAnswer(String exerciseID, CommonExercise exercise1,
                                      int questionID,
@@ -647,7 +650,7 @@ public class AudioFileHelper implements CollationSort {
    * @param file
    * @param validity
    * @param url
-   * @param doFlashcard
+   * @param doFlashcard true if should do decoding
    * @return
    */
   private AudioAnswer getAudioAnswer(CommonExercise exercise,
