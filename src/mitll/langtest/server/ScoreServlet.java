@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -62,6 +63,9 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String NOT_VALID = "NOT_VALID";
   private static final String IS_CORRECT = "isCorrect";
   private static final String SAID_WORD = "saidWord";
+  private LoadTesting loadTesting;
+
+  public enum Request { DECODE, ALIGN, RECORD };
 
   // Doug said to remove items with missing audio. 1/12/15
   private static final boolean REMOVE_EXERCISES_WITH_MISSING_AUDIO = true;
@@ -110,13 +114,6 @@ public class ScoreServlet extends DatabaseServlet {
         if (queryString.startsWith(NESTED_CHAPTERS)) {
           if (nestedChapters == null || (System.currentTimeMillis() - whenCached > REFRESH_CONTENT_INTERVAL)) {
             nestedChapters = getJsonNestedChapters();
-
-//            long then = System.currentTimeMillis();
-//            final byte[] content = nestedChapters.toString().getBytes("UTF-8");
-//            long now = System.currentTimeMillis();
-//            if (now - then > 20) logger.debug("Took " + (now - then) + " millis to determine content length of " + content.length);
-//
-//            contentLength = content.length;
             whenCached = System.currentTimeMillis();
           }
           toReturn = nestedChapters;
@@ -143,7 +140,9 @@ public class ScoreServlet extends DatabaseServlet {
             toReturn.put(HAS_RESET, userFound == null ? -1 : userFound.hasResetKey());
             toReturn.put(TOKEN, userFound == null ? "" : userFound.getResetKey());
             toReturn.put(PASSWORD_CORRECT,
-                userFound == null ? "false" : userFound.getPasswordHash().equalsIgnoreCase(passwordH));
+                userFound == null ? "false" :
+                    userFound.getPasswordHash() == null ? "false" :
+                        userFound.getPasswordHash().equalsIgnoreCase(passwordH));
           }
         } else if (queryString.startsWith(FORGOT_USERNAME)) {
           String[] split1 = queryString.split("&");
@@ -473,7 +472,7 @@ public class ScoreServlet extends DatabaseServlet {
         } else {
           jsonObject.put(USERID, user1.getId());
         }
-      } else if (requestType.startsWith(ALIGN) || requestType.startsWith(DECODE)) {
+      } else if (requestType.startsWith(ALIGN) || requestType.startsWith(DECODE) || requestType.startsWith(Request.RECORD.toString().toLowerCase())) {
         //jsonObject = getJsonForParts(request, requestType);
         boolean isMultipart = ServletFileUpload.isMultipartContent(request);
         logger.debug("doPost : Request " + requestType + " for " + deviceType);
@@ -593,7 +592,7 @@ public class ScoreServlet extends DatabaseServlet {
 
         writeToFile(next.getInputStream(), saveFile);
 
-        return getJsonForAudioForUser(reqid, exerciseID, i, isDecode(requestType), wavPath, saveFile, deviceType, device);
+        return getJsonForAudioForUser(reqid, exerciseID, i, Request.valueOf(requestType.toUpperCase()), wavPath, saveFile, deviceType, device);
       } else {
         File tempDir = Files.createTempDir();
         File saveFile = new File(tempDir + File.separator + "MyAudioFile.wav");
@@ -739,7 +738,11 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
+   * Write the posted audio file to a location based on the user id and the exercise id.
+   * If request type is decode, decode the file and return score info in json.
+   *
    * @param request
+   * @param requestType - decode or align or record
    * @param deviceType
    * @param device
    * @return
@@ -759,8 +762,8 @@ public class ScoreServlet extends DatabaseServlet {
       File saveFile = pathHelper.getAbsoluteFile(wavPath);
       new File(saveFile.getParent()).mkdirs();
 
-      writeToOutputStream(request, saveFile);
-      return getJsonForAudioForUser(reqid,exerciseID, i, isDecode(requestType), wavPath, saveFile, deviceType, device);
+      writeToOutputStream(request.getInputStream(), saveFile);
+      return getJsonForAudioForUser(reqid, exerciseID, i, Request.valueOf(requestType.toUpperCase()), wavPath, saveFile, deviceType, device);
     } else {   // for backwards compatibility
       return handleRequestWithNoType(request);
     }
@@ -790,7 +793,7 @@ public class ScoreServlet extends DatabaseServlet {
     File saveFile = new File(tempDir + File.separator + fileName);
 
     // opens input stream of the request for reading data
-    writeToOutputStream(request, saveFile);
+    writeToOutputStream(request.getInputStream(), saveFile);
 
     if (isFlashcard) {
       return getJsonForWordAndAudioFlashcard(word, saveFile);
@@ -799,21 +802,22 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
-  private boolean isDecode(String requestType) { return "decode".equalsIgnoreCase(requestType); }
+//  private boolean isDecode(String requestType) { return "decode".equalsIgnoreCase(requestType); }
 
   /**
-   * @param exerciseID
-   * @param user
-   * @param doFlashcard
-   * @param wavPath
-   * @param saveFile
-   * @param deviceType
-   * @param device
-   * @return
+   * @param reqid label response with req id so the client can tell if it got a stale response
+   * @param exerciseID for this exercise
+   * @param user by this user
+   * @param request
+   * @param wavPath relative path to posted audio file
+   * @param saveFile File handle to file
+   * @param deviceType iPad,iPhone, or browser
+   * @param device id for device - helpful for iPads, etc.
+   * @return score json
    * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
    * @see #getJsonForParts(javax.servlet.http.HttpServletRequest, String)
    */
-  private JSONObject getJsonForAudioForUser(int reqid, String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile,
+  private JSONObject getJsonForAudioForUser(int reqid, String exerciseID, int user, Request request, String wavPath, File saveFile,
                                             String deviceType, String device) {
     long then = System.currentTimeMillis();
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
@@ -821,9 +825,10 @@ public class ScoreServlet extends DatabaseServlet {
     JSONObject jsonForScore = new JSONObject();
     if (exercise1 == null) {
       jsonForScore.put("valid", "bad_exercise_id");
-
     } else {
    //   logger.debug("Req = " +reqid);
+
+      boolean doFlashcard = request == Request.DECODE;
       AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, deviceType, device, exercise1);
       long now = System.currentTimeMillis();
       PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
@@ -839,20 +844,28 @@ public class ScoreServlet extends DatabaseServlet {
           jsonForScore.put(SAID_WORD, answer.isSaidAnswer());
         }
       }
-      jsonForScore.put("exid", exerciseID);
-      jsonForScore.put("valid", answer == null ? "invalid" : answer.getValidity().toString());
-      jsonForScore.put("reqid", answer == null ? 1 : ""+answer.getReqid());
+      addValidity(exerciseID, jsonForScore, answer);
+
+      if (request == Request.RECORD) {
+        loadTesting.addToAudioTable(user,exercise1,answer);
+      }
     }
     return jsonForScore;
   }
 
+  private void addValidity(String exerciseID, JSONObject jsonForScore, AudioAnswer answer) {
+    jsonForScore.put("exid", exerciseID);
+    jsonForScore.put("valid", answer == null ? "invalid" : answer.getValidity().toString());
+    jsonForScore.put("reqid", answer == null ? 1 : ""+answer.getReqid());
+  }
+
   /**
    *
-   * @param reqid
-   * @param exerciseID
-   * @param user
+   * @param reqid label response with req id so the client can tell if it got a stale response
+   * @param exerciseID for this exercise
+   * @param user by this user
    * @param doFlashcard
-   * @param wavPath
+   * @param wavPath path to posted audio file
    * @param saveFile
    * @param deviceType
    * @param device
@@ -930,7 +943,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @param device
    * @param reqid
    * @return
-   * @see #getJsonForAudioForUser(int,String, int, boolean, String, java.io.File, String, String)
+   * @see #getJsonForAudioForUser
    */
   private AudioAnswer getAnswer(String exerciseID, int user, boolean doFlashcard, String wavPath, File file, float score,
                                 String deviceType, String device, int reqid) {
@@ -943,13 +956,13 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @param request
+   * @param inputStream
    * @param saveFile
    * @throws IOException
    * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
    */
-  private void writeToOutputStream(HttpServletRequest request, File saveFile) throws IOException {
-    writeToFile(request.getInputStream(), saveFile);
+  private void writeToOutputStream(ServletInputStream inputStream, File saveFile) throws IOException {
+    writeToFile(inputStream, saveFile);
   }
 
   /**
@@ -999,6 +1012,7 @@ public class ScoreServlet extends DatabaseServlet {
       db = getDatabase();
       serverProps = db.getServerProps();
       audioFileHelper = getAudioFileHelperRef();
+      loadTesting = getLoadTesting();
     }
     return audioFileHelper;
   }
@@ -1027,6 +1041,19 @@ public class ScoreServlet extends DatabaseServlet {
       logger.error("huh? for " + db.getServerProps().getLanguage()+ " no existing audio file reference?");
     }
     return fileHelper;
+  }
+
+  private LoadTesting getLoadTesting() {
+    LoadTesting ref = null;
+
+    Object databaseReference = getServletContext().getAttribute(LOAD_TESTING);
+    if (databaseReference != null) {
+      ref = (LoadTesting) databaseReference;
+      // logger.debug("found existing audio file reference " + fileHelper + " under " + getServletContext());
+    } else {
+      logger.error("huh? for " + db.getServerProps().getLanguage()+ " no existing load test reference?");
+    }
+    return ref;
   }
 
   /**
