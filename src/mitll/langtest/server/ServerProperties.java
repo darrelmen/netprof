@@ -150,7 +150,7 @@ public class ServerProperties {
   }
 
   public int getWebservicePort() { 
-    int ip = Integer.parseInt(props.getProperty("webserviceHostPort", -1));
+    int ip = Integer.parseInt(props.getProperty("webserviceHostPort", "-1"));
     if(ip == 1)
       logger.error("No webservice host port found.");
     return ip;
