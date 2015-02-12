@@ -199,10 +199,7 @@ public abstract class ExercisePanel extends VerticalPanel implements
     vp.add(prompt);
   }
 
-  protected String getQuestionPrompt() {
-    //return getWrittenPrompt(true);
-    return "";
-  }
+  protected String getQuestionPrompt() { return "";  }
 
 /*  protected String getWrittenPrompt(boolean promptInEnglish) {
     return THREE_SPACES +
