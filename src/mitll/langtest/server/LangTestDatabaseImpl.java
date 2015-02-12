@@ -252,7 +252,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private Collection<CommonExercise> filterByUnrecorded(long userID, boolean onlyUnrecordedByMyGender, boolean onlyExamples,
                                                         Collection<CommonExercise> exercises) {
-    logger.debug("for " +userID + " only by same gender " + onlyUnrecordedByMyGender + " examples only " + onlyExamples + " from " + exercises.size());
+    logger.debug("for " + userID + " only by same gender " + onlyUnrecordedByMyGender + " examples only " + onlyExamples + " from " + exercises.size());
 
     if (onlyUnrecordedByMyGender) {
       Set<String> recordedBySameGender = onlyExamples ? db.getAudioDAO().getWithContext(userID) : db.getAudioDAO().getRecordedBy(userID);
@@ -1764,6 +1764,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return audioFileHelper.getAnswer(exerciseID, exercise1, user, doFlashcard, wavPath, file, deviceType, device, score);
   }*/
 
+  public void addToAudioTable(int user, CommonExercise exercise1, AudioAnswer audioAnswer) {
+    addToAudioTable(user,"regular",exercise1,exercise1.getID(),audioAnswer);
+  }
+
   /**
    * Remember this audio as reference audio for this exercise, and possibly clear the APRROVED (inspected) state
    * on the exercise indicating it needs to be inspected again (we've added new audio).
@@ -1779,7 +1783,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String exercise = exercise1 == null ? exerciseID : exercise1.getID();
     File fileRef = pathHelper.getAbsoluteFile(audioAnswer.getPath());
     String destFileName = audioType + "_" + System.currentTimeMillis() + "_by_" + user + ".wav";
-    String permanentAudioPath = new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise, exercise1.getForeignLanguage());
+    String foreignLanguage = exercise1 == null ? "" : exercise1.getForeignLanguage();
+    String permanentAudioPath = new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise, foreignLanguage);
     AudioAttribute audioAttribute =
         db.getAudioDAO().addOrUpdate(user, permanentAudioPath, exercise, System.currentTimeMillis(), audioType, audioAnswer.getDurationInMillis());
     audioAnswer.setPath(audioAttribute.getAudioRef());
