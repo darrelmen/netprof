@@ -126,23 +126,7 @@ public class ScoreServlet extends DatabaseServlet {
           if (split1.length != 2) {
             toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
           } else {
-            String first = split1[0];
-            String user = first.split("=")[1];
-
-            String second = split1[1];
-            String passwordH = second.split("=")[1];
-
-            User userFound = db.getUserDAO().getUser(user, passwordH);
-
-            logger.debug("hasUser " + user + " pass " + passwordH + " -> " + userFound);
-
-            toReturn.put(USERID,   userFound == null ? -1 : userFound.getId());
-            toReturn.put(HAS_RESET, userFound == null ? -1 : userFound.hasResetKey());
-            toReturn.put(TOKEN, userFound == null ? "" : userFound.getResetKey());
-            toReturn.put(PASSWORD_CORRECT,
-                userFound == null ? "false" :
-                    userFound.getPasswordHash() == null ? "false" :
-                        userFound.getPasswordHash().equalsIgnoreCase(passwordH));
+            gotHasUser(toReturn, split1);
           }
         } else if (queryString.startsWith(FORGOT_USERNAME)) {
           String[] split1 = queryString.split("&");
@@ -296,6 +280,26 @@ public class ScoreServlet extends DatabaseServlet {
     reply(response, x);
   }
 
+  private void gotHasUser(JSONObject toReturn, String[] split1) {
+    String first = split1[0];
+    String user = first.split("=")[1];
+
+    String second = split1[1];
+    String passwordH = second.split("=")[1];
+
+    User userFound = db.getUserDAO().getUser(user, passwordH);
+
+    logger.debug("hasUser " + user + " pass " + passwordH + " -> " + userFound);
+
+    toReturn.put(USERID,   userFound == null ? -1 : userFound.getId());
+    toReturn.put(HAS_RESET, userFound == null ? -1 : userFound.hasResetKey());
+    toReturn.put(TOKEN, userFound == null ? "" : userFound.getResetKey());
+    toReturn.put(PASSWORD_CORRECT,
+        userFound == null ? "false" :
+            userFound.getPasswordHash() == null ? "false" :
+                userFound.getPasswordHash().equalsIgnoreCase(passwordH));
+  }
+
   /**
    * Don't die if audio file helper is not available.
    * @return
@@ -446,7 +450,6 @@ public class ScoreServlet extends DatabaseServlet {
  //   String pathInfo = request.getPathInfo();
 //    logger.debug("ScoreServlet.doPost : Request " + request.getQueryString() + " path " + pathInfo +
 //        " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
-
     getAudioFileHelper();
 
     configureResponse(response);
@@ -464,16 +467,26 @@ public class ScoreServlet extends DatabaseServlet {
         String passwordH = request.getHeader(PASSWORD_H);
         String emailH = request.getHeader(EMAIL_H);
 
-        logger.debug("doPost : Request " + requestType + " for " + deviceType + " user " +user);
-        User user1 = db.addUser(user, passwordH, emailH, deviceType, device);
+        // first check if user exists already with this password -- if so go ahead and log them in.
+        User userFound = db.getUserDAO().getUser(user, passwordH);
 
-        if (user1 == null) {
-          jsonObject.put(EXISTING_USER_NAME, "");
-        } else {
-          jsonObject.put(USERID, user1.getId());
+       // logger.debug("hasUser " + user + " pass " + passwordH + " -> " + userFound);
+
+        if (userFound != null && !userFound.hasResetKey()) {
+          jsonObject.put(USERID, userFound.getId());
         }
-      } else if (requestType.startsWith(ALIGN) || requestType.startsWith(DECODE) || requestType.startsWith(Request.RECORD.toString().toLowerCase())) {
-        //jsonObject = getJsonForParts(request, requestType);
+        else {
+          logger.debug("doPost : Request " + requestType + " for " + deviceType + " user " + user);
+          User user1 = db.addUser(user, passwordH, emailH, deviceType, device);
+
+          if (user1 == null) {
+            jsonObject.put(EXISTING_USER_NAME, "");
+          } else {
+            jsonObject.put(USERID, user1.getId());
+          }
+        }
+      } else if (requestType.startsWith(ALIGN) || requestType.startsWith(DECODE) ||
+          requestType.startsWith(Request.RECORD.toString().toLowerCase())) {
         boolean isMultipart = ServletFileUpload.isMultipartContent(request);
         logger.debug("doPost : Request " + requestType + " for " + deviceType);
 
@@ -485,24 +498,7 @@ public class ScoreServlet extends DatabaseServlet {
         }
       } else if (requestType.startsWith(EVENT)) {
         // log event
-        String user = request.getHeader(USER);
-        String context = request.getHeader("context");
-        String exid = request.getHeader("exid");
-        String widgetid = request.getHeader("widget");
-        String widgetType = request.getHeader("widgetType");
-
-        logger.debug("doPost : Request " + requestType + " for " + deviceType + " user " + user + " " + exid);
-
-        long userid = getUserFromParam2(user);
-        if (db.getUserDAO().getUserWhere(userid) == null) {
-          jsonObject.put(ERROR, "unknown user " + userid);
-        } else {
-          if (widgetid == null) {
-            db.logEvent(exid == null ? "N/A" : exid, context, userid, device);
-          } else {
-            db.logEvent(widgetid, widgetType, exid == null ? "N/A" : exid, context, userid, device);
-          }
-        }
+        gotLogEvent(request, requestType, deviceType, device, jsonObject);
       } else {
         jsonObject.put(ERROR, "unknown req " + requestType);
       }
@@ -519,8 +515,28 @@ public class ScoreServlet extends DatabaseServlet {
 
     PrintWriter writer = response.getWriter();
     writer.println(jsonObject.toString());
-
     writer.close();
+  }
+
+  private void gotLogEvent(HttpServletRequest request, String requestType, String deviceType, String device, JSONObject jsonObject) {
+    String user = request.getHeader(USER);
+    String context = request.getHeader("context");
+    String exid = request.getHeader("exid");
+    String widgetid = request.getHeader("widget");
+    String widgetType = request.getHeader("widgetType");
+
+ //   logger.debug("doPost : Request " + requestType + " for " + deviceType + " user " + user + " " + exid);
+
+    long userid = getUserFromParam2(user);
+    if (db.getUserDAO().getUserWhere(userid) == null) {
+      jsonObject.put(ERROR, "unknown user " + userid);
+    } else {
+      if (widgetid == null) {
+        db.logEvent(exid == null ? "N/A" : exid, context, userid, device);
+      } else {
+        db.logEvent(widgetid, widgetType, exid == null ? "N/A" : exid, context, userid, device);
+      }
+    }
   }
 
   private long getUserFromParam2(String user) {
@@ -545,6 +561,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @param request
    * @return
    * @see #doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @deprecated we use getJsonForAudio instead
    */
   private JSONObject getJsonForParts(HttpServletRequest request, String requestType) {
     long then = System.currentTimeMillis();
@@ -566,12 +583,12 @@ public class ScoreServlet extends DatabaseServlet {
       Iterator<FileItem> iterator = items.iterator();
       FileItem next = iterator.next();
 
-      logger.debug("got " + next.getContentType() + " " + next.getFieldName() + " " + next.getString() + " " + next.isInMemory() + " " + next.getSize());
+      logger.debug("getJsonForParts got " + next.getContentType() + " " + next.getFieldName() + " " + next.getString() + " " + next.isInMemory() + " " + next.getSize());
       InputStream inputStream = next.getInputStream();
       BufferedReader bufferedReader = getBufferedReader(inputStream);
       String word = bufferedReader.readLine();
       bufferedReader.close();
-      logger.debug("word is " + word);
+//      logger.debug("word is " + word);
 
       next = iterator.next();
       String name = next.getName();
@@ -756,14 +773,16 @@ public class ScoreServlet extends DatabaseServlet {
       String user = request.getHeader(USER);
       String exerciseID = request.getHeader("exercise");
       int reqid = getReqID(request);
-      logger.debug("getJsonForAudio got request " + requestType + " for user " + user + " exercise " + exerciseID + " req " + reqid);
+      logger.debug("getJsonForAudio got request " + requestType + " for user " + user + " exercise " + exerciseID +
+          " req " + reqid);
       int i = getUserFromParam(user);
       String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, 0, i);
       File saveFile = pathHelper.getAbsoluteFile(wavPath);
       new File(saveFile.getParent()).mkdirs();
 
       writeToOutputStream(request.getInputStream(), saveFile);
-      return getJsonForAudioForUser(reqid, exerciseID, i, Request.valueOf(requestType.toUpperCase()), wavPath, saveFile, deviceType, device);
+      return getJsonForAudioForUser(reqid, exerciseID, i, Request.valueOf(requestType.toUpperCase()), wavPath, saveFile,
+          deviceType, device);
     } else {   // for backwards compatibility
       return handleRequestWithNoType(request);
     }
@@ -802,8 +821,6 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
-//  private boolean isDecode(String requestType) { return "decode".equalsIgnoreCase(requestType); }
-
   /**
    * @param reqid label response with req id so the client can tell if it got a stale response
    * @param exerciseID for this exercise
@@ -826,8 +843,6 @@ public class ScoreServlet extends DatabaseServlet {
     if (exercise1 == null) {
       jsonForScore.put("valid", "bad_exercise_id");
     } else {
-   //   logger.debug("Req = " +reqid);
-
       boolean doFlashcard = request == Request.DECODE;
       AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, deviceType, device, exercise1);
       long now = System.currentTimeMillis();
@@ -842,11 +857,19 @@ public class ScoreServlet extends DatabaseServlet {
         if (doFlashcard) {
           jsonForScore.put(IS_CORRECT, answer.isCorrect());
           jsonForScore.put(SAID_WORD, answer.isSaidAnswer());
+          // attempt to get more feedback when we're too sensitive and match the unknown model
+          if (!answer.isCorrect() && !answer.isSaidAnswer() //&& pretestScore != null && pretestScore.getsTypeToEndTimes().isEmpty()
+              ) {
+            answer = getAudioAnswer(reqid, exerciseID, user, false, wavPath, saveFile, deviceType, device, exercise1);
+            jsonForScore = getJsonForScore(pretestScore);
+            jsonForScore.put(IS_CORRECT, false);
+            jsonForScore.put(SAID_WORD, true);   // we're going to say we said it...?
+          }
         }
       }
       addValidity(exerciseID, jsonForScore, answer);
 
-      if (request == Request.RECORD) {
+      if (request == Request.RECORD) { // this is OK, since we didn't actually do alignment on the audio...
         loadTesting.addToAudioTable(user,exercise1,answer);
       }
     }
@@ -949,7 +972,8 @@ public class ScoreServlet extends DatabaseServlet {
                                 String deviceType, String device, int reqid) {
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
 
-    AudioAnswer answer = audioFileHelper.getAnswer(exerciseID, exercise1, user, doFlashcard, wavPath, file, deviceType, device, score, reqid);
+    AudioAnswer answer = audioFileHelper.getAnswer(exerciseID, exercise1, user, doFlashcard, wavPath, file, deviceType,
+        device, score, reqid);
     ensureMP3(answer.getPath(), exercise1.getForeignLanguage());
 
     return answer;
@@ -966,17 +990,17 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @param book
+   * @param score
    * @return
    * @see #getJsonForAudioForUser
    * @see #getJsonForWordAndAudio
    * @see #getJsonForWordAndAudioFlashcard
    */
-  private JSONObject getJsonForScore(PretestScore book) {
+  private JSONObject getJsonForScore(PretestScore score) {
     JSONObject jsonObject = new JSONObject();
-    jsonObject.put(SCORE, book.getHydecScore());
+    jsonObject.put(SCORE, score.getHydecScore());
 
-    for (Map.Entry<NetPronImageType, List<TranscriptSegment>> pair : book.getsTypeToEndTimes().entrySet()) {
+    for (Map.Entry<NetPronImageType, List<TranscriptSegment>> pair : score.getsTypeToEndTimes().entrySet()) {
       List<TranscriptSegment> value = pair.getValue();
       JSONArray value1 = new JSONArray();
 
