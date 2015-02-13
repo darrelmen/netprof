@@ -42,9 +42,7 @@ public class DatabaseServlet extends HttpServlet {
    * @param wavFile
    * @param title
    */
-  protected void ensureMP3(String wavFile, String title) {
-    ensureMP3(wavFile, pathHelper, configDir, title);
-  }
+  protected void ensureMP3(String wavFile, String title) { ensureMP3(wavFile, pathHelper, configDir, title);  }
 
   private boolean ensureMP3(String wavFile, PathHelper pathHelper, String configDir, String title) {
     if (wavFile != null) {
