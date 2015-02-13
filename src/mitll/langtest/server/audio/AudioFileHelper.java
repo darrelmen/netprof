@@ -181,19 +181,19 @@ public class AudioFileHelper implements CollationSort {
 
     AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
     boolean isValid = validity.validity == AudioAnswer.Validity.OK || (serverProps.isQuietAudioOK() && validity.validity == AudioAnswer.Validity.TOO_QUIET);
-    return getAudioAnswer(exerciseID, exercise1, questionID, user, reqid, audioType, doFlashcard, recordInResults,
+    return getAudioAnswerDecoding(exerciseID, exercise1, questionID, user, reqid, audioType, doFlashcard, recordInResults,
         recordedWithFlash, wavPath, file, validity, isValid
         , deviceType, device
     );
   }
 
   /**
+   * TODO : this is misleading - if doFlashcard is true, it does decoding, otherwise it does *not* do alignment
    * @see mitll.langtest.server.ScoreServlet#getAnswer
-   * @param request
    * @param exerciseID
    * @param exercise1
    * @param user
-   * @param request
+   * @param doFlashcard
    * @param wavPath
    * @param file
    * @param deviceType
@@ -211,9 +211,9 @@ public class AudioFileHelper implements CollationSort {
             (serverProps.isQuietAudioOK() && validity.validity == AudioAnswer.Validity.TOO_QUIET);
 
     return doFlashcard ?
-        getAudioAnswer(exerciseID, exercise1, 0, user, reqid, audioType, doFlashcard, true, true, wavPath, file,
+        getAudioAnswerDecoding(exerciseID, exercise1, 0, user, reqid, audioType, doFlashcard, true, true, wavPath, file,
             validity, isValid, deviceType, device) :
-        getAudioAnswer(exerciseID, exercise1, 0, user, reqid, audioType, doFlashcard, true, true, wavPath, file,
+        getAudioAnswerAlignment(exerciseID, exercise1, 0, user, reqid, audioType, doFlashcard, true, true, wavPath, file,
             validity, isValid, score, deviceType, device)
         ;
   }
@@ -238,39 +238,89 @@ public class AudioFileHelper implements CollationSort {
    * @param device
    * @return
    */
-  private AudioAnswer getAudioAnswer(String exerciseID, CommonExercise exercise1,
-                                     int questionID,
-                                     int user,
-                                     int reqid,
-                                     String audioType, boolean doFlashcard, boolean recordInResults,
-                                     boolean recordedWithFlash, String wavPath, File file,
-                                     AudioCheck.ValidityAndDur validity, boolean isValid,
-                                     String deviceType, String device) {
-    if (!isValid) {
-      logger.warn("got invalid audio file (" + validity +
-          ") user = " + user + " exerciseID " + exerciseID +
-          " question " + questionID + " file " + file.getAbsolutePath());
-    }
-
-    String url = pathHelper.ensureForwardSlashes(wavPath);
-
-    AudioAnswer answer = (isValid && !serverProps.isNoModel()) ?
-        getAudioAnswer(
-            exercise1,
-            reqid, file, validity, url, doFlashcard) :
-        new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
+  private AudioAnswer getAudioAnswerDecoding(String exerciseID, CommonExercise exercise1,
+                                             int questionID,
+                                             int user,
+                                             int reqid,
+                                             String audioType, boolean doFlashcard, boolean recordInResults,
+                                             boolean recordedWithFlash, String wavPath, File file,
+                                             AudioCheck.ValidityAndDur validity, boolean isValid,
+                                             String deviceType, String device) {
+    checkValidity(exerciseID, questionID, user, file, validity, isValid);
+    AudioAnswer answer = getAudioAnswer(exercise1, reqid, doFlashcard, wavPath, file, validity, isValid);
 
     if (recordInResults) {
-      JSONObject json = getJson(answer);
-
       long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
-          isValid, audioType, validity.durationInMillis, answer.isCorrect(), (float) answer.getScore(), recordedWithFlash, deviceType, device, json.toString());
+          isValid, audioType, validity.durationInMillis, answer.isCorrect(), (float) answer.getScore(),
+          recordedWithFlash, deviceType, device, getJson(answer).toString());
       answer.setResultID(answerID);
 
       recordWordAndPhoneInfo(answer, answerID);
     }
     logger.debug("writeAudioFile answer " + answer);
     return answer;
+  }
+
+  private void checkValidity(String exerciseID, int questionID, int user, File file, AudioCheck.ValidityAndDur validity,
+                             boolean isValid) {
+    if (!isValid) {
+      logger.warn("got invalid audio file (" + validity +
+          ") user = " + user + " exerciseID " + exerciseID +
+          " question " + questionID + " file " + file.getAbsolutePath());
+    }
+  }
+
+  /**
+   *
+   * @param exerciseID
+   * @param exercise1
+   * @param questionID
+   * @param user
+   * @param reqid
+   * @param audioType
+   * @param doFlashcard
+   * @param recordInResults
+   * @param recordedWithFlash
+   * @param wavPath
+   * @param file
+   * @param validity
+   * @param isValid
+   * @param score
+   * @param deviceType
+   * @param device
+   * @return
+   * @see #getAnswer(String, mitll.langtest.shared.CommonExercise, int, boolean, String, java.io.File, String, String, float, int)
+   */
+  private AudioAnswer getAudioAnswerAlignment(String exerciseID, CommonExercise exercise1,
+                                              int questionID,
+                                              int user,
+                                              int reqid,
+                                              String audioType, boolean doFlashcard, boolean recordInResults,
+                                              boolean recordedWithFlash, String wavPath, File file,
+                                              AudioCheck.ValidityAndDur validity, boolean isValid,
+                                              float score, String deviceType, String device) {
+    checkValidity(exerciseID, questionID, user, file, validity, isValid);
+    AudioAnswer answer = getAudioAnswer(exercise1, reqid, doFlashcard, wavPath, file, validity, isValid);
+
+    if (recordInResults) {
+      long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
+          isValid, audioType, validity.durationInMillis, true, score, recordedWithFlash, deviceType, device,
+          getJson(answer).toString());
+      answer.setResultID(answerID);
+    }
+    logger.debug("getAudioAnswerAlignment answer " + answer);
+    return answer;
+  }
+
+  private AudioAnswer getAudioAnswer(CommonExercise exercise1, int reqid, boolean doFlashcard, String wavPath, File file,
+                                     AudioCheck.ValidityAndDur validity, boolean isValid) {
+    String url = pathHelper.ensureForwardSlashes(wavPath);
+
+    return (isValid && !serverProps.isNoModel()) ?
+        getAudioAnswer(
+            exercise1,
+            reqid, file, validity, url, doFlashcard) :
+        new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
   }
 
   private void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
@@ -361,58 +411,6 @@ public class AudioFileHelper implements CollationSort {
     BigDecimal bd = new BigDecimal(Float.toString(d));
     bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
     return bd.floatValue();
-  }
-
-  /**
-   *
-   * @param exerciseID
-   * @param exercise1
-   * @param questionID
-   * @param user
-   * @param reqid
-   * @param audioType
-   * @param doFlashcard
-   * @param recordInResults
-   * @param recordedWithFlash
-   * @param wavPath
-   * @param file
-   * @param validity
-   * @param isValid
-   * @param score
-   * @param deviceType
-   * @param device
-   * @return
-   * @see #getAnswer(String, mitll.langtest.shared.CommonExercise, int, String, String, java.io.File, String, String, float, int)
-   */
-  private AudioAnswer getAudioAnswer(String exerciseID, CommonExercise exercise1,
-                                     int questionID,
-                                     int user,
-                                     int reqid,
-                                     String audioType, boolean doFlashcard, boolean recordInResults,
-                                     boolean recordedWithFlash, String wavPath, File file,
-                                     AudioCheck.ValidityAndDur validity, boolean isValid,
-                                     float score, String deviceType, String device) {
-    if (!isValid) {
-      logger.warn("got invalid audio file (" + validity +
-          ") user = " + user + " exerciseID " + exerciseID +
-          " question " + questionID + " file " + file.getAbsolutePath());
-    }
-
-    String url = pathHelper.ensureForwardSlashes(wavPath);
-
-    AudioAnswer answer = (isValid && !serverProps.isNoModel()) ?
-        getAudioAnswer(
-            exercise1,
-            reqid, file, validity, url, doFlashcard) :
-        new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
-
-    if (recordInResults) {
-      long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
-          isValid, audioType, validity.durationInMillis, true, score, recordedWithFlash, deviceType, device, getJson(answer).toString());
-      answer.setResultID(answerID);
-    }
-    logger.debug("writeAudioFile answer " + answer);
-    return answer;
   }
 
   /**
@@ -650,7 +648,7 @@ public class AudioFileHelper implements CollationSort {
    * @param file
    * @param validity
    * @param url
-   * @param doFlashcard true if should do decoding
+   * @param doFlashcard true if should do decoding false if should not do anything
    * @return
    */
   private AudioAnswer getAudioAnswer(CommonExercise exercise,

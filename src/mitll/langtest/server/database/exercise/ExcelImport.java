@@ -104,7 +104,7 @@ public class ExcelImport implements ExerciseDAO {
     this.unitIndex = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
     this.weekIndex = serverProps.getUnitChapterWeek()[2];
-//    logger.debug("unit " + unitIndex + " chapter " +chapterIndex + " week " +weekIndex);
+    if (debug) logger.debug("unit " + unitIndex + " chapter " +chapterIndex + " week " +weekIndex);
   }
 
   @Override
@@ -1008,7 +1008,7 @@ public class ExcelImport implements ExerciseDAO {
           } else {
             missing++;
             c++;
-            if (c < 11) {
+            if (c < 5) {
               logger.warn("file " + test.getAbsolutePath() + " does not exist - \t" + audio.getAudioRef());
               if (c < 2) {
                 logger.warn("installPath " + installPath + "mediaDir " + mediaDir +" mediaDir1 " + mediaDir1);
