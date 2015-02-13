@@ -53,10 +53,12 @@ public class SectionHelper {
           }
         });
       }
+     // logger.debug("1 Valid types " + types + " vs predef " + predefinedTypeOrder);
+
       return types;
     } else {
       Set<String> validTypes = typeToUnitToLesson.keySet();
-     // logger.debug("Valid types " + validTypes + " vs predef " + predefinedTypeOrder);
+   //   logger.debug("2 Valid types " + validTypes + " vs predef " + predefinedTypeOrder);
       List<String> valid = new ArrayList<String>(predefinedTypeOrder);
       valid.retainAll(validTypes);
       return valid;
