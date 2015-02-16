@@ -25,13 +25,12 @@ public class AudioDAO extends DAO {
   private static final String AUDIO_TYPE = "audioType";
   private static final String DURATION = "duration";
   private static final String DEFECT = "defect";
- // public static final String REGULAR1 = "regular";
   private static final String REGULAR =  "regular";
   private static final String AUDIO_TYPE1 = "context=" + REGULAR;
   private static final String SLOW = "slow";
   private static final String CONTEXT_REGULAR = AUDIO_TYPE1;
 
-  // private final boolean debug = false;
+  private final boolean debug = false;
   private final Connection connection;
   private final UserDAO userDAO;
 
@@ -428,7 +427,7 @@ public class AudioDAO extends DAO {
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
-    logger.debug("both speeds " + results.size());
+    //logger.debug("both speeds " + results.size());
     return results.size();
   }
 
@@ -747,8 +746,7 @@ public class AudioDAO extends DAO {
       //logger.debug("addOrUpdate " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
       Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + AUDIO +
-          " " +
-          "SET " +
+          " SET " +
           AUDIO_REF +
           "=?," +
           Database.TIME +
@@ -774,12 +772,15 @@ public class AudioDAO extends DAO {
 
       AudioAttribute audioAttr = null;
       if (i == 0) {
-        logger.debug("\taddOrUpdate *adding* entry for  " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
+        logger.debug("\taddOrUpdate *adding* entry for  " + userid + " " + audioRef + " ex " + exerciseID +// " at " + new Date(timestamp) +
+            " type " + audioType + " dur " + durationInMillis);
 
         long l = addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
         audioAttr = getAudioAttribute((int) l, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
       } else {
-        logger.debug("\taddOrUpdate updating entry for  " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
+        logger.debug("\taddOrUpdate updating entry for  " + userid + " " + audioRef + " ex " + exerciseID +
+            //" at " + new Date(timestamp) +
+            " type " + audioType + " dur " + durationInMillis);
 
         List<AudioAttribute> audioAttributes = getAudioAttributes(exerciseID);
         //logger.debug("for  " +exerciseID + " found " + audioAttributes);
@@ -829,8 +830,7 @@ public class AudioDAO extends DAO {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + AUDIO +
-          " " +
-          "SET " +
+          " SET " +
           Database.EXID +
           "=? " +
           "WHERE " +
@@ -931,8 +931,8 @@ public class AudioDAO extends DAO {
       new Exception().printStackTrace();
     }
 
-    logger.debug("addAudio : by " + userid + " for ex " + exerciseID + " type " + audioType + " ref " + audioRef);
-    int before = getCount(AUDIO);
+    // logger.debug("addAudio : by " + userid + " for ex " + exerciseID + " type " + audioType + " ref " + audioRef);
+    int before = debug ? getCount(AUDIO) : 0;
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " + AUDIO +
         "(" +
@@ -961,13 +961,13 @@ public class AudioDAO extends DAO {
     if (newID == -1) {
       logger.error("addAudio : huh? no key was generated?");
     } else {
-      logger.debug("key was " + newID);
+      //logger.debug("key was " + newID);
     }
 
     statement.close();
     connection.commit();
 
-    int after = getCount(AUDIO);
+    int after = debug ? getCount(AUDIO) : 1;
     if (before == after) {
       logger.error("huh? after adding " + after + " but before " + before);
     }
