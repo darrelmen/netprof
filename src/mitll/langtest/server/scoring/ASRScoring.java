@@ -75,7 +75,7 @@ public class ASRScoring extends Scoring implements CollationSort {
    * If the score was below a threshold, or the magic -1, we keep it around for future study.
    */
   private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
-  private LTSFactory ltsFactory;
+  private final LTSFactory ltsFactory;
 
   /**
    * @param deployPath
@@ -119,9 +119,7 @@ public class ASRScoring extends Scoring implements CollationSort {
     isMandarin = language.equalsIgnoreCase("mandarin");
     ltsFactory = new LTSFactory(languageProperty);
     this.letterToSoundClass = ltsFactory.getLTSClass(language);
-    // this.htkDictionary = dict;
     makeDecoder();
-    // if (dict != null) logger.debug("htkDictionary size is " + dict.size());
     this.configFileCreator = new ConfigFileCreator(properties, letterToSoundClass, scoringDir);
   }
 
@@ -202,13 +200,10 @@ public class ASRScoring extends Scoring implements CollationSort {
       logger.error("lts " + language + "/" + lts + " failed on '" + foreignLanguagePhrase + "'", e);
       return false;
     }
-   // Collection<String> strings = checkLTS2(lts, foreignLanguagePhrase);
-
-   // logger.debug("phrase '" +foreignLanguagePhrase+ "' has bag of phones : " + strings);
     return true;
   }
 
-  int multiple = 0;
+  private int multiple = 0;
   /**
    * Might be n1 x n2 x n3 different possible combinations of pronunciations of a phrase
    * Consider running ASR on all ref audio to get actual phone sequence.
@@ -296,16 +291,12 @@ public class ASRScoring extends Scoring implements CollationSort {
   }
 
   public static class PhoneInfo {
-    private List<String> firstPron;
-    private Set<String> phoneSet;
+    private final List<String> firstPron;
+    private final Set<String> phoneSet;
 
     public PhoneInfo(List<String> firstPron, Set<String> phoneSet) {
       this.firstPron = firstPron;
       this.phoneSet = phoneSet;
-    }
-
-    public String toString() {
-      return "Phones " + getPhoneSet() + " " + getFirstPron();
     }
 
     public List<String> getFirstPron() {
@@ -315,8 +306,11 @@ public class ASRScoring extends Scoring implements CollationSort {
     public Set<String> getPhoneSet() {
       return phoneSet;
     }
-  }
 
+    public String toString() {
+      return "Phones " + getPhoneSet() + " " + getFirstPron();
+    }
+  }
 
   /**
    * For chinese, maybe later other languages.
@@ -332,10 +326,7 @@ public class ASRScoring extends Scoring implements CollationSort {
       builder.append(svDecoderHelper.segmentation(token.trim()));
       builder.append(" ");
     }
-    String s = builder.toString();
-   // logger.debug("getSegmented phrase '" + longPhrase + "' -> '" + s + "'");
-
-    return s;
+    return builder.toString();
   }
 
 /*  private Set<String> wordsInDict = new HashSet<String>();
@@ -526,6 +517,7 @@ public class ASRScoring extends Scoring implements CollationSort {
       sentence = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") +getSegmented(sentence.trim()); // segmentation method will filter out the UNK model
     }
     if (scores == null) {
+      if (DEBUG) logger.debug("no cached score for file '" + key + "', so doing " + (decode ? "decoding" : "alignment"));
       scores = calcScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir);
       audioToScore.put(key, scores);
     }
@@ -576,8 +568,7 @@ public class ASRScoring extends Scoring implements CollationSort {
    * @return
    */
   public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
-    List<String> backgroundVocab = svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT);
-    return getUniqueTokensInLM(lmSentences, backgroundVocab);
+    return getUniqueTokensInLM(lmSentences, svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT));
   }
 
   /**
@@ -797,74 +788,5 @@ public class ASRScoring extends Scoring implements CollationSort {
   private Scores getEmptyScores() {
     Map<String, Map<String, Float>> eventScores = Collections.emptyMap();
     return new Scores(0f, eventScores);
-  }
-
-  /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#getValidPhrases(java.util.Collection)
-   * @param phrases
-   * @return
-   */
-  public Collection<String> getValidPhrases(Collection<String> phrases) { return getValidSentences(phrases); }
-
-  /**
-   * @see #isValid(String)
-   * @param phrase
-   * @return
-   */
-  private boolean isPhraseInDict(String phrase) {  return letterToSoundClass.process(phrase) != null;  }
-
-  /**
-   * @see #getValidPhrases(java.util.Collection)
-   * @param sentences
-   * @return
-   */
-  private Collection<String> getValidSentences(Collection<String> sentences) {
-    Set<String> filtered = new TreeSet<String>();
-    Set<String> skipped = new TreeSet<String>();
-
-    for (String sentence : sentences) {
-      Collection<String> tokens = svDecoderHelper.getTokens(sentence);
-      boolean valid = true;
-      for (String token : tokens) {
-        if (!isValid(token)) {
-          //logger.warn("\tgetValidSentences : token '" + token + "' is not in dictionary.");
-
-          valid = false;
-        }
-      }
-      if (valid) filtered.add(sentence);
-      else {
-        skipped.add(sentence);
-       // logger.warn("getValidSentences : skipping '" + sentence + "' which is not in dictionary.");
-      }
-    }
-
-    if (!skipped.isEmpty()) {
-      logger.warn("getValidSentences : skipped " + skipped.size() + " sentences : " + skipped  );
-    }
-
-    return filtered;
-  }
-
-  /**
-   * @see #getValidSentences(java.util.Collection)
-   * @param token
-   * @return
-   */
-  private boolean isValid(String token) { return checkToken(token) && isPhraseInDict(token);  }
-
-  private boolean checkToken(String token) {
-    boolean valid = true;
-    if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL)) return true;
-    for (int i = 0; i < token.length() && valid; i++) {
-      char c = token.charAt(i);
-      if (Character.isDigit(c)) {
-        valid = false;
-      }
-      if (Character.UnicodeBlock.of(c) == Character.UnicodeBlock.BASIC_LATIN) {
-        valid = false;
-      }
-    }
-    return valid;
   }
 }
