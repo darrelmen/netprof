@@ -860,10 +860,12 @@ public class ScoreServlet extends DatabaseServlet {
           // attempt to get more feedback when we're too sensitive and match the unknown model
           if (!answer.isCorrect() && !answer.isSaidAnswer() //&& pretestScore != null && pretestScore.getsTypeToEndTimes().isEmpty()
               ) {
-            answer = getAudioAnswer(reqid, exerciseID, user, false, wavPath, saveFile, deviceType, device, exercise1);
-            jsonForScore = getJsonForScore(pretestScore);
+            answer = getAudioAnswerAlign(reqid, exerciseID, user, false, wavPath, saveFile, deviceType, device, exercise1);
+            logger.debug("Alignment on an unknown model gets " + answer.getPretestScore());
+         //   logger.debug("score info " + answer.getPretestScore().getsTypeToEndTimes());
+            jsonForScore = getJsonForScore(answer.getPretestScore());
             jsonForScore.put(IS_CORRECT, false);
-            jsonForScore.put(SAID_WORD, true);   // we're going to say we said it...?
+            jsonForScore.put(SAID_WORD, false);   // don't say they said the word - decode says they didn't
           }
         }
       }
@@ -907,6 +909,27 @@ public class ScoreServlet extends DatabaseServlet {
       answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(), deviceType, device, reqid);
       answer.setPretestScore(asrScoreForAudio);
     }
+    return answer;
+  }
+
+  /**
+   * @see #getJsonForAudio
+   * @param reqid
+   * @param exerciseID
+   * @param user
+   * @param doFlashcard
+   * @param wavPath
+   * @param saveFile
+   * @param deviceType
+   * @param device
+   * @param exercise1
+   * @return
+   */
+  private AudioAnswer getAudioAnswerAlign(int reqid, String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile,
+                                          String deviceType, String device, CommonExercise exercise1) {
+    PretestScore asrScoreForAudio = getASRScoreForAudioNoCache(reqid, saveFile.getAbsolutePath(), exercise1.getRefSentence(), exerciseID);
+    AudioAnswer answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(), deviceType, device, reqid);
+    answer.setPretestScore(asrScoreForAudio);
     return answer;
   }
 
@@ -1116,6 +1139,14 @@ public class ScoreServlet extends DatabaseServlet {
                                            String exerciseID) {
     return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, 128, 128, false,
         false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID);
+  }
+
+  private PretestScore getASRScoreForAudioNoCache(int reqid, String testAudioFile, String sentence,
+                                              String exerciseID) {
+  //  logger.debug("getASRScoreForAudioNoCache for " + testAudioFile + " under " + sentence);
+
+    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, 128, 128, false,
+        false, Files.createTempDir().getAbsolutePath(), false, exerciseID);
   }
 
   /**
