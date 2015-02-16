@@ -252,10 +252,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private Collection<CommonExercise> filterByUnrecorded(long userID, boolean onlyUnrecordedByMyGender, boolean onlyExamples,
                                                         Collection<CommonExercise> exercises) {
-    logger.debug("for " + userID + " only by same gender " + onlyUnrecordedByMyGender + " examples only " + onlyExamples + " from " + exercises.size());
-
     if (onlyUnrecordedByMyGender) {
-      Set<String> recordedBySameGender = onlyExamples ? db.getAudioDAO().getWithContext(userID) : db.getAudioDAO().getRecordedBy(userID);
+      logger.debug("for " + userID + " only by same gender " + onlyUnrecordedByMyGender +
+          " examples only " + onlyExamples + " from " + exercises.size());
+      Set<String> recordedBySameGender = onlyExamples ? db.getAudioDAO().getWithContext(userID) :
+          db.getAudioDAO().getRecordedBy(userID);
       Set<String> allExercises = new HashSet<String>();
 
       for (CommonExercise exercise : exercises) {
@@ -1815,7 +1816,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @see #getExercises
    */
-  void makeAutoCRT() {  audioFileHelper.makeAutoCRT(relativeConfigDir, this);  }
+  void makeAutoCRT() {
+    audioFileHelper.makeAutoCRT(relativeConfigDir, this);  }
 
   @Override
   public Map<User, Integer> getUserToResultCount() { return db.getUserToResultCount();  }
