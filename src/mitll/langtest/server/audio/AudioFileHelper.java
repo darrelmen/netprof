@@ -104,7 +104,6 @@ public class AudioFileHelper implements CollationSort {
 /*
         ExerciseSorter exerciseSorter = new ExerciseSorter(db.getSectionHelper().getTypeOrder());
      //   exerciseSorter.getSortedByUnitThenPhone(exercises, false, phoneToCount,true);
-      //  exerciseSorter.getSortedByUnitThenPhone(exercises, false, phoneToCount,true);
 
         List<CommonExercise>  copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, 1, getCollator());
 
@@ -534,14 +533,16 @@ public class AudioFileHelper implements CollationSort {
                                           int width, int height, boolean useScoreToColorBkg,
                                           boolean decode, String tmpDir, boolean useCache, String prefix) {
     logger.debug("getASRScoreForAudio (" + serverProps.getLanguage() + ")" +
-        " scoring " + testAudioFile + " with sentence '" + sentence + "' req# " + reqid);
+        " scoring " + testAudioFile + " with sentence '" + sentence + "' req# " + reqid + (useCache ? " check cache" : " NO CACHE"));
 
     makeASRScoring();
     if (testAudioFile == null) {
+      logger.error("huh? no test audio file for " + sentence);
       return new PretestScore(); // very defensive
     }
     testAudioFile = dealWithMP3Audio(testAudioFile);
     if (!new File(testAudioFile).exists()) {
+      logger.error("huh? no testAudioFile for " + sentence + " at " + new File(testAudioFile).getAbsolutePath());
       return new PretestScore();
     }
 
