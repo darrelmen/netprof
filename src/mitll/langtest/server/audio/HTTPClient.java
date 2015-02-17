@@ -1,6 +1,9 @@
 package mitll.langtest.server.audio;
 
 import java.net.*;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CodingErrorAction;
 import java.io.*;
 
 import mitll.langtest.server.scoring.ASRWebserviceScoring;
@@ -11,9 +14,12 @@ import org.apache.log4j.Logger;
 public class HTTPClient {
 
 	private HttpURLConnection httpConn;
-	private OutputStreamWriter sender;
+	//private OutputStreamWriter sender;
+	private BufferedWriter sender;
 	private BufferedReader receiver;
+	@SuppressWarnings("unused")
 	private String webserviceIP;
+	@SuppressWarnings("unused")
 	private int webservicePort;
 	private String url;
 	private static final Logger logger = Logger.getLogger(HTTPClient.class);
@@ -32,7 +38,6 @@ public class HTTPClient {
 		}
 	}
 
-	/* private methods */
 
 	private HttpURLConnection setupHttpConn(String url) throws IOException {
 		HttpURLConnection httpConn = (HttpURLConnection)(new URL(url)).openConnection();
@@ -40,9 +45,10 @@ public class HTTPClient {
 		httpConn.setDoOutput(true);
 		httpConn.setConnectTimeout(5000);
 		httpConn.setReadTimeout(20000);
-		httpConn.setRequestProperty("Content-Type", "application/json");    
-		httpConn.setRequestProperty("Accept-Charset", "UTF-8");
-		httpConn.setRequestProperty("charset", "UTF-8");
+		//httpConn.setRequestProperty("Content-Type", "application/json; charset=utf-8");  
+		httpConn.setRequestProperty("Content-Type", "text/plain; charset=utf-8");  
+		httpConn.setRequestProperty("Accept-Charset", "UTF8");
+		httpConn.setRequestProperty("charset", "UTF8");
 		return httpConn;
 	}
 
@@ -56,7 +62,11 @@ public class HTTPClient {
 	}
 
 	private void send(String input) throws IOException {
-		sender = new OutputStreamWriter(httpConn.getOutputStream(), "UTF-8");
+		logger.debug("SEND INPUT: " + input);
+		CharsetEncoder encoder = Charset.forName("UTF-8").newEncoder();
+		encoder.onMalformedInput(CodingErrorAction.REPORT);
+		encoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+		sender = new BufferedWriter(new OutputStreamWriter(httpConn.getOutputStream(), encoder));
 		sender.write(input);
 		sender.flush();    
 		sender.close();
@@ -64,7 +74,7 @@ public class HTTPClient {
 	}
 
 	private String receive() throws IOException {
-		receiver = new BufferedReader(new InputStreamReader(httpConn.getInputStream(), "UTF-8"));
+		receiver = new BufferedReader(new InputStreamReader(httpConn.getInputStream(), "UTF8"));
 		int code = httpConn.getResponseCode();
 		if(code == 200) {
 			String output = "";
@@ -82,14 +92,10 @@ public class HTTPClient {
 		}
 	}
 
-	/* public methods */
-
 	public String sendAndReceive(String input) {
 		try {
 			send(input);
 			String response = receive();
-			//closeConn();
-			//resetConn();
 			return response;
 		}
 		catch(IOException e) {
