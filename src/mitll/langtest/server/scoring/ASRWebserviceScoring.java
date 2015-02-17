@@ -19,14 +19,8 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
-
-
-//import pronz.dirs.Dirs;
-//import pronz.speech.Audio;
-//import pronz.speech.Audio$;
 import scala.Tuple2;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
@@ -436,9 +430,10 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 		logger.debug("Converting: " + (testAudioDir + File.separator + testAudioFileNoSuffix + ".wav to: " + rawAudioPath));
 		// TODO remove the 16k hardcoding?
 		double duration = (new AudioCheck()).getDurationInSeconds(wavFile);
-		int end = (int)((duration * 16000.0) / 100.0);               
+		//int end = (int)((duration * 16000.0) / 100.0);
+		int end = (int)(duration * 100.0);
 		if(scores == null) {                  
-                  Object[] result = runHydra(rawAudioPath, sentence, tmpDir, decode, end);
+			Object[] result = runHydra(rawAudioPath, sentence, tmpDir, decode, end);
 			scores = (Scores)result[0];
 			wordLab = (String)result[1];
 			phoneLab = (String)result[2];
@@ -467,7 +462,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 	////////////////////////////////
 	////////////////////////////////
 
-	private String createHydraDictWithSP(String transcript) {
+	private String createHydraDictWithoutSP(String transcript) {
 		String dict = "[";
 		transcript = "<s> " + transcript + " </s>";
 		int ctr = 0;
@@ -519,17 +514,19 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 		}
 				
 		// generate dictionary
-		String dictWithSP = createHydraDictWithSP(cleaned);
+		String dictWithoutSP = createHydraDictWithoutSP(cleaned);
 		String smallLM = "[]";
 		// generate SLF file (if decoding)
 		if(decode) {
-			ArrayList<String> lmSentences = new ArrayList<String>(Arrays.asList(cleaned.split("\\p{Z}")));
+			//ArrayList<String> lmSentences = new ArrayList<String>(Arrays.asList(cleaned.split("\\p{Z}")));
+			ArrayList<String> lmSentences = new ArrayList<String>();
+			lmSentences.add(cleaned);
 			smallLM = "[" + (new SLFFile()).createSimpleSLFFile(lmSentences) + "]";
 		}
 
-		//String hydraInput = tmpDir + "/:" + audioPath + ":" + dictWithSP + ":" + smallLM + ":xxx,0," + end + ",[<s>;" + cleaned.trim().replaceAll("\\p{Z}+", ";")  + ";</s>]";
-		String hydraInput = tmpDir + "/:" + audioPath + ":" + dictWithSP + ":" + smallLM + ":xxx,0," + end + ",[]";
-		logger.debug("Initial hydra input: " + hydraInput);
+		//String hydraInput = tmpDir + "/:" + audioPath + ":" + dictWithoSP + ":" + smallLM + ":xxx,0," + end + ",[<s>;" + cleaned.trim().replaceAll("\\p{Z}+", ";")  + ";</s>]";
+		String hydraInput = tmpDir + "/:" + audioPath + ":" + dictWithoutSP + ":" + smallLM + ":xxx,0," + end + ",[]";
+		long then = System.currentTimeMillis();
 		String ip = langTestDatabase.getWebserviceIP();
 		int port = langTestDatabase.getWebservicePort();
 		HTTPClient httpClient = new HTTPClient(ip, port);
@@ -540,15 +537,18 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 		catch(IOException e) {
 			logger.error("Error closing http connection");
 		}
+	//	logger.debug("JESS in runHydra, here is the results string: " + resultsStr);
 		String[] results = resultsStr.split("\n");
+		long timeToRunHydra = System.currentTimeMillis() - then;	
+		logger.debug("Took " + timeToRunHydra + " millis to run hydra");
 		if(results[0] == "") {
 			logger.error("Failure during running of hydra.");
 			return null;
 		}
 		// TODO makes this a tuple3 type 
 		Scores scores = new Scores(results[0]); 
+		logger.debug("overall score: " + results[0]);
 		return new Object[]{scores, results[1], results[2]};
-		//return null;
 	}
 
 
@@ -770,26 +770,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 		}
 		return valid;
 	}
-
-	/*private Scores getScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
-                                  String sentence,
-                                  String scoringDir,
-                                  boolean decode, String tmpDir, boolean useCache) {
-    String key = testAudioDir + File.separator + testAudioFileNoSuffix;
-    Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
-
-    if (isMandarin) {
-      sentence = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") +getSegmented(sentence.trim()); // segmentation method will filter out the UNK model
-    }
-    if (scores == null) {
-      scores = calcScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir);
-      audioToScore.put(key, scores);
-    }
-    else {
-      if (DEBUG) logger.debug("found cached score for file '" + key + "'");
-    }
-    return scores;
-  }*/
 
 
 }
