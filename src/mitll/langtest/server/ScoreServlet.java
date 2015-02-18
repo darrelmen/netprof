@@ -65,15 +65,15 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String SAID_WORD = "saidWord";
   private LoadTesting loadTesting;
 
-  public enum Request { DECODE, ALIGN, RECORD };
+  public enum Request { DECODE, ALIGN, RECORD }
 
   // Doug said to remove items with missing audio. 1/12/15
   private static final boolean REMOVE_EXERCISES_WITH_MISSING_AUDIO = true;
-  public static final String START = "start";
-  public static final String END = "end";
+  private static final String START = "start";
+  private static final String END = "end";
 
   private JSONObject nestedChapters;
-  int contentLength = 0;
+  private final int contentLength = 0;
   private long whenCached = -1;
   private static final String ENCODING = "UTF8";
 
@@ -463,28 +463,7 @@ public class ScoreServlet extends DatabaseServlet {
     JSONObject jsonObject = new JSONObject();
     if (requestType != null) {
       if (requestType.startsWith(ADD_USER)) {
-        String user = request.getHeader(USER);
-        String passwordH = request.getHeader(PASSWORD_H);
-        String emailH = request.getHeader(EMAIL_H);
-
-        // first check if user exists already with this password -- if so go ahead and log them in.
-        User userFound = db.getUserDAO().getUser(user, passwordH);
-
-       // logger.debug("hasUser " + user + " pass " + passwordH + " -> " + userFound);
-
-        if (userFound != null && !userFound.hasResetKey()) {
-          jsonObject.put(USERID, userFound.getId());
-        }
-        else {
-          logger.debug("doPost : Request " + requestType + " for " + deviceType + " user " + user);
-          User user1 = db.addUser(user, passwordH, emailH, deviceType, device);
-
-          if (user1 == null) {
-            jsonObject.put(EXISTING_USER_NAME, "");
-          } else {
-            jsonObject.put(USERID, user1.getId());
-          }
-        }
+        addUser(request, requestType, deviceType, device, jsonObject);
       } else if (requestType.startsWith(ALIGN) || requestType.startsWith(DECODE) ||
           requestType.startsWith(Request.RECORD.toString().toLowerCase())) {
         boolean isMultipart = ServletFileUpload.isMultipartContent(request);
@@ -498,7 +477,7 @@ public class ScoreServlet extends DatabaseServlet {
         }
       } else if (requestType.startsWith(EVENT)) {
         // log event
-        gotLogEvent(request, requestType, deviceType, device, jsonObject);
+        gotLogEvent(request, device, jsonObject);
       } else {
         jsonObject.put(ERROR, "unknown req " + requestType);
       }
@@ -518,7 +497,47 @@ public class ScoreServlet extends DatabaseServlet {
     writer.close();
   }
 
-  private void gotLogEvent(HttpServletRequest request, String requestType, String deviceType, String device, JSONObject jsonObject) {
+  private void addUser(HttpServletRequest request, String requestType, String deviceType, String device, JSONObject jsonObject) {
+    String user = request.getHeader(USER);
+    String passwordH = request.getHeader(PASSWORD_H);
+    String emailH = request.getHeader(EMAIL_H);
+
+    // first check if user exists already with this password -- if so go ahead and log them in.
+    User userFound = db.getUserDAO().getUser(user, passwordH);
+
+    // logger.debug("hasUser " + user + " pass " + passwordH + " -> " + userFound);
+
+    if (userFound != null && !userFound.hasResetKey()) {
+      jsonObject.put(USERID, userFound.getId());
+    }
+    else {
+      logger.debug("doPost : Request " + requestType + " for " + deviceType + " user " + user);
+      String age = request.getHeader("age");
+      String gender = request.getHeader("gender");
+      String dialect = request.getHeader("dialect");
+      User user1 = null;
+      if (age != null && gender != null && dialect != null) {
+        try {
+          int age1 = Integer.parseInt(age);
+          user1 = db.addUser(user, passwordH, emailH, deviceType, device, User.Kind.CONTENT_DEVELOPER, gender.equalsIgnoreCase("male"), age1, dialect);
+        } catch (NumberFormatException e) {
+          logger.warn("couldn't parse age " + age);
+          jsonObject.put(ERROR, "bad age");
+        }
+      }
+      else {
+        user1 = db.addUser(user, passwordH, emailH, deviceType, device);
+      }
+
+      if (user1 == null) {
+        jsonObject.put(EXISTING_USER_NAME, "");
+      } else {
+        jsonObject.put(USERID, user1.getId());
+      }
+    }
+  }
+
+  private void gotLogEvent(HttpServletRequest request, String device, JSONObject jsonObject) {
     String user = request.getHeader(USER);
     String context = request.getHeader("context");
     String exid = request.getHeader("exid");
