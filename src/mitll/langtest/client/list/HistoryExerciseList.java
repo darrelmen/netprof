@@ -118,7 +118,7 @@ public class HistoryExerciseList extends PagingExerciseList {
   protected void pushFirstListBoxSelection() {
     String initToken = History.getToken();
     if (initToken.length() == 0) {
-      System.out.println("pushFirstListBoxSelection : history token is blank " + getInstance());
+      //System.out.println("pushFirstListBoxSelection : history token is blank " + getInstance());
 
       pushNewSectionHistoryToken();
     } else {
@@ -145,7 +145,7 @@ public class HistoryExerciseList extends PagingExerciseList {
         System.out.println("pushNewSectionHistoryToken : skipping same token '" + historyToken + "'" + " instance " + getInstance());
       }
     } else {
-      System.out.println("pushNewSectionHistoryToken : currentToken " + currentToken + " instance " + getInstance());
+      //System.out.println("pushNewSectionHistoryToken : currentToken " + currentToken + " instance " + getInstance());
 
       setHistoryItem(historyToken);
     }
