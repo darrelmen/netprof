@@ -30,7 +30,7 @@ public class AudioDAO extends DAO {
   private static final String SLOW = "slow";
   private static final String CONTEXT_REGULAR = AUDIO_TYPE1;
 
-  private final boolean debug = false;
+  private final boolean DEBUG = false;
   private final Connection connection;
   private final UserDAO userDAO;
 
@@ -114,7 +114,7 @@ public class AudioDAO extends DAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#attachAudio(mitll.langtest.shared.CommonExercise)
    */
   public void attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir) {
-    List<AudioAttribute> audioAttributes = getAudioAttributes(firstExercise.getID());
+    Collection<AudioAttribute> audioAttributes = getAudioAttributes(firstExercise.getID());
 
     //logger.debug("\tattachAudio : found " + audioAttributes.size() + " for " + firstExercise.getID());
 /*    for (AudioAttribute attribute : audioAttributes) {
@@ -143,10 +143,10 @@ public class AudioDAO extends DAO {
    * @param relativeConfigDir
    * @param audioAttributes
    * @see mitll.langtest.server.database.AudioExport#writeFolderContents(java.util.zip.ZipOutputStream, java.util.List, AudioDAO, String, String, String, boolean)
-   * @see #attachAudio(mitll.langtest.shared.CommonExercise, String, String, java.util.List)
+   * @see #attachAudio
    */
   public void attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir,
-                          List<AudioAttribute> audioAttributes) {
+                          Collection<AudioAttribute> audioAttributes) {
     AudioConversion audioConversion = new AudioConversion();
 
     List<AudioAttribute> defaultAudio = new ArrayList<AudioAttribute>();
@@ -212,10 +212,16 @@ public class AudioDAO extends DAO {
     }
   }
 
-  private List<AudioAttribute> getAudioAttributes(String exid) {
+  /**
+   * Defensively protect against duplicate entries for same audio file.
+   * @param exid
+   * @return
+   * @see #attachAudio
+   */
+  private Collection<AudioAttribute> getAudioAttributes(String exid) {
     try {
       String sql = "SELECT * FROM " + AUDIO + " WHERE " + Database.EXID + "='" + exid + "' AND " + DEFECT + "=false";
-      List<AudioAttribute> resultsSQL = getResultsSQL(sql);
+      Collection<AudioAttribute> resultsSQL = getResultsSQL(sql);
       Set<String> paths = new HashSet<String>();
 
       List<AudioAttribute> ret = new ArrayList<AudioAttribute>();
@@ -229,6 +235,9 @@ public class AudioDAO extends DAO {
         //  else {
         //logger.info("skipping duplicate audio attr " + audioAttribute + " for " + exid);
         //  }
+      }
+      if (DEBUG) {
+        logger.debug("sql for " +exid + " = " + sql + " returned " + ret);
       }
       return ret;
     } catch (Exception ee) {
@@ -528,13 +537,7 @@ public class AudioDAO extends DAO {
       int dur = rs.getInt(DURATION);
 
       MiniUser user = miniUsers.get(userID);
-      if (userID == UserDAO.DEFAULT_USER_ID) {
-        user = UserDAO.DEFAULT_USER;
-      } else if (userID == UserDAO.DEFAULT_MALE_ID) {
-        user = UserDAO.DEFAULT_MALE;
-      } else if (userID == UserDAO.DEFAULT_FEMALE_ID) {
-        user = UserDAO.DEFAULT_FEMALE;
-      }
+      user = checkDefaultUser(userID, user);
 
       AudioAttribute audioAttr = new AudioAttribute(uniqueID, userID, //id
           exid, // id
@@ -555,6 +558,17 @@ public class AudioDAO extends DAO {
     finish(connection, statement, rs);
 
     return results;
+  }
+
+  private MiniUser checkDefaultUser(long userID, MiniUser user) {
+    if (userID == UserDAO.DEFAULT_USER_ID) {
+      user = UserDAO.DEFAULT_USER;
+    } else if (userID == UserDAO.DEFAULT_MALE_ID) {
+      user = UserDAO.DEFAULT_MALE;
+    } else if (userID == UserDAO.DEFAULT_FEMALE_ID) {
+      user = UserDAO.DEFAULT_FEMALE;
+    }
+    return user;
   }
 
   private Set<String> getExidResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
@@ -620,7 +634,7 @@ public class AudioDAO extends DAO {
         new Exception().printStackTrace();
       }
 
-      //logger.debug("added exerciseID " + exerciseID + " ref '" + audioRef + "' " +audioType + " for " + userid);
+      logger.debug("added exerciseID " + exerciseID + " ref '" + audioRef + "' " +audioType + " for " + userid);
       long newid = addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
       database.closeConnection(connection);
       return newid;
@@ -653,7 +667,7 @@ public class AudioDAO extends DAO {
     long timestamp = result.getTimestamp();
     String audioType = result.getAudioType();
     int durationInMillis = result.getDurationInMillis();
-
+    logger.debug("add result - " + result.getID() + " for " + userid + " ref " + audioRef);
     return addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
   }
 
@@ -701,7 +715,7 @@ public class AudioDAO extends DAO {
         long l = addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
         audioAttr = getAudioAttribute((int) l, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
       } else {
-        List<AudioAttribute> audioAttributes = getAudioAttributes(exerciseID);
+        Collection<AudioAttribute> audioAttributes = getAudioAttributes(exerciseID);
         logger.debug("for  " + exerciseID + " found " + audioAttributes);
 
         for (AudioAttribute audioAttribute : audioAttributes) {
@@ -782,7 +796,7 @@ public class AudioDAO extends DAO {
             //" at " + new Date(timestamp) +
             " type " + audioType + " dur " + durationInMillis);
 
-        List<AudioAttribute> audioAttributes = getAudioAttributes(exerciseID);
+        Collection<AudioAttribute> audioAttributes = getAudioAttributes(exerciseID);
         //logger.debug("for  " +exerciseID + " found " + audioAttributes);
 
         for (AudioAttribute audioAttribute : audioAttributes) {
@@ -901,7 +915,7 @@ public class AudioDAO extends DAO {
       if (i == 0) {
         logger.error("huh? couldn't find audio by " + userid + " for ex " + exerciseID + " and " + audioType);
       } else {
-        logger.debug(i + " marked audio defect by " + userid + " ex " + exerciseID + " speed " + audioType);
+        logger.debug("Num modified = " +i + ", marked audio defect by " + userid + " ex " + exerciseID + " speed " + audioType);
       }
 
       finish(connection, statement);
@@ -932,7 +946,7 @@ public class AudioDAO extends DAO {
     }
 
     // logger.debug("addAudio : by " + userid + " for ex " + exerciseID + " type " + audioType + " ref " + audioRef);
-    int before = debug ? getCount(AUDIO) : 0;
+    int before = DEBUG ? getCount(AUDIO) : 0;
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " + AUDIO +
         "(" +
@@ -967,7 +981,7 @@ public class AudioDAO extends DAO {
     statement.close();
     connection.commit();
 
-    int after = debug ? getCount(AUDIO) : 1;
+    int after = DEBUG ? getCount(AUDIO) : 1;
     if (before == after) {
       logger.error("huh? after adding " + after + " but before " + before);
     }
