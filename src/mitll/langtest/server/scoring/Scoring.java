@@ -77,35 +77,17 @@ public abstract class Scoring {
 		// These may not all exist. The speech file is created only by multisv right now.
 		String phoneLabFile  = prependDeploy(audioFileNoSuffix + ".phones.lab");
 		Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
-		// JESS replace this
-		/*if (new File(phoneLabFile).exists()) {
-			logger.debug("JESS phoneLabFile exists: " + phoneLabFile);
-			typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
-			foundATranscript = true;
-		}
-		// JESS replace this
-		String wordLabFile   = prependDeploy(audioFileNoSuffix + ".words.lab");
-		if (new File(wordLabFile).exists()) {
-			logger.debug("JESS wordLabFile exists: " + wordLabFile);
-			typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
-			foundATranscript = true;
-		}*/
 
 		if(phoneLab != null) {
-			logger.debug("JESS phoneLab: " + phoneLab);
+			logger.debug("phoneLab: " + phoneLab);
 			typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLab);
 			foundATranscript = true;
 		}
 		if(wordLab != null) {
-			logger.debug("JESS wordLab: " + wordLab);
+			logger.debug("wordLab: " + wordLab);
 			typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLab);
 		}
 
-		/*String speechLabFile = prependDeploy(audioFileNoSuffix + ".speech.lab");
-		if (new File(speechLabFile).exists()) {
-			foundATranscript = true;
-			typeToFile.put(ImageType.SPEECH_TRANSCRIPT, speechLabFile);
-		}*/
 		if (!foundATranscript) {
 			logger.error("no label files found, e.g. " + phoneLabFile);
 		}
