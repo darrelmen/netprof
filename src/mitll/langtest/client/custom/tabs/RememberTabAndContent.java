@@ -12,6 +12,11 @@ import java.util.Set;
 public class RememberTabAndContent extends TabAndContent {
   private final Set<Widget> widgets = new HashSet<Widget>();
 
+  /**
+   * @see mitll.langtest.client.qc.QCNPFExercise#addTabsForUsers
+   * @param iconType
+   * @param label
+   */
   public RememberTabAndContent(IconType iconType, String label) {
     super(iconType, label);
   }
@@ -22,6 +27,7 @@ public class RememberTabAndContent extends TabAndContent {
 
   /**
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio
+   * @see mitll.langtest.client.qc.QCNPFExercise#getPanelForAudio
    * @param allPlayed
    */
   public void checkAllPlayed(Set<Widget> allPlayed) {
