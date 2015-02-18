@@ -19,6 +19,7 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import scala.Tuple2;
@@ -419,11 +420,11 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 		if (testAudioFileNoSuffix.contains(AudioConversion.SIXTEEN_K_SUFFIX)) {
 			noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
 		}
-		
+
 		String key = testAudioDir + File.separator + testAudioFileNoSuffix;
-                Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
-                String phoneLab = "";
-                String wordLab = "";
+		Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
+		String phoneLab = "";
+		String wordLab = "";
 		// actually run the scoring
 		String rawAudioPath = testAudioDir + File.separator + testAudioFileNoSuffix + ".raw";
 		AudioConversion.wav2raw(testAudioDir + File.separator + testAudioFileNoSuffix + ".wav", rawAudioPath);
@@ -447,7 +448,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 	}
 
 	private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-                                             boolean decode, String prefix, String noSuffix, File wavFile, Scores scores, String phoneLab, String wordLab, double duration) {
+			boolean decode, String prefix, String noSuffix, File wavFile, Scores scores, String phoneLab, String wordLab, double duration) {
 		ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
 				useScoreForBkgColor,
 				prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, phoneLab, wordLab);
@@ -455,7 +456,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 		Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
 		String recoSentence = getRecoSentence(eventAndFileInfo);
 
-                //		double duration = new AudioCheck().getDurationInSeconds(wavFile);
 		return new PretestScore(scores.hydraScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence, (float) duration);
 	}
 
@@ -481,8 +481,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 							ctr2 += 1;
 							dict += p;
 						}
-					//	if(!word.equals("<s>") && !word.equals("</s>"))
-						//	dict += " sp";	
 					}
 				}
 				else {
@@ -495,7 +493,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 							ctr2 += 1;
 							dict += p;
 						}
-						//dict += " sp";
 					}
 				}
 			}
@@ -504,27 +501,23 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 		return dict;
 	}
 
-	// NOTE: Audio class is in pronz
-	//private Scores runHydra(String audioPath, String transcript, String tmpDir, boolean decode) {//, Map<String, ArrayList<String>> dictWords, ArrayList<String> smallLM) {
 	private Object[] runHydra(String audioPath, String transcript, String tmpDir, boolean decode, int end) {
 		// reference trans	
 		String cleaned = transcript.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ");
 		if (isMandarin) {
 			cleaned = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") + getSegmented(transcript.trim()); // segmentation method will filter out the UNK model
 		}
-				
+
 		// generate dictionary
 		String dictWithoutSP = createHydraDictWithoutSP(cleaned);
 		String smallLM = "[]";
 		// generate SLF file (if decoding)
 		if(decode) {
-			//ArrayList<String> lmSentences = new ArrayList<String>(Arrays.asList(cleaned.split("\\p{Z}")));
 			ArrayList<String> lmSentences = new ArrayList<String>();
 			lmSentences.add(cleaned);
 			smallLM = "[" + (new SLFFile()).createSimpleSLFFile(lmSentences) + "]";
 		}
 
-		//String hydraInput = tmpDir + "/:" + audioPath + ":" + dictWithoSP + ":" + smallLM + ":xxx,0," + end + ",[<s>;" + cleaned.trim().replaceAll("\\p{Z}+", ";")  + ";</s>]";
 		String hydraInput = tmpDir + "/:" + audioPath + ":" + dictWithoutSP + ":" + smallLM + ":xxx,0," + end + ",[]";
 		long then = System.currentTimeMillis();
 		String ip = langTestDatabase.getWebserviceIP();
@@ -537,7 +530,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 		catch(IOException e) {
 			logger.error("Error closing http connection");
 		}
-	//	logger.debug("JESS in runHydra, here is the results string: " + resultsStr);
 		String[] results = resultsStr.split("\n");
 		long timeToRunHydra = System.currentTimeMillis() - then;	
 		logger.debug("Took " + timeToRunHydra + " millis to run hydra");
@@ -548,6 +540,14 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 		// TODO makes this a tuple3 type 
 		Scores scores = new Scores(results[0]); 
 		logger.debug("overall score: " + results[0]);
+		if (Float.parseFloat(results[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
+			try {
+				logger.debug("deleting " + tmpDir + " since score is " + results[0]);
+				FileUtils.deleteDirectory(new File(tmpDir));
+			} catch (IOException e) {
+				logger.error("Deleting dir " + tmpDir + " got " +e,e);
+			}
+		}
 		return new Object[]{scores, results[1], results[2]};
 	}
 
