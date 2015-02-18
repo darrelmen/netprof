@@ -37,7 +37,13 @@ public class UserExerciseDAO extends DAO {
   private static final String USEREXERCISE = "userexercise";
   private static final String MODIFIED = "modified";
   private static final String STATE = "state";
+  /**
+   * @deprecated - we should join with the audio table
+   */
   private static final String REF_AUDIO = "refAudio";
+  /**
+   * @deprecated - we should join with the audio table
+   */
   private static final String SLOW_AUDIO_REF = "slowAudioRef";
 
   // ?? when would this be used?
@@ -101,7 +107,11 @@ public class UserExerciseDAO extends DAO {
         "INSERT INTO " + USEREXERCISE +
           "(" +
             EXERCISEID +
-            ",english,foreignLanguage," + TRANSLITERATION + ",creatorid,refAudio,slowAudioRef,override," + UNIT+
+            ",english,foreignLanguage," + TRANSLITERATION + ",creatorid," +
+            REF_AUDIO +
+            "," +
+            SLOW_AUDIO_REF +
+            ",override," + UNIT+
           ","+LESSON+
           ","+MODIFIED+
          // ","+STATE+
@@ -116,11 +126,14 @@ public class UserExerciseDAO extends DAO {
       statement.setString(i++, fixSingleQuote(userExercise.getTransliteration()));
       statement.setLong(i++, userExercise.getCreator());
 
+      // TODO : remove me!
       String refAudio = userExercise.getRefAudio();
       statement.setString(i++, refAudio == null ? "" : refAudio);
       String slowAudioRef = userExercise.getSlowAudioRef();
       String slowRefNullCheck = slowAudioRef == null || slowAudioRef.equals("null") ? "" : slowAudioRef;
       statement.setString(i++, slowRefNullCheck);
+
+
       statement.setBoolean(i++, isOverride);
 
       Map<String,String> unitToValue = userExercise.getUnitToValue();
@@ -214,9 +227,7 @@ public class UserExerciseDAO extends DAO {
     index(database);
   }
 
-  void index(Database database) throws SQLException {
-    createIndex(database, EXERCISEID, USEREXERCISE);
-  }
+  void index(Database database) throws SQLException {  createIndex(database, EXERCISEID, USEREXERCISE);  }
 
   /**
    * @see mitll.langtest.server.database.custom.UserListDAO#populateList
@@ -481,11 +492,11 @@ public class UserExerciseDAO extends DAO {
     if (time == 0) time = System.currentTimeMillis();
     if (!foundReg && hasRef) {
       audioDAO.add((int) e.getCreator(), ref, e.getID(), time, Result.AUDIO_TYPE_REGULAR, 0);
-      logger.debug("adding missing reg  audio ref -- only first time " + ref + " by " + e.getCreator());
+      logger.warn("adding missing reg  audio ref -- only first time " + ref + " by " + e.getCreator());
     }
     if (!foundSlow && hasSRef) {
       audioDAO.add((int) e.getCreator(), sref, e.getID(), time, Result.AUDIO_TYPE_SLOW, 0);
-      logger.debug("adding missing slow audio ref -- only first time " + ref + " by " + e.getCreator());
+      logger.warn("adding missing slow audio ref -- only first time " + ref + " by " + e.getCreator());
 
     }
   }
@@ -532,72 +543,6 @@ public class UserExerciseDAO extends DAO {
 
     return exercises;
   }
-
-
-  /**
-   * @see UserListManager#editItem(mitll.langtest.shared.custom.UserExercise, boolean, String)
-   * @param id
-   * @param state
-   */
-/*  public void updateState(String id, String state) {
-    try {
-      Connection connection = database.getConnection();
-
-      String sql = "UPDATE " + USEREXERCISE +
-        " " +
-        "SET " +
-        STATE +
-        "=? " +
-        "WHERE " +
-        EXERCISEID +
-        "=?"
-        ;
-      PreparedStatement statement = connection.prepareStatement(sql);
-
-      int ii = 1;
-
-      statement.setString(ii++, state);
-      statement.setString(ii++, id);
-      int i = statement.executeUpdate();
-      if (i == 0) {
-        logger.error("huh? no row updated for " + id);
-      }
-      statement.close();
-      database.closeConnection(connection);
-    } catch (Exception e) {
-      logger.error("got " + e, e);
-    }
-  }*/
-/*
-  public Set<String> getAtState(String state) {
-    try {
-      Connection connection = database.getConnection();
-
-      String sql = "SELECT " + EXERCISEID + " from " + USEREXERCISE +
-        "WHERE " +
-        STATE +
-        "=?";
-      PreparedStatement statement = connection.prepareStatement(sql);
-
-      int ii = 1;
-
-      statement.setString(ii++, state);
-
-      ResultSet rs = statement.executeQuery();
-      Set<String> exercises = new HashSet<String>();
-
-      while (rs.next()) {
-        exercises.add(rs.getString(1));
-      }
-      statement.close();
-      database.closeConnection(connection);
-
-      return exercises;
-    } catch (Exception e) {
-      logger.error("got " + e, e);
-    }
-    return Collections.emptySet();
-  }*/
 
   /**
    * @see UserListManager#editItem(mitll.langtest.shared.custom.UserExercise, boolean, String)
