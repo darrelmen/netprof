@@ -374,7 +374,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.client.custom.dialog.EditableExercise#postEditItem
    */
   public void editItem(UserExercise userExercise) {
-    logger.debug("editItem " + userExercise.getID() + " mediaDir : " + serverProps.getMediaDir() + " initially audio was\n\t " + userExercise.getAudioAttributes());
+    logger.debug("editItem ex #" + userExercise.getID() + " mediaDir : " + serverProps.getMediaDir() + " initially audio was\n\t " + userExercise.getAudioAttributes());
 
     userExercise.setTooltip();
 
@@ -385,8 +385,11 @@ public class DatabaseImpl implements Database {
     Set<AudioAttribute> original = new HashSet<AudioAttribute>(userExercise.getAudioAttributes());
     Set<AudioAttribute> defects = getAndMarkDefects(userExercise, userExercise.getFieldToAnnotation());
 
+    logger.debug("originally had " + original.size() + " attribute, and " + defects.size() + " defects");
+
     CommonExercise exercise = exerciseDAO.addOverlay(userExercise);
-    if (exercise == null) {
+    boolean notOverlay = exercise == null;
+    if (notOverlay) {
       // not an overlay! it's a new user exercise
       exercise = getUserExerciseWhere(userExercise.getID());
       logger.debug("not an overlay " + exercise);
@@ -395,10 +398,11 @@ public class DatabaseImpl implements Database {
       logger.debug("made overlay " + exercise);
     }
 
-    if (exercise == null) {
+    if (notOverlay) {
       logger.error("huh? couldn't make overlay or find user exercise for " + userExercise);
     } else {
-      original.removeAll(defects);
+      boolean b = original.removeAll(defects);  // TODO - does this work really without a compareTo?
+      logger.debug(b?"removed defects " +original.size() + " now" : " didn't remove any defects - " + defects.size());
 
       for (AudioAttribute attribute : defects) {
         if (!exercise.removeAudio(attribute)) {
@@ -406,7 +410,8 @@ public class DatabaseImpl implements Database {
         }
       }
 
-      String overlayID = exercise.getID();
+      // why would this make sense to do???
+/*      String overlayID = exercise.getID();
 
       logger.debug("editItem copying " + original.size() + " audio attrs under exercise overlay id " + overlayID);
 
@@ -414,9 +419,9 @@ public class DatabaseImpl implements Database {
         if (toCopy.getUserid() < UserDAO.DEFAULT_FEMALE_ID) {
           logger.error("bad user id for " + toCopy);
         }
-
+        logger.debug("\t copying " + toCopy);
         audioDAO.add((int) toCopy.getUserid(), toCopy.getAudioRef(), overlayID, toCopy.getTimestamp(), toCopy.getAudioType(), toCopy.getDuration());
-      }
+      }*/
     }
 
     getSectionHelper().refreshExercise(exercise);
@@ -671,9 +676,7 @@ public class DatabaseImpl implements Database {
    * @return unmodifiable list of exercises
    * @see mitll.langtest.server.LangTestDatabaseImpl#init
    */
-  public void preloadExercises() {
-    getExercises(useFile, lessonPlanFile);
-  }
+  public void preloadExercises() {  getExercises(useFile, lessonPlanFile); }
 
   /**
    *
@@ -686,7 +689,15 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.ScoreServlet#doPost
    */
   public User addUser(String userID, String passwordH, String emailH, String deviceType, String device) {
-    return addAndGetUser(userID, passwordH, emailH, User.Kind.STUDENT, true, 89, "unk", deviceType, device);
+    User.Kind kind = User.Kind.STUDENT;
+    boolean isMale = true;
+    int age = 89;
+    String dialect = "unk";
+    return addUser(userID, passwordH, emailH, deviceType, device, kind, isMale, age, dialect);
+  }
+
+  public User addUser(String userID, String passwordH, String emailH, String deviceType, String device, User.Kind kind, boolean isMale, int age, String dialect) {
+    return addAndGetUser(userID, passwordH, emailH, kind, isMale, age, dialect, deviceType, device);
   }
 
   /**
@@ -705,7 +716,7 @@ public class DatabaseImpl implements Database {
   public User addUser(HttpServletRequest request, String userID, String passwordH, String emailH, User.Kind kind,
                       boolean isMale, int age, String dialect, String device) {
     String ip = getIPInfo(request);
-    return addAndGetUser(userID, passwordH, emailH, kind, isMale, age, dialect, device, ip);
+    return addUser(userID, passwordH, emailH, device, ip, kind, isMale, age, dialect);
   }
 
   private User addAndGetUser(String userID, String passwordH, String emailH, User.Kind kind, boolean isMale, int age, String dialect, String device, String ip) {
