@@ -32,6 +32,7 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.*;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -41,6 +42,8 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class QCNPFExercise extends GoodwaveExercisePanel {
+  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
+
   private static final String DEFECT = "Defect?";
 
   public static final String FOREIGN_LANGUAGE = "foreignLanguage";
@@ -313,11 +316,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   protected Widget getScoringAudioPanel(final CommonExercise e) {
     if (!e.hasRefAudio()) {
-      ExerciseAnnotation refAudio = e.getAnnotation(REF_AUDIO);
-      Panel column = new FlowPanel();
-      column.addStyleName("blockStyle");
-      column.add(getCommentWidget(REF_AUDIO, new Label(NO_AUDIO_RECORDED), refAudio));
-      return column;
+      return addNoRefAudio(e);
     } else {
       Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getUserMap(true);
       Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getUserMap(false);
@@ -338,6 +337,14 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     }
   }
 
+  private Widget addNoRefAudio(CommonExercise e) {
+    ExerciseAnnotation refAudio = e.getAnnotation(REF_AUDIO);
+    Panel column = new FlowPanel();
+    column.addStyleName("blockStyle");
+    column.add(getCommentWidget(REF_AUDIO, new Label(NO_AUDIO_RECORDED), refAudio));
+    return column;
+  }
+
   /**
    * For all the users, show a tab for each audio cut they've recorded (regular and slow speed).
    * Special logic included for default users so a QC person can set the gender.
@@ -345,6 +352,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @param tabPanel
    * @param malesMap
    * @param maleUsers
+   * @see #getScoringAudioPanel
    */
   private void addTabsForUsers(CommonExercise e, TabPanel tabPanel, Map<MiniUser, List<AudioAttribute>> malesMap, List<MiniUser> maleUsers) {
     int me = controller.getUser();
@@ -370,16 +378,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         toResize.add(panelForAudio1.audioPanel);
 
         if (user.isDefault()) {    // add widgets to mark gender on default audio
-          Panel vp = new VerticalPanel();
-          Panel hp = new HorizontalPanel();
-
-          final Button next = getNextButton();
-          hp.add(getGenderGroup(tabAndContent, audio, next, audioAttributes));
-          hp.add(next);
-          next.setVisible(false);
-          vp.add(hp);
-          vp.add(panelForAudio);
-          tabAndContent.getContent().add(vp);
+          addGenderAssignmentButtons(tabAndContent, audioAttributes, audio, panelForAudio);
         } else {
           tabAndContent.getContent().add(panelForAudio);
         }
@@ -392,6 +391,19 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
         tabAndContent.getTab().setIcon(IconType.CHECK_SIGN);
       }
     }
+  }
+
+  private void addGenderAssignmentButtons(RememberTabAndContent tabAndContent, List<AudioAttribute> audioAttributes, AudioAttribute audio, Widget panelForAudio) {
+    Panel vp = new VerticalPanel();
+    Panel hp = new HorizontalPanel();
+
+    final Button next = getNextButton();
+    hp.add(getGenderGroup(tabAndContent, audio, next, audioAttributes));
+    hp.add(next);
+    next.setVisible(false);
+    vp.add(hp);
+    vp.add(panelForAudio);
+    tabAndContent.getContent().add(vp);
   }
 
   private Button getNextButton() {
@@ -536,7 +548,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       @Override
       public void playStarted() {
         audioWasPlayed.add(audioPanel);
-        //System.out.println("playing audio " + audio.getAudioRef() + " has " +tabs.size() + " tabs, now " + audioWasPlayed.size()  + " played");
+        logger.info("playing audio " + audio.getAudioRef() + " has " +tabs.size() + " tabs, now " + audioWasPlayed.size()  + " played");
         //if (audioWasPlayed.size() == toResize.size()) {
         // all components played
         setApproveButtonState();
@@ -548,8 +560,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       }
 
       @Override
-      public void playStopped() {
-      }
+      public void playStopped() {}
     });
     ExerciseAnnotation audioAnnotation = e.getAnnotation(audio.getAudioRef());
 
@@ -678,7 +689,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     boolean isComment = instance.equals(Navigation.COMMENT);
 
     final CheckBox checkBox = new CheckBox("");
-    checkBox.getElement().setId("CheckBox_"+field);
+    checkBox.getElement().setId("CheckBox_" + field);
     checkBox.addStyleName(isComment? "wideCenteredRadio" :"centeredRadio");
     checkBox.addClickHandler(new ClickHandler() {
       @Override
@@ -693,6 +704,13 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     return checkBox;
   }
 
+  /**
+   * @see #makeCheckBox
+   * @param isIncorrect
+   * @param field
+   * @param commentRow
+   * @param commentEntry
+   */
   private void checkBoxWasClicked(boolean isIncorrect, String field, Panel commentRow, FocusWidget commentEntry) {
     commentRow.setVisible(isIncorrect);
     commentEntry.setFocus(isIncorrect);
@@ -710,17 +728,17 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     if (isCourseContent()) {
       String id = exercise.getID();
      // System.out.println("\tcheckBoxWasClicked : instance = '" +instance +"'");
-      if (instance.equalsIgnoreCase(Navigation.CLASSROOM)) {
+      //if (instance.equalsIgnoreCase(Navigation.CLASSROOM)) {
         STATE state = incorrectFields.isEmpty() ? STATE.UNSET : STATE.DEFECT;
         exercise.setState(state);
         listContainer.setState(id, state);
      //   System.out.println("\tcheckBoxWasClicked : state now = '" +state +"'");
 
         listContainer.redraw();
-      }
-      else {
-        System.out.println("\tcheckBoxWasClicked : ignoring instance = '" +instance +"'");
-      }
+    //  }
+    //  else {
+    //    System.out.println("\tcheckBoxWasClicked : ignoring instance = '" +instance +"'");
+   //   }
 
       setApproveButtonState();
       markReviewed(exercise);
