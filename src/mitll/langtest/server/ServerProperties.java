@@ -71,6 +71,7 @@ public class ServerProperties {
   private static final String APPROVER_EMAILS = "approverEmails";
   private static final String ADMINS = "admins";
   private static final String PREFERRED_VOICES = "preferredVoices";
+  private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
 
   private static final List<String> DLI_APPROVERS = Arrays.asList(
       "Tamas",
@@ -193,14 +194,6 @@ public class ServerProperties {
     return getDefaultFalse(DOIMAGES);
   }
 
-  /**
-   * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
-   */
-  public boolean isAutoCRT() {
-    return getDefaultFalse(AUTOCRT);
-  }
-
   public String getLanguage() {
     return props.getProperty(LANGUAGE);
   }
@@ -244,6 +237,9 @@ public class ServerProperties {
   public boolean isNoModel() {
     return getDefaultFalse(NO_MODEL);
   }
+  public boolean removeExercisesWithMissingAudio() {
+    return getDefaultTrue(REMOVE_EXERCISES_WITH_MISSING_AUDIO);
+  }
 
   public String getEmailAddress() {
     return props.getProperty(EMAIL_ADDRESS, DEFAULT_EMAIL);
@@ -274,10 +270,6 @@ public class ServerProperties {
     } catch (NumberFormatException e) {
       return maxNumExercises;
     }
-  }
-
-  public boolean isIncludeFeedback() {
-    return getDefaultFalse(INCLUDE_FEEDBACK);
   }
 
   /**
