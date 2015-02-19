@@ -18,6 +18,7 @@ public class PropertyHandler {
   private Logger logger = Logger.getLogger("PropertyHandler");
 
   // property file property names
+  private static final String ENABLE_ALL_USERS = "enableAllUsers";
   private static final String GRADING_PROP = "grading";
   private static final String APP_TITLE = "appTitle";
   private static final String SPLASH_TITLE = "splashTitle";
@@ -25,7 +26,7 @@ public class PropertyHandler {
   private static final String BKG_COLOR_FOR_REF1 = "bkgColorForRef";
   private static final String DEMO_MODE = "demo";
   private static final String RECORD_TIMEOUT = "recordTimeout";
-  //private static final String ADMIN_VIEW = "adminView";
+
   private static final String NAME_FOR_ITEM = "nameForItem";
   private static final String NAME_FOR_ANSWER = "nameForAnswer";
   private static final String NAME_FOR_RECORDER = "nameForRecorder";
@@ -35,7 +36,6 @@ public class PropertyHandler {
 
   private static final String LANGUAGE = "language";
   private static final String RIGHT_ALIGN_CONTENT = "rightAlignContent";
- // private static final String SCREEN_PORTION = "screenPortion";
 
   // URL parameters that can override above parameters
   private static final String GRADING = GRADING_PROP;
@@ -70,6 +70,7 @@ public class PropertyHandler {
 
   public static final String SIGN_UP = "Sign Up";
   private boolean adminView;
+  private boolean enableAllUsers;
 
   /**
    * @see mitll.langtest.client.recorder.RecordButton#showTooLoud
@@ -88,6 +89,8 @@ public class PropertyHandler {
   }
 
   public Set<Long> getPreferredVoices() {  return preferredVoices;  }
+
+  public boolean enableAllUsers() {  return enableAllUsers;  }
 
   public enum LOGIN_TYPE { ANONYMOUS, STUDENT }
 
@@ -171,6 +174,7 @@ public class PropertyHandler {
       else if (key.equals(DIALOG)) dialog = getBoolean(value);
       else if (key.equals(QUIET_AUDIO_OK)) quietAudioOK = getBoolean(value);
       else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
+      else if (key.equals(ENABLE_ALL_USERS)) enableAllUsers = getBoolean(value);
       else if (key.equals(PREFERRED_VOICES)) {
         for (String userid : value.split(",")) {
           try {
@@ -209,9 +213,7 @@ public class PropertyHandler {
   private float getFloat(String value, float defValue, String propName) {
     try {
       if (value == null) return defValue;
-      float i = Float.parseFloat(value);
-      //System.out.println("value for " + propName +"=" +i + " vs default = " +defValue);
-      return i;
+      return Float.parseFloat(value);
     } catch (NumberFormatException e) {
       System.err.println("couldn't parse " + value + "using " + defValue +" for " + propName);
     }
@@ -410,25 +412,7 @@ public class PropertyHandler {
    * @return
    */
   public String getHelpMessage() {
-/*    return "If you are an existing user of Classroom (either as a student, teacher or audio recorder), " +
-        "you will need to use the <b>\"Sign Up\"</b> box to add a password and an email address to your account. " +
-        " Your email is only used if you ever forget your password.<br/><br/>" +
-        "If you were using Classroom for <u>recording of course audio</u>, check the box asking if you are a " +
-        "<b>reference audio recorder</b>." +
-        //"<br/>" +
-        //"<br/>" +
-        " Once you have submitted this form, LTEA personnel will approve your account. " +
-        "You will receive an email once it's approved.  " +
-        "You will not be able to access Classroom " +
-        //"for recording or quality control " +
-        "until approval is granted.<br/>" +
-        //   "<br/>" +
-        //     "If you a teacher or student with a pre-existing user name, please use the \"Sign Up\" form to add a user name and password.  Then select your appropriate role.  No approval is required to activate your account.<br/>" +
-        "<br/>" +
-        "Once you \"Sign up\", the site will remember your login information on this computer for up to one year.  " +
-        "You will need to login with your username and password again if you access Classroom from a different machine.<br/>";
-    */
-    return //"Classroom has been updated.\n" +
+    return
         "If you are a first-time user of this site, or an existing user of an earlier version of Classroom " +
             "(either as a student, teacher, or audio recorder), you will need to use the " +
             "\"" +
