@@ -32,17 +32,14 @@ public class ServerProperties {
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
   private static final String H2_DATABASE = "h2Database";
-  private static final String H2_DATABASE_DEFAULT = "vlr-parle";
-  //private static final String H2_STUDENT_ANSWERS_DATABASE = "h2StudentAnswers";
-  //private static final String SECOND_DATABASE = "secondDatabase";
-  //private static final String H2_STUDENT_ANSWERS_DATABASE_DEFAULT = "h2StudentAnswers";
+  private static final String H2_DATABASE_DEFAULT = "vlr-parle";   //likely never what you want
   private static final String READ_FROM_FILE = "readFromFile";
   private static final String LANGUAGE = "language";
   /**
    * @deprecated
    */
   private static final String WORDPAIRS = "wordPairs";
-  private static final String AUTOCRT = "autocrt";
+
   private static final String MEDIA_DIR = "mediaDir";
   private static final String RECO_TEST = "recoTest";
   private static final String RECO_TEST2 = "recoTest2";
@@ -53,7 +50,6 @@ public class ServerProperties {
   private static final String EMAIL_ADDRESS = "emailAddress";
   private static final String AUDIO_OFFSET = "audioOffset";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
-  private static final String INCLUDE_FEEDBACK = "includeFeedback";
   private static final String MAPPING_FILE = "mappingFile";
   private static final String NO_MODEL = "noModel";
   private static final String TIER_INDEX = "tierIndex";
@@ -72,6 +68,7 @@ public class ServerProperties {
   private static final String ADMINS = "admins";
   private static final String PREFERRED_VOICES = "preferredVoices";
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
+  private static final String ENABLE_ALL_USERS = "enableAllUsers";
 
   private static final List<String> DLI_APPROVERS = Arrays.asList(
       "Tamas",
@@ -156,9 +153,6 @@ public class ServerProperties {
   public String getH2Database() {
     return props.getProperty(H2_DATABASE, H2_DATABASE_DEFAULT);
   }
-//  public String getH2StudentAnswersDatabase() { return props.getProperty(H2_STUDENT_ANSWERS_DATABASE, H2_STUDENT_ANSWERS_DATABASE_DEFAULT); }
-//  public String getSecondH2Database() { return props.getProperty(SECOND_DATABASE, "second"); }
-
   public String getLessonPlan() {
     return props.getProperty("lessonPlanFile", "lesson.plan");
   }
@@ -240,7 +234,9 @@ public class ServerProperties {
   public boolean removeExercisesWithMissingAudio() {
     return getDefaultTrue(REMOVE_EXERCISES_WITH_MISSING_AUDIO);
   }
-
+  public boolean enableAllUsers() {
+    return getDefaultFalse(ENABLE_ALL_USERS);
+  }
   public String getEmailAddress() {
     return props.getProperty(EMAIL_ADDRESS, DEFAULT_EMAIL);
   }
