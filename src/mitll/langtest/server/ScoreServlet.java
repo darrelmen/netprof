@@ -64,7 +64,7 @@ public class ScoreServlet extends DatabaseServlet {
   public enum Request { DECODE, ALIGN, RECORD }
 
   // Doug said to remove items with missing audio. 1/12/15
-  private static final boolean REMOVE_EXERCISES_WITH_MISSING_AUDIO = true;
+  private  boolean REMOVE_EXERCISES_WITH_MISSING_AUDIO;
   private static final String START = "start";
   private static final String END = "end";
 
@@ -85,7 +85,6 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String RESET_PASS = "resetPassword";
   private static final String SET_PASSWORD = "setPassword";
   //private boolean debug = true;
-
   /**
    * Remembers chapters from previous requests...
    *
@@ -306,6 +305,11 @@ public class ScoreServlet extends DatabaseServlet {
     return new ExerciseSorter(typeOrder, phoneToCount);
   }
 
+
+  private void writeJsonToOutput(HttpServletResponse response, JSONObject jsonObject) throws IOException {
+    reply(response,jsonObject.toString());
+  }
+
   private void reply(HttpServletResponse response, String x) {
     try {
       PrintWriter writer = response.getWriter();
@@ -317,15 +321,13 @@ public class ScoreServlet extends DatabaseServlet {
       writer.println(x);
       writer.close();
     } catch (IOException e) {
-      e.printStackTrace();
+      logger.error("got " + e, e);
     }
   }
 
   private long getUserIDForToken(String token) {
     User user = db.getUserDAO().getUserWhereResetKey(token);
-    long l = (user == null) ? -1 : user.getId();
-    //logger.info("for token " + token + " got user id " + l);
-    return l;
+    return (user == null) ? -1 : user.getId();
   }
 
   /**
@@ -471,12 +473,6 @@ public class ScoreServlet extends DatabaseServlet {
     }
 
     writeJsonToOutput(response, jsonObject);
-  }
-
-  private void writeJsonToOutput(HttpServletResponse response, JSONObject jsonObject) throws IOException {
-    PrintWriter writer = response.getWriter();
-    writer.println(jsonObject.toString());
-    writer.close();
   }
 
   /**
@@ -1000,6 +996,7 @@ public class ScoreServlet extends DatabaseServlet {
       serverProps = db.getServerProps();
       audioFileHelper = getAudioFileHelperRef();
       loadTesting = getLoadTesting();
+      REMOVE_EXERCISES_WITH_MISSING_AUDIO = serverProps.removeExercisesWithMissingAudio();
     }
     return audioFileHelper;
   }
