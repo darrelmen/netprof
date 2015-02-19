@@ -38,8 +38,11 @@ import java.util.logging.Logger;
  * Created by go22670 on 8/11/14.
  */
 public class UserPassLogin extends UserDialog {
-  public static final boolean CHECK_AGE = false;
   private final Logger logger = Logger.getLogger("UserPassLogin");
+
+  private static final boolean CHECK_AGE = false;
+  private static final String WAIT_FOR_APPROVAL = "Wait for approval";
+  private static final String YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL = "You will get an approval message by email.";
 
   private static final String MALE = "male";
   private static final String MAGIC_PASS = Md5Hash.getHash("adm!n");
@@ -58,7 +61,6 @@ public class UserPassLogin extends UserDialog {
   private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer user id.";
   private static final String VALID_EMAIL = "Please enter a valid email address.";
   private static final String PLEASE_WAIT = "Please wait";
-  //private static final String INITIAL_PROMPT = "<b>Classroom</b> allows you to practice your vocabulary and learn pronunciation.";//"Learn how to pronounce words and practice vocabulary.";
   private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
   private static final String FIRST_BULLET = "Practice vocabulary with audio flashcards.";//"Do flashcards to learn or review vocabulary";
   private static final String SECOND_BULLET = "Record your voice and get feedback on your pronunciation.";//"Get feedback on your pronunciation";
@@ -577,9 +579,11 @@ public class UserPassLogin extends UserDialog {
       }
     });
 
-    getRecordAudioPopover();
-
     contentDevCheckbox.getElement().getStyle().setPaddingBottom(10, Style.Unit.PX);
+    if (!props.enableAllUsers()) {
+      getRecordAudioPopover();
+    }
+
     fieldset.add(contentDevCheckbox);
 
     makeRegistrationInfo(fieldset);
@@ -820,7 +824,7 @@ public class UserPassLogin extends UserDialog {
               } else {
                 eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result) +
                     " but waiting for approval from Tamas.");
-                markErrorBlur(signUp, "Wait for approval", "You will get an approval message by email.", Placement.TOP);
+                markErrorBlur(signUp, WAIT_FOR_APPROVAL, YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL, Placement.TOP);
                 Timer t = new Timer() {
                   @Override
                   public void run() {
@@ -952,7 +956,7 @@ public class UserPassLogin extends UserDialog {
         markErrorBlur(password, PLEASE_ENTER_YOUR_PASSWORD);
         signIn.setEnabled(true);
       } else if (result.getPasswordHash().equals(hashedPass)) {
-        if (result.isEnabled() || result.getUserKind() != User.Kind.CONTENT_DEVELOPER) {
+        if (result.isEnabled() || result.getUserKind() != User.Kind.CONTENT_DEVELOPER || props.enableAllUsers()) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user);
           logger.info("Got valid user " + user + " and matching password, so we're letting them in.");
 
