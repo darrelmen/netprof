@@ -37,6 +37,7 @@ public class UserDAO extends DAO {
   public static final String UNKNOWN = "unknown";
   private String language;
   private long defectDetector;
+private boolean enableAllUsers;
 
   private static final String ID = "id";
   public static final String AGE = "age";
@@ -81,6 +82,7 @@ public class UserDAO extends DAO {
     try {
       admins = serverProperties.getAdmins();
       language = serverProperties.getLanguage();
+      enableAllUsers = serverProperties.enableAllUsers();
       createTable(database);
 
       defectDetector = userExists(DEFECT_DETECTOR);
@@ -146,7 +148,8 @@ public class UserDAO extends DAO {
       }
     } else {
       Collection<User.Permission> perms = (kind == User.Kind.CONTENT_DEVELOPER) ? CD_PERMISSIONS : EMPTY_PERM;
-      boolean enabled = (kind != User.Kind.CONTENT_DEVELOPER) || isAdmin(userID);
+      boolean enabled = (kind != User.Kind.CONTENT_DEVELOPER) || isAdmin(userID) || enableAllUsers;
+
       long l = addUser(age, isMale ? MALE : FEMALE, 0, ipAddr, "", dialect, userID, enabled, perms, kind, passwordH, emailH, device);
       User userWhere = getUserWhere(l);
       logger.debug(language + " : addUser : added new user " + userWhere);
