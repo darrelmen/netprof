@@ -89,7 +89,7 @@ public class Navigation implements RequiresResize {
   private static final String RECORD_AUDIO = "Record Audio";
   private static final String RECORD_EXAMPLE = "Record In-context Audio";
   private static final String CONTENT1 = "content";
-  public static final String CLASSROOM = "classroom";
+ // public static final String CLASSROOM = "classroom";
   public static final String MARK_DEFECTS1 = "markDefects";
 
   private final ExerciseController controller;
