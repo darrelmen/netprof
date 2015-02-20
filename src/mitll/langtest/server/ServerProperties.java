@@ -357,6 +357,10 @@ public class ServerProperties {
   private boolean getDefaultTrue(String param) {
     return props.getProperty(param, "true").equals("true");
   }
+  // if true, use old school (hydec)
+  public boolean getOldSchoolService() {
+	  return Boolean.parseBoolean(props.getProperty("oldSchoolService", "false"));
+  }
 
   private String getDateFromManifest(ServletContext servletContext) {
     try {
