@@ -265,17 +265,6 @@ public class ResultDAO extends DAO {
     // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
     return getSortedAVPHistoryByPhones(results, allIds, idToEx,sorter);
   }
-  /**
-   * @param results
-   * @param allIds
-   * @return
-   * @seex #getSessionsForUserIn2(java.util.Collection, long, long, java.util.Collection)
-   */
-/*  private List<ExerciseCorrectAndScore> getSortedAVPHistoryOld(List<CorrectAndScore> results, Collection<String> allIds) {
-    List<ExerciseCorrectAndScore> sortedResults = getExerciseCorrectAndScores(results, allIds);
-    Collections.sort(sortedResults);
-    return sortedResults;
-  }*/
 
   /**
    *
@@ -395,8 +384,6 @@ public class ResultDAO extends DAO {
         String id = r.getId();
         ExerciseCorrectAndScore correctAndScores = idToScores.get(id);
         if (correctAndScores == null) idToScores.put(id, correctAndScores = new ExerciseCorrectAndScore(id));
-        //CorrectAndScore correctAndScore = new CorrectAndScore(r);
-        //logger.debug("added " + correctAndScore + " for "+ id + " from " + r);
         correctAndScores.add(r);
       }
     }
