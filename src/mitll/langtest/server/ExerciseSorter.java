@@ -19,9 +19,7 @@ public class ExerciseSorter {
   private Collection<String> typeOrder;
   private Map<String, Integer> phoneToCount;
 
-  public ExerciseSorter(Collection<String> typeOrder) {
-    this.typeOrder = typeOrder;
-  }
+  public ExerciseSorter(Collection<String> typeOrder) { this.typeOrder = typeOrder; }
 
   /**
    * @param typeOrder
