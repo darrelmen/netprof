@@ -2021,11 +2021,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 			logger.error("couldn't load database " +e,e);
 		}    
 
-		// webservice setup
-		//logger.debug("JESS webserviceip: " + serverProps.getWebserviceIP());
-		//logger.debug("JESS webserviceport: " + serverProps.getWebservicePort());
-		//httpClient = new HTTPClient(serverProps.getWebserviceIP(), serverProps.getWebservicePort());
-
 	}
 	
 	public String getWebserviceIP() {
@@ -2035,7 +2030,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	public int getWebservicePort() {
 		return serverProps.getWebservicePort();
 	}
-
+	
+	public boolean getOldSchoolService() {
+		return serverProps.getOldSchoolService();
+	}
 
 	/**
 	 * The config web.xml file.
