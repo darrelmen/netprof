@@ -265,9 +265,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         allExercises.add(exercise.getID().trim());
       }
 
-      logger.debug("all exercises " + allExercises.size() + " removing " + recordedBySameGender.size());
+      //logger.debug("all exercises " + allExercises.size() + " removing " + recordedBySameGender.size());
       allExercises.removeAll(recordedBySameGender);
-      logger.debug("after all exercises " + allExercises.size());
+     // logger.debug("after all exercises " + allExercises.size());
 
       List<CommonExercise> copy = new ArrayList<CommonExercise>();
       Set<String> seen = new HashSet<String>();
@@ -281,7 +281,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           }
         }
       }
-      logger.debug("to be recorded " + copy.size() + " from " + exercises.size());
+      //logger.debug("to be recorded " + copy.size() + " from " + exercises.size());
 
       return copy;
     } else {
@@ -297,7 +297,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
             copy.add(exercise);
           }
         }
-        logger.debug("ONLY EXAMPLES - to be recorded " + copy.size() + " from " + exercises.size());
+     //   logger.debug("ONLY EXAMPLES - to be recorded " + copy.size() + " from " + exercises.size());
 
         return copy;
       } else {
