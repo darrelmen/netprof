@@ -29,6 +29,9 @@ import java.util.*;
 @SuppressWarnings("serial")
 public class DownloadServlet extends DatabaseServlet {
   private static final Logger logger = Logger.getLogger(DownloadServlet.class);
+  public static final String AUDIO = "audio";
+  public static final String LIST = "list";
+  public static final String FILE = "file";
 
   /**
    * This is getting complicated.
@@ -60,7 +63,7 @@ public class DownloadServlet extends DatabaseServlet {
     if (db != null) {
       try {
         String encodedFileName = request.getRequestURI();
-        if (encodedFileName.toLowerCase().contains("audio")) {
+        if (encodedFileName.toLowerCase().contains(AUDIO)) {
           String pathInfo = request.getPathInfo();
           String queryString = request.getQueryString();
           logger.debug("DownloadServlet.doGet : Request " + queryString + " path " + pathInfo +
@@ -68,7 +71,7 @@ public class DownloadServlet extends DatabaseServlet {
           if (queryString == null) {
             setHeader(response, "allAudio.zip");
             writeAllAudio(response);
-          } else if (queryString.startsWith("list")) {
+          } else if (queryString.startsWith(LIST)) {
             String[] split = queryString.split("list=");
             if (split.length == 2) {
               String listid = split[1];
@@ -76,21 +79,20 @@ public class DownloadServlet extends DatabaseServlet {
                 writeUserList(response, db, listid);
               }
             }
-          } else if (queryString.startsWith("file")) {
+          } else if (queryString.startsWith(FILE)) {
             returnAudioFile(response, db, queryString);
-          } else {
+          } else if (queryString.startsWith("context")) {
             Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
-            String name = typeToSection.isEmpty() ? "audio" : db.getPrefix(typeToSection);
-            name = name.replaceAll("\\,", "_");
-            name += ".zip";
-            String fileName = db.getServerProps().getLanguage() + "_" + name;
+            String fileName = getZipFileName(db, typeToSection);
 
             setHeader(response, fileName);
-            try {
-              db.writeZip(response.getOutputStream(), typeToSection);
-            } catch (Exception e) {
-              logger.error("couldn't write zip?", e);
-            }
+            writeContextZip(response, typeToSection);
+          } else {
+            Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
+            String fileName = getZipFileName(db, typeToSection);
+
+            setHeader(response, fileName);
+            writeZip(response, typeToSection);
           }
         } else {
           returnSpreadsheet(response, db, encodedFileName);
@@ -107,6 +109,29 @@ public class DownloadServlet extends DatabaseServlet {
     } catch (IOException e) {
       logger.warn("got " + e, e);
     }
+  }
+
+  private void writeZip(HttpServletResponse response, Map<String, Collection<String>> typeToSection) {
+    try {
+      getDatabase().writeZip(response.getOutputStream(), typeToSection);
+    } catch (Exception e) {
+      logger.error("couldn't write zip?", e);
+    }
+  }
+
+  private void writeContextZip(HttpServletResponse response, Map<String, Collection<String>> typeToSection) {
+    try {
+      getDatabase().writeContextZip(response.getOutputStream(), typeToSection);
+    } catch (Exception e) {
+      logger.error("couldn't write zip?", e);
+    }
+  }
+
+  private String getZipFileName(DatabaseImpl db, Map<String, Collection<String>> typeToSection) {
+    String name = typeToSection.isEmpty() ? AUDIO : db.getPrefix(typeToSection);
+    name = name.replaceAll("\\,", "_");
+    name += ".zip";
+    return db.getServerProps().getLanguage() + "_" + name;
   }
 
   /**
