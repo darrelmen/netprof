@@ -22,15 +22,12 @@ import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
-import scala.Tuple2;
-
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,7 +48,7 @@ import java.util.TreeSet;
  * Time: 11:16 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ASRWebserviceScoring extends Scoring implements CollationSort {
+public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR {
 	private static final double KEEP_THRESHOLD = 0.3;
 	private static final Logger logger = Logger.getLogger(ASRWebserviceScoring.class);
 	private static final boolean DEBUG = false;
@@ -63,7 +60,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 
 	private static SmallVocabDecoder svDecoderHelper = null;
 	private LangTestDatabaseImpl langTestDatabase;
-	private AudioCheck audioCheck;
 
 	/**
 	 * By keeping these here, we ensure that we only ever read the dictionary once
@@ -93,7 +89,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 		this.langTestDatabase = langTestDatabase;
 		readDictionary();
 		makeDecoder();
-		this.audioCheck = new AudioCheck();
 	}
 
 	public <T extends CommonExercise> void sort(List<T> toSort) {
@@ -115,6 +110,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 	 */
 	private ASRWebserviceScoring(String deployPath, Map<String, String> properties) {
 		super(deployPath);
+		logger.debug("Creating ASRWebserviceScoring object");
 		lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
 		audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
@@ -283,7 +279,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 		return new PhoneInfo(firstPron,uphones);
 	}
 
-	public static class PhoneInfo {
+	/*public static class PhoneInfo {
 		private List<String> firstPron;
 		private Set<String> phoneSet;
 
@@ -303,7 +299,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 		public Set<String> getPhoneSet() {
 			return phoneSet;
 		}
-	}
+	}*/
 
 
 	/**
@@ -451,7 +447,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 			boolean decode, String prefix, String noSuffix, File wavFile, Scores scores, String phoneLab, String wordLab, double duration) {
 		ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
 				useScoreForBkgColor,
-				prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, phoneLab, wordLab);
+				prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, phoneLab, wordLab, true);
 		Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
 		Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
 		String recoSentence = getRecoSentence(eventAndFileInfo);
@@ -530,7 +526,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 		catch(IOException e) {
 			logger.error("Error closing http connection");
 		}
-		String[] results = resultsStr.split("\n");
+		String[] results = resultsStr.split("\n"); // 0th entry-overall score and phone scores, 1st entry-word alignments, 2nd entry-phone alignments
 		long timeToRunHydra = System.currentTimeMillis() - then;	
 		logger.debug("Took " + timeToRunHydra + " millis to run hydra");
 		if(results[0] == "") {
@@ -538,16 +534,18 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort {
 			return null;
 		}
 		// TODO makes this a tuple3 type 
-		Scores scores = new Scores(results[0]); 
-		logger.debug("overall score: " + results[0]);
-		if (Float.parseFloat(results[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
+		String[] split = results[0].split(";");
+		Scores scores = new Scores(split); 
+		// clean up tmp directory if above score threshold 
+		/*logger.debug("overall score: " + split[0]);
+		if (Float.parseFloat(split[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
 			try {
-				logger.debug("deleting " + tmpDir + " since score is " + results[0]);
+				logger.debug("deleting " + tmpDir + " since score is " + split[0]);
 				FileUtils.deleteDirectory(new File(tmpDir));
 			} catch (IOException e) {
 				logger.error("Deleting dir " + tmpDir + " got " +e,e);
 			}
-		}
+		}*/
 		return new Object[]{scores, results[1], results[2]};
 	}
 
