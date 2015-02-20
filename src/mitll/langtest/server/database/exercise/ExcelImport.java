@@ -56,7 +56,6 @@ public class ExcelImport implements ExerciseDAO {
   private final List<String> errors = new ArrayList<String>();
   private final String file;
   private final SectionHelper sectionHelper = new SectionHelper();
-  private final boolean debug = false;
   private String mediaDir,mediaDir1;
   private boolean shouldHaveRefAudio = false;
   private boolean usePredefinedTypeOrder;
@@ -73,15 +72,16 @@ public class ExcelImport implements ExerciseDAO {
   private int chapterIndex;
   private int weekIndex;
 
+  private final boolean DEBUG = false;
+
   /**
    *
    * @param file
-   * @param relativeConfigDir
    * @param userListManager
    * @param addDefects
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
    */
-  public ExcelImport(String file, String mediaDir, String relativeConfigDir, ServerProperties serverProps,
+  public ExcelImport(String file, String mediaDir, ServerProperties serverProps,
                      UserListManager userListManager,
                      String installPath, boolean addDefects) {
     this.file = file;
@@ -104,7 +104,7 @@ public class ExcelImport implements ExerciseDAO {
     this.unitIndex = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
     this.weekIndex = serverProps.getUnitChapterWeek()[2];
-    if (debug) logger.debug("unit " + unitIndex + " chapter " +chapterIndex + " week " +weekIndex);
+    if (DEBUG) logger.debug("unit " + unitIndex + " chapter " +chapterIndex + " week " +weekIndex);
   }
 
   @Override
@@ -263,7 +263,7 @@ public class ExcelImport implements ExerciseDAO {
    */
   private List<CommonExercise> readExercises(File file) {
     try {
-     // logger.debug("reading from " + file.getAbsolutePath());
+      logger.debug("Excel reading " +language +" from " + file.getAbsolutePath());
       return readExercises(new FileInputStream(file));
     } catch (FileNotFoundException e) {
       logger.error("looking for " + file.getAbsolutePath() + " got " + e, e);
@@ -325,7 +325,7 @@ public class ExcelImport implements ExerciseDAO {
           if (count++ < 10) logger.warn(error);
         }
       }
-      if (debug) sectionHelper.report();
+      if (DEBUG) sectionHelper.report();
       inp.close();
       now = System.currentTimeMillis();
       if (now-then > 1000) {
@@ -443,7 +443,7 @@ public class ExcelImport implements ExerciseDAO {
             sectionHelper.setPredefinedTypeOrder(predefinedTypeOrder);
           }
 
-          if (debug) logger.debug("columns word index " + colIndexOffset +
+          if (DEBUG) logger.debug("columns word index " + colIndexOffset +
             " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
             " meaning " + meaningIndex +
             " transliterationIndex " + transliterationIndex +
@@ -641,7 +641,7 @@ public class ExcelImport implements ExerciseDAO {
             }
           }
 
-          if (debug) logger.debug("columns word index " + colIndexOffset +
+          if (DEBUG) logger.debug("columns word index " + colIndexOffset +
               " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
               " meaning " + meaningIndex +
               " transliterationIndex " + transliterationIndex +
