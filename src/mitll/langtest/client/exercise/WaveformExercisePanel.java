@@ -73,12 +73,11 @@ public class WaveformExercisePanel extends ExercisePanel {
   private boolean isExampleRecord() {
     return message.equals(EXAMPLE_RECORD);
   }
-
   private boolean isNormalRecord() { return !isExampleRecord(); }
 
   @Override
   protected String getExerciseContent(CommonExercise e) {
-    System.out.println("normal recording for " +e.getID());
+    //System.out.println("normal recording for " +e.getID());
     String context = isNormalRecord() ? e.getForeignLanguage() : hasContext(exercise) ? exercise.getContext() : "No in-context audio for this exercise.";
 
     return ExerciseFormatter.getArabic(context);
@@ -127,7 +126,6 @@ public class WaveformExercisePanel extends ExercisePanel {
   private VerticalPanel addRecordAudioPanelNoCaption(CommonExercise exercise, LangTestDatabaseAsync service,
                                             ExerciseController controller, int index, Panel vp, String audioType) {
 //    System.out.println("addRecordAudioPanel " + exercise + " audioType " +audioType);
-
     RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, false, audioType);
     audioPanels.add(fast);
     vp.add(fast);
@@ -157,19 +155,6 @@ public class WaveformExercisePanel extends ExercisePanel {
     w.getElement().setId("ItemHeading");
     return w;
   }
-/*
-  public static class ResizableCaptionPanel extends CaptionPanel implements ProvidesResize, RequiresResize {
-    public ResizableCaptionPanel(String name) {
-      super(name);
-    }
-
-    public void onResize() {
-      Widget contentWidget = getContentWidget();
-      if (contentWidget instanceof RequiresResize) {
-        ((RequiresResize) contentWidget).onResize();
-      }
-    }
-  }*/
 
   protected Widget getContentScroller(HTML maybeRTLContent) {
     return maybeRTLContent;
@@ -177,9 +162,7 @@ public class WaveformExercisePanel extends ExercisePanel {
 
   @Override
   public void onResize() {
-    for (RecordAudioPanel ap : audioPanels) {
-      ap.onResize();
-    }
+    for (RecordAudioPanel ap : audioPanels) {  ap.onResize();  }
   }
 
   /**
