@@ -145,7 +145,7 @@ public class ExcelImport implements ExerciseDAO {
 
         // mask over old items that have been overridden
 
-        Collection<CommonUserExercise> overrides = userExerciseDAO.getOverrides(false);
+        Collection<CommonUserExercise> overrides = userExerciseDAO.getOverrides();
 
         for (CommonUserExercise userExercise : overrides) {
           if (!removes.contains(userExercise.getID())) {
