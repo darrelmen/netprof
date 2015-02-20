@@ -219,6 +219,9 @@ public class PagingExerciseList extends ExerciseList {
     waitCursor.setUrl(white);
   }
 
+  /**
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#gotEmptyExerciseList
+   */
   protected void showEmptySelection() {
   //  logger.info("showing no items match relative to " + typeAhead.getWidget().getElement().getId());
     showPopup("No items match the selection and search.", "Try clearing one of your selections or changing the search.", typeAhead.getWidget());
