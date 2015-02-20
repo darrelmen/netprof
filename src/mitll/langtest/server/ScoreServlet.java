@@ -36,6 +36,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String DECODE = "decode";
   private static final String SCORE = "score";
   private static final String CHAPTER_HISTORY = "chapterHistory";
+  private static final String RECORD_HISTORY = "recordHistory";
   private static final String PHONE_REPORT = "phoneReport";
   private static final String EXERCISE_HISTORY = "exerciseHistory";
   private static final String EXPECTING_TWO_QUERY_PARAMETERS = "expecting two query parameters";
@@ -61,10 +62,10 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String SAID_WORD = "saidWord";
   private LoadTesting loadTesting;
 
-  public enum Request { DECODE, ALIGN, RECORD }
+  public enum Request {DECODE, ALIGN, RECORD}
 
   // Doug said to remove items with missing audio. 1/12/15
-  private  boolean REMOVE_EXERCISES_WITH_MISSING_AUDIO;
+  private boolean REMOVE_EXERCISES_WITH_MISSING_AUDIO;
   private static final String START = "start";
   private static final String END = "end";
 
@@ -85,6 +86,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String RESET_PASS = "resetPassword";
   private static final String SET_PASSWORD = "setPassword";
   //private boolean debug = true;
+
   /**
    * Remembers chapters from previous requests...
    *
@@ -158,17 +160,16 @@ public class ScoreServlet extends DatabaseServlet {
 
             if (userIDForToken == -1) {
               // invalid/stale token
-              String rep = getHTML("Note : your password has already been reset. Please go back to NetProF.","Password has already been reset");
-              reply(response,rep);
+              String rep = getHTML("Note : your password has already been reset. Please go back to NetProF.", "Password has already been reset");
+              reply(response, rep);
               return;
-            }
-            else {
-              String rep = getHTML("OK, your password has been reset. Please go back to NetProF and login.","Password has been reset");
-              reply(response,rep);
+            } else {
+              String rep = getHTML("OK, your password has been reset. Please go back to NetProF and login.", "Password has been reset");
+              reply(response, rep);
               return;
             }
           }
-        }  else if (queryString.startsWith(SET_PASSWORD)) {
+        } else if (queryString.startsWith(SET_PASSWORD)) {
           String[] split1 = queryString.split("&");
           if (split1.length != 2) {
             toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
@@ -202,34 +203,10 @@ public class ScoreServlet extends DatabaseServlet {
           }
         } else if (queryString.startsWith(CHAPTER_HISTORY) || queryString.startsWith("request=" + CHAPTER_HISTORY)) {
           queryString = queryString.substring(queryString.indexOf(CHAPTER_HISTORY) + CHAPTER_HISTORY.length());
-          String[] split1 = queryString.split("&");
-          if (split1.length < 2) {
-            toReturn.put(ERROR, "expecting at least two query parameters");
-          } else {
-            String user = "";
-            Map<String, Collection<String>> selection = new TreeMap<String, Collection<String>>();
-            for (String param : split1) {
-              //logger.debug("param '" +param+               "'");
-              String[] split = param.split("=");
-              if (split.length == 2) {
-                String key = split[0];
-                String value = split[1];
-                if (key.equals(USER)) {
-                  user = value;
-                } else {
-                  selection.put(key, Collections.singleton(value));
-                }
-              }
-            }
-
-            //logger.debug("chapterHistory " + user + " selection " + selection);
-            try {
-              long l = Long.parseLong(user);
-              toReturn = db.getJsonScoreHistory(l, selection, getExerciseSorter(), audioFileHelper.getCollator());
-            } catch (NumberFormatException e) {
-              toReturn.put(ERROR, "User id should be a number");
-            }
-          }
+          toReturn = getChapterHistory(queryString, toReturn);
+        } else if (queryString.startsWith(RECORD_HISTORY) || queryString.startsWith("request=" + RECORD_HISTORY)) {
+          queryString = queryString.substring(queryString.indexOf(RECORD_HISTORY) + RECORD_HISTORY.length());
+          toReturn = getRecordHistory(queryString, toReturn);
         } else if (queryString.startsWith(PHONE_REPORT) || queryString.startsWith("request=" + PHONE_REPORT)) {
           queryString = queryString.substring(queryString.indexOf(PHONE_REPORT) + PHONE_REPORT.length());
           String[] split1 = queryString.split("&");
@@ -265,11 +242,76 @@ public class ScoreServlet extends DatabaseServlet {
         }
       }
     } catch (Exception e) {
-      logger.error("got " +e,e);
+      logger.error("got " + e, e);
     }
 
     String x = toReturn.toString();
     reply(response, x);
+  }
+
+  private JSONObject getChapterHistory(String queryString, JSONObject toReturn) {
+    String[] split1 = queryString.split("&");
+    if (split1.length < 2) {
+      toReturn.put(ERROR, "expecting at least two query parameters");
+    } else {
+      String user = "";
+      Map<String, Collection<String>> selection = new TreeMap<String, Collection<String>>();
+      for (String param : split1) {
+        //logger.debug("param '" +param+               "'");
+        String[] split = param.split("=");
+        if (split.length == 2) {
+          String key = split[0];
+          String value = split[1];
+          if (key.equals(USER)) {
+            user = value;
+          } else {
+            selection.put(key, Collections.singleton(value));
+          }
+        }
+      }
+
+      //logger.debug("chapterHistory " + user + " selection " + selection);
+      try {
+        long l = Long.parseLong(user);
+        toReturn = db.getJsonScoreHistory(l, selection, getExerciseSorter()/*, audioFileHelper.getCollator()*/);
+      } catch (NumberFormatException e) {
+        toReturn.put(ERROR, "User id should be a number");
+      }
+    }
+    return toReturn;
+  }
+
+
+  private JSONObject getRecordHistory(String queryString, JSONObject toReturn) {
+    String[] split1 = queryString.split("&");
+    if (split1.length < 2) {
+      toReturn.put(ERROR, "expecting at least two query parameters");
+    } else {
+      String user = "";
+      Map<String, Collection<String>> selection = new TreeMap<String, Collection<String>>();
+      for (String param : split1) {
+        //logger.debug("param '" +param+               "'");
+        String[] split = param.split("=");
+        if (split.length == 2) {
+          String key = split[0];
+          String value = split[1];
+          if (key.equals(USER)) {
+            user = value;
+          } else {
+            selection.put(key, Collections.singleton(value));
+          }
+        }
+      }
+
+      //logger.debug("chapterHistory " + user + " selection " + selection);
+      try {
+        long l = Long.parseLong(user);
+        toReturn = db.getJsonScoreHistoryRecorded(l, selection, audioFileHelper.getCollator());
+      } catch (NumberFormatException e) {
+        toReturn.put(ERROR, "User id should be a number");
+      }
+    }
+    return toReturn;
   }
 
   private void gotHasUser(JSONObject toReturn, String[] split1) {
@@ -283,7 +325,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     logger.debug("hasUser " + user + " pass " + passwordH + " -> " + userFound);
 
-    toReturn.put(USERID,   userFound == null ? -1 : userFound.getId());
+    toReturn.put(USERID, userFound == null ? -1 : userFound.getId());
     toReturn.put(HAS_RESET, userFound == null ? -1 : userFound.hasResetKey());
     toReturn.put(TOKEN, userFound == null ? "" : userFound.getResetKey());
     toReturn.put(PASSWORD_CORRECT,
@@ -294,6 +336,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * Don't die if audio file helper is not available.
+   *
    * @return
    * @see #doGet
    * @see #getJsonForSelection
@@ -307,7 +350,7 @@ public class ScoreServlet extends DatabaseServlet {
 
 
   private void writeJsonToOutput(HttpServletResponse response, JSONObject jsonObject) throws IOException {
-    reply(response,jsonObject.toString());
+    reply(response, jsonObject.toString());
   }
 
   private void reply(HttpServletResponse response, String x) {
@@ -331,16 +374,16 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #doGet
    * @param message
    * @return
+   * @see #doGet
    */
-  private String getHTML(String message,String title) {
+  private String getHTML(String message, String title) {
     return "<html>" +
         "<head>" +
         "<title>" +
         title +
-        "</title>"+
+        "</title>" +
         "</head>" +
 
         "<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>" +
@@ -476,12 +519,12 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #doPost
    * @param request
    * @param requestType
    * @param deviceType
    * @param device
    * @param jsonObject
+   * @see #doPost
    */
   private void addUser(HttpServletRequest request, String requestType, String deviceType, String device, JSONObject jsonObject) {
     String user = request.getHeader(USER);
@@ -496,7 +539,7 @@ public class ScoreServlet extends DatabaseServlet {
       String dialect = request.getHeader("dialect");
       String emailH = request.getHeader(EMAIL_H);
 
-      logger.debug("doPost : Request " + requestType + " for " + deviceType + " user " + user + " adding "+gender +" age " +age + " dialect " +dialect);
+      logger.debug("doPost : Request " + requestType + " for " + deviceType + " user " + user + " adding " + gender + " age " + age + " dialect " + dialect);
       User user1 = null;
       if (age != null && gender != null && dialect != null) {
         try {
@@ -576,8 +619,9 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * join against audio dao ex->audio map again to get user exercise audio! {@link #getJsonArray(java.util.List)}
-   * @see #doGet
+   *
    * @return
+   * @see #doGet
    */
   private JSONObject getJsonNestedChapters() {
     setInstallPath(db);
@@ -592,8 +636,8 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #getJsonNestedChapters
    * @return
+   * @see #getJsonNestedChapters
    */
   private JSONArray getContentAsJson() {
     JSONArray jsonArray = new JSONArray();
@@ -611,10 +655,10 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #getContentAsJson
    * @param node
    * @param typeToValues
    * @return
+   * @see #getContentAsJson
    */
   private JSONObject getJsonForNode(SectionNode node, Map<String, Collection<String>> typeToValues) {
     JSONObject jsonForNode = new JSONObject();
@@ -637,9 +681,9 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #getJsonForNode
    * @param typeToValues for this unit and chapter
    * @return
+   * @see #getJsonForNode
    */
   private JSONArray getJsonForSelection(Map<String, Collection<String>> typeToValues) {
     Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToValues);
@@ -761,17 +805,17 @@ public class ScoreServlet extends DatabaseServlet {
 */
 
   /**
-   * @param reqid label response with req id so the client can tell if it got a stale response
+   * @param reqid      label response with req id so the client can tell if it got a stale response
    * @param exerciseID for this exercise
-   * @param user by this user
+   * @param user       by this user
    * @param request
-   * @param wavPath relative path to posted audio file
-   * @param saveFile File handle to file
+   * @param wavPath    relative path to posted audio file
+   * @param saveFile   File handle to file
    * @param deviceType iPad,iPhone, or browser
-   * @param device id for device - helpful for iPads, etc.
+   * @param device     id for device - helpful for iPads, etc.
    * @return score json
-   * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
    * @seex #getJsonForParts(javax.servlet.http.HttpServletRequest, String)
+   * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
    */
   private JSONObject getJsonForAudioForUser(int reqid, String exerciseID, int user, Request request, String wavPath, File saveFile,
                                             String deviceType, String device) {
@@ -811,7 +855,7 @@ public class ScoreServlet extends DatabaseServlet {
       addValidity(exerciseID, jsonForScore, answer);
 
       if (request == Request.RECORD) { // this is OK, since we didn't actually do alignment on the audio...
-        loadTesting.addToAudioTable(user,exercise1,answer);
+        loadTesting.addToAudioTable(user, exercise1, answer);
       }
     }
     return jsonForScore;
@@ -820,16 +864,15 @@ public class ScoreServlet extends DatabaseServlet {
   private void addValidity(String exerciseID, JSONObject jsonForScore, AudioAnswer answer) {
     jsonForScore.put("exid", exerciseID);
     jsonForScore.put("valid", answer == null ? "invalid" : answer.getValidity().toString());
-    jsonForScore.put("reqid", answer == null ? 1 : ""+answer.getReqid());
+    jsonForScore.put("reqid", answer == null ? 1 : "" + answer.getReqid());
   }
 
   /**
-   *
-   * @param reqid label response with req id so the client can tell if it got a stale response
-   * @param exerciseID for this exercise
-   * @param user by this user
+   * @param reqid       label response with req id so the client can tell if it got a stale response
+   * @param exerciseID  for this exercise
+   * @param user        by this user
    * @param doFlashcard
-   * @param wavPath path to posted audio file
+   * @param wavPath     path to posted audio file
    * @param saveFile
    * @param deviceType
    * @param device
@@ -852,7 +895,6 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #getJsonForAudio
    * @param reqid
    * @param exerciseID
    * @param user
@@ -863,6 +905,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @param device
    * @param exercise1
    * @return
+   * @see #getJsonForAudio
    */
   private AudioAnswer getAudioAnswerAlign(int reqid, String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile,
                                           String deviceType, String device, CommonExercise exercise1) {
@@ -954,9 +997,9 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * @param score
    * @return
-   * @see #getJsonForAudioForUser
    * @seex #getJsonForWordAndAudio
    * @seex #getJsonForWordAndAudioFlashcard
+   * @see #getJsonForAudioForUser
    */
   private JSONObject getJsonForScore(PretestScore score) {
     JSONObject jsonObject = new JSONObject();
@@ -985,8 +1028,8 @@ public class ScoreServlet extends DatabaseServlet {
    * Get a reference to the current database object, made in the main LangTestDatabaseImpl servlet
    *
    * @return
-   * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    * @seex #getJsonForWordAndAudio(String, java.io.File)
+   * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   private AudioFileHelper getAudioFileHelper() {
     if (audioFileHelper == null) {
@@ -1022,7 +1065,7 @@ public class ScoreServlet extends DatabaseServlet {
       fileHelper = (AudioFileHelper) databaseReference;
       // logger.debug("found existing audio file reference " + fileHelper + " under " + getServletContext());
     } else {
-      logger.error("huh? for " + db.getServerProps().getLanguage()+ " no existing audio file reference?");
+      logger.error("huh? for " + db.getServerProps().getLanguage() + " no existing audio file reference?");
     }
     return fileHelper;
   }
@@ -1035,7 +1078,7 @@ public class ScoreServlet extends DatabaseServlet {
       ref = (LoadTesting) databaseReference;
       // logger.debug("found existing audio file reference " + fileHelper + " under " + getServletContext());
     } else {
-      logger.error("huh? for " + db.getServerProps().getLanguage()+ " no existing load test reference?");
+      logger.error("huh? for " + db.getServerProps().getLanguage() + " no existing load test reference?");
     }
     return ref;
   }
@@ -1064,7 +1107,6 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * TODO : this is wacky -- have to do this for alignment but not for decoding
-   *
    *
    * @param reqid
    * @param testAudioFile
