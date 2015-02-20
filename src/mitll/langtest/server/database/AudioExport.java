@@ -68,6 +68,21 @@ public class AudioExport {
     writeToStream(copy, audioDAO, installPath, relPath, prefix, typeOrder, language1, out, typeToSection.isEmpty());
   }
 
+  public void writeContextZip(OutputStream out,
+                       Map<String, Collection<String>> typeToSection,
+                       SectionHelper sectionHelper,
+                       Collection<CommonExercise> exercisesForSelectionState,
+                       String language1,
+                       AudioDAO audioDAO,
+                       String installPath,
+                       String relPath) throws Exception {
+    List<String> typeOrder = sectionHelper.getTypeOrder();
+    String prefix = getPrefix(typeToSection, typeOrder);
+    List<CommonExercise> copy = new ArrayList<CommonExercise>(exercisesForSelectionState);
+
+    new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(copy, false);
+    writeContextToStream(copy, audioDAO, installPath, relPath, prefix, typeOrder, language1, out);
+  }
   /**
    * @param out
    * @param prefix
@@ -251,11 +266,27 @@ public class AudioExport {
           isEnglish(language1));
     }
 
-    zOut.putNextEntry(new ZipEntry(overallName + File.separator + overallName + ".xlsx"));
-
-    writeExcelToStream(toWrite, zOut, typeOrder, language1);
+    addSpreadsheetToZip(toWrite, typeOrder, language1, zOut, overallName);
   }
 
+  private void writeContextToStream(List<CommonExercise> toWrite, AudioDAO audioDAO, String installPath,
+                                    String relativeConfigDir1, String name, List<String> typeOrder,
+                                    String language1, OutputStream out) throws Exception {
+    ZipOutputStream zOut = new ZipOutputStream(out);
+
+    String overallName = language1 + "_" + name;
+    overallName = overallName.replaceAll("\\,", "_");
+    writeFolderContentsContextOnly(zOut, toWrite, audioDAO, installPath, relativeConfigDir1,
+        overallName,
+        isEnglish(language1));
+
+    addSpreadsheetToZip(toWrite, typeOrder, language1, zOut, overallName);
+  }
+
+  private void addSpreadsheetToZip(List<CommonExercise> toWrite, List<String> typeOrder, String language1, ZipOutputStream zOut, String overallName) throws IOException {
+    zOut.putNextEntry(new ZipEntry(overallName + File.separator + overallName + ".xlsx"));
+    writeExcelToStream(toWrite, zOut, typeOrder, language1);
+  }
 
   private void writeToStreamJustOneAudio(List<CommonExercise> toWrite, String installPath,
                                          OutputStream out) throws Exception {
@@ -294,41 +325,36 @@ public class AudioExport {
     Map<MiniUser, Integer> maleToCount = new HashMap<MiniUser, Integer>();
     Map<MiniUser, Integer> femaleToCount = new HashMap<MiniUser, Integer>();
 
-    for (CommonExercise ex : toWrite) {
-      for (AudioAttribute attr : ex.getAudioAttributes()) {
-        MiniUser user = attr.getUser();
-
-        Map<MiniUser, Integer> userToCount = (user.isMale()) ? maleToCount : femaleToCount;
-        Integer count = userToCount.get(user);
-        userToCount.put(user, (count == null) ? 1 : count + 1);
-      }
-    }
-
-    // find the male and female with most recordings for this exercise
-    MiniUser male = getMaxUser(maleToCount);
-    MiniUser female = getMaxUser(femaleToCount);
-
-    AudioConversion audioConversion = new AudioConversion();
-
-    Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
+    // attach audio
     int numAttach = 0;
-    int numMissing = 0;
-    Set<String> names = new HashSet<String>();
+    Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
     for (CommonExercise ex : toWrite) {
       List<AudioAttribute> audioAttributes = exToAudio.get(ex.getID());
       if (audioAttributes != null) {
         audioDAO.attachAudio(ex, installPath, relativeConfigDir1, audioAttributes);
         numAttach++;
       }
+    }
 
+    populateGenderToCount(toWrite, maleToCount, femaleToCount);
+
+    // find the male and female with most recordings for this exercise
+    MiniUser male   = getMaxUser(maleToCount);
+    MiniUser female = getMaxUser(femaleToCount);
+
+    AudioConversion audioConversion = new AudioConversion();
+
+    int numMissing = 0;
+    Set<String> names = new HashSet<String>();
+    for (CommonExercise ex : toWrite) {
       boolean someAudio = false;
-      // choose male speaker
+
+      // write male/female fast/slow
       for (Boolean gender : GENDERS) {
         MiniUser majorityUser = gender ? male : female;
         for (String speed : SPEEDS) {
           AudioAttribute recording = getAudioAttribute(majorityUser, ex, gender, speed);
           if (recording != null) {
-
             // logger.debug("found " + recording + " by " + recording.getUser());
             String name = overallName + File.separator + getUniqueName(ex, !isEnglish);
             copyAudio(zOut, names, name, speed, installPath, audioConversion, recording, ex.getID(), ex.getForeignLanguage());
@@ -361,6 +387,69 @@ public class AudioExport {
     if (diff > 1000) {
       logger.debug("took " + diff + " millis to export " + toWrite.size() + " items, num attached " + numAttach +
           " missing audio " + numMissing);
+    }
+  }
+
+  private void writeFolderContentsContextOnly(ZipOutputStream zOut,
+                                   List<CommonExercise> toWrite,
+                                   AudioDAO audioDAO,
+                                   String installPath,
+                                   String relativeConfigDir1,
+                                   String overallName,
+                                   boolean isEnglish) throws Exception {
+    long then = System.currentTimeMillis();
+
+    // attach audio
+    int numAttach = 0;
+    Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
+    for (CommonExercise ex : toWrite) {
+      List<AudioAttribute> audioAttributes = exToAudio.get(ex.getID());
+      if (audioAttributes != null) {
+        audioDAO.attachAudio(ex, installPath, relativeConfigDir1, audioAttributes);
+        numAttach++;
+      }
+    }
+
+    AudioConversion audioConversion = new AudioConversion();
+
+    int numMissing = 0;
+    Set<String> names = new HashSet<String>();
+    for (CommonExercise ex : toWrite) {
+      boolean someAudio = false;
+
+      AudioAttribute latestContext = ex.getLatestContext(true);
+      if (latestContext != null) {
+        copyAudio(zOut, installPath, overallName, isEnglish, audioConversion, names, ex, latestContext);
+        someAudio = true;
+      }
+
+      latestContext = ex.getLatestContext(false);
+      if (latestContext != null) {
+        copyAudio(zOut, installPath, overallName, isEnglish, audioConversion, names, ex, latestContext);
+        someAudio = true;
+      }
+
+      if (!someAudio) {
+        numMissing++;
+      }
+    }
+    long now = System.currentTimeMillis();
+    long diff = now - then;
+    if (diff > 1000) {
+      logger.debug("took " + diff + " millis to export " + toWrite.size() + " items, num attached " + numAttach +
+          " missing audio " + numMissing);
+    }
+  }
+
+  private void populateGenderToCount(List<CommonExercise> toWrite, Map<MiniUser, Integer> maleToCount, Map<MiniUser, Integer> femaleToCount) {
+    for (CommonExercise ex : toWrite) {
+      for (AudioAttribute attr : ex.getAudioAttributes()) {
+        MiniUser user = attr.getUser();
+
+        Map<MiniUser, Integer> userToCount = (user.isMale()) ? maleToCount : femaleToCount;
+        Integer count = userToCount.get(user);
+        userToCount.put(user, (count == null) ? 1 : count + 1);
+      }
     }
   }
 
