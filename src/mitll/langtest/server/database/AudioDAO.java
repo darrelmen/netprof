@@ -97,7 +97,7 @@ public class AudioDAO extends DAO {
    * @seex mitll.langtest.server.database.DatabaseImpl#getResultsWithGrades
    * @see #getExToAudio
    */
-  private List<AudioAttribute> getAudioAttributes() {
+  private Collection<AudioAttribute> getAudioAttributes() {
     try {
       String sql = "SELECT * FROM " + AUDIO + " WHERE " + DEFECT + "=false";
       return getResultsSQL(sql);
@@ -244,6 +244,12 @@ public class AudioDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return new ArrayList<AudioAttribute>();
+  }
+
+  public Set<String> getRecordedRegularForUser(long userid) {
+    Set<Long> userids = new HashSet<Long>();
+    userids.add(userid);
+    return getAudioForGender(userids,REGULAR);
   }
 
   /**
