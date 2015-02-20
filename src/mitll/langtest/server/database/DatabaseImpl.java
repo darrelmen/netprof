@@ -470,23 +470,24 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    * @param userid
    * @param typeToSection
-   * @param collator
+   * @paramx collator
    * @return
    */
   public JSONObject getJsonScoreHistory(long userid,
                                         Map<String, Collection<String>> typeToSection,
-                                        ExerciseSorter sorter,
-                                        Collator collator) {
+                                        ExerciseSorter sorter//,
+                                      //  Collator collator
+  ) {
     Collection<CommonExercise> exercisesForState = getSectionHelper().getExercisesForSelectionState(typeToSection);
     List<String> allIDs = new ArrayList<String>();
 
-    Map<String, CollationKey> idToKey = new HashMap<String, CollationKey>();
+/*    Map<String, CollationKey> idToKey = new HashMap<String, CollationKey>();
     for (CommonExercise exercise : exercisesForState) {
       String id = exercise.getID();
       allIDs.add(id);
       CollationKey collationKey = collator.getCollationKey(exercise.getForeignLanguage());
       idToKey.put(id, collationKey);
-    }
+    }*/
 
     Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
     for (CommonExercise exercise : exercisesForState) {
@@ -499,6 +500,80 @@ public class DatabaseImpl implements Database {
     List<ExerciseCorrectAndScore> exerciseCorrectAndScores =
         resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, sorter);
 
+    JSONObject container = addJsonHistory(exerciseCorrectAndScores);
+
+    return container;
+  }
+
+
+  /**
+   * @see
+   * @param userid
+   * @param typeToSection
+   * @param collator
+   * @return
+   */
+  public JSONObject getJsonScoreHistoryRecorded(long userid,
+                                        Map<String, Collection<String>> typeToSection,
+                                          Collator collator
+  ) {
+    Collection<CommonExercise> exercisesForState = getSectionHelper().getExercisesForSelectionState(typeToSection);
+
+    final Map<String, CollationKey> idToKey = new HashMap<String, CollationKey>();
+    for (CommonExercise exercise : exercisesForState) {
+      String id = exercise.getID();
+      idToKey.put(id, collator.getCollationKey(exercise.getForeignLanguage()));
+    }
+
+    List<CommonExercise> copy = new ArrayList<CommonExercise>(exercisesForState);
+    final Set<String> recordedForUser = audioDAO.getRecordedRegularForUser(userid);
+
+    Collections.sort(copy, new Comparator<CommonExercise>() {
+      @Override
+      public int compare(CommonExercise o1, CommonExercise o2) {
+        String id = o1.getID();
+        String id1 = o2.getID();
+
+        boolean firstRecorded  = recordedForUser.contains(id);
+        boolean secondRecorded = recordedForUser.contains(id1);
+        if (!firstRecorded && secondRecorded) {
+          return -1;
+        } else if (firstRecorded && !secondRecorded) {
+          return +1;
+        } else {
+          CollationKey fl = idToKey.get(id);
+          CollationKey otherFL = idToKey.get(id1);
+          return fl.compareTo(otherFL);
+        }
+      }
+    });
+
+
+    JSONObject container = new JSONObject();
+    JSONArray scores = new JSONArray();
+
+    for (CommonExercise ex : copy) {
+      //logger.debug("for " + ex);
+      JSONObject exAndScores = new JSONObject();
+      exAndScores.put("ex", ex.getID());
+      boolean wasRecorded = recordedForUser.contains(ex.getID());
+      exAndScores.put("s", wasRecorded ?"100":"0");
+
+      JSONArray history = new JSONArray();
+      if (wasRecorded) {
+        history.add("Y");
+      }
+      exAndScores.put("h", history);
+
+      scores.add(exAndScores);
+    }
+    container.put("scores", scores);
+    container.put("lastCorrect", ""+recordedForUser.size());
+    container.put("lastIncorrect", Integer.toString(0));
+    return container;
+  }
+
+  private JSONObject addJsonHistory(Collection<ExerciseCorrectAndScore> exerciseCorrectAndScores) {
     JSONObject container = new JSONObject();
     JSONArray scores = new JSONArray();
     int correct = 0, incorrect = 0;
@@ -510,12 +585,8 @@ public class DatabaseImpl implements Database {
 
       JSONArray history = new JSONArray();
 
-      boolean lastCorrect = false;
       List<CorrectAndScore> correctAndScoresLimited = ex.getCorrectAndScoresLimited();
-      for (CorrectAndScore cs : correctAndScoresLimited) {
-        history.add(cs.isCorrect() ? "Y" : "N");
-        lastCorrect = cs.isCorrect();
-      }
+      boolean lastCorrect = getHistoryAsJson(history, correctAndScoresLimited);
       if (!correctAndScoresLimited.isEmpty()) {
         if (lastCorrect) correct++; else incorrect++;
       }
@@ -526,8 +597,16 @@ public class DatabaseImpl implements Database {
     container.put("scores", scores);
     container.put("lastCorrect", Integer.toString(correct));
     container.put("lastIncorrect", Integer.toString(incorrect));
-
     return container;
+  }
+
+  private boolean getHistoryAsJson(JSONArray history, List<CorrectAndScore> correctAndScoresLimited) {
+    boolean lastCorrect = false;
+    for (CorrectAndScore cs : correctAndScoresLimited) {
+      history.add(cs.isCorrect() ? "Y" : "N");
+      lastCorrect = cs.isCorrect();
+    }
+    return lastCorrect;
   }
 
   /**
@@ -567,9 +646,7 @@ public class DatabaseImpl implements Database {
       idToRef.put(id, exercise.getRefAudio());
     }
 
-    JSONObject object = getPhoneDAO().getWorstPhonesJson(userid, ids, idToRef);
-    //logger.debug("JSON " + object);
-    return object;
+    return getPhoneDAO().getWorstPhonesJson(userid, ids, idToRef);
   }
 
   /**
