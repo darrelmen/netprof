@@ -1249,9 +1249,15 @@ public class DatabaseImpl implements Database {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
         getExercises() :
         getSectionHelper().getExercisesForSelectionState(typeToSection);
-    String language1 = getServerProps().getLanguage();
+    new AudioExport().writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getServerProps().getLanguage(),
+        getAudioDAO(), installPath, configDir);
+  }
 
-    new AudioExport().writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, language1,
+  public void writeContextZip(OutputStream out, Map<String, Collection<String>> typeToSection) throws Exception {
+    Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
+        getExercises() :
+        getSectionHelper().getExercisesForSelectionState(typeToSection);
+    new AudioExport().writeContextZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getServerProps().getLanguage(),
         getAudioDAO(), installPath, configDir);
   }
 
