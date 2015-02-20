@@ -340,7 +340,7 @@ public class DatabaseImpl implements Database {
     if (exerciseDAO == null) {
       if (useFile && excel) {
         synchronized (this) {
-          this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, absConfigDir, serverProps, userListManager, installPath, addDefects);
+          this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, serverProps, userListManager, installPath, addDefects);
         }
       } else {
         this.exerciseDAO = makeExerciseDAO(useFile);
