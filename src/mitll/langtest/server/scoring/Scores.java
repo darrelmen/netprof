@@ -30,13 +30,23 @@ public class Scores {
     this.eventScores = eventScores;
   }
   
-  public Scores(String scoreStr) {
+  /*public Scores(String scoreStr) {
 	this.eventScores = new HashMap<String, Map<String, Float>>();
 	String[] split = scoreStr.split(";");
 	this.hydraScore = Float.parseFloat(split[0]);
 	eventScores.put("phones", new HashMap<String, Float>());
 	for(int i = 1; i < split.length; i+=2) {
 		eventScores.get("phones").put(split[i], Float.parseFloat(split[i+1]));
+	}
+  }*/
+  
+  public Scores(String[] scoreSplit) {
+	this.eventScores = new HashMap<String, Map<String, Float>>();
+	//String[] split = scoreStr.split(";");
+	this.hydraScore = Float.parseFloat(scoreSplit[0]);
+	eventScores.put("phones", new HashMap<String, Float>());
+	for(int i = 1; i < scoreSplit.length; i+=2) {
+		eventScores.get("phones").put(scoreSplit[i], Float.parseFloat(scoreSplit[i+1]));
 	}
   }
 
