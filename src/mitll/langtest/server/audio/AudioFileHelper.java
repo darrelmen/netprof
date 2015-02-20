@@ -1,6 +1,7 @@
 package mitll.langtest.server.audio;
 
 import com.google.common.io.Files;
+
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
@@ -10,6 +11,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.Export;
 import mitll.langtest.server.database.PhoneDAO;
 import mitll.langtest.server.database.WordDAO;
+import mitll.langtest.server.scoring.ASR;
 import mitll.langtest.server.scoring.ASRScoring;
 import mitll.langtest.server.scoring.ASRWebserviceScoring;
 import mitll.langtest.server.scoring.AutoCRTScoring;
@@ -22,6 +24,7 @@ import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -41,13 +44,15 @@ public class AudioFileHelper implements CollationSort {
 
 	private final PathHelper pathHelper;
 	private final ServerProperties serverProps;
-	private ASRScoring asrScoring;
-	private ASRWebserviceScoring asrWebserviceScoring;
+	//private ASRScoring asrScoring;
+	//private ASRWebserviceScoring asrWebserviceScoring;
+	private ASR asrScoring;
 	private AutoCRT autoCRT;
 	private final DatabaseImpl db;
 	private final LangTestDatabaseImpl langTestDatabase;
 	private boolean checkedLTS = false;
 	private Map<String,Integer> phoneToCount;
+	private boolean DECODE = false;
 
 	/**
 	 * @see mitll.langtest.server.ScoreServlet#getAudioFileHelper()
@@ -62,14 +67,14 @@ public class AudioFileHelper implements CollationSort {
 		this.serverProps = serverProperties;
 		this.db = db;
 		this.langTestDatabase = langTestDatabase;
-	}
+	}	
 
 	public <T extends CommonExercise> void sort(List<T> toSort) {
-		asrWebserviceScoring.sort(toSort);
+		asrScoring.sort(toSort);
 	}
 	@Override
 	public Collator getCollator() {
-		return asrWebserviceScoring.getCollator();
+		return asrScoring.getCollator();
 	}
 	/*public <T extends CommonExercise> void sort(List<T> toSort) {
 		asrScoring.sort(toSort);
@@ -92,7 +97,7 @@ public class AudioFileHelper implements CollationSort {
 				phoneToCount = new HashMap<String, Integer>();
 				for (CommonExercise exercise : exercises) {
 					//boolean validForeignPhrase = asrScoring.checkLTS(exercise.getForeignLanguage());
-					boolean validForeignPhrase = asrWebserviceScoring.checkLTS(exercise.getForeignLanguage());
+					boolean validForeignPhrase = asrScoring.checkLTS(exercise.getForeignLanguage());
 					if (!validForeignPhrase) {
 						if (count < 10) {
 							logger.error("huh? for " + exercise.getID() + " we can't parse " + exercise.getID() + " " + exercise.getEnglish() + " fl " + exercise.getForeignLanguage());
@@ -126,7 +131,8 @@ public class AudioFileHelper implements CollationSort {
 
 	private void countPhones(CommonExercise exercise) {
 		//ASRScoring.PhoneInfo bagOfPhones = asrScoring.getBagOfPhones(exercise.getForeignLanguage());
-		ASRWebserviceScoring.PhoneInfo bagOfPhones = asrWebserviceScoring.getBagOfPhones(exercise.getForeignLanguage());
+		//
+		ASR.PhoneInfo bagOfPhones = asrScoring.getBagOfPhones(exercise.getForeignLanguage());
 		exercise.setBagOfPhones(bagOfPhones.getPhoneSet());
 		exercise.setFirstPron(bagOfPhones.getFirstPron());
 
@@ -155,12 +161,12 @@ public class AudioFileHelper implements CollationSort {
 
 	public boolean checkLTS(String foreignLanguagePhrase) {
 		makeASRScoring();
-		return asrWebserviceScoring.checkLTS(foreignLanguagePhrase);
+		return asrScoring.checkLTS(foreignLanguagePhrase);
 	}
 
 	public SmallVocabDecoder getSmallVocabDecoder() {
 		makeASRScoring();
-		return asrWebserviceScoring.getSmallVocabDecoder();
+		return asrScoring.getSmallVocabDecoder();
 	}
 
 	/**
@@ -490,10 +496,11 @@ public class AudioFileHelper implements CollationSort {
 			logger.error("couldn't make slf file?");
 			return new PretestScore();
 		} else {*/
+		DECODE = true;
 		makeASRScoring();
 		List<String> unk = new ArrayList<String>();
 		//unk.add(SLFFile.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
-		String vocab = asrWebserviceScoring.getUsedTokens(lmSentences, unk); // this is basically the transcript
+		String vocab = asrScoring.getUsedTokens(lmSentences, unk); // this is basically the transcript
 		//logger.debug("getASRScoreForAudio : vocab " + vocab + " from " + lmSentences);
 		return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, 128, 128, false, true, tmpDir,
 				serverProps.useScoreCache(), "");
@@ -516,7 +523,7 @@ public class AudioFileHelper implements CollationSort {
 
 	public Collection<String> getValidPhrases(Collection<String> phrases) {
 		makeASRScoring(); // TODO : evil
-		return asrWebserviceScoring.getValidPhrases(phrases);
+		return asrScoring.getValidPhrases(phrases);
 	}
 
 
@@ -538,7 +545,6 @@ public class AudioFileHelper implements CollationSort {
 	 * @param prefix
 	 * @return PretestScore
 	 **/
-	// JESS alignment AND decoding
 	public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
 			int width, int height, boolean useScoreToColorBkg,
 			boolean decode, String tmpDir, boolean useCache, String prefix) {
@@ -546,6 +552,7 @@ public class AudioFileHelper implements CollationSort {
 				" scoring " + testAudioFile + " with sentence '" + sentence + "' req# " + reqid);
 
 		// audio stuff
+		DECODE = decode;
 		makeASRScoring();
 		if (testAudioFile == null) {
 			return new PretestScore(); // very defensive
@@ -565,13 +572,11 @@ public class AudioFileHelper implements CollationSort {
 			sentence = sentence.toUpperCase();  // hack for English
 		}
 		// TODO
-		//PretestScore pretestScore = asrScoring.scoreRepeat(
-		PretestScore pretestScore = asrWebserviceScoring.scoreRepeat(
+		PretestScore pretestScore = asrScoring.scoreRepeat(
 				testAudioDir, removeSuffix(testAudioName),
 				sentence,
 				pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix);
 		pretestScore.setReqid(reqid);
-
 		return pretestScore;
 	}
 
@@ -702,16 +707,23 @@ public class AudioFileHelper implements CollationSort {
 		}
 	}
 
-	/*private void makeASRScoring() {
-		if (asrScoring == null) {
-			asrScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase); // lazy eval since reads in the dictionary
-		}
-	}*/
-
+	// TODO: gross
 	private void makeASRScoring() {
-		if (asrWebserviceScoring == null) {
-			asrWebserviceScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase); // lazy eval since reads in the dictionary
-		}
+		if(!DECODE)
+			asrScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
+		else
+			asrScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
+		/*if (asrScoring == null && langTestDatabase.getOldSchoolService())
+			asrScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
+		else if (asrScoring == null && DECODE)
+			asrScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase); // lazy eval since reads in the dictionary
+		else if(asrScoring == null && !DECODE)
+			asrScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
+		else if((asrScoring instanceof ASRScoring) && DECODE)
+			asrScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
+		else if(((asrScoring instanceof ASRWebserviceScoring) && !DECODE) || ((asrScoring instanceof ASRWebserviceScoring) && langTestDatabase.getOldSchoolService()))
+			asrScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
+			*/
 	}
 
 	/**
