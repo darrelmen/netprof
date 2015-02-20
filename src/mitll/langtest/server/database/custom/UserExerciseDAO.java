@@ -62,6 +62,7 @@ public class UserExerciseDAO extends DAO {
     try {
       createUserTable(database);
       Collection<String> columns = getColumns(USEREXERCISE);
+     // logger.debug("for " + USEREXERCISE+ " columns " + columns);
       Connection connection = database.getConnection(this.getClass().toString());
       if (!columns.contains(TRANSLITERATION)) {
         addColumnToTable(connection);
