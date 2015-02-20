@@ -18,11 +18,15 @@ import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.WaveformExercisePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.list.Shuffler;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonShell;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -67,7 +71,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
       protected FlexSectionExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
                                                          boolean incorrectFirst) {
         return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst) {
-          CheckBox filterOnly;
+          private CheckBox filterOnly;
 
           @Override
           protected void addTableWithPager(PagingContainer pagingContainer) {
@@ -200,7 +204,6 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
         ((Panel) parent).add(c);
         added = true;
       } else {
-//        System.out.println("get progress info...");
         getProgressInfo();
       }
     }
