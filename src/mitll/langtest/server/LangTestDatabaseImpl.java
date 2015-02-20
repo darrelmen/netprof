@@ -256,16 +256,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (onlyUnrecordedByMyGender) {
       logger.debug("for " + userID + " only by same gender " + onlyUnrecordedByMyGender +
           " examples only " + onlyExamples + " from " + exercises.size());
-      Set<String> recordedBySameGender = onlyExamples ? db.getAudioDAO().getWithContext(userID) :
+      Set<String> recordedBySameGender = onlyExamples ?
+          db.getAudioDAO().getWithContext(userID) :
           db.getAudioDAO().getRecordedBy(userID);
-      Set<String> allExercises = new HashSet<String>();
 
+      Set<String> allExercises = new HashSet<String>();
       for (CommonExercise exercise : exercises) {
         allExercises.add(exercise.getID().trim());
       }
-     // logger.debug("all exercises " + allExercises.size() + " removing " + recordedBySameGender.size());
+
+      logger.debug("all exercises " + allExercises.size() + " removing " + recordedBySameGender.size());
       allExercises.removeAll(recordedBySameGender);
-     // logger.debug("after all exercises " + allExercises.size());
+      logger.debug("after all exercises " + allExercises.size());
 
       List<CommonExercise> copy = new ArrayList<CommonExercise>();
       Set<String> seen = new HashSet<String>();
@@ -273,16 +275,38 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         String trim = exercise.getID().trim();
         if (allExercises.contains(trim)) {
           if (seen.contains(trim)) logger.warn("saw " + trim + " " + exercise + " again!");
-          seen.add(trim);
-          copy.add(exercise);
+          if ((onlyExamples && hasContext(exercise)) || !onlyExamples) {
+            seen.add(trim);
+            copy.add(exercise);
+          }
         }
       }
-     // logger.debug("to be recorded " + copy.size() + " from " + exercises.size());
+      logger.debug("to be recorded " + copy.size() + " from " + exercises.size());
 
       return copy;
     } else {
-      return exercises;
+      if (onlyExamples) {
+        List<CommonExercise> copy = new ArrayList<CommonExercise>();
+        Set<String> seen = new HashSet<String>();
+        for (CommonExercise exercise : exercises) {
+          String trim = exercise.getID().trim();
+
+          if (seen.contains(trim)) logger.warn("saw " + trim + " " + exercise + " again!");
+          if (onlyExamples && hasContext(exercise)) {
+            seen.add(trim);
+            copy.add(exercise);
+          }
+        }
+        logger.debug("ONLY EXAMPLES - to be recorded " + copy.size() + " from " + exercises.size());
+
+        return copy;
+      } else {
+        return exercises;
+      }
     }
+  }
+  private boolean hasContext(CommonExercise exercise) {
+    return exercise.getContext() != null && !exercise.getContext().isEmpty();
   }
 
   private Collection<CommonExercise> filterByOnlyAudioAnno(boolean onlyAudioAnno,
