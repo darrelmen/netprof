@@ -187,6 +187,10 @@ public class EditItem {
     return exerciseList;
   }
 
+  /**
+   * TODO : consider filling in context and context translation?
+   * @return
+   */
   private UserExercise getNewItem() {
     return new UserExercise(-1, NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, "", "");
   }
@@ -247,6 +251,11 @@ public class EditItem {
     }
   }
 
+  /**
+   * TODO : consider filling in context and context translation?
+   * @param userid
+   * @return
+   */
   private UserExercise createNewItem(long userid) {
     return new UserExercise(-1, UserExercise.CUSTOM_PREFIX + Long.MAX_VALUE, userid, "", "", "");
   }
@@ -333,7 +342,6 @@ public class EditItem {
           @Override
           public void setFields(CommonExercise newUserExercise) {}
         };
-
       }
     }
     return editableExercise;
@@ -353,5 +361,4 @@ public class EditItem {
     }
     return -1;
   }
-
 }
