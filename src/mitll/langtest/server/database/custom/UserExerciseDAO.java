@@ -40,11 +40,16 @@ public class UserExerciseDAO extends DAO {
   /**
    * @deprecated - we should join with the audio table
    */
-  private static final String REF_AUDIO = "refAudio";
+ // private static final String REF_AUDIO = "refAudio";
   /**
    * @deprecated - we should join with the audio table
    */
-  private static final String SLOW_AUDIO_REF = "slowAudioRef";
+ // private static final String SLOW_AUDIO_REF = "slowAudioRef";
+  /**
+   *
+   */
+  private static final String CONTEXT = "context";
+  private static final String CONTEXT_TRANSLATION = "contextTranslation";
 
   // ?? when would this be used?
   //private static final boolean ADD_MISSING_AUDIO = false;
@@ -79,6 +84,12 @@ public class UserExerciseDAO extends DAO {
       if (!columns.contains(STATE)) {
         addColumnToTable4(connection);
       }
+      if (!columns.contains(CONTEXT)) {
+        addColumnToTable5(connection);
+      }
+      if (!columns.contains(CONTEXT_TRANSLATION)) {
+        addColumnToTable6(connection);
+      }
       database.closeConnection(connection);
     } catch (SQLException e) {
       logger.error("got " + e, e);
@@ -107,10 +118,17 @@ public class UserExerciseDAO extends DAO {
         "INSERT INTO " + USEREXERCISE +
           "(" +
             EXERCISEID +
-            ",english,foreignLanguage," + TRANSLITERATION + ",creatorid," +
-            REF_AUDIO +
             "," +
-            SLOW_AUDIO_REF +
+            "english" +
+            "," +
+            "foreignLanguage" +
+            "," + TRANSLITERATION + "," +
+            "creatorid" +
+            "," +
+           // REF_AUDIO +
+           // "," +
+           // SLOW_AUDIO_REF +
+            CONTEXT + "," +CONTEXT_TRANSLATION +
             ",override," + UNIT+
           ","+LESSON+
           ","+MODIFIED+
@@ -125,14 +143,15 @@ public class UserExerciseDAO extends DAO {
       statement.setString(i++, fixSingleQuote(userExercise.getForeignLanguage()));
       statement.setString(i++, fixSingleQuote(userExercise.getTransliteration()));
       statement.setLong(i++, userExercise.getCreator());
+      statement.setString(i++, fixSingleQuote(userExercise.getContext()));
+      statement.setString(i++, fixSingleQuote(userExercise.getContextTranslation()));
 
-      // TODO : remove me!
-      String refAudio = userExercise.getRefAudio();
+      // TODOx : remove me!
+/*      String refAudio = userExercise.getRefAudio();
       statement.setString(i++, refAudio == null ? "" : refAudio);
       String slowAudioRef = userExercise.getSlowAudioRef();
       String slowRefNullCheck = slowAudioRef == null || slowAudioRef.equals("null") ? "" : slowAudioRef;
-      statement.setString(i++, slowRefNullCheck);
-
+      statement.setString(i++, slowRefNullCheck);*/
 
       statement.setBoolean(i++, isOverride);
 
@@ -206,10 +225,10 @@ public class UserExerciseDAO extends DAO {
       "foreignLanguage VARCHAR, " +
       TRANSLITERATION + " VARCHAR, " +
       "creatorid INT, " +
-      REF_AUDIO +
-      " VARCHAR, " +
-      SLOW_AUDIO_REF +
-      " VARCHAR, " +
+    //    REF_AUDIO + " VARCHAR, " +
+    //    SLOW_AUDIO_REF + " VARCHAR, " +
+        CONTEXT + " VARCHAR, " +
+        CONTEXT_TRANSLATION + " VARCHAR, " +
       "override" +
       " BOOLEAN, " +
       UNIT +
@@ -240,7 +259,7 @@ public class UserExerciseDAO extends DAO {
     try {
       if (DEBUG) logger.debug("\tusing for user exercise = " +sql);
 
-      List<CommonUserExercise> userExercises = getUserExercises(sql, false);
+      List<CommonUserExercise> userExercises = getUserExercises(sql);
       if (DEBUG) logger.debug("\tfound " +userExercises.size()+ " exercises userExercises on list " +listID);
 
       List<CommonUserExercise> userExercises2 = new ArrayList<CommonUserExercise>();
@@ -335,7 +354,7 @@ public class UserExerciseDAO extends DAO {
   public CommonUserExercise getWhere(String exid) {
     String sql = "SELECT * from " + USEREXERCISE + " where " +  EXERCISEID + "='" + exid + "'";
     try {
-      List<CommonUserExercise> userExercises = getUserExercises(sql, false);
+      List<CommonUserExercise> userExercises = getUserExercises(sql);
       if (userExercises.isEmpty()) {
         //logger.debug("getWhere : no custom exercise with id " + exid);
         return null;
@@ -351,7 +370,7 @@ public class UserExerciseDAO extends DAO {
   public Collection<CommonUserExercise> getAll() {
     String sql = "SELECT * from " + USEREXERCISE;
     try {
-      return getUserExercises(sql, false);
+      return getUserExercises(sql);
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
@@ -361,13 +380,12 @@ public class UserExerciseDAO extends DAO {
   /**
    * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
    * @see #setAudioDAO(mitll.langtest.server.database.AudioDAO)
-   * @param addMissingAudio always false
    * @return
    */
-  public Collection<CommonUserExercise> getOverrides(boolean addMissingAudio) {
+  public Collection<CommonUserExercise> getOverrides() {
     String sql = "SELECT * from " + USEREXERCISE + " where override=true";
     try {
-      return getUserExercises(sql, addMissingAudio);
+      return getUserExercises(sql);
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
@@ -386,7 +404,7 @@ public class UserExerciseDAO extends DAO {
         EXERCISEID +
         " in (" + s+ ")";
     try {
-      List<CommonUserExercise> userExercises = getUserExercises(sql, false);
+      List<CommonUserExercise> userExercises = getUserExercises(sql);
       if (userExercises.isEmpty()) {
         logger.warn("getVisitorsOfList : no user exercises in " + exids.size() + " exercise ids");
       }
@@ -407,15 +425,15 @@ public class UserExerciseDAO extends DAO {
 
   /**
    * @see #getOnList(long)
-   * @see #getOverrides(boolean)
+   * @see #getOverrides()
    * @seex #getWhere(java.util.Collection)
    * @see #getWhere(java.lang.String)
-   * @param sql
    * @param addMissingAudio always false
+   * @param sql
    * @return user exercises without annotations
    * @throws SQLException
    */
-  private List<CommonUserExercise> getUserExercises(String sql, boolean addMissingAudio) throws SQLException {
+  private List<CommonUserExercise> getUserExercises(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     List<CommonUserExercise> exercises;
     try {
@@ -433,24 +451,24 @@ public class UserExerciseDAO extends DAO {
         Date date = (timestamp != null) ? new Date(timestamp.getTime()) : new Date(0);
 
         UserExercise e = new UserExercise(
-          rs.getLong("uniqueid"),
-          rs.getString(EXERCISEID),
-          rs.getLong("creatorid"),
-          rs.getString("english"),
-          rs.getString("foreignLanguage"),
-          rs.getString(TRANSLITERATION),
-          "",         // TODO complete fill in of context!
-          "",         // TODO complete fill in of contextTranslation!
-          rs.getBoolean(OVERRIDE),
-          unitToValue,
-          date.getTime()
+            rs.getLong("uniqueid"),
+            rs.getString(EXERCISEID),
+            rs.getLong("creatorid"),
+            rs.getString("english"),
+            rs.getString("foreignLanguage"),
+            rs.getString(TRANSLITERATION),
+            rs.getString(CONTEXT),
+            rs.getString(CONTEXT_TRANSLATION),
+            rs.getBoolean(OVERRIDE),
+            unitToValue,
+            date.getTime()
         );
 
-        if (addMissingAudio) {
-          String ref  = rs.getString(REF_AUDIO);
+/*        if (addMissingAudio) {
+          String ref = rs.getString(REF_AUDIO);
           String sref = rs.getString(SLOW_AUDIO_REF);
           addMissingAudio(e, ref, sref);
-        }
+        }*/
         exercises.add(e);
       }
       finish(connection, statement, rs);
@@ -462,7 +480,7 @@ public class UserExerciseDAO extends DAO {
   }
 
   /**
-   * @see #getUserExercises(String, boolean)
+   * @see #getUserExercises(String)
    * @param e
    * @param ref
    * @param sref
@@ -611,6 +629,12 @@ public class UserExerciseDAO extends DAO {
 
   private void addColumnToTable4(Connection connection) throws SQLException {
     addVarchar(connection, USEREXERCISE, STATE);
+  }
+  private void addColumnToTable5(Connection connection) throws SQLException {
+    addVarchar(connection, USEREXERCISE, CONTEXT);
+  }
+  private void addColumnToTable6(Connection connection) throws SQLException {
+    addVarchar(connection, USEREXERCISE, CONTEXT_TRANSLATION);
   }
 
   public void setExerciseDAO(ExerciseDAO exerciseDAO) {
