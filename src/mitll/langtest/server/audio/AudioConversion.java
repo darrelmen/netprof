@@ -122,7 +122,6 @@ public class AudioConversion {
 	public String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix) throws UnsupportedAudioFileException {
 		String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + ".wav";
 		File wavFile = new File(pathname);
-
 		wavFile = convertTo16Khz(wavFile);
 		String name1 = wavFile.getName();
 		return removeSuffix(name1);
@@ -149,7 +148,6 @@ public class AudioConversion {
 				String sampled = wavFile.getParent() + File.separator + removeSuffix(name1) + SIXTEEN_K_SUFFIX + ".wav";
 				if (new FileCopier().copy(convertTo16KHZ, sampled)) {
 					wavFile = new File(sampled);
-
 					// cleanup
 					String parent = new File(convertTo16KHZ).getParent();
 					File file = new File(parent);
