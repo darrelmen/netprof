@@ -73,7 +73,6 @@ public class ServerProperties {
   private static final List<String> DLI_APPROVERS = Arrays.asList(
       "Tamas",
       "Tamas",
-      "Alex",
       "David",
       "Sandy",
       "Gordon");
@@ -83,12 +82,11 @@ public class ServerProperties {
   private static final List<String> DLI_EMAILS = Arrays.asList(
       TAMAS_1,
       TAMAS_2,
-      "alexandra.cohen@dliflc.edu",
       "david.randolph@dliflc.edu",
       "sandra.wagner@dliflc.edu",
       GORDON_VIDAVER);
 
-  private static final Set<String> ADMINLIST = new HashSet<String>(Arrays.asList("swade", "gvidaver", "tmarius", "acohen",
+  private static final Set<String> ADMINLIST = new HashSet<String>(Arrays.asList("swade", "gvidaver", "tmarius",
       "drandolph", "swagner", "gmarkovic", "djones", "jmelot", "rbudd", "jray", "jwilliams", "pgatewood"));
 
   /**
