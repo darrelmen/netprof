@@ -87,7 +87,7 @@ public class UserExerciseDAO extends DAO {
       if (!columns.contains(CONTEXT)) {
         addColumnToTable5(connection);
       }
-      if (!columns.contains(CONTEXT_TRANSLATION)) {
+      if (!columns.contains(CONTEXT_TRANSLATION.toLowerCase())) {
         addColumnToTable6(connection);
       }
       database.closeConnection(connection);
