@@ -64,7 +64,7 @@ public abstract class Scoring {
 	protected ImageWriter.EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
 			String audioFileNoSuffix, boolean useScoreToColorBkg,
 			String prefix, String suffix, boolean decode,
-			String phoneLab, String wordLab) {
+			String phoneLab, String wordLab, boolean useWebservice) {
 		String pathname = audioFileNoSuffix + ".wav";
 		pathname = prependDeploy(pathname);
 		if (!new File(pathname).exists()) {
@@ -93,15 +93,15 @@ public abstract class Scoring {
 		}
 
 		if (decode || imageWidth < 0) {  // hack to skip image generation
-			return getEventInfo(typeToFile);
+			return getEventInfo(typeToFile, decode && useWebservice);
 		} else {
 			return new ImageWriter().writeTranscripts(pathname,
-					imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix);
+					imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, decode && useWebservice);
 		}
 	}
 	protected ImageWriter.EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
 			String audioFileNoSuffix, boolean useScoreToColorBkg,
-			String prefix, String suffix, boolean decode) {
+			String prefix, String suffix, boolean decode, boolean useWebservice) {
 		String pathname = audioFileNoSuffix + ".wav";
 		pathname = prependDeploy(pathname);
 		if (!new File(pathname).exists()) {
@@ -115,13 +115,11 @@ public abstract class Scoring {
 		String phoneLabFile  = prependDeploy(audioFileNoSuffix + ".phones.lab");
 		Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
 		if (new File(phoneLabFile).exists()) {
-			logger.debug("JESS phoneLabFile exists: " + phoneLabFile);
 			typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
 			foundATranscript = true;
 		}
 		String wordLabFile   = prependDeploy(audioFileNoSuffix + ".words.lab");
 		if (new File(wordLabFile).exists()) {
-			logger.debug("JESS wordLabFile exists: " + wordLabFile);
 			typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
 			foundATranscript = true;
 		}
@@ -135,26 +133,28 @@ public abstract class Scoring {
 		}
 
 		if (decode || imageWidth < 0) {  // hack to skip image generation
-			return getEventInfo(typeToFile);
+			return getEventInfo(typeToFile, decode && useWebservice); // if align, don't use webservice regardless
 		} else {
 			return new ImageWriter().writeTranscripts(pathname,
-					imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix);
+					imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, decode && useWebservice);
 		}
 	}
 
-	// JESS changed here
-	private ImageWriter.EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes) {
+	// JESS reupdate here
+	private ImageWriter.EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes, boolean useWebservice) {
 		Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
-		//try {
+		try {
 			for (Map.Entry<ImageType, String> o : imageTypes.entrySet()) {
-				//typeToEvent.put(o.getKey(), new TranscriptReader().readEventsFromFile(o.getValue()));
-				typeToEvent.put(o.getKey(), new TranscriptReader().readEventsFromString(o.getValue()));
+				if(useWebservice)
+					typeToEvent.put(o.getKey(), new TranscriptReader().readEventsFromString(o.getValue()));
+				else 
+					typeToEvent.put(o.getKey(), new TranscriptReader().readEventsFromFile(o.getValue()));
 			}
 			return new ImageWriter.EventAndFileInfo(new HashMap<ImageType, String>(), typeToEvent);
-	//	} catch (IOException e) {
-		//	e.printStackTrace();
-		//	return null;
-		//}
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	/**
