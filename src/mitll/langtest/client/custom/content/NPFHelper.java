@@ -154,7 +154,6 @@ public class NPFHelper implements RequiresResize {
       left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
     }
 
-
     return hp;
   }
 
