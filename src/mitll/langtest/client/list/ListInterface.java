@@ -80,8 +80,6 @@ public interface ListInterface extends RequiresResize {
    */
   void clear();
 
- // int getPercentComplete();
-
   int getComplete();
 
   /**
@@ -94,8 +92,6 @@ public interface ListInterface extends RequiresResize {
    */
   void reloadExercises();
   void addExercise(CommonShell es);
-
-  //List<CommonShell> rememberExercises(List<CommonShell> result);
 
   CommonShell simpleRemove(String id);
 
