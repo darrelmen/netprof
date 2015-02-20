@@ -8,7 +8,7 @@ import mitll.langtest.client.WavCallback;
  */
 public class WebAudioRecorder {
   private static boolean webAudioMicAvailable;
-  private static final boolean micConnected = true;  // TODO how to determine if mic not connected in web audio world?
+  //private static final boolean micConnected = true;  // TODO how to determine if mic not connected in web audio world?
   private static boolean tried = false;
 
   public void tryWebAudio() {
@@ -50,7 +50,7 @@ public class WebAudioRecorder {
       console.log( "WebAudioRecorder:" + message );
   }-*/;
 
-  public boolean isMicConnected() { return micConnected; }
+  //public boolean isMicConnected() { return micConnected; }
   public boolean isWebAudioMicAvailable() { return webAudioMicAvailable; }
 
   public static void webAudioMicAvailable() {
