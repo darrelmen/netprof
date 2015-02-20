@@ -16,6 +16,7 @@ public class PathWriter {
   private static final String BEST_AUDIO = "bestAudio";
 
   /**
+   * Skips copying files called FILE_MISSING {@link mitll.langtest.server.audio.AudioConversion#FILE_MISSING}
    * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath
    * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
    * @param pathHelper
@@ -39,7 +40,7 @@ public class PathWriter {
     //logger.debug("getPermanentAudioPath : copying from " + fileRef +  " to " + destination.getAbsolutePath());
     String s = BEST_AUDIO + File.separator + id + File.separator + destFileName;
     //logger.debug("getPermanentAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +s);
-    if (!fileRef.equals(destination)) {
+    if (!fileRef.equals(destination) && !destFileName.equals(AudioConversion.FILE_MISSING)) {
       new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
 
       logger.debug("getPermanentAudioPath : normalizing levels for " + destination.getAbsolutePath());
