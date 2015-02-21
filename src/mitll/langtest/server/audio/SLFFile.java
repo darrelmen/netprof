@@ -21,6 +21,7 @@ public class SLFFile {
  // private static final String LINK_WEIGHT = "-1.00";
   public static final float EQUAL_LINK_CONSTANT = -1.00f;
   public static final float UNKNOWN_MODEL_BIAS_CONSTANT = -1.20f;
+  private static final String UNKNOWN_MODEL_BIAS = "-1.20";
 
   /**
    * Unknown Model Bias Weight balances the likelihood between matching one of the decode words or the unknown model.
@@ -88,5 +89,55 @@ public class SLFFile {
     }
     //logger.debug("wrote " + slfFile + " exists " + new File(slfFile).exists());
     return slfFile;
+  }
+  
+  // creates string LM for hydra
+  // TODO calculate how many entries in the LM and then preallocate space appropriately to be faster
+  public String createSimpleSLFFile(Collection<String> lmSentences) {
+	  ArrayList<String> slf = new ArrayList<String>();
+	  slf.add("VERSION=1.0;");
+
+	  int linkCount = 0;
+	  StringBuilder nodesBuf = new StringBuilder();
+	  nodesBuf.append("I=0 W=<s>;");
+	  nodesBuf.append("I=1 W=</s>;");
+	  int newNodes = 2;
+	  StringBuilder linksBuf = new StringBuilder();
+	  Collection<String> sentencesToUse = new ArrayList<String>(lmSentences);
+	  sentencesToUse.add(UNKNOWN_MODEL);
+
+	  SmallVocabDecoder svd = new SmallVocabDecoder();
+	  int ctr = 0;
+	  for (String sentence : sentencesToUse) {
+		  Collection<String> tokens = svd.getTokens(sentence);
+		  int start = 0;
+
+		  for (String token : tokens) {
+			  int next = newNodes++;
+			  linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=" + next +
+					  " l=" +
+					  (token.equals(UNKNOWN_MODEL) ? UNKNOWN_MODEL_BIAS : "-1.00") + ";");
+			  nodesBuf.append("I=" +
+					  next +
+					  " W=" +
+					  token +
+					  ";");
+
+			  start = next;
+		  }
+		  linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=1" + " l=-1.00" + (ctr == sentencesToUse.size() - 1 ? "" : ";"));
+		  ctr += 1;
+	  }
+	  slf.add("N=" + newNodes + " L=" + linkCount + ";");
+	  slf.add(nodesBuf.toString());
+	  slf.add(linksBuf.toString());
+
+	  StringBuilder slfBuf = new StringBuilder();
+	  for(int i = 0; i < slf.size(); i++) {
+		  slfBuf.append(slf.get(i));
+		  //if(i != (slf.size() - 1))
+		//	  slfBuf.append(";");
+	  }
+	  return slfBuf.toString();
   }
 }
