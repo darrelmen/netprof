@@ -25,136 +25,176 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class Scoring {
-  private static final Logger logger = Logger.getLogger(Scoring.class);
+	private static final Logger logger = Logger.getLogger(Scoring.class);
 
-  protected static final float SCORE_SCALAR = 1.0f;// / 0.15f;
-  private static final String SCORING = "scoring";
+	protected static final float SCORE_SCALAR = 1.0f;// / 0.15f;
+	private static final String SCORING = "scoring";
 
-  protected final String scoringDir;
-  protected final String deployPath;
+	protected final String scoringDir;
+	protected final String deployPath;
 
-  /**
-   * @see ASRScoring#ASRScoring
-   *
-   * @param  deployPath
-   */
-  protected Scoring(String deployPath) {
-    this.deployPath = deployPath;
-    this.scoringDir = getScoringDir(deployPath);
-  }
+	/**
+	 * @see ASRScoring#ASRScoring
+	 *
+	 * @param  deployPath
+	 */
+	protected Scoring(String deployPath) {
+		this.deployPath = deployPath;
+		this.scoringDir = getScoringDir(deployPath);
+	}
 
-  private static String getScoringDir(String deployPath) { return deployPath + File.separator + SCORING; }
+	private static String getScoringDir(String deployPath) { return deployPath + File.separator + SCORING; }
 
-  /**
-   * Given an audio file without a suffix, check if there are label files, and if so, for each one,
-   * write out a transcript image file.  Write them to the imageOutDir, and use the specified width and height.
-   *
-   * @see ASRScoring#scoreRepeatExercise
-   *
-   * @param imageOutDir
-   * @param imageWidth
-   * @param imageHeight
-   * @param audioFileNoSuffix
-   * @param useScoreToColorBkg
-   * @param prefix
-   * @param suffix
-   * @param decode if true don't bother to write out images for word and phone
-   * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
-   */
-  protected ImageWriter.EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
-                                                          String audioFileNoSuffix, boolean useScoreToColorBkg,
-                                                          String prefix, String suffix, boolean decode) {
-    String pathname = audioFileNoSuffix + ".wav";
-    pathname = prependDeploy(pathname);
-    if (!new File(pathname).exists()) {
-      logger.error("writeTranscripts : can't find " + pathname);
-      return new ImageWriter.EventAndFileInfo();
-    }
-    imageOutDir = deployPath + File.separator + imageOutDir;
+	/**
+	 * Given an audio file without a suffix, check if there are label files, and if so, for each one,
+	 * write out a transcript image file.  Write them to the imageOutDir, and use the specified width and height.
+	 *
+	 * @see ASRScoring#scoreRepeatExercise
+	 *
+	 * @param imageOutDir
+	 * @param imageWidth
+	 * @param imageHeight
+	 * @param audioFileNoSuffix
+	 * @param useScoreToColorBkg
+	 * @param prefix
+	 * @param suffix
+	 * @param decode if true don't bother to write out images for word and phone
+	 * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
+	 */
+	protected ImageWriter.EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
+			String audioFileNoSuffix, boolean useScoreToColorBkg,
+			String prefix, String suffix, boolean decode,
+			String phoneLab, String wordLab, boolean useWebservice) {
+		String pathname = audioFileNoSuffix + ".wav";
+		pathname = prependDeploy(pathname);
+		if (!new File(pathname).exists()) {
+			logger.error("writeTranscripts : can't find " + pathname);
+			return new ImageWriter.EventAndFileInfo();
+		}
+		imageOutDir = deployPath + File.separator + imageOutDir;
 
-    boolean foundATranscript = false;
-    // These may not all exist. The speech file is created only by multisv right now.
-    String phoneLabFile  = prependDeploy(audioFileNoSuffix + ".phones.lab");
-    Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
-    if (new File(phoneLabFile).exists()) {
-      typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
-      foundATranscript = true;
-    }
+		boolean foundATranscript = false;
+		// These may not all exist. The speech file is created only by multisv right now.
+		String phoneLabFile  = prependDeploy(audioFileNoSuffix + ".phones.lab");
+		Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
 
-    String wordLabFile   = prependDeploy(audioFileNoSuffix + ".words.lab");
-    if (new File(wordLabFile).exists()) {
-      typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
-      foundATranscript = true;
-    }
+		if(phoneLab != null) {
+			logger.debug("phoneLab: " + phoneLab);
+			typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLab);
+			foundATranscript = true;
+		}
+		if(wordLab != null) {
+			logger.debug("wordLab: " + wordLab);
+			typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLab);
+		}
 
-    String speechLabFile = prependDeploy(audioFileNoSuffix + ".speech.lab");
-    if (new File(speechLabFile).exists()) {
-      foundATranscript = true;
-      typeToFile.put(ImageType.SPEECH_TRANSCRIPT, speechLabFile);
-    }
-    if (!foundATranscript) {
-      logger.error("no label files found, e.g. " + phoneLabFile);
-    }
+		if (!foundATranscript) {
+			logger.error("no label files found, e.g. " + phoneLabFile);
+		}
 
-    if (decode || imageWidth < 0) {  // hack to skip image generation
-      return getEventInfo(typeToFile);
-    } else {
-      return new ImageWriter().writeTranscripts(pathname,
-        imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix);
-    }
-  }
+		if (decode || imageWidth < 0) {  // hack to skip image generation
+			return getEventInfo(typeToFile, decode && useWebservice);
+		} else {
+			return new ImageWriter().writeTranscripts(pathname,
+					imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, decode && useWebservice);
+		}
+	}
+	protected ImageWriter.EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
+			String audioFileNoSuffix, boolean useScoreToColorBkg,
+			String prefix, String suffix, boolean decode, boolean useWebservice) {
+		String pathname = audioFileNoSuffix + ".wav";
+		pathname = prependDeploy(pathname);
+		if (!new File(pathname).exists()) {
+			logger.error("writeTranscripts : can't find " + pathname);
+			return new ImageWriter.EventAndFileInfo();
+		}
+		imageOutDir = deployPath + File.separator + imageOutDir;
 
-  private ImageWriter.EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes) {
-    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
-    try {
-      for (Map.Entry<ImageType, String> o : imageTypes.entrySet()) {
-        typeToEvent.put(o.getKey(), new TranscriptReader().readEventsFromFile(o.getValue()));
-      }
-      return new ImageWriter.EventAndFileInfo(new HashMap<ImageType, String>(), typeToEvent);
-    } catch (IOException e) {
-      e.printStackTrace();
-      return null;
-    }
-  }
+		boolean foundATranscript = false;
+		// These may not all exist. The speech file is created only by multisv right now.
+		String phoneLabFile  = prependDeploy(audioFileNoSuffix + ".phones.lab");
+		Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
+		if (new File(phoneLabFile).exists()) {
+			typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
+			foundATranscript = true;
+		}
+		String wordLabFile   = prependDeploy(audioFileNoSuffix + ".words.lab");
+		if (new File(wordLabFile).exists()) {
+			typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
+			foundATranscript = true;
+		}
+		String speechLabFile = prependDeploy(audioFileNoSuffix + ".speech.lab");
+		if (new File(speechLabFile).exists()) {
+			foundATranscript = true;
+			typeToFile.put(ImageType.SPEECH_TRANSCRIPT, speechLabFile);
+		}
+		if (!foundATranscript) {
+			logger.error("no label files found, e.g. " + phoneLabFile);
+		}
 
-  /**
-   * Make sure the paths for each image are relative (don't include the deploy path prefix) and have
-   * the slashes going in the right direction.<br></br>
-   * I.e. make valid URLs.
-   * @param typeToImageFile
-   * @return map of image type to URL
-   */
-  protected Map<NetPronImageType, String> getTypeToRelativeURLMap(Map<ImageType, String> typeToImageFile) {
-    Map<NetPronImageType, String> sTypeToImage = new HashMap<NetPronImageType, String>();
-    if (typeToImageFile == null) {
-      logger.error("huh? typeToImageFile is null?");
-    }
-    else {
-      for (Map.Entry<ImageType, String> kv : typeToImageFile.entrySet()) {
-        String name = kv.getKey().toString();
-        NetPronImageType key = NetPronImageType.valueOf(name);
-        String filePath = kv.getValue();
-        if (filePath.startsWith(deployPath)) {
-          filePath = filePath.substring(deployPath.length()); // make it a relative path
-        } else {
-          logger.error("expecting image " + filePath + "\tto be under " + deployPath);
-        }
+		if (decode || imageWidth < 0) {  // hack to skip image generation
+			return getEventInfo(typeToFile, decode && useWebservice); // if align, don't use webservice regardless
+		} else {
+			return new ImageWriter().writeTranscripts(pathname,
+					imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, decode && useWebservice);
+		}
+	}
 
-        filePath = filePath.replaceAll("\\\\", "/");
-        if (filePath.startsWith("/")) {
-          //System.out.println("removing initial slash from " + filePath);
-          filePath = filePath.substring(1);
-        }
-        sTypeToImage.put(key, filePath);
-      }
-    }
-    return sTypeToImage;
-  }
+	// JESS reupdate here
+	private ImageWriter.EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes, boolean useWebservice) {
+		Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
+		try {
+			for (Map.Entry<ImageType, String> o : imageTypes.entrySet()) {
+				if(useWebservice)
+					typeToEvent.put(o.getKey(), new TranscriptReader().readEventsFromString(o.getValue()));
+				else 
+					typeToEvent.put(o.getKey(), new TranscriptReader().readEventsFromFile(o.getValue()));
+			}
+			return new ImageWriter.EventAndFileInfo(new HashMap<ImageType, String>(), typeToEvent);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 
-  private String prependDeploy(String pathname) {
-    if (!new File(pathname).exists()) {
-       pathname = deployPath + File.separator + pathname;
-    }
-    return pathname;
-  }
+	/**
+	 * Make sure the paths for each image are relative (don't include the deploy path prefix) and have
+	 * the slashes going in the right direction.<br></br>
+	 * I.e. make valid URLs.
+	 * @param typeToImageFile
+	 * @return map of image type to URL
+	 */
+	protected Map<NetPronImageType, String> getTypeToRelativeURLMap(Map<ImageType, String> typeToImageFile) {
+		Map<NetPronImageType, String> sTypeToImage = new HashMap<NetPronImageType, String>();
+		if (typeToImageFile == null) {
+			logger.error("huh? typeToImageFile is null?");
+		}
+		else {
+			for (Map.Entry<ImageType, String> kv : typeToImageFile.entrySet()) {
+				String name = kv.getKey().toString();
+				NetPronImageType key = NetPronImageType.valueOf(name);
+				String filePath = kv.getValue();
+				if (filePath.startsWith(deployPath)) {
+					filePath = filePath.substring(deployPath.length()); // make it a relative path
+				} else {
+					logger.error("expecting image " + filePath + "\tto be under " + deployPath);
+				}
+
+				filePath = filePath.replaceAll("\\\\", "/");
+				if (filePath.startsWith("/")) {
+					//System.out.println("removing initial slash from " + filePath);
+					filePath = filePath.substring(1);
+				}
+				sTypeToImage.put(key, filePath);
+			}
+		}
+		return sTypeToImage;
+	}
+
+	private String prependDeploy(String pathname) {
+		if (!new File(pathname).exists()) {
+			pathname = deployPath + File.separator + pathname;
+		}
+		return pathname;
+	}
 }
