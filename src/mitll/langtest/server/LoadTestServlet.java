@@ -570,7 +570,7 @@ public class LoadTestServlet extends DatabaseServlet {
     // logger.debug("getASRScoreForAudio " +testAudioFile);
 
     AudioFileHelper.ScoreAndAnswer asrScoreForAudio = new AudioFileHelper.ScoreAndAnswer(new PretestScore(), new AudioAnswer());
-    if (!audioFileHelper.checkLTS(sentence)) {
+/*    if (!audioFileHelper.checkLTS(sentence)) {
       logger.error("couldn't decode the word '' since it's not in the dictionary or passes letter-to-sound.  E.g. english word with an arabic model.");
       return asrScoreForAudio;
     }
@@ -591,7 +591,7 @@ public class LoadTestServlet extends DatabaseServlet {
       asrScoreForAudio = audioFileHelper.getFlashcardAnswer(testAudioFile, sentence);
     } catch (Exception e) {
       logger.error("got " + e, e);
-    }
+    }*/
 
     return asrScoreForAudio;
   }
