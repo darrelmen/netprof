@@ -1,6 +1,5 @@
 package mitll.langtest.server.scoring;
 
-import Utils.Log;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
 import audio.imagewriter.ImageWriter;
@@ -13,6 +12,7 @@ import corpus.LTS;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -21,11 +21,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-
-import pronz.dirs.Dirs;
-import pronz.speech.Audio;
-import pronz.speech.Audio$;
-import scala.Tuple2;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 
@@ -53,9 +48,9 @@ import java.util.TreeSet;
  * Time: 11:16 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ASRScoring extends Scoring implements CollationSort, ASR {
+public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR {
 	private static final double KEEP_THRESHOLD = 0.3;
-	private static final Logger logger = Logger.getLogger(ASRScoring.class);
+	private static final Logger logger = Logger.getLogger(ASRWebserviceScoring.class);
 	private static final boolean DEBUG = false;
 
 	private static final int FOREGROUND_VOCAB_LIMIT = 100;
@@ -80,16 +75,16 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 	 * If the score was below a threshold, or the magic -1, we keep it around for future study.
 	 */
 	private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
-	private final LTSFactory ltsFactory;
+	private LTSFactory ltsFactory;
 
 	/**
 	 * @param deployPath
 	 * @param properties
 	 * @param langTestDatabase
 	 * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
-	 * @seex mitll.langtest.server.audio.AudioFileHelper#makeASRScoring()
+	 * @see mitll.langtest.server.audio.AudioFileHelper#makeASRScoring()
 	 */
-	public ASRScoring(String deployPath, Map<String, String> properties, LangTestDatabaseImpl langTestDatabase) {
+	public ASRWebserviceScoring(String deployPath, Map<String, String> properties, LangTestDatabaseImpl langTestDatabase) {
 		this(deployPath, properties);
 		this.langTestDatabase = langTestDatabase;
 		readDictionary();
@@ -113,9 +108,9 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 	 * @paramx dict
 	 * @see #ASRScoring(String, java.util.Map, mitll.langtest.server.LangTestDatabaseImpl)
 	 */
-	private ASRScoring(String deployPath, Map<String, String> properties) {
+	private ASRWebserviceScoring(String deployPath, Map<String, String> properties) {
 		super(deployPath);
-		logger.debug("Creating ASRScoring object");
+		logger.debug("Creating ASRWebserviceScoring object");
 		lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
 		audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
@@ -172,7 +167,6 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 		Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
 
 		String language = isMandarin ? " MANDARIN " : "";
-		//logger.debug("checkLTS '" + language + "' tokens : '" +tokens +"'");
 
 		try {
 			int i = 0;
@@ -206,10 +200,11 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 			logger.error("lts " + language + "/" + lts + " failed on '" + foreignLanguagePhrase + "'", e);
 			return false;
 		}
+
 		return true;
 	}
 
-	private int multiple = 0;
+	int multiple = 0;
 	/**
 	 * Might be n1 x n2 x n3 different possible combinations of pronunciations of a phrase
 	 * Consider running ASR on all ref audio to get actual phone sequence.
@@ -221,7 +216,6 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 		SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
 		Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
 
-		//List<List<String>> pronunciations = new ArrayList<List<String>>();
 		List<String> firstPron = new ArrayList<String>();
 		Set<String> uphones = new TreeSet<String>();
 
@@ -236,28 +230,23 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 					Collections.addAll(token2, segmentation.split(" "));
 				}
 			}
-			//    logger.debug("Tokens were " + tokens + " now " + token2);
 			tokens = token2;
 		}
 
 		for (String token : tokens) {
 			if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL))
 				return new PhoneInfo(firstPron,uphones) ;
-			// either lts can handle it or the dictionary can...
 
 			boolean htkEntry = htkDictionary.contains(token);
 			if (htkEntry) {
 				scala.collection.immutable.List<String[]> pronunciationList = htkDictionary.apply(token);
-				//   logger.debug("token " + pronunciationList);
 				scala.collection.Iterator iter = pronunciationList.iterator();
 				boolean first = true;
 				while (iter.hasNext()) {
 					Object next = iter.next();
-					//    logger.debug(next);
 
 					String[] tt = (String[]) next;
 					for (String t : tt) {
-						//logger.debug(t);
 						uphones.add(t);
 
 						if (first) {
@@ -269,17 +258,12 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 				}
 			} else {
 				String[][] process = lts.process(token);
-				//logger.debug("token " + token);
 				if (process != null) {
 
 					boolean first = true;
 					for (String[] onePronunciation : process) {
 						// each pronunciation
-						//          ArrayList<String> pronunciation = new ArrayList<String>();
-						//        pronunciations.add(pronunciation);
 						for (String phoneme : onePronunciation) {
-							//logger.debug("phoneme " +phoneme);
-							//        pronunciation.add(phoneme);
 							uphones.add(phoneme);
 
 							if (first) {
@@ -292,75 +276,51 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 				}
 			}
 		}
-		//if (multiple % 1000 == 0) logger.debug("mult " + multiple);
 		return new PhoneInfo(firstPron,uphones);
 	}
 
-	/* public static class PhoneInfo {
-    private final List<String> firstPron;
-    private final Set<String> phoneSet;
+	/*public static class PhoneInfo {
+		private List<String> firstPron;
+		private Set<String> phoneSet;
 
-    public PhoneInfo(List<String> firstPron, Set<String> phoneSet) {
-      this.firstPron = firstPron;
-      this.phoneSet = phoneSet;
-    }
+		public PhoneInfo(List<String> firstPron, Set<String> phoneSet) {
+			this.firstPron = firstPron;
+			this.phoneSet = phoneSet;
+		}
 
-    public List<String> getFirstPron() {
-      return firstPron;
-    }
+		public String toString() {
+			return "Phones " + getPhoneSet() + " " + getFirstPron();
+		}
 
-    public Set<String> getPhoneSet() {
-      return phoneSet;
-    }
+		public List<String> getFirstPron() {
+			return firstPron;
+		}
 
-    public String toString() {
-      return "Phones " + getPhoneSet() + " " + getFirstPron();
-    }
-  }*/
+		public Set<String> getPhoneSet() {
+			return phoneSet;
+		}
+	}*/
 
-  /**
-   * For chinese, maybe later other languages.
-   * @param longPhrase
-   * @return
-   * @seex AutoCRT#getRefs
-   * @see mitll.langtest.server.scoring.ASRScoring#getScoreForAudio
-   */
-  public static String getSegmented(String longPhrase) {
-    Collection<String> tokens = svDecoderHelper.getTokens(longPhrase);
-    StringBuilder builder = new StringBuilder();
-    for (String token : tokens) {
-      builder.append(svDecoderHelper.segmentation(token.trim()));
-      builder.append(" ");
-    }
-    return builder.toString();
-  }
 
-	/*  private Set<String> wordsInDict = new HashSet<String>();
-  private void readDict() {
-    String modelsDir = getModelsDir();
+	/**
+	 * For chinese, maybe later other languages.
+	 * @param longPhrase
+	 * @return
+	 * @seex AutoCRT#getRefs
+	 * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getScoreForAudio
+	 */
+	public static String getSegmented(String longPhrase) {
+		Collection<String> tokens = svDecoderHelper.getTokens(longPhrase);
+		StringBuilder builder = new StringBuilder();
+		for (String token : tokens) {
+			builder.append(svDecoderHelper.segmentation(token.trim()));
+			builder.append(" ");
+		}
+		String s = builder.toString();
 
-    String hldaDir = getProp(HLDA_DIR, HLDA_DIR_DEFAULT);
-    String dictOverride = getProp(DICTIONARY, "");
-    String dictFile = dictOverride.length() > 0 ?  modelsDir + File.separator + dictOverride :
-      modelsDir + File.separator + hldaDir +File.separator+ DICT_WO_SP;
-    boolean dictExists   = new File(dictFile).exists();
+		return s;
+	}
 
-    if (dictExists) {
-      try {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(dictFile), FileExerciseDAO.ENCODING));
-        String line2;
-        while ((line2 = reader.readLine()) != null) {
-          String[] split = line2.split("\\s");
-          String word = split[0];
-          wordsInDict.add(word);
-        }
-        reader.close();
-        logger.info("read dict " + dictFile + " and found " + wordsInDict.size() + " words");
-      } catch (IOException e) {
-        logger.error(e);
-      }
-    }
-  }*/
 
 	/**
 	 * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
@@ -415,9 +375,10 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 	 * @return score info coming back from alignment/reco
 	 * @see #scoreRepeat
 	 */
+	// JESS alignment and decoding
 	private PretestScore scoreRepeatExercise(String testAudioDir,
 			String testAudioFileNoSuffix,
-			String sentence,
+			String sentence, // TODO make two params, transcript and lm (null if no slf)
 			String scoringDir,
 
 			String imageOutDir,
@@ -429,11 +390,10 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 		String pathname = noSuffix + ".wav";
 
 		boolean b = checkLTS(sentence);
-		//logger.debug("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir + " check lts = " + b);
+		// audio conversion stuff
 		File wavFile = new File(pathname);
 		boolean mustPrepend = false;
 		if (!wavFile.exists() && deployPath != null) {
-			//logger.debug("trying new path for " + pathname + " under " + deployPath);
 			wavFile = new File(deployPath + File.separator + pathname);
 			mustPrepend = true;
 		}
@@ -441,7 +401,6 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 			logger.error("scoreRepeatExercise : Can't find audio wav file at : " + wavFile.getAbsolutePath());
 			return new PretestScore();
 		}
-		//logger.info("duration of " + wavFile.getAbsolutePath() + " is " + duration + " secs or " + duration*1000 + " millis");
 		try {
 			String audioDir = testAudioDir;
 			if (mustPrepend) {
@@ -458,99 +417,151 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 			noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
 		}
 
-		Scores scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
+		String key = testAudioDir + File.separator + testAudioFileNoSuffix;
+		Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
+		String phoneLab = "";
+		String wordLab = "";
+		// actually run the scoring
+		String rawAudioPath = testAudioDir + File.separator + testAudioFileNoSuffix + ".raw";
+		AudioConversion.wav2raw(testAudioDir + File.separator + testAudioFileNoSuffix + ".wav", rawAudioPath);
+		logger.debug("Converting: " + (testAudioDir + File.separator + testAudioFileNoSuffix + ".wav to: " + rawAudioPath));
+		// TODO remove the 16k hardcoding?
+		double duration = (new AudioCheck()).getDurationInSeconds(wavFile);
+		//int end = (int)((duration * 16000.0) / 100.0);
+		int end = (int)(duration * 100.0);
+		if(scores == null) {                  
+			Object[] result = runHydra(rawAudioPath, sentence, tmpDir, decode, end);
+			scores = (Scores)result[0];
+			wordLab = (String)result[1];
+			phoneLab = (String)result[2];
+			audioToScore.put(key, scores);
+		}
 		if (scores == null) {
 			logger.error("getScoreForAudio failed to generate scores.");
 			return new PretestScore(0.01f);
 		}
-		return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile, scores);
+		return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile, scores, phoneLab, wordLab, duration);
 	}
 
 	private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-			boolean decode, String prefix, String noSuffix, File wavFile, Scores scores) {
+			boolean decode, String prefix, String noSuffix, File wavFile, Scores scores, String phoneLab, String wordLab, double duration) {
 		ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
 				useScoreForBkgColor,
-				prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, false);
+				prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, phoneLab, wordLab, true);
 		Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
 		Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
 		String recoSentence = getRecoSentence(eventAndFileInfo);
 
-		double duration = new AudioCheck().getDurationInSeconds(wavFile);
 		return new PretestScore(scores.hydraScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence, (float) duration);
 	}
 
-	/**
-	 * @see #scoreRepeatExercise
-	 * @param testAudioDir audio file directory
-	 * @param testAudioFileNoSuffix file name without suffix
-	 * @param sentence for alignment, the sentence to align, for decoding, the vocab list to use to filter against the dictionary
-	 * @param scoringDir war/scoring path
-	 * @param decode true if doing decoding, false for alignment
-	 * @param tmpDir to use to run hydec in
-	 * @param useCache cache scores so subsequent requests for the same audio file will get the cached score
-	 * @return Scores -- hydec score and event (word/phoneme) scores
-	 */
-	private Scores getScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
-			String sentence,
-			String scoringDir,
-			boolean decode, String tmpDir, boolean useCache) {
-		String key = testAudioDir + File.separator + testAudioFileNoSuffix;
-		Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
+	////////////////////////////////
+	////////////////////////////////
 
+	private String createHydraDictWithoutSP(String transcript) {
+		String dict = "[";
+		transcript = "<s> " + transcript + " </s>";
+		int ctr = 0;
+		for(String word : transcript.split(" ")) {
+			if(!word.equals(" ") && !word.equals("")) {
+				if(htkDictionary.contains(word)) {
+					scala.collection.immutable.List<String[]> prons = htkDictionary.apply(word);
+					for(int i = 0; i < prons.size(); i++) {
+						if(ctr != 0) dict += ";";
+						ctr += 1;
+						dict += word + ",";
+						String[] pron = prons.apply(i);
+						int ctr2 = 0;
+						for(String p : pron) {
+							if(ctr2 != 0) dict += " ";
+							ctr2 += 1;
+							dict += p;
+						}
+					}
+				}
+				else {
+					for(String[] pron : letterToSoundClass.process(word.toLowerCase())) {
+						if(ctr != 0) dict += ";";
+						dict += word + ",";
+						int ctr2 = 0;
+						for(String p : pron) {
+							if(ctr2 != 0) dict += " ";
+							ctr2 += 1;
+							dict += p;
+						}
+					}
+				}
+			}
+		}
+		dict += ";UNKNOWNMODEL,+UNK+]";
+		return dict;
+	}
+
+	private Object[] runHydra(String audioPath, String transcript, String tmpDir, boolean decode, int end) {
+		// reference trans	
+		String cleaned = transcript.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ");
 		if (isMandarin) {
-			sentence = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") +getSegmented(sentence.trim()); // segmentation method will filter out the UNK model
+			cleaned = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") + getSegmented(transcript.trim()); // segmentation method will filter out the UNK model
 		}
-		if (scores == null) {
-			if (DEBUG) logger.debug("no cached score for file '" + key + "', so doing " + (decode ? "decoding" : "alignment"));
-			scores = calcScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir);
-			audioToScore.put(key, scores);
+
+		// generate dictionary
+		String dictWithoutSP = createHydraDictWithoutSP(cleaned);
+		String smallLM = "[]";
+		// generate SLF file (if decoding)
+		if(decode) {
+			ArrayList<String> lmSentences = new ArrayList<String>();
+			lmSentences.add(cleaned);
+			smallLM = "[" + (new SLFFile()).createSimpleSLFFile(lmSentences) + "]";
 		}
-		else {
-			if (DEBUG) logger.debug("found cached score for file '" + key + "'");
+
+		String hydraInput = tmpDir + "/:" + audioPath + ":" + dictWithoutSP + ":" + smallLM + ":xxx,0," + end + ",[]";
+		long then = System.currentTimeMillis();
+		String ip = langTestDatabase.getWebserviceIP();
+		int port = langTestDatabase.getWebservicePort();
+		HTTPClient httpClient = new HTTPClient(ip, port);
+		String resultsStr = httpClient.sendAndReceive(hydraInput);
+		try {
+			httpClient.closeConn();
 		}
-		return scores;
+		catch(IOException e) {
+			logger.error("Error closing http connection");
+		}
+		String[] results = resultsStr.split("\n"); // 0th entry-overall score and phone scores, 1st entry-word alignments, 2nd entry-phone alignments
+		long timeToRunHydra = System.currentTimeMillis() - then;	
+		logger.debug("Took " + timeToRunHydra + " millis to run hydra");
+		if(results[0] == "") {
+			logger.error("Failure during running of hydra.");
+			return null;
+		}
+		// TODO makes this a tuple3 type 
+		String[] split = results[0].split(";");
+		Scores scores = new Scores(split); 
+		// clean up tmp directory if above score threshold 
+		/*logger.debug("overall score: " + split[0]);
+		if (Float.parseFloat(split[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
+			try {
+				logger.debug("deleting " + tmpDir + " since score is " + split[0]);
+				FileUtils.deleteDirectory(new File(tmpDir));
+			} catch (IOException e) {
+				logger.error("Deleting dir " + tmpDir + " got " +e,e);
+			}
+		}*/
+		return new Object[]{scores, results[1], results[2]};
 	}
 
-	/**
-	 * There are two modes you can use to score the audio : align mode and decode mode
-	 * In align mode, the decoder figures out where the words and phonemes in the sentence occur in the audio.
-	 * In decode mode, given a lattice file
-	 * (HTK slf file) <a href="http://www1.icsi.berkeley.edu/Speech/docs/HTKBook/node293_mn.html">SLF Example</a>
-	 * will do decoding.
-	 * The event scores returned are a map of event type to event name to score (e.g. "words"->"dog"->0.5)
-	 * The score per audio file is cached in {@link #audioToScore}
-	 *
-	 * @see #getScoreForAudio(String, String, String, String, boolean, String, boolean)
-	 * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String)
-	 * @param testAudioDir
-	 * @param testAudioFileNoSuffix
-	 * @param sentence  only for align
-	 * @param scoringDir
-	 * @return Scores which is the overall score and the event scores
-	 */
-	private Scores calcScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
-			String sentence,
-			String scoringDir,
-			boolean decode, String tmpDir) {
-		Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
-		/*    if (false) logger.debug("dirs is " + dirs +
-      " audio dir " + testAudioDir + " audio " + testAudioFileNoSuffix + " sentence " + sentence + " decode " + decode + " scoring dir " + scoringDir);
-		 */
-		Audio testAudio = Audio$.MODULE$.apply(
-				testAudioDir, testAudioFileNoSuffix,
-				false /* notForScoring */, dirs);
 
-		return computeRepeatExerciseScores(testAudio, sentence, tmpDir, decode);
-	}
+	////////////////////////////////
+	////////////////////////////////
 
 	/**
 	 * @param lmSentences
 	 * @param background
-	 * @see AutoCRTScoring#getASRScoreForAudio(java.io.File, java.util.Collection, int)
+	 * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(java.io.File, java.util.Collection)
 	 * @return
 	 */
 	public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
-		return getUniqueTokensInLM(lmSentences, svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT));
+		List<String> backgroundVocab = svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT);
+		return getUniqueTokensInLM(lmSentences, backgroundVocab);
 	}
 
 	/**
@@ -626,7 +637,6 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 					if (!event.equals("<s>") && !event.equals("</s>") && !event.equals("sil")) {
 						String trim = event.trim();
 						if (trim.length() > 0) {
-							//logger.debug("Got " + event + " trim '" +trim+ "'");
 							b.append(trim);
 							b.append(" ");
 						}
@@ -663,45 +673,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 	}
 
 	/**
-	 * Assumes that testAudio was recorded through the UI, which should prevent audio that is too short or too long.
-	 *
-	 * @see #calcScoreForAudio(String, String, String, String, boolean, String)
-	 * @param testAudio
-	 * @param sentence
-	 * @param decode
-	 * @return Scores - score for audio, given the sentence and event info
-	 */
-	private Scores computeRepeatExerciseScores(Audio testAudio, String sentence, String tmpDir, boolean decode) {
-		String modelsDir = configFileCreator.getModelsDir();
-
-		// Make sure that we have an absolute path to the config and dict files.
-		// Make sure that we have absolute paths.
-
-		// do template replace on config file
-		String configFile = configFileCreator.getHydecConfigFile(tmpDir, modelsDir, decode);
-
-		// do some sanity checking
-		boolean configExists = new File(configFile).exists();
-		if (!configExists) {
-			logger.error("computeRepeatExerciseScores : Can't find config file at " + configFile);
-			return getEmptyScores();
-		}
-
-		Scores scoresFromHydec = getScoresFromHydec(testAudio, sentence, configFile);
-		double hydecScore = scoresFromHydec.hydraScore;
-		if (hydecScore > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
-			try {
-				//logger.debug("deleting " + tmpDir + " since score is " +hydecScore);
-				FileUtils.deleteDirectory(new File(tmpDir));
-			} catch (IOException e) {
-				logger.error("Deleting dir " + tmpDir + " got " +e,e);
-			}
-		}
-		return scoresFromHydec;
-	}
-
-	/**
-	 * @see #ASRScoring(String, java.util.Map, mitll.langtest.server.LangTestDatabaseImpl)
+	 * @see #ASRWebserviceScoring(String, java.util.Map, mitll.langtest.server.LangTestDatabaseImpl)
 	 */
 	private void readDictionary() { htkDictionary = makeDict(); }
 
@@ -716,10 +688,8 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 			HTKDictionary htkDictionary = new HTKDictionary(dictFile);
 			long now = System.currentTimeMillis();
 			int size = htkDictionary.size(); // force read from lazy val
-			//if (now - then > 300) {
 			logger.info("for " + languageProperty +
 					" read dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
-			//}
 			return htkDictionary;
 		}
 		else {
@@ -728,24 +698,30 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 		}
 	}
 
-	public Collection<String> getValidPhrases(Collection<String> phrases) { return getValidSentences(phrases); }
-	private boolean isValid(String token) { return checkToken(token) && isPhraseInDict(token);  }
-	private boolean isPhraseInDict(String phrase) {  return letterToSoundClass.process(phrase) != null;  }
-	private boolean checkToken(String token) {
-		boolean valid = true;
-		if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL)) return true;
-		for (int i = 0; i < token.length() && valid; i++) {
-			char c = token.charAt(i);
-			if (Character.isDigit(c)) {
-				valid = false;
-			}
-			if (Character.UnicodeBlock.of(c) == Character.UnicodeBlock.BASIC_LATIN) {
-				valid = false;
-			}
-		}
-		return valid;
+	private Scores getEmptyScores() {
+		Map<String, Map<String, Float>> eventScores = Collections.emptyMap();
+		return new Scores(0f, eventScores);
 	}
 
+	/**
+	 * @see mitll.langtest.server.audio.AudioFileHelper#getValidPhrases(java.util.Collection)
+	 * @param phrases
+	 * @return
+	 */
+	public Collection<String> getValidPhrases(Collection<String> phrases) { return getValidSentences(phrases); }
+
+	/**
+	 * @see #isValid(String)
+	 * @param phrase
+	 * @return
+	 */
+	private boolean isPhraseInDict(String phrase) {  return letterToSoundClass.process(phrase) != null;  }
+
+	/**
+	 * @see #getValidPhrases(java.util.Collection)
+	 * @param sentences
+	 * @return
+	 */
 	private Collection<String> getValidSentences(Collection<String> sentences) {
 		Set<String> filtered = new TreeSet<String>();
 		Set<String> skipped = new TreeSet<String>();
@@ -772,46 +748,26 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 	}
 
 	/**
-	 * @see #computeRepeatExerciseScores(pronz.speech.Audio, String, String, boolean)
-	 * @param testAudio
-	 * @param sentence
-	 * @param configFile
+	 * @see #getValidSentences(java.util.Collection)
+	 * @param token
 	 * @return
 	 */
-	private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
-		sentence = sentence.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ");
+	private boolean isValid(String token) { return checkToken(token) && isPhraseInDict(token);  }
 
-		long then = System.currentTimeMillis();
-
-		logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with LTS " + letterToSoundClass);
-
-		try {
-			Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut =
-					testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
-			float hydec_score = jscoreOut._1;
-			long timeToRunHydec = System.currentTimeMillis() - then;
-			logger.debug("getScoresFromHydec : scoring sentence " +sentence.length()+" characters long, got score " + hydec_score +
-					" and took " + timeToRunHydec + " millis");
-
-			return new Scores(hydec_score, jscoreOut._2);
-		} catch (AssertionError e) {
-			logger.error("Got assertion error " + e,e);
-			return new Scores();
-		} catch (Exception ee) {
-			logger.warn("Running align/decode on " + sentence +" Got " + ee, ee);
-			if (langTestDatabase != null) langTestDatabase.logAndNotifyServerException(ee);
+	private boolean checkToken(String token) {
+		boolean valid = true;
+		if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL)) return true;
+		for (int i = 0; i < token.length() && valid; i++) {
+			char c = token.charAt(i);
+			if (Character.isDigit(c)) {
+				valid = false;
+			}
+			if (Character.UnicodeBlock.of(c) == Character.UnicodeBlock.BASIC_LATIN) {
+				valid = false;
+			}
 		}
-
-		long timeToRunHydec = System.currentTimeMillis() - then;
-		logger.warn("got bad score and took " + timeToRunHydec + " millis");
-
-		Scores scores = new Scores();
-		scores.hydraScore = -1;
-		return scores;
+		return valid;
 	}
 
-	private Scores getEmptyScores() {
-		Map<String, Map<String, Float>> eventScores = Collections.emptyMap();
-		return new Scores(0f, eventScores);
-	}
+
 }
