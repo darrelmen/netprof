@@ -4,6 +4,7 @@
 package mitll.langtest.server.scoring;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -15,19 +16,39 @@ import java.util.Map;
  *
  */
 public class Scores {
-  public float hydecScore;
-  public final Map<String, Map<String, Float>> eventScores ;
+  public float hydraScore;
+  public final Map<String, Map<String, Float>> eventScores;
 
   public Scores() { eventScores = Collections.emptyMap(); }
   /**
    *
-   * @param hydecScore
+   * @param hydraScore
    * @param eventScores
    */
   public Scores(float hydecScore, Map<String, Map<String, Float>> eventScores) {
-    this.hydecScore = hydecScore;
+    this.hydraScore = hydecScore;
     this.eventScores = eventScores;
   }
+  
+  /*public Scores(String scoreStr) {
+	this.eventScores = new HashMap<String, Map<String, Float>>();
+	String[] split = scoreStr.split(";");
+	this.hydraScore = Float.parseFloat(split[0]);
+	eventScores.put("phones", new HashMap<String, Float>());
+	for(int i = 1; i < split.length; i+=2) {
+		eventScores.get("phones").put(split[i], Float.parseFloat(split[i+1]));
+	}
+  }*/
+  
+  public Scores(String[] scoreSplit) {
+	this.eventScores = new HashMap<String, Map<String, Float>>();
+	//String[] split = scoreStr.split(";");
+	this.hydraScore = Float.parseFloat(scoreSplit[0]);
+	eventScores.put("phones", new HashMap<String, Float>());
+	for(int i = 1; i < scoreSplit.length; i+=2) {
+		eventScores.get("phones").put(scoreSplit[i], Float.parseFloat(scoreSplit[i+1]));
+	}
+  }
 
-  public String toString() { return "Scores score " + hydecScore + " events " + eventScores; }
+  public String toString() { return "Scores score " + hydraScore + " events " + eventScores; }
 }
