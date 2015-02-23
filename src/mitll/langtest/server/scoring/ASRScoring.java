@@ -3,7 +3,7 @@ package mitll.langtest.server.scoring;
 import Utils.Log;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
-import audio.imagewriter.ImageWriter;
+import audio.imagewriter.EventAndFileInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import corpus.HTKDictionary;
@@ -462,7 +462,7 @@ public class ASRScoring extends Scoring implements CollationSort {
 
   private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
                                        boolean decode, String prefix, String noSuffix, File wavFile, Scores scores) {
-    ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
+    EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
       useScoreForBkgColor,
       prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode);
     Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
@@ -611,7 +611,7 @@ public class ASRScoring extends Scoring implements CollationSort {
    * @param eventAndFileInfo
    * @return
    */
-  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(ImageWriter.EventAndFileInfo eventAndFileInfo) {
+  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(EventAndFileInfo eventAndFileInfo) {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
@@ -633,7 +633,7 @@ public class ASRScoring extends Scoring implements CollationSort {
    * @param eventAndFileInfo
    * @return
    */
-  private String getRecoSentence(ImageWriter.EventAndFileInfo eventAndFileInfo) {
+  private String getRecoSentence(EventAndFileInfo eventAndFileInfo) {
     StringBuilder b = new StringBuilder();
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
