@@ -3,7 +3,8 @@ package mitll.langtest.server.scoring;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
 import audio.image.TranscriptReader;
-import audio.imagewriter.ImageWriter;
+import audio.imagewriter.EventAndFileInfo;
+import audio.imagewriter.TranscriptWriter;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.apache.log4j.Logger;
 
@@ -61,14 +62,14 @@ public abstract class Scoring {
    * @param decode if true don't bother to write out images for word and phone
    * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
    */
-  protected ImageWriter.EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
+  protected EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
                                                           String audioFileNoSuffix, boolean useScoreToColorBkg,
                                                           String prefix, String suffix, boolean decode) {
     String pathname = audioFileNoSuffix + ".wav";
     pathname = prependDeploy(pathname);
     if (!new File(pathname).exists()) {
       logger.error("writeTranscripts : can't find " + pathname);
-      return new ImageWriter.EventAndFileInfo();
+      return new EventAndFileInfo();
     }
     imageOutDir = deployPath + File.separator + imageOutDir;
 
@@ -99,18 +100,18 @@ public abstract class Scoring {
     if (decode || imageWidth < 0) {  // hack to skip image generation
       return getEventInfo(typeToFile);
     } else {
-      return new ImageWriter().writeTranscripts(pathname,
-        imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix);
+      return new TranscriptWriter().writeTranscripts(pathname,
+        imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix,false);
     }
   }
 
-  private ImageWriter.EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes) {
+  private EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes) {
     Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
     try {
       for (Map.Entry<ImageType, String> o : imageTypes.entrySet()) {
         typeToEvent.put(o.getKey(), new TranscriptReader().readEventsFromFile(o.getValue()));
       }
-      return new ImageWriter.EventAndFileInfo(new HashMap<ImageType, String>(), typeToEvent);
+      return new EventAndFileInfo(new HashMap<ImageType, String>(), typeToEvent);
     } catch (IOException e) {
       e.printStackTrace();
       return null;
