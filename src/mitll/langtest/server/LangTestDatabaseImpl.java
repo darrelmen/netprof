@@ -1,7 +1,7 @@
 package mitll.langtest.server;
 
 import audio.image.ImageType;
-import audio.imagewriter.ImageWriter;
+import audio.imagewriter.SimpleImageWriter;
 import com.google.common.io.Files;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
@@ -830,7 +830,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio
    */
   public ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID) {
-    ImageWriter imageWriter = new ImageWriter();
+    SimpleImageWriter imageWriter = new SimpleImageWriter();
 
     String wavAudioFile = getWavAudioFile(audioFile);
     File testFile = new File(wavAudioFile);
@@ -846,7 +846,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.debug("getImageForAudioFile : getting images (" + width + " x " + height + ") (" + reqid + ") type " + imageType +
         " for " + wavAudioFile + "");
 
-    String absolutePathToImage = imageWriter.writeImageSimple(wavAudioFile, pathHelper.getAbsoluteFile(imageOutDir).getAbsolutePath(),
+    String absolutePathToImage = imageWriter.writeImage(wavAudioFile, pathHelper.getAbsoluteFile(imageOutDir).getAbsolutePath(),
         width, height, imageType1, exerciseID);
     String installPath = pathHelper.getInstallPath();
 
