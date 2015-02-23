@@ -3,7 +3,11 @@ package mitll.langtest.client;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 
+import java.util.logging.Logger;
+
 public class PopupHelper {
+  private Logger logger = Logger.getLogger("PopupHelper");
+
   private static final int HIDE_DELAY = 2500;
 
   public void showPopup(String html) {
@@ -61,6 +65,9 @@ public class PopupHelper {
     vp.add(new HTML(toShow));
     vp.add(new HTML(toShow2));
     popupImage.add(vp);
+    if (over.getParent() == null) {
+      logger.warning("no parent for " + over);
+    }
     popupImage.showRelativeTo(over);
     Timer t = new Timer() {
       @Override
@@ -68,5 +75,4 @@ public class PopupHelper {
     };
     t.schedule(3000);
   }
-
 }
