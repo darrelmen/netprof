@@ -4,7 +4,10 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PopupHelper;
@@ -15,7 +18,12 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -61,7 +69,9 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   @Override
-  protected Set<String> getKeys() {  return pagingContainer.getKeys();  }
+  protected Set<String> getKeys() {
+    return pagingContainer.getKeys();
+  }
 
   @Override
   public void setState(String id, STATE state) {
@@ -88,10 +98,10 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   /**
-   * @see #addTypeAhead(com.google.gwt.user.client.ui.Panel)
    * @param selectionState
    * @param prefix
    * @param onlyWithAudioAnno
+   * @see #addTypeAhead(com.google.gwt.user.client.ui.Panel)
    */
   void loadExercises(String selectionState, String prefix, boolean onlyWithAudioAnno) {
     scheduleWaitTimer();
@@ -100,33 +110,37 @@ public class PagingExerciseList extends ExerciseList {
     logger.info("PagingExerciseList.loadExercises : looking for " +
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
     service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID,
-      controller.getUser(), getRole(), getUnrecorded(), isOnlyExamples(), incorrectFirstOrder, false, new SetExercisesCallback(""));
+        controller.getUser(), getRole(), getUnrecorded(), isOnlyExamples(), incorrectFirstOrder, false, new SetExercisesCallback(""));
   }
 
   /**
-   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises(java.util.Map, String)
    * @return
+   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises(java.util.Map, String)
    */
-  protected String getPrefix() { return typeAhead.getText(); }
+  protected String getPrefix() {
+    return typeAhead.getText();
+  }
 
   /**
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
    * @return
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
    */
   protected PagingContainer makePagingContainer() {
     final PagingExerciseList outer = this;
     PagingContainer pagingContainer1 =
-      new PagingContainer(controller, getVerticalUnaccountedFor()) {
-      @Override
-      protected void gotClickOnItem(CommonShell e) {  outer.gotClickOnItem(e);  }
-    };
+        new PagingContainer(controller, getVerticalUnaccountedFor()) {
+          @Override
+          protected void gotClickOnItem(CommonShell e) {
+            outer.gotClickOnItem(e);
+          }
+        };
     pagingContainer = pagingContainer1;
     return pagingContainer1;
   }
 
   @Override
   protected CommonShell findFirstExercise() {
-     //logger.info("findFirstExercise : completed " + controller.showCompleted());
+    //logger.info("findFirstExercise : completed " + controller.showCompleted());
     return controller.showCompleted() ? getFirstNotCompleted() : super.findFirstExercise();
   }
 
@@ -142,6 +156,7 @@ public class PagingExerciseList extends ExerciseList {
 
   /**
    * TODO : Not sure if this is needed anymore
+   *
    * @return
    */
   protected int getVerticalUnaccountedFor() {
@@ -149,8 +164,8 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList
    * @param v
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList
    */
   public void setUnaccountedForVertical(int v) {
     unaccountedForVertical = v;
@@ -159,7 +174,8 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   /**
-   *  add left side components
+   * add left side components
+   *
    * @param pagingContainer
    */
   protected void addTableWithPager(PagingContainer pagingContainer) {
@@ -179,8 +195,9 @@ public class PagingExerciseList extends ExerciseList {
 
   /**
    * Show wait cursor if the type ahead takes too long.
-   * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager
+   *
    * @param column
+   * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager
    */
   protected void addTypeAhead(Panel column) {
     if (showTypeAhead) {
@@ -207,7 +224,9 @@ public class PagingExerciseList extends ExerciseList {
     waitTimer.schedule(700);
   }
 
-  protected String getTypeAheadText() { return typeAhead.getText(); }
+  protected String getTypeAheadText() {
+    return typeAhead.getText();
+  }
 
   @Override
   protected void gotExercises(boolean success) {
@@ -223,14 +242,15 @@ public class PagingExerciseList extends ExerciseList {
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#gotEmptyExerciseList
    */
   protected void showEmptySelection() {
-  //  logger.info("showing no items match relative to " + typeAhead.getWidget().getElement().getId());
+    logger.info("for " +getInstance()+
+        " showing no items match relative to " + typeAhead.getWidget().getElement().getId() + " parent " + typeAhead.getWidget().getParent());
     showPopup("No items match the selection and search.", "Try clearing one of your selections or changing the search.", typeAhead.getWidget());
     createdPanel = new SimplePanel();
     createdPanel.getElement().setId("placeHolderWhenNoExercises");
   }
 
-  private void showPopup(String toShow,String toShow2, Widget over) {
-    new PopupHelper().showPopup(toShow,toShow2,over);
+  private void showPopup(String toShow, String toShow2, Widget over) {
+    new PopupHelper().showPopup(toShow, toShow2, over);
   }
 
   /**
@@ -240,7 +260,9 @@ public class PagingExerciseList extends ExerciseList {
     Window.alert("Please stop recording before changing items.");
   }
 
-  String getHistoryToken(String id) { return "item=" +id; }
+  String getHistoryToken(String id) {
+    return "item=" + id;
+  }
 
   void gotClickOnItem(final CommonShell e) {
     if (isExercisePanelBusy()) {
@@ -253,7 +275,9 @@ public class PagingExerciseList extends ExerciseList {
     }
   }
 
-  public void clear() { pagingContainer.clear(); }
+  public void clear() {
+    pagingContainer.clear();
+  }
 
   public void flush() {
     pagingContainer.flush();
@@ -265,8 +289,8 @@ public class PagingExerciseList extends ExerciseList {
   /**
    * A little complicated -- if {@link #doShuffle} is true, shuffles the exercises
    *
-   * @see ExerciseList#rememberAndLoadFirst(java.util.List, mitll.langtest.shared.CommonExercise, String)
    * @param result
+   * @see ExerciseList#rememberAndLoadFirst(java.util.List, mitll.langtest.shared.CommonExercise, String)
    * @see #simpleSetShuffle(boolean)
    */
   @Override
@@ -288,10 +312,14 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   @Override
-  protected List<CommonShell> getInOrder() { return inOrderResult; }
+  protected List<CommonShell> getInOrder() {
+    return inOrderResult;
+  }
 
   @Override
-  public int getSize() {  return pagingContainer.getSize();  }
+  public int getSize() {
+    return pagingContainer.getSize();
+  }
 
   @Override
   protected boolean isEmpty() {
@@ -304,7 +332,9 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   @Override
-  public CommonShell byID(String name) {  return pagingContainer.byID(name);  }
+  public CommonShell byID(String name) {
+    return pagingContainer.byID(name);
+  }
 
   @Override
   public CommonShell getCurrentExercise() {
@@ -328,24 +358,26 @@ public class PagingExerciseList extends ExerciseList {
     }*/
     pagingContainer.addExercise(es);
   }
-  public void addExerciseAfter(CommonShell after,CommonShell es) { pagingContainer.addExerciseAfter(after, es);  }
+
+  public void addExerciseAfter(CommonShell after, CommonShell es) {
+    pagingContainer.addExerciseAfter(after, es);
+  }
 
   public CommonShell forgetExercise(String id) {
-   // logger.info("PagingExerciseList.forgetExercise " + id + " on " + getElement().getId() + " ul " +userListID);
+    // logger.info("PagingExerciseList.forgetExercise " + id + " on " + getElement().getId() + " ul " +userListID);
     CommonShell es = byID(id);
     if (es != null) {
       return removeExercise(es);
-    }
-    else {
+    } else {
       return null;
     }
   }
 
   /**
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
-   * @see mitll.langtest.client.list.ExerciseList#removeExercise
    * @param id
    * @return
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
+   * @see mitll.langtest.client.list.ExerciseList#removeExercise
    */
   @Override
   public CommonShell simpleRemove(String id) {
@@ -366,10 +398,12 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   /**
-   * @see #useExercise(mitll.langtest.shared.CommonExercise)
    * @param itemID
+   * @see #useExercise(mitll.langtest.shared.CommonExercise)
    */
-  protected void markCurrentExercise(String itemID) { pagingContainer.markCurrentExercise(itemID); }
+  protected void markCurrentExercise(String itemID) {
+    pagingContainer.markCurrentExercise(itemID);
+  }
 
   public void setUserListID(long userListID) {
     this.userListID = userListID;
@@ -381,17 +415,26 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   /**
-   * @see HistoryExerciseList#loadExercisesUsingPrefix(java.util.Map, String, boolean)
    * @return
+   * @see HistoryExerciseList#loadExercisesUsingPrefix(java.util.Map, String, boolean)
    */
-  public boolean getUnrecorded() { return unrecorded;  }
+  public boolean getUnrecorded() {
+    return unrecorded;
+  }
 
   /**
-   * @see mitll.langtest.client.custom.Navigation.RecorderNPFHelper#getMyListLayout(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.custom.SimpleChapterNPFHelper)
    * @param unrecorded
+   * @see mitll.langtest.client.custom.RecorderNPFHelper#getMyListLayout
    */
-  public void setUnrecorded(boolean unrecorded) { this.unrecorded = unrecorded;  }
+  public void setUnrecorded(boolean unrecorded) {
+    this.unrecorded = unrecorded;
+  }
 
-  public boolean isOnlyExamples() { return onlyExamples;  }
-  public void setOnlyExamples(boolean onlyExamples) {  this.onlyExamples = onlyExamples;  }
+  public boolean isOnlyExamples() {
+    return onlyExamples;
+  }
+
+  public void setOnlyExamples(boolean onlyExamples) {
+    this.onlyExamples = onlyExamples;
+  }
 }
