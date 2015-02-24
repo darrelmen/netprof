@@ -954,6 +954,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   public int getUser() { return userManager.getUser(); }
+  public boolean isTeacher() { return userManager.isTeacher(); }
   public PropertyHandler getProps() { return props; }
 
   public boolean useBkgColorForRef() {  return props.isBkgColorForRef(); }
