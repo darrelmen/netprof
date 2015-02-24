@@ -113,7 +113,7 @@ public interface CommonExercise extends CommonShell {
   void setAvgScore(float v);
   float getAvgScore();
 
-  Set<String> getBagOfPhones();
+ // Set<String> getBagOfPhones();
   List<String> getFirstPron();
 
   void setBagOfPhones(Set<String> bagOfPhones);
