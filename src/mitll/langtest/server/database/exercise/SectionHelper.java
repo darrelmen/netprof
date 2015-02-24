@@ -152,7 +152,7 @@ public class SectionHelper {
      *
      * @param typeToSection
      * @return
-     * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesForState(int, java.util.Map, long)
+     * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesForState
      */
   public Collection<CommonExercise> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection) {
     Collection<CommonExercise> currentList = null;
@@ -251,7 +251,7 @@ public class SectionHelper {
     return new Pair(type, unitName);
   }
 
-  protected void addUnitNameEntry(CommonExercise exercise, String unitName, Map<String, Lesson> unit) {
+  private void addUnitNameEntry(CommonExercise exercise, String unitName, Map<String, Lesson> unit) {
     Lesson unitForName = unit.get(unitName);
     if (unitForName == null) {
       unit.put(unitName, unitForName = new Lesson(unitName));
@@ -283,14 +283,13 @@ public class SectionHelper {
    * @param unitName
    * @return
    */
-  public boolean removeExerciseToLesson(CommonExercise exercise, String type, String unitName) {
+  private boolean removeExerciseToLesson(CommonExercise exercise, String type, String unitName) {
     Map<String, Lesson> unit = getSectionToLesson(type);
-    Lesson unitForName = unit.get(unitName);
-    return unitForName.remove(exercise);
+    return unit.get(unitName).remove(exercise);
   }
 
 
-  private Map<String, Lesson> getSectionToLesson( String section) {
+  private Map<String, Lesson> getSectionToLesson(String section) {
     Map<String, Lesson> unit = typeToUnitToLesson.get(section);
     if (unit == null) {
       typeToUnitToLesson.put(section, unit = new HashMap<String, Lesson>());
@@ -348,8 +347,8 @@ public class SectionHelper {
     sections.add(otherSection);
   }
 
-  public Set<String> getSections() { return typeToUnitToLesson.keySet(); }
-  public Map<String, Lesson> getSection(String type) { return typeToUnitToLesson.get(type);  }
+/*  public Set<String> getSections() { return typeToUnitToLesson.keySet(); }
+  public Map<String, Lesson> getSection(String type) { return typeToUnitToLesson.get(type);  }*/
 
   public void report() {
     logger.debug("type order " + getTypeOrder());
