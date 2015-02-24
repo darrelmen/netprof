@@ -32,6 +32,7 @@ public class DownloadServlet extends DatabaseServlet {
   public static final String AUDIO = "audio";
   public static final String LIST = "list";
   public static final String FILE = "file";
+  public static final String CONTEXT = "context";
 
   /**
    * This is getting complicated.
@@ -62,12 +63,13 @@ public class DownloadServlet extends DatabaseServlet {
 
     if (db != null) {
       try {
-        String encodedFileName = request.getRequestURI();
-        if (encodedFileName.toLowerCase().contains(AUDIO)) {
+        String requestURI = request.getRequestURI();
+        if (requestURI.toLowerCase().contains(AUDIO)) {
           String pathInfo = request.getPathInfo();
           String queryString = request.getQueryString();
           logger.debug("DownloadServlet.doGet : Request " + queryString + " path " + pathInfo +
               " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
+
           if (queryString == null) {
             setHeader(response, "allAudio.zip");
             writeAllAudio(response);
@@ -81,21 +83,27 @@ public class DownloadServlet extends DatabaseServlet {
             }
           } else if (queryString.startsWith(FILE)) {
             returnAudioFile(response, db, queryString);
-          } else if (queryString.startsWith("context")) {
-            Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
-            String fileName = getZipFileName(db, typeToSection);
+          } else if (queryString.startsWith("request")) {
+            String[] split1 = queryString.split("&");
+            String requestCommand = split1[0];
 
-            setHeader(response, fileName);
-            writeContextZip(response, typeToSection);
-          } else {
-            Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
-            String fileName = getZipFileName(db, typeToSection);
+            queryString = split1.length == 1 ? split1[0] : split1[1];
 
-            setHeader(response, fileName);
-            writeZip(response, typeToSection);
+            logger.debug("request " + requestCommand + " query " +queryString);
+            if (requestCommand.contains(CONTEXT)) {
+              Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
+              setHeader(response, getZipFileName(db, typeToSection));
+              writeContextZip(response, typeToSection);
+            } else {
+              Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
+              setHeader(response, getZipFileName(db, typeToSection));
+              writeZip(response, typeToSection);
+            }
           }
         } else {
-          returnSpreadsheet(response, db, encodedFileName);
+          logger.warn("unknown request " + requestURI);
+
+          returnSpreadsheet(response, db, requestURI);
         }
       } catch (Exception e) {
         logger.error("Got " + e, e);
