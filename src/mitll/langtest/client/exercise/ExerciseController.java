@@ -30,6 +30,7 @@ public interface ExerciseController extends EventRegistration {
   String getBrowserInfo();
 
   int getUser();
+  boolean isTeacher();
 
   void startRecording();
   void stopRecording(WavCallback wavCallback);
