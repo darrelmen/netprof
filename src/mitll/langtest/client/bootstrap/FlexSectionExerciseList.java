@@ -34,15 +34,15 @@ import java.util.logging.Logger;
  */
 public class FlexSectionExerciseList extends HistoryExerciseList {
   private Logger logger = Logger.getLogger("FlexSectionExerciseList");
+  private static final int LABEL_MARGIN_BOTTOM = 10;
 
   private static final int HEADING_FOR_LABEL = 4;
   private static final int UNACCOUNTED_WIDTH = 60;
-  //private static final int VERTICAL_DEFAULT = 160;
   private static final int CLASSROOM_VERTICAL_EXTRA = 270;
   private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
   private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet and audio for selected sections.";
   private static final String DOWNLOAD_AUDIO = "downloadAudio";
-  private static final String CONTEXT = "context";
+//  private static final String CONTEXT = "context";
 
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
   private final Map<String, ButtonType> typeToButton = new HashMap<String, ButtonType>();
@@ -213,19 +213,33 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       }
     }
 
-    // add download links
-    labelColumn.add(downloadLink = getDownloadLink());
-    if (controller.isTeacher()) {
-      labelColumn.add(contextDownloadLink = getContextDownloadLink());
-    }
-    else logger.info("user is not a teacher.");
-
     long now = System.currentTimeMillis();
     if (now - then > 300)
       System.out.println("\taddButtonRow took " + (now - then) + " millis" + " instance " + getInstance());
 
     if (last != null) setSizesAndPushFirst();
-    addBottomText(container);
+
+    DivWidget bottomRow = getBottomRow();
+    addBottomText(bottomRow);
+    container.add(bottomRow);
+  }
+
+  private DivWidget getBottomRow() {
+    FlexTable links = new FlexTable();
+    links.setWidget(0, 0,downloadLink = getDownloadLink());
+    if (controller.isTeacher()) {
+      links.setWidget(0, 1,contextDownloadLink = getContextDownloadLink());
+    }
+    else {
+      logger.info("user is not a teacher.");
+    }
+    DivWidget bottomRow = new DivWidget();
+    bottomRow.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+    DivWidget left = new DivWidget();
+    left.addStyleName("floatLeftList");
+    left.add(links);
+    bottomRow.add(left);
+    return bottomRow;
   }
 
   /**
@@ -311,6 +325,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @param firstType
    * @param firstTypeRow
    * @param buttonGroupSectionWidget
+   * @see #addButtonRow
    */
   private Panel makeLabelColumn(String firstType, FlexTable firstTypeRow,
                                 ButtonGroupSectionWidget buttonGroupSectionWidget) {
@@ -331,8 +346,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
    */
   private Panel makeClearColumn(boolean usuallyThereWillBeAHorizScrollbar, Collection<String> types, String firstType,
-                               FlexTable firstTypeRow,
-                               ButtonGroupSectionWidget buttonGroupSectionWidget) {
+                                FlexTable firstTypeRow,
+                                ButtonGroupSectionWidget buttonGroupSectionWidget) {
     Panel clearColumnContainer = new VerticalPanel();
     addClearButton(buttonGroupSectionWidget, clearColumnContainer);
     firstTypeRow.setWidget(0, 1,  makeFlowPanel(clearColumnContainer, usuallyThereWillBeAHorizScrollbar));
@@ -351,12 +366,19 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     clearColumnContainer.add(clearButton);
   }
 
+  /**
+   *
+   * @param labelContainer
+   * @param usuallyThereWillBeAHorizScrollbar
+   * @return
+   * @see #makeLabelColumn
+   */
   private Panel makeFlowPanel(Panel labelContainer, boolean usuallyThereWillBeAHorizScrollbar) {
     Panel l2 = new FlowPanel();
     l2.add(labelContainer);
-    if (usuallyThereWillBeAHorizScrollbar) { // hack rule of thumb
+/*    if (usuallyThereWillBeAHorizScrollbar) { // hack rule of thumb
       l2.addStyleName("bottomMargin");
-    }
+    }*/
     return l2;
   }
 
@@ -434,7 +456,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     //DOM.setStyleAttribute(widget.getElement(), "webkitMarginBefore", "0");
    // DOM.setStyleAttribute(widget.getElement(), "webkitMarginAfter", "0");
     widget.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
-    widget.getElement().getStyle().setMarginBottom(15, Style.Unit.PX);
+    widget.getElement().getStyle().setMarginBottom(LABEL_MARGIN_BOTTOM, Style.Unit.PX);
     widget.getElement().getStyle().setProperty("whiteSpace","nowrap");
     return widget;
   }
@@ -506,7 +528,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     Panel status = getStatusRow();
     container.add(status);
     status.addStyleName("leftFiftyPercentMargin");
-
    // return status;
   }
 
@@ -808,7 +829,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     sectionButton.setEnabled(!isClear);
 
     if (isClear) {
-      sectionButton.getElement().getStyle().setMarginBottom(15, Style.Unit.PX);
+      sectionButton.getElement().getStyle().setMarginBottom(LABEL_MARGIN_BOTTOM, Style.Unit.PX);
     }
 
     addClickHandlerToButton(sectionButton, section, sectionWidgetFinal);
