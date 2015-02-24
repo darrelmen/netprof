@@ -915,6 +915,13 @@ public class Navigation implements RequiresResize {
     return container;
   }
 
+  /**
+   * @see #makeTabContent
+   * @param listid
+   * @param linkid
+   * @param name
+   * @return
+   */
   private Anchor getDownloadLink(long listid, String linkid, final String name) {
     final Anchor downloadLink = new Anchor(getURLForDownload(listid));
     new TooltipHelper().addTooltip(downloadLink, "Download spreadsheet and audio for list.");
