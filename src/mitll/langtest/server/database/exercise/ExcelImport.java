@@ -43,34 +43,36 @@ import java.util.Set;
  */
 public class ExcelImport implements ExerciseDAO {
   private static final Logger logger = Logger.getLogger(ExcelImport.class);
-  public static final String FAST_WAV = "Fast" + ".wav";
-  public static final String SLOW_WAV = "Slow" + ".wav";
-  public static final String CONTEXT_TRANSLATION = "context translation";
-  public static final String TRANSLATION_OF_CONTEXT = "Translation of Context";
-  public static final String CONTEXT = "context";
-  public static final String MEANING = "meaning";
-  public static final String ID = "id";
+  private static final String FAST_WAV = "Fast" + ".wav";
+  private static final String SLOW_WAV = "Slow" + ".wav";
+  private static final String CONTEXT_TRANSLATION = "context translation";
+  private static final String TRANSLATION_OF_CONTEXT = "Translation of Context";
+  private static final String CONTEXT = "context";
+  private static final String MEANING = "meaning";
+  private static final String ID = "id";
 
   private List<CommonExercise> exercises = null;
   private final Map<String, CommonExercise> idToExercise = new HashMap<String, CommonExercise>();
   private final List<String> errors = new ArrayList<String>();
   private final String file;
   private final SectionHelper sectionHelper = new SectionHelper();
-  private String mediaDir,mediaDir1;
+  private final String mediaDir;
+  private final String mediaDir1;
   private boolean shouldHaveRefAudio = false;
-  private boolean usePredefinedTypeOrder;
+  private final boolean usePredefinedTypeOrder;
   private final String language;
-  private boolean skipSemicolons;
+  private final boolean skipSemicolons;
   private int audioOffset = 0;
   private final int maxExercises;
-  private ServerProperties serverProps;
-  private UserListManager userListManager;
+  private final ServerProperties serverProps;
+  private final UserListManager userListManager;
   private AddRemoveDAO addRemoveDAO;
-  private File installPath;
-  private boolean addDefects;
+  private final File installPath;
+  private final boolean addDefects;
   private int unitIndex;
   private int chapterIndex;
   private int weekIndex;
+  private final Map<String, Map<String, String>> idToDefectMap = new HashMap<String, Map<String, String>>();
 
   private final boolean DEBUG = false;
 
@@ -326,6 +328,7 @@ public class ExcelImport implements ExerciseDAO {
         }
       }
       if (DEBUG) sectionHelper.report();
+      sectionHelper.allKeysValid();
       inp.close();
       now = System.currentTimeMillis();
       if (now-then > 1000) {
@@ -337,9 +340,7 @@ public class ExcelImport implements ExerciseDAO {
     return exercises;
   }
 
-  public List<CommonExercise> getExercises() { return exercises; }
-
-  private Map<String, Map<String, String>> idToDefectMap = new HashMap<String, Map<String, String>>();
+  //public List<CommonExercise> getExercises() { return exercises; }
 
   /**
    * @param sheet
@@ -835,18 +836,15 @@ public class ExcelImport implements ExerciseDAO {
     return imported;
   }
 
-  private boolean recordUnitChapterWeek(int unitIndex, int chapterIndex, int weekIndex,
-                                        Row next,
-                                        CommonExercise imported, String unitName, String chapterName, String weekName) {
+  private void recordUnitChapterWeek(int unitIndex, int chapterIndex, int weekIndex,
+                                     Row next,
+                                     CommonExercise imported, String unitName, String chapterName, String weekName) {
     String unit = getCell(next, unitIndex);
     String chapter = getCell(next, chapterIndex);
     String week = getCell(next, weekIndex);
     List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
 
-    if (unit.length() == 0 &&
-      chapter.length() == 0 &&
-      week.length() == 0
-      ) {
+    if (unit.length() == 0 && chapter.length() == 0 && week.length() == 0) {
       unit = "Blank";
     }
 
@@ -875,7 +873,6 @@ public class ExcelImport implements ExerciseDAO {
     }
     sectionHelper.addAssociations(pairs);
 
-    return false;
   }
 
   /**
@@ -905,7 +902,6 @@ public class ExcelImport implements ExerciseDAO {
     }
 
     int i = attachAudio(id, imported);
-
     return imported;
   }
 
@@ -932,35 +928,29 @@ public class ExcelImport implements ExerciseDAO {
     String fastAudioRef = parentPath + FAST_WAV;
     String slowAudioRef = parentPath + SLOW_WAV;
 
-    //if (!missingFastSet.contains(audioDir)) {
-      File test = new File(fastAudioRef);
-      boolean exists = test.exists();
-      if (!exists) {
-        test = new File(installPath, fastAudioRef);
-        exists = test.exists();
-      }
-      if (exists) {
-        imported.addAudioForUser(ensureForwardSlashes(fastAudioRef), UserDAO.DEFAULT_USER);
-      }
-    //}
-    //if (!missingSlowSet.contains(audioDir)) {
-      test = new File(slowAudioRef);
+    File test = new File(fastAudioRef);
+    boolean exists = test.exists();
+    if (!exists) {
+      test = new File(installPath, fastAudioRef);
       exists = test.exists();
-      if (!exists) {
-        test = new File(installPath, slowAudioRef);
-        exists = test.exists();
-      }
-      if (exists) {
-        imported.addAudio(new AudioAttribute(ensureForwardSlashes(slowAudioRef), UserDAO.DEFAULT_USER).markSlow());
-      }
-      // else {
-      //logger.debug("missing slow " + test.getAbsolutePath());
-      // }
-    //}
+    }
+    if (exists) {
+      imported.addAudioForUser(ensureForwardSlashes(fastAudioRef), UserDAO.DEFAULT_USER);
+    }
+
+    test = new File(slowAudioRef);
+    exists = test.exists();
+    if (!exists) {
+      test = new File(installPath, slowAudioRef);
+      exists = test.exists();
+    }
+    if (exists) {
+      imported.addAudio(new AudioAttribute(ensureForwardSlashes(slowAudioRef), UserDAO.DEFAULT_USER).markSlow());
+    }
   }
 
   private int missingExerciseCount = 0;
-  int c = 0;
+  private int c = 0;
 
   /**
    * Make sure every audio file we attach is a valid audio file -- it's really where it says it's supposed to be.
@@ -1018,9 +1008,10 @@ public class ExcelImport implements ExerciseDAO {
         }
       }
       //logger.debug("added " + c + " to " + id);
-    } else {
-    // logger.debug("can't find '" + id + "' in " + exToAudio.keySet().size() + " keys, e.g. '" + exToAudio.keySet().iterator().next() +"'");
     }
+    //else {
+    // logger.debug("can't find '" + id + "' in " + exToAudio.keySet().size() + " keys, e.g. '" + exToAudio.keySet().iterator().next() +"'");
+    //}
     return missing;
   }
 
@@ -1031,18 +1022,8 @@ public class ExcelImport implements ExerciseDAO {
    * @return
    */
   private String findBest(String refAudioIndex) {
-   // String best = "";
     String[] split = refAudioIndex.split("\\s+");
     return (split.length == 0) ? "" : split[0];
-/*    for (String recording : split) {
-      if (!missingFastSet.contains(recording) && !missingSlowSet.contains(recording)) {
-        best = recording;
-        break;
-      } else {
-        best = recording;
-      }
-    }
-    return best;*/
   }
 
   private String ensureForwardSlashes(String wavPath) {
