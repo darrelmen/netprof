@@ -134,26 +134,13 @@ public class SectionHelper {
     }
   }
 
-/*  public Map<String, Map<String,Integer>> getTypeToSectionToCount() {
-    Map<String,Map<String,Integer>> typeToSectionToCount = new HashMap<String, Map<String, Integer>>();
-    for (String key : typeToUnitToLesson.keySet()) {
-      Map<String, Lesson> stringLessonMap = typeToUnitToLesson.get(key);
-      Map<String, Integer> sectionToCount = new HashMap<String, Integer>();
-      typeToSectionToCount.put(key, sectionToCount);
-      for (Map.Entry<String, Lesson> pair : stringLessonMap.entrySet()) {
-        sectionToCount.put(pair.getKey(), pair.getValue().getExercises().size());
-      }
-    }
-    return typeToSectionToCount;
-  }*/
-
-    /**
-     * Return an overlap of all the type=section exercise sets (think venn diagram overlap).
-     *
-     * @param typeToSection
-     * @return
-     * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesForState
-     */
+  /**
+   * Return an overlap of all the type=section exercise sets (think venn diagram overlap).
+   *
+   * @param typeToSection
+   * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesForSelectionState
+   */
   public Collection<CommonExercise> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection) {
     Collection<CommonExercise> currentList = null;
 
