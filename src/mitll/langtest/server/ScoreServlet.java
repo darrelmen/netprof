@@ -32,6 +32,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final Logger logger = Logger.getLogger(ScoreServlet.class);
   private static final String REQUEST = "request";
   private static final String NESTED_CHAPTERS = "nestedChapters";
+  private static final String LEAST_RECORDED_CHAPTERS = "leastRecordedChapters";
   private static final String ALIGN = "align";
   private static final String DECODE = "decode";
   private static final String SCORE = "score";
@@ -115,6 +116,8 @@ public class ScoreServlet extends DatabaseServlet {
             whenCached = System.currentTimeMillis();
           }
           toReturn = nestedChapters;
+        } else if (queryString.startsWith(LEAST_RECORDED_CHAPTERS)) {
+          toReturn = getJsonLeastRecordedChapters();
         } else if (queryString.startsWith(HAS_USER)) {
           String[] split1 = queryString.split("&");
           if (split1.length != 2) {
@@ -342,12 +345,9 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #getJsonForSelection
    */
   private ExerciseSorter getExerciseSorter() {
-    List<String> typeOrder = db.getSectionHelper().getTypeOrder();
-
     Map<String, Integer> phoneToCount = audioFileHelper == null ? new HashMap<String, Integer>() : audioFileHelper.getPhoneToCount();
-    return new ExerciseSorter(typeOrder, phoneToCount);
+    return new ExerciseSorter(db.getSectionHelper().getTypeOrder(), phoneToCount);
   }
-
 
   private void writeJsonToOutput(HttpServletResponse response, JSONObject jsonObject) throws IOException {
     reply(response, jsonObject.toString());
@@ -1129,9 +1129,9 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @param audioFileHelper
-   * @param testAudioFile
-   * @param sentence to decode
+   * @paramx audioFileHelper
+   * @paramx testAudioFile
+   * @paramx sentence to decode
    * @return
    * @seex #getJsonForWordAndAudioFlashcard(String, java.io.File)
    * @deprecated - this is not in reference to an exercise
@@ -1155,6 +1155,106 @@ public class ScoreServlet extends DatabaseServlet {
 
     return asrScoreForAudio;
   }*/
+
+  /**
+   *
+   * @return
+   */
+  private JSONObject getJsonLeastRecordedChapters() {
+    setInstallPath(db);
+    db.getExercises();
+
+    Map<String, Integer> exToCount = db.getAudioDAO().getExToCount();
+
+    Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
+
+    List<SectionNode> sectionNodes = db.getSectionHelper().getSectionNodes();
+    for (SectionNode node : sectionNodes) {
+      String type = node.getType();
+      typeToValues.put(type, Collections.singletonList(node.getName()));
+      recurse(node, typeToValues,exToCount);
+      typeToValues.remove(type);
+    }
+
+    Collections.sort(sectionNodes);
+
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put(CONTENT, getContentAsJson2(sectionNodes));
+    jsonObject.put("version", "1.0");
+    jsonObject.put(HAS_MODEL, !db.getServerProps().isNoModel());
+
+    return jsonObject;
+  }
+
+  private JSONArray getContentAsJson2(Collection<SectionNode> sectionNodes) {
+    JSONArray jsonArray = new JSONArray();
+    Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
+
+    for (SectionNode node : sectionNodes) {
+      String type = node.getType();
+      typeToValues.put(type, Collections.singletonList(node.getName()));
+      JSONObject jsonForNode = getJsonForNode2(node, typeToValues);
+      typeToValues.remove(type);
+
+      jsonArray.add(jsonForNode);
+    }
+    return jsonArray;
+  }
+
+  /**
+   * @param node
+   * @param typeToValues
+   * @return
+   * @see #getContentAsJson
+   */
+  private JSONObject getJsonForNode2(SectionNode node, Map<String, Collection<String>> typeToValues) {
+    JSONObject jsonForNode = new JSONObject();
+    jsonForNode.put("type", node.getType());
+    jsonForNode.put("name", node.getName());
+    JSONArray jsonArray = new JSONArray();
+
+    if (node.isLeaf()) {
+      JSONArray exercises = getJsonForSelection(typeToValues);
+      jsonForNode.put("items", exercises);
+    } else {
+      List<SectionNode> children = node.getChildren();
+      Collections.sort(children); // by avg recorded number
+
+      for (SectionNode child : children) {
+        typeToValues.put(child.getType(), Collections.singletonList(child.getName()));
+        jsonArray.add(getJsonForNode2(child, typeToValues));
+        typeToValues.remove(child.getType());
+      }
+    }
+    jsonForNode.put("children", jsonArray);
+    return jsonForNode;
+  }
+
+  private void recurse(SectionNode node, Map<String, Collection<String>> typeToValues, Map<String, Integer> exToCount) {
+    if (node.isLeaf()) {
+      Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToValues);
+      float total = 0f;
+      for (CommonExercise ex : exercisesForState) {
+        Integer integer = exToCount.get(ex.getID());
+        if (integer == null) {
+  //        logger.error("huh? unknown ex id " +ex.getID());
+        }
+        else {
+          total += integer.floatValue();
+        }
+      }
+      total /= new Integer(exercisesForState.size()).floatValue();
+      node.setWeight(total); // avg number of recordings
+    //  logger.debug("set weight on " +node);
+    } else {
+      for (SectionNode child : node.getChildren()) {
+        String type = child.getType();
+        typeToValues.put(type, Collections.singletonList(child.getName()));
+        recurse(child, typeToValues, exToCount);
+        typeToValues.remove(type);
+      }
+    }
+  }
 
   /**
    * @param db
