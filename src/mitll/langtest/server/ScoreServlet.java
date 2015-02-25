@@ -39,6 +39,9 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String CHAPTER_HISTORY = "chapterHistory";
   private static final String RECORD_HISTORY = "recordHistory";
   private static final String PHONE_REPORT = "phoneReport";
+  /**
+   * Where is this used ???
+   */
   private static final String EXERCISE_HISTORY = "exerciseHistory";
   private static final String EXPECTING_TWO_QUERY_PARAMETERS = "expecting two query parameters";
   private static final String ERROR = "ERROR";
@@ -157,20 +160,13 @@ public class ScoreServlet extends DatabaseServlet {
             String token = first.split("=")[1];
 
             // OK the real person clicked on their email link
-
-            long userIDForToken = getUserIDForToken(token);
             response.setContentType("text/html");
 
-            if (userIDForToken == -1) {
-              // invalid/stale token
-              String rep = getHTML("Note : your password has already been reset. Please go back to NetProF.", "Password has already been reset");
-              reply(response, rep);
-              return;
-            } else {
-              String rep = getHTML("OK, your password has been reset. Please go back to NetProF and login.", "Password has been reset");
-              reply(response, rep);
-              return;
-            }
+            String rep = (getUserIDForToken(token) == -1) ?
+                getHTML("Note : your password has already been reset. Please go back to NetProF.", "Password has already been reset") :
+                getHTML("OK, your password has been reset. Please go back to NetProF and login.",  "Password has been reset");
+            reply(response, rep);
+            return;
           }
         } else if (queryString.startsWith(SET_PASSWORD)) {
           String[] split1 = queryString.split("&");
@@ -182,10 +178,9 @@ public class ScoreServlet extends DatabaseServlet {
 
             String second = split1[1];
             String passwordH = second.split("=")[1];
-            boolean valid = changePFor(token, passwordH);
-            toReturn.put("valid", valid);
+            toReturn.put("valid", changePFor(token, passwordH));
           }
-        } else if (queryString.startsWith(EXERCISE_HISTORY)) {
+        } else if (queryString.startsWith(EXERCISE_HISTORY)) { // TODO : who calls this???
           String[] split1 = queryString.split("&");
           if (split1.length != 2) {
             toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
@@ -216,29 +211,7 @@ public class ScoreServlet extends DatabaseServlet {
           if (split1.length < 2) {
             toReturn.put(ERROR, "expecting at least two query parameters");
           } else {
-            String user = "";
-            Map<String, Collection<String>> selection = new TreeMap<String, Collection<String>>();
-            for (String param : split1) {
-              //logger.debug("param '" +param+               "'");
-              String[] split = param.split("=");
-              if (split.length == 2) {
-                String key = split[0];
-                String value = split[1];
-                if (key.equals(USER)) {
-                  user = value;
-                } else {
-                  selection.put(key, Collections.singleton(value));
-                }
-              }
-            }
-
-            //logger.debug("chapterHistory " + user + " selection " + selection);
-            try {
-              long l = Long.parseLong(user);
-              toReturn = db.getJsonPhoneReport(l, selection);
-            } catch (NumberFormatException e) {
-              toReturn.put(ERROR, "User id should be a number");
-            }
+            toReturn = getPhoneReport(toReturn, split1);
           }
         } else {
           toReturn.put(ERROR, "unknown req " + queryString);
@@ -250,6 +223,33 @@ public class ScoreServlet extends DatabaseServlet {
 
     String x = toReturn.toString();
     reply(response, x);
+  }
+
+  private JSONObject getPhoneReport(JSONObject toReturn, String[] split1) {
+    String user = "";
+    Map<String, Collection<String>> selection = new TreeMap<String, Collection<String>>();
+    for (String param : split1) {
+      //logger.debug("param '" +param+               "'");
+      String[] split = param.split("=");
+      if (split.length == 2) {
+        String key = split[0];
+        String value = split[1];
+        if (key.equals(USER)) {
+          user = value;
+        } else {
+          selection.put(key, Collections.singleton(value));
+        }
+      }
+    }
+
+    //logger.debug("getPhoneReport " + user + " selection " + selection);
+    try {
+      long l = Long.parseLong(user);
+      toReturn = db.getJsonPhoneReport(l, selection);
+    } catch (NumberFormatException e) {
+      toReturn.put(ERROR, "User id should be a number");
+    }
+    return toReturn;
   }
 
   private JSONObject getChapterHistory(String queryString, JSONObject toReturn) {
@@ -284,7 +284,14 @@ public class ScoreServlet extends DatabaseServlet {
     return toReturn;
   }
 
-
+  /**
+   * This is for Appen.
+   *
+   * @see #doGet
+   * @param queryString
+   * @param toReturn
+   * @return
+   */
   private JSONObject getRecordHistory(String queryString, JSONObject toReturn) {
     String[] split1 = queryString.split("&");
     if (split1.length < 2) {
