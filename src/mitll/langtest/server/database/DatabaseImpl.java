@@ -500,22 +500,21 @@ public class DatabaseImpl implements Database {
     List<ExerciseCorrectAndScore> exerciseCorrectAndScores =
         resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, sorter);
 
-    JSONObject container = addJsonHistory(exerciseCorrectAndScores);
-
-    return container;
+    return addJsonHistory(exerciseCorrectAndScores);
   }
 
 
   /**
-   * @see
+   * A special, slimmed down history just for the Appen recording app.
+   * @see mitll.langtest.server.ScoreServlet#getRecordHistory
    * @param userid
    * @param typeToSection
    * @param collator
    * @return
    */
   public JSONObject getJsonScoreHistoryRecorded(long userid,
-                                        Map<String, Collection<String>> typeToSection,
-                                          Collator collator
+                                                Map<String, Collection<String>> typeToSection,
+                                                Collator collator
   ) {
     Collection<CommonExercise> exercisesForState = getSectionHelper().getExercisesForSelectionState(typeToSection);
 
@@ -534,7 +533,7 @@ public class DatabaseImpl implements Database {
         String id = o1.getID();
         String id1 = o2.getID();
 
-        boolean firstRecorded  = recordedForUser.contains(id);
+        boolean firstRecorded = recordedForUser.contains(id);
         boolean secondRecorded = recordedForUser.contains(id1);
         if (!firstRecorded && secondRecorded) {
           return -1;
@@ -549,15 +548,13 @@ public class DatabaseImpl implements Database {
     });
 
 
-    JSONObject container = new JSONObject();
     JSONArray scores = new JSONArray();
-
     for (CommonExercise ex : copy) {
       //logger.debug("for " + ex);
       JSONObject exAndScores = new JSONObject();
       exAndScores.put("ex", ex.getID());
       boolean wasRecorded = recordedForUser.contains(ex.getID());
-      exAndScores.put("s", wasRecorded ?"100":"0");
+      exAndScores.put("s", wasRecorded ? "100" : "0");
 
       JSONArray history = new JSONArray();
       if (wasRecorded) {
@@ -567,40 +564,55 @@ public class DatabaseImpl implements Database {
 
       scores.add(exAndScores);
     }
+
+    JSONObject container = new JSONObject();
     container.put("scores", scores);
     container.put("lastCorrect", ""+recordedForUser.size());
     container.put("lastIncorrect", Integer.toString(0));
     return container;
   }
 
+  /**
+   * @see #getJsonScoreHistory
+   * @param exerciseCorrectAndScores
+   * @return
+   */
   private JSONObject addJsonHistory(Collection<ExerciseCorrectAndScore> exerciseCorrectAndScores) {
-    JSONObject container = new JSONObject();
     JSONArray scores = new JSONArray();
     int correct = 0, incorrect = 0;
     for (ExerciseCorrectAndScore ex : exerciseCorrectAndScores) {
       //logger.debug("for " + ex);
+      List<CorrectAndScore> correctAndScoresLimited = ex.getCorrectAndScoresLimited();
+
+      JSONArray history = new JSONArray();
+      boolean lastCorrect = getHistoryAsJson(history, correctAndScoresLimited);
+      boolean empty = correctAndScoresLimited.isEmpty();
+      if (!empty) {
+        if (lastCorrect) correct++; else incorrect++;
+      }
+
       JSONObject exAndScores = new JSONObject();
       exAndScores.put("ex", ex.getId());
       exAndScores.put("s", Integer.toString(ex.getAvgScorePercent()));
-
-      JSONArray history = new JSONArray();
-
-      List<CorrectAndScore> correctAndScoresLimited = ex.getCorrectAndScoresLimited();
-      boolean lastCorrect = getHistoryAsJson(history, correctAndScoresLimited);
-      if (!correctAndScoresLimited.isEmpty()) {
-        if (lastCorrect) correct++; else incorrect++;
-      }
       exAndScores.put("h", history);
-
+      exAndScores.put("scoreJson",empty?"":correctAndScoresLimited.get(correctAndScoresLimited.size()-1).getScoreJson());
       scores.add(exAndScores);
     }
+
+    JSONObject container = new JSONObject();
     container.put("scores", scores);
-    container.put("lastCorrect", Integer.toString(correct));
+    container.put("lastCorrect",   Integer.toString(correct));
     container.put("lastIncorrect", Integer.toString(incorrect));
     return container;
   }
 
-  private boolean getHistoryAsJson(JSONArray history, List<CorrectAndScore> correctAndScoresLimited) {
+  /**
+   *
+   * @param history
+   * @param correctAndScoresLimited
+   * @return array of Y's and N's
+   */
+  private boolean getHistoryAsJson(JSONArray history, Collection<CorrectAndScore> correctAndScoresLimited) {
     boolean lastCorrect = false;
     for (CorrectAndScore cs : correctAndScoresLimited) {
       history.add(cs.isCorrect() ? "Y" : "N");
@@ -624,6 +636,7 @@ public class DatabaseImpl implements Database {
 
    Sort word by score asc
    * @return
+   * @see mitll.langtest.server.ScoreServlet#getPhoneReport
    */
   public JSONObject getJsonPhoneReport(long userid, Map<String, Collection<String>> typeToValues) {
     Collection<CommonExercise> exercisesForState = getSectionHelper().getExercisesForSelectionState(typeToValues);
