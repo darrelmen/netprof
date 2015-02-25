@@ -1320,7 +1320,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.LangTest#handleCDToken
    */
   public String enableCDUser(String token, String emailR, String url) {
-    logger.info("enabling token " + token + " for email " + emailR + " and url " +url);
+    logger.info("enabling token " + token + " for email " + emailR + " and url " + url);
 
     return getEmailHelper().enableCDUser(token, emailR, url);
   }
@@ -1962,6 +1962,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     } catch (Exception e) {
       logger.error("couldn't load database " +e,e);
     }
+    getExercises(); // preload so we can use the ScoreServlet
   }
 
   /**
