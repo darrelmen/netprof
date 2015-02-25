@@ -53,16 +53,24 @@ public class SectionHelper {
           }
         });
       }
-     // logger.debug("1 Valid types " + types + " vs predef " + predefinedTypeOrder);
-
       return types;
     } else {
       Set<String> validTypes = typeToUnitToLesson.keySet();
-   //   logger.debug("2 Valid types " + validTypes + " vs predef " + predefinedTypeOrder);
       List<String> valid = new ArrayList<String>(predefinedTypeOrder);
       valid.retainAll(validTypes);
       return valid;
     }
+  }
+
+  public boolean allKeysValid() {
+    for (String type : typeToUnitToLesson.keySet()) {
+      if (type == null || type.equals("null")) {
+        logger.error("ERROR ERROR \n\n - the tierIndex property is out of sync with the spreadsheet columns! - " +
+            "types are " + typeToUnitToLesson.keySet() + "\n\n");
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
