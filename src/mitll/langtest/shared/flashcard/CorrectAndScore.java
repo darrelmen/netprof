@@ -14,6 +14,7 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
   private float score;
   private long timestamp;
   private String path;
+  private transient String scoreJson;
 
   public CorrectAndScore() {}
 
@@ -36,8 +37,10 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
    * @param score
    * @param timestamp
    * @param path
+   * @param scoreJson
    */
-  public CorrectAndScore(int uniqueID, long userid, String exerciseID, boolean correct, float score, long timestamp, String path) {
+  public CorrectAndScore(int uniqueID, long userid, String exerciseID, boolean correct, float score, long timestamp,
+                         String path, String scoreJson) {
     this.uniqueID = uniqueID;
     this.id = exerciseID;
     this.userid = userid;
@@ -45,6 +48,7 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
     this.score = score;
     this.timestamp = timestamp;
     this.path = path;
+    this.scoreJson = scoreJson;
   }
 
   @Override
@@ -86,6 +90,8 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
   public long getUserid() {
     return userid;
   }
+
+  public String getScoreJson() { return scoreJson;  }
 
   public String toString() {
     return "id " + getId() + " " + (isCorrect() ? "C" : "I") + " score " + getPercentScore();
