@@ -247,9 +247,7 @@ public class AudioDAO extends DAO {
   }
 
   public Set<String> getRecordedRegularForUser(long userid) {
-    Set<Long> userids = new HashSet<Long>();
-    userids.add(userid);
-    return getAudioForGender(userids,REGULAR);
+    return getAudioForGender(Collections.singleton(userid), REGULAR);
   }
 
   /**
@@ -324,6 +322,28 @@ public class AudioDAO extends DAO {
       }
   //    logger.debug("for " + audioSpeed + " " + sql + " yielded " + results.size());
       finish(connection, statement, rs);
+
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    return results;
+  }
+
+  public Map<String,Integer> getExToCount() {
+    String sql = "select exid, count(exid) from (select distinct exid,userid from audio where defect=false and audiotype='regular')  group by exid\n";
+
+    Map<String,Integer> results = new HashMap<String, Integer>();
+    try {
+      Connection connection = database.getConnection(this.getClass().toString());
+      PreparedStatement statement = connection.prepareStatement(sql);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        String trim = rs.getString(1).trim();
+        results.put(trim,rs.getInt(2));
+      }
+      //    logger.debug("for " + audioSpeed + " " + sql + " yielded " + results.size());
+      finish(connection, statement, rs);
+      logger.debug("results returned " +results.size());
 
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
