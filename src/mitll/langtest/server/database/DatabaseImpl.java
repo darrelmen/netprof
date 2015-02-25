@@ -1332,7 +1332,5 @@ public class DatabaseImpl implements Database {
   }
 */
 
-  public String toString() {
-    return "Database : " + this.getClass().toString();
-  }
+  public String toString() {   return "Database : " + this.getClass().toString();  }
 }
