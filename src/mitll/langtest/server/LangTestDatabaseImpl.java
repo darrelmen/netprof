@@ -1804,7 +1804,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @see #getExercises
    */
-  void makeAutoCRT() { audioFileHelper.makeAutoCRT(relativeConfigDir, this);  }
+  void makeAutoCRT() { audioFileHelper.makeAutoCRT(this);  }
 
   @Override
   public Map<User, Integer> getUserToResultCount() { return db.getUserToResultCount();  }
