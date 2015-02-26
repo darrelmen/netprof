@@ -53,16 +53,24 @@ public class SectionHelper {
           }
         });
       }
-     // logger.debug("1 Valid types " + types + " vs predef " + predefinedTypeOrder);
-
       return types;
     } else {
       Set<String> validTypes = typeToUnitToLesson.keySet();
-   //   logger.debug("2 Valid types " + validTypes + " vs predef " + predefinedTypeOrder);
       List<String> valid = new ArrayList<String>(predefinedTypeOrder);
       valid.retainAll(validTypes);
       return valid;
     }
+  }
+
+  public boolean allKeysValid() {
+    for (String type : typeToUnitToLesson.keySet()) {
+      if (type == null || type.equals("null")) {
+        logger.error("ERROR ERROR \n\n - the tierIndex property is out of sync with the spreadsheet columns! - " +
+            "types are " + typeToUnitToLesson.keySet() + "\n\n");
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -134,26 +142,13 @@ public class SectionHelper {
     }
   }
 
-/*  public Map<String, Map<String,Integer>> getTypeToSectionToCount() {
-    Map<String,Map<String,Integer>> typeToSectionToCount = new HashMap<String, Map<String, Integer>>();
-    for (String key : typeToUnitToLesson.keySet()) {
-      Map<String, Lesson> stringLessonMap = typeToUnitToLesson.get(key);
-      Map<String, Integer> sectionToCount = new HashMap<String, Integer>();
-      typeToSectionToCount.put(key, sectionToCount);
-      for (Map.Entry<String, Lesson> pair : stringLessonMap.entrySet()) {
-        sectionToCount.put(pair.getKey(), pair.getValue().getExercises().size());
-      }
-    }
-    return typeToSectionToCount;
-  }*/
-
-    /**
-     * Return an overlap of all the type=section exercise sets (think venn diagram overlap).
-     *
-     * @param typeToSection
-     * @return
-     * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesForState(int, java.util.Map, long)
-     */
+  /**
+   * Return an overlap of all the type=section exercise sets (think venn diagram overlap).
+   *
+   * @param typeToSection
+   * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesForSelectionState
+   */
   public Collection<CommonExercise> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection) {
     Collection<CommonExercise> currentList = null;
 
@@ -251,7 +246,7 @@ public class SectionHelper {
     return new Pair(type, unitName);
   }
 
-  protected void addUnitNameEntry(CommonExercise exercise, String unitName, Map<String, Lesson> unit) {
+  private void addUnitNameEntry(CommonExercise exercise, String unitName, Map<String, Lesson> unit) {
     Lesson unitForName = unit.get(unitName);
     if (unitForName == null) {
       unit.put(unitName, unitForName = new Lesson(unitName));
@@ -283,14 +278,13 @@ public class SectionHelper {
    * @param unitName
    * @return
    */
-  public boolean removeExerciseToLesson(CommonExercise exercise, String type, String unitName) {
+  private boolean removeExerciseToLesson(CommonExercise exercise, String type, String unitName) {
     Map<String, Lesson> unit = getSectionToLesson(type);
-    Lesson unitForName = unit.get(unitName);
-    return unitForName.remove(exercise);
+    return unit.get(unitName).remove(exercise);
   }
 
 
-  private Map<String, Lesson> getSectionToLesson( String section) {
+  private Map<String, Lesson> getSectionToLesson(String section) {
     Map<String, Lesson> unit = typeToUnitToLesson.get(section);
     if (unit == null) {
       typeToUnitToLesson.put(section, unit = new HashMap<String, Lesson>());
@@ -348,8 +342,8 @@ public class SectionHelper {
     sections.add(otherSection);
   }
 
-  public Set<String> getSections() { return typeToUnitToLesson.keySet(); }
-  public Map<String, Lesson> getSection(String type) { return typeToUnitToLesson.get(type);  }
+/*  public Set<String> getSections() { return typeToUnitToLesson.keySet(); }
+  public Map<String, Lesson> getSection(String type) { return typeToUnitToLesson.get(type);  }*/
 
   public void report() {
     logger.debug("type order " + getTypeOrder());
