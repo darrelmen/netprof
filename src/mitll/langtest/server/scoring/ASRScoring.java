@@ -269,11 +269,7 @@ public class ASRScoring extends Scoring implements CollationSort {
           boolean first = true;
           for (String[] onePronunciation : process) {
             // each pronunciation
-  //          ArrayList<String> pronunciation = new ArrayList<String>();
-    //        pronunciations.add(pronunciation);
             for (String phoneme : onePronunciation) {
-              //logger.debug("phoneme " +phoneme);
-      //        pronunciation.add(phoneme);
               uphones.add(phoneme);
 
               if (first) {
@@ -286,7 +282,6 @@ public class ASRScoring extends Scoring implements CollationSort {
         }
       }
     }
-    //if (multiple % 1000 == 0) logger.debug("mult " + multiple);
     return new PhoneInfo(firstPron,uphones);
   }
 
@@ -328,33 +323,6 @@ public class ASRScoring extends Scoring implements CollationSort {
     }
     return builder.toString();
   }
-
-/*  private Set<String> wordsInDict = new HashSet<String>();
-  private void readDict() {
-    String modelsDir = getModelsDir();
-
-    String hldaDir = getProp(HLDA_DIR, HLDA_DIR_DEFAULT);
-    String dictOverride = getProp(DICTIONARY, "");
-    String dictFile = dictOverride.length() > 0 ?  modelsDir + File.separator + dictOverride :
-      modelsDir + File.separator + hldaDir +File.separator+ DICT_WO_SP;
-    boolean dictExists   = new File(dictFile).exists();
-
-    if (dictExists) {
-      try {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(dictFile), FileExerciseDAO.ENCODING));
-        String line2;
-        while ((line2 = reader.readLine()) != null) {
-          String[] split = line2.split("\\s");
-          String word = split[0];
-          wordsInDict.add(word);
-        }
-        reader.close();
-        logger.info("read dict " + dictFile + " and found " + wordsInDict.size() + " words");
-      } catch (IOException e) {
-        logger.error(e);
-      }
-    }
-  }*/
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
@@ -473,28 +441,6 @@ public class ASRScoring extends Scoring implements CollationSort {
     return new PretestScore(scores.hydecScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence, (float) duration);
   }
 
-/*  public Scores decode(String testAudioDir, String testAudioFileNoSuffix,
-                       String scoringDir,
-
-                       List<String> lmSentences, List<String> background) {
-    return getScoreForAudio(testAudioDir, testAudioFileNoSuffix, "", scoringDir, lmSentences, background);
-  }*/
-
-  /**
-   * @seex mitll.langtest.server.audio.SplitAudio#getAlignmentScores(ASRScoring, String, String, String, String)
-   * @paramx testAudioDir
-   * @paramx testAudioFileNoSuffix
-   * @paramx sentence
-   * @return
-   */
-/*
-  public Scores align(String testAudioDir, String testAudioFileNoSuffix,
-                      String sentence) {
-    return getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir,
-       false, Files.createTempDir().getAbsolutePath(), false);
-  }
-*/
-
   /**
    * @see #scoreRepeatExercise
    * @param testAudioDir audio file directory
@@ -557,7 +503,6 @@ public class ASRScoring extends Scoring implements CollationSort {
       false /* notForScoring */, dirs);
 
     //logger.debug("testAudio is " + testAudio + " dir " + testAudio.dir());
-
     return computeRepeatExerciseScores(testAudio, sentence, tmpDir, decode);
   }
 
