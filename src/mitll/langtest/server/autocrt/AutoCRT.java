@@ -1,7 +1,6 @@
 package mitll.langtest.server.autocrt;
 
 import mitll.langtest.server.audio.SLFFile;
-import mitll.langtest.server.database.Export;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
@@ -26,22 +25,20 @@ public class AutoCRT {
 	private static final Logger logger = Logger.getLogger(AutoCRT.class);
 	private final AutoCRTScoring autoCRTScoring;
 	private final double minPronScore;
+  private final SmallVocabDecoder svd = new SmallVocabDecoder();
 
 	/**
 	 * @see mitll.langtest.server.audio.AudioFileHelper#makeAutoCRT
-	 * @param exporter
 	 * @param db
-	 * @param installPath
-	 * @param relativeConfigDir
 	 * @param minPronScore
 	 */
-	public AutoCRT(Export exporter, AutoCRTScoring db, String installPath, String relativeConfigDir, double minPronScore) {
+  public AutoCRT(AutoCRTScoring db, double minPronScore) {
 		this.autoCRTScoring = db;
 		this.minPronScore = minPronScore;
 	}
 
 	/**
-	 * Allow multiple correct answers from synonym sentence list.
+   * Decode the phrase from the exercise in {@link mitll.langtest.shared.CommonExercise#getForeignLanguage}
 	 *
 	 * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
 	 * @seex mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
@@ -72,8 +69,7 @@ public class AutoCRT {
 	}
 
 	/**
-	 * @seex mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(java.io.File, String)
-	 * @see mitll.langtest.server.ScoreServlet#getFlashcardScore
+   * @see mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(java.io.File, String)
 	 *
 	 * @param audioFile
 	 * @param foregroundSentence
@@ -126,17 +122,8 @@ public class AutoCRT {
 						answer.setDecodeOutput(recoSentence);
 						answer.setScore(scoreForAnswer);
 						return asrScoreForAudio;
-	}
-
-  private List<String> removePunct(Collection<String> possibleSentences) {
-    List<String> foreground = new ArrayList<String>();
-    for (String ref : possibleSentences) {
-      foreground.add(removePunct(ref));
-    }
-    return foreground;
   }
 
-  private final SmallVocabDecoder svd = new SmallVocabDecoder();
 	/**
 	 * Convert dashes into spaces and remove periods, and other punct
 	 * @param answerSentences
@@ -188,6 +175,14 @@ public class AutoCRT {
     return language.equalsIgnoreCase("mandarin") && !rawRefSentence.trim().equalsIgnoreCase(SLFFile.UNKNOWN_MODEL) ?
         ASRScoring.getSegmented(rawRefSentence.trim().toUpperCase()) :
         rawRefSentence.trim().toUpperCase();
+  }
+
+  private List<String> removePunct(Collection<String> possibleSentences) {
+    List<String> foreground = new ArrayList<String>();
+    for (String ref : possibleSentences) {
+      foreground.add(removePunct(ref));
+    }
+    return foreground;
 			}
 
 	/**
