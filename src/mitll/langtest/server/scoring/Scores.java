@@ -43,7 +43,8 @@ public class Scores {
   public Scores(String[] scoreSplit) {
 	this.eventScores = new HashMap<String, Map<String, Float>>();
 	//String[] split = scoreStr.split(";");
-	this.hydraScore = Float.parseFloat(scoreSplit[0]);
+	float s = Float.parseFloat(scoreSplit[0]);
+	this.hydraScore = Float.isNaN(s) ? 0.0f : s;//Float.parseFloat(scoreSplit[0]);
 	eventScores.put("phones", new HashMap<String, Float>());
 	for(int i = 1; i < scoreSplit.length; i+=2) {
 		eventScores.get("phones").put(scoreSplit[i], Float.parseFloat(scoreSplit[i+1]));
