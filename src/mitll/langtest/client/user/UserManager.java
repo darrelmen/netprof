@@ -13,6 +13,7 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
 import java.util.Date;
+import java.util.logging.Logger;
 
 /**
  * Handles storing cookies for users, etc. IF user ids are stored as cookies.
@@ -27,6 +28,8 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 public class UserManager {
+  private Logger logger = Logger.getLogger("UserManager");
+
   private static final long HOUR_IN_MILLIS = 1000 * 60 * 60;
 
   private static final int DAY_HOURS = 24;
@@ -53,6 +56,7 @@ public class UserManager {
   private final String appTitle;
   private final PropertyHandler props;
   private boolean isMale;
+  private boolean isTeacher;
 
   /**
    * @param lt
@@ -76,7 +80,7 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#checkLogin()
    */
   public void checkLogin() {
-    //System.out.println("loginType " + loginType);
+    //logger.info("loginType " + loginType);
     if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
       anonymousLogin();
     } else {
@@ -90,7 +94,7 @@ public class UserManager {
   private void login() {
     final int user = getUser();
     if (user != NO_USER_SET) {
-      //System.out.println("UserManager.login : current user : " + user);
+      //logger.info("UserManager.login : current user : " + user);
       console("UserManager.login : current user : " + user);
       rememberAudioType();
       getPermissionsAndSetUser(user);
@@ -120,7 +124,7 @@ public class UserManager {
    */
   private void getPermissionsAndSetUser(final int user) {
     console("getPermissionsAndSetUser : " + user);
-   // System.out.println("UserManager.getPermissionsAndSetUser " + user + " asking server for info...");
+   // logger.info("UserManager.getPermissionsAndSetUser " + user + " asking server for info...");
 
     service.getUserBy(user, new AsyncCallback<User>() {
       @Override
@@ -130,7 +134,7 @@ public class UserManager {
 
       @Override
       public void onSuccess(User result) {
-//        System.out.println("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
+//        logger.info("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
 
         if (loginType == PropertyHandler.LOGIN_TYPE.ANONYMOUS && result.getUserKind() != User.Kind.ANONYMOUS) {
           clearUser();
@@ -154,7 +158,7 @@ public class UserManager {
    * @param result
    */
   private void gotNewUser(User result) {
-    System.out.println("UserManager.gotNewUser " + result);
+    logger.info("UserManager.gotNewUser " + result);
     userNotification.getPermissions().clear();
     if (result != null) {
       boolean isCD = result.getUserKind() == User.Kind.CONTENT_DEVELOPER;
@@ -166,9 +170,11 @@ public class UserManager {
           userNotification.setPermission(permission, true);
         }
       }
-      userNotification.gotUser(result);
       isMale = result.isMale();
-     // System.out.println("\n\n\n------ is male " + isMale);
+      isTeacher = (result.getUserKind() == User.Kind.TEACHER)|| isCD;
+      //logger.info("\t is male " + isMale + " is CD " + isCD + " is teacher " + isTeacher);
+
+      userNotification.gotUser(result);
     }
     //console("getPermissionsAndSetUser.onSuccess : " + user);
   }
@@ -182,19 +188,19 @@ public class UserManager {
   private void anonymousLogin() {
     int user = getUser();
     if (user != NO_USER_SET) {
-      //System.out.println("UserManager.anonymousLogin : current user : " + user);
+      //logger.info("UserManager.anonymousLogin : current user : " + user);
       rememberAudioType(); // TODO : necessary?
     //  userNotification.gotUser(user);
       getPermissionsAndSetUser(user);
     } else {
-      System.out.println("UserManager.anonymousLogin : make new user, since user = " + user);
+      logger.info("UserManager.anonymousLogin : make new user, since user = " + user);
 
       addAnonymousUser();
     }
   }
 
   private void addAnonymousUser() {
-    System.out.println("UserManager.addAnonymousUser : adding anonymous user");
+    logger.info("UserManager.addAnonymousUser : adding anonymous user");
 
     service.addUser("anonymous", "", "", User.Kind.ANONYMOUS, Window.Location.getHref(), "", true, 0, "unknown", false, "browser", new AsyncCallback<User>() {
       @Override
@@ -255,11 +261,11 @@ public class UserManager {
     boolean showUnansweredFirst = false;
     String unanswered = localStorageIfSupported.getItem(unansweredKey);
     if (unanswered != null) {
-      //System.out.println("found key " +unansweredKey + " = " + unanswered);
+      //logger.info("found key " +unansweredKey + " = " + unanswered);
       showUnansweredFirst = unanswered.equalsIgnoreCase("true");
     }
     else {
-      //System.out.println("===> no key " +unansweredKey);
+      //logger.info("===> no key " +unansweredKey);
     }
     return showUnansweredFirst;
   }*/
@@ -291,7 +297,7 @@ public class UserManager {
     String sid = getUserFromStorage();
 
     String shownHello = Storage.getLocalStorageIfSupported().getItem(UserPassLogin.SHOWN_HELLO);
-    System.out.println("user id cookie for " +getUserIDCookie() + " is " + sid + " shown hello " +shownHello);
+    logger.info("user id cookie for " + getUserIDCookie() + " is " + sid + " shown hello " + shownHello);
     return (sid == null || sid.equals("" + NO_USER_SET)) ||
         //shownHello == null ||
         checkUserExpired(sid);
@@ -339,7 +345,7 @@ public class UserManager {
   private boolean userExpired(String sid) {
     String expires = getExpiresCookie();
     if (expires == null) {
-      System.out.println("userExpired : checkExpiration : no expires item?");
+      logger.info("userExpired : checkExpiration : no expires item?");
     } else {
       try {
         long expirationDate = Long.parseLong(expires);
@@ -352,7 +358,7 @@ public class UserManager {
         }
 
         if (expirationDate < System.currentTimeMillis()) {
-          System.out.println("userExpired : checkExpiration : " + sid + " has expired : " + new Date(expirationDate));
+          logger.info("userExpired : checkExpiration : " + sid + " has expired : " + new Date(expirationDate));
           return true;
         }
       } catch (NumberFormatException e) {
@@ -387,7 +393,7 @@ public class UserManager {
 
       localStorageIfSupported.removeItem(getUserIDCookie());
       localStorageIfSupported.removeItem(getUserChosenID());
-      System.out.println("clearUser : removed item " + getUserID() + " user now " + getUser());
+      logger.info("clearUser : removed item " + getUserID() + " user now " + getUser());
     } else {
       userID = NO_USER_SET;
     }
@@ -399,7 +405,7 @@ public class UserManager {
    * @param audioType
    */
   void storeUser(User user, String audioType) {
-    System.out.println("storeUser : user now " + user + " audio type '" + audioType +"'");
+    logger.info("storeUser : user now " + user + " audio type '" + audioType + "'");
     final long DURATION = getUserSessionDuration();
     long futureMoment = getUserSessionEnd(DURATION);
     if (Storage.isLocalStorageSupported()) {
@@ -410,7 +416,7 @@ public class UserManager {
       rememberUserSessionEnd(localStorageIfSupported, futureMoment);
       localStorageIfSupported.setItem(getAudioType(), "" + audioType);
       // localStorageIfSupported.setItem(getLoginType(), "" + userType);
-      System.out.println("storeUser : user now " + user.getId() + " / " + getUser() + " audio '" + audioType + "' expires in " + (DURATION / 1000) + " seconds");
+      logger.info("storeUser : user now " + user.getId() + " / " + getUser() + " audio '" + audioType + "' expires in " + (DURATION / 1000) + " seconds");
       userNotification.rememberAudioType(audioType);
 
       gotNewUser(user);
@@ -445,7 +451,7 @@ public class UserManager {
     String expires = getExpiresCookie();
 
     long expirationDate = Long.parseLong(expires);
-    System.out.println("rememberUserSessionEnd : user will expire on " + new Date(expirationDate));
+    logger.info("rememberUserSessionEnd : user will expire on " + new Date(expirationDate));
   }
 
   private long getUserSessionEnd() {
@@ -470,5 +476,9 @@ public class UserManager {
 
   public boolean isMale() {
     return isMale;
+  }
+
+  public boolean isTeacher() {
+    return isTeacher;
   }
 }
