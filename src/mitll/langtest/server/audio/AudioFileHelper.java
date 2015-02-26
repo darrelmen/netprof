@@ -8,7 +8,6 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.Export;
 import mitll.langtest.server.database.PhoneDAO;
 import mitll.langtest.server.database.WordDAO;
 import mitll.langtest.server.scoring.ASR;
@@ -41,6 +40,7 @@ import java.util.*;
  */
 public class AudioFileHelper implements CollationSort {
 	private static final Logger logger = Logger.getLogger(AudioFileHelper.class);
+  private static final String POSTED_AUDIO = "postedAudio";
 
 	private final PathHelper pathHelper;
 	private final ServerProperties serverProps;
@@ -53,8 +53,6 @@ public class AudioFileHelper implements CollationSort {
 	private boolean checkedLTS = false;
 	private Map<String,Integer> phoneToCount;
 	private boolean DECODE = false;
-
-  public enum Request { DECODE, ALIGN, RECORD };
 
 	/**
 	 * @see mitll.langtest.server.ScoreServlet#getAudioFileHelper()
@@ -108,19 +106,7 @@ public class AudioFileHelper implements CollationSort {
 						countPhones(exercise);
 					}
 				}
-				/*
-        ExerciseSorter exerciseSorter = new ExerciseSorter(db.getSectionHelper().getTypeOrder());
-     //   exerciseSorter.getSortedByUnitThenPhone(exercises, false, phoneToCount,true);
 
-        List<CommonExercise>  copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, 1, getCollator());
-
-        int max = 0;
-        for (CommonExercise exercise : copy) {
-          if (max++ < 3000)
-            logger.debug(exercise.getID() + "\t" + exercise.getUnitToValue()+"\t"+exercise.getForeignLanguage() +
-                //" " + exercise.getBagOfPhones() +
-                " first \t" + exercise.getFirstPron());
-        }*/
 				if (count > 0) {
 					logger.error("huh? out of " + exercises.size() + " LTS fails on " + count);
 				}
@@ -135,8 +121,6 @@ public class AudioFileHelper implements CollationSort {
 		exercise.setBagOfPhones(bagOfPhones.getPhoneSet());
 		exercise.setFirstPron(bagOfPhones.getFirstPron());
 
-		// for (String phone : bagOfPhones.getPhoneSet()) {
-		//  logger.debug(exercise.getID() + " " + exercise.getForeignLanguage()+ " pron " + bagOfPhones.getFirstPron());
 		for (String phone : bagOfPhones.getFirstPron()) {
 			Integer integer = getPhoneToCount().get(phone);
 			getPhoneToCount().put(phone, integer == null ? 1 : integer + 1);
@@ -148,16 +132,6 @@ public class AudioFileHelper implements CollationSort {
 	 * @return
 	 * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
 	 */
-	/*public boolean checkLTS(String foreignLanguagePhrase) {
-		makeASRScoring();
-		return asrScoring.checkLTS(foreignLanguagePhrase);
-	}
-
-	public SmallVocabDecoder getSmallVocabDecoder() {
-		makeASRScoring();
-		return asrScoring.getSmallVocabDecoder();
-	}*/
-
 	public boolean checkLTS(String foreignLanguagePhrase) {
 		makeASRScoring();
 		return asrScoring.checkLTS(foreignLanguagePhrase);
@@ -341,6 +315,12 @@ public class AudioFileHelper implements CollationSort {
         new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
   }
 
+  /**
+   * Put word and phone scores into database.
+   * @see #getAudioAnswerDecoding
+   * @param answer
+   * @param answerID
+   */
 	private void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
 		PretestScore pretestScore = answer.getPretestScore();
 		List<TranscriptSegment> words  = pretestScore == null ? null : pretestScore.getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
@@ -422,10 +402,10 @@ public class AudioFileHelper implements CollationSort {
 		return jsonObject;
 	}
 
-	public static float round(float d) {
+  private static float round(float d) {
 		return round(d, 3);
 	}
-	public static float round(float d, int decimalPlace) {
+  private static float round(float d, int decimalPlace) {
 		BigDecimal bd = new BigDecimal(Float.toString(d));
 		bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
 		return bd.floatValue();
@@ -455,22 +435,20 @@ public class AudioFileHelper implements CollationSort {
 		return audioAnswer;
 	}
 
-	public File getPostedFileLoc() {
-		String postedAudio = "postedAudio";
-		return getPathUnder(postedAudio);
-	}
+  private File getPostedFileLoc() {  return getPathUnder(POSTED_AUDIO);  }
 
-	public File getPathUnder(String postedAudio) {
+  private File getPathUnder(String postedAudio) {
 		String wavPath = pathHelper.getWavPathUnder(postedAudio);
 		return pathHelper.getAbsoluteFile(wavPath);
 	}
 
-	public AudioAnswer getAudioAnswer(String base64EncodedString, int reqid, File file) {
+  private AudioAnswer getAudioAnswer(String base64EncodedString, int reqid, File file) {
 		AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
 		// boolean isValid = validity.validity == AudioAnswer.Validity.OK;
-		AudioAnswer audioAnswer = new AudioAnswer(pathHelper.ensureForwardSlashes(pathHelper.getWavPathUnder("postedAudio")), validity.validity, reqid, validity.durationInMillis);
+    AudioAnswer audioAnswer = new AudioAnswer(pathHelper.ensureForwardSlashes(pathHelper.getWavPathUnder(POSTED_AUDIO)),
+        validity.validity, reqid, validity.durationInMillis);
 
-		logger.debug("writing to " + file.getAbsolutePath() + " answer " + audioAnswer);
+    //logger.debug("writing to " + file.getAbsolutePath() + " answer " + audioAnswer);
 		return audioAnswer;
 	}
 
@@ -479,7 +457,7 @@ public class AudioFileHelper implements CollationSort {
 	 *
 	 * TODO : why even generate images here???
 	 *
-	 * @see AutoCRT#getAutoCRTDecodeOutput
+	 * @seex AutoCRT#getAutoCRTDecodeOutput
 	 * @see AutoCRT#getFlashcardAnswer
 	 * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(java.io.File, java.util.Collection)
 	 * @param testAudioFile audio file to score
@@ -520,10 +498,10 @@ public class AudioFileHelper implements CollationSort {
 	 * @param phrases
 	 * @return
 	 */
-	public Collection<String> getValidPhrases(Collection<String> phrases) {
-		makeASRScoring(); // TODO : evil
-		return asrScoring.getValidPhrases(phrases);
-	}
+//	public Collection<String> getValidPhrases(Collection<String> phrases) {
+//		makeASRScoring(); // TODO : evil
+//		return asrScoring.getValidPhrases(phrases);
+//	}
 
 	/**
 	 * For now, we don't use a ref audio file, since we aren't comparing against a ref audio file with the DTW/sv pathway.
@@ -733,27 +711,13 @@ public class AudioFileHelper implements CollationSort {
 
 	/**
 	 * @see mitll.langtest.server.LangTestDatabaseImpl#makeAutoCRT()
-	 * @param relativeConfigDir
 	 * @param crtScoring
 	 * @paramx studentAnswersDB
 	 * @paramx langTestDatabase
 	 */
-	public void makeAutoCRT(String relativeConfigDir, AutoCRTScoring crtScoring
-			//  , DatabaseImpl studentAnswersDB,
-			//                        LangTestDatabaseImpl langTestDatabase
-			) {
+  public void makeAutoCRT(AutoCRTScoring crtScoring) {
 		if (autoCRT == null) {
-			/*      DatabaseImpl exportDB = serverProps.isAutoCRT() ? studentAnswersDB : db;
-      if (serverProps.isAutoCRT()) {
-        langTestDatabase.setInstallPath(serverProps.getUseFile(), exportDB);
-        exportDB.getExercises();
-      }*/
-			Export export = db.getExport();
-			autoCRT = new AutoCRT(export, crtScoring, pathHelper.getInstallPath(), relativeConfigDir,
-					serverProps.getMinPronScore());
-//			if (serverProps.isAutoCRT() && serverProps.isIncludeFeedback()) {
-//				autoCRT.makeClassifier();
-//			}
+      autoCRT = new AutoCRT(crtScoring, serverProps.getMinPronScore());
 		}
 	}
 	/**
