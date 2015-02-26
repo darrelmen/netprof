@@ -1,7 +1,7 @@
 package mitll.langtest.server;
 
 import audio.image.ImageType;
-import audio.imagewriter.ImageWriter;
+import audio.imagewriter.SimpleImageWriter;
 import com.google.common.io.Files;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
@@ -830,7 +830,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	 * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio
 	 */
 	public ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID) {
-		ImageWriter imageWriter = new ImageWriter();
+    SimpleImageWriter imageWriter = new SimpleImageWriter();
 
 		String wavAudioFile = getWavAudioFile(audioFile);
 		File testFile = new File(wavAudioFile);
@@ -846,7 +846,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		logger.debug("getImageForAudioFile : getting images (" + width + " x " + height + ") (" + reqid + ") type " + imageType +
 				" for " + wavAudioFile + "");
 
-		String absolutePathToImage = imageWriter.writeImageSimple(wavAudioFile, pathHelper.getAbsoluteFile(imageOutDir).getAbsolutePath(),
+    String absolutePathToImage = imageWriter.writeImage(wavAudioFile, pathHelper.getAbsoluteFile(imageOutDir).getAbsolutePath(),
 				width, height, imageType1, exerciseID);
 		String installPath = pathHelper.getInstallPath();
 
@@ -942,7 +942,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	 * @param testAudioFile audio file to score
 	 * @param lmSentences   to look for in the audio
 	 * @return PretestScore for audio
-	 * @see mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput
+	 * @seex mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput
 	 * @see mitll.langtest.server.autocrt.AutoCRT#getFlashcardAnswer
 	 */
 	// JESS: this is entered for the flashcards (decoding)
@@ -955,12 +955,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	/**
 	 * @param phrases
 	 * @return
-	 * @see mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput
+	 * @seex mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput
 	 */
-	@Override
-	public Collection<String> getValidPhrases(Collection<String> phrases) {
-		return audioFileHelper.getValidPhrases(phrases);
-	}
+//	@Override
+//	public Collection<String> getValidPhrases(Collection<String> phrases) {
+//		return audioFileHelper.getValidPhrases(phrases);
+//	}
 
 	// Users ---------------------
 
@@ -1674,7 +1674,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		public String getNormalizedValue() {
 			return value;
 		}
-
 		public String toString() {
 			return "result " + e.getId() + " : " + value;
 		}
@@ -1818,7 +1817,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	/**
 	 * @see #getExercises
 	 */
-	void makeAutoCRT() {  audioFileHelper.makeAutoCRT(relativeConfigDir, this);  }
+	void makeAutoCRT() {  audioFileHelper.makeAutoCRT(/*relativeConfigDir,*/ this);  }
 
 	@Override
 	public Map<User, Integer> getUserToResultCount() {
@@ -2017,9 +2016,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		db = makeDatabaseImpl(h2DatabaseFile);
 		shareDB(servletContext);
 		shareLoadTesting(servletContext);
-		//  shareAudioFileHelper(servletContext);
-
-		// logger.debug(AUDIO_FILE_HELPER_REFERENCE + " " + servletContext.getAttribute(AUDIO_FILE_HELPER_REFERENCE));
 	}
 
 	private void shareLoadTesting(ServletContext servletContext) {
@@ -2073,15 +2069,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
 		db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile, serverProps.getLanguage(), useFile,
 				relativeConfigDir + File.separator + serverProps.getMediaDir());
-
-		//return lessonPlanFile;
 	}
 
 	private String getLessonPlan() {
 		return configDir + File.separator + serverProps.getLessonPlan();
 	}
-
-//	public HTTPClient getHTTPClient() {
-	//	return httpClient;
-	//}
 }
