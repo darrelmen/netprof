@@ -66,7 +66,10 @@ public class ExcelImport implements ExerciseDAO {
   private final int maxExercises;
   private final ServerProperties serverProps;
   private final UserListManager userListManager;
+
   private AddRemoveDAO addRemoveDAO;
+  private UserExerciseDAO userExerciseDAO;
+
   private final File installPath;
   private final boolean addDefects;
   private int unitIndex;
@@ -232,8 +235,6 @@ public class ExcelImport implements ExerciseDAO {
       return true;
     }
   }
-
-  private UserExerciseDAO userExerciseDAO;
 
   @Override
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) { this.userExerciseDAO = userExerciseDAO; }
