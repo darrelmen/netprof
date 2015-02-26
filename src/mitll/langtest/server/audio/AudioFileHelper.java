@@ -47,6 +47,8 @@ public class AudioFileHelper implements CollationSort {
 	//private ASRScoring asrScoring;
 	//private ASRWebserviceScoring asrWebserviceScoring;
 	private ASR asrScoring;
+	private ASRScoring oldschoolScoring;
+	private ASRWebserviceScoring webserviceScoring;
 	private AutoCRT autoCRT;
 	private final DatabaseImpl db;
 	private final LangTestDatabaseImpl langTestDatabase;
@@ -528,7 +530,7 @@ public class AudioFileHelper implements CollationSort {
         " scoring " + testAudioFile + " with sentence '" + sentence + "' req# " + reqid + (useCache ? " check cache" : " NO CACHE"));
 
 		// audio stuff
-		DECODE = decode;
+		//DECODE = decode;
 		makeASRScoring();
 		if (testAudioFile == null) {
       logger.error("huh? no test audio file for " + sentence);
@@ -549,7 +551,8 @@ public class AudioFileHelper implements CollationSort {
 		if (serverProps.getLanguage().equalsIgnoreCase("English")) {
 			sentence = sentence.toUpperCase();  // hack for English
 		}
-		PretestScore pretestScore = asrScoring.scoreRepeat(
+		
+		PretestScore pretestScore = getASRScoring(decode).scoreRepeat(
 				testAudioDir, removeSuffix(testAudioName),
 				sentence,
 				pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix);
@@ -665,7 +668,7 @@ public class AudioFileHelper implements CollationSort {
 	 * @paramx wordOrPhrase
 	 * @return
 	 */
-/*	public ScoreAndAnswer getFlashcardAnswer(File file, String wordOrPhrase) {
+	/*	public ScoreAndAnswer getFlashcardAnswer(File file, String wordOrPhrase) {
 		makeASRScoring();
 		AudioAnswer audioAnswer = new AudioAnswer();
     ASRScoring.PhoneInfo bagOfPhones = asrScoring.getBagOfPhones(wordOrPhrase);
@@ -688,25 +691,37 @@ public class AudioFileHelper implements CollationSort {
 		}
 	}
 
+	private ASR getASRScoring(boolean decode) {
+		if(decode)
+			return webserviceScoring;
+		else
+			return oldschoolScoring;
+	}
+	
 	// TODO: gross
 	private void makeASRScoring() {
-/*    if (asrScoring == null) {
-      if (!DECODE)
-        asrScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
-      else
-        asrScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
-    }*/
-/*		if (asrScoring == null && langTestDatabase.getOldSchoolService())
-			asrScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
-		else*/
-    if (asrScoring == null && DECODE)
-			asrScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase); // lazy eval since reads in the dictionary
-		else if(asrScoring == null && !DECODE)
-			asrScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
-		else if((asrScoring instanceof ASRScoring) && DECODE)
-			asrScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
-		else if(((asrScoring instanceof ASRWebserviceScoring) && !DECODE))
-			asrScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
+		if(webserviceScoring == null) {
+			webserviceScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
+			oldschoolScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
+		}
+		asrScoring = oldschoolScoring;
+		
+		/*if(asrScoring == null) {
+			if(DECODE && webserviceScoring == null) {
+				webserviceScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
+				asrScoring = webserviceScoring;
+			}
+			else if(!DECODE && oldschoolScoring == null) {
+				oldschoolScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
+				asrScoring = oldschoolScoring;
+			}
+		}
+		else {
+			if(DECODE)
+				asrScoring = webserviceScoring;
+			else
+				asrScoring = oldschoolScoring;
+		}*/
 	}
 
 	/**
