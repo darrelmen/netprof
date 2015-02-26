@@ -552,7 +552,7 @@ public class AudioFileHelper implements CollationSort {
         " scoring " + testAudioFile + " with sentence '" + sentence + "' req# " + reqid + (useCache ? " check cache" : " NO CACHE"));
 
 		// audio stuff
-		DECODE = decode;
+		//DECODE = decode;
 		makeASRScoring();
 		if (testAudioFile == null) {
       logger.error("huh? no test audio file for " + sentence);
@@ -573,7 +573,8 @@ public class AudioFileHelper implements CollationSort {
 		if (serverProps.getLanguage().equalsIgnoreCase("English")) {
 			sentence = sentence.toUpperCase();  // hack for English
 		}
-		PretestScore pretestScore = asrScoring.scoreRepeat(
+		
+		PretestScore pretestScore = getASRScoring(decode).scoreRepeat(
 				testAudioDir, removeSuffix(testAudioName),
 				sentence,
 				pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix);
@@ -712,10 +713,22 @@ public class AudioFileHelper implements CollationSort {
 		}
 	}
 
+	private ASR getASRScoring(boolean decode) {
+		if(decode)
+			return webserviceScoring;
+		else
+			return oldschoolScoring;
+	}
+	
 	// TODO: gross
 	private void makeASRScoring() {
-
-		if(asrScoring == null) {
+		if(webserviceScoring == null) {
+			webserviceScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
+			oldschoolScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
+		}
+		asrScoring = oldschoolScoring;
+		
+		/*if(asrScoring == null) {
 			if(DECODE && webserviceScoring == null) {
 				webserviceScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
 				asrScoring = webserviceScoring;
@@ -730,7 +743,7 @@ public class AudioFileHelper implements CollationSort {
 				asrScoring = webserviceScoring;
 			else
 				asrScoring = oldschoolScoring;
-		}
+		}*/
 	}
 
 	/**
