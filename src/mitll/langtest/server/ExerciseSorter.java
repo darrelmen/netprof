@@ -1,14 +1,16 @@
 package mitll.langtest.server;
 
-import mitll.langtest.server.scoring.CollationSort;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 import mitll.langtest.shared.custom.UserExercise;
 import org.apache.log4j.Logger;
 
-import java.text.Collator;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by GO22670 on 4/30/2014.
@@ -259,9 +261,9 @@ public class ExerciseSorter {
    * @param sort
    * @param <T>
    */
-  public <T extends CommonExercise> void sortByForeign(List<T> exerciseShells, CollationSort sort) {
+/*  public <T extends CommonExercise> void sortByForeign(List<T> exerciseShells, CollationSort sort) {
     sort.sort(exerciseShells);
-  }
+  }*/
 
   /**
    * I.e. by the lexicographic order of the displayed words in the word list
