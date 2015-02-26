@@ -87,6 +87,7 @@ public abstract class Scoring {
 		if(wordLab != null) {
 			logger.debug("wordLab: " + wordLab);
 			typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLab);
+			foundATranscript = true;
 		}
 
 		if (!foundATranscript) {
