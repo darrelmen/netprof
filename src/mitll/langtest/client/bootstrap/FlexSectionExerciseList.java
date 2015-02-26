@@ -230,9 +230,9 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     if (controller.isTeacher()) {
       links.setWidget(0, 1,contextDownloadLink = getContextDownloadLink());
     }
-    else {
-      logger.info("user is not a teacher.");
-    }
+   // else {
+   //   logger.info("user is not a teacher.");
+   // }
     DivWidget bottomRow = new DivWidget();
     bottomRow.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
     DivWidget left = new DivWidget();
