@@ -40,7 +40,10 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class CommentNPFExercise extends NPFExercise {
+  public static final String CONTEXT = "context";
   private Logger logger = Logger.getLogger("CommentNPFExercise");
+  private static final String CONTEXT_SENTENCE = "Context Sentence";
+  private static final String DEFAULT = "Default";
 
   private static final String NO_REFERENCE_AUDIO = "No reference audio";
   private static final String M = "M";
@@ -100,13 +103,13 @@ public class CommentNPFExercise extends NPFExercise {
     String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
 
     if (!context.isEmpty() && controller.getProps().showContextButton()) {
-      Button show = new Button("Context Sentence");
+      Button show = new Button(CONTEXT_SENTENCE);
       show.setIcon(IconType.QUOTE_RIGHT);
       show.setType(ButtonType.SUCCESS);
       show.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          new ModalInfoDialog("Context Sentence", Collections.EMPTY_LIST, getContext(e),
+          new ModalInfoDialog(CONTEXT_SENTENCE, Collections.EMPTY_LIST, getContext(e),
               null
           );
         }
@@ -143,9 +146,6 @@ public class CommentNPFExercise extends NPFExercise {
         vp.add(translationEntry);
       }
       hp.add(vp);
-
-      // hp.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
-      // toAddTo.add(hp);
       return hp;
     } else {
       return null;
@@ -253,7 +253,7 @@ public class CommentNPFExercise extends NPFExercise {
     long maleTime = 0, femaleTime = 0;
     Set<Long> preferredUsers = controller.getProps().getPreferredVoices();
     for (AudioAttribute audioAttribute : e.getAudioAttributes()) {
-      if (audioAttribute.getAudioType().startsWith("context")) {
+      if (audioAttribute.getAudioType().startsWith(CONTEXT)) {
         long user = audioAttribute.getUser().getId();
         if (user == -1) {
           defaultAudio = audioAttribute;
@@ -267,8 +267,8 @@ public class CommentNPFExercise extends NPFExercise {
         } else if (audioAttribute.getTimestamp() > femaleTime) {
           if (femaleAudio == null || !preferredUsers.contains(femaleAudio.getUser().getId())) {
             femaleAudio = audioAttribute;
-            if (preferredUsers.contains(femaleAudio.getUser().getId()))
-              logger.info("found " + femaleAudio.getUser());
+//            if (preferredUsers.contains(femaleAudio.getUser().getId()))
+//              logger.info("found " + femaleAudio.getUser());
 
             femaleTime = audioAttribute.getTimestamp();
           }
@@ -279,6 +279,10 @@ public class CommentNPFExercise extends NPFExercise {
     addPlayAndVoiceChoices(hp);
   }
 
+  /**
+   * choose male first if multiple choices
+   * @param hp
+   */
   private void addPlayAndVoiceChoices(Panel hp) {
     AudioAttribute toUse = maleAudio != null ? maleAudio : femaleAudio != null ? femaleAudio : defaultAudio;
     String path = toUse == null ? null : toUse.getAudioRef();
@@ -295,15 +299,20 @@ public class CommentNPFExercise extends NPFExercise {
       List<String> choices = new ArrayList<String>();
       if (maleAudio != null) choices.add(M);
       if (femaleAudio != null) choices.add(F);
-      if (defaultAudio != null && maleAudio == null || femaleAudio == null) {
+      if (defaultAudio != null && (maleAudio == null || femaleAudio == null)) {
         logger.info("Adding default choice since found " + defaultAudio);
-        choices.add("Default"); //better not happen
+        choices.add(DEFAULT); //better not happen
       }
 
       hp.add(getShowGroup(choices));
     }
   }
 
+  /**
+   * @see #addPlayAndVoiceChoices
+   * @param choices
+   * @return
+   */
   private DivWidget getShowGroup(List<String> choices) {
     ButtonToolbar w = new ButtonToolbar();
     ButtonGroup buttonGroup = new ButtonGroup();
