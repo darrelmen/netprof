@@ -46,6 +46,8 @@ import java.util.logging.Logger;
 public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
   private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
+  private static final String DEFAULT = "Default";
+
   private static final String REFERENCE = "";
   private static final String RECORD_YOURSELF = "Record";
   private static final String RELEASE_TO_STOP = "Release";
@@ -122,7 +124,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
   }
 
-  protected void addBelowPlaybackWidget(CommonExercise e, Panel toAddTo) {}
+  private void addBelowPlaybackWidget(CommonExercise e, Panel toAddTo) {}
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller,
                                                  final ListInterface listContainer, boolean addKeyHandler) {
@@ -638,6 +640,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     private static final String RADIO_BUTTON = "RadioButton";
     private static final String SELECTED_AUDIO = "Selected audio ";
 
+    private static final String M = "M";
+    private static final String F = "F";
+
     /**
      * @param exercise
      * @param path
@@ -676,16 +681,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       } else {
         // add gender choices
         Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true,controller.getProps().getPreferredVoices());
-
-        //System.out.println("getAfterPlayWidget.males  " + malesMap);
-
         Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false,controller.getProps().getPreferredVoices());
-
-        //System.out.println("getAfterPlayWidget.females  " + femalesMap);
-
         Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
-
-        //System.out.println("getAfterPlayWidget.defaultUserAudio  " + defaultUserAudio);
 
         List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
         boolean maleEmpty = maleUsers.isEmpty();
@@ -744,8 +741,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       if (!femalesMap.isEmpty()) {
         choices.add(F);
       }
-      if (!defaultAudioSet.isEmpty()) {
-        choices.add("Default");
+      if (choices.size() != 2 && !defaultAudioSet.isEmpty()) {
+        choices.add(DEFAULT);
       }
 
       boolean first = true;
@@ -780,9 +777,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
       return w;
     }
-
-    private static final String M = "M";
-    private static final String F = "F";
 
     private Button getChoice(String title, boolean isActive, ClickHandler handler) {
       Button onButton = new Button(title.equals(M) ? "" : title.equals(F) ? "" : title);
