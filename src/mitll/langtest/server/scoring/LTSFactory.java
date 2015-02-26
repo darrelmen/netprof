@@ -22,7 +22,7 @@ public class LTSFactory implements CollationSort {
 
   // known languages
   public enum Language {
-    ARABIC, DARI, EGYPTIAN, ENGLISH, FARSI, JAPANESE, LEVANTINE, KOREAN, MANDARIN, MSA, PASHTO, RUSSIAN, SPANISH, SUDANESE,TAGALOG, URDU
+    ARABIC, DARI, EGYPTIAN, ENGLISH, FARSI, JAPANESE, LEVANTINE, KOREAN, MANDARIN, MSA, PASHTO, RUSSIAN, SPANISH, SUDANESE, TAGALOG, URDU
   }
   // TODO : what about Japanese, Korean, ... for LTS?
 
@@ -89,6 +89,62 @@ public class LTSFactory implements CollationSort {
     });
   }
 
+  public static String getID(Language lang) {
+    String locale = "en";
+    switch (lang) {
+      case ARABIC:
+        locale = "ar";
+        break;
+      case DARI:
+        locale = "da";
+        break;
+      case EGYPTIAN:
+        locale = "ae";
+        break;
+      case FARSI:
+        locale = "fa";
+        break;
+      case KOREAN:
+        locale = "ko";
+        break;
+      case JAPANESE:
+        locale = "jp";
+        break;
+      case LEVANTINE:
+        locale = "al";
+        break;
+      case MANDARIN:
+        locale = "mn";
+        break;
+      case MSA:
+        locale = "ar";
+        break;
+      case PASHTO:
+        locale = "ps";
+        break;
+      case RUSSIAN:
+        locale = "ru";
+        break;
+      case SPANISH:
+        locale = "es";
+        break;
+      case SUDANESE:
+        locale = "as";
+        break;
+      case TAGALOG:
+        locale = "tl";
+        break;
+      case URDU:
+        locale = "ur";
+        break;
+    }
+//
+//    logger.debug("Name of Locale: " + locale.getDisplayName());
+//    logger.debug("Language Code: " + locale.getLanguage() + ", Language Display Name: " + locale.getDisplayLanguage());
+//    logger.debug("Country Code: " + locale.getCountry() + ", Country Display Name: " + locale.getDisplayCountry());
+
+    return locale;
+  }
   /**
    * @see #getCollator
    * @param lang
