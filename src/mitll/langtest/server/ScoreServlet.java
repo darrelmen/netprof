@@ -1003,8 +1003,8 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private JSONObject getJsonForScore(PretestScore score) {
     JSONObject jsonObject = new JSONObject();
+    //jsonObject.put(SCORE, Float.isNaN(score.getHydecScore()) ? 0.0 : score.getHydecScore());
     jsonObject.put(SCORE, score.getHydecScore());
-
     for (Map.Entry<NetPronImageType, List<TranscriptSegment>> pair : score.getsTypeToEndTimes().entrySet()) {
       List<TranscriptSegment> value = pair.getValue();
       JSONArray value1 = new JSONArray();
