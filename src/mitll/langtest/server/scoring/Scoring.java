@@ -3,7 +3,8 @@ package mitll.langtest.server.scoring;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
 import audio.image.TranscriptReader;
-import audio.imagewriter.ImageWriter;
+import audio.imagewriter.EventAndFileInfo;
+import audio.imagewriter.TranscriptWriter;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.apache.log4j.Logger;
 
@@ -61,7 +62,7 @@ public abstract class Scoring {
 	 * @param decode if true don't bother to write out images for word and phone
 	 * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
 	 */
-	protected ImageWriter.EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
+	protected EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
 			String audioFileNoSuffix, boolean useScoreToColorBkg,
 			String prefix, String suffix, boolean decode,
 			String phoneLab, String wordLab, boolean useWebservice) {
@@ -69,7 +70,7 @@ public abstract class Scoring {
 		pathname = prependDeploy(pathname);
 		if (!new File(pathname).exists()) {
 			logger.error("writeTranscripts : can't find " + pathname);
-			return new ImageWriter.EventAndFileInfo();
+			return new EventAndFileInfo();
 		}
 		imageOutDir = deployPath + File.separator + imageOutDir;
 
@@ -95,18 +96,18 @@ public abstract class Scoring {
 		if (decode || imageWidth < 0) {  // hack to skip image generation
 			return getEventInfo(typeToFile, decode && useWebservice);
 		} else {
-			return new ImageWriter().writeTranscripts(pathname,
+			return new TranscriptWriter().writeTranscripts(pathname,
 					imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, decode && useWebservice);
 		}
 	}
-	protected ImageWriter.EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
+	protected EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
 			String audioFileNoSuffix, boolean useScoreToColorBkg,
 			String prefix, String suffix, boolean decode, boolean useWebservice) {
 		String pathname = audioFileNoSuffix + ".wav";
 		pathname = prependDeploy(pathname);
 		if (!new File(pathname).exists()) {
 			logger.error("writeTranscripts : can't find " + pathname);
-			return new ImageWriter.EventAndFileInfo();
+			return new EventAndFileInfo();
 		}
 		imageOutDir = deployPath + File.separator + imageOutDir;
 
@@ -135,13 +136,13 @@ public abstract class Scoring {
 		if (decode || imageWidth < 0) {  // hack to skip image generation
 			return getEventInfo(typeToFile, decode && useWebservice); // if align, don't use webservice regardless
 		} else {
-			return new ImageWriter().writeTranscripts(pathname,
+			return new TranscriptWriter().writeTranscripts(pathname,
 					imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, decode && useWebservice);
 		}
 	}
 
 	// JESS reupdate here
-	private ImageWriter.EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes, boolean useWebservice) {
+	private EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes, boolean useWebservice) {
 		Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
 		try {
 			for (Map.Entry<ImageType, String> o : imageTypes.entrySet()) {
@@ -150,7 +151,7 @@ public abstract class Scoring {
 				else 
 					typeToEvent.put(o.getKey(), new TranscriptReader().readEventsFromFile(o.getValue()));
 			}
-			return new ImageWriter.EventAndFileInfo(new HashMap<ImageType, String>(), typeToEvent);
+			return new EventAndFileInfo(new HashMap<ImageType, String>(), typeToEvent);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
