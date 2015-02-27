@@ -141,6 +141,7 @@ public class AudioConversion {
 			AudioFileFormat audioFileFormat = AudioSystem.getAudioFileFormat(wavFile);
 			float sampleRate = audioFileFormat.getFormat().getSampleRate();
 			if (sampleRate != 16000f) {
+        long then = System.currentTimeMillis();
 				String binPath = getBinPath();
 				String convertTo16KHZ = new AudioConverter().convertTo16KHZ(binPath, wavFile.getAbsolutePath());
 				String name1 = wavFile.getName();
@@ -153,7 +154,9 @@ public class AudioConversion {
 					File file = new File(parent);
 					FileUtils.deleteDirectory(file);
 				}
-			}
+        long now = System.currentTimeMillis();
+        logger.debug ("convertTo16Khz : took " +(now-then) + " millis to convert " +wavFile.getName() + " to 16K wav file");
+      }
 		} catch (IOException e) {
 			logger.error("Got " +e,e);
 		}
