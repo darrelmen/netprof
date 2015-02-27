@@ -245,9 +245,16 @@ public class AudioFileHelper implements CollationSort {
     AudioAnswer answer = getAudioAnswer(exercise1, reqid, doFlashcard, wavPath, file, validity, isValid);
 
     if (recordInResults) {
+      long then = System.currentTimeMillis();
+      JSONObject json = getJson(answer);
+      long now = System.currentTimeMillis();
+      if (now - then > 10) {
+        logger.debug("took " + (now - then) + " to convert answer to json");
+      }
+      String scoreJson = json.toString();
       long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
           isValid, audioType, validity.durationInMillis, answer.isCorrect(), (float) answer.getScore(),
-          recordedWithFlash, deviceType, device, getJson(answer).toString());
+          recordedWithFlash, deviceType, device, scoreJson);
       answer.setResultID(answerID);
 
       recordWordAndPhoneInfo(answer, answerID);
@@ -656,7 +663,6 @@ public class AudioFileHelper implements CollationSort {
 		AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
 		if (doFlashcard) {
 			makeASRScoring();
-      if (autoCRT == null) logger.error("huh auto crt is null?>");
 			PretestScore flashcardAnswer = autoCRT.getFlashcardAnswer(exercise, file, audioAnswer, serverProps.getLanguage());
 			audioAnswer.setPretestScore(flashcardAnswer);
 			return audioAnswer;
