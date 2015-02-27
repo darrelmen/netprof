@@ -942,25 +942,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	 * @param testAudioFile audio file to score
 	 * @param lmSentences   to look for in the audio
 	 * @return PretestScore for audio
-	 * @seex mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput
 	 * @see mitll.langtest.server.autocrt.AutoCRT#getFlashcardAnswer
 	 */
 	// JESS: this is entered for the flashcards (decoding)
 	public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences) {
-		for(String sent : lmSentences)
-			logger.debug("sent: " + sent);
+//		for(String sent : lmSentences)
+//			logger.debug("sent: " + sent);
 		return audioFileHelper.getASRScoreForAudio(testAudioFile, lmSentences);
 	}
-
-	/**
-	 * @param phrases
-	 * @return
-	 * @seex mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput
-	 */
-//	@Override
-//	public Collection<String> getValidPhrases(Collection<String> phrases) {
-//		return audioFileHelper.getValidPhrases(phrases);
-//	}
 
 	// Users ---------------------
 
