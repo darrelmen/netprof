@@ -41,7 +41,7 @@ public class AutoCRT {
    * Decode the phrase from the exercise in {@link mitll.langtest.shared.CommonExercise#getForeignLanguage}
 	 *
 	 * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
-	 * @seex mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
+	 * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
 	 * @seex mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
 	 * @param commonExercise
 	 * @param audioFile
