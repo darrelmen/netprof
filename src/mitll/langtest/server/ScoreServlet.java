@@ -772,11 +772,11 @@ public class ScoreServlet extends DatabaseServlet {
 
   private int getReqID(HttpServletRequest request) {
     String reqid = request.getHeader("reqid");
-    logger.debug("got req id " + reqid);
+    //logger.debug("got req id " + reqid);
     if (reqid == null) reqid = "1";
     try {
       int req = Integer.parseInt(reqid);
-      logger.debug("returning req id " + req);
+      //logger.debug("returning req id " + req);
 
       return req;
     } catch (NumberFormatException e) {
@@ -848,8 +848,7 @@ public class ScoreServlet extends DatabaseServlet {
           jsonForScore.put(IS_CORRECT, answer.isCorrect());
           jsonForScore.put(SAID_WORD, answer.isSaidAnswer());
           // attempt to get more feedback when we're too sensitive and match the unknown model
-          if (!answer.isCorrect() && !answer.isSaidAnswer() //&& pretestScore != null && pretestScore.getsTypeToEndTimes().isEmpty()
-              ) {
+          if (!answer.isCorrect() && !answer.isSaidAnswer()) {
             answer = getAudioAnswerAlign(reqid, exerciseID, user, false, wavPath, saveFile, deviceType, device, exercise1);
             logger.debug("Alignment on an unknown model gets " + answer.getPretestScore());
             //   logger.debug("score info " + answer.getPretestScore().getsTypeToEndTimes());
@@ -861,7 +860,7 @@ public class ScoreServlet extends DatabaseServlet {
       }
       addValidity(exerciseID, jsonForScore, answer);
 
-      if (request == Request.RECORD) { // this is OK, since we didn't actually do alignment on the audio...
+      if (request == Request.RECORD) { // for Appen - this is OK, since we didn't actually do alignment on the audio...
         loadTesting.addToAudioTable(user, exercise1, answer);
       }
     }
@@ -986,7 +985,10 @@ public class ScoreServlet extends DatabaseServlet {
 
     AudioAnswer answer = audioFileHelper.getAnswer(exerciseID, exercise1, user, doFlashcard, wavPath, file, deviceType,
         device, score, reqid);
+    long then = System.currentTimeMillis();
     ensureMP3(answer.getPath(), exercise1.getForeignLanguage());
+    long now = System.currentTimeMillis();
+    logger.debug("Took " + (now-then) + " millis to write mp3 version");
 
     return answer;
   }
