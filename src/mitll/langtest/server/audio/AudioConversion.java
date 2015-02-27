@@ -232,9 +232,9 @@ public class AudioConversion {
    * @return
    */
   public String ensureWriteMP3(String pathToWav, String realContextPath, boolean overwrite, String title) {
-		if (pathToWav == null || pathToWav.equals("null")) throw new IllegalArgumentException("huh? path is null");
+    if (pathToWav == null || pathToWav.equals("null")) throw new IllegalArgumentException("huh? path is null");
     return writeMP3(pathToWav, realContextPath, overwrite, title);
-    }
+  }
 
 	/**
 	 * @param pathToWav
