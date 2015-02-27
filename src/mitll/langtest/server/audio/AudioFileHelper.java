@@ -1,7 +1,6 @@
 package mitll.langtest.server.audio;
 
 import com.google.common.io.Files;
-
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
@@ -23,13 +22,16 @@ import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.math.BigDecimal;
 import java.text.Collator;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -173,7 +175,11 @@ public class AudioFileHelper implements CollationSort {
 		String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, questionID, user);
 		File file = pathHelper.getAbsoluteFile(wavPath);
 
+    long then = System.currentTimeMillis();
 		AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
+    long now = System.currentTimeMillis();
+    logger.debug("took " + (now - then) + " millis to write file " + validity.durationInMillis + " millis long");
+
 		boolean isValid = validity.validity == AudioAnswer.Validity.OK || (serverProps.isQuietAudioOK() && validity.validity == AudioAnswer.Validity.TOO_QUIET);
     return getAudioAnswerDecoding(exerciseID, exercise1, questionID, user, reqid, audioType, doFlashcard, recordInResults,
 				recordedWithFlash, wavPath, file, validity, isValid
@@ -306,6 +312,17 @@ public class AudioFileHelper implements CollationSort {
 						return answer;
 	}
 
+  /**
+   * @see #getAudioAnswerDecoding
+   * @param exercise1
+   * @param reqid
+   * @param doFlashcard
+   * @param wavPath
+   * @param file
+   * @param validity
+   * @param isValid
+   * @return
+   */
   private AudioAnswer getAudioAnswer(CommonExercise exercise1, int reqid, boolean doFlashcard, String wavPath, File file,
                                      AudioCheck.ValidityAndDur validity, boolean isValid) {
     String url = pathHelper.ensureForwardSlashes(wavPath);
