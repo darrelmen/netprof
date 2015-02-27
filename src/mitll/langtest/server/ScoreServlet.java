@@ -968,6 +968,7 @@ public class ScoreServlet extends DatabaseServlet {
   }*/
 
   /**
+   * Don't wait for mp3 to write to return - can take 70 millis for a short file.
    * @param exerciseID
    * @param user
    * @param doFlashcard
@@ -985,10 +986,19 @@ public class ScoreServlet extends DatabaseServlet {
 
     AudioAnswer answer = audioFileHelper.getAnswer(exerciseID, exercise1, user, doFlashcard, wavPath, file, deviceType,
         device, score, reqid);
-    long then = System.currentTimeMillis();
-    ensureMP3(answer.getPath(), exercise1.getForeignLanguage());
-    long now = System.currentTimeMillis();
-    logger.debug("Took " + (now-then) + " millis to write mp3 version");
+
+    final String path = answer.getPath();
+    final String foreignLanguage = exercise1.getForeignLanguage();
+
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        long then = System.currentTimeMillis();
+        ensureMP3(path, foreignLanguage);
+        long now = System.currentTimeMillis();
+ //       logger.debug("Took " + (now-then) + " millis to write mp3 version");
+      }
+    }).start();
 
     return answer;
   }
