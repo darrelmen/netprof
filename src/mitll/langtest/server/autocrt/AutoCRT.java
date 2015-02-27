@@ -77,13 +77,13 @@ public class AutoCRT {
    * @param firstPronLength
 	 * @return
 	 */
-  public PretestScore getFlashcardAnswer(File audioFile, String foregroundSentence, AudioAnswer answer, String language,
+/*  public PretestScore getFlashcardAnswer(File audioFile, String foregroundSentence, AudioAnswer answer, String language,
                                          int firstPronLength) {
 
     Set<String> phraseToDecode = Collections.singleton(getPhraseToDecode(foregroundSentence, language));
     return getFlashcardAnswer(audioFile,
         phraseToDecode, answer, firstPronLength);
-  }
+  }*/
 
 	/**
 	 * So we need to process the possible decode sentences so that hydec can handle them.
@@ -110,18 +110,18 @@ public class AutoCRT {
     PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, removePunct(possibleSentences)/*,
         firstPronLength*/);
 
-		String recoSentence =
-				asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
-						asrScoreForAudio.getRecoSentence().toLowerCase().trim() : "";
-						// logger.debug("recoSentence is " + recoSentence + "(" +recoSentence.length()+ ")");
+    String recoSentence =
+        asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
+            asrScoreForAudio.getRecoSentence().toLowerCase().trim() : "";
+    // logger.debug("recoSentence is " + recoSentence + "(" +recoSentence.length()+ ")");
 
-						boolean isCorrect = isCorrect(possibleSentences, recoSentence);
-						double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : asrScoreForAudio.getHydecScore();
-						answer.setCorrect(isCorrect && scoreForAnswer > minPronScore);
-						answer.setSaidAnswer(isCorrect);
-						answer.setDecodeOutput(recoSentence);
-						answer.setScore(scoreForAnswer);
-						return asrScoreForAudio;
+    boolean isCorrect = isCorrect(possibleSentences, recoSentence);
+    double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : asrScoreForAudio.getHydecScore();
+    answer.setCorrect(isCorrect && scoreForAnswer > minPronScore);
+    answer.setSaidAnswer(isCorrect);
+    answer.setDecodeOutput(recoSentence);
+    answer.setScore(scoreForAnswer);
+    return asrScoreForAudio;
   }
 
 	/**
