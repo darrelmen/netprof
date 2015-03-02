@@ -34,7 +34,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
   private STATE state;
   private List<CorrectAndScore> scores;
   private float avgScore;
-  private transient Set<String> bagOfPhones = new HashSet<String>();
+  //private transient Set<String> bagOfPhones = new HashSet<String>();
   //private transient List<List<String>> pronunciations = new ArrayList<List<String>>();
   private transient List<String> firstPron = new ArrayList<String>();
 
@@ -177,12 +177,6 @@ public class Exercise extends AudioExercise implements CommonExercise {
     if (getTooltip().isEmpty() || getTooltip().equals("N/A")) combined = refSentence;
     return combined;
   }
-
-/*
-  public void addQuestion() {
-    addQuestion(FL, "Please record the sentence above.", "", EMPTY_LIST);
-  }
-*/
 
   /**
    * @param lang
@@ -361,8 +355,8 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.avgScore = avgScore;
   }
 
-  @Override
-  public Set<String> getBagOfPhones() {  return bagOfPhones;  }
+  //@Override
+  //public Set<String> getBagOfPhones() {  return bagOfPhones;  }
 
   /**
    * @see mitll.langtest.server.audio.AudioFileHelper#countPhones
@@ -370,7 +364,8 @@ public class Exercise extends AudioExercise implements CommonExercise {
    */
   @Override
   public void setBagOfPhones(Set<String> bagOfPhones) {
-    this.bagOfPhones = bagOfPhones;
+
+    //this.bagOfPhones = bagOfPhones;
   }
 
 /*  public List<List<String>> getPronunciations() {
