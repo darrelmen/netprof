@@ -170,7 +170,7 @@ public class ServerProperties {
   }
 
   public boolean getUseFile() {
-    return getDefaultFalse(READ_FROM_FILE);
+    return getDefaultTrue(READ_FROM_FILE);
   }
 
   public boolean doRecoTest() {
