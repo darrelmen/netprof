@@ -10,7 +10,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -24,6 +23,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -33,12 +33,16 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class FlexSectionExerciseList extends HistoryExerciseList {
+  private Logger logger = Logger.getLogger("FlexSectionExerciseList");
+  private static final int LABEL_MARGIN_BOTTOM = 10;
+
   private static final int HEADING_FOR_LABEL = 4;
   private static final int UNACCOUNTED_WIDTH = 60;
-  //private static final int VERTICAL_DEFAULT = 160;
   private static final int CLASSROOM_VERTICAL_EXTRA = 270;
   private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
   private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet and audio for selected sections.";
+  private static final String DOWNLOAD_AUDIO = "downloadAudio";
+//  private static final String CONTEXT = "context";
 
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
   private final Map<String, ButtonType> typeToButton = new HashMap<String, ButtonType>();
@@ -50,6 +54,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   private final Heading statusHeader = new Heading(4);
   private Collection<String> typeOrder;
   private final Panel sectionPanel;
+  private Anchor downloadLink;
+  private Anchor contextDownloadLink;
 
   /**
    * @param secondRow             add the section panel to this row
@@ -207,18 +213,41 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
       }
     }
 
-    labelColumn.add(downloadLink = getDownloadLink());
-
     long now = System.currentTimeMillis();
     if (now - then > 300)
       System.out.println("\taddButtonRow took " + (now - then) + " millis" + " instance " + getInstance());
 
     if (last != null) setSizesAndPushFirst();
-    addBottomText(container);
+
+    DivWidget bottomRow = getBottomRow();
+    addBottomText(bottomRow);
+    container.add(bottomRow);
   }
 
+  private DivWidget getBottomRow() {
+    FlexTable links = new FlexTable();
+    links.setWidget(0, 0,downloadLink = getDownloadLink());
+    if (controller.isTeacher()) {
+      links.setWidget(0, 1,contextDownloadLink = getContextDownloadLink());
+    }
+   // else {
+   //   logger.info("user is not a teacher.");
+   // }
+    DivWidget bottomRow = new DivWidget();
+    bottomRow.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+    DivWidget left = new DivWidget();
+    left.addStyleName("floatLeftList");
+    left.add(links);
+    bottomRow.add(left);
+    return bottomRow;
+  }
+
+  /**
+   * @see #addButtonRow
+   * @return
+   */
   private Anchor getDownloadLink() {
-    final Anchor downloadLink = new Anchor(getURL2());
+    final Anchor downloadLink = new Anchor(getDownloadURL());
     addTooltip(downloadLink);
     downloadLink.addClickHandler(new ClickHandler() {
       @Override
@@ -230,11 +259,27 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     return downloadLink;
   }
 
-  private Anchor downloadLink;
+  private Anchor getContextDownloadLink() {
+    final Anchor downloadLink = new Anchor(getDownloadContextURL());
+    new TooltipHelper().addTooltip(downloadLink, "Download spreadsheet and context audio for selected sections.");
+    downloadLink.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.logEvent(downloadLink,"ContextDownloadLink","N/A","downloading context audio");
+      }
+    });
+    downloadLink.getElement().setId("ContextDownloadLink_" + getInstance());
+    return downloadLink;
+  }
 
-  private SafeHtml getURL2() {
+  private SafeHtml getDownloadURL() {
     SelectionState selectionState = getSelectionState(getHistoryToken(""));
     return getURLForDownload(selectionState);
+  }
+
+  private SafeHtml getDownloadContextURL() {
+    SelectionState selectionState = getSelectionState(getHistoryToken(""));
+    return getURLForContextDownload(selectionState);
   }
 
   /**
@@ -243,23 +288,31 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @return
    */
   private SafeHtml getURLForDownload(SelectionState selectionState) {
-    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+    return getUrlDownloadLink(selectionState, DOWNLOAD_AUDIO,"download","Download");
+  }
 
+  private SafeHtml getURLForContextDownload(SelectionState selectionState) {
+    return getUrlDownloadLink(selectionState, DOWNLOAD_AUDIO,"context","Context");
+  }
+
+  private SafeHtml getUrlDownloadLink(SelectionState selectionState, String command, String request,String title) {
     Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
 
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<a class='" +"icon-download"+
       "' href='" +
-      "downloadAudio" +
-      "?" +typeToSection+
+        command +
+      "?request="+request+"&" +typeToSection+
       "'" +
       ">");
-    sb.appendEscaped(" Download");
+    sb.appendEscaped(" " + title);
     sb.appendHtmlConstant("</a>");
     return sb.toSafeHtml();
   }
 
   /**
    * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
+   * @see #getDownloadLink
    * @param widget
    * @return
    */
@@ -272,6 +325,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @param firstType
    * @param firstTypeRow
    * @param buttonGroupSectionWidget
+   * @see #addButtonRow
    */
   private Panel makeLabelColumn(String firstType, FlexTable firstTypeRow,
                                 ButtonGroupSectionWidget buttonGroupSectionWidget) {
@@ -292,8 +346,8 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
    */
   private Panel makeClearColumn(boolean usuallyThereWillBeAHorizScrollbar, Collection<String> types, String firstType,
-                               FlexTable firstTypeRow,
-                               ButtonGroupSectionWidget buttonGroupSectionWidget) {
+                                FlexTable firstTypeRow,
+                                ButtonGroupSectionWidget buttonGroupSectionWidget) {
     Panel clearColumnContainer = new VerticalPanel();
     addClearButton(buttonGroupSectionWidget, clearColumnContainer);
     firstTypeRow.setWidget(0, 1,  makeFlowPanel(clearColumnContainer, usuallyThereWillBeAHorizScrollbar));
@@ -312,12 +366,19 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     clearColumnContainer.add(clearButton);
   }
 
+  /**
+   *
+   * @param labelContainer
+   * @param usuallyThereWillBeAHorizScrollbar
+   * @return
+   * @see #makeLabelColumn
+   */
   private Panel makeFlowPanel(Panel labelContainer, boolean usuallyThereWillBeAHorizScrollbar) {
     Panel l2 = new FlowPanel();
     l2.add(labelContainer);
-    if (usuallyThereWillBeAHorizScrollbar) { // hack rule of thumb
+/*    if (usuallyThereWillBeAHorizScrollbar) { // hack rule of thumb
       l2.addStyleName("bottomMargin");
-    }
+    }*/
     return l2;
   }
 
@@ -395,7 +456,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     //DOM.setStyleAttribute(widget.getElement(), "webkitMarginBefore", "0");
    // DOM.setStyleAttribute(widget.getElement(), "webkitMarginAfter", "0");
     widget.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
-    widget.getElement().getStyle().setMarginBottom(15, Style.Unit.PX);
+    widget.getElement().getStyle().setMarginBottom(LABEL_MARGIN_BOTTOM, Style.Unit.PX);
     widget.getElement().getStyle().setProperty("whiteSpace","nowrap");
     return widget;
   }
@@ -419,8 +480,11 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
    */
   private void showSelectionState(SelectionState selectionState) {
     //System.out.println("FlexSectionExerciseList.showSelectionState : got " + event + " and state '" + selectionState +"'");
+
+    // keep the download link info in sync with the selection
     Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
     if (downloadLink != null) downloadLink.setHTML(getURLForDownload(selectionState));
+    if (contextDownloadLink != null) contextDownloadLink.setHTML(getURLForContextDownload(selectionState));
 
     if (typeToSection.isEmpty()) {
       showDefaultStatus();
@@ -464,7 +528,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     Panel status = getStatusRow();
     container.add(status);
     status.addStyleName("leftFiftyPercentMargin");
-
    // return status;
   }
 
@@ -766,7 +829,7 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     sectionButton.setEnabled(!isClear);
 
     if (isClear) {
-      sectionButton.getElement().getStyle().setMarginBottom(15, Style.Unit.PX);
+      sectionButton.getElement().getStyle().setMarginBottom(LABEL_MARGIN_BOTTOM, Style.Unit.PX);
     }
 
     addClickHandlerToButton(sectionButton, section, sectionWidgetFinal);
