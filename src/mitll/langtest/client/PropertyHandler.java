@@ -179,7 +179,7 @@ public class PropertyHandler {
         for (String userid : value.split(",")) {
           try {
             preferredVoices.add(Long.parseLong(userid));
-            logger.info("pref users " + preferredVoices);
+          //  logger.info("pref users " + preferredVoices);
           } catch (NumberFormatException e) {
             logger.warning("couldn't parse userid " + userid);
           }

@@ -29,13 +29,14 @@ public class ResultDAO extends DAO {
 
   private static final Map<String, String> EMPTY_MAP = new HashMap<String, String>();
   private static final int MINUTE = 60 * 1000;
+  private static final int LAST_NUM_RESULTS = 5;
   private static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
 
   private static final String ID = "id";
   public static final String USERID = "userid";
   private static final String PLAN = "plan";
   private static final String QID = "qid";
-  public static final String ANSWER = "answer";
+  private static final String ANSWER = "answer";
   public static final String SCORE_JSON = "scoreJson";
   public static final String WITH_FLASH = "withFlash";
   private static final String VALID = "valid";
@@ -51,7 +52,9 @@ public class ResultDAO extends DAO {
   static final String STIMULUS = "stimulus";
   static final String DEVICE_TYPE = "deviceType";  // iPad, iPhone, browser, etc.
   static final String DEVICE = "device"; // device id, or browser type
-  private LogAndNotify logAndNotify;
+  private static final String YES = "Yes";
+  private static final String NO = "No";
+  private final LogAndNotify logAndNotify;
 
   private final boolean debug = false;
 
@@ -73,7 +76,7 @@ public class ResultDAO extends DAO {
    * Pulls the list of results out of the database.
    *
    * @return
-   * @see DatabaseImpl#getResultsWithGrades()
+   * @see DatabaseImpl#populateUserToNumAnswers
    */
   public List<Result> getResults() {
     try {
@@ -95,15 +98,14 @@ public class ResultDAO extends DAO {
     return new ArrayList<Result>();
   }
 
-  List<CorrectAndScore> getCorrectAndScores() {
+  private List<CorrectAndScore> getCorrectAndScores() {
     try {
       synchronized (this) {
         if (cachedResultsForQuery2 != null) {
           return cachedResultsForQuery2;
         }
       }
-      String sql = getCSSelect() + " FROM " + RESULTS;
-      List<CorrectAndScore> resultsForQuery = getScoreResultsSQL(sql);
+      List<CorrectAndScore> resultsForQuery = getScoreResultsSQL(getCSSelect() + " FROM " + RESULTS);
 
       synchronized (this) {
         cachedResultsForQuery2 = resultsForQuery;
@@ -122,8 +124,7 @@ public class ResultDAO extends DAO {
           return cachedMonitorResultsForQuery;
         }
       }
-      String sql = "SELECT * FROM " + RESULTS;
-      List<MonitorResult> resultsForQuery = getMonitorResultsSQL(sql);
+      List<MonitorResult> resultsForQuery = getMonitorResultsSQL("SELECT * FROM " + RESULTS);
 
       synchronized (this) {
         cachedMonitorResultsForQuery = resultsForQuery;
@@ -251,7 +252,7 @@ public class ResultDAO extends DAO {
    * @param idToKey
    * @return
    */
-  public List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(long userid, List<String> allIds,
+  private List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(long userid, List<String> allIds,
                                                                    Map<String, CollationKey> idToKey) {
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
    // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
@@ -398,8 +399,8 @@ public class ResultDAO extends DAO {
   }
 
   public static class SessionsAndScores {
-    List<Session> sessions;
-    List<ExerciseCorrectAndScore> sortedResults;
+    final List<Session> sessions;
+    final List<ExerciseCorrectAndScore> sortedResults;
 
     public SessionsAndScores(List<Session> sessions, List<ExerciseCorrectAndScore> sortedResults) {
       this.sessions = sessions;
@@ -430,17 +431,32 @@ public class ResultDAO extends DAO {
     firstExercise.setAvgScore(total == 0 ? 0f : scoreTotal / total);
   }
 
-  public List<CorrectAndScore> getCorrectAndScores(long userID, CommonExercise firstExercise, boolean isFlashcardRequest) {
+  /**
+   * @see #attachScoreHistory
+   * @param userID
+   * @param firstExercise
+   * @param isFlashcardRequest
+   * @return
+   */
+  private List<CorrectAndScore> getCorrectAndScores(long userID, CommonExercise firstExercise, boolean isFlashcardRequest) {
     String id = firstExercise.getID();
     return getResultsForExIDInForUser(userID, isFlashcardRequest, id);
   }
 
+  /**
+   * Only take latest five.
+   *
+   * @see mitll.langtest.server.ScoreServlet#doGet
+   * @param userID
+   * @param id
+   * @return
+   */
   public JSONObject getHistoryAsJson(long userID, String id) {
-    JSONObject jsonObject = new JSONObject();
-
     List<CorrectAndScore> resultsForExercise = getResultsForExIDInForUser(userID, true, id);
-  //  List<CorrectAndScore> toUse = getCorrectAndScores();
-    if (resultsForExercise.size() > 5) resultsForExercise = resultsForExercise.subList(resultsForExercise.size() - 5, resultsForExercise.size());
+    int size = resultsForExercise.size();
+    if (size > LAST_NUM_RESULTS) {
+      resultsForExercise = resultsForExercise.subList(size - LAST_NUM_RESULTS, size);
+    }
 
 //    logger.debug("score history " + resultsForExercise);
     int total = 0;
@@ -453,12 +469,11 @@ public class ResultDAO extends DAO {
         total++;
         scoreTotal += pronScore;
       }
-   //   JSONObject value = new JSONObject();
-   //   value.put("c",r.isCorrect() ? "Yes":"No");
-      jsonArray.add(r.isCorrect() ? "Yes" : "No");
+      jsonArray.add(r.isCorrect() ? YES : NO);
     }
 
-    jsonObject.put("score",total == 0 ? 0f : scoreTotal / total);
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("score",  total == 0 ? 0f : scoreTotal / new Integer(total).floatValue());
     jsonObject.put("history",jsonArray);
     return jsonObject;
   }
@@ -519,7 +534,7 @@ public class ResultDAO extends DAO {
    * @see #attachScoreHistory(long, mitll.langtest.shared.CommonExercise, boolean)
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory
    */
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, long userid) {
+  private List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, long userid) {
     try {
       String list = getInList(ids);
 
@@ -553,7 +568,7 @@ public class ResultDAO extends DAO {
 
   private String getCSSelect() {
     return "SELECT " + ID + ", " + USERID + ", " +
-        Database.EXID + ", " + Database.TIME + ", " + CORRECT + ", " + PRON_SCORE + ", " + ANSWER + " ";
+        Database.EXID + ", " + Database.TIME + ", " + CORRECT + ", " + PRON_SCORE + ", " + ANSWER + ", " +SCORE_JSON;
   }
 
   /**
@@ -700,19 +715,18 @@ public class ResultDAO extends DAO {
     ResultSet rs = statement.executeQuery();
     List<CorrectAndScore> results = new ArrayList<CorrectAndScore>();
 
-    //logger.debug("getScoreResultsForQuery");
-
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
-      //logger.debug("Got " + uniqueID);
       long userid = rs.getInt(USERID);
       String id = rs.getString(Database.EXID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       boolean correct = rs.getBoolean(CORRECT);
       float pronScore = rs.getFloat(PRON_SCORE);
       String path = rs.getString(ANSWER);
+      String json = rs.getString(SCORE_JSON);
 
-      CorrectAndScore result = new CorrectAndScore(uniqueID, userid, id, correct, pronScore, timestamp.getTime(), trimPathForWebPage2(path));
+      CorrectAndScore result = new CorrectAndScore(uniqueID, userid, id, correct, pronScore, timestamp.getTime(),
+          trimPathForWebPage2(path), json);
       results.add(result);
     }
     finish(connection, statement, rs);
@@ -1255,10 +1269,10 @@ public class ResultDAO extends DAO {
       cell.setCellValue(result.getDurationInMillis());
 
       cell = row.createCell(j++);
-      cell.setCellValue(result.isValid() ? "Yes" : "No");
+      cell.setCellValue(result.isValid() ? YES : NO);
 
       cell = row.createCell(j++);
-      cell.setCellValue(result.isCorrect() ? "Yes" : "No");
+      cell.setCellValue(result.isCorrect() ? YES : NO);
 
       cell = row.createCell(j++);
       cell.setCellValue(result.getPronScore());
@@ -1273,10 +1287,12 @@ public class ResultDAO extends DAO {
     return wb;
   }
 
+/*
   public void writeExcelToStreamOld(List<Result> results, OutputStream out) {
     SXSSFWorkbook wb = writeExcelOld(results);
     writeToStream(out, wb);
   }
+*/
 
   private void writeToStream(OutputStream out, SXSSFWorkbook wb) {
     long then = System.currentTimeMillis();
@@ -1293,7 +1309,7 @@ public class ResultDAO extends DAO {
     }
   }
 
-  private SXSSFWorkbook writeExcelOld(List<Result> results) {
+  /*private SXSSFWorkbook writeExcelOld(List<Result> results) {
     long now;
     long then = System.currentTimeMillis();
 
@@ -1351,5 +1367,5 @@ public class ResultDAO extends DAO {
       logger.warn("toXLSX : took " + (now - then) + " millis to add " + rownum + " rows to sheet, or " + (now - then) / rownum + " millis/row");
     }
     return wb;
-  }
+  }*/
 }
