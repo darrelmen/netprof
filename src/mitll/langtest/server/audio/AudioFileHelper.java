@@ -55,6 +55,7 @@ public class AudioFileHelper implements CollationSort {
 	private boolean checkedLTS = false;
 	private Map<String,Integer> phoneToCount;
 	private boolean DECODE = false;
+	private boolean webserviceAllowed; 
 
   public enum Request { DECODE, ALIGN, RECORD };
 
@@ -71,7 +72,14 @@ public class AudioFileHelper implements CollationSort {
 		this.serverProps = serverProperties;
 		this.db = db;
 		this.langTestDatabase = langTestDatabase;
+		this.webserviceAllowed = (isUnix(System.getProperty("os.name")) && !serverProperties.getOldSchoolService()) ? true : false;
 	}	
+	
+	public static boolean isUnix(String osName) {
+		 
+		return (osName.indexOf("nix") >= 0 || osName.indexOf("nux") >= 0 || osName.indexOf("aix") > 0 );
+ 
+	}
 
 	public <T extends CommonExercise> void sort(List<T> toSort) {
 		asrScoring.sort(toSort);
@@ -714,7 +722,7 @@ public class AudioFileHelper implements CollationSort {
 	}
 
 	private ASR getASRScoring(boolean decode) {
-		if(decode)
+		if(decode && webserviceAllowed)
 			return webserviceScoring;
 		else
 			return oldschoolScoring;
