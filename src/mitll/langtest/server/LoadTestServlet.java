@@ -587,7 +587,7 @@ public class LoadTestServlet extends DatabaseServlet {
 //          return audioFileHelper.getValidPhrases(phrases);
 //        }
       };
-      audioFileHelper.makeAutoCRT(relativeConfigDir, crtScoring);
+      audioFileHelper.makeAutoCRT(crtScoring);
       asrScoreForAudio = audioFileHelper.getFlashcardAnswer(testAudioFile, sentence);
     } catch (Exception e) {
       logger.error("got " + e, e);
