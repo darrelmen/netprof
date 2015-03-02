@@ -1,7 +1,6 @@
 package mitll.langtest.server.autocrt;
 
 import mitll.langtest.server.audio.SLFFile;
-import mitll.langtest.server.database.Export;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
@@ -26,25 +25,23 @@ public class AutoCRT {
 	private static final Logger logger = Logger.getLogger(AutoCRT.class);
 	private final AutoCRTScoring autoCRTScoring;
 	private final double minPronScore;
+  private final SmallVocabDecoder svd = new SmallVocabDecoder();
 
 	/**
 	 * @see mitll.langtest.server.audio.AudioFileHelper#makeAutoCRT
-	 * @param exporter
 	 * @param db
-	 * @param installPath
-	 * @param relativeConfigDir
 	 * @param minPronScore
 	 */
-	public AutoCRT(Export exporter, AutoCRTScoring db, String installPath, String relativeConfigDir, double minPronScore) {
+  public AutoCRT(AutoCRTScoring db, double minPronScore) {
 		this.autoCRTScoring = db;
 		this.minPronScore = minPronScore;
 	}
 
 	/**
-	 * Allow multiple correct answers from synonym sentence list.
+   * Decode the phrase from the exercise in {@link mitll.langtest.shared.CommonExercise#getForeignLanguage}
 	 *
 	 * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
-	 * @seex mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(String, int, int, int, java.io.File, mitll.langtest.server.audio.AudioCheck.ValidityAndDur, String, boolean, mitll.langtest.client.LangTestDatabase)
+	 * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
 	 * @seex mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
 	 * @param commonExercise
 	 * @param audioFile
@@ -72,8 +69,7 @@ public class AutoCRT {
 	}
 
 	/**
-	 * @seex mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(java.io.File, String)
-	 * @see mitll.langtest.server.ScoreServlet#getFlashcardScore
+   * @see mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(java.io.File, String)
 	 *
 	 * @param audioFile
 	 * @param foregroundSentence
@@ -81,13 +77,13 @@ public class AutoCRT {
    * @param firstPronLength
 	 * @return
 	 */
-  public PretestScore getFlashcardAnswer(File audioFile, String foregroundSentence, AudioAnswer answer, String language,
+/*  public PretestScore getFlashcardAnswer(File audioFile, String foregroundSentence, AudioAnswer answer, String language,
                                          int firstPronLength) {
 
     Set<String> phraseToDecode = Collections.singleton(getPhraseToDecode(foregroundSentence, language));
     return getFlashcardAnswer(audioFile,
         phraseToDecode, answer, firstPronLength);
-  }
+  }*/
 
 	/**
 	 * So we need to process the possible decode sentences so that hydec can handle them.
@@ -114,29 +110,20 @@ public class AutoCRT {
     PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, removePunct(possibleSentences)/*,
         firstPronLength*/);
 
-		String recoSentence =
-				asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
-						asrScoreForAudio.getRecoSentence().toLowerCase().trim() : "";
-						// logger.debug("recoSentence is " + recoSentence + "(" +recoSentence.length()+ ")");
+    String recoSentence =
+        asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
+            asrScoreForAudio.getRecoSentence().toLowerCase().trim() : "";
+    // logger.debug("recoSentence is " + recoSentence + "(" +recoSentence.length()+ ")");
 
-						boolean isCorrect = isCorrect(possibleSentences, recoSentence);
-						double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : asrScoreForAudio.getHydecScore();
-						answer.setCorrect(isCorrect && scoreForAnswer > minPronScore);
-						answer.setSaidAnswer(isCorrect);
-						answer.setDecodeOutput(recoSentence);
-						answer.setScore(scoreForAnswer);
-						return asrScoreForAudio;
-	}
-
-  private List<String> removePunct(Collection<String> possibleSentences) {
-    List<String> foreground = new ArrayList<String>();
-    for (String ref : possibleSentences) {
-      foreground.add(removePunct(ref));
-    }
-    return foreground;
+    boolean isCorrect = isCorrect(possibleSentences, recoSentence);
+    double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : asrScoreForAudio.getHydecScore();
+    answer.setCorrect(isCorrect && scoreForAnswer > minPronScore);
+    answer.setSaidAnswer(isCorrect);
+    answer.setDecodeOutput(recoSentence);
+    answer.setScore(scoreForAnswer);
+    return asrScoreForAudio;
   }
 
-  private final SmallVocabDecoder svd = new SmallVocabDecoder();
 	/**
 	 * Convert dashes into spaces and remove periods, and other punct
 	 * @param answerSentences
@@ -188,6 +175,14 @@ public class AutoCRT {
     return language.equalsIgnoreCase("mandarin") && !rawRefSentence.trim().equalsIgnoreCase(SLFFile.UNKNOWN_MODEL) ?
         ASRScoring.getSegmented(rawRefSentence.trim().toUpperCase()) :
         rawRefSentence.trim().toUpperCase();
+  }
+
+  private List<String> removePunct(Collection<String> possibleSentences) {
+    List<String> foreground = new ArrayList<String>();
+    for (String ref : possibleSentences) {
+      foreground.add(removePunct(ref));
+    }
+    return foreground;
 			}
 
 	/**
