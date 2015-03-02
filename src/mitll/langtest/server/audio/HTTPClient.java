@@ -12,9 +12,7 @@ import org.apache.log4j.Logger;
 
 // closes and reopens the connection after every call to sendAndReceive()
 public class HTTPClient {
-
 	private HttpURLConnection httpConn;
-	//private OutputStreamWriter sender;
 	private BufferedWriter sender;
 	private BufferedReader receiver;
 	@SuppressWarnings("unused")
@@ -26,6 +24,11 @@ public class HTTPClient {
 
 	/* Constructor */
 
+  /**
+   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra
+   * @param webserviceIP
+   * @param webservicePort
+   */
 	public HTTPClient(String webserviceIP, int webservicePort) {
 		this.webserviceIP = webserviceIP;
 		this.webservicePort = webservicePort;
@@ -34,10 +37,9 @@ public class HTTPClient {
 			httpConn = setupHttpConn(url);
 		}
 		catch(IOException e) {
-			logger.error("Error constructing HTTPClient:\n" + e.getStackTrace());
+			logger.error("Error constructing HTTPClient:\n" + e,e);
 		}
 	}
-
 
 	private HttpURLConnection setupHttpConn(String url) throws IOException {
 		HttpURLConnection httpConn = (HttpURLConnection)(new URL(url)).openConnection();
