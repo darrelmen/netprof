@@ -5,6 +5,7 @@ import audio.image.ImageType;
 import audio.image.TranscriptEvent;
 import audio.imagewriter.ImageWriter;
 
+import audio.imagewriter.EventAndFileInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
@@ -297,6 +298,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 	}
 
 	/* public static class PhoneInfo {
+
     private final List<String> firstPron;
     private final Set<String> phoneSet;
 
@@ -335,483 +337,414 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     return builder.toString();
   }
 
-	/*  private Set<String> wordsInDict = new HashSet<String>();
-  private void readDict() {
-    String modelsDir = getModelsDir();
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
+   * @param testAudioDir
+   * @param testAudioFileNoSuffix
+   * @param sentence that should be what the test audio contains
+   * @param imageOutDir
+   * @param imageWidth
+   * @param imageHeight
+   * @param useScoreForBkgColor
+   * @param useCache
+   * @param prefix
+   * @return PretestScore object
+   */
+  public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
+                                  String sentence, String imageOutDir,
+                                  int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+                                  boolean decode, String tmpDir,
+                                  boolean useCache, String prefix) {
+    return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
+      sentence,
+      scoringDir, imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
+      decode, tmpDir,
+      useCache, prefix);
+  }
 
-    String hldaDir = getProp(HLDA_DIR, HLDA_DIR_DEFAULT);
-    String dictOverride = getProp(DICTIONARY, "");
-    String dictFile = dictOverride.length() > 0 ?  modelsDir + File.separator + dictOverride :
-      modelsDir + File.separator + hldaDir +File.separator+ DICT_WO_SP;
-    boolean dictExists   = new File(dictFile).exists();
+  /**
+   * Use hydec to do scoring<br></br>
+   * <p/>
+   * Some magic happens in {@link Scoring#writeTranscripts(String, int, int, String, boolean, String, String, boolean)} where .lab files are
+   * parsed to determine the start and end times for each event, which lets us both create images that
+   * show the location of the words and phonemes, and for decoding, the actual reco sentence returned. <br></br>
+   * <p/>
+   * For alignment, of course, the reco sentence is just the given sentence echoed back (unless alignment fails to
+   * generate any alignments (e.g. for audio that's complete silence or when the
+   * spoken sentence is utterly unrelated to the reference.)).
+   * <p/>
+   * Audio file must be a wav file, but can be any sample rate - if not 16K will be sampled down to 16K.
+   *
+   * @param testAudioDir          where the audio is
+   * @param testAudioFileNoSuffix file name without a suffix - wav file, any sample rate
+   * @param sentence              to align
+   * @param scoringDir            where the hydec subset is (models, bin.linux64, etc.)
+   * @param imageOutDir           where to write the images (audioImage)
+   * @param imageWidth            image width
+   * @param imageHeight           image height
+   * @param useScoreForBkgColor   true if we want to color the segments by score else all are gray
+   * @param decode                if true, skips writing image files
+   * @param tmpDir                where to run hydec
+   * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
+   * @param prefix                on the names of the image files, if they are written
+   * @return score info coming back from alignment/reco
+   * @see #scoreRepeat
+   */
+  private PretestScore scoreRepeatExercise(String testAudioDir,
+                                           String testAudioFileNoSuffix,
+                                           String sentence,
+                                           String scoringDir,
 
-    if (dictExists) {
-      try {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(dictFile), FileExerciseDAO.ENCODING));
-        String line2;
-        while ((line2 = reader.readLine()) != null) {
-          String[] split = line2.split("\\s");
-          String word = split[0];
-          wordsInDict.add(word);
-        }
-        reader.close();
-        logger.info("read dict " + dictFile + " and found " + wordsInDict.size() + " words");
-      } catch (IOException e) {
-        logger.error(e);
+                                           String imageOutDir,
+                                           int imageWidth, int imageHeight,
+                                           boolean useScoreForBkgColor,
+                                           boolean decode, String tmpDir,
+                                           boolean useCache, String prefix) {
+    String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
+    String pathname = noSuffix + ".wav";
+
+    boolean b = checkLTS(sentence);
+    //logger.debug("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir + " check lts = " + b);
+    File wavFile = new File(pathname);
+    boolean mustPrepend = false;
+    if (!wavFile.exists() && deployPath != null) {
+      //logger.debug("trying new path for " + pathname + " under " + deployPath);
+      wavFile = new File(deployPath + File.separator + pathname);
+      mustPrepend = true;
+    }
+    if (!wavFile.exists()) {
+      logger.error("scoreRepeatExercise : Can't find audio wav file at : " + wavFile.getAbsolutePath());
+      return new PretestScore();
+    }
+    //logger.info("duration of " + wavFile.getAbsolutePath() + " is " + duration + " secs or " + duration*1000 + " millis");
+    try {
+      String audioDir = testAudioDir;
+      if (mustPrepend) {
+         audioDir = deployPath + File.separator + audioDir;
+        if (!new File(audioDir).exists()) logger.error("Couldn't find " + audioDir);
+        else testAudioDir = audioDir;
+      }
+      testAudioFileNoSuffix = new AudioConversion().convertTo16Khz(audioDir, testAudioFileNoSuffix);
+    } catch (UnsupportedAudioFileException e) {
+      logger.error("Got " +e,e);
+    }
+
+    if (testAudioFileNoSuffix.contains(AudioConversion.SIXTEEN_K_SUFFIX)) {
+      noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
+    }
+
+    Scores scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
+    if (scores == null) {
+      logger.error("getScoreForAudio failed to generate scores.");
+      return new PretestScore(0.01f);
+    }
+    return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile, scores);
+  }
+
+  private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+                                       boolean decode, String prefix, String noSuffix, File wavFile, Scores scores) {
+    EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
+      useScoreForBkgColor,
+      prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, false);
+    Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
+    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
+    String recoSentence = getRecoSentence(eventAndFileInfo);
+
+    double duration = new AudioCheck().getDurationInSeconds(wavFile);
+    return new PretestScore(scores.hydraScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence, (float) duration);
+  }
+
+  /**
+   * @see #scoreRepeatExercise
+   * @param testAudioDir audio file directory
+   * @param testAudioFileNoSuffix file name without suffix
+   * @param sentence for alignment, the sentence to align, for decoding, the vocab list to use to filter against the dictionary
+   * @param scoringDir war/scoring path
+   * @param decode true if doing decoding, false for alignment
+   * @param tmpDir to use to run hydec in
+   * @param useCache cache scores so subsequent requests for the same audio file will get the cached score
+   * @return Scores -- hydec score and event (word/phoneme) scores
+   */
+  private Scores getScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
+                                  String sentence,
+                                  String scoringDir,
+                                  boolean decode, String tmpDir, boolean useCache) {
+    String key = testAudioDir + File.separator + testAudioFileNoSuffix;
+    Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
+
+    if (isMandarin) {
+      sentence = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") +getSegmented(sentence.trim()); // segmentation method will filter out the UNK model
+    }
+    if (scores == null) {
+      if (DEBUG) logger.debug("no cached score for file '" + key + "', so doing " + (decode ? "decoding" : "alignment"));
+      scores = calcScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir);
+      audioToScore.put(key, scores);
+    }
+    else {
+      if (DEBUG) logger.debug("found cached score for file '" + key + "'");
+    }
+    return scores;
+  }
+
+  /**
+   * There are two modes you can use to score the audio : align mode and decode mode
+   * In align mode, the decoder figures out where the words and phonemes in the sentence occur in the audio.
+   * In decode mode, given a lattice file
+   * (HTK slf file) <a href="http://www1.icsi.berkeley.edu/Speech/docs/HTKBook/node293_mn.html">SLF Example</a>
+   * will do decoding.
+   * The event scores returned are a map of event type to event name to score (e.g. "words"->"dog"->0.5)
+   * The score per audio file is cached in {@link #audioToScore}
+   *
+   * @see #getScoreForAudio(String, String, String, String, boolean, String, boolean)
+   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String)
+   * @param testAudioDir
+   * @param testAudioFileNoSuffix
+   * @param sentence  only for align
+   * @param scoringDir
+   * @return Scores which is the overall score and the event scores
+   */
+  private Scores calcScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
+                                   String sentence,
+                                   String scoringDir,
+                                   boolean decode, String tmpDir) {
+    Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
+/*    if (false) logger.debug("dirs is " + dirs +
+      " audio dir " + testAudioDir + " audio " + testAudioFileNoSuffix + " sentence " + sentence + " decode " + decode + " scoring dir " + scoringDir);
+*/
+    Audio testAudio = Audio$.MODULE$.apply(
+      testAudioDir, testAudioFileNoSuffix,
+      false /* notForScoring */, dirs);
+
+    //logger.debug("testAudio is " + testAudio + " dir " + testAudio.dir());
+    return computeRepeatExerciseScores(testAudio, sentence, tmpDir, decode);
+  }
+
+  /**
+   * @param lmSentences
+   * @param background
+   * @see AutoCRTScoring#getASRScoreForAudio(java.io.File, java.util.Collection, int)
+   * @return
+   */
+  public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
+    return getUniqueTokensInLM(lmSentences, svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT));
+  }
+
+  /**
+   * Get the unique set of tokens to use to filter against our full dictionary.
+   * We check all these words for existence in the dictionary.
+   *
+   * Any OOV words have letter-to-sound called to create word->phoneme mappings.
+   * This happens in {@see pronz.speech.Audio#hscore}
+   *
+   * @see #getUsedTokens
+   * @param lmSentences
+   * @param backgroundVocab
+   * @return
+   */
+  private String getUniqueTokensInLM(Collection<String> lmSentences, List<String> backgroundVocab) {
+    String sentence;
+    Set<String> backSet = new HashSet<String>(backgroundVocab);
+    List<String> mergedVocab = new ArrayList<String>(backgroundVocab);
+    List<String> foregroundVocab = svDecoderHelper.getSimpleVocab(lmSentences, FOREGROUND_VOCAB_LIMIT);
+    for (String foregroundToken : foregroundVocab) {
+      if (!backSet.contains(foregroundToken)) {
+        mergedVocab.add(foregroundToken);
       }
     }
-  }*/
+    StringBuilder builder = new StringBuilder();
 
-	/**
-	 * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
-	 * @param testAudioDir
-	 * @param testAudioFileNoSuffix
-	 * @param sentence that should be what the test audio contains
-	 * @param imageOutDir
-	 * @param imageWidth
-	 * @param imageHeight
-	 * @param useScoreForBkgColor
-	 * @param useCache
-	 * @param prefix
-	 * @return PretestScore object
-	 */
-	public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-			String sentence, String imageOutDir,
-			int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-			boolean decode, String tmpDir,
-			boolean useCache, String prefix) {
-		return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
-				sentence,
-				scoringDir, imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
-				decode, tmpDir,
-				useCache, prefix);
-	}
+    for (String token : mergedVocab) builder.append(token).append(" ");
 
-	/**
-	 * Use hydec to do scoring<br></br>
-	 * <p/>
-	 * Some magic happens in {@link Scoring#writeTranscripts(String, int, int, String, boolean, String, String, boolean)} where .lab files are
-	 * parsed to determine the start and end times for each event, which lets us both create images that
-	 * show the location of the words and phonemes, and for decoding, the actual reco sentence returned. <br></br>
-	 * <p/>
-	 * For alignment, of course, the reco sentence is just the given sentence echoed back (unless alignment fails to
-	 * generate any alignments (e.g. for audio that's complete silence or when the
-	 * spoken sentence is utterly unrelated to the reference.)).
-	 * <p/>
-	 * Audio file must be a wav file, but can be any sample rate - if not 16K will be sampled down to 16K.
-	 *
-	 * @param testAudioDir          where the audio is
-	 * @param testAudioFileNoSuffix file name without a suffix - wav file, any sample rate
-	 * @param sentence              to align
-	 * @param scoringDir            where the hydec subset is (models, bin.linux64, etc.)
-	 * @param imageOutDir           where to write the images (audioImage)
-	 * @param imageWidth            image width
-	 * @param imageHeight           image height
-	 * @param useScoreForBkgColor   true if we want to color the segments by score else all are gray
-	 * @param decode                if true, skips writing image files
-	 * @param tmpDir                where to run hydec
-	 * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
-	 * @param prefix                on the names of the image files, if they are written
-	 * @return score info coming back from alignment/reco
-	 * @see #scoreRepeat
-	 */
-	private PretestScore scoreRepeatExercise(String testAudioDir,
-			String testAudioFileNoSuffix,
-			String sentence,
-			String scoringDir,
+    sentence = builder.toString();
+    return sentence;
+  }
 
-			String imageOutDir,
-			int imageWidth, int imageHeight,
-			boolean useScoreForBkgColor,
-			boolean decode, String tmpDir,
-			boolean useCache, String prefix) {
-		String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
-		String pathname = noSuffix + ".wav";
+  /**
+   * Make a map of event type to segment end times (so we can map clicks to which segment is clicked on).<br></br>
+   * Note we have to adjust the last segment time to be the audio duration, so we can correct for wav vs mp3 time
+   * duration differences (mp3 files being typically about 0.1 seconds longer than wav files).
+   * The consumer of this map is at {@link mitll.langtest.client.scoring.ScoringAudioPanel.TranscriptEventClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)}
+   *
+   * @see #scoreRepeatExercise
+   * @param eventAndFileInfo
+   * @return
+   */
+  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(EventAndFileInfo eventAndFileInfo) {
+    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
+    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
+      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
+      List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
+      if (endTimes == null) { typeToEndTimes.put(key, endTimes = new ArrayList<TranscriptSegment>()); }
+      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
+        TranscriptEvent value = event.getValue();
+        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));
+      }
+    }
 
-		boolean b = checkLTS(sentence);
-		//logger.debug("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir + " check lts = " + b);
-		File wavFile = new File(pathname);
-		boolean mustPrepend = false;
-		if (!wavFile.exists() && deployPath != null) {
-			//logger.debug("trying new path for " + pathname + " under " + deployPath);
-			wavFile = new File(deployPath + File.separator + pathname);
-			mustPrepend = true;
-		}
-		if (!wavFile.exists()) {
-			logger.error("scoreRepeatExercise : Can't find audio wav file at : " + wavFile.getAbsolutePath());
-			return new PretestScore();
-		}
-		//logger.info("duration of " + wavFile.getAbsolutePath() + " is " + duration + " secs or " + duration*1000 + " millis");
-		try {
-			String audioDir = testAudioDir;
-			if (mustPrepend) {
-				audioDir = deployPath + File.separator + audioDir;
-				if (!new File(audioDir).exists()) logger.error("Couldn't find " + audioDir);
-				else testAudioDir = audioDir;
-			}
-			testAudioFileNoSuffix = new AudioConversion().convertTo16Khz(audioDir, testAudioFileNoSuffix);
-		} catch (UnsupportedAudioFileException e) {
-			logger.error("Got " +e,e);
-		}
+    return typeToEndTimes;
+  }
 
-		if (testAudioFileNoSuffix.contains(AudioConversion.SIXTEEN_K_SUFFIX)) {
-			noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
-		}
+  /**
+   * Take the events (originally from a .lab file generated in pronz) for WORDS and string them together into a
+   * sentence.
+   * @see #scoreRepeatExercise
+   * @param eventAndFileInfo
+   * @return
+   */
+  private String getRecoSentence(EventAndFileInfo eventAndFileInfo) {
+    StringBuilder b = new StringBuilder();
+    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
+      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
+      if (key == NetPronImageType.WORD_TRANSCRIPT) {
+        Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
+        for (Float timeStamp : timeToEvent.keySet()) {
+          String event = timeToEvent.get(timeStamp).event;
+          if (!event.equals("<s>") && !event.equals("</s>") && !event.equals("sil")) {
+            String trim = event.trim();
+            if (trim.length() > 0) {
+              //logger.debug("Got " + event + " trim '" +trim+ "'");
+              b.append(trim);
+              b.append(" ");
+            }
+          }
+        }
+      }
+    }
 
-		Scores scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
-		if (scores == null) {
-			logger.error("getScoreForAudio failed to generate scores.");
-			return new PretestScore(0.01f);
-		}
-		return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile, scores);
-	}
+    return b.toString().trim();
+  }
 
-	private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-			boolean decode, String prefix, String noSuffix, File wavFile, Scores scores) {
-		ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
-				useScoreForBkgColor,
-				prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, false);
-		Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
-		Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
-		String recoSentence = getRecoSentence(eventAndFileInfo);
+  /**
+   * Make sure that when we scale the phone scores by {@link #SCORE_SCALAR} we do it for both the scores and the image.
+   * <br></br>
+   * get the phones for display in the phone accuracy pane
+   * @param scores from hydec
+   * @return map of phone name to score
+   */
+  private Map<String, Float> getPhoneToScore(Scores scores) {
+    Map<String, Float> phones = scores.eventScores.get("phones");
+    if (phones == null) {
+      return Collections.emptyMap();
+    }
+    else {
+      Map<String, Float> phoneToScore = new HashMap<String, Float>();
+      for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
+        String key = phoneScorePair.getKey();
+        if (!key.equals("sil")) {
+          phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue() * SCORE_SCALAR));
+        }
+      }
+      return phoneToScore;
+    }
+  }
 
-		double duration = new AudioCheck().getDurationInSeconds(wavFile);
-		return new PretestScore(scores.hydraScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence, (float) duration);
-	}
+    /**
+     * Assumes that testAudio was recorded through the UI, which should prevent audio that is too short or too long.
+     *
+     * @see #calcScoreForAudio(String, String, String, String, boolean, String)
+     * @param testAudio
+     * @param sentence
+     * @param decode
+     * @return Scores - score for audio, given the sentence and event info
+     */
+  private Scores computeRepeatExerciseScores(Audio testAudio, String sentence, String tmpDir, boolean decode) {
+    String modelsDir = configFileCreator.getModelsDir();
 
-	/**
-	 * @see #scoreRepeatExercise
-	 * @param testAudioDir audio file directory
-	 * @param testAudioFileNoSuffix file name without suffix
-	 * @param sentence for alignment, the sentence to align, for decoding, the vocab list to use to filter against the dictionary
-	 * @param scoringDir war/scoring path
-	 * @param decode true if doing decoding, false for alignment
-	 * @param tmpDir to use to run hydec in
-	 * @param useCache cache scores so subsequent requests for the same audio file will get the cached score
-	 * @return Scores -- hydec score and event (word/phoneme) scores
-	 */
-	private Scores getScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
-			String sentence,
-			String scoringDir,
-			boolean decode, String tmpDir, boolean useCache) {
-		String key = testAudioDir + File.separator + testAudioFileNoSuffix;
-		Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
+    // Make sure that we have an absolute path to the config and dict files.
+    // Make sure that we have absolute paths.
 
-		if (isMandarin) {
-			sentence = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") +getSegmented(sentence.trim()); // segmentation method will filter out the UNK model
-		}
-		if (scores == null) {
-			if (DEBUG) logger.debug("no cached score for file '" + key + "', so doing " + (decode ? "decoding" : "alignment"));
-			scores = calcScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir);
-			audioToScore.put(key, scores);
-		}
-		else {
-			if (DEBUG) logger.debug("found cached score for file '" + key + "'");
-		}
-		return scores;
-	}
+    // do template replace on config file
+    String configFile = configFileCreator.getHydecConfigFile(tmpDir, modelsDir, decode);
 
-	/**
-	 * There are two modes you can use to score the audio : align mode and decode mode
-	 * In align mode, the decoder figures out where the words and phonemes in the sentence occur in the audio.
-	 * In decode mode, given a lattice file
-	 * (HTK slf file) <a href="http://www1.icsi.berkeley.edu/Speech/docs/HTKBook/node293_mn.html">SLF Example</a>
-	 * will do decoding.
-	 * The event scores returned are a map of event type to event name to score (e.g. "words"->"dog"->0.5)
-	 * The score per audio file is cached in {@link #audioToScore}
-	 *
-	 * @see #getScoreForAudio(String, String, String, String, boolean, String, boolean)
-	 * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String)
-	 * @param testAudioDir
-	 * @param testAudioFileNoSuffix
-	 * @param sentence  only for align
-	 * @param scoringDir
-	 * @return Scores which is the overall score and the event scores
-	 */
-	private Scores calcScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
-			String sentence,
-			String scoringDir,
-			boolean decode, String tmpDir) {
-		Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
-		/*    if (false) logger.debug("dirs is " + dirs +
-      " audio dir " + testAudioDir + " audio " + testAudioFileNoSuffix + " sentence " + sentence + " decode " + decode + " scoring dir " + scoringDir);
-		 */
-		Audio testAudio = Audio$.MODULE$.apply(
-				testAudioDir, testAudioFileNoSuffix,
-				false /* notForScoring */, dirs);
+    // do some sanity checking
+    boolean configExists = new File(configFile).exists();
+    if (!configExists) {
+      logger.error("computeRepeatExerciseScores : Can't find config file at " + configFile);
+      return getEmptyScores();
+    }
 
-		return computeRepeatExerciseScores(testAudio, sentence, tmpDir, decode);
-	}
+    Scores scoresFromHydec = getScoresFromHydec(testAudio, sentence, configFile);
+    double hydecScore = scoresFromHydec.hydraScore;
+    if (hydecScore > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
+      try {
+        //logger.debug("deleting " + tmpDir + " since score is " +hydecScore);
+        FileUtils.deleteDirectory(new File(tmpDir));
+      } catch (IOException e) {
+        logger.error("Deleting dir " + tmpDir + " got " +e,e);
+      }
+    }
+    return scoresFromHydec;
+  }
 
-	/**
-	 * @param lmSentences
-	 * @param background
-	 * @see AutoCRTScoring#getASRScoreForAudio(java.io.File, java.util.Collection, int)
-	 * @return
-	 */
-	public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
-		return getUniqueTokensInLM(lmSentences, svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT));
-	}
+  /**
+   * @see #ASRScoring(String, java.util.Map, mitll.langtest.server.LangTestDatabaseImpl)
+   */
+  private void readDictionary() { htkDictionary = makeDict(); }
 
-	/**
-	 * Get the unique set of tokens to use to filter against our full dictionary.
-	 * We check all these words for existence in the dictionary.
-	 *
-	 * Any OOV words have letter-to-sound called to create word->phoneme mappings.
-	 * This happens in {@see pronz.speech.Audio#hscore}
-	 *
-	 * @see #getUsedTokens
-	 * @param lmSentences
-	 * @param backgroundVocab
-	 * @return
-	 */
-	private String getUniqueTokensInLM(Collection<String> lmSentences, List<String> backgroundVocab) {
-		String sentence;
-		Set<String> backSet = new HashSet<String>(backgroundVocab);
-		List<String> mergedVocab = new ArrayList<String>(backgroundVocab);
-		List<String> foregroundVocab = svDecoderHelper.getSimpleVocab(lmSentences, FOREGROUND_VOCAB_LIMIT);
-		for (String foregroundToken : foregroundVocab) {
-			if (!backSet.contains(foregroundToken)) {
-				mergedVocab.add(foregroundToken);
-			}
-		}
-		StringBuilder builder = new StringBuilder();
+  /**
+   * @see #readDictionary()
+   * @return
+   */
+  private HTKDictionary makeDict() {
+    String dictFile = configFileCreator.getDictFile();
+    if (new File(dictFile).exists()) {
+      long then = System.currentTimeMillis();
+      HTKDictionary htkDictionary = new HTKDictionary(dictFile);
+      long now = System.currentTimeMillis();
+      int size = htkDictionary.size(); // force read from lazy val
+      //if (now - then > 300) {
+        logger.info("for " + languageProperty +
+            " read dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
+      //}
+      return htkDictionary;
+    }
+    else {
+      logger.warn("makeDict : Can't find dict file at " + dictFile);
+      return new HTKDictionary();
+    }
+  }
 
-		for (String token : mergedVocab) builder.append(token).append(" ");
+  /**
+   * @see #computeRepeatExerciseScores(pronz.speech.Audio, String, String, boolean)
+   * @param testAudio
+   * @param sentence
+   * @param configFile
+   * @return
+   */
+  private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
+    sentence = sentence.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ");
 
-		sentence = builder.toString();
-		return sentence;
-	}
+    long then = System.currentTimeMillis();
 
-	/**
-	 * Make a map of event type to segment end times (so we can map clicks to which segment is clicked on).<br></br>
-	 * Note we have to adjust the last segment time to be the audio duration, so we can correct for wav vs mp3 time
-	 * duration differences (mp3 files being typically about 0.1 seconds longer than wav files).
-	 * The consumer of this map is at {@link mitll.langtest.client.scoring.ScoringAudioPanel.TranscriptEventClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)}
-	 *
-	 * @see #scoreRepeatExercise
-	 * @param eventAndFileInfo
-	 * @return
-	 */
-	private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(ImageWriter.EventAndFileInfo eventAndFileInfo) {
-		Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
-		for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
-			NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-			List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
-			if (endTimes == null) { typeToEndTimes.put(key, endTimes = new ArrayList<TranscriptSegment>()); }
-			for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
-				TranscriptEvent value = event.getValue();
-				endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));
-			}
-		}
+    logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with LTS " + letterToSoundClass);
 
-		return typeToEndTimes;
-	}
+    try {
+      Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut =
+        testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
+      float hydec_score = jscoreOut._1;
+      long timeToRunHydec = System.currentTimeMillis() - then;
+      logger.debug("getScoresFromHydec : scoring sentence " +sentence.length()+" characters long, got score " + hydec_score +
+        " and took " + timeToRunHydec + " millis");
 
-	/**
-	 * Take the events (originally from a .lab file generated in pronz) for WORDS and string them together into a
-	 * sentence.
-	 * @see #scoreRepeatExercise
-	 * @param eventAndFileInfo
-	 * @return
-	 */
-	private String getRecoSentence(ImageWriter.EventAndFileInfo eventAndFileInfo) {
-		StringBuilder b = new StringBuilder();
-		for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
-			NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-			if (key == NetPronImageType.WORD_TRANSCRIPT) {
-				Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
-				for (Float timeStamp : timeToEvent.keySet()) {
-					String event = timeToEvent.get(timeStamp).event;
-					if (!event.equals("<s>") && !event.equals("</s>") && !event.equals("sil")) {
-						String trim = event.trim();
-						if (trim.length() > 0) {
-							//logger.debug("Got " + event + " trim '" +trim+ "'");
-							b.append(trim);
-							b.append(" ");
-						}
-					}
-				}
-			}
-		}
+      return new Scores(hydec_score, jscoreOut._2);
+    } catch (AssertionError e) {
+      logger.error("Got assertion error " + e,e);
+      return new Scores();
+    } catch (Exception ee) {
+      logger.warn("Running align/decode on " + sentence +" Got " + ee, ee);
+      if (langTestDatabase != null) langTestDatabase.logAndNotifyServerException(ee);
+    }
 
-		return b.toString().trim();
-	}
+    long timeToRunHydec = System.currentTimeMillis() - then;
+    logger.warn("got bad score and took " + timeToRunHydec + " millis");
 
-	/**
-	 * Make sure that when we scale the phone scores by {@link #SCORE_SCALAR} we do it for both the scores and the image.
-	 * <br></br>
-	 * get the phones for display in the phone accuracy pane
-	 * @param scores from hydec
-	 * @return map of phone name to score
-	 */
-	private Map<String, Float> getPhoneToScore(Scores scores) {
-		Map<String, Float> phones = scores.eventScores.get("phones");
-		if (phones == null) {
-			return Collections.emptyMap();
-		}
-		else {
-			Map<String, Float> phoneToScore = new HashMap<String, Float>();
-			for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
-				String key = phoneScorePair.getKey();
-				if (!key.equals("sil")) {
-					phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue() * SCORE_SCALAR));
-				}
-			}
-			return phoneToScore;
-		}
-	}
+    Scores scores = new Scores();
+    scores.hydraScore = -1;
+    return scores;
+  }
 
-	/**
-	 * Assumes that testAudio was recorded through the UI, which should prevent audio that is too short or too long.
-	 *
-	 * @see #calcScoreForAudio(String, String, String, String, boolean, String)
-	 * @param testAudio
-	 * @param sentence
-	 * @param decode
-	 * @return Scores - score for audio, given the sentence and event info
-	 */
-	private Scores computeRepeatExerciseScores(Audio testAudio, String sentence, String tmpDir, boolean decode) {
-		String modelsDir = configFileCreator.getModelsDir();
-
-		// Make sure that we have an absolute path to the config and dict files.
-		// Make sure that we have absolute paths.
-
-		// do template replace on config file
-		String configFile = configFileCreator.getHydecConfigFile(tmpDir, modelsDir, decode);
-
-		// do some sanity checking
-		boolean configExists = new File(configFile).exists();
-		if (!configExists) {
-			logger.error("computeRepeatExerciseScores : Can't find config file at " + configFile);
-			return getEmptyScores();
-		}
-
-		Scores scoresFromHydec = getScoresFromHydec(testAudio, sentence, configFile);
-		double hydecScore = scoresFromHydec.hydraScore;
-		if (hydecScore > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
-			try {
-				//logger.debug("deleting " + tmpDir + " since score is " +hydecScore);
-				FileUtils.deleteDirectory(new File(tmpDir));
-			} catch (IOException e) {
-				logger.error("Deleting dir " + tmpDir + " got " +e,e);
-			}
-		}
-		return scoresFromHydec;
-	}
-
-	/**
-	 * @see #ASRScoring(String, java.util.Map, mitll.langtest.server.LangTestDatabaseImpl)
-	 */
-	private void readDictionary() { htkDictionary = makeDict(); }
-
-	/**
-	 * @see #readDictionary()
-	 * @return
-	 */
-	private HTKDictionary makeDict() {
-		String dictFile = configFileCreator.getDictFile();
-		if (new File(dictFile).exists()) {
-			long then = System.currentTimeMillis();
-			HTKDictionary htkDictionary = new HTKDictionary(dictFile);
-			long now = System.currentTimeMillis();
-			int size = htkDictionary.size(); // force read from lazy val
-			//if (now - then > 300) {
-			logger.info("for " + languageProperty +
-					" read dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
-			//}
-			return htkDictionary;
-		}
-		else {
-			logger.warn("makeDict : Can't find dict file at " + dictFile);
-			return new HTKDictionary();
-		}
-	}
-
-	public Collection<String> getValidPhrases(Collection<String> phrases) { return getValidSentences(phrases); }
-	private boolean isValid(String token) { return checkToken(token) && isPhraseInDict(token);  }
-	private boolean isPhraseInDict(String phrase) {  return letterToSoundClass.process(phrase) != null;  }
-	private boolean checkToken(String token) {
-		boolean valid = true;
-		if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL)) return true;
-		for (int i = 0; i < token.length() && valid; i++) {
-			char c = token.charAt(i);
-			if (Character.isDigit(c)) {
-				valid = false;
-			}
-			if (Character.UnicodeBlock.of(c) == Character.UnicodeBlock.BASIC_LATIN) {
-				valid = false;
-			}
-		}
-		return valid;
-	}
-
-	private Collection<String> getValidSentences(Collection<String> sentences) {
-		Set<String> filtered = new TreeSet<String>();
-		Set<String> skipped = new TreeSet<String>();
-
-		for (String sentence : sentences) {
-			Collection<String> tokens = svDecoderHelper.getTokens(sentence);
-			boolean valid = true;
-			for (String token : tokens) {
-				if (!isValid(token)) {
-					valid = false;
-				}
-			}
-			if (valid) filtered.add(sentence);
-			else {
-				skipped.add(sentence);
-			}
-		}
-
-		if (!skipped.isEmpty()) {
-			logger.warn("getValidSentences : skipped " + skipped.size() + " sentences : " + skipped  );
-		}
-
-		return filtered;
-	}
-
-	/**
-	 * @see #computeRepeatExerciseScores(pronz.speech.Audio, String, String, boolean)
-	 * @param testAudio
-	 * @param sentence
-	 * @param configFile
-	 * @return
-	 */
-	private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
-		sentence = sentence.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ");
-
-		long then = System.currentTimeMillis();
-
-		logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with LTS " + letterToSoundClass);
-
-		try {
-			Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut =
-					testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
-			float hydec_score = jscoreOut._1;
-			long timeToRunHydec = System.currentTimeMillis() - then;
-			logger.debug("getScoresFromHydec : scoring sentence " +sentence.length()+" characters long, got score " + hydec_score +
-					" and took " + timeToRunHydec + " millis");
-
-			return new Scores(hydec_score, jscoreOut._2);
-		} catch (AssertionError e) {
-			logger.error("Got assertion error " + e,e);
-			return new Scores();
-		} catch (Exception ee) {
-			logger.warn("Running align/decode on " + sentence +" Got " + ee, ee);
-			if (langTestDatabase != null) langTestDatabase.logAndNotifyServerException(ee);
-		}
-
-		long timeToRunHydec = System.currentTimeMillis() - then;
-		logger.warn("got bad score and took " + timeToRunHydec + " millis");
-
-		Scores scores = new Scores();
-		scores.hydraScore = -1;
-		return scores;
-	}
-
-	private Scores getEmptyScores() {
-		Map<String, Map<String, Float>> eventScores = Collections.emptyMap();
-		return new Scores(0f, eventScores);
-	}
+  private Scores getEmptyScores() {
+    Map<String, Map<String, Float>> eventScores = Collections.emptyMap();
+    return new Scores(0f, eventScores);
+  }
 }
