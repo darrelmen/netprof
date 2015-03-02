@@ -165,16 +165,13 @@ public class PhoneDAO extends DAO {
     return val;
   }
 
-/*  public List<Phone> getAll() {
-    try {
-      return getPhones("SELECT * from " + PHONE);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-      logAndNotify.logAndNotifyServerException(ee);
-    }
-    return Collections.emptyList();
-  }*/
-
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getJsonPhoneReport
+   * @param userid
+   * @param exids
+   * @param idToRef
+   * @return
+   */
   public JSONObject getWorstPhonesJson(long userid, List<String> exids, Map<String, String> idToRef) {
     JSONObject jsonObject = new JSONObject();
     try {
