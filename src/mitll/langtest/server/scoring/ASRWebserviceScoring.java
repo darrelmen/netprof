@@ -2,6 +2,7 @@ package mitll.langtest.server.scoring;
 
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
+import audio.imagewriter.EventAndFileInfo;
 import audio.imagewriter.ImageWriter;
 
 import com.google.common.cache.Cache;
@@ -445,7 +446,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 
 	private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
 			boolean decode, String prefix, String noSuffix, File wavFile, Scores scores, String phoneLab, String wordLab, double duration) {
-		ImageWriter.EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
+		EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
 				useScoreForBkgColor,
 				prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, phoneLab, wordLab, true);
 		Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
@@ -604,7 +605,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * @param eventAndFileInfo
 	 * @return
 	 */
-	private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(ImageWriter.EventAndFileInfo eventAndFileInfo) {
+	private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(EventAndFileInfo eventAndFileInfo) {
 		Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
 		for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
 			NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
@@ -626,7 +627,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * @param eventAndFileInfo
 	 * @return
 	 */
-	private String getRecoSentence(ImageWriter.EventAndFileInfo eventAndFileInfo) {
+	private String getRecoSentence(EventAndFileInfo eventAndFileInfo) {
 		StringBuilder b = new StringBuilder();
 		for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
 			NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
