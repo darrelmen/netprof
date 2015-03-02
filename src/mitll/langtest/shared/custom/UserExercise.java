@@ -269,7 +269,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     return avgScore;
   }
 
-  @Override
+ // @Override
   public Set<String> getBagOfPhones() {
     return bagOfPhones;
   }
