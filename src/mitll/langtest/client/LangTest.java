@@ -295,12 +295,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Panel firstRow = makeFirstTwoRows(verticalContainer);
 
     if (!showLogin(verticalContainer, firstRow)) {
-      logger.info("populate below header...");
+     // logger.info("populate below header...");
       populateBelowHeader(verticalContainer, firstRow);
     }
-    else {
-      logger.info("showing login...");
-    }
+    //else {
+   //   logger.info("showing login...");
+   // }
   }
 
   private Container getRootContainer() {
@@ -325,7 +325,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       logger.info("adding headstart current exercise");
       RootPanel.get().add(getHeadstart(currentExerciseVPanel));
     } else {
-      logger.info("adding normal container...");
+    //  logger.info("adding normal container...");
 
       RootPanel.get().add(verticalContainer);
 
@@ -371,8 +371,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   @Override
   public void showLogin() {  populateRootPanel();  }
-
-  //private String staleToken = "";
 
   /**
    * So we have three different views here : the login page, the reset password page, and the content developer
@@ -954,6 +952,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   public int getUser() { return userManager.getUser(); }
+  public boolean isTeacher() { return userManager.isTeacher(); }
   public PropertyHandler getProps() { return props; }
 
   public boolean useBkgColorForRef() {  return props.isBkgColorForRef(); }
