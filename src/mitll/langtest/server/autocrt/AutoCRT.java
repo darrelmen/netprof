@@ -61,8 +61,8 @@ public class AutoCRT {
 		else {
 			int length = foregroundSentences.isEmpty() ? 0 : foregroundSentences.iterator().next().length();
 			logger.info("getFlashcardAnswer : incorrect response for exercise #" +commonExercise.getID() +
-					" reco sentence was '" + answer.getDecodeOutput() + "'(" +answer.getDecodeOutput().length()+
-					") vs " + "'"+foregroundSentences +"'(" + length +
+					" reco sentence was '" + answer.getDecodeOutput() + "' (" +answer.getDecodeOutput().length()+
+					") vs " + "'"+foregroundSentences +"' (" + length +
 					") pron score was " + answer.getScore());
 		}
 		return flashcardAnswer;
@@ -131,30 +131,32 @@ public class AutoCRT {
 	 * @return
 	 */
   private boolean isCorrect(Collection<String> answerSentences, String recoSentence) {
-   // logger.debug("iscorrect - answer " + answerSentences + " vs " + recoSentence);
+   logger.debug("isCorrect - answer " + answerSentences + " vs " + recoSentence);
 
-		List<String> recoTokens = svd.getTokens(recoSentence);
-		for (String answer : answerSentences) {
-			String converted = answer.replaceAll("-", " ").replaceAll("\\.\\.\\.", " ").replaceAll("\\.", "").replaceAll(":", "").toLowerCase();
-			// logger.debug("iscorrect - converted " + converted + " vs " + answer);
+    List<String> recoTokens = svd.getTokens(recoSentence);
+    for (String answer : answerSentences) {
+      String converted = answer.replaceAll("-", " ").replaceAll("\\.\\.\\.", " ").replaceAll("\\.", "").replaceAll(":", "").toLowerCase();
+      logger.debug("isCorrect - converted " + converted + " vs " + answer);
 
-			List<String> answerTokens = svd.getTokens(converted);
-			if (answerTokens.size() == recoTokens.size()) {
-				boolean same = true;
-				for (int i = 0; i < answerTokens.size() && same; i++) {
-					String s = answerTokens.get(i);
-					String anotherString = recoTokens.get(i);
-					//    logger.debug("comparing '" + s + "' " +s.length()+ " to '" + anotherString  +"' "  +anotherString.length());
-					same = s.equalsIgnoreCase(anotherString);
-				}
-				if (same) return true;
-			}
-     // else {
-				// logger.debug("not same number of tokens " + answerTokens + " " + answerTokens.size() + " vs " + recoTokens + " " + recoTokens.size());
-     // }
-			}
-		return false;
-	}
+      List<String> answerTokens = svd.getTokens(converted);
+      if (answerTokens.size() == recoTokens.size()) {
+        boolean same = true;
+        for (int i = 0; i < answerTokens.size() && same; i++) {
+          String s = answerTokens.get(i);
+          String anotherString = recoTokens.get(i);
+          //    logger.debug("comparing '" + s + "' " +s.length()+ " to '" + anotherString  +"' "  +anotherString.length());
+          same = s.equalsIgnoreCase(anotherString);
+          if (!same) {
+            logger.debug("comparing '" + s + "' " + s.length() + " to '" + anotherString + "' " + anotherString.length());
+          }
+        }
+        if (same) return true;
+      } else {
+        logger.debug("not same number of tokens " + answerTokens + " " + answerTokens.size() + " vs " + recoTokens + " " + recoTokens.size());
+      }
+    }
+    return false;
+  }
 
 	/**
    * @see #getFlashcardAnswer
