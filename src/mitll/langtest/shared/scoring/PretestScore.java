@@ -30,7 +30,8 @@ public class PretestScore implements IsSerializable {
   public PretestScore(float score) { this.hydecScore = score; }
 
   /**
-   * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise
+   * @see mitll.langtest.server.scoring.ASRScoring#getPretestScore
+   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getPretestScore
    * @param hydecScore
    * @param phoneScores
    * @param sTypeToImage
@@ -54,23 +55,16 @@ public class PretestScore implements IsSerializable {
   public float getHydecScore() {
     return hydecScore;
   }
-
 	public Map<String, Float> getPhoneScores() {
 		return phoneScores;
 	}
-
   public Map<NetPronImageType, String> getsTypeToImage() {
     return sTypeToImage;
   }
-
   public Map<NetPronImageType, List<TranscriptSegment>> getsTypeToEndTimes() {
     return sTypeToEndTimes;
   }
-
-  public String getRecoSentence() {
-    return recoSentence;
-  }
-
+  public String getRecoSentence() {   return recoSentence;  }
   public float getWavFileLengthInSeconds() { return wavFileLengthSeconds; }
 
   public void setReqid(int r) { this.reqid = r;}
