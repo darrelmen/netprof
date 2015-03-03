@@ -8,7 +8,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -64,6 +71,7 @@ public class ServerProperties {
   private static final String APPROVAL_EMAIL = "approvalEmail";
   private static final String GORDON_VIDAVER = "gordon.vidaver@ll.mit.edu";
   private static final String DOUG_JONES = "daj@ll.mit.edu";
+  private static final String RAY_BUDD = "Raymond.Budd@ll.mit.edu";
   private static final String DEFAULT_EMAIL = GORDON_VIDAVER;
   private static final String APPROVERS = "approvers";
   private static final String APPROVER_EMAILS = "approverEmails";
@@ -88,7 +96,7 @@ public class ServerProperties {
       "sandra.wagner@dliflc.edu",
       GORDON_VIDAVER);
 
-  private static final Set<String> ADMINLIST = new HashSet<String>(Arrays.asList("swade", "gvidaver", "tmarius",
+  private static final Set<String> ADMINLIST = new HashSet<String>(Arrays.asList("gvidaver", "tmarius",
       "drandolph", "swagner", "gmarkovic", "djones", "jmelot", "rbudd", "jray", "jwilliams", "pgatewood"));
 
   /**
@@ -96,7 +104,7 @@ public class ServerProperties {
    */
   private static final String REPORT_EMAILS = "reportEmails";
 
-  private List<String> REPORT_DEFAULT = Arrays.asList(ServerProperties.TAMAS_1, ServerProperties.TAMAS_2, ServerProperties.GORDON_VIDAVER, ServerProperties.DOUG_JONES);
+  private List<String> REPORT_DEFAULT = Arrays.asList(TAMAS_1, TAMAS_2, GORDON_VIDAVER, DOUG_JONES, RAY_BUDD);
   private List<String> reportEmails = REPORT_DEFAULT;
 
   private List<String> approvers = DLI_APPROVERS;
@@ -112,10 +120,20 @@ public class ServerProperties {
   private float unknownModelBias;
   private Set<Long> preferredVoices = new HashSet<Long>();
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties
+   * @param servletContext
+   * @param configDir
+   */
   public ServerProperties(ServletContext servletContext, String configDir) {
     this(servletContext, configDir, servletContext.getInitParameter(CONFIG_FILE));
   }
 
+  /**
+   * @seex mitll.langtest.server.database.ImportCourseExamples#makeDatabaseImpl
+   * @param configDir
+   * @param configFile
+   */
   public ServerProperties(String configDir, String configFile) {
     this(null, configDir, configFile);
   }
@@ -372,9 +390,14 @@ public class ServerProperties {
   private boolean getDefaultTrue(String param) {
     return props.getProperty(param, "true").equals("true");
   }
-  // if true, use old school (hydec)
+
+  /**
+   * if true, use old school (hydec)
+   * OR if there is no webservice port specified
+   * @return true if only use old school hydec decoder
+   */
   public boolean getOldSchoolService() {
-	  return Boolean.parseBoolean(props.getProperty("oldSchoolService", "false"));
+    return Boolean.parseBoolean(props.getProperty("oldSchoolService", "false")) || props.getProperty("webserviceHostPort") == null;
   }
 
   private String getDateFromManifest(ServletContext servletContext) {
@@ -384,7 +407,6 @@ public class ServerProperties {
       Attributes attributes = manifest.getMainAttributes();
       return attributes.getValue("Built-Date");
     } catch (Exception ex) {
-//      logger.warn("Error while reading version: " + ex.getMessage());
     }
     return "";
   }
@@ -400,7 +422,6 @@ public class ServerProperties {
   public List<String> getApprovers() {
     return approvers;
   }
-
   public List<String> getApproverEmails() {
     return approverEmails;
   }
@@ -415,7 +436,7 @@ public class ServerProperties {
 
   public List<String> getReportEmails() { return reportEmails;  }
 
-  public float getUnknownModelBias() {  return unknownModelBias;  }
+//  public float getUnknownModelBias() {  return unknownModelBias;  }
 
   public Set<Long> getPreferredVoices() {
     return preferredVoices;
