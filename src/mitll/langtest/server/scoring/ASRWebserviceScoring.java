@@ -623,6 +623,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	/**
 	 * Take the events (originally from a .lab file generated in pronz) for WORDS and string them together into a
 	 * sentence.
+   * Defensively sorts the events by time.
 	 * @see #scoreRepeatExercise
 	 * @param eventAndFileInfo
 	 * @return
@@ -633,14 +634,20 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 			NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
 			if (key == NetPronImageType.WORD_TRANSCRIPT) {
 				Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
-				for (Float timeStamp : timeToEvent.keySet()) {
-					String event = timeToEvent.get(timeStamp).event;
+
+        List<TranscriptEvent> sorted = new ArrayList<TranscriptEvent>(timeToEvent.values());
+        Collections.sort(sorted);
+        for (TranscriptEvent transcriptEvent : sorted) {
+					String event = transcriptEvent.event;
 					if (!event.equals("<s>") && !event.equals("</s>") && !event.equals("sil")) {
 						String trim = event.trim();
 						if (trim.length() > 0) {
 							b.append(trim);
 							b.append(" ");
 						}
+            else {
+              logger.warn("huh? event " + transcriptEvent + " had an event word that was zero length?");
+            }
 					}
 				}
 			}
