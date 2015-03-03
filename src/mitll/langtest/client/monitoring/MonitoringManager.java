@@ -31,7 +31,6 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class MonitoringManager {
-
 //  private static final Logger logger = Logger.getLogger(MonitoringManager.class);
 
   private static final int MIN = (60 * 1000);
@@ -961,6 +960,10 @@ public class MonitoringManager {
     });
   }
 
+  /**
+   * @see #showResults
+   * @param vp
+   */
   private void showUserInfo(final Panel vp) {
     service.getUserToResultCount(new AsyncCallback<Map<User, Integer>>() {
       public void onFailure(Throwable caught) {}
@@ -1378,6 +1381,11 @@ public class MonitoringManager {
     return browserToCount2;
   }
 
+  /**
+   * @see #showUserInfo
+   * @param userToCount
+   * @return
+   */
   private ColumnChart getUserChart(Map<User, Integer> userToCount) {
     String slot = user;
     Options options = getOptions(slot);
@@ -1429,7 +1437,7 @@ public class MonitoringManager {
       for (String u : users) {
         data.addRow();
         data.setValue(r, 0, u);
-        if (!males.contains(u)) {
+        if (males.contains(u)) {
           data.setValue(r, 1, 0);
           data.setValue(r++, 2, c);
         } else {
