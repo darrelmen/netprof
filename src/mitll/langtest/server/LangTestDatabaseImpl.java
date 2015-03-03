@@ -723,7 +723,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 			sendEmailWhenSlow(id, language, diff, threadInfo);
 		} else if (diff > 1000) {
 			logger.warn(message);
-		} else if (diff > 5) {
+		} else if (diff > 15) {
 			logger.debug(message);
 		}
 	}
