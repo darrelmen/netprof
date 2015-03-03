@@ -489,7 +489,7 @@ public class AudioFileHelper implements CollationSort {
 		makeASRScoring();
 		List<String> unk = new ArrayList<String>();
 
-    if (isMacOrWin()) {  // i.e. NOT using cool new jdocr webservice
+    if (isMacOrWin() || serverProps.getOldSchoolService()) {  // i.e. NOT using cool new jdocr webservice
       createSLFFile(lmSentences, tmpDir, 2);
       unk.add(SLFFile.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
     }
