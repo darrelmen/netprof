@@ -104,6 +104,7 @@ public class AutoCRT {
    *                          possible sentences
    * @param firstPronLength
 	 * @return PretestScore word/phone alignment with scores
+   * @see #getFlashcardAnswer
 	 */
   private PretestScore getFlashcardAnswer(File audioFile, Collection<String> possibleSentences, AudioAnswer answer,
                                           int firstPronLength) {
@@ -113,7 +114,7 @@ public class AutoCRT {
     String recoSentence =
         asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
             asrScoreForAudio.getRecoSentence().toLowerCase().trim() : "";
-    // logger.debug("recoSentence is " + recoSentence + "(" +recoSentence.length()+ ")");
+    // logger.debug("recoSentence is " + recoSentence + " (" +recoSentence.length()+ ")");
 
     boolean isCorrect = isCorrect(possibleSentences, recoSentence);
     double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : asrScoreForAudio.getHydecScore();
@@ -131,7 +132,7 @@ public class AutoCRT {
 	 * @return
 	 */
   private boolean isCorrect(Collection<String> answerSentences, String recoSentence) {
-   logger.debug("isCorrect - answer " + answerSentences + " vs " + recoSentence);
+    logger.debug("isCorrect - expected " + answerSentences + " vs heard " + recoSentence);
 
     List<String> recoTokens = svd.getTokens(recoSentence);
     for (String answer : answerSentences) {
@@ -164,7 +165,16 @@ public class AutoCRT {
 	 * @return
 	 */
   private Collection<String> getRefSentences(CommonExercise other, String language) {
-    return Collections.singleton(getPhraseToDecode(other.getForeignLanguage(),language));
+    String foreignLanguage = other.getForeignLanguage();
+ //   logger.debug("     ref " +foreignLanguage);
+    String phraseToDecode = getPhraseToDecode(foreignLanguage, language);
+ //   logger.debug("trim ref " +foreignLanguage);
+
+    Set<String> singleton = Collections.singleton(phraseToDecode);
+
+ //   logger.debug("list ref " +foreignLanguage);
+
+    return singleton;
 	}
 
   /**
