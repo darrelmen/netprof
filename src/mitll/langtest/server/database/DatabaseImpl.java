@@ -820,7 +820,7 @@ public class DatabaseImpl implements Database {
   /**
    * @param user
    * @return
-   * @see mitll.langtest.server.database.importExport.ImportCourseExamples#copyUser(DatabaseImpl, java.util.Map, java.util.Map, long)
+   * @see mitll.langtest.server.database.ImportCourseExamples#copyUser(DatabaseImpl, java.util.Map, java.util.Map, long)
    */
   public long addUser(User user) {
     long l;
@@ -864,9 +864,11 @@ public class DatabaseImpl implements Database {
     return request.getRemoteHost() +/*"/"+ request.getRemoteAddr()+*/(header != null ? "/" + header : "") + " at " + format;
   }
 
-  public void usersToXLSX(OutputStream out) {
-    userDAO.toXLSX(out, getUsers());
-  }
+  /**
+   * @see mitll.langtest.server.DownloadServlet
+   * @param out
+   */
+  public void usersToXLSX(OutputStream out) {  userDAO.toXLSX(out, getUsers());  }
 
   /**
    * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
@@ -901,7 +903,6 @@ public class DatabaseImpl implements Database {
       logger.error("Got " + e, e);
     }
 
-    //joinWithDLIUsers(users);
     return users;
   }
 
@@ -941,7 +942,6 @@ public class DatabaseImpl implements Database {
    */
   public boolean logEvent(String id, String widgetType, String exid, String context, long userid, String device) {
     try {
-      //return eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, UNKNOWN, device));
       return logEvent(id, widgetType, exid, context, userid, UNKNOWN, device);
     } catch (SQLException e) {
       logAndNotify(e);
@@ -1005,8 +1005,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(java.util.Map, long, String)
    */
   public List<MonitorResult> getMonitorResults() {
-    List<MonitorResult> monitorResults = resultDAO.getMonitorResults();
-    return getMonitorResultsWithText(monitorResults);
+    return getMonitorResultsWithText(resultDAO.getMonitorResults());
   }
 
   /**
