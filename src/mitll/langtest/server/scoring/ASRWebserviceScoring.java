@@ -530,8 +530,8 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		String[] results = resultsStr.split("\n"); // 0th entry-overall score and phone scores, 1st entry-word alignments, 2nd entry-phone alignments
 		long timeToRunHydra = System.currentTimeMillis() - then;	
 		logger.debug("Took " + timeToRunHydra + " millis to run hydra");
-		if(results[0] == "") {
-			logger.error("Failure during running of hydra.");
+    if (results[0].isEmpty()) {
+      logger.error("Failure during running of hydra.");
 			return null;
 		}
 		// TODO makes this a tuple3 type 
