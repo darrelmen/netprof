@@ -835,7 +835,7 @@ public class AudioDAO extends DAO {
           }
         }
       }
-      logger.debug("returning " + audioAttr);
+    //  logger.debug("returning " + audioAttr);
       finish(connection, statement);
 
       return audioAttr;
