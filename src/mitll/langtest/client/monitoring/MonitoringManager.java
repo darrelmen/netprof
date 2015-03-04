@@ -961,6 +961,8 @@ public class MonitoringManager {
   }
 
   /**
+   * Tamas didn't want an age chart.
+   *
    * @see #showResults
    * @param vp
    */
@@ -978,7 +980,7 @@ public class MonitoringManager {
             " = " + total/userToCount.size()));
         vp.add(getUserChart(userToCount));
 
-        vp.add(getAgeChart(userToCount));
+       // vp.add(getAgeChart(userToCount));
         vp.add(getLangChart(userToCount));
         vp.add(getDialectChart(userToCount));
         vp.add(getExperienceChart(userToCount));
