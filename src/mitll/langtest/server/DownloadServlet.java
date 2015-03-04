@@ -101,7 +101,7 @@ public class DownloadServlet extends DatabaseServlet {
             }
           }
         } else {
-          logger.warn("unknown request " + requestURI);
+          logger.warn("file download request " + requestURI);
 
           returnSpreadsheet(response, db, requestURI);
         }
@@ -221,16 +221,23 @@ public class DownloadServlet extends DatabaseServlet {
     return userWhere != null ? (userWhere.getUserID().isEmpty() ? "":"_by_" + userWhere.getUserID()) : "";
   }
 
+  /**
+   * @see #doGet
+   * @param response
+   * @param db
+   * @param encodedFileName
+   * @throws IOException
+   */
   private void returnSpreadsheet(HttpServletResponse response, DatabaseImpl db, String encodedFileName) throws IOException {
     response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     if (encodedFileName.toLowerCase().contains("users")) {
-      response.setHeader("Content-Disposition", "attachment; filename=users");
+      response.setHeader("Content-Disposition", "attachment; filename=users.xlsx");
       db.usersToXLSX(response.getOutputStream());
     } else if (encodedFileName.toLowerCase().contains("results")) {
-      response.setHeader("Content-Disposition", "attachment; filename=results");
+      response.setHeader("Content-Disposition", "attachment; filename=results.xlsx");
       db.getResultDAO().writeExcelToStream(db.getMonitorResults(), db.getSectionHelper().getTypeOrder(), response.getOutputStream());
     } else if (encodedFileName.toLowerCase().contains("events")) {
-      response.setHeader("Content-Disposition", "attachment; filename=events");
+      response.setHeader("Content-Disposition", "attachment; filename=events.xlsx");
       db.getEventDAO().toXLSX(response.getOutputStream());
     } else {
       logger.warn("huh? can't handle request " + encodedFileName);
