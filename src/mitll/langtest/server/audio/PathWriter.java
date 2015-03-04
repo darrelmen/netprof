@@ -24,8 +24,8 @@ public class PathWriter {
    * @param destFileName
    * @param overwrite
    * @param id
-   * @param title
-   * @return
+   * @param title mark the mp3 meta data with this title
+   * @return path of file under bestAudio directory
    */
   public String getPermanentAudioPath(PathHelper pathHelper, File fileRef, String destFileName, boolean overwrite, String id, String title) {
     final File bestDir = pathHelper.getAbsoluteFile(BEST_AUDIO);
@@ -42,7 +42,6 @@ public class PathWriter {
     //logger.debug("getPermanentAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +s);
     if (!fileRef.equals(destination) && !destFileName.equals(AudioConversion.FILE_MISSING)) {
       new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
-
       logger.debug("getPermanentAudioPath : normalizing levels for " + destination.getAbsolutePath());
 
       new AudioConversion().normalizeLevels(destination);
@@ -57,7 +56,6 @@ public class PathWriter {
     ensureMP3(pathHelper, s, overwrite, title);
     return s;
   }
-
 
   private void ensureMP3(PathHelper pathHelper, String wavFile, boolean overwrite, String title) {
     if (wavFile != null) {
