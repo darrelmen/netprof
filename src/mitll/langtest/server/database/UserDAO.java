@@ -693,9 +693,7 @@ private boolean enableAllUsers;
     return idToUser;
   }
 
-  public void toXLSX(OutputStream out, List<User> users) {
-    writeToStream(out, getSpreadsheet(users));
-  }
+  public void toXLSX(OutputStream out, List<User> users) {  writeToStream(out, getSpreadsheet(users));  }
 
   private SXSSFWorkbook getSpreadsheet(List<User> users) {
     long then = System.currentTimeMillis();
@@ -747,6 +745,7 @@ private boolean enableAllUsers;
       row.createCell(j++).setCellValue(passwordHash == null || passwordHash.isEmpty() ? "NO_PASSWORD" : "HAS_PASSWORD");
       String emailHash = user.getEmailHash();
       row.createCell(j++).setCellValue(emailHash == null || emailHash.isEmpty() ? "NO_EMAIL" : "HAS_EMAIL");
+      row.createCell(j++).setCellValue(user.getDevice());
     }
     long now = System.currentTimeMillis();
     long diff = now - then;
