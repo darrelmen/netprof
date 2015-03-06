@@ -64,6 +64,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String NOT_VALID = "NOT_VALID";
   private static final String IS_CORRECT = "isCorrect";
   private static final String SAID_WORD = "saidWord";
+  private static final String FALSE = "false";
   private LoadTesting loadTesting;
 
   public enum Request {DECODE, ALIGN, RECORD}
@@ -331,16 +332,17 @@ public class ScoreServlet extends DatabaseServlet {
     String second = split1[1];
     String passwordH = second.split("=")[1];
 
-    User userFound = db.getUserDAO().getUser(user, passwordH);
+    User userFound = db.getUserDAO().getUserByID(user);
 
     logger.debug("hasUser " + user + " pass " + passwordH + " -> " + userFound);
 
-    toReturn.put(USERID, userFound == null ? -1 : userFound.getId());
-    toReturn.put(HAS_RESET, userFound == null ? -1 : userFound.hasResetKey());
-    toReturn.put(TOKEN, userFound == null ? "" : userFound.getResetKey());
+    Boolean noUserWithID = userFound == null;
+    toReturn.put(USERID,    noUserWithID ? -1 : userFound.getId());
+    toReturn.put(HAS_RESET, noUserWithID ? -1 : userFound.hasResetKey());
+    toReturn.put(TOKEN,     noUserWithID ? "" : userFound.getResetKey());
     toReturn.put(PASSWORD_CORRECT,
-        userFound == null ? "false" :
-            userFound.getPasswordHash() == null ? "false" :
+        noUserWithID ? FALSE :
+            userFound.getPasswordHash() == null ? FALSE :
                 userFound.getPasswordHash().equalsIgnoreCase(passwordH));
   }
 
@@ -526,6 +528,10 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
+   * So - what can happen - either we have a user and password match, in which case adding a user is equivalent
+   * to logging in OR we have an existing user with a different password, in which case either it's a different
+   * person with the same userid attempt, or the same person making a password mistake...
+   *
    * @param request
    * @param requestType
    * @param deviceType
@@ -538,40 +544,46 @@ public class ScoreServlet extends DatabaseServlet {
     String passwordH = request.getHeader(PASSWORD_H);
 
     // first check if user exists already with this password -- if so go ahead and log them in.
-    User userFound = db.getUserDAO().getUser(user, passwordH);
+    User exactMatch = db.getUserDAO().getUserWithPass(user, passwordH);
 
-    if (userFound == null) {
-      String age = request.getHeader("age");
-      String gender = request.getHeader("gender");
-      String dialect = request.getHeader("dialect");
-      String emailH = request.getHeader(EMAIL_H);
+    if (exactMatch == null) {
+      User checkExisting = db.getUserDAO().getUserByID(user);
 
-      logger.debug("doPost : Request " + requestType + " for " + deviceType + " user " + user + " adding " + gender + " age " + age + " dialect " + dialect);
-      User user1 = null;
-      if (age != null && gender != null && dialect != null) {
-        try {
-          int age1 = Integer.parseInt(age);
-          user1 = db.addUser(user, passwordH, emailH, deviceType, device, User.Kind.CONTENT_DEVELOPER, gender.equalsIgnoreCase("male"), age1, dialect);
-        } catch (NumberFormatException e) {
-          logger.warn("couldn't parse age " + age);
-          jsonObject.put(ERROR, "bad age");
+      if (checkExisting == null) { // OK, nobody with matching user and password
+        String age = request.getHeader("age");
+        String gender = request.getHeader("gender");
+        String dialect = request.getHeader("dialect");
+        String emailH = request.getHeader(EMAIL_H);
+
+        logger.debug("addUser : Request " + requestType + " for " + deviceType + " user " + user + " adding " + gender + " age " + age + " dialect " + dialect);
+        User user1 = null;
+        if (age != null && gender != null && dialect != null) {
+          try {
+            int age1 = Integer.parseInt(age);
+            user1 = db.addUser(user, passwordH, emailH, deviceType, device, User.Kind.CONTENT_DEVELOPER, gender.equalsIgnoreCase("male"), age1, dialect);
+          } catch (NumberFormatException e) {
+            logger.warn("couldn't parse age " + age);
+            jsonObject.put(ERROR, "bad age");
+          }
+        } else {
+          user1 = db.addUser(user, passwordH, emailH, deviceType, device);
+        }
+
+        if (user1 == null) { // how could this happen?
+          jsonObject.put(EXISTING_USER_NAME, "");
+        } else {
+          jsonObject.put(USERID, user1.getId());
         }
       } else {
-        user1 = db.addUser(user, passwordH, emailH, deviceType, device);
-      }
-
-      if (user1 == null) {
         jsonObject.put(EXISTING_USER_NAME, "");
-      } else {
-        jsonObject.put(USERID, user1.getId());
       }
     } else {
-      logger.debug("addUser - existing user for " + user + " pass " + passwordH + " -> " + userFound);
+      logger.debug("addUser - found existing user for " + user + " pass " + passwordH + " -> " + exactMatch);
 
-      if (userFound.hasResetKey()) {
+      if (exactMatch.hasResetKey()) {
         jsonObject.put(ERROR, "password was reset");
       } else {
-        jsonObject.put(USERID, userFound.getId());
+        jsonObject.put(USERID, exactMatch.getId());
       }
     }
   }
