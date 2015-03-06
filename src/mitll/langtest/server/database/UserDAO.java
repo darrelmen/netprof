@@ -352,14 +352,26 @@ private boolean enableAllUsers;
 
   /**
    * Case insensitive match.
+   * TODO : Super misleading -- password not really required???
    *
    * @param id
    * @param passwordHash
-   * @return
+   * @return a
    * @see mitll.langtest.server.LangTestDatabaseImpl#userExists(String, String)
    * @see mitll.langtest.server.ScoreServlet#doGet
    */
   public User getUser(String id, String passwordHash) {
+    User userWhere = getUserWithPass(id, passwordHash);
+    if (userWhere == null) {
+      logger.debug("getUser : no user with id '" + id + "' and pass " + passwordHash);
+      userWhere = getUserByID(id);
+      logger.debug(language + " : getUser user with id '" + id + "' pass " + passwordHash +
+          " and empty or different pass is " + userWhere);
+    }
+    return userWhere;
+  }
+
+  public User getUserWithPass(String id, String passwordHash) {
     logger.debug(language + " : getUser getting user with id '" + id + "' and pass '" + passwordHash +"'");
     String sql = "SELECT * from " +
         USERS +
@@ -369,22 +381,10 @@ private boolean enableAllUsers;
         ")='" + id.toUpperCase() + "' OR " +
         EMAIL + "='" + id.toUpperCase() +
 
-        "') and " + PASS + "='" + passwordHash +
+        "') and UPPER(" + PASS + ")='" + passwordHash.toUpperCase() +
         "'";
 
-    User userWhere = getUserWhere(-1, sql);
-    if (userWhere == null) {
-/*
-      logger.debug("getUser sql '" +sql+
-          "' " +
-          " no user with id '" + id + "' and pass " + passwordHash);
-*/
-
-      userWhere = getUserByID(id);
-      logger.debug(language + " : getUser user with id '" + id + "' pass " + passwordHash +
-          " and empty or different pass is " + userWhere);
-    }
-    return userWhere;
+    return getUserWhere(-1, sql);
   }
 
   /**
@@ -393,12 +393,8 @@ private boolean enableAllUsers;
    * @param id
    * @return
    */
-  private User getUserByID(String id) {
-    return getUserWhere(-1, "SELECT * from users where UPPER(" +
-        USER_ID +
-        ")='" +
-        id.toUpperCase() +
-        "'");
+  public User getUserByID(String id) {
+    return getUserWhere(-1, "SELECT * from users where UPPER(" +USER_ID +")='" + id.toUpperCase() + "'");
   }
 
   private int userExistsSQL(String id, String sql) {
