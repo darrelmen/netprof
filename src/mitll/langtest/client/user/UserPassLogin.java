@@ -941,6 +941,12 @@ public class UserPassLogin extends UserDialog {
     });
   }
 
+  /**
+   * @see #gotLogin
+   * @param result
+   * @param emptyPassword
+   * @param hashedPass
+   */
   private void foundExistingUser(User result, boolean emptyPassword, String hashedPass) {
     String user = result.getUserID();
     String emailHash = result.getEmailHash();
@@ -955,7 +961,7 @@ public class UserPassLogin extends UserDialog {
 
         markErrorBlur(password, PLEASE_ENTER_YOUR_PASSWORD);
         signIn.setEnabled(true);
-      } else if (result.getPasswordHash().equals(hashedPass)) {
+      } else if (result.getPasswordHash().equalsIgnoreCase(hashedPass)) {
         if (result.isEnabled() || result.getUserKind() != User.Kind.CONTENT_DEVELOPER || props.enableAllUsers()) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user);
           logger.info("Got valid user " + user + " and matching password, so we're letting them in.");
