@@ -680,9 +680,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         return rightSide;
       } else {
         // add gender choices
-        Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true,controller.getProps().getPreferredVoices());
-        Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false,controller.getProps().getPreferredVoices());
-        Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
+        Set<Long> preferredVoices = controller.getProps().getPreferredVoices();
+        Map<MiniUser, List<AudioAttribute>> malesMap   = exercise.getMostRecentAudio(true,  preferredVoices);
+        Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
+        Collection<AudioAttribute> defaultUserAudio    = exercise.getDefaultUserAudio();
 
         List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
         boolean maleEmpty = maleUsers.isEmpty();
