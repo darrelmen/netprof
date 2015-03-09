@@ -156,7 +156,6 @@ public class DatabaseImpl implements Database {
    * Create or alter tables as needed.
    */
   private void initializeDAOs(PathHelper pathHelper) {
-//    logger.debug("initializeDAOs ---");
     userDAO = new UserDAO(this, serverProps);
     UserListDAO userListDAO = new UserListDAO(this, userDAO);
     addRemoveDAO = new AddRemoveDAO(this);
@@ -180,7 +179,7 @@ public class DatabaseImpl implements Database {
     Connection connection1 = getConnection();
     try {
       resultDAO.createResultTable(connection1);
-      connection1 = getConnection();
+      connection1 = getConnection();  // huh? why?
       gradeDAO.createGradesTable(connection1);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
@@ -190,7 +189,6 @@ public class DatabaseImpl implements Database {
 
     try {
       userDAO.createTable(this);
-      // dliUserDAO.createTable(this);
       userListManager.setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
@@ -1261,20 +1259,20 @@ public class DatabaseImpl implements Database {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
         getExercises() :
         getSectionHelper().getExercisesForSelectionState(typeToSection);
-    new AudioExport().writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getServerProps().getLanguage(),
-        getAudioDAO(), installPath, configDir);
+    new AudioExport(serverProps).writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getServerProps().getLanguage(),
+        getAudioDAO(), installPath, configDir, false);
   }
 
   public void writeContextZip(OutputStream out, Map<String, Collection<String>> typeToSection) throws Exception {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
         getExercises() :
         getSectionHelper().getExercisesForSelectionState(typeToSection);
-    new AudioExport().writeContextZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getServerProps().getLanguage(),
+    new AudioExport(serverProps).writeContextZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getServerProps().getLanguage(),
         getAudioDAO(), installPath, configDir);
   }
 
   public void writeZip(OutputStream out) throws Exception {
-    new AudioExport().writeZipJustOneAudio(out, getSectionHelper(), getExercises(), installPath);
+    new AudioExport(serverProps).writeZipJustOneAudio(out, getSectionHelper(), getExercises(), installPath);
   }
 
   /**
@@ -1286,7 +1284,7 @@ public class DatabaseImpl implements Database {
    * @throws Exception
    * @see mitll.langtest.server.DownloadServlet#writeUserList(javax.servlet.http.HttpServletResponse, DatabaseImpl, String)
    */
-  public String writeZip(OutputStream out, long listid) throws Exception {
+  public String writeZip(OutputStream out, long listid, PathHelper pathHelper) throws Exception {
     UserList userListByID = getUserListByID(listid);
 
     String language1 = getServerProps().getLanguage();
@@ -1295,7 +1293,18 @@ public class DatabaseImpl implements Database {
       return language1 + "_Unknown";
     } else {
       //logger.debug("writing contents of " + userListByID);
-      new AudioExport().writeZip(out, userListByID.getName(), getSectionHelper(), userListByID.getExercises(), language1, getAudioDAO(), installPath, configDir);
+      long then = System.currentTimeMillis();
+      Collection<CommonUserExercise> exercises = userListByID.getExercises();
+      for (CommonExercise ex : exercises) {
+        userListManager.addAnnotations(ex);
+        getAudioDAO().attachAudio(ex, pathHelper.getInstallPath(), configDir);
+        //logger.debug("ex " + ex.getID() + " males   " + ex.getUserMap(true));
+        //logger.debug("ex " + ex.getID() + " females " + ex.getUserMap(false));
+      }
+      long now = System.currentTimeMillis();
+      logger.debug("\nTook " +(now-then) + " millis to annotate and attach.");
+      new AudioExport(serverProps).writeZip(out, userListByID.getName(), getSectionHelper(), exercises, language1,
+          getAudioDAO(), installPath, configDir, listid == UserListManager.REVIEW_MAGIC_ID);
     }
     return language1 + "_" + userListByID.getName();
   }
@@ -1316,7 +1325,7 @@ public class DatabaseImpl implements Database {
   }
 
   public String getPrefix(Map<String, Collection<String>> typeToSection) {
-    return new AudioExport().getPrefix(getSectionHelper(), typeToSection);
+    return new AudioExport(serverProps).getPrefix(getSectionHelper(), typeToSection);
   }
 
   /**
