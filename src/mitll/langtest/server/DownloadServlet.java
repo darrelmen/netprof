@@ -119,6 +119,11 @@ public class DownloadServlet extends DatabaseServlet {
     }
   }
 
+  /**
+   * @see #doGet
+   * @param response
+   * @param typeToSection
+   */
   private void writeZip(HttpServletResponse response, Map<String, Collection<String>> typeToSection) {
     try {
       getDatabase().writeZip(response.getOutputStream(), typeToSection);
@@ -265,7 +270,7 @@ public class DownloadServlet extends DatabaseServlet {
       name += ".zip";
       setHeader(response, name);
 
-      db.writeZip(response.getOutputStream(), id);
+      db.writeZip(response.getOutputStream(), id, new PathHelper(getServletContext()));
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
     }
@@ -343,7 +348,6 @@ public class DownloadServlet extends DatabaseServlet {
   @Override
   public void init() throws ServletException {
     super.init();
-
     setPaths();
   }
 }
