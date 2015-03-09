@@ -43,14 +43,14 @@ public class UserListManager {
   private static final String FAST = "Fast";
   private static final String SLOW = "Slow";
   private static final String MY_FAVORITES = "My Favorites";
-  public static final String COMMENTS = "Comments";
-  public static final String ALL_ITEMS_WITH_COMMENTS = "All items with comments";
-  public static final String REVIEW = "Defects";
-  public static final String ATTENTION = "AttentionLL";
-  public static final String ITEMS_TO_REVIEW = "Possible defects to fix";
+  private static final String COMMENTS = "Comments";
+  private static final String ALL_ITEMS_WITH_COMMENTS = "All items with comments";
+  private static final String REVIEW = "Defects";
+  private static final String ATTENTION = "AttentionLL";
+  private static final String ITEMS_TO_REVIEW = "Possible defects to fix";
   public static final long REVIEW_MAGIC_ID = -100;
   public static final long COMMENT_MAGIC_ID = -200;
-  public static final long ATTN_LL_MAGIC_ID = -300;
+  private static final long ATTN_LL_MAGIC_ID = -300;
   private static final boolean DEBUG = false;
 
   private final UserDAO userDAO;
@@ -162,7 +162,7 @@ public class UserListManager {
    * Update an old db where the review table doesn't have a state column.
    * @return
    */
-  private Map<String, ReviewedDAO.StateCreator> getAmmendedStateMap() {
+  private void getAmmendedStateMap() {
     Map<String, ReviewedDAO.StateCreator> stateMap = getExerciseToState(false);
    // logger.debug("got " + stateMap.size() +" in state map");
     Map<String,Long> exerciseToCreator = annotationDAO.getAnnotatedExerciseToCreator();
@@ -186,7 +186,7 @@ public class UserListManager {
     if (count > 0) {
       logger.info("updated " + count + " rows in review table");
     }
-    return stateMap;
+  //  return stateMap;
   }
 
   /**
@@ -244,7 +244,7 @@ public class UserListManager {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUserList
-   * @see mitll.langtest.client.custom.CreateListDialog#doCreate
+   * @see mitll.langtest.client.custom.dialog.CreateListDialog#doCreate
    * @param userid
    * @param name
    * @param description
@@ -565,8 +565,8 @@ public class UserListManager {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
-   * @see mitll.langtest.client.custom.EditableExercise#postEditItem(mitll.langtest.client.list.ListInterface, boolean)
-   *@param userExercise
+   * @see mitll.langtest.client.custom.dialog.EditableExercise#postEditItem
+   * @param userExercise
    * @param createIfDoesntExist
    * @param mediaDir
    */
@@ -741,6 +741,7 @@ public class UserListManager {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotations
+   * @see #markAllFieldsFixed
    * @param exercise
    *
    */
@@ -826,7 +827,7 @@ public class UserListManager {
     reviewedDAO.remove(exerciseid);
   }
 
-  protected void markAllFieldsFixed(CommonExercise userExercise, long userID) {
+  void markAllFieldsFixed(CommonExercise userExercise, long userID) {
     Collection<String> fields = userExercise.getFields();
     logger.debug("setExerciseState " + userExercise  + "  has " + fields + " user " + userID);
     addAnnotations(userExercise);
@@ -874,7 +875,9 @@ public class UserListManager {
     userListDAO.setPublicOnList(userListID, isPublic);
   }
 
-  public Set<String> getAudioAnnos() {
-    return annotationDAO.getAudioAnnos();
-  }
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#filterByOnlyAudioAnno
+   * @return
+   */
+  public Set<String> getAudioAnnos() { return annotationDAO.getAudioAnnos();  }
 }
