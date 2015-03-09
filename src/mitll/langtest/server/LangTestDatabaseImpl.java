@@ -312,6 +312,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return exercise.getContext() != null && !exercise.getContext().isEmpty();
   }
 
+  /**
+   * @see #getExerciseIds
+   * @param onlyAudioAnno
+   * @param exercises
+   * @return
+   */
   private Collection<CommonExercise> filterByOnlyAudioAnno(boolean onlyAudioAnno,
                                                            Collection<CommonExercise> exercises) {
     if (onlyAudioAnno) {
@@ -743,9 +749,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	 * @param byID
 	 * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.CommonExercise, boolean)
 	 */
-	private void addAnnotations(CommonExercise byID) {
-		db.getUserListManager().addAnnotations(byID);
-	}
+	private void addAnnotations(CommonExercise byID) { db.getUserListManager().addAnnotations(byID);	}
 
 	/**
 	 * @param byID
@@ -1257,14 +1261,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (byID == null) {
       logger.error("couldn't find exercise " + exid);
       logAndNotifyServerException(new Exception("couldn't find exercise " + exid));
-    }
-    else {
+    } else {
       byID.getAudioAttributes().clear();
       attachAudio(byID);
-     // for (AudioAttribute audioAttribute : byID.getAudioAttributes()) logger.debug("after gender change, now " + audioAttribute);
+      // for (AudioAttribute audioAttribute : byID.getAudioAttributes()) logger.debug("after gender change, now " + audioAttribute);
     }
     db.getSectionHelper().refreshExercise(byID);
-    }
+  }
 
   /**
 	 * @param userID
@@ -1990,14 +1993,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	public String getWebserviceIP() {
 		return serverProps.getWebserviceIP();
 	}
-	
-	public int getWebservicePort() {
+	public int getWebservicePort()  {
 		return serverProps.getWebservicePort();
 	}
-	
-	//public boolean getOldSchoolService() {
-//		return serverProps.getOldSchoolService();
-//	}
 
 	/**
 	 * The config web.xml file.
