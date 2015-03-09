@@ -1,6 +1,13 @@
 package mitll.langtest.shared;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -41,6 +48,10 @@ public class AudioExercise extends ExerciseShell {
     return audio != null ? audio.getAudioRef() : null;
   }
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#fixAudioPaths
+   * @return
+   */
   public AudioAttribute getRegularSpeed() {  return getAudio(SPEED, REGULAR); }
 
   public AudioAttribute getRegularSpeedWithPrefs(Set<Long> prefs) {
@@ -123,23 +134,6 @@ public class AudioExercise extends ExerciseShell {
     }
     return candidate;
   }
-
-/*  public Collection<AudioAttribute> getAudioAtSpeed(boolean isRegular) {
-    return getAudioAtSpeed(isRegular ? REGULAR : SLOW);
-  }*/
-
-  /**
-   * @see mitll.langtest.server.database.AudioExport#writeFolderContents
-   * @paramx value
-   * @return
-   */
-/*  private Collection<AudioAttribute> getAudioAtSpeed(String value) {
-    List<AudioAttribute> ret = new ArrayList<AudioAttribute>();
-    for (AudioAttribute audio : getAudioAttributes()) {
-      if (audio.matches(SPEED, value)) ret.add(audio);
-    }
-    return ret;
-  }*/
 
   public boolean hasRefAudio() {
     return !audioAttributes.isEmpty();
@@ -335,7 +329,7 @@ public class AudioExercise extends ExerciseShell {
    */
   public Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Set<Long> preferredUsers) {
     Map<MiniUser, List<AudioAttribute>> userToAudio = getUserToAudio(isMale);
-//    System.out.println("\tgetMostRecentAudio userToAudio " + userToAudio + " " +preferredUsers);
+    //System.out.println("\tgetMostRecentAudio userToAudio " + userToAudio + " " + preferredUsers);
 
     long bothTimestamp = 0;
     long timestamp = 0;
@@ -346,7 +340,7 @@ public class AudioExercise extends ExerciseShell {
       boolean reg = false, slow = false;
       for (AudioAttribute audioAttribute : pair.getValue()) {
         MiniUser user = pair.getKey();
-       // System.out.println("\t\tgetMostRecentAudio user " + user + "" + (user.isDefault() ? " DEFAULT " : ""));
+        //System.out.println("\t\tgetMostRecentAudio user " + user + "" + (user.isDefault() ? " DEFAULT " : ""));
 
         if (user.getId() != -1) {
           if (audioAttribute.isRegularSpeed()) reg = true;
@@ -368,7 +362,7 @@ public class AudioExercise extends ExerciseShell {
             }
           }
         } else {
-  //        System.out.println("\t\tgetMostRecentAudio found default user " + user);
+          //System.out.println("\t\tgetMostRecentAudio found default user " + user);
           defaultUser = user;
         }
       }
@@ -376,7 +370,7 @@ public class AudioExercise extends ExerciseShell {
 
     MiniUser toUse = bothLatest != null ? bothLatest : latest;
 
-//    System.out.println("\tgetMostRecentAudio toUse " + toUse);
+  //  System.out.println("\tgetMostRecentAudio toUse " + toUse);
 
     Map<MiniUser, List<AudioAttribute>> userToAudioSingle = new HashMap<MiniUser, List<AudioAttribute>>();
     if (toUse == null && !userToAudio.isEmpty()) {
@@ -391,13 +385,13 @@ public class AudioExercise extends ExerciseShell {
         userToAudioSingle.put(toUse, value);
       }
       else {
-     //   System.out.println("\tgetMostRecentAudio no value for  " + toUse + " in " + userToAudio);
+//        System.out.println("\tgetMostRecentAudio no value for  " + toUse + " in " + userToAudio);
       }
     }
 
     sortRegBeforeSlow(userToAudioSingle);
 
- //   System.out.println("\tgetMostRecentAudio userToAudioSingle " + userToAudioSingle);
+//    System.out.println("\tgetMostRecentAudio userToAudioSingle " + userToAudioSingle);
 
     return userToAudioSingle;
   }
@@ -444,9 +438,9 @@ public class AudioExercise extends ExerciseShell {
       else if (field.endsWith(MP3)) {
         String key = field.replaceAll(MP3, WAV);
         ExerciseAnnotation exerciseAnnotation = fieldToAnnotation.get(key);
-        if (exerciseAnnotation == null && !fieldToAnnotation.isEmpty()) {
+   //     if (exerciseAnnotation == null && !fieldToAnnotation.isEmpty()) {
 //          System.out.println("getAnnotation : Can't find " + field + " in "+ fieldToAnnotation.keySet());
-        }
+     //   }
 
         return exerciseAnnotation;
       }
