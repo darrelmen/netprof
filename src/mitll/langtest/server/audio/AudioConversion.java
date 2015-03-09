@@ -78,7 +78,7 @@ public class AudioConversion {
 		try {
 			decoded = (byte[]) decoder.decode(base64EncodedByteArray);
 		} catch (Exception e1) {   // just b/c eclipse seems to insist
-			logger.error("got " +e1,e1);
+			logger.error("got " + e1, e1);
 		}
 		return decoded;
 	}
@@ -89,7 +89,7 @@ public class AudioConversion {
 			outputStream.write(byteArray);
 			outputStream.close();
 		} catch (Exception e) {
-			logger.error("got " +e,e);
+			logger.error("got " + e, e);
 		}
 	}
 
@@ -103,7 +103,7 @@ public class AudioConversion {
 			AudioCheck.ValidityAndDur validityAndDur = audioCheck.checkWavFile(file);
 			return validityAndDur;
 		} catch (Exception e) {
-			logger.error("got " +e,e);
+			logger.error("got " + e, e);
 		}
 		return new AudioCheck.ValidityAndDur(AudioAnswer.Validity.INVALID);
 	}
@@ -158,7 +158,7 @@ public class AudioConversion {
         logger.debug ("convertTo16Khz : took " +(now-then) + " millis to convert " +wavFile.getName() + " to 16K wav file");
       }
 		} catch (IOException e) {
-			logger.error("Got " +e,e);
+			logger.error("Got " + e, e);
 		}
 		return wavFile;
 	}
@@ -283,7 +283,9 @@ public class AudioConversion {
   }
 
 	private String getSox() {
-		return new AudioConverter().getSox(getBinPath());
+    String sox = new AudioConverter().getSox(getBinPath());
+    if (!new File(sox).exists()) sox = "sox";
+    return sox;
 	}
 
 	/**
@@ -363,6 +365,7 @@ public class AudioConversion {
 		if (!new File(lamePath).exists()) {
 			System.err.println("no lame installed at " + lamePath + " or " +LAME_PATH_WINDOWS);
 		}
+    lamePath = "lame";
 		return lamePath;
 	}
 
@@ -426,7 +429,7 @@ public class AudioConversion {
 			new ProcessRunner().runProcess(lameProc);
 		} catch (IOException e) {
     //  System.err.println("Couldn't run " + lameProc);
-      logger.error("for " +lameProc+ " got " +e,e);
+      logger.error("for " + lameProc + " got " + e, e);
 		}
 
 		File testMP3 = new File(mp3File);
@@ -436,12 +439,12 @@ public class AudioConversion {
 			}
 			else {
 				logger.error("didn't write MP3 : " + testMP3.getAbsolutePath() +
-						" exe path " + lamePath +
-						" command was " + lameProc.command());
+            " exe path " + lamePath +
+            " command was " + lameProc.command());
         try {
           new ProcessRunner().runProcess(lameProc,true);
         } catch (IOException e) {
-          logger.error("for " + lameProc + " got " +e,e);
+          logger.error("for " + lameProc + " got " + e, e);
 			}
 
       }
