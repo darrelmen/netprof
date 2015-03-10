@@ -42,7 +42,7 @@ import java.util.Map;
  */
 public class AudioFileHelper implements CollationSort {
 	private static final Logger logger = Logger.getLogger(AudioFileHelper.class);
-  private static final String POSTED_AUDIO = "postedAudio";
+	private static final String POSTED_AUDIO = "postedAudio";
 
 	private final PathHelper pathHelper;
 	private final ServerProperties serverProps;
@@ -71,18 +71,18 @@ public class AudioFileHelper implements CollationSort {
 		this.langTestDatabase = langTestDatabase;
 		this.useOldSchoolServiceOnly = serverProperties.getOldSchoolService();
 	}	
-	
+
 	public <T extends CommonExercise> void sort(List<T> toSort) {
 		asrScoring.sort(toSort);
 	}
 
-  /**
-   * @see mitll.langtest.server.scoring.ASRScoring#getCollator
-   * @return
-   */
+	/**
+	 * @see mitll.langtest.server.scoring.ASRScoring#getCollator
+	 * @return
+	 */
 	@Override
 	public Collator getCollator() {
-    makeASRScoring();
+		makeASRScoring();
 		return asrScoring.getCollator();
 	}
 	/**
@@ -172,20 +172,20 @@ public class AudioFileHelper implements CollationSort {
 		String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, questionID, user);
 		File file = pathHelper.getAbsoluteFile(wavPath);
 
-    long then = System.currentTimeMillis();
+		long then = System.currentTimeMillis();
 		AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
-    long now = System.currentTimeMillis();
-    logger.debug("took " + (now - then) + " millis to write wav file " + validity.durationInMillis + " millis long");
+		long now = System.currentTimeMillis();
+		logger.debug("took " + (now - then) + " millis to write wav file " + validity.durationInMillis + " millis long");
 
 		boolean isValid = validity.validity == AudioAnswer.Validity.OK || (serverProps.isQuietAudioOK() && validity.validity == AudioAnswer.Validity.TOO_QUIET);
-    return getAudioAnswerDecoding(exerciseID, exercise1, questionID, user, reqid, audioType, doFlashcard, recordInResults,
+		return getAudioAnswerDecoding(exerciseID, exercise1, questionID, user, reqid, audioType, doFlashcard, recordInResults,
 				recordedWithFlash, wavPath, file, validity, isValid
 				, deviceType, device
 				);
 	}
 
 	/**
-   * TODO : this is misleading - if doFlashcard is true, it does decoding, otherwise it does *not* do alignment
+	 * TODO : this is misleading - if doFlashcard is true, it does decoding, otherwise it does *not* do alignment
 	 * @see mitll.langtest.server.ScoreServlet#getAnswer
 	 * @param exerciseID
 	 * @param exercise1
@@ -208,15 +208,15 @@ public class AudioFileHelper implements CollationSort {
 				(serverProps.isQuietAudioOK() && validity.validity == AudioAnswer.Validity.TOO_QUIET);
 
 		return doFlashcard ?
-        getAudioAnswerDecoding(exerciseID, exercise1, 0, user, reqid, audioType, doFlashcard, true, true, wavPath, file,
+				getAudioAnswerDecoding(exerciseID, exercise1, 0, user, reqid, audioType, doFlashcard, true, true, wavPath, file,
 						validity, isValid, deviceType, device) :
-        getAudioAnswerAlignment(exerciseID, exercise1, 0, user, reqid, audioType, doFlashcard, true, true, wavPath, file,
+							getAudioAnswerAlignment(exerciseID, exercise1, 0, user, reqid, audioType, doFlashcard, true, true, wavPath, file,
 									validity, isValid, score, deviceType, device)
 									;
 	}
 
 	/**
-   * @see #getAnswer
+	 * @see #getAnswer
 	 * @see #writeAudioFile(String, String, mitll.langtest.shared.CommonExercise, int, int, int, String, boolean, boolean, boolean, String, String)
 	 * @param exerciseID
 	 * @param exercise1
@@ -235,7 +235,7 @@ public class AudioFileHelper implements CollationSort {
 	 * @param device
 	 * @return
 	 */
-  private AudioAnswer getAudioAnswerDecoding(String exerciseID, CommonExercise exercise1,
+	private AudioAnswer getAudioAnswerDecoding(String exerciseID, CommonExercise exercise1,
 			int questionID,
 			int user,
 			int reqid,
@@ -243,107 +243,107 @@ public class AudioFileHelper implements CollationSort {
 			boolean recordedWithFlash, String wavPath, File file,
 			AudioCheck.ValidityAndDur validity, boolean isValid,
 			String deviceType, String device) {
-    checkValidity(exerciseID, questionID, user, file, validity, isValid);
-    AudioAnswer answer = getAudioAnswer(exercise1, reqid, doFlashcard, wavPath, file, validity, isValid);
+		checkValidity(exerciseID, questionID, user, file, validity, isValid);
+		AudioAnswer answer = getAudioAnswer(exercise1, reqid, doFlashcard, wavPath, file, validity, isValid);
 
-    if (recordInResults) {
-      long then = System.currentTimeMillis();
-      JSONObject json = getJson(answer);
-      long now = System.currentTimeMillis();
-      if (now - then > 10) {
-        logger.debug("took " + (now - then) + " to convert answer to json");
-      }
-      String scoreJson = json.toString();
-      long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
-          isValid, audioType, validity.durationInMillis, answer.isCorrect(), (float) answer.getScore(),
-          recordedWithFlash, deviceType, device, scoreJson);
-      answer.setResultID(answerID);
+		if (recordInResults) {
+			long then = System.currentTimeMillis();
+			JSONObject json = getJson(answer);
+			long now = System.currentTimeMillis();
+			if (now - then > 10) {
+				logger.debug("took " + (now - then) + " to convert answer to json");
+			}
+			String scoreJson = json.toString();
+			long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
+					isValid, audioType, validity.durationInMillis, answer.isCorrect(), (float) answer.getScore(),
+					recordedWithFlash, deviceType, device, scoreJson);
+			answer.setResultID(answerID);
 
-      recordWordAndPhoneInfo(answer, answerID);
-    }
-    logger.debug("writeAudioFile answer " + answer);
-    return answer;
-  }
+			recordWordAndPhoneInfo(answer, answerID);
+		}
+		logger.debug("writeAudioFile answer " + answer);
+		return answer;
+	}
 
-  private void checkValidity(String exerciseID, int questionID, int user, File file, AudioCheck.ValidityAndDur validity,
-                             boolean isValid) {
+	private void checkValidity(String exerciseID, int questionID, int user, File file, AudioCheck.ValidityAndDur validity,
+			boolean isValid) {
 		if (!isValid) {
 			logger.warn("got invalid audio file (" + validity +
 					") user = " + user + " exerciseID " + exerciseID +
 					" question " + questionID + " file " + file.getAbsolutePath());
 		}
-  }
+	}
 
-  /**
-   *
-   * @param exerciseID
-   * @param exercise1
-   * @param questionID
-   * @param user
-   * @param reqid
-   * @param audioType
-   * @param doFlashcard
-   * @param recordInResults
-   * @param recordedWithFlash
-   * @param wavPath
-   * @param file
-   * @param validity
-   * @param isValid
-   * @param score
-   * @param deviceType
-   * @param device
-   * @return
-   * @see #getAnswer(String, mitll.langtest.shared.CommonExercise, int, boolean, String, java.io.File, String, String, float, int)
-   */
-  private AudioAnswer getAudioAnswerAlignment(String exerciseID, CommonExercise exercise1,
-                                              int questionID,
-                                              int user,
-                                              int reqid,
-                                              String audioType, boolean doFlashcard, boolean recordInResults,
-                                              boolean recordedWithFlash, String wavPath, File file,
-                                              AudioCheck.ValidityAndDur validity, boolean isValid,
-                                              float score, String deviceType, String device) {
-    checkValidity(exerciseID, questionID, user, file, validity, isValid);
-    AudioAnswer answer = getAudioAnswer(exercise1, reqid, doFlashcard, wavPath, file, validity, isValid);
+	/**
+	 *
+	 * @param exerciseID
+	 * @param exercise1
+	 * @param questionID
+	 * @param user
+	 * @param reqid
+	 * @param audioType
+	 * @param doFlashcard
+	 * @param recordInResults
+	 * @param recordedWithFlash
+	 * @param wavPath
+	 * @param file
+	 * @param validity
+	 * @param isValid
+	 * @param score
+	 * @param deviceType
+	 * @param device
+	 * @return
+	 * @see #getAnswer(String, mitll.langtest.shared.CommonExercise, int, boolean, String, java.io.File, String, String, float, int)
+	 */
+	private AudioAnswer getAudioAnswerAlignment(String exerciseID, CommonExercise exercise1,
+			int questionID,
+			int user,
+			int reqid,
+			String audioType, boolean doFlashcard, boolean recordInResults,
+			boolean recordedWithFlash, String wavPath, File file,
+			AudioCheck.ValidityAndDur validity, boolean isValid,
+			float score, String deviceType, String device) {
+		checkValidity(exerciseID, questionID, user, file, validity, isValid);
+		AudioAnswer answer = getAudioAnswer(exercise1, reqid, doFlashcard, wavPath, file, validity, isValid);
 
-    if (recordInResults) {
-      long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
-          isValid, audioType, validity.durationInMillis, true, score, recordedWithFlash, deviceType, device,
-          getJson(answer).toString());
-      answer.setResultID(answerID);
-    }
-    logger.debug("getAudioAnswerAlignment answer " + answer);
-    return answer;
-  }
+		if (recordInResults) {
+			long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
+					isValid, audioType, validity.durationInMillis, true, score, recordedWithFlash, deviceType, device,
+					getJson(answer).toString());
+			answer.setResultID(answerID);
+		}
+		logger.debug("getAudioAnswerAlignment answer " + answer);
+		return answer;
+	}
 
-  /**
-   * @see #getAudioAnswerDecoding
-   * @param exercise1
-   * @param reqid
-   * @param doFlashcard
-   * @param wavPath
-   * @param file
-   * @param validity
-   * @param isValid
-   * @return
-   */
-  private AudioAnswer getAudioAnswer(CommonExercise exercise1, int reqid, boolean doFlashcard, String wavPath, File file,
-                                     AudioCheck.ValidityAndDur validity, boolean isValid) {
-    String url = pathHelper.ensureForwardSlashes(wavPath);
+	/**
+	 * @see #getAudioAnswerDecoding
+	 * @param exercise1
+	 * @param reqid
+	 * @param doFlashcard
+	 * @param wavPath
+	 * @param file
+	 * @param validity
+	 * @param isValid
+	 * @return
+	 */
+	private AudioAnswer getAudioAnswer(CommonExercise exercise1, int reqid, boolean doFlashcard, String wavPath, File file,
+			AudioCheck.ValidityAndDur validity, boolean isValid) {
+		String url = pathHelper.ensureForwardSlashes(wavPath);
 
-    return (isValid && !serverProps.isNoModel()) ?
-        getAudioAnswer(
-            exercise1,
-            reqid, file, validity, url, doFlashcard) :
-        new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
-  }
+		return (isValid && !serverProps.isNoModel()) ?
+				getAudioAnswer(
+						exercise1,
+						reqid, file, validity, url, doFlashcard) :
+							new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
+	}
 
-  /**
-   * Put word and phone scores into database.
-   * @see #getAudioAnswerDecoding
-   * @param answer
-   * @param answerID
-   */
+	/**
+	 * Put word and phone scores into database.
+	 * @see #getAudioAnswerDecoding
+	 * @param answer
+	 * @param answerID
+	 */
 	private void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
 		PretestScore pretestScore = answer.getPretestScore();
 		List<TranscriptSegment> words  = pretestScore == null ? null : pretestScore.getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
@@ -373,7 +373,7 @@ public class AudioFileHelper implements CollationSort {
 	 * We skip sils, since we wouldn't want to show them to the user.
 	 * @param answer
 	 * @return
-   * @see #getAudioAnswerDecoding
+	 * @see #getAudioAnswerDecoding
 	 */
 	private JSONObject getJson(AudioAnswer answer) {
 		PretestScore pretestScore = answer.getPretestScore();
@@ -422,10 +422,10 @@ public class AudioFileHelper implements CollationSort {
 		return jsonObject;
 	}
 
-  private static float round(float d) {
+	private static float round(float d) {
 		return round(d, 3);
 	}
-  private static float round(float d, int decimalPlace) {
+	private static float round(float d, int decimalPlace) {
 		BigDecimal bd = new BigDecimal(Float.toString(d));
 		bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
 		return bd.floatValue();
@@ -444,7 +444,7 @@ public class AudioFileHelper implements CollationSort {
 		AudioAnswer audioAnswer = getAudioAnswer(base64EncodedString, reqid, file);
 
 		if (audioAnswer.isValid()) {
-			PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, file.getAbsolutePath(), textToAlign, -1, -1, false,
+			PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, file.getAbsolutePath(), textToAlign, null, -1, -1, false,
 					false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), identifier);
 
 			audioAnswer.setPretestScore(asrScoreForAudio);
@@ -455,20 +455,20 @@ public class AudioFileHelper implements CollationSort {
 		return audioAnswer;
 	}
 
-  private File getPostedFileLoc() {  return getPathUnder(POSTED_AUDIO);  }
+	private File getPostedFileLoc() {  return getPathUnder(POSTED_AUDIO);  }
 
-  private File getPathUnder(String postedAudio) {
+	private File getPathUnder(String postedAudio) {
 		String wavPath = pathHelper.getWavPathUnder(postedAudio);
 		return pathHelper.getAbsoluteFile(wavPath);
 	}
 
-  private AudioAnswer getAudioAnswer(String base64EncodedString, int reqid, File file) {
+	private AudioAnswer getAudioAnswer(String base64EncodedString, int reqid, File file) {
 		AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
 		// boolean isValid = validity.validity == AudioAnswer.Validity.OK;
-    AudioAnswer audioAnswer = new AudioAnswer(pathHelper.ensureForwardSlashes(pathHelper.getWavPathUnder(POSTED_AUDIO)),
-        validity.validity, reqid, validity.durationInMillis);
+		AudioAnswer audioAnswer = new AudioAnswer(pathHelper.ensureForwardSlashes(pathHelper.getWavPathUnder(POSTED_AUDIO)),
+				validity.validity, reqid, validity.durationInMillis);
 
-    //logger.debug("writing to " + file.getAbsolutePath() + " answer " + audioAnswer);
+		//logger.debug("writing to " + file.getAbsolutePath() + " answer " + audioAnswer);
 		return audioAnswer;
 	}
 
@@ -483,33 +483,37 @@ public class AudioFileHelper implements CollationSort {
 	 * @param lmSentences to look for in the audio
 	 * @return PretestScore for audio
 	 */
-	// JESS DECODING
+	
 	public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences) {
 		String tmpDir = Files.createTempDir().getAbsolutePath();
 		makeASRScoring();
 		List<String> unk = new ArrayList<String>();
 
-    if (isMacOrWin()) {  // i.e. NOT using cool new jdocr webservice
-      createSLFFile(lmSentences, tmpDir, 2);
-      unk.add(SLFFile.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
-    }
+		if (isMacOrWin() || useOldSchoolServiceOnly) {  // i.e. NOT using cool new jcodr webservice
+			createSLFFile(lmSentences, tmpDir, 2);
+			unk.add(SLFFile.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
+		}
 
 		String vocab = asrScoring.getUsedTokens(lmSentences, unk); // this is basically the transcript
 		//logger.debug("getASRScoreForAudio : vocab " + vocab + " from " + lmSentences);
-		return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, 128, 128, false, true, tmpDir,
-				serverProps.useScoreCache(), "");
+		if (isMacOrWin() || useOldSchoolServiceOnly) // we have lm sentences in the webservice version because we make the language model later on
+			return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, null, 128, 128, false, true, tmpDir,
+					serverProps.useScoreCache(), "");
+		else
+			return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, lmSentences, 128, 128, false, true, tmpDir,
+					serverProps.useScoreCache(), "");
 	}
 
-  /**
-   * @see #getASRScoreForAudio
-   * @param lmSentences
-   * @param tmpDir
-   * @param unknownModelBiasWeight
-   * @return
-   */
+	/**
+	 * @see #getASRScoreForAudio
+	 * @param lmSentences
+	 * @param tmpDir
+	 * @param unknownModelBiasWeight
+	 * @return
+	 */
 
-  private String createSLFFile(Collection<String> lmSentences, String tmpDir, float unknownModelBiasWeight) {
-    return new SLFFile().createSimpleSLFFile(lmSentences, tmpDir, unknownModelBiasWeight); //serverProps.getUnknownModelBias()
+	private String createSLFFile(Collection<String> lmSentences, String tmpDir, float unknownModelBiasWeight) {
+		return new SLFFile().createSimpleSLFFile(lmSentences, tmpDir, unknownModelBiasWeight); //serverProps.getUnknownModelBias()
 	}
 
 	/**
@@ -530,21 +534,29 @@ public class AudioFileHelper implements CollationSort {
 	 * @param prefix
 	 * @return PretestScore
 	 **/
+	
 	public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
 			int width, int height, boolean useScoreToColorBkg,
 			boolean decode, String tmpDir, boolean useCache, String prefix) {
+		
+		return getASRScoreForAudio(reqid, testAudioFile, sentence, null, width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix);
+	}
+	
+	public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence, Collection<String> lmSentences,
+			int width, int height, boolean useScoreToColorBkg,
+			boolean decode, String tmpDir, boolean useCache, String prefix) {
 		logger.debug("getASRScoreForAudio (" + serverProps.getLanguage() + ")" +
-        " scoring " + testAudioFile + " with sentence '" + sentence + "' req# " + reqid + (useCache ? " check cache" : " NO CACHE"));
+				" scoring " + testAudioFile + " with sentence '" + sentence + "' req# " + reqid + (useCache ? " check cache" : " NO CACHE"));
 
 		// audio stuff
 		makeASRScoring();
 		if (testAudioFile == null) {
-      logger.error("huh? no test audio file for " + sentence);
+			logger.error("huh? no test audio file for " + sentence);
 			return new PretestScore(); // very defensive
 		}
 		testAudioFile = dealWithMP3Audio(testAudioFile);
 		if (!new File(testAudioFile).exists()) {
-      logger.error("huh? no testAudioFile for " + sentence + " at " + new File(testAudioFile).getAbsolutePath());
+			logger.error("huh? no testAudioFile for " + sentence + " at " + new File(testAudioFile).getAbsolutePath());
 			return new PretestScore();
 		}
 
@@ -558,20 +570,20 @@ public class AudioFileHelper implements CollationSort {
 			sentence = sentence.toUpperCase();  // hack for English
 		}
 
-    PretestScore pretestScore = getASRScoring(decode).scoreRepeat(
-        testAudioDir, removeSuffix(testAudioName),
-        sentence,
-        pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix);
+		PretestScore pretestScore = getASRScoring(decode).scoreRepeat(
+				testAudioDir, removeSuffix(testAudioName),
+				sentence, lmSentences, 
+				pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix);
 		pretestScore.setReqid(reqid);
 
 		return pretestScore;
 	}
 
-  private boolean isEnglishSite() {
-    return serverProps.getLanguage().equalsIgnoreCase("English");
-  }
+	private boolean isEnglishSite() {
+		return serverProps.getLanguage().equalsIgnoreCase("English");
+	}
 
-  /**
+	/**
 	 * Just for testing!
 	 * @see mitll.langtest.server.RecoTest#isMatch
 	 * @param e
@@ -656,7 +668,7 @@ public class AudioFileHelper implements CollationSort {
 	 * @param file
 	 * @param validity
 	 * @param url
-   * @param doFlashcard true if should do decoding false if should not do anything
+	 * @param doFlashcard true if should do decoding false if should not do anything
 	 * @return
 	 */
 	private AudioAnswer getAudioAnswer(CommonExercise exercise,
@@ -709,12 +721,12 @@ public class AudioFileHelper implements CollationSort {
 			return oldschoolScoring;
 	}
 
-  private boolean isMacOrWin() {
-    String property = System.getProperty("os.name").toLowerCase();
-    return property.contains("mac") || property.contains("win");
-  }
+	private boolean isMacOrWin() {
+		String property = System.getProperty("os.name").toLowerCase();
+		return property.contains("mac") || property.contains("win");
+	}
 
-  // TODO: gross
+	// TODO: gross
 	private void makeASRScoring() {
 		if(webserviceScoring == null) {
 			webserviceScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
@@ -729,10 +741,10 @@ public class AudioFileHelper implements CollationSort {
 	 * @paramx studentAnswersDB
 	 * @paramx langTestDatabase
 	 */
-  public void makeAutoCRT(AutoCRTScoring crtScoring) {
+	public void makeAutoCRT(AutoCRTScoring crtScoring) {
 		if (autoCRT == null) {
-      autoCRT = new AutoCRT(crtScoring, serverProps.getMinPronScore());
-      //logger.debug("making auto crt " + autoCRT);
+			autoCRT = new AutoCRT(crtScoring, serverProps.getMinPronScore());
+			//logger.debug("making auto crt " + autoCRT);
 		}
 	}
 	/**
