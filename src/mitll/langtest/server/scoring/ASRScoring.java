@@ -351,7 +351,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @return PretestScore object
    */
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-                                  String sentence, String imageOutDir,
+                                  String sentence, Collection<String> lmSentences, String imageOutDir,
                                   int imageWidth, int imageHeight, boolean useScoreForBkgColor,
                                   boolean decode, String tmpDir,
                                   boolean useCache, String prefix) {
