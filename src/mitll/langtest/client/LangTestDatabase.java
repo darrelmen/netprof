@@ -79,7 +79,6 @@ public interface LangTestDatabase extends RemoteService {
 
   boolean forgotUsername(String emailH, String email, String url);
 
-//  List<Result> getResults(int start, int end, String sortInfo);
   ResultAndTotal getResults(int start, int end, String sortInfo,Map<String, String> unitToValue, long userid, String flText, int req);
 
   Map<String,Number> getResultStats();
