@@ -3,11 +3,8 @@ package mitll.langtest.server.scoring;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
 import audio.imagewriter.EventAndFileInfo;
-import audio.imagewriter.ImageWriter;
-
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-
 import corpus.HTKDictionary;
 import corpus.LTS;
 import mitll.langtest.server.LangTestDatabaseImpl;
@@ -19,12 +16,9 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
-
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
@@ -57,7 +51,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	private static final int FOREGROUND_VOCAB_LIMIT = 100;
 	private static final int VOCAB_SIZE_LIMIT = 200;
 
-	public static final String SMALL_LM_SLF = "smallLM.slf";
+//	public static final String SMALL_LM_SLF = "smallLM.slf";
 
 	private static SmallVocabDecoder svDecoderHelper = null;
 	private LangTestDatabaseImpl langTestDatabase;
@@ -76,7 +70,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * If the score was below a threshold, or the magic -1, we keep it around for future study.
 	 */
 	private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
-	private LTSFactory ltsFactory;
+	private final LTSFactory ltsFactory;
 
 	/**
 	 * @param deployPath
@@ -106,8 +100,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	/**
 	 * @param deployPath
 	 * @param properties
-	 * @paramx dict
-	 * @see #ASRScoring(String, java.util.Map, mitll.langtest.server.LangTestDatabaseImpl)
+	 * @see #ASRWebserviceScoring(String, java.util.Map, mitll.langtest.server.LangTestDatabaseImpl)
 	 */
 	private ASRWebserviceScoring(String deployPath, Map<String, String> properties) {
 		super(deployPath);
@@ -205,7 +198,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		return true;
 	}
 
-	int multiple = 0;
+	private int multiple = 0;
 	/**
 	 * Might be n1 x n2 x n3 different possible combinations of pronunciations of a phrase
 	 * Consider running ASR on all ref audio to get actual phone sequence.
@@ -280,37 +273,14 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		return new PhoneInfo(firstPron,uphones);
 	}
 
-	/*public static class PhoneInfo {
-		private List<String> firstPron;
-		private Set<String> phoneSet;
-
-		public PhoneInfo(List<String> firstPron, Set<String> phoneSet) {
-			this.firstPron = firstPron;
-			this.phoneSet = phoneSet;
-		}
-
-		public String toString() {
-			return "Phones " + getPhoneSet() + " " + getFirstPron();
-		}
-
-		public List<String> getFirstPron() {
-			return firstPron;
-		}
-
-		public Set<String> getPhoneSet() {
-			return phoneSet;
-		}
-	}*/
-
-
 	/**
 	 * For chinese, maybe later other languages.
 	 * @param longPhrase
 	 * @return
 	 * @seex AutoCRT#getRefs
-	 * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getScoreForAudio
+	 * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra
 	 */
-	public static String getSegmented(String longPhrase) {
+	private static String getSegmented(String longPhrase) {
 		Collection<String> tokens = svDecoderHelper.getTokens(longPhrase);
 		StringBuilder builder = new StringBuilder();
 		for (String token : tokens) {
@@ -337,12 +307,12 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * @return PretestScore object
 	 */
 	public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-			String sentence, String imageOutDir,
+			String sentence, Collection<String> lmSentences, String imageOutDir,
 			int imageWidth, int imageHeight, boolean useScoreForBkgColor,
 			boolean decode, String tmpDir,
 			boolean useCache, String prefix) {
 		return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
-				sentence,
+				sentence, lmSentences, 
 				scoringDir, imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
 				decode, tmpDir,
 				useCache, prefix);
@@ -351,7 +321,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	/**
 	 * Use hydec to do scoring<br></br>
 	 * <p/>
-	 * Some magic happens in {@link Scoring#writeTranscripts(String, int, int, String, boolean, String, String, boolean)} where .lab files are
+	 * Some magic happens in {@link Scoring#writeTranscripts } where .lab files are
 	 * parsed to determine the start and end times for each event, which lets us both create images that
 	 * show the location of the words and phonemes, and for decoding, the actual reco sentence returned. <br></br>
 	 * <p/>
@@ -379,7 +349,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	// JESS alignment and decoding
 	private PretestScore scoreRepeatExercise(String testAudioDir,
 			String testAudioFileNoSuffix,
-			String sentence, // TODO make two params, transcript and lm (null if no slf)
+			String sentence, Collection<String> lmSentences, // TODO make two params, transcript and lm (null if no slf)
 			String scoringDir,
 
 			String imageOutDir,
@@ -431,7 +401,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		//int end = (int)((duration * 16000.0) / 100.0);
 		int end = (int)(duration * 100.0);
 		if(scores == null) {                  
-			Object[] result = runHydra(rawAudioPath, sentence, tmpDir, decode, end);
+			Object[] result = runHydra(rawAudioPath, sentence, lmSentences, tmpDir, decode, end);
 			scores = (Scores)result[0];
 			wordLab = (String)result[1];
 			phoneLab = (String)result[2];
@@ -498,9 +468,11 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		return dict;
 	}
 
-	private Object[] runHydra(String audioPath, String transcript, String tmpDir, boolean decode, int end) {
+	private Object[] runHydra(String audioPath, String transcript, Collection<String> lmSentences, String tmpDir, boolean decode, int end) {
 		// reference trans	
+
 		String cleaned = transcript.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ");
+		logger.debug("cleaned sentence: " + cleaned);
 		if (isMandarin) {
 			cleaned = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") + getSegmented(transcript.trim()); // segmentation method will filter out the UNK model
 		}
@@ -510,8 +482,8 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		String smallLM = "[]";
 		// generate SLF file (if decoding)
 		if(decode) {
-			ArrayList<String> lmSentences = new ArrayList<String>();
-			lmSentences.add(cleaned);
+			//ArrayList<String> lmSentences = new ArrayList<String>();
+			//lmSentences.add(cleaned);
 			smallLM = "[" + (new SLFFile()).createSimpleSLFFile(lmSentences) + "]";
 		}
 
@@ -623,7 +595,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	/**
 	 * Take the events (originally from a .lab file generated in pronz) for WORDS and string them together into a
 	 * sentence.
-   * Defensively sorts the events by time.
+   * We might consider defensively sorting the events by time.
 	 * @see #scoreRepeatExercise
 	 * @param eventAndFileInfo
 	 * @return
@@ -634,20 +606,21 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 			NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
 			if (key == NetPronImageType.WORD_TRANSCRIPT) {
 				Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
-
-        List<TranscriptEvent> sorted = new ArrayList<TranscriptEvent>(timeToEvent.values());
-        Collections.sort(sorted);
-        for (TranscriptEvent transcriptEvent : sorted) {
-					String event = transcriptEvent.event;
+//        List<TranscriptEvent> sorted = new ArrayList<TranscriptEvent>(timeToEvent.values());
+//        Collections.sort(sorted);
+//        for (TranscriptEvent transcriptEvent : sorted) {
+//					String event = transcriptEvent.event;
+				for (Float timeStamp : timeToEvent.keySet()) {
+					String event = timeToEvent.get(timeStamp).event;
 					if (!event.equals("<s>") && !event.equals("</s>") && !event.equals("sil")) {
 						String trim = event.trim();
 						if (trim.length() > 0) {
 							b.append(trim);
 							b.append(" ");
 						}
-            else {
-              logger.warn("huh? event " + transcriptEvent + " had an event word that was zero length?");
-            }
+         //   else {
+              //logger.warn("huh? event " + transcriptEvent + " had an event word that was zero length?");
+       //     }
 					}
 				}
 			}
@@ -706,17 +679,17 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		}
 	}
 
-	private Scores getEmptyScores() {
-		Map<String, Map<String, Float>> eventScores = Collections.emptyMap();
-		return new Scores(0f, eventScores);
-	}
+//	private Scores getEmptyScores() {
+//		Map<String, Map<String, Float>> eventScores = Collections.emptyMap();
+//		return new Scores(0f, eventScores);
+//	}
 
 	/**
-	 * @see mitll.langtest.server.audio.AudioFileHelper#getValidPhrases(java.util.Collection)
+	 * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getValidSentences
 	 * @param phrases
 	 * @return
 	 */
-	public Collection<String> getValidPhrases(Collection<String> phrases) { return getValidSentences(phrases); }
+	//public Collection<String> getValidPhrases(Collection<String> phrases) { return getValidSentences(phrases); }
 
 	/**
 	 * @see #isValid(String)
@@ -726,11 +699,11 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	private boolean isPhraseInDict(String phrase) {  return letterToSoundClass.process(phrase) != null;  }
 
 	/**
-	 * @see #getValidPhrases(java.util.Collection)
+	 * @seex #getValidPhrases(java.util.Collection)
 	 * @param sentences
 	 * @return
 	 */
-	private Collection<String> getValidSentences(Collection<String> sentences) {
+/*	private Collection<String> getValidSentences(Collection<String> sentences) {
 		Set<String> filtered = new TreeSet<String>();
 		Set<String> skipped = new TreeSet<String>();
 
@@ -753,7 +726,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		}
 
 		return filtered;
-	}
+	}*/
 
 	/**
 	 * @see #getValidSentences(java.util.Collection)
@@ -776,6 +749,4 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		}
 		return valid;
 	}
-
-
 }
