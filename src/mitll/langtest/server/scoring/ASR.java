@@ -21,7 +21,7 @@ public interface ASR {
 	public String getUsedTokens(Collection<String> lmSentences, List<String> background);
 	//public Collection<String> getValidPhrases(Collection<String> phrases);
 	public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-			String sentence, String imageOutDir,
+			String sentence, Collection<String> lmSentences, String imageOutDir,
 			int imageWidth, int imageHeight, boolean useScoreForBkgColor,
 			boolean decode, String tmpDir,
 			boolean useCache, String prefix);
