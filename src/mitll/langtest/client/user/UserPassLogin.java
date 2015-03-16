@@ -39,8 +39,9 @@ import java.util.logging.Logger;
  */
 public class UserPassLogin extends UserDialog {
   private final Logger logger = Logger.getLogger("UserPassLogin");
+  private static final String CLASSROOM = "NetProF";
 
-  private static final boolean CHECK_AGE = false;
+//  private static final boolean CHECK_AGE = false;
   private static final String WAIT_FOR_APPROVAL = "Wait for approval";
   private static final String YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL = "You will get an approval message by email.";
 
@@ -147,7 +148,8 @@ public class UserPassLogin extends UserDialog {
   }
 
   private void showWelcome() {
-    Modal modal = new ModalInfoDialog().getModal("Welcome to Classroom!", "<h4>Classroom has been updated.</h4>" +
+    Modal modal = new ModalInfoDialog().getModal("Welcome to " + CLASSROOM + "!",
+        //"<h4>" + CLASSROOM + " has been updated.</h4>" +
         getLoginInfo(), null, new HiddenHandler() {
       @Override
       public void onHidden(HiddenEvent hiddenEvent) {
@@ -697,7 +699,8 @@ public class UserPassLogin extends UserDialog {
       }
     });
 
-    if (!CHECK_AGE) registrationInfo.hideAge();
+    //if (!CHECK_AGE)
+      registrationInfo.hideAge();
     registrationInfo.getDialectGroup().box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
@@ -756,10 +759,9 @@ public class UserPassLogin extends UserDialog {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't check role");
         } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && !registrationInfo.checkValidGender()) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't check gender");
-        } else if (CHECK_AGE && selectedRole == User.Kind.CONTENT_DEVELOPER && !isValidAge(registrationInfo.getAgeEntryGroup())) {
-          eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in age ");
-          markErrorBlur(registrationInfo.getAgeEntryGroup().box, AGE_ERR_MSG,Placement.TOP);
-
+//        } else if (CHECK_AGE && selectedRole == User.Kind.CONTENT_DEVELOPER && !isValidAge(registrationInfo.getAgeEntryGroup())) {
+ //         eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in age ");
+ //         markErrorBlur(registrationInfo.getAgeEntryGroup().box, AGE_ERR_MSG,Placement.TOP);
        //   registrationInfo.getAgeEntryGroup().markError(AGE_ERR_MSG);
 
         } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && registrationInfo.getDialectGroup().getText().isEmpty()) {
@@ -1021,7 +1023,7 @@ public class UserPassLogin extends UserDialog {
    * @param result
    */
   private void storeUser(User result) {
-    logger.info("UserPassLogin.storeUser - " + result);
+    //logger.info("UserPassLogin.storeUser - " + result);
     enterKeyButtonHelper.removeKeyHandler();
     userManager.storeUser(result, getAudioTypeFromPurpose(result.getUserKind()));
   }
