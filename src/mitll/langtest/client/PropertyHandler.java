@@ -412,7 +412,7 @@ public class PropertyHandler {
    * @return
    */
   public String getHelpMessage() {
-    return
+/*    return
         "If you are a first-time user of this site, or an existing user of an earlier version of Classroom " +
             "(either as a student, teacher, or audio recorder), you will need to use the " +
             "\"" +
@@ -431,8 +431,26 @@ public class PropertyHandler {
             //"Teachers who are not <i>audio recorders</i>: After you register, use the ’Login’ box to access the site. <br/>" +
             "<b>Teachers who are <i>audio recorders</i></b>: After you register and get approval, use the ‘Login’ box to access the site. <br/><br/>" +
             "The site will remember your login information on this computer for up to one year. " +
-            "You will need to login with your username and password again if you access Classroom from a different machine.<br/>";
+            "You will need to login with your username and password again if you access Classroom from a different machine.<br/>";*/
+  return "If you are a first-time user of this site, or an existing user of an earlier version of NetProF " +
+      "(either as a student, teacher, or audio recorder), you will need to use the \"Sign Up\" box to add a" +
+      " password and an email address to your account. Your email is only used if you ever forget your" +
+      " password.<br/>" +
+      "<br/>" +
+      "If you are a teacher assigned to record <u>course material</u> - " +
+      "check the box next to ‘<i>assigned reference audio recorder</i>.’" +
+      " Once you have submitted this form, LTEA personnel will approve your account. " +
+      "You will receive an email once it's approved. " +
+      "You will not be able to access the NetProF site until approval is granted. " +
+      "Students do not need approval to access the site.<br/>" +
+      "<br/>" +
+      "<b>Students and Teachers</b>: After you register, use the ‘Login’ box to access the site. <br/>" +
+      "<b>Teachers who are <i>audio recorders</i></b>: After you register and get approval, use the ‘Login’ box to access the site. <br/>" +
+      "<br/>" +
+      "The site will remember your login information on this computer for up to one year. " +
+      "You will need to login with your username and password again if you access NetProF from a different machine.";
   }
+
 
   /**
    * TODO : Consider rewording for other customers...
@@ -443,6 +461,6 @@ public class PropertyHandler {
         "After you click sign up, " +
         "LTEA personnel will approve your account.<br/>" +
         "You will receive an email once it's approved.<br/>" +
-        "You will not be able to access Classroom until approval is granted.";
+        "You will not be able to access NetProF until approval is granted.";
   }
 }
