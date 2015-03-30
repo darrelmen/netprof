@@ -26,6 +26,7 @@ import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
+import net.sf.json.JSONArray;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
@@ -166,12 +167,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 			boolean onlyExamples, boolean incorrectFirstOrder, boolean onlyWithAudioAnno) {
 		Collection<CommonExercise> exercises;
 
-		logger.debug("getExerciseIds : (" + serverProps.getLanguage()+ ") " +
+		logger.debug("getExerciseIds : (" + serverProps.getLanguage() + ") " +
 				"getting exercise ids for " +
 				" config " + relativeConfigDir +
 				" prefix '" + prefix +
 				"' and user list id " + userListID + " user " + userID + " role " + role +
-        " filter " + onlyRecorderByMatchingGender + " only examples " + onlyExamples + " only with audio " + onlyWithAudioAnno);
+				" filter " + onlyRecorderByMatchingGender + " only examples " + onlyExamples + " only with audio " + onlyWithAudioAnno);
 
 		try {
 			UserList userListByID = userListID != -1 ? db.getUserListByID(userListID) : null;
@@ -765,7 +766,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		}
 
 		if (audioAttributes.isEmpty()) {
-			logger.warn("ensureMP3s : (" +serverProps.getLanguage() + ") no ref audio for " + byID);
+			logger.warn("ensureMP3s : (" + serverProps.getLanguage() + ") no ref audio for " + byID);
 		}
 	}
 
@@ -1775,7 +1776,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	}
 
   public void addToAudioTable(int user, CommonExercise exercise1, AudioAnswer audioAnswer) {
-    addToAudioTable(user,"regular",exercise1,exercise1.getID(),audioAnswer);
+    addToAudioTable(user, "regular", exercise1, exercise1.getID(), audioAnswer);
   }
 
 	/**
@@ -1945,7 +1946,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		String id = exercise.getID();
 		allIDs.add(id);
 		CollationKey collationKey = collator.getCollationKey(exercise.getForeignLanguage());
-		idToKey.put(id,collationKey);
+		idToKey.put(id, collationKey);
 	}
 
 	public void logMessage(String message) {
@@ -1988,8 +1989,53 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 			logger.error("couldn't load database " +e,e);
 		}
     getExercises();
+		writeRefDecode();
 	}
-	
+
+	private void writeRefDecode() {
+		if (false) {
+			Map<String, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
+			String installPath = pathHelper.getInstallPath();
+
+			Set<String> decodedFiles = new HashSet<String>();
+
+			for (Result res : db.getRefResultDAO().getResults()) {
+				String[] bestAudios = res.getAnswer().split("bestAudio");
+				if (bestAudios.length > 1) {
+					String bestAudio = bestAudios[1];
+					logger.debug("added " + bestAudio);
+					decodedFiles.add(bestAudio);
+					logger.debug("previously found " + res);
+				}
+			}
+
+			// TODO : check if result is already in refresult table before doing decoding
+			int count = 0;
+			for (CommonExercise exercise : getExercises()) {
+				List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
+				if (audioAttributes != null) {
+					int c = 0;
+					int t = 0;
+					for (AudioAttribute attribute : audioAttributes) {
+						if (!attribute.isExampleSentence()) {
+							logger.debug("ref " + attribute.getAudioRef());
+							if (decodedFiles.contains(attribute.getAudioRef())) {
+								c++;
+							}
+							t++;
+						}
+					}
+					if (c < t) {
+						db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
+						if (count++ < 2)
+							audioFileHelper.decodeRefs(exercise);
+					}
+				}
+			}
+		}
+
+	}
+
 	public String getWebserviceIP() {
 		return serverProps.getWebserviceIP();
 	}
