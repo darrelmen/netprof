@@ -94,7 +94,6 @@ public class AudioDAO extends DAO {
    * Pulls the list of audio recordings out of the database.
    *
    * @return
-   * @seex mitll.langtest.server.database.DatabaseImpl#getResultsWithGrades
    * @see #getExToAudio
    */
   private Collection<AudioAttribute> getAudioAttributes() {
