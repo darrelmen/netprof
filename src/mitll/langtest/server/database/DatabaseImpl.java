@@ -56,6 +56,7 @@ public class DatabaseImpl implements Database {
   private ExerciseDAO exerciseDAO = null;
   private UserDAO userDAO;
   private ResultDAO resultDAO;
+  private RefResultDAO refresultDAO;
   private WordDAO wordDAO;
   private PhoneDAO phoneDAO;
   private AudioDAO audioDAO;
@@ -163,6 +164,7 @@ public class DatabaseImpl implements Database {
     userExerciseDAO = new UserExerciseDAO(this);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
     resultDAO = new ResultDAO(this, logAndNotify);
+    refresultDAO = new RefResultDAO(this, logAndNotify);
     wordDAO = new WordDAO(this, logAndNotify);
     phoneDAO = new PhoneDAO(this, logAndNotify);
     audioDAO = new AudioDAO(this, userDAO);
@@ -179,6 +181,7 @@ public class DatabaseImpl implements Database {
     Connection connection1 = getConnection();
     try {
       resultDAO.createResultTable(connection1);
+      refresultDAO.createResultTable(connection1);
       connection1 = getConnection();  // huh? why?
       gradeDAO.createGradesTable(connection1);
     } catch (Exception e) {
@@ -197,6 +200,10 @@ public class DatabaseImpl implements Database {
 
   public ResultDAO getResultDAO() {
     return resultDAO;
+  }
+
+  public RefResultDAO getRefResultDAO() {
+    return refresultDAO;
   }
 
   public UserDAO getUserDAO() {
@@ -1063,6 +1070,15 @@ public class DatabaseImpl implements Database {
         audioType,// + (recordedWithFlash ? "" : "_by_WebRTC"),
         durationInMillis, correct, score, deviceType, device, scoreJson, recordedWithFlash);
   }
+
+  public long addRefAnswer(int userID, String exerciseID,
+                           String audioFile,
+                           int durationInMillis, boolean correct, float score,
+                           String scoreJson) {
+    return refresultDAO.addAnswer(this, userID, exerciseID, "", audioFile,
+        durationInMillis, correct, score, scoreJson);
+  }
+
 
   public int userExists(String login) {
     return userDAO.userExists(login);
