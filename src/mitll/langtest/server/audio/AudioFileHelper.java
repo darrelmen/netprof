@@ -1,6 +1,7 @@
 package mitll.langtest.server.audio;
 
 import com.google.common.io.Files;
+import com.google.gwt.xml.client.Comment;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
@@ -16,6 +17,7 @@ import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.scoring.CollationSort;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -168,23 +170,23 @@ public class AudioFileHelper implements CollationSort {
    */
   public AudioAnswer writeAudioFile(String base64EncodedString, String exerciseID, CommonExercise exercise1, int questionID,
                                     int user, int reqid, String audioType, boolean doFlashcard,
-                                    boolean recordInResults, boolean recordedWithFlash, String deviceType, String device) {
-    String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, questionID, user);
-    File file = pathHelper.getAbsoluteFile(wavPath);
+																		boolean recordInResults, boolean recordedWithFlash, String deviceType, String device) {
+		String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, questionID, user);
+		File file = pathHelper.getAbsoluteFile(wavPath);
 
-    long then = System.currentTimeMillis();
-    AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
-    long now = System.currentTimeMillis();
-    long diff = now - then;
-    if (diff > 20) {
-      logger.debug("took " + diff + " millis to write wav file " + validity.durationInMillis + " millis long");
-    }
-    boolean isValid = validity.validity == AudioAnswer.Validity.OK || (serverProps.isQuietAudioOK() && validity.validity == AudioAnswer.Validity.TOO_QUIET);
-    return getAudioAnswerDecoding(exerciseID, exercise1, questionID, user, reqid, audioType, doFlashcard, recordInResults,
-        recordedWithFlash, wavPath, file, validity, isValid
-        , deviceType, device
-    );
-  }
+		long then = System.currentTimeMillis();
+		AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
+		long now = System.currentTimeMillis();
+		long diff = now - then;
+		if (diff > 20) {
+			logger.debug("took " + diff + " millis to write wav file " + validity.durationInMillis + " millis long");
+		}
+		boolean isValid = validity.validity == AudioAnswer.Validity.OK || (serverProps.isQuietAudioOK() && validity.validity == AudioAnswer.Validity.TOO_QUIET);
+		return getAudioAnswerDecoding(exerciseID, exercise1, questionID, user, reqid, audioType, doFlashcard, recordInResults,
+				recordedWithFlash, wavPath, file, validity, isValid
+				, deviceType, device
+		);
+	}
 
 	/**
 	 * TODO : this is misleading - if doFlashcard is true, it does decoding, otherwise it does *not* do alignment
@@ -263,8 +265,49 @@ public class AudioFileHelper implements CollationSort {
 
 			recordWordAndPhoneInfo(answer, answerID);
 		}
-		logger.debug("writeAudioFile answer " + answer);
+		logger.debug("getAudioAnswerDecoding answer " + answer);
 		return answer;
+	}
+
+	public void decodeRefs(CommonExercise exercise) {
+		for (AudioAttribute attribute : exercise.getAudioAttributes()) {
+			getRefAudioAnswerDecoding(exercise,(int)attribute.getUserid(),attribute.getAudioRef(),pathHelper.getAbsoluteFile(attribute.getAudioRef()),attribute.getDuration());
+		}
+	}
+
+	/**
+	 * Really helpful - could have annotation info always at hand, so don't have to wait for it in learn tab...
+	 * AND we can send it along to the iPad and have it do highlighting of words and phones in time with the audio
+	 * I.E. Follow the bouncing ball.
+	 *
+	 * @param exercise1
+	 * @param user
+	 * @param wavPath
+	 * @param file
+	 * @param duration
+	 * @return
+	 */
+	private void getRefAudioAnswerDecoding(CommonExercise exercise1,
+																								int user,	String wavPath, File file, long duration) {
+		AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(AudioAnswer.Validity.OK,duration);
+		AudioAnswer answer = getAudioAnswer(exercise1, 1, true, wavPath, file, validity, true);
+
+		long then = System.currentTimeMillis();
+		JSONObject json = getJson(answer);
+		long now = System.currentTimeMillis();
+		if (now - then > 10) {
+			logger.debug("took " + (now - then) + " to convert answer to json");
+		}
+		String scoreJson = json.toString();
+		long answerID = db.addRefAnswer(user, exercise1.getID(), file.getPath(),
+				validity.durationInMillis, answer.isCorrect(), (float) answer.getScore(),
+				scoreJson);
+		//answer.setResultID(answerID);
+
+		// TODO : add word and phone table for refs
+		//	recordWordAndPhoneInfo(answer, answerID);
+		logger.debug("getRefAudioAnswerDecoding answer " + answer);
+	//	return answer;
 	}
 
 	private void checkValidity(String exerciseID, int questionID, int user, File file, AudioCheck.ValidityAndDur validity,
