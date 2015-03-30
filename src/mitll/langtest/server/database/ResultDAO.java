@@ -1070,7 +1070,9 @@ public class ResultDAO extends DAO {
         PRON_SCORE + " FLOAT," +
         STIMULUS + " CLOB," +
         DEVICE_TYPE + " VARCHAR," +
-        DEVICE + " VARCHAR" +
+        DEVICE + " VARCHAR," +
+        SCORE_JSON + " VARCHAR," +
+        WITH_FLASH + " BOOLEAN" +
         ")");
     statement.execute();
     statement.close();
