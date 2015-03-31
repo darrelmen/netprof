@@ -13,6 +13,7 @@ import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -44,7 +45,7 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR {
-	private static final double KEEP_THRESHOLD = 0.3;
+	//private static final double KEEP_THRESHOLD = 0.3;
 	private static final Logger logger = Logger.getLogger(ASRWebserviceScoring.class);
 	private static final boolean DEBUG = false;
 
@@ -69,7 +70,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
 	 * If the score was below a threshold, or the magic -1, we keep it around for future study.
 	 */
-	private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
+//	private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
 	private final LTSFactory ltsFactory;
 
 	/**
@@ -105,7 +106,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	private ASRWebserviceScoring(String deployPath, Map<String, String> properties) {
 		super(deployPath);
 		logger.debug("Creating ASRWebserviceScoring object");
-		lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
+		//lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
 		audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
 		languageProperty = properties.get("language");
@@ -304,16 +305,18 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * @param useScoreForBkgColor
 	 * @param useCache
 	 * @param prefix
+	 * @param precalcResult
 	 * @return PretestScore object
 	 */
 	public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-			String sentence, Collection<String> lmSentences, String imageOutDir,
-			int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-			boolean decode, String tmpDir,
-			boolean useCache, String prefix) {
+																	String sentence, Collection<String> lmSentences, String imageOutDir,
+																	int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+																	boolean decode, String tmpDir,
+																	boolean useCache, String prefix, Result precalcResult) {
 		return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
 				sentence, lmSentences, 
-				scoringDir, imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
+				//scoringDir,
+				imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
 				decode, tmpDir,
 				useCache, prefix);
 	}
@@ -334,7 +337,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * @param testAudioDir          where the audio is
 	 * @param testAudioFileNoSuffix file name without a suffix - wav file, any sample rate
 	 * @param sentence              to align
-	 * @param scoringDir            where the hydec subset is (models, bin.linux64, etc.)
+	 * @paramx scoringDir            where the hydec subset is (models, bin.linux64, etc.)
 	 * @param imageOutDir           where to write the images (audioImage)
 	 * @param imageWidth            image width
 	 * @param imageHeight           image height
@@ -344,13 +347,13 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
 	 * @param prefix                on the names of the image files, if they are written
 	 * @return score info coming back from alignment/reco
-	 * @see #scoreRepeat
+	 * @see ASR#scoreRepeat
 	 */
 	// JESS alignment and decoding
 	private PretestScore scoreRepeatExercise(String testAudioDir,
 			String testAudioFileNoSuffix,
 			String sentence, Collection<String> lmSentences, // TODO make two params, transcript and lm (null if no slf)
-			String scoringDir,
+	//		String scoringDir,
 
 			String imageOutDir,
 			int imageWidth, int imageHeight,
@@ -677,76 +680,5 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 			logger.warn("makeDict : Can't find dict file at " + dictFile);
 			return new HTKDictionary();
 		}
-	}
-
-//	private Scores getEmptyScores() {
-//		Map<String, Map<String, Float>> eventScores = Collections.emptyMap();
-//		return new Scores(0f, eventScores);
-//	}
-
-	/**
-	 * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getValidSentences
-	 * @param phrases
-	 * @return
-	 */
-	//public Collection<String> getValidPhrases(Collection<String> phrases) { return getValidSentences(phrases); }
-
-	/**
-	 * @see #isValid(String)
-	 * @param phrase
-	 * @return
-	 */
-	private boolean isPhraseInDict(String phrase) {  return letterToSoundClass.process(phrase) != null;  }
-
-	/**
-	 * @seex #getValidPhrases(java.util.Collection)
-	 * @param sentences
-	 * @return
-	 */
-/*	private Collection<String> getValidSentences(Collection<String> sentences) {
-		Set<String> filtered = new TreeSet<String>();
-		Set<String> skipped = new TreeSet<String>();
-
-		for (String sentence : sentences) {
-			Collection<String> tokens = svDecoderHelper.getTokens(sentence);
-			boolean valid = true;
-			for (String token : tokens) {
-				if (!isValid(token)) {
-					valid = false;
-				}
-			}
-			if (valid) filtered.add(sentence);
-			else {
-				skipped.add(sentence);
-			}
-		}
-
-		if (!skipped.isEmpty()) {
-			logger.warn("getValidSentences : skipped " + skipped.size() + " sentences : " + skipped  );
-		}
-
-		return filtered;
-	}*/
-
-	/**
-	 * @see #getValidSentences(java.util.Collection)
-	 * @param token
-	 * @return
-	 */
-	private boolean isValid(String token) { return checkToken(token) && isPhraseInDict(token);  }
-
-	private boolean checkToken(String token) {
-		boolean valid = true;
-		if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL)) return true;
-		for (int i = 0; i < token.length() && valid; i++) {
-			char c = token.charAt(i);
-			if (Character.isDigit(c)) {
-				valid = false;
-			}
-			if (Character.UnicodeBlock.of(c) == Character.UnicodeBlock.BASIC_LATIN) {
-				valid = false;
-			}
-		}
-		return valid;
 	}
 }
