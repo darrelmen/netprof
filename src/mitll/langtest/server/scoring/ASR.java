@@ -8,26 +8,27 @@ import java.util.Set;
 import corpus.LTS;
 //import mitll.langtest.server.scoring.ASRWebserviceScoring.PhoneInfo;
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.scoring.PretestScore;
 
 // TODO make this actually have method signatures...
 public interface ASR {
 
-	public <T extends CommonExercise> void sort(List<T> toSort);
-	public Collator getCollator();
-	public boolean checkLTS(String foreignLanguagePhrase);
-	public PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
-	public SmallVocabDecoder getSmallVocabDecoder();
-	public String getUsedTokens(Collection<String> lmSentences, List<String> background);
+	<T extends CommonExercise> void sort(List<T> toSort);
+	Collator getCollator();
+	boolean checkLTS(String foreignLanguagePhrase);
+	PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
+	SmallVocabDecoder getSmallVocabDecoder();
+	String getUsedTokens(Collection<String> lmSentences, List<String> background);
 	//public Collection<String> getValidPhrases(Collection<String> phrases);
-	public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-			String sentence, Collection<String> lmSentences, String imageOutDir,
-			int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-			boolean decode, String tmpDir,
-			boolean useCache, String prefix);
+	PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
+													 String sentence, Collection<String> lmSentences, String imageOutDir,
+													 int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+													 boolean decode, String tmpDir,
+													 boolean useCache, String prefix, Result precalcResult);
 	
 	
-	public static class PhoneInfo {
+	class PhoneInfo {
 		private List<String> firstPron;
 		private Set<String> phoneSet;
 
