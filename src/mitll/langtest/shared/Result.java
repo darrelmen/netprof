@@ -28,15 +28,13 @@ public class Result implements IsSerializable {
   private String answer;
   private boolean valid;
   private long timestamp;
-  //public boolean flq;
- // public boolean spoken;
+
   private String audioType;
-  //public String gradeInfo = "";
   private int durationInMillis;
   private boolean correct;
   private float pronScore;
-  // private String stimulus;
   private String device;
+  private transient String jsonScore;
 
   public static final String AUDIO_TYPE_UNSET = "unset";
   public static final String AUDIO_TYPE_REGULAR = "regular";
@@ -162,5 +160,13 @@ public class Result implements IsSerializable {
         "  ans " + getAnswer() +
         " audioType : " + getAudioType() +" device " + device+
         " valid " + isValid() + " " + (isCorrect() ? "correct":"incorrect") + " score " + getPronScore();
+  }
+
+  public String getJsonScore() {
+    return jsonScore;
+  }
+
+  public void setJsonScore(String jsonScore) {
+    this.jsonScore = jsonScore;
   }
 }
