@@ -35,7 +35,7 @@ import java.util.Map;
 public class RefResultDAO extends DAO {
   private static final Logger logger = Logger.getLogger(RefResultDAO.class);
 
-  private static final Map<String, String> EMPTY_MAP = new HashMap<String, String>();
+//  private static final Map<String, String> EMPTY_MAP = new HashMap<String, String>();
  // private static final int MINUTE = 60 * 1000;
 
   private static final String ID = "id";
@@ -53,7 +53,7 @@ public class RefResultDAO extends DAO {
   private static final String NO = "No";
   private final LogAndNotify logAndNotify;
 
-  private final boolean debug = false;
+//  private final boolean debug = false;
 
   /**
    * @param database
@@ -192,7 +192,19 @@ public class RefResultDAO extends DAO {
     logAndNotify.logAndNotifyServerException(ee);
   }
 
-
+  public Result getResult(String exid, String answer) {
+    String sql = "SELECT * FROM " + REFRESULT + " WHERE " + Database.EXID + "='" + exid + "' AND " + ANSWER + "='" + answer + "'";
+    try {
+      List<Result> resultsSQL = getResultsSQL(sql);
+      if (resultsSQL.size() > 1) {
+        logger.warn("for " + exid + " and  " + answer + " got " + resultsSQL);
+      }
+      return resultsSQL.isEmpty() ? null : resultsSQL.iterator().next();
+    } catch (SQLException e) {
+      logger.error("Got " + e, e);
+    }
+    return null;
+  }
 
   /**
    * @param sql
@@ -245,15 +257,11 @@ public class RefResultDAO extends DAO {
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       String answer = rs.getString(ANSWER);
       boolean valid = true;//rs.getBoolean(VALID);
-      // boolean flq = rs.getBoolean(FLQ);
-      //  boolean spoken = rs.getBoolean(SPOKEN);
-
       String type = "";//rs.getString(AUDIO_TYPE);
       int dur = rs.getInt(DURATION);
 
       boolean correct = rs.getBoolean(CORRECT);
       float pronScore = rs.getFloat(PRON_SCORE);
-      //String stimulus = rs.getString(STIMULUS);
 
       Result result = new Result(uniqueID, userID, //id
           plan, // plan
@@ -262,17 +270,14 @@ public class RefResultDAO extends DAO {
           trimPathForWebPage2(answer), // answer
           valid, // valid
           timestamp.getTime(),
-          //flq, spoken,
           type, dur, correct, pronScore, "browser");
-//      result.setStimulus(stimulus);
+      result.setJsonScore(rs.getString(SCORE_JSON));
       results.add(result);
     }
     finish(connection, statement, rs);
 
     return results;
   }
-
-
 
   private String trimPathForWebPage2(String path) {
     int answer = path.indexOf(PathHelper.ANSWERS);
@@ -292,6 +297,8 @@ public class RefResultDAO extends DAO {
     database.closeConnection(connection);
 
     createIndex(database, Database.EXID, REFRESULT);
+    // seems to complain about index on CLOB???
+    createIndex(database, ANSWER, REFRESULT);
   }
 
   /**
