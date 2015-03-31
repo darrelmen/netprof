@@ -1,7 +1,6 @@
 package mitll.langtest.server.audio;
 
 import com.google.common.io.Files;
-import com.google.gwt.xml.client.Comment;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
@@ -19,6 +18,7 @@ import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -289,7 +289,7 @@ public class AudioFileHelper implements CollationSort {
 	 */
 	private void getRefAudioAnswerDecoding(CommonExercise exercise1,
 																								int user,	String wavPath, File file, long duration) {
-		AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(AudioAnswer.Validity.OK,duration);
+		AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(AudioAnswer.Validity.OK,duration/1000);
 		AudioAnswer answer = getAudioAnswer(exercise1, 1, true, wavPath, file, validity, true);
 
 		long then = System.currentTimeMillis();
@@ -490,7 +490,7 @@ public class AudioFileHelper implements CollationSort {
 
 		if (audioAnswer.isValid()) {
 			PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, file.getAbsolutePath(), textToAlign, null, -1, -1, false,
-					false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), identifier);
+					false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), identifier, null);
 
 			audioAnswer.setPretestScore(asrScoreForAudio);
 		} else {
@@ -543,10 +543,10 @@ public class AudioFileHelper implements CollationSort {
 		//logger.debug("getASRScoreForAudio : vocab " + vocab + " from " + lmSentences);
 		if (isMacOrWin() || useOldSchoolServiceOnly) // we have lm sentences in the webservice version because we make the language model later on
 			return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, null, 128, 128, false, true, tmpDir,
-					serverProps.useScoreCache(), "");
+					serverProps.useScoreCache(), "", null);
 		else
 			return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, lmSentences, 128, 128, false, true, tmpDir,
-					serverProps.useScoreCache(), "");
+					serverProps.useScoreCache(), "", null);
 	}
 
 	/**
@@ -577,19 +577,19 @@ public class AudioFileHelper implements CollationSort {
 	 * @param tmpDir
 	 * @param useCache
 	 * @param prefix
+	 * @param precalcResult
 	 * @return PretestScore
 	 **/
 	
 	public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
-			int width, int height, boolean useScoreToColorBkg,
-			boolean decode, String tmpDir, boolean useCache, String prefix) {
-		
-		return getASRScoreForAudio(reqid, testAudioFile, sentence, null, width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix);
+																					int width, int height, boolean useScoreToColorBkg,
+																					boolean decode, String tmpDir, boolean useCache, String prefix, Result precalcResult) {
+		return getASRScoreForAudio(reqid, testAudioFile, sentence, null, width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix, precalcResult);
 	}
 	
 	public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence, Collection<String> lmSentences,
-			int width, int height, boolean useScoreToColorBkg,
-			boolean decode, String tmpDir, boolean useCache, String prefix) {
+																					int width, int height, boolean useScoreToColorBkg,
+																					boolean decode, String tmpDir, boolean useCache, String prefix, Result precalcResult) {
 		logger.debug("getASRScoreForAudio (" + serverProps.getLanguage() + ")" +
 				" scoring " + testAudioFile + " with sentence '" + sentence + "' req# " + reqid + (useCache ? " check cache" : " NO CACHE"));
 
@@ -618,7 +618,7 @@ public class AudioFileHelper implements CollationSort {
 		PretestScore pretestScore = getASRScoring(decode).scoreRepeat(
 				testAudioDir, removeSuffix(testAudioName),
 				sentence, lmSentences, 
-				pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix);
+				pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix, precalcResult);
 		pretestScore.setReqid(reqid);
 
 		return pretestScore;
@@ -644,7 +644,7 @@ public class AudioFileHelper implements CollationSort {
 	}
 
 	/**
-	 * @see #getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean, String)
+	 * @see #getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean, String, Result)
 	 * @param testAudioFile
 	 * @return
 	 */
@@ -793,7 +793,7 @@ public class AudioFileHelper implements CollationSort {
 		}
 	}
 	/**
-	 * @see #getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean, String)
+	 * @see #getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean, String, Result)
 	 */
 	private static class DirAndName {
 		private final String testAudioFile;
