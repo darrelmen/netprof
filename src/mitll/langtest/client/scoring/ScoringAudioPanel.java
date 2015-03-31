@@ -14,6 +14,7 @@ import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Asks server to score the audio.  Gets back transcript image URLs, phonem scores and end times.
@@ -159,14 +160,17 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    */
   void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
                  boolean scoredBefore, String path) {
-    if (result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT) != null) {
-      showImageAndCheck(result.getsTypeToImage().get(NetPronImageType.WORD_TRANSCRIPT), wordTranscript);
+    Map<NetPronImageType, String> netPronImageTypeStringMap = result.getsTypeToImage();
+    String words = netPronImageTypeStringMap.get(NetPronImageType.WORD_TRANSCRIPT);
+    if (words != null) {
+      showImageAndCheck(words, wordTranscript);
     }
     else {
       wordTranscript.image.setUrl(IMAGES_REDX_PNG);
     }
-    if (result.getsTypeToImage().get(NetPronImageType.PHONE_TRANSCRIPT) != null) {
-      showImageAndCheck(result.getsTypeToImage().get(NetPronImageType.PHONE_TRANSCRIPT), phoneTranscript);
+    String phones = netPronImageTypeStringMap.get(NetPronImageType.PHONE_TRANSCRIPT);
+    if (phones != null) {
+      showImageAndCheck(phones, phoneTranscript);
     }
     else {
       phoneTranscript.image.setUrl(IMAGES_REDX_PNG);
