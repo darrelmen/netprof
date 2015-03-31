@@ -1,17 +1,24 @@
 package mitll.langtest.server.scoring;
 
+import audio.image.AudioImage;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
 import audio.image.TranscriptReader;
 import audio.imagewriter.EventAndFileInfo;
 import audio.imagewriter.TranscriptWriter;
+import com.google.gwt.user.client.ui.Image;
 import mitll.langtest.shared.scoring.NetPronImageType;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Base class for the two types of scoring : DTW (Dynamic Time Warping, using "sv") and ASR (Speech Recognition).
@@ -101,6 +108,63 @@ public abstract class Scoring {
 					imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, decode && useWebservice);
 		}
 	}
+
+	protected EventAndFileInfo writeTranscriptsCached(String imageOutDir, int imageWidth, int imageHeight,
+																							String audioFileNoSuffix, boolean useScoreToColorBkg,
+																							String prefix, String suffix, boolean decode,
+																							String phoneLab, String wordLab, boolean useWebservice,JSONObject object) {
+		String pathname = audioFileNoSuffix + ".wav";
+		pathname = prependDeploy(pathname);
+		if (!new File(pathname).exists()) {
+			logger.error("writeTranscripts : can't find " + pathname);
+			return new EventAndFileInfo();
+		}
+		imageOutDir = deployPath + File.separator + imageOutDir;
+
+		boolean foundATranscript = false;
+		// These may not all exist. The speech file is created only by multisv right now.
+		String phoneLabFile  = prependDeploy(audioFileNoSuffix + ".phones.lab");
+		Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
+
+		if(phoneLab != null) {
+			logger.debug("phoneLab: " + phoneLab);
+			typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLab);
+			foundATranscript = true;
+		}
+		if(wordLab != null) {
+			logger.debug("wordLab: " + wordLab);
+			typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLab);
+			foundATranscript = true;
+		}
+		List<ImageType> imageTypes = Arrays.asList(ImageType.PHONE_TRANSCRIPT, ImageType.WORD_TRANSCRIPT);
+
+		if (!foundATranscript) {
+			logger.error("no label files found, e.g. " + phoneLabFile);
+		}
+
+		if (decode || imageWidth < 0) {  // hack to skip image generation
+			return getEventInfo(typeToFile, decode && useWebservice);
+		} else {
+			Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = null;
+			return new TranscriptWriter().getEventAndFileInfo(pathname,
+					imageOutDir, imageWidth, imageHeight, imageTypes, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, typeToEvent);
+		}
+	}
+
+
+	/**
+	 * @see ASRScoring#getPretestScore
+	 * @param imageOutDir
+	 * @param imageWidth
+	 * @param imageHeight
+	 * @param audioFileNoSuffix
+	 * @param useScoreToColorBkg
+	 * @param prefix
+	 * @param suffix
+	 * @param decode
+	 * @param useWebservice
+	 * @return
+	 */
 	protected EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
 			String audioFileNoSuffix, boolean useScoreToColorBkg,
 			String prefix, String suffix, boolean decode, boolean useWebservice) {
@@ -139,6 +203,68 @@ public abstract class Scoring {
 		} else {
 			return new TranscriptWriter().writeTranscripts(pathname,
 					imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, decode && useWebservice);
+		}
+	}
+
+	protected EventAndFileInfo writeTranscriptsCached(String imageOutDir, int imageWidth, int imageHeight,
+																							String audioFileNoSuffix, boolean useScoreToColorBkg,
+																							String prefix, String suffix, boolean decode, boolean useWebservice,JSONObject object) {
+		String pathname = audioFileNoSuffix + ".wav";
+		pathname = prependDeploy(pathname);
+		if (!new File(pathname).exists()) {
+			logger.error("writeTranscripts : can't find " + pathname);
+			return new EventAndFileInfo();
+		}
+		imageOutDir = deployPath + File.separator + imageOutDir;
+
+	//	boolean foundATranscript = false;
+		// These may not all exist. The speech file is created only by multisv right now.
+		String phoneLabFile  = prependDeploy(audioFileNoSuffix + ".phones.lab");
+		Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
+		if (new File(phoneLabFile).exists()) {
+			typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
+		//	foundATranscript = true;
+		}
+		String wordLabFile   = prependDeploy(audioFileNoSuffix + ".words.lab");
+		if (new File(wordLabFile).exists()) {
+			typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
+			//foundATranscript = true;
+		}
+		String speechLabFile = prependDeploy(audioFileNoSuffix + ".speech.lab");
+		if (new File(speechLabFile).exists()) {
+		//	foundATranscript = true;
+			typeToFile.put(ImageType.SPEECH_TRANSCRIPT, speechLabFile);
+		}
+/*		if (!foundATranscript) {
+			logger.error("no label files found, e.g. " + phoneLabFile);
+		}*/
+
+		if (decode || imageWidth < 0) {  // hack to skip image generation
+			return getEventInfo(typeToFile, decode && useWebservice); // if align, don't use webservice regardless
+		} else {
+			//List<ImageType> imageTypes = Arrays.asList(ImageType.PHONE_TRANSCRIPT, ImageType.WORD_TRANSCRIPT);
+
+			Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
+
+			TreeMap<Float, TranscriptEvent> value = new TreeMap<Float, TranscriptEvent>();
+			typeToEvent.put(ImageType.PHONE_TRANSCRIPT, value);
+
+
+
+			return new TranscriptWriter().getEventAndFileInfo(pathname,
+					imageOutDir, imageWidth, imageHeight, typeToFile.keySet(), SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, typeToEvent);
+		}
+	}
+
+	private void parseJson(Map<String, Map<String, Float>> eventScores, JSONObject jsonObject, String words1, String w1) {
+		JSONArray words = jsonObject.getJSONArray(words1);
+		TreeMap<String, Float> wordEvents = new TreeMap<String, Float>();
+		eventScores.put(words1, wordEvents);
+		for (int i = 0; i < words.size(); i++) {
+			JSONObject word = words.getJSONObject(i);
+			String w = word.getString(w1);
+			String s = word.getString("s");
+			wordEvents.put(w,Float.parseFloat(s));
 		}
 	}
 
