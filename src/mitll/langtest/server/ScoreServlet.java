@@ -1148,7 +1148,7 @@ public class ScoreServlet extends DatabaseServlet {
   private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                            String exerciseID) {
     return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, 128, 128, false,
-        false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID);
+        false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, null);
   }
 
   private PretestScore getASRScoreForAudioNoCache(int reqid, String testAudioFile, String sentence,
@@ -1156,7 +1156,7 @@ public class ScoreServlet extends DatabaseServlet {
     //  logger.debug("getASRScoreForAudioNoCache for " + testAudioFile + " under " + sentence);
 
     return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, 128, 128, false,
-        false, Files.createTempDir().getAbsolutePath(), false, exerciseID);
+        false, Files.createTempDir().getAbsolutePath(), false, exerciseID, null);
   }
 
   /**
