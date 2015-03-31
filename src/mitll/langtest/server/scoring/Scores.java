@@ -22,7 +22,7 @@ public class Scores {
   public Scores() { eventScores = Collections.emptyMap(); }
   /**
    *
-   * @param hydraScore
+   * @param hydecScore
    * @param eventScores
    */
   public Scores(float hydecScore, Map<String, Map<String, Float>> eventScores) {
@@ -39,17 +39,20 @@ public class Scores {
 		eventScores.get("phones").put(split[i], Float.parseFloat(split[i+1]));
 	}
   }*/
-  
-  public Scores(String[] scoreSplit) {
-	this.eventScores = new HashMap<String, Map<String, Float>>();
-	//String[] split = scoreStr.split(";");
-	float s = Float.parseFloat(scoreSplit[0]);
-	this.hydraScore = Float.isNaN(s) ? 0.0f : s;//Float.parseFloat(scoreSplit[0]);
-	eventScores.put("phones", new HashMap<String, Float>());
-	for(int i = 1; i < scoreSplit.length; i+=2) {
-		eventScores.get("phones").put(scoreSplit[i], Float.parseFloat(scoreSplit[i+1]));
-	}
-  }
 
-  public String toString() { return "Scores score " + hydraScore + " events " + eventScores; }
+	public Scores(String[] scoreSplit) {
+		//String[] split = scoreStr.split(";");
+		float s = Float.parseFloat(scoreSplit[0]);
+		this.hydraScore = Float.isNaN(s) ? 0.0f : s;//Float.parseFloat(scoreSplit[0]);
+
+		this.eventScores = new HashMap<String, Map<String, Float>>();
+		eventScores.put("phones", new HashMap<String, Float>());
+		for (int i = 1; i < scoreSplit.length; i += 2) {
+			eventScores.get("phones").put(scoreSplit[i], Float.parseFloat(scoreSplit[i + 1]));
+		}
+	}
+
+	public String toString() {
+		return "Scores score " + hydraScore + " events " + eventScores;
+	}
 }
