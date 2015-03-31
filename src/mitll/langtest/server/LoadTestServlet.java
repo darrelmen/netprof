@@ -3,7 +3,6 @@ package mitll.langtest.server;
 import com.google.common.io.Files;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.SectionNode;
@@ -551,7 +550,7 @@ public class LoadTestServlet extends DatabaseServlet {
     PretestScore asrScoreForAudio = null;
     try {
       asrScoreForAudio = audioFileHelper.getASRScoreForAudio(-1, testAudioFile, sentence, 128, 128, false,
-          false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), "");
+          false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), "", null);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
