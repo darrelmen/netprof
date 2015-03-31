@@ -26,7 +26,6 @@ import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
-import net.sf.json.JSONArray;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
@@ -50,7 +49,7 @@ import java.util.*;
  */
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, AutoCRTScoring, LogAndNotify, LoadTesting {
-  private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
+	private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
   public static final String DATABASE_REFERENCE = "databaseReference";
@@ -59,8 +58,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final String ENGLISH = "English";
   private static final int MAX = 30;
   private static final int SLOW_MILLIS = 40;
+	public static final boolean DO_REF_DECODE = true;
 
-  private DatabaseImpl db;
+	private DatabaseImpl db;
   private AudioFileHelper audioFileHelper;
   private String relativeConfigDir;
   private String configDir;
@@ -942,8 +942,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
 		long then = System.currentTimeMillis();
 
+		String[] split = testAudioFile.split(File.separator);
+		String answer = split[split.length - 1];
+		Result result = db.getRefResultDAO().getResult(exerciseID, answer.replaceAll(".mp3",".wav"));
+		logger.debug("asking for " + exerciseID + " and " + split + "=" +answer + " found " + result);
+
 		PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-				false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID);
+				false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, null);
 		long timeToRunHydec = System.currentTimeMillis() - then;
 
 		logger.debug("getASRScoreForAudio : scoring exid " +exerciseID +
@@ -1989,51 +1994,86 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 			logger.error("couldn't load database " +e,e);
 		}
     getExercises();
-		writeRefDecode();
+
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				writeRefDecode();
+			}
+		}).start();
 	}
 
 	private void writeRefDecode() {
-		if (false) {
-			Map<String, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
+		if (DO_REF_DECODE) {
+  		Map<String, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
 			String installPath = pathHelper.getInstallPath();
 
 			Set<String> decodedFiles = new HashSet<String>();
 
 			for (Result res : db.getRefResultDAO().getResults()) {
-				String[] bestAudios = res.getAnswer().split("bestAudio");
+				String[] bestAudios = res.getAnswer().split(File.separator);
 				if (bestAudios.length > 1) {
-					String bestAudio = bestAudios[1];
-					logger.debug("added " + bestAudio);
+					String bestAudio = bestAudios[bestAudios.length-1];
+			//		logger.debug("added " + bestAudio);
 					decodedFiles.add(bestAudio);
-					logger.debug("previously found " + res);
+				//	logger.debug("previously found " + res);
 				}
 			}
 
-			// TODO : check if result is already in refresult table before doing decoding
+			// TODOz : check if result is already in refresult table before doing decoding
 			int count = 0;
 			for (CommonExercise exercise : getExercises()) {
-				List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
+
+		  	List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
 				if (audioAttributes != null) {
-					int c = 0;
-					int t = 0;
-					for (AudioAttribute attribute : audioAttributes) {
-						if (!attribute.isExampleSentence()) {
-							logger.debug("ref " + attribute.getAudioRef());
-							if (decodedFiles.contains(attribute.getAudioRef())) {
-								c++;
-							}
-							t++;
-						}
-					}
-					if (c < t) {
-						db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
-						if (count++ < 2)
-							audioFileHelper.decodeRefs(exercise);
-					}
+//					logger.warn("hmm - audio recorded for " + )
+					db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
+				}
+
+				Set<Long> preferredVoices = serverProps.getPreferredVoices();
+				Map<MiniUser, List<AudioAttribute>> malesMap   = exercise.getMostRecentAudio(true, preferredVoices);
+				Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
+				Collection<AudioAttribute> defaultUserAudio    = exercise.getDefaultUserAudio();
+
+				List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
+				boolean maleEmpty = maleUsers.isEmpty();
+				List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
+				boolean femaleEmpty = femaleUsers.isEmpty();
+				femalesMap.get(femaleUsers.get(0));
+
+				if (!maleEmpty) {
+					count = doDecode(/*installPath,*/ decodedFiles, count, exercise, malesMap.get(maleUsers.get(0)));
+				} else if (!femaleEmpty) {
+					count = doDecode(/*installPath,*/ decodedFiles, count, exercise, femalesMap.get(femaleUsers.get(0)));
+				} else {
+					count = doDecode(/*installPath,*/ decodedFiles, count, exercise, defaultUserAudio);
 				}
 			}
 		}
+	}
 
+	private int doDecode(//String installPath,
+											 Set<String> decodedFiles, int count, CommonExercise exercise, Collection<AudioAttribute> audioAttributes) {
+		int c = 0;
+		int t = 0;
+		for (AudioAttribute attribute : audioAttributes) {
+      if (!attribute.isExampleSentence()) {
+				String[] bestAudios = attribute.getAudioRef().split(File.separator);
+				String bestAudio = bestAudios[bestAudios.length-1];
+
+//				logger.debug("ref " + attribute.getAudioRef() + " = " + bestAudio	);
+        if (decodedFiles.contains(bestAudio)) {
+          c++;
+        }
+        t++;
+      }
+    }
+		if (c < t) {
+//      db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
+      //if (count++ < 2)
+        audioFileHelper.decodeRefs(exercise);
+    }
+		return count;
 	}
 
 	public String getWebserviceIP() {
