@@ -3,7 +3,6 @@ package mitll.langtest.server.scoring;
 import Utils.Log;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
-import audio.imagewriter.ImageWriter;
 
 import audio.imagewriter.EventAndFileInfo;
 import com.google.common.cache.Cache;
@@ -16,10 +15,13 @@ import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
@@ -33,15 +35,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Does ASR scoring using hydec.  Results in either alignment or decoding, depending on the mode.
@@ -297,29 +291,6 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 		return new PhoneInfo(firstPron,uphones);
 	}
 
-	/* public static class PhoneInfo {
-
-    private final List<String> firstPron;
-    private final Set<String> phoneSet;
-
-    public PhoneInfo(List<String> firstPron, Set<String> phoneSet) {
-      this.firstPron = firstPron;
-      this.phoneSet = phoneSet;
-    }
-
-    public List<String> getFirstPron() {
-      return firstPron;
-    }
-
-    public Set<String> getPhoneSet() {
-      return phoneSet;
-    }
-
-    public String toString() {
-      return "Phones " + getPhoneSet() + " " + getFirstPron();
-    }
-  }*/
-
   /**
    * For chinese, maybe later other languages.
    * @param longPhrase
@@ -348,24 +319,26 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @param useScoreForBkgColor
    * @param useCache
    * @param prefix
-   * @return PretestScore object
+   * @param precalcResult
+	 * @return PretestScore object
    */
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-                                  String sentence, Collection<String> lmSentences, String imageOutDir,
-                                  int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-                                  boolean decode, String tmpDir,
-                                  boolean useCache, String prefix) {
+																	String sentence, Collection<String> lmSentences, String imageOutDir,
+																	int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+																	boolean decode, String tmpDir,
+																	boolean useCache, String prefix, Result precalcResult) {
     return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
-      sentence,
-      scoringDir, imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
-      decode, tmpDir,
-      useCache, prefix);
+				sentence,
+				scoringDir,
+				imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
+				decode, tmpDir,
+				useCache, prefix, precalcResult);
   }
 
   /**
    * Use hydec to do scoring<br></br>
    * <p/>
-   * Some magic happens in {@link Scoring#writeTranscripts(String, int, int, String, boolean, String, String, boolean)} where .lab files are
+   * Some magic happens in {@link Scoring#writeTranscripts} where .lab files are
    * parsed to determine the start and end times for each event, which lets us both create images that
    * show the location of the words and phonemes, and for decoding, the actual reco sentence returned. <br></br>
    * <p/>
@@ -387,19 +360,20 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @param tmpDir                where to run hydec
    * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
    * @param prefix                on the names of the image files, if they are written
-   * @return score info coming back from alignment/reco
-   * @see #scoreRepeat
+   * @param precalcResult
+	 * @return score info coming back from alignment/reco
+   * @see ASR#scoreRepeat
    */
   private PretestScore scoreRepeatExercise(String testAudioDir,
-                                           String testAudioFileNoSuffix,
-                                           String sentence,
-                                           String scoringDir,
+																					 String testAudioFileNoSuffix,
+																					 String sentence,
+																					 String scoringDir,
 
-                                           String imageOutDir,
-                                           int imageWidth, int imageHeight,
-                                           boolean useScoreForBkgColor,
-                                           boolean decode, String tmpDir,
-                                           boolean useCache, String prefix) {
+																					 String imageOutDir,
+																					 int imageWidth, int imageHeight,
+																					 boolean useScoreForBkgColor,
+																					 boolean decode, String tmpDir,
+																					 boolean useCache, String prefix, Result precalcResult) {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
 
@@ -433,22 +407,68 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
       noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
     }
 
-    Scores scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
+		Scores scores;
+		JSONObject jsonObject = null;
+		if (precalcResult == null) {
+			 scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
+		}
+		else {
+			Map<String, Map<String, Float>> eventScores = new HashMap<String, Map<String, Float>>();
+			 jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
+
+			String words1 = "words";
+			String w1 = "w";
+			parseJson(eventScores, jsonObject, words1, w1);
+			//JSONArray phones = (JSONArray)jsonObject.get("phones");
+
+			parseJson(eventScores, jsonObject, "phones", "p");
+
+			scores = new Scores(precalcResult.getPronScore(), eventScores);
+			logger.debug("got cached scores " + scores);
+		}
     if (scores == null) {
       logger.error("getScoreForAudio failed to generate scores.");
       return new PretestScore(0.01f);
     }
-    return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile, scores);
+    return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile, scores,jsonObject);
   }
 
+	private void parseJson(Map<String, Map<String, Float>> eventScores, JSONObject jsonObject, String words1, String w1) {
+		JSONArray words = jsonObject.getJSONArray(words1);
+		TreeMap<String, Float> wordEvents = new TreeMap<String, Float>();
+		eventScores.put(words1, wordEvents);
+		for (int i = 0; i < words.size(); i++) {
+      JSONObject word = words.getJSONObject(i);
+      String w = word.getString(w1);
+      String s = word.getString("s");
+      wordEvents.put(w,Float.parseFloat(s));
+    }
+	}
+
+	/**
+	 * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result)
+	 * @param imageOutDir
+	 * @param imageWidth
+	 * @param imageHeight
+	 * @param useScoreForBkgColor
+	 * @param decode
+	 * @param prefix
+	 * @param noSuffix
+	 * @param wavFile
+	 * @param scores
+	 * @return
+	 */
   private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-                                       boolean decode, String prefix, String noSuffix, File wavFile, Scores scores) {
-    EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
-      useScoreForBkgColor,
-      prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, false);
-    Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
-    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
-    String recoSentence = getRecoSentence(eventAndFileInfo);
+																			 boolean decode, String prefix, String noSuffix, File wavFile, Scores scores, JSONObject jsonObject) {
+		EventAndFileInfo eventAndFileInfo = jsonObject == null ? writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
+				useScoreForBkgColor,
+				prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, false) :
+				writeTranscriptsCached(imageOutDir, imageWidth, imageHeight, noSuffix,
+						useScoreForBkgColor,
+						prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, false, jsonObject);
+		Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
+		Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
+		String recoSentence = getRecoSentence(eventAndFileInfo);
 
     double duration = new AudioCheck().getDurationInSeconds(wavFile);
     return new PretestScore(scores.hydraScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence, (float) duration);
@@ -496,7 +516,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * The score per audio file is cached in {@link #audioToScore}
    *
    * @see #getScoreForAudio(String, String, String, String, boolean, String, boolean)
-   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String)
+   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result)
    * @param testAudioDir
    * @param testAudioFileNoSuffix
    * @param sentence  only for align
@@ -522,7 +542,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
   /**
    * @param lmSentences
    * @param background
-   * @see AutoCRTScoring#getASRScoreForAudio(java.io.File, java.util.Collection, int)
+   * @see AutoCRTScoring#getASRScoreForAudio(java.io.File, java.util.Collection)
    * @return
    */
   public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
