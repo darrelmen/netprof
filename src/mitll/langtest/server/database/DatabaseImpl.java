@@ -24,6 +24,7 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -425,7 +426,7 @@ public class DatabaseImpl implements Database {
           logger.error("bad user id for " + toCopy);
         }
         logger.debug("\t copying " + toCopy);
-        audioDAO.add((int) toCopy.getUserid(), toCopy.getAudioRef(), overlayID, toCopy.getTimestamp(), toCopy.getAudioType(), toCopy.getDuration());
+        audioDAO.add((int) toCopy.getUserid(), toCopy.getAudioRef(), overlayID, toCopy.getTimestamp(), toCopy.getAudioType(), toCopy.getDurationInMillis());
       }*/
     }
 
@@ -1071,12 +1072,22 @@ public class DatabaseImpl implements Database {
         durationInMillis, correct, score, deviceType, device, scoreJson, recordedWithFlash);
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#getRefAudioAnswerDecoding
+   * @param userID
+   * @param exerciseID
+   * @param audioFile
+   * @param durationInMillis
+   * @param correct
+   * @param score
+   * @param scoreJson
+   * @return
+   */
   public long addRefAnswer(int userID, String exerciseID,
                            String audioFile,
                            int durationInMillis, boolean correct, float score,
-                           String scoreJson) {
-    return refresultDAO.addAnswer(this, userID, exerciseID, "", audioFile,
-        durationInMillis, correct, score, scoreJson);
+                           String scoreJson, float alignScore, String alignJson) {
+    return refresultDAO.addAnswer(this, userID, exerciseID, audioFile,  durationInMillis, correct, score, scoreJson,alignScore,alignJson);
   }
 
 
