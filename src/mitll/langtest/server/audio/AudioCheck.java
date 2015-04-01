@@ -180,6 +180,11 @@ public class AudioCheck {
       this(validity, 0d);
     }
 
+    public ValidityAndDur(AudioAnswer.Validity validity, int durInMillis) {
+      this.validity = validity;
+      this.durationInMillis = durInMillis;
+    }
+
     public ValidityAndDur(AudioAnswer.Validity validity, double dur) {
       this.validity = validity;
       this.durationInMillis = (int) (1000d * dur);
