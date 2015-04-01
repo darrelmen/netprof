@@ -103,14 +103,13 @@ public class EventDAO extends DAO {
     finish(database, connection, statement);
   }
 
-
   /**
    * <p/>
    * Uses return generated keys to get the user id
    *
    * @see mitll.langtest.server.database.DatabaseImpl#logEvent(String, String, String, String, long, String, String)
    */
-  public boolean add(Event event) throws SQLException {
+  public synchronized boolean add(Event event) throws SQLException {
     Connection connection = getConnection();
     boolean val = true;
     try {
@@ -146,6 +145,7 @@ public class EventDAO extends DAO {
       statement.setString(i++, event.getDevice());
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
 
+      logger.debug("Add " +event);
       int j = statement.executeUpdate();
 
       if (j != 1) {
