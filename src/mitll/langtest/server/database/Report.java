@@ -436,7 +436,7 @@ public class Report {
     List<AudioAttribute> audioAttributes = exToAudio.get(result.getExerciseID());
     if (audioAttributes != null) {
       for (AudioAttribute audioAttribute : audioAttributes) {
-        if (audioAttribute.getDuration() == result.getDurationInMillis()) {
+        if (audioAttribute.getDurationInMillis() == result.getDurationInMillis()) {
           long userid = result.getUserid();
           if (audioAttribute.getUser().getId() == userid) {
             skip = true;
