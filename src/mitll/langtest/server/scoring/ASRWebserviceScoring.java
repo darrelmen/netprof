@@ -475,7 +475,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		// reference trans	
 
 		String cleaned = transcript.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ");
-		logger.debug("cleaned sentence: " + cleaned);
+		//logger.debug("cleaned sentence: " + cleaned);
 		if (isMandarin) {
 			cleaned = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") + getSegmented(transcript.trim()); // segmentation method will filter out the UNK model
 		}
