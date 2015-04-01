@@ -96,21 +96,23 @@ public class ButtonFactory implements EventLogger {
     try {
       com.google.gwt.core.client.Scheduler.get().scheduleDeferred(new com.google.gwt.core.client.Scheduler.ScheduledCommand() {
         public void execute() {
-          service.logEvent(widgetID, widgetType, exid, context, userid, props.getTurkID(), controller.getBrowserInfo(),
-              new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              if (!caught.getMessage().trim().equals("0")) {
-                // System.err.println("FAILED to send event for " + widgetID + " message '" + caught.getMessage() +"'");
-                caught.printStackTrace();
-              }
-            }
+          if (props != null && controller != null) {
+            service.logEvent(widgetID, widgetType, exid, context, userid, props.getTurkID(), controller.getBrowserInfo(),
+                new AsyncCallback<Void>() {
+                  @Override
+                  public void onFailure(Throwable caught) {
+                    if (!caught.getMessage().trim().equals("0")) {
+                      // System.err.println("FAILED to send event for " + widgetID + " message '" + caught.getMessage() +"'");
+                      caught.printStackTrace();
+                    }
+                  }
 
-            @Override
-            public void onSuccess(Void result) {
-              //System.out.println("sent event for " + widgetID);
-            }
-          });
+                  @Override
+                  public void onSuccess(Void result) {
+                    //System.out.println("sent event for " + widgetID);
+                  }
+                });
+          }
         }
       });
     } catch (Exception e) {
