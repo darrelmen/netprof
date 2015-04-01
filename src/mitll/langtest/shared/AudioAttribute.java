@@ -31,7 +31,7 @@ public class AudioAttribute implements IsSerializable {
   private String exid;
   private long userid;
   private long timestamp;
-  private long duration;
+  private long durationInMillis;
 
   // 9/24/14 : setting it here may stop intermittent gwt rpc exceptions
   private Map<String, String> attributes = new HashMap<String, String>();
@@ -47,20 +47,20 @@ public class AudioAttribute implements IsSerializable {
    * @param exid
    * @param audioRef
    * @param timestamp
-   * @param duration
+   * @param durationInMillis
    * @param type
    * @param user
    */
   public AudioAttribute(int uniqueID, long userid,
                         String exid,
                         String audioRef,
-                        long timestamp, long duration, String type, MiniUser user) {
+                        long timestamp, long durationInMillis, String type, MiniUser user) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.exid = exid;
     this.audioRef = audioRef;
     this.timestamp = timestamp;
-    this.duration = duration;
+    this.durationInMillis = durationInMillis;
     this.setUser(user);
     if (type.equals(Result.AUDIO_TYPE_REGULAR)) markRegular();
     else if (type.equals(Result.AUDIO_TYPE_SLOW)) markSlow();
@@ -215,8 +215,8 @@ public class AudioAttribute implements IsSerializable {
   public long getTimestamp() {
     return timestamp;
   }
-  public long getDuration() {
-    return duration;
+  public long getDurationInMillis() {
+    return durationInMillis;
   }
   public int getUniqueID() { return uniqueID;  }
   public void setExid(String exid) {  this.exid = exid;  }
