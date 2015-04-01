@@ -113,6 +113,11 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param l
    */
   public void addScoreListener(ScoreListener l) { this.scoreListener = l;}
+
+  /**
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult(PretestScore, ImageAndCheck, ImageAndCheck, boolean, String)
+   * @param resultID
+   */
   public void setResultID(long resultID) { this.resultID = resultID;}
 
   /**
