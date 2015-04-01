@@ -227,10 +227,9 @@ public class DAO {
    *
    *
    */
-/*
-  void drop(String table) {
+  void drop(String table,Connection connection) {
     try {
-      Connection connection = database.getConnection();
+   //   Connection connection = database.getConnection("someone");
       PreparedStatement statement = connection.prepareStatement("DROP TABLE if exists " + table);
       if (!statement.execute()) {
         logger.error("couldn't drop table?");
@@ -242,7 +241,7 @@ public class DAO {
       e.printStackTrace();
     }
   }
-*/
+
 
   /**
    * Does not seem to work with h2
