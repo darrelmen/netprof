@@ -51,6 +51,8 @@ public class RefResultDAO extends DAO {
 
   private static final String YES = "Yes";
   private static final String NO = "No";
+  private static final String ALIGNSCORE = "ALIGNSCORE";
+  private static final String ALIGNJSON = "ALIGNJSON";
   private final LogAndNotify logAndNotify;
 
 //  private final boolean debug = false;
@@ -72,20 +74,19 @@ public class RefResultDAO extends DAO {
    * @param database
    * @param userID
    * @param id
-   * @param answer
    * @param audioFile
    * @param correct
    * @param pronScore
    * @param scoreJson
-   *  @return id of new row in result table
+   * @return id of new row in result table
    */
-  public long addAnswer(Database database, int userID, String id, String answer,
+  public long addAnswer(Database database, int userID, String id, //String answer,
                         String audioFile, int durationInMillis,
-                        boolean correct, float pronScore, String scoreJson) {
+                        boolean correct, float pronScore, String scoreJson, float alignScore, String alignJson) {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
-      long newid = addAnswerToTable(connection, userID, id, answer, audioFile, durationInMillis, correct, pronScore,  scoreJson);
+      long newid = addAnswerToTable(connection, userID, id, "", audioFile, durationInMillis, correct, pronScore,  scoreJson, alignScore, alignJson);
       long now = System.currentTimeMillis();
       if (now - then > 100) System.out.println("took " + (now - then) + " millis to record answer.");
       return newid;
@@ -117,7 +118,7 @@ public class RefResultDAO extends DAO {
   private long addAnswerToTable(Connection connection, int userid, String id,
                                 String answer, String audioFile,
                                  int durationInMillis,
-                                boolean correct, float pronScore,  String scoreJson
+                                boolean correct, float pronScore,  String scoreJson, float alignScore, String alignJson
                                 ) throws SQLException {
     //  logger.debug("adding answer for exid #" + id + " correct " + correct + " score " + pronScore + " audio type " +audioType + " answer " + answer);
 
@@ -131,8 +132,10 @@ public class RefResultDAO extends DAO {
         ResultDAO.DURATION + "," +
         ResultDAO.CORRECT + "," +
         ResultDAO.PRON_SCORE + "," +
-        ResultDAO.SCORE_JSON +
-        ") VALUES(?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+        ResultDAO.SCORE_JSON + ","+
+        ALIGNSCORE + ","+
+        ALIGNJSON +
+        ") VALUES(?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
     int i = 1;
 
@@ -148,6 +151,8 @@ public class RefResultDAO extends DAO {
     statement.setBoolean(i++, correct);
     statement.setFloat(i++, pronScore);
     statement.setString(i++, scoreJson);
+    statement.setFloat(i++, alignScore);
+    statement.setString(i++, alignJson);
 
     statement.executeUpdate();
 
@@ -292,13 +297,20 @@ public class RefResultDAO extends DAO {
    * @see DatabaseImpl#initializeDAOs
    */
   void createResultTable(Connection connection) throws SQLException {
+//    drop(REFRESULT, connection); // TODO JUST FOR NOW
     createTable(connection);
 
-    database.closeConnection(connection);
-
+    Collection<String> columns = getColumns(REFRESULT);
+    if (!columns.contains(ALIGNSCORE.toLowerCase())) {
+//      createTable(connection);
+      addVarchar(connection,REFRESULT,ALIGNSCORE);
+      addVarchar(connection,REFRESULT,ALIGNJSON);
+    }
     createIndex(database, Database.EXID, REFRESULT);
     // seems to complain about index on CLOB???
-    createIndex(database, ANSWER, REFRESULT);
+   // createIndex(database, ANSWER, REFRESULT);
+
+    database.closeConnection(connection);
   }
 
   /**
@@ -321,11 +333,13 @@ public class RefResultDAO extends DAO {
         USERID + " INT, " +
         Database.EXID + " VARCHAR, " +
         Database.TIME + " TIMESTAMP, " +// " AS CURRENT_TIMESTAMP," +
-        "answer CLOB," +
+        "answer VARCHAR," +
         DURATION + " INT," +
         CORRECT + " BOOLEAN," +
         PRON_SCORE + " FLOAT," +
-        SCORE_JSON + " VARCHAR" +
+        SCORE_JSON + " VARCHAR, " +
+        ALIGNSCORE + " VARCHAR," +
+        ALIGNJSON + " VARCHAR" +
         ")");
     statement.execute();
     statement.close();
