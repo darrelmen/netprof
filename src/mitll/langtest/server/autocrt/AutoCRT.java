@@ -132,12 +132,12 @@ public class AutoCRT {
 	 * @return
 	 */
   private boolean isCorrect(Collection<String> answerSentences, String recoSentence) {
-    logger.debug("isCorrect - expected " + answerSentences + " vs heard " + recoSentence);
+    //logger.debug("isCorrect - expected " + answerSentences + " vs heard " + recoSentence);
 
     List<String> recoTokens = svd.getTokens(recoSentence);
     for (String answer : answerSentences) {
       String converted = answer.replaceAll("-", " ").replaceAll("\\.\\.\\.", " ").replaceAll("\\.", "").replaceAll(":", "").toLowerCase();
-      logger.debug("isCorrect - converted " + converted + " vs " + answer);
+     // logger.debug("isCorrect - converted " + converted + " vs " + answer);
 
       List<String> answerTokens = svd.getTokens(converted);
       if (answerTokens.size() == recoTokens.size()) {
@@ -148,12 +148,12 @@ public class AutoCRT {
           //    logger.debug("comparing '" + s + "' " +s.length()+ " to '" + anotherString  +"' "  +anotherString.length());
           same = s.equalsIgnoreCase(anotherString);
           if (!same) {
-            logger.debug("comparing '" + s + "' " + s.length() + " to '" + anotherString + "' " + anotherString.length());
+            //logger.debug("comparing '" + s + "' " + s.length() + " to '" + anotherString + "' " + anotherString.length());
           }
         }
         if (same) return true;
       } else {
-        logger.debug("not same number of tokens " + answerTokens + " " + answerTokens.size() + " vs " + recoTokens + " " + recoTokens.size());
+        //logger.debug("not same number of tokens " + answerTokens + " " + answerTokens.size() + " vs " + recoTokens + " " + recoTokens.size());
       }
     }
     return false;
