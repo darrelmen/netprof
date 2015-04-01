@@ -79,6 +79,7 @@ public class ServerProperties {
   private static final String PREFERRED_VOICES = "preferredVoices";
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
   private static final String ENABLE_ALL_USERS = "enableAllUsers";
+  private static final String DO_DECODE = "dodecode";
 
   private static final List<String> DLI_APPROVERS = Arrays.asList(
       "Tamas",
@@ -274,7 +275,9 @@ public class ServerProperties {
   public String getApprovalEmailAddress() {
     return props.getProperty(APPROVAL_EMAIL, DEFAULT_EMAIL);
   }
-
+  public boolean shouldDoDecode() {
+    return getDefaultFalse(DO_DECODE);
+  }
   public int getAudioOffset() {
     try {
       return Integer.parseInt(props.getProperty(AUDIO_OFFSET));
