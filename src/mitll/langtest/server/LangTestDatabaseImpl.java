@@ -939,7 +939,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	// JESS: this is entered for the normal stuff (I think this is alignment)
 	public PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
 			int width, int height, boolean useScoreToColorBkg, String exerciseID) {
-
 		long then = System.currentTimeMillis();
 
 		String[] split = testAudioFile.split(File.separator);
@@ -1967,8 +1966,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail());
 	}
 
+	private boolean stopDecode = false;
 	@Override
 	public void destroy() {
+		stopDecode = true;
 		super.destroy();
 		db.destroy(); // TODO : redundant with h2 shutdown hook?
 	}
@@ -1995,12 +1996,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		}
     getExercises();
 
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				writeRefDecode();
-			}
-		}).start();
+		if (serverProps.shouldDoDecode()) {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					writeRefDecode();
+				}
+			}).start();
+		}
+		else {
+			logger.debug(serverProps.getLanguage() + " not doing decode all");
+		}
 	}
 
 	private void writeRefDecode() {
@@ -2010,70 +2021,85 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
 			Set<String> decodedFiles = new HashSet<String>();
 
-			for (Result res : db.getRefResultDAO().getResults()) {
+			List<Result> results = db.getRefResultDAO().getResults();
+			for (Result res : results) {
 				String[] bestAudios = res.getAnswer().split(File.separator);
 				if (bestAudios.length > 1) {
 					String bestAudio = bestAudios[bestAudios.length-1];
 			//		logger.debug("added " + bestAudio);
 					decodedFiles.add(bestAudio);
+					if (stopDecode) return;
 				//	logger.debug("previously found " + res);
 				}
 			}
+			List<CommonExercise> exercises = getExercises();
+			logger.debug(serverProps.getLanguage() + " found " + results.size() +" previous ref results, checking " + exercises.size() +" exercises ");
 
+			if (stopDecode) logger.debug("Stop decode true");
 			// TODOz : check if result is already in refresult table before doing decoding
 			int count = 0;
-			for (CommonExercise exercise : getExercises()) {
+			int attrc = 0;
+			for (CommonExercise exercise : exercises) {
+				if (stopDecode) return;
 
 		  	List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
 				if (audioAttributes != null) {
 //					logger.warn("hmm - audio recorded for " + )
 					db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
+					attrc += audioAttributes.size();
 				}
 
 				Set<Long> preferredVoices = serverProps.getPreferredVoices();
-				Map<MiniUser, List<AudioAttribute>> malesMap   = exercise.getMostRecentAudio(true, preferredVoices);
+				Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
 				Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
-				Collection<AudioAttribute> defaultUserAudio    = exercise.getDefaultUserAudio();
+				Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
 
 				List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
 				boolean maleEmpty = maleUsers.isEmpty();
 				List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
 				boolean femaleEmpty = femaleUsers.isEmpty();
-				femalesMap.get(femaleUsers.get(0));
 
 				if (!maleEmpty) {
-					count = doDecode(/*installPath,*/ decodedFiles, count, exercise, malesMap.get(maleUsers.get(0)));
-				} else if (!femaleEmpty) {
-					count = doDecode(/*installPath,*/ decodedFiles, count, exercise, femalesMap.get(femaleUsers.get(0)));
-				} else {
-					count = doDecode(/*installPath,*/ decodedFiles, count, exercise, defaultUserAudio);
+					count += doDecode(decodedFiles, exercise, malesMap.get(maleUsers.get(0)));
+				}
+				if (!femaleEmpty) {
+					count += doDecode(decodedFiles, exercise, femalesMap.get(femaleUsers.get(0)));
+				} else if (maleEmpty) {
+					count += doDecode(decodedFiles, exercise, defaultUserAudio);
 				}
 			}
+			logger.debug("Out of " +attrc + " audio files, decoded " + count);
 		}
 	}
 
-	private int doDecode(//String installPath,
-											 Set<String> decodedFiles, int count, CommonExercise exercise, Collection<AudioAttribute> audioAttributes) {
-		int c = 0;
-		int t = 0;
+	private int doDecode(Set<String> decodedFiles, CommonExercise exercise, Collection<AudioAttribute> audioAttributes) {
+  	int count = 0;
+		List<AudioAttribute> toDecode = new ArrayList<AudioAttribute>();
 		for (AudioAttribute attribute : audioAttributes) {
-      if (!attribute.isExampleSentence()) {
-				String[] bestAudios = attribute.getAudioRef().split(File.separator);
-				String bestAudio = bestAudios[bestAudios.length-1];
+			if (!attribute.isExampleSentence()) {
+				String bestAudio = getFile(attribute);
+				if (!decodedFiles.contains(bestAudio)) {
+					toDecode.add(attribute);
+				}
+			}
+		}
+		for (AudioAttribute attribute : toDecode) {
+			if (stopDecode) return 0;
 
-//				logger.debug("ref " + attribute.getAudioRef() + " = " + bestAudio	);
-        if (decodedFiles.contains(bestAudio)) {
-          c++;
-        }
-        t++;
-      }
-    }
-		if (c < t) {
-//      db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
-      //if (count++ < 2)
-        audioFileHelper.decodeRefs(exercise);
-    }
+			try {
+				audioFileHelper.decodeOneAttribute(exercise, attribute);
+				count++;
+			} catch (Exception e) {
+				logger.error("Got " + e, e);
+			}
+		}
+
 		return count;
+	}
+
+	private String getFile(AudioAttribute attribute) {
+		String[] bestAudios = attribute.getAudioRef().split(File.separator);
+		return bestAudios[bestAudios.length - 1];
 	}
 
 	public String getWebserviceIP() {
