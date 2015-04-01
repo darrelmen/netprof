@@ -269,9 +269,16 @@ public class AudioFileHelper implements CollationSort {
 		return answer;
 	}
 
-	public void decodeRefs(CommonExercise exercise) {
-		for (AudioAttribute attribute : exercise.getAudioAttributes()) {
-			getRefAudioAnswerDecoding(exercise,(int)attribute.getUserid(),attribute.getAudioRef(),pathHelper.getAbsoluteFile(attribute.getAudioRef()),attribute.getDuration());
+	public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute) {
+		String audioRef = attribute.getAudioRef();
+		if (!audioRef.contains("context=")) {
+			PretestScore asrScoreForAudio = getASRScoreForAudio(0, pathHelper.getAbsoluteFile(audioRef).getAbsolutePath(), exercise.getRefSentence(), 128, 128, false,
+					false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exercise.getID(), null);
+
+			JSONObject json = getJsonObject(asrScoreForAudio);
+
+			getRefAudioAnswerDecoding(exercise, (int) attribute.getUserid(), audioRef, pathHelper.getAbsoluteFile(audioRef), attribute.getDurationInMillis(),
+					asrScoreForAudio.getHydecScore(), json.toString());
 		}
 	}
 
@@ -288,8 +295,8 @@ public class AudioFileHelper implements CollationSort {
 	 * @return
 	 */
 	private void getRefAudioAnswerDecoding(CommonExercise exercise1,
-																								int user,	String wavPath, File file, long duration) {
-		AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(AudioAnswer.Validity.OK,duration/1000);
+																								int user,	String wavPath, File file, long duration, float alignScore, String alignJson) {
+		AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(AudioAnswer.Validity.OK, duration);
 		AudioAnswer answer = getAudioAnswer(exercise1, 1, true, wavPath, file, validity, true);
 
 		long then = System.currentTimeMillis();
@@ -299,9 +306,9 @@ public class AudioFileHelper implements CollationSort {
 			logger.debug("took " + (now - then) + " to convert answer to json");
 		}
 		String scoreJson = json.toString();
-		long answerID = db.addRefAnswer(user, exercise1.getID(), file.getPath(),
+		/*long answerID =*/ db.addRefAnswer(user, exercise1.getID(), file.getPath(),
 				validity.durationInMillis, answer.isCorrect(), (float) answer.getScore(),
-				scoreJson);
+				scoreJson,alignScore,alignJson);
 		//answer.setResultID(answerID);
 
 		// TODO : add word and phone table for refs
@@ -422,6 +429,10 @@ public class AudioFileHelper implements CollationSort {
 	 */
 	private JSONObject getJson(AudioAnswer answer) {
 		PretestScore pretestScore = answer.getPretestScore();
+		return getJsonObject(pretestScore);
+	}
+
+	private JSONObject getJsonObject(PretestScore pretestScore) {
 		JSONObject jsonObject = new JSONObject();
 		if (pretestScore != null) {
 			Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getsTypeToEndTimes();
@@ -617,7 +628,7 @@ public class AudioFileHelper implements CollationSort {
 
 		PretestScore pretestScore = getASRScoring(decode).scoreRepeat(
 				testAudioDir, removeSuffix(testAudioName),
-				sentence, lmSentences, 
+				sentence, lmSentences,
 				pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix, precalcResult);
 		pretestScore.setReqid(reqid);
 
