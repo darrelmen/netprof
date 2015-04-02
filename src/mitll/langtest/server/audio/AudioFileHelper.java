@@ -278,7 +278,7 @@ public class AudioFileHelper implements CollationSort {
 			JSONObject json = getJsonObject(asrScoreForAudio);
 
 			getRefAudioAnswerDecoding(exercise, (int) attribute.getUserid(), audioRef, pathHelper.getAbsoluteFile(audioRef), attribute.getDurationInMillis(),
-					asrScoreForAudio.getHydecScore(), json.toString());
+					asrScoreForAudio.getHydecScore(), json.toString(), numPhones(asrScoreForAudio));
 		}
 	}
 
@@ -292,10 +292,11 @@ public class AudioFileHelper implements CollationSort {
 	 * @param wavPath
 	 * @param file
 	 * @param duration
+	 * @param numAlignPhones
 	 * @return
 	 */
 	private void getRefAudioAnswerDecoding(CommonExercise exercise1,
-																								int user,	String wavPath, File file, long duration, float alignScore, String alignJson) {
+																				 int user, String wavPath, File file, long duration, float alignScore, String alignJson, int numAlignPhones) {
 		AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(AudioAnswer.Validity.OK, duration);
 		AudioAnswer answer = getAudioAnswer(exercise1, 1, true, wavPath, file, validity, true);
 
@@ -305,16 +306,14 @@ public class AudioFileHelper implements CollationSort {
 		if (now - then > 10) {
 			logger.debug("took " + (now - then) + " to convert answer to json");
 		}
-		String scoreJson = json.toString();
-		/*long answerID =*/ db.addRefAnswer(user, exercise1.getID(), file.getPath(),
+
+		db.addRefAnswer(user, exercise1.getID(), file.getPath(),
 				validity.durationInMillis, answer.isCorrect(), (float) answer.getScore(),
-				scoreJson,alignScore,alignJson);
-		//answer.setResultID(answerID);
+				json.toString(), alignScore, alignJson, numPhones(answer.getPretestScore()), numAlignPhones);
 
 		// TODO : add word and phone table for refs
 		//	recordWordAndPhoneInfo(answer, answerID);
 		logger.debug("getRefAudioAnswerDecoding answer " + answer);
-	//	return answer;
 	}
 
 	private void checkValidity(String exerciseID, int questionID, int user, File file, AudioCheck.ValidityAndDur validity,
@@ -476,6 +475,24 @@ public class AudioFileHelper implements CollationSort {
 			}
 		}
 		return jsonObject;
+	}
+
+	public int numPhones(PretestScore pretestScore) {
+		int c= 0;
+		if (pretestScore != null) {
+			Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getsTypeToEndTimes();
+			List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
+
+			if (phones != null) {
+				for (TranscriptSegment pseg : phones) {
+					String pevent = pseg.getEvent();
+					if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals("sil")) {
+						c++;
+					}
+				}
+			}
+		}
+		return c;
 	}
 
 	private static float round(float d) {
