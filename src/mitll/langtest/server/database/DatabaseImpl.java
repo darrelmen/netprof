@@ -24,7 +24,6 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -1081,13 +1080,15 @@ public class DatabaseImpl implements Database {
    * @param correct
    * @param score
    * @param scoreJson
-   * @return
+   * @param numDecodePhones
+   * @param numAlignPhones
+   *  @return
    */
   public long addRefAnswer(int userID, String exerciseID,
                            String audioFile,
                            int durationInMillis, boolean correct, float score,
-                           String scoreJson, float alignScore, String alignJson) {
-    return refresultDAO.addAnswer(this, userID, exerciseID, audioFile,  durationInMillis, correct, score, scoreJson,alignScore,alignJson);
+                           String scoreJson, float alignScore, String alignJson, int numDecodePhones, int numAlignPhones) {
+    return refresultDAO.addAnswer(this, userID, exerciseID, audioFile,  durationInMillis, correct, score, scoreJson,alignScore,alignJson, numDecodePhones, numAlignPhones);
   }
 
 
