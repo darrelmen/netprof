@@ -24,9 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Create, drop, alter, read from the results table.
@@ -34,9 +32,6 @@ import java.util.Map;
  */
 public class RefResultDAO extends DAO {
   private static final Logger logger = Logger.getLogger(RefResultDAO.class);
-
-//  private static final Map<String, String> EMPTY_MAP = new HashMap<String, String>();
- // private static final int MINUTE = 60 * 1000;
 
   private static final String ID = "id";
   public static final String USERID = "userid";
@@ -53,6 +48,8 @@ public class RefResultDAO extends DAO {
   private static final String NO = "No";
   private static final String ALIGNSCORE = "ALIGNSCORE";
   private static final String ALIGNJSON = "ALIGNJSON";
+  private static final String NUMDECODE_PHONES = "NUMDECODEPHONES";
+  private static final String NUM_ALIGN_PHONES = "NUMALIGNPHONES";
   private final LogAndNotify logAndNotify;
 
 //  private final boolean debug = false;
@@ -70,7 +67,7 @@ public class RefResultDAO extends DAO {
   private List<Result> cachedResultsForQuery = null;
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
+   * @see DatabaseImpl#addRefAnswer(int, String, String, int, boolean, float, String, float, String, int, int)
    * @param database
    * @param userID
    * @param id
@@ -78,15 +75,17 @@ public class RefResultDAO extends DAO {
    * @param correct
    * @param pronScore
    * @param scoreJson
+   * @param numDecodePhones
+   * @param numAlignPhones
    * @return id of new row in result table
    */
-  public long addAnswer(Database database, int userID, String id, //String answer,
+  public long addAnswer(Database database, int userID, String id,
                         String audioFile, int durationInMillis,
-                        boolean correct, float pronScore, String scoreJson, float alignScore, String alignJson) {
+                        boolean correct, float pronScore, String scoreJson, float alignScore, String alignJson, int numDecodePhones, int numAlignPhones) {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
-      long newid = addAnswerToTable(connection, userID, id, "", audioFile, durationInMillis, correct, pronScore,  scoreJson, alignScore, alignJson);
+      long newid = addAnswerToTable(connection, userID, id, "", audioFile, durationInMillis, correct, pronScore,  scoreJson, alignScore, alignJson, numDecodePhones,numAlignPhones);
       long now = System.currentTimeMillis();
       if (now - then > 100) System.out.println("took " + (now - then) + " millis to record answer.");
       return newid;
@@ -113,13 +112,15 @@ public class RefResultDAO extends DAO {
    * @param correct
    * @param pronScore
    * @param scoreJson
+   * @param numPhones
+   * @param numAlignPhones
    * @throws java.sql.SQLException
    */
   private long addAnswerToTable(Connection connection, int userid, String id,
                                 String answer, String audioFile,
-                                 int durationInMillis,
-                                boolean correct, float pronScore,  String scoreJson, float alignScore, String alignJson
-                                ) throws SQLException {
+                                int durationInMillis,
+                                boolean correct, float pronScore, String scoreJson, float alignScore, String alignJson,
+                                int numPhones, int numAlignPhones) throws SQLException {
     //  logger.debug("adding answer for exid #" + id + " correct " + correct + " score " + pronScore + " audio type " +audioType + " answer " + answer);
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
@@ -134,8 +135,10 @@ public class RefResultDAO extends DAO {
         ResultDAO.PRON_SCORE + "," +
         ResultDAO.SCORE_JSON + ","+
         ALIGNSCORE + ","+
-        ALIGNJSON +
-        ") VALUES(?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+        ALIGNJSON + ","+
+        NUMDECODE_PHONES + ","+
+        NUM_ALIGN_PHONES +
+        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
     int i = 1;
 
@@ -153,6 +156,8 @@ public class RefResultDAO extends DAO {
     statement.setString(i++, scoreJson);
     statement.setFloat(i++, alignScore);
     statement.setString(i++, alignJson);
+    statement.setInt(i++, numPhones);
+    statement.setInt(i++, numAlignPhones);
 
     statement.executeUpdate();
 
@@ -303,8 +308,19 @@ public class RefResultDAO extends DAO {
     Collection<String> columns = getColumns(REFRESULT);
     if (!columns.contains(ALIGNSCORE.toLowerCase())) {
 //      createTable(connection);
-      addVarchar(connection,REFRESULT,ALIGNSCORE);
-      addVarchar(connection,REFRESULT,ALIGNJSON);
+      addVarchar(connection, REFRESULT, ALIGNSCORE);
+      addVarchar(connection, REFRESULT, ALIGNJSON);
+    }
+    if (!columns.contains(NUMDECODE_PHONES)) {
+      PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
+          REFRESULT + " ADD " + NUMDECODE_PHONES + " INTEGER");
+      statement.execute();
+      statement.close();
+
+       statement = connection.prepareStatement("ALTER TABLE " +
+          REFRESULT + " ADD " + NUM_ALIGN_PHONES + " INTEGER");
+      statement.execute();
+      statement.close();
     }
     createIndex(database, Database.EXID, REFRESULT);
     // seems to complain about index on CLOB???
@@ -333,7 +349,8 @@ public class RefResultDAO extends DAO {
         USERID + " INT, " +
         Database.EXID + " VARCHAR, " +
         Database.TIME + " TIMESTAMP, " +// " AS CURRENT_TIMESTAMP," +
-        "answer VARCHAR," +
+        "answer" +
+        " VARCHAR," +
         DURATION + " INT," +
         CORRECT + " BOOLEAN," +
         PRON_SCORE + " FLOAT," +
@@ -370,9 +387,7 @@ public class RefResultDAO extends DAO {
     //DateTimeFormat format = DateTimeFormat.getFormat("MMM dd h:mm:ss a z ''yy");
     Row headerRow = sheet.createRow(rownum++);
 
-    List<String> columns = new ArrayList<String>(Arrays.asList(
-        USERID, "Exercise", "Text"));
-
+    List<String> columns = new ArrayList<String>(Arrays.asList(USERID, "Exercise", "Text"));
 
     for (final String type : typeOrder) {  columns.add(type);  }
 
