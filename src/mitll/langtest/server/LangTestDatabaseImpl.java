@@ -944,7 +944,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		String[] split = testAudioFile.split(File.separator);
 		String answer = split[split.length - 1];
 		Result result = db.getRefResultDAO().getResult(exerciseID, answer.replaceAll(".mp3",".wav"));
-		logger.debug("asking for " + exerciseID + " and " + split + "=" +answer + " found " + result);
+		logger.debug("align exercise id = " + exerciseID + " file " +answer + " found " + result);
 
 		PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
 				false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, null);
