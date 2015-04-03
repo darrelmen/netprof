@@ -40,7 +40,7 @@ public class AudioAttribute implements IsSerializable {
   public AudioAttribute() {}
 
   /**
-   * @see mitll.langtest.server.database.AudioDAO#getAudioAttribute(int, int, String, String, long, String, int)
+   * @see mitll.langtest.server.database.AudioDAO#getAudioAttribute
    * @see mitll.langtest.server.database.AudioDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
    * @param uniqueID
    * @param userid
