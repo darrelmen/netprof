@@ -311,17 +311,20 @@ public class RefResultDAO extends DAO {
       addVarchar(connection, REFRESULT, ALIGNSCORE);
       addVarchar(connection, REFRESULT, ALIGNJSON);
     }
-    if (!columns.contains(NUMDECODE_PHONES)) {
+    if (!columns.contains(NUMDECODE_PHONES.toLowerCase())) {
       PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
           REFRESULT + " ADD " + NUMDECODE_PHONES + " INTEGER");
       statement.execute();
       statement.close();
+    }
 
-      statement = connection.prepareStatement("ALTER TABLE " +
+    if (!columns.contains(NUM_ALIGN_PHONES.toLowerCase())) {
+      PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
           REFRESULT + " ADD " + NUM_ALIGN_PHONES + " INTEGER");
       statement.execute();
       statement.close();
     }
+
     if (!columns.contains(MALE)) {
       addBoolean(connection, REFRESULT, MALE);
     }
