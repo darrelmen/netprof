@@ -776,7 +776,7 @@ public class AudioDAO extends DAO {
    * @return AudioAttribute that represents the audio that has been added to the exercise
    * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
    */
-  public AudioAttribute addOrUpdate(int userid, String audioRef, String exerciseID, long timestamp, String audioType, int durationInMillis) {
+  public AudioAttribute addOrUpdate(int userid, String audioRef, String exerciseID, long timestamp, String audioType, long durationInMillis) {
     if (isBadUser(userid)) {
       logger.error("huh? userid is " + userid);
       new Exception().printStackTrace();
@@ -801,7 +801,7 @@ public class AudioDAO extends DAO {
 
       statement.setString(ii++, audioRef);
       statement.setTimestamp(ii++, new Timestamp(timestamp));
-      statement.setInt(ii++, durationInMillis);
+      statement.setInt(ii++, (int)durationInMillis);
 
       statement.setString(ii++, exerciseID);
       statement.setInt(ii++, userid);
@@ -856,7 +856,7 @@ public class AudioDAO extends DAO {
    * @see #addOrUpdate(int, String, String, long, String, int)
    */
   private AudioAttribute getAudioAttribute(int i,
-                                           int userid, String audioRef, String exerciseID, long timestamp, String audioType, int durationInMillis) {
+                                           int userid, String audioRef, String exerciseID, long timestamp, String audioType, long durationInMillis) {
     return new AudioAttribute(i, userid, //id
         exerciseID, // id
         audioRef, // answer
