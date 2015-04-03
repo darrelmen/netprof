@@ -174,20 +174,20 @@ public class AudioCheck {
 
   public static class ValidityAndDur {
     public final AudioAnswer.Validity validity;
-    public final int durationInMillis;
+    public final long durationInMillis;
 
     public ValidityAndDur(AudioAnswer.Validity validity) {
       this(validity, 0d);
     }
 
-    public ValidityAndDur(AudioAnswer.Validity validity, int durInMillis) {
+    public ValidityAndDur(AudioAnswer.Validity validity, long durInMillis) {
       this.validity = validity;
       this.durationInMillis = durInMillis;
     }
 
     public ValidityAndDur(AudioAnswer.Validity validity, double dur) {
       this.validity = validity;
-      this.durationInMillis = (int) (1000d * dur);
+      this.durationInMillis = (long) (1000d * dur);
     }
     public String toString() { return "valid " + validity + " dur " + durationInMillis; }
   }
