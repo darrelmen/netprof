@@ -25,7 +25,7 @@ public class AudioAnswer implements IsSerializable {
   private double score = -1;
   private boolean correct = false;
   private boolean saidAnswer = false;
-  private int durationInMillis;
+  private long durationInMillis;
   private long resultID;
   private AudioAttribute audioAttribute;
   private PretestScore pretestScore;
@@ -56,7 +56,7 @@ public class AudioAnswer implements IsSerializable {
    * @param reqid
    * @param duration
    */
-  public AudioAnswer(String path, Validity validity, int reqid, int duration) {
+  public AudioAnswer(String path, Validity validity, int reqid, long duration) {
     this.path = path;
     this.validity = validity;
     this.reqid = reqid;
@@ -79,7 +79,6 @@ public class AudioAnswer implements IsSerializable {
 
   /**
    * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer, com.google.gwt.user.client.ui.Panel)
-   * @see mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput(String, int, java.io.File, AudioAnswer)
    * @return
    */
   public boolean isCorrect() { return correct; }
@@ -130,7 +129,7 @@ public class AudioAnswer implements IsSerializable {
     return decodeOutput;
   }
 
-  public int getDurationInMillis() {
+  public long getDurationInMillis() {
     return durationInMillis;
   }
 
