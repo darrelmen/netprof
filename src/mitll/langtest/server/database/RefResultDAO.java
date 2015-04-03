@@ -2,18 +2,9 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.DataFormat;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,9 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -44,12 +33,14 @@ public class RefResultDAO extends DAO {
   static final String CORRECT = "correct";
   static final String PRON_SCORE = "pronscore";
 
-  private static final String YES = "Yes";
-  private static final String NO = "No";
+//  private static final String YES = "Yes";
+//  private static final String NO = "No";
   private static final String ALIGNSCORE = "ALIGNSCORE";
   private static final String ALIGNJSON = "ALIGNJSON";
   private static final String NUMDECODE_PHONES = "NUMDECODEPHONES";
   private static final String NUM_ALIGN_PHONES = "NUMALIGNPHONES";
+  public static final String MALE = "male";
+  public static final String SPEED = "speed";
   private final LogAndNotify logAndNotify;
 
 //  private final boolean debug = false;
@@ -67,7 +58,7 @@ public class RefResultDAO extends DAO {
   private List<Result> cachedResultsForQuery = null;
 
   /**
-   * @see DatabaseImpl#addRefAnswer(int, String, String, int, boolean, float, String, float, String, int, int)
+   * @see DatabaseImpl#addRefAnswer
    * @param database
    * @param userID
    * @param id
@@ -77,15 +68,18 @@ public class RefResultDAO extends DAO {
    * @param scoreJson
    * @param numDecodePhones
    * @param numAlignPhones
-   * @return id of new row in result table
+   * @param isMale
+   *@param speed @return id of new row in result table
    */
   public long addAnswer(Database database, int userID, String id,
-                        String audioFile, int durationInMillis,
-                        boolean correct, float pronScore, String scoreJson, float alignScore, String alignJson, int numDecodePhones, int numAlignPhones) {
+                        String audioFile, long durationInMillis,
+                        boolean correct, float pronScore, String scoreJson, float alignScore, String alignJson,
+                        int numDecodePhones, int numAlignPhones, boolean isMale, String speed) {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
-      long newid = addAnswerToTable(connection, userID, id, "", audioFile, durationInMillis, correct, pronScore,  scoreJson, alignScore, alignJson, numDecodePhones,numAlignPhones);
+      long newid = addAnswerToTable(connection, userID, id, "", audioFile, durationInMillis, correct, pronScore,
+          scoreJson, alignScore, alignJson, numDecodePhones, numAlignPhones, isMale, speed);
       long now = System.currentTimeMillis();
       if (now - then > 100) System.out.println("took " + (now - then) + " millis to record answer.");
       return newid;
@@ -114,13 +108,15 @@ public class RefResultDAO extends DAO {
    * @param scoreJson
    * @param numPhones
    * @param numAlignPhones
+   * @param isMale
+   * @param speed
    * @throws java.sql.SQLException
    */
   private long addAnswerToTable(Connection connection, int userid, String id,
                                 String answer, String audioFile,
-                                int durationInMillis,
+                                long durationInMillis,
                                 boolean correct, float pronScore, String scoreJson, float alignScore, String alignJson,
-                                int numPhones, int numAlignPhones) throws SQLException {
+                                int numPhones, int numAlignPhones, boolean isMale, String speed) throws SQLException {
     //  logger.debug("adding answer for exid #" + id + " correct " + correct + " score " + pronScore + " audio type " +audioType + " answer " + answer);
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
@@ -137,8 +133,10 @@ public class RefResultDAO extends DAO {
         ALIGNSCORE + ","+
         ALIGNJSON + ","+
         NUMDECODE_PHONES + ","+
-        NUM_ALIGN_PHONES +
-        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+        NUM_ALIGN_PHONES +","+
+        MALE +","+
+        SPEED +
+        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
     int i = 1;
 
@@ -149,7 +147,7 @@ public class RefResultDAO extends DAO {
     statement.setString(i++, copyStringChar(id));
     statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
     statement.setString(i++, copyStringChar(answerInserted));
-    statement.setInt(i++, durationInMillis);
+    statement.setLong(i++, durationInMillis);
 
     statement.setBoolean(i++, correct);
     statement.setFloat(i++, pronScore);
@@ -158,6 +156,8 @@ public class RefResultDAO extends DAO {
     statement.setString(i++, alignJson);
     statement.setInt(i++, numPhones);
     statement.setInt(i++, numAlignPhones);
+    statement.setBoolean(i++, isMale);
+    statement.setString(i++, speed);
 
     statement.executeUpdate();
 
@@ -317,10 +317,16 @@ public class RefResultDAO extends DAO {
       statement.execute();
       statement.close();
 
-       statement = connection.prepareStatement("ALTER TABLE " +
+      statement = connection.prepareStatement("ALTER TABLE " +
           REFRESULT + " ADD " + NUM_ALIGN_PHONES + " INTEGER");
       statement.execute();
       statement.close();
+    }
+    if (!columns.contains(MALE)) {
+      addBoolean(connection, REFRESULT, MALE);
+    }
+    if (!columns.contains(SPEED)) {
+      addVarchar(connection, REFRESULT, SPEED);
     }
     createIndex(database, Database.EXID, REFRESULT);
     // seems to complain about index on CLOB???
@@ -356,7 +362,9 @@ public class RefResultDAO extends DAO {
         PRON_SCORE + " FLOAT," +
         SCORE_JSON + " VARCHAR, " +
         ALIGNSCORE + " VARCHAR," +
-        ALIGNJSON + " VARCHAR" +
+        ALIGNJSON + " VARCHAR," +
+        MALE + " BOOLEAN," +
+        SPEED + " VARCHAR" +
         ")");
     statement.execute();
     statement.close();
@@ -368,7 +376,7 @@ public class RefResultDAO extends DAO {
    * @param out
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public void writeExcelToStream(Collection<MonitorResult> results, List<String> typeOrder, OutputStream out) {
+ /* public void writeExcelToStream(Collection<MonitorResult> results, List<String> typeOrder, OutputStream out) {
     writeToStream(out, writeExcel(results, typeOrder));
   }
 
@@ -469,5 +477,5 @@ public class RefResultDAO extends DAO {
     } catch (IOException e) {
       logger.error("got " + e, e);
     }
-  }
+  }*/
 }
