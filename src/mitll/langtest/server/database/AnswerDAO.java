@@ -41,7 +41,7 @@ public class AnswerDAO extends DAO {
    *  @return id of new row in result table
    */
   public long addAnswer(Database database, int userID, String id, int questionID, String answer,
-                        String audioFile, boolean valid, String audioType, int durationInMillis,
+                        String audioFile, boolean valid, String audioType, long durationInMillis,
                         boolean correct, float pronScore, String deviceType, String device, String scoreJson, boolean withFlash) {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
@@ -80,11 +80,11 @@ public class AnswerDAO extends DAO {
    * @param scoreJson
    * @param withFlash
    * @throws java.sql.SQLException
-   * @see #addAnswer(Database, int, String, int, String, String, boolean, String, int, boolean, float, String, String, String, boolean)
+   * @see #addAnswer(Database, int, String, int, String, String, boolean, String, long, boolean, float, String, String, String, boolean)
    */
   private long addAnswerToTable(Connection connection, int userid, String id, int questionID,
                                 String answer, String audioFile,
-                                boolean valid, String audioType, int durationInMillis,
+                                boolean valid, String audioType, long durationInMillis,
                                 boolean correct, float pronScore, String deviceType, String device, String scoreJson,
                                 boolean withFlash) throws SQLException {
   //  logger.debug("adding answer for exid #" + id + " correct " + correct + " score " + pronScore + " audio type " +audioType + " answer " + answer);
@@ -127,7 +127,7 @@ public class AnswerDAO extends DAO {
     statement.setBoolean(i++, true);
     statement.setBoolean(i++, true);
     statement.setString(i++, copyStringChar(audioType));
-    statement.setInt(i++, durationInMillis);
+    statement.setInt(i++, (int)durationInMillis);
 
     statement.setBoolean(i++, correct);
     statement.setFloat(i++, pronScore);
