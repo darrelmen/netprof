@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -269,6 +270,11 @@ public class AudioFileHelper implements CollationSort {
 		return answer;
 	}
 
+	/**
+	 * @see LangTestDatabaseImpl#doDecode(Set, CommonExercise, Collection)
+	 * @param exercise
+	 * @param attribute
+	 */
 	public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute) {
 		String audioRef = attribute.getAudioRef();
 		if (!audioRef.contains("context=")) {
@@ -278,7 +284,7 @@ public class AudioFileHelper implements CollationSort {
 			JSONObject json = getJsonObject(asrScoreForAudio);
 
 			getRefAudioAnswerDecoding(exercise, (int) attribute.getUserid(), audioRef, pathHelper.getAbsoluteFile(audioRef), attribute.getDurationInMillis(),
-					asrScoreForAudio.getHydecScore(), json.toString(), numPhones(asrScoreForAudio));
+					asrScoreForAudio.getHydecScore(), json.toString(), numPhones(asrScoreForAudio), attribute.isMale(), attribute.isRegularSpeed()?"reg":"slow");
 		}
 	}
 
@@ -293,10 +299,12 @@ public class AudioFileHelper implements CollationSort {
 	 * @param file
 	 * @param duration
 	 * @param numAlignPhones
+	 * @param isMale
+	 * @param speed
 	 * @return
 	 */
 	private void getRefAudioAnswerDecoding(CommonExercise exercise1,
-																				 int user, String wavPath, File file, long duration, float alignScore, String alignJson, int numAlignPhones) {
+																				 int user, String wavPath, File file, long duration, float alignScore, String alignJson, int numAlignPhones, boolean isMale, String speed) {
 		AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(AudioAnswer.Validity.OK, duration);
 		AudioAnswer answer = getAudioAnswer(exercise1, 1, true, wavPath, file, validity, true);
 
@@ -309,7 +317,7 @@ public class AudioFileHelper implements CollationSort {
 
 		db.addRefAnswer(user, exercise1.getID(), file.getPath(),
 				validity.durationInMillis, answer.isCorrect(), (float) answer.getScore(),
-				json.toString(), alignScore, alignJson, numPhones(answer.getPretestScore()), numAlignPhones);
+				json.toString(), alignScore, alignJson, numPhones(answer.getPretestScore()), numAlignPhones, isMale, speed);
 
 		// TODO : add word and phone table for refs
 		//	recordWordAndPhoneInfo(answer, answerID);
@@ -435,7 +443,7 @@ public class AudioFileHelper implements CollationSort {
 		JSONObject jsonObject = new JSONObject();
 		if (pretestScore != null) {
 			Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getsTypeToEndTimes();
-			List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
+			List<TranscriptSegment> words  = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
 			List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
 			if (words != null) {
 				int windex = 0;
@@ -449,7 +457,9 @@ public class AudioFileHelper implements CollationSort {
 						String wid = Integer.toString(windex++);
 						wordJson.put("id", wid);
 						wordJson.put("w", event);
-						wordJson.put("s", Float.toString(round(segment.getScore())));
+						wordJson.put("s", getScore(segment));
+						wordJson.put("str", floatToString(segment.getStart()));
+						wordJson.put("end", floatToString(segment.getEnd()));
 
 						JSONArray jsonPhones = new JSONArray();
 
@@ -460,13 +470,14 @@ public class AudioFileHelper implements CollationSort {
 									JSONObject phoneJson = new JSONObject();
 									phoneJson.put("id", Integer.toString(pindex++));
 									phoneJson.put("p", pevent);
-									phoneJson.put("s", Float.toString(round(pseg.getScore())));
+									phoneJson.put("s", getScore(pseg));
+									phoneJson.put("str", floatToString(pseg.getStart()));
+									phoneJson.put("end", floatToString(pseg.getEnd()));
 									jsonPhones.add(phoneJson);
 								}
 							}
 						}
 						wordJson.put("phones", jsonPhones);
-
 						jsonWords.add(wordJson);
 					}
 				}
@@ -475,6 +486,15 @@ public class AudioFileHelper implements CollationSort {
 			}
 		}
 		return jsonObject;
+	}
+
+	private String getScore(TranscriptSegment segment) {
+		float score = segment.getScore();
+		return floatToString(score);
+	}
+
+	private String floatToString(float round) {
+		return Float.toString(round(round));
 	}
 
 	public int numPhones(PretestScore pretestScore) {
