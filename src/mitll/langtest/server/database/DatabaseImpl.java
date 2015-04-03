@@ -1082,13 +1082,15 @@ public class DatabaseImpl implements Database {
    * @param scoreJson
    * @param numDecodePhones
    * @param numAlignPhones
-   *  @return
+   * @param isMale
+   * @param speed
+   * @return
    */
   public long addRefAnswer(int userID, String exerciseID,
                            String audioFile,
-                           int durationInMillis, boolean correct, float score,
-                           String scoreJson, float alignScore, String alignJson, int numDecodePhones, int numAlignPhones) {
-    return refresultDAO.addAnswer(this, userID, exerciseID, audioFile,  durationInMillis, correct, score, scoreJson,alignScore,alignJson, numDecodePhones, numAlignPhones);
+                           long durationInMillis, boolean correct, float score,
+                           String scoreJson, float alignScore, String alignJson, int numDecodePhones, int numAlignPhones, boolean isMale, String speed) {
+    return refresultDAO.addAnswer(this, userID, exerciseID, audioFile,  durationInMillis, correct, score, scoreJson,alignScore,alignJson, numDecodePhones, numAlignPhones, isMale, speed);
   }
 
 
