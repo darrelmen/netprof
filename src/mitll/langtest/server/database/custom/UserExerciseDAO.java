@@ -1,5 +1,6 @@
 package mitll.langtest.server.database.custom;
 
+import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
@@ -37,28 +38,16 @@ public class UserExerciseDAO extends DAO {
   private static final String USEREXERCISE = "userexercise";
   private static final String MODIFIED = "modified";
   private static final String STATE = "state";
-  /**
-   * @deprecated - we should join with the audio table
-   */
- // private static final String REF_AUDIO = "refAudio";
-  /**
-   * @deprecated - we should join with the audio table
-   */
- // private static final String SLOW_AUDIO_REF = "slowAudioRef";
-  /**
-   *
-   */
   private static final String CONTEXT = "context";
   private static final String CONTEXT_TRANSLATION = "contextTranslation";
 
-  // ?? when would this be used?
-  //private static final boolean ADD_MISSING_AUDIO = false;
-
   private ExerciseDAO exerciseDAO;
+  private final LogAndNotify logAndNotify;
   private static final boolean DEBUG = false;
 
-  public UserExerciseDAO(Database database) {
+  public UserExerciseDAO(Database database,LogAndNotify logAndNotify) {
     super(database);
+    this.logAndNotify = logAndNotify;
     try {
       createUserTable(database);
       Collection<String> columns = getColumns(USEREXERCISE);
@@ -93,7 +82,7 @@ public class UserExerciseDAO extends DAO {
       }
       database.closeConnection(connection);
     } catch (SQLException e) {
-      logger.error("got " + e, e);
+      logException(e);
     }
   }
 
@@ -209,8 +198,13 @@ public class UserExerciseDAO extends DAO {
     //  logger.debug("now " + getCount(USEREXERCISE) + " user exercises and user exercise is " + userExercise);
       logger.debug("new " + (predefined ? " PREDEF " : " USER ") + " user exercise is " + userExercise);
     } catch (Exception ee) {
-      logger.error("got " + ee, ee);
+      logException(ee);
     }
+  }
+
+  private void logException(Exception ee) {
+    logger.error("got " + ee, ee);
+    logAndNotify.logAndNotifyServerException(ee);
   }
 
   private String fixSingleQuote(String s) { return s.replaceAll("'","''"); }
@@ -301,7 +295,7 @@ public class UserExerciseDAO extends DAO {
       }
 
     } catch (SQLException e) {
-      logger.error("got " + e, e);
+      logException(e);
     }
     return new ArrayList<CommonUserExercise>();
   }
@@ -348,11 +342,14 @@ public class UserExerciseDAO extends DAO {
   CommonExercise getPredefExercise(String id) { return exerciseDAO.getExercise(id); }
 
   /**
+   * Remove single ticks which break the sql.
+   *
    * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseWhere(String)
    * @param exid
    * @return
    */
   public CommonUserExercise getWhere(String exid) {
+    exid = exid.replaceAll("\'","");
     String sql = "SELECT * from " + USEREXERCISE + " where " +  EXERCISEID + "='" + exid + "'";
     try {
       List<CommonUserExercise> userExercises = getUserExercises(sql);
@@ -363,7 +360,7 @@ public class UserExerciseDAO extends DAO {
         return userExercises.iterator().next();
       }
     } catch (SQLException e) {
-      logger.error("got " + e, e);
+      logException(e);
     }
     return null;
   }
@@ -373,7 +370,7 @@ public class UserExerciseDAO extends DAO {
     try {
       return getUserExercises(sql);
     } catch (SQLException e) {
-      logger.error("got " + e, e);
+      logException(e);
     }
     return Collections.emptyList();
   }
@@ -388,7 +385,7 @@ public class UserExerciseDAO extends DAO {
     try {
       return getUserExercises(sql);
     } catch (SQLException e) {
-      logger.error("got " + e, e);
+      logException(e);
     }
     return Collections.emptyList();
   }
@@ -411,7 +408,7 @@ public class UserExerciseDAO extends DAO {
       }
       return userExercises;
     } catch (SQLException e) {
-      logger.error("got " + e, e);
+      logException(e);
     }
     return null;
   }
@@ -427,9 +424,7 @@ public class UserExerciseDAO extends DAO {
   /**
    * @see #getOnList(long)
    * @see #getOverrides()
-   * @seex #getWhere(java.util.Collection)
    * @see #getWhere(java.lang.String)
-   * @param addMissingAudio always false
    * @param sql
    * @return user exercises without annotations
    * @throws SQLException
@@ -605,7 +600,7 @@ public class UserExerciseDAO extends DAO {
 
       finish(connection, statement);
     } catch (Exception e) {
-      logger.error("got " + e, e);
+      logException(e);
     }
   }
 
