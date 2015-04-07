@@ -18,18 +18,4 @@ public interface LoadTesting {
 
   CommonExercise getFirstExercise();
   void addToAudioTable(int user, CommonExercise exercise1, AudioAnswer audioAnswer);
-
-  /*
-  long addAnonUser();
-
-    ExerciseListWrapper getExerciseIDs(int userID);
-
-    void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID);
-
-  ImageResponse getImageForAudioFile(String audioFile, String exerciseID);
-
-  PretestScore getASRScoreForAudio(String testAudioFile, String sentence, String exerciseID);
-
-  Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean visited);
-  */
 }
