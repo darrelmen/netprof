@@ -87,10 +87,7 @@ public class SmallVocabDecoder {
   public List<String> getTokens(String sentence) {
     List<String> all = new ArrayList<String>();
    // logger.debug("initial " + sentence);
-    sentence = sentence.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ");
-   // logger.debug("after  convert " + sentence);
-
-    String trimmedSent = sentence.replaceAll("'", "").replaceAll("\\p{P}", " ").replaceAll("\\s+", " ").trim();
+    String trimmedSent = getTrimmed(sentence);
 
    // logger.debug("after  trim " + trimmedSent);
 
@@ -103,6 +100,13 @@ public class SmallVocabDecoder {
     }
 
     return all;
+  }
+
+  public String getTrimmed(String sentence) {
+    sentence = sentence.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ");
+    // logger.debug("after  convert " + sentence);
+
+    return sentence.replaceAll("'", "").replaceAll("\\p{P}", " ").replaceAll("\\s+", " ").trim();
   }
 
   /**
