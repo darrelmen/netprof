@@ -1,17 +1,12 @@
 package mitll.langtest.server;
 
 import mitll.langtest.server.scoring.SmallVocabDecoder;
-import mitll.langtest.server.trie.EmitValue;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.CommonExercise;
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,7 +27,7 @@ public class ExerciseTrie extends Trie<CommonExercise> {
    * Tokens are normalized to lower case.
    *
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseListWrapperForPrefix(int, String, java.util.Collection, long, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseListWrapperForPrefix
    * @param exercisesForState
    * @param language
    */
@@ -83,18 +78,19 @@ public class ExerciseTrie extends Trie<CommonExercise> {
     }
   }
 
-  protected Collection<String> getFLTokens(SmallVocabDecoder smallVocabDecoder, CommonExercise e) {
+  private Collection<String> getFLTokens(SmallVocabDecoder smallVocabDecoder, CommonExercise e) {
     return smallVocabDecoder.getTokens(smallVocabDecoder.segmentation(e.getForeignLanguage()));
   }
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseListWrapperForPrefix(int, String, java.util.Collection, long, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseListWrapperForPrefix
    * @param prefix
+   * @param smallVocabDecoder
    * @return
    */
-  public Collection<CommonExercise> getExercises(String prefix) {
-    return getMatches(prefix.toLowerCase());
+  public Collection<CommonExercise> getExercises(String prefix, SmallVocabDecoder smallVocabDecoder) {
+    return getMatches(smallVocabDecoder.getTrimmed(prefix.toLowerCase()));
   }
 
   private static class ExerciseWrapper implements TextEntityValue<CommonExercise> {
@@ -123,12 +119,12 @@ public class ExerciseTrie extends Trie<CommonExercise> {
     public String toString() { return "e " +e.getID() + " : " + value; }
   }
 
-  private long logMemory() {
+  private void logMemory() {
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory();
     long used = rt.totalMemory() - free;
     long max = rt.maxMemory();
     logger.debug("heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
-    return free;
+    //return free;
   }
 }
