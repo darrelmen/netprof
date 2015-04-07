@@ -6,20 +6,31 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
-import mitll.langtest.server.database.custom.*;
-import mitll.langtest.server.database.exercise.*;
+import mitll.langtest.server.database.custom.AddRemoveDAO;
+import mitll.langtest.server.database.custom.AnnotationDAO;
+import mitll.langtest.server.database.custom.ReviewedDAO;
+import mitll.langtest.server.database.custom.UserExerciseDAO;
+import mitll.langtest.server.database.custom.UserListDAO;
+import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
+import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.exercise.ExcelImport;
+import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.AudioAttribute;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonUserExercise;
+import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.MonitorResult;
+import mitll.langtest.shared.Result;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
@@ -71,15 +82,17 @@ public class DatabaseImpl implements Database {
   private MonitoringSupport monitoringSupport;
 
   private String lessonPlanFile;
-  private final boolean isWordPairs;
+//  private final boolean isWordPairs;
   private boolean useFile;
-  private String language = "";
-  private final boolean doImages;
+//  private String language = "";/
+//  private final boolean doImages;
   private final String configDir;
-  private final String absConfigDir;
+//  private final String absConfigDir;
   private String mediaDir;
   private final ServerProperties serverProps;
   private final LogAndNotify logAndNotify;
+
+  private JsonSupport jsonSupport;
 
   private final boolean addDefects = true;
 
@@ -115,12 +128,12 @@ public class DatabaseImpl implements Database {
     if (now - then > 300)
       logger.info("took " + (now - then) + " millis to open database for " + serverProps.getLanguage());
 
-    absConfigDir = configDir;
+//    absConfigDir = configDir;
     this.configDir = relativeConfigDir;
-
-    this.isWordPairs = serverProps.isWordPairs();
-    this.doImages = serverProps.doImages();
-    this.language = serverProps.getLanguage();
+//
+//    this.isWordPairs = serverProps.isWordPairs();
+//    this.doImages = serverProps.doImages();
+  //  this.language = serverProps.getLanguage();
     this.serverProps = serverProps;
     this.lessonPlanFile = serverProps.getLessonPlan();
     this.useFile = lessonPlanFile != null;
@@ -161,7 +174,7 @@ public class DatabaseImpl implements Database {
     UserListDAO userListDAO = new UserListDAO(this, userDAO);
     addRemoveDAO = new AddRemoveDAO(this);
 
-    userExerciseDAO = new UserExerciseDAO(this);
+    userExerciseDAO = new UserExerciseDAO(this, logAndNotify);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
     resultDAO = new ResultDAO(this, logAndNotify);
     refresultDAO = new RefResultDAO(this, logAndNotify);
@@ -206,9 +219,7 @@ public class DatabaseImpl implements Database {
     return refresultDAO;
   }
 
-  public UserDAO getUserDAO() {
-    return userDAO;
-  }
+  public UserDAO getUserDAO() {    return userDAO;  }
 
   @Override
   public Connection getConnection(String who) {
@@ -267,11 +278,11 @@ public class DatabaseImpl implements Database {
    * @return
    * @see #getExercises(boolean, String)
    */
-  private ExerciseDAO makeExerciseDAO(boolean useFile) {
+/*  private ExerciseDAO makeExerciseDAO(boolean useFile) {
     return useFile ?
         new FileExerciseDAO(mediaDir, language, true, absConfigDir, serverProps.getMappingFile()) :
         new SQLExerciseDAO(this, mediaDir, absConfigDir, serverProps);
-  }
+  }*/
 
   /**
    * @param installPath
@@ -287,7 +298,8 @@ public class DatabaseImpl implements Database {
     this.lessonPlanFile = lessonPlanFile;
     this.mediaDir = mediaDir;
     this.useFile = useFile;
-    this.language = language;
+    this.jsonSupport = new JsonSupport(getSectionHelper(),getResultDAO(),getAudioDAO(),getPhoneDAO(),configDir,installPath);
+//    this.language = language;
   }
 
   public SectionHelper getSectionHelper() {
@@ -325,7 +337,7 @@ public class DatabaseImpl implements Database {
     }
     //logger.debug("using lesson plan file " +lessonPlanFile + " at " + installPath);
     boolean isExcel = lessonPlanFile.endsWith(".xlsx");
-    makeDAO(useFile, lessonPlanFile, isExcel, mediaDir, installPath);
+    makeDAO(lessonPlanFile, mediaDir, installPath);
 
     List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();//getRawExercises(useFile, lessonPlanFile, isExcel);
     if (rawExercises.isEmpty()) {
@@ -335,33 +347,33 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @param useFile
    * @param lessonPlanFile
-   * @param excel
    * @param mediaDir
    * @see #getExercises(boolean, String)
    */
-  private void makeDAO(boolean useFile, String lessonPlanFile, boolean excel, String mediaDir, String installPath) {
+  private void makeDAO(String lessonPlanFile, String mediaDir, String installPath) {
     if (exerciseDAO == null) {
-      if (useFile && excel) {
+      //if (useFile && excel) {
         synchronized (this) {
           this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, serverProps, userListManager, installPath, addDefects);
         }
-      } else {
-        this.exerciseDAO = makeExerciseDAO(useFile);
-      }
+      //} else {
+      //  this.exerciseDAO = makeExerciseDAO(useFile);
+     // }
       userExerciseDAO.setExerciseDAO(exerciseDAO);
       exerciseDAO.setUserExerciseDAO(userExerciseDAO);
       exerciseDAO.setAddRemoveDAO(addRemoveDAO);
       exerciseDAO.setAudioDAO(audioDAO);
 
-      getRawExercises(useFile, lessonPlanFile, excel);
+    //  getRawExercises(useFile, lessonPlanFile, excel);
+      exerciseDAO.getRawExercises();
 
       userDAO.checkForFavorites(userListManager);
       userExerciseDAO.setAudioDAO(audioDAO);
     }
   }
 
+/*
   private void getRawExercises(boolean useFile, String lessonPlanFile, boolean isExcel) {
     if (useFile && !isExcel) {
       if (isWordPairs) {
@@ -370,8 +382,10 @@ public class DatabaseImpl implements Database {
         ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath, configDir, lessonPlanFile);
       }
     }
+
     exerciseDAO.getRawExercises();
   }
+*/
 
   /**
    * @param userExercise
@@ -480,34 +494,9 @@ public class DatabaseImpl implements Database {
    */
   public JSONObject getJsonScoreHistory(long userid,
                                         Map<String, Collection<String>> typeToSection,
-                                        ExerciseSorter sorter//,
-                                      //  Collator collator
-  ) {
-    Collection<CommonExercise> exercisesForState = getSectionHelper().getExercisesForSelectionState(typeToSection);
-    List<String> allIDs = new ArrayList<String>();
-
-/*    Map<String, CollationKey> idToKey = new HashMap<String, CollationKey>();
-    for (CommonExercise exercise : exercisesForState) {
-      String id = exercise.getID();
-      allIDs.add(id);
-      CollationKey collationKey = collator.getCollationKey(exercise.getForeignLanguage());
-      idToKey.put(id, collationKey);
-    }*/
-
-    Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
-    for (CommonExercise exercise : exercisesForState) {
-      String id = exercise.getID();
-      allIDs.add(id);
-      idToEx.put(id, exercise);
-    }
-
-    //List<ExerciseCorrectAndScore> exerciseCorrectAndScores = resultDAO.getExerciseCorrectAndScores(userid, allIDs, idToKey);
-    List<ExerciseCorrectAndScore> exerciseCorrectAndScores =
-        resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, sorter);
-
-    return addJsonHistory(exerciseCorrectAndScores);
+                                        ExerciseSorter sorter//,  Collator collator
+  ) {    return jsonSupport.getJsonScoreHistory(userid, typeToSection, sorter);
   }
-
 
   /**
    * A special, slimmed down history just for the Appen recording app.
@@ -519,111 +508,8 @@ public class DatabaseImpl implements Database {
    */
   public JSONObject getJsonScoreHistoryRecorded(long userid,
                                                 Map<String, Collection<String>> typeToSection,
-                                                Collator collator
-  ) {
-    Collection<CommonExercise> exercisesForState = getSectionHelper().getExercisesForSelectionState(typeToSection);
-
-    final Map<String, CollationKey> idToKey = new HashMap<String, CollationKey>();
-    for (CommonExercise exercise : exercisesForState) {
-      String id = exercise.getID();
-      idToKey.put(id, collator.getCollationKey(exercise.getForeignLanguage()));
-    }
-
-    List<CommonExercise> copy = new ArrayList<CommonExercise>(exercisesForState);
-    final Set<String> recordedForUser = audioDAO.getRecordedRegularForUser(userid);
-
-    Collections.sort(copy, new Comparator<CommonExercise>() {
-      @Override
-      public int compare(CommonExercise o1, CommonExercise o2) {
-        String id = o1.getID();
-        String id1 = o2.getID();
-
-        boolean firstRecorded = recordedForUser.contains(id);
-        boolean secondRecorded = recordedForUser.contains(id1);
-        if (!firstRecorded && secondRecorded) {
-          return -1;
-        } else if (firstRecorded && !secondRecorded) {
-          return +1;
-        } else {
-          CollationKey fl = idToKey.get(id);
-          CollationKey otherFL = idToKey.get(id1);
-          return fl.compareTo(otherFL);
-        }
-      }
-    });
-
-
-    JSONArray scores = new JSONArray();
-    for (CommonExercise ex : copy) {
-      //logger.debug("for " + ex);
-      JSONObject exAndScores = new JSONObject();
-      exAndScores.put("ex", ex.getID());
-      boolean wasRecorded = recordedForUser.contains(ex.getID());
-      exAndScores.put("s", wasRecorded ? "100" : "0");
-
-      JSONArray history = new JSONArray();
-      if (wasRecorded) {
-        history.add("Y");
-      }
-      exAndScores.put("h", history);
-
-      scores.add(exAndScores);
-    }
-
-    JSONObject container = new JSONObject();
-    container.put("scores", scores);
-    container.put("lastCorrect", ""+recordedForUser.size());
-    container.put("lastIncorrect", Integer.toString(0));
-    return container;
-  }
-
-  /**
-   * @see #getJsonScoreHistory
-   * @param exerciseCorrectAndScores
-   * @return
-   */
-  private JSONObject addJsonHistory(Collection<ExerciseCorrectAndScore> exerciseCorrectAndScores) {
-    JSONArray scores = new JSONArray();
-    int correct = 0, incorrect = 0;
-    for (ExerciseCorrectAndScore ex : exerciseCorrectAndScores) {
-      //logger.debug("for " + ex);
-      List<CorrectAndScore> correctAndScoresLimited = ex.getCorrectAndScoresLimited();
-
-      JSONArray history = new JSONArray();
-      boolean lastCorrect = getHistoryAsJson(history, correctAndScoresLimited);
-      boolean empty = correctAndScoresLimited.isEmpty();
-      if (!empty) {
-        if (lastCorrect) correct++; else incorrect++;
-      }
-
-      JSONObject exAndScores = new JSONObject();
-      exAndScores.put("ex", ex.getId());
-      exAndScores.put("s", Integer.toString(ex.getAvgScorePercent()));
-      exAndScores.put("h", history);
-      exAndScores.put("scoreJson",empty?"":correctAndScoresLimited.get(correctAndScoresLimited.size()-1).getScoreJson());
-      scores.add(exAndScores);
-    }
-
-    JSONObject container = new JSONObject();
-    container.put("scores", scores);
-    container.put("lastCorrect",   Integer.toString(correct));
-    container.put("lastIncorrect", Integer.toString(incorrect));
-    return container;
-  }
-
-  /**
-   *
-   * @param history
-   * @param correctAndScoresLimited
-   * @return array of Y's and N's
-   */
-  private boolean getHistoryAsJson(JSONArray history, Collection<CorrectAndScore> correctAndScoresLimited) {
-    boolean lastCorrect = false;
-    for (CorrectAndScore cs : correctAndScoresLimited) {
-      history.add(cs.isCorrect() ? "Y" : "N");
-      lastCorrect = cs.isCorrect();
-    }
-    return lastCorrect;
+                                                Collator collator) {
+    return jsonSupport.getJsonScoreHistoryRecorded(userid,typeToSection,collator);
   }
 
   /**
@@ -644,27 +530,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.ScoreServlet#getPhoneReport
    */
   public JSONObject getJsonPhoneReport(long userid, Map<String, Collection<String>> typeToValues) {
-    Collection<CommonExercise> exercisesForState = getSectionHelper().getExercisesForSelectionState(typeToValues);
-
-    long then = System.currentTimeMillis();
-    Map<String, List<AudioAttribute>> exToAudio = getAudioDAO().getExToAudio();
-    long now = System.currentTimeMillis();
-
-    if (now-then > 500) logger.warn("took " + (now-then) + " millis to get ex->audio map");
-
-    List<String> ids = new ArrayList<String>();
-    Map<String, String> idToRef = new HashMap<String, String>();
-    for (CommonExercise exercise : exercisesForState) {
-      List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
-      if (audioAttributes != null) {
-        getAudioDAO().attachAudio(exercise, installPath, configDir, audioAttributes);
-      }
-      String id = exercise.getID();
-      ids.add(id);
-      idToRef.put(id, exercise.getRefAudio());
-    }
-
-    return getPhoneDAO().getWorstPhonesJson(userid, ids, idToRef);
+    return jsonSupport.getJsonPhoneReport(userid, typeToValues);
   }
 
   /**
@@ -958,9 +824,7 @@ public class DatabaseImpl implements Database {
     return eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, hitID, device));
   }
 
-  public void logAndNotify(Exception e) {
-    logAndNotify.logAndNotifyServerException(e);
-  }
+  public void logAndNotify(Exception e) { logAndNotify.logAndNotifyServerException(e);  }
 
   public EventDAO getEventDAO() {
     return eventDAO;
@@ -1274,10 +1138,7 @@ public class DatabaseImpl implements Database {
   private AddRemoveDAO getAddRemoveDAO() {
     return addRemoveDAO;
   }
-
-  private ExerciseDAO getExerciseDAO() {
-    return exerciseDAO;
-  }
+  private ExerciseDAO getExerciseDAO()   { return exerciseDAO; }
 
   /**
    * @param out
@@ -1376,7 +1237,6 @@ public class DatabaseImpl implements Database {
       logger.error("got " +e);
     }
   }
-
 /*
   public Map<Long, Map<String, Integer>> getUserToDayToRecordings() {
     return new Report(userDAO, resultDAO, eventDAO, audioDAO).getUserToDayToRecordings(null);
