@@ -515,9 +515,7 @@ public class AudioFileHelper implements CollationSort {
 		return c;
 	}
 
-	private static float round(float d) {
-		return round(d, 3);
-	}
+	private static float round(float d) { return round(d, 3);	}
 	private static float round(float d, int decimalPlace) {
 		BigDecimal bd = new BigDecimal(Float.toString(d));
 		bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
