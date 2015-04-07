@@ -431,12 +431,18 @@ public class Report {
     weekToCount.put(w, (integer2 == null) ? 1 : integer2 + 1);
   }
 
+  /**
+   * @see #getResults(StringBuilder, Set, PathHelper)
+   * @param exToAudio
+   * @param result
+   * @return
+   */
   private boolean isRefAudioResult(Map<String, List<AudioAttribute>> exToAudio, Result result) {
     boolean skip = false;
     List<AudioAttribute> audioAttributes = exToAudio.get(result.getExerciseID());
     if (audioAttributes != null) {
       for (AudioAttribute audioAttribute : audioAttributes) {
-        if (audioAttribute.getDurationInMillis() == result.getDurationInMillis()) {
+        if (getFile(audioAttribute).equals(getFile(result))) {
           long userid = result.getUserid();
           if (audioAttribute.getUser().getId() == userid) {
             skip = true;
@@ -446,6 +452,14 @@ public class Report {
       }
     }
     return skip;
+  }
+
+  private String getFile(AudioAttribute attribute) { return getFile(attribute.getAudioRef()); }
+  private String getFile(Result result) { return getFile(result.getAnswer()); }
+
+  private String getFile(String audioRef) {
+    String[] bestAudios = audioRef.split(File.separator);
+    return bestAudios[bestAudios.length - 1];
   }
 
   /**
