@@ -66,6 +66,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String configDir;
   private ServerProperties serverProps;
   private PathHelper pathHelper;
+	/**
+	 * @see #getExercises()
+	 */
   private ExerciseTrie fullTrie;
 
   private static final boolean DEBUG = false;
@@ -229,7 +232,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	private Collection<CommonExercise> getExercisesForSearch(String prefix, int userID, Collection<CommonExercise> exercises, boolean predefExercises) {
 		long then = System.currentTimeMillis();
 		ExerciseTrie trie = predefExercises ? fullTrie : new ExerciseTrie(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
-		exercises = trie.getExercises(prefix);
+		exercises = trie.getExercises(prefix, audioFileHelper.getSmallVocabDecoder());
 		long now = System.currentTimeMillis();
 		if (now - then > 300) {
 			logger.debug("took " + (now - then) + " millis to do trie lookup");
@@ -450,7 +453,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
 		if (hasPrefix) {
 			ExerciseTrie trie = new ExerciseTrie(exercisesForState, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
-			exercisesForState = trie.getExercises(prefix);
+			exercisesForState = trie.getExercises(prefix, audioFileHelper.getSmallVocabDecoder());
 		}
 
 		if (exercisesForState.isEmpty()) { // allow lookup by id
