@@ -346,7 +346,7 @@
     <!-- Makes a jar of just the .class files and the javascript, so you can overlay it on an active webapp -->
     <target depends="build" name="patch">
         <jar destfile="npPatch.war" basedir="war"
-             excludes="bestAudio/**,bestAudioCM/**,bestAudioRussian/**,WEB-INF/web.xml,WEB-INF/lib/pronz*.jar,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+             excludes="bestAudio/**,bestAudioCM/**,bestAudioRussian/**,WEB-INF/web.xml,WEB-INF/lib/pronz*.jar,WEB-INF/lib/servlet*.jar,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -411,10 +411,7 @@
             <arg line="-style"/>
 
             <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
-            <arg value="OBF"/>
-<!--
             <arg value="PRETTY"/>
--->
             <arg line="-localWorkers"/>
             <arg value="6"/>
 <!--
