@@ -1779,6 +1779,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		return audioAnswer;
 	}
 
+	/**
+	 * Just for appen recording.
+	 * @param user
+	 * @param exercise1
+	 * @param audioAnswer
+	 */
   public void addToAudioTable(int user, CommonExercise exercise1, AudioAnswer audioAnswer) {
     addToAudioTable(user, "regular", exercise1, exercise1.getID(), audioAnswer);
   }
@@ -1801,7 +1807,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String foreignLanguage = exercise1 == null ? "" : exercise1.getForeignLanguage();
     String permanentAudioPath = new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise, foreignLanguage);
 		AudioAttribute audioAttribute =
-				db.getAudioDAO().addOrUpdate(user, permanentAudioPath, exercise, System.currentTimeMillis(), audioType, audioAnswer.getDurationInMillis());
+				db.getAudioDAO().addOrUpdate(user, exercise, audioType, permanentAudioPath, System.currentTimeMillis(), audioAnswer.getDurationInMillis());
 		audioAnswer.setPath(audioAttribute.getAudioRef());
 		logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " audio answer has " + audioAttribute);
 
