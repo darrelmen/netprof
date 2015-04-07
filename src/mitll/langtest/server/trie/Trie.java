@@ -47,7 +47,7 @@ public class Trie<T> {
   /**
    * @param toMatch
    * @return
-   * @see mitll.langtest.server.ExerciseTrie#getExercises(String)
+   * @see mitll.langtest.server.ExerciseTrie#getExercises(String, mitll.langtest.server.scoring.SmallVocabDecoder)
    */
   protected List<EmitValue<T>> getEmits(String toMatch) {
     TrieNode<T> start = getRoot();
@@ -190,7 +190,6 @@ public class Trie<T> {
     for (int i = 0; i < entry.length(); i++) {
       builder.append(entry.charAt(i));
       toAdd.add(builder.toString());
-
     }
     return toAdd;
   }
