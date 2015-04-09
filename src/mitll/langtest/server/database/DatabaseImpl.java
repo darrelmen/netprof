@@ -177,7 +177,7 @@ public class DatabaseImpl implements Database {
     userExerciseDAO = new UserExerciseDAO(this, logAndNotify);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
     resultDAO = new ResultDAO(this, logAndNotify);
-    refresultDAO = new RefResultDAO(this, logAndNotify);
+    refresultDAO = new RefResultDAO(this, logAndNotify, getServerProps().shouldDropRefResult());
     wordDAO = new WordDAO(this, logAndNotify);
     phoneDAO = new PhoneDAO(this, logAndNotify);
     audioDAO = new AudioDAO(this, userDAO);
