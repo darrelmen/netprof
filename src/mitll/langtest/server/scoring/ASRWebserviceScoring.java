@@ -7,9 +7,10 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import corpus.HTKDictionary;
 import corpus.LTS;
-import mitll.langtest.server.LangTestDatabaseImpl;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.shared.CommonExercise;
@@ -55,7 +56,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 //	public static final String SMALL_LM_SLF = "smallLM.slf";
 
 	private static SmallVocabDecoder svDecoderHelper = null;
-	private LangTestDatabaseImpl langTestDatabase;
+//	private LangTestDatabaseImpl langTestDatabase;
 
 	/**
 	 * By keeping these here, we ensure that we only ever read the dictionary once
@@ -72,52 +73,49 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 */
 //	private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
 	private final LTSFactory ltsFactory;
-
-	/**
-	 * @param deployPath
-	 * @param properties
-	 * @param langTestDatabase
-	 * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
-	 * @see mitll.langtest.server.audio.AudioFileHelper#makeASRScoring()
-	 */
-	public ASRWebserviceScoring(String deployPath, Map<String, String> properties, LangTestDatabaseImpl langTestDatabase) {
-		this(deployPath, properties);
-		this.langTestDatabase = langTestDatabase;
-		readDictionary();
-		makeDecoder();
-	}
-
-	public <T extends CommonExercise> void sort(List<T> toSort) {
-		ltsFactory.sort(toSort);
-	}
-
-	@Override
-	public Collator getCollator() {
-		return ltsFactory.getCollator();
-	}
-
+	private final String ip;
+	private final int port;
 	private final String languageProperty;
 
 	/**
 	 * @param deployPath
 	 * @param properties
-	 * @see #ASRWebserviceScoring(String, java.util.Map, mitll.langtest.server.LangTestDatabaseImpl)
+	 * @paramx langTestDatabase
+	 * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
+	 * @see mitll.langtest.server.audio.AudioFileHelper#makeASRScoring()
 	 */
-	private ASRWebserviceScoring(String deployPath, Map<String, String> properties) {
+	public ASRWebserviceScoring(String deployPath, ServerProperties properties){
 		super(deployPath);
+
 		logger.debug("Creating ASRWebserviceScoring object");
 		//lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
 		audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
-		languageProperty = properties.get("language");
+		languageProperty = properties.getLanguage();
 		String language = languageProperty != null ? languageProperty : "";
+		ip = properties.getWebserviceIP();
+		port = properties.getWebservicePort();
 
 		isMandarin = language.equalsIgnoreCase("mandarin");
+
 		ltsFactory = new LTSFactory(languageProperty);
 		this.letterToSoundClass = ltsFactory.getLTSClass(language);
+		logger.debug(this + " LTS is " + letterToSoundClass);
 		makeDecoder();
-		this.configFileCreator = new ConfigFileCreator(properties, letterToSoundClass, scoringDir);
+		this.configFileCreator = new ConfigFileCreator(properties.getProperties(), letterToSoundClass, scoringDir);
+		readDictionary();
+		makeDecoder();
 	}
+
+	/**
+	 * @see AudioFileHelper#sort
+	 * @param toSort
+	 * @param <T>
+	 */
+	public <T extends CommonExercise> void sort(List<T> toSort) {		ltsFactory.sort(toSort);	}
+
+	@Override
+	public Collator getCollator() { return ltsFactory.getCollator(); 	}
 
 	private void makeDecoder() {
 		if (svDecoderHelper == null && htkDictionary != null) {
@@ -315,7 +313,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 																	boolean useCache, String prefix, Result precalcResult) {
 		return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
 				sentence, lmSentences, 
-				//scoringDir,
 				imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
 				decode, tmpDir,
 				useCache, prefix);
@@ -353,7 +350,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	private PretestScore scoreRepeatExercise(String testAudioDir,
 			String testAudioFileNoSuffix,
 			String sentence, Collection<String> lmSentences, // TODO make two params, transcript and lm (null if no slf)
-	//		String scoringDir,
 
 			String imageOutDir,
 			int imageWidth, int imageHeight,
@@ -432,7 +428,16 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	////////////////////////////////
 	////////////////////////////////
 
+	/**
+	 * @see #runHydra(String, String, Collection, String, boolean, int)
+	 * @param transcript
+	 * @return
+	 */
 	private String createHydraDictWithoutSP(String transcript) {
+		if (letterToSoundClass == null) {
+			logger.warn(this  + " :  LTS is null???");
+		}
+
 		String dict = "[";
 		transcript = "<s> " + transcript + " </s>";
 		int ctr = 0;
@@ -454,14 +459,18 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 					}
 				}
 				else {
-					for(String[] pron : letterToSoundClass.process(word.toLowerCase())) {
-						if(ctr != 0) dict += ";";
-						dict += word + ",";
-						int ctr2 = 0;
-						for(String p : pron) {
-							if(ctr2 != 0) dict += " ";
-							ctr2 += 1;
-							dict += p;
+					if (letterToSoundClass == null) {
+						logger.warn(this + " " + languageProperty + " : LTS is null???");
+					} else {
+						for (String[] pron : letterToSoundClass.process(word.toLowerCase())) {
+							if (ctr != 0) dict += ";";
+							dict += word + ",";
+							int ctr2 = 0;
+							for (String p : pron) {
+								if (ctr2 != 0) dict += " ";
+								ctr2 += 1;
+								dict += p;
+							}
 						}
 					}
 				}
@@ -492,8 +501,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 
 		String hydraInput = tmpDir + "/:" + audioPath + ":" + dictWithoutSP + ":" + smallLM + ":xxx,0," + end + ",[]";
 		long then = System.currentTimeMillis();
-		String ip = langTestDatabase.getWebserviceIP();
-		int port = langTestDatabase.getWebservicePort();
 		HTTPClient httpClient = new HTTPClient(ip, port);
 		String resultsStr = httpClient.sendAndReceive(hydraInput);
 		try {
@@ -657,7 +664,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	}
 
 	/**
-	 * @see #ASRWebserviceScoring(String, java.util.Map, mitll.langtest.server.LangTestDatabaseImpl)
+	 * @see #ASRWebserviceScoring
 	 */
 	private void readDictionary() { htkDictionary = makeDict(); }
 
