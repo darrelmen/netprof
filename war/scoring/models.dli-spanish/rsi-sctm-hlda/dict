@@ -92,7 +92,6 @@ ABRIRLAS                       a b rf i rf l a s sp
 ABRIRLO                        a b rf i rf l o sp
 ABRIRÁN                        a b rf i rf a ng sp
 ABROCHARSE                     a b rf o tS a rf s e sp
-ABROCHARSE                     a b rf o ts a rf s e sp
 ABRUMADO                       a b rf u m a d o sp
 ABRUMADO                       a b rf u m a o sp
 ABRUMADORA                     a b rf u m a d o rf a sp
@@ -269,17 +268,11 @@ ACERTADO                       a t e rf t a o sp
 ACERVAMENTE                    a s e rf b a m e n t e sp
 ACES                           a s e s sp
 ACHACA                         a tS a k a sp
-ACHACA                         a ts a k a sp
 ACHACAN                        a tS a k a ng sp
-ACHACAN                        a ts a k a ng sp
 ACHECO                         a tS e k o sp
-ACHECO                         a ts e k o sp
 ACHILLE                        a tS i l e sp
-ACHILLE                        a ts i l e sp
 ACHT                           a tS t sp
-ACHT                           a ts t sp
 ACHTEN                         a tS t e ng sp
-ACHTEN                         a ts t e ng sp
 ACIAL                          a s j a l sp
 ACICATEADO                     a s i k a t e a d o sp
 ACICATEADO                     a t i k a t e a o sp
@@ -687,7 +680,6 @@ AFIANCEN                       a f j a ng s e ng sp
 AFIANZA                        a f j a n s a sp
 AFIANZA                        a f j a n t a sp
 AFICHE                         a f i tS e sp
-AFICHE                         a f i ts e sp
 AFICI                          a f i s i sp
 AFICIONADOS                    a f i s j o n a d o s sp
 AFICIONADOS                    a f i t j o n a d o s sp
@@ -732,7 +724,6 @@ AFTENPOSTEN                    a f t i n p o s t e ng sp
 AFUERA                         a f w e rf a sp
 AFUERAS                        a f w e rf a s sp
 AGACHARSE                      a g a tS a rf s e sp
-AGACHARSE                      a g a ts a rf s e sp
 AGARR                          a g a r sp
 AGARRAR                        a g a r a rf sp
 AGCA                           a g k a sp
@@ -870,7 +861,6 @@ AHORRO                         a o r o sp
 AHORROS                        a o r o s sp
 AHRONOT                        a rf o n o t sp
 AHUACHAP                       a w a tS a p sp
-AHUACHAP                       a w a ts a p sp
 AHUYENTAN                      a u j e n t a n sp
 AHUYENTAN                      a u l e n t a ng sp
 AHUYENTAR                      a u j e n t a rf sp
@@ -1331,17 +1321,11 @@ ANC                            a e n e s e sp
 ANCA                           a n k a sp
 ANCESTRAL                      a ng s e s t rf a l sp
 ANCHAR                         a n tS a rf sp
-ANCHAR                         a n ts a rf sp
 ANCHAR                         a ng tS a rf sp
-ANCHAR                         a ng ts a rf sp
 ANCHAS                         a n tS a s sp
-ANCHAS                         a n ts a s sp
 ANCHAS                         a ng tS a s sp
-ANCHAS                         a ng ts a s sp
 ANCHO                          a n tS o sp
-ANCHO                          a n ts o sp
 ANCHO                          a ng tS o sp
-ANCHO                          a ng ts o sp
 ANCIANO                        a n t j a n o sp
 ANCIANO                        a ng s j a n o sp
 ANCIANOS                       a n t j a n o s sp
@@ -1415,11 +1399,8 @@ ANNONHALMA                     a n o n a l m a sp
 ANNOS                          a n n o s sp
 ANO                            a n o sp
 ANOCHE                         a n o tS e sp
-ANOCHE                         a n o ts e sp
 ANOCHECER                      a n o tS e s e rf sp
 ANOCHECER                      a n o tS e t e rf sp
-ANOCHECER                      a n o ts e s e rf sp
-ANOCHECER                      a n o ts e t e rf sp
 ANOMAL                         a n o m a l sp
 ANOMALÍA                       a n o m a l i a sp
 ANORMAL                        a n o rf m a l sp
@@ -1517,11 +1498,8 @@ ANTOJADIZAS                    a n t o x a d i s a s sp
 ANTOLOG                        a n t o l o g sp
 ANTONIO                        a n t o n j o sp
 ANTORCHA                       a n t o rf tS a sp
-ANTORCHA                       a n t o rf ts a sp
 ANTORCHADA                     a n t o rf tS a d a sp
-ANTORCHADA                     a n t o rf ts a d a sp
 ANTORCHAS                      a n t o rf tS a s sp
-ANTORCHAS                      a n t o rf ts a s sp
 ANTURIOS                       a n t u rf j o s sp
 ANUAL                          a n w a l sp
 ANUALES                        a n w a l e s sp
@@ -1758,25 +1736,15 @@ APROPIADO                      a p rf o p j a d o sp
 APROPIADO                      a p rf o p j a o sp
 APROPIARSE                     a p rf o p j a rf s e sp
 APROVECH                       a p rf o b e tS sp
-APROVECH                       a p rf o b e ts sp
 APROVECHABLES                  a p rf o b e tS a b l e s sp
-APROVECHABLES                  a p rf o b e ts a b l e s sp
 APROVECHADA                    a p rf o b e tS a d a sp
-APROVECHADA                    a p rf o b e ts a d a sp
 APROVECHADO                    a p rf o b e tS a d o sp
 APROVECHADO                    a p rf o b e tS a o sp
-APROVECHADO                    a p rf o b e ts a d o sp
-APROVECHADO                    a p rf o b e ts a o sp
 APROVECHAMIENTO                a p rf o b e tS a m j e n t o sp
-APROVECHAMIENTO                a p rf o b e ts a m j e n t o sp
 APROVECHANDO                   a p rf o b e tS a n d o sp
-APROVECHANDO                   a p rf o b e ts a n d o sp
 APROVECHAR                     a p rf o b e tS a rf sp
-APROVECHAR                     a p rf o b e ts a rf sp
 APROVECHARON                   a p rf o b e tS a rf o ng sp
-APROVECHARON                   a p rf o b e ts a rf o ng sp
 APROVECHARSE                   a p rf o b e tS a rf s e sp
-APROVECHARSE                   a p rf o b e ts a rf s e sp
 APROXIMA                       a p rf o k s i m a sp
 APROXIMA                       a p rf o s i m a sp
 APROXIMACI                     a p rf o s i m a s i sp
@@ -1844,15 +1812,10 @@ ARCAS                          a rf k a s sp
 ARCE                           a rf s e sp
 ARCE                           a rf t e sp
 ARCHIENEMIGO                   a rf tS j e n e m i g o sp
-ARCHIENEMIGO                   a rf ts j e n e m i g o sp
 ARCHIPI                        a rf tS i p i sp
-ARCHIPI                        a rf ts i p i sp
 ARCHIVAR                       a rf tS i b a rf sp
-ARCHIVAR                       a rf ts i b a rf sp
 ARCHIVO                        a rf tS i b o sp
-ARCHIVO                        a rf ts i b o sp
 ARCHIVOS                       a rf tS i b o s sp
-ARCHIVOS                       a rf ts i b o s sp
 ARCILLOSO                      a rf s i l o s o sp
 ARCILLOSO                      a rf t i l o s o sp
 ARCO                           a rf k o sp
@@ -2001,7 +1964,6 @@ ARSENALES                      a rf s e n a l e s sp
 ART                            a rf t sp
 ARTE                           a rf t e sp
 ARTECH                         a rf t e tS sp
-ARTECH                         a rf t e ts sp
 ARTEFACTO                      a rf t e f a k t o sp
 ARTEFACTOS                     a rf t e f a k t o s sp
 ARTERIA                        a rf t e rf j a sp
@@ -2439,9 +2401,7 @@ AV                             a b sp
 AVAL                           a b a l sp
 AVALADO                        a b a l a d o sp
 AVALANCHA                      a b a l a n tS a sp
-AVALANCHA                      a b a l a n ts a sp
 AVALANCHA                      a b a l a ng tS a sp
-AVALANCHA                      a b a l a ng ts a sp
 AVALAR                         a b a l a rf sp
 AVANCE                         a b a n t e sp
 AVANCE                         a b a ng s e sp
@@ -2540,7 +2500,6 @@ AYUNTAMIENTO                   a i u n t a m j e n t o sp
 AYUNTAMIENTO                   a l u n t a m j e n t o sp
 AZ                             a s sp
 AZABACHE                       a s a b a tS e sp
-AZABACHE                       a s a b a ts e sp
 AZAFRÁN                        a s a f rf a ng sp
 AZAFRÁN                        a t a f rf a ng sp
 AZARES                         a s a rf e s sp
@@ -2576,9 +2535,7 @@ BA                             b a sp
 BAATH                          b a a t sp
 BABILONIA                      b a b i l o n j a sp
 BACHEO                         b a tS e o sp
-BACHEO                         b a ts e o sp
 BACHILLERES                    b a tS i l e rf e s sp
-BACHILLERES                    b a ts i l e rf e s sp
 BACON                          b a k o ng sp
 BACTERIANA                     b a k t e rf j a n a sp
 BACTERIAS                      b a k t e rf j a s sp
@@ -2694,7 +2651,6 @@ BARDA                          b a rf d a sp
 BARDO                          b a rf d o sp
 BARLETTA                       b a rf l e t t a sp
 BARNECHEA                      b a rf n e tS e a sp
-BARNECHEA                      b a rf n e ts e a sp
 BARQUERO                       b a rf k e rf o sp
 BARRA                          b a r a sp
 BARRACAS                       b a r a k a s sp
@@ -2740,14 +2696,12 @@ BATALLA                        b a t a l a sp
 BATALLADO                      b a t a l a o sp
 BATALLAR                       b a t a l a rf sp
 BATCHA                         b a t tS a sp
-BATCHA                         b a t ts a sp
 BATER                          b a t e rf sp
 BATERÍAS                       b a t e rf i a s sp
 BATIDO                         b a t i d o sp
 BATIR                          b a t i rf sp
 BATRES                         b a t rf e s sp
 BAUTCH                         b a u t tS sp
-BAUTCH                         b a u t ts sp
 BAUTISMAL                      b a u t i s m a l sp
 BAUTIZARLA                     b a u t i s a rf l a sp
 BAUTIZARLA                     b a u t i t a rf l a sp
@@ -2762,7 +2716,6 @@ BAÑERA                         b a nj e rf a sp
 BAÑO                           b a nj o sp
 BCAMA                          b k a m a sp
 BCH                            b e s e a tS e sp
-BCH                            b e s e a ts e sp
 BCIE                           b e s e i e sp
 BCIE                           b e t e i e sp
 BCU                            b e s e u sp
@@ -2806,7 +2759,6 @@ BELLO                          b e l o sp
 BELO                           b e l o sp
 BELTRANENA                     b e l t rf a n e n a sp
 BELUCHES                       b e l u tS e s sp
-BELUCHES                       b e l u ts e s sp
 BEN                            b e ng sp
 BENDICE                        b e n d i s e sp
 BENDICE                        b e n d i t e sp
@@ -2943,9 +2895,7 @@ BISTEC                         b i s t e k sp
 BIZANTINISMO                   b i s a n t i n i s m o sp
 BIZANTINISMO                   b i t a n t i n i s m o sp
 BIZCOCHO                       b i s k o tS o sp
-BIZCOCHO                       b i s k o ts o sp
 BIZCOCHO                       b i t k o tS o sp
-BIZCOCHO                       b i t k o ts o sp
 BLADES                         b l a d e s sp
 BLANCA                         b l a n k a sp
 BLANCA                         b l a ng k a sp
@@ -2998,9 +2948,7 @@ BOCADITOS                      b o k a d i t o s sp
 BOCAJARRO                      b o k a x a r o sp
 BOCANEGRA                      b o k a n e g rf a sp
 BOCHORNOSO                     b o tS o rf n o s o sp
-BOCHORNOSO                     b o ts o rf n o s o sp
 BOCHORNOSOS                    b o tS o rf n o s o s sp
-BOCHORNOSOS                    b o ts o rf n o s o s sp
 BOCINAS                        b o s i n a s sp
 BOCINAS                        b o t i n a s sp
 BODA                           b o d a sp
@@ -3018,7 +2966,6 @@ BOINA                          b o i n a sp
 BOL                            b o l sp
 BOLA                           b o l a sp
 BOLCHEVISMO                    b o l tS e b i s m o sp
-BOLCHEVISMO                    b o l ts e b i s m o sp
 BOLET                          b o l e t sp
 BOLETAS                        b o l e t a s sp
 BOLETO                         b o l e t o sp
@@ -3067,9 +3014,7 @@ BORJA                          b o rf x a sp
 BORNAND                        b o rf n a ng sp
 BORR                           b o r sp
 BORRACHITOS                    b o r a tS i t o s sp
-BORRACHITOS                    b o r a ts i t o s sp
 BORRACHO                       b o r a tS o sp
-BORRACHO                       b o r a ts o sp
 BORRADO                        b o r a d o sp
 BORRADO                        b o r a o sp
 BORRADOR                       b o r a d o rf sp
@@ -3101,7 +3046,6 @@ BRAZOS                         b rf a s o s sp
 BRAZOS                         b rf a t o s sp
 BREARD                         b rf e a rf sp
 BRECHA                         b rf e tS a sp
-BRECHA                         b rf e ts a sp
 BREGO                          b rf e g o sp
 BREOG                          b rf e o g sp
 BRETA                          b rf e t a sp
@@ -3157,7 +3101,6 @@ BUCEAR                         b u t e a rf sp
 BUCEO                          b u s e o sp
 BUCEO                          b u t e o sp
 BUCHANAN                       b u tS a n a ng sp
-BUCHANAN                       b u ts a n a ng sp
 BUDA                           b u d a sp
 BUDAPEST                       b u d a p e s t sp
 BUEN                           b w e ng sp
@@ -3257,9 +3200,7 @@ CACEROLAS                      k a t e rf o l a s sp
 CACEROLEADA                    k a s e rf o l e a d a sp
 CACEROLEADA                    k a t e rf o l e a d a sp
 CACHO                          k a tS o sp
-CACHO                          k a ts o sp
 CACHORRO                       k a tS o r o sp
-CACHORRO                       k a ts o r o sp
 CACIQUE                        k a s i k e sp
 CACIQUE                        k a t i k e sp
 CAD                            k a sp
@@ -3360,7 +3301,6 @@ CALZADO                        k a l t a o sp
 CAM                            k a m sp
 CAMA                           k a m a sp
 CAMACHO                        k a m a tS o sp
-CAMACHO                        k a m a ts o sp
 CAMACOL                        k a m a k o l sp
 CAMAR                          k a m a rf sp
 CAMARADAS                      k a m a rf a d a s sp
@@ -3463,9 +3403,7 @@ CANCELAR                       k a ng s e l a rf sp
 CANCEROSOS                     k a n t e rf o s o s sp
 CANCEROSOS                     k a ng s e rf o s o s sp
 CANCHAS                        k a n tS a s sp
-CANCHAS                        k a n ts a s sp
 CANCHAS                        k a ng tS a s sp
-CANCHAS                        k a ng ts a s sp
 CANCI                          k a n s i sp
 CANCI                          k a ng s i sp
 CANCILLER                      k a n t i l e rf sp
@@ -3571,7 +3509,6 @@ CAPO                           k a p o sp
 CAPOS                          k a p o s sp
 CAPOTÓ                         k a p o t o sp
 CAPRICHOS                      k a p rf i tS o s sp
-CAPRICHOS                      k a p rf i ts o s sp
 CAPT                           k a p t sp
 CAPTA                          k a p t a sp
 CAPTABAN                       k a p t a b a ng sp
@@ -3594,7 +3531,6 @@ CARABINAS                      k a rf a b i n a s sp
 CARACAS                        k a rf a k a s sp
 CARACCIOLI                     k a rf a s j o l i sp
 CARACCIOLI                     k a rf a tS j o l i sp
-CARACCIOLI                     k a rf a ts j o l i sp
 CARACOLES                      k a rf a k o l e s sp
 CARACTER                       k a rf a k t e rf sp
 CARACTERES                     k a rf a k t e rf e s sp
@@ -3990,9 +3926,7 @@ CENTROAMÉRICA                  t e n t rf o a m e rf i k a sp
 CENTROASIÁTICO                 s e n t rf o a s j a t i k o sp
 CENTROASIÁTICO                 t e n t rf o a s j a t i k o sp
 CENTRODERECHA                  s e n t rf o d e rf e tS a sp
-CENTRODERECHA                  s e n t rf o d e rf e ts a sp
 CENTRODERECHA                  t e n t rf o d e rf e tS a sp
-CENTRODERECHA                  t e n t rf o d e rf e ts a sp
 CENTROS                        s e n t rf o s sp
 CENTROS                        t e n t rf o s sp
 CENTRÍFUGAS                    s e n t rf i f u g a s sp
@@ -4096,183 +4030,94 @@ CESTO                          s e s t o sp
 CESTO                          t e s t o sp
 CGT                            s e x e t e sp
 CH                             s e a tS e sp
-CH                             s e a ts e sp
 CH                             tS e sp
-CH                             ts e sp
 CHACAO                         tS a k a o sp
-CHACAO                         ts a k a o sp
 CHACÓN                         tS a k o ng sp
-CHACÓN                         ts a k o ng sp
 CHAFO                          tS a f o sp
-CHAFO                          ts a f o sp
 CHALATENANGO                   tS a l a t e n a n g o sp
 CHALATENANGO                   tS a l a t e n a ng g o sp
-CHALATENANGO                   ts a l a t e n a n g o sp
-CHALATENANGO                   ts a l a t e n a ng g o sp
 CHALECO                        tS a l e k o sp
-CHALECO                        ts a l e k o sp
 CHAMBONERÍA                    tS a m b o n e rf i a sp
-CHAMBONERÍA                    ts a m b o n e rf i a sp
 CHAMORRO                       tS a m o r o sp
-CHAMORRO                       ts a m o r o sp
 CHAMPÚ                         tS a m p u sp
-CHAMPÚ                         ts a m p u sp
 CHANCAY                        tS a n k a i sp
-CHANCAY                        ts a n k a i sp
 CHANTAJE                       tS a n t a x e sp
-CHANTAJE                       ts a n t a x e sp
 CHAO                           tS a o sp
-CHAO                           ts a o sp
 CHAPULINES                     tS a p u l i n e s sp
-CHAPULINES                     ts a p u l i n e s sp
 CHAQUETA                       tS a k e t a sp
-CHAQUETA                       ts a k e t a sp
 CHARLA                         tS a rf l a sp
-CHARLA                         ts a rf l a sp
 CHARLAS                        tS a rf l a s sp
-CHARLAS                        ts a rf l a s sp
 CHARLATANERISMO                tS a rf l a t a n e rf i s m o sp
-CHARLATANERISMO                ts a rf l a t a n e rf i s m o sp
 CHARLTON                       tS a rf l t o ng sp
-CHARLTON                       ts a rf l t o ng sp
 CHARPANTIER                    tS a rf p a n t j e rf sp
-CHARPANTIER                    ts a rf p a n t j e rf sp
 CHASIS                         tS a s i s sp
-CHASIS                         ts a s i s sp
 CHAVO                          tS a b o sp
-CHAVO                          ts a b o sp
 CHECA                          tS e k a sp
-CHECA                          ts e k a sp
 CHECHENA                       tS e tS e n a sp
-CHECHENA                       ts e ts e n a sp
 CHECHENIA                      tS e tS e n j a sp
-CHECHENIA                      ts e ts e n j a sp
 CHECHENOS                      tS e tS e n o s sp
-CHECHENOS                      ts e ts e n o s sp
 CHECOSLOVACA                   tS e k o s l o b a k a sp
-CHECOSLOVACA                   ts e k o s l o b a k a sp
 CHEF                           tS e f sp
-CHEF                           ts e f sp
 CHEFS                          tS e f s sp
-CHEFS                          ts e f s sp
 CHEQUE                         tS e k e sp
-CHEQUE                         ts e k e sp
 CHEQUES                        tS e k e s sp
-CHEQUES                        ts e k e s sp
 CHERNENKO                      tS e rf n e n k o sp
-CHERNENKO                      ts e rf n e n k o sp
 CHERNOMYDIN                    tS e rf n o m j d i ng sp
-CHERNOMYDIN                    ts e rf n o m j d i ng sp
 CHERNOMYRDIM                   tS e rf n o m j rf d i m sp
-CHERNOMYRDIM                   ts e rf n o m j rf d i m sp
 CHERNOMYRDIN                   tS e rf n o m j rf d i ng sp
-CHERNOMYRDIN                   ts e rf n o m j rf d i ng sp
 CHERNOMYROVDIN                 tS e rf n o m j rf o b d i ng sp
-CHERNOMYROVDIN                 ts e rf n o m j rf o b d i ng sp
 CHERNONYRDIN                   tS e rf n o n j rf d i ng sp
-CHERNONYRDIN                   ts e rf n o n j rf d i ng sp
 CHEROKEE                       tS e rf o k e e sp
-CHEROKEE                       ts e rf o k e e sp
 CHI                            tS i sp
-CHI                            ts i sp
 CHIAPAS                        tS j a p a s sp
-CHIAPAS                        ts j a p a s sp
 CHIC                           tS i k sp
-CHIC                           ts i k sp
 CHICA                          tS i k a sp
-CHICA                          ts i k a sp
 CHICAGO                        tS i k a g o sp
-CHICAGO                        ts i k a g o sp
 CHICHONTEPEC                   tS i tS o n t e p e k sp
-CHICHONTEPEC                   ts i ts o n t e p e k sp
 CHICO                          tS i k o sp
-CHICO                          ts i k o sp
 CHILE                          tS i l e sp
-CHILE                          ts i l e sp
 CHILECTRA                      tS i l e k t rf a sp
-CHILECTRA                      ts i l e k t rf a sp
 CHILENA                        tS i l e n a sp
-CHILENA                        ts i l e n a sp
 CHILENAS                       tS i l e n a s sp
-CHILENAS                       ts i l e n a s sp
 CHILENO                        tS i l e n o sp
-CHILENO                        ts i l e n o sp
 CHILENOS                       tS i l e n o s sp
-CHILENOS                       ts i l e n o s sp
 CHILGENER                      tS i l x e n e rf sp
-CHILGENER                      ts i l x e n e rf sp
 CHIMACHOY                      tS i m a tS o i sp
-CHIMACHOY                      ts i m a ts o i sp
 CHIMALTENANGO                  tS i m a l t e n a n g o sp
 CHIMALTENANGO                  tS i m a l t e n a ng g o sp
-CHIMALTENANGO                  ts i m a l t e n a n g o sp
-CHIMALTENANGO                  ts i m a l t e n a ng g o sp
 CHIMENEA                       tS i m e n e a sp
-CHIMENEA                       ts i m e n e a sp
 CHINA                          tS i n a sp
-CHINA                          ts i n a sp
 CHINANDEGA                     tS i n a n d e g a sp
-CHINANDEGA                     ts i n a n d e g a sp
 CHINAS                         tS i n a s sp
-CHINAS                         ts i n a s sp
 CHINO                          tS i n o sp
-CHINO                          ts i n o sp
 CHIQUILLOS                     tS i k i l o s sp
-CHIQUILLOS                     ts i k i l o s sp
 CHIRA                          tS i rf a sp
-CHIRA                          ts i rf a sp
 CHIRAC                         tS i rf a k sp
-CHIRAC                         ts i rf a k sp
 CHISEC                         tS i s e k sp
-CHISEC                         ts i s e k sp
 CHISTE                         tS i s t e sp
-CHISTE                         ts i s t e sp
 CHIXOY                         tS i s o i sp
-CHIXOY                         ts i s o i sp
 CHOCAR                         tS o k a rf sp
-CHOCAR                         ts o k a rf sp
 CHOCLO                         tS o k l o sp
-CHOCLO                         ts o k l o sp
 CHOFER                         tS o f e rf sp
-CHOFER                         ts o f e rf sp
 CHOFERES                       tS o f e rf e s sp
-CHOFERES                       ts o f e rf e s sp
 CHOI                           tS o i sp
-CHOI                           ts o i sp
 CHOLUTECA                      tS o l u t e k a sp
-CHOLUTECA                      ts o l u t e k a sp
 CHOQUES                        tS o k e s sp
-CHOQUES                        ts o k e s sp
 CHORIZO                        tS o rf i s o sp
 CHORIZO                        tS o rf i t o sp
-CHORIZO                        ts o rf i s o sp
-CHORIZO                        ts o rf i t o sp
 CHORRO                         tS o r o sp
-CHORRO                         ts o r o sp
 CHOZA                          tS o s a sp
 CHOZA                          tS o t a sp
-CHOZA                          ts o s a sp
-CHOZA                          ts o t a sp
 CHRISTIAN                      tS rf i s t j a ng sp
-CHRISTIAN                      ts rf i s t j a ng sp
 CHRISTOPHER                    tS rf i s t o p e rf sp
-CHRISTOPHER                    ts rf i s t o p e rf sp
 CHUAYFFET                      tS w a i f f e t sp
-CHUAYFFET                      ts w a i f f e t sp
 CHUBAIS                        tS u b a i s sp
-CHUBAIS                        ts u b a i s sp
 CHUBASCO                       tS u b a s k o sp
-CHUBASCO                       ts u b a s k o sp
 CHUBASCOS                      tS u b a s k o s sp
-CHUBASCOS                      ts u b a s k o s sp
 CHULETA                        tS u l e t a sp
-CHULETA                        ts u l e t a sp
 CHUPAR                         tS u p a rf sp
-CHUPAR                         ts u p a rf sp
 CHÁVEZ                         tS a b e s sp
 CHÁVEZ                         tS a b e t sp
-CHÁVEZ                         ts a b e s sp
-CHÁVEZ                         ts a b e t sp
 CI                             s e i sp
 CI                             t i sp
 CIA                            s j a sp
@@ -4288,7 +4133,6 @@ CICLOS                         t i k l o s sp
 CIDA                           s i d a sp
 CIDAMENTE                      s i d a m e n t e sp
 CIDH                           s e i d e a tS e sp
-CIDH                           s e i d e a ts e sp
 CIDH                           t i d sp
 CIE                            s j e sp
 CIEGO                          s j e g o sp
@@ -4478,7 +4322,6 @@ CLEVELAND                      k l e b e l a ng sp
 CLEYFART                       k l e i f a rf t sp
 CLIC                           k l i k sp
 CLICH                          k l i tS sp
-CLICH                          k l i ts sp
 CLIENTE                        k l j e n t e sp
 CLIENTELISMO                   k l j e n t e l i s m o sp
 CLIENTES                       k l j e n t e s sp
@@ -4529,11 +4372,8 @@ COCA                           k o k a sp
 COCALEROS                      k o k a l e rf o s sp
 COCAÍNA                        k o k a i n a sp
 COCHE                          k o tS e sp
-COCHE                          k o ts e sp
 COCHERA                        k o tS e rf a sp
-COCHERA                        k o ts e rf a sp
 COCHINOS                       k o tS i n o s sp
-COCHINOS                       k o ts i n o s sp
 COCINA                         k o s i n a sp
 COCINA                         k o t i n a sp
 COCINAR                        k o s i n a rf sp
@@ -6027,7 +5867,6 @@ COPROPIETARIOS                 k o p rf o p j e t a rf j o s sp
 COQUERO                        k o k e rf o sp
 COQUETEAN                      k o k e t e a ng sp
 CORACH                         k o rf a tS sp
-CORACH                         k o rf a ts sp
 CORADO                         k o rf a d o sp
 CORADO                         k o rf a o sp
 CORAJE                         k o rf a x e sp
@@ -6150,9 +5989,7 @@ COSA                           k o s a sp
 COSAS                          k o s a s sp
 COSE                           k o s e sp
 COSECHA                        k o s e tS a sp
-COSECHA                        k o s e ts a sp
 COSECHAS                       k o s e tS a s sp
-COSECHAS                       k o s e ts a s sp
 COSM                           k o s m sp
 COSNTITUCIÓN                   k o s n t i t u s j o ng sp
 COSSIGA                        k o s s i g a sp
@@ -6414,11 +6251,8 @@ CUBRI                          k u b rf i sp
 CUBRIR                         k u b rf i rf sp
 CUBRIRSE                       k u b rf i rf s e sp
 CUCHARA                        k u tS a rf a sp
-CUCHARA                        k u ts a rf a sp
 CUCHARADA                      k u tS a rf a d a sp
-CUCHARADA                      k u ts a rf a d a sp
 CUCHILLO                       k u tS i l o sp
-CUCHILLO                       k u ts i l o sp
 CUECAS                         k w e k a s sp
 CUELLO                         k w e l o sp
 CUENCA                         k w e n k a sp
@@ -6534,7 +6368,6 @@ CUSTODIA                       k u s t o d j a sp
 CUSTODIADA                     k u s t o d j a d a sp
 CUSTODIO                       k u s t o d j o sp
 CUTH                           s e u t e a tS e sp
-CUTH                           s e u t e a ts e sp
 CUYA                           k u j a sp
 CUYA                           k u l a sp
 CUYAS                          k u j a s sp
@@ -7078,15 +6911,10 @@ DEPÓSITO                       d e p o s i t o sp
 DEPÓSITOS                      d e p o s i t o s sp
 DER                            d e rf sp
 DERECHA                        d e rf e tS a sp
-DERECHA                        d e rf e ts a sp
 DERECHISTA                     d e rf e tS i s t a sp
-DERECHISTA                     d e rf e ts i s t a sp
 DERECHISTAS                    d e rf e tS i s t a s sp
-DERECHISTAS                    d e rf e ts i s t a s sp
 DERECHO                        d e rf e tS o sp
-DERECHO                        d e rf e ts o sp
 DERECHOS                       d e rf e tS o s sp
-DERECHOS                       d e rf e ts o s sp
 DERES                          d e rf e s sp
 DERIV                          d e rf i b sp
 DERIVA                         d e rf i b a sp
@@ -7108,7 +6936,6 @@ DERROCADO                      d e r o k a o sp
 DERROCAR                       d e r o k a rf sp
 DERROCARA                      d e r o k a rf a sp
 DERROCHADORES                  d e r o tS a d o rf e s sp
-DERROCHADORES                  d e r o ts a d o rf e s sp
 DERROT                         d e r o t sp
 DERROTA                        d e r o t a sp
 DERROTADA                      d e r o t a d a sp
@@ -7331,15 +7158,10 @@ DESEAR                         d e s e a rf sp
 DESEARAN                       d e s e a rf a ng sp
 DESEARLE                       d e s e a rf l e sp
 DESECHABLE                     d e s e tS a b l e sp
-DESECHABLE                     d e s e ts a b l e sp
 DESECHABLES                    d e s e tS a b l e s sp
-DESECHABLES                    d e s e ts a b l e s sp
 DESECHADOS                     d e s e tS a d o s sp
-DESECHADOS                     d e s e ts a d o s sp
 DESECHE                        d e s e tS e sp
-DESECHE                        d e s e ts e sp
 DESECHOS                       d e s e tS o s sp
-DESECHOS                       d e s e ts o s sp
 DESEE                          d e s e e sp
 DESEEN                         d e s e e ng sp
 DESEMBARCAR                    d e s e m b a rf k a rf sp
@@ -7368,7 +7190,6 @@ DESENCADENAR                   d e s e ng k a d e n a rf sp
 DESENCANTO                     d e s e n k a n t o sp
 DESENCANTO                     d e s e ng k a n t o sp
 DESENCHUFAR                    d e s e ng tS u f a rf sp
-DESENCHUFAR                    d e s e ng ts u f a rf sp
 DESENLACE                      d e s e n l a t e sp
 DESENLACE                      d e s e ng l a s e sp
 DESENMASCARA                   d e s e n m a s k a rf a sp
@@ -7427,7 +7248,6 @@ DESGUACE                       d e s g w a t e sp
 DESHEREDADOS                   d e s e rf e d a d o s sp
 DESHIELO                       d e s j e l o sp
 DESHILACHARSE                  d e s i l a tS a rf s e sp
-DESHILACHARSE                  d e s i l a ts a rf s e sp
 DESIDENTIFICARSE               d e s i d e n t i f i k a rf s e sp
 DESIERTO                       d e s j e rf t o sp
 DESIGN                         d e s i g n sp
@@ -7498,15 +7318,10 @@ DESORDEN                       d e s o rf d e ng sp
 DESORDENADO                    d e s o rf d e n a d o sp
 DESORDENADO                    d e s o rf d e n a o sp
 DESPACHANDO                    d e s p a tS a n d o sp
-DESPACHANDO                    d e s p a ts a n d o sp
 DESPACHAR                      d e s p a tS a rf sp
-DESPACHAR                      d e s p a ts a rf sp
 DESPACHARÁN                    d e s p a tS a rf a ng sp
-DESPACHARÁN                    d e s p a ts a rf a ng sp
 DESPACHO                       d e s p a tS o sp
-DESPACHO                       d e s p a ts o sp
 DESPACHOS                      d e s p a tS o s sp
-DESPACHOS                      d e s p a ts o s sp
 DESPEDAZÓ                      d e s p e d a s o sp
 DESPEDAZÓ                      d e s p e d a t o sp
 DESPEDIDA                      d e s p e d i d a sp
@@ -7783,13 +7598,9 @@ DICE                           d i t e sp
 DICEN                          d i s e ng sp
 DICEN                          d i t e n sp
 DICHA                          d i tS a sp
-DICHA                          d i ts a sp
 DICHAS                         d i tS a s sp
-DICHAS                         d i ts a s sp
 DICHO                          d i tS o sp
-DICHO                          d i ts o sp
 DICHOS                         d i tS o s sp
-DICHOS                         d i ts o s sp
 DICIEMBRE                      d i s j e m b rf e sp
 DICIEMBRE                      d i t j e m b rf e sp
 DICIENDO                       d i s j e n d o sp
@@ -7817,9 +7628,7 @@ DIDE                           d i d e sp
 DIECINUEVE                     d j e s i n w e b e sp
 DIECINUEVE                     d j e t i n w e b e sp
 DIECIOCHO                      d j e s j o tS o sp
-DIECIOCHO                      d j e s j o ts o sp
 DIECIOCHO                      d j e t j o tS o sp
-DIECIOCHO                      d j e t j o ts o sp
 DIEGO                          d j e g o sp
 DIENTE                         d j e n t e sp
 DIENTES                        d j e n t e s sp
@@ -8217,7 +8026,6 @@ DOLARIZANDO                    d o l a rf i s a n d o sp
 DOLE                           d o l e sp
 DOLER                          d o l e rf sp
 DOLMESTCH                      d o l m e s t tS sp
-DOLMESTCH                      d o l m e s t ts sp
 DOLO                           d o l o sp
 DOLOR                          d o l o rf sp
 DOLORES                        d o l o rf e s sp
@@ -8226,7 +8034,6 @@ DOLOROSAS                      d o l o rf o s a s sp
 DOLOROSO                       d o l o rf o s o sp
 DOM                            d o m sp
 DOMENECH                       d o m e n e tS sp
-DOMENECH                       d o m e n e ts sp
 DOMICILIO                      d o m i s i l j o sp
 DOMICILIO                      d o m i t i l j o sp
 DOMICILIOS                     d o m i t i l j o s sp
@@ -8296,11 +8103,8 @@ DROGADICTO                     d rf o g a d i k t o sp
 DROGAS                         d rf o g a s sp
 DUARTE                         d w a rf t e sp
 DUCHA                          d u tS a sp
-DUCHA                          d u ts a sp
 DUCHARSE                       d u tS a rf s e sp
-DUCHARSE                       d u ts a rf s e sp
 DUCHO                          d u tS o sp
-DUCHO                          d u ts o sp
 DUD                            d u sp
 DUDA                           d u d a sp
 DUDAR                          d u d a rf sp
@@ -8381,23 +8185,14 @@ EBULLICIÓN                     e b u l i s j o ng sp
 EBULLICIÓN                     e b u l i t j o n sp
 EC                             e k sp
 ECH                            e tS sp
-ECH                            e ts sp
 ECHA                           e tS a sp
-ECHA                           e ts a sp
 ECHAN                          e tS a ng sp
-ECHAN                          e ts a ng sp
 ECHANDO                        e tS a n d o sp
-ECHANDO                        e ts a n d o sp
 ECHAR                          e tS a rf sp
-ECHAR                          e ts a rf sp
 ECHARLE                        e tS a rf l e sp
-ECHARLE                        e ts a rf l e sp
 ECHEVERR                       e tS e b e r sp
-ECHEVERR                       e ts e b e r sp
 ECHEVERRÍA                     e tS e b e r i a sp
-ECHEVERRÍA                     e ts e b e r i a sp
 ECHEVERS                       e tS e b e rf s sp
-ECHEVERS                       e ts e b e rf s sp
 ECLESI                         e k l e s i sp
 ECLESIAL                       e k l e s j a l sp
 ECLESIALES                     e k l e s j a l e s sp
@@ -8853,9 +8648,7 @@ ENCANTAR                       e ng k a n t a rf sp
 ENCANTO                        e n k a n t o sp
 ENCANTO                        e ng k a n t o sp
 ENCAPUCHADOS                   e n k a p u tS a d o s sp
-ENCAPUCHADOS                   e n k a p u ts a d o s sp
 ENCAPUCHADOS                   e ng k a p u tS a d o s sp
-ENCAPUCHADOS                   e ng k a p u ts a d o s sp
 ENCARAR                        e n k a rf a rf sp
 ENCARAR                        e ng k a rf a rf sp
 ENCARARÁ                       e n k a rf a rf a sp
@@ -9465,27 +9258,16 @@ ESCUADRA                       e s k w a d rf a sp
 ESCUADRAS                      e s k w a d rf a s sp
 ESCUADRONES                    e s k w a d rf o n e s sp
 ESCUCH                         e s k u tS sp
-ESCUCH                         e s k u ts sp
 ESCUCHA                        e s k u tS a sp
-ESCUCHA                        e s k u ts a sp
 ESCUCHABA                      e s k u tS a b a sp
-ESCUCHABA                      e s k u ts a b a sp
 ESCUCHABAN                     e s k u tS a b a ng sp
-ESCUCHABAN                     e s k u ts a b a ng sp
 ESCUCHADO                      e s k u tS a d o sp
 ESCUCHADO                      e s k u tS a o sp
-ESCUCHADO                      e s k u ts a d o sp
-ESCUCHADO                      e s k u ts a o sp
 ESCUCHAN                       e s k u tS a ng sp
-ESCUCHAN                       e s k u ts a ng sp
 ESCUCHAR                       e s k u tS a rf sp
-ESCUCHAR                       e s k u ts a rf sp
 ESCUCHARSE                     e s k u tS a rf s e sp
-ESCUCHARSE                     e s k u ts a rf s e sp
 ESCUCHEN                       e s k u tS e ng sp
-ESCUCHEN                       e s k u ts e ng sp
 ESCUCHO                        e s k u tS o sp
-ESCUCHO                        e s k u ts o sp
 ESCUDERO                       e s k u d e rf o sp
 ESCUDO                         e s k u d o sp
 ESCUDRI                        e s k u d rf i sp
@@ -9632,7 +9414,6 @@ ESPERO                         e s p e rf o sp
 ESPESA                         e s p e s a sp
 ESPINACAS                      e s p i n a k a s sp
 ESPINACH                       e s p i n a tS sp
-ESPINACH                       e s p i n a ts sp
 ESPINAS                        e s p i n a s sp
 ESPINOSO                       e s p i n o s o sp
 ESPINOZA                       e s p i n o s a sp
@@ -9810,21 +9591,13 @@ ESTRATEGIAS                    e s t rf a t e x j a s sp
 ESTRATOS                       e s t rf a t o s sp
 ESTRATÉGICO                    e s t rf a t e x i k o sp
 ESTRECHA                       e s t rf e tS a sp
-ESTRECHA                       e s t rf e ts a sp
 ESTRECHAMENTE                  e s t rf e tS a m e n t e sp
-ESTRECHAMENTE                  e s t rf e ts a m e n t e sp
 ESTRECHAMIENTO                 e s t rf e tS a m j e n t o sp
-ESTRECHAMIENTO                 e s t rf e ts a m j e n t o sp
 ESTRECHAR                      e s t rf e tS a rf sp
-ESTRECHAR                      e s t rf e ts a rf sp
 ESTRECHARSE                    e s t rf e tS a rf s e sp
-ESTRECHARSE                    e s t rf e ts a rf s e sp
 ESTRECHO                       e s t rf e tS o sp
-ESTRECHO                       e s t rf e ts o sp
 ESTRECHOS                      e s t rf e tS o s sp
-ESTRECHOS                      e s t rf e ts o s sp
 ESTRECHÍSIMA                   e s t rf e tS i s i m a sp
-ESTRECHÍSIMA                   e s t rf e ts i s i m a sp
 ESTRELL                        e s t rf e l sp
 ESTRELLA                       e s t rf e l a sp
 ESTRELLADO                     e s t rf e l a d o sp
@@ -9899,8 +9672,6 @@ ETAZOS                         e t a s o s sp
 ETC                            e t s e t e rf a sp
 ETCHEVARIARZA                  e t tS e b a rf j a rf s a sp
 ETCHEVARIARZA                  e t tS e b a rf j a rf t a sp
-ETCHEVARIARZA                  e t ts e b a rf j a rf s a sp
-ETCHEVARIARZA                  e t ts e b a rf j a rf t a sp
 ETENCIA                        e t e n s j a sp
 ETENCIA                        e t e ng s j a sp
 ETERNA                         e t e rf n a sp
@@ -10585,7 +10356,6 @@ FACCI                          f a s i sp
 FACCIONES                      f a k s j o n e s sp
 FACCIONES                      f a s j o n e s sp
 FACH                           f a tS sp
-FACH                           f a ts sp
 FACILIDAD                      f a s i l i d a sp
 FACILIDAD                      f a t i l i d a sp
 FACILIDADES                    f a s i l i d a d e s sp
@@ -10738,13 +10508,9 @@ FEBRERO                        f e b rf e rf o sp
 FEBRES                         f e b rf e s sp
 FEBRILMENTE                    f e b rf i l m e n t e sp
 FECHA                          f e tS a sp
-FECHA                          f e ts a sp
 FECHAS                         f e tS a s sp
-FECHAS                         f e ts a s sp
 FECHOR                         f e tS o rf sp
-FECHOR                         f e ts o rf sp
 FECHORÍAS                      f e tS o rf i a s sp
-FECHORÍAS                      f e ts o rf i a s sp
 FECUNDA                        f e k u n d a sp
 FEDEMETAL                      f e d e m e t a l sp
 FEDERACI                       f e d e rf a s i sp
@@ -11144,7 +10910,6 @@ FRANCESCO                      f rf a ng s e s k o sp
 FRANCESES                      f rf a n t e s e s sp
 FRANCESES                      f rf a ng s e s e s sp
 FRANCHING                      f rf a ng tS i ng g sp
-FRANCHING                      f rf a ng ts i ng g sp
 FRANCIA                        f rf a n t j a sp
 FRANCIA                        f rf a ng s j a sp
 FRANCIS                        f rf a n t i s sp
@@ -11558,7 +11323,6 @@ GESTIÓN                        x e s t j o ng sp
 GESTO                          x e s t o sp
 GESTOS                         x e s t o s sp
 GH                             x e a tS e sp
-GH                             x e a ts e sp
 GHISLAIN                       g i s l a i ng sp
 GIACOMO                        x j a k o m o sp
 GIAMBATTISTA                   x j a m b a t t i s t a sp
@@ -11586,9 +11350,7 @@ GINAS                          x i n a s sp
 GINEBRA                        x i n e b rf a sp
 GINER                          x i n e rf sp
 GINGRICH                       x i n g rf i tS sp
-GINGRICH                       x i n g rf i ts sp
 GINGRICH                       x i ng g rf i tS sp
-GINGRICH                       x i ng g rf i ts sp
 GIORGIO                        x j o rf x j o sp
 GIOVANNI                       l o b a n i sp
 GIR                            x i rf sp
@@ -11706,7 +11468,6 @@ GRABADORES                     g rf a b a d o rf e s sp
 GRABAR                         g rf a b a rf sp
 GRABIEL                        g rf a b j e l sp
 GRACHEV                        g rf a tS e b sp
-GRACHEV                        g rf a ts e b sp
 GRACIA                         g rf a s j a sp
 GRACIA                         g rf a t j a sp
 GRACIAS                        g rf a s j a s sp
@@ -11758,9 +11519,7 @@ GRECIA                         g rf e t j a sp
 GREENPEACE                     g rf e e n p e a t e sp
 GREENPEACE                     g rf i n p i s sp
 GREENWICH                      g rf e e n b i tS sp
-GREENWICH                      g rf e e n b i ts sp
 GREENWICH                      g rf i n w i tS sp
-GREENWICH                      g rf i n w i ts sp
 GREGORIO                       g rf e g o rf j o sp
 GREMIALES                      g rf e m j a l e s sp
 GREMIO                         g rf e m j o sp
@@ -11802,7 +11561,6 @@ GUARDI                         g w a rf d i sp
 GUARDIA                        g w a rf d j a sp
 GUARDIAS                       g w a rf d j a s sp
 GUARESCHI                      g w a rf e s tS i sp
-GUARESCHI                      g w a rf e s ts i sp
 GUARO                          g w a rf o sp
 GUATELMATECA                   g w a t e l m a t e k a sp
 GUATEMALA                      g w a t e m a l a sp
@@ -11863,7 +11621,6 @@ GÓMEZ                          g o m e s sp
 GÓMEZ                          g o m e t sp
 GÓTICAS                        g o t i k a s sp
 H                              a tS e sp
-H                              a ts e sp
 HA                             a sp
 HAB                            a b sp
 HABANA                         a b a n a sp
@@ -11943,7 +11700,6 @@ HACERNOS                       a t e rf n o s sp
 HACERSE                        a s e rf s e sp
 HACERSE                        a t e rf s e sp
 HACHA                          a tS a sp
-HACHA                          a ts a sp
 HACI                           a s i sp
 HACIA                          a s j a sp
 HACIA                          a t j a sp
@@ -12012,13 +11768,9 @@ HEBR                           e b rf sp
 HEBRON                         e b rf o ng sp
 HEBRÓN                         e b rf o ng sp
 HECHA                          e tS a sp
-HECHA                          e ts a sp
 HECHAS                         e tS a s sp
-HECHAS                         e ts a s sp
 HECHO                          e tS o sp
-HECHO                          e ts o sp
 HECHOS                         e tS o s sp
-HECHOS                         e ts o s sp
 HECT                           e k t sp
 HECTÁREAS                      e k t a rf e a s sp
 HEDIN                          e d i ng sp
@@ -12028,7 +11780,6 @@ HEDOR                          e d o rf sp
 HEGEMONÍA                      e x e m o n i a sp
 HEIL                           x e i l sp
 HEKMATYAR                      e k m e i tS l a rf sp
-HEKMATYAR                      e k m e i ts l a rf sp
 HELADA                         e l a d a sp
 HELADAS                        e l a d a s sp
 HELADO                         e l a d o sp
@@ -12047,7 +11798,6 @@ HEMORRAGIA                     e m o r a x j a sp
 HEMOS                          e m o s sp
 HENAO                          e n a o sp
 HENCHIDOS                      e ng tS i d o s sp
-HENCHIDOS                      e ng ts i d o s sp
 HENNING                        e n n i n g sp
 HENNING                        x e n i ng g sp
 HENRI                          e n r i sp
@@ -12122,9 +11872,7 @@ HIMNO                          i m n o sp
 HINCAPI                        i n k a p i sp
 HINCAPI                        i ng k a p i sp
 HINCHADO                       i n tS a o sp
-HINCHADO                       i n ts a o sp
 HINCHADO                       i ng tS a d o sp
-HINCHADO                       i ng ts a d o sp
 HIP                            i p e sp
 HIPERMERCADOS                  i p e rf m e rf k a d o s sp
 HIPERSENSIBILIZADOS            i p e rf s e ng s i b i l i t a d o s sp
@@ -12256,7 +12004,6 @@ HOYOS                          o i o s sp
 HOYOS                          o l o s sp
 HRER                           rf e rf sp
 HRN                            a tS e e rf e e n e sp
-HRN                            a ts e e rf e e n e sp
 HU                             u sp
 HUBI                           u b i sp
 HUBIERA                        u b j e rf a sp
@@ -12316,7 +12063,6 @@ HURTADO                        u rf t a d o sp
 HURTADO                        u rf t a o sp
 HUSH                           u s sp
 HUSH                           x u tS sp
-HUSH                           x u ts sp
 HUSSEIN                        u s s e i ng sp
 HUSSEIN                        x u s e i ng sp
 HUSSEINI                       x u s e i n i sp
@@ -13291,9 +13037,7 @@ INSOLIDARIDAD                  i ng s o l i d a rf i d a sp
 INSONDABLE                     i n s o n d a b l e sp
 INSONDABLE                     i ng s o n d a b l e sp
 INSOSPECHADOS                  i n s o s p e tS a d o s sp
-INSOSPECHADOS                  i n s o s p e ts a d o s sp
 INSOSPECHADOS                  i ng s o s p e tS a d o s sp
-INSOSPECHADOS                  i ng s o s p e ts a d o s sp
 INSOSTENIBLE                   i n s o s t e n i b l e sp
 INSOSTENIBLE                   i ng s o s t e n i b l e sp
 INSOSTENIBLES                  i ng s o s t e n i b l e s sp
@@ -14135,7 +13879,6 @@ KREMLIN                        k rf e m l i ng sp
 KROHN                          k rf o ng sp
 KROTO                          k rf o t o sp
 KRUSCHOV                       k rf u s tS o b sp
-KRUSCHOV                       k rf u s ts o b sp
 KTOR                           k t o rf sp
 KUK                            k u k sp
 KULIKOV                        k u l i k o b sp
@@ -14198,9 +13941,7 @@ LAMI                           l a m i sp
 LAN                            l a ng sp
 LANA                           l a n a sp
 LANCHAS                        l a n tS a s sp
-LANCHAS                        l a n ts a s sp
 LANCHAS                        l a ng tS a s sp
-LANCHAS                        l a ng ts a s sp
 LANEACI                        l a n e a s i sp
 LANETA                         l a n e t a sp
 LANGOSTA                       l a n g o s t a sp
@@ -14309,17 +14050,11 @@ LECCIONES                      l e s j o n e s sp
 LECCIÓN                        l e k s j o ng sp
 LECCIÓN                        l e s j o n sp
 LECHE                          l e tS e sp
-LECHE                          l e ts e sp
 LECHERA                        l e tS e rf a sp
-LECHERA                        l e ts e rf a sp
 LECHO                          l e tS o sp
-LECHO                          l e ts o sp
 LECHOS                         l e tS o s sp
-LECHOS                         l e ts o s sp
 LECHTMAN                       l e tS t m a ng sp
-LECHTMAN                       l e ts t m a ng sp
 LECHUGA                        l e tS u g a sp
-LECHUGA                        l e ts u g a sp
 LECLERQ                        l e k l e rf k sp
 LECTIVAS                       l e k t i b a s sp
 LECTIVO                        l e k t i b o sp
@@ -14720,7 +14455,6 @@ LN                             l ng sp
 LND                            e l e e n e d e sp
 LO                             l o sp
 LOACH                          l o a tS sp
-LOACH                          l o a ts sp
 LOBBY                          l o b j sp
 LOCAL                          l o k a l sp
 LOCALES                        l o k a l e s sp
@@ -14800,19 +14534,12 @@ LUCAS                          l u k a s sp
 LUCES                          l u s e s sp
 LUCES                          l u t e s sp
 LUCH                           l u tS sp
-LUCH                           l u ts sp
 LUCHA                          l u tS a sp
-LUCHA                          l u ts a sp
 LUCHABAN                       l u tS a b a ng sp
-LUCHABAN                       l u ts a b a ng sp
 LUCHAMOS                       l u tS a m o s sp
-LUCHAMOS                       l u ts a m o s sp
 LUCHAN                         l u tS a ng sp
-LUCHAN                         l u ts a ng sp
 LUCHAR                         l u tS a rf sp
-LUCHAR                         l u ts a rf sp
 LUCHAS                         l u tS a s sp
-LUCHAS                         l u ts a s sp
 LUCI                           l u s i sp
 LUCIO                          l u s j o sp
 LUCIO                          l u t j o sp
@@ -14892,11 +14619,8 @@ MACAP                          m a k a p sp
 MACARENA                       m a k a rf e n a sp
 MACFARLAN                      m a k f a rf l a ng sp
 MACHISMO                       m a tS i s m o sp
-MACHISMO                       m a ts i s m o sp
 MACHISTA                       m a tS i s t a sp
-MACHISTA                       m a ts i s t a sp
 MACHOS                         m a tS o s sp
-MACHOS                         m a ts o s sp
 MACRO                          m a k rf o sp
 MACROECON                      m a k rf o e k o ng sp
 MACROECONÓMICAS                m a k rf o e k o n o m i k a s sp
@@ -14966,9 +14690,7 @@ MALESTAR                       m a l e s t a rf sp
 MALET                          m a l e t sp
 MALETA                         m a l e t a sp
 MALHECHOR                      m a l e tS o rf sp
-MALHECHOR                      m a l e ts o rf sp
 MALHECHORES                    m a l e tS o rf e s sp
-MALHECHORES                    m a l e ts o rf e s sp
 MALICIOSAMENTE                 m a l i s j o s a m e n t e sp
 MALINTENCIONADA                m a l i n t e n t j o n a d a sp
 MALINTENCIONADA                m a l i n t e ng s j o n a d a sp
@@ -14985,7 +14707,6 @@ MALTA                          m a l t a sp
 MALTRATAR                      m a l t rf a t a rf sp
 MALTRATO                       m a l t rf a t o sp
 MALTRECHO                      m a l t rf e tS o sp
-MALTRECHO                      m a l t rf e ts o sp
 MALUF                          m a l u f sp
 MALVINAS                       m a l b i n a s sp
 MAM                            m a m sp
@@ -14999,13 +14720,9 @@ MANANTIALES                    m a n a n t j a l e s sp
 MANC                           m a n k sp
 MANC                           m a ng k sp
 MANCHADAS                      m a n tS a d a s sp
-MANCHADAS                      m a n ts a d a s sp
 MANCHADAS                      m a ng tS a d a s sp
-MANCHADAS                      m a ng ts a d a s sp
 MANCHAS                        m a n tS a s sp
-MANCHAS                        m a n ts a s sp
 MANCHAS                        m a ng tS a s sp
-MANCHAS                        m a ng ts a s sp
 MANCOMUNADOS                   m a n k o m u n a d o s sp
 MANCOMUNADOS                   m a ng k o m u n a d o s sp
 MAND                           m a ng sp
@@ -15117,7 +14834,6 @@ MANZANERO                      m a n t a n e rf o sp
 MANZANILLO                     m a n s a n i l o sp
 MAPA                           m a p a sp
 MAPOCHO                        m a p o tS o sp
-MAPOCHO                        m a p o ts o sp
 MAQUETA                        m a k e t a sp
 MAQUILA                        m a k i l a sp
 MAQUILLARSE                    m a k i l a rf s e sp
@@ -15150,19 +14866,12 @@ MARCELLINA                     m a rf s e l i n a sp
 MARCELLINA                     m a rf t e l i n a sp
 MARCELO                        m a rf s e l o sp
 MARCH                          m a rf tS sp
-MARCH                          m a rf ts sp
 MARCHA                         m a rf tS a sp
-MARCHA                         m a rf ts a sp
 MARCHAN                        m a rf tS a ng sp
-MARCHAN                        m a rf ts a ng sp
 MARCHAR                        m a rf tS a rf sp
-MARCHAR                        m a rf ts a rf sp
 MARCHARSE                      m a rf tS a rf s e sp
-MARCHARSE                      m a rf ts a rf s e sp
 MARCHAS                        m a rf tS a s sp
-MARCHAS                        m a rf ts a s sp
 MARCHEN                        m a rf tS e ng sp
-MARCHEN                        m a rf ts e ng sp
 MARCIAL                        m a rf s j a l sp
 MARCIAL                        m a rf t j a l sp
 MARCIANA                       m a rf s j a n a sp
@@ -15195,7 +14904,6 @@ MARGINALES                     m a rf x i n a l e s sp
 MARGINAMIENTO                  m a rf x i n a m j e n t o sp
 MARIA                          m a rf j a sp
 MARIACHIS                      m a rf j a tS i s sp
-MARIACHIS                      m a rf j a ts i s sp
 MARIANO                        m a rf j a n o sp
 MARIATTI                       m a rf j a t i sp
 MARIDO                         m a rf i d o sp
@@ -15366,7 +15074,6 @@ MEDIANA                        m e d j a n a sp
 MEDIANAS                       m e d j a n a s sp
 MEDIANO                        m e d j a n o sp
 MEDIANOCHE                     m e d j a n o tS e sp
-MEDIANOCHE                     m e d j a n o ts e sp
 MEDIANTE                       m e d j a n t e sp
 MEDIAR                         m e d j a rf sp
 MEDIAS                         m e d j a s sp
@@ -15422,9 +15129,7 @@ MEN                            m e n sp
 MEN                            m e ng sp
 MENA                           m e n a sp
 MENACHEM                       m e n a tS e m sp
-MENACHEM                       m e n a ts e m sp
 MENCH                          m e n tS sp
-MENCH                          m e n ts sp
 MENCION                        m e n s j o n sp
 MENCIONA                       m e n t j o n a sp
 MENCIONA                       m e ng s j o n a sp
@@ -15577,11 +15282,8 @@ MICAM                          m i k a m sp
 MICAS                          m i k a s sp
 MICHAEL                        m a i k e l sp
 MICHEL                         m i tS e l sp
-MICHEL                         m i ts e l sp
 MICHIGAN                       m i tS i g a ng sp
-MICHIGAN                       m i ts i g a ng sp
 MICHIO                         m i tS j o sp
-MICHIO                         m i ts j o sp
 MICO                           m i k o sp
 MICOS                          m i k o s sp
 MICR                           m i k rf sp
@@ -15707,7 +15409,6 @@ MISTROS                        m i s t rf o s sp
 MIT                            m i t sp
 MITAD                          m i t a sp
 MITCHEL                        m i t tS e l sp
-MITCHEL                        m i t ts e l sp
 MITE                           m i t e sp
 MITES                          m i t e s sp
 MITIGACIÓN                     m i t i g a s j o ng sp
@@ -15728,7 +15429,6 @@ MNI                            e m e e n e i sp
 MNIBUS                         m n i b u s sp
 MO                             m o sp
 MOCHILA                        m o tS i l a sp
-MOCHILA                        m o ts i l a sp
 MODA                           m o d a sp
 MODALIDAD                      m o d a l i d a sp
 MODALIDADES                    m o d a l i d a d e s sp
@@ -15940,25 +15640,15 @@ MSA                            e m e e s e a sp
 MTO                            m t o sp
 MU                             m u sp
 MUCH                           m u tS sp
-MUCH                           m u ts sp
 MUCHA                          m u tS a sp
-MUCHA                          m u ts a sp
 MUCHACHAS                      m u tS a tS a s sp
-MUCHACHAS                      m u ts a ts a s sp
 MUCHACHITO                     m u tS a tS i t o sp
-MUCHACHITO                     m u ts a ts i t o sp
 MUCHACHO                       m u tS a tS o sp
-MUCHACHO                       m u ts a ts o sp
 MUCHACHOS                      m u tS a tS o s sp
-MUCHACHOS                      m u ts a ts o s sp
 MUCHAS                         m u tS a s sp
-MUCHAS                         m u ts a s sp
 MUCHO                          m u tS o sp
-MUCHO                          m u ts o sp
 MUCHOS                         m u tS o s sp
-MUCHOS                         m u ts o s sp
 MUCHÍSIMO                      m u tS i s i m o sp
-MUCHÍSIMO                      m u ts i s i m o sp
 MUDARSE                        m u d a rf s e sp
 MUEBLE                         m w e b l e sp
 MUEBLER                        m w e b l e rf sp
@@ -16012,7 +15702,6 @@ MUNDIALISTA                    m u n d j a l i s t a sp
 MUNDO                          m u n d o sp
 MUNDOS                         m u n d o s sp
 MUNICH                         m u n i tS sp
-MUNICH                         m u n i ts sp
 MUNICIONES                     m u n i s j o n e s sp
 MUNICIONES                     m u n i t j o n e s sp
 MUNICIPAL                      m u n i s i p a l sp
@@ -16142,7 +15831,6 @@ NARANJO                        n a rf a ng x o sp
 NARAVAEZ                       n a rf a b a e s sp
 NARAVAEZ                       n a rf a b a e t sp
 NARCOCHEQUES                   n a rf k o tS e k e s sp
-NARCOCHEQUES                   n a rf k o ts e k e s sp
 NARCOS                         n a rf k o s sp
 NARCOTR                        n a rf k o t rf sp
 NARCOTRAFICANTE                n a rf k o t rf a f i k a n t e sp
@@ -16202,7 +15890,6 @@ NAZISMO                        n a t i s m o sp
 NC                             n k sp
 NCER                           n s e rf sp
 NCHEZ                          n tS e s sp
-NCHEZ                          n ts e s sp
 NCLAVES                        n k l a b e s sp
 NCULO                          n k u l o sp
 NCULOS                         n k u l o s sp
@@ -16424,11 +16111,8 @@ NOBLES                         n o b l e s sp
 NOBLEZA                        n o b l e s a sp
 NOBLEZA                        n o b l e t a sp
 NOCHE                          n o tS e sp
-NOCHE                          n o ts e sp
 NOCHEBUENA                     n o tS e b w e n a sp
-NOCHEBUENA                     n o ts e b w e n a sp
 NOCHES                         n o tS e s sp
-NOCHES                         n o ts e s sp
 NOCIVAS                        n o s i b a s sp
 NOCTURNA                       n o k t u rf n a sp
 NOCTURNO                       n o k t u rf n o sp
@@ -16733,13 +16417,9 @@ OCEFS                          o t e f s sp
 OCEÁNICO                       o s e a n i k o sp
 OCEÁNICO                       o t e a n i k o sp
 OCHAETA                        o tS a e t a sp
-OCHAETA                        o ts a e t a sp
 OCHEATA                        o tS e a t a sp
-OCHEATA                        o ts e a t a sp
 OCHENTA                        o tS e n t a sp
-OCHENTA                        o ts e n t a sp
 OCHO                           o tS o sp
-OCHO                           o ts o sp
 OCITOS                         o s i t o s sp
 OCO                            o k o sp
 OCTAVILLAS                     o k t a b i l a s sp
@@ -16870,9 +16550,7 @@ OK                             o k e i sp
 OL                             o l sp
 OLA                            o l a sp
 OLANCHO                        o l a n tS o sp
-OLANCHO                        o l a n ts o sp
 OLANCHO                        o l a ng tS o sp
-OLANCHO                        o l a ng ts o sp
 OLANCO                         o l a n k o sp
 OLAS                           o l a s sp
 OLBAN                          o l b a ng sp
@@ -17523,7 +17201,6 @@ PAÑUELO                        p a nj w e l o sp
 PEAJE                          p e a x e sp
 PEAJES                         p e a x e s sp
 PECHO                          p e tS o sp
-PECHO                          p e ts o sp
 PECUARIO                       p e k w a rf j o sp
 PECULADO                       p e k u l a d o sp
 PECULADO                       p e k u l a o sp
@@ -17563,7 +17240,6 @@ PELÍCULAS                      p e l i k u l a s sp
 PEN                            p e ng sp
 PENA                           p e n a sp
 PENACHO                        p e n a tS o sp
-PENACHO                        p e n a ts o sp
 PENAL                          p e n a l sp
 PENALES                        p e n a l e s sp
 PENALIZADOR                    p e n a l i s a d o rf sp
@@ -17814,10 +17490,7 @@ PERTINAZ                       p e rf t i n a s sp
 PERTINENTES                    p e rf t i n e n t e s sp
 PERTRECHADO                    p e rf t rf e tS a d o sp
 PERTRECHADO                    p e rf t rf e tS a o sp
-PERTRECHADO                    p e rf t rf e ts a d o sp
-PERTRECHADO                    p e rf t rf e ts a o sp
 PERTRECHOS                     p e rf t rf e tS o s sp
-PERTRECHOS                     p e rf t rf e ts o s sp
 PERTURBADOR                    p e rf t u rf b a d o rf sp
 PERUANA                        p e rf w a n a sp
 PERUANAS                       p e rf w a n a s sp
@@ -17873,7 +17546,6 @@ PICANTE                        p i k a n t e sp
 PICAR                          p i k a rf sp
 PICARESCA                      p i k a rf e s k a sp
 PICHICATO                      p i tS i k a t o sp
-PICHICATO                      p i ts i k a t o sp
 PICOS                          p i k o s sp
 PID                            p i sp
 PIDA                           p i d a sp
@@ -17916,9 +17588,7 @@ PILOTO                         p i l o t o sp
 PILOTOS                        p i l o t o s sp
 PIMIENTA                       p i m j e n t a sp
 PINCHARON                      p i n tS a rf o n sp
-PINCHARON                      p i n ts a rf o n sp
 PINCHARON                      p i ng tS a rf o ng sp
-PINCHARON                      p i ng ts a rf o ng sp
 PING                           p i n g sp
 PINGÜINO                       p i n g w i n o sp
 PINIL                          p i n i l sp
@@ -17964,13 +17634,9 @@ PLAN                           p l a ng sp
 PLANA                          p l a n a sp
 PLANAS                         p l a n a s sp
 PLANCHA                        p l a n tS a sp
-PLANCHA                        p l a n ts a sp
 PLANCHA                        p l a ng tS a sp
-PLANCHA                        p l a ng ts a sp
 PLANCHAR                       p l a n tS a rf sp
-PLANCHAR                       p l a n ts a rf sp
 PLANCHAR                       p l a ng tS a rf sp
-PLANCHAR                       p l a ng ts a rf sp
 PLANE                          p l a n e sp
 PLANEA                         p l a n e a sp
 PLANEABA                       p l a n e a b a sp
@@ -18332,7 +17998,6 @@ PREDICARON                     p rf e d i k a rf o ng sp
 PREDICEN                       p rf e d i s e ng sp
 PREDICEN                       p rf e d i t e n sp
 PREDICHO                       p rf e d i tS o sp
-PREDICHO                       p rf e d i ts o sp
 PREDILECCI                     p rf e d i l e s i sp
 PREDILECTO                     p rf e d i l e k t o sp
 PREDOMIN                       p rf e d o m i n sp
@@ -19017,7 +18682,6 @@ PROTESTAS                      p rf o t e s t a s sp
 PROTOCOLAR                     p rf o t o k o l a rf sp
 PROTOCOLARIOS                  p rf o t o k o l a rf j o s sp
 PROVECHO                       p rf o b e tS o sp
-PROVECHO                       p rf o b e ts o sp
 PROVEEDOR                      p rf o b e e d o rf sp
 PROVEEDORES                    p rf o b e e d o rf e s sp
 PROVEEN                        p rf o b e e ng sp
@@ -19255,7 +18919,6 @@ QUEZADA                        k e s a d a sp
 QUEZADA                        k e t a d a sp
 QUI                            k i sp
 QUICH                          k i tS sp
-QUICH                          k i ts sp
 QUICOS                         k i k o s sp
 QUID                           k i sp
 QUIDO                          k i d o sp
@@ -19374,7 +19037,6 @@ RAMPANTE                       r a m p a n t e sp
 RAMS                           r a m s sp
 RAMÓN                          r a m o ng sp
 RANCHERAS                      r a ng tS e rf a s sp
-RANCHERAS                      r a ng ts e rf a s sp
 RANGO                          r a n g o sp
 RANGO                          r a ng g o sp
 RANGOS                         r a n g o s sp
@@ -19617,45 +19279,25 @@ RECETA                         r e s e t a sp
 RECETA                         r e t e t a sp
 RECETAR                        r e s e t a rf sp
 RECHAC                         r e tS a k sp
-RECHAC                         r e ts a k sp
 RECHAZ                         r e tS a s sp
-RECHAZ                         r e ts a s sp
 RECHAZA                        r e tS a s a sp
 RECHAZA                        r e tS a t a sp
-RECHAZA                        r e ts a s a sp
-RECHAZA                        r e ts a t a sp
 RECHAZABAN                     r e tS a s a b a ng sp
 RECHAZABAN                     r e tS a t a b a n sp
-RECHAZABAN                     r e ts a s a b a ng sp
-RECHAZABAN                     r e ts a t a b a n sp
 RECHAZADA                      r e tS a s a d a sp
 RECHAZADA                      r e tS a t a d a sp
-RECHAZADA                      r e ts a s a d a sp
-RECHAZADA                      r e ts a t a d a sp
 RECHAZADO                      r e tS a s a d o sp
 RECHAZADO                      r e tS a t a o sp
-RECHAZADO                      r e ts a s a d o sp
-RECHAZADO                      r e ts a t a o sp
 RECHAZAN                       r e tS a s a ng sp
 RECHAZAN                       r e tS a t a n sp
-RECHAZAN                       r e ts a s a ng sp
-RECHAZAN                       r e ts a t a n sp
 RECHAZAR                       r e tS a s a rf sp
 RECHAZAR                       r e tS a t a rf sp
-RECHAZAR                       r e ts a s a rf sp
-RECHAZAR                       r e ts a t a rf sp
 RECHAZARON                     r e tS a s a rf o ng sp
 RECHAZARON                     r e tS a t a rf o n sp
-RECHAZARON                     r e ts a s a rf o ng sp
-RECHAZARON                     r e ts a t a rf o n sp
 RECHAZO                        r e tS a s o sp
 RECHAZO                        r e tS a t o sp
-RECHAZO                        r e ts a s o sp
-RECHAZO                        r e ts a t o sp
 RECHAZÓ                        r e tS a s o sp
 RECHAZÓ                        r e tS a t o sp
-RECHAZÓ                        r e ts a s o sp
-RECHAZÓ                        r e ts a t o sp
 RECI                           r e s i sp
 RECIB                          r e s i b sp
 RECIBA                         r e s i b a sp
@@ -20591,9 +20233,7 @@ REUTER                         r e u t e rf sp
 REUTERS                        r e u t e rf s sp
 REV                            r e b sp
 REVANCHISTAS                   r e b a n tS i s t a s sp
-REVANCHISTAS                   r e b a n ts i s t a s sp
 REVANCHISTAS                   r e b a ng tS i s t a s sp
-REVANCHISTAS                   r e b a ng ts i s t a s sp
 REVEL                          r e b e l sp
 REVELA                         r e b e l a sp
 REVELACI                       r e b e l a s i sp
@@ -20680,11 +20320,8 @@ RICAS                          r i k a s sp
 RICE                           r a i s sp
 RICE                           r i t e sp
 RICHARD                        r i tS a rf sp
-RICHARD                        r i ts a rf sp
 RICHARDSON                     r i tS a rf d s o ng sp
-RICHARDSON                     r i ts a rf d s o ng sp
 RICHTER                        r i tS t e rf sp
-RICHTER                        r i ts t e rf sp
 RICO                           r i k o sp
 RICOS                          r i k o s sp
 RIDONOV                        r i d o n o b sp
@@ -20780,7 +20417,6 @@ ROCES                          r o s e s sp
 ROCES                          r o t e s sp
 ROCESOS                        r o s e s o s sp
 ROCHA                          r o tS a sp
-ROCHA                          r o ts a sp
 ROCK                           r o k k sp
 ROCLAMADOS                     r o k l a m a d o s sp
 ROCOSO                         r o k o s o sp
@@ -20798,7 +20434,6 @@ RODEADO                        r o d e a o sp
 RODEAN                         r o d e a ng sp
 RODEAR                         r o d e a rf sp
 RODERECHOS                     r o d e rf e tS o s sp
-RODERECHOS                     r o d e rf e ts o s sp
 RODH                           r o d sp
 RODI                           r o d i sp
 RODILLA                        r o d i l a sp
@@ -20858,7 +20493,6 @@ ROMPIERON                      r o m p j e rf o ng sp
 ROMPIMIENTO                    r o m p i m j e n t o sp
 RONALD                         r o n a l sp
 RONCHA                         r o ng tS a sp
-RONCHA                         r o ng ts a sp
 RONDA                          r o n d a sp
 RONDAS                         r o n d a s sp
 ROOSEVELT                      r u s b e l t sp
@@ -20944,7 +20578,6 @@ RUMMELHARDT                    r u m m e l x a rf d t sp
 RUMOR                          r u m o rf sp
 RUMORES                        r u m o rf e s sp
 RUNDSCHAU                      r u n d s tS a u sp
-RUNDSCHAU                      r u n d s ts a u sp
 RUPTURA                        r u p t u rf a sp
 RURAL                          r u rf a l sp
 RURALES                        r u rf a l e s sp
@@ -21025,7 +20658,6 @@ SAGACIDAD                      s a g a t i d a sp
 SAGRADO                        s a g rf a d o sp
 SAGRADO                        s a g rf a o sp
 SAGUACHIL                      s a g w a tS i l sp
-SAGUACHIL                      s a g w a ts i l sp
 SAIZA                          s a i s a sp
 SAIZA                          s a i t a sp
 SAJAROV                        s a x a rf o b sp
@@ -21041,9 +20673,7 @@ SALAS                          s a l a s sp
 SALAZAR                        s a l a s a rf sp
 SALAZAR                        s a l a t a rf sp
 SALCHICHAS                     s a l tS i tS a s sp
-SALCHICHAS                     s a l ts i ts a s sp
 SALCHICHÓN                     s a l tS i tS o ng sp
-SALCHICHÓN                     s a l ts i ts o ng sp
 SALDARINI                      s a l d a rf i n i sp
 SALDO                          s a l d o sp
 SALDR                          s a l d rf sp
@@ -21111,11 +20741,8 @@ SANA                           s a n a sp
 SANAMENTE                      s a n a m e n t e sp
 SANAS                          s a n a s sp
 SANCHEZ                        s a ng tS e s sp
-SANCHEZ                        s a ng ts e s sp
 SANCHO                         s a n tS o sp
-SANCHO                         s a n ts o sp
 SANCHO                         s a ng tS o sp
-SANCHO                         s a ng ts o sp
 SANCI                          s a n s i sp
 SANCI                          s a ng s i sp
 SANCIONA                       s a n t j o n a sp
@@ -21196,11 +20823,8 @@ SATISFACIENDO                  s a t i s f a t j e n d o sp
 SATISFACTORIA                  s a t i s f a k t o rf j a sp
 SATISFACTORIO                  s a t i s f a k t o rf j o sp
 SATISFECHA                     s a t i s f e tS a sp
-SATISFECHA                     s a t i s f e ts a sp
 SATISFECHO                     s a t i s f e tS o sp
-SATISFECHO                     s a t i s f e ts o sp
 SATISFECHOS                    s a t i s f e tS o s sp
-SATISFECHOS                    s a t i s f e ts o s sp
 SATURADA                       s a t u rf a d a sp
 SAUDÍ                          s a u d i sp
 SAVIA                          s a b j a sp
@@ -21211,18 +20835,13 @@ SAZONAR                        s a s o n a rf sp
 SBARRA                         s b a r a sp
 SC                             s k sp
 SC                             s tS sp
-SC                             s ts sp
 SCALFARO                       s k a l f a rf o sp
 SCARPONE                       s k a rf p o n e sp
 SCENARIOLINE                   s t e n a rf j o l i n e sp
 SCHAUSPIELHAUS                 s tS a u s p j e l a u s sp
-SCHAUSPIELHAUS                 s ts a u s p j e l a u s sp
 SCHREIBER                      s tS rf e i b e rf sp
-SCHREIBER                      s ts rf e i b e rf sp
 SCHRIBER                       s tS rf i b e rf sp
-SCHRIBER                       s ts rf i b e rf sp
 SCHULLHEISS                    s tS u l e i s sp
-SCHULLHEISS                    s ts u l e i s sp
 SCIENTIFIC                     s s j e n t i f i k sp
 SCILINGO                       s s i l i ng g o sp
 SCILINGO                       s t i l i n g o sp
@@ -21519,29 +21138,18 @@ SEÑORA                         s e nj o rf a sp
 SEÑORITA                       s e nj o rf i t a sp
 SFERA                          s f e rf a sp
 SHAKICH                        tS a k i tS sp
-SHAKICH                        ts a k i ts sp
 SHARON                         tS a rf o ng sp
-SHARON                         ts a rf o ng sp
 SHELL                          tS e l sp
-SHELL                          ts e l sp
 SHERATON                       tS e rf a t o ng sp
-SHERATON                       ts e rf a t o ng sp
 SHOCK                          tS o k k sp
-SHOCK                          ts o k k sp
 SHOCKS                         tS o k k s sp
-SHOCKS                         ts o k k s sp
 SHOMR                          tS o m rf sp
-SHOMR                          ts o m rf sp
 SHOMRON                        tS o m rf o ng sp
-SHOMRON                        ts o m rf o ng sp
 SHOPPING                       s o p p i n g sp
 SHOPPING                       tS o p p i ng g sp
-SHOPPING                       ts o p p i ng g sp
 SHOW                           s o b sp
 SHOW                           tS o w sp
-SHOW                           ts o w sp
 SHUBA                          tS u b a sp
-SHUBA                          ts u b a sp
 SI                             s i sp
 SICA                           s i k a sp
 SICAMENTE                      s i k a m e n t e sp
@@ -21922,19 +21530,12 @@ SORPRESIVO                     s o rf p rf e s i b o sp
 SOS                            e s e o e s e sp
 SOSOL                          s o s o l sp
 SOSPECHA                       s o s p e tS a sp
-SOSPECHA                       s o s p e ts a sp
 SOSPECHAN                      s o s p e tS a ng sp
-SOSPECHAN                      s o s p e ts a ng sp
 SOSPECHARON                    s o s p e tS a rf o ng sp
-SOSPECHARON                    s o s p e ts a rf o ng sp
 SOSPECHAS                      s o s p e tS a s sp
-SOSPECHAS                      s o s p e ts a s sp
 SOSPECHOSAS                    s o s p e tS o s a s sp
-SOSPECHOSAS                    s o s p e ts o s a s sp
 SOSPECHOSO                     s o s p e tS o s o sp
-SOSPECHOSO                     s o s p e ts o s o sp
 SOSPECHOSOS                    s o s p e tS o s o s sp
-SOSPECHOSOS                    s o s p e ts o s o s sp
 SOSS                           s o s sp
 SOSSA                          s o s a sp
 SOSTENDR                       s o s t e n d rf sp
@@ -22385,9 +21986,7 @@ SÁENZ                          s a e n s sp
 SÁENZ                          s a e n t sp
 SÁLAS                          s a l a s sp
 SÁNCHEZ                        s a n tS e t sp
-SÁNCHEZ                        s a n ts e t sp
 SÁNCHEZ                        s a ng tS e s sp
-SÁNCHEZ                        s a ng ts e s sp
 SÉ                             s e sp
 SÉPTIMO                        s e p t i m o sp
 SÍ                             s i sp
@@ -22407,13 +22006,9 @@ TABLA                          t a b l a sp
 TABLERO                        t a b l e rf o sp
 TABLOIDES                      t a b l o i d e s sp
 TACAMICHE                      t a k a m i tS e sp
-TACAMICHE                      t a k a m i ts e sp
 TACAMICHES                     t a k a m i tS e s sp
-TACAMICHES                     t a k a m i ts e s sp
 TACHAN                         t a tS a ng sp
-TACHAN                         t a ts a ng sp
 TACHONES                       t a tS o n e s sp
-TACHONES                       t a ts o n e s sp
 TACOS                          t a k o s sp
 TACTO                          t a k t o sp
 TADJIK                         t a d x i k sp
@@ -22484,11 +22079,8 @@ TE                             t e sp
 TEA                            t e a sp
 TEATRO                         t e a t rf o sp
 TECHINT                        t e tS i n t sp
-TECHINT                        t e ts i n t sp
 TECHO                          t e tS o sp
-TECHO                          t e ts o sp
 TECHOS                         t e tS o s sp
-TECHOS                         t e ts o s sp
 TECLA                          t e k l a sp
 TECLAS                         t e k l a s sp
 TECNOL                         t e k n o l sp
@@ -22706,7 +22298,6 @@ TEXTOS                         t e s t o s sp
 TEXTUALMENTE                   t e k s t w a l m e n t e sp
 TEXTUALMENTE                   t e s t w a l m e n t e sp
 THATCHER                       t a t tS e rf sp
-THATCHER                       t a t ts e rf sp
 THE                            t e sp
 THIESEN                        t j e s e ng sp
 THORVALD                       t o rf b a l d sp
@@ -23199,9 +22790,7 @@ TRIMESTRALES                   t rf i m e s t rf a l e s sp
 TRIMESTRE                      t rf i m e s t rf e sp
 TRIMESTRES                     t rf i m e s t rf e s sp
 TRINCHERA                      t rf i n tS e rf a sp
-TRINCHERA                      t rf i n ts e rf a sp
 TRINCHERA                      t rf i ng tS e rf a sp
-TRINCHERA                      t rf i ng ts e rf a sp
 TRINIDAD                       t rf i n i d a sp
 TRIPARTITA                     t rf i p a rf t i t a sp
 TRIPLICANDO                    t rf i p l i k a n d o sp
@@ -23469,7 +23058,6 @@ USO                            u s o sp
 USOS                           u s o s sp
 USS                            u e s e e s e sp
 USTACHA                        u s t a tS a sp
-USTACHA                        u s t a ts a sp
 USTED                          u s t e sp
 USTEDES                        u s t e d e s sp
 USUALES                        u s w a l e s sp
@@ -23820,7 +23408,6 @@ VETO                           b e t o sp
 VEZ                            b e s sp
 VEZ                            b e t sp
 VH                             u b e a tS e sp
-VH                             u b e a ts e sp
 VI                             b i sp
 VI                             s e i s sp
 VIA                            b j a sp
@@ -23924,9 +23511,7 @@ VIGOR                          b i g o rf sp
 VIGORIZADO                     b i g o rf i s a d o sp
 VIGOROSAMENTE                  b i g o rf o s a m e n t e sp
 VIH                            u b e i a tS e sp
-VIH                            u b e i a ts e sp
 VIII                           o tS o sp
-VIII                           o ts o sp
 VIKING                         b i k i n g sp
 VIKING                         b i k i ng g sp
 VIKTOR                         b i k t o rf sp
@@ -24205,9 +23790,7 @@ WEB                            w e b sp
 WEBER                          b e b e rf sp
 WEBER                          w e b e rf sp
 WEHRMACHT                      b e rf m a tS t sp
-WEHRMACHT                      b e rf m a ts t sp
 WEHRMACHT                      w e rf m a tS t sp
-WEHRMACHT                      w e rf m a ts t sp
 WEI                            w e i sp
 WEIZMAN                        b e i t m a n sp
 WEIZMAN                        w e i s m a ng sp
@@ -24269,7 +23852,6 @@ XV                             k i ng s e sp
 XVI                            d j e s i s e i s sp
 XVII                           d j e s i s j e t e sp
 XVIII                          d j e s i o tS o sp
-XVIII                          d j e s i o ts o sp
 XX                             b e i n t e sp
 XXI                            b e i n t i u n o sp
 XXIII                          b e i n t i t rf e s sp
@@ -24320,7 +23902,6 @@ YERNOS                         l e rf n o s sp
 YERROS                         j e r o s sp
 YERROS                         l e r o s sp
 YEVICH                         l e b i tS sp
-YEVICH                         l e b i ts sp
 YITZHAK                        j i t t a k sp
 YITZHAK                        l i t s a k sp
 YNDAMIRO                       j n d a m i rf o sp
@@ -24447,7 +24028,6 @@ ZYUGANOV                       t j u g a n o b sp
 ÁN                             a n sp
 ÁN                             a ng sp
 ÁNCHEZ                         a n tS e s sp
-ÁNCHEZ                         a n ts e s sp
 ÁNDEZ                          a n d e s sp
 ÁNGELES                        a n x e l e s sp
 ÁNICA                          a n i k a sp
@@ -24585,7 +24165,6 @@ ZYUGANOV                       t j u g a n o b sp
 ０５                             s e rf o s i ng k o sp
 ０７                             s e rf o s j e t e sp
 ０８                             s e rf o o tS o sp
-０８                             s e rf o o ts o sp
 ０９                             s e rf o n w e b e sp
 １                              u n o sp
 １０                             d j e s sp
@@ -24617,7 +24196,6 @@ ZYUGANOV                       t j u g a n o b sp
 １１１０７４                         s j e n t o o n s e m i l s e t e n t a i k w a t rf o sp
 １１２                            s j e n t o d o s e sp
 １１２８０００                        u n m i l o n s j e n t o b e i n t i o tS o m i l sp
-１１２８０００                        u n m i l o n s j e n t o b e i n t i o ts o m i l sp
 １１４                            s j e n t o k a t o rf s e sp
 １１５                            s j e n t o k i n s e sp
 １１６                            s j e n t o d j e s i s e i s sp
@@ -24635,14 +24213,12 @@ ZYUGANOV                       t j u g a n o b sp
 １２４０                           m i l d o s j e n t o s k w a rf e n t a sp
 １２５                            s j e n t o b e i n t i s i ng k o sp
 １２８                            s j e n t o b e i n t i o tS o sp
-１２８                            s j e n t o b e i n t i o ts o sp
 １３                             t rf e s e sp
 １３０                            s j e n t o t rf e i n t a sp
 １３００                           m i l t rf e s j e n t o s sp
 １３０００                          t rf e s e m i l sp
 １３０３                           m i l t rf e s j e n t o s t rf e s sp
 １３１３８                          t rf e s e m i l s j e n t o t rf e i n t a i o tS o sp
-１３１３８                          t rf e s e m i l s j e n t o t rf e i n t a i o ts o sp
 １３２５９                          t rf e s e m i l d o s j e n t o s s i ng k w e n t a i n w e b e sp
 １３３                            s j e n t o t rf e i n t a i t rf e s sp
 １３４                            s j e n t o t rf e i n t a i k w a t rf o sp
@@ -24650,15 +24226,12 @@ ZYUGANOV                       t j u g a n o b sp
 １３６３                           m i l t rf e s j e n t o s s e s e n t a i t rf e s sp
 １３７                            s j e n t o t rf e i n t a i s j e t e sp
 １３８                            s j e n t o t rf e i n t a i o tS o sp
-１３８                            s j e n t o t rf e i n t a i o ts o sp
 １３８３４                          t rf e s e m i l o tS o s j e n t o s t rf e i n t a i k w a t rf o sp
-１３８３４                          t rf e s e m i l o ts o s j e n t o s t rf e i n t a i k w a t rf o sp
 １４                             k a t o rf s e sp
 １４０００                          k a t o rf s e m i l sp
 １４２                            s j e n t o k w a rf e n t a i d o s sp
 １４５                            s j e n t o k w a rf e n t a i s i ng k o sp
 １４８                            s j e n t o k w a rf e n t a i o tS o sp
-１４８                            s j e n t o k w a rf e n t a i o ts o sp
 １４９２                           m i l k w a t rf o s j e n t o s n o b e n t a i d o s sp
 １５                             k i n s e sp
 １５０                            s j e n t o s i ng k w e n t a sp
@@ -24671,9 +24244,7 @@ ZYUGANOV                       t j u g a n o b sp
 １５３６                           m i l k i n j e n t o s t rf e i n t a i s e i s sp
 １５６                            s j e n t o s i ng k w e n t a i s e i s sp
 １５７８                           m i l k i n j e n t o s s e t e n t a i o tS o sp
-１５７８                           m i l k i n j e n t o s s e t e n t a i o ts o sp
 １５８                            s j e n t o s i ng k w e n t a i o tS o sp
-１５８                            s j e n t o s i ng k w e n t a i o ts o sp
 １５９４                           m i l k i n j e n t o s n o b e n t a i k w a t rf o sp
 １６                             d j e s i s e i s sp
 １６０                            s j e n t o s e s e n t a sp
@@ -24683,7 +24254,6 @@ ZYUGANOV                       t j u g a n o b sp
 １６２３６０                         s j e n t o s e s e n t a i d o s m i l t rf e s j e n t o s s e s e n t a sp
 １６２５００                         s j e n t o s e s e n t a i d o s m i l k i n j e n t o s sp
 １６３８３                          d j e s i s e i s m i l t rf e s j e n t o s o tS e n t a i t rf e s sp
-１６３８３                          d j e s i s e i s m i l t rf e s j e n t o s o ts e n t a i t rf e s sp
 １６４                            s j e n t o s e s e n t a i k w a t rf o sp
 １６４０００                         s j e n t o s e s e n t a i k w a t rf o m i l sp
 １６４３                           m i l s e i s j e n t o s k w a rf e n t a i t rf e s sp
@@ -24696,37 +24266,21 @@ ZYUGANOV                       t j u g a n o b sp
 １７５                            s j e n t o s e t e n t a i s i ng k o sp
 １７６２                           m i l s e t e s j e n t o s s e s e n t a i d o s sp
 １７８                            s j e n t o s s e t e n t a i o tS o sp
-１７８                            s j e n t o s s e t e n t a i o ts o sp
 １８                             d j e s i o tS o sp
-１８                             d j e s i o ts o sp
 １８００                           m i l o tS o s j e n t o s sp
-１８００                           m i l o ts o s j e n t o s sp
 １８０００                          d j e s i o tS o m i l sp
-１８０００                          d j e s i o ts o m i l sp
 １８１                            s j e n t o o tS e n t a i u n o sp
-１８１                            s j e n t o o ts e n t a i u n o sp
 １８１１                           m i l o tS o s j e n t o s o n s e sp
-１８１１                           m i l o ts o s j e n t o s o n s e sp
 １８１２                           m i l o tS o s j e n t o s d o s e sp
-１８１２                           m i l o ts o s j e n t o s d o s e sp
 １８２７                           m i l o tS o s j e n t o s b e i n t i s j e t e sp
-１８２７                           m i l o ts o s j e n t o s b e i n t i s j e t e sp
 １８４                            s j e n t o o tS e n t a i k w a t rf o sp
-１８４                            s j e n t o o ts e n t a i k w a t rf o sp
 １８５                            s j e n t o s o tS e n t a i s i ng k o sp
-１８５                            s j e n t o s o ts e n t a i s i ng k o sp
 １８７                            s j e n t o o tS e n t a i s j e t e sp
-１８７                            s j e n t o o ts e n t a i s j e t e sp
 １８７４                           m i l o tS o s j e n t o s s e t e n t a i k w a t rf o sp
-１８７４                           m i l o ts o s j e n t o s s e t e n t a i k w a t rf o sp
 １８８６                           m i l o tS o s j e n t o s o tS e n t a i s e i s sp
-１８８６                           m i l o ts o s j e n t o s o ts e n t a i s e i s sp
 １８８８                           m i l o tS o s j e n t o s o tS e n t a i o tS o sp
-１８８８                           m i l o ts o s j e n t o s o ts e n t a i o ts o sp
 １８９０                           m i l o tS o s j e n t o s n o b e n t a sp
-１８９０                           m i l o ts o s j e n t o s n o b e n t a sp
 １８９６                           m i l o tS o s j e n t o s n o b e n t a i s e i s sp
-１８９６                           m i l o ts o s j e n t o s n o b e n t a i s e i s sp
 １９                             d j e s i n w e b e sp
 １９００                           m i l n o b e s j e n t o s sp
 １９０００                          d j e s i n w e b e m i l sp
@@ -24753,7 +24307,6 @@ ZYUGANOV                       t j u g a n o b sp
 １９５３                           m i l n o b e s j e n t o s s i ng k w e n t a i t rf e s sp
 １９５４                           m i l n o b e s j e n t o s s i ng k w e n t a i k w a t rf o sp
 １９５８                           m i l n o b e s j e n t o s s i ng k w e n t a i o tS o sp
-１９５８                           m i l n o b e s j e n t o s s i ng k w e n t a i o ts o sp
 １９６                            s j e n t o n o b e n t a i s e i s sp
 １９６０                           m i l n o b e s j e n t o s s e s e n t a sp
 １９６２                           m i l n o b e s j e n t o s s e s e n t a i d o s sp
@@ -24769,28 +24322,17 @@ ZYUGANOV                       t j u g a n o b sp
 １９７６                           m i l n o b e s j e n t o s s e t e n t a i s e i s sp
 １９７７                           m i l n o b e s j e n t o s s e t e n t a i s j e t e sp
 １９７８                           m i l n o b e s j e n t o s s e t e n t a i o tS o sp
-１９７８                           m i l n o b e s j e n t o s s e t e n t a i o ts o sp
 １９７９                           m i l n o b e s j e n t o s s e t e n t a i n w e b e sp
 １９８０                           m i l n o b e s j e n t o s o tS e n t a sp
-１９８０                           m i l n o b e s j e n t o s o ts e n t a sp
 １９８１                           m i l n o b e s j e n t o s o tS e n t a i u n o sp
-１９８１                           m i l n o b e s j e n t o s o ts e n t a i u n o sp
 １９８２                           m i l n o b e s j e n t o s o tS e n t a i d o s sp
-１９８２                           m i l n o b e s j e n t o s o ts e n t a i d o s sp
 １９８３                           m i l n o b e s j e n t o s o tS e n t a i t rf e s sp
-１９８３                           m i l n o b e s j e n t o s o ts e n t a i t rf e s sp
 １９８４                           m i l n o b e s j e n t o s o tS e n t a i k w a t rf o sp
-１９８４                           m i l n o b e s j e n t o s o ts e n t a i k w a t rf o sp
 １９８５                           m i l n o b e s j e n t o s o tS e n t a i s i ng k o sp
-１９８５                           m i l n o b e s j e n t o s o ts e n t a i s i ng k o sp
 １９８６                           m i l n o b e s j e n t o s o tS e n t a i s e i s sp
-１９８６                           m i l n o b e s j e n t o s o ts e n t a i s e i s sp
 １９８７                           m i l n o b e s j e n t o s o tS e n t a i s j e t e sp
-１９８７                           m i l n o b e s j e n t o s o ts e n t a i s j e t e sp
 １９８８                           m i l n o b e s j e n t o s o tS e n t a i o tS o sp
-１９８８                           m i l n o b e s j e n t o s o ts e n t a i o ts o sp
 １９８９                           m i l n o b e s j e n t o s o tS e n t a i n w e b e sp
-１９８９                           m i l n o b e s j e n t o s o ts e n t a i n w e b e sp
 １９９０                           m i l n o b e s j e n t o s n o b e n t a sp
 １９９１                           m i l n o b e s j e n t o s n o b e n t a i u n o sp
 １９９２                           m i l n o b e s j e n t o s n o b e n t a i d o s sp
@@ -24800,7 +24342,6 @@ ZYUGANOV                       t j u g a n o b sp
 １９９６                           m i l n o b e s j e n t o s n o b e n t a i s e i s sp
 １９９７                           m i l n o b e s j e n t o s n o b e n t a i s j e t e sp
 １９９８                           m i l n o b e s j e n t o s n o b e n t a i o tS o sp
-１９９８                           m i l n o b e s j e n t o s n o b e n t a i o ts o sp
 １９９９                           m i l n o b e s j e n t o s n o b e n t a i n w e b e sp
 ２                              d o s sp
 ２０                             b e i n t e sp
@@ -24817,7 +24358,6 @@ ZYUGANOV                       t j u g a n o b sp
 ２０１３                           d o s m i l s j e n t a i t rf e s sp
 ２０１３                           d o s m i l s j e n t o s t rf e s sp
 ２０１８５                          b e i n t e m i l s j e n t o o tS e n t a i s i ng k o sp
-２０１８５                          b e i n t e m i l s j e n t o o ts e n t a i s i ng k o sp
 ２１                             b e i n t i u n o sp
 ２１０                            d o s j e n t o s d j e s sp
 ２１００                           d o s m i l s j e ng sp
@@ -24826,7 +24366,6 @@ ZYUGANOV                       t j u g a n o b sp
 ２２１０００                         d o s j e n t o s b e i n t i u n m i l sp
 ２２２                            d o s j e n t o s b e i n t i d o s sp
 ２２８                            d o s j e n t o s b e i n t i o tS o sp
-２２８                            d o s j e n t o s b e i n t i o ts o sp
 ２３                             b e i n t i t rf e s sp
 ２３０                            d o s j e n t o s t rf e i n t a sp
 ２３０００                          b e i n t i t rf e s m i l sp
@@ -24854,14 +24393,10 @@ ZYUGANOV                       t j u g a n o b sp
 ２７００                           d o s m i l s e t e s j e n t o s sp
 ２７００００                         d o s j e n t o s s e t e n t a m i l sp
 ２７８                            d o s j e n t o s s e t e n t a i o tS o sp
-２７８                            d o s j e n t o s s e t e n t a i o ts o sp
 ２７９                            d o s j e n t o s s e t e n t a i n w e b e sp
 ２８                             b e i n t i o tS o sp
-２８                             b e i n t i o ts o sp
 ２８０                            d o s j e n t o s o tS e n t a sp
-２８０                            d o s j e n t o s o ts e n t a sp
 ２８８                            d o s j e n t o s o tS e n t a i o tS o sp
-２８８                            d o s j e n t o s o ts e n t a i o ts o sp
 ２９                             b e i n t i n w e b e sp
 ３                              t rf e s sp
 ３０                             t rf e i n t a sp
@@ -24881,7 +24416,6 @@ ZYUGANOV                       t j u g a n o b sp
 ３３０                            t rf e s j e n t o s t rf e i n t a sp
 ３３６                            t rf e s j e n t o s t rf e i n t a i s e i s sp
 ３３８６                           t rf e s m i l t rf e s j e n t o s o tS e n t a i s e i s sp
-３３８６                           t rf e s m i l t rf e s j e n t o s o ts e n t a i s e i s sp
 ３４                             t rf e i n t a i k w a t rf o sp
 ３４００                           t rf e s m i l k w a t rf o s j e n t o s sp
 ３４４                            t rf e s j e n t o s k w a rf e n t a i k w a t rf o sp
@@ -24904,7 +24438,6 @@ ZYUGANOV                       t j u g a n o b sp
 ３７４                            t rf e s j e n t o s s e t e n t a i k w a t rf o sp
 ３７５０                           t rf e s m i l s e t e s j e n t o s s i ng k w e n t a sp
 ３８                             t rf e i n t a i o tS o sp
-３８                             t rf e i n t a i o ts o sp
 ３９                             t rf e i n t a i n w e b e sp
 ３９５４７                          t rf e i n t a i n w e b e m i l k i n j e n t o s k w a rf e n t a i s j e t e sp
 ４                              k w a t rf o sp
@@ -24936,18 +24469,14 @@ ZYUGANOV                       t j u g a n o b sp
 ４５０００                          k w a rf e n t a i s i ng k o m i l sp
 ４５６                            k w a t rf o s j e n t o s s i ng k w e n t a i s e i s sp
 ４５８０００                         k w a t rf o s j e n t o s s i ng k w e n t a i o tS o m i l sp
-４５８０００                         k w a t rf o s j e n t o s s i ng k w e n t a i o ts o m i l sp
 ４６                             k w a rf e n t a i s e i s sp
 ４６０００                          k w a rf e n t a i s e i s m i l sp
 ４７                             k w a rf e n t a i s j e t e sp
 ４７１                            k w a t rf o s j e n t o s s e t e n t a i u n o sp
 ４７４                            k w a t rf o s j e n t o s s e t e n t a i k w a t rf o sp
 ４８                             k w a rf e n t a i o tS o sp
-４８                             k w a rf e n t a i o ts o sp
 ４８００                           k w a t rf o m i l o tS o s j e n t o s sp
-４８００                           k w a t rf o m i l o ts o s j e n t o s sp
 ４８５０                           k w a t rf o m i l o tS o s j e n t o s s i ng k w e n t a sp
-４８５０                           k w a t rf o m i l o ts o s j e n t o s s i ng k w e n t a sp
 ４９                             k w a rf e n t a i n w e b e sp
 ５                              s i ng k o sp
 ５０                             s i ng k w e n t a sp
@@ -24974,11 +24503,8 @@ ZYUGANOV                       t j u g a n o b sp
 ５７６７０２６                        s i ng k o m i l o n e s s e t e s j e n t o s s e s e n t a i s j e t e m i l b e i n t i s e i s sp
 ５７７                            k i n j e n t o s s e t e n t a i s j e t e sp
 ５８                             s i ng k w e n t a i o tS o sp
-５８                             s i ng k w e n t a i o ts o sp
 ５８７                            k i n j e n t o s o tS e n t a i s j e t e sp
-５８７                            k i n j e n t o s o ts e n t a i s j e t e sp
 ５８７６０６                         k i n j e n t o s o tS e n t a i s j e t e m i l s e i s j e n t o s s e i s sp
-５８７６０６                         k i n j e n t o s o ts e n t a i s j e t e m i l s e i s j e n t o s s e i s sp
 ５９                             s i ng k w e n t a i n w e b e sp
 ５９４                            k i n j e n t o s n o b e n t a i k w a t rf o sp
 ６                              s e i s sp
@@ -24992,7 +24518,6 @@ ZYUGANOV                       t j u g a n o b sp
 ６２                             s e s e n t a i d o s sp
 ６３                             s e s e n t a i t rf e s sp
 ６３４８                           s e i s m i l t rf e s j e n t o s k w a rf e n t a i o tS o sp
-６３４８                           s e i s m i l t rf e s j e n t o s k w a rf e n t a i o ts o sp
 ６４                             s e s e n t a i k w a t rf o sp
 ６４０                            s e i s j e n t o s k w a rf e n t a sp
 ６５                             s e s e n t a i s i ng k o sp
@@ -25008,13 +24533,10 @@ ZYUGANOV                       t j u g a n o b sp
 ６７０                            s e i s j e n t o s s e t e n t a sp
 ６７１                            s e i s j e n t o s s e t e n t a i u n o sp
 ６８                             s e s e n t a i o tS o sp
-６８                             s e s e n t a i o ts o sp
 ６８０                            s e i s j e n t o s o tS e n t a sp
-６８０                            s e i s j e n t o s o ts e n t a sp
 ６９                             s e s e n t a i n w e b e sp
 ６９０                            s e i s j e n t o s n o b e n t a sp
 ６９１０１８                         s e i s j e n t o s n o b e n t a i u n m i l d j e s i o tS o sp
-６９１０１８                         s e i s j e n t o s n o b e n t a i u n m i l d j e s i o ts o sp
 ７                              s j e t e sp
 ７０                             s e t e n t a sp
 ７００                            s e t e s j e n t o s sp
@@ -25022,7 +24544,6 @@ ZYUGANOV                       t j u g a n o b sp
 ７００００                          s e t e n t a m i l sp
 ７１                             s e t e n t a i u n o sp
 ７１０５８                          s e t e n t a i u n m i l s i ng k w e n t a i o tS o sp
-７１０５８                          s e t e n t a i u n m i l s i ng k w e n t a i o ts o sp
 ７１４０                           s j e t e m i l s j e n t o k w a rf e n t a sp
 ７２                             s e t e n t a i d o s sp
 ７３０００                          s e t e n t a i t rf e s m i l sp
@@ -25041,55 +24562,31 @@ ZYUGANOV                       t j u g a n o b sp
 ７６１０００                         s e t e s j e n t o s s e s e n t a i u n m i l sp
 ７７０９５                          s e t e n t a i s j e t e m i l n o b e n t a i s i ng k o sp
 ７７８                            s e t e s j e n t o s s e t e n t a i o tS o sp
-７７８                            s e t e s j e n t o s s e t e n t a i o ts o sp
 ７８                             s e t e n t a i o tS o sp
-７８                             s e t e n t a i o ts o sp
 ７９                             s e t e n t a i n w e b e sp
 ７９５                            s e t e s j e n t o s n o b e n t a i s i ng k o sp
 ８                              o tS o sp
-８                              o ts o sp
 ８０                             o tS e n t a sp
-８０                             o ts e n t a sp
 ８００                            o tS o s j e n t o s sp
-８００                            o ts o s j e n t o s sp
 ８０００                           o tS o m i l sp
-８０００                           o ts o m i l sp
 ８０００００                         o tS o s j e n t o s m i l sp
-８０００００                         o ts o s j e n t o s m i l sp
 ８０８                            o tS e n t o tS o sp
-８０８                            o ts e n t o ts o sp
 ８１                             o tS e n t a i u n o sp
-８１                             o ts e n t a i u n o sp
 ８２                             o tS e n t a i d o s sp
-８２                             o ts e n t a i d o s sp
 ８２００                           o tS o m i l d o s j e n t o s sp
-８２００                           o ts o m i l d o s j e n t o s sp
 ８２５０                           o tS o m i l d o s j e n t o s s i ng k w e n t a sp
-８２５０                           o ts o m i l d o s j e n t o s s i ng k w e n t a sp
 ８３                             o tS e n t a i t rf e s sp
-８３                             o ts e n t a i t rf e s sp
 ８４                             o tS e n t a i k w a t rf o sp
-８４                             o ts e n t a i k w a t rf o sp
 ８４０                            o tS o s j e n t o s k w a rf e n t a sp
-８４０                            o ts o s j e n t o s k w a rf e n t a sp
 ８５                             o tS e n t a i s i ng k o sp
-８５                             o ts e n t a i s i ng k o sp
 ８５０００                          o tS e n t a i s i ng k o m i l sp
-８５０００                          o ts e n t a i s i ng k o m i l sp
 ８６                             o tS e n t a i s e i s sp
-８６                             o ts e n t a i s e i s sp
 ８６００                           o tS o m i l s e i s j e n t o s sp
-８６００                           o ts o m i l s e i s j e n t o s sp
 ８７                             o tS e n t a i s j e t e sp
-８７                             o ts e n t a i s j e t e sp
 ８７０                            o tS o s j e n t o s s e t e n t a sp
-８７０                            o ts o s j e n t o s s e t e n t a sp
 ８８                             o tS e n t a i o tS o sp
-８８                             o ts e n t a i o ts o sp
 ８８８４                           o tS o m i l o tS o s j e n t o s o tS e n t a i k w a t rf o sp
-８８８４                           o ts o m i l o ts o s j e n t o s o ts e n t a i k w a t rf o sp
 ８９５                            o tS o s j e n t o s n o b e n t a i s i ng k o sp
-８９５                            o ts o s j e n t o s n o b e n t a i s i ng k o sp
 ９                              n w e b e sp
 ９０                             n o b e n t a sp
 ９００                            n o b e s j e n t o s sp
@@ -25107,9 +24604,6 @@ ZYUGANOV                       t j u g a n o b sp
 ９６０                            n o b e s j e n t o s s e s e n t a sp
 ９７                             n o b e n t a i s j e t e sp
 ９８                             n o b e n t a i o tS o sp
-９８                             n o b e n t a i o ts o sp
 ９８２                            n o b e s j e n t o s o tS e n t a i d o s sp
-９８２                            n o b e s j e n t o s o ts e n t a i d o s sp
 ９８４                            n o b e s j e n t o s o tS e n t a i k w a t rf o sp
-９８４                            n o b e s j e n t o s o ts e n t a i k w a t rf o sp
 ９９                             n o b e n t a i n w e b e sp
