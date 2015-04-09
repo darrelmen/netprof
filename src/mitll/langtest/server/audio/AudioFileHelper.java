@@ -276,15 +276,20 @@ public class AudioFileHelper implements CollationSort {
 	 * @param attribute
 	 */
 	public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute) {
-		String audioRef = attribute.getAudioRef();
-		if (!audioRef.contains("context=")) {
-			PretestScore asrScoreForAudio = getASRScoreForAudio(0, pathHelper.getAbsoluteFile(audioRef).getAbsolutePath(), exercise.getRefSentence(), 128, 128, false,
-					false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exercise.getID(), null);
+		if (asrScoring.checkLTS(exercise.getForeignLanguage())) {
+			String audioRef = attribute.getAudioRef();
+			if (!audioRef.contains("context=")) {
+				PretestScore asrScoreForAudio = getASRScoreForAudio(0, pathHelper.getAbsoluteFile(audioRef).getAbsolutePath(), exercise.getRefSentence(), 128, 128, false,
+						false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exercise.getID(), null);
 
-			JSONObject json = getJsonObject(asrScoreForAudio);
+				JSONObject json = getJsonObject(asrScoreForAudio);
 
-			getRefAudioAnswerDecoding(exercise, (int) attribute.getUserid(), audioRef, pathHelper.getAbsoluteFile(audioRef), attribute.getDurationInMillis(),
-					asrScoreForAudio.getHydecScore(), json.toString(), numPhones(asrScoreForAudio), attribute.isMale(), attribute.isRegularSpeed()?"reg":"slow");
+				getRefAudioAnswerDecoding(exercise, (int) attribute.getUserid(), audioRef, pathHelper.getAbsoluteFile(audioRef), attribute.getDurationInMillis(),
+						asrScoreForAudio.getHydecScore(), json.toString(), numPhones(asrScoreForAudio), attribute.isMale(), attribute.isRegularSpeed() ? "reg" : "slow");
+			}
+		}
+		else {
+			logger.warn("skipping " +exercise.getID() + " since can't do decode/align b/c of LTS errors ");
 		}
 	}
 
@@ -820,7 +825,7 @@ public class AudioFileHelper implements CollationSort {
 	// TODO: gross
 	private void makeASRScoring() {
 		if(webserviceScoring == null) {
-			webserviceScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
+			webserviceScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps);//.getProperties(), langTestDatabase);
 			oldschoolScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
 		}
 		asrScoring = oldschoolScoring;
