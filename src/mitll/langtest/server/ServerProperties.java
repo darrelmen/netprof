@@ -439,9 +439,9 @@ public class ServerProperties {
 
   public List<String> getReportEmails() { return reportEmails;  }
 
-//  public float getUnknownModelBias() {  return unknownModelBias;  }
-
   public Set<Long> getPreferredVoices() {
     return preferredVoices;
   }
+
+  public boolean shouldDropRefResult() {  return getDefaultFalse("dropRefResultTable");  }
 }
