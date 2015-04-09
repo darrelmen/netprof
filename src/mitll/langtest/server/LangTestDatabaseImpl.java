@@ -1363,7 +1363,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	public long getUserIDForToken(String token) {
 		User user = db.getUserDAO().getUserWhereResetKey(token);
 		long l = (user == null) ? -1 : user.getId();
-		logger.info("for token " +  token + " got user id " + l);
+		logger.info("for token " + token + " got user id " + l);
 		return l;
 	}
 
@@ -2028,21 +2028,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   		Map<String, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
 			String installPath = pathHelper.getInstallPath();
 
-			Set<String> decodedFiles = new HashSet<String>();
 
-			List<Result> results = db.getRefResultDAO().getResults();
-			for (Result res : results) {
-				String[] bestAudios = res.getAnswer().split(File.separator);
-				if (bestAudios.length > 1) {
-					String bestAudio = bestAudios[bestAudios.length-1];
-			//		logger.debug("added " + bestAudio);
-					decodedFiles.add(bestAudio);
-					if (stopDecode) return;
-				//	logger.debug("previously found " + res);
-				}
-			}
+			int numResults = db.getRefResultDAO().getNumResults();
+			logger.debug("found " +numResults+ " in ref results table for " + db.getServerProps().getLanguage());
+
+			Set<String> decodedFiles = getDecodedFiles();
 			List<CommonExercise> exercises = getExercises();
-			logger.debug(serverProps.getLanguage() + " found " + results.size() +" previous ref results, checking " + exercises.size() +" exercises ");
+			logger.debug(serverProps.getLanguage() + " found " + decodedFiles.size() +" previous ref results, checking " + exercises.size() +" exercises ");
 
 			if (stopDecode) logger.debug("Stop decode true");
 			// TODOz : check if result is already in refresult table before doing decoding
@@ -2081,6 +2073,28 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		}
 	}
 
+	private Set<String> getDecodedFiles() {
+		List<Result> results = db.getRefResultDAO().getResults();
+		logger.debug(serverProps.getLanguage() + " found " + results.size() +" previous ref results");
+
+		Set<String> decodedFiles = new HashSet<String>();
+		int count = 0;
+		for (Result res : results) {
+      if (count++ < 20) {
+        logger.debug("\t found " + res);
+      }
+      String[] bestAudios = res.getAnswer().split(File.separator);
+      if (bestAudios.length > 1) {
+        String bestAudio = bestAudios[bestAudios.length-1];
+    //		logger.debug("added " + bestAudio);
+        decodedFiles.add(bestAudio);
+        if (stopDecode) break;
+      //	logger.debug("previously found " + res);
+      }
+    }
+		return decodedFiles;
+	}
+
 	private int doDecode(Set<String> decodedFiles, CommonExercise exercise, Collection<AudioAttribute> audioAttributes) {
   	int count = 0;
 		List<AudioAttribute> toDecode = new ArrayList<AudioAttribute>();
@@ -2110,13 +2124,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		String[] bestAudios = attribute.getAudioRef().split(File.separator);
 		return bestAudios[bestAudios.length - 1];
 	}
-
-	public String getWebserviceIP() {
-		return serverProps.getWebserviceIP();
-	}
+/*
+	public String getWebserviceIP() {	return serverProps.getWebserviceIP(); 	}
 	public int getWebservicePort()  {
 		return serverProps.getWebservicePort();
-	}
+	}*/
 
 	/**
 	 * The config web.xml file.
