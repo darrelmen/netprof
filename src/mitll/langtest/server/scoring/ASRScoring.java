@@ -140,9 +140,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 	 * @see mitll.langtest.server.audio.AudioFileHelper#checkLTS(String)
 	 * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
 	 */
-	public boolean checkLTS(String foreignLanguagePhrase) {
-		return checkLTS(letterToSoundClass, foreignLanguagePhrase);
-	}
+	public boolean checkLTS(String foreignLanguagePhrase) { return checkLTS(letterToSoundClass, foreignLanguagePhrase);	}
 
 	/**
 	 *
