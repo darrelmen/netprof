@@ -1,6 +1,7 @@
 package mitll.langtest.server.scoring;
 
 import corpus.*;
+import mitll.langtest.server.database.AudioExport;
 import mitll.langtest.shared.CommonExercise;
 import org.apache.log4j.Logger;
 
@@ -89,6 +90,11 @@ public class LTSFactory implements CollationSort {
     });
   }
 
+  /**
+   * @see AudioExport#writeContextToStream
+   * @param lang
+   * @return
+   */
   public static String getID(Language lang) {
     String locale = "en";
     switch (lang) {
@@ -145,6 +151,7 @@ public class LTSFactory implements CollationSort {
 
     return locale;
   }
+
   /**
    * @see #getCollator
    * @param lang
