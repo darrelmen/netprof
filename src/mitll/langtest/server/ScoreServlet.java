@@ -65,6 +65,22 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String IS_CORRECT = "isCorrect";
   private static final String SAID_WORD = "saidWord";
   private static final String FALSE = "false";
+
+  private static final String EXID = "exid";
+  private static final String VALID = "valid";
+  private static final String REQID = "reqid";
+  private static final String INVALID = "invalid";
+  private static final String TYPE = "type";
+  private static final String NAME = "name";
+  private static final String ITEMS = "items";
+  private static final String VERSION = "version";
+  private static final String AGE = "age";
+  private static final String GENDER = "gender";
+  private static final String DIALECT = "dialect";
+  private static final String CONTEXT = "context";
+  private static final String WIDGET = "widget";
+  private static final String CHILDREN = "children";
+
   private LoadTesting loadTesting;
 
   public enum Request {DECODE, ALIGN, RECORD}
@@ -90,6 +106,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String FORGOT_USERNAME = "forgotUsername";
   private static final String RESET_PASS = "resetPassword";
   private static final String SET_PASSWORD = "setPassword";
+  private static final double ALIGNMENT_SCORE_CORRECT = 0.5;
   //private boolean debug = true;
 
   /**
@@ -137,7 +154,7 @@ public class ScoreServlet extends DatabaseServlet {
             String first = split1[0];
             String emailFromDevice = first.split("=")[1];
             boolean valid = forgotUsername(emailFromDevice);
-            toReturn.put("valid", valid);
+            toReturn.put(VALID, valid);
           }
         } else if (queryString.startsWith(RESET_PASS)) {
           String[] split1 = queryString.split("&");
@@ -179,7 +196,7 @@ public class ScoreServlet extends DatabaseServlet {
 
             String second = split1[1];
             String passwordH = second.split("=")[1];
-            toReturn.put("valid", changePFor(token, passwordH));
+            toReturn.put(VALID, changePFor(token, passwordH));
           }
         } else if (queryString.startsWith(EXERCISE_HISTORY)) { // TODO : who calls this???
           String[] split1 = queryString.split("&");
@@ -242,7 +259,6 @@ public class ScoreServlet extends DatabaseServlet {
         }
       }
     }
-
 
     logger.debug("getPhoneReport (" +serverProps.getLanguage() + ") : user " + user + " selection " + selection);
     try {
@@ -556,9 +572,9 @@ public class ScoreServlet extends DatabaseServlet {
       User checkExisting = db.getUserDAO().getUserByID(user);
 
       if (checkExisting == null) { // OK, nobody with matching user and password
-        String age = request.getHeader("age");
-        String gender = request.getHeader("gender");
-        String dialect = request.getHeader("dialect");
+        String age = request.getHeader(AGE);
+        String gender = request.getHeader(GENDER);
+        String dialect = request.getHeader(DIALECT);
         String emailH = request.getHeader(EMAIL_H);
 
         logger.debug("addUser : Request " + requestType + " for " + deviceType + " user " + user + " adding " + gender + " age " + age + " dialect " + dialect);
@@ -601,9 +617,9 @@ public class ScoreServlet extends DatabaseServlet {
     if (db.getUserDAO().getUserWhere(userid) == null) {
       jsonObject.put(ERROR, "unknown user " + userid);
     } else {
-      String context = request.getHeader("context");
-      String exid = request.getHeader("exid");
-      String widgetid = request.getHeader("widget");
+      String context = request.getHeader(CONTEXT);
+      String exid = request.getHeader(EXID);
+      String widgetid = request.getHeader(WIDGET);
       String widgetType = request.getHeader("widgetType");
 
       //   logger.debug("doPost : Request " + requestType + " for " + deviceType + " user " + user + " " + exid);
@@ -654,7 +670,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     JSONObject jsonObject = new JSONObject();
     jsonObject.put(CONTENT, getContentAsJson());
-    jsonObject.put("version", "1.0");
+    jsonObject.put(VERSION, "1.0");
     jsonObject.put(HAS_MODEL, !db.getServerProps().isNoModel());
 
     return jsonObject;
@@ -687,13 +703,13 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private JSONObject getJsonForNode(SectionNode node, Map<String, Collection<String>> typeToValues) {
     JSONObject jsonForNode = new JSONObject();
-    jsonForNode.put("type", node.getType());
-    jsonForNode.put("name", node.getName());
+    jsonForNode.put(TYPE, node.getType());
+    jsonForNode.put(NAME, node.getName());
     JSONArray jsonArray = new JSONArray();
 
     if (node.isLeaf()) {
       JSONArray exercises = getJsonForSelection(typeToValues);
-      jsonForNode.put("items", exercises);
+      jsonForNode.put(ITEMS, exercises);
     } else {
       for (SectionNode child : node.getChildren()) {
         typeToValues.put(child.getType(), Collections.singletonList(child.getName()));
@@ -701,7 +717,7 @@ public class ScoreServlet extends DatabaseServlet {
         typeToValues.remove(child.getType());
       }
     }
-    jsonForNode.put("children", jsonArray);
+    jsonForNode.put(CHILDREN, jsonArray);
     return jsonForNode;
   }
 
@@ -724,7 +740,6 @@ public class ScoreServlet extends DatabaseServlet {
     }
     //  getExerciseSorter().sortByForeign(copy, getAudioFileHelper());
     getExerciseSorter().sortedByPronLengthThenPhone(copy, audioFileHelper.getPhoneToCount());
-
     return getJsonArray(copy);
   }
 
@@ -789,7 +804,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private int getReqID(HttpServletRequest request) {
-    String reqid = request.getHeader("reqid");
+    String reqid = request.getHeader(REQID);
     //logger.debug("got req id " + reqid);
     if (reqid == null) reqid = "1";
     try {
@@ -849,7 +864,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     JSONObject jsonForScore = new JSONObject();
     if (exercise1 == null) {
-      jsonForScore.put("valid", "bad_exercise_id");
+      jsonForScore.put(VALID, "bad_exercise_id");
     } else {
       boolean doFlashcard = request == Request.DECODE;
       AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, deviceType, device, exercise1);
@@ -868,10 +883,13 @@ public class ScoreServlet extends DatabaseServlet {
           // attempt to get more feedback when we're too sensitive and match the unknown model
           if (!answer.isCorrect() && !answer.isSaidAnswer()) {
             answer = getAudioAnswerAlign(reqid, exerciseID, user, false, wavPath, saveFile, deviceType, device, exercise1);
-            logger.debug("Alignment on an unknown model gets " + answer.getPretestScore());
+            PretestScore pretestScore1 = answer.getPretestScore();
+            logger.debug("Alignment on an unknown model gets " + pretestScore1);
             //   logger.debug("score info " + answer.getPretestScore().getsTypeToEndTimes());
-            jsonForScore = getJsonForScore(answer.getPretestScore());
-            jsonForScore.put(IS_CORRECT, false);
+            jsonForScore = getJsonForScore(pretestScore1);
+
+            // so we mark it correct if the score is above 50% on alignment
+            jsonForScore.put(IS_CORRECT, pretestScore1.getHydecScore() > ALIGNMENT_SCORE_CORRECT);
             jsonForScore.put(SAID_WORD, false);   // don't say they said the word - decode says they didn't
           }
         }
@@ -886,9 +904,9 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private void addValidity(String exerciseID, JSONObject jsonForScore, AudioAnswer answer) {
-    jsonForScore.put("exid", exerciseID);
-    jsonForScore.put("valid", answer == null ? "invalid" : answer.getValidity().toString());
-    jsonForScore.put("reqid", answer == null ? 1 : "" + answer.getReqid());
+    jsonForScore.put(EXID, exerciseID);
+    jsonForScore.put(VALID, answer == null ? INVALID : answer.getValidity().toString());
+    jsonForScore.put(REQID, answer == null ? 1 : "" + answer.getReqid());
   }
 
   /**
@@ -1011,9 +1029,9 @@ public class ScoreServlet extends DatabaseServlet {
     new Thread(new Runnable() {
       @Override
       public void run() {
-        long then = System.currentTimeMillis();
+        //long then = System.currentTimeMillis();
         ensureMP3(path, foreignLanguage);
-        long now = System.currentTimeMillis();
+       // long now = System.currentTimeMillis();
  //       logger.debug("Took " + (now-then) + " millis to write mp3 version");
       }
     }).start();
@@ -1083,7 +1101,6 @@ public class ScoreServlet extends DatabaseServlet {
 
   private DatabaseImpl getDatabase() {
     DatabaseImpl db = null;
-
     Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
     if (databaseReference != null) {
       db = (DatabaseImpl) databaseReference;
@@ -1096,7 +1113,6 @@ public class ScoreServlet extends DatabaseServlet {
 
   private AudioFileHelper getAudioFileHelperRef() {
     AudioFileHelper fileHelper = null;
-
     Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.AUDIO_FILE_HELPER_REFERENCE);
     if (databaseReference != null) {
       fileHelper = (AudioFileHelper) databaseReference;
@@ -1109,7 +1125,6 @@ public class ScoreServlet extends DatabaseServlet {
 
   private LoadTesting getLoadTesting() {
     LoadTesting ref = null;
-
     Object databaseReference = getServletContext().getAttribute(LOAD_TESTING);
     if (databaseReference != null) {
       ref = (LoadTesting) databaseReference;
@@ -1160,7 +1175,6 @@ public class ScoreServlet extends DatabaseServlet {
   private PretestScore getASRScoreForAudioNoCache(int reqid, String testAudioFile, String sentence,
                                                   String exerciseID) {
     //  logger.debug("getASRScoreForAudioNoCache for " + testAudioFile + " under " + sentence);
-
     return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, 128, 128, false,
         false, Files.createTempDir().getAbsolutePath(), false, exerciseID, null);
   }
@@ -1194,7 +1208,7 @@ public class ScoreServlet extends DatabaseServlet {
   }*/
 
   /**
-   *
+   * Just for appen -
    * @return
    */
   private JSONObject getJsonLeastRecordedChapters() {
@@ -1217,7 +1231,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     JSONObject jsonObject = new JSONObject();
     jsonObject.put(CONTENT, getContentAsJson2(sectionNodes));
-    jsonObject.put("version", "1.0");
+    jsonObject.put(VERSION, "1.0");
     jsonObject.put(HAS_MODEL, !db.getServerProps().isNoModel());
 
     return jsonObject;
@@ -1242,17 +1256,17 @@ public class ScoreServlet extends DatabaseServlet {
    * @param node
    * @param typeToValues
    * @return
-   * @see #getContentAsJson
+   * @see #getContentAsJson2
    */
   private JSONObject getJsonForNode2(SectionNode node, Map<String, Collection<String>> typeToValues) {
     JSONObject jsonForNode = new JSONObject();
-    jsonForNode.put("type", node.getType());
-    jsonForNode.put("name", node.getName());
+    jsonForNode.put(TYPE, node.getType());
+    jsonForNode.put(NAME, node.getName());
     JSONArray jsonArray = new JSONArray();
 
     if (node.isLeaf()) {
       JSONArray exercises = getJsonForSelection(typeToValues);
-      jsonForNode.put("items", exercises);
+      jsonForNode.put(ITEMS, exercises);
     } else {
       List<SectionNode> children = node.getChildren();
       Collections.sort(children); // by avg recorded number
@@ -1263,7 +1277,7 @@ public class ScoreServlet extends DatabaseServlet {
         typeToValues.remove(child.getType());
       }
     }
-    jsonForNode.put("children", jsonArray);
+    jsonForNode.put(CHILDREN, jsonArray);
     return jsonForNode;
   }
 
