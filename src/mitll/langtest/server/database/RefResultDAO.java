@@ -42,17 +42,20 @@ public class RefResultDAO extends DAO {
   public static final String MALE = "male";
   public static final String SPEED = "speed";
   private final LogAndNotify logAndNotify;
+  private final boolean dropTable;
 
 //  private final boolean debug = false;
 
   /**
    * @param database
    * @param logAndNotify
+   * @param dropTable
    * @see DatabaseImpl#initializeDAOs(PathHelper)
    */
-  public RefResultDAO(Database database, LogAndNotify logAndNotify) {
+  public RefResultDAO(Database database, LogAndNotify logAndNotify, boolean dropTable) {
     super(database);
     this.logAndNotify = logAndNotify;
+    this.dropTable = dropTable;
   }
 
   private List<Result> cachedResultsForQuery = null;
@@ -69,7 +72,8 @@ public class RefResultDAO extends DAO {
    * @param numDecodePhones
    * @param numAlignPhones
    * @param isMale
-   *@param speed @return id of new row in result table
+   * @param speed
+   * @return id of new row in result table
    */
   public long addAnswer(Database database, int userID, String id,
                         String audioFile, long durationInMillis,
@@ -170,7 +174,6 @@ public class RefResultDAO extends DAO {
 
   private String copyStringChar(String plan) { return new String(plan.toCharArray());  }
 
-
   /**
    * Pulls the list of results out of the database.
    *
@@ -226,15 +229,16 @@ public class RefResultDAO extends DAO {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
 
-    return getResultsForQuery(connection, statement);
+    List<Result> resultsForQuery = getResultsForQuery(connection, statement);
+    logger.debug("running " + sql + " -> " +resultsForQuery.size() + " results");
+    return resultsForQuery;
   }
-
 
   public int getNumResults() {
     int numResults = 0;
     try {
       Connection connection = database.getConnection(this.getClass().toString());
-      PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + REFRESULT + ";");
+      PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + REFRESULT);
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {
         numResults = rs.getInt(1);
@@ -302,12 +306,14 @@ public class RefResultDAO extends DAO {
    * @see DatabaseImpl#initializeDAOs
    */
   void createResultTable(Connection connection) throws SQLException {
-//    drop(REFRESULT, connection); // TODO JUST FOR NOW
+    if (dropTable) {
+      drop(REFRESULT,connection);
+    }
     createTable(connection);
 
     Collection<String> columns = getColumns(REFRESULT);
+    logger.debug("for " + REFRESULT + " found " + columns + " and " + getNumResults());
     if (!columns.contains(ALIGNSCORE.toLowerCase())) {
-//      createTable(connection);
       addVarchar(connection, REFRESULT, ALIGNSCORE);
       addVarchar(connection, REFRESULT, ALIGNJSON);
     }
@@ -372,113 +378,4 @@ public class RefResultDAO extends DAO {
     statement.execute();
     statement.close();
   }
-
-  /**
-   *
-   * @param typeOrder
-   * @param out
-   * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-   */
- /* public void writeExcelToStream(Collection<MonitorResult> results, List<String> typeOrder, OutputStream out) {
-    writeToStream(out, writeExcel(results, typeOrder));
-  }
-
-  private SXSSFWorkbook writeExcel(Collection<MonitorResult> results,  List<String> typeOrder
-  ) {
-    long now;
-    long then = System.currentTimeMillis();
-
-    SXSSFWorkbook wb = new SXSSFWorkbook(10000); // keep 100 rows in memory, exceeding rows will be flushed to disk
-    Sheet sheet = wb.createSheet("Results");
-    int rownum = 0;
-    CellStyle cellStyle = wb.createCellStyle();
-    DataFormat dataFormat = wb.createDataFormat();
-
-    cellStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss 'yy"));
-    //DateTimeFormat format = DateTimeFormat.getFormat("MMM dd h:mm:ss a z ''yy");
-    Row headerRow = sheet.createRow(rownum++);
-
-    List<String> columns = new ArrayList<String>(Arrays.asList(USERID, "Exercise", "Text"));
-
-    for (final String type : typeOrder) {  columns.add(type);  }
-
-    List<String> columns2 = Arrays.asList(
-        "Recording",
-        Database.TIME,
-        "type",//AUDIO_TYPE,
-        DURATION,
-        "Valid",
-        CORRECT, PRON_SCORE, "Device"
-    );
-
-    columns.addAll(columns2);
-
-    for (int i = 0; i < columns.size(); i++) {
-      Cell headerCell = headerRow.createCell(i);
-      headerCell.setCellValue(columns.get(i));
-    }
-
-    for (MonitorResult result : results) {
-      Row row = sheet.createRow(rownum++);
-      int j = 0;
-      Cell cell = row.createCell(j++);
-      cell.setCellValue(result.getUserid());
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getId());
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getForeignText());
-
-      for (String type : typeOrder) {
-        cell = row.createCell(j++);
-        cell.setCellValue(result.getUnitToValue().get(type));
-      }
-
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getAnswer());
-
-      cell = row.createCell(j++);
-      cell.setCellValue(new Date(result.getTimestamp()));
-      cell.setCellStyle(cellStyle);
-
-      cell = row.createCell(j++);
-      String audioType = result.getAudioType();
-      cell.setCellValue(audioType.equals("avp")?"flashcard": audioType);
-
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getDurationInMillis());
-
-      cell = row.createCell(j++);
-      cell.setCellValue(result.isValid() ? YES : NO);
-
-      cell = row.createCell(j++);
-      cell.setCellValue(result.isCorrect() ? YES : NO);
-
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getPronScore());
-
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getDevice());
-    }
-    now = System.currentTimeMillis();
-    if (now - then > 100) {
-      logger.warn("toXLSX : took " + (now - then) + " millis to add " + rownum + " rows to sheet, or " + (now - then) / rownum + " millis/row");
-    }
-    return wb;
-  }
-
-
-  private void writeToStream(OutputStream out, SXSSFWorkbook wb) {
-    long then = System.currentTimeMillis();
-    try {
-      wb.write(out);
-      long now2 = System.currentTimeMillis();
-      if (now2 - then > 100) {
-        logger.warn("toXLSX : took " + (now2 - then) + " millis to write excel to output stream ");
-      }
-      out.close();
-      wb.dispose();
-    } catch (IOException e) {
-      logger.error("got " + e, e);
-    }
-  }*/
 }
