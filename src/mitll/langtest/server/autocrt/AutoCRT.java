@@ -195,14 +195,15 @@ public class AutoCRT {
       foreground.add(removePunct(ref));
     }
     return foreground;
-			}
+  }
 
-	/**
-	 * Replace elipsis with space. Then remove all punct.
-	 * @param t
-	 * @return
-	 */
-	private String removePunct(String t) {
-		return t.replaceAll("\\.\\.\\."," ").replaceAll("\\p{P}","");
-	}
+  /**
+   * Replace elipsis with space. Then remove all punct.
+   *
+   * @param t
+   * @return
+   */
+  private String removePunct(String t) {
+    return t.replaceAll("\\.\\.\\.", " ").replaceAll("\\p{P}", "");
+  }
 }
