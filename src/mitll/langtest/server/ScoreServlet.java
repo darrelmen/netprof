@@ -890,6 +890,7 @@ public class ScoreServlet extends DatabaseServlet {
 
             // so we mark it correct if the score is above 50% on alignment
             jsonForScore.put(IS_CORRECT, pretestScore1.getHydecScore() > ALIGNMENT_SCORE_CORRECT);
+            jsonForScore.put(SCORE, pretestScore1.getHydecScore());
             jsonForScore.put(SAID_WORD, false);   // don't say they said the word - decode says they didn't
           }
         }
