@@ -1200,6 +1200,10 @@ public class DatabaseImpl implements Database {
     return language1 + "_" + userListByID.getName();
   }
 
+  public int attachAudio(CommonExercise ex) {
+    return getAudioDAO().attachAudio(ex, installPath, configDir);
+  }
+
   public String getUserListName(long listid) {
     UserList userListByID = getUserListByID(listid);
     String language1 = getServerProps().getLanguage();
