@@ -112,7 +112,7 @@ public class AudioDAO extends DAO {
    * @param relativeConfigDir
    * @see mitll.langtest.server.LangTestDatabaseImpl#attachAudio(mitll.langtest.shared.CommonExercise)
    */
-  public void attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir) {
+  public int attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir) {
     Collection<AudioAttribute> audioAttributes = getAudioAttributes(firstExercise.getID());
 
     //logger.debug("\tattachAudio : found " + audioAttributes.size() + " for " + firstExercise.getID());
@@ -129,6 +129,7 @@ public class AudioDAO extends DAO {
 /*    for (AudioAttribute attribute : firstExercise.getAudioAttributes()) {
       logger.debug("\t\tattachAudio : after on ex exid " + firstExercise.getID() + " audio " + attribute);
     }*/
+    return audioAttributes == null ? 0 :audioAttributes.size();
   }
 
   /**
