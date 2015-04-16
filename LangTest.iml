@@ -125,7 +125,7 @@
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/war/WEB-INF/classes" />
     <exclude-output />
     <content url="file://$MODULE_DIR$">
@@ -183,7 +183,6 @@
       <excludeFolder url="file://$MODULE_DIR$/war/config/pashto" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/pilot" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/russian" />
-      <excludeFolder url="file://$MODULE_DIR$/war/config/spanish" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/sudanese" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/unitFlashcard" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/urdu" />
