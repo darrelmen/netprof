@@ -59,6 +59,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final int MAX = 30;
   private static final int SLOW_MILLIS = 40;
 	public static final boolean DO_REF_DECODE = true;
+	public static final String REGULAR = "regular";
 
 	private DatabaseImpl db;
   private AudioFileHelper audioFileHelper;
@@ -1734,6 +1735,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 			String deviceType, String device) {
 		CommonExercise exercise1 = db.getCustomOrPredefExercise(exercise);  // allow custom items to mask out non-custom items
 
+		if (exercise1 == null) {
+			logger.warn("couldn't find exercise with id '" +exercise +"'");
+		}
 		AudioAnswer audioAnswer = audioFileHelper.writeAudioFile(base64EncodedString, exercise, exercise1, questionID, user, reqid,
 				audioType, doFlashcard, recordInResults, recordedWithFlash, deviceType, device);
 
@@ -1746,7 +1750,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 			// are speaking too softly or too loudly.
 
 			// normalizeLevel(audioAnswer);
-      ensureMP3(audioAnswer.getPath(), exercise1.getForeignLanguage());
+
+			String foreignLanguage = exercise1 == null ? "unknown":exercise1.getForeignLanguage();
+			ensureMP3(audioAnswer.getPath(), foreignLanguage);
 		}
 		if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
 			logger.warn("huh? got zero length recording " + user + " " + exercise);
@@ -1789,7 +1795,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	 * @param audioAnswer
 	 */
   public void addToAudioTable(int user, CommonExercise exercise1, AudioAnswer audioAnswer) {
-    addToAudioTable(user, "regular", exercise1, exercise1.getID(), audioAnswer);
+    addToAudioTable(user, REGULAR, exercise1, exercise1.getID(), audioAnswer);
   }
 
 	/**
