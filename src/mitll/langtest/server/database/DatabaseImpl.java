@@ -265,24 +265,13 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  public Export getExport() {
+/*  public Export getExport() {
     return new Export(exerciseDAO, resultDAO, gradeDAO);
-  }
+  }*/
 
   MonitoringSupport getMonitoringSupport() {
     return new MonitoringSupport(userDAO, resultDAO, gradeDAO);
   }
-
-  /**
-   * @param useFile
-   * @return
-   * @see #getExercises(boolean, String)
-   */
-/*  private ExerciseDAO makeExerciseDAO(boolean useFile) {
-    return useFile ?
-        new FileExerciseDAO(mediaDir, language, true, absConfigDir, serverProps.getMappingFile()) :
-        new SQLExerciseDAO(this, mediaDir, absConfigDir, serverProps);
-  }*/
 
   /**
    * @param installPath
@@ -353,39 +342,20 @@ public class DatabaseImpl implements Database {
    */
   private void makeDAO(String lessonPlanFile, String mediaDir, String installPath) {
     if (exerciseDAO == null) {
-      //if (useFile && excel) {
-        synchronized (this) {
-          this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, serverProps, userListManager, installPath, addDefects);
-        }
-      //} else {
-      //  this.exerciseDAO = makeExerciseDAO(useFile);
-     // }
+      synchronized (this) {
+        this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, serverProps, userListManager, installPath, addDefects);
+      }
       userExerciseDAO.setExerciseDAO(exerciseDAO);
       exerciseDAO.setUserExerciseDAO(userExerciseDAO);
       exerciseDAO.setAddRemoveDAO(addRemoveDAO);
       exerciseDAO.setAudioDAO(audioDAO);
 
-    //  getRawExercises(useFile, lessonPlanFile, excel);
       exerciseDAO.getRawExercises();
 
       userDAO.checkForFavorites(userListManager);
       userExerciseDAO.setAudioDAO(audioDAO);
     }
   }
-
-/*
-  private void getRawExercises(boolean useFile, String lessonPlanFile, boolean isExcel) {
-    if (useFile && !isExcel) {
-      if (isWordPairs) {
-        ((FileExerciseDAO) exerciseDAO).readWordPairs(lessonPlanFile, doImages);
-      } else {
-        ((FileExerciseDAO) exerciseDAO).readFastAndSlowExercises(installPath, configDir, lessonPlanFile);
-      }
-    }
-
-    exerciseDAO.getRawExercises();
-  }
-*/
 
   /**
    * @param userExercise
