@@ -2,6 +2,7 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
@@ -27,7 +28,7 @@ public class InvalidateAudioTest {
   @BeforeClass
   public static void setup() {
     String config = "spanish";
-    dbName = "npfSpanish";//"mandarin";// "mandarin";
+    dbName = "npfSpanish";
     String dbName = InvalidateAudioTest.dbName;
     String props = "quizlet.properties";
 
@@ -35,61 +36,65 @@ public class InvalidateAudioTest {
     List<CommonExercise> exercises = war.getExercises();
     logger.warn("found " + exercises.size() + " exercises");
 
-    Map<String,CommonExercise> idToEx = new HashMap<String,CommonExercise>();
-    for (CommonExercise ex : exercises) idToEx.put(ex.getID(),ex);
+    Map<String,CommonExercise> idToNewEx = new HashMap<String,CommonExercise>();
+    for (CommonExercise ex : exercises) idToNewEx.put(ex.getID(),ex);
 
     DatabaseImpl war2 = getDatabase(config, "npfSpanishTest", "quizletOld.properties");
     List<CommonExercise> oldExercises = war2.getExercises();
     logger.warn("OLD found " + oldExercises.size() + " exercises");
 
-
-  //  Map<String,CommonExercise> idToEx2 = new HashMap<String,CommonExercise>();
-    List<String> exs = new ArrayList<String>();
-    for (CommonExercise ex : oldExercises) {
-      String id = ex.getID();
-      CommonExercise newEx = idToEx.get(id);
+    List<String> idsOfDefects = new ArrayList<String>();
+    for (CommonExercise oldEx : oldExercises) {
+      String id = oldEx.getID();
+      CommonExercise newEx = idToNewEx.get(id);
 
       if (newEx == null) {
-        //logger.warn("no new ex for old " + id);
+        //logger.warn("no new oldEx for old " + id);
       }
       else {
-        String foreignLanguage  = newEx.getForeignLanguage().toLowerCase().trim();
-        String foreignLanguage1 = ex.getForeignLanguage().toLowerCase().trim();
-        List<String> tokens = getTokens(foreignLanguage);
+        String foreignLanguageNew = newEx.getForeignLanguage().toLowerCase().trim();
+        String foreignLanguageOld = oldEx.getForeignLanguage().toLowerCase().trim();
+        List<String> newTokens = getTokens(foreignLanguageNew);
+        List<String> oldTokens = getTokens(foreignLanguageOld);
 
-        List<String> tokens1 = getTokens(foreignLanguage1);
-        if (tokens.size() != tokens1.size()) {
-          logger.warn("Diff " + id + "\t'" + foreignLanguage + "' vs '" + foreignLanguage1 +"'");
-          exs.add(id);
+        if (newTokens.size() != oldTokens.size()) {
+          logger.warn("Diff " + id + "\t'" + foreignLanguageNew + "' vs '" + foreignLanguageOld +"'");
+          idsOfDefects.add(id);
         }
         else {
           int i = 0;
-          for (String token : tokens) {
-            String token2 = tokens1.get(i++);
+          for (String token : newTokens) {
+            String token2 = oldTokens.get(i++);
             if (!token.equals(token2)) {
               if (token.endsWith(".")) {
                 token = token.substring(0,token.length()-1);
               }
               if (!token.equals(token2)) {
              //   logger.warn("2 Diff " + id + " '" + token + "' vs '" + token2 + "'");
-                logger.warn("3 Diff " + id + " '" + foreignLanguage + "' vs '" + foreignLanguage1 + "'");
-                exs.add(id);
+                logger.warn("3 Diff " + id + " '" + foreignLanguageNew + "' vs '" + foreignLanguageOld + "'");
+                idsOfDefects.add(id);
                 break;
               }
             }
-            else {
+  //          else {
               //logger.debug("comp '" + token + "'  '" + token2 +"'");
-            }
+    //        }
           }
         }
 
-//        if (!removePunct(foreignLanguage.toLowerCase()).equals(removePunct(foreignLanguage1.toLowerCase()))) {
-//          logger.warn("Diff " + id + " new " + foreignLanguage + " vs " + foreignLanguage1);
-//          exs.add(id);
+//        if (!removePunct(foreignLanguageNEw.toLowerCase()).equals(removePunct(foreignLanguageOld.toLowerCase()))) {
+//          logger.warn("Diff " + id + " new " + foreignLanguageNEw + " vs " + foreignLanguageOld);
+//          idsOfDefects.add(id);
 //        }
       }
-      //idToEx2.put(ex.getID(),ex);
+      //idToEx2.put(oldEx.getID(),oldEx);
     }
+    markDefects(war, idToNewEx, idsOfDefects);
+  }
+
+  public static void markDefects(DatabaseImpl war, Map<String, CommonExercise> idToEx, List<String> exs) {
+    AudioDAO audioDAO = war.getAudioDAO();
+
     logger.warn("ids " + exs);
     int c = 0;
     int i = 0;
@@ -101,7 +106,7 @@ public class InvalidateAudioTest {
       else {
         i += war.attachAudio(exercise);
         for (AudioAttribute att : exercise.getAudioAttributes()) {
-             war.getAudioDAO().markDefect(att);
+          audioDAO.markDefect(att);
           logger.debug("marked " + att);
           c++;
         }
