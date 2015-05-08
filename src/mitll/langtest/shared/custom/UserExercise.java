@@ -134,14 +134,12 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @return
    */
   public Exercise toExercise() {
-    Exercise exercise = new Exercise("plan", getID(), getEnglish(), null, getForeignLanguage(), getTooltip());
+    Exercise exercise = new Exercise(getID(), getEnglish(), getForeignLanguage(), getTooltip());
     copyFields(exercise);
     copyAudio(exercise);
 
     return exercise;
   }
-
-  public CommonUserExercise toCommonUserExercise() { return this; }
 
   private void copyFields(Exercise imported) {
     AudioAttribute slowSpeed = getSlowSpeed();
@@ -267,11 +265,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
 
   public float getAvgScore() {
     return avgScore;
-  }
-
- // @Override
-  public Set<String> getBagOfPhones() {
-    return bagOfPhones;
   }
 
   @Override
