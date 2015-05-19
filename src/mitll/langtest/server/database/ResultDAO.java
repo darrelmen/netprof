@@ -264,7 +264,7 @@ public class ResultDAO extends DAO {
                                                                            ExerciseSorter sorter) {
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
     // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
-    return getSortedAVPHistoryByPhones(results, allIds, idToEx,sorter);
+    return getSortedAVPHistoryByPhones(results, allIds, idToEx, sorter);
   }
 
   /**
@@ -378,6 +378,12 @@ public class ResultDAO extends DAO {
     }
   }
 
+  /**
+   * @see #getSortedAVPHistory(List, Collection, Map)
+   * @param results
+   * @param allIds
+   * @return
+   */
   private List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(List<CorrectAndScore> results, Collection<String> allIds) {
     SortedMap<String, ExerciseCorrectAndScore> idToScores = new TreeMap<String, ExerciseCorrectAndScore>();
     if (results != null) {
