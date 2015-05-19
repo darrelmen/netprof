@@ -1,8 +1,10 @@
 package mitll.langtest.shared.flashcard;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.ResultDAO;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -127,6 +129,10 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
     return Math.round(getAvgScore() * 100f);
   }
 
+  /**
+   * @see ResultDAO#getExerciseCorrectAndScores(List, Collection)
+   * @param correctAndScore
+   */
   public void add(CorrectAndScore correctAndScore) {
     getCorrectAndScores().add(correctAndScore);
   }
