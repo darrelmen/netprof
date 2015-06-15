@@ -105,7 +105,7 @@ public abstract class Scoring {
 			return getEventInfo(typeToFile, decode && useWebservice);
 		} else {
 			return new TranscriptWriter().writeTranscripts(pathname,
-					imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, decode && useWebservice);
+                                                                       imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, useWebservice);//decode && useWebservice);
 		}
 	}
 
@@ -202,7 +202,7 @@ public abstract class Scoring {
 			return getEventInfo(typeToFile, decode && useWebservice); // if align, don't use webservice regardless
 		} else {
 			return new TranscriptWriter().writeTranscripts(pathname,
-					imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, decode && useWebservice);
+					imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, useWebservice);//decode && useWebservice);
 		}
 	}
 
