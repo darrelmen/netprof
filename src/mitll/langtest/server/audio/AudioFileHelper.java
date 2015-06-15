@@ -666,7 +666,7 @@ public class AudioFileHelper implements CollationSort {
 			sentence = sentence.toUpperCase();  // hack for English
 		}
 
-		PretestScore pretestScore = getASRScoring(decode).scoreRepeat(
+		PretestScore pretestScore = getASRScoring().scoreRepeat(
 				testAudioDir, removeSuffix(testAudioName),
 				sentence, lmSentences,
 				pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix, precalcResult);
@@ -809,9 +809,9 @@ public class AudioFileHelper implements CollationSort {
 		}
 	}
 
-	private ASR getASRScoring(boolean decode) {
+	private ASR getASRScoring() {
 		boolean isMacOrWin = isMacOrWin();
-		if(decode && !isMacOrWin && !useOldSchoolServiceOnly)
+		if(!isMacOrWin && !useOldSchoolServiceOnly)
 			return webserviceScoring;
 		else
 			return oldschoolScoring;
