@@ -92,8 +92,7 @@ public class SLFFile {
   }
   
   // creates string LM for hydra
-  // TODO calculate how many entries in the LM and then preallocate space appropriately to be faster
-  public String createSimpleSLFFile(Collection<String> lmSentences) {
+  public String[] createSimpleSLFFile(Collection<String> lmSentences) {
 	  ArrayList<String> slf = new ArrayList<String>();
 	  slf.add("VERSION=1.0;");
 
@@ -105,6 +104,7 @@ public class SLFFile {
 	  StringBuilder linksBuf = new StringBuilder();
 	  Collection<String> sentencesToUse = new ArrayList<String>(lmSentences);
 	  sentencesToUse.add(UNKNOWN_MODEL);
+	  String finalSentence = "";
 
 	  SmallVocabDecoder svd = new SmallVocabDecoder();
 	  int ctr = 0;
@@ -113,15 +113,18 @@ public class SLFFile {
 		  int start = 0;
 
 		  for (String token : tokens) {
+			  String cleanedToken = token.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("\\p{P}","");
 			  int next = newNodes++;
 			  linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=" + next +
 					  " l=" +
-					  (token.equals(UNKNOWN_MODEL) ? UNKNOWN_MODEL_BIAS : "-1.00") + ";");
+					  (cleanedToken.equals(UNKNOWN_MODEL) ? UNKNOWN_MODEL_BIAS : "-1.00") + ";");
 			  nodesBuf.append("I=" +
 					  next +
 					  " W=" +
-					  token +
+					  cleanedToken +
 					  ";");
+			  if(!cleanedToken.equals(UNKNOWN_MODEL))
+				  finalSentence += cleanedToken + ";";
 
 			  start = next;
 		  }
@@ -138,6 +141,6 @@ public class SLFFile {
 		  //if(i != (slf.size() - 1))
 		//	  slfBuf.append(";");
 	  }
-	  return slfBuf.toString();
+	  return new String[]{slfBuf.toString(), finalSentence};
   }
 }
