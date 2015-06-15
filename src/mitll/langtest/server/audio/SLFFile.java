@@ -113,7 +113,7 @@ public class SLFFile {
 		  int start = 0;
 
 		  for (String token : tokens) {
-			  String cleanedToken = token.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("\\p{P}","");
+			  String cleanedToken = token.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("\\p{P}","").toLowerCase();
 			  int next = newNodes++;
 			  linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=" + next +
 					  " l=" +
@@ -121,9 +121,9 @@ public class SLFFile {
 			  nodesBuf.append("I=" +
 					  next +
 					  " W=" +
-					  cleanedToken +
+					  (cleanedToken.toUpperCase().equals(UNKNOWN_MODEL) ? cleanedToken.toUpperCase() : cleanedToken) +
 					  ";");
-			  if(!cleanedToken.equals(UNKNOWN_MODEL))
+			  if(!cleanedToken.toUpperCase().equals(UNKNOWN_MODEL))
 				  finalSentence += cleanedToken + ";";
 
 			  start = next;
