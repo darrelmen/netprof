@@ -3,8 +3,10 @@ package mitll.langtest.server.scoring;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
 import audio.imagewriter.EventAndFileInfo;
+
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+
 import corpus.HTKDictionary;
 import corpus.LTS;
 import mitll.langtest.server.ServerProperties;
@@ -18,9 +20,12 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
@@ -46,7 +51,7 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR {
-	//private static final double KEEP_THRESHOLD = 0.3;
+	private static final double KEEP_THRESHOLD = 0.3;
 	private static final Logger logger = Logger.getLogger(ASRWebserviceScoring.class);
 	private static final boolean DEBUG = false;
 
@@ -63,7 +68,9 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 */
 	private HTKDictionary htkDictionary;
 	private final LTS letterToSoundClass;
-	private final Cache<String, Scores> audioToScore;
+	//private final Cache<String, Scores> audioToScore;
+	// TODO make Scores + phoneLab + wordLab an object so have something more descriptive than Object[]
+	private final Cache<String, Object[]> audioToScore; // key => (Scores, wordLab, phoneLab)
 	private final ConfigFileCreator configFileCreator;
 	private final boolean isMandarin;
 
@@ -71,7 +78,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
 	 * If the score was below a threshold, or the magic -1, we keep it around for future study.
 	 */
-	//	private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
+	private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
 	private final LTSFactory ltsFactory;
 	private final String ip;
 	private final int port;
@@ -388,9 +395,17 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		}
 
 		String key = testAudioDir + File.separator + testAudioFileNoSuffix;
-		Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
+//		Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
+		Object[] cached = useCache ? audioToScore.getIfPresent(key) : null;
+		Scores scores = null;
 		String phoneLab = "";
 		String wordLab = "";
+		if(cached != null) {
+			scores = (Scores) cached[0];
+			wordLab = (String) cached[1];
+			phoneLab = (String) cached[2];
+		}
+		
 		// actually run the scoring
 		String rawAudioPath = testAudioDir + File.separator + testAudioFileNoSuffix + ".raw";
 		AudioConversion.wav2raw(testAudioDir + File.separator + testAudioFileNoSuffix + ".wav", rawAudioPath);
@@ -404,7 +419,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 			scores = (Scores) result[0];
 			wordLab = (String) result[1];
 			phoneLab = (String) result[2];
-			audioToScore.put(key, scores);
+			audioToScore.put(key, new Object[]{scores, wordLab, phoneLab});
 		}
 		if (scores == null) {
 			logger.error("getScoreForAudio failed to generate scores.");
@@ -488,7 +503,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	private Object[] runHydra(String audioPath, String transcript, Collection<String> lmSentences, String tmpDir, boolean decode, int end) {
 
           // reference trans	
-		String cleaned = transcript.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("\\p{P}","");
+		String cleaned = transcript.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("\\p{P}","").toLowerCase();
 		if (isMandarin) 
 			cleaned = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") + getSegmented(transcript.trim()); // segmentation method will filter out the UNK model
 
@@ -501,7 +516,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		if(decode) {
 			String[] slfOut = (new SLFFile()).createSimpleSLFFile(lmSentences);
 			smallLM = "[" + slfOut[0] + "]";
-			cleaned = slfOut[1].replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("\\p{P}","");
+			cleaned = slfOut[1].replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("\\p{P}","").toLowerCase();
 		}
 
 		String hydraInput = tmpDir + "/:" + audioPath + ":" + hydraDict + ":" + smallLM + ":xxx,0," + end + ",[<s>;" + cleaned + ";</s>]";
@@ -525,8 +540,8 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		String[] split = results[0].split(";");
 		Scores scores = new Scores(split); 
 		// clean up tmp directory if above score threshold 
-		/*logger.debug("overall score: " + split[0]);
-		if (Float.parseFloat(split[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
+		logger.debug("overall score: " + split[0]);
+		/*if (Float.parseFloat(split[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
 			try {
 				logger.debug("deleting " + tmpDir + " since score is " + split[0]);
 				FileUtils.deleteDirectory(new File(tmpDir));
@@ -534,7 +549,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 				logger.error("Deleting dir " + tmpDir + " got " +e,e);
 			}
 		}*/
-		return new Object[]{scores, results[1], results[2]};
+		return new Object[]{scores, results[1].replaceAll("#",""), results[2].replaceAll("#","")}; // where are the # coming from?
 	}
 
 
