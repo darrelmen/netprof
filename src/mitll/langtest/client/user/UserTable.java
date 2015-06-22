@@ -192,7 +192,7 @@ public class UserTable extends PagerTable {
       }
     };
     rate.setSortable(true);
-    table.addColumn(rate, "Rate(sec)");
+    table.addColumn(rate, "Rate (sec)");
 
     TextColumn<User> ipaddr = new TextColumn<User>() {
       @Override
