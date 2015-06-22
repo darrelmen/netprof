@@ -412,13 +412,9 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 		}
 		else {
 			Map<String, Map<String, Float>> eventScores = new HashMap<String, Map<String, Float>>();
-			 jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
+			jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
 
-			String words1 = "words";
-			String w1 = "w";
-			parseJson(eventScores, jsonObject, words1, w1);
-			//JSONArray phones = (JSONArray)jsonObject.get("phones");
-
+			parseJson(eventScores, jsonObject, "words",  "w");
 			parseJson(eventScores, jsonObject, "phones", "p");
 
 			scores = new Scores(precalcResult.getPronScore(), eventScores);
@@ -540,7 +536,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
   /**
    * @param lmSentences
    * @param background
-   * @see AutoCRTScoring#getASRScoreForAudio(java.io.File, java.util.Collection)
+   * @see AutoCRTScoring#getASRScoreForAudio(File, Collection, boolean)
    * @return
    */
   public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
