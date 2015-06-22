@@ -922,9 +922,19 @@ public class DatabaseImpl implements Database {
    */
   public long addRefAnswer(int userID, String exerciseID,
                            String audioFile,
-                           long durationInMillis, boolean correct, float score,
-                           String scoreJson, float alignScore, String alignJson, int numDecodePhones, int numAlignPhones, boolean isMale, String speed) {
-    return refresultDAO.addAnswer(this, userID, exerciseID, audioFile,  durationInMillis, correct, score, scoreJson,alignScore,alignJson, numDecodePhones, numAlignPhones, isMale, speed);
+                           long durationInMillis, boolean correct,
+
+                           float score, String scoreJson,
+
+                           float alignScore, String alignJson,
+
+                           int numDecodePhones, int numAlignPhones,
+                           boolean isMale, String speed) {
+    return refresultDAO.addAnswer(this, userID, exerciseID, audioFile, durationInMillis, correct,
+        score, scoreJson,
+        alignScore, alignJson,
+        numDecodePhones, numAlignPhones,
+        isMale, speed);
   }
 
 
