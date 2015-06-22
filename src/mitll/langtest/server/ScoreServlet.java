@@ -854,7 +854,6 @@ public class ScoreServlet extends DatabaseServlet {
    * @param deviceType iPad,iPhone, or browser
    * @param device     id for device - helpful for iPads, etc.
    * @return score json
-   * @seex #getJsonForParts(javax.servlet.http.HttpServletRequest, String)
    * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
    */
   private JSONObject getJsonForAudioForUser(int reqid, String exerciseID, int user, Request request, String wavPath, File saveFile,
@@ -1051,15 +1050,15 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
+   * For both words and phones, return event text, start, end times, and score for event.
+   *
    * @param score
    * @return
-   * @seex #getJsonForWordAndAudio
-   * @seex #getJsonForWordAndAudioFlashcard
    * @see #getJsonForAudioForUser
    */
   private JSONObject getJsonForScore(PretestScore score) {
     JSONObject jsonObject = new JSONObject();
-    //jsonObject.put(SCORE, Float.isNaN(score.getHydecScore()) ? 0.0 : score.getHydecScore());
+
     jsonObject.put(SCORE, score.getHydecScore());
     for (Map.Entry<NetPronImageType, List<TranscriptSegment>> pair : score.getsTypeToEndTimes().entrySet()) {
       List<TranscriptSegment> value = pair.getValue();
@@ -1069,7 +1068,7 @@ public class ScoreServlet extends DatabaseServlet {
         JSONObject object = new JSONObject();
         object.put(EVENT, segment.getEvent());
         object.put(START, segment.getStart());
-        object.put(END, segment.getEnd());
+        object.put(END,   segment.getEnd());
         object.put(SCORE, segment.getScore());
 
         value1.add(object);
@@ -1084,7 +1083,6 @@ public class ScoreServlet extends DatabaseServlet {
    * Get a reference to the current database object, made in the main LangTestDatabaseImpl servlet
    *
    * @return
-   * @seex #getJsonForWordAndAudio(String, java.io.File)
    * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   private AudioFileHelper getAudioFileHelper() {
