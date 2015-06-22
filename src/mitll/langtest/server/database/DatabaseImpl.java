@@ -3,7 +3,9 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.ExerciseSorter;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
@@ -62,6 +64,9 @@ public class DatabaseImpl implements Database {
   private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
   private static final int LOG_THRESHOLD = 10;
   private static final String UNKNOWN = "unknown";
+  private final List<String> sites = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean", "Levantine",
+      "Mandarin",
+      "MSA", "Pashto1", "Pashto2", "Pashto3", "Spanish", "Sudanese", "Urdu");
 
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
@@ -82,12 +87,9 @@ public class DatabaseImpl implements Database {
   private MonitoringSupport monitoringSupport;
 
   private String lessonPlanFile;
-//  private final boolean isWordPairs;
   private boolean useFile;
-//  private String language = "";/
-//  private final boolean doImages;
   private final String configDir;
-//  private final String absConfigDir;
+
   private String mediaDir;
   private final ServerProperties serverProps;
   private final LogAndNotify logAndNotify;
@@ -95,20 +97,6 @@ public class DatabaseImpl implements Database {
   private JsonSupport jsonSupport;
 
   private final boolean addDefects = true;
-
-  /**
-   * Just for testing
-   *
-   * @param configDir
-   * @param pathHelper
-   * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
-   */
-/*  public DatabaseImpl(String configDir, String configFile, String dbName, PathHelper pathHelper, boolean mustAlreadyExist) {
-    this(configDir, "", dbName, new ServerProperties(configDir, configFile), pathHelper, mustAlreadyExist, null);
-    this.lessonPlanFile = serverProps.getLessonPlan();
-    this.useFile = lessonPlanFile != null;
-    addDefects = false;
-  }*/
 
   /**
    * @param configDir
@@ -128,12 +116,7 @@ public class DatabaseImpl implements Database {
     if (now - then > 300)
       logger.info("took " + (now - then) + " millis to open database for " + serverProps.getLanguage());
 
-//    absConfigDir = configDir;
     this.configDir = relativeConfigDir;
-//
-//    this.isWordPairs = serverProps.isWordPairs();
-//    this.doImages = serverProps.doImages();
-  //  this.language = serverProps.getLanguage();
     this.serverProps = serverProps;
     this.lessonPlanFile = serverProps.getLessonPlan();
     this.useFile = lessonPlanFile != null;
@@ -265,10 +248,6 @@ public class DatabaseImpl implements Database {
     }
   }
 
-/*  public Export getExport() {
-    return new Export(exerciseDAO, resultDAO, gradeDAO);
-  }*/
-
   MonitoringSupport getMonitoringSupport() {
     return new MonitoringSupport(userDAO, resultDAO, gradeDAO);
   }
@@ -325,10 +304,10 @@ public class DatabaseImpl implements Database {
       return Collections.emptyList();
     }
     //logger.debug("using lesson plan file " +lessonPlanFile + " at " + installPath);
-    boolean isExcel = lessonPlanFile.endsWith(".xlsx");
+//    boolean isExcel = lessonPlanFile.endsWith(".xlsx");
     makeDAO(lessonPlanFile, mediaDir, installPath);
 
-    List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();//getRawExercises(useFile, lessonPlanFile, isExcel);
+    List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
     if (rawExercises.isEmpty()) {
       logger.warn("no exercises for useFile = " + useFile + " and " + lessonPlanFile + " at " + installPath);
     }
@@ -610,6 +589,59 @@ public class DatabaseImpl implements Database {
   public void preloadExercises() {  getExercises(useFile, lessonPlanFile); }
 
   /**
+   * Check other sites to see if the user exists somewhere else, and if so go ahead and use that person
+   * here.
+   *
+   * @param login
+   * @param passwordH
+   * @return
+   * @see mitll.langtest.client.user.UserPassLogin#gotLogin
+   * @see mitll.langtest.client.user.UserPassLogin#makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
+   */
+  public User userExists(HttpServletRequest request,String login, String passwordH) {
+    UserDAO userDAO = getUserDAO();
+    User user = userDAO.getUser(login, passwordH);
+
+    if (user == null && !passwordH.isEmpty()) {
+      logger.debug("userExists : checking '" + login + "'");
+
+      for (String site : sites) {
+        String url = "https://np.ll.mit.edu/npfClassroom" + site.replaceAll("Mandarin", "CM") + "/scoreServlet";
+        String json = new HTTPClient("", 0).readFromGET(url + "?hasUser=" + login + "&passwordH=" + passwordH);
+
+//        logger.info("asking " + site + " got '" + json + "'");
+        if (!json.isEmpty()) {
+          try {
+            JSONObject jsonObject = JSONObject.fromObject(json);
+            Object o = jsonObject.get(ScoreServlet.USERID);
+            Object pc = jsonObject.get(ScoreServlet.PASSWORD_CORRECT);
+
+            if (!o.toString().equals("-1")) {
+              logger.info(site + " : found user " + o);
+
+              if (pc.toString().equals("true")) {
+                logger.info("\tmatching password for " + site);
+
+                String ip = getIPInfo(request);
+                Object emailH = jsonObject.get(ScoreServlet.EMAIL_H);
+                Object kind   = jsonObject.get(ScoreServlet.KIND);
+                User.Kind realKind = kind == null ? User.Kind.STUDENT : User.Kind.valueOf(kind.toString());
+
+                user = addUser(login, passwordH, emailH.toString(), "browser", ip, realKind, true);
+                break;
+              }
+            }
+          } catch (Exception e) {
+            logger.error("Got " + e, e);
+          }
+        }
+      }
+    }
+
+    return user;
+  }
+
+  /**
    *
    * @param userID
    * @param passwordH
@@ -620,8 +652,12 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.ScoreServlet#doPost
    */
   public User addUser(String userID, String passwordH, String emailH, String deviceType, String device) {
-    User.Kind kind = User.Kind.STUDENT;
     boolean isMale = true;
+    User.Kind kind = User.Kind.STUDENT;
+    return addUser(userID, passwordH, emailH, deviceType, device, kind, isMale);
+  }
+
+  public User addUser(String userID, String passwordH, String emailH, String deviceType, String device, User.Kind kind, boolean isMale) {
     int age = 89;
     String dialect = "unk";
     return addUser(userID, passwordH, emailH, deviceType, device, kind, isMale, age, dialect);
@@ -661,7 +697,7 @@ public class DatabaseImpl implements Database {
   /**
    * @param user
    * @return
-   * @see mitll.langtest.server.database.ImportCourseExamples#copyUser(DatabaseImpl, java.util.Map, java.util.Map, long)
+   * @see mitll.langtest.server.database.ImportCourseExamples#copyUser
    */
   public long addUser(User user) {
     long l;
