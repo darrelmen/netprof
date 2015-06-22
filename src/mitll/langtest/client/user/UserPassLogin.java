@@ -1,10 +1,6 @@
 package mitll.langtest.client.user;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.*;
-import com.github.gwtbootstrap.client.ui.Image;
-import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
@@ -15,16 +11,28 @@ import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.DecoratedPopupPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.client.custom.HidePopupTextBox;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
@@ -32,6 +40,7 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
+import java.util.Arrays;
 import java.util.logging.Logger;
 
 /**
@@ -182,6 +191,7 @@ public class UserPassLogin extends UserDialog {
     container.add(leftAndRight);
     getLeftIntro(leftAndRight);
     getRightLogin(leftAndRight);
+    leftAndRight.add(getLinksToSites());
     return container;
   }
 
@@ -197,6 +207,18 @@ public class UserPassLogin extends UserDialog {
     rightDiv.add(populateSignInForm(getSignInForm()));
     rightDiv.add(getSignUpForm());
   }
+
+  private Panel getLinksToSites() {
+    Panel hp = new HorizontalPanel();
+    hp.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
+    for (String site : Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean", "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Spanish", "Sudanese", "Urdu")) {
+      Anchor w = new Anchor(site, "https://np.ll.mit.edu/npfClassroom" + site.replaceAll("Mandarin", "CM"));
+      w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
+      hp.add(w);
+    }
+    return hp;
+  }
+
 
   /**
    *
@@ -362,7 +384,7 @@ public class UserPassLogin extends UserDialog {
           markErrorBlur(user, ENTER_A_USER_NAME);
           return;
         }
-        final HidePopupTextBox emailEntry = new HidePopupTextBox();
+        final TextBox emailEntry = new TextBox();
         resetEmailPopup = new DecoratedPopupPanel(true);
         sendEmail = new Button(SEND);
         sendEmail.setType(ButtonType.PRIMARY);
@@ -433,7 +455,7 @@ public class UserPassLogin extends UserDialog {
     forgotUsername.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        final HidePopupTextBox emailEntry = new HidePopupTextBox();
+        final TextBox emailEntry = new TextBox();
         sendUsernamePopup = new DecoratedPopupPanel(true);
         sendUsernamePopup.setAutoHideEnabled(true);
         sendUsernameEmail = new Button(SEND);
