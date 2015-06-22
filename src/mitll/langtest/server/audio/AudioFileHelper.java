@@ -474,7 +474,7 @@ public class AudioFileHelper implements CollationSort {
     JSONObject jsonObject = new JSONObject();
     if (pretestScore != null) {
       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getsTypeToEndTimes();
-      List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
+      List<TranscriptSegment> words  = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
       List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
       if (words != null) {
         int windex = 0;
