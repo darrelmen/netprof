@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class UserDAO extends DAO {
@@ -34,17 +35,18 @@ public class UserDAO extends DAO {
   private static final String RESET_PASSWORD_KEY = "resetPasswordKey";
   private static final String ENABLED_REQ_KEY = "enabledReqKey";
   private static final String NATIVE_LANG = "nativeLang";
-  public static final String UNKNOWN = "unknown";
+  private static final String UNKNOWN = "unknown";
   private String language;
   private long defectDetector;
-private boolean enableAllUsers;
+  private boolean enableAllUsers;
 
   private static final String ID = "id";
-  public static final String AGE = "age";
-  public static final String GENDER = "gender";
-  public static final String EXPERIENCE = "experience";
-  public static final String IPADDR = "ipaddr";
-  public static final String DIALECT = "dialect";
+  private static final String AGE = "age";
+  private static final String GENDER = "gender";
+  private static final String EXPERIENCE = "experience";
+  private static final String IPADDR = "ipaddr";
+  private static final String DIALECT = "dialect";
+  private static final String TIMESTAMP = "timestamp";
   /**
    * For spreadsheet download
    */
@@ -58,7 +60,7 @@ private boolean enableAllUsers;
       "items complete?",
       "num recordings", "rate(sec)",
       IPADDR,
-      "timestamp",
+      TIMESTAMP,
       KIND,
       PASS,
       EMAIL,
@@ -432,7 +434,8 @@ private boolean enableAllUsers;
           "nativeLang VARCHAR, " +
           "dialect VARCHAR, " +
           USER_ID + " VARCHAR, " +
-          "timestamp TIMESTAMP AS CURRENT_TIMESTAMP, " +
+          TIMESTAMP +
+          " TIMESTAMP AS CURRENT_TIMESTAMP, " +
           "enabled BOOLEAN, " +
           RESET_PASSWORD_KEY + " VARCHAR, " +
           ENABLED_REQ_KEY + " VARCHAR, " +
@@ -450,12 +453,12 @@ private boolean enableAllUsers;
 
       Set<String> expected = new HashSet<String>();
       expected.addAll(Arrays.asList(ID, AGE, GENDER, EXPERIENCE,
-          IPADDR, "nativelang", DIALECT, USER_ID.toLowerCase(), "timestamp", ENABLED));
+          IPADDR, "nativelang", DIALECT, USER_ID.toLowerCase(), TIMESTAMP, ENABLED));
       expected.removeAll(getColumns(USERS));
       if (!expected.isEmpty()) logger.info("adding columns for " + expected);
       for (String missing : expected) {
-        if (missing.equalsIgnoreCase("timestamp")) {
-          addColumn(connection, "timestamp", "TIMESTAMP AS CURRENT_TIMESTAMP");
+        if (missing.equalsIgnoreCase(TIMESTAMP)) {
+          addColumn(connection, TIMESTAMP, "TIMESTAMP AS CURRENT_TIMESTAMP");
         }
         if (missing.equalsIgnoreCase(ENABLED)) {
           addColumn(connection, ENABLED, "BOOLEAN");
@@ -463,7 +466,8 @@ private boolean enableAllUsers;
       }
       Collection<String> columns = getColumns(USERS);
 
-      for (String col : new HashSet<String>(Arrays.asList(NATIVE_LANG, DIALECT, USER_ID, PERMISSIONS, KIND, PASS, EMAIL, DEVICE, ENABLED_REQ_KEY, RESET_PASSWORD_KEY))) {
+      for (String col : new HashSet<String>(Arrays.asList(NATIVE_LANG, DIALECT, USER_ID, PERMISSIONS, KIND, PASS, EMAIL,
+          DEVICE, ENABLED_REQ_KEY, RESET_PASSWORD_KEY))) {
         if (!columns.contains(col.toLowerCase())) {
           addVarcharColumn(connection, col);
         }
@@ -532,10 +536,10 @@ private boolean enableAllUsers;
     return getUserWhere(-1, sql);
   }
 
-  public boolean isMale(long userid) {
+/*  public boolean isMale(long userid) {
     User userWhere = getUserWhere(userid);
     return userWhere == null || userWhere.isMale();
-  }
+  }*/
 
   /**
    * @param userid
@@ -644,7 +648,8 @@ private boolean enableAllUsers;
           email,
           device,
           resetKey,
-          "");
+          "",
+          rs.getTimestamp(TIMESTAMP).getTime());
 
       users.add(newUser);
 
@@ -729,7 +734,9 @@ private boolean enableAllUsers;
 
       Cell cell = row.createCell(j++);
       try {
-        cell.setCellValue(user.getTimestamp());
+        SimpleDateFormat sdf = new SimpleDateFormat();
+        String format = sdf.format(new Date(user.getTimestampMillis()));
+        cell.setCellValue(format);
       } catch (Exception e) {
         cell.setCellValue("Unknown");
       }
