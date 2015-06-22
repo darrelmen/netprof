@@ -33,6 +33,13 @@ public class User extends MiniUser {
   private long timestamp;
   private Collection<Permission> permissions;
 
+  public boolean isTeacher() {
+    return getUserKind().equals(Kind.TEACHER);
+  }
+  public boolean isCD() {
+    return getUserKind().equals(Kind.CONTENT_DEVELOPER);
+  }
+
   public enum Kind implements IsSerializable { UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ANONYMOUS }
   public enum Permission implements IsSerializable { QUALITY_CONTROL, RECORD_AUDIO }
 
