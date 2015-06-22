@@ -432,11 +432,11 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 		TreeMap<String, Float> wordEvents = new TreeMap<String, Float>();
 		eventScores.put(words1, wordEvents);
 		for (int i = 0; i < words.size(); i++) {
-      JSONObject word = words.getJSONObject(i);
-      String w = word.getString(w1);
-      String s = word.getString("s");
-      wordEvents.put(w,Float.parseFloat(s));
-    }
+			JSONObject word = words.getJSONObject(i);
+			String w = word.getString(w1);
+			String s = word.getString("s");
+			wordEvents.put(w, Float.parseFloat(s));
+		}
 	}
 
 	/**
