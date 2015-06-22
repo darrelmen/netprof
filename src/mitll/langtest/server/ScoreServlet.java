@@ -49,8 +49,8 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String EXISTING_USER_NAME = "ExistingUserName";
   private static final String USER = "user";
   private static final String PASSWORD_H = "passwordH";
-  private static final String EMAIL_H = "emailH";
-  private static final String USERID = "userid";
+  public static final String EMAIL_H = "emailH";
+  public static final String USERID = "userid";
   private static final String DEVICE_TYPE = "deviceType";
   private static final String DEVICE = "device";
   private static final String EVENT = "event";
@@ -59,7 +59,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final long REFRESH_CONTENT_INTERVAL = 12 * 60 * 60 * 1000l;
   private static final String HAS_RESET = "hasReset";
   private static final String TOKEN = "token";
-  private static final String PASSWORD_CORRECT = "passwordCorrect";
+  public static final String PASSWORD_CORRECT = "passwordCorrect";
   private static final String PASSWORD_EMAIL_SENT = "PASSWORD_EMAIL_SENT";
   private static final String NOT_VALID = "NOT_VALID";
   private static final String IS_CORRECT = "isCorrect";
@@ -80,6 +80,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String CONTEXT = "context";
   private static final String WIDGET = "widget";
   private static final String CHILDREN = "children";
+  public static final String KIND = "kind";
 
   private LoadTesting loadTesting;
 
@@ -347,19 +348,31 @@ public class ScoreServlet extends DatabaseServlet {
     return toReturn;
   }
 
+  /**
+   * Return enough information so we could create a new user from the json.
+   * @see DatabaseImpl#
+   * @param toReturn
+   * @param split1
+   */
   private void gotHasUser(JSONObject toReturn, String[] split1) {
     String first = split1[0];
     String user = first.split("=")[1];
 
     String second = split1[1];
-    String passwordH = second.split("=")[1];
+    String[] split = second.split("=");
+    String passwordH = split.length > 1 ? split[1] : "";
 
     User userFound = db.getUserDAO().getUserByID(user);
 
-    logger.debug("hasUser " + user + " pass " + passwordH + " -> " + userFound);
-
     Boolean noUserWithID = userFound == null;
+
+    if (!noUserWithID) {
+      logger.debug("hasUser '" + user + "' pass '" + passwordH + "' -> " + userFound);
+    }
+
     toReturn.put(USERID,    noUserWithID ? -1 : userFound.getId());
+    toReturn.put(EMAIL_H,   noUserWithID ? -1 : userFound.getEmailHash());
+    toReturn.put(KIND,      noUserWithID ? -1 : userFound.getUserKind().toString());
     toReturn.put(HAS_RESET, noUserWithID ? -1 : userFound.hasResetKey());
     toReturn.put(TOKEN,     noUserWithID ? "" : userFound.getResetKey());
     toReturn.put(PASSWORD_CORRECT,
@@ -576,26 +589,34 @@ public class ScoreServlet extends DatabaseServlet {
         String gender = request.getHeader(GENDER);
         String dialect = request.getHeader(DIALECT);
         String emailH = request.getHeader(EMAIL_H);
+        //String kind = request.getHeader("kind");
+        logger.debug("addUser : Request " + requestType + " for " + deviceType + " user " + user +
+            " adding " + gender + //" " + kind +
+            " age " + age + " dialect " + dialect);
 
-        logger.debug("addUser : Request " + requestType + " for " + deviceType + " user " + user + " adding " + gender + " age " + age + " dialect " + dialect);
         User user1 = null;
-        if (age != null && gender != null && dialect != null) {
-          try {
-            int age1 = Integer.parseInt(age);
-            user1 = db.addUser(user, passwordH, emailH, deviceType, device, User.Kind.CONTENT_DEVELOPER, gender.equalsIgnoreCase("male"), age1, dialect);
-          } catch (NumberFormatException e) {
-            logger.warn("couldn't parse age " + age);
-            jsonObject.put(ERROR, "bad age");
+//        if (kind != null) {
+//          User.Kind kind1 = User.Kind.valueOf(kind);
+//          user1 = db.addUser(user, passwordH, emailH, deviceType, device, kind1, gender.equalsIgnoreCase("male"));
+//        } else {
+          if (age != null && gender != null && dialect != null) {
+            try {
+              int age1 = Integer.parseInt(age);
+              user1 = db.addUser(user, passwordH, emailH, deviceType, device, User.Kind.CONTENT_DEVELOPER, gender.equalsIgnoreCase("male"), age1, dialect);
+            } catch (NumberFormatException e) {
+              logger.warn("couldn't parse age " + age);
+              jsonObject.put(ERROR, "bad age");
+            }
+          } else {
+            user1 = db.addUser(user, passwordH, emailH, deviceType, device);
           }
-        } else {
-          user1 = db.addUser(user, passwordH, emailH, deviceType, device);
-        }
-
+        //}
         if (user1 == null) { // how could this happen?
           jsonObject.put(EXISTING_USER_NAME, "");
         } else {
           jsonObject.put(USERID, user1.getId());
         }
+
       } else {
         jsonObject.put(EXISTING_USER_NAME, "");
       }
