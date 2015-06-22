@@ -59,6 +59,11 @@ import java.util.logging.Logger;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private Logger logger = Logger.getLogger("LangTest");
 
+  /**
+   * @see
+   */
+  private static final int LEFT_LIST_WIDTH = 267;
+
   private static final String UNKNOWN = "unknown";
   public static final String LANGTEST_IMAGES = "langtest/images/";
   private static final String DIVIDER = "|";
@@ -345,6 +350,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       w.getElement().setId("status");
       verticalContainer.add(w);
     }*/
+    verticalContainer.add(getLinksToSites());
+
+  }
+
+  private Panel getLinksToSites() {
+    Panel hp = new HorizontalPanel();
+    hp.getElement().getStyle().setMarginLeft(LEFT_LIST_WIDTH, Style.Unit.PX);
+    for (String site : Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean", "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Spanish", "Sudanese", "Urdu")) {
+      Anchor w = new Anchor(site, "https://np.ll.mit.edu/npfClassroom" + site.replaceAll("Mandarin", "CM"));
+      w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
+      hp.add(w);
+    }
+    return hp;
   }
 
   /**
