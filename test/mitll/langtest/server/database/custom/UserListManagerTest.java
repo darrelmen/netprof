@@ -31,9 +31,9 @@ import static org.junit.Assert.*;
  * Created by GO22670 on 1/30/14.
  */
 public class UserListManagerTest {
-  public static final String CHANGED = "changed";
-  public static final String ENGLISH = "english";
-  private static Logger logger = Logger.getLogger(UserListManagerTest.class);
+  private static final String CHANGED = "changed";
+  private static final String ENGLISH = "english";
+  private static final Logger logger = Logger.getLogger(UserListManagerTest.class);
   private static DatabaseImpl database;
   private static String dbName;
 
@@ -42,7 +42,7 @@ public class UserListManagerTest {
     logger.debug("setup called");
 
     String config = "spanish";//"mandarin";
-    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "appen.properties");
+    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParent();
     logger.debug("config dir " + parent);
     logger.debug("config     " + file.getName());
@@ -55,7 +55,8 @@ public class UserListManagerTest {
     List<CommonExercise> exercises = database.getExercises();
   }
 
-  static AudioFileHelper audioFileHelper;
+  private static AudioFileHelper audioFileHelper;
+/*
   private static AudioFileHelper getAudioFileHelper(PathHelper pathHelper) {
     if (audioFileHelper == null) {
       ServerProperties serverProps = database.getServerProps();
@@ -63,11 +64,12 @@ public class UserListManagerTest {
     }
     return audioFileHelper;
   }
+*/
 
   @Test
   public void testReport() {
-    Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
-    typeToValues.put("Lesson", Arrays.asList("1-1"));
+   // Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
+  //  typeToValues.put("Lesson", Arrays.asList("1-1"));
     database.doReport(new PathHelper("war"));
   }
 
@@ -131,13 +133,14 @@ public class UserListManagerTest {
     Map<String, Integer> monthToCount = new TreeMap<String, Integer>();
     Map<Integer, Integer> weekToCount = new TreeMap<Integer, Integer>();
     for (User user : users) {
-      try {
-        if (user.getTimestamp().isEmpty()) continue;
-        Date parse = simpleDateFormat2.parse(user.getTimestamp());
-        if (parse.getTime() > january1st.getTime()) {
+      //try {
+       // if (user.getTimestamp().isEmpty()) continue;
+       // Date parse = simpleDateFormat2.parse(user.getTimestamp());
+      long created = user.getTimestampMillis();
+        if (created > january1st.getTime()) {
           ytd++;
 
-          calendar.setTime(parse);
+          calendar.setTimeInMillis(created);
           int i = calendar.get(Calendar.MONTH);
           String month1 = getMonth(i);
           Integer integer = monthToCount.get(month1);
@@ -148,11 +151,11 @@ public class UserListManagerTest {
 
           weekToCount.put(w, (integer2 == null) ? 1 : integer2 + 1);
         } else {
-          logger.debug("NO time " + user.getTimestamp() + " " + parse);
+         // logger.debug("NO time " + user.getTimestamp() + " " + parse);
         }
-      } catch (ParseException e) {
-        e.printStackTrace();
-      }
+     /// } catch (ParseException e) {
+     //   e.printStackTrace();
+     // }
     }
     logger.debug("ytd " + ytd);
     logger.debug("month " + monthToCount);
@@ -166,15 +169,14 @@ public class UserListManagerTest {
   private void getResults() {
     Calendar calendar = new GregorianCalendar();
     int year = calendar.get(Calendar.YEAR);
-    logger.debug("year " + year);
+   // logger.debug("year " + year);
     calendar.set(Calendar.YEAR, year);
     calendar.set(Calendar.DAY_OF_YEAR, 1);
     Date january1st = calendar.getTime();
-    logger.debug("jan first " + january1st);
+  //  logger.debug("jan first " + january1st);
 
     int ytd = 0;
 
- //   List<Result> results = ;
     Map<String, Integer> monthToCount = new TreeMap<String, Integer>();
     Map<Integer, Integer> weekToCount = new TreeMap<Integer, Integer>();
     for (Result result : database.getResultDAO().getResults()) {
@@ -557,7 +559,7 @@ public class UserListManagerTest {
     assertTrue(next.getEnglish().equals(CHANGED));
   }
 
-  public UserExercise addAndDelete(User owner, UserListManager userListManager, long listid, UserList testList) {
+  private UserExercise addAndDelete(User owner, UserListManager userListManager, long listid, UserList testList) {
     UserExercise english = addExercise(owner, userListManager, listid, testList);
 
     boolean b = userListManager.deleteItemFromList(listid, english.getID(), new ArrayList<String>());
@@ -565,7 +567,7 @@ public class UserListManagerTest {
     return english;
   }
 
-  public UserExercise addExercise(User owner, UserListManager userListManager, long listid, UserList testList) {
+  private UserExercise addExercise(User owner, UserListManager userListManager, long listid, UserList testList) {
     UserExercise english = createNewItem(owner.getId());
     assertTrue(!english.getTooltip().isEmpty());
     userListManager.reallyCreateNewItem(listid, english, "");
