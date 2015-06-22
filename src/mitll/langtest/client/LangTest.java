@@ -800,7 +800,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     if (userID > -1) {
       flashcard.setCogVisible(true);
-      flashcard.setVisibleAdmin(user.isAdmin() || props.isAdminView());
+      flashcard.setVisibleAdmin(user.isAdmin() || props.isAdminView() || user.isTeacher() || user.isCD());
     }
   }
 
