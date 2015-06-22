@@ -50,7 +50,7 @@ public class UserPassLogin extends UserDialog {
   private final Logger logger = Logger.getLogger("UserPassLogin");
   private static final String CLASSROOM = "NetProF";
 
-//  private static final boolean CHECK_AGE = false;
+  //  private static final boolean CHECK_AGE = false;
   private static final String WAIT_FOR_APPROVAL = "Wait for approval";
   private static final String YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL = "You will get an approval message by email.";
 
@@ -122,7 +122,7 @@ public class UserPassLogin extends UserDialog {
    */
   public UserPassLogin(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager,
                        EventRegistration eventRegistration) {
-    super(service,props);
+    super(service, props);
     keyStorage = new KeyStorage(props.getLanguage(), 1000000);
 
     checkWelcome();
@@ -160,24 +160,26 @@ public class UserPassLogin extends UserDialog {
     Modal modal = new ModalInfoDialog().getModal("Welcome to " + CLASSROOM + "!",
         //"<h4>" + CLASSROOM + " has been updated.</h4>" +
         getLoginInfo(), null, new HiddenHandler() {
-      @Override
-      public void onHidden(HiddenEvent hiddenEvent) {
-        setFocusOnUserID();
-      }
-    });
+          @Override
+          public void onHidden(HiddenEvent hiddenEvent) {
+            setFocusOnUserID();
+          }
+        });
     modal.setMaxHeigth((600) + "px");
     modal.show();
   }
 
   private void showWelcome2() {
-    new ModalInfoDialog("Login options",    getLoginInfo());
+    new ModalInfoDialog("Login options", getLoginInfo());
   }
 
-  private String getLoginInfo() { return props.getHelpMessage(); }
+  private String getLoginInfo() {
+    return props.getHelpMessage();
+  }
 
   /**
-   * @see mitll.langtest.client.LangTest#showLogin()
    * @return
+   * @see mitll.langtest.client.LangTest#showLogin()
    */
   public Panel getContent() {
     Panel container = new DivWidget();
@@ -221,7 +223,6 @@ public class UserPassLogin extends UserDialog {
 
 
   /**
-   *
    * @param signInForm
    * @return
    * @see #getRightLogin(com.google.gwt.user.client.ui.Panel)
@@ -310,7 +311,7 @@ public class UserPassLogin extends UserDialog {
         } else {
           String value = password.box.getValue();
           if (!value.isEmpty() && value.length() < MIN_PASSWORD) {
-            markErrorBlur(password, value.isEmpty() ? PLEASE_ENTER_YOUR_PASSWORD : BAD_PASSWORD);
+            markErrorBlur(password, BAD_PASSWORD);
           } else {
             gotLogin(userID, value, value.isEmpty());
           }
@@ -327,6 +328,12 @@ public class UserPassLogin extends UserDialog {
     return signIn;
   }
 
+  /**
+   * If there's an existing user without a password, copy their info to the sign up box.
+   *
+   * @param fieldset
+   * @see #populateSignInForm(Form)
+   */
   private void makeSignInUserName(Fieldset fieldset) {
     user = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, USERNAME);
     user.box.addStyleName("topMargin");
@@ -346,8 +353,9 @@ public class UserPassLogin extends UserDialog {
       @Override
       public void onBlur(BlurEvent event) {
         if (!user.getText().isEmpty()) {
-          eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "left username field '" + user.getText()+ "'");
+          eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "left username field '" + user.getText() + "'");
 
+          logger.info("checking makeSignInUserName " + user.getText());
           service.userExists(user.getText(), "", new AsyncCallback<User>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -356,7 +364,7 @@ public class UserPassLogin extends UserDialog {
 
             @Override
             public void onSuccess(User result) {
-       //       System.out.println("makeSignInUserName : for " + user.getText() + " got back " + result);
+              //       System.out.println("makeSignInUserName : for " + user.getText() + " got back " + result);
               if (result != null) {
                 String emailHash = result.getEmailHash();
                 String passwordHash = result.getPasswordHash();
@@ -369,7 +377,8 @@ public class UserPassLogin extends UserDialog {
             }
           });
         }
-      }});
+      }
+    });
   }
 
   private DecoratedPopupPanel resetEmailPopup;
@@ -447,8 +456,8 @@ public class UserPassLogin extends UserDialog {
   private Button sendUsernameEmail;
 
   /**
-   * @see #populateSignInForm(com.github.gwtbootstrap.client.ui.Form)
    * @return
+   * @see #populateSignInForm(com.github.gwtbootstrap.client.ui.Form)
    */
   private Anchor getForgotUser() {
     final Anchor forgotUsername = new Anchor(FORGOT_USERNAME);
@@ -483,9 +492,9 @@ public class UserPassLogin extends UserDialog {
                 if (!isValid) {
                   markErrorBlur(sendUsernameEmail, "Check your spelling", "No user has this email.", Placement.LEFT);
                   sendUsernameEmail.setEnabled(true);
-                  eventRegistration.logEvent(sendUsernameEmail,"send username link","N/A","invalid email request ");
+                  eventRegistration.logEvent(sendUsernameEmail, "send username link", "N/A", "invalid email request ");
                 } else {
-                  eventRegistration.logEvent(sendUsernameEmail,"send username link","N/A","valid email request ");
+                  eventRegistration.logEvent(sendUsernameEmail, "send username link", "N/A", "valid email request ");
 
                   setupPopover(sendUsernameEmail, CHECK_EMAIL, PLEASE_CHECK_YOUR_EMAIL, Placement.LEFT, EMAIL_POPUP_DELAY, new MyPopover() {
                     boolean isFirst = true;
@@ -524,7 +533,6 @@ public class UserPassLogin extends UserDialog {
   }
 
   /**
-   *
    * @param commentPopup
    * @param commentEntryText
    * @param okButton
@@ -544,7 +552,9 @@ public class UserPassLogin extends UserDialog {
     commentPopup.add(vp);
   }
 
-  private void setFocusOnUserID() { setFocusOn(user.box); }
+  private void setFocusOnUserID() {
+    setFocusOn(user.box);
+  }
 
   private void setFocusOn(final FocusWidget widget) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -581,7 +591,7 @@ public class UserPassLogin extends UserDialog {
     fieldset.add(getRolesChoices());
 
     SafeHtmlBuilder builder = new SafeHtmlBuilder();
-      builder.appendHtmlConstant(RECORD_REFERENCE_AUDIO);
+    builder.appendHtmlConstant(RECORD_REFERENCE_AUDIO);
     contentDevCheckbox = new CheckBox(builder.toSafeHtml());
 
     contentDevCheckbox.setVisible(false);
@@ -715,14 +725,14 @@ public class UserPassLogin extends UserDialog {
       @Override
       public void onBlur(BlurEvent event) {
         if (!isValidAge(registrationInfo.getAgeEntryGroup())) {
-        //  registrationInfo.getAgeEntryGroup().markError(AGE_ERR_MSG);
+          //  registrationInfo.getAgeEntryGroup().markError(AGE_ERR_MSG);
           markErrorBlur(registrationInfo.getAgeEntryGroup().box, AGE_ERR_MSG, Placement.TOP);
         }
       }
     });
 
     //if (!CHECK_AGE)
-      registrationInfo.hideAge();
+    registrationInfo.hideAge();
     registrationInfo.getDialectGroup().box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
@@ -761,14 +771,14 @@ public class UserPassLogin extends UserDialog {
       public void onClick(ClickEvent event) {
         //  System.out.println("signUp got click!");
         if (userBox.getValue().length() < MIN_LENGTH_USER_ID) {
-          eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "short user id '" +userBox.getValue()+ "'");
+          eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "short user id '" + userBox.getValue() + "'");
           markErrorBlur(signUpUser, PLEASE_ENTER_A_LONGER_USER_ID);
         } else if (signUpEmail.box.getValue().isEmpty()) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "short email");
           markErrorBlur(signUpEmail, "Please enter your email.");
-      //  } else if (signUpEmail.box.getValue().length() < MIN_EMAIL) {
-     //     eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "short email");
-     //     markErrorBlur(signUpEmail, "Please enter your email.");
+          //  } else if (signUpEmail.box.getValue().length() < MIN_EMAIL) {
+          //     eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "short email");
+          //     markErrorBlur(signUpEmail, "Please enter your email.");
         } else if (!isValidEmail(signUpEmail.box.getValue())) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "invalid email");
           markErrorBlur(signUpEmail, VALID_EMAIL);
@@ -782,9 +792,9 @@ public class UserPassLogin extends UserDialog {
         } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && !registrationInfo.checkValidGender()) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't check gender");
 //        } else if (CHECK_AGE && selectedRole == User.Kind.CONTENT_DEVELOPER && !isValidAge(registrationInfo.getAgeEntryGroup())) {
- //         eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in age ");
- //         markErrorBlur(registrationInfo.getAgeEntryGroup().box, AGE_ERR_MSG,Placement.TOP);
-       //   registrationInfo.getAgeEntryGroup().markError(AGE_ERR_MSG);
+          //         eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in age ");
+          //         markErrorBlur(registrationInfo.getAgeEntryGroup().box, AGE_ERR_MSG,Placement.TOP);
+          //   registrationInfo.getAgeEntryGroup().markError(AGE_ERR_MSG);
 
         } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && registrationInfo.getDialectGroup().getText().isEmpty()) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in dialect ");
@@ -805,6 +815,7 @@ public class UserPassLogin extends UserDialog {
 
   /**
    * When the form is valid, make a new user or update an existing one.
+   *
    * @param user
    * @param password
    * @param email
@@ -812,11 +823,11 @@ public class UserPassLogin extends UserDialog {
    * @see #getSignUpButton(com.github.gwtbootstrap.client.ui.base.TextBoxBase, com.github.gwtbootstrap.client.ui.base.TextBoxBase)
    */
   private void gotSignUp(final String user, String password, String email, User.Kind kind) {
-    String passH  = Md5Hash.getHash(password);
+    String passH = Md5Hash.getHash(password);
     String emailH = Md5Hash.getHash(email);
 
     boolean isCD = kind == User.Kind.CONTENT_DEVELOPER;
-    String gender = isCD ? registrationInfo.isMale() ? MALE :"female" : MALE;
+    String gender = isCD ? registrationInfo.isMale() ? MALE : "female" : MALE;
     String age = isCD ? registrationInfo.getAgeEntryGroup().getText() : "";
     int age1 = isCD ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
     String dialect = isCD ? registrationInfo.getDialectGroup().getText() : "unk";
@@ -836,7 +847,7 @@ public class UserPassLogin extends UserDialog {
           @Override
           public void onSuccess(User result) {
             if (result == null) {
-              eventRegistration.logEvent(signUp, "signing up", "N/A", "Tried to sign up, but existing user (" +user+   ").");
+              eventRegistration.logEvent(signUp, "signing up", "N/A", "Tried to sign up, but existing user (" + user + ").");
               signUp.setEnabled(true);
               markErrorBlur(signUpUser, USER_EXISTS);
             } else {
@@ -864,7 +875,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   private String getSignUpEvent(User result) {
-    return "successful sign up as " + result.getUserID() + "/" + result.getId() + " as " +result.getUserKind();
+    return "successful sign up as " + result.getUserID() + "/" + result.getId() + " as " + result.getUserKind();
   }
 
   /**
@@ -878,7 +889,7 @@ public class UserPassLogin extends UserDialog {
     left.setWidth(LEFT_SIDE_WIDTH + "px");
     leftAndRight.add(left);
     int size = 1;
- //   int subSize = size + 2;
+    //   int subSize = size + 2;
     Heading w2 = new Heading(size, INITIAL_PROMPT);
     left.add(w2);
     w2.getElement().getStyle().setPaddingBottom(24, Style.Unit.PX);
@@ -937,7 +948,7 @@ public class UserPassLogin extends UserDialog {
    */
   private void gotLogin(final String user, final String pass, final boolean emptyPassword) {
     final String hashedPass = Md5Hash.getHash(pass);
-    //  System.out.println("gotLogin : user is '" +user + "' pass '" + pass +"' or " + hashedPass);
+    logger.info("gotLogin : user is '" + user + "' pass '" + pass + "' or '" + hashedPass + "'");
 
     signIn.setEnabled(false);
     service.userExists(user, hashedPass, new AsyncCallback<User>() {
@@ -952,7 +963,7 @@ public class UserPassLogin extends UserDialog {
         if (result == null) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "unknown user " + user);
 
-          logger.info("No user with that name '" +user + "' pass '" + pass+ "'" + emptyPassword);
+          logger.info("No user with that name '" + user + "' pass '" + pass + "'" + emptyPassword);
           markErrorBlur(password, emptyPassword ? PLEASE_ENTER_YOUR_PASSWORD : BAD_PASSWORD);
           signIn.setEnabled(true);
         } else {
@@ -966,10 +977,10 @@ public class UserPassLogin extends UserDialog {
   }
 
   /**
-   * @see #gotLogin
    * @param result
    * @param emptyPassword
    * @param hashedPass
+   * @see #gotLogin
    */
   private void foundExistingUser(User result, boolean emptyPassword, String hashedPass) {
     String user = result.getUserID();
@@ -1002,10 +1013,9 @@ public class UserPassLogin extends UserDialog {
         if (enteredPass.equals(MAGIC_PASS)) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "sign in as user '" + user + "'");
           storeUser(result);
-        }
-        else {
+        } else {
           logger.info("bad pass  " + passwordHash);
-        //  logger.info("admin " + Md5Hash.getHash("adm!n"));
+          //  logger.info("admin " + Md5Hash.getHash("adm!n"));
           eventRegistration.logEvent(signIn, "sign in", "N/A", "bad password");
 
           markErrorBlur(password, BAD_PASSWORD);
@@ -1040,9 +1050,9 @@ public class UserPassLogin extends UserDialog {
   }
 
   /**
+   * @param result
    * @see #foundExistingUser(mitll.langtest.shared.User, boolean, String)
    * @see #gotSignUp(String, String, String, mitll.langtest.shared.User.Kind)
-   * @param result
    */
   private void storeUser(User result) {
     //logger.info("UserPassLogin.storeUser - " + result);
