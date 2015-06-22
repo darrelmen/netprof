@@ -206,7 +206,7 @@ public class RefResultDAO extends DAO {
   }
 
   public Result getResult(String exid, String answer) {
-    String sql = "SELECT * FROM " + REFRESULT + " WHERE " + Database.EXID + "='" + exid + "' AND " + ANSWER + "='" + answer + "'";
+    String sql = "SELECT * FROM " + REFRESULT + " WHERE " + Database.EXID + "='" + exid + "' AND " + ANSWER + " like '%" + answer + "'";
     try {
       List<Result> resultsSQL = getResultsSQL(sql);
       if (resultsSQL.size() > 1) {
@@ -230,7 +230,7 @@ public class RefResultDAO extends DAO {
     PreparedStatement statement = connection.prepareStatement(sql);
 
     List<Result> resultsForQuery = getResultsForQuery(connection, statement);
-    logger.debug("running " + sql + " -> " +resultsForQuery.size() + " results");
+  //  logger.debug("running " + sql + " -> " +resultsForQuery.size() + " results");
     return resultsForQuery;
   }
 
