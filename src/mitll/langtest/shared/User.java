@@ -13,7 +13,7 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class User extends MiniUser {
-  public static final String NOT_SET = "NOT_SET";
+  private static final String NOT_SET = "NOT_SET";
   private int experience;
   private String ipaddr;
   private String  passwordHash;
@@ -30,10 +30,11 @@ public class User extends MiniUser {
   private String device;
   private String resetKey;
   private String cdKey;
+  private long timestamp;
   private Collection<Permission> permissions;
 
-  public static enum Kind implements IsSerializable { UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ANONYMOUS }
-  public static enum Permission implements IsSerializable { QUALITY_CONTROL, RECORD_AUDIO }
+  public enum Kind implements IsSerializable { UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ANONYMOUS }
+  public enum Permission implements IsSerializable { QUALITY_CONTROL, RECORD_AUDIO }
 
   public User() {} // for serialization
 
@@ -50,7 +51,8 @@ public class User extends MiniUser {
    */
   public User(long id, int age, int gender, int experience, String ipaddr, String password,
               boolean enabled, Collection<Permission> permissions) {
-     this(id,age,gender,experience,ipaddr,password, NOT_SET, NOT_SET, NOT_SET, enabled,false, permissions, Kind.STUDENT, "", "", "", "");
+    this(id, age, gender, experience, ipaddr, password, NOT_SET, NOT_SET, NOT_SET, enabled, false, permissions,
+        Kind.STUDENT, "", "", "", "", System.currentTimeMillis());
   }
 
   /**
@@ -70,10 +72,12 @@ public class User extends MiniUser {
    * @param device
    * @param resetPassKey
    * @param cdEnableKey
+   * @param timestamp
    */
   public User(long id, int age, int gender, int experience, String ipaddr, String passwordH,
               String nativeLang, String dialect, String userID, boolean enabled, boolean isAdmin,
-              Collection<Permission> permissions, Kind userKind, String emailHash, String device, String resetPassKey, String cdEnableKey) {
+              Collection<Permission> permissions, Kind userKind, String emailHash, String device, String resetPassKey,
+              String cdEnableKey, long timestamp) {
     super(id, age, gender, userID, isAdmin);
     this.experience = experience;
     this.ipaddr = ipaddr;
@@ -88,20 +92,23 @@ public class User extends MiniUser {
     this.device = device;
     this.resetKey = resetPassKey;
     this.cdKey = cdEnableKey;
+    this.timestamp = timestamp;
   }
 
   public Collection<Permission> getPermissions() {
     return permissions;
   }
 
-  public String getTimestamp() {
+/*  public String getTimestamp() {
 	  if (ipaddr == null) return "";
     if (ipaddr.contains("at ")) {
       int i = ipaddr.lastIndexOf("at ")+"at ".length();
       return ipaddr.substring(i);
     }
     else return "";
-  }
+  }*/
+
+  public long getTimestampMillis() { return timestamp; }
 
   /**
    * @see mitll.langtest.client.user.UserTable#getTable
@@ -173,7 +180,7 @@ public class User extends MiniUser {
     return enabled;
   }
 
-  public void setEnabled(boolean enabled) {
+  private void setEnabled(boolean enabled) {
     this.enabled = enabled;
   }
 
