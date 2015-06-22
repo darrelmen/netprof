@@ -23,15 +23,15 @@ public class RefResultDAO extends DAO {
   private static final Logger logger = Logger.getLogger(RefResultDAO.class);
 
   private static final String ID = "id";
-  public static final String USERID = "userid";
+  private static final String USERID = "userid";
   private static final String ANSWER = "answer";
-  public static final String SCORE_JSON = "scoreJson";
+  private static final String SCORE_JSON = "scoreJson";
 
-  public static final String REFRESULT = "refresult";
+  private static final String REFRESULT = "refresult";
 
-  static final String DURATION = "duration";
-  static final String CORRECT = "correct";
-  static final String PRON_SCORE = "pronscore";
+  private static final String DURATION = "duration";
+  private static final String CORRECT = "correct";
+  private static final String PRON_SCORE = "pronscore";
 
 //  private static final String YES = "Yes";
 //  private static final String NO = "No";
@@ -39,8 +39,8 @@ public class RefResultDAO extends DAO {
   private static final String ALIGNJSON = "ALIGNJSON";
   private static final String NUMDECODE_PHONES = "NUMDECODEPHONES";
   private static final String NUM_ALIGN_PHONES = "NUMALIGNPHONES";
-  public static final String MALE = "male";
-  public static final String SPEED = "speed";
+  private static final String MALE = "male";
+  private static final String SPEED = "speed";
   private final LogAndNotify logAndNotify;
   private final boolean dropTable;
 
@@ -312,7 +312,7 @@ public class RefResultDAO extends DAO {
     createTable(connection);
 
     Collection<String> columns = getColumns(REFRESULT);
-    logger.debug("for " + REFRESULT + " found " + columns + " and " + getNumResults());
+  //  logger.debug("for " + REFRESULT + " found " + columns + " and " + getNumResults());
     if (!columns.contains(ALIGNSCORE.toLowerCase())) {
       addVarchar(connection, REFRESULT, ALIGNSCORE);
       addVarchar(connection, REFRESULT, ALIGNJSON);
