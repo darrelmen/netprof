@@ -50,9 +50,16 @@ public class PagerTable {
     return vPanel;
   }
 
-  DateTimeFormat format = DateTimeFormat.getFormat("MMM dd h:mm:ss a z ''yy");
+  private final DateTimeFormat yformat = DateTimeFormat.getFormat("yy");
+  private final DateTimeFormat format = DateTimeFormat.getFormat("MM-dd-yy h:mm:ss a");
+  private final DateTimeFormat sformat = DateTimeFormat.getFormat("MM-dd h:mm:ss a");
+  private final String thisYear = yformat.format(new Date());
+
   protected SafeHtml getSafeHTMLForTimestamp(long timestamp) {
-    String noWrapContent = format.format(new Date(timestamp));
+    Date date = new Date(timestamp);
+    String sampleYear = yformat.format(date);
+    DateTimeFormat dtf = (sampleYear.equals(thisYear)) ? sformat : format;
+    String noWrapContent = dtf.format(date);
     return getNoWrapContent(noWrapContent);
   }
 
