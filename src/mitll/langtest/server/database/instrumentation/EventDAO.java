@@ -40,9 +40,9 @@ public class EventDAO extends DAO {
   private static final String HITID = "hitid";
   private static final String EXERCISEID = "exerciseid";
   private static final String EVENTS = "Events";
-  public static final String DEVICE = "device";
+  private static final String DEVICE = "device";
   private final UserDAO userDAO;
-  private LogAndNotify logAndNotify;
+  private final LogAndNotify logAndNotify;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
@@ -79,7 +79,7 @@ public class EventDAO extends DAO {
    * @param database
    * @throws java.sql.SQLException
    */
-  void createTable(Database database) throws SQLException {
+  private void createTable(Database database) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
       EVENT +
@@ -109,7 +109,7 @@ public class EventDAO extends DAO {
    *
    * @see mitll.langtest.server.database.DatabaseImpl#logEvent(String, String, String, String, long, String, String)
    */
-  public synchronized boolean add(Event event) throws SQLException {
+  public synchronized boolean add(Event event) {
     Connection connection = getConnection();
     boolean val = true;
     try {
@@ -169,7 +169,9 @@ public class EventDAO extends DAO {
       return getEvents("SELECT * from " + EVENT);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
-      logAndNotify.logAndNotifyServerException(ee);
+      if (logAndNotify != null) {
+        logAndNotify.logAndNotifyServerException(ee);
+      }
     }
     return Collections.emptyList();
   }
@@ -188,7 +190,7 @@ public class EventDAO extends DAO {
     }
   }
 
-  public List<Event> getAllForUserAndExercise(long userid, String exid) {
+  private List<Event> getAllForUserAndExercise(long userid, String exid) {
     try {
       String sql = "SELECT * from " + EVENT + " where " +
         WIDGETTYPE +
