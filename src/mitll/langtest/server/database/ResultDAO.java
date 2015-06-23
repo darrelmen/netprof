@@ -1200,6 +1200,31 @@ public class ResultDAO extends DAO {
     return userToResult;
   }
 
+  Map<Long, Map<String, Result>> getUserToResults2(String typeToUse, UserDAO userDAO) {
+    List<Result> results = getResults();
+    Map<Long, Map<String, Result>> userToResult = new HashMap<Long, Map<String, Result>>();
+
+    Map<Long, User> userMap = userDAO.getUserMap();
+
+    for (Result r : results) {
+      if (r.isValid() && r.getAudioType().equals(typeToUse)) {
+        User user = userMap.get(r.getUserid());
+        if (user != null && user.getExperience() == 240) {    // only natives!
+          Map<String, Result> results1 = userToResult.get(r.getUserid());
+          if (results1 == null)
+            userToResult.put(r.getUserid(), results1 = new HashMap<String, Result>());
+          String exerciseID = r.getExerciseID();
+          Result result = results1.get(exerciseID);
+          if (result == null || (r.getTimestamp() > result.getTimestamp())) {
+            results1.put(exerciseID, r);
+          }
+        }
+      }
+    }
+    return userToResult;
+  }
+
+
   /**
    *
    * @param typeOrder
