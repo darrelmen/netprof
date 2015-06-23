@@ -249,7 +249,7 @@ public class AudioFileHelper implements CollationSort {
 			AudioCheck.ValidityAndDur validity, boolean isValid,
 			String deviceType, String device) {
 		checkValidity(exerciseID, questionID, user, file, validity, isValid);
-		AudioAnswer answer = getAudioAnswer(exercise1, reqid, doFlashcard, wavPath, file, validity, isValid);
+		AudioAnswer answer = getAudioAnswer(exercise1, reqid, doFlashcard, wavPath, file, validity, isValid, true);
 
 		if (recordInResults) {
 			long then = System.currentTimeMillis();
@@ -275,23 +275,39 @@ public class AudioFileHelper implements CollationSort {
 	 * @param exercise
 	 * @param attribute
 	 */
-	public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute) {
-		if (asrScoring.checkLTS(exercise.getForeignLanguage())) {
-			String audioRef = attribute.getAudioRef();
-			if (!audioRef.contains("context=")) {
-				PretestScore asrScoreForAudio = getASRScoreForAudio(0, pathHelper.getAbsoluteFile(audioRef).getAbsolutePath(), exercise.getRefSentence(), 128, 128, false,
-						false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exercise.getID(), null);
+    public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute) {
+    if (asrScoring.checkLTS(exercise.getForeignLanguage())) {
+      String audioRef = attribute.getAudioRef();
+      if (!audioRef.contains("context=")) {
+        //logger.debug("doing alignment -- ");
 
-				JSONObject json = getJsonObject(asrScoreForAudio);
+        // Do alignment...
+        long then = System.currentTimeMillis();
+        PretestScore alignmentScore = getAlignmentScore(exercise, pathHelper.getAbsoluteFile(audioRef).getAbsolutePath());
+        long now = System.currentTimeMillis();
+        logger.debug("Took " + (now - then) + " to do alignment");
 
-				getRefAudioAnswerDecoding(exercise, (int) attribute.getUserid(), audioRef, pathHelper.getAbsoluteFile(audioRef), attribute.getDurationInMillis(),
-						asrScoreForAudio.getHydecScore(), json.toString(), numPhones(asrScoreForAudio), attribute.isMale(), attribute.isRegularSpeed() ? "reg" : "slow");
-			}
-		}
-		else {
-			logger.warn("skipping " +exercise.getID() + " since can't do decode/align b/c of LTS errors ");
-		}
-	}
+        //logger.debug("doing decoding -- ");
+        then = System.currentTimeMillis();
+
+        // Do decoding, and record alignment info we just got in the database ...
+
+        getRefAudioAnswerDecoding(exercise, (int) attribute.getUserid(), audioRef, pathHelper.getAbsoluteFile(audioRef),
+                                  attribute.getDurationInMillis(),
+
+                                  alignmentScore.getHydecScore(), getJsonObject(alignmentScore).toString(), numPhones(alignmentScore),
+
+                                  attribute.isMale(),
+                                  attribute.isRegularSpeed() ? "reg" : "slow");
+
+        now = System.currentTimeMillis();
+        logger.debug("Took " + (now - then) + " to do decoding");
+      }
+    } else {
+      logger.warn("skipping " + exercise.getID() + " since can't do decode/align b/c of LTS errors ");
+    }
+  }
+  
 
 	/**
 	 * Really helpful - could have annotation info always at hand, so don't have to wait for it in learn tab...
@@ -311,22 +327,22 @@ public class AudioFileHelper implements CollationSort {
 	private void getRefAudioAnswerDecoding(CommonExercise exercise1,
 																				 int user, String wavPath, File file, long duration, float alignScore, String alignJson, int numAlignPhones, boolean isMale, String speed) {
 		AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(AudioAnswer.Validity.OK, duration);
-		AudioAnswer answer = getAudioAnswer(exercise1, 1, true, wavPath, file, validity, true);
+		AudioAnswer decodeAnswer = getAudioAnswer(exercise1, 1, true, wavPath, file, validity, true, false);
 
 		long then = System.currentTimeMillis();
-		JSONObject json = getJson(answer);
+		JSONObject decodeJSON = getJson(decodeAnswer);
 		long now = System.currentTimeMillis();
 		if (now - then > 10) {
 			logger.debug("took " + (now - then) + " to convert answer to json");
 		}
 
 		db.addRefAnswer(user, exercise1.getID(), file.getPath(),
-				validity.durationInMillis, answer.isCorrect(), (float) answer.getScore(),
-				json.toString(), alignScore, alignJson, numPhones(answer.getPretestScore()), numAlignPhones, isMale, speed);
+				validity.durationInMillis, decodeAnswer.isCorrect(), (float) decodeAnswer.getScore(),
+				decodeJSON.toString(), alignScore, alignJson, numPhones(decodeAnswer.getPretestScore()), numAlignPhones, isMale, speed);
 
 		// TODO : add word and phone table for refs
 		//	recordWordAndPhoneInfo(answer, answerID);
-		logger.debug("getRefAudioAnswerDecoding answer " + answer);
+		logger.debug("getRefAudioAnswerDecoding answer " + decodeAnswer);
 	}
 
 	private void checkValidity(String exerciseID, int questionID, int user, File file, AudioCheck.ValidityAndDur validity,
@@ -368,7 +384,7 @@ public class AudioFileHelper implements CollationSort {
 			AudioCheck.ValidityAndDur validity, boolean isValid,
 			float score, String deviceType, String device) {
 		checkValidity(exerciseID, questionID, user, file, validity, isValid);
-		AudioAnswer answer = getAudioAnswer(exercise1, reqid, doFlashcard, wavPath, file, validity, isValid);
+		AudioAnswer answer = getAudioAnswer(exercise1, reqid, doFlashcard, wavPath, file, validity, isValid, true);
 
 		if (recordInResults) {
 			long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
@@ -392,13 +408,13 @@ public class AudioFileHelper implements CollationSort {
 	 * @return
 	 */
 	private AudioAnswer getAudioAnswer(CommonExercise exercise1, int reqid, boolean doFlashcard, String wavPath, File file,
-			AudioCheck.ValidityAndDur validity, boolean isValid) {
+                                           AudioCheck.ValidityAndDur validity, boolean isValid, boolean canUseCache) {
 		String url = pathHelper.ensureForwardSlashes(wavPath);
 
 		return (isValid && !serverProps.isNoModel()) ?
 				getAudioAnswer(
 						exercise1,
-						reqid, file, validity, url, doFlashcard) :
+						reqid, file, validity, url, doFlashcard, canUseCache) :
 							new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
 	}
 
@@ -580,7 +596,7 @@ public class AudioFileHelper implements CollationSort {
 	 * @return PretestScore for audio
 	 */
 	
-	public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences) {
+  public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache) {
 		String tmpDir = Files.createTempDir().getAbsolutePath();
 		makeASRScoring();
 		List<String> unk = new ArrayList<String>();
@@ -594,10 +610,10 @@ public class AudioFileHelper implements CollationSort {
 		//logger.debug("getASRScoreForAudio : vocab " + vocab + " from " + lmSentences);
 		if (isMacOrWin() || useOldSchoolServiceOnly) // we have lm sentences in the webservice version because we make the language model later on
 			return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, null, 128, 128, false, true, tmpDir,
-					serverProps.useScoreCache(), "", null);
+					canUseCache && serverProps.useScoreCache(), "", null);
 		else
 			return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, lmSentences, 128, 128, false, true, tmpDir,
-					serverProps.useScoreCache(), "", null);
+					canUseCache && serverProps.useScoreCache(), "", null);
 	}
 
 	/**
@@ -612,6 +628,10 @@ public class AudioFileHelper implements CollationSort {
 		return new SLFFile().createSimpleSLFFile(lmSentences, tmpDir, unknownModelBiasWeight); //serverProps.getUnknownModelBias()
 	}
 
+  private PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath) {
+    return getASRScoreForAudio(0, testAudioPath, exercise.getRefSentence(), 128, 128, false,
+                               false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exercise.getID(), null);
+  }
 	/**
 	 * For now, we don't use a ref audio file, since we aren't comparing against a ref audio file with the DTW/sv pathway.
 	 *
@@ -687,7 +707,7 @@ public class AudioFileHelper implements CollationSort {
 	 * @param answer
 	 */
 	public PretestScore getFlashcardAnswer(CommonExercise e, File audioFile, AudioAnswer answer) {
-		return this.autoCRT.getFlashcardAnswer(e, audioFile, answer, this.serverProps.getLanguage());
+          return this.autoCRT.getFlashcardAnswer(e, audioFile, answer, this.serverProps.getLanguage(), true);
 	}
 
 	private String removeSuffix(String audioFile) {
@@ -769,11 +789,12 @@ public class AudioFileHelper implements CollationSort {
 	 */
 	private AudioAnswer getAudioAnswer(CommonExercise exercise,
 			int reqid,
-			File file, AudioCheck.ValidityAndDur validity, String url, boolean doFlashcard) {
+                                           File file, AudioCheck.ValidityAndDur validity, String url, boolean doFlashcard,
+                                           boolean canUseCache) {
 		AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
 		if (doFlashcard) {
 			makeASRScoring();
-			PretestScore flashcardAnswer = autoCRT.getFlashcardAnswer(exercise, file, audioAnswer, serverProps.getLanguage());
+			PretestScore flashcardAnswer = autoCRT.getFlashcardAnswer(exercise, file, audioAnswer, serverProps.getLanguage(), canUseCache);
 			audioAnswer.setPretestScore(flashcardAnswer);
 			return audioAnswer;
 		}
@@ -801,8 +822,8 @@ public class AudioFileHelper implements CollationSort {
 	}
 
 	public static class ScoreAndAnswer {
-		public PretestScore score;
-		public AudioAnswer answer;
+		public final PretestScore score;
+		public final AudioAnswer answer;
 		public ScoreAndAnswer(PretestScore score, AudioAnswer answer) {
 			this.score = score;
 			this.answer = answer;
