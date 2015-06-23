@@ -519,7 +519,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 			cleaned = slfOut[1].replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("\\p{P}","").toLowerCase();
 		}
 
-		String hydraInput = tmpDir + "/:" + audioPath + ":" + hydraDict + ":" + smallLM + ":xxx,0," + end + ",[<s>;" + cleaned.replaceAll("\\p{Z}",";") + ";</s>]";
+		String hydraInput = tmpDir + "/:" + audioPath + ":" + hydraDict + ":" + smallLM + ":xxx,0," + end + ",[<s>;" + cleaned + ";</s>]";
 		long then = System.currentTimeMillis();
 		HTTPClient httpClient = new HTTPClient(ip, port);
 		String resultsStr = httpClient.sendAndReceive(hydraInput);
