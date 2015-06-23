@@ -9,6 +9,7 @@ import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.UserDAO;
@@ -26,6 +27,7 @@ import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
@@ -35,7 +37,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.CollationKey;
 import java.text.Collator;
@@ -970,14 +974,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	 *
 	 * @param testAudioFile audio file to score
 	 * @param lmSentences   to look for in the audio
+	 * @param canUseCache
 	 * @return PretestScore for audio
 	 * @see mitll.langtest.server.autocrt.AutoCRT#getFlashcardAnswer
 	 */
 	// JESS: this is entered for the flashcards (decoding)
-	public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences) {
+	public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache) {
 //		for(String sent : lmSentences)
 //			logger.debug("sent: " + sent);
-		return audioFileHelper.getASRScoreForAudio(testAudioFile, lmSentences);
+		return audioFileHelper.getASRScoreForAudio(testAudioFile, lmSentences, canUseCache);
 	}
 
 	// Users ---------------------
@@ -990,7 +995,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	 * @see mitll.langtest.client.user.UserPassLogin#makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
 	 */
 	public User userExists(String login, String passwordH) {
-		return db.getUserDAO().getUser(login, passwordH);
+		return db.userExists(getThreadLocalRequest(), login, passwordH);
 	}
 
 	/**
@@ -1764,7 +1769,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	/**
 	 * A low overhead way of doing alignment.
 	 *
-	 * Useful for conversational dialogs.
+	 * Useful for conversational dialogs - Jennifer Melot's project.
 	 *
 	 * @param base64EncodedString
 	 * @param textToAlign
@@ -2029,21 +2034,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		}
 	}
 
+	/**
+	 * Do alignment and decoding on all the reference audio and store the results in the RefResult table.
+	 * @see #doDecode(Set, CommonExercise, Collection) 
+	 */
 	private void writeRefDecode() {
 		if (DO_REF_DECODE) {
   		Map<String, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
 			String installPath = pathHelper.getInstallPath();
-
 
 			int numResults = db.getRefResultDAO().getNumResults();
 			logger.debug("found " +numResults+ " in ref results table for " + db.getServerProps().getLanguage());
 
 			Set<String> decodedFiles = getDecodedFiles();
 			List<CommonExercise> exercises = getExercises();
-			logger.debug(serverProps.getLanguage() + " found " + decodedFiles.size() +" previous ref results, checking " + exercises.size() +" exercises ");
+			logger.debug(serverProps.getLanguage() + " found " + decodedFiles.size() +" previous ref results, checking " +
+					exercises.size() +" exercises ");
 
 			if (stopDecode) logger.debug("Stop decode true");
-			// TODOz : check if result is already in refresult table before doing decoding
+
 			int count = 0;
 			int attrc = 0;
 			for (CommonExercise exercise : exercises) {
@@ -2079,6 +2088,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		}
 	}
 
+	/**
+	 * Get the set of files that have already been decoded and aligned so we don't do them a second time.
+	 * @return
+	 * @see #writeRefDecode
+	 */
 	private Set<String> getDecodedFiles() {
 		List<Result> results = db.getRefResultDAO().getResults();
 		logger.debug(serverProps.getLanguage() + " found " + results.size() +" previous ref results");
@@ -2089,6 +2103,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       if (count++ < 20) {
         logger.debug("\t found " + res);
       }
+
       String[] bestAudios = res.getAnswer().split(File.separator);
       if (bestAudios.length > 1) {
         String bestAudio = bestAudios[bestAudios.length-1];
