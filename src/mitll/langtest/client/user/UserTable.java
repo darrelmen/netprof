@@ -1,15 +1,21 @@
 package mitll.langtest.client.user;
 
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
@@ -21,20 +27,24 @@ import java.util.List;
 
 public class UserTable extends PagerTable {
   private static final int PAGE_SIZE = 5;
- // private static final boolean INCLUDE_EXPERIENCE = false;
-  public static final String USER_ID = "User ID";
-  public static final int PAGE_SIZE1 = 5;
-  public static final int INSET_PERCENT = 50;
-  public static final String IP_PREFIX = "127.0.0.1/Mozilla/5.0 ";
-  public static final String PERMISSIONS = "Perm.";//issions";
-  public static final String QUALITY_CONTROL = "QUALITY_CONTROL";
-  public static final String RECORD_AUDIO = "RECORD_AUDIO";
-  public static final String C_DEVELOPER = "CONTENT";//_DEVELOPER";
+
+  private static final String USER_ID = "User ID";
+  private static final int PAGE_SIZE1 = 5;
+  private static final int INSET_PERCENT = 50;
+  private static final String IP_PREFIX = "127.0.0.1/Mozilla/5.0 ";
+  private static final String PERMISSIONS = "Perm.";//issions";
+  private static final String QUALITY_CONTROL = "QUALITY_CONTROL";
+  private static final String RECORD_AUDIO = "RECORD_AUDIO";
+  private static final String C_DEVELOPER = "CONTENT";//_DEVELOPER";
 
   private Widget lastTable = null;
   private Button closeButton;
   private final PropertyHandler props;
 
+  /**
+   * @see mitll.langtest.client.LangTest.UsersClickHandler#onClick(ClickEvent)
+   * @param props
+   */
   public UserTable(PropertyHandler props) { this.props = props; }
   /**
    * @see mitll.langtest.client.LangTest.UsersClickHandler
@@ -43,7 +53,7 @@ public class UserTable extends PagerTable {
     showDialog(service);
   }
 
-  void showDialog(final LangTestDatabaseAsync service) {
+  private void showDialog(final LangTestDatabaseAsync service) {
     // Create the resetEmailPopup dialog box
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("Registered Users");
@@ -151,7 +161,9 @@ public class UserTable extends PagerTable {
 
     TextColumn<User> perm = new TextColumn<User>() {
       @Override
-      public String getValue(User contact) { return "" + contact.getPermissions().toString().replaceAll(QUALITY_CONTROL, "QC").replaceAll(RECORD_AUDIO,"RECORD"); }
+      public String getValue(User contact) {
+        return "" + contact.getPermissions().toString().replaceAll(QUALITY_CONTROL, "QC").replaceAll(RECORD_AUDIO, "RECORD");
+      }
     };
     perm.setSortable(true);
     table.addColumn(perm, PERMISSIONS);
@@ -180,7 +192,7 @@ public class UserTable extends PagerTable {
       }
     };
     rate.setSortable(true);
-    table.addColumn(rate, "Rate(sec)");
+    table.addColumn(rate, "Rate (sec)");
 
     TextColumn<User> ipaddr = new TextColumn<User>() {
       @Override
@@ -204,15 +216,7 @@ public class UserTable extends PagerTable {
     ipaddr.setSortable(true);
     table.addColumn(ipaddr, "IP Addr");
 
-    TextColumn<User> date = new TextColumn<User>() {
-      @Override
-      public String getValue(User contact) {
-        return "" + contact.getTimestamp();
-      }
-    };
-    date.setSortable(true);
-    table.addColumn(date, "Time");
-
+    getDateColumn(table);
 
     TextColumn<User> kind = new TextColumn<User>() {
       @Override
@@ -296,9 +300,21 @@ public class UserTable extends PagerTable {
     return getOldSchoolPagerAndTable(table, table, PAGE_SIZE1, PAGE_SIZE1);
   }
 
+  private void getDateColumn(CellTable<User> table) {
+    SafeHtmlCell cell = new SafeHtmlCell();
+    Column<User,SafeHtml> dateCol = new Column<User, SafeHtml>(cell) {
+      @Override
+      public SafeHtml getValue(User answer) {
+        return getSafeHTMLForTimestamp(answer.getTimestampMillis());
+      }
+    };
+    table.addColumn(dateCol, "Time");
+    dateCol.setSortable(true);
+  }
+
   private float roundToHundredth(double totalHours) { return ((float) ((Math.round(totalHours * 100)))) / 100f;  }
 
-  void addUserIDColumns(CellTable<User> table) {
+  private void addUserIDColumns(CellTable<User> table) {
     TextColumn<User> userID = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
