@@ -53,14 +53,13 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class Navigation implements RequiresResize {
-  private Logger logger = Logger.getLogger("Navigation");
+  private final Logger logger = Logger.getLogger("Navigation");
 
   private static final String CHAPTERS = "Learn Pronunciation";
-//  private static final String CONTENT = CHAPTERS;
   private static final String YOUR_LISTS = "Study Your Lists";
   private static final String STUDY_LISTS = "Study Lists";// and Favorites";
   private static final String OTHERS_LISTS = "Study Visited Lists";
-  private static final String PRACTICE = "Audio Flashcards"; // "Do Flashcards";
+  private static final String PRACTICE = "Audio Vocabulary Practice"; //"Audio Flashcards"; // "Do Flashcards";
   public static final String REVIEW = "review";
   public static final String COMMENT = "comment";
   private static final String ATTENTION = "attention";
@@ -90,7 +89,7 @@ public class Navigation implements RequiresResize {
   private static final String RECORD_EXAMPLE = "Record In-context Audio";
   private static final String CONTENT1 = "content";
  // public static final String CLASSROOM = "classroom";
-  public static final String MARK_DEFECTS1 = "markDefects";
+  private static final String MARK_DEFECTS1 = "markDefects";
 
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
@@ -305,7 +304,7 @@ public class Navigation implements RequiresResize {
     return tabPanel;    // TODO - consider how to tell panels when they are hidden by tab changes
   }
 
-  TabPanel subListTabPanel;
+  private TabPanel subListTabPanel;
 
   /**
    * Defines order of tabs...
@@ -503,7 +502,7 @@ public class Navigation implements RequiresResize {
 
   private boolean isQC() {  return controller.getPermissions().contains(User.Permission.QUALITY_CONTROL); }
 
-  void logEvent(TabAndContent yourStuff, String context) {
+  private void logEvent(TabAndContent yourStuff, String context) {
     if (yourStuff != null && yourStuff.getTab() != null) {
       controller.logEvent(yourStuff.getTab().asWidget(), "Tab", "", context);
     }
@@ -542,7 +541,7 @@ public class Navigation implements RequiresResize {
    * @param onlyMine
    * @param onlyVisited
    */
-  void refreshViewLessons(boolean onlyMine, boolean onlyVisited) {
+  private void refreshViewLessons(boolean onlyMine, boolean onlyVisited) {
     viewLessons(onlyMine ? yourStuff.getContent() : othersStuff.getContent(), false, onlyMine, onlyVisited);
   }
 
