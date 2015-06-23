@@ -13,14 +13,13 @@ import mitll.langtest.shared.scoring.PretestScore;
 
 // TODO make this actually have method signatures...
 public interface ASR {
-
 	<T extends CommonExercise> void sort(List<T> toSort);
 	Collator getCollator();
 	boolean checkLTS(String foreignLanguagePhrase);
 	PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
 	SmallVocabDecoder getSmallVocabDecoder();
 	String getUsedTokens(Collection<String> lmSentences, List<String> background);
-	//public Collection<String> getValidPhrases(Collection<String> phrases);
+
 	PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
 													 String sentence, Collection<String> lmSentences, String imageOutDir,
 													 int imageWidth, int imageHeight, boolean useScoreForBkgColor,
