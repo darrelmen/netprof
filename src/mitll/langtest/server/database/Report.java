@@ -14,7 +14,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -29,12 +28,12 @@ public class Report {
 
   private static final int MIN_MILLIS = (1000 * 60);
   private static final int TEN_SECONDS = 1000 * 10;
-  public static final boolean WRITE_RESULTS_TO_FILE = false;
-  public static final String ACTIVE_USERS = "# Active Users";
-  public static final String TIME_ON_TASK_MINUTES = "Time on Task Minutes ";
-  public static final String TOTAL_TIME_ON_TASK_HOURS = "Total time on task (hours)";
-  public static final String MONTH = "month";
-  public static final String WEEK = "week";
+  private static final boolean WRITE_RESULTS_TO_FILE = false;
+  private static final String ACTIVE_USERS = "# Active Users";
+  private static final String TIME_ON_TASK_MINUTES = "Time on Task Minutes ";
+  private static final String TOTAL_TIME_ON_TASK_HOURS = "Total time on task (hours)";
+  private static final String MONTH = "month";
+  private static final String WEEK = "week";
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
   private final EventDAO eventDAO;
@@ -109,7 +108,7 @@ public class Report {
     return message;
   }
 
-  public File getReportFile(PathHelper pathHelper, String today) {
+  private File getReportFile(PathHelper pathHelper, String today) {
     File reports = pathHelper.getAbsoluteFile("reports");
     //File test = new File("reports");
     if (!reports.exists()) {
@@ -137,9 +136,9 @@ public class Report {
     return builder.toString();
   }
 
-  public Map<Long, Map<String, Integer>> getUserToDayToRecordings(PathHelper pathHelper) {
+/*  public Map<Long, Map<String, Integer>> getUserToDayToRecordings(PathHelper pathHelper) {
     return getResults(new StringBuilder(), getUsers(new StringBuilder()), pathHelper);
-  }
+  }*/
 
   /**
    * @param builder
@@ -154,39 +153,46 @@ public class Report {
 
     int ytd = 0;
 
-    SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM/dd/yy h:mm aaa");
+   // SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM/dd/yy h:mm aaa");
     Map<Integer, Integer> monthToCount = new TreeMap<Integer, Integer>();
     Map<Integer, Integer> weekToCount = new TreeMap<Integer, Integer>();
     Set<Long> students = new HashSet<Long>();
     for (User user : users) {
-      try {
-        boolean isStudent = (user.getAge() == 89 && user.getUserID().isEmpty()) || user.getAge() == 0;
+     // try {
+        boolean isStudent = (user.getAge() == 89 && user.getUserID().isEmpty()) || user.getAge() == 0 || user.getUserKind() == User.Kind.STUDENT;
 
-        if (user.getTimestamp().isEmpty()) continue;
+        if ( user.getId() == 3 || user.getId() == 1 ) {
+          logger.warn("skipping ? " + user);
+
+          continue;
+        }
         if (isStudent) {
           students.add(user.getId());
-          Date parse = simpleDateFormat2.parse(user.getTimestamp());
-          if (parse.getTime() > january1st.getTime()) {
-            ytd++;
+        //  if (!user.getTimestamp().isEmpty()) {
+            //Date parse = (!user.getTimestamp().isEmpty()) ? simpleDateFormat2.parse(user.getTimestamp()) : new Date();
+          long userCreated = user.getTimestampMillis();
+            if (userCreated > january1st.getTime()) {
+              ytd++;
 
-            calendar.setTime(parse);
-            int month = calendar.get(Calendar.MONTH);
-            Integer integer = monthToCount.get(month);
-            monthToCount.put(month, (integer == null) ? 1 : integer + 1);
+              calendar.setTimeInMillis(userCreated);
+              int month = calendar.get(Calendar.MONTH);
+              Integer integer = monthToCount.get(month);
+              monthToCount.put(month, (integer == null) ? 1 : integer + 1);
 
-            int w = calendar.get(Calendar.WEEK_OF_YEAR);
-            Integer integer2 = weekToCount.get(w);
+              int w = calendar.get(Calendar.WEEK_OF_YEAR);
+              Integer integer2 = weekToCount.get(w);
 
-            weekToCount.put(w, (integer2 == null) ? 1 : integer2 + 1);
-          } else {
-            //   logger.debug("NO time " +user.getTimestamp() + " " + parse);
-          }
+              weekToCount.put(w, (integer2 == null) ? 1 : integer2 + 1);
+            } else {
+              //   logger.debug("NO time " +user.getTimestamp() + " " + parse);
+            }
+          //}
         } else {
-          //logger.warn("skipping teacher " + user);
+          logger.warn("skipping teacher " + user);
         }
-      } catch (ParseException e) {
-        e.printStackTrace();
-      }
+      //} catch (ParseException e) {
+     //   e.printStackTrace();
+     // }
     }
     String users1 = "New Users";// (users enrolled after 10/8)";
     builder.append("<html><head><body>" +
@@ -309,6 +315,7 @@ public class Report {
     int invalidScore = 0;
     //int scoresByTeachers = 0;
     int beforeJanuary = 0;
+    Set<Long> skipped = new TreeSet<>();
     try {
       SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
       String today = simpleDateFormat2.format(new Date());
@@ -345,6 +352,7 @@ public class Report {
                 //  scoresByTeachers++;
                 //}
               } else {
+                skipped.add(result.getUserid());
                 teacherAudio++;
               }
             }
@@ -363,7 +371,7 @@ public class Report {
     logger.debug("Skipped " + invalid + " invalid recordings, " + invalidScore + " -1 score items, " +
         //scoresByTeachers + " scores by teachers(?) " + scoresBeforeOctober + " before 10/8 " +
         beforeJanuary + " beforeJan1st");
-    logger.debug("skipped " + teacherAudio + " teacher recordings");
+    logger.debug("skipped " + teacherAudio + " teacher recordings by " + skipped);
     logger.debug("userToDayToCount " + userToDayToCount);
 
     String recordings = "Recordings";
@@ -599,16 +607,16 @@ public class Report {
       Map<Long, Set<Event>> userToEvents = monthToUserToEvents.getValue();
 
       for (Map.Entry<Long, Set<Event>> eventsForUser : userToEvents.entrySet()) {
-        Long user = eventsForUser.getKey();
+//        Long user = eventsForUser.getKey();
         long start = 0;
         long dur = 0;
         long last = 0;
-        Event sevent = null, levent = null;
+  //      Event sevent = null, levent = null;
         for (Event event : eventsForUser.getValue()) {
           long now = event.getTimestamp();
           if (start == 0) {
             start = now;
-            sevent = event;
+    //        sevent = event;
           } else if (now - last > 1000 * 300) {
             long session = (last - start);
             if (session == 0) {
@@ -616,11 +624,11 @@ public class Report {
             }
             dur += session;
             start = now;
-            sevent = event;
+      //      sevent = event;
           }
 
           last = now;
-          levent = event;
+        //  levent = event;
         }
         long session = (last - start);
         if (session == 0) {
@@ -644,7 +652,7 @@ public class Report {
       Map<Long, Set<Event>> userToEvents = weekToUserToEvents.getValue();
 
       for (Map.Entry<Long, Set<Event>> eventsForUser : userToEvents.entrySet()) {
-        Long user = eventsForUser.getKey();
+      //  Long user = eventsForUser.getKey();
         //logger.debug("\tuser " + user);
         long start = 0;
         long dur = 0;
