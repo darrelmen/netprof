@@ -559,7 +559,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	/**
 	 * @param lmSentences
 	 * @param background
-	 * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio(java.io.File, java.util.Collection)
+	 * @see AutoCRTScoring#getASRScoreForAudio(File, Collection, boolean)
 	 * @return
 	 */
 	public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
