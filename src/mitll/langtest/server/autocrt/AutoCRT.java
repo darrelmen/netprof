@@ -42,15 +42,15 @@ public class AutoCRT {
 	 *
 	 * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
 	 * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
-	 * @seex mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(mitll.langtest.shared.Exercise, java.io.File, mitll.langtest.shared.AudioAnswer)
-	 * @param commonExercise
-	 * @param audioFile
-	 * @param answer
-	 */
-	public PretestScore getFlashcardAnswer(CommonExercise commonExercise, File audioFile, AudioAnswer answer, String language) {
+   * @param commonExercise
+   * @param audioFile
+   * @param answer
+   * @param canUseCache
+   */
+	public PretestScore getFlashcardAnswer(CommonExercise commonExercise, File audioFile, AudioAnswer answer,
+                                         String language, boolean canUseCache) {
     Collection<String> foregroundSentences = getRefSentences(commonExercise, language);
-    int firstPronLength = commonExercise.getFirstPron().size();
-    PretestScore flashcardAnswer = getFlashcardAnswer(audioFile, foregroundSentences, answer, firstPronLength);
+    PretestScore flashcardAnswer = getFlashcardAnswer(audioFile, foregroundSentences, answer, canUseCache);
 
 		// log what happened
 		if (answer.isCorrect()) {
@@ -102,14 +102,14 @@ public class AutoCRT {
 	 * @param possibleSentences any of these can match and we'd call this a correct response
    * @param answer            holds the score, whether it was correct, the decode output, and whether one of the
    *                          possible sentences
-   * @param firstPronLength
+   * @param canUseCache
+   * @paramx firstPronLength
 	 * @return PretestScore word/phone alignment with scores
    * @see #getFlashcardAnswer
 	 */
   private PretestScore getFlashcardAnswer(File audioFile, Collection<String> possibleSentences, AudioAnswer answer,
-                                          int firstPronLength) {
-    PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, removePunct(possibleSentences)/*,
-        firstPronLength*/);
+                                          boolean canUseCache) {
+    PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, removePunct(possibleSentences), canUseCache);
 
     String recoSentence =
         asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
