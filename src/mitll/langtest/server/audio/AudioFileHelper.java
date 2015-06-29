@@ -646,6 +646,7 @@ public class AudioFileHelper implements CollationSort {
 
   /**
    * @return
+   * @see #decodeOneAttribute(CommonExercise, AudioAttribute)
    */
   private PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath) {
     return getASRScoreForAudio(0, testAudioPath, exercise.getRefSentence(), 128, 128, false,
@@ -678,6 +679,22 @@ public class AudioFileHelper implements CollationSort {
     return getASRScoreForAudio(reqid, testAudioFile, sentence, null, width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix, precalcResult);
   }
 
+  /**
+   *
+   * @param reqid
+   * @param testAudioFile
+   * @param sentence
+   * @param lmSentences
+   * @param width
+   * @param height
+   * @param useScoreToColorBkg
+   * @param decode
+   * @param tmpDir
+   * @param useCache
+   * @param prefix
+   * @param precalcResult
+   * @return
+   */
   private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence, Collection<String> lmSentences,
                                            int width, int height, boolean useScoreToColorBkg,
                                            boolean decode, String tmpDir, boolean useCache, String prefix, Result precalcResult) {
