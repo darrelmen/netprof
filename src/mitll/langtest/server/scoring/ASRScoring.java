@@ -354,15 +354,15 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @param imageWidth            image width
    * @param imageHeight           image height
    * @param useScoreForBkgColor   true if we want to color the segments by score else all are gray
-   * @param decode                if true, skips writing image files
-   * @param tmpDir                where to run hydec
-   * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
-   * @param prefix                on the names of the image files, if they are written
-   * @param precalcResult
+	 * @param decode                if true, skips writing image files
+	 * @param tmpDir                where to run hydec
+	 * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
+	 * @param prefix                on the names of the image files, if they are written
+	 * @param precalcResult
 	 * @return score info coming back from alignment/reco
-   * @see ASR#scoreRepeat
-   */
-  private PretestScore scoreRepeatExercise(String testAudioDir,
+	 * @see ASR#scoreRepeat
+	 */
+	private PretestScore scoreRepeatExercise(String testAudioDir,
 																					 String testAudioFileNoSuffix,
 																					 String sentence,
 																					 String scoringDir,
@@ -372,15 +372,18 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 																					 boolean useScoreForBkgColor,
 																					 boolean decode, String tmpDir,
 																					 boolean useCache, String prefix, Result precalcResult) {
-    String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
-    String pathname = noSuffix + ".wav";
+		String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
+		String pathname = noSuffix + ".wav";
 
-    boolean b = checkLTS(sentence);
-    //logger.debug("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir + " check lts = " + b);
-    File wavFile = new File(pathname);
-    boolean mustPrepend = false;
-    if (!wavFile.exists() && deployPath != null) {
-      //logger.debug("trying new path for " + pathname + " under " + deployPath);
+		boolean b = checkLTS(sentence);
+
+		if (!b) {
+			logger.info("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir + " '" + sentence + "' is not in lts");
+		}
+		File wavFile = new File(pathname);
+		boolean mustPrepend = false;
+		if (!wavFile.exists() && deployPath != null) {
+			//logger.debug("trying new path for " + pathname + " under " + deployPath);
       wavFile = new File(deployPath + File.separator + pathname);
       mustPrepend = true;
     }
@@ -718,7 +721,11 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     }
   }
 
+	private SmallVocabDecoder svd = new SmallVocabDecoder();
+
   /**
+	 * Tries to remove junky characters from the sentence so hydec won't choke on them.
+	 * @see SmallVocabDecoder
    * @see #computeRepeatExerciseScores(pronz.speech.Audio, String, String, boolean)
    * @param testAudio
    * @param sentence
@@ -726,18 +733,17 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @return
    */
   private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
-    sentence = sentence.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ");
-
+		sentence = svd.getTrimmed(sentence);
     long then = System.currentTimeMillis();
-
-    logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with LTS " + letterToSoundClass);
+//    logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with LTS " + letterToSoundClass);
 
     try {
       Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut =
         testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
-      logger.debug("getScoresFromHydec : scoring sentence " +sentence.length()+" characters long, got score " + hydec_score +
+
+      logger.debug("getScoresFromHydec : scoring '" + sentence +"' (" +sentence.length()+ " ) got score " + hydec_score +
         " and took " + timeToRunHydec + " millis");
 
       return new Scores(hydec_score, jscoreOut._2);
@@ -750,7 +756,8 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     }
 
     long timeToRunHydec = System.currentTimeMillis() - then;
-    logger.warn("got bad score and took " + timeToRunHydec + " millis");
+
+		logger.warn("getScoresFromHydec : scoring '" + sentence + "' (" + sentence.length() + " ) : got bad score and took " + timeToRunHydec + " millis");
 
     Scores scores = new Scores();
     scores.hydraScore = -1;
