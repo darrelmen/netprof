@@ -58,6 +58,8 @@ import java.util.logging.Logger;
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private Logger logger = Logger.getLogger("LangTest");
+  private static final List<String> SITE_LIST = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean",
+      "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Spanish", "Sudanese", "Urdu");
 
   /**
    * @see
@@ -356,8 +358,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private Panel getLinksToSites() {
     Panel hp = new HorizontalPanel();
-    hp.getElement().getStyle().setMarginLeft(LEFT_LIST_WIDTH, Style.Unit.PX);
-    for (String site : Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean", "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Spanish", "Sudanese", "Urdu")) {
+    Style style = hp.getElement().getStyle();
+    style.setMarginLeft(LEFT_LIST_WIDTH, Style.Unit.PX);
+    style.setMarginTop(10, Style.Unit.PX);
+
+    for (String site : SITE_LIST) {
       Anchor w = new Anchor(site, "https://np.ll.mit.edu/npfClassroom" + site.replaceAll("Mandarin", "CM"));
       w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
       hp.add(w);
