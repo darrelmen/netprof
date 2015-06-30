@@ -255,19 +255,17 @@ public class DatabaseImpl implements Database {
   /**
    * @param installPath
    * @param lessonPlanFile
-   * @param language
    * @param mediaDir
    * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath
    */
-  public void setInstallPath(String installPath, String lessonPlanFile, String language,
-                             boolean useFile, String mediaDir) {
+  public void setInstallPath(String installPath, String lessonPlanFile, boolean useFile, String mediaDir) {
     // logger.debug("got install path " + installPath + " media " + mediaDir);
     this.installPath = installPath;
     this.lessonPlanFile = lessonPlanFile;
     this.mediaDir = mediaDir;
     this.useFile = useFile;
-    this.jsonSupport = new JsonSupport(getSectionHelper(),getResultDAO(),getAudioDAO(),getPhoneDAO(),configDir,installPath);
-//    this.language = language;
+    this.jsonSupport = new JsonSupport(getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
+        getPhoneDAO(), configDir, installPath);
   }
 
   public SectionHelper getSectionHelper() {
@@ -443,8 +441,12 @@ public class DatabaseImpl implements Database {
    */
   public JSONObject getJsonScoreHistory(long userid,
                                         Map<String, Collection<String>> typeToSection,
-                                        ExerciseSorter sorter//,  Collator collator
-  ) {    return jsonSupport.getJsonScoreHistory(userid, typeToSection, sorter);
+                                        ExerciseSorter sorter) {
+    return jsonSupport.getJsonScoreHistory(userid, typeToSection, sorter);
+  }
+
+  public JSONObject getJsonRefResult(Map<String, Collection<String>> typeToSection) {
+    return jsonSupport.getJsonRefResults(typeToSection);
   }
 
   /**
