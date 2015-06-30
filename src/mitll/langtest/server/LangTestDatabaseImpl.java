@@ -9,7 +9,6 @@ import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.UserDAO;
@@ -27,7 +26,6 @@ import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
-import net.sf.json.JSONObject;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
@@ -37,9 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.InetAddress;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.CollationKey;
 import java.text.Collator;
@@ -2066,9 +2062,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 				}
 
 				Set<Long> preferredVoices = serverProps.getPreferredVoices();
-				Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
+				Map<MiniUser, List<AudioAttribute>> malesMap   = exercise.getMostRecentAudio(true, preferredVoices);
 				Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
-				Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
+				Collection<AudioAttribute> defaultUserAudio    = exercise.getDefaultUserAudio();
 
 				List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
 				boolean maleEmpty = maleUsers.isEmpty();
@@ -2225,7 +2221,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		String lessonPlanFile = getLessonPlan();
 		if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
-		db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile, serverProps.getLanguage(), useFile,
+		db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile, useFile,
 				relativeConfigDir + File.separator + serverProps.getMediaDir());
 	}
 
