@@ -1,8 +1,14 @@
 package mitll.langtest.server.database;
 
+import com.mongodb.util.JSON;
+import jdk.nashorn.api.scripting.JSObject;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONString;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -13,7 +19,9 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Create, drop, alter, read from the results table.
@@ -82,7 +90,7 @@ public class RefResultDAO extends DAO {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
-      long newid = addAnswerToTable(connection, userID, id, "", audioFile, durationInMillis, correct, pronScore,
+      long newid = addAnswerToTable(connection, userID, id, audioFile, durationInMillis, correct, pronScore,
           scoreJson, alignScore, alignJson, numDecodePhones, numAlignPhones, isMale, speed);
       long now = System.currentTimeMillis();
       if (now - then > 100) System.out.println("took " + (now - then) + " millis to record answer.");
@@ -117,11 +125,12 @@ public class RefResultDAO extends DAO {
    * @throws java.sql.SQLException
    */
   private long addAnswerToTable(Connection connection, int userid, String id,
-                                String answer, String audioFile,
+                                String audioFile,
                                 long durationInMillis,
                                 boolean correct, float pronScore, String scoreJson, float alignScore, String alignJson,
                                 int numPhones, int numAlignPhones, boolean isMale, String speed) throws SQLException {
     //  logger.debug("adding answer for exid #" + id + " correct " + correct + " score " + pronScore + " audio type " +audioType + " answer " + answer);
+    String answer = "";
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
         REFRESULT +
@@ -219,6 +228,68 @@ public class RefResultDAO extends DAO {
     return null;
   }
 
+  public JSONObject getJSONScores(Collection<String> ids)  {
+    try {
+      String list = getInList(ids);
+
+      String sql = "SELECT " +
+          Database.EXID + ", "   + SCORE_JSON + ", "+ ANSWER+
+          " FROM " + REFRESULT + " WHERE " +
+          Database.EXID + " in (" + list + ")";
+
+      Connection connection = database.getConnection(this.getClass().toString());
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      ResultSet rs = statement.executeQuery();
+
+      Map<String,List<String>> idToAnswers = new HashMap<>();
+      Map<String, List<String>> idToJSONs = new HashMap<>();
+      while (rs.next()) {
+        String exid = rs.getString(Database.EXID);
+        String answer = rs.getString(ANSWER);
+        String json = rs.getString(SCORE_JSON);
+
+        List<String> orDefault = idToAnswers.get(exid);
+        if (orDefault == null) {
+          idToAnswers.put(exid, orDefault = new ArrayList<String>());
+          int i = answer.lastIndexOf("/");
+          String fileName =  (i > -1) ? answer.substring(i+1) : answer;
+          orDefault.add(fileName);
+        }
+
+        List<String> orDefault2 = idToJSONs.get(exid);
+        if (orDefault2 == null) {
+          idToJSONs.put(exid, orDefault2 = new ArrayList<String>());
+          orDefault2.add(json);
+        }
+      }
+
+      JSONObject jsonObject = new JSONObject();
+      for (Map.Entry<String,List<String>> pair : idToAnswers.entrySet()) {
+        String exid = pair.getKey();
+        List<String> answers = pair.getValue();
+        List<String> jsons = idToJSONs.get(exid);
+
+        JSONArray array = new JSONArray();
+
+        for (int i = 0; i < answers.size(); i++) {
+          JSONObject jsonObject1 = new JSONObject();
+          jsonObject1.put("file",answers.get(i));
+          jsonObject1.put("scoreJSON",jsons.get(i));
+          array.add(jsonObject1);
+        }
+        jsonObject.put(exid, array);
+      }
+
+      finish(connection, statement, rs);
+
+      return jsonObject;
+    } catch (Exception ee) {
+      logException(ee);
+    }
+    return new JSONObject();
+  }
+
   /**
    * @param sql
    * @return
@@ -267,11 +338,11 @@ public class RefResultDAO extends DAO {
       long userID = rs.getLong(USERID);
       String plan = "";//rs.getString(PLAN);
       String exid = rs.getString(Database.EXID);
-      int qid = 0;//rs.getInt(QID);
+      int qid = 0;
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       String answer = rs.getString(ANSWER);
-      boolean valid = true;//rs.getBoolean(VALID);
-      String type = "";//rs.getString(AUDIO_TYPE);
+      boolean valid = true;
+      String type = "";
       int dur = rs.getInt(DURATION);
 
       boolean correct = rs.getBoolean(CORRECT);
@@ -314,7 +385,7 @@ public class RefResultDAO extends DAO {
     Collection<String> columns = getColumns(REFRESULT);
   //  logger.debug("for " + REFRESULT + " found " + columns + " and " + getNumResults());
     if (!columns.contains(ALIGNSCORE.toLowerCase())) {
-      addVarchar(connection, REFRESULT, ALIGNSCORE);
+      addFloat(connection, REFRESULT, ALIGNSCORE);
       addVarchar(connection, REFRESULT, ALIGNJSON);
     }
     if (!columns.contains(NUMDECODE_PHONES.toLowerCase())) {
@@ -370,7 +441,7 @@ public class RefResultDAO extends DAO {
         CORRECT + " BOOLEAN," +
         PRON_SCORE + " FLOAT," +
         SCORE_JSON + " VARCHAR, " +
-        ALIGNSCORE + " VARCHAR," +
+        ALIGNSCORE + " FLOAT," +
         ALIGNJSON + " VARCHAR," +
         MALE + " BOOLEAN," +
         SPEED + " VARCHAR" +
