@@ -30,15 +30,27 @@ public class JsonSupport {
 
   private final SectionHelper sectionHelper;
   private final ResultDAO resultDAO;
+  private final RefResultDAO refResultDAO;
   private final AudioDAO audioDAO;
   private final PhoneDAO phoneDAO;
   private final String configDir;
   private final String installPath;
 
-  public JsonSupport(SectionHelper sectionHelper, ResultDAO resultDAO, AudioDAO audioDAO,
+  /**
+   *
+   * @param sectionHelper
+   * @param resultDAO
+   * @param refResultDAO
+   * @param audioDAO
+   * @param phoneDAO
+   * @param configDir
+   * @param installPath
+   */
+  public JsonSupport(SectionHelper sectionHelper, ResultDAO resultDAO,RefResultDAO refResultDAO, AudioDAO audioDAO,
                      PhoneDAO phoneDAO,String configDir, String installPath) {
     this.sectionHelper = sectionHelper;
     this.resultDAO = resultDAO;
+    this.refResultDAO = refResultDAO;
     this.audioDAO = audioDAO;
     this.phoneDAO = phoneDAO;
     this.configDir = configDir;
@@ -53,9 +65,7 @@ public class JsonSupport {
    */
   public JSONObject getJsonScoreHistory(long userid,
                                         Map<String, Collection<String>> typeToSection,
-                                        ExerciseSorter sorter//,
-                                        //  Collator collator
-  ) {
+                                        ExerciseSorter sorter) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToSection);
     List<String> allIDs = new ArrayList<String>();
 
@@ -81,6 +91,18 @@ public class JsonSupport {
     return addJsonHistory(exerciseCorrectAndScores);
   }
 
+  public JSONObject getJsonRefResults(Map<String, Collection<String>> typeToSection) {
+    Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToSection);
+    List<String> allIDs = new ArrayList<String>();
+
+    Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
+    for (CommonExercise exercise : exercisesForState) {
+      String id = exercise.getID();
+      allIDs.add(id);
+      idToEx.put(id, exercise);
+    }
+    return refResultDAO.getJSONScores(allIDs);
+  }
 
   /**
    * A special, slimmed down history just for the Appen recording app.
