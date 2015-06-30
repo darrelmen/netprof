@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -51,7 +50,7 @@ public class UserListManagerTest {
     logger.debug("made " + database);
     String media = parent + File.separator + "media";
     logger.debug("media " + media);
-    database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(), config, true, "media");
+    database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(), true, "media");
     List<CommonExercise> exercises = database.getExercises();
   }
 
