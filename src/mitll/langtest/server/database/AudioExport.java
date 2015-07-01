@@ -244,7 +244,8 @@ public class AudioExport {
         row.createCell(j++).setCellValue(exercise.getForeignLanguage());
       }
 
-      row.createCell(j++).setCellValue(english ? exercise.getMeaning() : exercise.getTransliteration());
+      // evil thing where the meaning is empty for UserExercise overrides, but on the spreadsheet
+      row.createCell(j++).setCellValue(english ? (exercise.getMeaning().isEmpty() ? exercise.getForeignLanguage() : exercise.getMeaning()) : exercise.getTransliteration());
 
       for (String type : typeOrder) {
         row.createCell(j++).setCellValue(exercise.getUnitToValue().get(type));
