@@ -34,7 +34,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   private long modifiedTimestamp;
   private List<CorrectAndScore> scores;
   private float avgScore;
-  private transient Set<String> bagOfPhones = new HashSet<String>();
+ // private transient Set<String> bagOfPhones = new HashSet<String>();
   private transient List<String> firstPron = new ArrayList<String>();
  // private transient List<List<String>> pronunciations = new ArrayList<List<String>>();
   private static final int MAX_TOOLTIP_LENGTH = 15;
@@ -167,6 +167,10 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   @Override
   public String getTransliteration() { return transliteration;  }
 
+  /**
+   * Consider how to do this better -- not consistent with Exercise meaning...
+   * @return
+   */
   @Override
   public String getMeaning() {
     return "";
@@ -274,7 +278,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
 
   @Override
   public void setBagOfPhones(Set<String> bagOfPhones) {
-    this.bagOfPhones = bagOfPhones;
+    /*this.bagOfPhones = bagOfPhones;*/
   }
 
   @Override
