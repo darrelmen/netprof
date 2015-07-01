@@ -152,6 +152,8 @@ public class ExcelImport implements ExerciseDAO {
 
         Collection<CommonUserExercise> overrides = userExerciseDAO.getOverrides();
 
+        logger.debug("found " + overrides.size() + " overrides...");
+        int override = 0;
         for (CommonUserExercise userExercise : overrides) {
           if (!removes.contains(userExercise.getID())) {
             CommonExercise exercise = getExercise(userExercise.getID());
@@ -160,12 +162,14 @@ public class ExcelImport implements ExerciseDAO {
               sectionHelper.removeExercise(exercise);
               sectionHelper.addExercise(userExercise);
               addOverlay(userExercise);
+              override++;
             }
             //else {
-              //logger.debug("not adding as overlay " + userExercise.getID());
+            //logger.debug("not adding as overlay " + userExercise.getID());
             //}
           }
         }
+        logger.debug("overlay count was " + override);
 
         // add new items
         for (String id : addRemoveDAO.getAdds()) {
@@ -820,7 +824,7 @@ public class ExcelImport implements ExerciseDAO {
 
 //    logger.debug("id " + id + " context " + context);
     imported = getExercise(id, english, foreignLanguagePhrase, translit, meaning, context, contextTranslation,
-        promptInEnglish, audioIndex, lookForOldAudio);
+        audioIndex, lookForOldAudio);
  //   logger.debug("id " + id + " context " + imported.getContext());
 
     imported.setEnglishSentence(english);
@@ -891,8 +895,9 @@ public class ExcelImport implements ExerciseDAO {
    */
   private Exercise getExercise(String id,
                                String english, String foreignLanguagePhrase, String translit, String meaning,
-                               String context, String contextTranslation, boolean promptInEnglish, String refAudioIndex, boolean lookForOldAudio) {
-    String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context, contextTranslation, language);
+                               String context, String contextTranslation, String refAudioIndex, boolean lookForOldAudio) {
+    String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context,
+        contextTranslation, language);
     Exercise imported = new Exercise(id, content, english, context, contextTranslation);
 
     //logger.debug("id  " + id+  " context " + imported.getContext());
@@ -916,7 +921,7 @@ public class ExcelImport implements ExerciseDAO {
    *
    * @param refAudioIndex override place to look for audio
    * @param imported to attach audio to
-   * @see #getExercise(String, String, String, String, String, String, String, boolean, String, boolean)
+   * @see #getExercise(String, String, String, String, String, String, String, String, boolean)
    */
   private void addOldSchoolAudio(String refAudioIndex, Exercise imported) {
     String id = imported.getID();
@@ -960,7 +965,7 @@ public class ExcelImport implements ExerciseDAO {
    * Why does it sometimes have the config dir on the front?
    * @param id
    * @param imported
-   * @see #getExercise(String, String, String, String, String, String,String, boolean, String, boolean)
+   * @see #getExercise(String, String, String, String, String, String, String, String, boolean)
    */
   private int attachAudio(String id, Exercise imported) {
     //String mediaDir1 = mediaDir.replaceAll("bestAudio","");
