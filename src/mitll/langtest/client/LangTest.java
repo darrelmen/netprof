@@ -59,10 +59,11 @@ import java.util.logging.Logger;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private Logger logger = Logger.getLogger("LangTest");
   private static final List<String> SITE_LIST = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean",
-      "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Spanish", "Sudanese", "Urdu");
+      "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Russian", "Spanish", "Sudanese", "Urdu");
 
   /**
-   * @see
+   * How far to the right to shift the list of sites...
+   * @see #getLinksToSites()
    */
   private static final int LEFT_LIST_WIDTH = 267;
 
@@ -72,7 +73,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int MAX_EXCEPTION_STRING = 300;
   private static final int MAX_CACHE_SIZE = 100;
   private static final int NO_USER_INITIAL = -2;
- // private static final boolean SHOW_STATUS = false;
   private static final String PLEASE_ALLOW_ACCESS_TO_THE_MICROPHONE = "Please allow access to the microphone.";
   private static final String TRY_AGAIN = "Try Again";
 
