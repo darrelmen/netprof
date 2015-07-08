@@ -139,6 +139,8 @@ function encodeWAV(samples, mono){
     var buffer = new ArrayBuffer(44 + samples.length * 2);
     var view = new DataView(buffer);
 
+  //  console.log("encodeWAV : sample rate "+sampleRate);
+
     /* RIFF identifier */
     writeString(view, 0, 'RIFF');
     /* file length */
