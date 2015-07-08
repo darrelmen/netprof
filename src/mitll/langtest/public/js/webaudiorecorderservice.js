@@ -21,16 +21,15 @@
 
   var WORKER_PATH = 'langtest/js/recorderWorker.js';
 
-  var Recorder = function(source, cfg){
-
-      $('#status').append("Making recorder...");
+  window.Recorder = function (source, cfg) {
+//  $('#status').append("Making recorder...");
 
     var config = cfg || {};
     var bufferLen = config.bufferLen || 4096;
     this.context = source.context;
     this.node = (this.context.createScriptProcessor ||
-                 this.context.createJavaScriptNode).call(this.context,
-                                                         bufferLen, 2, 2);
+    this.context.createJavaScriptNode).call(this.context,
+        bufferLen, 2, 2);
     var worker = new Worker(config.workerPath || WORKER_PATH);
     worker.postMessage({
       command: 'init',
@@ -39,9 +38,9 @@
       }
     });
     var recording = false,
-      currCallback;
+        currCallback;
 
-    this.node.onaudioprocess = function(e){
+    this.node.onaudioprocess = function (e) {
       if (!recording) return;
       worker.postMessage({
         command: 'record',
@@ -52,57 +51,58 @@
       });
     };
 
-    this.configure = function(cfg){
-      for (var prop in cfg){
-        if (cfg.hasOwnProperty(prop)){
+    this.configure = function (cfg) {
+      for (var prop in cfg) {
+        if (cfg.hasOwnProperty(prop)) {
           config[prop] = cfg[prop];
         }
       }
     };
 
-    this.record = function(){
+    this.record = function () {
       recording = true;
     };
 
-    this.stop = function(){
+    this.stop = function () {
       recording = false;
     };
 
-    this.clear = function(){
-      worker.postMessage({ command: 'clear' });
+    this.clear = function () {
+      worker.postMessage({command: 'clear'});
     };
 
-    this.getBuffers = function(cb) {
+    this.getBuffers = function (cb) {
       currCallback = cb || config.callback;
-      worker.postMessage({ command: 'getBuffers' })
+      worker.postMessage({command: 'getBuffers'})
     };
 
-    this.exportWAV = function(cb, type){
+    this.exportWAV = function (cb, type) {
       currCallback = cb || config.callback;
       type = type || config.type || 'audio/wav';
       if (!currCallback) throw new Error('Callback not set');
       worker.postMessage({
         command: 'exportWAV',
-          type: type
+        type: type
       });
     };
 
+    // called from webaudiorecorder.grabWav
     this.exportMonoWAV = function (cb, type) {
       currCallback = cb || config.callback;
       type = type || config.type || 'audio/wav';
       if (!currCallback) throw new Error('Callback not set');
       worker.postMessage({
         command: 'exportMonoWAV',
-          type: type
+        type: type
       });
     };
 
     this.getAllZero = function (cb) {
-       currCallback = cb || config.callback;
-       worker.postMessage({ command: 'getAllZero' })
+      currCallback = cb || config.callback;
+      worker.postMessage({command: 'getAllZero'})
     };
 
-    worker.onmessage = function(e){
+    worker.onmessage = function (e) {
       var blob = e.data;
       currCallback(blob);
     };
@@ -110,7 +110,5 @@
     source.connect(this.node);
     this.node.connect(this.context.destination);    //this should not be necessary
   };
-
-  window.Recorder = Recorder;
 
 })(window);
