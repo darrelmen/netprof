@@ -42,6 +42,8 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class ResultManager extends PagerTable {
+  public static final String YES = "Yes";
+  public static final String NO = "No";
   private Logger logger = Logger.getLogger("ResultManager");
 
   private static final int PAGE_SIZE = 12;
@@ -434,6 +436,8 @@ public class ResultManager extends PagerTable {
 
         int val = req++;
        // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
+        logger.info("got " + builder.toString());
+
         service.getResults(start, end, builder.toString(), unitToValue, userID, text, val, new AsyncCallback<ResultAndTotal>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -478,7 +482,11 @@ public class ResultManager extends PagerTable {
     for (int i = 0; i < sortList.size(); i++) {
       ColumnSortList.ColumnSortInfo columnSortInfo = sortList.get(i);
       Column<?, ?> column = columnSortInfo.getColumn();
-      builder.append(colToField.get(column) + "_" + (columnSortInfo.isAscending() ? ASC : DESC) + ",");
+      String s = colToField.get(column);
+      if (s == null) {
+        logger.warning("Can't find column " + column + "?");
+      }
+      builder.append(s + "_" + (columnSortInfo.isAscending() ? ASC : DESC) + ",");
     }
     if (!builder.toString().contains(TIMESTAMP)) {
       builder.append(TIMESTAMP + "_" + DESC);
@@ -616,7 +624,7 @@ public class ResultManager extends PagerTable {
     TextColumn<MonitorResult> valid = new TextColumn<MonitorResult>() {
       @Override
       public String getValue(MonitorResult answer) {
-        return answer.isValid() ? "Yes":"No";
+        return answer.isValid() ? YES : NO;
       }
     };
     valid.setSortable(true);
@@ -626,7 +634,7 @@ public class ResultManager extends PagerTable {
     TextColumn<MonitorResult> correct = new TextColumn<MonitorResult>() {
       @Override
       public String getValue(MonitorResult answer) {
-        return answer.isCorrect() ? "Yes":"No";
+        return answer.isCorrect() ? YES : NO;
       }
     };
     correct.setSortable(true);
@@ -653,6 +661,16 @@ public class ResultManager extends PagerTable {
     type.setSortable(true);
     table.addColumn(type, DEVICE);
     colToField.put(type, DEVICE);
+
+    TextColumn<MonitorResult> wFlash = new TextColumn<MonitorResult>() {
+      @Override
+      public String getValue(MonitorResult answer) {
+        return answer.isWithFlash() ? YES : NO;
+      }
+    };
+    wFlash.setSortable(true);
+    table.addColumn(wFlash, "w/Flash");
+    colToField.put(wFlash, "withFlash");
   }
 
   private void addNoWrapColumn(CellTable<MonitorResult> table) {
