@@ -610,7 +610,7 @@ public class ResultDAO extends DAO {
     int numResults = 0;
     try {
       Connection connection = database.getConnection(this.getClass().toString());
-      PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + RESULTS + ";");
+      PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + RESULTS );
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {
         numResults = rs.getInt(1);
@@ -695,7 +695,7 @@ public class ResultDAO extends DAO {
           trimPathForWebPage2(answer), // answer
           valid, // valid
           timestamp.getTime(),
-          type, dur, correct, pronScore, device);
+          type, dur, correct, pronScore, device, rs.getBoolean(WITH_FLASH));
       results.add(result);
     }
     finish(connection, statement, rs);
