@@ -1,7 +1,10 @@
 package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import org.apache.log4j.Logger;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.*;
 
 /**
@@ -24,6 +27,9 @@ public class MonitorResult implements IsSerializable {
   public static final String DEVICE = "device";
   public static final String TEXT = "text";
 
+
+ // private transient static final Logger logger = Logger.getLogger(MonitorResult.class);
+
   private int uniqueID;
   private long userid;
   private String id;
@@ -38,14 +44,29 @@ public class MonitorResult implements IsSerializable {
   private boolean correct;
   private float pronScore;
   private String device;
+  private boolean withFlash;
   private Map<String, String> unitToValue;
 
-  public MonitorResult() {
-  }
+  public MonitorResult() {}
 
+  /**
+   *  @param uniqueID
+   * @param userid
+   * @param id
+   * @param answer
+   * @param valid
+   * @param timestamp
+   * @param answerType
+   * @param durationInMillis
+   * @param correct
+   * @param pronScore
+   * @param device
+   * @param withFlash
+   * @see mitll.langtest.server.database.ResultDAO#getMonitorResultsForQuery(Connection, PreparedStatement)
+   */
   public MonitorResult(int uniqueID, long userid, String id, String answer,
                        boolean valid, long timestamp, String answerType, int durationInMillis,
-                       boolean correct, float pronScore, String device) {
+                       boolean correct, float pronScore, String device, boolean withFlash) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.id = id;
@@ -57,6 +78,7 @@ public class MonitorResult implements IsSerializable {
     this.correct = correct;
     this.pronScore = pronScore;
     this.device = device;
+    this.withFlash = withFlash;
   }
 
   public int getUniqueID() {
@@ -116,13 +138,15 @@ public class MonitorResult implements IsSerializable {
   }
 
   /**
+   * ONLY does the first column, for now...
+   *
    * Expects a query where the columns are field_ASC or field_DESC
    *
    * @param columns
    * @return
    */
   public Comparator<MonitorResult> getComparator(final Collection<String> columns) {
-//    System.out.println("getComparator columns " + columns);
+    //logger.info("getComparator columns " + columns);
     final List<String> copy = new ArrayList<String>(columns);
     if (copy.isEmpty() || copy.iterator().next().equals("")) {
       return new Comparator<MonitorResult>() {
@@ -142,6 +166,8 @@ public class MonitorResult implements IsSerializable {
 
           if (split.length != 2) System.err.println("huh? col = " + col);
           boolean asc = split.length <= 1 || split[1].equals(ASC);
+
+        //  logger.info("col " + col + " asc = " + asc);
 
           // USERID ---------------
           long comp = 0;
@@ -166,7 +192,7 @@ public class MonitorResult implements IsSerializable {
 
           // valid
           if (field.equals(VALID)) {
-            comp = o1.valid == o2.valid ? 0 : (!o1.valid && o2.valid ? -1 : +1);
+            comp = o1.valid == o2.valid ? 0 : (!o1.valid ? -1 : +1);
           }
           if (comp != 0) return getComp(asc, comp);
 
@@ -199,7 +225,12 @@ public class MonitorResult implements IsSerializable {
 
           // correct
           if (field.equals(CORRECT)) {
-            comp = o1.isCorrect() == o2.isCorrect() ? 0 : (!o1.isCorrect() && o2.isCorrect() ? -1 : +1);
+            comp = o1.isCorrect() == o2.isCorrect() ? 0 : (!o1.isCorrect() ? -1 : +1);
+          }
+          if (comp != 0) return getComp(asc, comp);
+
+          if (field.equals("withFlash")) {
+            comp = o1.isWithFlash() == o2.isWithFlash() ? 0 : (!o1.isWithFlash() ? -1 : +1);
           }
           if (comp != 0) return getComp(asc, comp);
 
@@ -256,5 +287,9 @@ public class MonitorResult implements IsSerializable {
         "  ans " + answer +
         " " + " audioType : " + audioType + " device " + device+
         " valid " + valid + " " + (correct ? "correct" : "incorrect") + " score " + pronScore;
+  }
+
+  public boolean isWithFlash() {
+    return withFlash;
   }
 }
