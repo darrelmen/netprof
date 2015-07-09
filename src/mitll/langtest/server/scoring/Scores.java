@@ -3,6 +3,9 @@
  */
 package mitll.langtest.server.scoring;
 
+import mitll.langtest.shared.Result;
+import pronz.speech.Audio;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,43 +19,46 @@ import java.util.Map;
  *
  */
 public class Scores {
-  public float hydraScore;
+	private static final String PHONES = "phones";
+	public float hydraScore;
   public final Map<String, Map<String, Float>> eventScores;
+	private int processDur = 0;
 
-  public Scores() { eventScores = Collections.emptyMap(); }
-  /**
+	public Scores(int processDur) {
+		eventScores = Collections.emptyMap();
+		this.processDur = processDur;
+	}
+
+	/**
    *
    * @param hydecScore
    * @param eventScores
+	 * @param processDur
+	 * @see ASRScoring#getEmptyScores()
+	 * @see ASRScoring#getScoresFromHydec(Audio, String, String)
+	 * @see ASRScoring#scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result)
    */
-  public Scores(float hydecScore, Map<String, Map<String, Float>> eventScores) {
+  public Scores(float hydecScore, Map<String, Map<String, Float>> eventScores, int processDur) {
     this.hydraScore = hydecScore;
     this.eventScores = eventScores;
+		this.processDur = processDur;
   }
-  
-  /*public Scores(String scoreStr) {
-	this.eventScores = new HashMap<String, Map<String, Float>>();
-	String[] split = scoreStr.split(";");
-	this.hydraScore = Float.parseFloat(split[0]);
-	eventScores.put("phones", new HashMap<String, Float>());
-	for(int i = 1; i < split.length; i+=2) {
-		eventScores.get("phones").put(split[i], Float.parseFloat(split[i+1]));
-	}
-  }*/
 
 	public Scores(String[] scoreSplit) {
-		//String[] split = scoreStr.split(";");
 		float s = Float.parseFloat(scoreSplit[0]);
-		this.hydraScore = Float.isNaN(s) ? 0.0f : s;//Float.parseFloat(scoreSplit[0]);
-
+		this.hydraScore = Float.isNaN(s) ? 0.0f : s;
 		this.eventScores = new HashMap<String, Map<String, Float>>();
-		eventScores.put("phones", new HashMap<String, Float>());
+		eventScores.put(PHONES, new HashMap<String, Float>());
 		for (int i = 1; i < scoreSplit.length; i += 2) {
-			eventScores.get("phones").put(scoreSplit[i], Float.parseFloat(scoreSplit[i + 1]));
+			eventScores.get(PHONES).put(scoreSplit[i], Float.parseFloat(scoreSplit[i + 1]));
 		}
 	}
 
+	public int getProcessDur() {
+		return processDur;
+	}
+
 	public String toString() {
-		return "Scores score " + hydraScore + " events " + eventScores;
+		return "Scores score " + hydraScore + " events " + eventScores + " took " + processDur + " millis";
 	}
 }

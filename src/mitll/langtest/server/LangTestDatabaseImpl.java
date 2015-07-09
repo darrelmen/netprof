@@ -960,9 +960,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 				" and took " + timeToRunHydec + " millis");
 
 		if (resultID > -1) {
-			db.getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore());
+			db.getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur());
 		}
 		return asrScoreForAudio;
+	}
+
+	@Override
+	public void addRoundTrip(long resultID, int roundTrip) {
+		db.getAnswerDAO().addRoundTrip(resultID, roundTrip);
 	}
 
 	/**
