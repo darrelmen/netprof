@@ -20,6 +20,7 @@ public class PretestScore implements IsSerializable {
   private Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
   private String recoSentence;
   private float wavFileLengthSeconds;
+  private int processDur = 0;
 
   public PretestScore(){} // required for serialization
 
@@ -37,19 +38,22 @@ public class PretestScore implements IsSerializable {
    * @param sTypeToImage
    * @param sTypeToEndTimes
    * @param recoSentence
+   * @param processDur
    */
   public PretestScore(float hydecScore,
                       Map<String, Float> phoneScores,
                       Map<NetPronImageType, String> sTypeToImage,
                       Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes,
                       String recoSentence,
-                      float wavFileLengthSeconds) {
+                      float wavFileLengthSeconds,
+                      int processDur) {
     this.sTypeToImage = sTypeToImage;
     this.hydecScore = hydecScore;
     this.phoneScores = phoneScores;
     this.sTypeToEndTimes = sTypeToEndTimes;
     this.recoSentence = recoSentence;
     this.wavFileLengthSeconds = wavFileLengthSeconds;
+    this.processDur = processDur;
 	}
 	
   public float getHydecScore() {
@@ -70,11 +74,15 @@ public class PretestScore implements IsSerializable {
   public void setReqid(int r) { this.reqid = r;}
   public int  getReqid()      { return reqid;  }
 
+  public int getProcessDur() {
+    return processDur;
+  }
+
   public String toString() {
     return "hydec score " + hydecScore +
       " phones " + getPhoneScores() +
       " type->image " + getsTypeToImage() +
-      " type->endtimes " + getsTypeToEndTimes()
+      " type->endtimes " + getsTypeToEndTimes() + " took " + processDur + " millis"
       ;
   }
 }
