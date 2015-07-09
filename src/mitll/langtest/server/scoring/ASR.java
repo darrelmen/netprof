@@ -20,6 +20,23 @@ public interface ASR {
 	SmallVocabDecoder getSmallVocabDecoder();
 	String getUsedTokens(Collection<String> lmSentences, List<String> background);
 
+	/**
+	 * @see mitll.langtest.server.audio.AudioFileHelper#getASRScoreForAudio(int, String, String, Collection, int, int, boolean, boolean, String, boolean, String, Result)
+	 * @param testAudioDir
+	 * @param testAudioFileNoSuffix
+	 * @param sentence
+	 * @param lmSentences
+	 * @param imageOutDir
+	 * @param imageWidth
+	 * @param imageHeight
+	 * @param useScoreForBkgColor
+	 * @param decode
+	 * @param tmpDir
+	 * @param useCache
+	 * @param prefix
+	 * @param precalcResult
+	 * @return
+	 */
 	PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
 													 String sentence, Collection<String> lmSentences, String imageOutDir,
 													 int imageWidth, int imageHeight, boolean useScoreForBkgColor,
