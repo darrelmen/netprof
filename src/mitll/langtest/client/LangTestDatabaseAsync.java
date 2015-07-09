@@ -142,4 +142,6 @@ public interface LangTestDatabaseAsync {
 
   // just for backwards compatibility
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, AsyncCallback<Void> async);
+
+  void addRoundTrip(long resultid, int roundTrip, AsyncCallback<Void> async);
 }
