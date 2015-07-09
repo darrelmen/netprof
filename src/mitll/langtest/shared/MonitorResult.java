@@ -45,6 +45,9 @@ public class MonitorResult implements IsSerializable {
   private float pronScore;
   private String device;
   private boolean withFlash;
+  private int processDur;
+  private int roundTripDur;
+
   private Map<String, String> unitToValue;
 
   public MonitorResult() {}
@@ -62,11 +65,13 @@ public class MonitorResult implements IsSerializable {
    * @param pronScore
    * @param device
    * @param withFlash
-   * @see mitll.langtest.server.database.ResultDAO#getMonitorResultsForQuery(Connection, PreparedStatement)
+   * @param processDur
+   * @param roundTripDur
+   *  @see mitll.langtest.server.database.ResultDAO#getMonitorResultsForQuery(Connection, PreparedStatement)
    */
   public MonitorResult(int uniqueID, long userid, String id, String answer,
                        boolean valid, long timestamp, String answerType, int durationInMillis,
-                       boolean correct, float pronScore, String device, boolean withFlash) {
+                       boolean correct, float pronScore, String device, boolean withFlash, int processDur, int roundTripDur) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.id = id;
@@ -79,6 +84,8 @@ public class MonitorResult implements IsSerializable {
     this.pronScore = pronScore;
     this.device = device;
     this.withFlash = withFlash;
+    this.processDur   = processDur;
+    this.roundTripDur = roundTripDur;
   }
 
   public int getUniqueID() {
@@ -291,5 +298,13 @@ public class MonitorResult implements IsSerializable {
 
   public boolean isWithFlash() {
     return withFlash;
+  }
+
+  public int getProcessDur() {
+    return processDur;
+  }
+
+  public int getRoundTripDur() {
+    return roundTripDur;
   }
 }
