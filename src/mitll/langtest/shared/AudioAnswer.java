@@ -159,6 +159,6 @@ public class AudioAnswer implements IsSerializable {
   public String toString() {
     return "Answer id " + getResultID() + " : audio attr " +audioAttribute+
       " Path " + path + " duration " + durationInMillis + " id " + reqid + " validity " + validity +
-      " correct " + correct + " score " + score + " said answer " + saidAnswer;
+      " correct " + correct + " score " + score + " said answer " + saidAnswer + " pretest "+ pretestScore;
   }
 }
