@@ -259,9 +259,13 @@ public class AudioFileHelper implements CollationSort {
         logger.debug("took " + (now - then) + " to convert answer to json");
       }
       String scoreJson = json.toString();
+      PretestScore pretestScore = answer.getPretestScore();
+
+      int processDur = pretestScore == null ? 0 : pretestScore.getProcessDur();
+      logger.info(" got " + pretestScore + " and " + processDur);
       long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
           isValid, audioType, validity.durationInMillis, answer.isCorrect(), (float) answer.getScore(),
-          recordedWithFlash, deviceType, device, scoreJson);
+          recordedWithFlash, deviceType, device, scoreJson, processDur);
       answer.setResultID(answerID);
 
       recordWordAndPhoneInfo(answer, answerID);
@@ -394,9 +398,10 @@ public class AudioFileHelper implements CollationSort {
     AudioAnswer answer = getAudioAnswer(exercise1, reqid, doFlashcard, wavPath, file, validity, isValid, true);
 
     if (recordInResults) {
+      int processDur = answer.getPretestScore() == null ? 0 : answer.getPretestScore().getProcessDur();
       long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
           isValid, audioType, validity.durationInMillis, true, score, recordedWithFlash, deviceType, device,
-          getJson(answer).toString());
+          getJson(answer).toString(), processDur);
       answer.setResultID(answerID);
     }
     logger.debug("getAudioAnswerAlignment answer " + answer);
@@ -841,21 +846,6 @@ public class AudioFileHelper implements CollationSort {
     return audioAnswer;
   }
 
-  /**
-   * @return
-   * @seez mitll.langtest.server.ScoreServlet#getFlashcardScore(AudioFileHelper, java.io.File, String)
-   * @paramx file
-   * @paramx wordOrPhrase
-   */
-  /*	public ScoreAndAnswer getFlashcardAnswer(File file, String wordOrPhrase) {
-		makeASRScoring();
-		AudioAnswer audioAnswer = new AudioAnswer();
-    ASRScoring.PhoneInfo bagOfPhones = asrScoring.getBagOfPhones(wordOrPhrase);
-    int firstPronLength = bagOfPhones.getFirstPron().size();
-    PretestScore flashcardAnswer = autoCRT.getFlashcardAnswer(file, wordOrPhrase, audioAnswer, serverProps.getLanguage(),
-        firstPronLength);
-		return new ScoreAndAnswer(flashcardAnswer, audioAnswer);
-	}*/
   public Map<String, Integer> getPhoneToCount() {
     return phoneToCount;
   }
@@ -886,7 +876,7 @@ public class AudioFileHelper implements CollationSort {
   // TODO: gross
   private void makeASRScoring() {
     if (webserviceScoring == null) {
-      webserviceScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps);//.getProperties(), langTestDatabase);
+      webserviceScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps);
       oldschoolScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
     }
     asrScoring = oldschoolScoring;
