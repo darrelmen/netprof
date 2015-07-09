@@ -153,27 +153,6 @@ public class NPFExercise extends GoodwaveExercisePanel {
     });
   }
 
-/*  protected void configurePopupButton(final Button popupButton, final PopupPanel popup, final TextBox textEntry, final Tooltip tooltip) {
-    popupButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        boolean visible = popup.isShowing();
-
-        if (visible) {// fix for bug that Wade found -- if we click off of popup, it dismisses it,
-          // but if that click is on the button, it would immediately shows it again
-          //System.out.println("popup visible " + visible);
-          popup.hide();
-        } else {
-          popup.showRelativeTo(popupButton);
-          textEntry.setFocus(true);
-          tooltip.hide();
-        }
-
-        makeANewList(textEntry);
-      }
-    });
-  }*/
-
   private void makeANewList(TextBox textEntry) {
     String newListName = textEntry.getValue();
     if (!newListName.isEmpty()) {
@@ -197,46 +176,6 @@ public class NPFExercise extends GoodwaveExercisePanel {
     }
     return addIt;
   }
-
-  /**
-   * @param commentEntryText
-   * @return
-   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#makeCommentPopup(String, com.github.gwtbootstrap.client.ui.Button, NPFExercise.HidePopupTextBox, com.github.gwtbootstrap.client.ui.Button)
-   */
-/*  private DecoratedPopupPanel makePopupAndButton(TextBox commentEntryText, ClickHandler clickHandler) {
-    final DecoratedPopupPanel commentPopup = new DecoratedPopupPanel();
-    commentPopup.setAutoHideEnabled(true);
-
-    Panel hp = new HorizontalPanel();
-    hp.add(commentEntryText);
-    hp.add(getOKButton(commentPopup, clickHandler));
-
-    commentPopup.add(hp);
-    return commentPopup;
-  }*/
-
-  /**
-   * Clicking OK just dismisses the popup.
-   * @param commentPopup
-   * @return
-   * @see #makePopupAndButton(com.github.gwtbootstrap.client.ui.TextBox, com.google.gwt.event.dom.client.ClickHandler)
-   * @see mitll.langtest.client.custom.CommentNPFExercise#makeCommentPopup(String, com.github.gwtbootstrap.client.ui.Button, HidePopupTextBox, com.github.gwtbootstrap.client.ui.Button)
-   */
-  /*protected Button getOKButton(final PopupPanel commentPopup, ClickHandler clickHandler) {
-    Button ok = new Button("OK");
-    ok.setType(ButtonType.PRIMARY);
-    ok.addStyleName("leftTenMargin");
-    ok.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        commentPopup.hide();
-      }
-    });
-    if (clickHandler != null) {
-      ok.addClickHandler(clickHandler);
-    }
-    return ok;
-  }*/
 
   /**
    * @see #makeANewList(com.github.gwtbootstrap.client.ui.TextBox)
@@ -313,8 +252,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
                 controller.logEvent(w1,"DropUp",e.getID(), ADDING_TO_LIST + ul.getID() +"/"+ul.getName());
                 service.addItemToUserList(ul.getUniqueID(), new UserExercise(e, controller.getUser()), new AsyncCallback<Void>() {
                   @Override
-                  public void onFailure(Throwable caught) {
-                  }
+                  public void onFailure(Throwable caught) {}
 
                   @Override
                   public void onSuccess(Void result) {

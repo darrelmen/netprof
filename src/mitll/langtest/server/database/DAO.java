@@ -153,6 +153,13 @@ public class DAO {
     statement.close();
   }
 
+  protected void addInt(Connection connection, String table, String col) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
+        table + " ADD " + col + " INTEGER");
+    statement.execute();
+    statement.close();
+  }
+
   protected void createIndex(Database database, String column, String table) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement("" +
