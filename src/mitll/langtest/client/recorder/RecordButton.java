@@ -12,6 +12,8 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.AudioAnswer;
 
+import java.util.logging.Logger;
+
 /**
  * Basically a click handler and a timer to click stop recording, if the user doesn't.
  * <p/>
@@ -27,12 +29,15 @@ import mitll.langtest.shared.AudioAnswer;
  * To change this template use File | Settings | File Templates.
  */
 public class RecordButton extends Button {
+  private Logger logger = Logger.getLogger("RecordButton");
+
   private static final int PERIOD_MILLIS = 500;
   public static final String RECORD1 = "Record      ";
   public static final String STOP1 = "Recording...";
   public static final String WINDOWS = "Win32";
   private final String RECORD;
   private final String STOP;
+
 
   private boolean recording = false;
   private Timer recordTimer;
@@ -42,8 +47,9 @@ public class RecordButton extends Button {
 
   private RecordingListener recordingListener;
   PropertyHandler propertyHandler;
+  Timer afterStopTimer = null;
 
-  public static interface RecordingListener {
+  public interface RecordingListener {
     void startRecording();
     void flip(boolean first);
     void stopRecording();
@@ -63,11 +69,7 @@ public class RecordButton extends Button {
     RECORD = buttonText;
     STOP = stopButtonText;
     this.propertyHandler = propertyHandler;
-    //if (STOP.equalsIgnoreCase("stop")) new Exception().printStackTrace();
     this.doClickAndHold = doClickAndHold;
-/*    if (doClickAndHold) {
-      setTitle(FlashcardRecordButtonPanel.PRESS_AND_HOLD_THE_MOUSE_BUTTON_TO_RECORD);
-    }*/
     this.autoStopDelay = delay;
     setType(ButtonType.PRIMARY);
     setIcon(IconType.MICROPHONE);
@@ -119,7 +121,7 @@ public class RecordButton extends Button {
             doClick();
           }
           else {
-            System.out.println("ignoring mouse down since mouse already down " + mouseDown);
+            logger.info("ignoring mouse down since mouse already down " + mouseDown);
           }
         }
       });
@@ -155,7 +157,7 @@ public class RecordButton extends Button {
   protected void gotMouseOut() {
     if (mouseDown) {
       mouseDown = false;
-      System.out.println("got mouse out " + mouseDown);
+      logger.info("got mouse out " + mouseDown);
       doClick();
     }
   }
@@ -168,10 +170,24 @@ public class RecordButton extends Button {
     }
   }
 
+  /**
+   * @see #doClick()
+   */
   private void startOrStopRecording() {
+    if (afterStopTimer != null && afterStopTimer.isRunning()) {
+      afterStopTimer.cancel();
+    }
     if (isRecording()) {
       cancelTimer();
-      stop();
+
+      afterStopTimer = new Timer() {
+        @Override
+        public void run() {
+          stop();
+        }
+      };
+      afterStopTimer.schedule(50);
+
     } else {
       start();
       addRecordingMaxLengthTimeout();
@@ -289,23 +305,15 @@ public class RecordButton extends Button {
   }
 
   public void removeTooltip() {}
-    //private Popover popover;
   protected void showTooLoud() {
-    //if (popover == null) {
-    //  popover =
     final RecordButton widget = this;
     removeTooltip();
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-
         new BasicDialog().showPopover(widget,
             null,
             propertyHandler.getTooLoudMessage(), Placement.RIGHT);
       }
     });
-    // }
-    // else {
-    //   popover.show();
-    // }
   }
 }
