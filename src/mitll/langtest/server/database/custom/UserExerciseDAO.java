@@ -207,7 +207,7 @@ public class UserExerciseDAO extends DAO {
     logAndNotify.logAndNotifyServerException(ee);
   }
 
-  private String fixSingleQuote(String s) { return s.replaceAll("'","''"); }
+  private String fixSingleQuote(String s) { return s == null ? "" : s.replaceAll("'","''"); }
 
   void createUserTable(Database database) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
