@@ -671,6 +671,29 @@ public class ResultManager extends PagerTable {
     wFlash.setSortable(true);
     table.addColumn(wFlash, "w/Flash");
     colToField.put(wFlash, "withFlash");
+
+    TextColumn<MonitorResult> processDur = new TextColumn<MonitorResult>() {
+      @Override
+      public String getValue(MonitorResult answer) {
+        float secs = ((float) answer.getProcessDur()) / 1000f;
+        return "" + roundToHundredth(secs);
+      }
+    };
+    processDur.setSortable(true);
+    table.addColumn(processDur, "Process");
+    colToField.put(processDur, "Process");
+
+
+    TextColumn<MonitorResult> rtDur = new TextColumn<MonitorResult>() {
+      @Override
+      public String getValue(MonitorResult answer) {
+        float secs = ((float) answer.getRoundTripDur()) / 1000f;
+        return "" + roundToHundredth(secs);
+      }
+    };
+    rtDur.setSortable(true);
+    table.addColumn(rtDur, "RT");
+    colToField.put(rtDur, "RT");
   }
 
   private void addNoWrapColumn(CellTable<MonitorResult> table) {
