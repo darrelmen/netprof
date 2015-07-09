@@ -163,11 +163,21 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
             System.out.println("ignoring old answer " + result);
             return;
           }
+          long now = System.currentTimeMillis();
+          long diff = now - then;
+
+          service.addRoundTrip(result.getResultID(), (int)diff, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+            }
+          });
           recordButton.setEnabled(true);
           receivedAudioAnswer(result, outer);
 
-          long now = System.currentTimeMillis();
-          long diff = now - then;
           if (diff > 1000) {
             logMessage("posted "+ getLog(then));
           }
