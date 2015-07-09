@@ -399,8 +399,11 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		double duration = (new AudioCheck()).getDurationInSeconds(wavFile);
 		//int end = (int)((duration * 16000.0) / 100.0);
 		int end = (int)(duration * 100.0);
-		if(scores == null) {                  
+		int processDur = 0;
+		if(scores == null) {
+			long then = System.currentTimeMillis();
 			Object[] result = runHydra(rawAudioPath, sentence, lmSentences, tmpDir, decode, end);
+			processDur = (int)(System.currentTimeMillis()-then);
 			scores = (Scores)result[0];
 			wordLab = (String)result[1];
 			phoneLab = (String)result[2];
@@ -410,11 +413,11 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 			logger.error("getScoreForAudio failed to generate scores.");
 			return new PretestScore(0.01f);
 		}
-		return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile, scores, phoneLab, wordLab, duration);
+		return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile, scores, phoneLab, wordLab, duration, processDur);
 	}
 
 	private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-			boolean decode, String prefix, String noSuffix, File wavFile, Scores scores, String phoneLab, String wordLab, double duration) {
+			boolean decode, String prefix, String noSuffix, File wavFile, Scores scores, String phoneLab, String wordLab, double duration, int processDur) {
 		EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
 				useScoreForBkgColor,
 				prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, phoneLab, wordLab, true);
@@ -422,7 +425,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
 		String recoSentence = getRecoSentence(eventAndFileInfo);
 
-		return new PretestScore(scores.hydraScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence, (float) duration);
+		return new PretestScore(scores.hydraScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence, (float) duration, processDur);
 	}
 
 	////////////////////////////////
