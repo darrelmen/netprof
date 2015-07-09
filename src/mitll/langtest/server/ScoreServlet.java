@@ -38,6 +38,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String SCORE = "score";
   private static final String CHAPTER_HISTORY = "chapterHistory";
   private static final String REF_INFO = "refInfo";
+  private static final String ROUND_TRIP = "roundTrip";
   private static final String RECORD_HISTORY = "recordHistory";
   private static final String PHONE_REPORT = "phoneReport";
   /**
@@ -583,6 +584,15 @@ public class ScoreServlet extends DatabaseServlet {
       } else if (requestType.startsWith(EVENT)) {
         // log event
         gotLogEvent(request, device, jsonObject);
+      } else if (requestType.startsWith(ROUND_TRIP)) {
+        String resultID = request.getHeader("resultID");
+        String roundTripMillis = request.getHeader("roundTrip");
+
+        try {
+          addRT(Long.parseLong(resultID), Integer.parseInt(roundTripMillis), jsonObject);
+        } catch (NumberFormatException e) {
+          jsonObject.put(ERROR, "bad param format " + e.getMessage());
+        }
       } else {
         jsonObject.put(ERROR, "unknown req " + requestType);
       }
@@ -678,6 +688,11 @@ public class ScoreServlet extends DatabaseServlet {
         db.logEvent(widgetid, widgetType, exid == null ? "N/A" : exid, context, userid, device);
       }
     }
+  }
+
+  private void addRT(long resultID, int roundTripMillis, JSONObject jsonObject) {
+    db.getAnswerDAO().addRoundTrip(resultID, roundTripMillis);
+    jsonObject.put("OK","OK");
   }
 
   private long getUserFromParam2(String user) {
@@ -786,7 +801,12 @@ public class ScoreServlet extends DatabaseServlet {
         if (!next.hasRefAudio()) iterator.remove();
       }
     }
-    getExerciseSorter().sortedByPronLengthThenPhone(copy, audioFileHelper.getPhoneToCount());
+    if (audioFileHelper != null) {
+      getExerciseSorter().sortedByPronLengthThenPhone(copy, audioFileHelper.getPhoneToCount());
+    }
+    else {
+      logger.warn("audioFileHelper not set yet!");
+    }
     return getJsonArray(copy);
   }
 
@@ -894,6 +914,8 @@ public class ScoreServlet extends DatabaseServlet {
         if (doFlashcard) {
           jsonForScore.put(IS_CORRECT, answer.isCorrect());
           jsonForScore.put(SAID_WORD, answer.isSaidAnswer());
+          jsonForScore.put("resultID", answer.getResultID());
+
           // attempt to get more feedback when we're too sensitive and match the unknown model
           if (!answer.isCorrect() && !answer.isSaidAnswer()) {
             answer = getAudioAnswerAlign(reqid, exerciseID, user, false, wavPath, saveFile, deviceType, device, exercise1);
