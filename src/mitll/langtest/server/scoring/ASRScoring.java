@@ -420,15 +420,16 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 			parseJson(eventScores, jsonObject, "words",  "w");
 			parseJson(eventScores, jsonObject, "phones", "p");
 
-			scores = new Scores(precalcResult.getPronScore(), eventScores);
+			scores = new Scores(precalcResult.getPronScore(), eventScores, 0);
 			logger.debug("got cached scores " + scores);
 		}
     if (scores == null) {
       logger.error("getScoreForAudio failed to generate scores.");
       return new PretestScore(0.01f);
     }
-    return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile, scores,jsonObject);
-  }
+		return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile,
+				scores, jsonObject);
+	}
 
 	private void parseJson(Map<String, Map<String, Float>> eventScores, JSONObject jsonObject, String words1, String w1) {
 		JSONArray words = jsonObject.getJSONArray(words1);
@@ -468,7 +469,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 		String recoSentence = getRecoSentence(eventAndFileInfo);
 
     double duration = new AudioCheck().getDurationInSeconds(wavFile);
-    return new PretestScore(scores.hydraScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence, (float) duration);
+    return new PretestScore(scores.hydraScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence, (float) duration, scores.getProcessDur());
   }
 
   /**
@@ -743,13 +744,13 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
 
-      logger.debug("getScoresFromHydec : scoring '" + sentence +"' (" +sentence.length()+ " ) got score " + hydec_score +
+      logger.debug("getScoresFromHydec  : scoring '" + sentence +"' (" +sentence.length()+ " ) got score " + hydec_score +
         " and took " + timeToRunHydec + " millis");
 
-      return new Scores(hydec_score, jscoreOut._2);
+      return new Scores(hydec_score, jscoreOut._2, (int)timeToRunHydec);
     } catch (AssertionError e) {
       logger.error("Got assertion error " + e,e);
-      return new Scores();
+      return new Scores((int)(System.currentTimeMillis() - then));
     } catch (Exception ee) {
       logger.warn("Running align/decode on " + sentence +" Got " + ee, ee);
       if (langTestDatabase != null) langTestDatabase.logAndNotifyServerException(ee);
@@ -759,13 +760,13 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 
 		logger.warn("getScoresFromHydec : scoring '" + sentence + "' (" + sentence.length() + " ) : got bad score and took " + timeToRunHydec + " millis");
 
-    Scores scores = new Scores();
+    Scores scores = new Scores((int)timeToRunHydec);
     scores.hydraScore = -1;
     return scores;
   }
 
   private Scores getEmptyScores() {
     Map<String, Map<String, Float>> eventScores = Collections.emptyMap();
-    return new Scores(0f, eventScores);
+    return new Scores(0f, eventScores, 0);
   }
 }
