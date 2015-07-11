@@ -116,12 +116,12 @@ public class KeyPressHelper {
 
   public void removeKeyHandler() {
     if (keyHandler == null) {
-      System.err.println("\nEnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
+      logger.warning("\nEnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
     } //else {
     //System.out.println("EnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
     // }
     if (keyHandler != null) {
-      logger.info("KeyPressHelper : removeKeyHandler : " + keyHandler);
+      //logger.info("KeyPressHelper : removeKeyHandler : " + keyHandler);
       keyHandler.removeHandler();
       keyHandler = null;
     }
