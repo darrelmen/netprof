@@ -28,6 +28,7 @@ import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Coordinates editing an item -
@@ -39,6 +40,8 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class EditItem {
+  private final Logger logger = Logger.getLogger("EditItem");
+
   private static final String NEW_ITEM = "*New Item*";
   public static final String NEW_EXERCISE_ID = "NewExerciseID";
   private static final String EDIT_ITEM = "editItem";
@@ -70,7 +73,7 @@ public class EditItem {
     this.predefinedContentList = listInterface;
     this.feedback = feedback;
     this.npfHelper = npfHelper;
-    //System.out.println(getClass() + " : npfHelper " + npfHelper);
+    logger.info(getClass() + " : npfHelper " + npfHelper);
   }
 
   /**
@@ -123,11 +126,11 @@ public class EditItem {
    */
   private PagingExerciseList makeExerciseList(Panel right, String instanceName, UserList ul, UserList originalList,
                                                  final boolean includeAddItem) {
-    System.out.println("EditItem.makeExerciseList - ul = " + ul.getName() + " " + includeAddItem);
+    logger.info("EditItem.makeExerciseList - ul = " + ul.getName() + " " + includeAddItem);
 
     if (includeAddItem) {
       UserExercise newItem = getNewItem();
-      System.out.println("makeExerciseList : Adding " + newItem + " with " + newItem.getTooltip());
+      logger.info("makeExerciseList : Adding " + newItem + " with " + newItem.getTooltip());
       ul.addExercise(newItem);
     }
 
@@ -150,7 +153,7 @@ public class EditItem {
             useExercise(getNewItem());
           }
           else {
-            System.out.println("EditItem.makeExerciseList - askServerForExercise = "  + itemID);
+            logger.info("EditItem.makeExerciseList - askServerForExercise = "  + itemID);
 
             super.askServerForExercise(itemID);
           }
@@ -177,7 +180,7 @@ public class EditItem {
       };
     setFactory(exerciseList, ul, originalList);
     exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
-   // System.out.println("setting vertical on " +exerciseList.getElement().getId());
+   // logger.info("setting vertical on " +exerciseList.getElement().getId());
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
       public void execute() {
@@ -237,7 +240,7 @@ public class EditItem {
    */
   private void populatePanel(CommonUserExercise exercise, final Panel right, final UserList ul, final UserList originalList, final HasText itemMarker,
                              final ListInterface pagingContainer) {
-    System.out.println("exercise " + exercise.getAudioAttributes());
+   // logger.info("exercise audio attributes : " + exercise.getAudioAttributes());
     if (exercise.getID().equals(NEW_EXERCISE_ID)) {
       if (newExercise == null) {
         newExercise = createNewItem(userManager.getUser());
@@ -329,7 +332,7 @@ public class EditItem {
             delete.addClickHandler(new ClickHandler() {
               @Override
               public void onClick(ClickEvent event) {
-                System.out.println(getClass() + " : makeDeleteButton npfHelperList (2) " + npfHelper);
+                logger.info(getClass() + " : makeDeleteButton npfHelperList (2) " + npfHelper);
 
                 deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, npfHelper.npfExerciseList);
               }
