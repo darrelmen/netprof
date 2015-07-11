@@ -636,7 +636,7 @@ public class Navigation implements RequiresResize {
         Widget widget = content.getWidget(0);
 
         int tab = orig.equals(YOUR_LISTS) ? 0 : orig.equals(OTHERS_LISTS) ? 1 :orig.equals(CREATE) ? 2: orig.equals(BROWSE) ? 3:0;
-        logger.info("Select tab " + tab + " orig " + orig);
+        logger.info("selectPreviousTab Select tab " + tab + " orig " + orig);
         showFirstUserListTab((TabPanel) widget, tab);
         if (tab == 0) {
           showMyLists(true, false,subListTabPanel);
@@ -714,7 +714,7 @@ public class Navigation implements RequiresResize {
 
     int tabToSelect = onlyCreated ? 0:1;//getSafeTabIndexFor(YOUR_LISTS) : getSafeTabIndexFor(OTHERS_LISTS);
 
-    logger.info("Select tab " + tabToSelect + " only " + onlyCreated);
+    logger.info("showMyLists Select tab " + tabToSelect + " only " + onlyCreated);
 
     tabPanel.selectTab(tabToSelect);
 
@@ -729,8 +729,13 @@ public class Navigation implements RequiresResize {
    */
   public void clickOnYourLists(long userListID) {
     storeCurrentClickedList(userListID);
+  //  checkAndMaybeClearTab(YOUR_LISTS);
     storage.storeValue(SUB_TAB, EDIT_ITEM);
-    showMyLists(true, false, subListTabPanel);
+  //  showMyLists(true, false, subListTabPanel);
+
+    subListTabPanel.selectTab(0);
+    clickOnTab(yourStuff);
+    refreshViewLessons(true, false);
   }
 
   /**
