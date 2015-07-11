@@ -398,6 +398,12 @@ public class Navigation implements RequiresResize {
     }
   }
 
+  /**
+   * @see #addTabs()
+   * @see #selectPreviousTab(String)
+   * @param w
+   * @param tab
+   */
   private void showFirstUserListTab(TabPanel w, int tab) {
     clickOnTab(yourStuff);
     w.selectTab(tab);
@@ -522,7 +528,10 @@ public class Navigation implements RequiresResize {
 
   private int getSafeTabIndexFor(String tabName) {
     Integer integer = nameToIndex.get(tabName);
-    if (integer == null) return 0;
+    if (integer == null) {
+      logger.warning("Can't find index for " + tabName + " in " + nameToIndex.keySet());
+      return 0;
+    }
     else return integer;
   }
 
@@ -558,7 +567,8 @@ public class Navigation implements RequiresResize {
     if (value.isEmpty()) {   // no previous tab
       service.getListsForUser(userManager.getUser(), true, true, new AsyncCallback<Collection<UserList>>() {
         @Override
-        public void onFailure(Throwable caught) {}
+        public void onFailure(Throwable caught) {
+        }
 
         @Override
         public void onSuccess(Collection<UserList> result) {
@@ -600,6 +610,9 @@ public class Navigation implements RequiresResize {
   private void selectPreviousTab(String value) {
     TabAndContent tabAndContent = nameToTab.get(value);
     Integer tabIndex = nameToIndex.get(value);
+
+    logger.info("selectPreviousTab " + value + " index " + tabIndex);
+
     String orig = value;
     if (tabIndex == null) {
       if (value.equals(OTHERS_LISTS) || value.equals(YOUR_LISTS) || value.equals(CREATE) || value.equals(BROWSE)) {
@@ -623,7 +636,7 @@ public class Navigation implements RequiresResize {
         Widget widget = content.getWidget(0);
 
         int tab = orig.equals(YOUR_LISTS) ? 0 : orig.equals(OTHERS_LISTS) ? 1 :orig.equals(CREATE) ? 2: orig.equals(BROWSE) ? 3:0;
-      //  logger.info("Select tab " + tab + " orig " + orig);
+        logger.info("Select tab " + tab + " orig " + orig);
         showFirstUserListTab((TabPanel) widget, tab);
         if (tab == 0) {
           showMyLists(true, false,subListTabPanel);
@@ -701,7 +714,7 @@ public class Navigation implements RequiresResize {
 
     int tabToSelect = onlyCreated ? 0:1;//getSafeTabIndexFor(YOUR_LISTS) : getSafeTabIndexFor(OTHERS_LISTS);
 
-  //  logger.info("Select tab " + tabToSelect + " only " + onlyCreated);
+    logger.info("Select tab " + tabToSelect + " only " + onlyCreated);
 
     tabPanel.selectTab(tabToSelect);
 
@@ -717,10 +730,7 @@ public class Navigation implements RequiresResize {
   public void clickOnYourLists(long userListID) {
     storeCurrentClickedList(userListID);
     storage.storeValue(SUB_TAB, EDIT_ITEM);
-
-    tabPanel.selectTab(getSafeTabIndexFor(YOUR_LISTS));
-    clickOnTab(yourStuff);
-    refreshViewLessons(true, false);
+    showMyLists(true, false, subListTabPanel);
   }
 
   /**
@@ -736,7 +746,7 @@ public class Navigation implements RequiresResize {
     } else if (toUse.getTab() == null) {
       logger.warning("huh? toUse has a null tab? " + toUse);
     } else {
-   //   logger.info("click on tab " + toUse);
+      logger.info("click on tab " + toUse);
       toUse.getTab().fireEvent(new ButtonClickEvent());
     }
   }
@@ -809,7 +819,8 @@ public class Navigation implements RequiresResize {
 
     service.getReviewLists(new AsyncCallback<List<UserList>>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
       public void onSuccess(List<UserList> reviewLists) {
@@ -861,7 +872,7 @@ public class Navigation implements RequiresResize {
   void showList(final UserList ul, Panel contentPanel, final String instanceName) {
     //logger.info("showList " + ul + " instance " + instanceName);
     //  if (!ul.isEmpty()) logger.info("\tfirst" + ul.getExercises().iterator().next());
-    controller.logEvent(contentPanel,"Tab","UserList_"+ul.getID(),"Show List");
+    controller.logEvent(contentPanel, "Tab", "UserList_" + ul.getID(), "Show List");
 
     String previousList = storage.getValue(CLICKED_USER_LIST);
     String currentValue = storeCurrentClickedList(ul);
@@ -942,10 +953,10 @@ public class Navigation implements RequiresResize {
    */
   private SafeHtml getURLForDownload(long listid) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<a class='" +"icon-download"+
+    sb.appendHtmlConstant("<a class='" + "icon-download" +
         "' href='" +
         "downloadAudio" +
-        "?list=" + listid+
+        "?list=" + listid +
         "'" +
         ">");
     sb.appendEscaped(" Download");
@@ -1027,6 +1038,8 @@ public class Navigation implements RequiresResize {
     // add practice tab
     TabAndContent practice = null;
     if (isNormalList) {
+      //logger.info("getListOperations : isNormalList ");
+
       practice = makeTab(tabPanel, IconType.CHECK, PRACTICE);
       final TabAndContent fpractice = practice;
       practice.getContent().addStyleName("centerPractice");
@@ -1034,7 +1047,7 @@ public class Navigation implements RequiresResize {
         @Override
         public void onClick(ClickEvent event) {
           storage.storeValue(SUB_TAB, PRACTICE1);
-        //   logger.info("getListOperations : got click on practice " + fpractice.getContent());
+          logger.info("getListOperations : got click on practice " + fpractice.getContent().getElement().getId());
           avpHelper.setContentPanel(fpractice.getContent());
           avpHelper.showNPF(ul, fpractice, PRACTICE1, true);
           controller.logEvent(fpractice.getTab(), "Tab", "UserList_" + ul.getID(), PRACTICE1);
@@ -1045,16 +1058,25 @@ public class Navigation implements RequiresResize {
     // add add item and edit tabs (conditionally)
     TabAndContent editItemTab = null;
     if (created && (!ul.isPrivate() || ul.getCreator().getId() == controller.getUser())) {
-      final TabAndContent editTab = makeTab(tabPanel, IconType.EDIT, isReview ? ADD_DELETE_EDIT_ITEM :ADD_OR_EDIT_ITEM);
+      final TabAndContent editTab = makeTab(tabPanel, IconType.EDIT, isReview ? ADD_DELETE_EDIT_ITEM : ADD_OR_EDIT_ITEM);
       editItemTab = editTab;
+
+    //  logger.info("getListOperations : making editTab");
+
       editTab.getTab().addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
+      //    logger.info("getListOperations : got click on edit tab ");
+
           storage.storeValue(SUB_TAB, EDIT_ITEM);
           controller.logEvent(editTab.getTab(), "Tab", "UserList_" + ul.getID(), EDIT_ITEM);
           if ((isReview || isComment)) {
+        //    logger.info("getListOperations : showNPF ");
+
             reviewItem.showNPF(ul, editTab, (isReview ? REVIEW : COMMENT) + "_edit", false);
           } else {
+         //   logger.info("getListOperations : showEditItem ");
+
             showEditItem(ul, editTab, Navigation.this.editItem, !ul.isFavorite());
           }
         }
@@ -1091,13 +1113,23 @@ public class Navigation implements RequiresResize {
         ul, instanceName1, isReview, isComment, isAttention, isNormalList);
 
     if (!chosePrev) {
-      if (createdByYou(ul) && !ul.isPrivate() && ul.isEmpty() && edit != null) {
+    //  logger.info("selectTabGivenHistory ul " + ul.getName() + " private " + ul.isPrivate() + " empty " + ul.isEmpty() + " ");
+
+      if (createdByYou(ul) &&
+          //!ul.isPrivate() &&
+          ul.isEmpty() && edit != null) {
         tabPanel.selectTab(ul.getName().equals(FIX_DEFECTS) ? 0 : SUBTAB_EDIT_INDEX);    // 2 = add/edit item
-        showEditReviewOrComment(ul, isNormalList, edit, isReview,isComment);
+     //   logger.info("selectTabGivenHistory doing showEditReviewOrComment");
+        showEditReviewOrComment(ul, isNormalList, edit, isReview, isComment);
       } else {
+       // logger.info("selectTabGivenHistory doing sublearn");
+
         tabPanel.selectTab(SUBTAB_LEARN_INDEX);
         showLearnTab(learn, ul, instanceName1, isReview, isComment, isAttention);
       }
+    }
+    else {
+      logger.info("selectTabGivenHistory choose prev ");
     }
   }
 
@@ -1165,7 +1197,7 @@ public class Navigation implements RequiresResize {
                                                 boolean isReview, boolean isComment, boolean isAttention,
                                                 boolean isNormalList) {
     String subTab = storage.getValue(SUB_TAB);
-    //logger.info("selectPreviouslyClickedSubTab : subtab " + subTab);
+    logger.info("selectPreviouslyClickedSubTab : subtab " + subTab);
 
     boolean chosePrev = false;
     if (subTab != null) {
@@ -1187,10 +1219,14 @@ public class Navigation implements RequiresResize {
         if (reviewOrComment) {
           reviewItem.showNPF(ul, editTab, (isReview ? REVIEW : COMMENT) + "_edit", false);
         } else {
+          logger.info("selectPreviouslyClickedSubTab : showEditItem for list " + ul.getName());
+
           showEditItem(ul, editTab, this.editItem, isNormalList && !ul.isFavorite());
         }
 
       } else {
+        logger.info("selectPreviouslyClickedSubTab : no subtab?");
+
         chosePrev = false;
       }
     }
