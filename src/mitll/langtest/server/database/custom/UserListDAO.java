@@ -175,6 +175,11 @@ public class UserListDAO extends DAO {
 
   public int getCount() { return getCount(USER_EXERCISE_LIST); }
 
+  /**
+   * @see UserListManager#getListsForUser(long, boolean, boolean)
+   * @param userid
+   * @return
+   */
   public List<UserList> getAllByUser(long userid) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
@@ -186,7 +191,7 @@ public class UserListDAO extends DAO {
       for (UserList ul : lists) {
         populateList(ul);
       }
-   //   logger.debug("getAllByUser by " + userid + " is " + lists.size());
+//      logger.debug("getAllByUser by " + userid + " is " + lists.size());
       return lists;
 
     } catch (Exception ee) {
