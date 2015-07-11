@@ -24,6 +24,8 @@ import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
+import java.util.logging.Logger;
+
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -32,6 +34,8 @@ import mitll.langtest.shared.custom.UserList;
  * To change this template use File | Settings | File Templates.
  */
 public class NewUserExercise extends BasicDialog {
+  private final Logger logger = Logger.getLogger("NewUserExercise");
+
   private static final String FOREIGN_LANGUAGE = "Foreign Language";
   private static final String CREATE = "Create";
   static final String ENGLISH_LABEL = "English (optional)";
@@ -281,7 +285,7 @@ public class NewUserExercise extends BasicDialog {
 */
 
   public void setFields(CommonExercise newUserExercise) {
-    System.out.println("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
+    logger.info("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
 
     // english
     english.box.setText(newUserExercise.getEnglish());
@@ -388,7 +392,7 @@ public class NewUserExercise extends BasicDialog {
     }
     else {
       formInvalid();
-      System.out.println("NewUserExercise.validateThenPost : form not valid");
+      logger.info("NewUserExercise.validateThenPost : form not valid");
     }
   }
 
@@ -406,7 +410,7 @@ public class NewUserExercise extends BasicDialog {
   private void isValidForeignPhrase(final UserList ul, final ListInterface pagingContainer, final Panel toAddTo,
                                     final boolean onClick) {
     //String foreignLangText = foreignLang.getText();
-/*    System.out.println("isValidForeignPhrase : checking phrase " + foreignLangText +
+/*    logger.info("isValidForeignPhrase : checking phrase " + foreignLangText +
       " before adding/changing " + newUserExercise);*/
 
     service.isValidForeignPhrase(foreignLang.getText(), new AsyncCallback<Boolean>() {
@@ -436,7 +440,7 @@ public class NewUserExercise extends BasicDialog {
 
   void checkIfNeedsRefAudio() {
     if (newUserExercise == null || newUserExercise.getRefAudio() == null) {
-      //System.out.println("checkIfNeedsRefAudio : new user ex " + newUserExercise);
+      //logger.info("checkIfNeedsRefAudio : new user ex " + newUserExercise);
 
       Button recordButton = rap.getButton();
       markError(normalSpeedRecording, recordButton, recordButton, "", RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE, Placement.RIGHT);
@@ -481,7 +485,7 @@ public class NewUserExercise extends BasicDialog {
    * @param toAddTo
    */
   void afterItemCreated(UserExercise newExercise, UserList ul, ListInterface exerciseList, Panel toAddTo) {
-    //System.out.println("afterItemCreated " + newExercise);
+    //logger.info("afterItemCreated " + newExercise);
 
     editItem.clearNewExercise(); // success -- don't remember it
 
@@ -600,7 +604,7 @@ public class NewUserExercise extends BasicDialog {
           public void useResult(AudioAnswer result) {
             super.useResult(result);
 
-            //System.out.println("got back " + result.getAudioAttribute() + " for " + newUserExercise);
+            //logger.info("got back " + result.getAudioAttribute() + " for " + newUserExercise);
             if (result.getAudioAttribute() != null) {
 
               if (recordRegularSpeed) {
@@ -668,7 +672,7 @@ public class NewUserExercise extends BasicDialog {
       markError(foreignLang, ENTER_THE_FOREIGN_LANGUAGE_PHRASE);
       return false;
     } else if (newUserExercise == null || newUserExercise.getRefAudio() == null) {
-      System.out.println("validateForm : new user ex " + newUserExercise);
+      logger.info("validateForm : new user ex " + newUserExercise);
 
       if (foreignChanged && rap != null) {
         Button recordButton = rap.getButton();
