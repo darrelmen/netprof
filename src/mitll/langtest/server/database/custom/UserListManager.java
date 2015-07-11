@@ -254,7 +254,10 @@ public class UserListManager {
    */
   public long addUserList(long userid, String name, String description, String dliClass, boolean isPublic) {
     UserList userList = createUserList(userid, name, description, dliClass, !isPublic);
-    if (userList == null) return -1;
+    if (userList == null) {
+      logger.info("no user list??? for " + userid + " " + name);
+      return -1;
+    }
     else return userList.getUniqueID();
   }
 
@@ -307,7 +310,7 @@ public class UserListManager {
     if (userid == -1) {
       return Collections.emptyList();
     }
-    //logger.debug("getListsForUser for user #" + userid + " only created " + listsICreated + " visited " +visitedLists);
+    if (DEBUG) logger.debug("getListsForUser for user #" + userid + " only created " + listsICreated + " visited " +visitedLists);
 
     List<UserList> listsForUser = new ArrayList<UserList>();
     UserList favorite = null;
@@ -319,7 +322,7 @@ public class UserListManager {
           favorite = userList;
         }
         else {
-          //logger.debug("not favorite " + userList + " " + userList.getName());
+    //      logger.debug("not favorite " + userList + " " + userList.getName());
         }
         ids.add(userList.getUniqueID());
       }
