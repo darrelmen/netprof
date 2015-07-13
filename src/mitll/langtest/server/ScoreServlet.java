@@ -1181,13 +1181,16 @@ public class ScoreServlet extends DatabaseServlet {
     JSONArray jsonArray = new JSONArray();
     Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
 
-    for (SectionNode node : sectionNodes) {
-      String type = node.getType();
-      typeToValues.put(type, Collections.singletonList(node.getName()));
-      JSONObject jsonForNode = getJsonForNode2(node, typeToValues);
-      typeToValues.remove(type);
+    if (audioFileHelper != null) {
 
-      jsonArray.add(jsonForNode);
+      for (SectionNode node : sectionNodes) {
+        String type = node.getType();
+        typeToValues.put(type, Collections.singletonList(node.getName()));
+        JSONObject jsonForNode = getJsonForNode2(node, typeToValues);
+        typeToValues.remove(type);
+
+        jsonArray.add(jsonForNode);
+      }
     }
     return jsonArray;
   }
