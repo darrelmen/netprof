@@ -56,7 +56,7 @@ public class UserManager {
   private final String appTitle;
   private final PropertyHandler props;
   private boolean isMale;
-  private boolean isTeacher;
+  private boolean isTeacher,isAdmin;
 
   /**
    * @param lt
@@ -172,6 +172,7 @@ public class UserManager {
       }
       isMale = result.isMale();
       isTeacher = (result.getUserKind() == User.Kind.TEACHER)|| isCD;
+      isAdmin = result.isAdmin();
       //logger.info("\t is male " + isMale + " is CD " + isCD + " is teacher " + isTeacher);
 
       userNotification.gotUser(result);
@@ -480,5 +481,9 @@ public class UserManager {
 
   public boolean isTeacher() {
     return isTeacher;
+  }
+
+  public boolean isAdmin() {
+    return isAdmin;
   }
 }
