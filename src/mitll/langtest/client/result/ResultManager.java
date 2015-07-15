@@ -179,8 +179,7 @@ public class ResultManager extends PagerTable {
           //logger.info(" requestSuggestions got request for " + type + " : " + unitToValue);
           service.getResultAlternatives(unitToValue, getUserID(), getText(), type, new AsyncCallback<Collection<String>>() {
             @Override
-            public void onFailure(Throwable caught) {
-            }
+            public void onFailure(Throwable caught) {}
 
             @Override
             public void onSuccess(Collection<String> result) {
@@ -310,7 +309,6 @@ public class ResultManager extends PagerTable {
             redraw();
           }
         });
-
 
         return replacementString;
       }
