@@ -1,5 +1,9 @@
 package mitll.langtest.shared.custom;
 
+import com.github.gwtbootstrap.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.custom.Navigation;
+import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.User;
@@ -7,6 +11,7 @@ import mitll.langtest.shared.User;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -125,6 +130,13 @@ public class UserList extends ExerciseShell {
   public boolean isPrivate() {
     return isPrivate;
   }
+
+  /**
+   * @see mitll.langtest.client.custom.Navigation#selectTabGivenHistory(TabPanel, TabAndContent, TabAndContent, TabAndContent, UserList, String, boolean, boolean, boolean, boolean)
+   * @see Navigation#showInitialState()
+   * @see mitll.langtest.client.custom.UserListCallback#addUserListsToDisplay(Collection, Panel, Map)
+   * @return
+   */
   public boolean isEmpty() { return getExercises().isEmpty();  }
   public boolean isFavorite() { return getName().equals(MY_LIST);  }
 
