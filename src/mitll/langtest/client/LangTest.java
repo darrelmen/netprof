@@ -1055,7 +1055,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           downloadFailedAlert();
         }
         public void onSuccess() {
-          new UserTable(props).showUsers(service);
+          new UserTable(props,userManager.isAdmin()).showUsers(service);
         }
       });
     }
