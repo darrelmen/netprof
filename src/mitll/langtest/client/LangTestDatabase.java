@@ -78,6 +78,8 @@ public interface LangTestDatabase extends RemoteService {
 
   long getUserIDForToken(String token);
 
+  void changeEnabledFor(int userid, boolean enabled);
+
   boolean forgotUsername(String emailH, String email, String url);
 
   ResultAndTotal getResults(int start, int end, String sortInfo,Map<String, String> unitToValue, long userid, String flText, int req);
