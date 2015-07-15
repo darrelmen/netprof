@@ -33,11 +33,15 @@ import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created by GO22670 on 3/28/2014.
  */
 public class ReviewEditableExercise extends EditableExercise {
+
+  private final Logger logger = Logger.getLogger("ReviewEditableExercise");
+
   private static final String FIXED = "Mark Fixed";
   private static final String DUPLICATE = "Duplicate";
   private static final String DELETE = "Delete";
@@ -257,12 +261,10 @@ public class ReviewEditableExercise extends EditableExercise {
   }
 
   private Widget getDeleteButton(final Panel widgets, final AudioAttribute audio, final String exerciseID, String tip) {
-
-    //final Widget outer = this;
     ClickHandler handler = new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        System.out.println("marking audio defect for " + audio + " on " + exerciseID);
+        logger.info("marking audio defect for " + audio + " on " + exerciseID);
         service.markAudioDefect(audio, exerciseID, new AsyncCallback<Void>() {    // delete comment too?
           @Override
           public void onFailure(Throwable caught) {
@@ -448,7 +450,7 @@ public class ReviewEditableExercise extends EditableExercise {
       newUserExercise.setState(commonShell.getState());
       newUserExercise.setSecondState(commonShell.getSecondState());
     }
-    //System.out.println("to duplicate " + newUserExercise + " state " + newUserExercise.getState());
+    //logger.info("to duplicate " + newUserExercise + " state " + newUserExercise.getState());
     service.duplicateExercise(newUserExercise, new AsyncCallback<UserExercise>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -513,7 +515,7 @@ public class ReviewEditableExercise extends EditableExercise {
       final String id = newUserExercise.getID();
       int user = controller.getUser();
 
-      System.out.println("doAfterEditComplete : forgetting " + id + " user " + user);
+      logger.info("doAfterEditComplete : forgetting " + id + " user " + user);
 
       if (!ul.remove(newUserExercise)) {
         System.err.println("\ndoAfterEditComplete : error - didn't remove " + id + " from ul " + ul);
@@ -535,7 +537,7 @@ public class ReviewEditableExercise extends EditableExercise {
         }
       });
     } //else {
-      //System.out.println("----> doAfterEditComplete : button not clicked ");
+      //logger.info("----> doAfterEditComplete : button not clicked ");
    // }
   }
   @Override
@@ -582,7 +584,7 @@ public class ReviewEditableExercise extends EditableExercise {
         @Override
         public void onClick(ClickEvent event) {
           deleteButton.setEnabled(false);
-          System.out.println("marking audio defect for " + getAudioAttribute() + " on " + exerciseID);
+          logger.info("marking audio defect for " + getAudioAttribute() + " on " + exerciseID);
           service.markAudioDefect(getAudioAttribute(), exerciseID, new AsyncCallback<Void>() {    // delete comment too?
             @Override
             public void onFailure(Throwable caught) {
