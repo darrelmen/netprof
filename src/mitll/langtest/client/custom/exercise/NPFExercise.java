@@ -26,6 +26,7 @@ import mitll.langtest.shared.custom.UserList;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -35,6 +36,8 @@ import java.util.Collections;
  * To change this template use File | Settings | File Templates.
  */
 public class NPFExercise extends GoodwaveExercisePanel {
+  private final Logger logger = Logger.getLogger("NPFExercise");
+
   private static final String ADD_ITEM = "Add Item to List";
   private static final String ITEM_ALREADY_ADDED = "Item already added to your list(s)";
   private static final String ADD_TO_LIST = "Add to List";
@@ -159,7 +162,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
       controller.logEvent(textEntry, "NewList_TextBox", exercise.getID(), "make new list called '" + newListName + "'");
       boolean duplicateName = isDuplicateName(newListName);
       if (duplicateName) {
-        System.out.println("---> not adding duplicate list " + newListName);
+        logger.info("---> not adding duplicate list " + newListName);
       } else {
         addUserList(controller.getUser(), newListName, textEntry);
       }
@@ -184,7 +187,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param textBox
    */
   private void addUserList(long userID, String title, final TextBox textBox) {
-    //System.out.println("user " +userID + " adding list " +title);
+    logger.info("user " +userID + " adding list " +title);
     String audioType = controller.getAudioType();
     boolean isStudent = audioType.equalsIgnoreCase(PRACTICE);
     service.addUserList(userID,
@@ -239,7 +242,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
         w1.clear();
         activeCount = 0;
         boolean anyAdded = false;
-        //System.out.println("\tpopulateListChoices : found list " + result.size() + " choices");
+    //    logger.info("\tpopulateListChoices : found list " + result.size() + " choices");
         for (final UserList ul : result) {
           if (!ul.contains(new UserExercise(e))) {
             activeCount++;
