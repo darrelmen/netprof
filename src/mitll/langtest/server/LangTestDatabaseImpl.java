@@ -1304,7 +1304,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 			boolean isMale, int age, String dialect, boolean isCD, String device) {
 		User user = db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind, isMale, age, dialect, "browser");
 		if (user != null && !user.isEnabled()) { // user = null means existing user.
-			logger.debug("user " + userID +"/" +user+
+			logger.debug("user " + userID + "/" + user +
 					" wishes to be a content developer. Asking for approval.");
 			getEmailHelper().addContentDeveloper(url, email, user, getMailSupport());
 		}
@@ -1356,7 +1356,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	 * @see mitll.langtest.client.LangTest#handleCDToken
 	 */
 	public String enableCDUser(String token, String emailR, String url) {
-		logger.info("enabling token " + token + " for email " + emailR + " and url " +url);
+		logger.info("enabling token " + token + " for email " + emailR + " and url " + url);
 
 		return getEmailHelper().enableCDUser(token, emailR, url);
 	}
@@ -1385,6 +1385,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 			}
 			return true;
 		} else return false;
+	}
+
+	@Override
+	public void changeEnabledFor(int userid, boolean enabled) {
+		User userWhere = db.getUserDAO().getUserWhere(userid);
+		if (userWhere == null) logger.error("couldn't find " + userid);
+		else {
+			db.getUserDAO().changeEnabled(userid, enabled);
+		}
 	}
 
 	/**
