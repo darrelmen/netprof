@@ -569,7 +569,13 @@ public class UserExerciseDAO extends DAO {
       String sql = "UPDATE " + USEREXERCISE +
         " " +
         "SET " +
-        "english=?,foreignLanguage=?," + TRANSLITERATION + "=?,refAudio=?,slowAudioRef=?," + MODIFIED +
+        "english=?," +
+          "foreignLanguage=?," +
+          TRANSLITERATION + "=?," +
+          //"refAudio=?," +
+          //"slowAudioRef=?," +
+
+              MODIFIED +
         "=? " +
         "WHERE " +
         EXERCISEID +
@@ -582,8 +588,8 @@ public class UserExerciseDAO extends DAO {
       statement.setString(ii++, userExercise.getEnglish());
       statement.setString(ii++, userExercise.getForeignLanguage());
       statement.setString(ii++, userExercise.getTransliteration());
-      statement.setString(ii++, userExercise.getRefAudio());
-      statement.setString(ii++, userExercise.getSlowAudioRef());
+      //statement.setString(ii++, userExercise.getRefAudio());
+      //statement.setString(ii++, userExercise.getSlowAudioRef());
       statement.setTimestamp(ii++, new Timestamp(System.currentTimeMillis()));
       statement.setString(ii++, userExercise.getID());
 
