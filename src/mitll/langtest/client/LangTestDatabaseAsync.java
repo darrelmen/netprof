@@ -144,4 +144,6 @@ public interface LangTestDatabaseAsync {
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, AsyncCallback<Void> async);
 
   void addRoundTrip(long resultid, int roundTrip, AsyncCallback<Void> async);
+
+  void changeEnabledFor(int userid, boolean enabled, AsyncCallback<Void> async);
 }
