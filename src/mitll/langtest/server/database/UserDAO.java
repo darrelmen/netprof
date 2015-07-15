@@ -854,4 +854,29 @@ public class UserDAO extends DAO {
   public boolean clearKey(Long remove, boolean resetKey) {
     return updateKey(remove, resetKey, "");
   }
+
+    public boolean changeEnabled(int userid, boolean enabled) {
+        try {
+            Connection connection = getConnection();
+
+            PreparedStatement statement = connection.prepareStatement(
+                    "UPDATE " + USERS + " SET " +
+                            ENABLED + "=?" +
+                            " WHERE " +
+                            ID + "=?");
+            int i = 1;
+            statement.setBoolean(i++, enabled);
+            statement.setLong(i++, userid);
+            int i1 = statement.executeUpdate();
+
+            statement.close();
+            database.closeConnection(connection);
+            logger.debug("for " + language + " update " + ENABLED + "/" + enabled + " for " + userid +  "  " + i1);
+            return i1 != 0;
+        } catch (Exception ee) {
+            logger.error("Got " + ee, ee);
+            database.logEvent("unk", "changeEnabled user: " + userid + " " + ee.toString(), 0, UNKNOWN);
+        }
+        return false;
+    }
 }
