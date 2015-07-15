@@ -41,7 +41,7 @@ public class User extends MiniUser {
   }
 
   public enum Kind implements IsSerializable { UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ANONYMOUS }
-  public enum Permission implements IsSerializable { QUALITY_CONTROL, RECORD_AUDIO }
+  public enum Permission implements IsSerializable { QUALITY_CONTROL, RECORD_AUDIO, ENABLE_DEVELOPER }
 
   public User() {} // for serialization
 
@@ -105,16 +105,6 @@ public class User extends MiniUser {
   public Collection<Permission> getPermissions() {
     return permissions;
   }
-
-/*  public String getTimestamp() {
-	  if (ipaddr == null) return "";
-    if (ipaddr.contains("at ")) {
-      int i = ipaddr.lastIndexOf("at ")+"at ".length();
-      return ipaddr.substring(i);
-    }
-    else return "";
-  }*/
-
   public long getTimestampMillis() { return timestamp; }
 
   /**
