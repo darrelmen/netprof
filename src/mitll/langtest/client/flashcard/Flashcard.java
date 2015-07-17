@@ -123,6 +123,10 @@ public class Flashcard implements RequiresResize {
 
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("UsernameContainer");
+
+    Anchor emailAnchor = getAnchor();
+    hp.add(emailAnchor);
+
     userNameWidget = getUserNameWidget(userName);
     if (!isAnonymous) {
       hp.add(userNameWidget);
@@ -211,6 +215,16 @@ public class Flashcard implements RequiresResize {
     userNameWidget.addStyleName("rightTenMargin");
     userNameWidget.addStyleName("blueColor");
     return userNameWidget;
+  }
+
+  private Anchor getAnchor() {
+    Anchor emailAnchor = new Anchor("Need Help? Questions? Contact us.", "mailto:netprof-help@ll.mit.edu");
+
+    emailAnchor.getElement().setId("emailAnchor");
+    emailAnchor.addStyleName("bold");
+    emailAnchor.addStyleName("rightTwentyMargin");
+    emailAnchor.getElement().getStyle().setColor("#90B3CF");
+    return emailAnchor;
   }
 
   private NavLink userC, resultsC, monitoringC, eventsC;
