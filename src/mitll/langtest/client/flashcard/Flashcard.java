@@ -30,6 +30,7 @@ public class Flashcard implements RequiresResize {
   private static final String LOG_OUT = "Log Out";
   private static final double MIN_RATIO = 0.7;
   private static final int min = 720;
+  private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@ll.mit.edu";
 
   private final boolean isAnonymous;
   private Paragraph appName;
@@ -218,7 +219,8 @@ public class Flashcard implements RequiresResize {
   }
 
   private Anchor getAnchor() {
-    Anchor emailAnchor = new Anchor("Need Help? Questions? Contact us.", "mailto:netprof-help@ll.mit.edu");
+    Anchor emailAnchor = new Anchor("Need Help? Questions? Contact us.", "mailto:" +
+            NETPROF_HELP_LL_MIT_EDU);
 
     emailAnchor.getElement().setId("emailAnchor");
     emailAnchor.addStyleName("bold");
