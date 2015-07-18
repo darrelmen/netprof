@@ -1082,7 +1082,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           downloadFailedAlert();
         }
         public void onSuccess() {
-          ResultManager resultManager = new ResultManager(service, props.getNameForAnswer(), getStartupInfo().getTypeOrder(), outer);
+          ResultManager resultManager = new ResultManager(service, props.getNameForAnswer(), getStartupInfo().getTypeOrder(), outer, LangTest.this);
           resultManager.showResults();
         }
       });
