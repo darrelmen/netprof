@@ -36,9 +36,8 @@ public class Result implements IsSerializable {
   private String device;
   private transient String jsonScore;
 
-  private int processDurInMillis;
-  private int roundTripInMillis;
-
+//  private int processDurInMillis;
+//  private int roundTripInMillis;
 
   public static final String AUDIO_TYPE_UNSET = "unset";
   public static final String AUDIO_TYPE_REGULAR = "regular";
