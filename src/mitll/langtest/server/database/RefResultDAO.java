@@ -228,6 +228,23 @@ public class RefResultDAO extends DAO {
     return null;
   }
 
+  public Result getResultByID(int id) {
+    String sql = "SELECT * FROM " + REFRESULT + " WHERE " + ID + "='" + id + "'";
+    try {
+      List<Result> resultsSQL = getResultsSQL(sql);
+      if (resultsSQL.size() > 1) {
+        logger.error("for " + id + " got " + resultsSQL);
+      }
+      else if (resultsSQL.isEmpty()) {
+        logger.error("no result for " + id);
+      }
+      return resultsSQL.isEmpty() ? null : resultsSQL.iterator().next();
+    } catch (SQLException e) {
+      logger.error("Got " + e, e);
+    }
+    return null;
+  }
+
   public JSONObject getJSONScores(Collection<String> ids)  {
     try {
       String list = getInList(ids);
