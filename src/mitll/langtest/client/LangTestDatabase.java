@@ -50,6 +50,8 @@ public interface LangTestDatabase extends RemoteService {
 
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID);
 
+  PretestScore getResultASRInfo(long resultID, int width, int height);
+
   PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, String exerciseID);
 
   void addRoundTrip(long resultid, int roundTrip);
