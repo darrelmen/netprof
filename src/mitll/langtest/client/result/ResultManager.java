@@ -407,12 +407,12 @@ public class ResultManager extends PagerTable {
         ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getForeignText(), service, controller, new EmptyScoreListener(), "", "");
         reviewContainer.add(w);
         w.setResultID(selectedObject.getUniqueID());
-
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-          public void execute() {
-            w.getImagesForPath(selectedObject.getAnswer());
-          }
-        });
+        w.getImagesForPath(selectedObject.getAnswer());
+//        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+//          public void execute() {
+//
+//          }
+//        });
       }
     });
     addColumnsToTable(cellTable);
