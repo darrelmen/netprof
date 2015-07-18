@@ -110,9 +110,9 @@ public abstract class Scoring {
 	}
 
 	protected EventAndFileInfo writeTranscriptsCached(String imageOutDir, int imageWidth, int imageHeight,
-																							String audioFileNoSuffix, boolean useScoreToColorBkg,
-																							String prefix, String suffix, boolean decode,
-																							String phoneLab, String wordLab, boolean useWebservice,JSONObject object) {
+													  String audioFileNoSuffix, boolean useScoreToColorBkg,
+													  String prefix, String suffix, boolean decode,
+													  String phoneLab, String wordLab, boolean useWebservice, JSONObject object) {
 		String pathname = audioFileNoSuffix + ".wav";
 		pathname = prependDeploy(pathname);
 		if (!new File(pathname).exists()) {
@@ -146,6 +146,8 @@ public abstract class Scoring {
 			return getEventInfo(typeToFile, decode && useWebservice);
 		} else {
 			Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = null;
+
+
 			return new TranscriptWriter().getEventAndFileInfo(pathname,
 					imageOutDir, imageWidth, imageHeight, imageTypes, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, typeToEvent);
 		}
@@ -153,7 +155,6 @@ public abstract class Scoring {
 
 
 	/**
-	 * @see ASRScoring#getPretestScore
 	 * @param imageOutDir
 	 * @param imageWidth
 	 * @param imageHeight
@@ -164,10 +165,11 @@ public abstract class Scoring {
 	 * @param decode
 	 * @param useWebservice
 	 * @return
+	 * @see ASRScoring#getPretestScore
 	 */
 	protected EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
-			String audioFileNoSuffix, boolean useScoreToColorBkg,
-			String prefix, String suffix, boolean decode, boolean useWebservice) {
+												String audioFileNoSuffix, boolean useScoreToColorBkg,
+												String prefix, String suffix, boolean decode, boolean useWebservice) {
 		String pathname = audioFileNoSuffix + ".wav";
 		pathname = prependDeploy(pathname);
 		if (!new File(pathname).exists()) {
@@ -178,13 +180,13 @@ public abstract class Scoring {
 
 		boolean foundATranscript = false;
 		// These may not all exist. The speech file is created only by multisv right now.
-		String phoneLabFile  = prependDeploy(audioFileNoSuffix + ".phones.lab");
+		String phoneLabFile = prependDeploy(audioFileNoSuffix + ".phones.lab");
 		Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
 		if (new File(phoneLabFile).exists()) {
 			typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
 			foundATranscript = true;
 		}
-		String wordLabFile   = prependDeploy(audioFileNoSuffix + ".words.lab");
+		String wordLabFile = prependDeploy(audioFileNoSuffix + ".words.lab");
 		if (new File(wordLabFile).exists()) {
 			typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
 			foundATranscript = true;
@@ -206,9 +208,24 @@ public abstract class Scoring {
 		}
 	}
 
+	/**
+	 * TODO : actually use the json to
+	 * @param imageOutDir
+	 * @param imageWidth
+	 * @param imageHeight
+	 * @param audioFileNoSuffix
+	 * @param useScoreToColorBkg
+	 * @param prefix
+	 * @param suffix
+	 * @param decode
+	 * @param useWebservice
+	 * @param object TODO Actually use it
+	 * @return
+	 */
 	protected EventAndFileInfo writeTranscriptsCached(String imageOutDir, int imageWidth, int imageHeight,
-																							String audioFileNoSuffix, boolean useScoreToColorBkg,
-																							String prefix, String suffix, boolean decode, boolean useWebservice,JSONObject object) {
+													  String audioFileNoSuffix, boolean useScoreToColorBkg,
+													  String prefix, String suffix, boolean decode, boolean useWebservice,
+													  JSONObject object) {
 		String pathname = audioFileNoSuffix + ".wav";
 		pathname = prependDeploy(pathname);
 		if (!new File(pathname).exists()) {
@@ -242,13 +259,22 @@ public abstract class Scoring {
 		if (decode || imageWidth < 0) {  // hack to skip image generation
 			return getEventInfo(typeToFile, decode && useWebservice); // if align, don't use webservice regardless
 		} else {
-			//List<ImageType> imageTypes = Arrays.asList(ImageType.PHONE_TRANSCRIPT, ImageType.WORD_TRANSCRIPT);
-
+		//	List<ImageType> imageTypes = Arrays.asList(ImageType.PHONE_TRANSCRIPT, ImageType.WORD_TRANSCRIPT);
 			Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
 
 			TreeMap<Float, TranscriptEvent> value = new TreeMap<Float, TranscriptEvent>();
-			typeToEvent.put(ImageType.PHONE_TRANSCRIPT, value);
+	      	typeToEvent.put(ImageType.PHONE_TRANSCRIPT, value);
 
+
+			logger.info("got " + object);
+
+
+		//	Map<String, Map<String, Float>> eventScores = new HashMap<String, Map<String, Float>>();
+		//	jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
+
+
+			//parseJson(eventScores, jsonObject, "words", "w");
+			//parseJson(eventScores, jsonObject, "phones", "p");
 
 
 			return new TranscriptWriter().getEventAndFileInfo(pathname,
@@ -256,7 +282,14 @@ public abstract class Scoring {
 		}
 	}
 
-	private void parseJson(Map<String, Map<String, Float>> eventScores, JSONObject jsonObject, String words1, String w1) {
+	/**
+	 * TODO : actually use the parsed json to get transcript info
+	 * @param eventScores
+	 * @param jsonObject
+	 * @param words1
+	 * @param w1
+	 */
+	protected void parseJson(Map<String, Map<String, Float>> eventScores, JSONObject jsonObject, String words1, String w1) {
 		JSONArray words = jsonObject.getJSONArray(words1);
 		TreeMap<String, Float> wordEvents = new TreeMap<String, Float>();
 		eventScores.put(words1, wordEvents);
@@ -264,7 +297,7 @@ public abstract class Scoring {
 			JSONObject word = words.getJSONObject(i);
 			String w = word.getString(w1);
 			String s = word.getString("s");
-			wordEvents.put(w,Float.parseFloat(s));
+			wordEvents.put(w, Float.parseFloat(s));
 		}
 	}
 
