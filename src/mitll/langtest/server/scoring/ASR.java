@@ -38,10 +38,10 @@ public interface ASR {
 	 * @return
 	 */
 	PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-													 String sentence, Collection<String> lmSentences, String imageOutDir,
-													 int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-													 boolean decode, String tmpDir,
-													 boolean useCache, String prefix, Result precalcResult);
+							 String sentence, Collection<String> lmSentences, String imageOutDir,
+							 int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+							 boolean decode, String tmpDir,
+							 boolean useCache, String prefix, Result precalcResult);
 	
 	
 	class PhoneInfo {
