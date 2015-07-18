@@ -928,6 +928,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		return new StartupInfo(serverProps.getProperties(), getTypeOrder(), getSectionNodes());
 	}
 
+	@Override
+	public PretestScore getResultASRInfo(long resultID, int width, int height) {
+		Result result = db.getResultDAO().getResultByID(resultID);
+		PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(1, result.getAnswer(), "", width, height, true,
+				false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), result.getExerciseID(), null);
+
+		logger.info("Got " + asrScoreForAudio);
+		return asrScoreForAudio;
+	}
+
 	/**
 	 * @param reqid
 	 * @param resultID
