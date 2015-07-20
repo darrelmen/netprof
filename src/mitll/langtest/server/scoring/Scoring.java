@@ -14,11 +14,7 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Base class for the two types of scoring : DTW (Dynamic Time Warping, using "sv") and ASR (Speech Recognition).
@@ -35,7 +31,7 @@ import java.util.TreeMap;
 public abstract class Scoring {
 	private static final Logger logger = Logger.getLogger(Scoring.class);
 
-	protected static final float SCORE_SCALAR = 1.0f;// / 0.15f;
+	protected static final float SCORE_SCALAR = 1.0f;
 	private static final String SCORING = "scoring";
 
 	protected final String scoringDir;
@@ -105,7 +101,7 @@ public abstract class Scoring {
 			return getEventInfo(typeToFile, decode && useWebservice);
 		} else {
 			return new TranscriptWriter().writeTranscripts(pathname,
-					imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, decode && useWebservice);
+                    imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, decode && useWebservice);
 		}
 	}
 
@@ -149,7 +145,7 @@ public abstract class Scoring {
 
 
 			return new TranscriptWriter().getEventAndFileInfo(pathname,
-					imageOutDir, imageWidth, imageHeight, imageTypes, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, typeToEvent);
+                    imageOutDir, imageWidth, imageHeight, imageTypes, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, typeToEvent);
 		}
 	}
 
@@ -204,7 +200,7 @@ public abstract class Scoring {
 			return getEventInfo(typeToFile, decode && useWebservice); // if align, don't use webservice regardless
 		} else {
 			return new TranscriptWriter().writeTranscripts(pathname,
-					imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, decode && useWebservice);
+                    imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, decode && useWebservice);
 		}
 	}
 
@@ -259,49 +255,61 @@ public abstract class Scoring {
 		if (decode || imageWidth < 0) {  // hack to skip image generation
 			return getEventInfo(typeToFile, decode && useWebservice); // if align, don't use webservice regardless
 		} else {
-		//	List<ImageType> imageTypes = Arrays.asList(ImageType.PHONE_TRANSCRIPT, ImageType.WORD_TRANSCRIPT);
-			Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
-
-			TreeMap<Float, TranscriptEvent> value = new TreeMap<Float, TranscriptEvent>();
-	      	typeToEvent.put(ImageType.PHONE_TRANSCRIPT, value);
-
-
-			logger.info("got " + object);
-
-
-		//	Map<String, Map<String, Float>> eventScores = new HashMap<String, Map<String, Float>>();
-		//	jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
-
-
-			//parseJson(eventScores, jsonObject, "words", "w");
-			//parseJson(eventScores, jsonObject, "phones", "p");
-
-
+            Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseJson(object, "words", "w");
 			return new TranscriptWriter().getEventAndFileInfo(pathname,
-					imageOutDir, imageWidth, imageHeight, typeToFile.keySet(), SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, typeToEvent);
+					imageOutDir, imageWidth, imageHeight, typeToFile.keySet(), SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, imageTypeMapMap);
 		}
 	}
 
-	/**
-	 * TODO : actually use the parsed json to get transcript info
-	 * @param eventScores
-	 * @param jsonObject
-	 * @param words1
-	 * @param w1
-	 */
-	protected void parseJson(Map<String, Map<String, Float>> eventScores, JSONObject jsonObject, String words1, String w1) {
-		JSONArray words = jsonObject.getJSONArray(words1);
-		TreeMap<String, Float> wordEvents = new TreeMap<String, Float>();
-		eventScores.put(words1, wordEvents);
-		for (int i = 0; i < words.size(); i++) {
-			JSONObject word = words.getJSONObject(i);
-			String w = word.getString(w1);
-			String s = word.getString("s");
-			wordEvents.put(w, Float.parseFloat(s));
-		}
-	}
+    /**
+     * TODOx : actually use the parsed json to get transcript info
+     *
+     * @param jsonObject
+     * @param words1
+     * @param w1
+     * @paramx eventScores
+     */
+    protected Map<ImageType, Map<Float, TranscriptEvent>> parseJson(JSONObject jsonObject, String words1, String w1) {
 
-	// JESS reupdate here
+        Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
+
+        JSONArray words = jsonObject.getJSONArray(words1);
+        SortedMap<Float, TranscriptEvent> wordEvents = new TreeMap<Float, TranscriptEvent>();
+        SortedMap<Float, TranscriptEvent> phoneEvents = new TreeMap<Float, TranscriptEvent>();
+
+        typeToEvent.put(ImageType.WORD_TRANSCRIPT, wordEvents);
+        typeToEvent.put(ImageType.PHONE_TRANSCRIPT, phoneEvents);
+
+        for (int i = 0; i < words.size(); i++) {
+            JSONObject word = words.getJSONObject(i);
+            String w = word.getString(w1);
+            double score = word.getDouble("s");
+            double start = word.getDouble("str");
+            double end = word.getDouble("end");
+
+            wordEvents.put((float) start, new TranscriptEvent((float) start, (float) end, w, (float) score));
+
+            JSONArray phones = word.getJSONArray("phones");
+            getPhones(phoneEvents, phones);
+        }
+
+        return typeToEvent;
+    }
+
+    private void getPhones(SortedMap<Float, TranscriptEvent> phoneEvents, JSONArray phones) {
+        for (int j = 0; j < phones.size(); j++) {
+            JSONObject phone = phones.getJSONObject(j);
+
+            String token  = phone.getString("p");
+            double pscore = phone.getDouble("s");
+            double pstart = phone.getDouble("str");
+            double pend   = phone.getDouble("end");
+
+            phoneEvents.put((float) pstart, new TranscriptEvent((float) pstart, (float) pend, token, (float) pscore));
+        }
+    }
+
+    // JESS reupdate here
 	private EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes, boolean useWebservice) {
 		Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
 		try {
