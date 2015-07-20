@@ -15,7 +15,8 @@ import java.util.Map;
 public class PretestScore implements IsSerializable {
   private int reqid = 0;
   private float hydecScore = -1f;
-  private Map<String, Float> phoneScores;
+    private Map<String, Float> phoneScores;
+    private Map<String, Float> wordScores;
   private Map<NetPronImageType, String> sTypeToImage = new HashMap<NetPronImageType, String>();
   private Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
   private String recoSentence;
@@ -36,6 +37,7 @@ public class PretestScore implements IsSerializable {
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getPretestScore
    * @param hydecScore
    * @param phoneScores
+   * @param wordScores
    * @param sTypeToImage
    * @param sTypeToEndTimes
    * @param recoSentence
@@ -43,26 +45,31 @@ public class PretestScore implements IsSerializable {
    */
   public PretestScore(float hydecScore,
                       Map<String, Float> phoneScores,
-                      Map<NetPronImageType, String> sTypeToImage,
+                      Map<String, Float> wordScores, Map<NetPronImageType, String> sTypeToImage,
                       Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes,
                       String recoSentence,
                       float wavFileLengthSeconds,
                       int processDur) {
-    this.sTypeToImage = sTypeToImage;
-    this.hydecScore = hydecScore;
-    this.phoneScores = phoneScores;
-    this.sTypeToEndTimes = sTypeToEndTimes;
-    this.recoSentence = recoSentence;
-    this.wavFileLengthSeconds = wavFileLengthSeconds;
-    this.processDur = processDur;
-	}
-	
-  public float getHydecScore() {
-    return hydecScore;
+      this.sTypeToImage = sTypeToImage;
+      this.hydecScore = hydecScore;
+      this.phoneScores = phoneScores;
+      this.wordScores = wordScores;
+      this.sTypeToEndTimes = sTypeToEndTimes;
+      this.recoSentence = recoSentence;
+      this.wavFileLengthSeconds = wavFileLengthSeconds;
+      this.processDur = processDur;
   }
-	public Map<String, Float> getPhoneScores() {
-		return phoneScores;
-	}
+
+    public float getHydecScore() {
+        return hydecScore;
+    }
+
+    public Map<String, Float> getPhoneScores() {
+        return phoneScores;
+    }
+    public Map<String, Float> getWordScores() {
+        return wordScores;
+    }
   public Map<NetPronImageType, String> getsTypeToImage() {
     return sTypeToImage;
   }
