@@ -26,6 +26,7 @@ import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
@@ -926,17 +927,23 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	@Override
 	public StartupInfo getStartupInfo() {
 		return new StartupInfo(serverProps.getProperties(), getTypeOrder(), getSectionNodes());
-	}
+    }
 
-	@Override
-	public PretestScore getResultASRInfo(long resultID, int width, int height) {
-		Result result = db.getResultDAO().getResultByID(resultID);
-		PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(1, result.getAnswer(), "", width, height, true,
-				false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), result.getExerciseID(), null);
+    @Override
+    public PretestScore getResultASRInfo(long resultID, int width, int height) {
+        PretestScore asrScoreForAudio = null;
+        try {
+            Result result = db.getResultDAO().getResultByID(resultID);
+        //    logger.info("Got " + result + " for " + resultID);
+            asrScoreForAudio = audioFileHelper.getASRScoreForAudio(1, result.getAnswer(), "", width, height, true,
+                    false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), result.getExerciseID(), result);
+        } catch (Exception e) {
+            logger.error("Got " + e, e);
+        }
 
-		logger.info("Got " + asrScoreForAudio);
-		return asrScoreForAudio;
-	}
+      //  logger.info("getResultASRInfo got " + asrScoreForAudio);
+        return asrScoreForAudio;
+    }
 
 	/**
 	 * @param reqid
@@ -952,25 +959,26 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	 */
 	// JESS: this is entered for the normal stuff (I think this is alignment)
 	public PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
-			int width, int height, boolean useScoreToColorBkg, String exerciseID) {
+											int width, int height, boolean useScoreToColorBkg, String exerciseID) {
 		long then = System.currentTimeMillis();
 
 		String[] split = testAudioFile.split(File.separator);
 		String answer = split[split.length - 1];
-		Result result = db.getRefResultDAO().getResult(exerciseID, answer.replaceAll(".mp3",".wav"));
-		logger.debug("align exercise id = " + exerciseID + " file " +answer + " found " + result);
+		Result result = db.getRefResultDAO().getResult(exerciseID, answer.replaceAll(".mp3", ".wav"));
+		logger.debug("align exercise id = " + exerciseID + " file " + answer + " found " + result);
 
 		PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-				false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, null);
+				false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, result);
 		long timeToRunHydec = System.currentTimeMillis() - then;
 
-		logger.debug("getASRScoreForAudio : scoring exid " +exerciseID +
-				" sentence " +sentence.length()+" characters long and " + testAudioFile +
+		logger.debug("getASRScoreForAudio : scoring exid " + exerciseID +
+				" sentence " + sentence.length() + " characters long and " + testAudioFile +
 				" got score " + asrScoreForAudio.getHydecScore() +
 				" and took " + timeToRunHydec + " millis");
 
 		if (resultID > -1) {
-			db.getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur());
+			logger.debug("json is " + asrScoreForAudio.getJson());
+			db.getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(),asrScoreForAudio.getJson());
 		}
 		return asrScoreForAudio;
 	}
@@ -2058,55 +2066,55 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	 * Do alignment and decoding on all the reference audio and store the results in the RefResult table.
 	 * @see #doDecode(Set, CommonExercise, Collection) 
 	 */
-	private void writeRefDecode() {
-		if (DO_REF_DECODE) {
-  		Map<String, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
-			String installPath = pathHelper.getInstallPath();
+    private void writeRefDecode() {
+        if (DO_REF_DECODE) {
+            Map<String, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
+            String installPath = pathHelper.getInstallPath();
 
-			int numResults = db.getRefResultDAO().getNumResults();
-			logger.debug("found " +numResults+ " in ref results table for " + db.getServerProps().getLanguage());
+            int numResults = db.getRefResultDAO().getNumResults();
+            logger.debug("found " + numResults + " in ref results table for " + db.getServerProps().getLanguage());
 
-			Set<String> decodedFiles = getDecodedFiles();
-			List<CommonExercise> exercises = getExercises();
-			logger.debug(serverProps.getLanguage() + " found " + decodedFiles.size() +" previous ref results, checking " +
-					exercises.size() +" exercises ");
+            Set<String> decodedFiles = getDecodedFiles();
+            List<CommonExercise> exercises = getExercises();
+            logger.debug(serverProps.getLanguage() + " found " + decodedFiles.size() + " previous ref results, checking " +
+                    exercises.size() + " exercises ");
 
-			if (stopDecode) logger.debug("Stop decode true");
+            if (stopDecode) logger.debug("Stop decode true");
 
-			int count = 0;
-			int attrc = 0;
-			for (CommonExercise exercise : exercises) {
-				if (stopDecode) return;
+            int count = 0;
+            int attrc = 0;
+            for (CommonExercise exercise : exercises) {
+                if (stopDecode) return;
 
-		  	List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
-				if (audioAttributes != null) {
+                List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
+                if (audioAttributes != null) {
 //					logger.warn("hmm - audio recorded for " + )
-					db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
-					attrc += audioAttributes.size();
-				}
+                    db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
+                    attrc += audioAttributes.size();
+                }
 
-				Set<Long> preferredVoices = serverProps.getPreferredVoices();
-				Map<MiniUser, List<AudioAttribute>> malesMap   = exercise.getMostRecentAudio(true, preferredVoices);
-				Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
-				Collection<AudioAttribute> defaultUserAudio    = exercise.getDefaultUserAudio();
+                Set<Long> preferredVoices = serverProps.getPreferredVoices();
+                Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
+                Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
+                Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
 
-				List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
-				boolean maleEmpty = maleUsers.isEmpty();
-				List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
-				boolean femaleEmpty = femaleUsers.isEmpty();
+                List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
+                boolean maleEmpty = maleUsers.isEmpty();
+                List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
+                boolean femaleEmpty = femaleUsers.isEmpty();
 
-				if (!maleEmpty) {
-					count += doDecode(decodedFiles, exercise, malesMap.get(maleUsers.get(0)));
-				}
-				if (!femaleEmpty) {
-					count += doDecode(decodedFiles, exercise, femalesMap.get(femaleUsers.get(0)));
-				} else if (maleEmpty) {
-					count += doDecode(decodedFiles, exercise, defaultUserAudio);
-				}
-			}
-			logger.debug("Out of " +attrc + " audio files, decoded " + count);
-		}
-	}
+                if (!maleEmpty) {
+                    count += doDecode(decodedFiles, exercise, malesMap.get(maleUsers.get(0)));
+                }
+                if (!femaleEmpty) {
+                    count += doDecode(decodedFiles, exercise, femalesMap.get(femaleUsers.get(0)));
+                } else if (maleEmpty) {
+                    count += doDecode(decodedFiles, exercise, defaultUserAudio);
+                }
+            }
+            logger.debug("Out of " + attrc + " audio files, decoded " + count);
+        }
+    }
 
 	/**
 	 * Get the set of files that have already been decoded and aligned so we don't do them a second time.
