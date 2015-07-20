@@ -434,12 +434,6 @@ public class ResultManager extends PagerTable {
     cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(time, false));
     cellTable.setWidth("100%", false);
 
-//    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-//      public void execute() {
-//        selectionModel
-//      }
-//    });
-    // Create a SimplePager.
     return getPagerAndTable(cellTable);
   }
 
@@ -499,6 +493,8 @@ public class ResultManager extends PagerTable {
               final int numTotal = result.numTotal;
               cellTable.setRowCount(numTotal, true);
               updateRowData(start, result.results);
+              if (numTotal>0)
+              cellTable.getSelectionModel().setSelected(result.results.get(0),true);
             }
           }
         });
