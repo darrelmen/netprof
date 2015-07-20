@@ -38,7 +38,7 @@ public class AudioConversion {
 	public static final String SIXTEEN_K_SUFFIX = "_16K";
 	public static final String FILE_MISSING = "FILE_MISSING";
 	private final AudioCheck audioCheck = new AudioCheck();
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 
 	public AudioConversion() {}
 
@@ -239,54 +239,60 @@ public class AudioConversion {
     return writeMP3(pathToWav, realContextPath, overwrite, title);
   }
 
-	/**
-	 * @param pathToWav
-	 * @param realContextPath
-	 * @param overwrite
-	 * @return
-   * @see #ensureWriteMP3
-	 */
-  private String writeMP3(String pathToWav, String realContextPath, boolean overwrite, String title) {
-		File absolutePathToWav = getAbsoluteFile(pathToWav, realContextPath);
+    /**
+     * @param pathToWav
+     * @param realContextPath
+     * @param overwrite
+     * @return
+     * @see #ensureWriteMP3
+     */
+    private String writeMP3(String pathToWav, String realContextPath, boolean overwrite, String title) {
+        File absolutePathToWav = getAbsoluteFile(pathToWav, realContextPath);
 
-		String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav", ".mp3");
-		File mp3 = new File(mp3File);
-		if (!mp3.exists() || overwrite) {
-			if (DEBUG) logger.debug("writeMP3 : doing mp3 conversion for " + absolutePathToWav + " path " + pathToWav + " context " + realContextPath);
+        String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav", ".mp3");
+        File mp3 = new File(mp3File);
+        if (!mp3.exists() || overwrite) {
+            if (DEBUG)
+                logger.debug("writeMP3 : doing mp3 conversion for " + absolutePathToWav + " path " + pathToWav + " context " + realContextPath);
 
-			try {
-        File tempFile = convertTo48KWav(absolutePathToWav);
+           // try {
+              //  File tempFile = convertTo48KWav(absolutePathToWav);
+                File tempFile = absolutePathToWav;
+                String lamePath = getLame();
+                if (DEBUG) logger.debug("run lame on " + tempFile + " making " + mp3File);
 
-				String lamePath = getLame();
-				if (DEBUG)  logger.debug("run lame on " + tempFile + " making " + mp3File);
+                if (!convertFileAndCheck(lamePath, title, tempFile.getAbsolutePath(), mp3File)) {
+                    return FILE_MISSING;
+                }
+          //  } catch (IOException e) {
+        //        logger.error("converting " + pathToWav + " to " + mp3File + " got " + e, e);
+           // }
+        }
+        return mp3File;
+    }
 
-        if (!convertFileAndCheck(lamePath, title, tempFile.getAbsolutePath(), mp3File)) {
-					return FILE_MISSING;
-				}
-			} catch (IOException e) {
-				logger.error("converting " + pathToWav + " to " + mp3File + " got " + e,e);
-			}
-		}
-		return mp3File;
-	}
-
-  private File convertTo48KWav(File absolutePathToWav) throws IOException {
+/*  private File convertTo48KWav(File absolutePathToWav) throws IOException {
     File tempFile = File.createTempFile("fortyEightK",".wav");
     // logger.debug("sox conversion from " + absolutePathToWav + " to " + tempFile.getAbsolutePath());
     ProcessBuilder soxFirst = new ProcessBuilder(getSox(),
         absolutePathToWav.getAbsolutePath(), "-s", "-2", "-c", "1", "-q",tempFile.getAbsolutePath(), "rate", "48000");
 
-    new ProcessRunner().runProcess(soxFirst);
+	ProcessRunner processRunner = new ProcessRunner();
+	  try {
+		  processRunner.runProcess(soxFirst);
+	  } catch (IOException e) {
 
-    if (!tempFile.exists()) logger.error("didn't make " + tempFile);
+	  }
+
+	  if (!tempFile.exists()) logger.error("didn't make " + tempFile);
     return tempFile;
-  }
+  }*/
 
-	private String getSox() {
-    String sox = new AudioConverter().getSox(getBinPath());
-    if (!new File(sox).exists()) sox = "sox";
-    return sox;
-	}
+    private String getSox() {
+        String sox = new AudioConverter().getSox(getBinPath());
+        if (!new File(sox).exists()) sox = "sox";
+        return sox;
+    }
 
 	/**
 	 * sox normalize to -3db -- thanks Paul!
