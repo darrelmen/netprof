@@ -145,7 +145,8 @@ public interface LangTestDatabaseAsync {
 
   void addRoundTrip(long resultid, int roundTrip, AsyncCallback<Void> async);
 
+  void getResultASRInfo(long resultID, int width, int height, AsyncCallback<PretestScore> async);
+
   void changeEnabledFor(int userid, boolean enabled, AsyncCallback<Void> async);
 
-  void getResultASRInfo(long resultID, int width, int height, AsyncCallback<PretestScore> async);
 }
