@@ -48,7 +48,7 @@ public class ResultManager extends PagerTable {
   public static final String NO = "No";
   private Logger logger = Logger.getLogger("ResultManager");
 
-  private static final int PAGE_SIZE = 9;
+  private static final int PAGE_SIZE = 10;
   private static final String TIMESTAMP = "timestamp";
   private static final String CORRECT = "Correct";
   private static final String PRO_F_SCORE = "Score";
