@@ -93,7 +93,8 @@ public class AnswerDAO extends DAO {
                                 boolean valid, String audioType, long durationInMillis,
                                 boolean correct, float pronScore, String deviceType, String device, String scoreJson,
                                 boolean withFlash, int processDur, int roundTripDur) throws SQLException {
-    logger.debug("adding answer for exid #" + id + " correct " + correct + " score " + pronScore + " audio type " +audioType + " answer " + answer + " process " + processDur);
+    logger.debug("adding answer for exid #" + id + " correct " + correct + " score " + pronScore +
+            " audio type " +audioType + " answer " + answer + " process " + processDur + " json " + scoreJson);
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
         ResultDAO.RESULTS +
@@ -188,17 +189,18 @@ public class AnswerDAO extends DAO {
    * @param id
    * @param processDur
    */
-  public void changeAnswer(long id, float score, int processDur) {
-    Connection connection = getConnection();
-    try {
-      String sql = "UPDATE " +
-          "results" +
-          " " +
-        "SET " +
-          ResultDAO.PRON_SCORE+"='" + score + "', " +
-          ResultDAO.PROCESS_DUR+"='" + processDur + "' " +
-        "WHERE id=" + id;
-      PreparedStatement statement = connection.prepareStatement(sql);
+  public void changeAnswer(long id, float score, int processDur, String json) {
+      Connection connection = getConnection();
+      try {
+          String sql = "UPDATE " +
+                  "results" +
+                  " " +
+                  "SET " +
+                  ResultDAO.PRON_SCORE + "='" + score + "', " +
+                  ResultDAO.PROCESS_DUR + "='" + processDur + "', " +
+                  ResultDAO.SCORE_JSON + "='" + json + "' " +
+                  "WHERE id=" + id;
+          PreparedStatement statement = connection.prepareStatement(sql);
 
       int i = statement.executeUpdate();
 
