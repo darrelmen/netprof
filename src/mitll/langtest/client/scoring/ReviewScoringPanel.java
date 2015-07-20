@@ -24,7 +24,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
 
     @Override
     protected void scoreAudio(String path, long resultID, String refSentence, final ImageAndCheck wordTranscript,
-                              final ImageAndCheck phoneTranscript, int toUse, int height, int reqid) {
+                              final ImageAndCheck phoneTranscript, int width, int height, int reqid) {
         boolean wasVisible = wordTranscript.image.isVisible();
 
         // only show the spinning icon if it's going to take awhile
@@ -39,9 +39,10 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
 
         // Schedule the timer to run once in 1 seconds.
         t.schedule(wasVisible ? 1000 : 1);
-        logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " type " + "score" + " width " + toUse);
 
-        service.getResultASRInfo(resultID, toUse, height, new AsyncCallback<PretestScore>() {
+        logger.info("ReviewScoringPanel.scoreAudio : path " + path + " width " + width + " height " + height);
+
+        service.getResultASRInfo(resultID, width, height, new AsyncCallback<PretestScore>() {
             public void onFailure(Throwable caught) {
                 wordTranscript.image.setVisible(false);
                 phoneTranscript.image.setVisible(false);
@@ -51,7 +52,9 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
                 logger.info("scoreAudio : req " + result);
 
                 t.cancel();
-                useResult(result, wordTranscript, phoneTranscript, false, "");
+                if (result != null) {
+                    useResult(result, wordTranscript, phoneTranscript, false, "");
+                }
             }
         });
     }
