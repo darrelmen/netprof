@@ -21,6 +21,7 @@ import java.util.Map;
  */
 public class Scores {
     public static final String PHONES = "phones";
+    public static final String WORDS = "words";
     public float hydraScore;
     public final Map<String, Map<String, Float>> eventScores;
     private int processDur = 0;
