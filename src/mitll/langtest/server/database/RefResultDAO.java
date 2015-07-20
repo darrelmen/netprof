@@ -364,6 +364,7 @@ public class RefResultDAO extends DAO {
 
       boolean correct = rs.getBoolean(CORRECT);
       float pronScore = rs.getFloat(PRON_SCORE);
+   //   String device = rs.getString(DEVICE);
 
       Result result = new Result(uniqueID, userID, //id
           plan, // plan
