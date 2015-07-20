@@ -254,6 +254,7 @@ public class AudioFileHelper implements CollationSort {
     if (recordInResults) {
       long then = System.currentTimeMillis();
       JSONObject json = getJson(answer);
+      logger.debug("json is " + json);
       long now = System.currentTimeMillis();
       if (now - then > 10) {
         logger.debug("took " + (now - then) + " to convert answer to json");
@@ -262,7 +263,10 @@ public class AudioFileHelper implements CollationSort {
       PretestScore pretestScore = answer.getPretestScore();
 
       int processDur = pretestScore == null ? 0 : pretestScore.getProcessDur();
-      logger.info(" got " + pretestScore + " and " + processDur);
+
+      //  ERROROROROR
+
+      logger.info("getAudioAnswerDecoding got pretest score = " + pretestScore + " and duration = " + processDur);
       long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
           isValid, audioType, validity.durationInMillis, answer.isCorrect(), (float) answer.getScore(),
           recordedWithFlash, deviceType, device, scoreJson, processDur);
@@ -475,7 +479,7 @@ public class AudioFileHelper implements CollationSort {
     return getJsonObject(pretestScore);
   }
 
-  private JSONObject getJsonObject(PretestScore pretestScore) {
+  public JSONObject getJsonObject(PretestScore pretestScore) {
     JSONObject jsonObject = new JSONObject();
     if (pretestScore != null) {
       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getsTypeToEndTimes();
@@ -733,6 +737,9 @@ public class AudioFileHelper implements CollationSort {
         sentence, lmSentences,
         pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix, precalcResult);
     pretestScore.setReqid(reqid);
+
+    JSONObject json = getJsonObject(pretestScore);
+    pretestScore.setJson(json.toString());
 
     return pretestScore;
   }
