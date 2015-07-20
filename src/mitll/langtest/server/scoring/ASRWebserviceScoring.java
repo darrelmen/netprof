@@ -425,7 +425,8 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
 		String recoSentence = getRecoSentence(eventAndFileInfo);
 
-		return new PretestScore(scores.hydraScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence, (float) duration, processDur);
+		return new PretestScore(scores.hydraScore, getPhoneToScore(scores), getWordToScore(scores),
+                sTypeToImage, typeToEndTimes, recoSentence, (float) duration, processDur);
 	}
 
 	////////////////////////////////
@@ -649,7 +650,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * @param scores from hydec
 	 * @return map of phone name to score
 	 */
-	private Map<String, Float> getPhoneToScore(Scores scores) {
+/*	private Map<String, Float> getPhoneToScore(Scores scores) {
 		Map<String, Float> phones = scores.eventScores.get("phones");
 		if (phones == null) {
 			return Collections.emptyMap();
@@ -659,12 +660,38 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 			for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
 				String key = phoneScorePair.getKey();
 				if (!key.equals("sil")) {
-					phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue() * SCORE_SCALAR));
+					phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue()));
 				}
 			}
 			return phoneToScore;
 		}
-	}
+	}*/
+
+    private Map<String, Float> getPhoneToScore(Scores scores) {
+        Map<String, Float> phones = scores.eventScores.get("phones");
+        return getTokenToScore(scores, phones);
+    }
+    private Map<String, Float> getWordToScore(Scores scores) {
+        Map<String, Float> phones = scores.eventScores.get(Scores.WORDS);
+        return getTokenToScore(scores, phones);
+    }
+
+    private Map<String, Float> getTokenToScore(Scores scores, Map<String, Float> phones) {
+        if (phones == null) {
+            logger.warn("no phone scores in " + scores.eventScores);
+            return Collections.emptyMap();
+        }
+        else {
+            Map<String, Float> phoneToScore = new HashMap<String, Float>();
+            for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
+                String key = phoneScorePair.getKey();
+                if (!key.equals("sil")) {
+                    phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue()));
+                }
+            }
+            return phoneToScore;
+        }
+    }
 
 	/**
 	 * @see #ASRWebserviceScoring
