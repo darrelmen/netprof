@@ -132,9 +132,11 @@ public class Result implements IsSerializable {
 
   public String getExerciseID() { return id;  }
 
+/*
   public int getQid() {
     return qid;
   }
+*/
 
   public String getAnswer() {
     return answer;
