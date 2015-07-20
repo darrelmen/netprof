@@ -38,7 +38,7 @@ public class AudioConversion {
 	public static final String SIXTEEN_K_SUFFIX = "_16K";
 	public static final String FILE_MISSING = "FILE_MISSING";
 	private final AudioCheck audioCheck = new AudioCheck();
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 	public AudioConversion() {}
 
