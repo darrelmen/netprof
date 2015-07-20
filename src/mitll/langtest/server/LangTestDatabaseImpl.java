@@ -977,7 +977,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 				" and took " + timeToRunHydec + " millis");
 
 		if (resultID > -1) {
-			logger.debug("json is " + asrScoreForAudio.getJson());
+			//logger.debug("json is " + asrScoreForAudio.getJson());
 			db.getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(),asrScoreForAudio.getJson());
 		}
 		return asrScoreForAudio;
