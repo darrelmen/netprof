@@ -671,7 +671,8 @@ public class ResultDAO extends DAO {
 
       boolean correct = rs.getBoolean(CORRECT);
       float pronScore = rs.getFloat(PRON_SCORE);
-      //String stimulus = rs.getString(STIMULUS);
+      String json = rs.getString(SCORE_JSON);
+      String device = rs.getString(DEVICE);
 
       Result result = new Result(uniqueID, userID, //id
           plan, // plan
@@ -680,9 +681,9 @@ public class ResultDAO extends DAO {
           trimPathForWebPage2(answer), // answer
           valid, // valid
           timestamp.getTime(),
-          //flq, spoken,
-          type, dur, correct, pronScore, "browser");
-//      result.setStimulus(stimulus);
+
+          type, dur, correct, pronScore, device);
+      result.setJsonScore(json);
       results.add(result);
     }
     finish(connection, statement, rs);
