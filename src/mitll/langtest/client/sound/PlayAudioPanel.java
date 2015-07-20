@@ -15,6 +15,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * A play button, and an interface with the SoundManagerAPI to call off into the soundmanager.js
@@ -31,7 +32,9 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
-  /**
+    private Logger logger = Logger.getLogger("PlayAudioPanel");
+
+    /**
    * @see #setPlayButtonText
    */
   private static final String PAUSE_LABEL = "pause";
@@ -74,9 +77,9 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     }
     playButton = new Button(playLabel);
     playButton.setIcon(IconType.PLAY);
-    addButtons(optionalToTheRight);
     id = counter++;
     getElement().setId("PlayAudioPanel_"+id);
+    addButtons(optionalToTheRight);
   }
 
   public PlayAudioPanel(ExerciseController controller, String path) {
@@ -126,9 +129,9 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    */
   protected void addButtons(Widget optionalToTheRight) {
     playButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        doClick();
-      }
+        public void onClick(ClickEvent event) {
+            doClick();
+        }
     });
     playButton.setType(ButtonType.INFO);
     playButton.getElement().setId("PlayAudioPanel_playButton");
@@ -139,8 +142,11 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     add(warnNoFlash);
 
     if (optionalToTheRight != null) {
-     // System.out.println("adding " +optionalToTheRight.getElement().getId() + " to " + getElement().getId());
+      //  logger.info("adding " + optionalToTheRight.getElement().getId() + " to " + getElement().getId());
       add(optionalToTheRight);
+    }
+    else {
+       // logger.info("NOT adding right optional thing  to " + getElement().getId());
     }
   }
 
