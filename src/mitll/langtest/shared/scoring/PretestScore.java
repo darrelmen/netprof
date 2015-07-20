@@ -14,13 +14,14 @@ import java.util.Map;
  */
 public class PretestScore implements IsSerializable {
   private int reqid = 0;
-	private float hydecScore = -1f;
-	private Map<String, Float> phoneScores;
+  private float hydecScore = -1f;
+  private Map<String, Float> phoneScores;
   private Map<NetPronImageType, String> sTypeToImage = new HashMap<NetPronImageType, String>();
   private Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
   private String recoSentence;
   private float wavFileLengthSeconds;
   private int processDur = 0;
+  private String json;
 
   public PretestScore(){} // required for serialization
 
@@ -84,5 +85,13 @@ public class PretestScore implements IsSerializable {
       " type->image " + getsTypeToImage() +
       " type->endtimes " + getsTypeToEndTimes() + " took " + processDur + " millis"
       ;
+  }
+
+  public String getJson() {
+    return json;
+  }
+
+  public void setJson(String json) {
+    this.json = json;
   }
 }
