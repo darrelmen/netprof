@@ -51,7 +51,7 @@ import java.util.*;
 public class ASRScoring extends Scoring implements CollationSort, ASR {
 	private static final double KEEP_THRESHOLD = 0.3;
 	private static final Logger logger = Logger.getLogger(ASRScoring.class);
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 
 	private static final int FOREGROUND_VOCAB_LIMIT = 100;
 	private static final int VOCAB_SIZE_LIMIT = 200;
@@ -326,11 +326,11 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 																	boolean decode, String tmpDir,
 																	boolean useCache, String prefix, Result precalcResult) {
     return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
-				sentence,
-				scoringDir,
-				imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
-				decode, tmpDir,
-				useCache, prefix, precalcResult);
+            sentence,
+            scoringDir,
+            imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
+            decode, tmpDir,
+            useCache, prefix, precalcResult);
   }
 
   /**
@@ -412,15 +412,36 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 	  Scores scores;
 	  JSONObject jsonObject = null;
 	  if (precalcResult == null) {
+          logger.debug("no precalc result, so recalculating...");
 		  scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
 	  } else {
 		  Map<String, Map<String, Float>> eventScores = new HashMap<String, Map<String, Float>>();
 		  jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
 
-		  parseJson(eventScores, jsonObject, "words",  "w");
-		  parseJson(eventScores, jsonObject, "phones", "p");
+          Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseJson(jsonObject, "words", "w");
+          Map<Float, TranscriptEvent> floatTranscriptEventMap = imageTypeMapMap.get(ImageType.PHONE_TRANSCRIPT);
 
-		  scores = new Scores(precalcResult.getPronScore(), eventScores, 0);
+          Map<String, Float> value = new HashMap<>();
+          Map<String, Float> value2 = new HashMap<>();
+          eventScores.put(Scores.PHONES, value2);
+
+          Map<String, Float> cvalue = new HashMap<>();
+
+
+          for (TranscriptEvent ev : floatTranscriptEventMap.values()) {
+              Float orDefault = cvalue.getOrDefault(ev.event, 0.0f);
+              orDefault += 1.0f;
+              cvalue.put(ev.event, orDefault);
+
+              Float orDefault1 = value.getOrDefault(ev.event, ev.score);
+              value.put(ev.event, orDefault1);
+          }
+          for (Map.Entry<String, Float> pair : value.entrySet()) {
+              String key = pair.getKey();
+              value2.put(key,pair.getValue()/cvalue.get(key));
+          }
+
+          scores = new Scores(precalcResult.getPronScore(), eventScores, 0);
 		  logger.debug("got cached scores " + scores);
 	  }
 	  if (scores == null) {
@@ -652,7 +673,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
       for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
         String key = phoneScorePair.getKey();
         if (!key.equals("sil")) {
-          phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue() * SCORE_SCALAR));
+          phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue()));
         }
       }
       return phoneToScore;
