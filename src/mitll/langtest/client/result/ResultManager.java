@@ -143,7 +143,7 @@ public class ResultManager extends PagerTable {
   private Button getCloseButton(final DialogBox dialogBox) {
     final Button closeButton = new Button(CLOSE);
     closeButton.setEnabled(true);
-    closeButton.getElement().setId("closeButton");
+    closeButton.getElement().setId("closeButtonLessTopMargin");
     eventRegistration.register(closeButton, "N/A", "Close recordings dialog");
     // Add a handler to send the name to the server
     closeButton.addClickHandler(new ClickHandler() {
