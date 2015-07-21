@@ -26,6 +26,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/17/15.
  */
 public class ReviewScoringPanel extends ScoringAudioPanel {
+    public static final int WIDTH_MARGIN = 230;
     private Logger logger = Logger.getLogger("ReviewScoringPanel");
     private HTML scoreInfo;
     private Panel tablesContainer, belowContainer;
@@ -44,10 +45,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
         super(refSentence, service, controller, gaugePanel, playButtonSuffix, exerciseID);
         tablesContainer = new HorizontalPanel();
         tablesContainer.getElement().setId("TablesContainer");
-       // belowContainer = new ScrollPanel();
         belowContainer = new DivWidget();
-       // belowContainer.setHeight("70px");
-
         addStyleName("topFiveMargin");
         addStyleName("leftFiveMargin");
         addStyleName("rightFiveMargin");
@@ -141,7 +139,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
 
     @Override
     protected int getWidthForWaveform(int leftColumnWidth1, int leftColumnWidth, int rightSide) {
-        return Window.getClientWidth() - 180;
+        return Window.getClientWidth() - WIDTH_MARGIN;
     }
 
         /**
@@ -234,24 +232,6 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
             }
         });
     }
-/*
-    private Widget getTable(PretestScore score) {
-        Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(score);
-        FlexTable flex = new FlexTable();
-
-        int col = 0;
-        for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
-            TranscriptSegment word = pair.getKey();
-            flex.setWidget(0, col, new HTML(word.getEvent() + " " + getPercent(word.getScore())));
-            flex.getFlexCellFormatter().setColSpan(0, col, col + pair.getValue().size());
-
-            for (TranscriptSegment phone : pair.getValue()) {
-                HTML widget = new HTML(phone.getEvent() + " " + getPercent(phone.getScore()));
-                flex.setWidget(1, col++, widget);
-            }
-        }
-        return flex;
-    }*/
 
     private Map<TranscriptSegment, List<TranscriptSegment>> getWordToPhones(PretestScore score) {
         Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = new HashMap<>();
@@ -297,18 +277,13 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
 
             HTMLPanel col;
             srow.add(col = new HTMLPanel("td", ""));
-         //   HTML wscore = new HTML(" <b>" + getPercent(word.getScore()) +"</b>");
             HTML wscore = new HTML(""+ getPercent(word.getScore()) );
             wscore.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
 
             col.add(wscore);
 
-            //wscore.getElement().getStyle().setBackgroundColor(color);
-
             Table pTable = new Table();
-           // pTable.getElement().setId("PhoneTable");
             pTable.removeStyleName("table");
-           // pTable.getElement().getStyle().clearWidth();
 
             col = new HTMLPanel("td", "");
             col.getElement().getStyle().clearBorderStyle();
