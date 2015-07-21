@@ -21,37 +21,41 @@ import java.util.Collection;
  * Does fancy font sizing depending on available width...
  */
 public class Flashcard implements RequiresResize {
-  private static final String PRONUNCIATION_FEEDBACK = "NetProF – Networked Pronunciation Feedback";//"Classroom";//NetProF";//"PRONUNCIATION FEEDBACK";
+    private static final String PRONUNCIATION_FEEDBACK = "NetProF – Networked Pronunciation Feedback";//"Classroom";//NetProF";//"PRONUNCIATION FEEDBACK";
   private static final double MAX_FONT_EM = 1.7d;
   private static final int SLOP = 55;
   private static final String NEW_PRO_F1_PNG = "NewProF1.png";
   private static final String RECORDING_DISABLED = "RECORDING DISABLED";
   private static final int MIN_SCREEN_WIDTH = 1100;
-  private static final String LOG_OUT = "Log Out";
-  private static final double MIN_RATIO = 0.7;
-  private static final int min = 720;
-  private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@ll.mit.edu";
+    private static final String LOG_OUT = "Log Out";
+    private static final double MIN_RATIO = 0.7;
+    private static final int min = 720;
+    private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@ll.mit.edu";
+    private final String HREF;
+    public static final String NEED_HELP_QUESTIONS_CONTACT_US = "Need Help? Questions? Contact us.";
 
-  private final boolean isAnonymous;
-  private Paragraph appName;
-  private Image flashcardImage;
-  private Image collab;
-  private HTML userNameWidget;
-  private final String nameForAnswer;
-  private Paragraph subtitle;
-  private HTML browserInfo;
-  private Panel qc,recordAudio;
-  private Dropdown cogMenu;
+    private final boolean isAnonymous;
+    private Paragraph appName;
+    private Image flashcardImage;
+    private Image collab;
+    private HTML userNameWidget;
+    private final String nameForAnswer;
+    private Paragraph subtitle;
+    private HTML browserInfo;
+    private Panel qc, recordAudio;
+    private Dropdown cogMenu;
 
-  /**
-   * @see mitll.langtest.client.LangTest#makeHeaderRow()
-   */
-  public Flashcard(PropertyHandler props) {
-    this.nameForAnswer = props.getNameForAnswer() + "s";
-    isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
-  }
+    /**
+     * @see mitll.langtest.client.LangTest#makeHeaderRow()
+     */
+    public Flashcard(PropertyHandler props) {
+        this.nameForAnswer = props.getNameForAnswer() + "s";
+        isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
+        HREF = "mailto:" +
+                NETPROF_HELP_LL_MIT_EDU + "?Subject=Question%20about%20" + props.getLanguage() + "%20NetProF";
+    }
 
-  /**
+    /**
    * @param splashText
    * @param userName
    * @return
@@ -219,8 +223,7 @@ public class Flashcard implements RequiresResize {
   }
 
   private Anchor getAnchor() {
-    Anchor emailAnchor = new Anchor("Need Help? Questions? Contact us.", "mailto:" +
-            NETPROF_HELP_LL_MIT_EDU);
+    Anchor emailAnchor = new Anchor(NEED_HELP_QUESTIONS_CONTACT_US, HREF);
 
     emailAnchor.getElement().setId("emailAnchor");
     emailAnchor.addStyleName("bold");
