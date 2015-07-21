@@ -69,7 +69,10 @@ public abstract class Scoring {
 			String audioFileNoSuffix, boolean useScoreToColorBkg,
 			String prefix, String suffix, boolean decode,
 			String phoneLab, String wordLab, boolean useWebservice) {
-		String pathname = audioFileNoSuffix + ".wav";
+
+        logger.debug("writeTranscripts - "+ audioFileNoSuffix);
+
+        String pathname = audioFileNoSuffix + ".wav";
 		pathname = prependDeploy(pathname);
 		if (!new File(pathname).exists()) {
 			logger.error("writeTranscripts : can't find " + pathname);
@@ -105,7 +108,7 @@ public abstract class Scoring {
 		}
 	}
 
-	protected EventAndFileInfo writeTranscriptsCached(String imageOutDir, int imageWidth, int imageHeight,
+/*	protected EventAndFileInfo writeTranscriptsCached(String imageOutDir, int imageWidth, int imageHeight,
 													  String audioFileNoSuffix, boolean useScoreToColorBkg,
 													  String prefix, String suffix, boolean decode,
 													  String phoneLab, String wordLab, boolean useWebservice, JSONObject object) {
@@ -147,7 +150,7 @@ public abstract class Scoring {
 			return new TranscriptWriter().getEventAndFileInfo(pathname,
                     imageOutDir, imageWidth, imageHeight, imageTypes, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, typeToEvent);
 		}
-	}
+	}*/
 
 
 	/**
@@ -166,6 +169,7 @@ public abstract class Scoring {
 	protected EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
 												String audioFileNoSuffix, boolean useScoreToColorBkg,
 												String prefix, String suffix, boolean decode, boolean useWebservice) {
+        logger.debug("writeTranscripts -");
 		String pathname = audioFileNoSuffix + ".wav";
 		pathname = prependDeploy(pathname);
 		if (!new File(pathname).exists()) {
@@ -222,6 +226,8 @@ public abstract class Scoring {
 													  String audioFileNoSuffix, boolean useScoreToColorBkg,
 													  String prefix, String suffix, boolean decode, boolean useWebservice,
 													  JSONObject object) {
+        logger.debug("writeTranscriptsCached " + object);
+
 		String pathname = audioFileNoSuffix + ".wav";
 		pathname = prependDeploy(pathname);
 		if (!new File(pathname).exists()) {
@@ -277,21 +283,27 @@ public abstract class Scoring {
         typeToEvent.put(ImageType.WORD_TRANSCRIPT,  wordEvents);
         typeToEvent.put(ImageType.PHONE_TRANSCRIPT, phoneEvents);
 
+        boolean valid = true;
         if (jsonObject.containsKey(words1)) {
             try {
                 JSONArray words = jsonObject.getJSONArray(words1);
-                for (int i = 0; i < words.size(); i++) {
+                for (int i = 0; i < words.size() && valid; i++) {
                     JSONObject word = words.getJSONObject(i);
-                    objectToEvent(wordEvents, w1, word);
-                    JSONArray phones = word.getJSONArray("phones");
-                    getPhones(phoneEvents, phones);
+                    if (word.containsKey("str")) {
+                        objectToEvent(wordEvents, w1, word);
+                        JSONArray phones = word.getJSONArray("phones");
+                        getPhones(phoneEvents, phones);
+                    }
+                    else {
+                        valid = false;
+                    }
                 }
             } catch (Exception e) {
                 logger.debug("no json array at " + words1 + " in " + jsonObject,e);
             }
         }
 
-        return typeToEvent;
+        return valid ? typeToEvent: new HashMap<ImageType, Map<Float, TranscriptEvent>>();
     }
 
     private void getPhones(SortedMap<Float, TranscriptEvent> phoneEvents, JSONArray phones) {
