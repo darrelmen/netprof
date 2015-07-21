@@ -44,9 +44,9 @@ import java.util.*;
  */
 public class ASRScoring extends Scoring implements CollationSort, ASR {
     private static final Logger logger = Logger.getLogger(ASRScoring.class);
+    private static final boolean DEBUG = false;
 
 	private static final double KEEP_THRESHOLD = 0.3;
-	private static final boolean DEBUG = false;
 
 	private static final int FOREGROUND_VOCAB_LIMIT = 100;
 	private static final int VOCAB_SIZE_LIMIT = 200;
@@ -557,7 +557,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
       sentence = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") +getSegmented(sentence.trim()); // segmentation method will filter out the UNK model
     }
     if (scores == null) {
-      if (DEBUG) logger.debug("no cached score for file '" + key + "', so doing " + (decode ? "decoding" : "alignment"));
+      if (DEBUG) logger.debug("no cached score for file '" + key + "', so doing " + (decode ? "decoding" : "alignment") + " on " + sentence);
       scores = calcScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir);
       audioToScore.put(key, scores);
     }
@@ -812,7 +812,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
   private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
 		sentence = svd.getTrimmed(sentence);
     long then = System.currentTimeMillis();
-//    logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with LTS " + letterToSoundClass);
+    logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with LTS " + letterToSoundClass + " against " + testAudio + " with " + configFile);
 
     try {
       Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut =
