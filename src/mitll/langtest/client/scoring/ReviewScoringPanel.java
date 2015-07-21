@@ -236,14 +236,20 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
     private Map<TranscriptSegment, List<TranscriptSegment>> getWordToPhones(PretestScore score) {
         Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = new HashMap<>();
 
-        List<TranscriptSegment> words = score.getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
+        List<TranscriptSegment> words  = score.getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
         List<TranscriptSegment> phones = score.getsTypeToEndTimes().get(NetPronImageType.PHONE_TRANSCRIPT);
         for (TranscriptSegment word : words) {
-            for (TranscriptSegment phone : phones) {
-                if (phone.getStart() >= word.getStart() && phone.getEnd() <= word.getEnd()) {
-                    List<TranscriptSegment> orDefault = wordToPhones.get(word);
-                    if (orDefault == null) wordToPhones.put(word, orDefault = new ArrayList<TranscriptSegment>());
-                    orDefault.add(phone);
+            String event = word.getEvent();
+            if (event.equals("sil") || event.equals("<s>") || event.equals("</s>")) {
+
+            }
+            else {
+                for (TranscriptSegment phone : phones) {
+                    if (phone.getStart() >= word.getStart() && phone.getEnd() <= word.getEnd()) {
+                        List<TranscriptSegment> orDefault = wordToPhones.get(word);
+                        if (orDefault == null) wordToPhones.put(word, orDefault = new ArrayList<TranscriptSegment>());
+                        orDefault.add(phone);
+                    }
                 }
             }
         }
@@ -297,20 +303,24 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
             pTable.add(row3);
 
             for (TranscriptSegment phone : pair.getValue()) {
-                TableHeader h = new TableHeader(phone.getEvent());
-                h.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
-                pTable.add(h);
-                String color1 = SimpleColumnChart.getColor(phone.getScore());
-                h.getElement().getStyle().setBackgroundColor(color1);
 
-              //  HTML widget = new HTML(" <b>" + getPercent(phone.getScore()) +"</b>");
-                HTML widget = new HTML(""+ getPercent(phone.getScore()));
-                widget.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
-                widget.getElement().getStyle().setWidth(25, Style.Unit.PX);
+                String event = phone.getEvent();
+                if (!event.equals("sil")) {
+                    TableHeader h = new TableHeader(event);
+                    h.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+                    pTable.add(h);
+                    String color1 = SimpleColumnChart.getColor(phone.getScore());
+                    h.getElement().getStyle().setBackgroundColor(color1);
 
-                col = new HTMLPanel("td", "");
-                col.add(widget);
-                row3.add(col);
+                    //  HTML widget = new HTML(" <b>" + getPercent(phone.getScore()) +"</b>");
+                    HTML widget = new HTML("" + getPercent(phone.getScore()));
+                    widget.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+                    widget.getElement().getStyle().setWidth(25, Style.Unit.PX);
+
+                    col = new HTMLPanel("td", "");
+                    col.add(widget);
+                    row3.add(col);
+                }
             }
         }
 
