@@ -934,7 +934,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         try {
             Result result = db.getResultDAO().getResultByID(resultID);
         //    logger.info("Got " + result + " for " + resultID);
-            asrScoreForAudio = audioFileHelper.getASRScoreForAudio(1, result.getAnswer(), "", width, height, true,
+            String sentence = "";
+            if (result != null) {
+                CommonExercise exercise = db.getExercise(result.getExerciseID());
+                sentence = exercise.getForeignLanguage();
+            }
+            asrScoreForAudio = audioFileHelper.getASRScoreForAudio(1, result.getAnswer(), sentence, width, height, true,
                     false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), result.getExerciseID(), result);
         } catch (Exception e) {
             logger.error("Got " + e, e);
