@@ -1,7 +1,9 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.incubator.Table;
 import com.github.gwtbootstrap.client.ui.incubator.TableHeader;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -24,7 +26,7 @@ import java.util.logging.Logger;
 public class ReviewScoringPanel extends ScoringAudioPanel {
     private Logger logger = Logger.getLogger("ReviewScoringPanel");
     private HTML scoreInfo;
-    private Panel tablesContainer;
+    private Panel tablesContainer, belowContainer;
 
     /**
      *
@@ -40,6 +42,10 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
         super(refSentence, service, controller, gaugePanel, playButtonSuffix, exerciseID);
         tablesContainer = new HorizontalPanel();
         tablesContainer.getElement().setId("TablesContainer");
+       // belowContainer = new ScrollPanel();
+        belowContainer = new DivWidget();
+       // belowContainer.setHeight("70px");
+
         addStyleName("topFiveMargin");
         addStyleName("leftFiveMargin");
         addStyleName("rightFiveMargin");
@@ -86,9 +92,42 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
         return table;
     }
 
+    private Table makeTableHoriz(String label, String scoreColHeader, Map<String, Float> scores) {
+        Table table = new Table();
+        table.getElement().setId("LeaderboardTable_" + label + "_" + scoreColHeader.substring(0, 3));
+        //table.add(new TableHeader(scoreColHeader));
+
+        if (scores == null) {
+            logger.warning("scores is null?");
+        }
+        else {
+            List<String> keys = new ArrayList<String>(scores.keySet());
+            Collections.sort(keys);
+
+            HTMLPanel row = new HTMLPanel("tr", "");
+            table.add(row);
+            table.add(new TableHeader(label));
+
+            HTMLPanel col = new HTMLPanel("td", "");
+            col.add(new HTML("<b>"+scoreColHeader+"</b>"));
+            row.add(col);
+
+            for (String key : keys) {
+                table.add(new TableHeader(key));
+
+                // add score
+                col = new HTMLPanel("td", "");
+                String html = "" + Math.round(scores.get(key)*100);
+                col.add(new HTML(html));
+                row.add(col);
+            }
+        }
+        return table;
+    }
+
     @Override
     protected int getWidthForWaveform(int leftColumnWidth1, int leftColumnWidth, int rightSide) {
-        return Window.getClientWidth() - 380;
+        return Window.getClientWidth() - 180;
     }
 
         /**
@@ -107,6 +146,8 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
                               final ImageAndCheck phoneTranscript, int width, int height, int reqid) {
 
         boolean wasVisible = wordTranscript.image.isVisible();
+
+        belowContainer.setWidth(width+"px");
 
         // only show the spinning icon if it's going to take awhile
         final Timer t = new Timer() {
@@ -144,6 +185,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
 
                     // logger.info("Setting " + scoreInfo.getElement().getId() + " to " + html);
                     tablesContainer.clear();
+                    belowContainer.clear();
 
                     if (result.getWordScores() != null) {
                         if (!result.getWordScores().isEmpty()) {
@@ -151,19 +193,27 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
 
                             ScrollPanel child = new ScrollPanel(wordTable);
                             child.getElement().setId("TableScroller_Word");
-                            child.setWidth("150px");
+                            child.setWidth("170px");
                             child.setHeight("200px");
                             tablesContainer.add(child);
                         }
 
                         if (!result.getPhoneScores().isEmpty()) {
-                            Table phoneTable = makeTable("Phone", "Score", result.getPhoneScores());
+                            Table phoneTable = makeTableHoriz("Phone", "Score", result.getPhoneScores());
+                            phoneTable.getElement().getStyle().setMarginBottom(3, Style.Unit.PX);
+                            phoneTable.addStyleName("topFiveMargin");
 
-                            ScrollPanel child = new ScrollPanel(phoneTable);
-                            child.getElement().setId("TableScroller_Phone");
-                            child.setWidth("120px");
-                            child.setHeight("200px");
-                            tablesContainer.add(child);
+                            DivWidget left = new DivWidget();
+                            left.addStyleName("floatLeft");
+                            left.add(phoneTable);
+
+                            belowContainer.add(left);
+                            belowContainer.add(new DivWidget());
+                            //ScrollPanel child = new ScrollPanel(phoneTable);
+                            //child.getElement().setId("TableScroller_Phone");
+                            //child.setWidth("120px");
+                            //child.setHeight("200px");
+                            //belowContainer.add(phoneTable);
                         }
                     }
                 }
@@ -171,7 +221,15 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
         });
     }
 
+    /**
+     * @see mitll.langtest.client.result.ResultManager#getAsyncTable(int)
+     * @return
+     */
     public Widget getTables() {
         return tablesContainer;
+    }
+    public Widget getBelow() {
+
+        return belowContainer;
     }
 }
