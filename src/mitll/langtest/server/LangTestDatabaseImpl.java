@@ -116,7 +116,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	}
 
 	private List<CommonShell> getExerciseShells(Collection<? extends CommonExercise> exercises) {
-		return serverProps.getLanguage().equals(ENGLISH) ? getExerciseShellsShort(exercises) : getExerciseShellsCombined(exercises);
+		return getLanguage().equals(ENGLISH) ? getExerciseShellsShort(exercises) : getExerciseShellsCombined(exercises);
 	}
 
 	private List<CommonShell> getExerciseShellsShort(Collection<? extends CommonExercise> exercises) {
@@ -172,7 +172,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 			boolean onlyExamples, boolean incorrectFirstOrder, boolean onlyWithAudioAnno) {
 		Collection<CommonExercise> exercises;
 
-		logger.debug("getExerciseIds : (" + serverProps.getLanguage() + ") " +
+		logger.debug("getExerciseIds : (" + getLanguage() + ") " +
 				"getting exercise ids for " +
 				" config " + relativeConfigDir +
 				" prefix '" + prefix +
@@ -233,7 +233,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
 	private Collection<CommonExercise> getExercisesForSearch(String prefix, int userID, Collection<CommonExercise> exercises, boolean predefExercises) {
 		long then = System.currentTimeMillis();
-		ExerciseTrie trie = predefExercises ? fullTrie : new ExerciseTrie(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
+		ExerciseTrie trie = predefExercises ? fullTrie : new ExerciseTrie(exercises, getLanguage(), audioFileHelper.getSmallVocabDecoder());
 		exercises = trie.getExercises(prefix, audioFileHelper.getSmallVocabDecoder());
 		long now = System.currentTimeMillis();
 		if (now - then > 300) {
@@ -454,7 +454,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		//logger.debug("marked " +i + " as recorded role " +role);
 
 		if (hasPrefix) {
-			ExerciseTrie trie = new ExerciseTrie(exercisesForState, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
+			ExerciseTrie trie = new ExerciseTrie(exercisesForState, getLanguage(), audioFileHelper.getSmallVocabDecoder());
 			exercisesForState = trie.getExercises(prefix, audioFileHelper.getSmallVocabDecoder());
 		}
 
@@ -527,7 +527,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     addAnnotations(firstExercise); // todo do this in a better way
     long now = System.currentTimeMillis();
     if (now - then > SLOW_MILLIS) {
-      logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to add annotations to exercise " + firstExercise.getID());
+      logger.debug("addAnnotationsAndAudio : (" + getLanguage() + ") took " + (now - then) + " millis to add annotations to exercise " + firstExercise.getID());
     }
     then = now;
     attachAudio(firstExercise);
@@ -539,7 +539,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     now = System.currentTimeMillis();
     if (now - then > SLOW_MILLIS) {
-      logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to attach audio to exercise " + firstExercise.getID());
+      logger.debug("addAnnotationsAndAudio : (" + getLanguage() + ") took " + (now - then) + " millis to attach audio to exercise " + firstExercise.getID());
     }
     then = now;
 
@@ -548,7 +548,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       addPlayedMarkings(userID, firstExercise);
       now = System.currentTimeMillis();
       if (now - then > SLOW_MILLIS) {
-        logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to add played markings to exercise " + firstExercise.getID());
+        logger.debug("addAnnotationsAndAudio : (" + getLanguage() + ") took " + (now - then) + " millis to add played markings to exercise " + firstExercise.getID());
       }
     }
 
@@ -558,7 +558,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     now = System.currentTimeMillis();
     if (now - then > SLOW_MILLIS) {
-      logger.debug("addAnnotationsAndAudio : (" + serverProps.getLanguage() + ") took " + (now - then) + " millis to attach score history to exercise " + firstExercise.getID());
+      logger.debug("addAnnotationsAndAudio : (" + getLanguage() + ") took " + (now - then) + " millis to attach score history to exercise " + firstExercise.getID());
     }
 
     if (DEBUG) {
@@ -678,7 +678,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		CommonExercise byID = db.getCustomOrPredefExercise(id);  // allow custom items to mask out non-custom items
 
 		long now = System.currentTimeMillis();
-		String language = serverProps.getLanguage();
+		String language = getLanguage();
 		if (now - then2 > 100) {
 			logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to find exercise " + id);
 		}
@@ -725,7 +725,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		long now;
 		now = System.currentTimeMillis();
 		long diff = now - then;
-		String language = serverProps.getLanguage();
+		String language = getLanguage();
 
 		String message = "getExercise : (" + language + ") took " + diff + " millis to get exercise " + id;// + " : " + threadInfo;
 		if (diff > SLOW_EXERCISE_EMAIL) {
@@ -771,7 +771,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		}
 
 		if (audioAttributes.isEmpty()) {
-			logger.warn("ensureMP3s : (" + serverProps.getLanguage() + ") no ref audio for " + byID);
+			logger.warn("ensureMP3s : (" + getLanguage() + ") no ref audio for " + byID);
 		}
 	}
 
@@ -786,7 +786,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		List<CommonExercise> exercises = db.getExercises();
 		makeAutoCRT();   // side effect of db.getExercises is to make the exercise DAO which is needed here...
 		if (fullTrie == null) {
-			fullTrie = new ExerciseTrie(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
+			fullTrie = new ExerciseTrie(exercises, getLanguage(), audioFileHelper.getSmallVocabDecoder());
 		}
 
 		audioFileHelper.checkLTS(exercises);
@@ -795,7 +795,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		}
 		long now = System.currentTimeMillis();
 		if (now - then > 200) {
-			logger.info("took " + (now - then) + " millis to get the predef exercise list for " + serverProps.getLanguage());
+			logger.info("took " + (now - then) + " millis to get the predef exercise list for " + getLanguage());
 		}
 		return exercises;
 	}
@@ -2058,7 +2058,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 			}).start();
 		}
 		else {
-			logger.debug(serverProps.getLanguage() + " not doing decode all");
+			logger.debug(getLanguage() + " not doing decode all");
 		}
 	}
 
@@ -2072,11 +2072,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
             String installPath = pathHelper.getInstallPath();
 
             int numResults = db.getRefResultDAO().getNumResults();
-            logger.debug("found " + numResults + " in ref results table for " + db.getServerProps().getLanguage());
+            logger.debug(getLanguage() + "writeRefDecode : found " +
+                    numResults + " in ref results table vs " +exToAudio.size() + " exercises with audio");
 
             Set<String> decodedFiles = getDecodedFiles();
             List<CommonExercise> exercises = getExercises();
-            logger.debug(serverProps.getLanguage() + " found " + decodedFiles.size() + " previous ref results, checking " +
+            logger.debug(getLanguage() + " found " + decodedFiles.size() + " previous ref results, checking " +
                     exercises.size() + " exercises ");
 
             if (stopDecode) logger.debug("Stop decode true");
@@ -2116,14 +2117,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
     }
 
-	/**
+    private String getLanguage() {
+        return serverProps.getLanguage();
+    }
+
+    /**
 	 * Get the set of files that have already been decoded and aligned so we don't do them a second time.
 	 * @return
 	 * @see #writeRefDecode
 	 */
 	private Set<String> getDecodedFiles() {
 		List<Result> results = db.getRefResultDAO().getResults();
-		logger.debug(serverProps.getLanguage() + " found " + results.size() +" previous ref results");
+		logger.debug(getLanguage() + " found " + results.size() +" previous ref results");
 
 		Set<String> decodedFiles = new HashSet<String>();
 		int count = 0;
