@@ -270,43 +270,48 @@ public abstract class Scoring {
      * @paramx eventScores
      */
     protected Map<ImageType, Map<Float, TranscriptEvent>> parseJson(JSONObject jsonObject, String words1, String w1) {
-
         Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
-
-        JSONArray words = jsonObject.getJSONArray(words1);
-        SortedMap<Float, TranscriptEvent> wordEvents = new TreeMap<Float, TranscriptEvent>();
+        SortedMap<Float, TranscriptEvent> wordEvents  = new TreeMap<Float, TranscriptEvent>();
         SortedMap<Float, TranscriptEvent> phoneEvents = new TreeMap<Float, TranscriptEvent>();
 
-        typeToEvent.put(ImageType.WORD_TRANSCRIPT, wordEvents);
+        typeToEvent.put(ImageType.WORD_TRANSCRIPT,  wordEvents);
         typeToEvent.put(ImageType.PHONE_TRANSCRIPT, phoneEvents);
 
-        for (int i = 0; i < words.size(); i++) {
-            JSONObject word = words.getJSONObject(i);
-            String w = word.getString(w1);
-            double score = word.getDouble("s");
-            double start = word.getDouble("str");
-            double end = word.getDouble("end");
-
-            wordEvents.put((float) start, new TranscriptEvent((float) start, (float) end, w, (float) score));
-
-            JSONArray phones = word.getJSONArray("phones");
-            getPhones(phoneEvents, phones);
+        if (jsonObject.containsKey(words1)) {
+            try {
+                JSONArray words = jsonObject.getJSONArray(words1);
+                for (int i = 0; i < words.size(); i++) {
+                    JSONObject word = words.getJSONObject(i);
+                    objectToEvent(wordEvents, w1, word);
+                    JSONArray phones = word.getJSONArray("phones");
+                    getPhones(phoneEvents, phones);
+                }
+            } catch (Exception e) {
+                logger.debug("no json array at " + words1 + " in " + jsonObject,e);
+            }
         }
 
         return typeToEvent;
     }
 
     private void getPhones(SortedMap<Float, TranscriptEvent> phoneEvents, JSONArray phones) {
+        getEventsFromJson(phoneEvents, phones, "p");
+    }
+
+    private void getEventsFromJson(SortedMap<Float, TranscriptEvent> phoneEvents, JSONArray phones, String tokenKey) {
         for (int j = 0; j < phones.size(); j++) {
             JSONObject phone = phones.getJSONObject(j);
-
-            String token  = phone.getString("p");
-            double pscore = phone.getDouble("s");
-            double pstart = phone.getDouble("str");
-            double pend   = phone.getDouble("end");
-
-            phoneEvents.put((float) pstart, new TranscriptEvent((float) pstart, (float) pend, token, (float) pscore));
+            objectToEvent(phoneEvents, tokenKey, phone);
         }
+    }
+
+    private void objectToEvent(SortedMap<Float, TranscriptEvent> phoneEvents, String tokenKey, JSONObject phone) {
+        String token  = phone.getString(tokenKey);
+        double pscore = phone.getDouble("s");
+        double pstart = phone.getDouble("str");
+        double pend   = phone.getDouble("end");
+
+        phoneEvents.put((float) pstart, new TranscriptEvent((float) pstart, (float) pend, token, (float) pscore));
     }
 
     // JESS reupdate here

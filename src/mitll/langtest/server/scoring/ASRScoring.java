@@ -411,12 +411,18 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 
 	  Scores scores;
 	  JSONObject jsonObject = null;
-	  if (precalcResult == null) {
-          logger.debug("no precalc result, so recalculating...");
+	  if (precalcResult == null || precalcResult.getPronScore() < 0 || precalcResult.getJsonScore() == null || precalcResult.getJsonScore().isEmpty()) {
+          logger.debug("no precalc result, so recalculating : " + precalcResult);
 		  scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
 	  } else {
+          logger.debug("for " + precalcResult + " got " +precalcResult.getJsonScore());
 		  jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
           scores = getCachedScores(precalcResult, jsonObject);
+
+          if (scores.eventScores.isEmpty() || scores.eventScores.get(Scores.WORDS).isEmpty()) {
+              logger.debug("no valid precalc result, so recalculating : " + precalcResult);
+              scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
+          }
 	  }
 	  if (scores == null) {
 		  logger.error("getScoreForAudio failed to generate scores.");
@@ -426,13 +432,18 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 			  scores, jsonObject);
   }
 
+    /**
+     * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result)
+     * @param precalcResult
+     * @param jsonObject
+     * @return
+     */
     private Scores getCachedScores(Result precalcResult, JSONObject jsonObject) {
-        Scores scores;
         Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseJson(jsonObject, "words", "w");
         Map<String, Map<String, Float>> eventScores = getEventAverages(imageTypeMapMap);
 
-        scores = new Scores(precalcResult.getPronScore(), eventScores, 0);
-        logger.debug("got cached scores " + scores);
+        Scores scores = new Scores(precalcResult.getPronScore(), eventScores, 0);
+        logger.debug("got cached scores " + scores + " json " + jsonObject);
         return scores;
     }
 
@@ -442,13 +453,16 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
         Map<Float, TranscriptEvent> floatTranscriptEventMap = imageTypeMapMap.get(ImageType.PHONE_TRANSCRIPT);
         Map<String, Float> value2 = new HashMap<>();
         eventScores.put(Scores.PHONES, value2);
-        getEventAverages(floatTranscriptEventMap, value2);
-
+        if (floatTranscriptEventMap != null) {
+            getEventAverages(floatTranscriptEventMap, value2);
+        }
         // words
         floatTranscriptEventMap = imageTypeMapMap.get(ImageType.WORD_TRANSCRIPT);
         value2 = new HashMap<>();
         eventScores.put(Scores.WORDS, value2);
-        getEventAverages(floatTranscriptEventMap, value2);
+        if (floatTranscriptEventMap != null) {
+            getEventAverages(floatTranscriptEventMap, value2);
+        }
         return eventScores;
     }
 
@@ -456,12 +470,9 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
         Map<String, Float> value = new HashMap<>();
         Map<String, Float> cvalue = new HashMap<>();
 
-
         for (TranscriptEvent ev : floatTranscriptEventMap.values()) {
-
             String event = ev.event;
             if (event.equals("sil") || event.equals("<s>") || event.equals("</s>")) {
-
             }
             else {
                 Float orDefault = cvalue.getOrDefault(event, 0.0f);
@@ -695,28 +706,28 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @return map of phone name to score
    */
   private Map<String, Float> getPhoneToScore(Scores scores) {
-      Map<String, Float> phones = scores.eventScores.get("phones");
-      return getTokenToScore(scores, phones);
+      Map<String, Float> phones = scores.eventScores.get(Scores.PHONES);
+      return getTokenToScore(scores, phones, Scores.PHONES);
   }
+
     private Map<String, Float> getWordToScore(Scores scores) {
         Map<String, Float> phones = scores.eventScores.get(Scores.WORDS);
-        return getTokenToScore(scores, phones);
+        return getTokenToScore(scores, phones, Scores.WORDS);
     }
 
-    private Map<String, Float> getTokenToScore(Scores scores, Map<String, Float> phones) {
+    private Map<String, Float> getTokenToScore(Scores scores, Map<String, Float> phones, String token) {
         if (phones == null) {
-            logger.warn("no scores in " + scores.eventScores);
-          return Collections.emptyMap();
-        }
-        else {
-          Map<String, Float> phoneToScore = new HashMap<String, Float>();
-          for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
-            String key = phoneScorePair.getKey();
-            if (!key.equals("sil")) {
-              phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue()));
+            logger.warn("getTokenToScore : no scores in " + scores.eventScores + " for  " + token);
+            return Collections.emptyMap();
+        } else {
+            Map<String, Float> phoneToScore = new HashMap<String, Float>();
+            for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
+                String key = phoneScorePair.getKey();
+                if (!key.equals("sil")) {
+                    phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue()));
+                }
             }
-          }
-          return phoneToScore;
+            return phoneToScore;
         }
     }
 
