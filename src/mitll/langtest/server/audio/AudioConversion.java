@@ -132,36 +132,38 @@ public class AudioConversion {
 	 * @return
 	 * @throws UnsupportedAudioFileException
 	 */
-	private File convertTo16Khz(File wavFile) throws UnsupportedAudioFileException {
-		if (!wavFile.exists()) {
-			System.err.println("convertTo16Khz " + wavFile + " doesn't exist");
-			return wavFile;
-		}
-		try {
-			AudioFileFormat audioFileFormat = AudioSystem.getAudioFileFormat(wavFile);
-			float sampleRate = audioFileFormat.getFormat().getSampleRate();
-			if (sampleRate != 16000f) {
-        long then = System.currentTimeMillis();
-				String binPath = getBinPath();
-				String convertTo16KHZ = new AudioConverter().convertTo16KHZ(binPath, wavFile.getAbsolutePath());
-				String name1 = wavFile.getName();
-				String sampled = wavFile.getParent() + File.separator + removeSuffix(name1) + SIXTEEN_K_SUFFIX + ".wav";
-				if (new FileCopier().copy(convertTo16KHZ, sampled)) {
-					wavFile = new File(sampled);
+    private File convertTo16Khz(File wavFile) throws UnsupportedAudioFileException {
+        if (!wavFile.exists()) {
+            System.err.println("convertTo16Khz " + wavFile + " doesn't exist");
+            return wavFile;
+        }
+        try {
+            AudioFileFormat audioFileFormat = AudioSystem.getAudioFileFormat(wavFile);
+            File orig = wavFile;
+            float sampleRate = audioFileFormat.getFormat().getSampleRate();
+            if (sampleRate != 16000f) {
+                long then = System.currentTimeMillis();
+                String binPath = getBinPath();
+                String convertTo16KHZ = new AudioConverter().convertTo16KHZ(binPath, wavFile.getAbsolutePath());
+                String name1   = wavFile.getName();
+                String sampled = wavFile.getParent() + File.separator + removeSuffix(name1) + SIXTEEN_K_SUFFIX + ".wav";
+                if (new FileCopier().copy(convertTo16KHZ, sampled)) {
+                    wavFile = new File(sampled);
 
-					// cleanup
-					String parent = new File(convertTo16KHZ).getParent();
-					File file = new File(parent);
-					FileUtils.deleteDirectory(file);
-				}
-        long now = System.currentTimeMillis();
-        logger.debug ("convertTo16Khz : took " +(now-then) + " millis to convert " +wavFile.getName() + " to 16K wav file");
-      }
-		} catch (IOException e) {
-			logger.error("Got " + e, e);
-		}
-		return wavFile;
-	}
+                    // cleanup
+                    String parent = new File(convertTo16KHZ).getParent();
+                    File file = new File(parent);
+                    FileUtils.deleteDirectory(file);
+                }
+                long now = System.currentTimeMillis();
+                logger.debug("convertTo16Khz : took " + (now - then) + " millis to convert original " + orig.getName() + " at " + sampleRate +
+                        " to 16K wav file : " + wavFile.getName());
+            }
+        } catch (IOException e) {
+            logger.error("Got " + e, e);
+        }
+        return wavFile;
+    }
 
 	// assumes 16Khz
 	public static void wav2raw(String wavFile, String rawFile) {
