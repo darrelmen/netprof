@@ -17,4 +17,6 @@ public interface Database {
 
   String TIME = "time";
   String EXID = "exid";
+
+    String getLanguage();
 }
