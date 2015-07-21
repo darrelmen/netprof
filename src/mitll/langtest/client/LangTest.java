@@ -59,7 +59,7 @@ import java.util.logging.Logger;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private Logger logger = Logger.getLogger("LangTest");
   private static final List<String> SITE_LIST = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean",
-      "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Russian", "Spanish", "Sudanese", "Urdu");
+      "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Russian", "Spanish", "Sudanese", "Tagalog", "Urdu");
 
   /**
    * How far to the right to shift the list of sites...
