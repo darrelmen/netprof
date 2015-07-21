@@ -2084,6 +2084,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
             int count = 0;
             int attrc = 0;
+            int maleAudio = 0;
+            int femaleAudio = 0;
+            int defaultAudio = 0;
             for (CommonExercise exercise : exercises) {
                 if (stopDecode) return;
 
@@ -2095,25 +2098,34 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                 }
 
                 Set<Long> preferredVoices = serverProps.getPreferredVoices();
-                Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
+                Map<MiniUser, List<AudioAttribute>> malesMap   = exercise.getMostRecentAudio(true, preferredVoices);
                 Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
                 Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
 
-                List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
+                List<MiniUser> maleUsers   = exercise.getSortedUsers(malesMap);
                 boolean maleEmpty = maleUsers.isEmpty();
+
                 List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
                 boolean femaleEmpty = femaleUsers.isEmpty();
 
                 if (!maleEmpty) {
-                    count += doDecode(decodedFiles, exercise, malesMap.get(maleUsers.get(0)));
+                    List<AudioAttribute> audioAttributes1 = malesMap.get(maleUsers.get(0));
+                    maleAudio += audioAttributes1.size();
+                    count += doDecode(decodedFiles, exercise, audioAttributes1);
                 }
                 if (!femaleEmpty) {
-                    count += doDecode(decodedFiles, exercise, femalesMap.get(femaleUsers.get(0)));
+                    List<AudioAttribute> audioAttributes1 = femalesMap.get(femaleUsers.get(0));
+                    femaleAudio += audioAttributes1.size();
+
+                    count += doDecode(decodedFiles, exercise, audioAttributes1);
                 } else if (maleEmpty) {
+                    defaultAudio += defaultUserAudio.size();
+
                     count += doDecode(decodedFiles, exercise, defaultUserAudio);
                 }
             }
-            logger.debug("Out of " + attrc + " audio files, decoded " + count);
+            logger.debug("Out of " + attrc + " best audio files, " +maleAudio + " male, " + femaleAudio + " female, " +
+                    defaultAudio + " default " + "decoded " + count);
         }
     }
 
@@ -2126,63 +2138,58 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	 * @return
 	 * @see #writeRefDecode
 	 */
-	private Set<String> getDecodedFiles() {
-		List<Result> results = db.getRefResultDAO().getResults();
-		logger.debug(getLanguage() + " found " + results.size() +" previous ref results");
+    private Set<String> getDecodedFiles() {
+        List<Result> results = db.getRefResultDAO().getResults();
+        logger.debug(getLanguage() + " found " + results.size() + " previous ref results");
 
-		Set<String> decodedFiles = new HashSet<String>();
-		int count = 0;
-		for (Result res : results) {
-      if (count++ < 20) {
-        logger.debug("\t found " + res);
-      }
+        Set<String> decodedFiles = new HashSet<String>();
+        int count = 0;
+        for (Result res : results) {
+            if (count++ < 20) {
+                logger.debug("\t found " + res);
+            }
 
-      String[] bestAudios = res.getAnswer().split(File.separator);
-      if (bestAudios.length > 1) {
-        String bestAudio = bestAudios[bestAudios.length-1];
-    //		logger.debug("added " + bestAudio);
-        decodedFiles.add(bestAudio);
-        if (stopDecode) break;
-      //	logger.debug("previously found " + res);
-      }
+            String[] bestAudios = res.getAnswer().split(File.separator);
+            if (bestAudios.length > 1) {
+                String bestAudio = bestAudios[bestAudios.length - 1];
+                //		logger.debug("added " + bestAudio);
+                decodedFiles.add(bestAudio);
+                if (stopDecode) break;
+                //	logger.debug("previously found " + res);
+            }
+        }
+        return decodedFiles;
     }
-		return decodedFiles;
-	}
 
-	private int doDecode(Set<String> decodedFiles, CommonExercise exercise, Collection<AudioAttribute> audioAttributes) {
-  	int count = 0;
-		List<AudioAttribute> toDecode = new ArrayList<AudioAttribute>();
-		for (AudioAttribute attribute : audioAttributes) {
-			if (!attribute.isExampleSentence()) {
-				String bestAudio = getFile(attribute);
-				if (!decodedFiles.contains(bestAudio)) {
-					toDecode.add(attribute);
-				}
-			}
-		}
-		for (AudioAttribute attribute : toDecode) {
-			if (stopDecode) return 0;
+    private int doDecode(Set<String> decodedFiles, CommonExercise exercise, Collection<AudioAttribute> audioAttributes) {
+        int count = 0;
+        List<AudioAttribute> toDecode = new ArrayList<AudioAttribute>();
+        for (AudioAttribute attribute : audioAttributes) {
+            if (!attribute.isExampleSentence()) {
+                String bestAudio = getFile(attribute);
+                if (!decodedFiles.contains(bestAudio)) {
+                    toDecode.add(attribute);
+                }
+            }
+        }
+        for (AudioAttribute attribute : toDecode) {
+            if (stopDecode) return 0;
 
-			try {
-				audioFileHelper.decodeOneAttribute(exercise, attribute);
-				count++;
-			} catch (Exception e) {
-				logger.error("Got " + e, e);
-			}
-		}
+            try {
+                audioFileHelper.decodeOneAttribute(exercise, attribute);
+                count++;
+            } catch (Exception e) {
+                logger.error("Got " + e, e);
+            }
+        }
 
-		return count;
-	}
+        return count;
+    }
 
 	private String getFile(AudioAttribute attribute) {
 		String[] bestAudios = attribute.getAudioRef().split(File.separator);
 		return bestAudios[bestAudios.length - 1];
 	}
-/*
-	public String getWebserviceIP() {	return serverProps.getWebserviceIP(); 	}
-	public int getWebservicePort()  {
-		return serverProps.getWebservicePort();
-	}*/
 
 	/**
 	 * The config web.xml file.
