@@ -56,7 +56,12 @@ public class SmallDatabaseImpl implements Database {
 
   }
 
-  /**
+    @Override
+    public String getLanguage() {
+        return "";
+    }
+
+    /**
    * @param s
    * @see mitll.langtest.server.LangTestDatabaseImpl#init
    */
