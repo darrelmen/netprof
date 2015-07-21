@@ -11,13 +11,15 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -82,7 +84,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
 
                 // add score
                 col = new HTMLPanel("td", "");
-                String html = "" + Math.round(scores.get(key)*100);
+                String html = "" + getScore(scores, key);
                 col.add(new HTML(html));
                 row.add(col);
 
@@ -114,15 +116,27 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
 
             for (String key : keys) {
                 table.add(new TableHeader(key));
-
                 // add score
                 col = new HTMLPanel("td", "");
-                String html = "" + Math.round(scores.get(key)*100);
+                String html = "" + getScore(scores, key);
                 col.add(new HTML(html));
                 row.add(col);
             }
         }
         return table;
+    }
+
+    private int getScore(Map<String, Float> scores, String key) {
+        Float aFloat = scores.get(key);
+        return getPercent(aFloat);
+    }
+
+    private int getPercent(Float aFloat) {
+        return getScore(aFloat * 100);
+    }
+
+    private int getScore(float a) {
+        return Math.round(a);
     }
 
     @Override
@@ -179,7 +193,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
 
                     float hydecScore = result.getHydecScore();
                     float zeroToHundred = hydecScore * 100f;
-                    String html = "Score : <b>" + Math.round(Math.min(100.0f, zeroToHundred)) +
+                    String html = "Score : <b>" + getScore(Math.min(100.0f, zeroToHundred)) +
                             "%</b>";
                     scoreInfo.setHTML(html);
 
@@ -199,7 +213,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
                         }
 
                         if (!result.getPhoneScores().isEmpty()) {
-                            Table phoneTable = makeTableHoriz("Phone", "Score", result.getPhoneScores());
+                            Table phoneTable = makeTableHoriz("Phone", "Avg. Score", result.getPhoneScores());
                             phoneTable.getElement().getStyle().setMarginBottom(3, Style.Unit.PX);
                             phoneTable.addStyleName("topFiveMargin");
 
@@ -208,17 +222,124 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
                             left.add(phoneTable);
 
                             belowContainer.add(left);
+                            Widget table2 = getTable2(result);
+                            table2.addStyleName("topFiveMargin");
+                            table2.addStyleName("leftFiveMargin");
+                            table2.addStyleName("floatLeft");
+                            belowContainer.add(table2);
                             belowContainer.add(new DivWidget());
-                            //ScrollPanel child = new ScrollPanel(phoneTable);
-                            //child.getElement().setId("TableScroller_Phone");
-                            //child.setWidth("120px");
-                            //child.setHeight("200px");
-                            //belowContainer.add(phoneTable);
                         }
                     }
                 }
             }
         });
+    }
+/*
+    private Widget getTable(PretestScore score) {
+        Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(score);
+        FlexTable flex = new FlexTable();
+
+        int col = 0;
+        for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
+            TranscriptSegment word = pair.getKey();
+            flex.setWidget(0, col, new HTML(word.getEvent() + " " + getPercent(word.getScore())));
+            flex.getFlexCellFormatter().setColSpan(0, col, col + pair.getValue().size());
+
+            for (TranscriptSegment phone : pair.getValue()) {
+                HTML widget = new HTML(phone.getEvent() + " " + getPercent(phone.getScore()));
+                flex.setWidget(1, col++, widget);
+            }
+        }
+        return flex;
+    }*/
+
+    private Map<TranscriptSegment, List<TranscriptSegment>> getWordToPhones(PretestScore score) {
+        Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = new HashMap<>();
+
+        List<TranscriptSegment> words = score.getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
+        List<TranscriptSegment> phones = score.getsTypeToEndTimes().get(NetPronImageType.PHONE_TRANSCRIPT);
+        for (TranscriptSegment word : words) {
+            for (TranscriptSegment phone : phones) {
+                if (phone.getStart() >= word.getStart() && phone.getEnd() <= word.getEnd()) {
+                    List<TranscriptSegment> orDefault = wordToPhones.get(word);
+                    if (orDefault == null) wordToPhones.put(word, orDefault = new ArrayList<TranscriptSegment>());
+                    orDefault.add(phone);
+                }
+            }
+        }
+        return wordToPhones;
+    }
+
+    private Widget getTable2(PretestScore score) {
+        Table table = new Table();
+        table.getElement().setId("WordTable");
+        table.getElement().getStyle().clearWidth();
+        table.removeStyleName("table");
+
+        Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(score);
+
+        HTMLPanel srow = new HTMLPanel("tr", "");
+        table.add(srow);
+
+        HTMLPanel row = new HTMLPanel("tr", "");
+        table.add(row);
+
+
+        for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
+            TranscriptSegment word = pair.getKey();
+
+            TableHeader w = new TableHeader(word.getEvent());
+            w.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+            String color = SimpleColumnChart.getColor(word.getScore());
+            w.getElement().getStyle().setBackgroundColor(color);
+
+            table.add(w);
+
+            HTMLPanel col;
+            srow.add(col = new HTMLPanel("td", ""));
+         //   HTML wscore = new HTML(" <b>" + getPercent(word.getScore()) +"</b>");
+            HTML wscore = new HTML(""+ getPercent(word.getScore()) );
+            wscore.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+
+            col.add(wscore);
+
+            //wscore.getElement().getStyle().setBackgroundColor(color);
+
+            Table pTable = new Table();
+           // pTable.getElement().setId("PhoneTable");
+            pTable.removeStyleName("table");
+           // pTable.getElement().getStyle().clearWidth();
+
+            col = new HTMLPanel("td", "");
+            col.getElement().getStyle().clearBorderStyle();
+            col.add(pTable);
+            row.add(col);
+
+            HTMLPanel row2 = new HTMLPanel("tr", "");
+            pTable.add(row2);
+
+            HTMLPanel row3 = new HTMLPanel("tr", "");
+            pTable.add(row3);
+
+            for (TranscriptSegment phone : pair.getValue()) {
+                TableHeader h = new TableHeader(phone.getEvent());
+                h.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+                pTable.add(h);
+                String color1 = SimpleColumnChart.getColor(phone.getScore());
+                h.getElement().getStyle().setBackgroundColor(color1);
+
+              //  HTML widget = new HTML(" <b>" + getPercent(phone.getScore()) +"</b>");
+                HTML widget = new HTML(""+ getPercent(phone.getScore()));
+                widget.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+                widget.getElement().getStyle().setWidth(25, Style.Unit.PX);
+
+                col = new HTMLPanel("td", "");
+                col.add(widget);
+                row3.add(col);
+            }
+        }
+
+        return table;
     }
 
     /**
