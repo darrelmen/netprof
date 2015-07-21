@@ -1170,15 +1170,18 @@ public class DatabaseImpl implements Database {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
         getExercises() :
         getSectionHelper().getExercisesForSelectionState(typeToSection);
-    new AudioExport(serverProps).writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getServerProps().getLanguage(),
+    new AudioExport(serverProps).writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getLanguage(),
         getAudioDAO(), installPath, configDir, false);
   }
 
-  public void writeContextZip(OutputStream out, Map<String, Collection<String>> typeToSection) throws Exception {
+    @Override
+    public String getLanguage() {  return getServerProps().getLanguage();  }
+
+    public void writeContextZip(OutputStream out, Map<String, Collection<String>> typeToSection) throws Exception {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
         getExercises() :
         getSectionHelper().getExercisesForSelectionState(typeToSection);
-    new AudioExport(serverProps).writeContextZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getServerProps().getLanguage(),
+    new AudioExport(serverProps).writeContextZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getLanguage(),
         getAudioDAO(), installPath, configDir);
   }
 
@@ -1198,7 +1201,7 @@ public class DatabaseImpl implements Database {
   public String writeZip(OutputStream out, long listid, PathHelper pathHelper) throws Exception {
     UserList userListByID = getUserListByID(listid);
 
-    String language1 = getServerProps().getLanguage();
+    String language1 = getLanguage();
     if (userListByID == null) {
       logger.error("huh? can't find user list " + listid);
       return language1 + "_Unknown";
@@ -1226,7 +1229,7 @@ public class DatabaseImpl implements Database {
 
   public String getUserListName(long listid) {
     UserList userListByID = getUserListByID(listid);
-    String language1 = getServerProps().getLanguage();
+    String language1 = getLanguage();
     if (userListByID == null) {
       logger.error("huh? can't find user list " + listid);
       return language1 + "_Unknown";
