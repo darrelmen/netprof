@@ -95,7 +95,7 @@ public class Result implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getResultsWithGrades()
+   * @seex mitll.langtest.server.database.DatabaseImpl#getResultsWithGrades()
    * @paramx g
    */
 /*
@@ -118,9 +118,7 @@ public class Result implements IsSerializable {
     return correct;
   }
 
-  public float getPronScore() {
-    return pronScore;
-  }
+  public float getPronScore() { return pronScore;  }
 
   public int getUniqueID() {
     return uniqueID;
