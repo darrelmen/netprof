@@ -7,8 +7,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -93,8 +91,8 @@ public class UserTable extends PagerTable {
           dialogVPanel.remove(closeButton);
         }
 
-        Widget table = getTable(result,service);
-        dialogVPanel.add(new Anchor(getURL2()));
+        Widget table = getTable(result, service, getDownloadAnchor());
+
         dialogVPanel.add(table);
         dialogVPanel.add(closeButton);
 
@@ -113,19 +111,12 @@ public class UserTable extends PagerTable {
     });
   }
 
-  private SafeHtml getURL2() {
-    SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<a href='" +
-      "downloadUsers" +
-      //   name +
-      "'" +
-      ">");
-    sb.appendEscaped("Download Excel");
-    sb.appendHtmlConstant("</a>");
-    return sb.toSafeHtml();
+    @Override
+    protected SafeHtml getURL2() {
+      return getAnchorHTML("downloadUsers", "Download Excel");
   }
 
-  private Widget getTable(List<User> result, final LangTestDatabaseAsync service) {
+    private Widget getTable(List<User> result, final LangTestDatabaseAsync service, Widget rightOfPager) {
     final CellTable<User> table = new CellTable<User>();
     table.setPageSize(PAGE_SIZE);
     int width = (int) (Window.getClientWidth() * 0.9);
@@ -340,7 +331,7 @@ public class UserTable extends PagerTable {
 
     // Create a SimplePager.
     // return getPagerAndTable(table, table, 10, 10);
-    return getOldSchoolPagerAndTable(table, table, PAGE_SIZE1, PAGE_SIZE1);
+    return getOldSchoolPagerAndTable(table, table, PAGE_SIZE1, PAGE_SIZE1, rightOfPager);
   }
 
   private void getDateColumn(CellTable<User> table) {
