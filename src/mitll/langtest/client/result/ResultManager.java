@@ -4,7 +4,6 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.Typeahead;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Scheduler;
@@ -25,7 +24,6 @@ import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.list.TypeAhead;
-import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.EmptyScoreListener;
 import mitll.langtest.client.scoring.ReviewScoringPanel;
 import mitll.langtest.client.table.PagerTable;
@@ -154,12 +152,9 @@ public class ResultManager extends PagerTable {
     return closeButton;
   }
 
-  private SafeHtml getURL2() {
-    SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<a href='" + "downloadResults" + "'" + ">");
-    sb.appendEscaped("Download Excel");
-    sb.appendHtmlConstant("</a>");
-    return sb.toSafeHtml();
+    @Override
+  protected SafeHtml getURL2() {
+      return getAnchorHTML("downloadResults", "Download Excel");
   }
 
   /**
@@ -169,14 +164,12 @@ public class ResultManager extends PagerTable {
    * @see #showResults()
    */
   private void populateTable(int numResults, Panel dialogVPanel, DialogBox dialogBox,
-                             //DivWidget reviewContainer,
                              Button closeButton) {
     dialogVPanel.clear();
 
-    Widget table = getAsyncTable(numResults);
+    Widget table = getAsyncTable(numResults, getDownloadAnchor());
     table.setWidth("100%");
 
-    dialogVPanel.add(new Anchor(getURL2()));
     dialogVPanel.add(getSearchBoxes());
     dialogVPanel.add(table);
     dialogVPanel.add(reviewContainer); // made in asynctable
@@ -397,7 +390,7 @@ public class ResultManager extends PagerTable {
    * @return
    * @see #populateTable
    */
-  private Widget getAsyncTable(int numResults) {
+  private Widget getAsyncTable(int numResults, Widget rightOfPager) {
       cellTable = new CellTable<MonitorResult>();
 
       reviewContainer = new HorizontalPanel();
@@ -438,7 +431,7 @@ public class ResultManager extends PagerTable {
       cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(time, false));
       cellTable.setWidth("100%", false);
 
-      return getPagerAndTable(cellTable);
+      return getPagerAndTable(cellTable, rightOfPager);
   }
 
   private Column<?, ?> getColumn(String name) {
@@ -758,8 +751,8 @@ public class ResultManager extends PagerTable {
     return ((float) ((Math.round(totalHours * 100d)))) / 100f;
   }
 
-  private Panel getPagerAndTable(CellTable<MonitorResult> table) {
-    return getOldSchoolPagerAndTable(table, table, PAGE_SIZE, 1000);
+  private Panel getPagerAndTable(CellTable<MonitorResult> table, Widget rightOfPager) {
+    return getOldSchoolPagerAndTable(table, table, PAGE_SIZE, 1000, rightOfPager);
   }
 
   private static class MySuggestion implements SuggestOracle.Suggestion {
