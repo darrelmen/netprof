@@ -406,26 +406,28 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
           noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
       }
 
-	  Scores scores;
-	  JSONObject jsonObject = null;
-	  if (precalcResult == null || precalcResult.getPronScore() < 0 || precalcResult.getJsonScore() == null || precalcResult.getJsonScore().isEmpty()) {
+      Scores scores;
+      JSONObject jsonObject = null;
+      if (precalcResult == null ||
+              (precalcResult.isValid() &&
+                      (precalcResult.getPronScore() < 0 || precalcResult.getJsonScore() == null || precalcResult.getJsonScore().isEmpty()))) {
           logger.debug("no precalc result, so recalculating : " + precalcResult);
-		  scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
-	  } else {
-          logger.debug("for " + precalcResult + "\n\tgot json : " +precalcResult.getJsonScore());
-		  jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
+          scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
+      } else {
+          logger.debug("for " + precalcResult + "\n\tgot json : " + precalcResult.getJsonScore());
+          jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
           scores = getCachedScores(precalcResult, jsonObject);
 
           boolean isDecode = precalcResult.getAudioType().equals("avp");
-          if (scores.eventScores.isEmpty() || (scores.eventScores.get(Scores.WORDS).isEmpty() && (!isDecode || precalcResult.isCorrect()))) {
+          if (precalcResult.isValid() &&
+                  (scores.eventScores.isEmpty() || (scores.eventScores.get(Scores.WORDS).isEmpty() && (!isDecode || precalcResult.isCorrect())))) {
               logger.debug("no valid precalc result, so recalculating : " + precalcResult);
               jsonObject = null;
               scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
-          }
-          else {
+          } else {
               //logger.debug("precalc : events " + scores.eventScores);
           }
-	  }
+      }
 	  if (scores == null) {
 		  logger.error("getScoreForAudio failed to generate scores.");
 		  return new PretestScore(0.01f);
@@ -481,8 +483,8 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
                 orDefault += 1.0f;
                 cvalue.put(event, orDefault);
 
-                Float orDefault1 = value.getOrDefault(event, ev.score);
-                value.put(event, orDefault1);
+                Float orDefault1 = value.getOrDefault(event, 0.0f);
+                value.put(event, orDefault1+ev.score);
             }
         }
 
@@ -491,20 +493,6 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
             value2.put(key,pair.getValue()/cvalue.get(key));
         }
     }
-
-/*
-	private void parseJson(Map<String, Map<String, Float>> eventScores, JSONObject jsonObject, String words1, String w1) {
-		JSONArray words = jsonObject.getJSONArray(words1);
-		TreeMap<String, Float> wordEvents = new TreeMap<String, Float>();
-		eventScores.put(words1, wordEvents);
-		for (int i = 0; i < words.size(); i++) {
-			JSONObject word = words.getJSONObject(i);
-			String w = word.getString(w1);
-			String s = word.getString("s");
-			wordEvents.put(w, Float.parseFloat(s));
-		}
-	}
-*/
 
 	/**
      * Make image files for words, and phones, find out the reco sentence from the events.
@@ -707,19 +695,20 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     return b.toString().trim();
   }
 
-  /**
-   * Filter out sil.
-   *
-   * Make sure that when we scale the phone scores by {@link #SCORE_SCALAR} we do it for both the scores and the image.
-   * <br></br>
-   * get the phones for display in the phone accuracy pane
-   * @param scores from hydec
-   * @return map of phone name to score
-   */
-  private Map<String, Float> getPhoneToScore(Scores scores) {
-      Map<String, Float> phones = scores.eventScores.get(Scores.PHONES);
-      return getTokenToScore(scores, phones, Scores.PHONES);
-  }
+    /**
+     * Filter out sil.
+     * <p>
+     * Make sure that when we scale the phone scores by {@link #SCORE_SCALAR} we do it for both the scores and the image.
+     * <br></br>
+     * get the phones for display in the phone accuracy pane
+     *
+     * @param scores from hydec
+     * @return map of phone name to score
+     */
+    private Map<String, Float> getPhoneToScore(Scores scores) {
+        Map<String, Float> phones = scores.eventScores.get(Scores.PHONES);
+        return getTokenToScore(scores, phones, Scores.PHONES);
+    }
 
     private Map<String, Float> getWordToScore(Scores scores) {
         Map<String, Float> phones = scores.eventScores.get(Scores.WORDS);
@@ -729,7 +718,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     private Map<String, Float> getTokenToScore(Scores scores, Map<String, Float> phones, String token) {
         if (phones == null) {
 
-            logger.warn("getTokenToScore : no scores in " + scores.eventScores + " for '" + token +"'");
+            logger.warn("getTokenToScore : no scores in " + scores.eventScores + " for '" + token + "'");
             return Collections.emptyMap();
         } else {
             Map<String, Float> phoneToScore = new HashMap<String, Float>();
