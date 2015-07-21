@@ -3,11 +3,9 @@ package mitll.langtest.server.scoring;
 import Utils.Log;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
-
 import audio.imagewriter.EventAndFileInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-
 import corpus.HTKDictionary;
 import corpus.LTS;
 import mitll.langtest.server.LangTestDatabaseImpl;
@@ -19,18 +17,15 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
-
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-
 import pronz.dirs.Dirs;
 import pronz.speech.Audio;
 import pronz.speech.Audio$;
 import scala.Tuple2;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
@@ -340,9 +335,9 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * parsed to determine the start and end times for each event, which lets us both create images that
    * show the location of the words and phonemes, and for decoding, the actual reco sentence returned. <br></br>
    * <p/>
-   * For alignment, of course, the reco sentence is just the given sentence echoed back (unless alignment fails to
+   * For alignment, the reco sentence is just the given sentence echoed back (unless alignment fails to
    * generate any alignments (e.g. for audio that's complete silence or when the
-   * spoken sentence is utterly unrelated to the reference.)).
+   * spoken sentence is unrelated to the expected.)).
    * <p/>
    * Audio file must be a wav file, but can be any sample rate - if not 16K will be sampled down to 16K.
    *
@@ -373,41 +368,43 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 										   boolean decode, String tmpDir,
 										   boolean useCache, String prefix,
 										   Result precalcResult) {
-	  String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
-	  String pathname = noSuffix + ".wav";
+      String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
+      String pathname = noSuffix + ".wav";
 
-	  boolean b = checkLTS(sentence);
+      boolean b = checkLTS(sentence);
 
-	  if (!b) {
-		  logger.info("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir + " '" + sentence + "' is not in lts");
-	  }
-	  File wavFile = new File(pathname);
-	  boolean mustPrepend = false;
-	  if (!wavFile.exists() && deployPath != null) {
-		  //logger.debug("trying new path for " + pathname + " under " + deployPath);
-		  wavFile = new File(deployPath + File.separator + pathname);
-		  mustPrepend = true;
-	  }
-	  if (!wavFile.exists()) {
-		  logger.error("scoreRepeatExercise : Can't find audio wav file at : " + wavFile.getAbsolutePath());
-		  return new PretestScore();
-	  }
-	  //logger.info("duration of " + wavFile.getAbsolutePath() + " is " + duration + " secs or " + duration*1000 + " millis");
-	  try {
-		  String audioDir = testAudioDir;
-		  if (mustPrepend) {
-			  audioDir = deployPath + File.separator + audioDir;
-			  if (!new File(audioDir).exists()) logger.error("Couldn't find " + audioDir);
-			  else testAudioDir = audioDir;
-		  }
-		  testAudioFileNoSuffix = new AudioConversion().convertTo16Khz(audioDir, testAudioFileNoSuffix);
-	  } catch (UnsupportedAudioFileException e) {
-		  logger.error("Got " + e, e);
-	  }
+      if (!b) {
+          logger.info("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir + " '" + sentence + "' is not in lts");
+      }
+      File wavFile = new File(pathname);
+      boolean mustPrepend = false;
+      if (!wavFile.exists() && deployPath != null) {
+          //logger.debug("trying new path for " + pathname + " under " + deployPath);
+          wavFile = new File(deployPath + File.separator + pathname);
+          mustPrepend = true;
+      }
+      if (!wavFile.exists()) {
+          logger.error("scoreRepeatExercise : Can't find audio wav file at : " + wavFile.getAbsolutePath());
+          return new PretestScore();
+      }
+      //logger.info("duration of " + wavFile.getAbsolutePath() + " is " + duration + " secs or " + duration*1000 + " millis");
 
-	  if (testAudioFileNoSuffix.contains(AudioConversion.SIXTEEN_K_SUFFIX)) {
-		  noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
-	  }
+      // resample if needed
+      try {
+          String audioDir = testAudioDir;
+          if (mustPrepend) {
+              audioDir = deployPath + File.separator + audioDir;
+              if (!new File(audioDir).exists()) logger.error("Couldn't find " + audioDir);
+              else testAudioDir = audioDir;
+          }
+          testAudioFileNoSuffix = new AudioConversion().convertTo16Khz(audioDir, testAudioFileNoSuffix);
+      } catch (UnsupportedAudioFileException e) {
+          logger.error("Got " + e, e);
+      }
+
+      if (testAudioFileNoSuffix.contains(AudioConversion.SIXTEEN_K_SUFFIX)) {
+          noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
+      }
 
 	  Scores scores;
 	  JSONObject jsonObject = null;
@@ -415,17 +412,18 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
           logger.debug("no precalc result, so recalculating : " + precalcResult);
 		  scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
 	  } else {
-          logger.debug("for " + precalcResult + " got " +precalcResult.getJsonScore());
+          logger.debug("for " + precalcResult + "\n\tgot json : " +precalcResult.getJsonScore());
 		  jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
           scores = getCachedScores(precalcResult, jsonObject);
 
-          if (scores.eventScores.isEmpty() || scores.eventScores.get(Scores.WORDS).isEmpty()) {
+          boolean isDecode = precalcResult.getAudioType().equals("avp");
+          if (scores.eventScores.isEmpty() || (scores.eventScores.get(Scores.WORDS).isEmpty() && (!isDecode || precalcResult.isCorrect()))) {
               logger.debug("no valid precalc result, so recalculating : " + precalcResult);
               jsonObject = null;
               scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
           }
           else {
-              logger.debug("precalc : events " + scores.eventScores);
+              //logger.debug("precalc : events " + scores.eventScores);
           }
 	  }
 	  if (scores == null) {
@@ -447,7 +445,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
         Map<String, Map<String, Float>> eventScores = getEventAverages(imageTypeMapMap);
 
         Scores scores = new Scores(precalcResult.getPronScore(), eventScores, 0);
-        logger.debug("got cached scores " + scores + " json " + jsonObject);
+        //logger.debug("got cached scores " + scores + " json " + jsonObject);
         return scores;
     }
 
@@ -509,6 +507,8 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 */
 
 	/**
+     * Make image files for words, and phones, find out the reco sentence from the events.
+     *
 	 * @param imageOutDir
 	 * @param imageWidth
 	 * @param imageHeight
@@ -518,14 +518,14 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 	 * @param noSuffix
 	 * @param wavFile
 	 * @param scores
-     * @param jsonObject if not-null, uses it to make the word and phone transcripts
+     * @param jsonObject if not-null, uses it to make the word and phone transcripts instead of .lab files
 	 * @return
 	 * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result)
 	 */
 	private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
 										 boolean decode, String prefix, String noSuffix, File wavFile, Scores scores, JSONObject jsonObject) {
-        logger.debug("jsonObject " + jsonObject);
-        logger.debug("scores " + scores);
+      //  logger.debug("getPretestScore jsonObject " + jsonObject);
+      //  logger.debug("getPretestScore scores     " + scores);
 
         EventAndFileInfo eventAndFileInfo = jsonObject == null ?
 				writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
@@ -534,6 +534,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 				writeTranscriptsCached(imageOutDir, imageWidth, imageHeight, noSuffix,
 						useScoreForBkgColor,
 						prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, false, jsonObject);
+
 		Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
 		Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
 		String recoSentence = getRecoSentence(eventAndFileInfo);
