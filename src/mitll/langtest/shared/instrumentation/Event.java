@@ -77,7 +77,9 @@ public class Event implements IsSerializable, Comparable<Event> {
   }
 
   public String toString() {
-    return "Event on " + getWidgetID() + " by " +  getCreatorID() + " at " + new Date(getTimestamp()) + " info " +
+      long timestamp = getTimestamp();
+      if (timestamp == -1) timestamp = System.currentTimeMillis();
+      return "Event on " + getWidgetID() + " by " +  getCreatorID() + " at " + new Date(timestamp) + " info " +
       getExerciseID() + "/" + getContext() + " hit " + getHitID() + " from " +device;
   }
 }
