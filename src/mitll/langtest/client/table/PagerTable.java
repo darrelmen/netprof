@@ -5,9 +5,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.SimplePager;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.HasRows;
 
 import java.util.Date;
@@ -19,7 +17,7 @@ import java.util.Date;
  * Time: 3:15 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagerTable {
+public abstract class PagerTable {
 /*  public Panel getPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows) {
     com.github.gwtbootstrap.client.ui.SimplePager.Resources DEFAULT_RESOURCES = GWT.create(com.github.gwtbootstrap.client.ui.SimplePager.Resources.class);
     com.github.gwtbootstrap.client.ui.SimplePager pager = new com.github.gwtbootstrap.client.ui.SimplePager(com.github.gwtbootstrap.client.ui.SimplePager.TextLocation.CENTER, DEFAULT_RESOURCES, true, fastForwardRows, true);
@@ -35,19 +33,23 @@ public class PagerTable {
     return vPanel;
   }*/
 
-  protected Panel getOldSchoolPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows) {
-    SimplePager.Resources DEFAULT_RESOURCES = GWT.create(SimplePager.Resources.class);
-    SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, DEFAULT_RESOURCES, true, fastForwardRows, true);
+    protected Panel getOldSchoolPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows, Widget toRightOfPager) {
+        SimplePager.Resources DEFAULT_RESOURCES = GWT.create(SimplePager.Resources.class);
+        SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, DEFAULT_RESOURCES, true, fastForwardRows, true);
+        pager.getElement().setId("SimplePager");
+        // Set the cellList as the display.
+        pager.setDisplay(table);
+        pager.setPageSize(pageSize);
+        // Add the pager and list to the page.
 
-    // Set the cellList as the display.
-    pager.setDisplay(table);
-    pager.setPageSize(pageSize);
-    // Add the pager and list to the page.
-    VerticalPanel vPanel = new VerticalPanel();
-    vPanel.add(pager);
-    vPanel.add(tableAsPanel);
+        VerticalPanel vPanel = new VerticalPanel();
+        HorizontalPanel horizontalPanel = new HorizontalPanel();
+        horizontalPanel.add(pager);
+        if (toRightOfPager != null) horizontalPanel.add(toRightOfPager);
+        vPanel.add(horizontalPanel);
+        vPanel.add(tableAsPanel);
 
-    return vPanel;
+        return vPanel;
   }
 
   private final DateTimeFormat yformat = DateTimeFormat.getFormat("yy");
@@ -72,4 +74,24 @@ public class PagerTable {
     sb.appendHtmlConstant("</div>");
     return sb.toSafeHtml();
   }
+
+    protected SafeHtml getAnchorHTML(String href, String label) {
+        SafeHtmlBuilder sb = new SafeHtmlBuilder();
+        sb.appendHtmlConstant("<a href='" +
+                href +
+        //   name +
+        "'" +
+        ">");
+        sb.appendEscaped(label);
+        sb.appendHtmlConstant("</a>");
+        return sb.toSafeHtml();
+    }
+
+    protected Anchor getDownloadAnchor() {
+        Anchor w = new Anchor(getURL2());
+        w.addStyleName("leftFiveMargin");
+        w.addStyleName("topFiveMargin");
+        return w;
+    }
+    protected abstract SafeHtml getURL2();
 }
