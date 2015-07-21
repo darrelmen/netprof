@@ -1,12 +1,10 @@
 package mitll.langtest.server.scoring;
 
-import audio.image.AudioImage;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
 import audio.image.TranscriptReader;
 import audio.imagewriter.EventAndFileInfo;
 import audio.imagewriter.TranscriptWriter;
-import com.google.gwt.user.client.ui.Image;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
