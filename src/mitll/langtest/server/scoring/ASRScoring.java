@@ -421,7 +421,11 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 
           if (scores.eventScores.isEmpty() || scores.eventScores.get(Scores.WORDS).isEmpty()) {
               logger.debug("no valid precalc result, so recalculating : " + precalcResult);
+              jsonObject = null;
               scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
+          }
+          else {
+              logger.debug("precalc : events " + scores.eventScores);
           }
 	  }
 	  if (scores == null) {
@@ -514,12 +518,16 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 	 * @param noSuffix
 	 * @param wavFile
 	 * @param scores
+     * @param jsonObject if not-null, uses it to make the word and phone transcripts
 	 * @return
 	 * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result)
 	 */
 	private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
 										 boolean decode, String prefix, String noSuffix, File wavFile, Scores scores, JSONObject jsonObject) {
-		EventAndFileInfo eventAndFileInfo = jsonObject == null ?
+        logger.debug("jsonObject " + jsonObject);
+        logger.debug("scores " + scores);
+
+        EventAndFileInfo eventAndFileInfo = jsonObject == null ?
 				writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
 						useScoreForBkgColor,
 						prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, false) :
@@ -532,7 +540,9 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 
 		double duration = new AudioCheck().getDurationInSeconds(wavFile);
 
-		return new PretestScore(scores.hydraScore, getPhoneToScore(scores), getWordToScore(scores),
+		return new PretestScore(scores.hydraScore,
+                getPhoneToScore(scores),
+                getWordToScore(scores),
                 sTypeToImage, typeToEndTimes, recoSentence, (float) duration, scores.getProcessDur());
 	}
 
@@ -717,7 +727,8 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 
     private Map<String, Float> getTokenToScore(Scores scores, Map<String, Float> phones, String token) {
         if (phones == null) {
-            logger.warn("getTokenToScore : no scores in " + scores.eventScores + " for  " + token);
+
+            logger.warn("getTokenToScore : no scores in " + scores.eventScores + " for '" + token +"'");
             return Collections.emptyMap();
         } else {
             Map<String, Float> phoneToScore = new HashMap<String, Float>();
@@ -819,10 +830,13 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
 
-      logger.debug("getScoresFromHydec  : scoring '" + sentence +"' (" +sentence.length()+ " ) got score " + hydec_score +
+      logger.debug("getScoresFromHydec  : scoring '" + sentence +"' (" +sentence.length()+ ") got score " + hydec_score +
         " and took " + timeToRunHydec + " millis");
 
-      return new Scores(hydec_score, jscoreOut._2, (int)timeToRunHydec);
+        Map<String, Map<String, Float>> stringMapMap = jscoreOut._2;
+        logger.debug("hydec output " + stringMapMap);
+
+        return new Scores(hydec_score, stringMapMap, (int)timeToRunHydec);
     } catch (AssertionError e) {
       logger.error("Got assertion error " + e,e);
       return new Scores((int)(System.currentTimeMillis() - then));
