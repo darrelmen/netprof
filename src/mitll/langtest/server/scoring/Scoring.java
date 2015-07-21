@@ -69,16 +69,7 @@ public abstract class Scoring {
 			String audioFileNoSuffix, boolean useScoreToColorBkg,
 			String prefix, String suffix, boolean decode,
 			String phoneLab, String wordLab, boolean useWebservice) {
-
         logger.debug("writeTranscripts - "+ audioFileNoSuffix);
-
-        String pathname = audioFileNoSuffix + ".wav";
-		pathname = prependDeploy(pathname);
-		if (!new File(pathname).exists()) {
-			logger.error("writeTranscripts : can't find " + pathname);
-			return new EventAndFileInfo();
-		}
-		imageOutDir = deployPath + File.separator + imageOutDir;
 
 		boolean foundATranscript = false;
 		// These may not all exist. The speech file is created only by multisv right now.
@@ -103,57 +94,22 @@ public abstract class Scoring {
 		if (decode || imageWidth < 0) {  // hack to skip image generation
 			return getEventInfo(typeToFile, decode && useWebservice);
 		} else {
-			return new TranscriptWriter().writeTranscripts(pathname,
+            String pathname = audioFileNoSuffix + ".wav";
+            pathname = prependDeploy(pathname);
+            if (!new File(pathname).exists()) {
+                logger.error("writeTranscripts : can't find " + pathname);
+                return new EventAndFileInfo();
+            }
+            imageOutDir = deployPath + File.separator + imageOutDir;
+
+            return new TranscriptWriter().writeTranscripts(pathname,
                     imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, decode && useWebservice);
 		}
 	}
 
-/*	protected EventAndFileInfo writeTranscriptsCached(String imageOutDir, int imageWidth, int imageHeight,
-													  String audioFileNoSuffix, boolean useScoreToColorBkg,
-													  String prefix, String suffix, boolean decode,
-													  String phoneLab, String wordLab, boolean useWebservice, JSONObject object) {
-		String pathname = audioFileNoSuffix + ".wav";
-		pathname = prependDeploy(pathname);
-		if (!new File(pathname).exists()) {
-			logger.error("writeTranscripts : can't find " + pathname);
-			return new EventAndFileInfo();
-		}
-		imageOutDir = deployPath + File.separator + imageOutDir;
-
-		boolean foundATranscript = false;
-		// These may not all exist. The speech file is created only by multisv right now.
-		String phoneLabFile  = prependDeploy(audioFileNoSuffix + ".phones.lab");
-		Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
-
-		if(phoneLab != null) {
-			logger.debug("phoneLab: " + phoneLab);
-			typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLab);
-			foundATranscript = true;
-		}
-		if(wordLab != null) {
-			logger.debug("wordLab: " + wordLab);
-			typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLab);
-			foundATranscript = true;
-		}
-		List<ImageType> imageTypes = Arrays.asList(ImageType.PHONE_TRANSCRIPT, ImageType.WORD_TRANSCRIPT);
-
-		if (!foundATranscript) {
-			logger.error("no label files found, e.g. " + phoneLabFile);
-		}
-
-		if (decode || imageWidth < 0) {  // hack to skip image generation
-			return getEventInfo(typeToFile, decode && useWebservice);
-		} else {
-			Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = null;
-
-
-			return new TranscriptWriter().getEventAndFileInfo(pathname,
-                    imageOutDir, imageWidth, imageHeight, imageTypes, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, typeToEvent);
-		}
-	}*/
-
-
 	/**
+     * Parse the .lab files that are put into the audio directory as a side effect of alignment/decoding.
+     *
 	 * @param imageOutDir
 	 * @param imageWidth
 	 * @param imageHeight
@@ -169,14 +125,7 @@ public abstract class Scoring {
 	protected EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
 												String audioFileNoSuffix, boolean useScoreToColorBkg,
 												String prefix, String suffix, boolean decode, boolean useWebservice) {
-        logger.debug("writeTranscripts -");
-		String pathname = audioFileNoSuffix + ".wav";
-		pathname = prependDeploy(pathname);
-		if (!new File(pathname).exists()) {
-			logger.error("writeTranscripts : can't find " + pathname);
-			return new EventAndFileInfo();
-		}
-		imageOutDir = deployPath + File.separator + imageOutDir;
+        logger.debug("writeTranscripts - decode " + decode + " file " +audioFileNoSuffix +" width " +imageWidth);
 
 		boolean foundATranscript = false;
 		// These may not all exist. The speech file is created only by multisv right now.
@@ -186,24 +135,36 @@ public abstract class Scoring {
 			typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
 			foundATranscript = true;
 		}
+        else {
+            logger.warn("no phones " + phoneLabFile);
+        }
+
 		String wordLabFile = prependDeploy(audioFileNoSuffix + ".words.lab");
 		if (new File(wordLabFile).exists()) {
 			typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
 			foundATranscript = true;
 		}
-		String speechLabFile = prependDeploy(audioFileNoSuffix + ".speech.lab");
-		if (new File(speechLabFile).exists()) {
-			foundATranscript = true;
-			typeToFile.put(ImageType.SPEECH_TRANSCRIPT, speechLabFile);
-		}
+        else {
+            logger.warn("no words " + wordLabFile);
+        }
+
 		if (!foundATranscript) {
 			logger.error("no label files found, e.g. " + phoneLabFile);
 		}
 
+       // logger.debug("typeToFile " + typeToFile);
+
 		if (decode || imageWidth < 0) {  // hack to skip image generation
 			return getEventInfo(typeToFile, decode && useWebservice); // if align, don't use webservice regardless
 		} else {
-			return new TranscriptWriter().writeTranscripts(pathname,
+            String pathname = audioFileNoSuffix + ".wav";
+            pathname = prependDeploy(pathname);
+            if (!new File(pathname).exists()) {
+                logger.error("writeTranscripts : can't find " + pathname);
+                return new EventAndFileInfo();
+            }
+            imageOutDir = deployPath + File.separator + imageOutDir;
+            return new TranscriptWriter().writeTranscripts(pathname,
                     imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, decode && useWebservice);
 		}
 	}
@@ -219,53 +180,42 @@ public abstract class Scoring {
 	 * @param suffix
 	 * @param decode
 	 * @param useWebservice
-	 * @param object TODO Actually use it
-	 * @return
-	 */
-	protected EventAndFileInfo writeTranscriptsCached(String imageOutDir, int imageWidth, int imageHeight,
-													  String audioFileNoSuffix, boolean useScoreToColorBkg,
-													  String prefix, String suffix, boolean decode, boolean useWebservice,
-													  JSONObject object) {
-        logger.debug("writeTranscriptsCached " + object);
-
-		String pathname = audioFileNoSuffix + ".wav";
-		pathname = prependDeploy(pathname);
-		if (!new File(pathname).exists()) {
-			logger.error("writeTranscripts : can't find " + pathname);
-			return new EventAndFileInfo();
-		}
-		imageOutDir = deployPath + File.separator + imageOutDir;
-
-	//	boolean foundATranscript = false;
-		// These may not all exist. The speech file is created only by multisv right now.
-		String phoneLabFile  = prependDeploy(audioFileNoSuffix + ".phones.lab");
-		Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
-		if (new File(phoneLabFile).exists()) {
-			typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
-		//	foundATranscript = true;
-		}
-		String wordLabFile   = prependDeploy(audioFileNoSuffix + ".words.lab");
-		if (new File(wordLabFile).exists()) {
-			typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
-			//foundATranscript = true;
-		}
-		String speechLabFile = prependDeploy(audioFileNoSuffix + ".speech.lab");
-		if (new File(speechLabFile).exists()) {
-		//	foundATranscript = true;
-			typeToFile.put(ImageType.SPEECH_TRANSCRIPT, speechLabFile);
-		}
-/*		if (!foundATranscript) {
-			logger.error("no label files found, e.g. " + phoneLabFile);
-		}*/
-
-		if (decode || imageWidth < 0) {  // hack to skip image generation
-			return getEventInfo(typeToFile, decode && useWebservice); // if align, don't use webservice regardless
-		} else {
+     * @param object TODO Actually use it
+     * @return
+     */
+    protected EventAndFileInfo writeTranscriptsCached(String imageOutDir, int imageWidth, int imageHeight,
+                                                      String audioFileNoSuffix, boolean useScoreToColorBkg,
+                                                      String prefix, String suffix, boolean decode, boolean useWebservice,
+                                                      JSONObject object) {
+        // logger.debug("writeTranscriptsCached " + object);
+        if (decode || imageWidth < 0) {  // hack to skip image generation
+            // These may not all exist. The speech file is created only by multisv right now.
+            String phoneLabFile = prependDeploy(audioFileNoSuffix + ".phones.lab");
+            Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
+            if (new File(phoneLabFile).exists()) {
+                typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
+            }
+            String wordLabFile = prependDeploy(audioFileNoSuffix + ".words.lab");
+            if (new File(wordLabFile).exists()) {
+                typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
+            }
+            return getEventInfo(typeToFile, decode && useWebservice); // if align, don't use webservice regardless
+        } else {
             Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseJson(object, "words", "w");
-			return new TranscriptWriter().getEventAndFileInfo(pathname,
-					imageOutDir, imageWidth, imageHeight, typeToFile.keySet(), SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, imageTypeMapMap);
-		}
-	}
+
+            String pathname = audioFileNoSuffix + ".wav";
+            pathname = prependDeploy(pathname);
+            if (!new File(pathname).exists()) {
+                logger.error("writeTranscripts : can't find " + pathname);
+                return new EventAndFileInfo();
+            }
+            imageOutDir = deployPath + File.separator + imageOutDir;
+
+            Collection<ImageType> expectedTypes = Arrays.asList(ImageType.PHONE_TRANSCRIPT, ImageType.WORD_TRANSCRIPT);
+            return new TranscriptWriter().getEventAndFileInfo(pathname,
+                    imageOutDir, imageWidth, imageHeight, expectedTypes, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, imageTypeMapMap);
+        }
+    }
 
     /**
      * TODOx : actually use the parsed json to get transcript info
@@ -327,21 +277,21 @@ public abstract class Scoring {
     }
 
     // JESS reupdate here
-	private EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes, boolean useWebservice) {
-		Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
-		try {
-			for (Map.Entry<ImageType, String> o : imageTypes.entrySet()) {
-				if(useWebservice)
-					typeToEvent.put(o.getKey(), new TranscriptReader().readEventsFromString(o.getValue()));
-				else 
-					typeToEvent.put(o.getKey(), new TranscriptReader().readEventsFromFile(o.getValue()));
-			}
-			return new EventAndFileInfo(new HashMap<ImageType, String>(), typeToEvent);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+    private EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes, boolean useWebservice) {
+        Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
+        try {
+            for (Map.Entry<ImageType, String> o : imageTypes.entrySet()) {
+                if (useWebservice)
+                    typeToEvent.put(o.getKey(), new TranscriptReader().readEventsFromString(o.getValue()));
+                else
+                    typeToEvent.put(o.getKey(), new TranscriptReader().readEventsFromFile(o.getValue()));
+            }
+            return new EventAndFileInfo(new HashMap<ImageType, String>(), typeToEvent);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 	/**
 	 * Make sure the paths for each image are relative (don't include the deploy path prefix) and have
