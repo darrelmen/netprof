@@ -379,6 +379,10 @@ fieldset > legend {
   margin: 15px 6px 6px;
 }
 
+#closeButtonLessTopMargin {
+    margin: 3px 6px 6px;
+}
+
 #registerButton {
     margin: 15px 6px 6px;
 }
