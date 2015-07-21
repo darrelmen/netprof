@@ -116,8 +116,8 @@ public class ResultManager extends PagerTable {
 
     final Panel dialogVPanel = new VerticalPanel();
 
-    int left = (Window.getClientWidth()) / 40;
-    int top = (Window.getClientHeight()) / 40;
+    int left = (Window.getClientWidth()) / 200;
+    int top = (Window.getClientHeight()) / 200;
     dialogBox.setPopupPosition(left, top);
     dialogVPanel.setWidth("100%");
 
@@ -398,39 +398,47 @@ public class ResultManager extends PagerTable {
    * @see #populateTable
    */
   private Widget getAsyncTable(int numResults) {
-    cellTable = new CellTable<MonitorResult>();
-  //    reviewContainer = new DivWidget();
+      cellTable = new CellTable<MonitorResult>();
+
       reviewContainer = new HorizontalPanel();
       reviewContainer.addStyleName("topFiveMargin");
       reviewContainer.addStyleName("border");
-    final SingleSelectionModel<MonitorResult> selectionModel = new SingleSelectionModel<>();
-    cellTable.setSelectionModel(selectionModel);
-    cellTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-      @Override
-      public void onSelectionChange(SelectionChangeEvent event) {
-        reviewContainer.clear();
-        final MonitorResult selectedObject = selectionModel.getSelectedObject();
-        ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getForeignText(), service, controller, new EmptyScoreListener(), "", "");
-        reviewContainer.add(w);
-        w.setResultID(selectedObject.getUniqueID());
-        w.getImagesForPath(selectedObject.getAnswer());
-          reviewContainer.add(w.getTables());
-      }
-    });
-    addColumnsToTable(cellTable);
-    cellTable.setRowCount(numResults, true);
-    cellTable.setVisibleRange(0, MAX_TO_SHOW);
-    createProvider(numResults, cellTable);
+      final SingleSelectionModel<MonitorResult> selectionModel = new SingleSelectionModel<>();
+      cellTable.setSelectionModel(selectionModel);
+      cellTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+          @Override
+          public void onSelectionChange(SelectionChangeEvent event) {
 
-    // Add a ColumnSortEvent.AsyncHandler to connect sorting to the AsyncDataPRrovider.
-    ColumnSortEvent.AsyncHandler columnSortHandler = new ColumnSortEvent.AsyncHandler(cellTable);
-    cellTable.addColumnSortHandler(columnSortHandler);
+              final MonitorResult selectedObject = selectionModel.getSelectedObject();
 
-    Column<?, ?> time = getColumn(TIMESTAMP);
-    cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(time, false));
-    cellTable.setWidth("100%", false);
+              ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getForeignText(), service, controller, new EmptyScoreListener(), "", "");
 
-    return getPagerAndTable(cellTable);
+              w.setResultID(selectedObject.getUniqueID());
+              w.getImagesForPath(selectedObject.getAnswer());
+
+              Panel vert = new VerticalPanel();
+              vert.add(w);
+              vert.add(w.getBelow());
+
+              reviewContainer.clear();
+              reviewContainer.add(vert);
+              reviewContainer.add(w.getTables());
+          }
+      });
+      addColumnsToTable(cellTable);
+      cellTable.setRowCount(numResults, true);
+      cellTable.setVisibleRange(0, MAX_TO_SHOW);
+      createProvider(numResults, cellTable);
+
+      // Add a ColumnSortEvent.AsyncHandler to connect sorting to the AsyncDataPRrovider.
+      ColumnSortEvent.AsyncHandler columnSortHandler = new ColumnSortEvent.AsyncHandler(cellTable);
+      cellTable.addColumnSortHandler(columnSortHandler);
+
+      Column<?, ?> time = getColumn(TIMESTAMP);
+      cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(time, false));
+      cellTable.setWidth("100%", false);
+
+      return getPagerAndTable(cellTable);
   }
 
   private Column<?, ?> getColumn(String name) {
