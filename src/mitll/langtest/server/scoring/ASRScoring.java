@@ -412,7 +412,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
       if (precalcResult == null ||
               (precalcResult.isValid() &&
                       (precalcResult.getPronScore() < 0 || precalcResult.getJsonScore() == null || precalcResult.getJsonScore().isEmpty()))) {
-          logger.debug("no precalc result, so recalculating : " + precalcResult);
+          logger.debug("unusable precalc result, so recalculating : " + precalcResult);
           scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
       } else {
           logger.debug("for " + precalcResult);// + "\n\tgot json : " + precalcResult.getJsonScore());
