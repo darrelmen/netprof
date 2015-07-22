@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Does ASR scoring using hydec.  Results in either alignment or decoding, depending on the mode.
@@ -44,7 +45,7 @@ import java.util.*;
  */
 public class ASRScoring extends Scoring implements CollationSort, ASR {
     private static final Logger logger = Logger.getLogger(ASRScoring.class);
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
 	private static final double KEEP_THRESHOLD = 0.3;
 
@@ -812,7 +813,8 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
   private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
 		sentence = svd.getTrimmed(sentence);
     long then = System.currentTimeMillis();
-    logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with LTS " + letterToSoundClass + " against " + testAudio + " with " + configFile);
+    logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with " +
+            "LTS " + letterToSoundClass + " against " + testAudio + " with " + configFile);
 
     try {
       Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut =
