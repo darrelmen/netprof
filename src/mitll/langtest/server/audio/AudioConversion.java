@@ -1,6 +1,5 @@
 package mitll.langtest.server.audio;
 
-import audio.imagewriter.AudioConverter;
 import audio.tools.FileCopier;
 import mitll.langtest.shared.AudioAnswer;
 import org.apache.commons.codec.binary.Base64;
@@ -13,7 +12,6 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -31,6 +29,7 @@ public class AudioConversion {
 	private static final Logger logger = Logger.getLogger(AudioConversion.class);
 	private static final String LAME_PATH_WINDOWS = "C:\\Users\\go22670\\lame\\lame.exe";
 	private static final String LAME_PATH_LINUX = "/usr/local/bin/lame";
+    private static final String SOX = "sox";
 
 	private static final String LINUX_SOX_BIN_DIR = "/usr/local/bin";
 	private static final String LINUX_SOX_BIN_DIR_2 = "/usr/bin";
@@ -100,8 +99,7 @@ public class AudioConversion {
 	 */
 	public AudioCheck.ValidityAndDur isValid(File file) {
 		try {
-			AudioCheck.ValidityAndDur validityAndDur = audioCheck.checkWavFile(file);
-			return validityAndDur;
+            return audioCheck.checkWavFile(file);
 		} catch (Exception e) {
 			logger.error("got " + e, e);
 		}
@@ -144,7 +142,8 @@ public class AudioConversion {
             if (sampleRate != 16000f) {
                 long then = System.currentTimeMillis();
                 String binPath = getBinPath();
-                String convertTo16KHZ = new AudioConverter().convertTo16KHZ(binPath, wavFile.getAbsolutePath());
+           //     String convertTo16KHZ = new AudioConverter().convertTo16KHZ(binPath, wavFile.getAbsolutePath());
+                String convertTo16KHZ = convertTo16KHZ(binPath, wavFile.getAbsolutePath());
                 String name1   = wavFile.getName();
                 String sampled = wavFile.getParent() + File.separator + removeSuffix(name1) + SIXTEEN_K_SUFFIX + ".wav";
                 if (new FileCopier().copy(convertTo16KHZ, sampled)) {
@@ -156,13 +155,52 @@ public class AudioConversion {
                     FileUtils.deleteDirectory(file);
                 }
                 long now = System.currentTimeMillis();
-                logger.debug("convertTo16Khz : took " + (now - then) + " millis to convert original " + orig.getName() + " at " + sampleRate +
+                logger.info("convertTo16Khz : took " + (now - then) + " millis to convert original " + orig.getName() + " at " + sampleRate +
                         " to 16K wav file : " + wavFile.getName());
             }
         } catch (IOException e) {
             logger.error("Got " + e, e);
         }
         return wavFile;
+    }
+
+    private String convertTo16KHZ(String binPath, String pathToAudioFile) throws IOException {
+        return sampleAt16KHZ(getSox(binPath), pathToAudioFile, createTempDirectory());
+    }
+
+    private File createTempDirectory() throws IOException {
+        File temp = File.createTempFile("temp", Long.toString(System.nanoTime()));
+
+        if (!temp.delete()) {
+            throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
+        }
+
+        if (!temp.mkdir()) {
+            throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
+        }
+
+        return temp;
+    }
+
+    private String sampleAt16KHZ(String soxPath, String pathToAudioFile, File tempDirectory) throws IOException {
+        final String tempForWavz = tempDirectory + File.separator + "tempForWavz.wav";
+
+        //log.info("running sox on " + tempForWavz);
+
+        // i.e. sox inputFile -s -2 -c 1 -q tempForWavz.wav rate 16000
+        ProcessBuilder soxFirst = new ProcessBuilder(soxPath,
+                pathToAudioFile, "-s", "-2", "-c", "1", "-q", tempForWavz, "rate", "16000");
+        //log.info("ENTER running sox on " + tempForWavz + " : " + soxFirst);
+
+        if (!new ProcessRunner().runProcess(soxFirst)) {
+            ProcessBuilder soxFirst2 = new ProcessBuilder(soxPath,
+                    pathToAudioFile, "-c", "1", "-q", tempForWavz, "rate", "16000");
+            new ProcessRunner().runProcess(soxFirst2);
+        }
+
+        //   log.info("EXIT running sox on " + tempForWavz + " : " + soxFirst);
+
+        return tempForWavz;
     }
 
 	// assumes 16Khz
@@ -183,16 +221,9 @@ public class AudioConversion {
 			f.close();
 			fout.close();
 		} 
-		catch(FileNotFoundException e) {
+		catch(UnsupportedAudioFileException | IOException e) {
 			e.printStackTrace();
-		}
-		catch(UnsupportedAudioFileException e) {
-			e.printStackTrace();
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			try {
 				if(fout != null)
 					fout.close();
@@ -209,11 +240,6 @@ public class AudioConversion {
 	private String removeSuffix(String name1) {
 		return name1.substring(0, name1.length() - 4);
 	}
-
-	/*  private boolean writeOGG(String pathToWav) {
-    String oggFile = pathToWav.replace(".wav",".ogg");
-    return oggEncoder != null && convertFileAndCheck(oggEncoder.getAbsolutePath(), pathToWav, oggFile);
-  }*/
 
 	/**
 	 * Remember to resample wav to 48K before doing lame on it.
@@ -259,11 +285,10 @@ public class AudioConversion {
 
            // try {
               //  File tempFile = convertTo48KWav(absolutePathToWav);
-                File tempFile = absolutePathToWav;
-                String lamePath = getLame();
-                if (DEBUG) logger.debug("run lame on " + tempFile + " making " + mp3File);
+            String lamePath = getLame();
+                if (DEBUG) logger.debug("run lame on " + absolutePathToWav + " making " + mp3File);
 
-                if (!convertFileAndCheck(lamePath, title, tempFile.getAbsolutePath(), mp3File)) {
+                if (!convertFileAndCheck(lamePath, title, absolutePathToWav.getAbsolutePath(), mp3File)) {
                     return FILE_MISSING;
                 }
           //  } catch (IOException e) {
@@ -273,27 +298,22 @@ public class AudioConversion {
         return mp3File;
     }
 
-/*  private File convertTo48KWav(File absolutePathToWav) throws IOException {
-    File tempFile = File.createTempFile("fortyEightK",".wav");
-    // logger.debug("sox conversion from " + absolutePathToWav + " to " + tempFile.getAbsolutePath());
-    ProcessBuilder soxFirst = new ProcessBuilder(getSox(),
-        absolutePathToWav.getAbsolutePath(), "-s", "-2", "-c", "1", "-q",tempFile.getAbsolutePath(), "rate", "48000");
-
-	ProcessRunner processRunner = new ProcessRunner();
-	  try {
-		  processRunner.runProcess(soxFirst);
-	  } catch (IOException e) {
-
-	  }
-
-	  if (!tempFile.exists()) logger.error("didn't make " + tempFile);
-    return tempFile;
-  }*/
-
     private String getSox() {
-        String sox = new AudioConverter().getSox(getBinPath());
+        String sox = getSox(getBinPath());
         if (!new File(sox).exists()) sox = "sox";
         return sox;
+    }
+
+    private String getSox(String binPath) {
+        return getExe(binPath, SOX);
+    }
+
+    private String getExe(String binPath, String exe) {
+        if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
+            return binPath + File.separator + exe + ".exe";
+        } else {
+            return binPath + File.separator + exe;
+        }
     }
 
 	/**
@@ -345,25 +365,8 @@ public class AudioConversion {
 	}
 
 	private File getAbsolute(String filePath, String realContextPath) {
-		File file = new File(realContextPath, filePath);
-		//    assert(file.exists());
-		return file;
+        return new File(realContextPath, filePath);
 	}
-
-	/**
-	 * Use lame to write an mp3 file.
-   * @paramx pathToWav
-	 * @see #convertBase64ToAudioFiles(String, java.io.File)
-	 */
-/*  private void writeMP3(String pathToWav) {
-		String mp3File = pathToWav.replace(".wav", ".mp3");
-		String lamePath = getLame();
-
-		if (DEBUG) logger.debug("using " + lamePath + " audio :'" + pathToWav +
-				"' mp3 '" + mp3File +
-				"'");
-		convertFileAndCheck(lamePath, pathToWav, mp3File);
-  }*/
 
 	private String getLame() {
 		String lamePath = LAME_PATH_WINDOWS;    // Windows
@@ -388,12 +391,11 @@ public class AudioConversion {
 		String lamePath = getLame();
 
 
-		File file = writeWavFromMP3(lamePath, pathToWav, mp3File);
 		/*    System.out.println("convertMP3ToWav using " +lamePath +" audio :'" +pathToWav +
         "' out '" +mp3File+
         "' = '" +file.getName()+
         "'");*/
-		return file;
+		return writeWavFromMP3(lamePath, pathToWav, mp3File);
 	}
 
 	private File writeWavFromMP3(String lamePath, String pathToAudioFile, String mp3File) {
@@ -425,39 +427,40 @@ public class AudioConversion {
 	 * @param mp3File
 	 * @return
 	 */
-  private boolean convertFileAndCheck(String lamePath, String title, String pathToAudioFile, String mp3File) {
-		if (DEBUG) logger.debug("convert " + pathToAudioFile + " to " + mp3File);
-    // " --tt \""+title +"\" "
-    if (title.length() > 30) {
-      title = title.substring(0,30);
-    }
-    ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File,"--tt", ""+title+"");
-		try {
-			//logger.debug("running lame" + lameProc.command());
-			new ProcessRunner().runProcess(lameProc);
-		} catch (IOException e) {
-    //  System.err.println("Couldn't run " + lameProc);
-      logger.error("for " + lameProc + " got " + e, e);
-		}
-
-		File testMP3 = new File(mp3File);
-		if (!testMP3.exists()) {
-			if (!new File(pathToAudioFile).exists()) {
-				logger.error("huh? source file " + pathToAudioFile + " doesn't exist?");
-			}
-			else {
-				logger.error("didn't write MP3 : " + testMP3.getAbsolutePath() +
-            " exe path " + lamePath +
-            " command was " + lameProc.command());
+    private boolean convertFileAndCheck(String lamePath, String title, String pathToAudioFile, String mp3File) {
+        if (DEBUG) logger.debug("convert " + pathToAudioFile + " to " + mp3File);
+        // " --tt \""+title +"\" "
+        if (title.length() > 30) {
+            title = title.substring(0, 30);
+        }
+        ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File, "--tt", "" + title + "");
         try {
-          new ProcessRunner().runProcess(lameProc,true);
+            //logger.debug("running lame" + lameProc.command());
+            new ProcessRunner().runProcess(lameProc);
         } catch (IOException e) {
-          logger.error("for " + lameProc + " got " + e, e);
-			}
+            //  System.err.println("Couldn't run " + lameProc);
+            logger.error("for " + lameProc + " got " + e, e);
+        }
 
-      }
-			return false;
+        File testMP3 = new File(mp3File);
+        if (!testMP3.exists()) {
+            if (!new File(pathToAudioFile).exists()) {
+                logger.error("huh? source file " + pathToAudioFile + " doesn't exist?");
+            } else {
+                logger.error("didn't write MP3 : " + testMP3.getAbsolutePath() +
+                        " exe path " + lamePath +
+                        " command was " + lameProc.command());
+                try {
+                    if (!new ProcessRunner().runProcess(lameProc, true)) {
+                        return false;
+                    }
+                } catch (IOException e) {
+                    logger.error("for " + lameProc + " got " + e, e);
+                }
+
+            }
+            return false;
+        }
+        return true;
     }
-		return true;
-	}
 }
