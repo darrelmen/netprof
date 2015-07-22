@@ -90,7 +90,6 @@ public interface LangTestDatabase extends RemoteService {
 
   Map<String, Map<Integer, Integer>> getResultCountsByGender();
   Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts();
-  Map<Integer, Map<String, Map<String, Integer>>> getGradeCountPerExercise();
 
   void logMessage(String message);
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device);
