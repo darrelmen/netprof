@@ -77,7 +77,6 @@ public class DatabaseImpl implements Database {
   private PhoneDAO phoneDAO;
   private AudioDAO audioDAO;
   private AnswerDAO answerDAO;
-  private GradeDAO gradeDAO;
   private UserListManager userListManager;
   private UserExerciseDAO userExerciseDAO;
   private AddRemoveDAO addRemoveDAO;
@@ -165,7 +164,6 @@ public class DatabaseImpl implements Database {
     phoneDAO = new PhoneDAO(this, logAndNotify);
     audioDAO = new AudioDAO(this, userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
-    gradeDAO = new GradeDAO(this, userDAO, resultDAO);
     userListManager = new UserListManager(userDAO, userListDAO, userListExerciseJoinDAO,
         new AnnotationDAO(this, userDAO),
         new ReviewedDAO(this, ReviewedDAO.REVIEWED),
@@ -179,7 +177,6 @@ public class DatabaseImpl implements Database {
       resultDAO.createResultTable(connection1);
       refresultDAO.createResultTable(connection1);
       connection1 = getConnection();  // huh? why?
-      gradeDAO.createGradesTable(connection1);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     } finally {
@@ -248,9 +245,7 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  MonitoringSupport getMonitoringSupport() {
-    return new MonitoringSupport(userDAO, resultDAO, gradeDAO);
-  }
+  MonitoringSupport getMonitoringSupport() { return new MonitoringSupport(userDAO, resultDAO);  }
 
   /**
    * @param installPath
@@ -699,7 +694,7 @@ public class DatabaseImpl implements Database {
   /**
    * @param user
    * @return
-   * @see mitll.langtest.server.database.ImportCourseExamples#copyUser
+   * @seex mitll.langtest.server.database.ImportCourseExamples#copyUser
    */
   public long addUser(User user) {
     long l;
@@ -1061,10 +1056,6 @@ public class DatabaseImpl implements Database {
    */
   public Map<String, Number> getResultStats() {
     return monitoringSupport.getResultStats();
-  }
-
-  public Map<Integer, Map<String, Map<String, Integer>>> getGradeCountPerExercise() {
-    return monitoringSupport.getGradeCountPerExercise(getExercises());
   }
 
   public void destroy() {
