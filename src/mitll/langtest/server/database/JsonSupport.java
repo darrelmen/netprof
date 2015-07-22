@@ -91,6 +91,11 @@ public class JsonSupport {
     return addJsonHistory(exerciseCorrectAndScores);
   }
 
+    /**
+     * @see DatabaseImpl#getJsonRefResult(Map) 
+     * @param typeToSection
+     * @return
+     */
   public JSONObject getJsonRefResults(Map<String, Collection<String>> typeToSection) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToSection);
     List<String> allIDs = new ArrayList<String>();
