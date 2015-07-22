@@ -401,13 +401,11 @@ public class ResultManager extends PagerTable {
       cellTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
           @Override
           public void onSelectionChange(SelectionChangeEvent event) {
-
               final MonitorResult selectedObject = selectionModel.getSelectedObject();
 
-              ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getForeignText(), service, controller, new EmptyScoreListener(), "", "");
+              ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(),selectedObject.getForeignText(), service, controller, selectedObject.getId());
 
               w.setResultID(selectedObject.getUniqueID());
-              w.getImagesForPath(selectedObject.getAnswer());
 
               Panel vert = new VerticalPanel();
               vert.add(w);
@@ -484,14 +482,16 @@ public class ResultManager extends PagerTable {
                   " --->req " + unitToValue + " user " + userID + " text '" + text + "' : got back " + result.results.size() + " of total " + result.numTotal);
 */
             } else {
- /*             logger.info("--->getResults req " + result.req +
-                  " " + unitToValue + " user " + userID + " text '" + text + "' : got back " + result.results.size() + " of total " + result.numTotal);
-*/
-              final int numTotal = result.numTotal;
-              cellTable.setRowCount(numTotal, true);
-              updateRowData(start, result.results);
-              if (numTotal>0)
-              cellTable.getSelectionModel().setSelected(result.results.get(0),true);
+                final int numTotal = result.numTotal;
+                cellTable.setRowCount(numTotal, true);
+                updateRowData(start, result.results);
+                if (numTotal > 0) {
+                    MonitorResult object = result.results.get(0);
+//                    logger.info("--->getResults req " + result.req +
+//                            " " + unitToValue + " user " + userID + " text '" + text + "' : " +
+//                            "got back " + result.results.size() + " of total " + result.numTotal + " selecting "+ object);
+                    cellTable.getSelectionModel().setSelected(object, true);
+              }
             }
           }
         });
