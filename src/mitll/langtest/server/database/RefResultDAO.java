@@ -1,14 +1,10 @@
 package mitll.langtest.server.database;
 
-import com.mongodb.util.JSON;
-import jdk.nashorn.api.scripting.JSObject;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import net.sf.json.JSONString;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -228,23 +224,11 @@ public class RefResultDAO extends DAO {
     return null;
   }
 
-  public Result getResultByID(int id) {
-    String sql = "SELECT * FROM " + REFRESULT + " WHERE " + ID + "='" + id + "'";
-    try {
-      List<Result> resultsSQL = getResultsSQL(sql);
-      if (resultsSQL.size() > 1) {
-        logger.error("for " + id + " got " + resultsSQL);
-      }
-      else if (resultsSQL.isEmpty()) {
-        logger.error("no result for " + id);
-      }
-      return resultsSQL.isEmpty() ? null : resultsSQL.iterator().next();
-    } catch (SQLException e) {
-      logger.error("Got " + e, e);
-    }
-    return null;
-  }
-
+    /**
+     * @see JsonSupport#getJsonRefResults(Map)
+     * @param ids
+     * @return
+     */
   public JSONObject getJSONScores(Collection<String> ids)  {
     try {
       String list = getInList(ids);
@@ -317,9 +301,8 @@ public class RefResultDAO extends DAO {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
 
-    List<Result> resultsForQuery = getResultsForQuery(connection, statement);
-  //  logger.debug("running " + sql + " -> " +resultsForQuery.size() + " results");
-    return resultsForQuery;
+      //  logger.debug("running " + sql + " -> " +resultsForQuery.size() + " results");
+    return getResultsForQuery(connection, statement);
   }
 
   public int getNumResults() {
