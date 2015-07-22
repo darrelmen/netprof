@@ -32,17 +32,14 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
     private Panel tablesContainer, belowContainer;
 
     /**
-     *
+     * @see mitll.langtest.client.result.ResultManager#getAsyncTable(int, Widget)
      * @param refSentence
      * @param service
      * @param controller
-     * @param gaugePanel
-     * @param playButtonSuffix
      * @param exerciseID
      */
-    public ReviewScoringPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel,
-                              String playButtonSuffix, String exerciseID) {
-        super(refSentence, service, controller, gaugePanel, playButtonSuffix, exerciseID);
+    public ReviewScoringPanel(String path, String refSentence, LangTestDatabaseAsync service, ExerciseController controller, String exerciseID) {
+        super(path, refSentence, service, controller, false, new EmptyScoreListener(), 23, "", exerciseID);
         tablesContainer = new HorizontalPanel();
         tablesContainer.getElement().setId("TablesContainer");
         belowContainer = new DivWidget();
@@ -156,6 +153,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
     @Override
     protected void scoreAudio(String path, long resultID, String refSentence, final ImageAndCheck wordTranscript,
                               final ImageAndCheck phoneTranscript, int width, int height, int reqid) {
+       // logger.info("ReviewScoringPanel.scoreAudio : path " + path + " width " + width + " height " + height);
 
         boolean wasVisible = wordTranscript.image.isVisible();
 
@@ -173,8 +171,6 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
 
         // Schedule the timer to run once in 1 seconds.
         t.schedule(wasVisible ? 1000 : 1);
-
-        logger.info("ReviewScoringPanel.scoreAudio : path " + path + " width " + width + " height " + height);
 
         service.getResultASRInfo(resultID, width, height, new AsyncCallback<PretestScore>() {
             public void onFailure(Throwable caught) {
