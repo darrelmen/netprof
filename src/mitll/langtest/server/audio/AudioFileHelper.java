@@ -480,7 +480,7 @@ public class AudioFileHelper implements CollationSort {
     return getJsonObject(pretestScore);
   }
 
-  public JSONObject getJsonObject(PretestScore pretestScore) {
+  private JSONObject getJsonObject(PretestScore pretestScore) {
     JSONObject jsonObject = new JSONObject();
     if (pretestScore != null) {
       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getsTypeToEndTimes();
@@ -601,12 +601,9 @@ public class AudioFileHelper implements CollationSort {
 
   private AudioAnswer getAudioAnswer(String base64EncodedString, int reqid, File file) {
     AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
-    // boolean isValid = validity.validity == AudioAnswer.Validity.OK;
-    AudioAnswer audioAnswer = new AudioAnswer(pathHelper.ensureForwardSlashes(pathHelper.getWavPathUnder(POSTED_AUDIO)),
-        validity.validity, reqid, validity.durationInMillis);
-
     //logger.debug("writing to " + file.getAbsolutePath() + " answer " + audioAnswer);
-    return audioAnswer;
+    return new AudioAnswer(pathHelper.ensureForwardSlashes(pathHelper.getWavPathUnder(POSTED_AUDIO)),
+        validity.validity, reqid, validity.durationInMillis);
   }
 
   /**
@@ -621,7 +618,6 @@ public class AudioFileHelper implements CollationSort {
    * @see AutoCRT#getFlashcardAnswer
    * @see AutoCRTScoring#getASRScoreForAudio(File, Collection, boolean)
    */
-
   public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache) {
     String tmpDir = Files.createTempDir().getAbsolutePath();
     makeASRScoring();
@@ -651,7 +647,7 @@ public class AudioFileHelper implements CollationSort {
    */
 
   private void createSLFFile(Collection<String> lmSentences, String tmpDir, float unknownModelBiasWeight) {
-    new SLFFile().createSimpleSLFFile(lmSentences, tmpDir, unknownModelBiasWeight); //serverProps.getUnknownModelBias()
+    new SLFFile().createSimpleSLFFile(lmSentences, tmpDir, unknownModelBiasWeight);
   }
 
   /**
@@ -704,6 +700,7 @@ public class AudioFileHelper implements CollationSort {
    * @param prefix
    * @param precalcResult
    * @return
+   * @see #getASRScoreForAudio(File, Collection, boolean)
    */
   private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence, Collection<String> lmSentences,
                                            int width, int height, boolean useScoreToColorBkg,
