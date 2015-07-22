@@ -96,7 +96,7 @@ public class MonitoringManager {
     doSessionQuery(getVPanel(vp),null);
     doMaleFemale(getVPanel(vp),null);
     doResultQuery(getVPanel(vp),null);
-    doGradeQuery(getVPanel(vp));
+   // doGradeQuery(getVPanel(vp));
     doGenderQuery(getVPanel(vp));
    // doTimeUntilItems(getSPanel(vp));
     doResultLineQuery(getVPanel(vp),null);
@@ -320,7 +320,7 @@ public class MonitoringManager {
         final double avgSecs = result.get("avgSecs").doubleValue();
         final int badRecordings = result.get("badRecordings").intValue();
 
-        vp.add(addGradeInfo(result));
+        //vp.add(addGradeInfo(result));
         vp.add(new HTML("<h2>Session Info</h2>"));
 
         service.getSessions(new AsyncCallback<List<Session>>() {
@@ -394,7 +394,7 @@ public class MonitoringManager {
 
   }
 
-  private Panel addGradeInfo(Map<String, Number> result) {
+/*  private Panel addGradeInfo(Map<String, Number> result) {
     VerticalPanel vp = new VerticalPanel();
     HTML html = new HTML("<h2>Grade Stats</h2>");
     vp.add(html);
@@ -450,7 +450,7 @@ public class MonitoringManager {
     }
     vp.setWidth("100%");
     return vp;
-  }
+  }*/
 
   private void addGraphOfExperienceToIncorrectAndCorrect(Map<String, Number> result, VerticalPanel vp, int i) {
     List<String> incorrectKeys = new ArrayList<String>();
@@ -826,7 +826,7 @@ public class MonitoringManager {
       }
     });
   }
-
+/*
   private void doGradeQuery(final Panel vp) {
     service.getGradeCountPerExercise(new AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>>() {
       @Override
@@ -849,7 +849,7 @@ public class MonitoringManager {
         }
       }
     });
-  }
+  }*/
 
   /**
    * Handles a large exercise list by making a sequence of charts.
