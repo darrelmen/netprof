@@ -62,8 +62,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     private RefResultDecoder refResultDecoder;
 
     public static final String REGULAR = "regular";
+    private static final boolean warnMissingFile = true;
 
-	private DatabaseImpl db;
+
+    private DatabaseImpl db;
   private AudioFileHelper audioFileHelper;
   private String relativeConfigDir;
   private String configDir;
@@ -798,32 +800,30 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		return exercises;
 	}
 
-  private boolean warnMissingFile = true;
-	/**
-	 *
-	 * @param wavFile
-   * @param title
-	 * @return true if mp3 file exists
-	 * @see #ensureMP3s(mitll.langtest.shared.CommonExercise)
-	 * @see #writeAudioFile
-	 */
-  private boolean ensureMP3(String wavFile, String title) {
-		if (wavFile != null) {
-			String parent = pathHelper.getInstallPath();
+    /**
+     * @param wavFile
+     * @param title
+     * @return true if mp3 file exists
+     * @see #ensureMP3s(mitll.langtest.shared.CommonExercise)
+     * @see #writeAudioFile
+     */
+    private boolean ensureMP3(String wavFile, String title) {
+        if (wavFile != null) {
+            String parent = pathHelper.getInstallPath();
 
-			AudioConversion audioConversion = new AudioConversion();
-			if (!audioConversion.exists(wavFile, parent)) {
-       if (warnMissingFile)  logger.warn("can't find " + wavFile + " under " + parent + " trying config... ");
-				parent = configDir;
-			}
-			if (!audioConversion.exists(wavFile, parent)) {
-        if (warnMissingFile)   logger.error("huh? can't find " + wavFile + " under " + parent);
-			}
-      String s = audioConversion.ensureWriteMP3(wavFile, parent, false, title);
-			return !(s.equals(AudioConversion.FILE_MISSING));
-		}
-		return false;
-	}
+            AudioConversion audioConversion = new AudioConversion();
+            if (!audioConversion.exists(wavFile, parent)) {
+                if (warnMissingFile) logger.warn("can't find " + wavFile + " under " + parent + " trying config... ");
+                parent = configDir;
+            }
+            if (!audioConversion.exists(wavFile, parent)) {
+                if (warnMissingFile) logger.error("huh? can't find " + wavFile + " under " + parent);
+            }
+            String s = audioConversion.ensureWriteMP3(wavFile, parent, false, title);
+            return !(s.equals(AudioConversion.FILE_MISSING));
+        }
+        return false;
+    }
 
 	/**
 	 * Get an image of desired dimensions for the audio file - only for Waveform and spectrogram.
@@ -940,14 +940,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         try {
             Result result = db.getResultDAO().getResultByID(resultID);
 
-            String sentence = "";
-            String audioFilePath = "";
             String exerciseID = result.getExerciseID();
 
             CommonExercise exercise = db.getExercise(exerciseID);
-            sentence = exercise.getForeignLanguage();
-            audioFilePath = result.getAnswer();
-
+            String sentence = exercise.getForeignLanguage();
+            String audioFilePath = result.getAnswer();
+            ensureMP3(audioFilePath,sentence);
             File tempDir = Files.createTempDir();
             //logger.info("resultID " +resultID+ " temp dir " + tempDir.getAbsolutePath());
             asrScoreForAudio = audioFileHelper.getASRScoreForAudio(1,
