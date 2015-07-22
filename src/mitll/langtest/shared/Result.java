@@ -36,14 +36,10 @@ public class Result implements IsSerializable {
   private String device;
   private transient String jsonScore;
 
-//  private int processDurInMillis;
-//  private int roundTripInMillis;
-
   public static final String AUDIO_TYPE_UNSET = "unset";
   public static final String AUDIO_TYPE_REGULAR = "regular";
   public static final String AUDIO_TYPE_SLOW = "slow";
   public static final String AUDIO_TYPE_FAST_AND_SLOW = "fastAndSlow";
- // public static final String AUDIO_TYPE_DEMO = "demo";
   public static final String AUDIO_TYPE_PRACTICE = "practice";
   public static final String AUDIO_TYPE_REVIEW = "review";
   public static final String AUDIO_TYPE_RECORDER = "recorder";
@@ -94,26 +90,6 @@ public class Result implements IsSerializable {
     return audioType;
   }
 
-  /**
-   * @seex mitll.langtest.server.database.DatabaseImpl#getResultsWithGrades()
-   * @paramx g
-   */
-/*
-  public void addGrade(Grade g) {
-    gradeInfo += g.grade +",";
-  }
-
-  public void clearGradeInfo() { gradeInfo = "";  }
-
-  public String getGradeInfo() {
-    if (gradeInfo.endsWith(",")) {
-      return gradeInfo.substring(0, gradeInfo.length() - 1);
-    } else {
-      return gradeInfo;
-    }
-  }
-*/
-
   public boolean isCorrect() {
     return correct;
   }
@@ -129,12 +105,6 @@ public class Result implements IsSerializable {
   }
 
   public String getExerciseID() { return id;  }
-
-/*
-  public int getQid() {
-    return qid;
-  }
-*/
 
   public String getAnswer() {
     return answer;
