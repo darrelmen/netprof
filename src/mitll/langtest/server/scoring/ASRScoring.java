@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Does ASR scoring using hydec.  Results in either alignment or decoding, depending on the mode.
@@ -45,7 +44,7 @@ import java.util.concurrent.ExecutionException;
  */
 public class ASRScoring extends Scoring implements CollationSort, ASR {
     private static final Logger logger = Logger.getLogger(ASRScoring.class);
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
 	private static final double KEEP_THRESHOLD = 0.3;
 
@@ -412,7 +411,9 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
       if (precalcResult == null ||
               (precalcResult.isValid() &&
                       (precalcResult.getPronScore() < 0 || precalcResult.getJsonScore() == null || precalcResult.getJsonScore().isEmpty()))) {
-          logger.debug("unusable precalc result, so recalculating : " + precalcResult);
+          if (precalcResult != null) {
+              logger.debug("unusable precalc result, so recalculating : " + precalcResult);
+          }
           scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
       } else {
           logger.debug("for " + precalcResult);// + "\n\tgot json : " + precalcResult.getJsonScore());
@@ -708,18 +709,18 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
      */
     private Map<String, Float> getPhoneToScore(Scores scores) {
         Map<String, Float> phones = scores.eventScores.get(Scores.PHONES);
-        return getTokenToScore(scores, phones, Scores.PHONES);
+        return getTokenToScore(phones);
     }
 
     private Map<String, Float> getWordToScore(Scores scores) {
         Map<String, Float> phones = scores.eventScores.get(Scores.WORDS);
-        return getTokenToScore(scores, phones, Scores.WORDS);
+        return getTokenToScore(phones);
     }
 
-    private Map<String, Float> getTokenToScore(Scores scores, Map<String, Float> phones, String token) {
+    private Map<String, Float> getTokenToScore(Map<String, Float> phones) {
         if (phones == null) {
 
-            logger.warn("getTokenToScore : no scores in " + scores.eventScores + " for '" + token + "'");
+//            logger.warn("getTokenToScore : no scores in " + scores.eventScores + " for '" + token + "'");
             return Collections.emptyMap();
         } else {
             Map<String, Float> phoneToScore = new HashMap<String, Float>();
@@ -813,8 +814,8 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
   private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
 		sentence = svd.getTrimmed(sentence);
     long then = System.currentTimeMillis();
-    logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with " +
-            "LTS " + letterToSoundClass + " against " + testAudio + " with " + configFile);
+//    logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with " +
+//            "LTS " + letterToSoundClass + " against " + testAudio + " with " + configFile);
 
     try {
       Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut =
@@ -826,7 +827,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
         " and took " + timeToRunHydec + " millis");
 
         Map<String, Map<String, Float>> stringMapMap = jscoreOut._2;
-        logger.debug("hydec output " + stringMapMap);
+        //logger.debug("hydec output " + stringMapMap);
 
         return new Scores(hydec_score, stringMapMap, (int)timeToRunHydec);
     } catch (AssertionError e) {
@@ -839,7 +840,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 
     long timeToRunHydec = System.currentTimeMillis() - then;
 
-		logger.warn("getScoresFromHydec : scoring '" + sentence + "' (" + sentence.length() + " ) : got bad score and took " + timeToRunHydec + " millis");
+	logger.warn("getScoresFromHydec : scoring '" + sentence + "' (" + sentence.length() + " ) : got bad score and took " + timeToRunHydec + " millis");
 
     Scores scores = new Scores((int)timeToRunHydec);
     scores.hydraScore = -1;
