@@ -934,7 +934,7 @@ public class DatabaseImpl implements Database {
                              boolean valid,
                              String audioType, long durationInMillis, boolean correct, float score,
                              boolean recordedWithFlash, String deviceType, String device, String scoreJson, int processDur) {
-    logger.debug("addAudioAnser json = " + scoreJson);
+    //logger.debug("addAudioAnser json = " + scoreJson);
     return answerDAO.addAnswer(this, userID, exerciseID, questionID, "", audioFile, valid,
         audioType,// + (recordedWithFlash ? "" : "_by_WebRTC"),
         durationInMillis, correct, score, deviceType, device, scoreJson, recordedWithFlash, processDur, 0);
