@@ -275,7 +275,7 @@ public class AudioFileHelper implements CollationSort {
 
       recordWordAndPhoneInfo(answer, answerID);
     }
-    logger.debug("getAudioAnswerDecoding answer " + answer);
+ //   logger.debug("getAudioAnswerDecoding answer " + answer);
     return answer;
   }
 
