@@ -3,11 +3,9 @@ package mitll.langtest.server.scoring;
 import Utils.Log;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
-
 import audio.imagewriter.EventAndFileInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-
 import corpus.HTKDictionary;
 import corpus.LTS;
 import mitll.langtest.server.LangTestDatabaseImpl;
@@ -19,23 +17,20 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
-
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-
 import pronz.dirs.Dirs;
 import pronz.speech.Audio;
 import pronz.speech.Audio$;
 import scala.Tuple2;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Does ASR scoring using hydec.  Results in either alignment or decoding, depending on the mode.
@@ -49,9 +44,10 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoring extends Scoring implements CollationSort, ASR {
+    private static final Logger logger = Logger.getLogger(ASRScoring.class);
+    private static final boolean DEBUG = true;
+
 	private static final double KEEP_THRESHOLD = 0.3;
-	private static final Logger logger = Logger.getLogger(ASRScoring.class);
-	private static final boolean DEBUG = false;
 
 	private static final int FOREGROUND_VOCAB_LIMIT = 100;
 	private static final int VOCAB_SIZE_LIMIT = 200;
@@ -326,11 +322,11 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 																	boolean decode, String tmpDir,
 																	boolean useCache, String prefix, Result precalcResult) {
     return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
-				sentence,
-				scoringDir,
-				imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
-				decode, tmpDir,
-				useCache, prefix, precalcResult);
+            sentence,
+            scoringDir,
+            imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
+            decode, tmpDir,
+            useCache, prefix, precalcResult);
   }
 
   /**
@@ -340,9 +336,9 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * parsed to determine the start and end times for each event, which lets us both create images that
    * show the location of the words and phonemes, and for decoding, the actual reco sentence returned. <br></br>
    * <p/>
-   * For alignment, of course, the reco sentence is just the given sentence echoed back (unless alignment fails to
+   * For alignment, the reco sentence is just the given sentence echoed back (unless alignment fails to
    * generate any alignments (e.g. for audio that's complete silence or when the
-   * spoken sentence is utterly unrelated to the reference.)).
+   * spoken sentence is unrelated to the expected.)).
    * <p/>
    * Audio file must be a wav file, but can be any sample rate - if not 16K will be sampled down to 16K.
    *
@@ -359,88 +355,149 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
    * @param prefix                on the names of the image files, if they are written
    * @param precalcResult
-	 * @return score info coming back from alignment/reco
+   * @return score info coming back from alignment/reco
    * @see ASR#scoreRepeat
    */
   private PretestScore scoreRepeatExercise(String testAudioDir,
-																					 String testAudioFileNoSuffix,
-																					 String sentence,
-																					 String scoringDir,
+										   String testAudioFileNoSuffix,
+										   String sentence,
+										   String scoringDir,
 
-																					 String imageOutDir,
-																					 int imageWidth, int imageHeight,
-																					 boolean useScoreForBkgColor,
-																					 boolean decode, String tmpDir,
-																					 boolean useCache, String prefix, Result precalcResult) {
-    String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
-    String pathname = noSuffix + ".wav";
+										   String imageOutDir,
+										   int imageWidth, int imageHeight,
+										   boolean useScoreForBkgColor,
+										   boolean decode, String tmpDir,
+										   boolean useCache, String prefix,
+										   Result precalcResult) {
+      String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
+      String pathname = noSuffix + ".wav";
 
-    boolean b = checkLTS(sentence);
-    //logger.debug("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir + " check lts = " + b);
-    File wavFile = new File(pathname);
-    boolean mustPrepend = false;
-    if (!wavFile.exists() && deployPath != null) {
-      //logger.debug("trying new path for " + pathname + " under " + deployPath);
-      wavFile = new File(deployPath + File.separator + pathname);
-      mustPrepend = true;
-    }
-    if (!wavFile.exists()) {
-      logger.error("scoreRepeatExercise : Can't find audio wav file at : " + wavFile.getAbsolutePath());
-      return new PretestScore();
-    }
-    //logger.info("duration of " + wavFile.getAbsolutePath() + " is " + duration + " secs or " + duration*1000 + " millis");
-    try {
-      String audioDir = testAudioDir;
-      if (mustPrepend) {
-         audioDir = deployPath + File.separator + audioDir;
-        if (!new File(audioDir).exists()) logger.error("Couldn't find " + audioDir);
-        else testAudioDir = audioDir;
+      boolean b = checkLTS(sentence);
+
+      if (!b) {
+          logger.info("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir + " '" + sentence + "' is not in lts");
       }
-      testAudioFileNoSuffix = new AudioConversion().convertTo16Khz(audioDir, testAudioFileNoSuffix);
-    } catch (UnsupportedAudioFileException e) {
-      logger.error("Got " +e,e);
-    }
+      File wavFile = new File(pathname);
+      boolean mustPrepend = false;
+      if (!wavFile.exists() && deployPath != null) {
+          //logger.debug("trying new path for " + pathname + " under " + deployPath);
+          wavFile = new File(deployPath + File.separator + pathname);
+          mustPrepend = true;
+      }
+      if (!wavFile.exists()) {
+          logger.error("scoreRepeatExercise : Can't find audio wav file at : " + wavFile.getAbsolutePath());
+          return new PretestScore();
+      }
+      //logger.info("duration of " + wavFile.getAbsolutePath() + " is " + duration + " secs or " + duration*1000 + " millis");
 
-    if (testAudioFileNoSuffix.contains(AudioConversion.SIXTEEN_K_SUFFIX)) {
-      noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
-    }
+      // resample if needed
+      try {
+          String audioDir = testAudioDir;
+          if (mustPrepend) {
+              audioDir = deployPath + File.separator + audioDir;
+              if (!new File(audioDir).exists()) logger.error("Couldn't find " + audioDir);
+              else testAudioDir = audioDir;
+          }
+          testAudioFileNoSuffix = new AudioConversion().convertTo16Khz(audioDir, testAudioFileNoSuffix);
+      } catch (UnsupportedAudioFileException e) {
+          logger.error("Got " + e, e);
+      }
 
-		Scores scores;
-		JSONObject jsonObject = null;
-		if (precalcResult == null) {
-			 scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
-		}
-		else {
-			Map<String, Map<String, Float>> eventScores = new HashMap<String, Map<String, Float>>();
-			jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
+      if (testAudioFileNoSuffix.contains(AudioConversion.SIXTEEN_K_SUFFIX)) {
+          noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
+      }
 
-			parseJson(eventScores, jsonObject, "words",  "w");
-			parseJson(eventScores, jsonObject, "phones", "p");
+      Scores scores;
+      JSONObject jsonObject = null;
+      if (precalcResult == null ||
+              (precalcResult.isValid() &&
+                      (precalcResult.getPronScore() < 0 || precalcResult.getJsonScore() == null || precalcResult.getJsonScore().isEmpty()))) {
+          logger.debug("unusable precalc result, so recalculating : " + precalcResult);
+          scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
+      } else {
+          logger.debug("for " + precalcResult);// + "\n\tgot json : " + precalcResult.getJsonScore());
+          jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
+          scores = getCachedScores(precalcResult, jsonObject);
 
-			scores = new Scores(precalcResult.getPronScore(), eventScores);
-			logger.debug("got cached scores " + scores);
-		}
-    if (scores == null) {
-      logger.error("getScoreForAudio failed to generate scores.");
-      return new PretestScore(0.01f);
-    }
-    return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile, scores,jsonObject);
+          boolean isDecode = precalcResult.getAudioType().equals("avp");
+          if (precalcResult.isValid() &&
+                  (scores.eventScores.isEmpty() || (scores.eventScores.get(Scores.WORDS).isEmpty() && (!isDecode || precalcResult.isCorrect())))) {
+              logger.debug("no valid precalc result, so recalculating : " + precalcResult);
+              jsonObject = null;
+              scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
+          } else {
+              //logger.debug("precalc : events " + scores.eventScores);
+          }
+      }
+	  if (scores == null) {
+		  logger.error("getScoreForAudio failed to generate scores.");
+		  return new PretestScore(0.01f);
+	  }
+	  return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile,
+			  scores, jsonObject);
   }
 
-	private void parseJson(Map<String, Map<String, Float>> eventScores, JSONObject jsonObject, String words1, String w1) {
-		JSONArray words = jsonObject.getJSONArray(words1);
-		TreeMap<String, Float> wordEvents = new TreeMap<String, Float>();
-		eventScores.put(words1, wordEvents);
-		for (int i = 0; i < words.size(); i++) {
-			JSONObject word = words.getJSONObject(i);
-			String w = word.getString(w1);
-			String s = word.getString("s");
-			wordEvents.put(w, Float.parseFloat(s));
-		}
-	}
+    /**
+     * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result)
+     * @param precalcResult
+     * @param jsonObject
+     * @return
+     */
+    private Scores getCachedScores(Result precalcResult, JSONObject jsonObject) {
+        Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseJson(jsonObject, "words", "w");
+        Map<String, Map<String, Float>> eventScores = getEventAverages(imageTypeMapMap);
+
+        Scores scores = new Scores(precalcResult.getPronScore(), eventScores, 0);
+        //logger.debug("got cached scores " + scores + " json " + jsonObject);
+        return scores;
+    }
+
+    private Map<String, Map<String, Float>> getEventAverages(Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap) {
+        Map<String, Map<String, Float>> eventScores = new HashMap<String, Map<String, Float>>();
+        // phones
+        Map<Float, TranscriptEvent> floatTranscriptEventMap = imageTypeMapMap.get(ImageType.PHONE_TRANSCRIPT);
+        Map<String, Float> value2 = new HashMap<>();
+        eventScores.put(Scores.PHONES, value2);
+        if (floatTranscriptEventMap != null) {
+            getEventAverages(floatTranscriptEventMap, value2);
+        }
+        // words
+        floatTranscriptEventMap = imageTypeMapMap.get(ImageType.WORD_TRANSCRIPT);
+        value2 = new HashMap<>();
+        eventScores.put(Scores.WORDS, value2);
+        if (floatTranscriptEventMap != null) {
+            getEventAverages(floatTranscriptEventMap, value2);
+        }
+        return eventScores;
+    }
+
+    private void getEventAverages(Map<Float, TranscriptEvent> floatTranscriptEventMap, Map<String, Float> value2) {
+        Map<String, Float> value = new HashMap<>();
+        Map<String, Float> cvalue = new HashMap<>();
+
+        for (TranscriptEvent ev : floatTranscriptEventMap.values()) {
+            String event = ev.event;
+            if (event.equals("sil") || event.equals("<s>") || event.equals("</s>")) {
+            }
+            else {
+                Float orDefault = cvalue.getOrDefault(event, 0.0f);
+                orDefault += 1.0f;
+                cvalue.put(event, orDefault);
+
+                Float orDefault1 = value.getOrDefault(event, 0.0f);
+                value.put(event, orDefault1+ev.score);
+            }
+        }
+
+        for (Map.Entry<String, Float> pair : value.entrySet()) {
+            String key = pair.getKey();
+            value2.put(key,pair.getValue()/cvalue.get(key));
+        }
+    }
 
 	/**
-	 * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result)
+     * Make image files for words, and phones, find out the reco sentence from the events.
+     *
 	 * @param imageOutDir
 	 * @param imageWidth
 	 * @param imageHeight
@@ -450,23 +507,34 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 	 * @param noSuffix
 	 * @param wavFile
 	 * @param scores
+     * @param jsonObject if not-null, uses it to make the word and phone transcripts instead of .lab files
 	 * @return
+	 * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result)
 	 */
-  private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-																			 boolean decode, String prefix, String noSuffix, File wavFile, Scores scores, JSONObject jsonObject) {
-		EventAndFileInfo eventAndFileInfo = jsonObject == null ? writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
-				useScoreForBkgColor,
-				prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, false) :
+	private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+										 boolean decode, String prefix, String noSuffix, File wavFile, Scores scores, JSONObject jsonObject) {
+      //  logger.debug("getPretestScore jsonObject " + jsonObject);
+      //  logger.debug("getPretestScore scores     " + scores);
+
+        EventAndFileInfo eventAndFileInfo = jsonObject == null ?
+				writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
+						useScoreForBkgColor,
+						prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, false) :
 				writeTranscriptsCached(imageOutDir, imageWidth, imageHeight, noSuffix,
 						useScoreForBkgColor,
 						prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, false, jsonObject);
+
 		Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
 		Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
 		String recoSentence = getRecoSentence(eventAndFileInfo);
 
-    double duration = new AudioCheck().getDurationInSeconds(wavFile);
-    return new PretestScore(scores.hydraScore, getPhoneToScore(scores), sTypeToImage, typeToEndTimes, recoSentence, (float) duration);
-  }
+		double duration = new AudioCheck().getDurationInSeconds(wavFile);
+
+		return new PretestScore(scores.hydraScore,
+                getPhoneToScore(scores),
+                getWordToScore(scores),
+                sTypeToImage, typeToEndTimes, recoSentence, (float) duration, scores.getProcessDur());
+	}
 
   /**
    * @see #scoreRepeatExercise
@@ -490,7 +558,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
       sentence = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") +getSegmented(sentence.trim()); // segmentation method will filter out the UNK model
     }
     if (scores == null) {
-      if (DEBUG) logger.debug("no cached score for file '" + key + "', so doing " + (decode ? "decoding" : "alignment"));
+      if (DEBUG) logger.debug("no cached score for file '" + key + "', so doing " + (decode ? "decoding" : "alignment") + " on " + sentence);
       scores = calcScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir);
       audioToScore.put(key, scores);
     }
@@ -628,29 +696,42 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     return b.toString().trim();
   }
 
-  /**
-   * Make sure that when we scale the phone scores by {@link #SCORE_SCALAR} we do it for both the scores and the image.
-   * <br></br>
-   * get the phones for display in the phone accuracy pane
-   * @param scores from hydec
-   * @return map of phone name to score
-   */
-  private Map<String, Float> getPhoneToScore(Scores scores) {
-    Map<String, Float> phones = scores.eventScores.get("phones");
-    if (phones == null) {
-      return Collections.emptyMap();
+    /**
+     * Filter out sil.
+     * <p>
+     * Make sure that when we scale the phone scores by {@link #SCORE_SCALAR} we do it for both the scores and the image.
+     * <br></br>
+     * get the phones for display in the phone accuracy pane
+     *
+     * @param scores from hydec
+     * @return map of phone name to score
+     */
+    private Map<String, Float> getPhoneToScore(Scores scores) {
+        Map<String, Float> phones = scores.eventScores.get(Scores.PHONES);
+        return getTokenToScore(scores, phones, Scores.PHONES);
     }
-    else {
-      Map<String, Float> phoneToScore = new HashMap<String, Float>();
-      for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
-        String key = phoneScorePair.getKey();
-        if (!key.equals("sil")) {
-          phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue() * SCORE_SCALAR));
+
+    private Map<String, Float> getWordToScore(Scores scores) {
+        Map<String, Float> phones = scores.eventScores.get(Scores.WORDS);
+        return getTokenToScore(scores, phones, Scores.WORDS);
+    }
+
+    private Map<String, Float> getTokenToScore(Scores scores, Map<String, Float> phones, String token) {
+        if (phones == null) {
+
+            logger.warn("getTokenToScore : no scores in " + scores.eventScores + " for '" + token + "'");
+            return Collections.emptyMap();
+        } else {
+            Map<String, Float> phoneToScore = new HashMap<String, Float>();
+            for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
+                String key = phoneScorePair.getKey();
+                if (!key.equals("sil")) {
+                    phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue()));
+                }
+            }
+            return phoneToScore;
         }
-      }
-      return phoneToScore;
     }
-  }
 
     /**
      * Assumes that testAudio was recorded through the UI, which should prevent audio that is too short or too long.
@@ -718,7 +799,11 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     }
   }
 
+	private SmallVocabDecoder svd = new SmallVocabDecoder();
+
   /**
+	 * Tries to remove junky characters from the sentence so hydec won't choke on them.
+	 * @see SmallVocabDecoder
    * @see #computeRepeatExerciseScores(pronz.speech.Audio, String, String, boolean)
    * @param testAudio
    * @param sentence
@@ -726,39 +811,43 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @return
    */
   private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
-    sentence = sentence.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ");
-
+		sentence = svd.getTrimmed(sentence);
     long then = System.currentTimeMillis();
-
-    logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with LTS " + letterToSoundClass);
+    logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with " +
+            "LTS " + letterToSoundClass + " against " + testAudio + " with " + configFile);
 
     try {
       Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut =
         testAudio.jscore(sentence, htkDictionary, letterToSoundClass, configFile);
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
-      logger.debug("getScoresFromHydec : scoring sentence " +sentence.length()+" characters long, got score " + hydec_score +
+
+      logger.debug("getScoresFromHydec  : scoring '" + sentence +"' (" +sentence.length()+ ") got score " + hydec_score +
         " and took " + timeToRunHydec + " millis");
 
-      return new Scores(hydec_score, jscoreOut._2);
+        Map<String, Map<String, Float>> stringMapMap = jscoreOut._2;
+        logger.debug("hydec output " + stringMapMap);
+
+        return new Scores(hydec_score, stringMapMap, (int)timeToRunHydec);
     } catch (AssertionError e) {
       logger.error("Got assertion error " + e,e);
-      return new Scores();
+      return new Scores((int)(System.currentTimeMillis() - then));
     } catch (Exception ee) {
       logger.warn("Running align/decode on " + sentence +" Got " + ee, ee);
       if (langTestDatabase != null) langTestDatabase.logAndNotifyServerException(ee);
     }
 
     long timeToRunHydec = System.currentTimeMillis() - then;
-    logger.warn("got bad score and took " + timeToRunHydec + " millis");
 
-    Scores scores = new Scores();
+		logger.warn("getScoresFromHydec : scoring '" + sentence + "' (" + sentence.length() + " ) : got bad score and took " + timeToRunHydec + " millis");
+
+    Scores scores = new Scores((int)timeToRunHydec);
     scores.hydraScore = -1;
     return scores;
   }
 
   private Scores getEmptyScores() {
     Map<String, Map<String, Float>> eventScores = Collections.emptyMap();
-    return new Scores(0f, eventScores);
+    return new Scores(0f, eventScores, 0);
   }
 }

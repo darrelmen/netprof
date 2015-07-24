@@ -580,8 +580,9 @@ public class AudioDAO extends DAO {
       results.add(audioAttr);
     }
 
-    //logger.debug("found " + results.size() + " audio attributes");
-    finish(connection, statement, rs);
+ //   logger.debug("found " + results.size() + " audio attributes");
+
+      finish(connection, statement, rs);
 
     return results;
   }
