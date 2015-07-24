@@ -19,8 +19,10 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserManager;
 
+import java.util.logging.Logger;
+
 public class CreateListDialog extends BasicDialog {
-  //private static final String REVIEW = "Review";
+  private final Logger logger = Logger.getLogger("CreateListDialog");
   private static final String PRACTICE = "Practice";
 
   private static final String CLASS = "Course Info (optional)";
@@ -148,7 +150,7 @@ public class CreateListDialog extends BasicDialog {
     submit.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        //System.out.println("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getText());
+        logger.info("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getText());
         enterKeyButtonHelper.removeKeyHandler();
         if (validateCreateList(titleBox/*, description, classBox*/)) {
           addUserList(titleBox, area, classBox,publicRadio.getValue());
