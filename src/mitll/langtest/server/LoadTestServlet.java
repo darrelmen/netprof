@@ -605,7 +605,7 @@ public class LoadTestServlet extends DatabaseServlet {
     String lessonPlanFile = getLessonPlan();
     if (!new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
-    db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile, serverProps.getLanguage(), true,
+    db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile, true,
         relativeConfigDir + File.separator + serverProps.getMediaDir());
 
     return lessonPlanFile;
