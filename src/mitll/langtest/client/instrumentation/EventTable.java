@@ -60,8 +60,7 @@ public class EventTable extends PagerTable {
           dialogVPanel.remove(closeButton);
         }
 
-        Widget table = getTable(result);
-        dialogVPanel.add(new Anchor(getURL2()));
+        Widget table = getTable(result,getDownloadAnchor());
         dialogVPanel.add(table);
         dialogVPanel.add(closeButton);
 
@@ -80,18 +79,12 @@ public class EventTable extends PagerTable {
     });
   }
 
-  private SafeHtml getURL2() {
-    SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<a href='" +
-      "downloadEvents" +
-      "'" +
-      ">");
-    sb.appendEscaped("Download Excel");
-    sb.appendHtmlConstant("</a>");
-    return sb.toSafeHtml();
+    @Override
+    protected SafeHtml getURL2() {
+      return getAnchorHTML("downloadEvents", "Download Excel");
   }
 
-  private Widget getTable(List<Event> result) {
+  private Widget getTable(List<Event> result, Widget rightOfPager) {
     final CellTable<Event> table = new CellTable<Event>();
     table.setPageSize(PAGE_SIZE);
     int width = (int) (Window.getClientWidth() * 0.9);
@@ -114,7 +107,7 @@ public class EventTable extends PagerTable {
 
     // We know that the data is sorted alphabetically by default.
 
-    return getOldSchoolPagerAndTable(table, table, 10, 10);
+    return getOldSchoolPagerAndTable(table, table, 10, 10, rightOfPager);
   }
 
   private TextColumn<Event> addColumns(CellTable<Event> table) {
