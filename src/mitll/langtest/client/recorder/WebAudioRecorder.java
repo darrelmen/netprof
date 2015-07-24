@@ -20,6 +20,12 @@ public class WebAudioRecorder {
     }
   }
 
+  /**
+   * Call initWebAudio in webaudiorecorder.js.
+   * That will result in either webAudioMicAvailable being called (from startUserMedia), if you can record,
+   * or one of webAudioMicNotAvailable or webAudioPermissionDenied if the browser doesn't support recording or
+   * there's no mic, or the user doesn't permit it.
+   */
   private native void initWebaudio() /*-{
       $wnd.initWebAudio();
   }-*/;

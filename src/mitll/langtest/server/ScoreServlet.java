@@ -37,6 +37,8 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String DECODE = "decode";
   private static final String SCORE = "score";
   private static final String CHAPTER_HISTORY = "chapterHistory";
+  private static final String REF_INFO = "refInfo";
+  private static final String ROUND_TRIP = "roundTrip";
   private static final String RECORD_HISTORY = "recordHistory";
   private static final String PHONE_REPORT = "phoneReport";
   /**
@@ -221,6 +223,9 @@ public class ScoreServlet extends DatabaseServlet {
         } else if (queryString.startsWith(CHAPTER_HISTORY) || queryString.startsWith("request=" + CHAPTER_HISTORY)) {
           queryString = queryString.substring(queryString.indexOf(CHAPTER_HISTORY) + CHAPTER_HISTORY.length());
           toReturn = getChapterHistory(queryString, toReturn);
+        } else if (queryString.startsWith(REF_INFO) || queryString.startsWith("request=" + REF_INFO)) {
+          queryString = queryString.substring(queryString.indexOf(REF_INFO) + REF_INFO.length());
+          toReturn = getRefInfo(queryString, toReturn);
         } else if (queryString.startsWith(RECORD_HISTORY) || queryString.startsWith("request=" + RECORD_HISTORY)) {
           queryString = queryString.substring(queryString.indexOf(RECORD_HISTORY) + RECORD_HISTORY.length());
           toReturn = getRecordHistory(queryString, toReturn);
@@ -276,6 +281,12 @@ public class ScoreServlet extends DatabaseServlet {
     return toReturn;
   }
 
+  /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
+   * @param queryString
+   * @param toReturn
+   * @return
+   */
   private JSONObject getChapterHistory(String queryString, JSONObject toReturn) {
     String[] split1 = queryString.split("&");
     if (split1.length < 2) {
@@ -300,10 +311,31 @@ public class ScoreServlet extends DatabaseServlet {
       //logger.debug("chapterHistory " + user + " selection " + selection);
       try {
         long l = Long.parseLong(user);
-        toReturn = db.getJsonScoreHistory(l, selection, getExerciseSorter()/*, audioFileHelper.getCollator()*/);
+        toReturn = db.getJsonScoreHistory(l, selection, getExerciseSorter());
       } catch (NumberFormatException e) {
         toReturn.put(ERROR, "User id should be a number");
       }
+    }
+    return toReturn;
+  }
+
+  private JSONObject getRefInfo(String queryString, JSONObject toReturn) {
+    String[] split1 = queryString.split("&");
+    if (split1.length < 2) {
+      toReturn.put(ERROR, "expecting at least two query parameters");
+    } else {
+      Map<String, Collection<String>> selection = new TreeMap<String, Collection<String>>();
+      for (String param : split1) {
+        String[] split = param.split("=");
+        if (split.length == 2) {
+          String key = split[0];
+          String value = split[1];
+          selection.put(key, Collections.singleton(value));
+        }
+      }
+
+      //logger.debug("chapterHistory " + user + " selection " + selection);
+      toReturn = db.getJsonRefResult(selection);
     }
     return toReturn;
   }
@@ -552,6 +584,15 @@ public class ScoreServlet extends DatabaseServlet {
       } else if (requestType.startsWith(EVENT)) {
         // log event
         gotLogEvent(request, device, jsonObject);
+      } else if (requestType.startsWith(ROUND_TRIP)) {
+        String resultID = request.getHeader("resultID");
+        String roundTripMillis = request.getHeader("roundTrip");
+
+        try {
+          addRT(Long.parseLong(resultID), Integer.parseInt(roundTripMillis), jsonObject);
+        } catch (NumberFormatException e) {
+          jsonObject.put(ERROR, "bad param format " + e.getMessage());
+        }
       } else {
         jsonObject.put(ERROR, "unknown req " + requestType);
       }
@@ -589,27 +630,23 @@ public class ScoreServlet extends DatabaseServlet {
         String gender = request.getHeader(GENDER);
         String dialect = request.getHeader(DIALECT);
         String emailH = request.getHeader(EMAIL_H);
-        //String kind = request.getHeader("kind");
+
         logger.debug("addUser : Request " + requestType + " for " + deviceType + " user " + user +
-            " adding " + gender + //" " + kind +
+            " adding " + gender +
             " age " + age + " dialect " + dialect);
 
         User user1 = null;
-//        if (kind != null) {
-//          User.Kind kind1 = User.Kind.valueOf(kind);
-//          user1 = db.addUser(user, passwordH, emailH, deviceType, device, kind1, gender.equalsIgnoreCase("male"));
-//        } else {
-          if (age != null && gender != null && dialect != null) {
-            try {
-              int age1 = Integer.parseInt(age);
-              user1 = db.addUser(user, passwordH, emailH, deviceType, device, User.Kind.CONTENT_DEVELOPER, gender.equalsIgnoreCase("male"), age1, dialect);
-            } catch (NumberFormatException e) {
-              logger.warn("couldn't parse age " + age);
-              jsonObject.put(ERROR, "bad age");
-            }
-          } else {
-            user1 = db.addUser(user, passwordH, emailH, deviceType, device);
+        if (age != null && gender != null && dialect != null) {
+          try {
+            int age1 = Integer.parseInt(age);
+            user1 = db.addUser(user, passwordH, emailH, deviceType, device, User.Kind.CONTENT_DEVELOPER, gender.equalsIgnoreCase("male"), age1, dialect);
+          } catch (NumberFormatException e) {
+            logger.warn("couldn't parse age " + age);
+            jsonObject.put(ERROR, "bad age");
           }
+        } else {
+          user1 = db.addUser(user, passwordH, emailH, deviceType, device);
+        }
         //}
         if (user1 == null) { // how could this happen?
           jsonObject.put(EXISTING_USER_NAME, "");
@@ -651,6 +688,11 @@ public class ScoreServlet extends DatabaseServlet {
         db.logEvent(widgetid, widgetType, exid == null ? "N/A" : exid, context, userid, device);
       }
     }
+  }
+
+  private void addRT(long resultID, int roundTripMillis, JSONObject jsonObject) {
+    db.getAnswerDAO().addRoundTrip(resultID, roundTripMillis);
+    jsonObject.put("OK","OK");
   }
 
   private long getUserFromParam2(String user) {
@@ -759,8 +801,12 @@ public class ScoreServlet extends DatabaseServlet {
         if (!next.hasRefAudio()) iterator.remove();
       }
     }
-    //  getExerciseSorter().sortByForeign(copy, getAudioFileHelper());
-    getExerciseSorter().sortedByPronLengthThenPhone(copy, audioFileHelper.getPhoneToCount());
+    if (audioFileHelper != null) {
+      getExerciseSorter().sortedByPronLengthThenPhone(copy, audioFileHelper.getPhoneToCount());
+    }
+    else {
+      logger.warn("audioFileHelper not set yet!");
+    }
     return getJsonArray(copy);
   }
 
@@ -804,8 +850,6 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private JSONObject getJsonForAudio(HttpServletRequest request, String requestType,
                                      String deviceType, String device) throws IOException {
-    // Gets file name for HTTP header
-    //   if (requestType != null) {
     String user = request.getHeader(USER);
     String exerciseID = request.getHeader("exercise");
     int reqid = getReqID(request);
@@ -819,9 +863,6 @@ public class ScoreServlet extends DatabaseServlet {
     writeToOutputStream(request.getInputStream(), saveFile);
     return getJsonForAudioForUser(reqid, exerciseID, i, Request.valueOf(requestType.toUpperCase()), wavPath, saveFile,
         deviceType, device);
-    //  } else {   // for backwards compatibility
-    //    return handleRequestWithNoType(request);
-    //  }
   }
 
   private int getReqID(HttpServletRequest request) {
@@ -831,39 +872,12 @@ public class ScoreServlet extends DatabaseServlet {
     try {
       int req = Integer.parseInt(reqid);
       //logger.debug("returning req id " + req);
-
       return req;
     } catch (NumberFormatException e) {
       logger.warn("Got parse error on reqid " + reqid);
     }
     return 1;
   }
-
-  /**
-   * Down this pathway, we can do simple decoding - word/phrase + audio file.
-   * Generally, we want lots of other information - who asked for it, in reference to which exercise, etc.
-   *
-   * This exists mainly to support some theoretical future webservice application.
-   * @see #getJsonForAudio
-   * @param request filename retrieved from header, word to decode from header
-   * @return json result
-   * @throws IOException
-   */
-/*
-  private JSONObject handleRequestWithNoType(HttpServletRequest request) throws IOException {
-    String fileName = request.getHeader("fileName");
-    String word = request.getHeader("word");
-    boolean isFlashcard = request.getHeader("flashcard") != null;
-
-    File tempDir = Files.createTempDir();
-    File saveFile = new File(tempDir + File.separator + fileName);
-
-    // opens input stream of the request for reading data
-    writeToOutputStream(request.getInputStream(), saveFile);
-
-    return isFlashcard ? getJsonForWordAndAudioFlashcard(word, saveFile) : getJsonForWordAndAudio(word, saveFile);
-  }
-*/
 
   /**
    * @param reqid      label response with req id so the client can tell if it got a stale response
@@ -900,6 +914,8 @@ public class ScoreServlet extends DatabaseServlet {
         if (doFlashcard) {
           jsonForScore.put(IS_CORRECT, answer.isCorrect());
           jsonForScore.put(SAID_WORD, answer.isSaidAnswer());
+          jsonForScore.put("resultID", answer.getResultID());
+
           // attempt to get more feedback when we're too sensitive and match the unknown model
           if (!answer.isCorrect() && !answer.isSaidAnswer()) {
             answer = getAudioAnswerAlign(reqid, exerciseID, user, false, wavPath, saveFile, deviceType, device, exercise1);
@@ -977,52 +993,6 @@ public class ScoreServlet extends DatabaseServlet {
     answer.setPretestScore(asrScoreForAudio);
     return answer;
   }
-
-  /**
-   * @param word
-   * @param saveFile
-   * @return
-   * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
-   * @see #getJsonForParts(javax.servlet.http.HttpServletRequest, String)
-   * @deprecated we should move toward the API that records the audio in the results table
-   */
-/*  private JSONObject getJsonForWordAndAudio(String word, File saveFile) {
-    logger.debug("File written to: " + saveFile.getAbsolutePath());
-
-    AudioFileHelper audioFileHelper = getAudioFileHelper();
-    long then = System.currentTimeMillis();
-    PretestScore book = getASRScoreForAudio(audioFileHelper, saveFile.getAbsolutePath(), word);
-    long now = System.currentTimeMillis();
-    logger.debug("score for '" + word + "' took " + (now - then) + " millis for " + saveFile.getName() + " = " + book);
-
-    return getJsonForScore(book);
-  }*/
-
-  /**
-   * @param word
-   * @param saveFile
-   * @return
-   * @see #getJsonForAudio
-   * @deprecated we should move toward the API that records the audio in the results table
-   */
-/*  private JSONObject getJsonForWordAndAudioFlashcard(String word, File saveFile) {
-    logger.debug("File written to: " + saveFile.getAbsolutePath());
-
-    AudioFileHelper audioFileHelper = getAudioFileHelper();
-    long then = System.currentTimeMillis();
-    AudioFileHelper.ScoreAndAnswer scoreAndAnswer = getFlashcardScore(audioFileHelper, saveFile, word);
-    long now = System.currentTimeMillis();
-    float hydecScore = scoreAndAnswer.score == null ? -1 : scoreAndAnswer.score.getHydecScore();
-    logger.debug("score for '" + word + "' took " + (now - then) +
-        " millis for " + saveFile.getName() + " = " + hydecScore);
-
-    JSONObject jsonForScore = getJsonForScore(scoreAndAnswer.score);
-    jsonForScore.put(IS_CORRECT, scoreAndAnswer.answer.isCorrect());
-    jsonForScore.put(SAID_WORD,  scoreAndAnswer.answer.isSaidAnswer());
-    jsonForScore.put("exid", "unknown");
-
-    return jsonForScore;
-  }*/
 
   /**
    * Don't wait for mp3 to write to return - can take 70 millis for a short file.
@@ -1156,28 +1126,6 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * Do alignment of audio file against sentence.
-   *
-   * @param audioFileHelper
-   * @param testAudioFile
-   * @param sentence
-   * @return
-   * @seex #getJsonForWordAndAudio(String, java.io.File)
-   */
-/*  private PretestScore getASRScoreForAudio(AudioFileHelper audioFileHelper, String testAudioFile, String sentence) {
-    // logger.debug("getASRScoreForAudio " +testAudioFile);
-    PretestScore asrScoreForAudio = null;
-    try {
-      asrScoreForAudio = audioFileHelper.getASRScoreForAudio(-1, testAudioFile, sentence, 128, 128, false,
-          false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), "");
-    } catch (Exception e) {
-      logger.error("got " + e, e);
-    }
-
-    return asrScoreForAudio;
-  }*/
-
-  /**
    * TODO : this is wacky -- have to do this for alignment but not for decoding
    *
    * @param reqid
@@ -1198,34 +1146,6 @@ public class ScoreServlet extends DatabaseServlet {
     return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, 128, 128, false,
         false, Files.createTempDir().getAbsolutePath(), false, exerciseID, null);
   }
-
-  /**
-   * @paramx audioFileHelper
-   * @paramx testAudioFile
-   * @paramx sentence to decode
-   * @return
-   * @seex #getJsonForWordAndAudioFlashcard(String, java.io.File)
-   * @deprecated - this is not in reference to an exercise
-   */
-/*  private AudioFileHelper.ScoreAndAnswer getFlashcardScore(final AudioFileHelper audioFileHelper, File testAudioFile,
-                                                           String sentence) {
-    // logger.debug("getASRScoreForAudio " +testAudioFile);
-
-    AudioFileHelper.ScoreAndAnswer asrScoreForAudio = new AudioFileHelper.ScoreAndAnswer(new PretestScore(), new AudioAnswer());
-    if (!audioFileHelper.checkLTS(sentence)) {
-      logger.error("couldn't decode the word '' since it's not in the dictionary or passes letter-to-sound.  " +
-          "E.g. english word with an arabic model.");
-      return asrScoreForAudio;
-    }
-
-    try {
-      asrScoreForAudio = audioFileHelper.getFlashcardAnswer(testAudioFile, sentence);
-    } catch (Exception e) {
-      logger.error("got " + e, e);
-    }
-
-    return asrScoreForAudio;
-  }*/
 
   /**
    * Just for appen -
@@ -1261,13 +1181,16 @@ public class ScoreServlet extends DatabaseServlet {
     JSONArray jsonArray = new JSONArray();
     Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
 
-    for (SectionNode node : sectionNodes) {
-      String type = node.getType();
-      typeToValues.put(type, Collections.singletonList(node.getName()));
-      JSONObject jsonForNode = getJsonForNode2(node, typeToValues);
-      typeToValues.remove(type);
+    if (audioFileHelper != null) {
 
-      jsonArray.add(jsonForNode);
+      for (SectionNode node : sectionNodes) {
+        String type = node.getType();
+        typeToValues.put(type, Collections.singletonList(node.getName()));
+        JSONObject jsonForNode = getJsonForNode2(node, typeToValues);
+        typeToValues.remove(type);
+
+        jsonArray.add(jsonForNode);
+      }
     }
     return jsonArray;
   }
@@ -1336,7 +1259,7 @@ public class ScoreServlet extends DatabaseServlet {
     String lessonPlanFile = getLessonPlan();
     if (!new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
-    db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile, serverProps.getLanguage(), true,
+    db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile, true,
         relativeConfigDir + File.separator + serverProps.getMediaDir());
   }
 
