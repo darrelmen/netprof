@@ -448,7 +448,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * @param transcript
 	 * @return
 	 */
-	private String createHydraDict(String transcript, boolean addSp) {
+	private String createHydraDict(String transcript) {
 		if (letterToSoundClass == null) {
 			logger.warn(this  + " :  LTS is null???");
 		}
@@ -471,8 +471,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 							ctr2 += 1;
 							dict += p;
 						}
-						if(addSp)
-							dict += " sp";
+						dict += " sp";
 					}
 				}
 				else {
@@ -489,8 +488,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 								ctr2 += 1;
 								dict += p;
 							}
-							if(addSp)
-								dict += " sp";
+							dict += " sp";
 						}
 					}
 				}
@@ -508,7 +506,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 			cleaned = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") + getSegmented(transcript.trim()); // segmentation method will filter out the UNK model
 
 		// generate dictionary
-		String hydraDict = createHydraDict(cleaned, !decode);
+		String hydraDict = createHydraDict(cleaned);
 		String smallLM = "[]";
 
 		// generate SLF file (if decoding)
