@@ -98,7 +98,7 @@ public class ServerProperties {
       GORDON_VIDAVER);
 
   private static final Set<String> ADMINLIST = new HashSet<String>(Arrays.asList("gvidaver", "tmarius",
-      "drandolph", "swagner", "gmarkovic", "djones", "jmelot", "rbudd", "jray", "jwilliams", "pgatewood"));
+      "drandolph", "swagner", "gmarkovic", "djones", "jmelot", "rbudd", "jray", "pgatewood"));
 
   /**
    * Set this property for non-DLI deployments.
