@@ -14,12 +14,15 @@ import java.util.Map;
  */
 public class PretestScore implements IsSerializable {
   private int reqid = 0;
-	private float hydecScore = -1f;
-	private Map<String, Float> phoneScores;
+  private float hydecScore = -1f;
+    private Map<String, Float> phoneScores;
+    private Map<String, Float> wordScores;
   private Map<NetPronImageType, String> sTypeToImage = new HashMap<NetPronImageType, String>();
   private Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
   private String recoSentence;
   private float wavFileLengthSeconds;
+  private int processDur = 0;
+  private String json;
 
   public PretestScore(){} // required for serialization
 
@@ -34,30 +37,39 @@ public class PretestScore implements IsSerializable {
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getPretestScore
    * @param hydecScore
    * @param phoneScores
+   * @param wordScores
    * @param sTypeToImage
    * @param sTypeToEndTimes
    * @param recoSentence
+   * @param processDur
    */
   public PretestScore(float hydecScore,
                       Map<String, Float> phoneScores,
-                      Map<NetPronImageType, String> sTypeToImage,
+                      Map<String, Float> wordScores, Map<NetPronImageType, String> sTypeToImage,
                       Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes,
                       String recoSentence,
-                      float wavFileLengthSeconds) {
-    this.sTypeToImage = sTypeToImage;
-    this.hydecScore = hydecScore;
-    this.phoneScores = phoneScores;
-    this.sTypeToEndTimes = sTypeToEndTimes;
-    this.recoSentence = recoSentence;
-    this.wavFileLengthSeconds = wavFileLengthSeconds;
-	}
-	
-  public float getHydecScore() {
-    return hydecScore;
+                      float wavFileLengthSeconds,
+                      int processDur) {
+      this.sTypeToImage = sTypeToImage;
+      this.hydecScore = hydecScore;
+      this.phoneScores = phoneScores;
+      this.wordScores = wordScores;
+      this.sTypeToEndTimes = sTypeToEndTimes;
+      this.recoSentence = recoSentence;
+      this.wavFileLengthSeconds = wavFileLengthSeconds;
+      this.processDur = processDur;
   }
-	public Map<String, Float> getPhoneScores() {
-		return phoneScores;
-	}
+
+    public float getHydecScore() {
+        return hydecScore;
+    }
+
+    public Map<String, Float> getPhoneScores() {
+        return phoneScores;
+    }
+    public Map<String, Float> getWordScores() {
+        return wordScores;
+    }
   public Map<NetPronImageType, String> getsTypeToImage() {
     return sTypeToImage;
   }
@@ -70,11 +82,23 @@ public class PretestScore implements IsSerializable {
   public void setReqid(int r) { this.reqid = r;}
   public int  getReqid()      { return reqid;  }
 
+  public int getProcessDur() {
+    return processDur;
+  }
+
   public String toString() {
     return "hydec score " + hydecScore +
       " phones " + getPhoneScores() +
       " type->image " + getsTypeToImage() +
-      " type->endtimes " + getsTypeToEndTimes()
+      " type->endtimes " + getsTypeToEndTimes() + " took " + processDur + " millis"
       ;
+  }
+
+  public String getJson() {
+    return json;
+  }
+
+  public void setJson(String json) {
+    this.json = json;
   }
 }
