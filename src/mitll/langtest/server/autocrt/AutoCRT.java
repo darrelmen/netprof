@@ -48,25 +48,24 @@ public class AutoCRT {
    * @param canUseCache
    */
 	public PretestScore getFlashcardAnswer(CommonExercise commonExercise, File audioFile, AudioAnswer answer,
-                                         String language, boolean canUseCache) {
-    Collection<String> foregroundSentences = getRefSentences(commonExercise, language);
-    PretestScore flashcardAnswer = getFlashcardAnswer(audioFile, foregroundSentences, answer, canUseCache);
+                                           String language, boolean canUseCache) {
+      Collection<String> foregroundSentences = getRefSentences(commonExercise, language);
+      PretestScore flashcardAnswer = getFlashcardAnswer(audioFile, foregroundSentences, answer, canUseCache);
 
-		// log what happened
-		if (answer.isCorrect()) {
-			logger.info("correct response for exercise #" +commonExercise.getID() +
-					" reco sentence was '" + answer.getDecodeOutput() + "' vs " + "'"+foregroundSentences +"' " +
-					"pron score was " + answer.getScore() + " answer " + answer);
-		}
-		else {
-			int length = foregroundSentences.isEmpty() ? 0 : foregroundSentences.iterator().next().length();
-			logger.info("getFlashcardAnswer : incorrect response for exercise #" +commonExercise.getID() +
-					" reco sentence was '" + answer.getDecodeOutput() + "' (" +answer.getDecodeOutput().length()+
-					") vs " + "'"+foregroundSentences +"' (" + length +
-					") pron score was " + answer.getScore());
-		}
-		return flashcardAnswer;
-	}
+      // log what happened
+      if (answer.isCorrect()) {
+        logger.info("correct response for exercise #" + commonExercise.getID() +
+                " reco sentence was '" + answer.getDecodeOutput() + "' vs " + "'" + foregroundSentences + "' " +
+                "pron score was " + answer.getScore() + " answer " + answer);
+      } else {
+        int length = foregroundSentences.isEmpty() ? 0 : foregroundSentences.iterator().next().length();
+        logger.info("getFlashcardAnswer : incorrect response for exercise #" + commonExercise.getID() +
+                " reco sentence was '" + answer.getDecodeOutput() + "' (" + answer.getDecodeOutput().length() +
+                ") vs " + "'" + foregroundSentences + "' (" + length +
+                ") pron score was " + answer.getScore());
+      }
+      return flashcardAnswer;
+    }
 
 	/**
    * @see mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(java.io.File, String)
