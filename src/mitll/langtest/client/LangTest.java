@@ -58,9 +58,12 @@ import java.util.logging.Logger;
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private Logger logger = Logger.getLogger("LangTest");
+  private static final List<String> SITE_LIST = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean",
+      "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Russian", "Spanish", "Sudanese", "Tagalog", "Urdu");
 
   /**
-   * @see
+   * How far to the right to shift the list of sites...
+   * @see #getLinksToSites()
    */
   private static final int LEFT_LIST_WIDTH = 267;
 
@@ -70,7 +73,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int MAX_EXCEPTION_STRING = 300;
   private static final int MAX_CACHE_SIZE = 100;
   private static final int NO_USER_INITIAL = -2;
- // private static final boolean SHOW_STATUS = false;
   private static final String PLEASE_ALLOW_ACCESS_TO_THE_MICROPHONE = "Please allow access to the microphone.";
   private static final String TRY_AGAIN = "Try Again";
 
@@ -356,8 +358,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private Panel getLinksToSites() {
     Panel hp = new HorizontalPanel();
-    hp.getElement().getStyle().setMarginLeft(LEFT_LIST_WIDTH, Style.Unit.PX);
-    for (String site : Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean", "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Spanish", "Sudanese", "Urdu")) {
+    Style style = hp.getElement().getStyle();
+    style.setMarginLeft(LEFT_LIST_WIDTH, Style.Unit.PX);
+    style.setMarginTop(10, Style.Unit.PX);
+
+    for (String site : SITE_LIST) {
       Anchor w = new Anchor(site, "https://np.ll.mit.edu/npfClassroom" + site.replaceAll("Mandarin", "CM"));
       w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
       hp.add(w);
@@ -1050,7 +1055,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           downloadFailedAlert();
         }
         public void onSuccess() {
-          new UserTable(props).showUsers(service);
+          new UserTable(props,userManager.isAdmin()).showUsers(service);
         }
       });
     }
@@ -1077,7 +1082,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           downloadFailedAlert();
         }
         public void onSuccess() {
-          ResultManager resultManager = new ResultManager(service, props.getNameForAnswer(), getStartupInfo().getTypeOrder(), outer);
+          ResultManager resultManager = new ResultManager(service, props.getNameForAnswer(), getStartupInfo().getTypeOrder(), outer, LangTest.this);
           resultManager.showResults();
         }
       });
