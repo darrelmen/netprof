@@ -50,8 +50,11 @@ public interface LangTestDatabase extends RemoteService {
 
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID);
 
+  PretestScore getResultASRInfo(long resultID, int width, int height);
+
   PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, String exerciseID);
 
+  void addRoundTrip(long resultid, int roundTrip);
   // monitoring support
 
   AudioAnswer getAlignment(String base64EncodedString,
@@ -77,6 +80,8 @@ public interface LangTestDatabase extends RemoteService {
 
   long getUserIDForToken(String token);
 
+  void changeEnabledFor(int userid, boolean enabled);
+
   boolean forgotUsername(String emailH, String email, String url);
 
   ResultAndTotal getResults(int start, int end, String sortInfo,Map<String, String> unitToValue, long userid, String flText, int req);
@@ -85,7 +90,6 @@ public interface LangTestDatabase extends RemoteService {
 
   Map<String, Map<Integer, Integer>> getResultCountsByGender();
   Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts();
-  Map<Integer, Map<String, Map<String, Integer>>> getGradeCountPerExercise();
 
   void logMessage(String message);
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device);

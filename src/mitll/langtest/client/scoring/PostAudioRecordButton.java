@@ -114,6 +114,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
               (controller.getProps().isQuietAudioOK() && result.getValidity() == AudioAnswer.Validity.TOO_QUIET)) {
             validAudio = true;
             useResult(result);
+            addRT(result, (int) roundtrip);
           } else {
             validAudio = false;
             useInvalidResult(result);
@@ -123,6 +124,18 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
           }
         }
       });
+  }
+
+  public void addRT(AudioAnswer result, int roundtrip) {
+    service.addRoundTrip(result.getResultID(), roundtrip, new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+      }
+    });
   }
 
   protected boolean shouldAddToAudioTable() {
