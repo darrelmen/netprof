@@ -54,6 +54,8 @@ public class ResultDAO extends DAO {
   static final String DEVICE = "device"; // device id, or browser type
   private static final String YES = "Yes";
   private static final String NO = "No";
+  public static final String PROCESS_DUR = "processDur";
+  public static final String ROUND_TRIP_DUR = "roundTripDur";
   private final LogAndNotify logAndNotify;
 
   private final boolean debug = false;
@@ -136,6 +138,24 @@ public class ResultDAO extends DAO {
 
     return new ArrayList<MonitorResult>();
   }
+
+  public Result getResultByID(long id) {
+    String sql = "SELECT * FROM " + RESULTS + " WHERE " + ID + "='" + id + "'";
+    try {
+      List<Result> resultsSQL = getResultsSQL(sql);
+      if (resultsSQL.size() > 1) {
+        logger.error("for " + id + " got " + resultsSQL);
+      }
+      else if (resultsSQL.isEmpty()) {
+        logger.error("no result for " + id);
+      }
+      return resultsSQL.isEmpty() ? null : resultsSQL.iterator().next();
+    } catch (SQLException e) {
+      logger.error("Got " + e, e);
+    }
+    return null;
+  }
+
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#getMonitorResultsWithText(java.util.List)
@@ -610,7 +630,7 @@ public class ResultDAO extends DAO {
     int numResults = 0;
     try {
       Connection connection = database.getConnection(this.getClass().toString());
-      PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + RESULTS + ";");
+      PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + RESULTS);
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {
         numResults = rs.getInt(1);
@@ -651,7 +671,8 @@ public class ResultDAO extends DAO {
 
       boolean correct = rs.getBoolean(CORRECT);
       float pronScore = rs.getFloat(PRON_SCORE);
-      //String stimulus = rs.getString(STIMULUS);
+      String json = rs.getString(SCORE_JSON);
+      String device = rs.getString(DEVICE);
 
       Result result = new Result(uniqueID, userID, //id
           plan, // plan
@@ -660,9 +681,9 @@ public class ResultDAO extends DAO {
           trimPathForWebPage2(answer), // answer
           valid, // valid
           timestamp.getTime(),
-          //flq, spoken,
-          type, dur, correct, pronScore, "browser");
-//      result.setStimulus(stimulus);
+
+          type, dur, correct, pronScore, device);
+      result.setJsonScore(json);
       results.add(result);
     }
     finish(connection, statement, rs);
@@ -687,6 +708,8 @@ public class ResultDAO extends DAO {
       float pronScore = rs.getFloat(PRON_SCORE);
       String dtype = rs.getString(DEVICE_TYPE);
       String device = dtype == null ? "Unk" : dtype.equals("browser") ? rs.getString(DEVICE) : (dtype + "/" + rs.getString(DEVICE));
+      int processDur = rs.getInt(PROCESS_DUR);
+      int roundTripDur = rs.getInt(ROUND_TRIP_DUR);
 
       MonitorResult result = new MonitorResult(uniqueID, userID, //id
           // plan
@@ -695,7 +718,7 @@ public class ResultDAO extends DAO {
           trimPathForWebPage2(answer), // answer
           valid, // valid
           timestamp.getTime(),
-          type, dur, correct, pronScore, device);
+          type, dur, correct, pronScore, device, rs.getBoolean(WITH_FLASH), processDur, roundTripDur);
       results.add(result);
     }
     finish(connection, statement, rs);
@@ -1035,6 +1058,12 @@ public class ResultDAO extends DAO {
     if (!columns.contains(WITH_FLASH.toLowerCase())) {
       addBoolean(connection, RESULTS, WITH_FLASH);
     }
+    if (!columns.contains(PROCESS_DUR.toLowerCase())) {
+      addInt(connection, RESULTS, PROCESS_DUR);
+    }
+    if (!columns.contains(ROUND_TRIP_DUR.toLowerCase())) {
+      addInt(connection, RESULTS, ROUND_TRIP_DUR);
+    }
 
     database.closeConnection(connection);
 
@@ -1078,7 +1107,9 @@ public class ResultDAO extends DAO {
         DEVICE_TYPE + " VARCHAR," +
         DEVICE + " VARCHAR," +
         SCORE_JSON + " VARCHAR," +
-        WITH_FLASH + " BOOLEAN" +
+        WITH_FLASH + " BOOLEAN," +
+        PROCESS_DUR + " INT," +
+        ROUND_TRIP_DUR + " INT" +
         ")");
     statement.execute();
     statement.close();
@@ -1262,7 +1293,9 @@ public class ResultDAO extends DAO {
         AUDIO_TYPE,
         DURATION,
         "Valid",
-        CORRECT, PRON_SCORE, "Device"
+        CORRECT,
+        PRON_SCORE,
+        "Device"
     );
 
     columns.addAll(columns2);
