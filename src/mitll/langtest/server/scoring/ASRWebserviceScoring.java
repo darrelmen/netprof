@@ -3,8 +3,10 @@ package mitll.langtest.server.scoring;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
 import audio.imagewriter.EventAndFileInfo;
+
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+
 import corpus.HTKDictionary;
 import corpus.LTS;
 import mitll.langtest.server.ServerProperties;
@@ -18,9 +20,12 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
@@ -46,24 +51,26 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR {
-	//private static final double KEEP_THRESHOLD = 0.3;
+	private static final double KEEP_THRESHOLD = 0.3;
 	private static final Logger logger = Logger.getLogger(ASRWebserviceScoring.class);
 	private static final boolean DEBUG = false;
 
 	private static final int FOREGROUND_VOCAB_LIMIT = 100;
 	private static final int VOCAB_SIZE_LIMIT = 200;
 
-//	public static final String SMALL_LM_SLF = "smallLM.slf";
+	//	public static final String SMALL_LM_SLF = "smallLM.slf";
 
 	private static SmallVocabDecoder svDecoderHelper = null;
-//	private LangTestDatabaseImpl langTestDatabase;
+	//	private LangTestDatabaseImpl langTestDatabase;
 
 	/**
 	 * By keeping these here, we ensure that we only ever read the dictionary once
 	 */
 	private HTKDictionary htkDictionary;
 	private final LTS letterToSoundClass;
-	private final Cache<String, Scores> audioToScore;
+	//private final Cache<String, Scores> audioToScore;
+	// TODO make Scores + phoneLab + wordLab an object so have something more descriptive than Object[]
+	private final Cache<String, Object[]> audioToScore; // key => (Scores, wordLab, phoneLab)
 	private final ConfigFileCreator configFileCreator;
 	private final boolean isMandarin;
 
@@ -71,7 +78,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
 	 * If the score was below a threshold, or the magic -1, we keep it around for future study.
 	 */
-//	private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
+	private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
 	private final LTSFactory ltsFactory;
 	private final String ip;
 	private final int port;
@@ -307,10 +314,10 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * @return PretestScore object
 	 */
 	public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-																	String sentence, Collection<String> lmSentences, String imageOutDir,
-																	int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-																	boolean decode, String tmpDir,
-																	boolean useCache, String prefix, Result precalcResult) {
+			String sentence, Collection<String> lmSentences, String imageOutDir,
+			int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+			boolean decode, String tmpDir,
+			boolean useCache, String prefix, Result precalcResult) {
 		return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
 				sentence, lmSentences, 
 				imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
@@ -388,9 +395,17 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		}
 
 		String key = testAudioDir + File.separator + testAudioFileNoSuffix;
-		Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
+//		Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
+		Object[] cached = useCache ? audioToScore.getIfPresent(key) : null;
+		Scores scores = null;
 		String phoneLab = "";
 		String wordLab = "";
+		if(cached != null) {
+			scores = (Scores) cached[0];
+			wordLab = (String) cached[1];
+			phoneLab = (String) cached[2];
+		}
+		
 		// actually run the scoring
 		String rawAudioPath = testAudioDir + File.separator + testAudioFileNoSuffix + ".raw";
 		AudioConversion.wav2raw(testAudioDir + File.separator + testAudioFileNoSuffix + ".wav", rawAudioPath);
@@ -403,11 +418,11 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		if(scores == null) {
 			long then = System.currentTimeMillis();
 			Object[] result = runHydra(rawAudioPath, sentence, lmSentences, tmpDir, decode, end);
-			processDur = (int)(System.currentTimeMillis()-then);
-			scores = (Scores)result[0];
-			wordLab = (String)result[1];
-			phoneLab = (String)result[2];
-			audioToScore.put(key, scores);
+                        processDur = (int)(System.currentTimeMillis()-then);
+			scores = (Scores) result[0];
+			wordLab = (String) result[1];
+			phoneLab = (String) result[2];
+			audioToScore.put(key, new Object[]{scores, wordLab, phoneLab});
 		}
 		if (scores == null) {
 			logger.error("getScoreForAudio failed to generate scores.");
@@ -437,13 +452,13 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * @param transcript
 	 * @return
 	 */
-	private String createHydraDictWithoutSP(String transcript) {
+	private String createHydraDict(String transcript) {
 		if (letterToSoundClass == null) {
 			logger.warn(this  + " :  LTS is null???");
 		}
 
 		String dict = "[";
-		transcript = "<s> " + transcript + " </s>";
+		//transcript = "<s> " + transcript + " </s>";
 		int ctr = 0;
 		for(String word : transcript.split(" ")) {
 			if(!word.equals(" ") && !word.equals("")) {
@@ -451,7 +466,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 					scala.collection.immutable.List<String[]> prons = htkDictionary.apply(word);
 					for(int i = 0; i < prons.size(); i++) {
 						if(ctr != 0) dict += ";";
-						ctr += 1;
+						ctr++;
 						dict += word + ",";
 						String[] pron = prons.apply(i);
 						int ctr2 = 0;
@@ -460,6 +475,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 							ctr2 += 1;
 							dict += p;
 						}
+						dict += " sp";
 					}
 				}
 				else {
@@ -468,6 +484,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 					} else {
 						for (String[] pron : letterToSoundClass.process(word.toLowerCase())) {
 							if (ctr != 0) dict += ";";
+							ctr++;
 							dict += word + ",";
 							int ctr2 = 0;
 							for (String p : pron) {
@@ -475,35 +492,36 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 								ctr2 += 1;
 								dict += p;
 							}
+							dict += " sp";
 						}
 					}
 				}
 			}
 		}
-		dict += ";UNKNOWNMODEL,+UNK+]";
+		dict += ";UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil]";
 		return dict;
 	}
 
 	private Object[] runHydra(String audioPath, String transcript, Collection<String> lmSentences, String tmpDir, boolean decode, int end) {
-		// reference trans	
 
-		String cleaned = transcript.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ");
-		//logger.debug("cleaned sentence: " + cleaned);
-		if (isMandarin) {
+          // reference trans	
+		String cleaned = transcript.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("\\p{P}","").toLowerCase();
+		if (isMandarin) 
 			cleaned = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") + getSegmented(transcript.trim()); // segmentation method will filter out the UNK model
-		}
 
 		// generate dictionary
-		String dictWithoutSP = createHydraDictWithoutSP(cleaned);
+		String hydraDict = createHydraDict(cleaned);
 		String smallLM = "[]";
+
 		// generate SLF file (if decoding)
+		// TODO the repeating of replaceAll should be combined into one (happens in createSimpleSLFFile also)
 		if(decode) {
-			//ArrayList<String> lmSentences = new ArrayList<String>();
-			//lmSentences.add(cleaned);
-			smallLM = "[" + (new SLFFile()).createSimpleSLFFile(lmSentences) + "]";
+			String[] slfOut = (new SLFFile()).createSimpleSLFFile(lmSentences);
+			smallLM = "[" + slfOut[0] + "]";
+			cleaned = slfOut[1].replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("\\p{P}","").toLowerCase();
 		}
 
-		String hydraInput = tmpDir + "/:" + audioPath + ":" + dictWithoutSP + ":" + smallLM + ":xxx,0," + end + ",[]";
+		String hydraInput = tmpDir + "/:" + audioPath + ":" + hydraDict + ":" + smallLM + ":xxx,0," + end + ",[<s>;" + cleaned.replaceAll("\\p{Z}",";") + ";</s>]";
 		long then = System.currentTimeMillis();
 		HTTPClient httpClient = new HTTPClient(ip, port);
 		String resultsStr = httpClient.sendAndReceive(hydraInput);
@@ -516,16 +534,16 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		String[] results = resultsStr.split("\n"); // 0th entry-overall score and phone scores, 1st entry-word alignments, 2nd entry-phone alignments
 		long timeToRunHydra = System.currentTimeMillis() - then;	
 		logger.debug("Took " + timeToRunHydra + " millis to run hydra");
-    if (results[0].isEmpty()) {
-      logger.error("Failure during running of hydra.");
+		if (results[0].isEmpty()) {
+			logger.error("Failure during running of hydra.");
 			return null;
 		}
 		// TODO makes this a tuple3 type 
 		String[] split = results[0].split(";");
 		Scores scores = new Scores(split); 
 		// clean up tmp directory if above score threshold 
-		/*logger.debug("overall score: " + split[0]);
-		if (Float.parseFloat(split[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
+		logger.debug("overall score: " + split[0]);
+		/*if (Float.parseFloat(split[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
 			try {
 				logger.debug("deleting " + tmpDir + " since score is " + split[0]);
 				FileUtils.deleteDirectory(new File(tmpDir));
@@ -533,7 +551,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 				logger.error("Deleting dir " + tmpDir + " got " +e,e);
 			}
 		}*/
-		return new Object[]{scores, results[1], results[2]};
+		return new Object[]{scores, results[1].replaceAll("#",""), results[2].replaceAll("#","")}; // where are the # coming from?
 	}
 
 
@@ -609,7 +627,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	/**
 	 * Take the events (originally from a .lab file generated in pronz) for WORDS and string them together into a
 	 * sentence.
-   * We might consider defensively sorting the events by time.
+	 * We might consider defensively sorting the events by time.
 	 * @see #scoreRepeatExercise
 	 * @param eventAndFileInfo
 	 * @return
@@ -620,10 +638,10 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 			NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
 			if (key == NetPronImageType.WORD_TRANSCRIPT) {
 				Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
-//        List<TranscriptEvent> sorted = new ArrayList<TranscriptEvent>(timeToEvent.values());
-//        Collections.sort(sorted);
-//        for (TranscriptEvent transcriptEvent : sorted) {
-//					String event = transcriptEvent.event;
+				//        List<TranscriptEvent> sorted = new ArrayList<TranscriptEvent>(timeToEvent.values());
+				//        Collections.sort(sorted);
+				//        for (TranscriptEvent transcriptEvent : sorted) {
+				//					String event = transcriptEvent.event;
 				for (Float timeStamp : timeToEvent.keySet()) {
 					String event = timeToEvent.get(timeStamp).event;
 					if (!event.equals("<s>") && !event.equals("</s>") && !event.equals("sil")) {
@@ -632,9 +650,9 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 							b.append(trim);
 							b.append(" ");
 						}
-         //   else {
-              //logger.warn("huh? event " + transcriptEvent + " had an event word that was zero length?");
-       //     }
+						//   else {
+						//logger.warn("huh? event " + transcriptEvent + " had an event word that was zero length?");
+						//     }
 					}
 				}
 			}
