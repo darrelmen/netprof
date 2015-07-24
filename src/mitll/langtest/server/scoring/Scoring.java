@@ -90,7 +90,7 @@ public abstract class Scoring {
 		}
 
 		if (decode || imageWidth < 0) {  // hack to skip image generation
-			return getEventInfo(typeToFile, decode && useWebservice);
+			return getEventInfo(typeToFile, useWebservice);
 		} else {
             String pathname = audioFileNoSuffix + ".wav";
             pathname = prependDeploy(pathname);
@@ -101,7 +101,7 @@ public abstract class Scoring {
             imageOutDir = deployPath + File.separator + imageOutDir;
 
             return new TranscriptWriter().writeTranscripts(pathname,
-                    imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, decode && useWebservice);
+                    imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, useWebservice);
 		}
 	}
 
@@ -153,7 +153,7 @@ public abstract class Scoring {
        // logger.debug("typeToFile " + typeToFile);
 
 		if (decode || imageWidth < 0) {  // hack to skip image generation
-			return getEventInfo(typeToFile, decode && useWebservice); // if align, don't use webservice regardless
+			return getEventInfo(typeToFile, useWebservice); // if align, don't use webservice regardless
 		} else {
             String pathname = audioFileNoSuffix + ".wav";
             pathname = prependDeploy(pathname);
@@ -163,7 +163,7 @@ public abstract class Scoring {
             }
             imageOutDir = deployPath + File.separator + imageOutDir;
             return new TranscriptWriter().writeTranscripts(pathname,
-                    imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, decode && useWebservice);
+                    imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, useWebservice);
 		}
 	}
 
@@ -197,7 +197,7 @@ public abstract class Scoring {
             if (new File(wordLabFile).exists()) {
                 typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
             }
-            return getEventInfo(typeToFile, decode && useWebservice); // if align, don't use webservice regardless
+            return getEventInfo(typeToFile, useWebservice); // if align, don't use webservice regardless
         } else {
             Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseJson(object, "words", "w");
 
