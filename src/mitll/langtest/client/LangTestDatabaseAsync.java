@@ -53,8 +53,6 @@ public interface LangTestDatabaseAsync {
 
   void logMessage(String message, AsyncCallback<Void> async);
 
-  void getGradeCountPerExercise(AsyncCallback<Map<Integer, Map<String, Map<String, Integer>>>> async);
-
   void getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID,
                       int userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples, boolean incorrectFirstOrder, boolean onlyWithAudioAnno, AsyncCallback<ExerciseListWrapper> async);
 
@@ -142,4 +140,11 @@ public interface LangTestDatabaseAsync {
 
   // just for backwards compatibility
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, AsyncCallback<Void> async);
+
+  void addRoundTrip(long resultid, int roundTrip, AsyncCallback<Void> async);
+
+  void getResultASRInfo(long resultID, int width, int height, AsyncCallback<PretestScore> async);
+
+  void changeEnabledFor(int userid, boolean enabled, AsyncCallback<Void> async);
+
 }
