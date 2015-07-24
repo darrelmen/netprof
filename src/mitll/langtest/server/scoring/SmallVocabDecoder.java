@@ -2,6 +2,7 @@ package mitll.langtest.server.scoring;
 
 import corpus.HTKDictionary;
 import org.apache.log4j.Logger;
+import pronz.speech.Audio;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -102,15 +103,25 @@ public class SmallVocabDecoder {
     return all;
   }
 
+
+  /**
+   * Tries to remove junky characters from the sentence so hydec won't choke on them.
+   *
+   * @param sentence
+   * @return
+   * @see #getTokens(String)
+   * @see mitll.langtest.server.ExerciseTrie#getExercises(String, SmallVocabDecoder)
+   * @see ASRScoring#getScoresFromHydec(Audio, String, String)
+   */
   public String getTrimmed(String sentence) {
-    sentence = sentence.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ");
+    //String orig = sentence;
+    sentence = sentence.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("/", " ");
     // logger.debug("after  convert " + sentence);
 
     return sentence.replaceAll("'", "").replaceAll("\\p{P}", " ").replaceAll("\\s+", " ").trim();
   }
 
   /**
-   *
    * @param phrase
    * @return
    * @see mitll.langtest.server.scoring.ASRScoring#checkLTS(corpus.LTS, String)
@@ -139,5 +150,9 @@ public class SmallVocabDecoder {
   private boolean inDict(String token) {
     scala.collection.immutable.List<String[]> apply = htkDictionary.apply(token);
     return apply != null && !apply.isEmpty();
+  }
+  public static void main(String [] arg) {
+    String b = "barber/barbers";
+    System.out.println(new SmallVocabDecoder().getTrimmed(b));
   }
 }
