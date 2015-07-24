@@ -32,7 +32,7 @@ public class HTTPClient {
 	public HTTPClient(String webserviceIP, int webservicePort) {
 		this.webserviceIP = webserviceIP;
 		this.webservicePort = webservicePort;
-		this.url = "http://" + webserviceIP + ":" + webservicePort + "/jcodr";
+		this.url = "http://" + webserviceIP + ":" + webservicePort + "/dcodr";
 		try {
 			httpConn = setupHttpConn(url);
 		}
