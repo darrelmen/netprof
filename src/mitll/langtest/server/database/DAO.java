@@ -141,7 +141,21 @@ public class DAO {
 
   protected void addBoolean(Connection connection, String table, String col) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
-      table + " ADD " + col + " BOOLEAN");
+        table + " ADD " + col + " BOOLEAN");
+    statement.execute();
+    statement.close();
+  }
+
+  protected void addFloat(Connection connection, String table, String col) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
+        table + " ADD " + col + " FLOAT");
+    statement.execute();
+    statement.close();
+  }
+
+  protected void addInt(Connection connection, String table, String col) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
+        table + " ADD " + col + " INTEGER");
     statement.execute();
     statement.close();
   }
