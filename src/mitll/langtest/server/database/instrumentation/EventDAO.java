@@ -145,7 +145,7 @@ public class EventDAO extends DAO {
       statement.setString(i++, event.getDevice());
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
 
-      logger.debug("Add " +event);
+      logger.debug(getDatabase().getLanguage() + " : Add " +event);
       int j = statement.executeUpdate();
 
       if (j != 1) {
