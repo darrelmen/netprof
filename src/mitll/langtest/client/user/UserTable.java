@@ -1,10 +1,12 @@
 package mitll.langtest.client.user;
 
+import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -16,7 +18,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.table.PagerTable;
@@ -24,8 +26,11 @@ import mitll.langtest.shared.User;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class UserTable extends PagerTable {
+  private Logger logger = Logger.getLogger("UserTable");
+
   private static final int PAGE_SIZE = 5;
 
   private static final String USER_ID = "User ID";
@@ -40,12 +45,14 @@ public class UserTable extends PagerTable {
   private Widget lastTable = null;
   private Button closeButton;
   private final PropertyHandler props;
+  private boolean isAdmin;
+ // private final LangTestDatabaseAsync service;
 
   /**
    * @see mitll.langtest.client.LangTest.UsersClickHandler#onClick(ClickEvent)
    * @param props
    */
-  public UserTable(PropertyHandler props) { this.props = props; }
+  public UserTable(PropertyHandler props, boolean isAdmin) { this.props = props; this.isAdmin = isAdmin; }
   /**
    * @see mitll.langtest.client.LangTest.UsersClickHandler
    */
@@ -84,8 +91,8 @@ public class UserTable extends PagerTable {
           dialogVPanel.remove(closeButton);
         }
 
-        Widget table = getTable(result);
-        dialogVPanel.add(new Anchor(getURL2()));
+        Widget table = getTable(result, service, getDownloadAnchor());
+
         dialogVPanel.add(table);
         dialogVPanel.add(closeButton);
 
@@ -104,19 +111,12 @@ public class UserTable extends PagerTable {
     });
   }
 
-  private SafeHtml getURL2() {
-    SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<a href='" +
-      "downloadUsers" +
-      //   name +
-      "'" +
-      ">");
-    sb.appendEscaped("Download Excel");
-    sb.appendHtmlConstant("</a>");
-    return sb.toSafeHtml();
+    @Override
+    protected SafeHtml getURL2() {
+      return getAnchorHTML("downloadUsers", "Download Excel");
   }
 
-  private Widget getTable(List<User> result) {
+    private Widget getTable(List<User> result, final LangTestDatabaseAsync service, Widget rightOfPager) {
     final CellTable<User> table = new CellTable<User>();
     table.setPageSize(PAGE_SIZE);
     int width = (int) (Window.getClientWidth() * 0.9);
@@ -250,13 +250,47 @@ public class UserTable extends PagerTable {
     };
     table.addColumn(device, "Device");
 
-    TextColumn<User> enabled = new TextColumn<User>() {
-      @Override
-      public String getValue(User contact) {
-        return contact.isEnabled() ? "Yes":"No";
-      }
-    };
-    table.addColumn(enabled, "Enabled");
+
+    if (isAdmin) {
+      CheckboxCell checkboxCell = new CheckboxCell(true, false);
+
+      Column<User, Boolean> checkColumn = new Column<User, Boolean>(checkboxCell) {
+        @Override
+        public Boolean getValue(User object) {
+          return object.isEnabled() || (!object.isCD());
+        }
+      };
+
+      checkColumn.setFieldUpdater(new FieldUpdater<User, Boolean>() {
+        @Override
+        public void update(int index, User object, Boolean value) {
+//          logger.info("update " + object.getUserID() + " " + value);
+          service.changeEnabledFor((int)object.getId(), value, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+
+            }
+          });
+        }
+      });
+
+
+      table.addColumn(checkColumn, "Enabled?");
+      table.setColumnWidth(checkColumn, 40, Style.Unit.PX);
+    } else {
+      TextColumn<User> enabled = new TextColumn<User>() {
+        @Override
+        public String getValue(User contact) {
+          return contact.isEnabled() ? "Yes" : "No";
+        }
+      };
+      table.addColumn(enabled, "Enabled");
+    }
 
     // Create a data provider.
     ListDataProvider<User> dataProvider = new ListDataProvider<User>();
@@ -297,7 +331,7 @@ public class UserTable extends PagerTable {
 
     // Create a SimplePager.
     // return getPagerAndTable(table, table, 10, 10);
-    return getOldSchoolPagerAndTable(table, table, PAGE_SIZE1, PAGE_SIZE1);
+    return getOldSchoolPagerAndTable(table, table, PAGE_SIZE1, PAGE_SIZE1, rightOfPager);
   }
 
   private void getDateColumn(CellTable<User> table) {
