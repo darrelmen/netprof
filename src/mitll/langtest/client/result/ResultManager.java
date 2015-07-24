@@ -17,15 +17,15 @@ import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.NoSelectionModel;
-import com.google.gwt.view.client.RangeChangeEvent;
+import com.google.gwt.view.client.*;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PopupHelper;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.list.TypeAhead;
+import mitll.langtest.client.scoring.EmptyScoreListener;
+import mitll.langtest.client.scoring.ReviewScoringPanel;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.ResultAndTotal;
@@ -42,9 +42,11 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class ResultManager extends PagerTable {
+  public static final String YES = "Yes";
+  public static final String NO = "No";
   private Logger logger = Logger.getLogger("ResultManager");
 
-  private static final int PAGE_SIZE = 12;
+  private static final int PAGE_SIZE = 9;
   private static final String TIMESTAMP = "timestamp";
   private static final String CORRECT = "Correct";
   private static final String PRO_F_SCORE = "Score";
@@ -74,7 +76,7 @@ public class ResultManager extends PagerTable {
   private final Map<Column<?, ?>, String> colToField = new HashMap<Column<?, ?>, String>();
   private Collection<String> typeOrder;
   private int req = 0;
-
+  ExerciseController controller;
   /**
    * @param s
    * @param nameForAnswer
@@ -82,11 +84,12 @@ public class ResultManager extends PagerTable {
    * @see mitll.langtest.client.LangTest#onModuleLoad2
    */
   public ResultManager(LangTestDatabaseAsync s, String nameForAnswer,
-                       Collection<String> typeOrder, EventRegistration eventRegistration) {
+                       Collection<String> typeOrder, EventRegistration eventRegistration, ExerciseController controller) {
     this.service = s;
     this.nameForAnswer = nameForAnswer;
     this.typeOrder = typeOrder;
     this.eventRegistration = eventRegistration;
+    this.controller = controller;
 //    PlayAudioWidget.addPlayer();
   }
 
@@ -111,8 +114,8 @@ public class ResultManager extends PagerTable {
 
     final Panel dialogVPanel = new VerticalPanel();
 
-    int left = (Window.getClientWidth()) / 40;
-    int top = (Window.getClientHeight()) / 40;
+    int left = (Window.getClientWidth()) / 200;
+    int top = (Window.getClientHeight()) / 200;
     dialogBox.setPopupPosition(left, top);
     dialogVPanel.setWidth("100%");
 
@@ -130,10 +133,15 @@ public class ResultManager extends PagerTable {
     dialogBox.setWidget(dialogVPanel);
   }
 
+    /**
+     * @see #showResults() 
+     * @param dialogBox
+     * @return
+     */
   private Button getCloseButton(final DialogBox dialogBox) {
     final Button closeButton = new Button(CLOSE);
     closeButton.setEnabled(true);
-    closeButton.getElement().setId("closeButton");
+    closeButton.getElement().setId("closeButtonLessTopMargin");
     eventRegistration.register(closeButton, "N/A", "Close recordings dialog");
     // Add a handler to send the name to the server
     closeButton.addClickHandler(new ClickHandler() {
@@ -144,12 +152,9 @@ public class ResultManager extends PagerTable {
     return closeButton;
   }
 
-  private SafeHtml getURL2() {
-    SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<a href='" + "downloadResults" + "'" + ">");
-    sb.appendEscaped("Download Excel");
-    sb.appendHtmlConstant("</a>");
-    return sb.toSafeHtml();
+    @Override
+  protected SafeHtml getURL2() {
+      return getAnchorHTML("downloadResults", "Download Excel");
   }
 
   /**
@@ -158,16 +163,25 @@ public class ResultManager extends PagerTable {
    * @param dialogBox
    * @see #showResults()
    */
-  private void populateTable(int numResults, Panel dialogVPanel, DialogBox dialogBox, Button closeButton) {
+  private void populateTable(int numResults, Panel dialogVPanel, DialogBox dialogBox,
+                             Button closeButton) {
     dialogVPanel.clear();
 
-    final Widget table = getAsyncTable(numResults);
+    Widget table = getAsyncTable(numResults, getDownloadAnchor());
     table.setWidth("100%");
 
-    dialogVPanel.add(new Anchor(getURL2()));
+    dialogVPanel.add(getSearchBoxes());
+    dialogVPanel.add(table);
+    dialogVPanel.add(reviewContainer); // made in asynctable
+    dialogVPanel.add(closeButton);
+
+    dialogBox.show();
+  }
+
+  private Panel getSearchBoxes() {
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("search_container");
-    dialogVPanel.add(hp);
+    //dialogVPanel.add(hp);
 
     for (final String type : typeOrder) {
       Typeahead user = new Typeahead(new SuggestOracle() {
@@ -177,8 +191,7 @@ public class ResultManager extends PagerTable {
           //logger.info(" requestSuggestions got request for " + type + " : " + unitToValue);
           service.getResultAlternatives(unitToValue, getUserID(), getText(), type, new AsyncCallback<Collection<String>>() {
             @Override
-            public void onFailure(Throwable caught) {
-            }
+            public void onFailure(Throwable caught) {}
 
             @Override
             public void onSuccess(Collection<String> result) {
@@ -206,8 +219,7 @@ public class ResultManager extends PagerTable {
 
         service.getResultAlternatives(getUnitToValue(), getUserID(), getText(), MonitorResult.USERID, new AsyncCallback<Collection<String>>() {
           @Override
-          public void onFailure(Throwable caught) {
-          }
+          public void onFailure(Throwable caught) {}
 
           @Override
           public void onSuccess(Collection<String> result) {
@@ -258,10 +270,7 @@ public class ResultManager extends PagerTable {
 
     ControlGroup controlGroup2 = TypeAhead.getControlGroup("Text", textSuggest.asWidget());
     hp.add(controlGroup2);
-
-    dialogVPanel.add(table);
-    dialogVPanel.add(closeButton);
-    dialogBox.show();
+    return hp;
   }
 
   private void makeSuggestionResponse(Collection<String> result, SuggestOracle.Callback callback, SuggestOracle.Request request) {
@@ -308,7 +317,6 @@ public class ResultManager extends PagerTable {
             redraw();
           }
         });
-
 
         return replacementString;
       }
@@ -374,30 +382,54 @@ public class ResultManager extends PagerTable {
   }*/
 
   CellTable<MonitorResult> cellTable;
+  Panel reviewContainer;
 
   /**
+   * Also shows on the bottom a widget for review.
    * @param numResults
    * @return
    * @see #populateTable
    */
-  private Widget getAsyncTable(int numResults) {
-    cellTable = new CellTable<MonitorResult>();
-    cellTable.setSelectionModel(new NoSelectionModel<MonitorResult>());
-    addColumnsToTable(cellTable);
-    cellTable.setRowCount(numResults, true);
-    cellTable.setVisibleRange(0, MAX_TO_SHOW);
-    createProvider(numResults, cellTable);
+  private Widget getAsyncTable(int numResults, Widget rightOfPager) {
+      cellTable = new CellTable<MonitorResult>();
 
-    // Add a ColumnSortEvent.AsyncHandler to connect sorting to the AsyncDataPRrovider.
-    ColumnSortEvent.AsyncHandler columnSortHandler = new ColumnSortEvent.AsyncHandler(cellTable);
-    cellTable.addColumnSortHandler(columnSortHandler);
+      reviewContainer = new HorizontalPanel();
+      reviewContainer.addStyleName("topFiveMargin");
+      reviewContainer.addStyleName("border");
+      final SingleSelectionModel<MonitorResult> selectionModel = new SingleSelectionModel<>();
+      cellTable.setSelectionModel(selectionModel);
+      cellTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+          @Override
+          public void onSelectionChange(SelectionChangeEvent event) {
+              final MonitorResult selectedObject = selectionModel.getSelectedObject();
 
-    Column<?, ?> time = getColumn(TIMESTAMP);
-    cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(time, false));
-    cellTable.setWidth("100%", false);
+              ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(),selectedObject.getForeignText(), service, controller, selectedObject.getId());
 
-    // Create a SimplePager.
-    return getPagerAndTable(cellTable);
+              w.setResultID(selectedObject.getUniqueID());
+
+              Panel vert = new VerticalPanel();
+              vert.add(w);
+              vert.add(w.getBelow());
+
+              reviewContainer.clear();
+              reviewContainer.add(vert);
+              reviewContainer.add(w.getTables());
+          }
+      });
+      addColumnsToTable(cellTable);
+      cellTable.setRowCount(numResults, true);
+      cellTable.setVisibleRange(0, MAX_TO_SHOW);
+      createProvider(numResults, cellTable);
+
+      // Add a ColumnSortEvent.AsyncHandler to connect sorting to the AsyncDataPRrovider.
+      ColumnSortEvent.AsyncHandler columnSortHandler = new ColumnSortEvent.AsyncHandler(cellTable);
+      cellTable.addColumnSortHandler(columnSortHandler);
+
+      Column<?, ?> time = getColumn(TIMESTAMP);
+      cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(time, false));
+      cellTable.setWidth("100%", false);
+
+      return getPagerAndTable(cellTable, rightOfPager);
   }
 
   private Column<?, ?> getColumn(String name) {
@@ -415,7 +447,7 @@ public class ResultManager extends PagerTable {
    * @param numResults
    * @param table
    * @return
-   * @see #getAsyncTable(int)
+   * @see #getAsyncTable
    */
   private AsyncDataProvider<MonitorResult> createProvider(final int numResults, final CellTable<MonitorResult> table) {
     AsyncDataProvider<MonitorResult> dataProvider = new AsyncDataProvider<MonitorResult>() {
@@ -434,6 +466,8 @@ public class ResultManager extends PagerTable {
 
         int val = req++;
        // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
+        logger.info("got " + builder.toString());
+
         service.getResults(start, end, builder.toString(), unitToValue, userID, text, val, new AsyncCallback<ResultAndTotal>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -448,12 +482,16 @@ public class ResultManager extends PagerTable {
                   " --->req " + unitToValue + " user " + userID + " text '" + text + "' : got back " + result.results.size() + " of total " + result.numTotal);
 */
             } else {
- /*             logger.info("--->getResults req " + result.req +
-                  " " + unitToValue + " user " + userID + " text '" + text + "' : got back " + result.results.size() + " of total " + result.numTotal);
-*/
-              final int numTotal = result.numTotal;
-              cellTable.setRowCount(numTotal, true);
-              updateRowData(start, result.results);
+                final int numTotal = result.numTotal;
+                cellTable.setRowCount(numTotal, true);
+                updateRowData(start, result.results);
+                if (numTotal > 0) {
+                    MonitorResult object = result.results.get(0);
+//                    logger.info("--->getResults req " + result.req +
+//                            " " + unitToValue + " user " + userID + " text '" + text + "' : " +
+//                            "got back " + result.results.size() + " of total " + result.numTotal + " selecting "+ object);
+                    cellTable.getSelectionModel().setSelected(object, true);
+              }
             }
           }
         });
@@ -478,7 +516,11 @@ public class ResultManager extends PagerTable {
     for (int i = 0; i < sortList.size(); i++) {
       ColumnSortList.ColumnSortInfo columnSortInfo = sortList.get(i);
       Column<?, ?> column = columnSortInfo.getColumn();
-      builder.append(colToField.get(column) + "_" + (columnSortInfo.isAscending() ? ASC : DESC) + ",");
+      String s = colToField.get(column);
+      if (s == null) {
+        logger.warning("Can't find column " + column + "?");
+      }
+      builder.append(s + "_" + (columnSortInfo.isAscending() ? ASC : DESC) + ",");
     }
     if (!builder.toString().contains(TIMESTAMP)) {
       builder.append(TIMESTAMP + "_" + DESC);
@@ -616,7 +658,7 @@ public class ResultManager extends PagerTable {
     TextColumn<MonitorResult> valid = new TextColumn<MonitorResult>() {
       @Override
       public String getValue(MonitorResult answer) {
-        return answer.isValid() ? "Yes":"No";
+        return answer.isValid() ? YES : NO;
       }
     };
     valid.setSortable(true);
@@ -626,7 +668,7 @@ public class ResultManager extends PagerTable {
     TextColumn<MonitorResult> correct = new TextColumn<MonitorResult>() {
       @Override
       public String getValue(MonitorResult answer) {
-        return answer.isCorrect() ? "Yes":"No";
+        return answer.isCorrect() ? YES : NO;
       }
     };
     correct.setSortable(true);
@@ -653,6 +695,39 @@ public class ResultManager extends PagerTable {
     type.setSortable(true);
     table.addColumn(type, DEVICE);
     colToField.put(type, DEVICE);
+
+    TextColumn<MonitorResult> wFlash = new TextColumn<MonitorResult>() {
+      @Override
+      public String getValue(MonitorResult answer) {
+        return answer.isWithFlash() ? YES : NO;
+      }
+    };
+    wFlash.setSortable(true);
+    table.addColumn(wFlash, "w/Flash");
+    colToField.put(wFlash, "withFlash");
+
+    TextColumn<MonitorResult> processDur = new TextColumn<MonitorResult>() {
+      @Override
+      public String getValue(MonitorResult answer) {
+        float secs = ((float) answer.getProcessDur()) / 1000f;
+        return "" + roundToHundredth(secs);
+      }
+    };
+    processDur.setSortable(true);
+    table.addColumn(processDur, "Process");
+    colToField.put(processDur, "Process");
+
+
+    TextColumn<MonitorResult> rtDur = new TextColumn<MonitorResult>() {
+      @Override
+      public String getValue(MonitorResult answer) {
+        float secs = ((float) answer.getRoundTripDur()) / 1000f;
+        return "" + roundToHundredth(secs);
+      }
+    };
+    rtDur.setSortable(true);
+    table.addColumn(rtDur, "RT");
+    colToField.put(rtDur, "RT");
   }
 
   private void addNoWrapColumn(CellTable<MonitorResult> table) {
@@ -676,8 +751,8 @@ public class ResultManager extends PagerTable {
     return ((float) ((Math.round(totalHours * 100d)))) / 100f;
   }
 
-  private Panel getPagerAndTable(CellTable<MonitorResult> table) {
-    return getOldSchoolPagerAndTable(table, table, PAGE_SIZE, 1000);
+  private Panel getPagerAndTable(CellTable<MonitorResult> table, Widget rightOfPager) {
+    return getOldSchoolPagerAndTable(table, table, PAGE_SIZE, 1000, rightOfPager);
   }
 
   private static class MySuggestion implements SuggestOracle.Suggestion {
