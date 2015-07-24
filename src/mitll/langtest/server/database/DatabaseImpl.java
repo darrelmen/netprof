@@ -77,7 +77,6 @@ public class DatabaseImpl implements Database {
   private PhoneDAO phoneDAO;
   private AudioDAO audioDAO;
   private AnswerDAO answerDAO;
-  private GradeDAO gradeDAO;
   private UserListManager userListManager;
   private UserExerciseDAO userExerciseDAO;
   private AddRemoveDAO addRemoveDAO;
@@ -165,7 +164,6 @@ public class DatabaseImpl implements Database {
     phoneDAO = new PhoneDAO(this, logAndNotify);
     audioDAO = new AudioDAO(this, userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
-    gradeDAO = new GradeDAO(this, userDAO, resultDAO);
     userListManager = new UserListManager(userDAO, userListDAO, userListExerciseJoinDAO,
         new AnnotationDAO(this, userDAO),
         new ReviewedDAO(this, ReviewedDAO.REVIEWED),
@@ -179,7 +177,6 @@ public class DatabaseImpl implements Database {
       resultDAO.createResultTable(connection1);
       refresultDAO.createResultTable(connection1);
       connection1 = getConnection();  // huh? why?
-      gradeDAO.createGradesTable(connection1);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     } finally {
@@ -248,26 +245,22 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  MonitoringSupport getMonitoringSupport() {
-    return new MonitoringSupport(userDAO, resultDAO, gradeDAO);
-  }
+  MonitoringSupport getMonitoringSupport() { return new MonitoringSupport(userDAO, resultDAO);  }
 
   /**
    * @param installPath
    * @param lessonPlanFile
-   * @param language
    * @param mediaDir
    * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath
    */
-  public void setInstallPath(String installPath, String lessonPlanFile, String language,
-                             boolean useFile, String mediaDir) {
+  public void setInstallPath(String installPath, String lessonPlanFile, boolean useFile, String mediaDir) {
     // logger.debug("got install path " + installPath + " media " + mediaDir);
     this.installPath = installPath;
     this.lessonPlanFile = lessonPlanFile;
     this.mediaDir = mediaDir;
     this.useFile = useFile;
-    this.jsonSupport = new JsonSupport(getSectionHelper(),getResultDAO(),getAudioDAO(),getPhoneDAO(),configDir,installPath);
-//    this.language = language;
+    this.jsonSupport = new JsonSupport(getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
+        getPhoneDAO(), configDir, installPath);
   }
 
   public SectionHelper getSectionHelper() {
@@ -443,8 +436,12 @@ public class DatabaseImpl implements Database {
    */
   public JSONObject getJsonScoreHistory(long userid,
                                         Map<String, Collection<String>> typeToSection,
-                                        ExerciseSorter sorter//,  Collator collator
-  ) {    return jsonSupport.getJsonScoreHistory(userid, typeToSection, sorter);
+                                        ExerciseSorter sorter) {
+    return jsonSupport.getJsonScoreHistory(userid, typeToSection, sorter);
+  }
+
+  public JSONObject getJsonRefResult(Map<String, Collection<String>> typeToSection) {
+    return jsonSupport.getJsonRefResults(typeToSection);
   }
 
   /**
@@ -697,7 +694,7 @@ public class DatabaseImpl implements Database {
   /**
    * @param user
    * @return
-   * @see mitll.langtest.server.database.ImportCourseExamples#copyUser
+   * @seex mitll.langtest.server.database.ImportCourseExamples#copyUser
    */
   public long addUser(User user) {
     long l;
@@ -928,6 +925,7 @@ public class DatabaseImpl implements Database {
    * @param deviceType
    * @param device
    * @param scoreJson
+   * @param processDur
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
@@ -935,10 +933,11 @@ public class DatabaseImpl implements Database {
                              String audioFile,
                              boolean valid,
                              String audioType, long durationInMillis, boolean correct, float score,
-                             boolean recordedWithFlash, String deviceType, String device, String scoreJson) {
+                             boolean recordedWithFlash, String deviceType, String device, String scoreJson, int processDur) {
+    logger.debug("addAudioAnser json = " + scoreJson);
     return answerDAO.addAnswer(this, userID, exerciseID, questionID, "", audioFile, valid,
         audioType,// + (recordedWithFlash ? "" : "_by_WebRTC"),
-        durationInMillis, correct, score, deviceType, device, scoreJson, recordedWithFlash);
+        durationInMillis, correct, score, deviceType, device, scoreJson, recordedWithFlash, processDur, 0);
   }
 
   /**
@@ -1059,10 +1058,6 @@ public class DatabaseImpl implements Database {
     return monitoringSupport.getResultStats();
   }
 
-  public Map<Integer, Map<String, Map<String, Integer>>> getGradeCountPerExercise() {
-    return monitoringSupport.getGradeCountPerExercise(getExercises());
-  }
-
   public void destroy() {
     try {
       connection.contextDestroyed();
@@ -1166,15 +1161,18 @@ public class DatabaseImpl implements Database {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
         getExercises() :
         getSectionHelper().getExercisesForSelectionState(typeToSection);
-    new AudioExport(serverProps).writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getServerProps().getLanguage(),
+    new AudioExport(serverProps).writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getLanguage(),
         getAudioDAO(), installPath, configDir, false);
   }
 
-  public void writeContextZip(OutputStream out, Map<String, Collection<String>> typeToSection) throws Exception {
+    @Override
+    public String getLanguage() {  return getServerProps().getLanguage();  }
+
+    public void writeContextZip(OutputStream out, Map<String, Collection<String>> typeToSection) throws Exception {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
         getExercises() :
         getSectionHelper().getExercisesForSelectionState(typeToSection);
-    new AudioExport(serverProps).writeContextZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getServerProps().getLanguage(),
+    new AudioExport(serverProps).writeContextZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getLanguage(),
         getAudioDAO(), installPath, configDir);
   }
 
@@ -1194,7 +1192,7 @@ public class DatabaseImpl implements Database {
   public String writeZip(OutputStream out, long listid, PathHelper pathHelper) throws Exception {
     UserList userListByID = getUserListByID(listid);
 
-    String language1 = getServerProps().getLanguage();
+    String language1 = getLanguage();
     if (userListByID == null) {
       logger.error("huh? can't find user list " + listid);
       return language1 + "_Unknown";
@@ -1222,7 +1220,7 @@ public class DatabaseImpl implements Database {
 
   public String getUserListName(long listid) {
     UserList userListByID = getUserListByID(listid);
-    String language1 = getServerProps().getLanguage();
+    String language1 = getLanguage();
     if (userListByID == null) {
       logger.error("huh? can't find user list " + listid);
       return language1 + "_Unknown";
