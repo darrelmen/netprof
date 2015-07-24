@@ -3,7 +3,6 @@ package mitll.langtest.server.database;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.monitoring.Session;
 import org.apache.log4j.Logger;
 
@@ -37,16 +36,14 @@ public class MonitoringSupport {
 
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
-  private final GradeDAO gradeDAO;
 
   private MonitoringSupport() {
-    this(null,null,null);
+    this(null,null);
   }
 
-  public MonitoringSupport(UserDAO userDAO, ResultDAO resultDAO, GradeDAO gradeDAO) {
+  public MonitoringSupport(UserDAO userDAO, ResultDAO resultDAO) {
     this.userDAO = userDAO;
     this.resultDAO = resultDAO;
-    this.gradeDAO = gradeDAO;
   }
 
   /**
@@ -191,7 +188,7 @@ public class MonitoringSupport {
    * @param exercises
    * @return
    */
-  public Map<Integer, Map<String, Map<String,Integer>>> getGradeCountPerExercise(List<CommonExercise> exercises) {
+/*  public Map<Integer, Map<String, Map<String,Integer>>> getGradeCountPerExercise(List<CommonExercise> exercises) {
     List<Result> results = getResults();
     Map<Integer, List<Grade>> idToGrade = gradeDAO.getIdToGrade();
     Map<Integer, Map<String, Map<String,Integer>>> roundToGradeToCount = new HashMap<Integer, Map<String, Map<String, Integer>>>();
@@ -224,7 +221,7 @@ public class MonitoringSupport {
     }
     logger.info("found " + total + " grades for " + results.size() + " results");
     return roundToGradeToCount;
-  }
+  }*/
 
   /**
    * Get results for only male or only female users.
@@ -627,7 +624,7 @@ public class MonitoringSupport {
 
     logger.warn("getResultStats : found " + unknownUsers.size() + " unknown users : " + unknownUsers);
 
-    Collection<Grade> grades1 = gradeDAO.getGrades();
+/*    Collection<Grade> grades1 = gradeDAO.getGrades();
     for (int i = 0; i < 3; i++) {
       GradeInfo gradeInfo = new GradeInfo(grades1, resultIDToExp, i);
       if (gradeInfo.gradeCount > 0) {
@@ -654,7 +651,7 @@ public class MonitoringSupport {
           typeToStat.put("averageNumCorrect_" +i+suffix, (float)expToCorr.getValue()/(float)gradeInfo.numExercises);
         }
       }
-    }
+    }*/
 
     Number aDouble = total / ((double)HOUR);
     typeToStat.put("totalHrs", aDouble);
@@ -668,7 +665,7 @@ public class MonitoringSupport {
     return typeToStat;
   }
 
-  private static class GradeInfo {
+/*  private static class GradeInfo {
     int gradeCount = 0;
     int valid = 0;
     int incorrect = 0;
@@ -678,12 +675,12 @@ public class MonitoringSupport {
     final Map<Integer,Integer> expToIncorrect = new HashMap<Integer, Integer>();
     final Map<Integer,Integer> expToCorrect = new HashMap<Integer, Integer>();
 
-    /**
+    *//**
      *
      * @paramx gradeDAO
      * @paramx idToUser
-     * @param index
-     */
+     * @paramx index
+     *//*
     public GradeInfo( Collection<Grade> grades, Map<Integer,Integer> resultToExp, int index) {
       Set<String> exids = new HashSet<String>();
       for (Grade g : grades) {
@@ -715,15 +712,15 @@ public class MonitoringSupport {
       if (numExercises == 0) numExercises = 1; //avoid NaN
       avgGrade = (float) gradeTotal / (float) valid;
       avgNumGrades = (float) valid / (float) numExercises;
-    }
+    }*/
 
 /*    private int getExp(Map<Long, User> idToUser, Grade g) {
       User key = idToUser.get((long)g.grader);
       int exp = -1;
       if (key != null) exp = key.experience;
       return exp;
-    }*/
-  }
+    }
+  }*/
 
   private List<User> getUsers() {
     return userDAO.getUsers();
