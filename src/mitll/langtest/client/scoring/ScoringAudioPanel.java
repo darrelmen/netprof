@@ -15,6 +15,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Asks server to score the audio.  Gets back transcript image URLs, phonem scores and end times.
@@ -25,7 +26,9 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class ScoringAudioPanel extends AudioPanel {
-  private static final int ANNOTATION_HEIGHT = 20;
+   // private Logger logger = Logger.getLogger("ScoringAudioPanel");
+
+    private static final int ANNOTATION_HEIGHT = 20;
   private static final boolean SHOW_SPECTROGRAM = false;
 
   private final String refSentence;
@@ -128,7 +131,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   protected void getEachImage(int width) {
     super.getEachImage(width);
     if (!controller.getProps().isNoModel()) {
-      getTranscriptImageURLForAudio(audioPath, refSentence, width, words, phones);
+        getTranscriptImageURLForAudio(audioPath, refSentence, width, words, phones);
     }
   }
 
@@ -145,7 +148,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
                                              final ImageAndCheck wordTranscript,
                                              final ImageAndCheck phoneTranscript) {
     int widthToUse = Math.max(MIN_WIDTH, width);
-    scoreAudio(path, resultID, refSentence, wordTranscript, phoneTranscript, widthToUse, ANNOTATION_HEIGHT, getReqID("score"));
+      scoreAudio(path, resultID, refSentence, wordTranscript, phoneTranscript, widthToUse, ANNOTATION_HEIGHT, getReqID("score"));
   }
 
   protected abstract void scoreAudio(final String path, long resultID, String refSentence,
