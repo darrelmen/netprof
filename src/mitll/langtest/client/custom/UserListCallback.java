@@ -15,11 +15,14 @@ import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
 * Created by GO22670 on 6/5/2014.
 */
 class UserListCallback implements AsyncCallback<Collection<UserList>> {
+  private final Logger logger = Logger.getLogger("UserListCallback");
+
   private static final String NO_LISTS_CREATED_YET = "No lists created yet.";
   private static final String NO_LISTS_CREATED_OR_VISITED_YET = "No lists created or visited yet.";
   private static final String NO_LISTS_YET = "No lists created yet that you haven't seen.";
@@ -51,7 +54,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
   public UserListCallback(Navigation navigation, Panel contentPanel, Panel child, ScrollPanel listScrollPanel, String instanceName,
                           boolean onlyMyLists, boolean allLists, UserManager userManager, boolean showIsPublic) {
     this.navigation = navigation;
-    // System.out.println("UserListCallback instance " +instanceName);
+    logger.info("UserListCallback instance " +instanceName + " only my lists " + onlyMyLists);
     this.contentPanel = contentPanel;
     this.child = child;
     this.listScrollPanel = listScrollPanel;
@@ -67,7 +70,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
 
   @Override
   public void onSuccess(final Collection<UserList> result) {
-    //System.out.println("\tUserListCallback : Displaying " + result.size() + " user lists for " + instanceName);
+    logger.info("\tUserListCallback : Displaying " + result.size() + " user lists for " + instanceName);
     if (result.isEmpty()) {
       child.add(new Heading(3, allLists ? NO_LISTS_YET : NO_LISTS_CREATED_YET));
     } else {
@@ -135,9 +138,12 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
       if (collisions.size() > 1) {
         if (collisions.indexOf(ul) > 0) showMore = true;
       }
-      if (!ul.isEmpty() || (!ul.isPrivate()) ) {
+      if (!ul.isEmpty() || createdByYou(ul) || (!ul.isPrivate()) ) {
         anyAdded = true;
         insideScroll.add(getDisplayRowPerList(ul, showMore, onlyMyLists));
+      }
+      else {
+        logger.info("skipping " + ul.getName() + " empty " + ul.isEmpty());
       }
     }
     return anyAdded;
@@ -273,7 +279,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
       @Override
       public void onClick(ClickEvent event) {
         event.stopPropagation();
-        System.out.println("For " + uniqueID   + " value " + isPublic.getValue());
+        logger.info("For " + uniqueID + " value " + isPublic.getValue());
         navigation.setPublic(uniqueID, isPublic.getValue());
       }
     });
@@ -335,10 +341,9 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
    * @param ul
    * @return
    */
-  private boolean isYourList(UserList ul) {
+  private boolean isYourList(UserList ul)   {
     return createdByYou(ul) && !ul.getName().equals(UserList.MY_LIST);
   }
-
   private boolean createdByYou(UserList ul) {
     return ul.getCreator().getId() == userManager.getUser();
   }
