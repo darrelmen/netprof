@@ -89,6 +89,7 @@ public class AudioCheck {
       assert(fsize == 2);
       assert(format.getChannels() == 1);
       double dur = getDurationInSeconds(ais);
+    //    logger.debug("rate is " +format.getFrameRate());
 
       long frameLength = ais.getFrameLength();
       if (frameLength < MinRecordLength) {
