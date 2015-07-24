@@ -8,10 +8,11 @@ import com.google.gwt.user.client.ui.Panel;
 
 /**
 * Created by GO22670 on 4/14/2014.
-*/
+ */
 public class TabAndContent {
   private final Tab tab;
   private final DivWidget content;
+  private String label;
 
   /**
    * @param iconType
@@ -32,6 +33,7 @@ public class TabAndContent {
 
     this.tab = tab;
     this.content = content;
+    this.label = label;
   }
 
   private void zeroPadding(Panel createContent) {
@@ -47,4 +49,6 @@ public class TabAndContent {
   public DivWidget getContent() {
     return content;
   }
+
+  public String toString() { return "TabAndContent " + label; }
 }
