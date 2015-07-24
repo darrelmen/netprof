@@ -1,5 +1,6 @@
 function __log(e, data) {
     $('#status').append("<p>"+e + "  at " + new Date().getTime());
+  //  console.log(e + "  at " + new Date().getTime());
 }
 
 var audio_context;
@@ -20,19 +21,17 @@ function startUserMedia(stream) {
     document.addEventListener('webkitvisibilitychange', onVisibilityChange);
 }
 
+// if the user goes to another tab or changes focus, stop recording.
 function onVisibilityChange() {
     if (document.webkitHidden) {
-        __log('webkitHidden');
+      //  __log('webkitHidden');
 
         if (rememberedInput) {
-            rememberedInput.stop(0);
+            recorder && recorder.stop();
+    //        __log('Stopped recording.');
         }
     } else {
-        __log('webkitRevealed');
-
-        if (rememberedInput) {
-            rememberedInput.start(0);
-        }
+//        __log('webkitRevealed');
     }
 }
 
@@ -46,6 +45,7 @@ function startRecording() {
     __log('Recording...');
 }
 
+// called from FlashRecordPanelHeadless.stopRecording
 function stopRecording() {
     recorder && recorder.stop();
     __log('Stopped recording.');
@@ -147,6 +147,9 @@ function initWebAudio() {
         audio_context = new AudioContext;
         gotAudioContext = true;
         __log('Audio context set up.');
+
+        __log('sample rate = ' +audio_context.sampleRate);
+
         //console.info('Audio context set up.');
 
         __log('navigator.getUserMedia ' + (navigator.getMedia ? 'available.' : 'not present!'));
