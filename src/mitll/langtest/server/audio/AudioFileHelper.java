@@ -158,11 +158,12 @@ public class AudioFileHelper implements CollationSort {
    * @param user                answering the question
    * @param reqid               request id from the client, so it can potentially throw away out of order responses
    * @param audioType           regular or fast then slow audio recording
-   * @param doFlashcard
-   * @param recordInResults
-   * @param recordedWithFlash
-   * @param deviceType
-   * @param device
+   * @param doFlashcard         true if decoding
+   * @param recordInResults     true if we should add info to the results table
+   * @param recordedWithFlash   true if recorded with Flash, false if via webRTC
+   * @param deviceType          browser or iPad or iPhone
+   * @param device              browser make and version or iPad unique id
+   * @param isRefRecording
    * @return URL to audio on server and if audio is valid (not too short, etc.)
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
@@ -170,12 +171,12 @@ public class AudioFileHelper implements CollationSort {
    */
   public AudioAnswer writeAudioFile(String base64EncodedString, String exerciseID, CommonExercise exercise1, int questionID,
                                     int user, int reqid, String audioType, boolean doFlashcard,
-                                    boolean recordInResults, boolean recordedWithFlash, String deviceType, String device) {
+                                    boolean recordInResults, boolean recordedWithFlash, String deviceType, String device, boolean isRefRecording) {
     String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, questionID, user);
     File file = pathHelper.getAbsoluteFile(wavPath);
 
     long then = System.currentTimeMillis();
-    AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
+    AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file, isRefRecording);
     long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > 20) {
@@ -207,13 +208,13 @@ public class AudioFileHelper implements CollationSort {
   public AudioAnswer getAnswer(String exerciseID, CommonExercise exercise1, int user, boolean doFlashcard, String wavPath,
                                File file, String deviceType, String device, float score, int reqid) {
     String audioType = doFlashcard ? "flashcard" : "learn";
-    AudioCheck.ValidityAndDur validity = new AudioConversion().isValid(file);
+    AudioCheck.ValidityAndDur validity = new AudioConversion().isValid(file, false);
     boolean isValid =
         validity.validity == AudioAnswer.Validity.OK ||
             (serverProps.isQuietAudioOK() && validity.validity == AudioAnswer.Validity.TOO_QUIET);
 
     return doFlashcard ?
-        getAudioAnswerDecoding(exerciseID, exercise1, 0, user, reqid, audioType, doFlashcard, true, true, wavPath, file,
+        getAudioAnswerDecoding (exerciseID, exercise1, 0, user, reqid, audioType, doFlashcard, true, true, wavPath, file,
             validity, isValid, deviceType, device) :
         getAudioAnswerAlignment(exerciseID, exercise1, 0, user, reqid, audioType, doFlashcard, true, true, wavPath, file,
             validity, isValid, score, deviceType, device)
@@ -238,7 +239,7 @@ public class AudioFileHelper implements CollationSort {
    * @param device
    * @return
    * @see #getAnswer
-   * @see #writeAudioFile(String, String, mitll.langtest.shared.CommonExercise, int, int, int, String, boolean, boolean, boolean, String, String)
+   * @see #writeAudioFile(String, String, CommonExercise, int, int, int, String, boolean, boolean, boolean, String, String, boolean)
    */
   private AudioAnswer getAudioAnswerDecoding(String exerciseID, CommonExercise exercise1,
                                              int questionID,
@@ -600,7 +601,7 @@ public class AudioFileHelper implements CollationSort {
   }
 
   private AudioAnswer getAudioAnswer(String base64EncodedString, int reqid, File file) {
-    AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file);
+    AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file, false);
     //logger.debug("writing to " + file.getAbsolutePath() + " answer " + audioAnswer);
     return new AudioAnswer(pathHelper.ensureForwardSlashes(pathHelper.getWavPathUnder(POSTED_AUDIO)),
         validity.validity, reqid, validity.durationInMillis);
