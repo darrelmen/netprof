@@ -210,7 +210,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     } else {
       logger.info("didn't get Flash Player permission!");
       if (checkIfFlashInstalled()) {
-        console("found flash, installing from " + GWT.getModuleBaseURL());
+       // console("found flash, installing from " + GWT.getModuleBaseURL());
         logger.info("installFlash looking for " + id);
 
         installFlash(GWT.getModuleBaseURL(), id);
@@ -257,11 +257,27 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
           else {  //deal with flash blocked
               if(typeof e.ref.PercentLoaded !== "undefined") {
                   if (e.ref.PercentLoaded() < 100) {
-                      $wnd.installFailure();
+                      //$wnd.installFailure();
                   }
               }
               else {
-                  $wnd.installFailure();
+ //                 $wnd.installFailure();
+
+                  //var initialTimeout = setTimeout(function (){
+                  //    //Ensure Flash Player's PercentLoaded method is available and returns a value
+                  //    if(typeof e.ref.PercentLoaded !== "undefined" && e.ref.PercentLoaded()){
+                  //        //Set up a timer to periodically check value of PercentLoaded
+                  //        var loadCheckInterval = setInterval(function (){
+                  //            //Once value == 100 (fully loaded) we can do whatever we want
+                  //            if(e.ref.PercentLoaded() === 100){
+                  //                //Execute function
+                  //                fn();
+                  //                //Clear timer
+                  //                clearInterval(loadCheckInterval);
+                  //            }
+                  //        }, 1500);
+                  //    }
+                  //}, 200);
               }
           }
       };
