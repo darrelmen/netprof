@@ -11,6 +11,7 @@ import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.WavCallback;
 
 import java.util.Date;
+import java.util.logging.Logger;
 
 /**
  * Somewhat related to Cykod example at <a href='https://github.com/cykod/FlashWavRecorder/blob/master/html/index.html'>Cykod example html</a><p></p>
@@ -23,6 +24,8 @@ import java.util.Date;
  * @author Gordon Vidaver *
  */
 public class FlashRecordPanelHeadless extends AbsolutePanel {
+  private Logger logger = Logger.getLogger("FlashRecordPanelHeadless");
+
   private static final int WIDTH = 250;
   private static final int HEIGHT = 170;
   private static final String PX = "8px";
@@ -67,7 +70,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    */
   void show() {
     setSize(WIDTH + "px", HEIGHT + "px");
-   // System.out.println("show: set size on " + this.getElement().getId());
+   // logger.info("show: set size on " + this.getElement().getId());
     if (BrowserCheck.getIEVersion() != -1) {
       console("Found IE Version " + BrowserCheck.getIEVersion());
     }
@@ -98,17 +101,17 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * @seex #webAudioMicNotAvailable
    */
   private boolean rememberInstallFlash() {
-    System.out.println("rememberInstallFlash");
+    logger.info("rememberInstallFlash");
 
     if (!didPopup) {
       show();
       installFlash();
-      System.out.println("rememberInstallFlash : did   installFlash");
+      logger.info("rememberInstallFlash : did   installFlash");
       didPopup = true;
       return false;
     }
     else {
-      System.out.println("rememberInstallFlash didPopup " + didPopup);
+      logger.info("rememberInstallFlash didPopup " + didPopup);
 
       return true;
     }
@@ -128,7 +131,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
         System.err.println("recordOnClick mic is not available");
       }
       else {
-        //System.out.println("recordOnClick mic IS  available");
+        //logger.info("recordOnClick mic IS  available");
       }
       flashRecordOnClick();
     } else if (webAudio.isWebAudioMicAvailable()) {
@@ -153,7 +156,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * @see #FlashRecordPanelHeadless()
    */
   public void hide() {
-    //System.out.println("hide...");
+    //logger.info("hide...");
     setSize(PX, PX);
   }
 
@@ -162,7 +165,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    */
   public void hide2() {
     if (permissionReceived) {
-      //System.out.println("hide2...");
+      //logger.info("hide2...");
 
       flashHide2();
     }
@@ -179,7 +182,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    */
   private String getWav() {
     if (permissionReceived) {
-      //System.out.println("getWav...");
+      //logger.info("getWav...");
 
       return flashGetWav();
     } else {
@@ -201,14 +204,14 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    */
   private void installFlash() {
     if (gotPermission()) {
-      System.out.println("installFlash :  got permission!");
+      logger.info("installFlash :  got permission!");
 
       micPermission.gotPermission();
     } else {
-      System.out.println("didn't get Flash Player permission!");
+      logger.info("didn't get Flash Player permission!");
       if (checkIfFlashInstalled()) {
         console("found flash, installing from " + GWT.getModuleBaseURL());
-        System.out.println("installFlash looking for " +id);
+        logger.info("installFlash looking for " + id);
 
         installFlash(GWT.getModuleBaseURL(), id);
       }
@@ -243,16 +246,24 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
     $wnd.micConnected = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::micConnected());
     $wnd.micNotConnected = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::micNotConnected());
-      $wnd.noMicrophoneFound = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::noMicrophoneFound());
-      $wnd.installFailure = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::installFailure());
+    $wnd.noMicrophoneFound = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::noMicrophoneFound());
+    $wnd.installFailure = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::installFailure());
 
       //This function is invoked by SWFObject once the <object> has been created
       var callback = function (e){
 
           //Only execute if SWFObject embed was successful
           if(!e.success || !e.ref){ $wnd.installFailure(); }
-
-
+          else {  //deal with flash blocked
+              if(typeof e.ref.PercentLoaded !== "undefined") {
+                  if (e.ref.PercentLoaded() < 100) {
+                      $wnd.installFailure();
+                  }
+              }
+              else {
+                  $wnd.installFailure();
+              }
+          }
       };
 		
 		$wnd.swfobject.embedSWF(moduleBaseURL + "test.swf", id, appWidth, appHeight, "10.1.0", "", flashvars, params, attributes, callback);
@@ -264,17 +275,15 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
 
   public static native void installFailure() /*-{
-      if ($wnd.console) {
-          $wnd.console("got swf install failure!")
-      }
       $wnd.micNotConnected();
+
   }-*/;
 
   /**
    * Event from flash when user clicks Accept
    */
   public static void micConnected() {
-    System.out.println("micConnected!");
+    consoleLog("micConnected!");
     permissionReceived = true;
     micPermission.gotPermission();
   }
@@ -283,13 +292,13 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * Event from flash when user clicks Deny
    */
   public static void micNotConnected() {
-    System.err.println("---> mic *NOT* Connected! <--- ");
+    consoleLog("---> mic *NOT* Connected! <--- ");
     permissionReceived = false;
     webAudio.tryWebAudio();
   }
 
   public static void noMicrophoneFound() {
-    System.err.println("no mic available");
+    consoleLog("no mic available");
     permissionReceived = false;
     //micConnected = false;
     micPermission.noMicAvailable();
@@ -305,15 +314,15 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   public void stopRecording(final WavCallback wavCallback) {
     if (permissionReceived) {
       final long then = System.currentTimeMillis();
-      System.out.println("stopRecording at " + then + " " + new Date(then));
+      logger.info("stopRecording at " + then + " " + new Date(then));
 
       Timer t = new Timer() {
         @Override
         public void run() {
 
           long now = System.currentTimeMillis();
-          System.out.println("stopRecording timer at " + now + " diff " + (now-then)+
-              " " + new Date(now) );
+          logger.info("stopRecording timer at " + now + " diff " + (now - then) +
+              " " + new Date(now));
 
           flashStopRecording();
           wavCallback.getBase64EncodedWavFile(getWav());
