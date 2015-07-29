@@ -2,6 +2,7 @@ package mitll.langtest.server.audio;
 
 import audio.tools.FileCopier;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.CommonExercise;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -29,7 +30,7 @@ public class AudioConversion {
 	private static final Logger logger = Logger.getLogger(AudioConversion.class);
 	private static final String LAME_PATH_WINDOWS = "C:\\Users\\go22670\\lame\\lame.exe";
 	private static final String LAME_PATH_LINUX = "/usr/local/bin/lame";
-    private static final String SOX = "sox";
+	private static final String SOX = "sox";
 
 	private static final String LINUX_SOX_BIN_DIR = "/usr/local/bin";
 	private static final String LINUX_SOX_BIN_DIR_2 = "/usr/bin";
@@ -45,22 +46,23 @@ public class AudioConversion {
 	 * Converts base 64 string into bytes and writes them to a file.
 	 * This is what we send over from FLASH when recording.  TODO : Ideally we could post the bytes without encoding.
 	 *
-	 * @see AudioFileHelper#writeAudioFile(String, String, mitll.langtest.shared.CommonExercise, int, int, int, String, boolean, boolean, boolean, String, String)
+	 * @see AudioFileHelper#writeAudioFile(String, String, CommonExercise, int, int, int, String, boolean, boolean, boolean, String, String, boolean)
 	 * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment(String, String, String, int)
 	 * @param base64EncodedString audio bytes from the client
 	 * @param file where we want to write the wav file to
+	 * @param useSensitiveTooLoudCheck
 	 * @return true if audio is valid (not too short, not silence)
 	 */
-	public AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString, File file) {
+	public AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString, File file, boolean useSensitiveTooLoudCheck) {
 		file.getParentFile().mkdirs();
 		byte[] byteArray = getBytesFromBase64String(base64EncodedString);
 
 		writeToFile(byteArray, file);
 
 		if (!file.exists()) {
-			System.err.println("writeAudioFile : huh? can't find " + file.getAbsolutePath());
+			logger.error("writeAudioFile : huh? can't find " + file.getAbsolutePath());
 		}
-		return isValid(file);
+		return isValid(file, useSensitiveTooLoudCheck);
 	}
 
 	/**
@@ -93,13 +95,15 @@ public class AudioConversion {
 	}
 
 	/**
-	 * @see #convertBase64ToAudioFiles(String, java.io.File)
+	 * @see #convertBase64ToAudioFiles(String, File, boolean)
+	 * @see AudioFileHelper#getAnswer(String, CommonExercise, int, boolean, String, File, String, String, float, int)
 	 * @param file
+	 * @param useSensitiveTooLoudCheck
 	 * @return
 	 */
-	public AudioCheck.ValidityAndDur isValid(File file) {
+	public AudioCheck.ValidityAndDur isValid(File file, boolean useSensitiveTooLoudCheck) {
 		try {
-            return audioCheck.checkWavFile(file);
+			return useSensitiveTooLoudCheck ? audioCheck.checkWavFileRejectAnyTooLoud(file) : audioCheck.checkWavFile(file);
 		} catch (Exception e) {
 			logger.error("got " + e, e);
 		}
@@ -132,7 +136,7 @@ public class AudioConversion {
 	 */
     private File convertTo16Khz(File wavFile) throws UnsupportedAudioFileException {
         if (!wavFile.exists()) {
-            System.err.println("convertTo16Khz " + wavFile + " doesn't exist");
+            logger.error("convertTo16Khz " + wavFile + " doesn't exist");
             return wavFile;
         }
         try {
@@ -190,7 +194,7 @@ public class AudioConversion {
         // i.e. sox inputFile -s -2 -c 1 -q tempForWavz.wav rate 16000
         ProcessBuilder soxFirst = new ProcessBuilder(soxPath,
                 pathToAudioFile, "-s", "-2", "-c", "1", "-q", tempForWavz, "rate", "16000");
-        //log.info("ENTER running sox on " + tempForWavz + " : " + soxFirst);
+//        logger.info("ENTER running sox on " + tempForWavz + " : " + soxFirst);
 
         if (!new ProcessRunner().runProcess(soxFirst)) {
             ProcessBuilder soxFirst2 = new ProcessBuilder(soxPath,
@@ -374,7 +378,7 @@ public class AudioConversion {
 			lamePath = LAME_PATH_LINUX;
 		}
 		if (!new File(lamePath).exists()) {
-			System.err.println("no lame installed at " + lamePath + " or " +LAME_PATH_WINDOWS);
+			logger.error("no lame installed at " + lamePath + " or " +LAME_PATH_WINDOWS);
 		}
     lamePath = "lame";
 		return lamePath;
@@ -405,16 +409,18 @@ public class AudioConversion {
 			new ProcessRunner().runProcess(lameProc);
 			//     System.out.println("convertFileAndCheck exited  lame" + lameProc);
 		} catch (IOException e) {
-			System.err.println("Couldn't run " + lameProc);
+			logger.error("Couldn't run " + lameProc);
 			logger.error("got " +e,e);
 		}
 
 		File testMP3 = new File(mp3File);
-		if (!testMP3.exists()) {
-			//  System.err.println("didn't write MP3 : " + testMP3.getAbsolutePath());
-		} else {
+
+		//if (!testMP3.exists()) {
+			//  logger.error("didn't write MP3 : " + testMP3.getAbsolutePath());
+	//	} else {
 			//    System.out.println("Wrote to " + testMP3 + " length " + testMP3.getTotalSpace());
-		}
+	//	}
+
 		return testMP3;
 	}
 
@@ -438,7 +444,7 @@ public class AudioConversion {
             //logger.debug("running lame" + lameProc.command());
             new ProcessRunner().runProcess(lameProc);
         } catch (IOException e) {
-            //  System.err.println("Couldn't run " + lameProc);
+            //  logger.error("Couldn't run " + lameProc);
             logger.error("for " + lameProc + " got " + e, e);
         }
 
