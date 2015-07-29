@@ -22,12 +22,19 @@ import java.io.IOException;
 public class AudioCheck {
   private static final Logger logger = Logger.getLogger(AudioCheck.class);
 
-  private static final int MinRecordLength = 1*(10000/2); // 10000 = 0.7 second
+  private static final int MinRecordLength = (10000 / 2); // 10000 = 0.7 second
   private static final int WinSize = 10;
   private static final float PowerThreshold = -79.50f;//-55.0f;
   private static final float VarianceThreshold = 20.0f;
   private static final double CLIPPED_RATIO = 0.005; // 1/2 %
   private static final double LOG_OF_TEN = Math.log(10.0);
+
+  private static final short clippedThreshold  = 32704; // 32768-64
+  private static final short clippedThresholdMinus  = -32704; // 32768-64
+  private static final short ct = 32112;
+ // private static final short clippedThreshold2 = 32752; // 32768-16
+ // private static final short clippedThreshold2Minus = -32752; // 32768-16
+  private static final float MAX_VALUE = 32768.0f;
 
   private double dB(double power) {
     return 20.0 * Math.log(power < 0.0001f ? 0.0001f : power) / LOG_OF_TEN;
@@ -69,18 +76,33 @@ public class AudioCheck {
     return (frames + 0.0d) / format.getFrameRate();
   }
 
+  public ValidityAndDur checkWavFileRejectAnyTooLoud(File file) {
+    return checkWavFileWithClipThreshold(file, false);
+  }
+
+  /**
+   * @see AudioConversion#isValid(File, boolean)
+   * @param file
+   * @return
+   */
+  public ValidityAndDur checkWavFile(File file) {
+    return checkWavFileWithClipThreshold(file, true);
+  }
+
   /**
    * Verify audio messages
    *
-   * @see AudioConversion#isValid(java.io.File)
+   * @see AudioConversion#isValid(File, boolean)
    * @param file audio byte array with header
    * @return true if well formed
    */
-  public ValidityAndDur checkWavFile(File file){
+  private ValidityAndDur checkWavFileWithClipThreshold(File file, boolean usePercent){
     AudioInputStream ais = null;
     try {
       ais = AudioSystem.getAudioInputStream(file);
       AudioFormat format = ais.getFormat();
+      logger.info("file " + file.getName() + " sample rate " + format.getSampleRate());
+
       boolean bigEndian = format.isBigEndian();
       if (bigEndian) {
         logger.warn("huh? file " + file.getAbsoluteFile() + " is in big endian format?");
@@ -89,7 +111,6 @@ public class AudioCheck {
       assert(fsize == 2);
       assert(format.getChannels() == 1);
       double dur = getDurationInSeconds(ais);
-    //    logger.debug("rate is " +format.getFrameRate());
 
       long frameLength = ais.getFrameLength();
       if (frameLength < MinRecordLength) {
@@ -101,7 +122,11 @@ public class AudioCheck {
       float pm = 0.0f, p2 = 0.0f, n = 0.0f;
       int bufSize = WinSize * fsize;
       byte[] buf = new byte[bufSize];
-      float countClipped = 0f;
+      int countClipped = 0;
+      int cc = 0;
+
+      short max = 0;
+      short nmax = 0;
 
       while (ais.read(buf) == bufSize) {
         float fpower = 0.0f;
@@ -110,29 +135,35 @@ public class AudioCheck {
             // short tmp = (short) ((buf[i + s] << 8) | buf[i + s + 1]); // BIG ENDIAN
             short tmp = (short) ((buf[i + s] & 0xFF) | (buf[i + s + 1] << 8)); // LITTLE ENDIAN
 
-            float r = ((float) tmp) / 32768.0f;
-            if (Math.abs(r) > 0.98f) {
+            float r = ((float) tmp) / MAX_VALUE;
+            if (tmp > clippedThreshold || tmp < clippedThresholdMinus) {//.abs(r) > 0.98f) {
               countClipped++;
        /*       logger.debug("at " + frameIndex + " s " + s + " i " + i + " value was " + tmp + " and r " + r);*/
             }
+            if (tmp > ct) cc++;
+            if (tmp > max) max = tmp;
+            if (tmp < nmax) nmax = tmp;
+
             fpower += r * r;
           }
 
         fpower /= (float) WinSize;
-        fpower = (float) dB((double) fpower);
+        fpower  = (float) dB((double) fpower);
 
         pm += fpower;
         p2 += fpower * fpower;
-        n += (float) fsize / 2.0f;
+        n  += (float) fsize / 2.0f;
       }
 
-      float clippedRatio = countClipped / (float)frameLength;
-      boolean wasClipped = clippedRatio > CLIPPED_RATIO;
+      float clippedRatio = ((float)countClipped) / (float)frameLength;
+      float clippedRatio2 = ((float)cc) / (float)frameLength;
+      boolean wasClipped = usePercent ? clippedRatio > CLIPPED_RATIO : countClipped > 1;
+      boolean wasClipped2 = usePercent ? clippedRatio2 > CLIPPED_RATIO : cc > 1;
 /*      logger.info("of " + total +" got " +countClipped + " out of " + n +"  or " + clippedRatio  + "/" +clippedRatio2+
         " not " + notClippedRatio +" wasClipped = " + wasClipped);*/
 
       float mean = pm / n;
-      float var = p2 / n - mean * mean;
+      float var  = p2 / n - mean * mean;
       double std = Math.sqrt(var);
       final boolean validAudio = mean > PowerThreshold || std > VarianceThreshold;
 
@@ -140,8 +171,11 @@ public class AudioCheck {
         logger.info("checkWavFile: audio recording (Length: " + frameLength + ") " +
           "mean power = " + mean + " (dB) vs " + PowerThreshold +
           ", std = " + std + " vs " + VarianceThreshold+
-          " valid = " + validAudio + " was clipped " + wasClipped + " (" + (clippedRatio * 100f) +
-          "% samples clipped)");
+          " valid = " + validAudio +
+                " was clipped " + wasClipped + " (" + (clippedRatio * 100f) + "% samples clipped, # clipped = " + countClipped+ ") " +
+            " was clipped " + wasClipped2 + " (" + (clippedRatio2 * 100f) + "% samples clipped, # clipped = " + cc+ ")" +
+                " max = " + max + "/" +nmax
+        );
       }
 
       boolean micDisconnected = mean < -79.999 && std < 0.001;
@@ -175,20 +209,15 @@ public class AudioCheck {
 
   public static class ValidityAndDur {
     public final AudioAnswer.Validity validity;
-    public final long durationInMillis;
+    public final int durationInMillis;
 
     public ValidityAndDur(AudioAnswer.Validity validity) {
       this(validity, 0d);
     }
 
-    public ValidityAndDur(AudioAnswer.Validity validity, long durInMillis) {
-      this.validity = validity;
-      this.durationInMillis = durInMillis;
-    }
-
     public ValidityAndDur(AudioAnswer.Validity validity, double dur) {
       this.validity = validity;
-      this.durationInMillis = (long) (1000d * dur);
+      this.durationInMillis = (int) (1000d * dur);
     }
     public String toString() { return "valid " + validity + " dur " + durationInMillis; }
   }
