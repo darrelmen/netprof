@@ -27,7 +27,8 @@ public class PathWriter {
    * @param title mark the mp3 meta data with this title
    * @return path of file under bestAudio directory
    */
-  public String getPermanentAudioPath(PathHelper pathHelper, File fileRef, String destFileName, boolean overwrite, String id, String title) {
+  public String getPermanentAudioPath(PathHelper pathHelper, File fileRef, String destFileName, boolean overwrite,
+                                      String id, String title) {
     final File bestDir = pathHelper.getAbsoluteFile(BEST_AUDIO);
     if (!bestDir.exists() && !bestDir.mkdir()) {
       if (!bestDir.exists()) logger.warn("huh? couldn't make " + bestDir.getAbsolutePath());
