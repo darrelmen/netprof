@@ -1,12 +1,17 @@
 package mitll.langtest.client.recorder;
 
+import com.google.gwt.user.client.Window;
 import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.WavCallback;
+
+import java.util.logging.Logger;
 
 /**
  * Created by GO22670 on 5/27/2014.
  */
 public class WebAudioRecorder {
+  private Logger logger = Logger.getLogger("WebAudioRecorder");
+
   private static boolean webAudioMicAvailable;
   //private static final boolean micConnected = true;  // TODO how to determine if mic not connected in web audio world?
   private static boolean tried = false;
@@ -14,8 +19,7 @@ public class WebAudioRecorder {
   public void tryWebAudio() {
     if (!tried) {
       tried = true;
-      System.out.println("webAudioMicAvailable -- tryWebAudio!");
-
+      logger.info("webAudioMicAvailable -- tryWebAudio!");
       initWebaudio();
     }
   }
@@ -62,19 +66,19 @@ public class WebAudioRecorder {
   public static void webAudioMicAvailable() {
     webAudioMicAvailable = true;
 
-    System.out.println("webAudioMicAvailable -- connected!");
+//    logger.info("webAudioMicAvailable -- connected!");
     console("webAudioMicAvailable -- connected!");
     FlashRecordPanelHeadless.micPermission.gotPermission();
   }
 
   public static void webAudioMicNotAvailable() {
-    System.out.println("webAudioMicNotAvailable!");
+    console("webAudioMicNotAvailable!");
     webAudioMicAvailable = false;
     FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
   }
 
   public static void webAudioPermissionDenied() {
-    System.out.println("webAudioPermissionDenied!");
+    console("webAudioPermissionDenied!");
     webAudioMicAvailable = false;
    // FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
   }
@@ -84,15 +88,15 @@ public class WebAudioRecorder {
    * @param encoded
    */
   public static void getBase64(String encoded) {
-    //System.out.println("WebAudioRecorder.getBase64 " + encoded.length());
+    //logger.info("WebAudioRecorder.getBase64 " + encoded.length());
     if (encoded.length() < 100) {
-      System.out.print("bytes = '" +encoded+ "'");
+      console("bytes = '" + encoded + "'");
     }
 /*    if (getAllZero()) {
-      System.out.println("Seems like the mic is not plugged in?");
+      logger.info("Seems like the mic is not plugged in?");
     }*/
     if (WebAudioRecorder.wavCallback == null) {
-      System.err.println("getBase64 no callback?");
+      console("getBase64 no callback?");
     } else {
       WebAudioRecorder.wavCallback.getBase64EncodedWavFile(encoded);
       WebAudioRecorder.wavCallback = null;
