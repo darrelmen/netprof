@@ -1292,8 +1292,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		if (!byID.removeAudio(audioAttribute)) {
 			String key = audioAttribute.getKey();
 			logger.warn("huh? couldn't remove key '" + key +
-                    "' : " + audioAttribute + " from " + exid +
-                    " keys were " + byID.getAudioRefToAttr().keySet() + " contains " + byID.getAudioRefToAttr().containsKey(key));
+					"' : " + audioAttribute + " from " + exid +
+					" keys were " + byID.getAudioRefToAttr().keySet() + " contains " + byID.getAudioRefToAttr().containsKey(key));
 		}
 		/*   int afterNumAudio = byID.getAudioAttributes().size();
     if (afterNumAudio != beforeNumAudio - 1) {
@@ -1793,7 +1793,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 			logger.warn("couldn't find exercise with id '" +exercise +"'");
 		}
 		AudioAnswer audioAnswer = audioFileHelper.writeAudioFile(base64EncodedString, exercise, exercise1, questionID, user, reqid,
-                audioType, doFlashcard, recordInResults, recordedWithFlash, deviceType, device);
+                audioType, doFlashcard, recordInResults, recordedWithFlash, deviceType, device, addToAudioTable);
 
 		if (addToAudioTable && audioAnswer.isValid()) {
 			AudioAttribute attribute = addToAudioTable(user, audioType, exercise1, exercise, audioAnswer);
