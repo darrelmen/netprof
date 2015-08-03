@@ -594,6 +594,7 @@ public class DatabaseImpl implements Database {
    * @return
    * @see mitll.langtest.client.user.UserPassLogin#gotLogin
    * @see mitll.langtest.client.user.UserPassLogin#makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#userExists(String, String)
    */
   public User userExists(HttpServletRequest request,String login, String passwordH) {
     UserDAO userDAO = getUserDAO();
