@@ -53,7 +53,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private final ScoreListener gaugePanel;
   protected final String exerciseID;
   protected String audioPath;
-  private final Map<String,Integer> reqs = new HashMap<String, Integer>();
+  protected final Map<String,Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
 
   private ImageAndCheck waveform;
