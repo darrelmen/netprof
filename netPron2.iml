@@ -67,5 +67,6 @@
     <orderEntry type="library" name="pronz" level="project" />
     <orderEntry type="library" name="commons-fileupload-1.2.2 (2)" level="project" />
     <orderEntry type="library" name="jtransforms-2.3 (2)" level="project" />
+    <orderEntry type="library" name="commons-beanutils-1.8.0 (2)" level="project" />
   </component>
 </module>
