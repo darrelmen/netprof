@@ -10,17 +10,14 @@ import mitll.langtest.server.scoring.ASRWebserviceScoring;
 
 import org.apache.log4j.Logger;
 
+import javax.servlet.http.HttpServletRequest;
+
 // closes and reopens the connection after every call to sendAndReceive()
 public class HTTPClient {
-	private HttpURLConnection httpConn;
-	private BufferedWriter sender;
-	private BufferedReader receiver;
-	@SuppressWarnings("unused")
-	private String webserviceIP;
-	@SuppressWarnings("unused")
-	private int webservicePort;
-	private String url;
 	private static final Logger logger = Logger.getLogger(HTTPClient.class);
+
+	private HttpURLConnection httpConn;
+	private BufferedReader receiver;
 
 	/* Constructor */
 
@@ -30,14 +27,26 @@ public class HTTPClient {
    * @param webservicePort
    */
 	public HTTPClient(String webserviceIP, int webservicePort) {
-		this.webserviceIP = webserviceIP;
-		this.webservicePort = webservicePort;
-		this.url = "http://" + webserviceIP + ":" + webservicePort + "/dcodr";
+		String url = "http://" + webserviceIP + ":" + webservicePort + "/dcodr";
 		try {
 			httpConn = setupHttpConn(url);
 		}
 		catch(IOException e) {
 			logger.error("Error constructing HTTPClient:\n" + e,e);
+		}
+	}
+
+	/**
+	 * @see mitll.langtest.server.database.DatabaseImpl#userExists(HttpServletRequest, String, String)
+	 * @param url
+	 * @return
+	 */
+	public String readFromGET(String url) {
+		try {
+			return receive(setupGetHttpConn(url));
+		} catch (IOException e) {
+			e.printStackTrace();
+			return "";
 		}
 	}
 
@@ -47,20 +56,11 @@ public class HTTPClient {
 		httpConn.setDoOutput(true);
 		httpConn.setConnectTimeout(5000);
 		httpConn.setReadTimeout(20000);
-		//httpConn.setRequestProperty("Content-Type", "application/json; charset=utf-8");  
-		httpConn.setRequestProperty("Content-Type", "text/plain; charset=utf-8");  
+		//httpConn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+		httpConn.setRequestProperty("Content-Type", "text/plain; charset=utf-8");
 		httpConn.setRequestProperty("Accept-Charset", "UTF8");
 		httpConn.setRequestProperty("charset", "UTF8");
 		return httpConn;
-	}
-
-	public String readFromGET(String url) {
-		try {
-			return receive(setupGetHttpConn(url));
-		} catch (IOException e) {
-			e.printStackTrace();
-			return "";
-		}
 	}
 
 	private HttpURLConnection setupGetHttpConn(String url) throws IOException {
@@ -75,7 +75,7 @@ public class HTTPClient {
 		return httpConn;
 	}
 
-	public String read(HttpURLConnection conn) {
+	private String read(HttpURLConnection conn) {
 		return receive(conn);
 	}
 
@@ -90,10 +90,13 @@ public class HTTPClient {
 
 	private void send(String input) throws IOException {
 		logger.debug("SEND INPUT: " + input);
+
+		OutputStream outputStream = httpConn.getOutputStream();
+
 		CharsetEncoder encoder = Charset.forName("UTF-8").newEncoder();
 		encoder.onMalformedInput(CodingErrorAction.REPORT);
 		encoder.onUnmappableCharacter(CodingErrorAction.REPORT);
-		sender = new BufferedWriter(new OutputStreamWriter(httpConn.getOutputStream(), encoder));
+		BufferedWriter sender = new BufferedWriter(new OutputStreamWriter(outputStream, encoder));
 		sender.write(input);
 		sender.flush();    
 		sender.close();
@@ -139,11 +142,10 @@ public class HTTPClient {
 	public String sendAndReceive(String input) {
 		try {
 			send(input);
-			String response = receive();
-			return response;
+			return receive();
 		}
 		catch(IOException e) {
-			e.printStackTrace();
+			logger.error("sending " +input +" got " +e,e);
 			return "";
 		}
 	}
