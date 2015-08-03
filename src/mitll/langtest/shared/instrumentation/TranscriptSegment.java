@@ -48,8 +48,10 @@ public class TranscriptSegment implements IsSerializable {
   public float getScore() {
     return score;
   }
-
+  private float roundToHundredth(float totalHours) {
+    return ((float) ((Math.round(totalHours * 100d)))) / 100f;
+  }
   public String toString() {
-    return "[" + start + "-" + end + "] " + event + "(" + score + ")";
+    return "[" + roundToHundredth(start) + "-" + roundToHundredth(end) + "] " + event + " (" + roundToHundredth(score) + ")";
   }
 }
