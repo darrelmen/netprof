@@ -351,7 +351,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
 	 * @param prefix                on the names of the image files, if they are written
 	 * @return score info coming back from alignment/reco
-	 * @see ASR#scoreRepeat
+	 * @see #scoreRepeat
 	 */
 	// JESS alignment and decoding
 	private PretestScore scoreRepeatExercise(String testAudioDir,
@@ -409,7 +409,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		// actually run the scoring
 		String rawAudioPath = testAudioDir + File.separator + testAudioFileNoSuffix + ".raw";
 		AudioConversion.wav2raw(testAudioDir + File.separator + testAudioFileNoSuffix + ".wav", rawAudioPath);
-		logger.debug("Converting: " + (testAudioDir + File.separator + testAudioFileNoSuffix + ".wav to: " + rawAudioPath));
+	//	logger.debug("Converting: " + (testAudioDir + File.separator + testAudioFileNoSuffix + ".wav to: " + rawAudioPath));
 		// TODO remove the 16k hardcoding?
 		double duration = (new AudioCheck()).getDurationInSeconds(wavFile);
 		//int end = (int)((duration * 16000.0) / 100.0);
@@ -418,17 +418,23 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		if(scores == null) {
 			long then = System.currentTimeMillis();
 			Object[] result = runHydra(rawAudioPath, sentence, lmSentences, tmpDir, decode, end);
-                        processDur = (int)(System.currentTimeMillis()-then);
-			scores = (Scores) result[0];
-			wordLab = (String) result[1];
-			phoneLab = (String) result[2];
-			audioToScore.put(key, new Object[]{scores, wordLab, phoneLab});
+			if (result == null) {
+				return new PretestScore(0);
+			}
+			else {
+				processDur = (int) (System.currentTimeMillis() - then);
+				scores = (Scores) result[0];
+				wordLab = (String) result[1];
+				phoneLab = (String) result[2];
+				audioToScore.put(key, new Object[]{scores, wordLab, phoneLab});
+			}
 		}
 		if (scores == null) {
 			logger.error("getScoreForAudio failed to generate scores.");
 			return new PretestScore(0.01f);
 		}
-		return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile, scores, phoneLab, wordLab, duration, processDur);
+		return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile,
+				scores, phoneLab, wordLab, duration, processDur);
 	}
 
 	private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
@@ -502,10 +508,22 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		return dict;
 	}
 
-	private Object[] runHydra(String audioPath, String transcript, Collection<String> lmSentences, String tmpDir, boolean decode, int end) {
+	private SLFFile slfFile = new SLFFile();
 
-          // reference trans	
-		String cleaned = transcript.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("\\p{P}","").toLowerCase();
+	/**
+	 *
+	 * @param audioPath
+	 * @param transcript
+	 * @param lmSentences
+	 * @param tmpDir
+	 * @param decode
+	 * @param end
+	 * @return
+	 * @see #scoreRepeatExercise(String, String, String, Collection, String, int, int, boolean, boolean, String, boolean, String)
+	 */
+	private Object[] runHydra(String audioPath, String transcript, Collection<String> lmSentences, String tmpDir, boolean decode, int end) {
+          // reference trans
+		String cleaned = slfFile.cleanToken(transcript);
 		if (isMandarin) 
 			cleaned = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") + getSegmented(transcript.trim()); // segmentation method will filter out the UNK model
 
@@ -516,26 +534,21 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		// generate SLF file (if decoding)
 		// TODO the repeating of replaceAll should be combined into one (happens in createSimpleSLFFile also)
 		if(decode) {
-			String[] slfOut = (new SLFFile()).createSimpleSLFFile(lmSentences);
+			String[] slfOut = slfFile.createSimpleSLFFile(lmSentences);
 			smallLM = "[" + slfOut[0] + "]";
-			cleaned = slfOut[1].replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("\\p{P}","").toLowerCase();
+			cleaned = slfFile.cleanToken(slfOut[1]);
 		}
 
 		String hydraInput = tmpDir + "/:" + audioPath + ":" + hydraDict + ":" + smallLM + ":xxx,0," + end + ",[<s>;" + cleaned.replaceAll("\\p{Z}",";") + ";</s>]";
 		long then = System.currentTimeMillis();
 		HTTPClient httpClient = new HTTPClient(ip, port);
-		String resultsStr = httpClient.sendAndReceive(hydraInput);
-		try {
-			httpClient.closeConn();
-		}
-		catch(IOException e) {
-			logger.error("Error closing http connection");
-		}
+
+		String resultsStr = runHydra(hydraInput, httpClient);
 		String[] results = resultsStr.split("\n"); // 0th entry-overall score and phone scores, 1st entry-word alignments, 2nd entry-phone alignments
 		long timeToRunHydra = System.currentTimeMillis() - then;	
 		logger.debug("Took " + timeToRunHydra + " millis to run hydra");
 		if (results[0].isEmpty()) {
-			logger.error("Failure during running of hydra.");
+			logger.error("Failure during running of hydra on " + audioPath + (decode ? " DECODING " : " ALIGNMENT ") + " with " + (decode ? transcript : lmSentences));
 			return null;
 		}
 		// TODO makes this a tuple3 type 
@@ -552,6 +565,23 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 			}
 		}*/
 		return new Object[]{scores, results[1].replaceAll("#",""), results[2].replaceAll("#","")}; // where are the # coming from?
+	}
+
+	private String runHydra(String hydraInput, HTTPClient httpClient) {
+		try {
+			String resultsStr = httpClient.sendAndReceive(hydraInput);
+			try {
+        httpClient.closeConn();
+      }
+      catch(IOException e) {
+        logger.error("Error closing http connection");
+				resultsStr = "";
+      }
+			return resultsStr;
+		} catch (Exception e) {
+			logger.error("running on " + port + " with " + hydraInput + " got "+e,e);
+			return "";
+		}
 	}
 
 
