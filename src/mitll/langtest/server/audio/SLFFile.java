@@ -113,7 +113,7 @@ public class SLFFile {
 		  int start = 0;
 
 		  for (String token : tokens) {
-			  String cleanedToken = token.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("\\p{P}","").toLowerCase();
+			  String cleanedToken = cleanToken(token);
 			  int next = newNodes++;
 			  linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=" + next +
 					  " l=" +
@@ -142,5 +142,9 @@ public class SLFFile {
 		//	  slfBuf.append(";");
 	  }
 	  return new String[]{slfBuf.toString(), finalSentence};
+  }
+
+  public String cleanToken(String token) {
+    return token.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("\\p{P}","").toLowerCase();
   }
 }
