@@ -10,6 +10,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Does ASR scoring -- adds phone and word transcript images below waveform and spectrum
@@ -19,12 +20,14 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoringAudioPanel extends ScoringAudioPanel {
+  private Logger logger = Logger.getLogger("ASRScoringAudioPanel");
+
   public static final String SCORE = "score";
   private final Set<String> tested = new HashSet<String>();
   private boolean useScoreToColorBkg = true;
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel#ASRRecordAudioPanel(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.FastAndSlowASRScoringAudioPanel#FastAndSlowASRScoringAudioPanel
    * @param refSentence
    * @param service
    * @param gaugePanel
@@ -37,7 +40,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
   }
 
   /**
-   * @see GoodwaveExercisePanel#getAudioPanel(mitll.langtest.shared.CommonExercise, String)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.FastAndSlowASRScoringAudioPanel#FastAndSlowASRScoringAudioPanel
    * @param path
    * @param refSentence
    * @param service
@@ -71,7 +74,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    */
   protected void scoreAudio(final String path, long resultID, String refSentence,
                             final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
-                            int toUse, int height, int reqid) {
+                            int toUse, int height, final int reqid) {
     if (path == null) return;
     //System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
     boolean wasVisible = wordTranscript.image.isVisible();
@@ -89,13 +92,15 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
     // Schedule the timer to run once in 1 seconds.
     t.schedule(wasVisible ? 1000 : 1);
 
-    //System.out.println("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " type " + "score" + " width " + toUse);
+    //logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " type " + "score" + " width " + toUse);
 
     service.getASRScoreForAudio(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, exerciseID, new AsyncCallback<PretestScore>() {
       public void onFailure(Throwable caught) {
         //if (!caught.getMessage().trim().equals("0")) {
         //  Window.alert("Server error -- couldn't contact server.");
         //}
+      //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " failure? "+ caught.getMessage());
+
         wordTranscript.image.setVisible(false);
         phoneTranscript.image.setVisible(false);
       }
@@ -103,9 +108,14 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
       public void onSuccess(PretestScore result) {
         t.cancel();
 
+
         if (isMostRecentRequest(SCORE, result.getReqid())) {
+        //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " success " + result);
           useResult(result, wordTranscript, phoneTranscript, tested.contains(path), path);
           tested.add(path);
+        }
+        else {
+          //logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " success " + result + " DISCARDING : " + reqs);
         }
       }
     });
