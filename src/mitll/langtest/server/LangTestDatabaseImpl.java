@@ -100,10 +100,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
 	@Override
 	public void logAndNotifyServerException(Exception e) {
+		logAndNotifyServerException(e, "");
+	}
+
+	public void logAndNotifyServerException(Exception e, String additionalMessage) {
 		String message1 = e == null ? "null_ex" : e.getMessage() == null ? "null_msg" : e.getMessage();
 		if (!message1.contains("Broken Pipe")) {
 			String message = "Server Exception : " + ExceptionUtils.getStackTrace(e);
-			String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
+			String prefix = additionalMessage.isEmpty() ? "" : additionalMessage + "\n";
+			String prefixedMessage = prefix + "for " + pathHelper.getInstallPath() + " got " + message;
 			String subject = "Server Exception on " + pathHelper.getInstallPath();
 			sendEmail(subject, prefixedMessage);
 
@@ -925,42 +930,47 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	@Override
 	public StartupInfo getStartupInfo() {
 		return new StartupInfo(serverProps.getProperties(), getTypeOrder(), getSectionNodes());
-    }
+	}
 
-    /**
-     * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, long, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
-     * @param resultID
-     * @param width
-     * @param height
-     * @return
-     */
-    @Override
-    public PretestScore getResultASRInfo(long resultID, int width, int height) {
-        PretestScore asrScoreForAudio = null;
-        try {
-            Result result = db.getResultDAO().getResultByID(resultID);
+	/**
+	 * @param resultID
+	 * @param width
+	 * @param height
+	 * @return
+	 * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, long, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+	 */
+	@Override
+	public PretestScore getResultASRInfo(long resultID, int width, int height) {
+		PretestScore asrScoreForAudio = null;
+		try {
+			Result result = db.getResultDAO().getResultByID(resultID);
 
-            String exerciseID = result.getExerciseID();
+			String exerciseID = result.getExerciseID();
 
-            CommonExercise exercise = db.getExercise(exerciseID);
-            String sentence = exercise.getForeignLanguage();
-            String audioFilePath = result.getAnswer();
-            ensureMP3(audioFilePath,sentence);
-            File tempDir = Files.createTempDir();
-            //logger.info("resultID " +resultID+ " temp dir " + tempDir.getAbsolutePath());
-            asrScoreForAudio = audioFileHelper.getASRScoreForAudio(1,
-                    audioFilePath, sentence,
-                    width, height,
-                    true,  // make transcript images with colored segments
-                    false, // false = do alignment
-                    tempDir.getAbsolutePath(),
-                    serverProps.useScoreCache(), exerciseID, result);
-        } catch (Exception e) {
-            logger.error("Got " + e, e);
-        }
+			CommonExercise exercise = db.getExercise(exerciseID);
+			if (exercise == null) {
+				logger.warn(getLanguage() + " can't find exercise id " + exerciseID);
+				return new PretestScore();
+			} else {
+				String sentence = exercise.getForeignLanguage();
+				String audioFilePath = result.getAnswer();
+				ensureMP3(audioFilePath, sentence);
+				File tempDir = Files.createTempDir();
+				//logger.info("resultID " +resultID+ " temp dir " + tempDir.getAbsolutePath());
+				asrScoreForAudio = audioFileHelper.getASRScoreForAudio(1,
+						audioFilePath, sentence,
+						width, height,
+						true,  // make transcript images with colored segments
+						false, // false = do alignment
+						tempDir.getAbsolutePath(),
+						serverProps.useScoreCache(), exerciseID, result);
+			}
+		} catch (Exception e) {
+			logger.error("Got " + e, e);
+		}
 
-        return asrScoreForAudio;
-    }
+		return asrScoreForAudio;
+	}
 
 	/**
      * So first we check and see if we've already done alignment for this audio (if reference audio), and if so, we grab the Result
@@ -979,30 +989,30 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	 */
 	// JESS: this is entered for the normal stuff (I think this is alignment)
 	public PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
-											int width, int height, boolean useScoreToColorBkg, String exerciseID) {
+																					int width, int height, boolean useScoreToColorBkg, String exerciseID) {
 		long then = System.currentTimeMillis();
 
 		String[] split = testAudioFile.split(File.separator);
 		String answer = split[split.length - 1];
 		Result result = db.getRefResultDAO().getResult(exerciseID, answer.replaceAll(".mp3", ".wav"));
 		if (result != null) {
-            logger.debug("align exercise id = " + exerciseID + " file " + answer + " found previous " + result);
-        }
-        db.getExercise(exerciseID);
+			logger.debug("align exercise id = " + exerciseID + " file " + answer + " found previous " + result);
+		}
+		db.getExercise(exerciseID); // TODO : why is this needed?
 
 		PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
 				false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, result);
 		long timeToRunHydec = System.currentTimeMillis() - then;
 
-		logger.debug("getASRScoreForAudio : scoring" + testAudioFile + " for " +
-                " exid " + exerciseID +
-				" sentence " + sentence.length() + " characters long : "+
+		logger.debug("getASRScoreForAudio : scoring file " + testAudioFile + " for " +
+				" exid " + exerciseID +
+				" sentence " + sentence.length() + " characters long : " +
 				" score " + asrScoreForAudio.getHydecScore() +
 				" took " + timeToRunHydec + " millis");
 
 		if (resultID > -1 && result == null) { // alignment has two steps : 1) post the audio, then 2) do alignment
-            db.getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson());
-        }
+			db.getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson());
+		}
 		return asrScoreForAudio;
 	}
 
