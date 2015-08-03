@@ -687,6 +687,7 @@ public class AudioFileHelper implements CollationSort {
   }
 
   /**
+   * If trying asr webservice and it doesn't work, falls back to using hydec - {@link PretestScore#isRanNormally()}
    *
    * @param reqid
    * @param testAudioFile
@@ -734,10 +735,21 @@ public class AudioFileHelper implements CollationSort {
       sentence = sentence.toUpperCase();  // hack for English
     }
 
-    PretestScore pretestScore = getASRScoring().scoreRepeat(
-            testAudioDir, removeSuffix(testAudioName),
-            sentence, lmSentences,
-            pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix, precalcResult);
+    ASR asrScoring = getASRScoring();
+    //logger.info("using " +asrScoring);
+
+    PretestScore pretestScore = asrScoring.scoreRepeat(
+        testAudioDir, removeSuffix(testAudioName),
+        sentence, lmSentences,
+        pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix, precalcResult);
+
+    if (!pretestScore.isRanNormally() && isWebservice(asrScoring)) {
+      logger.warn("Using hydec as fallback for " + (decode ? " decoding " : " aligning ") + testAudioFile);
+      pretestScore = oldschoolScoring.scoreRepeat(
+          testAudioDir, removeSuffix(testAudioName),
+          sentence, lmSentences,
+          pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix, precalcResult);
+    }
     pretestScore.setReqid(reqid);
 
     JSONObject json = getJsonObject(pretestScore);
@@ -870,13 +882,14 @@ public class AudioFileHelper implements CollationSort {
   }
 
   private ASR getASRScoring() {
-    boolean isMacOrWin = isMacOrWin();
+    boolean isMacOrWin = false;//isMacOrWin();
     if (!isMacOrWin && !useOldSchoolServiceOnly)
       return webserviceScoring;
     else
       return oldschoolScoring;
   }
 
+  private boolean isWebservice(ASR asr) { return asr == webserviceScoring; }
   private boolean isMacOrWin() {
     String property = System.getProperty("os.name").toLowerCase();
     return property.contains("mac") || property.contains("win");
@@ -886,7 +899,7 @@ public class AudioFileHelper implements CollationSort {
   private void makeASRScoring() {
     if (webserviceScoring == null) {
       webserviceScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps);
-      oldschoolScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
+      oldschoolScoring  = new ASRScoring(pathHelper.getInstallPath(), serverProps.getProperties(), langTestDatabase);
     }
     asrScoring = oldschoolScoring;
   }
