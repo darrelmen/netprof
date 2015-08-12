@@ -6,10 +6,6 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.DecoratedPopupPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.PopupPanel;
 import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.KeyPressHelper;
@@ -31,7 +27,6 @@ import mitll.langtest.client.flashcard.MyCustomIconType;
  * To change this template use File | Settings | File Templates.
  */
 public class FlashcardRecordButton extends RecordButton {
-  private static final int HIDE_DELAY = 2500;
   private static final String PROMPT2 = "Click/space and hold to record";
   private static final String SPACE_BAR = PROMPT2;//"space bar";
   private static final String NO_SPACE_WARNING = "Press and hold space bar or mouse button to begin recording, release to stop.";
@@ -41,7 +36,7 @@ public class FlashcardRecordButton extends RecordButton {
   private boolean warnUserWhenNotSpace = true;
   private final boolean addKeyBinding;
   private final ExerciseController controller;
-  Tooltip tooltip ;
+  private Tooltip tooltip;
 
   /**
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton
@@ -149,13 +144,9 @@ public class FlashcardRecordButton extends RecordButton {
     }
   }
 
-  protected void gotRightArrow() {
+  protected void gotRightArrow() {}
 
-  }
-
-  protected void gotLeftArrow() {
-
-  }
+  protected void gotLeftArrow()  {}
 
   protected void checkKeyUp(NativeEvent event) {
     if (!shouldIgnoreKeyPress()) {
@@ -199,9 +190,6 @@ public class FlashcardRecordButton extends RecordButton {
   private void warnNotASpace() { showPopup(NO_SPACE_WARNING);  }
 
   private void showPopup(String html) { new PopupHelper().showPopup(html); }
-  //  System.out.println("\n\n\nFlashcardRecordButton: showing popup : " + html);
-
-
 
   protected boolean showInitialRecordImage() {
     showFirstRecordImage();
