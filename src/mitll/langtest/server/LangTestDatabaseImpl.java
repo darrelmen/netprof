@@ -178,11 +178,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		Collection<CommonExercise> exercises;
 
 		logger.debug("getExerciseIds : (" + getLanguage() + ") " +
-                "getting exercise ids for " +
-                " config " + relativeConfigDir +
-                " prefix '" + prefix +
-                "' and user list id " + userListID + " user " + userID + " role " + role +
-                " filter " + onlyRecorderByMatchingGender + " only examples " + onlyExamples + " only with audio " + onlyWithAudioAnno);
+				"getting exercise ids for " +
+				" config " + relativeConfigDir +
+				" prefix '" + prefix +
+				"' and user list id " + userListID + " user " + userID + " role " + role +
+				" filter " + onlyRecorderByMatchingGender + " only examples " + onlyExamples + " only with audio " + onlyWithAudioAnno);
 
 		try {
 			UserList userListByID = userListID != -1 ? db.getUserListByID(userListID) : null;
@@ -753,7 +753,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 			logger.error("Got " + e, e);
 		}
 		sendEmail("slow exercise on " + language, "Getting ex " + id + " on " + language + " took " + diff +
-                " millis, threads " + threadInfo + " on " + hostName);
+				" millis, threads " + threadInfo + " on " + hostName);
 	}
 
 	/**
@@ -1788,22 +1788,27 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	 * @param recordedWithFlash   mark if we recorded it using flash recorder or webrtc
 	 * @param deviceType
 	 * @param device
+	 * @param allowAlternates
 	 * @return AudioAnswer object with information about the audio on the server, including if audio is valid (not too short, etc.)
 	 * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
 	 * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
 	 */
 	@Override
 	public AudioAnswer writeAudioFile(String base64EncodedString, String exercise, int questionID,
-			int user, int reqid, boolean flq, String audioType, boolean doFlashcard,
-			boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash,
-			String deviceType, String device) {
+																		int user, int reqid, boolean flq, String audioType, boolean doFlashcard,
+																		boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash,
+																		String deviceType, String device, boolean allowAlternates) {
 		CommonExercise exercise1 = db.getCustomOrPredefExercise(exercise);  // allow custom items to mask out non-custom items
 
 		if (exercise1 == null) {
 			logger.warn("couldn't find exercise with id '" +exercise +"'");
 		}
+//		else {
+//			logger.info("allow alternates " + allowAlternates + " " +exercise +
+//					" exercise1 " + exercise1.getForeignLanguage() + " refs " + exercise1.getRefSentences());
+//		}
 		AudioAnswer audioAnswer = audioFileHelper.writeAudioFile(base64EncodedString, exercise, exercise1, questionID, user, reqid,
-                audioType, doFlashcard, recordInResults, recordedWithFlash, deviceType, device, addToAudioTable);
+                audioType, doFlashcard, recordInResults, recordedWithFlash, deviceType, device, addToAudioTable, allowAlternates);
 
 		if (addToAudioTable && audioAnswer.isValid()) {
 			AudioAttribute attribute = addToAudioTable(user, audioType, exercise1, exercise, audioAnswer);
