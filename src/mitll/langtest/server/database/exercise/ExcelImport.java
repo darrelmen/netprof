@@ -132,7 +132,9 @@ public class ExcelImport implements ExerciseDAO {
     synchronized (this) {
       if (exercises == null) {
         exercises = readExercises(new File(file));
-        for (CommonExercise e : exercises) idToExercise.put(e.getID(), e);
+
+        addAlternates();
+
         addDefects(idToDefectMap);
 
         // remove exercises to remove
@@ -187,6 +189,31 @@ public class ExcelImport implements ExerciseDAO {
       }
     }
     return exercises;
+  }
+
+  /**
+   * Keep track of possible alternatives for each english word - e.g. Good Bye = Ciao OR Adios
+   */
+  private void addAlternates() {
+    Map<String,Set<String>> englishToFL = new HashMap<>();
+    for (CommonExercise e : exercises) {
+      idToExercise.put(e.getID(), e);
+
+      Set<String> refs = englishToFL.getOrDefault(e.getEnglish(), new HashSet<>());
+      if (refs.isEmpty()) englishToFL.put(e.getEnglish(),refs);
+      refs.add(e.getForeignLanguage());
+    }
+
+    for (CommonExercise e : exercises) {
+      Set<String> orDefault = englishToFL.getOrDefault(e.getEnglish(), new HashSet<>());
+      if (orDefault.isEmpty()) {
+        logger.error("huh? no fl for " + e);
+      }
+      else {
+        e.setRefSentences(orDefault);
+     //   if (orDefault.size() > 1) logger.info("For " + e.getID() + " found " + orDefault.size());
+      }
+    }
   }
 
   /**
@@ -345,8 +372,6 @@ public class ExcelImport implements ExerciseDAO {
     return exercises;
   }
 
-  //public List<CommonExercise> getExercises() { return exercises; }
-
   /**
    * @param sheet
    * @return
@@ -406,8 +431,8 @@ public class ExcelImport implements ExerciseDAO {
               colIndexOffset = columns.indexOf(col);
             } else if (colNormalized.contains("transliteration")) {
               transliterationIndex = columns.indexOf(col);
-            } else if (colNormalized.contains("weight")) {
-              weightIndex = columns.indexOf(col);
+//            } else if (colNormalized.contains("weight")) {
+ //             weightIndex = columns.indexOf(col);
             } else if (colNormalized.contains(MEANING)) {
               meaningIndex = columns.indexOf(col);
             } else if (colNormalized.contains(ID)) {
@@ -515,7 +540,7 @@ public class ExcelImport implements ExerciseDAO {
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
 
-              CommonExercise imported = isDelete ? null : getExercise(idToUse, weightIndex, next, english, foreignLanguagePhrase, translit,
+              CommonExercise imported = isDelete ? null : getExercise(idToUse, english, foreignLanguagePhrase, translit,
                 meaning, context, contextTranslation, false, hasAudioIndex ? getCell(next, audioIndex) : "", true);
 
               if (!isDelete &&
@@ -580,7 +605,7 @@ public class ExcelImport implements ExerciseDAO {
     int colIndexOffset = -1;
 
     int transliterationIndex = -1;
-    int weightIndex = -1;
+   // int weightIndex = -1;
     int meaningIndex = -1;
     int idIndex = -1;
     int contextIndex = -1;
@@ -642,8 +667,8 @@ public class ExcelImport implements ExerciseDAO {
             } else if (colNormalized.contains("week")) {
               weekIndex = columns.indexOf(col);
               weekName = col;
-            } else if (colNormalized.contains("weight")) {
-              weightIndex = columns.indexOf(col);
+//            } else if (colNormalized.contains("weight")) {
+//              weightIndex = columns.indexOf(col);
             }
           }
 
@@ -685,7 +710,7 @@ public class ExcelImport implements ExerciseDAO {
 
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
-              CommonExercise imported = getExercise(idToUse, weightIndex, next, english, foreignLanguagePhrase, translit,
+              CommonExercise imported = getExercise(idToUse, english, foreignLanguagePhrase, translit,
                   meaning, context, contextTranslation, false, (audioIndex != -1) ? getCell(next, audioIndex) : "", false);
               if (isDelete) {
                 deleted++;
@@ -804,9 +829,8 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   /**
-   * @param id
    * @param weightIndex
-   * @param next
+   * @param id
    * @param english
    * @param foreignLanguagePhrase
    * @param translit
@@ -816,7 +840,7 @@ public class ExcelImport implements ExerciseDAO {
    * @return
    * @see #readFromSheet(org.apache.poi.ss.usermodel.Sheet)
    */
-  private CommonExercise getExercise(String id, int weightIndex, Row next,
+  private CommonExercise getExercise(String id,
                                      String english, String foreignLanguagePhrase, String translit, String meaning,
                                      String context, String contextTranslation, boolean promptInEnglish,
                                      String audioIndex, boolean lookForOldAudio) {
@@ -837,6 +861,7 @@ public class ExcelImport implements ExerciseDAO {
       translations.add(foreignLanguagePhrase);
     }
     imported.setRefSentences(translations);
+    imported.setForeignLanguage(foreignLanguagePhrase);
 
     return imported;
   }
@@ -891,7 +916,7 @@ public class ExcelImport implements ExerciseDAO {
    * @param refAudioIndex
    * @param lookForOldAudio
    * @return
-   * @see #getExercise(String, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, String, boolean, String, boolean)
+   * @see #getExercise(String, String, String, String, String, String, String, boolean, String, boolean)
    */
   private Exercise getExercise(String id,
                                String english, String foreignLanguagePhrase, String translit, String meaning,
