@@ -1,10 +1,7 @@
 package mitll.langtest.client.scoring;
 
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PopupHelper;
@@ -89,7 +86,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
         true,
         getAudioType(),
         false, recordInResults,
-        shouldAddToAudioTable(), controller.usingFlashRecorder(), "browser", controller.getBrowserInfo(),
+        shouldAddToAudioTable(), controller.usingFlashRecorder(), "browser", controller.getBrowserInfo(), false,
         new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
             long now = System.currentTimeMillis();
