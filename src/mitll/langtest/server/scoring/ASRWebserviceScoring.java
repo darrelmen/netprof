@@ -532,7 +532,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		String smallLM = "[]";
 
 		// generate SLF file (if decoding)
-		// TODO the repeating of replaceAll should be combined into one (happens in createSimpleSLFFile also)
 		if(decode) {
 			String[] slfOut = slfFile.createSimpleSLFFile(lmSentences);
 			smallLM = "[" + slfOut[0] + "]";
