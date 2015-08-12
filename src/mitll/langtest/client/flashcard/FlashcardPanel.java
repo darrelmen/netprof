@@ -66,6 +66,7 @@ class FlashcardPanel extends HorizontalPanel {
   final ListInterface exerciseList;
   private final DivWidget prevNextRow;
   final LangTestDatabaseAsync service;
+  boolean showOnlyEnglish = false;
 
   /**
    * @param e
@@ -650,6 +651,7 @@ class FlashcardPanel extends HorizontalPanel {
 
   private FocusPanel makeEnglishPhrase(String englishSentence) {
     Heading englishHeading = new Heading(1, englishSentence);
+  //  englishHeading.getElement().getStyle().setWidth(500, Style.Unit.PX);
     englishHeading.getElement().setId("EnglishPhrase");
     FocusPanel widgets = new FocusPanel();
     widgets.add(englishHeading);
@@ -745,6 +747,8 @@ class FlashcardPanel extends HorizontalPanel {
 
     if (controlState.showBoth()) {
       showBoth();
+      showOnlyEnglish = false;
+
     } else if (controlState.isEnglish()) {
       english.setHeight("100%");
       showEnglish();
@@ -753,7 +757,10 @@ class FlashcardPanel extends HorizontalPanel {
       if (clickToFlip != null) {
         clickToFlipContainer.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
       }
+      showOnlyEnglish = true;
     } else if (controlState.isForeign()) {
+      showOnlyEnglish = false;
+
       foreign.setHeight("100%");
       english.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
 
