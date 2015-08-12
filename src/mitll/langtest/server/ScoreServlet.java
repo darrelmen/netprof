@@ -840,6 +840,8 @@ public class ScoreServlet extends DatabaseServlet {
    * Write the posted audio file to a location based on the user id and the exercise id.
    * If request type is decode, decode the file and return score info in json.
    *
+   * Allow alternate decode possibilities if header is set.
+   *
    * @param request
    * @param requestType - decode or align or record
    * @param deviceType
@@ -860,9 +862,11 @@ public class ScoreServlet extends DatabaseServlet {
     File saveFile = pathHelper.getAbsoluteFile(wavPath);
     new File(saveFile.getParent()).mkdirs();
 
+    String allow_alternates = request.getHeader("ALLOW_ALTERNATES");
+    boolean allowAlternates = allow_alternates != null && !allow_alternates.equals("false");
     writeToOutputStream(request.getInputStream(), saveFile);
     return getJsonForAudioForUser(reqid, exerciseID, i, Request.valueOf(requestType.toUpperCase()), wavPath, saveFile,
-        deviceType, device);
+        deviceType, device, allowAlternates);
   }
 
   private int getReqID(HttpServletRequest request) {
@@ -888,11 +892,12 @@ public class ScoreServlet extends DatabaseServlet {
    * @param saveFile   File handle to file
    * @param deviceType iPad,iPhone, or browser
    * @param device     id for device - helpful for iPads, etc.
+   * @param allowAlternates
    * @return score json
    * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
    */
   private JSONObject getJsonForAudioForUser(int reqid, String exerciseID, int user, Request request, String wavPath, File saveFile,
-                                            String deviceType, String device) {
+                                            String deviceType, String device, boolean allowAlternates) {
     long then = System.currentTimeMillis();
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
 
@@ -901,7 +906,7 @@ public class ScoreServlet extends DatabaseServlet {
       jsonForScore.put(VALID, "bad_exercise_id");
     } else {
       boolean doFlashcard = request == Request.DECODE;
-      AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, deviceType, device, exercise1);
+      AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, deviceType, device, exercise1, allowAlternates);
       long now = System.currentTimeMillis();
       PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
       float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
@@ -913,7 +918,7 @@ public class ScoreServlet extends DatabaseServlet {
         jsonForScore = getJsonForScore(pretestScore);
         if (doFlashcard) {
           jsonForScore.put(IS_CORRECT, answer.isCorrect());
-          jsonForScore.put(SAID_WORD, answer.isSaidAnswer());
+          jsonForScore.put(SAID_WORD,  answer.isSaidAnswer());
           jsonForScore.put("resultID", answer.getResultID());
 
           // attempt to get more feedback when we're too sensitive and match the unknown model
@@ -956,18 +961,19 @@ public class ScoreServlet extends DatabaseServlet {
    * @param deviceType
    * @param device
    * @param exercise1
+   * @param allowAlternates
    * @return
    * @see #getJsonForAudioForUser
    */
   private AudioAnswer getAudioAnswer(int reqid, String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile,
-                                     String deviceType, String device, CommonExercise exercise1) {
+                                     String deviceType, String device, CommonExercise exercise1, boolean allowAlternates) {
     AudioAnswer answer;
 
     if (doFlashcard) {
-      answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, -1, deviceType, device, reqid);
+      answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, -1, deviceType, device, reqid, allowAlternates);
     } else {
       PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, wavPath, exercise1.getRefSentence(), exerciseID);
-      answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(), deviceType, device, reqid);
+      answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(), deviceType, device, reqid, allowAlternates);
       answer.setPretestScore(asrScoreForAudio);
     }
     return answer;
@@ -989,7 +995,7 @@ public class ScoreServlet extends DatabaseServlet {
   private AudioAnswer getAudioAnswerAlign(int reqid, String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile,
                                           String deviceType, String device, CommonExercise exercise1) {
     PretestScore asrScoreForAudio = getASRScoreForAudioNoCache(reqid, saveFile.getAbsolutePath(), exercise1.getRefSentence(), exerciseID);
-    AudioAnswer answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(), deviceType, device, reqid);
+    AudioAnswer answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(), deviceType, device, reqid, false);
     answer.setPretestScore(asrScoreForAudio);
     return answer;
   }
@@ -1004,15 +1010,16 @@ public class ScoreServlet extends DatabaseServlet {
    * @param deviceType
    * @param device
    * @param reqid
+   * @param allowAlternates
    * @return
    * @see #getJsonForAudioForUser
    */
   private AudioAnswer getAnswer(String exerciseID, int user, boolean doFlashcard, String wavPath, File file, float score,
-                                String deviceType, String device, int reqid) {
+                                String deviceType, String device, int reqid, boolean allowAlternates) {
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
 
     AudioAnswer answer = audioFileHelper.getAnswer(exerciseID, exercise1, user, doFlashcard, wavPath, file, deviceType,
-        device, score, reqid);
+        device, score, reqid, allowAlternates);
 
     final String path = answer.getPath();
     final String foreignLanguage = exercise1.getForeignLanguage();
