@@ -84,7 +84,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     controlState = new ControlState();
     this.instance = instance;
     this.ul = ul;
-    // System.out.println("made factory ---------------------\n");
+    // logger.info("made factory ---------------------\n");
 /*    boolean sharedList = exerciseList == null;
     if (sharedList) {   // when does this happen??
       exerciseList = controller.getExerciseList();
@@ -101,7 +101,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
         public void listChanged(List<CommonShell> items, String selectionID) {
           StatsFlashcardFactory.this.selectionID = selectionID;
           allExercises = items;
-      //    System.out.println("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
+      //    logger.info("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
           reset();
         }
       });
@@ -114,7 +114,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     };
     sticky = new StickyState(storage);
     controlState.setStorage(storage);
-    // System.out.println("setting shuffle --------------------- " +controlState.isShuffle()+ "\n");
+    // logger.info("setting shuffle --------------------- " +controlState.isShuffle()+ "\n");
 
     if (exerciseList != null) {
       exerciseList.simpleSetShuffle(controlState.isShuffle());
@@ -174,7 +174,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   public void populateCorrectMap() {
     String value = sticky.getCorrect();
     if (value != null && !value.trim().isEmpty()) {
-      // System.out.println("using correct map " + value);
+      // logger.info("using correct map " + value);
       for (String ex : value.split(",")) {
         exToCorrect.put(ex, Boolean.TRUE);
       }
@@ -182,7 +182,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
 
     value = sticky.getIncorrect();
     if (value != null && !value.trim().isEmpty()) {
-      //  System.out.println("using incorrect map " + value);
+      //  logger.info("using incorrect map " + value);
       for (String ex : value.split(",")) {
         exToCorrect.put(ex, Boolean.FALSE);
       }
@@ -229,7 +229,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
           StatsFlashcardFactory.this.controlState,
           soundFeedback,
           soundFeedback.endListener, StatsFlashcardFactory.this.instance, exerciseListToUse);
-    //  System.out.println("made " + this + " for " + e.getID());
+    //  logger.info("made " + this + " for " + e.getID());
     }
 
     @Override
@@ -263,7 +263,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
      * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, com.google.gwt.user.client.ui.Panel)
      */
     public void receivedAudioAnswer(final AudioAnswer result) {
-      System.out.println("StatsPracticePanel.receivedAudioAnswer: result " + result);
+      logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
 
       if (result.getValidity() == AudioAnswer.Validity.OK) {
         resultIDs.add(result.getResultID());
@@ -291,7 +291,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
         setStateFeedback();
 
         latestResultID = result.getResultID();
-        //System.out.println("\tStatsPracticePanel.receivedAudioAnswer: latest now " + latestResultID);
+        //logger.info("\tStatsPracticePanel.receivedAudioAnswer: latest now " + latestResultID);
       } else {
         logger.info("got invalid result " + result);
       }
@@ -332,7 +332,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
         }
       }
 
-/*      System.out.println("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
+/*      logger.info("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
         " with " + exToCorrect + " and latest " + latestResultID + " and ids " +copies);*/
 
       service.getUserHistoryForList(user, copies, latestResultID, selection, ul == null ? -1 : ul.getUniqueID(), new AsyncCallback<AVPScoreReport>() {
@@ -354,7 +354,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
 
       contentPanel.removeStyleName("centerPractice");
       contentPanel.addStyleName("noWidthCenterPractice");
-    //  System.out.println("showFeedbackCharts ---- \n\n\n");
+    //  logger.info("showFeedbackCharts ---- \n\n\n");
 
       HorizontalPanel widgets = new HorizontalPanel();
       container = widgets;
@@ -387,7 +387,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       w.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          //   System.out.println("----> click on " + START_OVER);
+          //   logger.info("----> click on " + START_OVER);
           w.setVisible(false);
           doIncorrectFirst();
         }
@@ -442,7 +442,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
         @Override
         public void onClick(ClickEvent event) {
 
-//          System.out.println("getRepeatButton : click on " + GO_BACK);
+//          logger.info("getRepeatButton : click on " + GO_BACK);
 
           w1.setVisible(false);
           showFlashcardDisplay();
@@ -475,7 +475,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       String lastID = allExercises.get(allExercises.size() - 1).getID();
       String currentExerciseID = sticky.getCurrentExerciseID();
 
-       System.out.println("startOver : current " + currentExerciseID);
+       logger.info("startOver : current " + currentExerciseID);
 
       if (currentExerciseID != null && !currentExerciseID.isEmpty() && !currentExerciseID.equals(lastID)) {
         exerciseList.loadExercise(currentExerciseID);
@@ -493,7 +493,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
      contentPanel.removeStyleName("noWidthCenterPractice");
       contentPanel.addStyleName("centerPractice");
 
-   //   System.out.println("makeFlashcardButtonsVisible ---- \n\n\n");
+   //   logger.info("makeFlashcardButtonsVisible ---- \n\n\n");
 
       startOver.setVisible(true);
       startOver.setEnabled(true);
@@ -537,11 +537,11 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     protected void gotClickOnNext() {
       abortPlayback();
 
-      //System.out.println("on last " + exerciseList.onLast());
+      //logger.info("on last " + exerciseList.onLast());
       if (exerciseList.onLast()) {
         onSetComplete();
       } else {
-        //System.out.println("load next " + exerciseList.getCurrentExerciseID());
+        //logger.info("load next " + exerciseList.getCurrentExerciseID());
 
         exerciseList.loadNext();
       }
@@ -674,7 +674,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
       // TODO : come back to the color coding ...
       LabelType type = total > 0.8 ? LabelType.SUCCESS :
           total > 0.5 ? LabelType.INFO : LabelType.WARNING;
-      //  System.out.println("type "+type + " score " + total);
+      //  logger.info("type "+type + " score " + total);
       pronScore.setType(type);
 
       total *= 100;
@@ -690,19 +690,19 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     }
 
     public synchronized void queueSong(String song, SoundFeedback.EndListener endListener) {
-      //System.out.println("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
+      //logger.info("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
       destroySound(); // if there's something playing, stop it!
       createSound(song, endListener);
     }
 
     public synchronized void queueSong(String song) {
-      //System.out.println("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
+      //logger.info("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
       destroySound(); // if there's something playing, stop it!
       createSound(song, endListener);
     }
 
     public synchronized void clear() {
-      //  System.out.println("\t stop playing current sound -------  "+ System.currentTimeMillis());
+      //  logger.info("\t stop playing current sound -------  "+ System.currentTimeMillis());
       destroySound(); // if there's something playing, stop it!
 
     }
@@ -711,12 +711,12 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     private final SoundFeedback.EndListener endListener = new SoundFeedback.EndListener() {
       @Override
       public void songStarted() {
-        //System.out.println("song started --------- "+ System.currentTimeMillis());
+        //logger.info("song started --------- "+ System.currentTimeMillis());
       }
 
       @Override
       public void songEnded() {
-        //System.out.println("song ended   --------- " + System.currentTimeMillis());
+        //logger.info("song ended   --------- " + System.currentTimeMillis());
       }
     };
   }
