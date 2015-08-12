@@ -25,6 +25,7 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,6 +35,8 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswerListener {
+  private Logger logger = Logger.getLogger("BootstrapExercisePanel");
+
   private Heading recoOutput;
   private static final int DELAY_MILLIS_LONG = 3000;
   private static final int LONG_DELAY_MILLIS = 3500;
@@ -236,6 +239,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
   RecordButtonPanel getAnswerWidget(final CommonExercise exercise, LangTestDatabaseAsync service,
                                     ExerciseController controller, final boolean addKeyBinding, String instance) {
     return new FlashcardRecordButtonPanel(this, service, controller, exercise, 1, instance) {
+      FlashcardRecordButtonPanel outer = this;
       @Override
       protected RecordButton makeRecordButton(final ExerciseController controller, String buttonTitle) {
        // System.out.println("makeRecordButton : using " + instance);
@@ -250,8 +254,16 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
           }
 
           @Override
+          public void setAllowAlternates(boolean allowAlternates) {
+            //super.setAllowAlternates(allowAlternates);
+            outer.setAllowAlternates(allowAlternates);
+          }
+
+          @Override
           public void stop() {
             controller.logEvent(this, "AVP_RecordButton", exercise, "Stop_Recording");
+
+            outer.setAllowAlternates(showOnlyEnglish);
             super.stop();
           }
 
