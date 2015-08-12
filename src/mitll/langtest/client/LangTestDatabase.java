@@ -27,7 +27,8 @@ public interface LangTestDatabase extends RemoteService {
 
   ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection,
                                      String prefix, long userListID, int userID, String role,
-                                     boolean onlyUnrecordedByMe, boolean onlyExamples, boolean incorrectFirstOrder, boolean onlyWithAudioAnno);
+                                     boolean onlyUnrecordedByMe, boolean onlyExamples, boolean incorrectFirstOrder,
+                                     boolean onlyWithAudioAnno);
 
   CommonExercise getExercise(String id, long userID, boolean isFlashcardReq);
 
@@ -35,7 +36,8 @@ public interface LangTestDatabase extends RemoteService {
   void markGender(AudioAttribute attr, boolean isMale);
   // user DAO
 
-  User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale, int age, String dialect, boolean isCD, String device);
+  User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale,
+               int age, String dialect, boolean isCD, String device);
 
   List<User> getUsers();
   User userExists(String login, String passwordH);
@@ -43,7 +45,9 @@ public interface LangTestDatabase extends RemoteService {
 
   // answer DAO
   AudioAnswer writeAudioFile(String base64EncodedString, String exercise, int question, int user,
-                             int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults, boolean addToAudioTable, boolean recordedWithFlash, String deviceType, String device);
+                             int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults,
+                             boolean addToAudioTable, boolean recordedWithFlash, String deviceType, String device,
+                             boolean allowAlternates);
 
   Collection<String> getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which);
 
@@ -52,7 +56,8 @@ public interface LangTestDatabase extends RemoteService {
 
   PretestScore getResultASRInfo(long resultID, int width, int height);
 
-  PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, String exerciseID);
+  PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
+                                   int width, int height, boolean useScoreToColorBkg, String exerciseID);
 
   void addRoundTrip(long resultid, int roundTrip);
   // monitoring support
@@ -95,7 +100,8 @@ public interface LangTestDatabase extends RemoteService {
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device);
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID);
 
-  AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID, Map<String, Collection<String>> typeToSection, long userListID);
+  AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
+                                       Map<String, Collection<String>> typeToSection, long userListID);
 
   StartupInfo getStartupInfo();
   long addUserList(long userid, String name, String description, String dliClass, boolean isPublic);
