@@ -35,6 +35,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
   private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
   private boolean doFlashcardAudio = false;
+  private boolean allowAlternates = false;
   private final String audioType;
 
   /**
@@ -124,7 +125,6 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
         postAudioFile(getPanel(), 1, bytes);
       }
     });
-
   }
 
   protected void postAudioFile(final Panel outer, final int tries, final String base64EncodedWavFile) {
@@ -142,7 +142,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
       false,
       audioType,
       doFlashcardAudio,
-      true, false, controller.usingFlashRecorder(), "browser", device, new AsyncCallback<AudioAnswer>() {
+      true, false, controller.usingFlashRecorder(), "browser", device, allowAlternates, new AsyncCallback<AudioAnswer>() {
         public void onFailure(Throwable caught) {
           controller.logException(caught);
           if (tries > 0) {
@@ -208,4 +208,8 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   public RecordButton getRealRecordButton() { return recordButton; }
   protected void receivedAudioAnswer(AudioAnswer result, final Panel outer) {}
   protected void receivedAudioFailure() {}
+
+  public void setAllowAlternates(boolean allowAlternates) {
+    this.allowAlternates = allowAlternates;
+  }
 }
