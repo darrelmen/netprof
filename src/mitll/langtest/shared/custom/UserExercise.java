@@ -34,6 +34,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   private long modifiedTimestamp;
   private List<CorrectAndScore> scores;
   private float avgScore;
+  private transient Collection<String> refSentences;
  // private transient Set<String> bagOfPhones = new HashSet<String>();
   private transient List<String> firstPron = new ArrayList<String>();
  // private transient List<List<String>> pronunciations = new ArrayList<List<String>>();
@@ -165,6 +166,11 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   }
 
   @Override
+  public Collection<String> getRefSentences() {
+    return refSentences;
+  }
+
+  @Override
   public String getTransliteration() { return transliteration;  }
 
   /**
@@ -284,6 +290,11 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   @Override
   public void setFirstPron(List<String> phones) {
     this.firstPron = phones;
+  }
+
+  @Override
+  public void setRefSentences(Collection<String> orDefault) {
+  this.refSentences = orDefault;
   }
 
   public void setAvgScore(float avgScore) {
