@@ -25,13 +25,13 @@ public class Exercise extends AudioExercise implements CommonExercise {
 
   private String englishSentence;
   private String meaning, context, contextTranslation;
-  private List<String> refSentences = new ArrayList<String>();
+  private transient Collection<String> refSentences = new ArrayList<String>();
   private List<String> translitSentences = new ArrayList<String>();
+  private String foreignLanguage;
   private STATE state;
   private List<CorrectAndScore> scores;
   private float avgScore;
-  //private transient Set<String> bagOfPhones = new HashSet<String>();
-  //private transient List<List<String>> pronunciations = new ArrayList<List<String>>();
+
   private transient List<String> firstPron = new ArrayList<String>();
 
   public Exercise() {}     // required for serialization
@@ -43,8 +43,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
    * @param content
    * @param tooltip
    * @param context   */
-  public Exercise(String id, String content, String tooltip,
-                  String context, String contextTranslation) {
+  public Exercise(String id, String content, String tooltip, String context, String contextTranslation) {
     super(id, tooltip);
     this.setContent(content);
     this.context = context;
@@ -71,7 +70,6 @@ public class Exercise extends AudioExercise implements CommonExercise {
 
   public CommonShell getShellCombinedTooltip() {
     String combined = getCombinedTooltip();
-
     return new ExerciseShell(getID(), combined);
   }
 
@@ -92,27 +90,23 @@ public class Exercise extends AudioExercise implements CommonExercise {
 
   public String getContent() { return content; }
 
-  public String getRefSentence() {
-    StringBuilder builder = new StringBuilder();
-    for (String s : refSentences) {
-      builder.append(s).append(" ");
-    }
-    return builder.toString();
-  }
+  public String getRefSentence() {  return getForeignLanguage();  }
+
+  @Override
+  public Collection<String> getRefSentences() { return refSentences; }
 
   /**
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise(String, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, boolean, String, boolean)
    * @param sentenceRefs
    */
-  public void setRefSentences(List<String> sentenceRefs) {
+  @Override
+  public void setRefSentences(Collection<String> sentenceRefs) {
     this.refSentences = sentenceRefs;
   }
-  public String getTransliteration() { return translitSentences.isEmpty() ? "" : translitSentences.get(0); }
 
-/*  public void setRefSentence(String ref) {
-    refSentences.clear();
-    refSentences.add(ref);
-  }*/
+  public void setForeignLanguage(String foreignLanguage) { this.foreignLanguage = foreignLanguage; }
+
+  public String getTransliteration() { return translitSentences.isEmpty() ? "" : translitSentences.get(0); }
 
   public void setTranslitSentence(String translitSentence) {
     translitSentences.clear();
@@ -140,9 +134,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
   }
 
   @Override
-  public String getForeignLanguage() {
-    return getRefSentence();
-  }
+  public String getForeignLanguage() {  return foreignLanguage;  }
 
   @Override
   public String getContext() {
@@ -203,22 +195,12 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.avgScore = avgScore;
   }
 
-  //@Override
-  //public Set<String> getBagOfPhones() {  return bagOfPhones;  }
-
   /**
    * @see mitll.langtest.server.audio.AudioFileHelper#countPhones
    * @param bagOfPhones
    */
   @Override
-  public void setBagOfPhones(Set<String> bagOfPhones) {
-
-    //this.bagOfPhones = bagOfPhones;
-  }
-
-/*  public List<List<String>> getPronunciations() {
-    return pronunciations;
-  }*/
+  public void setBagOfPhones(Set<String> bagOfPhones) {}
 
   @Override
   public List<String> getFirstPron() {
@@ -233,7 +215,6 @@ public class Exercise extends AudioExercise implements CommonExercise {
   public String toString() {
     //  String moreAboutQuestions = DEBUG ? " : " +  getQuestionToString() : "";
     //  String questionInfo = langToQuestion == null ? " no questions" : " num questions " + langToQuestion.size() + moreAboutQuestions;
-
     Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
 
     // warn about attr that have no user
