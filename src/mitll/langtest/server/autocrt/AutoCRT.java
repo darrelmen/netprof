@@ -15,97 +15,81 @@ import java.util.*;
 /**
  * AutoCRT support -- basically wrapping Jacob's work that lives in mira.jar <br></br>
  * Does some work to make a lm and lattice file suitable for doing small vocabulary decoding.
- *
+ * <p/>
  * User: GO22670
  * Date: 1/10/13
  * Time: 11:37 AM
  * To change this template use File | Settings | File Templates.
  */
 public class AutoCRT {
-	private static final Logger logger = Logger.getLogger(AutoCRT.class);
-	private final AutoCRTScoring autoCRTScoring;
-	private final double minPronScore;
+  private static final Logger logger = Logger.getLogger(AutoCRT.class);
+  private final AutoCRTScoring autoCRTScoring;
+  private final double minPronScore;
   private final SmallVocabDecoder svd = new SmallVocabDecoder();
 
-	/**
-	 * @see mitll.langtest.server.audio.AudioFileHelper#makeAutoCRT
-	 * @param db
-	 * @param minPronScore
-	 */
+  /**
+   * @param db
+   * @param minPronScore
+   * @see mitll.langtest.server.audio.AudioFileHelper#makeAutoCRT
+   */
   public AutoCRT(AutoCRTScoring db, double minPronScore) {
-		this.autoCRTScoring = db;
-		this.minPronScore = minPronScore;
-	}
+    this.autoCRTScoring = db;
+    this.minPronScore = minPronScore;
+  }
 
-	/**
+  /**
    * Decode the phrase from the exercise in {@link mitll.langtest.shared.CommonExercise#getForeignLanguage}
-	 *
-	 * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
-	 * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
+   *
    * @param commonExercise
    * @param audioFile
    * @param answer
    * @param canUseCache
+   * @param allowAlternates
+   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
-	public PretestScore getFlashcardAnswer(CommonExercise commonExercise, File audioFile, AudioAnswer answer,
-                                           String language, boolean canUseCache) {
-      Collection<String> foregroundSentences = getRefSentences(commonExercise, language);
-      PretestScore flashcardAnswer = getFlashcardAnswer(audioFile, foregroundSentences, answer, canUseCache);
+  public PretestScore getFlashcardAnswer(CommonExercise commonExercise, File audioFile, AudioAnswer answer,
+                                         String language, boolean canUseCache, boolean allowAlternates) {
+    Collection<String> foregroundSentences = getRefSentences(commonExercise, language, allowAlternates);
+    PretestScore flashcardAnswer = getFlashcardAnswer(audioFile, foregroundSentences, answer, canUseCache);
 
-      // log what happened
-      if (answer.isCorrect()) {
-        logger.info("correct response for exercise #" + commonExercise.getID() +
-                " reco sentence was '" + answer.getDecodeOutput() + "' vs " + "'" + foregroundSentences + "' " +
-                "pron score was " + answer.getScore() + " answer " + answer);
-      } else {
-        int length = foregroundSentences.isEmpty() ? 0 : foregroundSentences.iterator().next().length();
-        logger.info("getFlashcardAnswer : incorrect response for exercise #" + commonExercise.getID() +
-                " reco sentence was '" + answer.getDecodeOutput() + "' (" + answer.getDecodeOutput().length() +
-                ") vs " + "'" + foregroundSentences + "' (" + length +
-                ") pron score was " + answer.getScore());
-      }
-      return flashcardAnswer;
+    // log what happened
+    if (answer.isCorrect()) {
+      logger.info("correct response for exercise #" + commonExercise.getID() +
+          " reco sentence was '" + answer.getDecodeOutput() + "' vs " + "'" + foregroundSentences + "' " +
+          "pron score was " + answer.getScore() + " answer " + answer);
+    } else {
+      int length = foregroundSentences.isEmpty() ? 0 : foregroundSentences.iterator().next().length();
+      logger.info("getFlashcardAnswer : incorrect response for exercise #" + commonExercise.getID() +
+          " reco sentence was '" + answer.getDecodeOutput() + "' (" + answer.getDecodeOutput().length() +
+          ") vs " + "'" + foregroundSentences + "' (" + length +
+          ") pron score was " + answer.getScore());
     }
+    return flashcardAnswer;
+  }
 
-	/**
-   * @see mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(java.io.File, String)
-	 *
-	 * @param audioFile
-	 * @param foregroundSentence
-	 * @param answer
-   * @param firstPronLength
-	 * @return
-	 */
-/*  public PretestScore getFlashcardAnswer(File audioFile, String foregroundSentence, AudioAnswer answer, String language,
-                                         int firstPronLength) {
-
-    Set<String> phraseToDecode = Collections.singleton(getPhraseToDecode(foregroundSentence, language));
-    return getFlashcardAnswer(audioFile,
-        phraseToDecode, answer, firstPronLength);
-  }*/
-
-	/**
-	 * So we need to process the possible decode sentences so that hydec can handle them.
-	 * <p/>
-	 * E.g. english is in UPPER CASE.
-	 * <p/>
-	 * Decode result is correct if all the tokens match (ignore case) any of the possibleSentences AND the score is
-	 * above the {@link #minPronScore} min score, typically in the 30s.
-	 * <p/>
-	 * If you want to see what the decoder output was, that's in {@link mitll.langtest.shared.AudioAnswer#getDecodeOutput()}.
-	 *  For instance if you wanted to show that for debugging purposes.
+  /**
+   * So we need to process the possible decode sentences so that hydec can handle them.
+   * <p/>
+   * E.g. english is in UPPER CASE.
+   * <p/>
+   * Decode result is correct if all the tokens match (ignore case) any of the possibleSentences AND the score is
+   * above the {@link #minPronScore} min score, typically in the 30s.
+   * <p/>
+   * If you want to see what the decoder output was, that's in {@link mitll.langtest.shared.AudioAnswer#getDecodeOutput()}.
+   * For instance if you wanted to show that for debugging purposes.
    * If you want to know whether the said the right word or not (which might have scored too low to be correct)
    * see {@link mitll.langtest.shared.AudioAnswer#isSaidAnswer()}.
-	 *
-	 * @param audioFile         to score against
-	 * @param possibleSentences any of these can match and we'd call this a correct response
+   *
+   * @param audioFile         to score against
+   * @param possibleSentences any of these can match and we'd call this a correct response
    * @param answer            holds the score, whether it was correct, the decode output, and whether one of the
    *                          possible sentences
    * @param canUseCache
+   * @return PretestScore word/phone alignment with scores
    * @paramx firstPronLength
-	 * @return PretestScore word/phone alignment with scores
    * @see #getFlashcardAnswer
-	 */
+   */
   private PretestScore getFlashcardAnswer(File audioFile, Collection<String> possibleSentences, AudioAnswer answer,
                                           boolean canUseCache) {
     PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, removePunct(possibleSentences), canUseCache);
@@ -124,19 +108,20 @@ public class AutoCRT {
     return asrScoreForAudio;
   }
 
-	/**
-	 * Convert dashes into spaces and remove periods, and other punct
-	 * @param answerSentences
-	 * @param recoSentence
-	 * @return
-	 */
+  /**
+   * Convert dashes into spaces and remove periods, and other punct
+   *
+   * @param answerSentences
+   * @param recoSentence
+   * @return
+   */
   private boolean isCorrect(Collection<String> answerSentences, String recoSentence) {
     //logger.debug("isCorrect - expected " + answerSentences + " vs heard " + recoSentence);
 
     List<String> recoTokens = svd.getTokens(recoSentence);
     for (String answer : answerSentences) {
       String converted = answer.replaceAll("-", " ").replaceAll("\\.\\.\\.", " ").replaceAll("\\.", "").replaceAll(":", "").toLowerCase();
-     // logger.debug("isCorrect - converted " + converted + " vs " + answer);
+      // logger.debug("isCorrect - converted " + converted + " vs " + answer);
 
       List<String> answerTokens = svd.getTokens(converted);
       if (answerTokens.size() == recoTokens.size()) {
@@ -158,26 +143,26 @@ public class AutoCRT {
     return false;
   }
 
-	/**
+  /**
+   * @param other
+   * @param allowAlternates
+   * @return
    * @see #getFlashcardAnswer
-	 * @param other
-	 * @return
-	 */
-  private Collection<String> getRefSentences(CommonExercise other, String language) {
-    String foreignLanguage = other.getForeignLanguage();
- //   logger.debug("     ref " +foreignLanguage);
-    String phraseToDecode = getPhraseToDecode(foreignLanguage, language);
- //   logger.debug("trim ref " +foreignLanguage);
-
-    Set<String> singleton = Collections.singleton(phraseToDecode);
-
- //   logger.debug("list ref " +foreignLanguage);
-
-    return singleton;
-	}
+   */
+  private Collection<String> getRefSentences(CommonExercise other, String language, boolean allowAlternates) {
+    if (allowAlternates) {
+      Set<String> ret = new HashSet<>();
+      for (String alt : other.getRefSentences()) ret.add(getPhraseToDecode(alt, language));
+      return ret;
+    } else {
+      String phraseToDecode = getPhraseToDecode(other.getForeignLanguage(), language);
+      return Collections.singleton(phraseToDecode);
+    }
+  }
 
   /**
    * Special rule for mandarin - break it up into characters
+   *
    * @param rawRefSentence
    * @param language
    * @return
