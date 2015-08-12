@@ -22,6 +22,8 @@ public interface CommonExercise extends CommonShell {
   String getForeignLanguage();
   String getRefSentence();
 
+  Collection<String> getRefSentences();
+
   String getTransliteration();
 
   String getContent();
@@ -118,4 +120,6 @@ public interface CommonExercise extends CommonShell {
 
   void setBagOfPhones(Set<String> bagOfPhones);
   void setFirstPron(List<String> phones);
+
+  void setRefSentences(Collection<String> orDefault);
 }
