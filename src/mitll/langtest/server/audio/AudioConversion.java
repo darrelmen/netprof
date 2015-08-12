@@ -46,7 +46,7 @@ public class AudioConversion {
 	 * Converts base 64 string into bytes and writes them to a file.
 	 * This is what we send over from FLASH when recording.  TODO : Ideally we could post the bytes without encoding.
 	 *
-	 * @see AudioFileHelper#writeAudioFile(String, String, CommonExercise, int, int, int, String, boolean, boolean, boolean, String, String, boolean)
+	 * @see AudioFileHelper#writeAudioFile(String, String, CommonExercise, int, int, int, String, boolean, boolean, boolean, String, String, boolean, boolean)
 	 * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment(String, String, String, int)
 	 * @param base64EncodedString audio bytes from the client
 	 * @param file where we want to write the wav file to
@@ -96,7 +96,7 @@ public class AudioConversion {
 
 	/**
 	 * @see #convertBase64ToAudioFiles(String, File, boolean)
-	 * @see AudioFileHelper#getAnswer(String, CommonExercise, int, boolean, String, File, String, String, float, int)
+	 * @see AudioFileHelper#getAnswer(String, CommonExercise, int, boolean, String, File, String, String, float, int, boolean)
 	 * @param file
 	 * @param useSensitiveTooLoudCheck
 	 * @return
