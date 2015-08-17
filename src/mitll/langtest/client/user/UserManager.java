@@ -296,9 +296,8 @@ public class UserManager {
    */
   public boolean isUserExpired() {
     String sid = getUserFromStorage();
-
-    String shownHello = Storage.getLocalStorageIfSupported().getItem(UserPassLogin.SHOWN_HELLO);
-    logger.info("user id cookie for " + getUserIDCookie() + " is " + sid + " shown hello " + shownHello);
+    //String shownHello = Storage.getLocalStorageIfSupported().getItem(UserPassLogin.SHOWN_HELLO);
+   // logger.info("user id cookie for " + getUserIDCookie() + " is " + sid + " shown hello " + shownHello);
     return (sid == null || sid.equals("" + NO_USER_SET)) ||
         //shownHello == null ||
         checkUserExpired(sid);
