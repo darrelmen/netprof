@@ -107,7 +107,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 
 		ltsFactory = new LTSFactory(languageProperty);
 		this.letterToSoundClass = ltsFactory.getLTSClass(language);
-		logger.debug(this + " LTS is " + letterToSoundClass);
+//		logger.debug(this + " LTS is " + letterToSoundClass);
 		makeDecoder();
 		this.configFileCreator = new ConfigFileCreator(properties.getProperties(), letterToSoundClass, scoringDir);
 		readDictionary();
