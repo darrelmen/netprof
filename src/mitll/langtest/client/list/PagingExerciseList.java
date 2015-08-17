@@ -93,7 +93,6 @@ public class PagingExerciseList extends ExerciseList {
    */
   protected void addComponents() {
     PagingContainer exerciseShellPagingContainer = makePagingContainer();
-
     addTableWithPager(exerciseShellPagingContainer);
   }
 
