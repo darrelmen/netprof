@@ -28,10 +28,14 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.CommonExercise;
 
+import java.util.logging.Logger;
+
 /**
  * Created by GO22670 on 6/26/2014.
  */
 class FlashcardPanel extends HorizontalPanel {
+  private Logger logger = Logger.getLogger("StatsFlashcardFactory");
+
   protected static final String PLAYING_AUDIO_HIGHLIGHT = "playingAudioHighlight";
   private static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. " +
       "Do you have a flashblocker? Please add this site to its whitelist.</font>";
@@ -67,6 +71,7 @@ class FlashcardPanel extends HorizontalPanel {
   private final DivWidget prevNextRow;
   final LangTestDatabaseAsync service;
   boolean showOnlyEnglish = false;
+  Heading foreignLanguageContent;
 
   /**
    * @param e
@@ -120,7 +125,11 @@ class FlashcardPanel extends HorizontalPanel {
 
     inner.add(threePartContent);
 
+  //  logger.info("Adding recording widgets to " + inner2.getElement().getId());
     addRecordingAndFeedbackWidgets(e, service, controller, inner2);
+
+  //  logger.info("After adding recording widgets to " + inner2.getElement().getId());
+
     inner2.add(getFinalWidgets());
 
     HTML warnNoFlash = new HTML(WARN_NO_FLASH);
@@ -220,6 +229,7 @@ class FlashcardPanel extends HorizontalPanel {
   }
 
   void addRecordingAndFeedbackWidgets(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller, Panel contentMiddle) {
+    logger.warning("adding empty recording and feedback widgets");
   }
 
   /**
@@ -629,7 +639,7 @@ class FlashcardPanel extends HorizontalPanel {
     widgets.getElement().getStyle().setMarginLeft(-20, Style.Unit.PX);
     widgets.setWidth("100%");
     DivWidget div = new DivWidget();
-    div.getElement().setId("FieldContainer");
+    div.getElement().setId("QuestionContentFieldContainer");
     div.addStyleName("blockStyle");
     div.add(widgets);
 
@@ -671,14 +681,15 @@ class FlashcardPanel extends HorizontalPanel {
    * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
    */
   private Widget getForeignLanguageContent(String foreignSentence, boolean hasRefAudio) {
-    Heading heading = new Heading(1, foreignSentence);
-    heading.getElement().setId("FLPhrase");
-    heading.getElement().getStyle().setMarginLeft(LEFT_MARGIN_FOR_FOREIGN_PHRASE, Style.Unit.PX);
+    foreignLanguageContent = new Heading(1, foreignSentence);
+    foreignLanguageContent.getElement().setId("ForeignLanguageContent");
+    foreignLanguageContent.getElement().getStyle().setMarginLeft(LEFT_MARGIN_FOR_FOREIGN_PHRASE, Style.Unit.PX);
+
     FocusPanel container = new FocusPanel();   // TODO : remove???
     container.getElement().setId("FLPhrase_container");
 
     Panel hp = new HorizontalPanel();
-    hp.add(heading);
+    hp.add(foreignLanguageContent);
     Widget toShow;
     Icon w = new Icon(IconType.VOLUME_UP);
     w.setSize(IconSize.TWO_TIMES);
@@ -700,11 +711,13 @@ class FlashcardPanel extends HorizontalPanel {
     return container;
   }
 
+  private void setForeignLanguageContentText(String text) { this.foreignLanguageContent.setText(text); }
+
   DivWidget getCenteringRow() {
     DivWidget status = new DivWidget();
     status.getElement().setId("statusRow");
     status.addStyleName("alignCenter");
-    status.addStyleName("inlineBlockStyle");
+    status.addStyleName("inlineBlockStyleOnly");
     return status;
   }
 
