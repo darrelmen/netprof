@@ -232,6 +232,11 @@ h1 {
     display: inline-block;
     white-space:nowrap;
 }
+
+.inlineBlockStyleOnly {
+    display: inline-block;
+}
+
 .trueInlineStyle {
      display: inline;
  }
@@ -892,7 +897,7 @@ fieldset > legend {
     left: 0;
     text-align: center;
     vertical-align: middle;
-    width:100%;
+    width:750px;
 }
 
 .middleColumn {
