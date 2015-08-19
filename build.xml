@@ -8,8 +8,8 @@
     <property name="ECLIPSE_HOME" value="../../../eclipse_juno"/>
     <property name="imagewriter.location" value="imagewriter"/>
     <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.7"/>
-    <property name="source" value="1.7"/>
+    <property name="target" value="1.8"/>
+    <property name="source" value="1.8"/>
 
     <tstamp>
         <format property="current.time" pattern="MM/dd_HH"/>
@@ -411,7 +411,7 @@
             <arg line="-style"/>
 
             <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
-            <arg value="PRETTY"/>
+            <arg value="OBF"/>
             <arg line="-localWorkers"/>
             <arg value="6"/>
 <!--
