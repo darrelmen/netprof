@@ -53,6 +53,8 @@ public class PropertyHandler {
   private static final String SHOW_FLASHCARD_ANSWER = "showFlashcardAnswer";
   private static final String ALLOW_PLUS_IN_URL = "allowPlusInURL";
   private static final String SHOW_SPECTROGRAM = "spectrogram";
+  private static final String SHOW_SPECTROGRAM2 = "showSpectrogram";
+  private static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
 
   /**
    * @see mitll.langtest.server.mail.EmailHelper#RP
@@ -68,9 +70,10 @@ public class PropertyHandler {
   private static final String NO_MODEL = "noModel";
   private static final String PREFERRED_VOICES = "preferredVoices";
 
-  public static final String SIGN_UP = "Sign Up";
+//  public static final String SIGN_UP = "Sign Up";
   private boolean adminView;
   private boolean enableAllUsers;
+  private boolean usePhoneToDisplay;
 
   /**
    * @see mitll.langtest.client.recorder.RecordButton#showTooLoud
@@ -92,6 +95,10 @@ public class PropertyHandler {
 
   public boolean enableAllUsers() {  return enableAllUsers;  }
 
+  public boolean shouldUsePhoneToDisplay() {
+    return usePhoneToDisplay;
+  }
+
   public enum LOGIN_TYPE { ANONYMOUS, STUDENT }
 
   private boolean spectrogram = false;
@@ -109,7 +116,7 @@ public class PropertyHandler {
   private String exercise_title;
   private String appTitle = DLI_LANGUAGE_TESTING;
   private boolean demoMode;
-  //private boolean adminView = false;
+
   private boolean showWelcome = true;// default value
   private boolean logClientMessages = false;
   private int numGradesToCollect = NUM_GRADES_TO_COLLECT_DEFAULT;
@@ -169,12 +176,16 @@ public class PropertyHandler {
       else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
       else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
-   //   else if (key.equals(INSTRUMENT)) instrument = getBoolean(value);
+
       else if (key.equals(NO_MODEL)) noModel = getBoolean(value);
       else if (key.equals(DIALOG)) dialog = getBoolean(value);
       else if (key.equals(QUIET_AUDIO_OK)) quietAudioOK = getBoolean(value);
       else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
       else if (key.equals(ENABLE_ALL_USERS)) enableAllUsers = getBoolean(value);
+      else if (key.equals(USE_PHONE_TO_DISPLAY)) {
+        logger.info("found " + USE_PHONE_TO_DISPLAY +  " = " + value);
+        usePhoneToDisplay = getBoolean(value);
+      }
       else if (key.equals(PREFERRED_VOICES)) {
         for (String userid : value.split(",")) {
           try {
@@ -200,7 +211,7 @@ public class PropertyHandler {
       if (value == null) return defValue;
       int i = Integer.parseInt(value);
       if (i != defValue) {
-        System.out.println("getInt : value for " + propName +"=" +i + " vs default = " +defValue);
+        logger.info("getInt : value for " + propName + "=" + i + " vs default = " + defValue);
       }
       return i;
     } catch (NumberFormatException e) {
@@ -284,7 +295,17 @@ public class PropertyHandler {
 
     if (Window.Location.getParameter(SHOW_SPECTROGRAM) != null) {
       spectrogram = !Window.Location.getParameter(SHOW_SPECTROGRAM).equals("false");
-      if (spectrogram) System.out.println("spectrogram is " + spectrogram);
+      if (spectrogram) logger.info("spectrogram is " + spectrogram);
+    }
+
+    if (Window.Location.getParameter(SHOW_SPECTROGRAM2) != null) {
+      spectrogram = !Window.Location.getParameter(SHOW_SPECTROGRAM2).equals("false");
+      if (spectrogram) logger.info("spectrogram is " + spectrogram);
+    }
+
+    if (Window.Location.getParameter(USE_PHONE_TO_DISPLAY) != null) {
+      usePhoneToDisplay = !Window.Location.getParameter(USE_PHONE_TO_DISPLAY).equals("false");
+      if (usePhoneToDisplay) logger.info("usePhoneToDisplay is " + usePhoneToDisplay);
     }
 
     String loginType = Window.Location.getParameter(LOGIN_TYPE_PARAM);
