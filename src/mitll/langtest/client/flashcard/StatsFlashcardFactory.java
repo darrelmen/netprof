@@ -84,7 +84,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     controlState = new ControlState();
     this.instance = instance;
     this.ul = ul;
-    // logger.info("made factory ---------------------\n");
+   // logger.info("made factory ---------------------\n");
 /*    boolean sharedList = exerciseList == null;
     if (sharedList) {   // when does this happen??
       exerciseList = controller.getExerciseList();
@@ -139,19 +139,31 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   public Panel getExercisePanel(CommonExercise e) {
     currentExercise = e;
     sticky.storeCurrent(e);
-    return controller.getProps().isNoModel() || !controller.isRecordingEnabled() ? new FlashcardPanel(e,
-        StatsFlashcardFactory.this.service,
-        StatsFlashcardFactory.this.controller,
-        ADD_KEY_BINDING,
-        StatsFlashcardFactory.this.controlState,
-        soundFeedback,
-        soundFeedback.endListener, StatsFlashcardFactory.this.instance, exerciseList) {
-      @Override
-      protected void gotShuffleClick(boolean b) {
-        sticky.resetStorage();
-        super.gotShuffleClick(b);
-      }
-    } : new StatsPracticePanel(e, exerciseList);
+    if (!controller.isRecordingEnabled()) {
+      logger.warning("Recording is *not* enabled!");
+    }
+    if (controller.getProps().isNoModel()) {
+      logger.warning("No model?");
+    }
+
+    boolean b = controller.getProps().isNoModel() || !controller.isRecordingEnabled();
+    if (b) logger.warning("showing empty record box");
+
+    return b ?
+        new FlashcardPanel(e,
+            StatsFlashcardFactory.this.service,
+            StatsFlashcardFactory.this.controller,
+            ADD_KEY_BINDING,
+            StatsFlashcardFactory.this.controlState,
+            soundFeedback,
+            soundFeedback.endListener, StatsFlashcardFactory.this.instance, exerciseList) {
+          @Override
+          protected void gotShuffleClick(boolean b) {
+            sticky.resetStorage();
+            super.gotShuffleClick(b);
+          }
+        } :
+        new StatsPracticePanel(e, exerciseList);
   }
 
   private void reset() {
@@ -229,7 +241,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
           StatsFlashcardFactory.this.controlState,
           soundFeedback,
           soundFeedback.endListener, StatsFlashcardFactory.this.instance, exerciseListToUse);
-    //  logger.info("made " + this + " for " + e.getID());
+//      logger.info("made " + this.getElement().getId() + " for " + e.getID());
     }
 
     @Override
