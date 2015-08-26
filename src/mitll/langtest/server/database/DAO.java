@@ -198,9 +198,7 @@ public class DAO {
     long newID = -1;
     if (rs.next()) {
       newID = rs.getLong(1);
-    } //else {
-      //AnswerDAO.logger.error("huh? no key was generated?");
-    //}
+    }
     return newID;
   }
 
@@ -208,27 +206,6 @@ public class DAO {
     return database.getConnection(this.getClass().toString());
   }
 
-  /**
-   * @param toExclude
-   * @return
-   * @seex DatabaseImpl#getNextUngradedExerciseQuick(java.util.Collection, int, boolean, boolean, boolean)
-   */
-/*  public Collection<Result> getResultExcludingExercises(Collection<String> toExclude) {
-    // select results.* from results where results.exid not in ('ac-R0P-006','ac-LOP-001','ac-L0P-013')
-    try {
-      Connection connection = database.getConnection();
-
-      String list = getInList(toExclude);
-      String sql = "SELECT * FROM results WHERE EXID NOT IN (" + list + ")";
-
-      PreparedStatement statement = connection.prepareStatement(sql);
-      return getResultsForQuery(connection, statement);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return new ArrayList<Result>();
-
-  }*/
   protected String getInList(Collection<String> toExclude) {
     StringBuilder b = new StringBuilder();
     for (String id : toExclude) b.append("'").append(id).append("'").append(",");
@@ -239,18 +216,16 @@ public class DAO {
 
   /**
    *
-   *
+   * @see RefResultDAO#createResultTable(Connection)
    */
   void drop(String table,Connection connection) {
     try {
-   //   Connection connection = database.getConnection("someone");
       PreparedStatement statement = connection.prepareStatement("DROP TABLE if exists " + table);
       if (!statement.execute()) {
-        logger.error("couldn't drop table?");
+        logger.error("couldn't drop table " + table);
       }
       statement.close();
       database.closeConnection(connection);
-
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -278,7 +253,6 @@ public class DAO {
 
     return numColumns;
   }*/
-
 
   /**
    * Does not seem to work with h2
