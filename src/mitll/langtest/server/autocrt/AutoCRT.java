@@ -45,13 +45,14 @@ public class AutoCRT {
    * @param answer
    * @param canUseCache
    * @param allowAlternates
+   * @param useOldSchool
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
   public PretestScore getFlashcardAnswer(CommonExercise commonExercise, File audioFile, AudioAnswer answer,
-                                         String language, boolean canUseCache, boolean allowAlternates) {
+                                         String language, boolean canUseCache, boolean allowAlternates, boolean useOldSchool) {
     Collection<String> foregroundSentences = getRefSentences(commonExercise, language, allowAlternates);
-    PretestScore flashcardAnswer = getFlashcardAnswer(audioFile, foregroundSentences, answer, canUseCache);
+    PretestScore flashcardAnswer = getFlashcardAnswer(audioFile, foregroundSentences, answer, canUseCache, useOldSchool);
 
     // log what happened
     if (answer.isCorrect()) {
@@ -86,13 +87,14 @@ public class AutoCRT {
    * @param answer            holds the score, whether it was correct, the decode output, and whether one of the
    *                          possible sentences
    * @param canUseCache
+   * @param useOldSchool
    * @return PretestScore word/phone alignment with scores
    * @paramx firstPronLength
    * @see #getFlashcardAnswer
    */
   private PretestScore getFlashcardAnswer(File audioFile, Collection<String> possibleSentences, AudioAnswer answer,
-                                          boolean canUseCache) {
-    PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, removePunct(possibleSentences), canUseCache);
+                                          boolean canUseCache, boolean useOldSchool) {
+    PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, removePunct(possibleSentences), canUseCache, useOldSchool);
 
     String recoSentence =
         asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
