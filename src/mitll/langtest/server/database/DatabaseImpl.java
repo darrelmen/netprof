@@ -5,6 +5,7 @@ import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
@@ -959,17 +960,19 @@ public class DatabaseImpl implements Database {
   public long addRefAnswer(int userID, String exerciseID,
                            String audioFile,
                            long durationInMillis, boolean correct,
+                           AudioFileHelper.DecodeAlignOutput alignOutput,
+                           AudioFileHelper.DecodeAlignOutput decodeOutput,
+                         //  float score, String scoreJson,
 
-                           float score, String scoreJson,
+                         //  float alignScore, String alignJson,
 
-                           float alignScore, String alignJson,
-
-                           int numDecodePhones, int numAlignPhones,
+                         //  int numDecodePhones, int numAlignPhones,
                            boolean isMale, String speed) {
     return refresultDAO.addAnswer(this, userID, exerciseID, audioFile, durationInMillis, correct,
-        score, scoreJson,
-        alignScore, alignJson,
-        numDecodePhones, numAlignPhones,
+       // score, scoreJson,
+        //alignScore, alignJson,
+       // numDecodePhones, numAlignPhones,
+        alignOutput,decodeOutput,
         isMale, speed);
   }
 
