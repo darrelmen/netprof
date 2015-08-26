@@ -901,8 +901,10 @@ public class ScoreServlet extends DatabaseServlet {
    * @return score json
    * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
    */
-  private JSONObject getJsonForAudioForUser(int reqid, String exerciseID, int user, Request request, String wavPath, File saveFile,
-                                            String deviceType, String device, boolean allowAlternates, boolean usePhoneToDisplay) {
+  private JSONObject getJsonForAudioForUser(int reqid, String exerciseID, int user, Request request, String wavPath,
+                                            File saveFile,
+                                            String deviceType, String device, boolean allowAlternates,
+                                            boolean usePhoneToDisplay) {
     long then = System.currentTimeMillis();
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
 
@@ -911,7 +913,8 @@ public class ScoreServlet extends DatabaseServlet {
       jsonForScore.put(VALID, "bad_exercise_id");
     } else {
       boolean doFlashcard = request == Request.DECODE;
-      AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, deviceType, device, exercise1, allowAlternates, usePhoneToDisplay);
+      AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, deviceType, device,
+          exercise1, allowAlternates, usePhoneToDisplay);
       long now = System.currentTimeMillis();
       PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
       float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
@@ -920,7 +923,7 @@ public class ScoreServlet extends DatabaseServlet {
           " millis for " + saveFile.getName() + " = " + hydecScore);
 
       if (answer != null && answer.isValid()) {
-        jsonForScore = getJsonForScore(pretestScore);
+        jsonForScore = getJsonForScore(pretestScore,usePhoneToDisplay);
         if (doFlashcard) {
           jsonForScore.put(IS_CORRECT, answer.isCorrect());
           jsonForScore.put(SAID_WORD,  answer.isSaidAnswer());
@@ -928,11 +931,12 @@ public class ScoreServlet extends DatabaseServlet {
 
           // attempt to get more feedback when we're too sensitive and match the unknown model
           if (!answer.isCorrect() && !answer.isSaidAnswer()) {
-            answer = getAudioAnswerAlign(reqid, exerciseID, user, false, wavPath, saveFile, deviceType, device, exercise1, usePhoneToDisplay);
+            answer = getAudioAnswerAlign(reqid, exerciseID, user, false, wavPath, saveFile, deviceType, device,
+                exercise1, usePhoneToDisplay);
             PretestScore pretestScore1 = answer.getPretestScore();
             logger.debug("Alignment on an unknown model gets " + pretestScore1);
             //   logger.debug("score info " + answer.getPretestScore().getsTypeToEndTimes());
-            jsonForScore = getJsonForScore(pretestScore1);
+            jsonForScore = getJsonForScore(pretestScore1, usePhoneToDisplay);
 
             // so we mark it correct if the score is above 50% on alignment
             jsonForScore.put(IS_CORRECT, pretestScore1.getHydecScore() > ALIGNMENT_SCORE_CORRECT);
@@ -1061,17 +1065,25 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #getJsonForAudioForUser
    */
-  private JSONObject getJsonForScore(PretestScore score) {
+  private JSONObject getJsonForScore(PretestScore score, boolean usePhoneDisplay) {
     JSONObject jsonObject = new JSONObject();
 
     jsonObject.put(SCORE, score.getHydecScore());
+
     for (Map.Entry<NetPronImageType, List<TranscriptSegment>> pair : score.getsTypeToEndTimes().entrySet()) {
       List<TranscriptSegment> value = pair.getValue();
       JSONArray value1 = new JSONArray();
+      NetPronImageType imageType = pair.getKey();
+
+      boolean usePhone = imageType == NetPronImageType.PHONE_TRANSCRIPT &&
+          (serverProps.usePhoneToDisplay() || usePhoneDisplay);
 
       for (TranscriptSegment segment : value) {
         JSONObject object = new JSONObject();
-        object.put(EVENT, segment.getEvent());
+        String event = segment.getEvent();
+        if (usePhone) event = serverProps.getDisplayPhoneme(event);
+
+        object.put(EVENT, event);
         object.put(START, segment.getStart());
         object.put(END,   segment.getEnd());
         object.put(SCORE, segment.getScore());
@@ -1079,7 +1091,7 @@ public class ScoreServlet extends DatabaseServlet {
         value1.add(object);
       }
 
-      jsonObject.put(pair.getKey().toString(), value1);
+      jsonObject.put(imageType.toString(), value1);
     }
     return jsonObject;
   }
