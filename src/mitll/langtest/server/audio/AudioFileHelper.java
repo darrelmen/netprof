@@ -631,8 +631,10 @@ public class AudioFileHelper implements CollationSort {
 //      return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, lmSentences, 128, 128, false, true, tmpDir,
 //          canUseCache && serverProps.useScoreCache(), "", null,usePhoneToDisplay);
 //    else
+
+    String prefix = usePhoneToDisplay ? "phoneToDisplay" : "";
       return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, lmSentences, 128, 128, false, true, tmpDir,
-          canUseCache && serverProps.useScoreCache(), "", null,usePhoneToDisplay);
+          canUseCache && serverProps.useScoreCache(), prefix, null,usePhoneToDisplay);
   }
 
   /**
@@ -706,7 +708,7 @@ public class AudioFileHelper implements CollationSort {
                                            boolean decode, String tmpDir, boolean useCache, String prefix, Result precalcResult,
                                            boolean usePhoneToDisplay) {
     logger.debug("getASRScoreForAudio (" + serverProps.getLanguage() + ")" +
-        " scoring " + testAudioFile + " with sentence '" + sentence + "' req# " + reqid + (useCache ? " check cache" : " NO CACHE"));
+        " scoring " + testAudioFile + " with sentence '" + sentence + "' req# " + reqid + (useCache ? " check cache" : " NO CACHE") + " prefix " + prefix);
 
     // audio stuff
     makeASRScoring();
