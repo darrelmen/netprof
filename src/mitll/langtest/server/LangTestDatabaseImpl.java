@@ -1023,7 +1023,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
 	@Override
 	public PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, String exerciseID) {
-    logger.debug("getASRScoreForAudioPhonemes -\n\n\n");
 		return getPretestScore(reqid, resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, true);
 	}
 
