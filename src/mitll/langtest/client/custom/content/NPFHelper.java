@@ -151,10 +151,14 @@ public class NPFHelper implements RequiresResize {
       logger.warning("huh? exercise list is null for " + instanceName + " and " +ul);
     }
     else {
-      left.add(npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
+      addExerciseListOnLeftSide(left, npfExerciseList.getExerciseListOnLeftSide(controller.getProps()));
     }
 
     return hp;
+  }
+
+  void addExerciseListOnLeftSide(Panel left, Widget exerciseListOnLeftSide) {
+    left.add(exerciseListOnLeftSide);
   }
 
   protected Panel getRightSideContent(UserList ul, String instanceName) {
