@@ -441,9 +441,12 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
 																			 boolean decode, String prefix, String noSuffix, Scores scores, String phoneLab,
 																			 String wordLab, double duration, int processDur, boolean usePhoneToDisplay) {
-		EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
+    String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") +(usePhoneToDisplay ? "_phoneToDisplay" : "");
+
+
+    EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
 				useScoreForBkgColor,
-        prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, phoneLab, wordLab, true, usePhoneToDisplay);
+        prefix1, "", decode, phoneLab, wordLab, true, usePhoneToDisplay);
     Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
 		Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
 		String recoSentence = getRecoSentence(eventAndFileInfo);
@@ -547,7 +550,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		String resultsStr = runHydra(hydraInput, httpClient);
 		String[] results = resultsStr.split("\n"); // 0th entry-overall score and phone scores, 1st entry-word alignments, 2nd entry-phone alignments
 		long timeToRunHydra = System.currentTimeMillis() - then;	
-		logger.debug("Took " + timeToRunHydra + " millis to run hydra");
+
 		if (results[0].isEmpty()) {
 			logger.error("Failure during running of hydra on " + audioPath + (decode ? " DECODING " : " ALIGNMENT ") + " with " + (decode ? transcript : lmSentences));
 			return null;
@@ -556,7 +559,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		String[] split = results[0].split(";");
 		Scores scores = new Scores(split); 
 		// clean up tmp directory if above score threshold 
-		logger.debug("overall score: " + split[0]);
+		logger.debug("Took " + timeToRunHydra + " millis to run hydra - overall score: " + split[0]);
 		/*if (Float.parseFloat(split[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
 			try {
 				logger.debug("deleting " + tmpDir + " since score is " + split[0]);
@@ -715,30 +718,31 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 			return phoneToScore;
 		}
 	}*/
+  private Map<String, Float> getPhoneToScore(Scores scores) {
+    Map<String, Float> phones = scores.eventScores.get("phones");
+    return getTokenToScore(scores, phones, true);
+  }
 
-    private Map<String, Float> getPhoneToScore(Scores scores) {
-        Map<String, Float> phones = scores.eventScores.get("phones");
-        return getTokenToScore(scores, phones);
-    }
-    private Map<String, Float> getWordToScore(Scores scores) {
-        Map<String, Float> phones = scores.eventScores.get(Scores.WORDS);
-        return getTokenToScore(scores, phones);
-    }
+  private Map<String, Float> getWordToScore(Scores scores) {
+    Map<String, Float> phones = scores.eventScores.get(Scores.WORDS);
+    return getTokenToScore(scores, phones, false);
+  }
 
-    private Map<String, Float> getTokenToScore(Scores scores, Map<String, Float> phones) {
-        if (phones == null) {
-            logger.warn("no phone scores in " + scores.eventScores);
-            return Collections.emptyMap();
+  private Map<String, Float> getTokenToScore(Scores scores, Map<String, Float> phones, boolean expecting) {
+    if (phones == null) {
+      if (expecting) {
+        logger.warn("no phone scores in " + scores.eventScores);
+      }
+      return Collections.emptyMap();
+    } else {
+      Map<String, Float> phoneToScore = new HashMap<String, Float>();
+      for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
+        String key = phoneScorePair.getKey();
+        if (!key.equals("sil")) {
+          phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue()));
         }
-        else {
-            Map<String, Float> phoneToScore = new HashMap<String, Float>();
-            for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
-                String key = phoneScorePair.getKey();
-                if (!key.equals("sil")) {
-                    phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue()));
-                }
-            }
-            return phoneToScore;
+      }
+      return phoneToScore;
         }
     }
 
