@@ -421,7 +421,7 @@ public class LoadTestServlet extends DatabaseServlet {
 
     AudioFileHelper audioFileHelper = getAudioFileHelper();
     long then = System.currentTimeMillis();
-    PretestScore book = getASRScoreForAudio(audioFileHelper, saveFile.getAbsolutePath(), word);
+    PretestScore book = getASRScoreForAudio(audioFileHelper, saveFile.getAbsolutePath(), word, true);
     long now = System.currentTimeMillis();
     logger.debug("score for '" + word + "' took " + (now - then) +
         " millis for " + saveFile.getName() + " = " + book);
@@ -475,7 +475,7 @@ public class LoadTestServlet extends DatabaseServlet {
     return jsonObject;
   }
 
-  private JSONObject getJsonForScoreFlashcard(PretestScore book) {
+/*  private JSONObject getJsonForScoreFlashcard(PretestScore book) {
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("score", book.getHydecScore());
 
@@ -499,7 +499,7 @@ public class LoadTestServlet extends DatabaseServlet {
       jsonObject.put(pair.getKey().toString(), value1);
     }
     return jsonObject;
-  }
+  }*/
 
   private DatabaseImpl db;
   private AudioFileHelper audioFileHelper;
@@ -542,15 +542,16 @@ public class LoadTestServlet extends DatabaseServlet {
    * @param audioFileHelper
    * @param testAudioFile
    * @param sentence
+   * @param usePhoneToDisplay
    * @return
    * @see #getJsonForWordAndAudio(String, java.io.File)
    */
-  private PretestScore getASRScoreForAudio(AudioFileHelper audioFileHelper, String testAudioFile, String sentence) {
+  private PretestScore getASRScoreForAudio(AudioFileHelper audioFileHelper, String testAudioFile, String sentence, boolean usePhoneToDisplay) {
     // logger.debug("getASRScoreForAudio " +testAudioFile);
     PretestScore asrScoreForAudio = null;
     try {
       asrScoreForAudio = audioFileHelper.getASRScoreForAudio(-1, testAudioFile, sentence, 128, 128, false,
-          false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), "", null);
+          false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), "", null,usePhoneToDisplay);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
