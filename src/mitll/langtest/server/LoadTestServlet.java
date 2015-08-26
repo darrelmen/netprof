@@ -551,7 +551,7 @@ public class LoadTestServlet extends DatabaseServlet {
     PretestScore asrScoreForAudio = null;
     try {
       asrScoreForAudio = audioFileHelper.getASRScoreForAudio(-1, testAudioFile, sentence, 128, 128, false,
-          false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), "", null,usePhoneToDisplay);
+          false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), "", null,usePhoneToDisplay, false);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
