@@ -41,7 +41,7 @@ public class AudioCheck {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile
    * @param file
    * @return
    */
@@ -101,7 +101,7 @@ public class AudioCheck {
     try {
       ais = AudioSystem.getAudioInputStream(file);
       AudioFormat format = ais.getFormat();
-      logger.info("file " + file.getName() + " sample rate " + format.getSampleRate());
+      //logger.info("file " + file.getName() + " sample rate " + format.getSampleRate());
 
       boolean bigEndian = format.isBigEndian();
       if (bigEndian) {
