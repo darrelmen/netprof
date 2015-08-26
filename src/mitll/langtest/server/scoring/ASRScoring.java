@@ -52,6 +52,9 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 	private static final int FOREGROUND_VOCAB_LIMIT = 100;
 	private static final int VOCAB_SIZE_LIMIT = 200;
 
+  /**
+   * @see SLFFile#createSimpleSLFFile(Collection, String, float)
+   */
 	public static final String SMALL_LM_SLF = "smallLM.slf";
 
 	private static SmallVocabDecoder svDecoderHelper = null;
@@ -211,7 +214,6 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 		SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
 		Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
 
-		//List<List<String>> pronunciations = new ArrayList<List<String>>();
 		List<String> firstPron = new ArrayList<String>();
 		Set<String> uphones = new TreeSet<String>();
 
@@ -420,9 +422,9 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
       }
       scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
     } else {
-      logger.debug("for " + precalcResult);// + "\n\tgot json : " + precalcResult.getJsonScore());
+      logger.debug("for cached result " + precalcResult);// + "\n\tgot json : " + precalcResult.getJsonScore());
       jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
-      scores = getCachedScores(precalcResult, jsonObject,usePhoneToDisplay);
+      scores = getCachedScores(precalcResult, jsonObject, usePhoneToDisplay);
 
       boolean isDecode = precalcResult.getAudioType().equals("avp");
       if (precalcResult.isValid() &&
@@ -524,7 +526,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @param scores
    * @param jsonObject if not-null, uses it to make the word and phone transcripts instead of .lab files
    * @return
-   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result)
+   * @see #scoreRepeatExercise
    */
   private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
                                        boolean decode, String prefix, String noSuffix, File wavFile, Scores scores, JSONObject jsonObject,
@@ -627,7 +629,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
   /**
    * @param lmSentences
    * @param background
-   * @see AutoCRTScoring#getASRScoreForAudio(File, Collection, boolean)
+   * @see AutoCRTScoring#getASRScoreForAudio(File, Collection, boolean, boolean)
    * @return
    */
   public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
