@@ -13,5 +13,5 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public interface AutoCRTScoring {
-  PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache);
+  PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache, boolean useOldSchool);
 }
