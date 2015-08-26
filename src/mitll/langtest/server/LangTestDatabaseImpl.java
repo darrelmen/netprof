@@ -963,7 +963,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 						true,  // make transcript images with colored segments
 						false, // false = do alignment
 						tempDir.getAbsolutePath(),
-						serverProps.useScoreCache(), exerciseID, result, serverProps.usePhoneToDisplay());
+						serverProps.useScoreCache(), exerciseID, result, serverProps.usePhoneToDisplay(), false);
 			}
 		} catch (Exception e) {
 			logger.error("Got " + e, e);
@@ -993,7 +993,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		return getPretestScore(reqid, resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, false);
 	}
 
-	private PretestScore getPretestScore(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, String exerciseID, boolean usePhoneToDisplay) {
+	private PretestScore getPretestScore(int reqid, long resultID, String testAudioFile, String sentence,
+                                       int width, int height, boolean useScoreToColorBkg, String exerciseID, boolean usePhoneToDisplay) {
 		long then = System.currentTimeMillis();
 
 		String[] split = testAudioFile.split(File.separator);
@@ -1006,7 +1007,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
     PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-				false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, result, usePhoneToDisplay1);
+				false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, result, usePhoneToDisplay1, false);
 		long timeToRunHydec = System.currentTimeMillis() - then;
 
 		logger.debug("getASRScoreForAudio : scoring file " + testAudioFile + " for " +
@@ -1022,7 +1023,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	}
 
 	@Override
-	public PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, String exerciseID) {
+	public PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
+                                                  int width, int height, boolean useScoreToColorBkg, String exerciseID) {
 		return getPretestScore(reqid, resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, true);
 	}
 
@@ -1035,14 +1037,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	 * @param testAudioFile audio file to score
 	 * @param lmSentences   to look for in the audio
 	 * @param canUseCache
-	 * @return PretestScore for audio
+	 * @param useOldSchool
+   * @return PretestScore for audio
 	 * @see mitll.langtest.server.autocrt.AutoCRT#getFlashcardAnswer
 	 */
 	// JESS: this is entered for the flashcards (decoding)
-	public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache) {
+	public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache, boolean useOldSchool) {
 //		for(String sent : lmSentences)
 //			logger.debug("sent: " + sent);
-		return audioFileHelper.getASRScoreForAudio(testAudioFile, lmSentences, canUseCache, serverProps.usePhoneToDisplay());
+		return audioFileHelper.getASRScoreForAudio(testAudioFile, lmSentences, canUseCache, serverProps.usePhoneToDisplay(), useOldSchool);
 	}
 
 	// Users ---------------------
