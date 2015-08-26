@@ -21,7 +21,6 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
@@ -92,7 +91,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * @see mitll.langtest.server.audio.AudioFileHelper#makeASRScoring()
 	 */
 	public ASRWebserviceScoring(String deployPath, ServerProperties properties){
-		super(deployPath);
+    super(deployPath, properties);
 
 		logger.debug("Creating ASRWebserviceScoring object");
 		//lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
@@ -107,7 +106,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 
 		ltsFactory = new LTSFactory(languageProperty);
 		this.letterToSoundClass = ltsFactory.getLTSClass(language);
-		logger.debug(this + " LTS is " + letterToSoundClass);
+//		logger.debug(this + " LTS is " + letterToSoundClass);
 		makeDecoder();
 		this.configFileCreator = new ConfigFileCreator(properties.getProperties(), letterToSoundClass, scoringDir);
 		readDictionary();
@@ -311,18 +310,19 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * @param useCache
 	 * @param prefix
 	 * @param precalcResult
-	 * @return PretestScore object
+	 * @param usePhoneToDisplay
+   * @return PretestScore object
 	 */
 	public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-			String sentence, Collection<String> lmSentences, String imageOutDir,
-			int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-			boolean decode, String tmpDir,
-			boolean useCache, String prefix, Result precalcResult) {
+                                  String sentence, Collection<String> lmSentences, String imageOutDir,
+                                  int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+                                  boolean decode, String tmpDir,
+                                  boolean useCache, String prefix, Result precalcResult, boolean usePhoneToDisplay) {
 		return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
 				sentence, lmSentences, 
 				imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
 				decode, tmpDir,
-				useCache, prefix);
+				useCache, prefix, usePhoneToDisplay);
 	}
 
 	/**
@@ -341,7 +341,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * @param testAudioDir          where the audio is
 	 * @param testAudioFileNoSuffix file name without a suffix - wav file, any sample rate
 	 * @param sentence              to align
-	 * @paramx scoringDir            where the hydec subset is (models, bin.linux64, etc.)
 	 * @param imageOutDir           where to write the images (audioImage)
 	 * @param imageWidth            image width
 	 * @param imageHeight           image height
@@ -350,19 +349,21 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * @param tmpDir                where to run hydec
 	 * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
 	 * @param prefix                on the names of the image files, if they are written
+	 * @param usePhoneToDisplay
+   * @paramx scoringDir            where the hydec subset is (models, bin.linux64, etc.)
 	 * @return score info coming back from alignment/reco
-	 * @see #scoreRepeat
+	 * @see ASR#scoreRepeat
 	 */
 	// JESS alignment and decoding
 	private PretestScore scoreRepeatExercise(String testAudioDir,
-			String testAudioFileNoSuffix,
-			String sentence, Collection<String> lmSentences, // TODO make two params, transcript and lm (null if no slf)
+                                           String testAudioFileNoSuffix,
+                                           String sentence, Collection<String> lmSentences, // TODO make two params, transcript and lm (null if no slf)
 
-			String imageOutDir,
-			int imageWidth, int imageHeight,
-			boolean useScoreForBkgColor,
-			boolean decode, String tmpDir,
-			boolean useCache, String prefix) {
+                                           String imageOutDir,
+                                           int imageWidth, int imageHeight,
+                                           boolean useScoreForBkgColor,
+                                           boolean decode, String tmpDir,
+                                           boolean useCache, String prefix, boolean usePhoneToDisplay) {
 		String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
 		String pathname = noSuffix + ".wav";
 
@@ -433,16 +434,17 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 			logger.error("getScoreForAudio failed to generate scores.");
 			return new PretestScore(0.01f);
 		}
-		return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile,
-				scores, phoneLab, wordLab, duration, processDur);
+		return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix,
+				scores, phoneLab, wordLab, duration, processDur, usePhoneToDisplay);
 	}
 
 	private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-			boolean decode, String prefix, String noSuffix, File wavFile, Scores scores, String phoneLab, String wordLab, double duration, int processDur) {
+																			 boolean decode, String prefix, String noSuffix, Scores scores, String phoneLab,
+																			 String wordLab, double duration, int processDur, boolean usePhoneToDisplay) {
 		EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
 				useScoreForBkgColor,
-				prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, phoneLab, wordLab, true);
-		Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
+        prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, phoneLab, wordLab, true, usePhoneToDisplay);
+    Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
 		Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
 		String recoSentence = getRecoSentence(eventAndFileInfo);
 
@@ -519,7 +521,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 	 * @param decode
 	 * @param end
 	 * @return
-	 * @see #scoreRepeatExercise(String, String, String, Collection, String, int, int, boolean, boolean, String, boolean, String)
+	 * @see #scoreRepeatExercise(String, String, String, Collection, String, int, int, boolean, boolean, String, boolean, String, boolean)
 	 */
 	private Object[] runHydra(String audioPath, String transcript, Collection<String> lmSentences, String tmpDir, boolean decode, int end) {
           // reference trans
