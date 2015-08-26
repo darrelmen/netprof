@@ -963,7 +963,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 						true,  // make transcript images with colored segments
 						false, // false = do alignment
 						tempDir.getAbsolutePath(),
-						serverProps.useScoreCache(), exerciseID, result);
+						serverProps.useScoreCache(), exerciseID, result, serverProps.usePhoneToDisplay());
 			}
 		} catch (Exception e) {
 			logger.error("Got " + e, e);
@@ -990,6 +990,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	// JESS: this is entered for the normal stuff (I think this is alignment)
 	public PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
 																					int width, int height, boolean useScoreToColorBkg, String exerciseID) {
+		return getPretestScore(reqid, resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, false);
+	}
+
+	private PretestScore getPretestScore(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, String exerciseID, boolean usePhoneToDisplay) {
 		long then = System.currentTimeMillis();
 
 		String[] split = testAudioFile.split(File.separator);
@@ -1000,20 +1004,27 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		}
 		db.getExercise(exerciseID); // TODO : why is this needed?
 
-		PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-				false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, result);
+    boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
+    PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
+				false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, result, usePhoneToDisplay1);
 		long timeToRunHydec = System.currentTimeMillis() - then;
 
 		logger.debug("getASRScoreForAudio : scoring file " + testAudioFile + " for " +
 				" exid " + exerciseID +
 				" sentence " + sentence.length() + " characters long : " +
 				" score " + asrScoreForAudio.getHydecScore() +
-				" took " + timeToRunHydec + " millis");
+				" took " + timeToRunHydec + " millis " + " usePhoneToDisplay " + usePhoneToDisplay1);
 
 		if (resultID > -1 && result == null) { // alignment has two steps : 1) post the audio, then 2) do alignment
 			db.getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson());
 		}
 		return asrScoreForAudio;
+	}
+
+	@Override
+	public PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, String exerciseID) {
+    logger.debug("getASRScoreForAudioPhonemes -\n\n\n");
+		return getPretestScore(reqid, resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, true);
 	}
 
 	@Override
@@ -1032,7 +1043,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache) {
 //		for(String sent : lmSentences)
 //			logger.debug("sent: " + sent);
-		return audioFileHelper.getASRScoreForAudio(testAudioFile, lmSentences, canUseCache);
+		return audioFileHelper.getASRScoreForAudio(testAudioFile, lmSentences, canUseCache, serverProps.usePhoneToDisplay());
 	}
 
 	// Users ---------------------
@@ -1848,7 +1859,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 			String textToAlign,
 			String identifier,
 			int reqid, String device) {
-		AudioAnswer audioAnswer = audioFileHelper.getAlignment(base64EncodedString, textToAlign, identifier, reqid);
+		AudioAnswer audioAnswer = audioFileHelper.getAlignment(base64EncodedString, textToAlign, identifier, reqid, serverProps.usePhoneToDisplay());
 
 		if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
 			logger.warn("huh? got zero length recording " + identifier);
