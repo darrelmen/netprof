@@ -533,13 +533,19 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     //  logger.debug("getPretestScore scores     " + scores);
 
     boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay();
+
+    // we cache the images, so we don't want to return an image for a different option...
+    String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") + (reallyUsePhone ? "_phoneToDisp" : "");
+
+    logger.debug("getPretestScore prefix " + prefix1);
+
     EventAndFileInfo eventAndFileInfo = jsonObject == null ?
         writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
             useScoreForBkgColor,
-            prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, false, reallyUsePhone) :
+            prefix1, "", decode, false, reallyUsePhone) :
         writeTranscriptsCached(imageOutDir, imageWidth, imageHeight, noSuffix,
             useScoreForBkgColor,
-            prefix + (useScoreForBkgColor ? "bkgColorForRef" : ""), "", decode, false, jsonObject, reallyUsePhone);
+            prefix1, "", decode, false, jsonObject, reallyUsePhone);
 
     Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
