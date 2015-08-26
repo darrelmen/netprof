@@ -1,29 +1,18 @@
 package mitll.langtest.server;
 
-import mitll.langtest.server.audio.SLFFile;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 /**
  * This has a lot of overlap with the PropertyHandler set of properties.
- * <p/>
+ * <p>
  * TODO : There should be a better way of handling their relationship.
- * <p/>
+ * <p>
  * User: GO22670
  * Date: 3/5/13
  * Time: 2:30 PM
@@ -36,7 +25,6 @@ public class ServerProperties {
 
   private static final String DEBUG_EMAIL = "debugEmail";
   private static final String TEST_EMAIL = "testEmail";
-  private static final String DOIMAGES = "doimages";
   private static final String USE_SCORE_CACHE = "useScoreCache";
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
@@ -44,10 +32,7 @@ public class ServerProperties {
   private static final String H2_DATABASE_DEFAULT = "vlr-parle";   //likely never what you want
   private static final String READ_FROM_FILE = "readFromFile";
   private static final String LANGUAGE = "language";
-  /**
-   * @deprecated
-   */
-  private static final String WORDPAIRS = "wordPairs";
+
 
   private static final String MEDIA_DIR = "mediaDir";
   private static final String RECO_TEST = "recoTest";
@@ -118,22 +103,21 @@ public class ServerProperties {
 
   // just for automated testing
   private boolean quietAudioOK;
-  private float unknownModelBias;
   private Set<Long> preferredVoices = new HashSet<Long>();
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties
    * @param servletContext
    * @param configDir
+   * @see mitll.langtest.server.LangTestDatabaseImpl#readProperties
    */
   public ServerProperties(ServletContext servletContext, String configDir) {
     this(servletContext, configDir, servletContext.getInitParameter(CONFIG_FILE));
   }
 
   /**
-   * @seex mitll.langtest.server.database.ImportCourseExamples#makeDatabaseImpl
    * @param configDir
    * @param configFile
+   * @seex mitll.langtest.server.database.ImportCourseExamples#makeDatabaseImpl
    */
   public ServerProperties(String configDir, String configFile) {
     this(null, configDir, configFile);
@@ -143,6 +127,8 @@ public class ServerProperties {
     String dateFromManifest = getDateFromManifest(servletContext);
     if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
     readProps(configDir, configFile, dateFromManifest);
+
+    readPhonemeMap(configDir);
   }
 
   /**
@@ -169,13 +155,13 @@ public class ServerProperties {
     return props.getProperty("webserviceHostIP", WEBSERVICE_HOST_IP);
   }
 
-  public int getWebservicePort() { 
+  public int getWebservicePort() {
     int ip = Integer.parseInt(props.getProperty("webserviceHostPort", "-1"));
-    if(ip == 1)
+    if (ip == 1)
       logger.error("No webservice host port found.");
     return ip;
   }
-  
+
   /**
    * @return
    * @see LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
@@ -207,16 +193,9 @@ public class ServerProperties {
   public boolean isDebugEMail() {
     return getDefaultFalse(DEBUG_EMAIL);
   }
+
   public boolean isTestEmail() {
     return getDefaultFalse(TEST_EMAIL);
-  }
-
-  public boolean isWordPairs() {
-    return getDefaultFalse(WORDPAIRS);
-  }
-
-  public boolean doImages() {
-    return getDefaultFalse(DOIMAGES);
   }
 
   public String getLanguage() {
@@ -262,12 +241,15 @@ public class ServerProperties {
   public boolean isNoModel() {
     return getDefaultFalse(NO_MODEL);
   }
+
   public boolean removeExercisesWithMissingAudio() {
     return getDefaultTrue(REMOVE_EXERCISES_WITH_MISSING_AUDIO);
   }
+
   public boolean enableAllUsers() {
     return getDefaultFalse(ENABLE_ALL_USERS);
   }
+
   public String getEmailAddress() {
     return props.getProperty(EMAIL_ADDRESS, DEFAULT_EMAIL);
   }
@@ -275,19 +257,17 @@ public class ServerProperties {
   public String getApprovalEmailAddress() {
     return props.getProperty(APPROVAL_EMAIL, DEFAULT_EMAIL);
   }
+
   public boolean shouldDoDecode() {
     return getDefaultFalse(DO_DECODE);
   }
+
   public int getAudioOffset() {
     try {
       return Integer.parseInt(props.getProperty(AUDIO_OFFSET));
     } catch (NumberFormatException e) {
       return 0;
     }
-  }
-
-  public String getMappingFile() {
-    return props.getProperty(MAPPING_FILE, VLR_PARLE_PILOT_ITEMS_TXT);
   }
 
   public int getMaxNumExercises() {
@@ -318,13 +298,14 @@ public class ServerProperties {
 
   /**
    * The config web.xml file.
-   * <p/>
+   * <p>
    * Note that this will only ever be called once.
    * TODO : remember to set the approvers and approver emails properties for new customers
    * TODO : also you may want to set the welcome message to OFF
    * {@link mitll.langtest.client.PropertyHandler#SHOW_WELCOME}
-   *
+   * <p>
    * Here's where we can over-ride default values.
+   *
    * @param dateFromManifest
    * @see
    */
@@ -343,17 +324,6 @@ public class ServerProperties {
         minPronScore = Double.parseDouble(MIN_PRON_SCORE_DEFAULT);
       } catch (NumberFormatException e1) {
         e1.printStackTrace();
-      }
-    }
-
-    try {
-      unknownModelBias = Float.parseFloat(props.getProperty(UNKNOWN_MODEL_BIAS, ""+SLFFile.UNKNOWN_MODEL_BIAS_CONSTANT));
-    } catch (NumberFormatException e) {
-      logger.error("Couldn't parse property " + UNKNOWN_MODEL_BIAS, e);
-      try {
-        unknownModelBias = SLFFile.UNKNOWN_MODEL_BIAS_CONSTANT;
-      } catch (NumberFormatException e1) {
-       logger.error(e1);
       }
     }
 
@@ -397,6 +367,7 @@ public class ServerProperties {
   /**
    * if true, use old school (hydec)
    * OR if there is no webservice port specified
+   *
    * @return true if only use old school hydec decoder
    */
   public boolean getOldSchoolService() {
@@ -415,8 +386,8 @@ public class ServerProperties {
   }
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#writeAudioFile(String, String, mitll.langtest.shared.CommonExercise, int, int, int, String, boolean, boolean, boolean, String, String)
    * @return
+   * @see mitll.langtest.server.audio.AudioFileHelper#writeAudioFile
    */
   public boolean isQuietAudioOK() {
     return quietAudioOK;
@@ -425,23 +396,81 @@ public class ServerProperties {
   public List<String> getApprovers() {
     return approvers;
   }
+
   public List<String> getApproverEmails() {
     return approverEmails;
   }
 
   /**
-   * @see mitll.langtest.server.database.UserDAO#UserDAO
    * @return
+   * @see mitll.langtest.server.database.UserDAO#UserDAO
    */
   public Set<String> getAdmins() {
     return admins;
   }
 
-  public List<String> getReportEmails() { return reportEmails;  }
+  public List<String> getReportEmails() {
+    return reportEmails;
+  }
 
   public Set<Long> getPreferredVoices() {
     return preferredVoices;
   }
 
-  public boolean shouldDropRefResult() {  return getDefaultFalse("dropRefResultTable");  }
+  public boolean shouldDropRefResult() {
+    return getDefaultFalse("dropRefResultTable");
+  }
+
+  private Map<String, String> phoneToDisplay = new HashMap<>();
+
+  public Map<String,String> getPhoneToDisplay() { return phoneToDisplay; }
+
+  public String getDisplayPhoneme(String phone) {
+    String s = phoneToDisplay.get(phone.toLowerCase());
+    if (s == null) return phone;
+    else return s;
+  }
+
+  private void readPhonemeMap(String configDir) {
+    String phonemeMapping = props.getProperty("phonemeMapping");
+
+    if (phonemeMapping == null) {
+      logger.debug("no phoneme mapping file property");
+      return;
+    }
+
+    File file1 = new File(configDir + File.separator + phonemeMapping);
+
+    if (!file1.exists()) {
+      logger.error("couldn't find phoneme mapping file " + file1);
+      return;
+    }
+
+    FileReader file;
+    String line;
+    try {
+      file = new FileReader(file1);
+      BufferedReader reader = new BufferedReader(file);
+
+      line = reader.readLine(); // skip header
+
+      while ((line = reader.readLine()) != null) {
+        String[] split = line.split("\\s++");
+        if (split.length == 2) {
+          String key = split[0].trim();
+          String value = split[1].trim();
+          phoneToDisplay.put(key, value);
+          phoneToDisplay.put(key.toLowerCase(), value);
+          phoneToDisplay.put(key.toUpperCase(), value);
+        }
+      }
+      reader.close();
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
+  }
+
+  public boolean usePhoneToDisplay() {
+    return getDefaultFalse("usePhoneToDisplay");
+  }
 }
