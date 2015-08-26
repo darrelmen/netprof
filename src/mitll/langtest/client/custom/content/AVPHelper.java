@@ -2,6 +2,7 @@ package mitll.langtest.client.custom.content;
 
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -20,7 +21,8 @@ import mitll.langtest.shared.custom.UserList;
 * To change this template use File | Settings | File Templates.
 */
 public class AVPHelper extends NPFHelper {
-  UserList ul;
+  private UserList ul;
+
   /**
    * @see mitll.langtest.client.custom.Navigation#Navigation
    * @param service
@@ -75,11 +77,13 @@ public class AVPHelper extends NPFHelper {
   @Override
   protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList, final String instanceName, boolean showQC) {
     StatsFlashcardFactory avpHelper = new StatsFlashcardFactory(service, feedback, controller, exerciseList, "AVPHelper", ul);
-
-    System.out.println("getFactory setting content panel " + contentPanel);
-
+//    System.out.println("getFactory setting content panel " + contentPanel);
     avpHelper.setContentPanel(contentPanel);
     return avpHelper;
+  }
+
+  void addExerciseListOnLeftSide(Panel left, Widget exerciseListOnLeftSide) {
+   // left.add(exerciseListOnLeftSide);
   }
 
   @Override
