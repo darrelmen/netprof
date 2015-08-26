@@ -94,12 +94,12 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
 
     //logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " type " + "score" + " width " + toUse);
 
-    service.getASRScoreForAudio(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, exerciseID, new AsyncCallback<PretestScore>() {
+    AsyncCallback<PretestScore> async = new AsyncCallback<PretestScore>() {
       public void onFailure(Throwable caught) {
         //if (!caught.getMessage().trim().equals("0")) {
         //  Window.alert("Server error -- couldn't contact server.");
         //}
-      //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " failure? "+ caught.getMessage());
+        //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " failure? "+ caught.getMessage());
 
         wordTranscript.image.setVisible(false);
         phoneTranscript.image.setVisible(false);
@@ -108,16 +108,20 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
       public void onSuccess(PretestScore result) {
         t.cancel();
 
-
         if (isMostRecentRequest(SCORE, result.getReqid())) {
-        //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " success " + result);
+          //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " success " + result);
           useResult(result, wordTranscript, phoneTranscript, tested.contains(path), path);
           tested.add(path);
-        }
-        else {
+        } else {
           //logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " success " + result + " DISCARDING : " + reqs);
         }
       }
-    });
+    };
+
+    if (controller.getProps().shouldUsePhoneToDisplay()) {
+      service.getASRScoreForAudioPhonemes(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, exerciseID, async);
+    } else {
+      service.getASRScoreForAudio(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, exerciseID, async);
+    }
   }
 }
