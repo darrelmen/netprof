@@ -59,6 +59,9 @@ public interface LangTestDatabase extends RemoteService {
   PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
                                    int width, int height, boolean useScoreToColorBkg, String exerciseID);
 
+  PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
+                                   int width, int height, boolean useScoreToColorBkg, String exerciseID);
+
   void addRoundTrip(long resultid, int roundTrip);
   // monitoring support
 
