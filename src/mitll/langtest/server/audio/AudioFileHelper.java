@@ -248,7 +248,7 @@ public class AudioFileHelper implements CollationSort {
 
     if (recordInResults) {
       long then = System.currentTimeMillis();
-      JSONObject json = getJson(answer);
+      JSONObject json = getJsonFromAnswer(answer);
      // logger.debug("json is " + json);
       long now = System.currentTimeMillis();
       if (now - then > 10) {
@@ -279,7 +279,7 @@ public class AudioFileHelper implements CollationSort {
    *
    * @param exercise
    * @param attribute
-   * @see LangTestDatabaseImpl#doDecode(Set, CommonExercise, Collection)
+   * @see LangTestDatabaseImpl#doDecode
    */
   public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute) {
     if (asrScoring.checkLTS(exercise.getForeignLanguage())) {
@@ -289,7 +289,8 @@ public class AudioFileHelper implements CollationSort {
 
         // Do alignment...
         long then = System.currentTimeMillis();
-        PretestScore alignmentScore = getAlignmentScore(exercise, pathHelper.getAbsoluteFile(audioRef).getAbsolutePath(),serverProps.usePhoneToDisplay());
+        PretestScore alignmentScore = getAlignmentScore(exercise, pathHelper.getAbsoluteFile(audioRef).getAbsolutePath(),
+            serverProps.usePhoneToDisplay());
         long now = System.currentTimeMillis();
         logger.debug("Took " + (now - then) + " to do alignment");
 
@@ -297,12 +298,13 @@ public class AudioFileHelper implements CollationSort {
         then = System.currentTimeMillis();
 
         // Do decoding, and record alignment info we just got in the database ...
+        DecodeAlignOutput alignOutput = new DecodeAlignOutput(alignmentScore);
 
         getRefAudioAnswerDecoding(exercise, (int) attribute.getUserid(), audioRef, pathHelper.getAbsoluteFile(audioRef),
             attribute.getDurationInMillis(),
 
-            alignmentScore.getHydecScore(), getJsonObject(alignmentScore).toString(), numPhones(alignmentScore),
-
+           // alignmentScore.getHydecScore(), getJsonObject(alignmentScore).toString(), numPhones(alignmentScore),
+            alignOutput,
             attribute.isMale(),
             attribute.isRegularSpeed() ? "reg" : "slow");
 
@@ -332,29 +334,77 @@ public class AudioFileHelper implements CollationSort {
    */
   private void getRefAudioAnswerDecoding(CommonExercise exercise1,
                                          int user, String wavPath, File file, long duration,
-                                         float alignScore, String alignJson,
-                                         int numAlignPhones,
+                                        // float alignScore, String alignJson,
+                                        // int numAlignPhones,
+
+                                         DecodeAlignOutput alignOutput,
                                          boolean isMale, String speed) {
     AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(AudioAnswer.Validity.OK, duration);
     AudioAnswer decodeAnswer = getAudioAnswer(exercise1, 1, true, wavPath, file, validity, true, false, false);
 
-    long then = System.currentTimeMillis();
-    JSONObject decodeJSON = getJson(decodeAnswer);
-    long now = System.currentTimeMillis();
-    if (now - then > 10) {
-      logger.debug("took " + (now - then) + " to convert decode answer to JSON");
-    }
+ //   long then = System.currentTimeMillis();
+  //  JSONObject decodeJSON = getJsonFromAnswer(decodeAnswer);
+  //  long now = System.currentTimeMillis();
+  //  if (now - then > 10) {
+  //    logger.debug("took " + (now - then) + " to convert decode answer to JSON");
+  //  }
 
+    DecodeAlignOutput decodeOutput = new DecodeAlignOutput(decodeAnswer);
     db.addRefAnswer(user, exercise1.getID(), file.getPath(),
-        validity.durationInMillis, decodeAnswer.isCorrect(),
-        (float) decodeAnswer.getScore(), decodeJSON.toString(),
-        alignScore, alignJson,
-        numPhones(decodeAnswer.getPretestScore()),
-        numAlignPhones, isMale, speed);
+        validity.durationInMillis,
+
+        decodeAnswer.isCorrect(),
+
+        alignOutput,
+        decodeOutput,
+        //(float) decodeAnswer.getScore(), decodeJSON.toString(),
+       // alignScore, alignJson,
+       // numPhones(decodeAnswer.getPretestScore()),
+       // numAlignPhones,
+        isMale, speed);
 
     // TODO : add word and phone table for refs
     //	recordWordAndPhoneInfo(decodeAnswer, answerID);
     logger.debug("getRefAudioAnswerDecoding decodeAnswer " + decodeAnswer);
+  }
+
+  public class DecodeAlignOutput {
+    private float score;
+    private String json;
+    private int numPhones;
+
+    public DecodeAlignOutput(PretestScore alignmentScore) {
+      this(alignmentScore.getHydecScore(), getJsonObject(alignmentScore).toString(), numPhones(alignmentScore));
+    }
+
+    public DecodeAlignOutput(AudioAnswer decodeAnswer) {
+      this((float) decodeAnswer.getScore(),
+          getJsonFromAnswer(decodeAnswer).toString(),
+          numPhones(decodeAnswer.getPretestScore()));
+    }
+
+    public DecodeAlignOutput(float score, String json, int numPhones) {
+      this.score = score;
+      this.json = json;
+      this.numPhones = numPhones;
+    }
+
+    public float getScore() {
+      return score;
+    }
+
+    public String getJson() {
+      return json;
+    }
+
+    public int getNumPhones() {
+      return numPhones;
+    }
+
+    @Override
+    public String toString() {
+      return "Score "+score + " # phones "  + numPhones;
+    }
   }
 
   private void checkValidity(String exerciseID, int questionID, int user, File file, AudioCheck.ValidityAndDur validity,
@@ -401,7 +451,7 @@ public class AudioFileHelper implements CollationSort {
       int processDur = answer.getPretestScore() == null ? 0 : answer.getPretestScore().getProcessDur();
       long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
           isValid, audioType, validity.durationInMillis, true, score, recordedWithFlash, deviceType, device,
-          getJson(answer).toString(), processDur);
+          getJsonFromAnswer(answer).toString(), processDur);
       answer.setResultID(answerID);
     }
     logger.debug("getAudioAnswerAlignment answer " + answer);
@@ -422,7 +472,8 @@ public class AudioFileHelper implements CollationSort {
    * @see #getAudioAnswerDecoding
    */
   private AudioAnswer getAudioAnswer(CommonExercise exercise1, int reqid, boolean doFlashcard, String wavPath, File file,
-                                     AudioCheck.ValidityAndDur validity, boolean isValid, boolean canUseCache, boolean allowAlternates) {
+                                     AudioCheck.ValidityAndDur validity, boolean isValid, boolean canUseCache,
+                                     boolean allowAlternates) {
     String url = pathHelper.ensureForwardSlashes(wavPath);
 
     return (isValid && !serverProps.isNoModel()) ?
@@ -471,7 +522,7 @@ public class AudioFileHelper implements CollationSort {
    * @return
    * @see #getAudioAnswerDecoding
    */
-  private JSONObject getJson(AudioAnswer answer) {
+  private JSONObject getJsonFromAnswer(AudioAnswer answer) {
     PretestScore pretestScore = answer.getPretestScore();
     return getJsonObject(pretestScore);
   }
@@ -680,7 +731,8 @@ public class AudioFileHelper implements CollationSort {
                                           int width, int height, boolean useScoreToColorBkg,
                                           boolean decode, String tmpDir, boolean useCache, String prefix, Result precalcResult,
                                           boolean usePhoneToDisplay) {
-    return getASRScoreForAudio(reqid, testAudioFile, sentence, null, width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix, precalcResult,usePhoneToDisplay);
+    return getASRScoreForAudio(reqid, testAudioFile, sentence, null, width, height, useScoreToColorBkg, decode, tmpDir,
+        useCache, prefix, precalcResult, usePhoneToDisplay);
   }
 
   /**
@@ -861,7 +913,8 @@ public class AudioFileHelper implements CollationSort {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
     if (doFlashcard) {
       makeASRScoring();
-      PretestScore flashcardAnswer = autoCRT.getFlashcardAnswer(exercise, file, audioAnswer, serverProps.getLanguage(), canUseCache, allowAlternates);
+      PretestScore flashcardAnswer = autoCRT.getFlashcardAnswer(exercise, file, audioAnswer, serverProps.getLanguage(),
+          canUseCache, allowAlternates);
       audioAnswer.setPretestScore(flashcardAnswer);
       return audioAnswer;
     }
