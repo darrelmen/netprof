@@ -220,11 +220,19 @@ public class DAO {
    */
   void drop(String table,Connection connection) {
     try {
-      PreparedStatement statement = connection.prepareStatement("DROP TABLE if exists " + table);
+      PreparedStatement statement = connection.prepareStatement("DROP TABLE " + table);
       if (!statement.execute()) {
+        statement.close();
+
         logger.error("couldn't drop table " + table);
+        PreparedStatement preparedStatement = connection.prepareStatement("DROP TABLE " + table.toUpperCase());
+        if (!preparedStatement.execute()) {
+          logger.error("2 couldn't drop table " + table);
+        }
       }
-      statement.close();
+      else {
+        statement.close();
+      }
       database.closeConnection(connection);
     } catch (Exception e) {
       e.printStackTrace();
