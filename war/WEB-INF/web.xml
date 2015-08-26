@@ -77,7 +77,7 @@
 
     <context-param>
         <param-name>config</param-name>
-        <param-value>english</param-value>
+        <param-value>spanish</param-value>
     </context-param>
 
     <context-param>
@@ -85,4 +85,3 @@
         <param-value>quizlet.properties</param-value>
     </context-param>
 </web-app>
-
