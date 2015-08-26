@@ -1164,14 +1164,14 @@ public class ScoreServlet extends DatabaseServlet {
   private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                            String exerciseID, boolean usePhoneToDisplay) {
     return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, 128, 128, false,
-        false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, null,usePhoneToDisplay);
+        false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, null,usePhoneToDisplay, false);
   }
 
   private PretestScore getASRScoreForAudioNoCache(int reqid, String testAudioFile, String sentence,
                                                   String exerciseID, boolean usePhoneToDisplay) {
     //  logger.debug("getASRScoreForAudioNoCache for " + testAudioFile + " under " + sentence);
     return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, 128, 128, false,
-        false, Files.createTempDir().getAbsolutePath(), false, exerciseID, null,usePhoneToDisplay);
+        false, Files.createTempDir().getAbsolutePath(), false, exerciseID, null,usePhoneToDisplay, false);
   }
 
   /**
