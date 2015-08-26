@@ -147,4 +147,6 @@ public interface LangTestDatabaseAsync {
 
   void changeEnabledFor(int userid, boolean enabled, AsyncCallback<Void> async);
 
+  void getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
+                                   int width, int height, boolean useScoreToColorBkg, String exerciseID, AsyncCallback<PretestScore> async);
 }
