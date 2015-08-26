@@ -39,22 +39,42 @@ public class LTSFactory implements CollationSort {
     languageToLTS.put(Language.ARABIC.name().toLowerCase(), new ModernStandardArabicLTS());
     languageToLTS.put(Language.DARI.name().toLowerCase(), new DariLTS());
     languageToLTS.put(Language.EGYPTIAN.name().toLowerCase(), new EgyptianLTS());
-    languageToLTS.put(Language.SPANISH.name().toLowerCase(), new SpanishLTS());
     languageToLTS.put(Language.ENGLISH.name().toLowerCase(), new EnglishLTS());
     languageToLTS.put(Language.FARSI.name().toLowerCase(), new FarsiLTS());
     // languageToLTS.put(Language.JAPANESE.name().toLowerCase(), new LevantineLTS());
-    languageToLTS.put(Language.RUSSIAN.name().toLowerCase(), new RussianLTS());
     languageToLTS.put(Language.LEVANTINE.name().toLowerCase(), new LevantineLTS());
     languageToLTS.put(Language.MANDARIN.name().toLowerCase(), unknown);
     languageToLTS.put(Language.MSA.name().toLowerCase(), new ModernStandardArabicLTS());
-    languageToLTS.put(Language.PASHTO.name().toLowerCase(), new PashtoLTS());
-    languageToLTS.put(Language.URDU.name().toLowerCase(), new UrduLTS());
-    languageToLTS.put(Language.SUDANESE.name().toLowerCase(), new SudaneseLTS());
-    languageToLTS.put(Language.TAGALOG.name().toLowerCase(), unknown);
-
-/*    for (Language lang : Language.values()) {
-      getLocale(lang);
-    }*/
+    try {
+      languageToLTS.put(Language.PASHTO.name().toLowerCase(), new PashtoLTS());
+    } catch (Exception e) {
+     logger.warn("got " +e);
+    }
+    try {
+      languageToLTS.put(Language.RUSSIAN.name().toLowerCase(), new RussianLTS());
+    } catch (Exception e) {
+      logger.warn("got " + e);
+    }
+    try {
+      languageToLTS.put(Language.SPANISH.name().toLowerCase(), new SpanishLTS());
+    } catch (Exception e) {
+      logger.warn("got " + e);
+    }
+    try {
+      languageToLTS.put(Language.SUDANESE.name().toLowerCase(), new SudaneseLTS());
+    } catch (Exception e) {
+     logger.warn("got " +e);
+    }
+    try {
+      languageToLTS.put(Language.TAGALOG.name().toLowerCase(), unknown);
+    } catch (Exception e) {
+     logger.warn("got " +e);
+    }
+    try {
+      languageToLTS.put(Language.URDU.name().toLowerCase(), new UrduLTS());
+    } catch (Exception e) {
+     logger.warn("got " +e);
+    }
   }
 
   /**
@@ -225,7 +245,8 @@ public class LTSFactory implements CollationSort {
     LTS letterToSoundClass = languageToLTS.get(language.toLowerCase());
 
     if (letterToSoundClass == null) {
-      logger.warn("NOTE: we have no LTS for '" + language + "', using the empty LTS class : " + unknown.getClass());
+      logger.warn("NOTE: we have no LTS for '" + language + "' in " + new TreeSet<String>(languageToLTS.keySet()) +
+          " , using the empty LTS class : " + unknown.getClass());
       letterToSoundClass = unknown;
     }
     return letterToSoundClass;
