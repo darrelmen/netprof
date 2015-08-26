@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.shared.Result;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -79,15 +80,28 @@ public class RefResultDAO extends DAO {
    * @param speed
    * @return id of new row in result table
    */
-  public long addAnswer(Database database, int userID, String id,
-                        String audioFile, long durationInMillis,
-                        boolean correct, float pronScore, String scoreJson, float alignScore, String alignJson,
-                        int numDecodePhones, int numAlignPhones, boolean isMale, String speed) {
+  public long addAnswer(Database database,
+                        int userID, String id,
+                        String audioFile,
+                        long durationInMillis,
+                        boolean correct,
+                        //float pronScore, String scoreJson,
+                        //float alignScore, String alignJson,
+                        //int numDecodePhones,
+                        //int numAlignPhones,
+
+                        AudioFileHelper.DecodeAlignOutput alignOutput,
+                        AudioFileHelper.DecodeAlignOutput decodeOutput,
+                        boolean isMale, String speed) {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
-      long newid = addAnswerToTable(connection, userID, id, audioFile, durationInMillis, correct, pronScore,
-          scoreJson, alignScore, alignJson, numDecodePhones, numAlignPhones, isMale, speed);
+      long newid = addAnswerToTable(connection, userID, id, audioFile, durationInMillis, correct,
+          //pronScore,
+          //scoreJson, alignScore, alignJson, numDecodePhones, numAlignPhones,
+          alignOutput,
+          decodeOutput,
+          isMale, speed);
       long now = System.currentTimeMillis();
       if (now - then > 100) System.out.println("took " + (now - then) + " millis to record answer.");
       return newid;
@@ -109,25 +123,35 @@ public class RefResultDAO extends DAO {
    * @param connection
    * @param userid
    * @param id
-   * @paramx answer
    * @param audioFile
+   * @param durationInMillis
    * @param correct
    * @param pronScore
    * @param scoreJson
+   * @param alignScore
+   * @param alignJson
    * @param numPhones
    * @param numAlignPhones
    * @param isMale
    * @param speed
    * @throws java.sql.SQLException
+   * @see #addAnswer(Database, int, String, String, long, boolean, float, String, float, String, int, int, boolean, String)
    */
-  private long addAnswerToTable(Connection connection, int userid, String id,
+  private long addAnswerToTable(Connection connection,
+                                int userid, String id,
                                 String audioFile,
                                 long durationInMillis,
-                                boolean correct, float pronScore, String scoreJson, float alignScore, String alignJson,
-                                int numPhones, int numAlignPhones, boolean isMale, String speed) throws SQLException {
-    //  logger.debug("adding answer for exid #" + id + " correct " + correct + " score " + pronScore + " audio type " +audioType + " answer " + answer);
-    String answer = "";
+                                boolean correct,
 
+                              //  float pronScore, String scoreJson, float alignScore, String alignJson,
+
+                                //int numPhones, int numAlignPhones,
+
+                                AudioFileHelper.DecodeAlignOutput alignOutput,
+                                AudioFileHelper.DecodeAlignOutput decodeOutput,
+                                boolean isMale, String speed) throws SQLException {
+    //  logger.debug("adding answer for exid #" + id + " correct " + correct + " score " + pronScore + " audio type " +
+    // audioType + " answer " + answer);
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
         REFRESULT +
         "(" +
@@ -149,22 +173,19 @@ public class RefResultDAO extends DAO {
 
     int i = 1;
 
-    boolean isAudioAnswer = answer == null || answer.length() == 0;
-    String answerInserted = isAudioAnswer ? audioFile : answer;
-
     statement.setInt(i++, userid);
     statement.setString(i++, copyStringChar(id));
     statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
-    statement.setString(i++, copyStringChar(answerInserted));
+    statement.setString(i++, copyStringChar(audioFile));
     statement.setLong(i++, durationInMillis);
 
     statement.setBoolean(i++, correct);
-    statement.setFloat(i++, pronScore);
-    statement.setString(i++, scoreJson);
-    statement.setFloat(i++, alignScore);
-    statement.setString(i++, alignJson);
-    statement.setInt(i++, numPhones);
-    statement.setInt(i++, numAlignPhones);
+    statement.setFloat(i++, decodeOutput.getScore());
+    statement.setString(i++, decodeOutput.getJson());
+    statement.setFloat(i++, alignOutput.getScore());
+    statement.setString(i++, alignOutput.getJson());
+    statement.setInt(i++, decodeOutput.getNumPhones());
+    statement.setInt(i++, alignOutput.getNumPhones());
     statement.setBoolean(i++, isMale);
     statement.setString(i++, speed);
 
@@ -336,7 +357,7 @@ public class RefResultDAO extends DAO {
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
       long userID = rs.getLong(USERID);
-      String plan = "";//rs.getString(PLAN);
+      String plan = "";
       String exid = rs.getString(Database.EXID);
       int qid = 0;
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
@@ -347,7 +368,6 @@ public class RefResultDAO extends DAO {
 
       boolean correct = rs.getBoolean(CORRECT);
       float pronScore = rs.getFloat(PRON_SCORE);
-   //   String device = rs.getString(DEVICE);
 
       Result result = new Result(uniqueID, userID, //id
           plan, // plan
