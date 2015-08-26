@@ -8,17 +8,8 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.*;
+import java.util.*;
 
 /**
  * Create, drop, alter, read from the results table.
@@ -29,7 +20,7 @@ public class RefResultDAO extends DAO {
 
   private static final String ID = "id";
   private static final String USERID = "userid";
-  private static final String ANSWER = "answer";
+  public static final String ANSWER = "answer";
   private static final String SCORE_JSON = "scoreJson";
 
   private static final String REFRESULT = "refresult";
@@ -38,17 +29,22 @@ public class RefResultDAO extends DAO {
   private static final String CORRECT = "correct";
   private static final String PRON_SCORE = "pronscore";
 
-//  private static final String YES = "Yes";
-//  private static final String NO = "No";
   private static final String ALIGNSCORE = "ALIGNSCORE";
   private static final String ALIGNJSON = "ALIGNJSON";
   private static final String NUMDECODE_PHONES = "NUMDECODEPHONES";
   private static final String NUM_ALIGN_PHONES = "NUMALIGNPHONES";
   private static final String MALE = "male";
   private static final String SPEED = "speed";
+  public static final String DECODE_PROCESS_DUR = "decodeProcessDur";
+  public static final String ALIGN_PROCESS_DUR = "alignProcessDur";
+  public static final String HYDEC_DECODE_PRON_SCORE = "hydecDecodePronScore";
+  public static final String HYDEC_DECODE_PROCESS_DUR = "hydecDecodeProcessDur";
+  public static final String HYDEC_DECODE_NUM_PHONES = "hydecDecodeNumPhones";
+  public static final String HYDEC_ALIGN_PRON_SCORE = "hydecAlignPronScore";
+  public static final String HYDEC_ALIGN_PROCESS_DUR = "hydecAlignProcessDur";
+  public static final String HYDEC_ALIGN_NUM_PHONES = "hydecAlignNumPhones";
   private final LogAndNotify logAndNotify;
   private final boolean dropTable;
-
 //  private final boolean debug = false;
 
   /**
@@ -66,41 +62,39 @@ public class RefResultDAO extends DAO {
   private List<Result> cachedResultsForQuery = null;
 
   /**
-   * @see DatabaseImpl#addRefAnswer
    * @param database
    * @param userID
    * @param id
    * @param audioFile
    * @param correct
-   * @param pronScore
-   * @param scoreJson
-   * @param numDecodePhones
-   * @param numAlignPhones
    * @param isMale
    * @param speed
    * @return id of new row in result table
+   * @see DatabaseImpl#addRefAnswer
    */
   public long addAnswer(Database database,
                         int userID, String id,
                         String audioFile,
                         long durationInMillis,
                         boolean correct,
-                        //float pronScore, String scoreJson,
-                        //float alignScore, String alignJson,
-                        //int numDecodePhones,
-                        //int numAlignPhones,
 
                         AudioFileHelper.DecodeAlignOutput alignOutput,
                         AudioFileHelper.DecodeAlignOutput decodeOutput,
+
+                        AudioFileHelper.DecodeAlignOutput alignOutputOld,
+                        AudioFileHelper.DecodeAlignOutput decodeOutputOld,
+
                         boolean isMale, String speed) {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
       long newid = addAnswerToTable(connection, userID, id, audioFile, durationInMillis, correct,
-          //pronScore,
-          //scoreJson, alignScore, alignJson, numDecodePhones, numAlignPhones,
           alignOutput,
           decodeOutput,
+
+          alignOutputOld,
+          decodeOutputOld,
+
           isMale, speed);
       long now = System.currentTimeMillis();
       if (now - then > 100) System.out.println("took " + (now - then) + " millis to record answer.");
@@ -119,23 +113,16 @@ public class RefResultDAO extends DAO {
    * Each insert is marked with a timestamp.
    * This allows us to determine user completion rate.
    *
-   *
    * @param connection
    * @param userid
    * @param id
    * @param audioFile
    * @param durationInMillis
    * @param correct
-   * @param pronScore
-   * @param scoreJson
-   * @param alignScore
-   * @param alignJson
-   * @param numPhones
-   * @param numAlignPhones
    * @param isMale
    * @param speed
    * @throws java.sql.SQLException
-   * @see #addAnswer(Database, int, String, String, long, boolean, float, String, float, String, int, int, boolean, String)
+   * @see #addAnswer
    */
   private long addAnswerToTable(Connection connection,
                                 int userid, String id,
@@ -143,33 +130,53 @@ public class RefResultDAO extends DAO {
                                 long durationInMillis,
                                 boolean correct,
 
-                              //  float pronScore, String scoreJson, float alignScore, String alignJson,
-
-                                //int numPhones, int numAlignPhones,
-
                                 AudioFileHelper.DecodeAlignOutput alignOutput,
                                 AudioFileHelper.DecodeAlignOutput decodeOutput,
+
+                                AudioFileHelper.DecodeAlignOutput alignOutputOld,
+                                AudioFileHelper.DecodeAlignOutput decodeOutputOld,
+
                                 boolean isMale, String speed) throws SQLException {
     //  logger.debug("adding answer for exid #" + id + " correct " + correct + " score " + pronScore + " audio type " +
     // audioType + " answer " + answer);
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
-        REFRESULT +
-        "(" +
-        "userid," +
-        Database.EXID + "," +
-        Database.TIME + "," +
-        "answer," +
-        ResultDAO.DURATION + "," +
-        ResultDAO.CORRECT + "," +
-        ResultDAO.PRON_SCORE + "," +
-        ResultDAO.SCORE_JSON + ","+
-        ALIGNSCORE + ","+
-        ALIGNJSON + ","+
-        NUMDECODE_PHONES + ","+
-        NUM_ALIGN_PHONES +","+
-        MALE +","+
-        SPEED +
-        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+            REFRESULT +
+            "(" +
+            "userid," +
+            Database.EXID + "," +
+            Database.TIME + "," +
+            ANSWER + "," +
+            ResultDAO.DURATION + "," +
+            ResultDAO.CORRECT + "," +
+
+            ResultDAO.PRON_SCORE + "," +
+            ResultDAO.SCORE_JSON + "," +
+            NUMDECODE_PHONES + "," +
+            DECODE_PROCESS_DUR + "," +
+
+            ALIGNSCORE + "," +
+            ALIGNJSON + "," +
+            NUM_ALIGN_PHONES + "," +
+            ALIGN_PROCESS_DUR + "," +
+
+            HYDEC_DECODE_PRON_SCORE + ", " +
+            HYDEC_DECODE_NUM_PHONES + ", " +
+            HYDEC_DECODE_PROCESS_DUR + ", " +
+
+            HYDEC_ALIGN_PRON_SCORE + ", " +
+            HYDEC_ALIGN_NUM_PHONES + ", " +
+            HYDEC_ALIGN_PROCESS_DUR + ", " +
+
+            MALE + "," +
+            SPEED +
+            ") VALUES(?,?,?,?,?,?," +
+            "?,?,?,?," +
+            "?,?,?,?," +
+            "?,?,?," +
+            "?,?,?," +
+            "?,?" +
+            ")",
+        Statement.RETURN_GENERATED_KEYS);
 
     int i = 1;
 
@@ -180,12 +187,25 @@ public class RefResultDAO extends DAO {
     statement.setLong(i++, durationInMillis);
 
     statement.setBoolean(i++, correct);
+
     statement.setFloat(i++, decodeOutput.getScore());
     statement.setString(i++, decodeOutput.getJson());
+    statement.setInt(i++, decodeOutput.getNumPhones());
+    statement.setInt(i++, decodeOutput.getProcessDurInMillis());
+
     statement.setFloat(i++, alignOutput.getScore());
     statement.setString(i++, alignOutput.getJson());
-    statement.setInt(i++, decodeOutput.getNumPhones());
     statement.setInt(i++, alignOutput.getNumPhones());
+    statement.setInt(i++, alignOutput.getProcessDurInMillis());
+
+    statement.setFloat(i++, decodeOutputOld.getScore());
+    statement.setInt(i++, decodeOutputOld.getNumPhones());
+    statement.setInt(i++, decodeOutputOld.getProcessDurInMillis());
+
+    statement.setFloat(i++, alignOutputOld.getScore());
+    statement.setInt(i++, alignOutputOld.getNumPhones());
+    statement.setInt(i++, alignOutputOld.getProcessDurInMillis());
+
     statement.setBoolean(i++, isMale);
     statement.setString(i++, speed);
 
@@ -198,7 +218,9 @@ public class RefResultDAO extends DAO {
     return newID;
   }
 
-  private String copyStringChar(String plan) { return new String(plan.toCharArray());  }
+  private String copyStringChar(String plan) {
+    return new String(plan.toCharArray());
+  }
 
   /**
    * Pulls the list of results out of the database.
@@ -245,17 +267,17 @@ public class RefResultDAO extends DAO {
     return null;
   }
 
-    /**
-     * @see JsonSupport#getJsonRefResults(Map)
-     * @param ids
-     * @return
-     */
-  public JSONObject getJSONScores(Collection<String> ids)  {
+  /**
+   * @param ids
+   * @return
+   * @see JsonSupport#getJsonRefResults(Map)
+   */
+  public JSONObject getJSONScores(Collection<String> ids) {
     try {
       String list = getInList(ids);
 
       String sql = "SELECT " +
-          Database.EXID + ", "   + SCORE_JSON + ", "+ ANSWER+
+          Database.EXID + ", " + SCORE_JSON + ", " + ANSWER +
           " FROM " + REFRESULT + " WHERE " +
           Database.EXID + " in (" + list + ")";
 
@@ -264,7 +286,7 @@ public class RefResultDAO extends DAO {
 
       ResultSet rs = statement.executeQuery();
 
-      Map<String,List<String>> idToAnswers = new HashMap<>();
+      Map<String, List<String>> idToAnswers = new HashMap<>();
       Map<String, List<String>> idToJSONs = new HashMap<>();
       while (rs.next()) {
         String exid = rs.getString(Database.EXID);
@@ -275,7 +297,7 @@ public class RefResultDAO extends DAO {
         if (orDefault == null) {
           idToAnswers.put(exid, orDefault = new ArrayList<String>());
           int i = answer.lastIndexOf("/");
-          String fileName =  (i > -1) ? answer.substring(i+1) : answer;
+          String fileName = (i > -1) ? answer.substring(i + 1) : answer;
           orDefault.add(fileName);
         }
 
@@ -287,7 +309,7 @@ public class RefResultDAO extends DAO {
       }
 
       JSONObject jsonObject = new JSONObject();
-      for (Map.Entry<String,List<String>> pair : idToAnswers.entrySet()) {
+      for (Map.Entry<String, List<String>> pair : idToAnswers.entrySet()) {
         String exid = pair.getKey();
         List<String> answers = pair.getValue();
         List<String> jsons = idToJSONs.get(exid);
@@ -296,8 +318,8 @@ public class RefResultDAO extends DAO {
 
         for (int i = 0; i < answers.size(); i++) {
           JSONObject jsonObject1 = new JSONObject();
-          jsonObject1.put("file",answers.get(i));
-          jsonObject1.put("scoreJSON",jsons.get(i));
+          jsonObject1.put("file", answers.get(i));
+          jsonObject1.put("scoreJSON", jsons.get(i));
           array.add(jsonObject1);
         }
         jsonObject.put(exid, array);
@@ -322,7 +344,7 @@ public class RefResultDAO extends DAO {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
 
-      //  logger.debug("running " + sql + " -> " +resultsForQuery.size() + " results");
+    //  logger.debug("running " + sql + " -> " +resultsForQuery.size() + " results");
     return getResultsForQuery(connection, statement);
   }
 
@@ -399,12 +421,12 @@ public class RefResultDAO extends DAO {
    */
   void createResultTable(Connection connection) throws SQLException {
     if (dropTable) {
-      drop(REFRESULT,connection);
+      drop(REFRESULT, connection);
     }
     createTable(connection);
 
     Collection<String> columns = getColumns(REFRESULT);
-  //  logger.debug("for " + REFRESULT + " found " + columns + " and " + getNumResults());
+    //  logger.debug("for " + REFRESULT + " found " + columns + " and " + getNumResults());
     if (!columns.contains(ALIGNSCORE.toLowerCase())) {
       addFloat(connection, REFRESULT, ALIGNSCORE);
       addVarchar(connection, REFRESULT, ALIGNJSON);
@@ -431,7 +453,7 @@ public class RefResultDAO extends DAO {
     }
     createIndex(database, Database.EXID, REFRESULT);
     // seems to complain about index on CLOB???
-   // createIndex(database, ANSWER, REFRESULT);
+    // createIndex(database, ANSWER, REFRESULT);
 
     database.closeConnection(connection);
   }
@@ -451,19 +473,35 @@ public class RefResultDAO extends DAO {
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " +
         REFRESULT +
         " (" +
-        ID +
-        " IDENTITY, " +
+        ID + " IDENTITY, " +
         USERID + " INT, " +
         Database.EXID + " VARCHAR, " +
         Database.TIME + " TIMESTAMP, " +// " AS CURRENT_TIMESTAMP," +
-        "answer" +
-        " VARCHAR," +
+        ANSWER + " VARCHAR," +
         DURATION + " INT," +
+
         CORRECT + " BOOLEAN," +
+
         PRON_SCORE + " FLOAT," +
         SCORE_JSON + " VARCHAR, " +
+        DECODE_PROCESS_DUR + " INT, " +
+        NUMDECODE_PHONES + " INT, " +
+
         ALIGNSCORE + " FLOAT," +
         ALIGNJSON + " VARCHAR," +
+        ALIGN_PROCESS_DUR + " INT, " +
+        NUM_ALIGN_PHONES + " INT, " +
+
+        HYDEC_DECODE_PRON_SCORE + " FLOAT," +
+        //SCORE_JSON + " VARCHAR, " +
+        HYDEC_DECODE_PROCESS_DUR + " INT, " +
+        HYDEC_DECODE_NUM_PHONES + " INT, " +
+
+        HYDEC_ALIGN_PRON_SCORE + " FLOAT," +
+        //SCORE_JSON + " VARCHAR, " +
+        HYDEC_ALIGN_PROCESS_DUR + " INT, " +
+        HYDEC_ALIGN_NUM_PHONES + " INT, " +
+
         MALE + " BOOLEAN," +
         SPEED + " VARCHAR" +
         ")");
