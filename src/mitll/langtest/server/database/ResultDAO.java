@@ -483,7 +483,6 @@ public class ResultDAO extends DAO {
     if (size > LAST_NUM_RESULTS) {
       resultsForExercise = resultsForExercise.subList(size - LAST_NUM_RESULTS, size);
     }
-
 //    logger.debug("score history " + resultsForExercise);
     int total = 0;
     float scoreTotal = 0f;
@@ -1017,8 +1016,6 @@ public class ResultDAO extends DAO {
     return userToAnswers;
   }
 
-  //void dropResults() { drop(RESULTS);  }
-
   /**
    * No op if table exists and has the current number of columns.
    *
@@ -1231,7 +1228,7 @@ public class ResultDAO extends DAO {
     return userToResult;
   }
 
-  Map<Long, Map<String, Result>> getUserToResults2(String typeToUse, UserDAO userDAO) {
+/*  Map<Long, Map<String, Result>> getUserToResults2(String typeToUse, UserDAO userDAO) {
     List<Result> results = getResults();
     Map<Long, Map<String, Result>> userToResult = new HashMap<Long, Map<String, Result>>();
 
@@ -1253,7 +1250,7 @@ public class ResultDAO extends DAO {
       }
     }
     return userToResult;
-  }
+  }*/
 
 
   /**
@@ -1295,7 +1292,10 @@ public class ResultDAO extends DAO {
         "Valid",
         CORRECT,
         PRON_SCORE,
-        "Device"
+        "Device",
+        "w/Flash",
+        "Process",
+        "RoundTrip"
     );
 
     columns.addAll(columns2);
@@ -1329,7 +1329,7 @@ public class ResultDAO extends DAO {
 
       cell = row.createCell(j++);
       String audioType = result.getAudioType();
-      cell.setCellValue(audioType.equals("avp")?"flashcard": audioType);
+      cell.setCellValue(audioType.equals("avp") ? "flashcard" : audioType);
 
       cell = row.createCell(j++);
       cell.setCellValue(result.getDurationInMillis());
@@ -1345,6 +1345,15 @@ public class ResultDAO extends DAO {
 
       cell = row.createCell(j++);
       cell.setCellValue(result.getDevice());
+
+      cell = row.createCell(j++);
+      cell.setCellValue(result.isWithFlash() ? YES : NO);
+
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getProcessDur());
+
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getRoundTripDur());
     }
     now = System.currentTimeMillis();
     if (now - then > 100) {
@@ -1352,13 +1361,6 @@ public class ResultDAO extends DAO {
     }
     return wb;
   }
-
-/*
-  public void writeExcelToStreamOld(List<Result> results, OutputStream out) {
-    SXSSFWorkbook wb = writeExcelOld(results);
-    writeToStream(out, wb);
-  }
-*/
 
   private void writeToStream(OutputStream out, SXSSFWorkbook wb) {
     long then = System.currentTimeMillis();
@@ -1374,64 +1376,4 @@ public class ResultDAO extends DAO {
       logger.error("got " + e, e);
     }
   }
-
-  /*private SXSSFWorkbook writeExcelOld(List<Result> results) {
-    long now;
-    long then = System.currentTimeMillis();
-
-    SXSSFWorkbook wb = new SXSSFWorkbook(10000); // keep 100 rows in memory, exceeding rows will be flushed to disk
-    Sheet sheet = wb.createSheet("Results");
-    int rownum = 0;
-    CellStyle cellStyle = wb.createCellStyle();
-    DataFormat dataFormat = wb.createDataFormat();
-
-    cellStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss"));
-    Row headerRow = sheet.createRow(rownum++);
-
-    List<String> columns = Arrays.asList(ID, USERID, Database.EXID,
-        //"qid",
-        Database.TIME,
-        "answer",
-        "valid",
-        //"grades", FLQ, SPOKEN,
-        AUDIO_TYPE, DURATION, CORRECT, PRON_SCORE//, STIMULUS
-    );
-
-    for (int i = 0; i < columns.size(); i++) {
-      Cell headerCell = headerRow.createCell(i);
-      headerCell.setCellValue(columns.get(i));
-    }
-
-    for (Result result : results) {
-      Row row = sheet.createRow(rownum++);
-      int j = 0;
-      Cell cell = row.createCell(j++);
-      cell.setCellValue(result.getUniqueID());
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getUserid());
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getExerciseID());
-      cell = row.createCell(j++);
-      cell.setCellValue(new Date(result.getTimestamp()));
-      cell.setCellStyle(cellStyle);
-
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getAnswer());
-      cell = row.createCell(j++);
-      cell.setCellValue(result.isValid());
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getAudioType());
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getDurationInMillis());
-      cell = row.createCell(j++);
-      cell.setCellValue(result.isCorrect());
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getPronScore());
-    }
-    now = System.currentTimeMillis();
-    if (now - then > 100) {
-      logger.warn("toXLSX : took " + (now - then) + " millis to add " + rownum + " rows to sheet, or " + (now - then) / rownum + " millis/row");
-    }
-    return wb;
-  }*/
 }
