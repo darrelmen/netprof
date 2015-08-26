@@ -35,14 +35,14 @@ public interface ASR {
 	 * @param useCache
 	 * @param prefix
 	 * @param precalcResult
+	 * @param usePhoneToDisplay
 	 * @return
 	 */
 	PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-							 String sentence, Collection<String> lmSentences, String imageOutDir,
-							 int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-							 boolean decode, String tmpDir,
-							 boolean useCache, String prefix, Result precalcResult);
-	
+													 String sentence, Collection<String> lmSentences, String imageOutDir,
+													 int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+													 boolean decode, String tmpDir,
+													 boolean useCache, String prefix, Result precalcResult, boolean usePhoneToDisplay);
 	
 	class PhoneInfo {
 		private List<String> firstPron;
@@ -60,7 +60,6 @@ public interface ASR {
 		public List<String> getFirstPron() {
 			return firstPron;
 		}
-
 		public Set<String> getPhoneSet() {
 			return phoneSet;
 		}
