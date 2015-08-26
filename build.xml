@@ -411,7 +411,7 @@
             <arg line="-style"/>
 
             <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
-            <arg value="PRETTY"/>
+            <arg value="OBF"/>
             <arg line="-localWorkers"/>
             <arg value="6"/>
 <!--
