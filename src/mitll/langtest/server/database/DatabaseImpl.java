@@ -196,9 +196,7 @@ public class DatabaseImpl implements Database {
     return resultDAO;
   }
 
-  public RefResultDAO getRefResultDAO() {
-    return refresultDAO;
-  }
+  public RefResultDAO getRefResultDAO() {  return refresultDAO;  }
 
   public UserDAO getUserDAO() {    return userDAO;  }
 
@@ -949,10 +947,6 @@ public class DatabaseImpl implements Database {
    * @param audioFile
    * @param durationInMillis
    * @param correct
-   * @param score
-   * @param scoreJson
-   * @param numDecodePhones
-   * @param numAlignPhones
    * @param isMale
    * @param speed
    * @return
@@ -962,17 +956,14 @@ public class DatabaseImpl implements Database {
                            long durationInMillis, boolean correct,
                            AudioFileHelper.DecodeAlignOutput alignOutput,
                            AudioFileHelper.DecodeAlignOutput decodeOutput,
-                         //  float score, String scoreJson,
 
-                         //  float alignScore, String alignJson,
+                           AudioFileHelper.DecodeAlignOutput alignOutputOld,
+                           AudioFileHelper.DecodeAlignOutput decodeOutputOld,
 
-                         //  int numDecodePhones, int numAlignPhones,
                            boolean isMale, String speed) {
     return refresultDAO.addAnswer(this, userID, exerciseID, audioFile, durationInMillis, correct,
-       // score, scoreJson,
-        //alignScore, alignJson,
-       // numDecodePhones, numAlignPhones,
         alignOutput,decodeOutput,
+        alignOutputOld, decodeOutputOld,
         isMale, speed);
   }
 
