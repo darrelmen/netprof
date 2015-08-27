@@ -1,5 +1,6 @@
 package mitll.langtest.server;
 
+import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
@@ -425,8 +426,13 @@ public class ServerProperties {
 
   public Map<String,String> getPhoneToDisplay() { return phoneToDisplay; }
 
+  /**
+   * @see ScoreServlet#getJsonForScore(PretestScore, boolean)
+   * @param phone
+   * @return
+   */
   public String getDisplayPhoneme(String phone) {
-    String s = phoneToDisplay.get(phone.toLowerCase());
+    String s = phoneToDisplay.get(phone);
     if (s == null) return phone;
     else return s;
   }
@@ -460,8 +466,8 @@ public class ServerProperties {
           String key = split[0].trim();
           String value = split[1].trim();
           phoneToDisplay.put(key, value);
-          phoneToDisplay.put(key.toLowerCase(), value);
-          phoneToDisplay.put(key.toUpperCase(), value);
+         // phoneToDisplay.put(key.toLowerCase(), value);
+          //phoneToDisplay.put(key.toUpperCase(), value);
         }
       }
       reader.close();
