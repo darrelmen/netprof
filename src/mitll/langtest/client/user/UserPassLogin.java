@@ -649,6 +649,9 @@ public class UserPassLogin extends UserDialog {
       }
     });
 
+    // Tamas wanted student by default...?
+    studentChoice.setValue(true);
+
     teacherChoice.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
