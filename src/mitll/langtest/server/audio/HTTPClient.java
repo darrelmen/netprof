@@ -144,6 +144,10 @@ public class HTTPClient {
 			send(input);
 			return receive();
 		}
+    catch (ConnectException ce) {
+      logger.error("sending " +input +" couldn't connect to server at  " +httpConn.getURL());
+      return "";
+    }
 		catch(IOException e) {
 			logger.error("sending " +input +" got " +e,e);
 			return "";
