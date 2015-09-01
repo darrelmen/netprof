@@ -449,7 +449,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     onButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        markGender(DEFAULT_MALE, onButton, audio, tabAndContent, allByUser, next);
+        markGender(DEFAULT_MALE, onButton, audio, tabAndContent, allByUser, next, true);
       }
     });
 
@@ -458,7 +458,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     offButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        markGender(DEFAULT_FEMALE, offButton, audio, tabAndContent, allByUser, next);
+        markGender(DEFAULT_FEMALE, offButton, audio, tabAndContent, allByUser, next, false);
       }
     });
 
@@ -467,15 +467,13 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   public void markGender(final MiniUser defaultFemale, final Button offButton,
                          final AudioAttribute audio, final RememberTabAndContent tabAndContent,
-                         final List<AudioAttribute> allByUser, final Button next) {
+                         final List<AudioAttribute> allByUser, final Button next,
+                          boolean isMale) {
     offButton.setEnabled(false);
-   // final MiniUser prev = audio.getUser();
-    service.markGender(audio, false, new AsyncCallback<Void>() {
+
+    service.markGender(audio, isMale, new AsyncCallback<Void>() {
       @Override
-      public void onFailure(Throwable caught) {
-        offButton.setEnabled(true);
-//        audio.setUser(prev);
-      }
+      public void onFailure(Throwable caught) {  offButton.setEnabled(true);   }
 
       @Override
       public void onSuccess(Void result) {
