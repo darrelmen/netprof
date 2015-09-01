@@ -539,7 +539,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     // we cache the images, so we don't want to return an image for a different option...
     String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") + (reallyUsePhone ? "_phoneToDisp" : "");
 
-    logger.debug("getPretestScore prefix " + prefix1);
+    //logger.debug("getPretestScore prefix " + prefix1);
 
     EventAndFileInfo eventAndFileInfo = jsonObject == null ?
         writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
