@@ -115,21 +115,21 @@ public class AudioDAO extends DAO {
   public int attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir) {
     Collection<AudioAttribute> audioAttributes = getAudioAttributes(firstExercise.getID());
 
-    //logger.debug("\tattachAudio : found " + audioAttributes.size() + " for " + firstExercise.getID());
+//    logger.debug("\tattachAudio : found " + audioAttributes.size() + " for " + firstExercise.getID());
 /*    for (AudioAttribute attribute : audioAttributes) {
       logger.debug("\t\tattachAudio : exid " + firstExercise.getID() + " audio " + attribute);
     }*/
-/*
-    for (AudioAttribute attribute : firstExercise.getAudioAttributes()) {
-      logger.debug("\t\tattachAudio on ex : exid " + firstExercise.getID() + " audio " + attribute);
-    }*/
+
+//    for (AudioAttribute attribute : firstExercise.getAudioAttributes()) {
+//      logger.debug("\t\tbefore attachAudio on ex : exid " + firstExercise.getID() + " audio " + attribute);
+//    }
 
     attachAudio(firstExercise, installPath, relativeConfigDir, audioAttributes);
 
-/*    for (AudioAttribute attribute : firstExercise.getAudioAttributes()) {
-      logger.debug("\t\tattachAudio : after on ex exid " + firstExercise.getID() + " audio " + attribute);
-    }*/
-    return audioAttributes == null ? 0 :audioAttributes.size();
+//    for (AudioAttribute attribute : firstExercise.getAudioAttributes()) {
+//      logger.debug("\t\tafter attachAudio : after on ex exid " + firstExercise.getID() + " audio " + attribute);
+//    }
+    return audioAttributes.size();
   }
 
   /**
@@ -639,8 +639,10 @@ public class AudioDAO extends DAO {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#markGender(mitll.langtest.shared.AudioAttribute, boolean)
    */
-  public AudioAttribute addOrUpdateUser(int userid, AudioAttribute attr) {
-    return addOrUpdateUser(userid, attr.getAudioRef(), attr.getExid(), attr.getTimestamp(), attr.getAudioType(), (int) attr.getDurationInMillis());
+  public void addOrUpdateUser(int userid, AudioAttribute attr) {
+    long timestamp = attr.getTimestamp();
+    if (timestamp == 0) timestamp = System.currentTimeMillis();
+    addOrUpdateUser(userid, attr.getAudioRef(), attr.getExid(), timestamp, attr.getAudioType(), (int) attr.getDurationInMillis());
   }
 
   /**
@@ -710,8 +712,9 @@ public class AudioDAO extends DAO {
    * @param durationInMillis
    * @return AudioAttribute that represents the audio that has been added to the exercise
    * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
+   * @see #addOrUpdateUser(int, AudioAttribute)
    */
-  private AudioAttribute addOrUpdateUser(int userid, String audioRef, String exerciseID, long timestamp, String audioType, int durationInMillis) {
+  private void addOrUpdateUser(int userid, String audioRef, String exerciseID, long timestamp, String audioType, int durationInMillis) {
     if (isBadUser(userid)) {
       logger.error("huh? userid is " + userid);
       new Exception().printStackTrace();
@@ -720,11 +723,15 @@ public class AudioDAO extends DAO {
       logger.debug("addOrUpdate userid = " + userid + " audio ref " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
       Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + AUDIO + " " +
+
           "SET " + USERID + "=? " +
+
           "WHERE " +
           Database.EXID + "=?" + " AND " +
           AUDIO_TYPE + "=? AND " +
-          DEFECT + "=FALSE";
+          DEFECT + "=FALSE AND " +
+          AUDIO_REF + "=?";
+
       PreparedStatement statement = connection.prepareStatement(sql);
 
       int ii = 1;
@@ -732,38 +739,21 @@ public class AudioDAO extends DAO {
       statement.setInt(ii++, userid);
       statement.setString(ii++, exerciseID);
       statement.setString(ii++, audioType);
+      statement.setString(ii++, audioRef);
 
       int i = statement.executeUpdate();
 
-      AudioAttribute audioAttr = null;
-      if (i == 0) {
+      if (i == 0) { // so we didn't update, so we need to add it
         logger.debug("\taddOrUpdate adding entry for  " + userid + " " + audioRef + " ex " + exerciseID + " at " + new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
 
         long l = addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
-        audioAttr = getAudioAttribute((int) l, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis);
-      } else {
-        Collection<AudioAttribute> audioAttributes = getAudioAttributes(exerciseID);
-        logger.debug("for  " + exerciseID + " found " + audioAttributes);
-
-        for (AudioAttribute audioAttribute : audioAttributes) {
-          logger.debug("\tfor  " + audioAttribute + " against " + userid + "/" + audioType);
-          if (audioAttribute.getUserid() == userid && audioAttribute.getAudioType().equalsIgnoreCase(audioType)) {
-            logger.debug("\t\tfound  " + audioAttribute + " for " + userid + "/" + audioType);
-            if (audioAttr == null) {
-              audioAttr = audioAttribute;
-            }
-            //break;
-          }
-        }
       }
-      logger.debug("returning " + audioAttr);
+
       finish(connection, statement);
 
-      return audioAttr;
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
-    return null;
   }
 
   /**
