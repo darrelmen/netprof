@@ -72,9 +72,9 @@ public class UserDAO extends DAO {
   public static final int DEFAULT_USER_ID = -1;
   public static final int DEFAULT_MALE_ID = -2;
   public static final int DEFAULT_FEMALE_ID = -3;
-  public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 30, 0, "default", false);
-  public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, 0, "Male", false);
-  public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, "Female", false);
+  public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 99, 0, "default", false);
+  public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 99, 0, "Male", false);
+  public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, 1, "Female", false);
 
   private Collection<String> admins;
 
