@@ -1340,8 +1340,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logAndNotifyServerException(new Exception("couldn't find exercise " + exid));
     } else {
       byID.getAudioAttributes().clear();
+
+      logger.debug("re-attach " + attr + " given isMale " + isMale);
+
       attachAudio(byID);
-      // for (AudioAttribute audioAttribute : byID.getAudioAttributes()) logger.debug("after gender change, now " + audioAttribute);
+
+      for (AudioAttribute audioAttribute : byID.getAudioAttributes()) {
+        logger.debug("after gender change, now " + audioAttribute);
+      }
     }
     db.getSectionHelper().refreshExercise(byID);
   }
