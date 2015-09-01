@@ -1016,8 +1016,12 @@ public class ExcelImport implements ExerciseDAO {
 
           boolean exists = test.exists();
           if (!exists) {
+         //   logger.debug("child " + test.getAbsolutePath() + " doesn't exist");
             test = new File(installPath, audio.getAudioRef());
             exists = test.exists();
+            if (!exists) {
+         //     logger.debug("child " + test.getAbsolutePath() + " doesn't exist");
+            }
             child = audio.getAudioRef();
           }
           if (exists) {
@@ -1029,7 +1033,7 @@ public class ExcelImport implements ExerciseDAO {
           } else {
             missing++;
             c++;
-            if (c < 5) {
+            if (c < 5 || test.getAbsolutePath().contains("17")) {
               logger.warn("file " + test.getAbsolutePath() + " does not exist - \t" + audio.getAudioRef());
               if (c < 2) {
                 logger.warn("installPath " + installPath + "mediaDir " + mediaDir +" mediaDir1 " + mediaDir1);
