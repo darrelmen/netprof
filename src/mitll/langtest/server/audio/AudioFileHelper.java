@@ -17,12 +17,10 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.math.BigDecimal;
 import java.text.Collator;
 import java.util.*;
 
@@ -39,6 +37,7 @@ public class AudioFileHelper implements CollationSort {
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
+  private final MP3Support mp3Support;
   private ASR asrScoring;
   private ASRScoring oldschoolScoring;
   private ASRWebserviceScoring webserviceScoring;
@@ -63,6 +62,7 @@ public class AudioFileHelper implements CollationSort {
     this.db = db;
     this.langTestDatabase = langTestDatabase;
     this.useOldSchoolServiceOnly = serverProperties.getOldSchoolService();
+    this.mp3Support = new MP3Support(pathHelper);
   }
 
   public <T extends CommonExercise> void sort(List<T> toSort) {
@@ -253,7 +253,7 @@ public class AudioFileHelper implements CollationSort {
 
     if (recordInResults) {
       long then = System.currentTimeMillis();
-      JSONObject json = getJsonFromAnswer(answer);
+      JSONObject json = new ScoreToJSON().getJsonFromAnswer(answer);
       // logger.debug("json is " + json);
       long now = System.currentTimeMillis();
       if (now - then > 10) {
@@ -302,11 +302,11 @@ public class AudioFileHelper implements CollationSort {
 
         PretestScore alignmentScoreOld = getAlignmentScore(exercise, pathHelper.getAbsoluteFile(audioRef).getAbsolutePath(),
             serverProps.usePhoneToDisplay(), true);
-        DecodeAlignOutput alignOutputOld  = new DecodeAlignOutput(alignmentScoreOld, false);
+        DecodeAlignOutput alignOutputOld = new DecodeAlignOutput(alignmentScoreOld, false);
 
         // Do decoding, and record alignment info we just got in the database ...
-        AudioAnswer decodeAnswerOld  = getRefDecodeAnswer(exercise, audioRef, pathHelper.getAbsoluteFile(audioRef), attribute.getDurationInMillis(), true);
-        DecodeAlignOutput decodeOutputOld  = new DecodeAlignOutput(decodeAnswerOld, true);
+        AudioAnswer decodeAnswerOld = getRefDecodeAnswer(exercise, audioRef, pathHelper.getAbsoluteFile(audioRef), attribute.getDurationInMillis(), true);
+        DecodeAlignOutput decodeOutputOld = new DecodeAlignOutput(decodeAnswerOld, true);
 
         logger.debug("attr dur " + attribute.getDurationInMillis());
 
@@ -336,12 +336,12 @@ public class AudioFileHelper implements CollationSort {
    *
    * @param exercise1
    * @param user
-   * @param wavPath
    * @param file
    * @param duration
    * @param isMale
    * @param speed
    * @return
+   * @paramx wavPath
    * @paramx numAlignPhones
    * @see #decodeOneAttribute(CommonExercise, AudioAttribute)
    */
@@ -367,7 +367,6 @@ public class AudioFileHelper implements CollationSort {
 
     logger.debug("validity dur " + validity.durationInMillis);
 
-    // DecodeAlignOutput decodeOutput = new DecodeAlignOutput(decodeAnswer);
     db.addRefAnswer(user, exercise1.getID(), file.getPath(),
         validity.durationInMillis,
 
@@ -383,7 +382,7 @@ public class AudioFileHelper implements CollationSort {
 
     // TODO : add word and phone table for refs
     //	recordWordAndPhoneInfo(decodeAnswer, answerID);
- //   logger.debug("getRefAudioAnswerDecoding decodeAnswer " + decodeAnswer);
+    //   logger.debug("getRefAudioAnswerDecoding decodeAnswer " + decodeAnswer);
   }
 
   private AudioAnswer getRefDecodeAnswer(CommonExercise exercise1, String wavPath, File file, long duration, boolean useOldSchool) {
@@ -402,23 +401,45 @@ public class AudioFileHelper implements CollationSort {
      * @param alignmentScore
      */
     public DecodeAlignOutput(PretestScore alignmentScore, boolean isDecode) {
-      this(alignmentScore.getHydecScore(), getJsonObject(alignmentScore).toString(), numPhones(alignmentScore), alignmentScore.getProcessDur(), false, isDecode);
+      this(alignmentScore.getHydecScore(), new ScoreToJSON().getJsonObject(alignmentScore).toString(),
+          //numPhones(alignmentScore),
+          alignmentScore.getProcessDur(), false, isDecode, alignmentScore);
     }
 
     public DecodeAlignOutput(AudioAnswer decodeAnswer, boolean isDecode) {
       this((float) decodeAnswer.getScore(),
-          getJsonFromAnswer(decodeAnswer).toString(),
-          numPhones(decodeAnswer.getPretestScore()),
-          decodeAnswer.getPretestScore().getProcessDur(), decodeAnswer.isCorrect(), isDecode);
+          new ScoreToJSON().getJsonFromAnswer(decodeAnswer).toString(),
+          //     numPhones(decodeAnswer.getPretestScore()),
+          decodeAnswer.getPretestScore().getProcessDur(), decodeAnswer.isCorrect(), isDecode, decodeAnswer.getPretestScore());
     }
 
-    public DecodeAlignOutput(float score, String json, int numPhones, long processDurInMillis, boolean isCorrect, boolean isDecode) {
+    public DecodeAlignOutput(float score, String json,
+                             //int numPhones,
+                             long processDurInMillis, boolean isCorrect, boolean isDecode, PretestScore pretestScore) {
       this.score = score;
       this.json = json;
-      this.numPhones = numPhones;
+      this.numPhones = numPhones(pretestScore);
       this.processDurInMillis = processDurInMillis;
       this.isCorrect = isCorrect;
       this.isDecode = isDecode;
+    }
+
+    private int numPhones(PretestScore pretestScore) {
+      int c = 0;
+      if (pretestScore != null) {
+        Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getsTypeToEndTimes();
+        List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
+
+        if (phones != null) {
+          for (TranscriptSegment pseg : phones) {
+            String pevent = pseg.getEvent();
+            if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals("sil")) {
+              c++;
+            }
+          }
+        }
+      }
+      return c;
     }
 
     public float getScore() {
@@ -496,7 +517,7 @@ public class AudioFileHelper implements CollationSort {
       int processDur = answer.getPretestScore() == null ? 0 : answer.getPretestScore().getProcessDur();
       long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
           isValid, audioType, validity.durationInMillis, true, score, recordedWithFlash, deviceType, device,
-          getJsonFromAnswer(answer).toString(), processDur);
+          new ScoreToJSON().getJsonFromAnswer(answer).toString(), processDur);
       answer.setResultID(answerID);
     }
     logger.debug("getAudioAnswerAlignment answer " + answer);
@@ -562,104 +583,6 @@ public class AudioFileHelper implements CollationSort {
   }
 
   /**
-   * We skip sils, since we wouldn't want to show them to the user.
-   *
-   * @param answer
-   * @return
-   * @see #getAudioAnswerDecoding
-   */
-  private JSONObject getJsonFromAnswer(AudioAnswer answer) {
-    PretestScore pretestScore = answer.getPretestScore();
-    return getJsonObject(pretestScore);
-  }
-
-  private JSONObject getJsonObject(PretestScore pretestScore) {
-    JSONObject jsonObject = new JSONObject();
-    if (pretestScore != null) {
-      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getsTypeToEndTimes();
-      List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
-      List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
-      if (words != null) {
-        int windex = 0;
-        int pindex = 0;
-        JSONArray jsonWords = new JSONArray();
-
-        for (TranscriptSegment segment : words) {
-          String event = segment.getEvent();
-          if (!event.equals(SLFFile.UNKNOWN_MODEL) && !event.equals("sil")) {
-            JSONObject wordJson = new JSONObject();
-            String wid = Integer.toString(windex++);
-            wordJson.put("id", wid);
-            wordJson.put("w", event);
-            wordJson.put("s", getScore(segment));
-            wordJson.put("str", floatToString(segment.getStart()));
-            wordJson.put("end", floatToString(segment.getEnd()));
-
-            JSONArray jsonPhones = new JSONArray();
-
-            for (TranscriptSegment pseg : phones) {
-              if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
-                String pevent = pseg.getEvent();
-                if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals("sil")) {
-                  JSONObject phoneJson = new JSONObject();
-                  phoneJson.put("id", Integer.toString(pindex++));
-                  phoneJson.put("p", pevent);
-                  phoneJson.put("s", getScore(pseg));
-                  phoneJson.put("str", floatToString(pseg.getStart()));
-                  phoneJson.put("end", floatToString(pseg.getEnd()));
-                  jsonPhones.add(phoneJson);
-                }
-              }
-            }
-            wordJson.put("phones", jsonPhones);
-            jsonWords.add(wordJson);
-          }
-        }
-
-        jsonObject.put("words", jsonWords);
-      }
-    }
-    return jsonObject;
-  }
-
-  private String getScore(TranscriptSegment segment) {
-    float score = segment.getScore();
-    return floatToString(score);
-  }
-
-  private String floatToString(float round) {
-    return Float.toString(round(round));
-  }
-
-  private int numPhones(PretestScore pretestScore) {
-    int c = 0;
-    if (pretestScore != null) {
-      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getsTypeToEndTimes();
-      List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
-
-      if (phones != null) {
-        for (TranscriptSegment pseg : phones) {
-          String pevent = pseg.getEvent();
-          if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals("sil")) {
-            c++;
-          }
-        }
-      }
-    }
-    return c;
-  }
-
-  private static float round(float d) {
-    return round(d, 3);
-  }
-
-  private static float round(float d, int decimalPlace) {
-    BigDecimal bd = new BigDecimal(Float.toString(d));
-    bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
-    return bd.floatValue();
-  }
-
-  /**
    * @param base64EncodedString
    * @param textToAlign
    * @param identifier
@@ -718,18 +641,13 @@ public class AudioFileHelper implements CollationSort {
     makeASRScoring();
     List<String> unk = new ArrayList<String>();
 
+    createSLFFile(lmSentences, tmpDir, -1.2f);
+
     if (isMacOrWin() || useOldSchoolServiceOnly || useOldSchool) {  // i.e. NOT using cool new jcodr webservice
-      createSLFFile(lmSentences, tmpDir, -1.2f);
       unk.add(SLFFile.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
     }
 
     String vocab = asrScoring.getUsedTokens(lmSentences, unk); // this is basically the transcript
-    //logger.debug("getASRScoreForAudio : vocab " + vocab + " from " + lmSentences);
-//    if (isMacOrWin() || useOldSchoolServiceOnly) // we have lm sentences in the webservice version because we make the language model later on
-//      return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, lmSentences, 128, 128, false, true, tmpDir,
-//          canUseCache && serverProps.useScoreCache(), "", null,usePhoneToDisplay);
-//    else
-
     String prefix = usePhoneToDisplay ? "phoneToDisplay" : "";
     return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, lmSentences, 128, 128, false, true, tmpDir,
         canUseCache && serverProps.useScoreCache(), prefix, null, usePhoneToDisplay, useOldSchool);
@@ -809,7 +727,7 @@ public class AudioFileHelper implements CollationSort {
                                            int width, int height, boolean useScoreToColorBkg,
                                            boolean decode, String tmpDir, boolean useCache, String prefix, Result precalcResult,
                                            boolean usePhoneToDisplay, boolean useOldSchool) {
-    logger.debug("getASRScoreForAudio (" + serverProps.getLanguage() + ")" + (decode ? " Decoding " : " Aligning ")+
+    logger.debug("getASRScoreForAudio (" + serverProps.getLanguage() + ")" + (decode ? " Decoding " : " Aligning ") +
         "" + testAudioFile + " with sentence '" + sentence + "' req# " + reqid + (useCache ? " check cache" : " NO CACHE") + " prefix " + prefix);
 
     // audio stuff
@@ -818,7 +736,7 @@ public class AudioFileHelper implements CollationSort {
       logger.error("huh? no test audio file for " + sentence);
       return new PretestScore(); // very defensive
     }
-    testAudioFile = dealWithMP3Audio(testAudioFile);
+    testAudioFile = mp3Support.dealWithMP3Audio(testAudioFile);
     if (!new File(testAudioFile).exists()) {
       String absolutePath = pathHelper.getAbsolute(pathHelper.getInstallPath(), testAudioFile).getAbsolutePath();
       if (!new File(absolutePath).exists()) {
@@ -856,7 +774,7 @@ public class AudioFileHelper implements CollationSort {
     }
     pretestScore.setReqid(reqid);
 
-    JSONObject json = getJsonObject(pretestScore);
+    JSONObject json = new ScoreToJSON().getJsonObject(pretestScore);
     pretestScore.setJson(json.toString());
 
     return pretestScore;
@@ -882,66 +800,8 @@ public class AudioFileHelper implements CollationSort {
     return audioFile.substring(0, audioFile.length() - ("." + AudioTag.COMPRESSED_TYPE).length());
   }
 
-  /**
-   * @param testAudioFile
-   * @return
-   * @see #getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean, String, Result)
-   */
-  private String dealWithMP3Audio(String testAudioFile) {
-    if (testAudioFile.endsWith("." + AudioTag.COMPRESSED_TYPE)) {
-      String noSuffix = removeSuffix(testAudioFile);
-      String wavFile = noSuffix + ".wav";
-      File test = pathHelper.getAbsoluteFile(wavFile);
-      if (!test.exists()) {
-        logger.warn("expecting audio file with wav extension, but didn't find " + test.getAbsolutePath());
-      }
-      return test.exists() ? test.getAbsolutePath() : getWavForMP3(testAudioFile);
-    } else {
-      return testAudioFile;
-    }
-  }
-
-  /**
-   * @param audioFile
-   * @return
-   * @see #dealWithMP3Audio(String)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile
-   */
   public String getWavForMP3(String audioFile) {
-    return getWavForMP3(audioFile, pathHelper.getInstallPath());
-  }
-
-  /**
-   * Ultimately does lame --decode from.mp3 to.wav
-   * <p>
-   * Worries about converting from either a relative path to an absolute path (given the webapp install location)
-   * or if audioFile is a URL, converting it to a relative path before making an absolute path.
-   * <p>
-   * Gotta be a better way...
-   *
-   * @param audioFile to convert
-   * @return
-   * @see #getWavForMP3(String)
-   */
-  private String getWavForMP3(String audioFile, String installPath) {
-    assert (audioFile.endsWith(".mp3"));
-    String absolutePath = pathHelper.getAbsolute(installPath, audioFile).getAbsolutePath();
-
-    if (!new File(absolutePath).exists())
-      logger.error("getWavForMP3 : expecting file at " + absolutePath);
-    else {
-      AudioConversion audioConversion = new AudioConversion();
-      File file = audioConversion.convertMP3ToWav(absolutePath);
-      if (file.exists()) {
-        String orig = audioFile;
-        audioFile = file.getAbsolutePath();
-        logger.info("\n\ngetWavForMP3 : from " + orig + " wrote to " + file + " or " + audioFile);
-      } else {
-        logger.error("getImageForAudioFile : can't find " + file.getAbsolutePath());
-      }
-    }
-    assert (audioFile.endsWith(".wav"));
-    return audioFile;
+    return mp3Support.getWavForMP3(audioFile);
   }
 
   /**
@@ -989,11 +849,7 @@ public class AudioFileHelper implements CollationSort {
   }
 
   private ASR getASRScoring() {
-    //boolean isMacOrWin = false;//isMacOrWin();
-    //  if (!isMacOrWin && !useOldSchoolServiceOnly)
     return webserviceScoring;
-    // else
-    //   return oldschoolScoring;
   }
 
   private boolean isWebservice(ASR asr) {
@@ -1023,12 +879,11 @@ public class AudioFileHelper implements CollationSort {
   public void makeAutoCRT(AutoCRTScoring crtScoring) {
     if (autoCRT == null) {
       autoCRT = new AutoCRT(crtScoring, serverProps.getMinPronScore());
-      //logger.debug("making auto crt " + autoCRT);
     }
   }
 
   /**
-   * @see #getASRScoreForAudio(int, String, String, int, int, boolean, boolean, String, boolean, String, Result)
+   * @see #getASRScoreForAudio
    */
   private static class DirAndName {
     private final String testAudioFile;
