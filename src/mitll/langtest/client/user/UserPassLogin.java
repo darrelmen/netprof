@@ -758,7 +758,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   private RegistrationInfo registrationInfo;
-  private User.Kind selectedRole = User.Kind.UNSET;
+  private User.Kind selectedRole = User.Kind.STUDENT;
 
   private final RadioButton studentChoice = new RadioButton("ROLE_CHOICE", STUDENT);
   private final RadioButton teacherChoice = new RadioButton("ROLE_CHOICE", TEACHER);
