@@ -1,14 +1,14 @@
 var recorderHasConsole = (window.console || console.log);
 var recordingStart;
-var recordingEnd;
+//var recordingEnd;
 function microphone_recorder_events() {
-  $('#status').append("<p>Microphone recorder event: " + arguments[0] + "  at " + new Date().getTime());
+  //$('#status').append("<p>Microphone recorder event: " + arguments[0] + "  at " + new Date().getTime());
   if (recorderHasConsole) {
     console.log("got event " + arguments[0]+ " at " + new Date().getTime());
   }
   switch (arguments[0]) {
     case "ready":
-      $('#status').css({'color': '#000'}).append("<p>ready: ");
+    //  $('#status').css({'color': '#000'}).append("<p>ready: ");
       try {
         FlashRecorderLocal.connect("recorderApp", 0);
       } catch (e) {
@@ -17,37 +17,36 @@ function microphone_recorder_events() {
       break;
 
     case "no_microphone_found":
-      $('#status').css({'color': '#000'}).append("<p>no_microphone_found: ");
+    //  $('#status').css({'color': '#000'}).append("<p>no_microphone_found: ");
       noMicrophoneFound();
       break;
 
     case "microphone_user_request":
-      $('#status').css({'color': '#000'}).append("<p>microphone_user_request: ");
+    //  $('#status').css({'color': '#000'}).append("<p>microphone_user_request: ");
       break;
 
     case "microphone_connected":
       var mic = arguments[1];
-      $('#status').css({'color': '#000'}).append("<p>Microphone: " + mic.name);
+    //  $('#status').css({'color': '#000'}).append("<p>Microphone: " + mic.name);
       micConnected();
       break;
 
     case "microphone_not_connected":
       //console.log("got microphone_not_connected");
-
-      $('#status').css({'color': '#000'}).append("<p>microphone_not_connected: ");
+    //  $('#status').css({'color': '#000'}).append("<p>microphone_not_connected: ");
       micNotConnected();
       break;
 
     case "recording":
       var name = arguments[1];
-      $('#status').css({'color': '#000'}).append("<p> recording - " + name + " at " + new Date().getTime());
-        recordingStart = new Date().getTime();
+    //  $('#status').css({'color': '#000'}).append("<p> recording - " + name + " at " + new Date().getTime());
+      recordingStart = new Date().getTime();
       break;
 
     case "recording_stopped":
       var name = arguments[1];
       var duration = arguments[2];
-      $('#status').css({'color': '#000'}).append("<p> recording_stopped - " + name + " Duration: " + duration + "  at " + new Date().getTime());
+      //$('#status').css({'color': '#000'}).append("<p> recording_stopped - " + name + " Duration: " + duration + "  at " + new Date().getTime());
         if (recorderHasConsole) console.log("recording duration " + (new Date().getTime()-recordingStart))
       break;
   }
@@ -60,7 +59,7 @@ FlashRecorderLocal = {
   permitCalled: 0,
 
   connect: function (name, attempts) {
-    $('#status').css({'color': '#0F0'}).append("<p>connect called:  at " + new Date().getTime());
+    //$('#status').css({'color': '#0F0'}).append("<p>connect called:  at " + new Date().getTime());
 
     if (navigator.appName.indexOf("Microsoft") != -1) {
       FlashRecorderLocal.recorder = window[name];
@@ -72,11 +71,15 @@ FlashRecorderLocal = {
       return;
     }
 
+    if (recorderHasConsole) {
+      console.log("about to show showPrivacy");
+    }
+
     // flash app needs time to load and initialize
-    if (FlashRecorderLocal.recorder && FlashRecorderLocal.recorder.init) {
-      $('#status').css({'color': '#0F0'}).append("<p>calling permit at " + new Date().getTime());
+    if (FlashRecorderLocal.recorder /*&& FlashRecorderLocal.recorder.init*/) {
+      //$('#status').css({'color': '#0F0'}).append("<p>calling permit at " + new Date().getTime());
       if (recorderHasConsole) {
-        console.log("showPrivacy");
+        console.log("FlashRecorderLocal.showPrivacy");
       }
       FlashRecorderLocal.recorder.showPrivacy();
       return;
@@ -93,7 +96,7 @@ FlashRecorderLocal = {
   },
 
   record: function (name, filename) {
-    $('#status').css({'color': '#0F0'}).append("<p>record at " + new Date().getTime());
+    //$('#status').css({'color': '#0F0'}).append("<p>record at " + new Date().getTime());
     FlashRecorderLocal.recorder.record(name, filename);
   },
 
@@ -111,7 +114,7 @@ FlashRecorderLocal = {
   },
 
   stop: function () {
-    $('#status').css({'color': '#0F0'}).append("<p>stop at " + new Date().getTime());
+    //$('#status').css({'color': '#0F0'}).append("<p>stop at " + new Date().getTime());
     FlashRecorderLocal.recorder.stopRecording();
   },
 
