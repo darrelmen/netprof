@@ -229,7 +229,7 @@ class FlashcardPanel extends HorizontalPanel {
   }
 
   void addRecordingAndFeedbackWidgets(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller, Panel contentMiddle) {
-    logger.warning("adding empty recording and feedback widgets");
+     logger.warning("adding empty recording and feedback widgets");
   }
 
   /**
@@ -242,7 +242,6 @@ class FlashcardPanel extends HorizontalPanel {
    * @see #FlashcardPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ControlState, StatsFlashcardFactory.MySoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener, String, mitll.langtest.client.list.ListInterface)
    */
   private Panel getThreePartContent(ControlState controlState,
-                                    // Widget firstRow,
                                     Panel contentMiddle,
                                     DivWidget belowDiv, DivWidget lowestRow) {
     Panel horiz = new HorizontalPanel();

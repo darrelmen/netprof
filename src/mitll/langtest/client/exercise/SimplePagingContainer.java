@@ -14,11 +14,14 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 9/16/14.
  */
 public class SimplePagingContainer<T> implements RequiresResize {
+  private final Logger logger = Logger.getLogger("SimplePagingContainer");
+
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
   private static final int VERTICAL_SLOP = 35;
   protected static final int ID_LINE_WRAP_LENGTH = 20;
@@ -66,6 +69,8 @@ public class SimplePagingContainer<T> implements RequiresResize {
     column.add(pager);
     column.add(table);
     table.addStyleName("floatLeft");
+
+    table.getElement().getStyle().setProperty("maxWidth","270px");
 /*    Scheduler.get().scheduleDeferred(new Command() {
       @Override
       public void execute() {
@@ -101,6 +106,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
     table.setWidth("100%");
     table.setHeight("auto");
+   // table.getElement().getStyle().setProperty("maxWidth","270px");
 
     // Add a selection model to handle user selection.
     addSelectionModel();
@@ -111,12 +117,12 @@ public class SimplePagingContainer<T> implements RequiresResize {
 
   protected void addSelectionModel() {}
 
-  protected void addColumnsToTable() {
-
-  }
+  protected void addColumnsToTable() {}
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
     int pageSize = PAGE_SIZE;
+    logger.info("making cell table with " + o);
+
     return new CellTable<T>(pageSize, o);
   }
 
