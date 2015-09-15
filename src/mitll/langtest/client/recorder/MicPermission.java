@@ -10,7 +10,6 @@ package mitll.langtest.client.recorder;
  */
 public interface MicPermission {
   void gotPermission();
-  void gotDenial();
   void noMicAvailable();
   void noRecordingMethodAvailable();
 }
