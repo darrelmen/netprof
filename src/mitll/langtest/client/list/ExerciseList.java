@@ -242,7 +242,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         ((RequiresResize) current).onResize();
       }
       else {
-        logger.warning("huh?  right side is not resizable " + instance + " "+ current.getClass());
+        //logger.warning("huh?  right side is not resizable " + instance + " "+ current.getClass());
       }
     }
  //   else {
@@ -618,7 +618,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see #checkAndAskServer(String)
    */
   protected void askServerForExercise(String itemID) {
-    logger.info("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
+    //logger.info("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
     controller.checkUser();
     if (cachedNext != null && cachedNext.getID().equals(itemID)) {
       //logger.info("\tExerciseList.askServerForExercise using cached id = " + itemID + " instance " + instance);
