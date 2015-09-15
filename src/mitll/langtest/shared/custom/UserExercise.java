@@ -1,12 +1,6 @@
 package mitll.langtest.shared.custom;
 
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.AudioExercise;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
-import mitll.langtest.shared.CommonUserExercise;
-import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.*;
@@ -22,8 +16,8 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   public static final String CUSTOM_PREFIX = "Custom_";
   private long uniqueID = -1; //set by database
 
-  private String english;
-  private String foreignLanguage;
+  //private String english;
+  //private String foreignLanguage;
   private String transliteration;
   private String context;
   private String contextTranslation;
@@ -35,17 +29,18 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   private List<CorrectAndScore> scores;
   private float avgScore;
   private transient Collection<String> refSentences;
- // private transient Set<String> bagOfPhones = new HashSet<String>();
+  // private transient Set<String> bagOfPhones = new HashSet<String>();
   private transient List<String> firstPron = new ArrayList<String>();
- // private transient List<List<String>> pronunciations = new ArrayList<List<String>>();
+  // private transient List<List<String>> pronunciations = new ArrayList<List<String>>();
   private static final int MAX_TOOLTIP_LENGTH = 15;
 
-  public UserExercise() {}  // just for serialization
+  public UserExercise() {
+  }  // just for serialization
 
   /**
-   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    * @param shell
    * @param creator
+   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   public UserExercise(CommonShell shell, long creator) {
     super(shell.getID());
@@ -56,21 +51,21 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   /**
    * Tooltip is the english phrase, but if it's empty, use the foreign language.
    *
-   * @see mitll.langtest.client.custom.dialog.EditItem#createNewItem(long)
-   * @see mitll.langtest.client.custom.dialog.EditItem#getNewItem() (long)
    * @param uniqueID
    * @param exerciseID
    * @param creator
    * @param english
    * @param foreignLanguage
    * @param transliteration
+   * @see mitll.langtest.client.custom.dialog.EditItem#createNewItem(long)
+   * @see mitll.langtest.client.custom.dialog.EditItem#getNewItem() (long)
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
                       String transliteration) {
     super(exerciseID);
     this.creator = creator;
     this.uniqueID = uniqueID;
-    this.english = english;
+    this.englishSentence = english;
     this.foreignLanguage = foreignLanguage;
     this.transliteration = transliteration;
     isPredef = !exerciseID.startsWith(CUSTOM_PREFIX);
@@ -78,7 +73,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserExerciseDAO#getUserExercises
    * @param uniqueID
    * @param exerciseID
    * @param creator
@@ -89,6 +83,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @param contextTranslation
    * @param isOverride
    * @param modifiedTimestamp
+   * @see mitll.langtest.server.database.custom.UserExerciseDAO#getUserExercises
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
                       String transliteration, String context, String contextTranslation,
@@ -110,7 +105,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   public UserExercise(CommonExercise exercise) {
     super(exercise.getID());
     this.isPredef = true;
-    this.english = exercise.getEnglish();
+    this.englishSentence = exercise.getEnglish();
     this.foreignLanguage = exercise.getRefSentence();
     this.transliteration = exercise.getTransliteration();
     setTooltip();
@@ -130,9 +125,9 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   }
 
   /**
+   * @return
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#addNew
    * @deprecated ideally we shouldn't have to do this
-   * @return
    */
   public Exercise toExercise() {
     Exercise exercise = new Exercise(getID(), getEnglish(), getForeignLanguage(), getTooltip());
@@ -155,10 +150,10 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     imported.setContextTranslation(getContextTranslation());
   }
 
-  @Override
+/*  @Override
   public String getEnglish() { return english; }
   @Override
-  public String getForeignLanguage() { return foreignLanguage;  }
+  public String getForeignLanguage() { return foreignLanguage;  }*/
 
   @Override
   public String getRefSentence() {
@@ -171,10 +166,13 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   }
 
   @Override
-  public String getTransliteration() { return transliteration;  }
+  public String getTransliteration() {
+    return transliteration;
+  }
 
   /**
    * Consider how to do this better -- not consistent with Exercise meaning...
+   *
    * @return
    */
   @Override
@@ -183,26 +181,32 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   }
 
   /**
-   * @deprecated  - nobody set this
    * @return
+   * @deprecated - nobody set this
    */
   @Override
-  public String getContent() { return ""; }
+  public String getContent() {
+    return "";
+  }
 
+  /**
+   * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShellsCombined(Collection)
+   */
   public CommonShell getShellCombinedTooltip() {
     String combined = getCombinedTooltip();
 
-    return new ExerciseShell(getID(), combined);
+    return new ExerciseShell(getID(), combined, englishSentence, meaning, foreignLanguage);
   }
 
   public String getCombinedTooltip() {
     String refSentence = getForeignLanguage();
     if (refSentence.length() > MAX_TOOLTIP_LENGTH) {
-      refSentence = refSentence.substring(0,  MAX_TOOLTIP_LENGTH);
+      refSentence = refSentence.substring(0, MAX_TOOLTIP_LENGTH);
     }
-   // boolean refSentenceEqualsTooltip = getTooltip().trim().equals(getForeignLanguage().trim());
+    // boolean refSentenceEqualsTooltip = getTooltip().trim().equals(getForeignLanguage().trim());
     boolean englishSameAsForeign = getEnglish().trim().equals(getForeignLanguage().trim());
-    String combined = englishSameAsForeign ? getEnglish() : getEnglish() + (refSentence.isEmpty() ? "": " / " + refSentence);
+    String combined = englishSameAsForeign ? getEnglish() : getEnglish() + (refSentence.isEmpty() ? "" : " / " + refSentence);
     if (combined.isEmpty()) combined = refSentence;
     return combined;
   }
@@ -215,49 +219,73 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   public long getCreator() {
     return creator;
   }
+
   public void setCreator(long id) {
     creator = id;
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserExerciseDAO#add
    * @param uniqueID
+   * @see mitll.langtest.server.database.custom.UserExerciseDAO#add
    */
-  public void setUniqueID(long uniqueID) { this.uniqueID = uniqueID;  }
+  public void setUniqueID(long uniqueID) {
+    this.uniqueID = uniqueID;
+  }
+
   @Override
-  public long getUniqueID() { return uniqueID; }
+  public long getUniqueID() {
+    return uniqueID;
+  }
 
   /**
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#grabInfoFromFormAndStuffInfoExercise()
    * @param english
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#grabInfoFromFormAndStuffInfoExercise()
    */
-  public void setEnglish(String english) { this.english = english;  }
+  public void setEnglish(String english) {  this.englishSentence = english;  }
+
   public void setForeignLanguage(String foreignLanguage) {
     this.foreignLanguage = foreignLanguage;
   }
+
   public void setTransliteration(String transliteration) {
     this.transliteration = transliteration;
   }
 
   @Override
-  public String getContext() { return context;  }
-  private void setContext(String context) { this.context = context; }
-  
-  @Override
-  public String getContextTranslation() { return contextTranslation; }
-  private void setContextTranslation(String contextTranslation) {this.contextTranslation = contextTranslation; }
+  public String getContext() {
+    return context;
+  }
+
+  private void setContext(String context) {
+    this.context = context;
+  }
 
   @Override
-  public boolean isPredefined() {  return isPredef;  }
+  public String getContextTranslation() {
+    return contextTranslation;
+  }
+
+  private void setContextTranslation(String contextTranslation) {
+    this.contextTranslation = contextTranslation;
+  }
 
   @Override
-  public UserExercise toUserExercise() {  return this;  }
+  public boolean isPredefined() {
+    return isPredef;
+  }
+
+  @Override
+  public UserExercise toUserExercise() {
+    return this;
+  }
 
   /**
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getCreateButton(UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
    * @return
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getCreateButton(UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
    */
-  public boolean checkPredef() {  return !getID().startsWith(CUSTOM_PREFIX);  }
+  public boolean checkPredef() {
+    return !getID().startsWith(CUSTOM_PREFIX);
+  }
 
   @Override
   public long getModifiedDateTimestamp() {
@@ -283,7 +311,8 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   }
 
   @Override
-  public void setBagOfPhones(Set<String> bagOfPhones) {}
+  public void setBagOfPhones(Set<String> bagOfPhones) {
+  }
 
   @Override
   public void setFirstPron(List<String> phones) {
@@ -292,7 +321,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
 
   @Override
   public void setRefSentences(Collection<String> orDefault) {
-  this.refSentences = orDefault;
+    this.refSentences = orDefault;
   }
 
   public void setAvgScore(float avgScore) {
@@ -301,20 +330,20 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
 
   public String toString() {
     return "UserExercise" +
-      " #" + uniqueID + "/" + getID() +
-      (isPredef ? " <Predef>" : " <User>") +
-      (isOverride ? " <Override>" : "") +
-      " creator " + getCreator() +
-      " : English '" + getEnglish() + "', " +
-      "foreign language '" + getForeignLanguage() + "'" + " (" + getTransliteration() + ") " +
-      "context '" + getContext()+ "' " +
-      "contextTranslation '" + getContextTranslation() + "' "+
-      "tooltip '" + getTooltip() +
-      "' audio attr (" + getAudioAttributes().size() +
-      ")" +
-       // " :" + getAudioAttributes() +
+        " #" + uniqueID + "/" + getID() +
+        (isPredef ? " <Predef>" : " <User>") +
+        (isOverride ? " <Override>" : "") +
+        " creator " + getCreator() +
+        " : English '" + getEnglish() + "', " +
+        "foreign language '" + getForeignLanguage() + "'" + " (" + getTransliteration() + ") " +
+        "context '" + getContext() + "' " +
+        "contextTranslation '" + getContextTranslation() + "' " +
+        "tooltip '" + getTooltip() +
+        "' audio attr (" + getAudioAttributes().size() +
+        ")" +
+        // " :" + getAudioAttributes() +
         " unit/lesson " + getUnitToValue() +
-      " state " + getState()+"/" +getSecondState()+
-      " modified " + modifiedTimestamp;
+        " state " + getState() + "/" + getSecondState() +
+        " modified " + modifiedTimestamp;
   }
 }
