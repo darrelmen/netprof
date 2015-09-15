@@ -34,8 +34,9 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   public static MicPermission micPermission;
   private boolean didPopup = false;
   private static boolean permissionReceived;
-  //private static boolean micConnected = true;
+
   private static WebAudioRecorder webAudio;
+  private static FlashRecordPanelHeadless selfPointer;
 
   /**
    * @see mitll.langtest.client.LangTest#makeFlashContainer()
@@ -48,6 +49,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
     webAudio = new WebAudioRecorder();
     webAudio.advertise();
+    selfPointer = this;
   }
 
   /**
@@ -70,7 +72,6 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    */
   void show() {
     setSize(WIDTH + "px", HEIGHT + "px");
-   // logger.info("show: set size on " + this.getElement().getId());
     if (BrowserCheck.getIEVersion() != -1) {
       console("Found IE Version " + BrowserCheck.getIEVersion());
     }
@@ -166,7 +167,6 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   public void hide2() {
     if (permissionReceived) {
       //logger.info("hide2...");
-
       flashHide2();
     }
   }
@@ -183,7 +183,6 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   private String getWav() {
     if (permissionReceived) {
       //logger.info("getWav...");
-
       return flashGetWav();
     } else {
       return "";
@@ -208,15 +207,13 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
       micPermission.gotPermission();
     } else {
-      logger.info("didn't get Flash Player permission!");
+      logger.info("installFlash : didn't get Flash Player permission!");
       if (checkIfFlashInstalled()) {
-       // console("found flash, installing from " + GWT.getModuleBaseURL());
-        logger.info("installFlash looking for " + id);
-
+        logger.info("installFlash : looking for " + id);
         installFlash(GWT.getModuleBaseURL(), id);
       }
       else {
-        console("no flash, trying web audio");
+        console("installFlash : no flash, trying web audio");
 
         webAudio.tryWebAudio(); // kick web audio!
       }
@@ -292,7 +289,6 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
   public static native void installFailure() /*-{
       $wnd.micNotConnected();
-
   }-*/;
 
   /**
@@ -310,20 +306,25 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   public static void micNotConnected() {
     consoleLog("---> mic *NOT* Connected! <--- ");
     permissionReceived = false;
+
+    selfPointer.hide();
+    selfPointer.hide2(); // must be a separate call!
+
     webAudio.tryWebAudio();
   }
 
   public static void noMicrophoneFound() {
     consoleLog("no mic available");
     permissionReceived = false;
-    //micConnected = false;
+
     micPermission.noMicAvailable();
   }
 
   public boolean gotPermission()  { return permissionReceived || usingWebRTC(); }
- // public boolean isMicConnected() { return micConnected; }
+
   public boolean usingFlash() { return permissionReceived; }
   public boolean usingWebRTC() { return webAudio.isWebAudioMicAvailable(); }
+
   /**
    * @see mitll.langtest.client.LangTest#stopRecording(mitll.langtest.client.WavCallback)
    */
