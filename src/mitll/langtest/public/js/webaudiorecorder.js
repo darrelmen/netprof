@@ -1,6 +1,6 @@
 function __log(e, data) {
-    $('#status').append("<p>"+e + "  at " + new Date().getTime());
-  //  console.log(e + "  at " + new Date().getTime());
+//    $('#status').append("<p>"+e + "  at " + new Date().getTime());
+    console.log(e + "  at " + new Date().getTime());
 }
 
 var audio_context;
@@ -146,15 +146,15 @@ function initWebAudio() {
 
         audio_context = new AudioContext;
         gotAudioContext = true;
-        __log('Audio context set up.');
+        __log('initWebAudio Audio context set up.');
 
-        __log('sample rate = ' +audio_context.sampleRate);
+        __log('initWebAudio sample rate = ' +audio_context.sampleRate);
 
         //console.info('Audio context set up.');
 
-        __log('navigator.getUserMedia ' + (navigator.getMedia ? 'available.' : 'not present!'));
+        __log('initWebAudio navigator.getUserMedia ' + (navigator.getMedia ? 'available.' : 'not present!'));
     } catch (e) {
-        __log('No web audio support in this browser!');
+        __log('initWebAudio No web audio support in this browser!');
         //console.error(e);
         webAudioMicNotAvailable();
     }
@@ -162,8 +162,10 @@ function initWebAudio() {
     if (gotAudioContext) {
         try {
             if (navigator.getMedia) {
+                __log('initWebAudio getMedia ...');
+
                 navigator.getMedia({audio: true}, startUserMedia, function (e) {
-                    __log('No live audio input: ' + e);
+                    __log('initWebAudio No live audio input: ' + e);
                     if (e.name == "PermissionDeniedError") {
                         webAudioPermissionDenied();
                     }
@@ -172,10 +174,12 @@ function initWebAudio() {
                 });
             }
             else {
+                __log('initWebAudio getMedia null - no mic.');
+
                 webAudioMicNotAvailable();
             }
         } catch (e) {
-            __log('No navigator.getMedia in this browser!');
+            __log('initWebAudio No navigator.getMedia in this browser!');
            // console.error(e);
             webAudioMicNotAvailable();
         }
