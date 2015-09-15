@@ -11,15 +11,15 @@ import java.util.Set;
  * Created by GO22670 on 3/20/2014.
  */
 public interface CommonExercise extends CommonShell {
-  String getEnglish();
+//  String getEnglish();
 
-  String getMeaning();
+//  String getMeaning();
 
   String getContext();
   
   String getContextTranslation();
 
-  String getForeignLanguage();
+//  String getForeignLanguage();
   String getRefSentence();
 
   Collection<String> getRefSentences();
