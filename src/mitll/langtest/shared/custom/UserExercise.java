@@ -283,9 +283,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   }
 
   @Override
-  public void setBagOfPhones(Set<String> bagOfPhones) {
-    /*this.bagOfPhones = bagOfPhones;*/
-  }
+  public void setBagOfPhones(Set<String> bagOfPhones) {}
 
   @Override
   public void setFirstPron(List<String> phones) {
@@ -313,7 +311,9 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
       "contextTranslation '" + getContextTranslation() + "' "+
       "tooltip '" + getTooltip() +
       "' audio attr (" + getAudioAttributes().size() +
-      ") :" + getAudioAttributes() + " unit/lesson " + getUnitToValue() +
+      ")" +
+       // " :" + getAudioAttributes() +
+        " unit/lesson " + getUnitToValue() +
       " state " + getState()+"/" +getSecondState()+
       " modified " + modifiedTimestamp;
   }
