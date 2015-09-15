@@ -13,6 +13,7 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -22,24 +23,29 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class PagingContainer extends SimplePagingContainer<CommonShell> {
-  private static final int MAX_LENGTH_ID = 35;
+  private final Logger logger = Logger.getLogger("PagingContainer");
+
+  private static final int MAX_LENGTH_ID = 20;
   private static final boolean DEBUG = false;
-  private final Map<String,CommonShell> idToExercise = new HashMap<String, CommonShell>();
+  private final Map<String, CommonShell> idToExercise = new HashMap<String, CommonShell>();
 
   public PagingContainer(ExerciseController controller) {
     super(controller);
   }
-    /**
-     * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer()
-     * @param controller
-     * @param verticalUnaccountedFor
-     */
+
+  /**
+   * @param controller
+   * @param verticalUnaccountedFor
+   * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer()
+   */
   public PagingContainer(ExerciseController controller, int verticalUnaccountedFor) {
     this(controller);
     this.verticalUnaccountedFor = verticalUnaccountedFor;
   }
 
-  public void redraw() {  table.redraw();  }
+  public void redraw() {
+    table.redraw();
+  }
 
   private CommonShell getByID(String id) {
     for (CommonShell t : getList()) {
@@ -51,8 +57,8 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
   }
 
   /**
-   * @see mitll.langtest.client.list.PagingExerciseList#simpleRemove(String)
    * @param es
+   * @see mitll.langtest.client.list.PagingExerciseList#simpleRemove(String)
    */
   public void forgetExercise(CommonShell es) {
     List<CommonShell> list = getList();
@@ -61,35 +67,51 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
 
     if (!list.remove(es)) {
       if (!list.remove(getByID(es.getID()))) {
-        System.err.println("forgetExercise couldn't remove " + es);
+        logger.warning("forgetExercise couldn't remove " + es);
         for (CommonShell t : list) {
           System.out.println("\tnow has " + t.getID());
         }
-      }
-      else {
+      } else {
         idToExercise.remove(es.getID());
       }
-    }
-    else {
-      if (list.size() == before -1) {
+    } else {
+      if (list.size() == before - 1) {
         //System.out.println("\tPagingContainer : now has " + list.size()+ " items");
-      }
-      else {
-        System.err.println("\tPagingContainer.forgetExercise : now has " + list.size() + " items vs " +before);
+      } else {
+        logger.warning("\tPagingContainer.forgetExercise : now has " + list.size() + " items vs " + before);
       }
       idToExercise.remove(es.getID());
     }
     redraw();
   }
 
-  public void setUnaccountedForVertical(int v) {  verticalUnaccountedFor = v;  }
+  public void setUnaccountedForVertical(int v) {
+    verticalUnaccountedFor = v;
+  }
 
-  public List<CommonShell> getExercises() {  return getList();  }
-  public int getSize() { return getList().size(); }
-  public boolean isEmpty() { return getList().isEmpty();  }
-  public CommonShell getFirst() {  return getAt(0);  }
-  public int getIndex(CommonShell t) {  return getList().indexOf(t); }
-  public CommonShell getAt(int i) { return getList().get(i);  }
+  public List<CommonShell> getExercises() {
+    return getList();
+  }
+
+  public int getSize() {
+    return getList().size();
+  }
+
+  public boolean isEmpty() {
+    return getList().isEmpty();
+  }
+
+  public CommonShell getFirst() {
+    return getAt(0);
+  }
+
+  public int getIndex(CommonShell t) {
+    return getList().indexOf(t);
+  }
+
+  public CommonShell getAt(int i) {
+    return getList().get(i);
+  }
 /*
   public int getMouseX() {
     return mouseX;
@@ -139,7 +161,9 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     return bootstrapCellTable;
   }*/
 
-  public CommonShell getCurrentSelection() { return selectionModel.getSelectedObject(); }
+  public CommonShell getCurrentSelection() {
+    return selectionModel.getSelectedObject();
+  }
 
   /*  private com.github.gwtbootstrap.client.ui.CellTable<CommonShell> createBootstrapCellTable(com.github.gwtbootstrap.client.ui.CellTable.Resources o) {
      int pageSize = PAGE_SIZE;
@@ -151,7 +175,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
 
     Column<CommonShell, SafeHtml> id2 = getExerciseIdColumn2();
     addColumn(id2);
-
+    addColumn(getExerciseIdColumnFL());
     // this would be better, but want to consume clicks
   /*  TextColumn<ExerciseShell> id2 = new TextColumn<ExerciseShell>() {
       @Override
@@ -170,18 +194,16 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     table.setSelectionModel(selectionModel);
   }
 
+  /**
+   * @return
+   * @see #addColumnsToTable()
+   */
   private Column<CommonShell, SafeHtml> getExerciseIdColumn2() {
-
     return new Column<CommonShell, SafeHtml>(new MySafeHtmlCell(true)) {
-
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, CommonShell object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
         if (BrowserEvents.CLICK.equals(event.getType())) {
-          //System.out.println("getExerciseIdColumn.onBrowserEvent : got click " + event);
-          //mouseX = event.getClientX();
-          //mouseY = event.getClientY();
-          //clickedExerciseID = object.getID();
           gotClickOnItem(object);
         }
       }
@@ -189,17 +211,17 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
       @Override
       public SafeHtml getValue(CommonShell shell) {
         if (!controller.showCompleted()) {
-          return getColumnToolTip(shell.getTooltip());
+          return getColumnToolTip(shell.getEnglish());
         } else {
-          String columnText = shell.getTooltip();
+          String columnText = shell.getEnglish();
           String html = shell.getID();
           if (columnText != null) {
-            if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
+            columnText = truncate(columnText);
             STATE state = shell.getState();
 
             boolean isDefect = state == STATE.DEFECT;
-            boolean isFixed  = state == STATE.FIXED;
-            boolean isLL     = shell.getSecondState() == STATE.ATTN_LL;
+            boolean isFixed = state == STATE.FIXED;
+            boolean isLL = shell.getSecondState() == STATE.ATTN_LL;
             boolean isRerecord = shell.getSecondState() == STATE.RECORDED;
 
             boolean hasSecondState = isLL || isRerecord;
@@ -218,26 +240,26 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
            }*/
 
             String icon =
-              approved ? "icon-check" :
-                isDefect ? "icon-bug" :
-                  isFixed ? "icon-thumbs-up" :
-                      "";
+                approved ? "icon-check" :
+                    isDefect ? "icon-bug" :
+                        isFixed ? "icon-thumbs-up" :
+                            "";
 
             html = (isSet ?
-              "<i " +
-                (isDefect ? "style='color:red'" :
-                  isFixed ? "style='color:green'" :
-                    "") +
-                " class='" +
-                icon +
-                "'></i>" +
+                "<i " +
+                    (isDefect ? "style='color:red'" :
+                        isFixed ? "style='color:green'" :
+                            "") +
+                    " class='" +
+                    icon +
+                    "'></i>" +
 
-                "&nbsp;" : "") + columnText + (hasSecondState ?
-              "&nbsp;<i " +
-                (isLL ? "style='color:gold'" : "") +
-                " class='" +
-                (isLL ? "icon-warning-sign" : "icon-microphone") +
-                "'></i>" : "");
+                    "&nbsp;" : "") + columnText + (hasSecondState ?
+                "&nbsp;<i " +
+                    (isLL ? "style='color:gold'" : "") +
+                    " class='" +
+                    (isLL ? "icon-warning-sign" : "icon-microphone") +
+                    "'></i>" : "");
 
           }
           return new SafeHtmlBuilder().appendHtmlConstant(html).toSafeHtml();
@@ -245,13 +267,37 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
       }
 
       private SafeHtml getColumnToolTip(String columnText) {
-        if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
+        columnText = truncate(columnText);
         return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
       }
     };
   }
 
-  protected void gotClickOnItem(final CommonShell e) {}
+  private String truncate(String columnText) {
+    if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
+    return columnText;
+  }
+
+  private Column<CommonShell, SafeHtml> getExerciseIdColumnFL() {
+    return new Column<CommonShell, SafeHtml>(new MySafeHtmlCell(true)) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, CommonShell object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        if (BrowserEvents.CLICK.equals(event.getType())) {
+          gotClickOnItem(object);
+        }
+      }
+
+      @Override
+      public SafeHtml getValue(CommonShell shell) {
+        String columnText = truncate(shell.getForeignLanguage());
+        return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
+      }
+    };
+  }
+
+  protected void gotClickOnItem(final CommonShell e) {
+  }
 
   @Override
   public void clear() {
@@ -259,7 +305,9 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     idToExercise.clear();
   }
 
-  public CommonShell byID(String id) { return idToExercise.get(id); }
+  public CommonShell byID(String id) {
+    return idToExercise.get(id);
+  }
 
   public void addExercise(CommonShell exercise) {
     idToExercise.put(exercise.getID(), exercise);
@@ -271,17 +319,19 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     //System.out.println("addExercise adding " + exercise);
 
     List<CommonShell> list = getList();
-    int before= list.size();
+    int before = list.size();
     String id = exercise.getID();
     idToExercise.put(id, exercise);
     int i = list.indexOf(afterThisOne);
     list.add(i + 1, exercise);
     int after = list.size();
-   // System.out.println("data now has "+ after + " after adding " + exercise.getID());
-    if (before +1!=after) System.err.println("didn't add " + exercise.getID());
+    // System.out.println("data now has "+ after + " after adding " + exercise.getID());
+    if (before + 1 != after) logger.warning("didn't add " + exercise.getID());
   }
 
-  public Set<String> getKeys() { return idToExercise.keySet(); }
+  public Set<String> getKeys() {
+    return idToExercise.keySet();
+  }
 
   protected void markCurrent(CommonShell currentExercise) {
     if (currentExercise != null) {
@@ -315,7 +365,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     if (DEBUG) {
       int pageEnd = table.getPageStart() + table.getPageSize();
       System.out.println("marking " + i + " out of " + table.getRowCount() + " page start " + table.getPageStart() +
-        " end " + pageEnd);
+          " end " + pageEnd);
     }
 
     int pageNum = i / table.getPageSize();
@@ -329,7 +379,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
       if (i >= pageEnd) {
         int newStart = Math.max(0, Math.min(table.getRowCount() - table.getPageSize(), newIndex));   // not sure how this happens, but need Math.max(0,...)
         if (DEBUG) System.out.println("new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
-          " vs current " + table.getVisibleRange());
+            " vs current " + table.getVisibleRange());
         table.setVisibleRange(newStart, table.getPageSize());
       }
     }
@@ -337,8 +387,8 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
   }
 
   /**
-   * @see mitll.langtest.client.list.PagingExerciseList#onResize()
    * @param currentExercise
+   * @see mitll.langtest.client.list.PagingExerciseList#onResize()
    */
   public void onResize(CommonShell currentExercise) {
     //System.out.println("PagingContainer : onResize");
