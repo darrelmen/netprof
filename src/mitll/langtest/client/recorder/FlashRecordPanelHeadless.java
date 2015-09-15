@@ -320,7 +320,14 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     micPermission.noMicAvailable();
   }
 
-  public boolean gotPermission()  { return permissionReceived || usingWebRTC(); }
+  public boolean gotPermission()  {
+    boolean b = permissionReceived || usingWebRTC();
+    if (!b) {
+      logger.info("gotPermission permission received " + permissionReceived);
+      logger.info("gotPermission usingWebRTC " + usingWebRTC());
+    }
+    return b;
+  }
 
   public boolean usingFlash() { return permissionReceived; }
   public boolean usingWebRTC() { return webAudio.isWebAudioMicAvailable(); }
