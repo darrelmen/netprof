@@ -101,8 +101,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
           long now = System.currentTimeMillis();
           long roundtrip = now - then;
 
-          logger.info("PostAudioRecordButton : Got audio answer " + result + "platform is " + getPlatform());
-          //showTooLoud();
+          logger.info("PostAudioRecordButton : Got audio answer " + result + " platform is " + getPlatform());
+
           if (result.getReqid() != reqid) {
             logger.info("ignoring old response " + result);
             return;
@@ -165,7 +165,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
   protected void useInvalidResult(AudioAnswer result) {
     controller.logEvent(this, "recordButton", getExercise().getID(), "invalid recording " + result.getValidity());
-    logger.info("useInvalidResult platform is " + getPlatform());
+  //  logger.info("useInvalidResult platform is " + getPlatform());
     if (!checkAndShowTooLoud(result.getValidity())) {
       showPopup(result.getValidity().getPrompt());
     }
