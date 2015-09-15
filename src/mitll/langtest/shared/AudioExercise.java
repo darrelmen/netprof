@@ -1,13 +1,6 @@
 package mitll.langtest.shared;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,18 +17,19 @@ public class AudioExercise extends ExerciseShell {
   private static final String MP3 = ".mp3";
   private static final String CONTEXT = "context";
 
-  private Map<String,AudioAttribute> audioAttributes = new HashMap<String, AudioAttribute>();
-  private Map<String,String> unitToValue = new HashMap<String, String>();
-  private Map<String,ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
+  private Map<String, AudioAttribute> audioAttributes = new HashMap<String, AudioAttribute>();
+  private Map<String, String> unitToValue = new HashMap<String, String>();
+  private Map<String, ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
 
-  public AudioExercise() {}
+  public AudioExercise() {
+  }
 
   public AudioExercise(String id) {
     super(id);
   }
 
-  public AudioExercise(String id, String tooltip) {
-    super(id, tooltip);
+  public AudioExercise(String id, String tooltip/*, String englishSentence, String meaning, String foreignLanguage*/) {
+    super(id, tooltip/*, englishSentence, meaning, foreignLanguage*/);
   }
 
   public String getRefAudio() {
@@ -43,6 +37,11 @@ public class AudioExercise extends ExerciseShell {
     return audio != null ? audio.getAudioRef() : null;
   }
 
+  /**
+   * @see mitll.langtest.server.DatabaseServlet#getJsonForExercise
+   * @param prefs
+   * @return
+   */
   public String getRefAudioWithPrefs(Set<Long> prefs) {
     AudioAttribute audio = getRegularSpeedWithPrefs(prefs);
     return audio != null ? audio.getAudioRef() : null;
