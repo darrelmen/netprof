@@ -164,7 +164,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @see #addRecordingAndFeedbackWidgets(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel)
    */
   private Widget getAnswerAndRecordButtonRow(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller) {
-    logger.info("BootstrapExercisePanel.getAnswerAndRecordButtonRow = " + instance);
+   // logger.info("BootstrapExercisePanel.getAnswerAndRecordButtonRow = " + instance);
     RecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, addKeyBinding, instance);
     this.answerWidget = answerWidget;
     button = answerWidget.getRecordButton();
@@ -360,7 +360,6 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     } else {
       long round = Math.round(score * 100f);
       String heard = result.getDecodeOutput();
-   //   logger.info("heard " + heard);
 
       if (correct) {
         controller.logEvent(button, "Button", exercise.getID(), "correct response - score " + round);
@@ -395,8 +394,16 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     showHeard(heard);
   }
 
+  /**
+   * @see #showCorrectFeedback(double, String)
+   * @see #showIncorrectFeedback(AudioAnswer, double, boolean, String)
+   * @param heard
+   */
   private void showHeard(String heard) {
-    if (!heard.equals(exercise.getForeignLanguage())) {
+    if (!heard.equalsIgnoreCase(exercise.getForeignLanguage())) {
+//      logger.info("heard '" + heard +
+//          "' vs '" + exercise.getForeignLanguage() +
+//          "'");
       Heading recoOutput = getRecoOutput();
       if (recoOutput != null) {
         recoOutput.setText("Heard " + heard);
