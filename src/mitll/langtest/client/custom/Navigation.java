@@ -481,7 +481,7 @@ public class Navigation implements RequiresResize {
   private void showPracticeTab() {
     if (practiceTab != null) {
       checkAndMaybeClearTab(PRACTICE);
-      logger.info(" ------- showPracticeTab make practice tab  - " + practiceTab.getContent());
+      logger.info(" ------- showPracticeTab make practice tab  - ");// + practiceTab.getContent());
       practiceHelper.showNPF(practiceTab, PRACTICE);
       practiceHelper.setContentPanel(practiceTab.getContent());
       practiceHelper.hideList();
