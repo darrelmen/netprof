@@ -207,18 +207,18 @@ public class SetCompleteDisplay {
 
   public Panel getScoreHistory(List<ExerciseCorrectAndScore> sortedHistory,
                                 List<CommonShell> allExercises, ExerciseController controller) {
-    final Map<String,String> idToExercise = new HashMap<String, String>();
+    final Map<String, String> idToExercise = new HashMap<String, String>();
     for (CommonShell commonShell : allExercises) {
       idToExercise.put(commonShell.getID(), commonShell.getTooltip());
     }
 
     SimplePagingContainer<ExerciseCorrectAndScore> container = new SimplePagingContainer<ExerciseCorrectAndScore>(controller) {
 
-        @Override
+      @Override
       protected CellTable.Resources chooseResources() {
         CellTable.Resources o;
 
-          o = GWT.create(LocalTableResources.class);
+        o = GWT.create(LocalTableResources.class);
         return o;
       }
 
