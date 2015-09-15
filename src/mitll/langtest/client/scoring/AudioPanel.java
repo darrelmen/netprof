@@ -34,7 +34,8 @@ import java.util.logging.Logger;
  */
 public class AudioPanel extends VerticalPanel implements RequiresResize {
 
-    private Logger logger = Logger.getLogger("AudioPanel");
+  public static final int LEFT_COLUMN_WIDTH = 275;
+  private Logger logger = Logger.getLogger("AudioPanel");
 
     static final int MIN_WIDTH = 256;
   private static final float WAVEFORM_HEIGHT = 80f;//96;
@@ -344,7 +345,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   private void getImages() {
     int leftColumnWidth1 = controller.getLeftColumnWidth();
-    int leftColumnWidth =  Math.max(225, leftColumnWidth1) + IMAGE_WIDTH_SLOP;
+    int leftColumnWidth =  Math.max(LEFT_COLUMN_WIDTH, leftColumnWidth1) + IMAGE_WIDTH_SLOP;
     int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : rightMargin;
     if (gaugePanel != null && rightSide == 0 /*&& !controller.getProps().isNoModel()*/) {
       rightSide = 180; // TODO : hack!!!

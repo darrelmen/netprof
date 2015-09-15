@@ -9,7 +9,6 @@
 .cellTableCell {
     padding: 2px 15px;
     overflow: hidden;
-    text-align: center;
     cursor:pointer;
     direction: rtl;
     font-family: sans-serif;
