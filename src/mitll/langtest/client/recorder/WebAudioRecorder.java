@@ -1,5 +1,6 @@
 package mitll.langtest.client.recorder;
 
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.WavCallback;
@@ -7,20 +8,45 @@ import mitll.langtest.client.WavCallback;
 import java.util.logging.Logger;
 
 /**
+ * Tries to do initWebaudio, and if no response has been received in 5 seconds, tries again.
+ *
  * Created by GO22670 on 5/27/2014.
  */
 public class WebAudioRecorder {
   private Logger logger = Logger.getLogger("WebAudioRecorder");
+  private static final int DELAY_MILLIS = 5000;
 
   private static boolean webAudioMicAvailable;
-  //private static final boolean micConnected = true;  // TODO how to determine if mic not connected in web audio world?
   private static boolean tried = false;
+  private static boolean gotResponse = false;
+  private Timer theTimer = null;
 
+  /**
+   *
+   * The valid responses to this are : webAudioMicAvailable, webAudioMicNotAvailable, webAudioPermissionDenied
+   * IF we get no response in 5 seconds, ask again!
+   *
+   * The user can easily ignore the dialog by clicking away.
+   */
   public void tryWebAudio() {
     if (!tried) {
       tried = true;
       logger.info("webAudioMicAvailable -- tryWebAudio!");
       initWebaudio();
+
+
+      if (theTimer != null) theTimer.cancel();
+
+      theTimer = new Timer() {
+        @Override
+        public void run() {
+          if (!gotResponse) {
+            tried = false;
+            tryWebAudio();
+          }
+        }
+      };
+      theTimer.schedule(DELAY_MILLIS);
     }
   }
 
@@ -64,21 +90,29 @@ public class WebAudioRecorder {
   public boolean isWebAudioMicAvailable() { return webAudioMicAvailable; }
 
   public static void webAudioMicAvailable() {
-    webAudioMicAvailable = true;
+    gotResponse = true;
 
-//    logger.info("webAudioMicAvailable -- connected!");
     console("webAudioMicAvailable -- connected!");
+
+    webAudioMicAvailable = true;
+//    logger.info("webAudioMicAvailable -- connected!");
     FlashRecordPanelHeadless.micPermission.gotPermission();
   }
 
   public static void webAudioMicNotAvailable() {
+    gotResponse = true;
+
     console("webAudioMicNotAvailable!");
+
     webAudioMicAvailable = false;
     FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
   }
 
   public static void webAudioPermissionDenied() {
+    gotResponse = true;
+
     console("webAudioPermissionDenied!");
+
     webAudioMicAvailable = false;
    // FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
   }
