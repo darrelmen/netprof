@@ -679,9 +679,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         checkLogin();
       }
 
-      public void gotDenial() {
+/*      public void gotDenial() {
         showPopupOnDenial();
-      }
+      }*/
 
       /**
        * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#noMicrophoneFound()
