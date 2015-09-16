@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PopupHelper;
+import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.recorder.FlashcardRecordButton;
@@ -400,7 +401,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @param heard
    */
   private void showHeard(String heard) {
-    if (!heard.equalsIgnoreCase(exercise.getForeignLanguage())) {
+    if (!removePunct(heard).equalsIgnoreCase(removePunct(exercise.getForeignLanguage()))) {
 //      logger.info("heard '" + heard +
 //          "' vs '" + exercise.getForeignLanguage() +
 //          "'");
@@ -410,6 +411,10 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
         recoOutput.getElement().getStyle().setColor("#000000");
       }
     }
+  }
+
+  private String removePunct(String t) {
+    return t.replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
   }
 
   /**
