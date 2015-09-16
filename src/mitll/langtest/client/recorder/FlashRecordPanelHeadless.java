@@ -10,7 +10,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.WavCallback;
 
-import java.util.Date;
 import java.util.logging.Logger;
 
 /**
@@ -24,7 +23,7 @@ import java.util.logging.Logger;
  * @author Gordon Vidaver *
  */
 public class FlashRecordPanelHeadless extends AbsolutePanel {
-  private Logger logger = Logger.getLogger("FlashRecordPanelHeadless");
+  private final Logger logger = Logger.getLogger("FlashRecordPanelHeadless");
 
   private static final int WIDTH = 250;
   private static final int HEIGHT = 170;
@@ -52,37 +51,12 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     selfPointer = this;
   }
 
-  /**
-   * @see #installFlash()
-   * @return
-   */
-  public native boolean checkIfFlashInstalled() /*-{
-      var hasFlash = false;
-      try {
-          var fo = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
-          if(fo) hasFlash = true;
-      } catch(e){
-          if(navigator.mimeTypes ["application/x-shockwave-flash"] != undefined) hasFlash = true;
-      }
-      return hasFlash;
-  }-*/;
-
-  /**
-   * @see #rememberInstallFlash()
-   */
-  void show() {
-    setSize(WIDTH + "px", HEIGHT + "px");
-    if (BrowserCheck.getIEVersion() != -1) {
-      console("Found IE Version " + BrowserCheck.getIEVersion());
-    }
-  }
-
-  private void console(String message) {
+/*  private void console(String message) {
     int ieVersion = BrowserCheck.getIEVersion();
     if (ieVersion == -1 || ieVersion > 9) {
       consoleLog(message);
     }
-  }
+  }*/
 
   private native static void consoleLog( String message) /*-{
       console.log( "FlashRecordPanelHeadless:" + message );
@@ -91,30 +65,31 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   /**
    * Show this widget (make it big enough to accommodate the permission dialog) and install the flash player.
    * @see mitll.langtest.client.LangTest#checkInitFlash()
-   * @see mitll.langtest.client.LangTest#showPopupOnDenial()
+   * @seex mitll.langtest.client.LangTest#showPopupOnDenial()
    */
   public boolean initFlash() {
-    return rememberInstallFlash();
-  }
-
-  /**
-   * @see #initFlash()
-   * @seex #webAudioMicNotAvailable
-   */
-  private boolean rememberInstallFlash() {
-    logger.info("rememberInstallFlash");
+    logger.info("initFlash");
 
     if (!didPopup) {
       show();
       installFlash();
-      logger.info("rememberInstallFlash : did   installFlash");
+      logger.info("initFlash : did   installFlash");
       didPopup = true;
       return false;
     }
     else {
-      logger.info("rememberInstallFlash didPopup " + didPopup);
-
+      logger.info("initFlash didPopup " + didPopup);
       return true;
+    }
+  }
+
+  /**
+   * @see #initFlash()
+   */
+  private void show() {
+    setSize(WIDTH + "px", HEIGHT + "px");
+    if (BrowserCheck.getIEVersion() != -1) {
+      logger.info("Found IE Version " + BrowserCheck.getIEVersion());
     }
   }
 
@@ -129,7 +104,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   public void recordOnClick() {
     if (permissionReceived) {
       if (!isMicAvailable()) {
-        System.err.println("recordOnClick mic is not available");
+        logger.warning("recordOnClick mic is not available");
       }
       else {
         //logger.info("recordOnClick mic IS  available");
@@ -140,16 +115,16 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     }
   }
 
+  public native boolean isMicAvailable() /*-{
+      return $wnd.FlashRecorderLocal.isMicrophoneAvailable();
+  }-*/;
+
   public native void flashRecordOnClick() /*-{
     $wnd.FlashRecorderLocal.record('audio', 'audio.wav');
   }-*/;
 
   public native void flashStopRecording() /*-{
       $wnd.FlashRecorderLocal.stop();
-  }-*/;
-
-  public native boolean isMicAvailable() /*-{
-      return $wnd.FlashRecorderLocal.isMicrophoneAvailable();
   }-*/;
 
   /**
@@ -176,30 +151,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }-*/;
 
   /**
-   * @see mitll.langtest.client.WavCallback#getBase64EncodedWavFile
-   * @see #stopRecording(mitll.langtest.client.WavCallback)
-   * @return
-   */
-  private String getWav() {
-    if (permissionReceived) {
-      //logger.info("getWav...");
-      return flashGetWav();
-    } else {
-      return "";
-    }
-  }
-
-  /**
-   * Base64 encoded byte array from action script.
-   *
-   * @return
-   */
-  public native String flashGetWav() /*-{
-      return $wnd.FlashRecorderLocal.getWav();
-  }-*/;
-
-  /**
-   * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#rememberInstallFlash()
+   * @see FlashRecordPanelHeadless#initFlash()
    */
   private void installFlash() {
     if (gotPermission()) {
@@ -213,7 +165,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
         installFlash(GWT.getModuleBaseURL(), id);
       }
       else {
-        console("installFlash : no flash, trying web audio");
+        logger.info("installFlash : no flash, trying web audio");
 
         webAudio.tryWebAudio(); // kick web audio!
       }
@@ -221,11 +173,19 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#removeAndReloadFlash()
+   * @see #installFlash()
+   * @return
    */
-  public void removeFlash() {
-    removeFlash(id);
-  }
+  public native boolean checkIfFlashInstalled() /*-{
+      var hasFlash = false;
+      try {
+          var fo = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+          if(fo) hasFlash = true;
+      } catch(e){
+          if(navigator.mimeTypes ["application/x-shockwave-flash"] != undefined) hasFlash = true;
+      }
+      return hasFlash;
+  }-*/;
 
   /**
    * Uses SWFObject to embed flash -- <a href='http://code.google.com/p/swfobject/'>SWFObject</a>
@@ -234,61 +194,77 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * @param id marks the div that the flash player will live inside
    */
 	private native void installFlash(String moduleBaseURL, String id) /*-{
-		var appWidth = 240;
-		var appHeight = 160;
-		
-		var flashvars = {'event_handler': 'microphone_recorder_events'};
-		var params = {};
-		var attributes = {'id': "recorderApp", 'name': "recorderApp"};
+      var appWidth = 240;
+      var appHeight = 160;
 
-    $wnd.micConnected = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::micConnected());
-    $wnd.micNotConnected = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::micNotConnected());
-    $wnd.noMicrophoneFound = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::noMicrophoneFound());
-    $wnd.installFailure = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::installFailure());
+      var flashvars = {'event_handler': 'microphone_recorder_events'};
+      var params = {};
+      var attributes = {'id': "recorderApp", 'name': "recorderApp"};
+
+      $wnd.micConnected = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::micConnected());
+      $wnd.micNotConnected = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::micNotConnected());
+      $wnd.noMicrophoneFound = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::noMicrophoneFound());
+      $wnd.installFailure = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::installFailure());
+      $wnd.installFailure2 = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::installFailure2());
+      $wnd.swfCallbackCalled = $entry(@mitll.langtest.client.recorder.FlashRecordPanelHeadless::swfCallbackCalled());
 
       //This function is invoked by SWFObject once the <object> has been created
-      var callback = function (e){
-
+      var callback = function (e) {
           //Only execute if SWFObject embed was successful
-          if(!e.success || !e.ref){ $wnd.installFailure(); }
+
+          //var recorderHasConsole = (window.console || console.log);
+          //if (recorderHasConsole) {
+          //    console.log("got success " + e.success );
+          //    console.log("got ref " + e.ref );
+          //}
+
+          if (!e.success || !e.ref) {
+              $wnd.installFailure();
+          }
           else {  //deal with flash blocked
-              if(typeof e.ref.PercentLoaded !== "undefined") {
-                  if (e.ref.PercentLoaded() < 100) {
+              $wnd.swfCallbackCalled();
+
+              if (typeof e.ref.PercentLoaded !== "undefined") {
+    //              if (recorderHasConsole) {
+      //                console.log("got percent loaded " + e.ref.PercentLoaded() );
+        //          }
+
+//                  if (e.ref.PercentLoaded() < 100) {
                       //$wnd.installFailure();
-                  }
+  //                }
               }
               else {
- //                 $wnd.installFailure();
-
-                  //var initialTimeout = setTimeout(function (){
-                  //    //Ensure Flash Player's PercentLoaded method is available and returns a value
-                  //    if(typeof e.ref.PercentLoaded !== "undefined" && e.ref.PercentLoaded()){
-                  //        //Set up a timer to periodically check value of PercentLoaded
-                  //        var loadCheckInterval = setInterval(function (){
-                  //            //Once value == 100 (fully loaded) we can do whatever we want
-                  //            if(e.ref.PercentLoaded() === 100){
-                  //                //Execute function
-                  //                fn();
-                  //                //Clear timer
-                  //                clearInterval(loadCheckInterval);
-                  //            }
-                  //        }, 1500);
-                  //    }
-                  //}, 200);
+                  $wnd.installFailure2();
               }
           }
       };
-		
-		$wnd.swfobject.embedSWF(moduleBaseURL + "test.swf", id, appWidth, appHeight, "10.1.0", "", flashvars, params, attributes, callback);
-  }-*/;
 
-  private native void removeFlash(String id) /*-{
-      $wnd.swfobject.removeSWF("recorderApp");
+      $wnd.swfobject.embedSWF(moduleBaseURL + "test.swf", id, appWidth, appHeight, "10.1.0", "", flashvars, params, attributes, callback);
   }-*/;
-
 
   public static native void installFailure() /*-{
+      var recorderHasConsole = (window.console || console.log);
+      if (recorderHasConsole) {
+          console.log("got event installFailure");
+      }
+
       $wnd.micNotConnected();
+  }-*/;
+
+  public static native void installFailure2() /*-{
+        var recorderHasConsole = (window.console || console.log);
+        if (recorderHasConsole) {
+            console.log("got event installFailure2");
+        }
+
+    //    $wnd.micNotConnected();
+    }-*/;
+
+  public static native void swfCallbackCalled() /*-{
+      var recorderHasConsole = (window.console || console.log);
+      if (recorderHasConsole) {
+          console.log("got event swfCallbackCalled");
+      }
   }-*/;
 
   /**
@@ -329,27 +305,29 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     return b;
   }
 
-  public boolean usingFlash() { return permissionReceived; }
+  public boolean usingFlash()  { return permissionReceived; }
   public boolean usingWebRTC() { return webAudio.isWebAudioMicAvailable(); }
 
   /**
+   * Handles either state - either we have flash, in which case we ask flash for the wav file,
+   * otherwisse we ask webRTC to stop recording and post the audio to us.
+   *
    * @see mitll.langtest.client.LangTest#stopRecording(mitll.langtest.client.WavCallback)
    */
   public void stopRecording(final WavCallback wavCallback) {
     if (permissionReceived) {
       final long then = System.currentTimeMillis();
-      logger.info("stopRecording at " + then + " " + new Date(then));
+      logger.info("stopRecording - initial ");
 
       Timer t = new Timer() {
         @Override
         public void run() {
 
           long now = System.currentTimeMillis();
-          logger.info("stopRecording timer at " + now + " diff " + (now - then) +
-              " " + new Date(now));
+          logger.info("stopRecording timer at " + now + " diff " + (now - then));
 
           flashStopRecording();
-          wavCallback.getBase64EncodedWavFile(getWav());
+          wavCallback.getBase64EncodedWavFile(flashGetWav());
         }
       };
       t.schedule(FLASH_RECORDING_STOP_DELAY); // add flash delay
@@ -358,4 +336,13 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
       webAudio.stopRecording(wavCallback);
     }
   }
+
+  /**
+   * Base64 encoded byte array from action script.
+   *
+   * @return
+   */
+  public native String flashGetWav() /*-{
+      return $wnd.FlashRecorderLocal.getWav();
+  }-*/;
 }

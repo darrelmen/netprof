@@ -148,7 +148,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void dealWithExceptions() {
     GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
       public void onUncaughtException(Throwable throwable) {
-        /*String exceptionAsString =*/ logException(throwable);
+        /*String exceptionAsString =*/
+        logException(throwable);
 
  /*       if (SHOW_EXCEPTION_TO_USER) {
           if (exceptionAsString.length() > 0) {
@@ -187,19 +188,21 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (toSend.length() > MAX_EXCEPTION_STRING) {
       toSend = toSend.substring(0, MAX_EXCEPTION_STRING)+"...";
     }
-    getButtonFactory().logEvent(UNKNOWN, UNKNOWN,exerciseID,toSend,user);
+    getButtonFactory().logEvent(UNKNOWN, UNKNOWN, exerciseID, toSend, user);
   }
 
   private void logMessageOnServer(String message) {
     new Exception().printStackTrace();
     service.logMessage(message,
-      new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {}
+        new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
 
-        @Override
-        public void onSuccess(Void result) {}
-      }
+          @Override
+          public void onSuccess(Void result) {
+          }
+        }
     );
   }
 
@@ -451,7 +454,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // staleToken = resetPassToken;
     service.getUserIDForToken(resetPassToken, new AsyncCallback<Long>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
       public void onSuccess(Long result) {
@@ -459,10 +463,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           logger.info("token '" + resetPassToken + "' is stale. Showing normal view");
           trimURL();
 
-          populateBelowHeader(verticalContainer,firstRow);
-        //  trimURLAndReload();
-        }
-        else {
+          populateBelowHeader(verticalContainer, firstRow);
+          //  trimURLAndReload();
+        } else {
           ResetPassword userPassLogin = new ResetPassword(service, getProps(), eventRegistration);
           Panel content = userPassLogin.getResetPassword(resetPassToken);
           firstRow.add(content);
@@ -750,7 +753,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #makeFlashContainer()
    * @deprecated fall back to in browswer recording
    */
-  private void showPopupOnDenial() {
+/*  private void showPopupOnDenial() {
     new ModalInfoDialog(TRY_AGAIN, PLEASE_ALLOW_ACCESS_TO_THE_MICROPHONE,
       new HiddenHandler() {
         @Override
@@ -758,9 +761,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           removeAndReloadFlash();
         }
       });
-  }
+  }*/
 
-  private void removeAndReloadFlash() {
+/*  private void removeAndReloadFlash() {
     logger.info(" : removeAndReloadFlash - reloading...");
 
     firstRow.remove(flashRecordPanel);
@@ -768,7 +771,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     makeFlashContainer();
     firstRow.add(flashRecordPanel);
     flashRecordPanel.initFlash();
-  }
+  }*/
 
   /**
    * @see #gotUser
@@ -848,18 +851,16 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   /**
    * @see #modeSelect()
    */
-  // TODO : refactor all this into mode objects that decide whether we need flash or not, etc.
   private void checkInitFlash() {
-    if (!flashRecordPanel.gotPermission()) {
-      logger.info("checkInitFlash : initFlash - no permission yet");
-
+    if (flashRecordPanel.gotPermission()) {
+      //logger.info("checkInitFlash : initFlash - has permission");
+      checkLogin();
+    }
+    else {
+      //logger.info("checkInitFlash : initFlash - no permission yet");
       if (flashRecordPanel.initFlash()) {
         checkLogin();
       }
-    }
-    else {
-      logger.info("checkInitFlash : initFlash - has permission");
-      checkLogin();
     }
   }
 
