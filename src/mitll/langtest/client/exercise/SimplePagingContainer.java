@@ -121,7 +121,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
     int pageSize = PAGE_SIZE;
-    logger.info("making cell table with " + o);
+    //logger.info("making cell table with " + o);
 
     return new CellTable<T>(pageSize, o);
   }
