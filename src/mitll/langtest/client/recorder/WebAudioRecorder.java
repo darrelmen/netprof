@@ -34,7 +34,6 @@ public class WebAudioRecorder {
       logger.info("webAudioMicAvailable -- tryWebAudio!");
       initWebaudio();
 
-
       if (theTimer != null) theTimer.cancel();
 
       theTimer = new Timer() {
