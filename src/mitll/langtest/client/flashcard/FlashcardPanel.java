@@ -34,7 +34,7 @@ import java.util.logging.Logger;
  * Created by GO22670 on 6/26/2014.
  */
 class FlashcardPanel extends HorizontalPanel {
-  private Logger logger = Logger.getLogger("StatsFlashcardFactory");
+  private Logger logger = Logger.getLogger("FlashcardPanel");
 
   protected static final String PLAYING_AUDIO_HIGHLIGHT = "playingAudioHighlight";
   private static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. " +
@@ -100,7 +100,7 @@ class FlashcardPanel extends HorizontalPanel {
     controlState.setStorage(new KeyStorage(controller));
 
     this.soundFeedback = soundFeedback;
-    DivWidget inner2 = new DivWidget();
+    final DivWidget inner2 = new DivWidget();
     inner2.getElement().setId("middle_vert_container");
 
     Panel contentMiddle = getCardContent();
@@ -126,7 +126,11 @@ class FlashcardPanel extends HorizontalPanel {
     inner.add(threePartContent);
 
   //  logger.info("Adding recording widgets to " + inner2.getElement().getId());
-    addRecordingAndFeedbackWidgets(e, service, controller, inner2);
+    Scheduler.get().scheduleDeferred(new Command() {
+      public void execute() {
+        addRecordingAndFeedbackWidgets(exercise, service, controller, inner2);
+      }
+    });
 
   //  logger.info("After adding recording widgets to " + inner2.getElement().getId());
 
