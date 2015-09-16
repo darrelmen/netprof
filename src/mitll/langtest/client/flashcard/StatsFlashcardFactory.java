@@ -241,7 +241,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
           StatsFlashcardFactory.this.controlState,
           soundFeedback,
           soundFeedback.endListener, StatsFlashcardFactory.this.instance, exerciseListToUse);
-//      logger.info("made " + this.getElement().getId() + " for " + e.getID());
+     // logger.info("made " + this.getElement().getId() + " for " + e.getID());
     }
 
     @Override
