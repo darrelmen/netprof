@@ -215,7 +215,6 @@ public class CommentNPFExercise extends NPFExercise {
     return t.replaceAll(PUNCT_REGEX, "");
   }
 
-
 /*
   private void log(String message) {
     System.out.println(message);
