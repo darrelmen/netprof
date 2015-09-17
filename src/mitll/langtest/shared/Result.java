@@ -19,7 +19,7 @@ import java.util.Date;
  * Time: 5:45 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Result implements IsSerializable {
+public class Result implements IsSerializable, UserAndTime {
   private int uniqueID;
   private long userid;
   public String plan;
