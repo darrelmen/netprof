@@ -308,7 +308,7 @@ public class AudioFileHelper implements CollationSort {
         AudioAnswer decodeAnswerOld = getRefDecodeAnswer(exercise, audioRef, pathHelper.getAbsoluteFile(audioRef), attribute.getDurationInMillis(), true);
         DecodeAlignOutput decodeOutputOld = new DecodeAlignOutput(decodeAnswerOld, true);
 
-        logger.debug("attr dur " + attribute.getDurationInMillis());
+        //logger.debug("attr dur " + attribute.getDurationInMillis());
 
         getRefAudioAnswerDecoding(exercise, (int) attribute.getUserid(),
             //audioRef,
@@ -358,14 +358,7 @@ public class AudioFileHelper implements CollationSort {
                                          boolean isMale, String speed) {
     AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(AudioAnswer.Validity.OK, duration);
 
-    //   long then = System.currentTimeMillis();
-    //  JSONObject decodeJSON = getJsonFromAnswer(decodeAnswer);
-    //  long now = System.currentTimeMillis();
-    //  if (now - then > 10) {
-    //    logger.debug("took " + (now - then) + " to convert decode answer to JSON");
-    //  }
-
-    logger.debug("validity dur " + validity.durationInMillis);
+   // logger.debug("validity dur " + validity.durationInMillis);
 
     db.addRefAnswer(user, exercise1.getID(), file.getPath(),
         validity.durationInMillis,
