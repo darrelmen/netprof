@@ -1185,9 +1185,11 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.DownloadServlet#writeUserList(javax.servlet.http.HttpServletResponse, DatabaseImpl, String)
    */
   public String writeZip(OutputStream out, long listid, PathHelper pathHelper) throws Exception {
+    String language1 = getLanguage();
+    if (listid == -1) return language1 + "_Unknown";
+
     UserList userListByID = getUserListByID(listid);
 
-    String language1 = getLanguage();
     if (userListByID == null) {
       logger.error("huh? can't find user list " + listid);
       return language1 + "_Unknown";
