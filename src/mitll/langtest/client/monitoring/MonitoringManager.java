@@ -31,7 +31,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class MonitoringManager {
-//  private static final Logger logger = Logger.getLogger(MonitoringManager.class);
+  private static final Logger logger = Logger.getLogger(MonitoringManager.class);
 
   private static final int MIN = (60 * 1000);
   private static final int HOUR = (60 * MIN);
@@ -39,7 +39,7 @@ public class MonitoringManager {
   private static final int MIN_COUNT_FOR_DIALECT = 10;
   private static final int MIN_SIZE_TO_TRIGGER_FILTER = 15;
   private static final int ITEM_CHART_ITEM_WIDTH = 1000;
-  private static final int MAX_GRADE_ROUNDS = 3;
+ // private static final int MAX_GRADE_ROUNDS = 3;
 
   private final LangTestDatabaseAsync service;
   private String item = "Item";
@@ -216,7 +216,7 @@ public class MonitoringManager {
             String value = numPeopleBox.getItemText(selectedIndex2);
 
             int numPeople = Integer.parseInt(value);
-            //  System.out.println("desired " + numDesired + " people list " + peopleToNumPerForDesired.keySet() + " first " + numPeople);
+            //  logger.info("desired " + numDesired + " people list " + peopleToNumPerForDesired.keySet() + " first " + numPeople);
 
             setMinutesBox(numDesired, numPeople, desiredToPeopleToMinutesPerPerson, minutesBox, hoursBox);
             setItemPerPerson(peopleToNumPerForDesired, numPeople, g);
@@ -281,14 +281,14 @@ public class MonitoringManager {
         getBoxForSet(minutesBox, values);
 
         Integer minutesPerPerson = peopleToMinutesPer.get(firstPerson);
-       // System.out.println("looking for "+ firstPerson + " in " + peopleToMinutesPer + " found " + minutesPerPerson);
+       // logger.info("looking for "+ firstPerson + " in " + peopleToMinutesPer + " found " + minutesPerPerson);
 
         List<Integer> mins = new ArrayList<Integer>(values);
         Collections.sort(mins);
         int index = mins.indexOf(minutesPerPerson);
-      //  System.out.println("index "+ index + " for " + minutesPerPerson + " in " + mins);
+      //  logger.info("index "+ index + " for " + minutesPerPerson + " in " + mins);
         int hours = (int)Math.ceil((float)minutesPerPerson/60f);
-        System.out.println("for " + minutesPerPerson + " minutes " + hours + " hours");
+        logger.info("for " + minutesPerPerson + " minutes " + hours + " hours");
         hoursBox.setHTML(" minutes or " + hours + " hours.");
         minutesBox.setSelectedIndex(index);
       }
@@ -452,7 +452,7 @@ public class MonitoringManager {
     return vp;
   }*/
 
-  private void addGraphOfExperienceToIncorrectAndCorrect(Map<String, Number> result, VerticalPanel vp, int i) {
+/*  private void addGraphOfExperienceToIncorrectAndCorrect(Map<String, Number> result, VerticalPanel vp, int i) {
     List<String> incorrectKeys = new ArrayList<String>();
     List<String> correctKeys = new ArrayList<String>();
     for (String key : result.keySet()) {
@@ -481,7 +481,7 @@ public class MonitoringManager {
 
   private String getPercent(int numer, int denom) {
     return (int)(100f*(float)numer/(float)denom) + "%";
-  }
+  }*/
 
   private float roundToHundredth(double totalHours) {
     return ((float)((Math.round(totalHours*100))))/100f;
@@ -631,7 +631,7 @@ public class MonitoringManager {
   private List<String> getSortedKeys(Map<String, Integer> overall) {
     List<String> keys = new ArrayList<String>(overall.keySet());
     List<String> strings = keys.subList(0, Math.min(200, keys.size()));
-    System.out.println("keys " +strings);
+    logger.info("keys " +strings);
     sortKeysIntelligently(keys);
     return keys;
   }
@@ -645,11 +645,11 @@ public class MonitoringManager {
     DataTable data = DataTable.create();
     data.addColumn(AbstractDataTable.ColumnType.STRING, "ID");
     for (String key : overallToExIDToCount.keySet()) {
- //     System.out.println("type " + key);
+ //     logger.info("type " + key);
       data.addColumn(AbstractDataTable.ColumnType.NUMBER, key);
     }
     int size = keys.size();
-  //  System.out.println(" keys " + size + " table " + data);
+  //  logger.info(" keys " + size + " table " + data);
 
     data.addRows(size);
     int colCount = 1;
@@ -660,7 +660,7 @@ public class MonitoringManager {
     }
 
     for (String key : overallToExIDToCount.keySet()) {
-   //   System.out.println("type " + key + " keys " + keys);
+   //   logger.info("type " + key + " keys " + keys);
       Map<String, Integer> exidToCount = overallToExIDToCount.get(key);
       r = 0;
       for (String exid : keys) {
@@ -685,11 +685,11 @@ public class MonitoringManager {
     DataTable data = DataTable.create();
     data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Index");
     for (String key : overallToExIDToCount.keySet()) {
-      //     System.out.println("type " + key);
+      //     logger.info("type " + key);
       data.addColumn(AbstractDataTable.ColumnType.NUMBER, key);
     }
     int size = keys.size();
-    //  System.out.println(" keys " + size + " table " + data);
+    //  logger.info(" keys " + size + " table " + data);
 
     data.addRows(size);
     int colCount = 1;
@@ -702,7 +702,7 @@ public class MonitoringManager {
     }
 
     for (String key : overallToExIDToCount.keySet()) {
-      //   System.out.println("type " + key + " keys " + keys);
+      //   logger.info("type " + key + " keys " + keys);
       Map<String, Integer> exidToCount = overallToExIDToCount.get(key);
       r = 0;
       for (String exid : keys) {
@@ -762,10 +762,7 @@ public class MonitoringManager {
         vp.add(flex);
 
         float total = result.get("total");
-     //   Float male = result.get("male");
-
-      //  logger.debug("ref audio coverage " + result);
-        System.out.println("ref audio coverage " + result);
+        logger.info("ref audio coverage " + result);
 
         int r = 0;
 
@@ -859,7 +856,7 @@ public class MonitoringManager {
    * @param incorrect
    * @param vp
    */
-  private void doChartSequence(int round, List<String> keys,
+/*  private void doChartSequence(int round, List<String> keys,
                                Map<String, Integer> correct, Map<String, Integer> incorrect, final Panel vp) {
     int size = keys.size();
     //boolean showItemIDs = size > 500;
@@ -888,7 +885,7 @@ public class MonitoringManager {
 
       vp.add(gradeCounts);
     }
-  }
+  }*/
 
   private void sortKeysIntelligently(List<String> keys) {
     String sample = keys.isEmpty() ? "" : keys.iterator().next();
@@ -1101,9 +1098,9 @@ public class MonitoringManager {
 
     int r = 0;
     List<Integer> countsForUsers = getSortedList(expToIncorrect.keySet());
-    System.out.println("exp " + countsForUsers);
+    logger.info("exp " + countsForUsers);
     for (Integer count : countsForUsers) {
-      if (count > 36) System.out.println("Skipping " + count + "->" + expToIncorrect.get(count));
+      if (count > 36) logger.info("Skipping " + count + "->" + expToIncorrect.get(count));
       else {
         data.addRow();
         data.setValue(r, 0, count);
@@ -1129,9 +1126,9 @@ public class MonitoringManager {
 
     int r = 0;
     List<Integer> countsForUsers = getSortedList(expToIncorrect.keySet());
-    System.out.println("exp " + countsForUsers);
+    logger.info("exp " + countsForUsers);
     for (Integer count : countsForUsers) {
-      if (count > 36) System.out.println("Skipping " + count + "->" + expToIncorrect.get(count));
+      if (count > 36) logger.info("Skipping " + count + "->" + expToIncorrect.get(count));
       else {
         data.addRow();
         data.setValue(r, 0, count);// count >= 100 ? count +"-"+(count+99): (count >= 10 ? count +"-" +(count+9) : ""+count));
@@ -1166,14 +1163,14 @@ public class MonitoringManager {
     long total = 0;
     for (Integer v : usersAtCount.values()) total += v;
     long avg = total/usersAtCount.size();
-    System.out.println("avg " + avg);
+    logger.info("avg " + avg);
     AxisOptions options1 = AxisOptions.create();
     options1.setMaxValue(4*avg);
     options.setVAxisOptions(options1);
 
     int r = 0;
     List<Integer> countsForUsers = getSortedList(usersAtCount.keySet());
-    System.out.println("counts for users " + countsForUsers);
+    logger.info("counts for users " + countsForUsers);
     for (Integer count : countsForUsers) {
       data.addRow();
       data.setValue(r, 0, count);// count >= 100 ? count +"-"+(count+99): (count >= 10 ? count +"-" +(count+9) : ""+count));
@@ -1272,7 +1269,7 @@ public class MonitoringManager {
       String day = key.substring(3,5);
       String year = key.substring(6,10);
 
-      System.out.println("from " + key + " got '" + month+
+      logger.info("from " + key + " got '" + month+
           "' '" +  day+
           "' '" + year+
           "'");
@@ -1432,10 +1429,10 @@ public class MonitoringManager {
     data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Male "+ answers);
     int r = 0;
 
-    //System.out.println("counts " + counts);
+    //logger.info("counts " + counts);
     for (Integer c : counts) {
       List<String> users = countToUser.get(c);
-    //  System.out.println("\tcount " + c + " users " + users);
+    //  logger.info("\tcount " + c + " users " + users);
       for (String u : users) {
         data.addRow();
         data.setValue(r, 0, u);
