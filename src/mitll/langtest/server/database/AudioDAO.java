@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.shared.*;
 import org.apache.log4j.Logger;
@@ -96,7 +97,7 @@ public class AudioDAO extends DAO {
    * @return
    * @see #getExToAudio
    */
-  private Collection<AudioAttribute> getAudioAttributes() {
+  public Collection<AudioAttribute> getAudioAttributes() {
     try {
       String sql = "SELECT * FROM " + AUDIO + " WHERE " + DEFECT + "=false";
       return getResultsSQL(sql);
@@ -339,11 +340,11 @@ public class AudioDAO extends DAO {
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
         String trim = rs.getString(1).trim();
-        results.put(trim,rs.getInt(2));
+        results.put(trim, rs.getInt(2));
       }
       //    logger.debug("for " + audioSpeed + " " + sql + " yielded " + results.size());
       finish(connection, statement, rs);
-      logger.debug("results returned " +results.size());
+      logger.debug("results returned " + results.size());
 
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -351,6 +352,14 @@ public class AudioDAO extends DAO {
     return results;
   }
 
+  /**
+   * @see LangTestDatabaseImpl#getMaleFemaleProgress()
+   * @param userMapMales
+   * @param userMapFemales
+   * @param total
+   * @param uniqueIDs
+   * @return
+   */
   public Map<String, Float> getRecordedReport(Map<Long, User> userMapMales, Map<Long, User> userMapFemales, float total,
                                               Set<String> uniqueIDs) {
     float maleFast = getCountForGender(userMapMales.keySet(), REGULAR, uniqueIDs);
@@ -385,7 +394,7 @@ public class AudioDAO extends DAO {
    * @return
    */
   private int getCountForGender(Set<Long> userIds, String audioSpeed,
-                               Set<String> uniqueIDs) {
+                                Set<String> uniqueIDs) {
     //  int count = -1;
     Set<String> results = new HashSet<String>();
     try {
