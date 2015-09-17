@@ -17,7 +17,7 @@ import java.util.Set;
  * Time: 3:53 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AudioAttribute implements IsSerializable {
+public class AudioAttribute implements IsSerializable, UserAndTime {
   private static final String SPEED = "speed";
   public static final String SLOW = "slow";
   public static final String REGULAR = "regular";
