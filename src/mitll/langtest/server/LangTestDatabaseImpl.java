@@ -1966,14 +1966,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
 	@Override
 	public Map<String, Float> getMaleFemaleProgress() {
-    Map<Long, User> userMapMales   = db.getUserDAO().getUserMap(true);
-    Map<Long, User> userMapFemales = db.getUserDAO().getUserMap(false);
+		Map<Long, User> userMapMales   = db.getUserDAO().getUserMap(true);
+		Map<Long, User> userMapFemales = db.getUserDAO().getUserMap(false);
 
-    float total = getExercises().size();
-    Set<String> uniqueIDs = new HashSet<String>();
-    for (CommonShell shell : getExercises()) uniqueIDs.add(shell.getID());
-    return db.getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs);
-			}
+		float total = getExercises().size();
+		Set<String> uniqueIDs = new HashSet<String>();
+		for (CommonShell shell : getExercises()) uniqueIDs.add(shell.getID());
+		return db.getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs);
+	}
 
 	/**
 	 * Map of overall, male, female to list of counts (ex 0 had 7, ex 1, had 5, etc.)
