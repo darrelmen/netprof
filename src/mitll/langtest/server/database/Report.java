@@ -7,6 +7,7 @@ import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.instrumentation.Event;
 import org.apache.log4j.Logger;
 
@@ -130,6 +131,7 @@ public class Report {
 
     Set<Long> users = getUsers(builder);
     getEvents(builder, users);
+
     getResults(builder, users, pathHelper);
 
     builder.append("</body></head></html>");
@@ -144,7 +146,6 @@ public class Report {
    * @param builder
    * @return
    * @see #doReport
-   * @see #getUserToDayToRecordings
    */
   private Set<Long> getUsers(StringBuilder builder) {
     List<User> users = userDAO.getUsers();
@@ -153,46 +154,46 @@ public class Report {
 
     int ytd = 0;
 
-   // SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM/dd/yy h:mm aaa");
+    // SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM/dd/yy h:mm aaa");
     Map<Integer, Integer> monthToCount = new TreeMap<Integer, Integer>();
     Map<Integer, Integer> weekToCount = new TreeMap<Integer, Integer>();
     Set<Long> students = new HashSet<Long>();
     for (User user : users) {
-     // try {
-        boolean isStudent = (user.getAge() == 89 && user.getUserID().isEmpty()) || user.getAge() == 0 || user.getUserKind() == User.Kind.STUDENT;
+      // try {
+      boolean isStudent = (user.getAge() == 89 && user.getUserID().isEmpty()) || user.getAge() == 0 || user.getUserKind() == User.Kind.STUDENT;
 
-        if ( user.getId() == 3 || user.getId() == 1 ) {
-          logger.warn("skipping ? " + user);
+      if (user.getId() == 3 || user.getId() == 1) {
+        logger.warn("skipping ? " + user);
 
-          continue;
-        }
-        if (isStudent) {
-          students.add(user.getId());
+        continue;
+      }
+      if (isStudent) {
+        students.add(user.getId());
         //  if (!user.getTimestamp().isEmpty()) {
-            //Date parse = (!user.getTimestamp().isEmpty()) ? simpleDateFormat2.parse(user.getTimestamp()) : new Date();
-          long userCreated = user.getTimestampMillis();
-            if (userCreated > january1st.getTime()) {
-              ytd++;
+        //Date parse = (!user.getTimestamp().isEmpty()) ? simpleDateFormat2.parse(user.getTimestamp()) : new Date();
+        long userCreated = user.getTimestampMillis();
+        if (userCreated > january1st.getTime()) {
+          ytd++;
 
-              calendar.setTimeInMillis(userCreated);
-              int month = calendar.get(Calendar.MONTH);
-              Integer integer = monthToCount.get(month);
-              monthToCount.put(month, (integer == null) ? 1 : integer + 1);
+          calendar.setTimeInMillis(userCreated);
+          int month = calendar.get(Calendar.MONTH);
+          Integer integer = monthToCount.get(month);
+          monthToCount.put(month, (integer == null) ? 1 : integer + 1);
 
-              int w = calendar.get(Calendar.WEEK_OF_YEAR);
-              Integer integer2 = weekToCount.get(w);
+          int w = calendar.get(Calendar.WEEK_OF_YEAR);
+          Integer integer2 = weekToCount.get(w);
 
-              weekToCount.put(w, (integer2 == null) ? 1 : integer2 + 1);
-            } else {
-              //   logger.debug("NO time " +user.getTimestamp() + " " + parse);
-            }
-          //}
+          weekToCount.put(w, (integer2 == null) ? 1 : integer2 + 1);
         } else {
-          logger.warn("skipping teacher " + user);
+          //   logger.debug("NO time " +user.getTimestamp() + " " + parse);
         }
+        //}
+      } else {
+        logger.warn("skipping teacher " + user);
+      }
       //} catch (ParseException e) {
-     //   e.printStackTrace();
-     // }
+      //   e.printStackTrace();
+      // }
     }
     String users1 = "New Users";// (users enrolled after 10/8)";
     builder.append("<html><head><body>" +
@@ -210,7 +211,7 @@ public class Report {
         "<tr>" +
         "<th>" +
         users1 +
-        " YTD (" +i+
+        " YTD (" + i +
         ")</th>" + "</tr>" +
         "<tr>" +
         "<td>" + ytd +
@@ -288,7 +289,7 @@ public class Report {
     Calendar instance = Calendar.getInstance();
     int i = instance.get(Calendar.YEAR);
     instance.clear();
-    instance.set(Calendar.YEAR,i);
+    instance.set(Calendar.YEAR, i);
     return instance;
   }
 
@@ -298,22 +299,22 @@ public class Report {
    */
   private Map<Long, Map<String, Integer>> getResults(StringBuilder builder, Set<Long> students, PathHelper pathHelper) {
     Calendar calendar = getCal();
-    Date january1st = getJanuaryFirst( getCal());
-   // logger.debug("starting at " + january1st);
+    Date january1st = getJanuaryFirst(getCal());
     int ytd = 0;
 
     List<Result> results = resultDAO.getResults();
     Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
 
+    //logger.debug("found " + exToAudio.size() + " ref audio exercises");
+
     Map<Integer, Integer> monthToCount = new TreeMap<Integer, Integer>();
     Map<Integer, Integer> weekToCount = new TreeMap<Integer, Integer>();
     Map<Long, Map<String, Integer>> userToDayToCount = new TreeMap<Long, Map<String, Integer>>();
 
-    List<Result> refAudio = null;
     int teacherAudio = 0;
     int invalid = 0;
     int invalidScore = 0;
-    //int scoresByTeachers = 0;
+
     int beforeJanuary = 0;
     Set<Long> skipped = new TreeSet<>();
     try {
@@ -323,7 +324,7 @@ public class Report {
 //      logger.debug("wrote to " + file.getAbsolutePath());
       BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 
-      refAudio = new ArrayList<Result>();
+      //refAudio = new ArrayList<Result>();
       teacherAudio = 0;
       invalid = 0;
       calendar = getCal();
@@ -331,9 +332,7 @@ public class Report {
       for (Result result : results) {
         if (result.getTimestamp() > january1st.getTime()) {
           if (result.isValid()) {
-            if (isRefAudioResult(exToAudio, result)) {
-              refAudio.add(result);
-            } else {
+            if (!isRefAudioResult(exToAudio, result)) {
               if (students.contains(result.getUserid())) {
                 //if (result.getAudioType().equals("unset") || result.getAudioType().equals("_by_WebRTC")) {
                 if (result.getPronScore() > -1) {
@@ -379,19 +378,31 @@ public class Report {
     builder.append("\n<br/><span>Valid student recordings</span>");
     builder.append(
         getYTD(ytd, recordings) +
-        getMC(monthToCount, MONTH, recordings) +
-        getWC(weekToCount, WEEK, recordings));
+            getMC(monthToCount, MONTH, recordings) +
+            getWC(weekToCount, WEEK, recordings));
 
-    addRefAudio(builder, calendar, january1st, refAudio);
+    Collection<AudioAttribute> audioAttributes = audioDAO.getAudioAttributes();
+    logger.debug("got " + audioAttributes.size() + " audio attributes.");
+
+    addRefAudio(builder, calendar, january1st, audioAttributes);
+
     return userToDayToCount;
   }
 
-  private void addRefAudio(StringBuilder builder, Calendar calendar, Date january1st, List<Result> refAudio) {
+  /**
+   * @see #getResults(StringBuilder, Set, PathHelper)
+   * @param builder
+   * @param calendar
+   * @param january1st
+   * @param refAudio
+   */
+  private <T extends UserAndTime> void addRefAudio(StringBuilder builder, Calendar calendar, Date january1st, Collection<T> refAudio) {
     int ytd = 0;
     Map<Integer, Integer> monthToCount = new TreeMap<Integer, Integer>();
     Map<Integer, Integer> weekToCount = new TreeMap<Integer, Integer>();
     Map<Long, Map<String, Integer>> userToDayToCount = new TreeMap<Long, Map<String, Integer>>();
-    for (Result result : refAudio) {
+
+    for (T result : refAudio) {
       if (result.getTimestamp() > january1st.getTime()) {
         ytd++;
         tallyByMonthAndWeek(calendar, monthToCount, weekToCount, result, userToDayToCount);
@@ -401,8 +412,8 @@ public class Report {
     String refAudioRecs = "Ref Audio Recordings";
     builder.append(
         getYTD(ytd, refAudioRecs) +
-        getMC(monthToCount, MONTH, refAudioRecs) +
-        getWC(weekToCount, WEEK, refAudioRecs));
+            getMC(monthToCount, MONTH, refAudioRecs) +
+            getWC(weekToCount, WEEK, refAudioRecs));
   }
 
   /**
@@ -417,9 +428,18 @@ public class Report {
   private void tallyByMonthAndWeek(Calendar calendar,
                                    Map<Integer, Integer> monthToCount,
                                    Map<Integer, Integer> weekToCount,
-                                   Result result,
+                                   UserAndTime result,
                                    Map<Long, Map<String, Integer>> userToDayToCount) {
-    calendar.setTimeInMillis(result.getTimestamp());
+    long timestamp = result.getTimestamp();
+    long userid = result.getUserid();
+
+    tallyByMonthAndWeek(calendar, monthToCount, weekToCount, userToDayToCount, timestamp, userid);
+  }
+
+  private void tallyByMonthAndWeek(Calendar calendar, Map<Integer, Integer> monthToCount,
+                                   Map<Integer, Integer> weekToCount,
+                                   Map<Long, Map<String, Integer>> userToDayToCount, long timestamp, long userid) {
+    calendar.setTimeInMillis(timestamp);
     int month = calendar.get(Calendar.MONTH);
     Integer integer = monthToCount.get(month);
     monthToCount.put(month, (integer == null) ? 1 : integer + 1);
@@ -427,8 +447,8 @@ public class Report {
     int w = calendar.get(Calendar.WEEK_OF_YEAR);
     Integer integer2 = weekToCount.get(w);
 
-    Map<String, Integer> dayToCount = userToDayToCount.get(result.getUserid());
-    if (dayToCount == null) userToDayToCount.put(result.getUserid(), dayToCount = new TreeMap<String, Integer>());
+    Map<String, Integer> dayToCount = userToDayToCount.get(userid);
+    if (dayToCount == null) userToDayToCount.put(userid, dayToCount = new TreeMap<String, Integer>());
     String key = calendar.get(Calendar.YEAR) + "," +
         calendar.get(Calendar.MONTH) + "," +
         calendar.get(Calendar.DAY_OF_MONTH);
@@ -440,10 +460,10 @@ public class Report {
   }
 
   /**
-   * @see #getResults(StringBuilder, Set, PathHelper)
    * @param exToAudio
    * @param result
    * @return
+   * @see #getResults(StringBuilder, Set, PathHelper)
    */
   private boolean isRefAudioResult(Map<String, List<AudioAttribute>> exToAudio, Result result) {
     boolean skip = false;
@@ -462,8 +482,13 @@ public class Report {
     return skip;
   }
 
-  private String getFile(AudioAttribute attribute) { return getFile(attribute.getAudioRef()); }
-  private String getFile(Result result) { return getFile(result.getAnswer()); }
+  private String getFile(AudioAttribute attribute) {
+    return getFile(attribute.getAudioRef());
+  }
+
+  private String getFile(Result result) {
+    return getFile(result.getAnswer());
+  }
 
   private String getFile(String audioRef) {
     String[] bestAudios = audioRef.split(File.separator);
@@ -611,12 +636,12 @@ public class Report {
         long start = 0;
         long dur = 0;
         long last = 0;
-  //      Event sevent = null, levent = null;
+        //      Event sevent = null, levent = null;
         for (Event event : eventsForUser.getValue()) {
           long now = event.getTimestamp();
           if (start == 0) {
             start = now;
-    //        sevent = event;
+            //        sevent = event;
           } else if (now - last > 1000 * 300) {
             long session = (last - start);
             if (session == 0) {
@@ -624,11 +649,11 @@ public class Report {
             }
             dur += session;
             start = now;
-      //      sevent = event;
+            //      sevent = event;
           }
 
           last = now;
-        //  levent = event;
+          //  levent = event;
         }
         long session = (last - start);
         if (session == 0) {
@@ -652,7 +677,7 @@ public class Report {
       Map<Long, Set<Event>> userToEvents = weekToUserToEvents.getValue();
 
       for (Map.Entry<Long, Set<Event>> eventsForUser : userToEvents.entrySet()) {
-      //  Long user = eventsForUser.getKey();
+        //  Long user = eventsForUser.getKey();
         //logger.debug("\tuser " + user);
         long start = 0;
         long dur = 0;
