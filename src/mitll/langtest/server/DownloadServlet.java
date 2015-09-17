@@ -261,16 +261,27 @@ public class DownloadServlet extends DatabaseServlet {
     }
   }
 
+  /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
+   * @param response
+   * @param db
+   * @param listid
+   */
   private void writeUserList(HttpServletResponse response, DatabaseImpl db, String listid) {
-    Integer id = Integer.parseInt(listid);
+    Integer id = null;
+    try {
+      id = Integer.parseInt(listid);
+    } catch (NumberFormatException e) {
+      logger.error("couldn't parse " + listid);
+    }
 
     try {
-      String name = db.getUserListName(id);
+      String name = id == null ? "unknown" : db.getUserListName(id);
       name = name.replaceAll("\\,", "_").replaceAll(" ", "_");
       name += ".zip";
       setHeader(response, name);
 
-      db.writeZip(response.getOutputStream(), id, new PathHelper(getServletContext()));
+      db.writeZip(response.getOutputStream(), id == null ? -1 : id, new PathHelper(getServletContext()));
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
     }
