@@ -1001,8 +1001,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		String answer = split[split.length - 1];
 		Result result = db.getRefResultDAO().getResult(exerciseID, answer.replaceAll(".mp3", ".wav"));
 		if (result != null) {
-			logger.debug("align exercise id = " + exerciseID + " file " + answer + " found previous " + result);
+			logger.debug("Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + result.getUniqueID());
 		}
+		else {
+      logger.debug("Cache MISS : align exercise id = " + exerciseID + " file " + answer);
+    }
+
 		db.getExercise(exerciseID); // TODO : why is this needed?
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
