@@ -19,7 +19,6 @@ public interface CommonExercise extends CommonShell {
   
   String getContextTranslation();
 
-//  String getForeignLanguage();
   String getRefSentence();
 
   Collection<String> getRefSentences();
