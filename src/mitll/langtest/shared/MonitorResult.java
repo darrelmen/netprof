@@ -27,14 +27,12 @@ public class MonitorResult implements IsSerializable {
   public static final String DEVICE = "device";
   public static final String TEXT = "text";
 
-
- // private transient static final Logger logger = Logger.getLogger(MonitorResult.class);
-
   private int uniqueID;
   private long userid;
   private String id;
 
   private String foreignText;
+ // private String context;
 
   private String answer;
   private boolean valid;
@@ -86,6 +84,7 @@ public class MonitorResult implements IsSerializable {
     this.withFlash = withFlash;
     this.processDur   = processDur;
     this.roundTripDur = roundTripDur;
+  //  this.context = "";
   }
 
   public int getUniqueID() {
@@ -135,6 +134,10 @@ public class MonitorResult implements IsSerializable {
   public void setForeignText(String foreignText) {
     this.foreignText = foreignText;
   }
+
+/*
+  public void setContext(String context) { this.context = context;}
+*/
 
   public Map<String, String> getUnitToValue() {
     return unitToValue;
@@ -292,7 +295,9 @@ public class MonitorResult implements IsSerializable {
     return "MonitorResult #" + uniqueID + "\t\tby user " + userid + "\texid " + id + " " +
         " at " + new Date(timestamp) +
         "  ans " + answer +
-        " " + " audioType : " + audioType + " device " + device+
+        " audioType : " + audioType +
+     //   " context : " + context +
+        " device " + device+
         " valid " + valid + " " + (correct ? "correct" : "incorrect") + " score " + pronScore;
   }
 
@@ -307,4 +312,8 @@ public class MonitorResult implements IsSerializable {
   public int getRoundTripDur() {
     return roundTripDur;
   }
+
+/*  public String getContext() {
+    return context;
+  }*/
 }
