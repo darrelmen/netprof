@@ -11,10 +11,6 @@ import java.util.Set;
  * Created by GO22670 on 3/20/2014.
  */
 public interface CommonExercise extends CommonShell {
-//  String getEnglish();
-
-//  String getMeaning();
-
   String getContext();
   
   String getContextTranslation();
@@ -114,7 +110,6 @@ public interface CommonExercise extends CommonShell {
   void setAvgScore(float v);
   float getAvgScore();
 
- // Set<String> getBagOfPhones();
   List<String> getFirstPron();
 
   void setBagOfPhones(Set<String> bagOfPhones);
