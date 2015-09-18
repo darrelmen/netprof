@@ -18,7 +18,9 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.util.*;
 
@@ -51,7 +53,14 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String EXISTING_USER_NAME = "ExistingUserName";
   private static final String USER = "user";
   private static final String PASSWORD_H = "passwordH";
+
+  /**
+   * @see DatabaseImpl#userExists(HttpServletRequest, String, String)
+   */
   public static final String EMAIL_H = "emailH";
+  /**
+   * @see DatabaseImpl#userExists(HttpServletRequest, String, String)
+   */
   public static final String USERID = "userid";
   private static final String DEVICE_TYPE = "deviceType";
   private static final String DEVICE = "device";
@@ -61,6 +70,10 @@ public class ScoreServlet extends DatabaseServlet {
   private static final long REFRESH_CONTENT_INTERVAL = 12 * 60 * 60 * 1000l;
   private static final String HAS_RESET = "hasReset";
   private static final String TOKEN = "token";
+
+  /**
+   * @see DatabaseImpl#userExists(HttpServletRequest, String, String)
+   */
   public static final String PASSWORD_CORRECT = "passwordCorrect";
   private static final String PASSWORD_EMAIL_SENT = "PASSWORD_EMAIL_SENT";
   private static final String NOT_VALID = "NOT_VALID";
@@ -406,7 +419,7 @@ public class ScoreServlet extends DatabaseServlet {
     toReturn.put(EMAIL_H,   noUserWithID ? -1 : userFound.getEmailHash());
     toReturn.put(KIND,      noUserWithID ? -1 : userFound.getUserKind().toString());
     toReturn.put(HAS_RESET, noUserWithID ? -1 : userFound.hasResetKey());
-    toReturn.put(TOKEN,     noUserWithID ? "" : userFound.getResetKey());
+    toReturn.put(TOKEN, noUserWithID ? "" : userFound.getResetKey());
     toReturn.put(PASSWORD_CORRECT,
         noUserWithID ? FALSE :
             userFound.getPasswordHash() == null ? FALSE :
@@ -425,7 +438,12 @@ public class ScoreServlet extends DatabaseServlet {
     return new ExerciseSorter(db.getSectionHelper().getTypeOrder(), phoneToCount);
   }
 
-  private void writeJsonToOutput(HttpServletResponse response, JSONObject jsonObject) throws IOException {
+  /**
+   * @see #doPost(HttpServletRequest, HttpServletResponse)
+   * @param response
+   * @param jsonObject
+   */
+  private void writeJsonToOutput(HttpServletResponse response, JSONObject jsonObject) {
     reply(response, jsonObject.toString());
   }
 
@@ -690,6 +708,12 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
+  /**
+   * @see #doPost(HttpServletRequest, HttpServletResponse)
+   * @param resultID
+   * @param roundTripMillis
+   * @param jsonObject
+   */
   private void addRT(long resultID, int roundTripMillis, JSONObject jsonObject) {
     db.getAnswerDAO().addRoundTrip(resultID, roundTripMillis);
     jsonObject.put("OK","OK");
@@ -873,6 +897,11 @@ public class ScoreServlet extends DatabaseServlet {
         deviceType, device, allowAlternates, usePhoneToDisplay);
   }
 
+  /**
+   * @see #getJsonForAudio(HttpServletRequest, String, String, String)
+   * @param request
+   * @return
+   */
   private int getReqID(HttpServletRequest request) {
     String reqid = request.getHeader(REQID);
     //logger.debug("got req id " + reqid);
@@ -954,6 +983,12 @@ public class ScoreServlet extends DatabaseServlet {
     return jsonForScore;
   }
 
+  /**
+   * @see #getJsonForAudioForUser(int, String, int, Request, String, File, String, String, boolean, boolean)
+   * @param exerciseID
+   * @param jsonForScore
+   * @param answer
+   */
   private void addValidity(String exerciseID, JSONObject jsonForScore, AudioAnswer answer) {
     jsonForScore.put(EXID, exerciseID);
     jsonForScore.put(VALID, answer == null ? INVALID : answer.getValidity().toString());
@@ -1102,7 +1137,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  private AudioFileHelper getAudioFileHelper() {
+  private void getAudioFileHelper() {
     if (audioFileHelper == null) {
       setPaths();
 
@@ -1112,9 +1147,13 @@ public class ScoreServlet extends DatabaseServlet {
       loadTesting = getLoadTesting();
       REMOVE_EXERCISES_WITH_MISSING_AUDIO = serverProps.removeExercisesWithMissingAudio();
     }
-    return audioFileHelper;
+   // return audioFileHelper;
   }
 
+  /**
+   * @see #getAudioFileHelper()
+   * @return
+   */
   private DatabaseImpl getDatabase() {
     DatabaseImpl db = null;
     Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
@@ -1127,6 +1166,10 @@ public class ScoreServlet extends DatabaseServlet {
     return db;
   }
 
+  /**
+   * @see #getAudioFileHelper()
+   * @return
+   */
   private AudioFileHelper getAudioFileHelperRef() {
     AudioFileHelper fileHelper = null;
     Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.AUDIO_FILE_HELPER_REFERENCE);
@@ -1154,6 +1197,7 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * TODO : this is wacky -- have to do this for alignment but not for decoding
    *
+   * @see #getAudioAnswer(int, String, int, boolean, String, File, String, String, CommonExercise, boolean, boolean)
    * @param reqid
    * @param testAudioFile
    * @param sentence
@@ -1167,6 +1211,15 @@ public class ScoreServlet extends DatabaseServlet {
         false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, null,usePhoneToDisplay, false);
   }
 
+  /**
+   * @see #getAudioAnswerAlign(int, String, int, boolean, String, File, String, String, CommonExercise, boolean)
+   * @param reqid
+   * @param testAudioFile
+   * @param sentence
+   * @param exerciseID
+   * @param usePhoneToDisplay
+   * @return
+   */
   private PretestScore getASRScoreForAudioNoCache(int reqid, String testAudioFile, String sentence,
                                                   String exerciseID, boolean usePhoneToDisplay) {
     //  logger.debug("getASRScoreForAudioNoCache for " + testAudioFile + " under " + sentence);
@@ -1177,6 +1230,7 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * Just for appen -
    * @return
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private JSONObject getJsonLeastRecordedChapters() {
     setInstallPath(db);
@@ -1204,6 +1258,11 @@ public class ScoreServlet extends DatabaseServlet {
     return jsonObject;
   }
 
+  /**
+   * @see #getJsonLeastRecordedChapters()
+   * @param sectionNodes
+   * @return
+   */
   private JSONArray getContentAsJson2(Collection<SectionNode> sectionNodes) {
     JSONArray jsonArray = new JSONArray();
     Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
@@ -1251,6 +1310,12 @@ public class ScoreServlet extends DatabaseServlet {
     return jsonForNode;
   }
 
+  /**
+   * @see #getJsonLeastRecordedChapters()
+   * @param node
+   * @param typeToValues
+   * @param exToCount
+   */
   private void recurse(SectionNode node, Map<String, Collection<String>> typeToValues, Map<String, Integer> exToCount) {
     if (node.isLeaf()) {
       Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToValues);
