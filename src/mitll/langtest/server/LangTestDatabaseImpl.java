@@ -953,6 +953,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 				return new PretestScore();
 			} else {
 				String sentence = exercise.getForeignLanguage();
+				if (result.getAudioType().contains("context")) sentence = exercise.getContext();
+
 				String audioFilePath = result.getAnswer();
 				ensureMP3(audioFilePath, sentence);
 				File tempDir = Files.createTempDir();
