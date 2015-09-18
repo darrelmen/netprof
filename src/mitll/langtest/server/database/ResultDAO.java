@@ -158,6 +158,8 @@ public class ResultDAO extends DAO {
 
 
   /**
+   * Add info from exercises.
+   *
    * @see mitll.langtest.server.database.DatabaseImpl#getMonitorResultsWithText(java.util.List)
    * @param monitorResults
    * @param join
@@ -177,9 +179,12 @@ public class ResultDAO extends DAO {
         n++;
         result.setUnitToValue(EMPTY_MAP);
         result.setForeignText("");
+        //result.setContext("");
       } else {
         result.setUnitToValue(exercise.getUnitToValue());
         result.setForeignText(exercise.getForeignLanguage());
+        //result.setContext(exercise.getContext());
+        //logger.info("for " + exercise.getID() + " ft " + exercise.getForeignLanguage() + " context " + exercise.getContext());
       }
     }
     if (n > 0) {
