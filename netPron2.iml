@@ -41,13 +41,19 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/imagewriter/audioimage/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/imagewriter/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/.settings" />
+      <excludeFolder url="file://$MODULE_DIR$/bogus" />
+      <excludeFolder url="file://$MODULE_DIR$/crash" />
+      <excludeFolder url="file://$MODULE_DIR$/dbAnalysis" />
       <excludeFolder url="file://$MODULE_DIR$/gwt-unitCache" />
+      <excludeFolder url="file://$MODULE_DIR$/imagewriter/bin" />
+      <excludeFolder url="file://$MODULE_DIR$/korean" />
+      <excludeFolder url="file://$MODULE_DIR$/oda-test" />
+      <excludeFolder url="file://$MODULE_DIR$/old" />
       <excludeFolder url="file://$MODULE_DIR$/test-classes" />
       <excludeFolder url="file://$MODULE_DIR$/war/WEB-INF/classes" />
+      <excludeFolder url="file://$MODULE_DIR$/war/bestAudio" />
       <excludeFolder url="file://$MODULE_DIR$/war/bin" />
       <excludeFolder url="file://$MODULE_DIR$/war/langtest" />
       <excludeFolder url="file://$MODULE_DIR$/war/scoring" />
@@ -71,5 +77,6 @@
     <orderEntry type="library" name="servlet-api (2)" level="project" />
     <orderEntry type="library" name="servlet-api (2)" level="project" />
     <orderEntry type="library" name="commons-beanutils-1.8.0" level="project" />
+    <orderEntry type="library" name="xmlbeans-2.3.0" level="project" />
   </component>
 </module>
