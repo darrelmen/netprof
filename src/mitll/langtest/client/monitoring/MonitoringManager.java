@@ -18,9 +18,9 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.monitoring.Session;
-import org.apache.log4j.Logger;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Show lots of charts and graphs to allow us to follow progress of data collection.
@@ -31,7 +31,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class MonitoringManager {
-  private static final Logger logger = Logger.getLogger(MonitoringManager.class);
+  private static final Logger logger = Logger.getLogger("MonitoringManager");
 
   private static final int MIN = (60 * 1000);
   private static final int HOUR = (60 * MIN);
@@ -142,7 +142,8 @@ public class MonitoringManager {
   private void doDesiredQuery(final Panel vp, final DoIt it) {
     service.getDesiredCounts(new AsyncCallback<Map<String, Map<Integer, Map<Integer, Integer>>>>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
       public void onSuccess(Map<String, Map<Integer, Map<Integer, Integer>>> result) {
@@ -172,16 +173,16 @@ public class MonitoringManager {
         if (it != null) it.go();
       }
 
-      private Panel getItemCalculator(Map<String, Map<Integer, Map<Integer, Integer>>> result, String key,String gender) {
+      private Panel getItemCalculator(Map<String, Map<Integer, Map<Integer, Integer>>> result, String key, String gender) {
         final Map<Integer, Map<Integer, Integer>> desiredToPeopleToItemsPerPerson = result.get(key);
-        final Map<Integer, Map<Integer, Integer>> desiredToPeopleToMinutesPerPerson = result.get(key+"Hours");
+        final Map<Integer, Map<Integer, Integer>> desiredToPeopleToMinutesPerPerson = result.get(key + "Hours");
         final ListBox desiredItemsBox = new ListBox();
         final ListBox numPeopleBox = new ListBox();
         final ListBox minutesBox = new ListBox();
         final HTML hoursBox = new HTML("");
         final Set<Integer> desiredSet = desiredToPeopleToItemsPerPerson.keySet();
         final List<Integer> desiredList = getBoxForSet(desiredItemsBox, desiredSet);
-        final Grid g = new Grid(4,3);
+        final Grid g = new Grid(4, 3);
         desiredItemsBox.addChangeHandler(new ChangeHandler() {
           @Override
           public void onChange(ChangeEvent event) {
@@ -197,13 +198,13 @@ public class MonitoringManager {
 
         vp.add(new HTML("<b>" +
             gender +
-            " " +users+
+            " " + users +
             " Needed</b>&nbsp;"));
-        g.setText(0,0,"Desired " +answers + " per "+ item);
+        g.setText(0, 0, "Desired " + answers + " per " + item);
         g.setWidget(0, 1, desiredItemsBox);
 
         Map<Integer, Integer> peopleToNumPer = desiredToPeopleToItemsPerPerson.get(desiredList.get(0));
-        g.setText(1,0, "Number of " + users);
+        g.setText(1, 0, "Number of " + users);
         g.setWidget(1, 1, numPeopleBox);
         List<Integer> peopleList = getBoxForSet(numPeopleBox, peopleToNumPer.keySet());
         numPeopleBox.addChangeHandler(new ChangeHandler() {
@@ -231,39 +232,39 @@ public class MonitoringManager {
             Integer numDesired = getNumDesired(desiredItemsBox, desiredList);
             Map<Integer, Integer> peopleToMinutesPer = desiredToPeopleToMinutesPerPerson.get(numDesired);
             for (Map.Entry<Integer, Integer> pair : peopleToMinutesPer.entrySet()) {
-                if (pair.getValue().equals(minSelected)) {
-                  people = pair.getKey();
-                  for (int i = 0; i < numPeopleBox.getItemCount(); i++) {
-                    if (numPeopleBox.getItemText(i).equals(""+people)) {
-                      numPeopleBox.setSelectedIndex(i);
-                      break;
-                    }
+              if (pair.getValue().equals(minSelected)) {
+                people = pair.getKey();
+                for (int i = 0; i < numPeopleBox.getItemCount(); i++) {
+                  if (numPeopleBox.getItemText(i).equals("" + people)) {
+                    numPeopleBox.setSelectedIndex(i);
+                    break;
                   }
-                  break;
                 }
+                break;
+              }
             }
 
-            int hours = (int)Math.ceil((float)minSelected/60f);
+            int hours = (int) Math.ceil((float) minSelected / 60f);
             hoursBox.setHTML(" minutes or " + hours + " hours.");
             Map<Integer, Integer> peopleToNumPerForDesired = desiredToPeopleToItemsPerPerson.get(numDesired);
             setItemPerPerson(peopleToNumPerForDesired, people, g);
           }
         });
 
-        g.setText(3,0,items + " per " + user);
+        g.setText(3, 0, items + " per " + user);
         Integer firstPerson = peopleList.get(0);
         setItemPerPerson(peopleToNumPer, firstPerson, g);
 
-        g.setText(2,0, "Time per " + user);
+        g.setText(2, 0, "Time per " + user);
         setMinutesBox(desiredList.get(0), firstPerson, desiredToPeopleToMinutesPerPerson, minutesBox, hoursBox);
         g.setWidget(2, 1, minutesBox);
-        g.setWidget(2,2, hoursBox);
+        g.setWidget(2, 2, hoursBox);
         return g;
       }
 
       private void setMinutesBox(Integer numDesired, int numPeople, Map<Integer, Map<Integer, Integer>> desiredToPeopleToMinutesPerPerson, ListBox minutesBox, HTML hoursBox) {
         Map<Integer, Integer> peopleToMinutesPer = desiredToPeopleToMinutesPerPerson.get(numDesired);
-        setMinutesBox(numPeople, peopleToMinutesPer, minutesBox,hoursBox);
+        setMinutesBox(numPeople, peopleToMinutesPer, minutesBox, hoursBox);
       }
 
       private void setItemPerPerson(Map<Integer, Integer> peopleToNumPerForDesired, int numPeople, Grid g) {
@@ -281,13 +282,13 @@ public class MonitoringManager {
         getBoxForSet(minutesBox, values);
 
         Integer minutesPerPerson = peopleToMinutesPer.get(firstPerson);
-       // logger.info("looking for "+ firstPerson + " in " + peopleToMinutesPer + " found " + minutesPerPerson);
+        // logger.info("looking for "+ firstPerson + " in " + peopleToMinutesPer + " found " + minutesPerPerson);
 
         List<Integer> mins = new ArrayList<Integer>(values);
         Collections.sort(mins);
         int index = mins.indexOf(minutesPerPerson);
-      //  logger.info("index "+ index + " for " + minutesPerPerson + " in " + mins);
-        int hours = (int)Math.ceil((float)minutesPerPerson/60f);
+        //  logger.info("index "+ index + " for " + minutesPerPerson + " in " + mins);
+        int hours = (int) Math.ceil((float) minutesPerPerson / 60f);
         logger.info("for " + minutesPerPerson + " minutes " + hours + " hours");
         hoursBox.setHTML(" minutes or " + hours + " hours.");
         minutesBox.setSelectedIndex(index);
@@ -311,7 +312,8 @@ public class MonitoringManager {
   private void doSessionQuery(final Panel vp, final DoIt it) {
     service.getResultStats(new AsyncCallback<Map<String, Number>>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
       public void onSuccess(Map<String, Number> result) {
@@ -325,62 +327,62 @@ public class MonitoringManager {
 
         service.getSessions(new AsyncCallback<List<Session>>() {
           @Override
-          public void onFailure(Throwable caught) {}
+          public void onFailure(Throwable caught) {
+          }
 
           @Override
           public void onSuccess(List<Session> sessions) {
             long totalTime = 0;
             long total = 0;
             long valid = sessions.size();
-            Map<Long,Integer> rateToCount = new HashMap<Long, Integer>();
-            for (Session s: sessions) {
+            Map<Long, Integer> rateToCount = new HashMap<Long, Integer>();
+            for (Session s : sessions) {
               totalTime += s.duration;
               total += s.getNumAnswers();
 
               Integer count = rateToCount.get(s.getSecAverage());
               if (count == null) rateToCount.put(s.getSecAverage(), s.getNumAnswers());
-              else rateToCount.put(s.getSecAverage(),count+ s.getNumAnswers());
+              else rateToCount.put(s.getSecAverage(), count + s.getNumAnswers());
             }
-            FlexTable flex=  new FlexTable();
+            FlexTable flex = new FlexTable();
             int row = 0;
-            flex.setText(row,0,"Num sessions");
+            flex.setText(row, 0, "Num sessions");
             flex.setText(row++, 1, "" + valid);
 
             long hoursSpent = totalTime / HOUR;
-            double dhoursSpent = (double)hoursSpent;
-            flex.setText(row,0,"Time spent");
-            flex.setText(row++,1,""+hoursSpent + " hours " + (totalTime - hoursSpent *HOUR)/MIN + " mins");
+            double dhoursSpent = (double) hoursSpent;
+            flex.setText(row, 0, "Time spent");
+            flex.setText(row++, 1, "" + hoursSpent + " hours " + (totalTime - hoursSpent * HOUR) / MIN + " mins");
 
-            flex.setText(row,0,"Audio collected");
-            flex.setText(row++,1,roundToHundredth(totalHours) + " hours");
+            flex.setText(row, 0, "Audio collected");
+            flex.setText(row++, 1, roundToHundredth(totalHours) + " hours");
 
-            flex.setText(row,0,"# Bad audio recordings (zero length)");
-            flex.setText(row++,1,""+badRecordings);
+            flex.setText(row, 0, "# Bad audio recordings (zero length)");
+            flex.setText(row++, 1, "" + badRecordings);
 
             if (dhoursSpent > 0) {
-              flex.setText(row,0,"Audio yield (collected/spent)");
-              flex.setText(row++,1,""+Math.round((totalHours/dhoursSpent)*100) + "%");
+              flex.setText(row, 0, "Audio yield (collected/spent)");
+              flex.setText(row++, 1, "" + Math.round((totalHours / dhoursSpent) * 100) + "%");
             }
 
-            flex.setText(row,0,"Total "+ answers);
-            flex.setText(row++,1,""+total);
+            flex.setText(row, 0, "Total " + answers);
+            flex.setText(row++, 1, "" + total);
             if (valid > 0) {
-              flex.setText(row,0,"Avg " +
+              flex.setText(row, 0, "Avg " +
                   answers +
                   "/session");
-              flex.setText(row++,1,""+(total / valid));
-              flex.setText(row,0,"Avg time spent/session");
-              flex.setText(row++,1,""+((totalTime / valid) / MIN) + " mins");
+              flex.setText(row++, 1, "" + (total / valid));
+              flex.setText(row, 0, "Avg time spent/session");
+              flex.setText(row++, 1, "" + ((totalTime / valid) / MIN) + " mins");
             }
             if (total > 0) {
               long rateInMillis = totalTime / total;
-              flex.setText(row,0,"Avg time spent/" + item);
-              flex.setText(row++,1,""+ (rateInMillis / 1000) + " sec" );
+              flex.setText(row, 0, "Avg time spent/" + item);
+              flex.setText(row++, 1, "" + (rateInMillis / 1000) + " sec");
             }
 
-            flex.setText(row,0,"Avg audio collected/" + item);
-            flex.setText(row++,1,""+ roundToHundredth(avgSecs) + " sec");
-
+            flex.setText(row, 0, "Avg audio collected/" + item);
+            flex.setText(row++, 1, "" + roundToHundredth(avgSecs) + " sec");
 
 
             vp.add(flex);
