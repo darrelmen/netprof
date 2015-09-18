@@ -212,6 +212,9 @@ public class AudioExport {
   }
 
   /**
+   * TODO : come back to this to make sure meaning, english, and foreign language make sense for English
+   * Exercises and UserExercises.
+   *
    * @param copy
    * @param language
    * @param typeOrder
@@ -238,14 +241,25 @@ public class AudioExport {
       int j = 0;
 
       row.createCell(j++).setCellValue(exercise.getID());
-      row.createCell(j++).setCellValue(exercise.getEnglish());
+
+     // logger.warn("English " + exercise.getEnglish() + " getMeaning " + exercise.getMeaning() + " getForeignLanguage " + exercise.getForeignLanguage() + " ref " + exercise.getRefSentence());
+
+      // TODO : some horrible hacks to deal with UserExercise vs Exercise confusion about fields.
+      // WORD_EXPRESSION
+      String english1 = english ? exercise.getRefSentence() : exercise.getEnglish();
+      row.createCell(j++).setCellValue(english1);
 
       if (!english) {
         row.createCell(j++).setCellValue(exercise.getForeignLanguage());
       }
 
+      String meaning = english ?
+          (exercise.getMeaning().isEmpty() ? exercise.getEnglish() : exercise.getMeaning()) :
+          exercise.getTransliteration();
+
+      // english ? MEANING : TRANSLITERATION
       // evil thing where the meaning is empty for UserExercise overrides, but on the spreadsheet
-      row.createCell(j++).setCellValue(english ? (exercise.getMeaning().isEmpty() ? exercise.getForeignLanguage() : exercise.getMeaning()) : exercise.getTransliteration());
+      row.createCell(j++).setCellValue(meaning);
 
       for (String type : typeOrder) {
         row.createCell(j++).setCellValue(exercise.getUnitToValue().get(type));
