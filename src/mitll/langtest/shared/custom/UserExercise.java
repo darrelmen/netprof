@@ -16,8 +16,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   public static final String CUSTOM_PREFIX = "Custom_";
   private long uniqueID = -1; //set by database
 
-  //private String english;
-  //private String foreignLanguage;
   private String transliteration;
   private String context;
   private String contextTranslation;
@@ -29,9 +27,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   private List<CorrectAndScore> scores;
   private float avgScore;
   private transient Collection<String> refSentences;
-  // private transient Set<String> bagOfPhones = new HashSet<String>();
   private transient List<String> firstPron = new ArrayList<String>();
-  // private transient List<List<String>> pronunciations = new ArrayList<List<String>>();
   private static final int MAX_TOOLTIP_LENGTH = 15;
 
   public UserExercise() {
@@ -149,11 +145,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     imported.setContext(getContext());
     imported.setContextTranslation(getContextTranslation());
   }
-
-/*  @Override
-  public String getEnglish() { return english; }
-  @Override
-  public String getForeignLanguage() { return foreignLanguage;  }*/
 
   @Override
   public String getRefSentence() {
@@ -336,6 +327,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
         " creator " + getCreator() +
         " : English '" + getEnglish() + "', " +
         "foreign language '" + getForeignLanguage() + "'" + " (" + getTransliteration() + ") " +
+        "meaning " + getMeaning() +
         "context '" + getContext() + "' " +
         "contextTranslation '" + getContextTranslation() + "' " +
         "tooltip '" + getTooltip() +
