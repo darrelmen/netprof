@@ -24,27 +24,29 @@ import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.list.TypeAhead;
-import mitll.langtest.client.scoring.EmptyScoreListener;
 import mitll.langtest.client.scoring.ReviewScoringPanel;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.ResultAndTotal;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
  * Show a dialog with all the results we've collected so far.
- * <p/>
+ * <p>
  * User: go22670
  * Date: 5/18/12
  * Time: 5:43 PM
  * To change this template use File | Settings | File Templates.
  */
 public class ResultManager extends PagerTable {
-  public static final String YES = "Yes";
-  public static final String NO = "No";
-  private Logger logger = Logger.getLogger("ResultManager");
+  private static final String YES = "Yes";
+  private static final String NO = "No";
+  private final Logger logger = Logger.getLogger("ResultManager");
 
   private static final int PAGE_SIZE = 9;
   private static final String TIMESTAMP = "timestamp";
@@ -74,9 +76,10 @@ public class ResultManager extends PagerTable {
   private final AudioTag audioTag = new AudioTag();
   private final String nameForAnswer;
   private final Map<Column<?, ?>, String> colToField = new HashMap<Column<?, ?>, String>();
-  private Collection<String> typeOrder;
+  private final Collection<String> typeOrder;
   private int req = 0;
-  ExerciseController controller;
+  private final ExerciseController controller;
+
   /**
    * @param s
    * @param nameForAnswer
@@ -133,11 +136,11 @@ public class ResultManager extends PagerTable {
     dialogBox.setWidget(dialogVPanel);
   }
 
-    /**
-     * @see #showResults() 
-     * @param dialogBox
-     * @return
-     */
+  /**
+   * @param dialogBox
+   * @return
+   * @see #showResults()
+   */
   private Button getCloseButton(final DialogBox dialogBox) {
     final Button closeButton = new Button(CLOSE);
     closeButton.setEnabled(true);
@@ -152,9 +155,9 @@ public class ResultManager extends PagerTable {
     return closeButton;
   }
 
-    @Override
+  @Override
   protected SafeHtml getURL2() {
-      return getAnchorHTML("downloadResults", "Download Excel");
+    return getAnchorHTML("downloadResults", "Download Excel");
   }
 
   /**
@@ -191,11 +194,12 @@ public class ResultManager extends PagerTable {
           //logger.info(" requestSuggestions got request for " + type + " : " + unitToValue);
           service.getResultAlternatives(unitToValue, getUserID(), getText(), type, new AsyncCallback<Collection<String>>() {
             @Override
-            public void onFailure(Throwable caught) {}
+            public void onFailure(Throwable caught) {
+            }
 
             @Override
             public void onSuccess(Collection<String> result) {
-             // logger.info(" request for " + type + " : " + unitToValue + " yielded " + result.size());
+              // logger.info(" request for " + type + " : " + unitToValue + " yielded " + result.size());
               makeSuggestionResponse(result, callback, request);
             }
           });
@@ -219,7 +223,8 @@ public class ResultManager extends PagerTable {
 
         service.getResultAlternatives(getUnitToValue(), getUserID(), getText(), MonitorResult.USERID, new AsyncCallback<Collection<String>>() {
           @Override
-          public void onFailure(Throwable caught) {}
+          public void onFailure(Throwable caught) {
+          }
 
           @Override
           public void onSuccess(Collection<String> result) {
@@ -297,7 +302,7 @@ public class ResultManager extends PagerTable {
     return new KeyUpHandler() {
       @Override
       public void onKeyUp(KeyUpEvent event) {
-     //   logger.info(w.getId() + " KeyUpEvent event " + event + " item " + w.getText() + " " + w.getValue());
+        //   logger.info(w.getId() + " KeyUpEvent event " + event + " item " + w.getText() + " " + w.getValue());
         redraw();
       }
     };
@@ -346,7 +351,7 @@ public class ResultManager extends PagerTable {
     try {
       return userIDSuggest == null ? -1 : textFromTypeahead.isEmpty() ? -1 : Long.parseLong(textFromTypeahead);
     } catch (NumberFormatException e) {
-      new PopupHelper().showPopup("Please enter a number",userIDSuggest.getWidget());
+      new PopupHelper().showPopup("Please enter a number", userIDSuggest.getWidget());
     }
     return -1;
   }
@@ -365,71 +370,60 @@ public class ResultManager extends PagerTable {
     return unitToValue;
   }
 
-/*  private List<MonitorResult> createProvider(Collection<MonitorResult> result, CellTable<MonitorResult> table) {
-    ListDataProvider<MonitorResult> dataProvider = new ListDataProvider<MonitorResult>();
-
-    // Connect the table to the data provider.
-    dataProvider.addDataDisplay(table);
-
-    // Add the data to the data provider, which automatically pushes it to the
-    // widget.
-    List<MonitorResult> list = dataProvider.getList();
-    for (MonitorResult answer : result) {
-      list.add(answer);
-    }
-    table.setRowCount(list.size());
-    return list;
-  }*/
-
-  CellTable<MonitorResult> cellTable;
-  Panel reviewContainer;
+  private CellTable<MonitorResult> cellTable;
+  private Panel reviewContainer;
 
   /**
    * Also shows on the bottom a widget for review.
+   *
    * @param numResults
    * @return
    * @see #populateTable
    */
   private Widget getAsyncTable(int numResults, Widget rightOfPager) {
-      cellTable = new CellTable<MonitorResult>();
+    cellTable = new CellTable<MonitorResult>();
 
-      reviewContainer = new HorizontalPanel();
-      reviewContainer.addStyleName("topFiveMargin");
-      reviewContainer.addStyleName("border");
-      final SingleSelectionModel<MonitorResult> selectionModel = new SingleSelectionModel<>();
-      cellTable.setSelectionModel(selectionModel);
-      cellTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-          @Override
-          public void onSelectionChange(SelectionChangeEvent event) {
-              final MonitorResult selectedObject = selectionModel.getSelectedObject();
+    reviewContainer = new HorizontalPanel();
+    reviewContainer.addStyleName("topFiveMargin");
+    reviewContainer.addStyleName("border");
+    final SingleSelectionModel<MonitorResult> selectionModel = new SingleSelectionModel<>();
+    cellTable.setSelectionModel(selectionModel);
+    cellTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+      @Override
+      public void onSelectionChange(SelectionChangeEvent event) {
+        final MonitorResult selectedObject = selectionModel.getSelectedObject();
+       // String audioType = selectedObject.getAudioType();
 
-              ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(),selectedObject.getForeignText(), service, controller, selectedObject.getId());
+       // logger.info("audio type " + audioType);
+        String foreignText =  selectedObject.getForeignText();
 
-              w.setResultID(selectedObject.getUniqueID());
+        ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(), foreignText, service, controller, selectedObject.getId());
 
-              Panel vert = new VerticalPanel();
-              vert.add(w);
-              vert.add(w.getBelow());
+        w.setResultID(selectedObject.getUniqueID());
 
-              reviewContainer.clear();
-              reviewContainer.add(vert);
-              reviewContainer.add(w.getTables());
-          }
-      });
-      addColumnsToTable(cellTable);
-      cellTable.setRowCount(numResults, true);
-      cellTable.setVisibleRange(0, MAX_TO_SHOW);
-      createProvider(numResults, cellTable);
+        Panel vert = new VerticalPanel();
+        vert.add(w);
+        vert.add(w.getBelow());
 
-      // Add a ColumnSortEvent.AsyncHandler to connect sorting to the AsyncDataPRrovider.
-      ColumnSortEvent.AsyncHandler columnSortHandler = new ColumnSortEvent.AsyncHandler(cellTable);
-      cellTable.addColumnSortHandler(columnSortHandler);
+        reviewContainer.clear();
+        reviewContainer.add(vert);
+        reviewContainer.add(w.getTables());
+      }
+    });
+    addColumnsToTable(cellTable);
+    cellTable.setRowCount(numResults, true);
+    cellTable.setVisibleRange(0, MAX_TO_SHOW);
+    createProvider(numResults, cellTable);
 
-      Column<?, ?> time = getColumn(TIMESTAMP);
-      cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(time, false));
-      cellTable.setWidth("100%", false);
+    // Add a ColumnSortEvent.AsyncHandler to connect sorting to the AsyncDataPRrovider.
+    ColumnSortEvent.AsyncHandler columnSortHandler = new ColumnSortEvent.AsyncHandler(cellTable);
+    cellTable.addColumnSortHandler(columnSortHandler);
 
-      return getPagerAndTable(cellTable, rightOfPager);
+    Column<?, ?> time = getColumn(TIMESTAMP);
+    cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(time, false));
+    cellTable.setWidth("100%", false);
+
+    return getPagerAndTable(cellTable, rightOfPager);
   }
 
   private Column<?, ?> getColumn(String name) {
@@ -449,7 +443,7 @@ public class ResultManager extends PagerTable {
    * @return
    * @see #getAsyncTable
    */
-  private AsyncDataProvider<MonitorResult> createProvider(final int numResults, final CellTable<MonitorResult> table) {
+  private void createProvider(final int numResults, final CellTable<MonitorResult> table) {
     AsyncDataProvider<MonitorResult> dataProvider = new AsyncDataProvider<MonitorResult>() {
       @Override
       protected void onRangeChanged(HasData<MonitorResult> display) {
@@ -465,13 +459,14 @@ public class ResultManager extends PagerTable {
         final String text = getText();
 
         int val = req++;
-       // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
+        // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
         logger.info("got " + builder.toString());
 
         service.getResults(start, end, builder.toString(), unitToValue, userID, text, val, new AsyncCallback<ResultAndTotal>() {
           @Override
           public void onFailure(Throwable caught) {
             Window.alert("Can't contact server.");
+            logger.warning("Got  " +caught);
           }
 
           @Override
@@ -482,15 +477,15 @@ public class ResultManager extends PagerTable {
                   " --->req " + unitToValue + " user " + userID + " text '" + text + "' : got back " + result.results.size() + " of total " + result.numTotal);
 */
             } else {
-                final int numTotal = result.numTotal;
-                cellTable.setRowCount(numTotal, true);
-                updateRowData(start, result.results);
-                if (numTotal > 0) {
-                    MonitorResult object = result.results.get(0);
+              final int numTotal = result.numTotal;
+              cellTable.setRowCount(numTotal, true);
+              updateRowData(start, result.results);
+              if (numTotal > 0) {
+                MonitorResult object = result.results.get(0);
 //                    logger.info("--->getResults req " + result.req +
 //                            " " + unitToValue + " user " + userID + " text '" + text + "' : " +
 //                            "got back " + result.results.size() + " of total " + result.numTotal + " selecting "+ object);
-                    cellTable.getSelectionModel().setSelected(object, true);
+                cellTable.getSelectionModel().setSelected(object, true);
               }
             }
           }
@@ -502,13 +497,13 @@ public class ResultManager extends PagerTable {
     dataProvider.addDataDisplay(table);
     dataProvider.updateRowCount(numResults, true);
 
-    return dataProvider;
+    //  return dataProvider;
   }
 
   /**
-   * @see #createProvider(int, com.google.gwt.user.cellview.client.CellTable)
    * @param table
    * @return
+   * @see #createProvider(int, com.google.gwt.user.cellview.client.CellTable)
    */
   private StringBuilder getColumnSortedState(CellTable<MonitorResult> table) {
     final ColumnSortList sortList = table.getColumnSortList();
@@ -536,8 +531,9 @@ public class ResultManager extends PagerTable {
    * @seex #getAsyncTable(int)
    */
 
-  private TextColumn<MonitorResult> addColumnsToTable(CellTable<MonitorResult> table) {
-    TextColumn<MonitorResult> id = addUserPlanExercise(table);
+  private void addColumnsToTable(CellTable<MonitorResult> table) {
+    /*TextColumn<MonitorResult> id =*/
+    addUserPlanExercise(table);
 
     final AbstractCell<SafeHtml> progressCell = new AbstractCell<SafeHtml>("click") {
       @Override
@@ -566,7 +562,6 @@ public class ResultManager extends PagerTable {
     table.addColumn(audioFile, nameForAnswer);
     colToField.put(audioFile, ANSWER);
     addResultColumn(table);
-    return id;
   }
 
   /**
@@ -574,7 +569,7 @@ public class ResultManager extends PagerTable {
    * @return
    * @see #addColumnsToTable(com.google.gwt.user.cellview.client.CellTable)
    */
-  protected TextColumn<MonitorResult> addUserPlanExercise(CellTable<MonitorResult> table) {
+  private void addUserPlanExercise(CellTable<MonitorResult> table) {
     TextColumn<MonitorResult> id = new TextColumn<MonitorResult>() {
       @Override
       public String getValue(MonitorResult answer) {
@@ -600,7 +595,7 @@ public class ResultManager extends PagerTable {
     table.addColumn(exercise, "Ex.");
     colToField.put(exercise, ID);
 
-    Column<MonitorResult,SafeHtml> fl = new Column<MonitorResult, SafeHtml>(new SafeHtmlCell()) {
+    Column<MonitorResult, SafeHtml> fl = new Column<MonitorResult, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(MonitorResult answer) {
         return getNoWrapContent(answer.getForeignText());
@@ -625,13 +620,13 @@ public class ResultManager extends PagerTable {
       colToField.put(unit, type);
     }
 
-    return id;
+    // return id;
   }
 
   /**
    * @param table to add columns to
    */
-  protected void addResultColumn(CellTable<MonitorResult> table) {
+  private void addResultColumn(CellTable<MonitorResult> table) {
     addNoWrapColumn(table);
 
     TextColumn<MonitorResult> audioType = new TextColumn<MonitorResult>() {
@@ -685,7 +680,7 @@ public class ResultManager extends PagerTable {
     table.addColumn(pronScore, PRO_F_SCORE);
     colToField.put(pronScore, PRON_SCORE);
 
-    Column<MonitorResult,SafeHtml> type = new Column<MonitorResult, SafeHtml>(new SafeHtmlCell()) {
+    Column<MonitorResult, SafeHtml> type = new Column<MonitorResult, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(MonitorResult answer) {
         return getNoWrapContent(answer.getDevice());
