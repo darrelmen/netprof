@@ -27,40 +27,40 @@ Title: Unit 1: Part 3
 Speaker 1: Kao
 Speaker 2: He
 
-1: Èi, Lăo Hé!
-2: Xiăo Gāo!
-1: Zuìjìn zěmmeyàng a?
-2: Hái kéyi. Nĭ ne?
-1: Hái shi lăo yàngzi. Nĭ gōngzuò máng bu máng?
-2: Bú tài máng. Nĭ xuéxí zěmmeyàng?
-1: Tĭng jĭnzhāngde.
+1: Èi, Lăo Hé! (/90/regular_1403794727635_by_8.wav, /90/slow_1403794714026_by_8.wav)
+2: Xiăo Gāo! (/93/regular_1403794869759_by_8.wav, /93/slow_1403794875313_by_8.wav) 
+1: Zuìjìn zěmmeyàng a? (/96/regular_1403794766781_by_8.wav, /96/slow_1403794750850_by_8.wav)
+2: Hái kéyi. Nĭ ne? (/99/regular_1403795159594_by_8.wav, /99/slow_1403795185981_by_8.wav)
+1: Hái shi lăo yàngzi. Nĭ gōngzuò máng bu máng? (/109/regular_1403795348397_by_8.wav, /109/slow_1403795359109_by_8.wav)
+2: Bú tài máng. Nĭ xuéxí zěmmeyàng? (/115/regular_1403795085285_by_8.wav, /115/slow_1403795093515_by_8.wav)
+1: Tĭng jĭnzhāngde. (/119/regular_1403795511433_by_8.wav, /119/slow_1403795517517_by_8.wav)
 
 Title: Unit 1: Part 4
 
 Speaker 1: Mrs. Li
 Speaker 2: Mrs. Smith
 
-1: Xiè Tàitai, huānyíng, huānyíng! Qĭng jìn, qĭng jìn.
-2: Xièxie.
-1: Qĭng zuò, qĭng zuò.
-2: Xièxie.
-2: Lĭ Tàitai, wŏ yŏu yìdiăn shì, děi zŏule.
-2: Lĭ Tàitai, xièxie nín le.
-1: Bú kèqi. Màn zŏu a!
-2: Zàijiàn, zàijiàn!
+1: Xiè Tàitai, huānyíng, huānyíng! Qĭng jìn, qĭng jìn. (/145/regular_1403797935594_by_8.wav, /145/slow_1403797946854_by_8.wav)
+2: Xièxie. (/146/regular_1403798184425_by_8.wav, /146/slow_1403798188972_by_8.wav)
+1: Qĭng zuò, qĭng zuò. (/149/regular_1403798074844_by_8.wav, /149/slow_1403798082119_by_8.wav)
+2: Xièxie. (/146/regular_1403798184425_by_8.wav, /146/slow_1403798188972_by_8.wav)
+2: Lĭ Tàitai, wŏ yŏu yìdiăn shì, děi zŏule. (/154/regular_1403797865456_by_8.wav, /154/slow_1403797874655_by_8.wav)
+2: Lĭ Tàitai, xièxie nín le. (/158/regular_1403797900178_by_8.wav, /158/slow_1403797916593_by_8.wav)
+1: Bú kèqi. Màn zŏu a! (/161/regular_1403798275036_by_8.wav, /161/slow_1403798282629_by_8.wav)
+2: Zàijiàn, zàijiàn! (/162/regular_1403797559758_by_8.wav, /162/slow_1403797569320_by_8.wav)
 
 Title: Unit 2: Part 1
 
 Speaker 1: Taiwanese Student
 Speaker 2: Parsons
 
-1: Qĭng wèn, nĭ shì něiguó rén?
-2: Wŏ shi Měiguo rén.
-1: Nĭ jiào shémme míngzi?
-2: Wŏ jiào Bái Jiéruì.
-1: Nĭmen dōu shi Měiguo rén ma?
-2: Wŏmen bù dōu shi Měiguo rén.
-2: Zhèiwèi tóngxué yě shi Měiguo rén, kěshi nèiwèi tóngxué shi Jiā'nádà rén. 
+1: Qĭng wèn, nĭ shì něiguó rén? (/188/regular_1409322875786_by_8.wav, /188/slow_1409322882550_by_8.wav)
+2: Wŏ shi Měiguo rén. (/191/regular_1409322897089_by_8.wav, /191/slow_1409322902819_by_8.wav)
+1: Nĭ jiào shémme míngzi? (/196/regular_1409323764263_by_8.wav, /196/slow_1409323768824_by_8.wav)
+2: Wŏ jiào Bái Jiéruì. (/199/regular_1409323274311_by_8.wav, /199/slow_1409323280017_by_8.wav)
+1: Nĭmen dōu shi Měiguo rén ma? (/200/regular_1409321590091_by_8.wav, /200/slow_1409321642660_by_8.wav)
+2: Wŏmen bù dōu shi Měiguo rén. (/202/regular_1409323704609_by_8.wav, /202/slow_1409323710820_by_8.wav)
+2: Zhèiwèi tóngxué yě shi Měiguo rén, kěshi nèiwèi tóngxué shi Jiā'nádà rén. (/215/regular_1409323661836_by_8.wav, /215/slow_1409323675900_by_8.wav)
 
 Title: Unit 2: Part 2
 
@@ -68,34 +68,34 @@ Speaker 1: First Chinese
 Speaker 2: Second Chinese
 Speaker 3: American
 
-1: Qĭng jìn!
-2: Èi, Xiăo Mă. Ò.
-1: Ò, Xiăo Chén, wŏ gĕi nĭ jièshao yixiar.
-1: Zhè shi wŏde xīn tóngwū, tā jiào Wáng Àihuá.
-1: Wáng Àihuá, zhè shi wŏde lăo tóngxué, Xiăo Chén.
-2: Ò, huānyíng nĭ dào Zhōngguo lái!
-3: Hĕn gāoxìng rènshi nĭ, Chén Xiáojie!
-2: Ò, bié zhèmme chēnghu wŏ.
-2: Hái shi jiào wŏ Xiăo Chén hăole.
-3: Xíng. Nà nĭ yě jiào wŏ Xiăo Wáng hăole.
-2: Hăo.
+1: Qĭng jìn! (/242/regular_1409324867082_by_8.wav, /242/slow_1409324871090_by_8.wav)
+2: Èi, Xiăo Mă. Ò. (/243/missing2_2.wav, /243/missing2_2.wav)
+1: Ò, Xiăo Chén, wŏ gĕi nĭ jièshao yixiar. (/261/regular_1409325498732_by_8.wav, /261/slow_1409325506235_by_8.wav)
+1: Zhè shi wŏde xīn tóngwū, tā jiào Wáng Àihuá. (/262/regular_1409325719045_by_8.wav, /262/slow_1409325727429_by_8.wav)
+1: Wáng Àihuá, zhè shi wŏde lăo tóngxué, Xiăo Chén. (/263/regular_1409325343747_by_8.wav, /263/slow_1409325351489_by_8.wav)
+2: Ò, huānyíng nĭ dào Zhōngguo lái! (/268/regular_1409325523740_by_8.wav, /268/slow_1409325530229_by_8.wav)
+3: Hĕn gāoxìng rènshi nĭ, Chén Xiáojie! (/272/regular_1409325037171_by_8.wav, /272/slow_1409325044588_by_8.wav)
+2: Ò, bié zhèmme chēnghu wŏ. (/280/regular_1409325476239_by_8.wav, /280/slow_1409325482468_by_8.wav)
+2: Hái shi jiào wŏ Xiăo Chén hăole. (/281/regular_1409325318317_by_8.wav, /281/slow_1409325324176_by_8.wav)
+3: Xíng. Nà nĭ yě jiào wŏ Xiăo Wáng hăole. (/284/regular_1409325429191_by_8.wav, /284/slow_1409325437152_by_8.wav)
+2: Hăo. (/285/regular_1409324474164_by_8.wav, /285/slow_1409324477262_by_8.wav)
 
 Title: Unit 2: Part 3
 
 Speaker 1: American
 Speaker 2: Chinese
 
-1: Nín guìxìng?
-2: Wŏ xìng Gāo. Nín guìxìng?
-1: Wŏ xìng Wú, Wú Sùshān.
-1: Gāo Xiānsheng, nín zài nĕige dānwèi gōngzuò?
-2: Wŏ zài Wàijiāobù gōngzuò. Nín ne?
-1: Wŏ zài Měiguo Dàshĭguăn gōngzuò.
-2: Nèiwèi shi nínde xiānsheng ba?
-1: Bú shì, bú shì! Tā shì wŏde tóngshì.
-2: Ò, Wú nǚshì, duìbuqĭ.
-2: Wŏ yŏu yìdiănshìr, xiān zŏule. Zàijiàn!
-1: Zàijiàn! 
+1: Nín guìxìng? (/296/regular_1409328095788_by_8.wav, /296/slow_1409328100134_by_8.wav)
+2: Wŏ xìng Gāo. Nín guìxìng? (/299/regular_1409327839500_by_8.wav, /299/slow_1409327855443_by_8.wav)
+1: Wŏ xìng Wú, Wú Sùshān. (/310/regular_1409327869935_by_8.wav, /310/slow_1409327876439_by_8.wav)
+1: Gāo Xiānsheng, nín zài nĕige dānwèi gōngzuò? (/311/regular_1409327753895_by_8.wav, /311/slow_1409327769824_by_8.wav)
+2: Wŏ zài Wàijiāobù gōngzuò. Nín ne? (/314/regular_1409327615970_by_8.wav, /314/slow_1409327623622_by_8.wav)
+1: Wŏ zài Měiguo Dàshĭguăn gōngzuò. (/317/regular_1409327653722_by_8.wav, /317/slow_1409327660792_by_8.wav)
+2: Nèiwèi shi nínde xiānsheng ba? (/323/regular_1409327593572_by_8.wav, /323/slow_1409327599327_by_8.wav)
+1: Bú shì, bú shì! Tā shì wŏde tóngshì. (/328/regular_1409327910091_by_8.wav, /328/slow_1409327926507_by_8.wav)
+2: Ò, Wú nǚshì, duìbuqĭ. (/332/regular_1409327942560_by_8.wav, /332/slow_1409327948820_by_8.wav)
+2: Wŏ yŏu yìdiănshìr, xiān zŏule. Zàijiàn! (/333/regular_1409327507146_by_8.wav, /333/slow_1409327522521_by_8.wav)
+1: Zàijiàn! (/334/regular_1409327365810_by_8.wav, /334/slow_1409327369250_by_8.wav)
 
 Title: Unit 2: Part 4
 
@@ -103,171 +103,170 @@ Speaker 1: Rogers
 Speaker 2: Taiwanese Guest
 Speaker 3: Holbrooke
 
-1: Nĭ hăo! Wŏ jiào Luó Jiésī.
-1: Qĭng duō zhĭ jiào.
-2: Wŏ xìng Shī. Duìbuqĭ, wŏ méi dài míngpiàn.
-2: Wŏ zài Zhōng-Měi Màoyì Gōngsī gōngzuò.
-1: Zŏngjīnglĭ, zhè shì Zhōng-Měi Màoyì Gōngsī de Shī Xiáojie.
-3: À, huānyíng, huānyíng! Wŏ xìng Hóu.
-2: Xièxie. Zŏngjīnglĭ yě shi Yīngguo rén ba?
-3: Bù, wŏ gēn Luó Xiáojie dōu bú shi Yīngguo rén.
-3: Wŏmen shi Měiguo rén.
-2: Ò, duìbuqĭ, wŏ găocuòle.
-3: Méi guānxi.
+1: Nĭ hăo! Wŏ jiào Luó Jiésī. (/355/regular_1409329603821_by_8.wav, /355/slow_1409329610608_by_8.wav)
+1: Qĭng duō zhĭ jiào. (/357/regular_1409330000487_by_8.wav, /357/slow_1409330005743_by_8.wav)
+2: Wŏ xìng Shī. Duìbuqĭ, wŏ méi dài míngpiàn. (/368/regular_1409329841202_by_8.wav, /368/slow_1409329849454_by_8.wav)
+2: Wŏ zài Zhōng-Měi Màoyì Gōngsī gōngzuò. (/369/regular_1409329682905_by_8.wav, /369/slow_1409329689735_by_8.wav)
+1: Zŏngjīnglĭ, zhè shì Zhōng-Měi Màoyì Gōngsī de Shī Xiáojie. (/374/regular_1409329793024_by_8.wav, /374/slow_1409329769057_by_8.wav)
+3: À, huānyíng, huānyíng! Wŏ xìng Hóu. (/378/regular_1409329975201_by_8.wav, /378/slow_1409329982278_by_8.wav)
+2: Xièxie. Zŏngjīnglĭ yě shi Yīngguo rén ba? (/382/regular_1409330116515_by_8.wav, /382/slow_1409330123914_by_8.wav)
+3: Bù, wŏ gēn Luó Xiáojie dōu bú shi Yīngguo rén. (/387/regular_1409329916452_by_8.wav, /387/slow_1409329924825_by_8.wav)
+3: Wŏmen shi Měiguo rén. (/388/regular_1409330281249_by_8.wav, /388/slow_1409330286656_by_8.wav)
+2: Ò, duìbuqĭ, wŏ găocuòle. (/395/regular_1409329951250_by_8.wav, /395/slow_1409329957821_by_8.wav)
+3: Méi guānxi. (/397/regular_1409330196368_by_8.wav, /397/slow_1409330185688_by_8.wav)
 
 Title: Unit 3: Part 1
 
 Speaker 1: Chinese
 Speaker 2: American
 
-1: Nĭmen bānshang yŏu jĭwèi tóngxué?
-2: Yŏu shíwèi.
-1: Dōu shi Mĕiguo rén ma?
-2: Bù dōu shi Mĕiguó rén. Yŏu qíge Mĕiguo rén, liăngge Déguo rén gēn yíge Făguo rén.
-1: Jĭge nánshēng, jĭge nǚshēng?
-2: Yíbànr yíbànr. Wŭge nánde, wŭge nǚde.
-1: Nà, nĭmen yŏu jĭwèi lăoshī ne?
-2: Yígòng yŏu sānwèi. Liăngwèi shi nǚlăoshī, yíwèi shi nánlăoshī.
+1: Nĭmen bānshang yŏu jĭwèi tóngxué? (/415/regular_1411181687843_by_6.wav, /415/slow_1411181695953_by_6.wav)
+2: Yŏu shíwèi. (/418/regular_1411182172767_by_6.wav, /418/slow_1411182177877_by_6.wav)
+1: Dōu shi Mĕiguo rén ma? (/419/regular_1411181176755_by_6.wav, /419/slow_1411181183573_by_6.wav)
+2: Bù dōu shi Mĕiguó rén. Yŏu qíge Mĕiguo rén, liăngge Déguo rén gēn yíge Făguo rén. (/432/regular_1411182280591_by_6.wav, /432/slow_1411182270715_by_6.wav)
+1: Jĭge nánshēng, jĭge nǚshēng? (/436/regular_1411181675630_by_6.wav, /436/slow_1411181659446_by_6.wav)
+2: Yíbànr yíbànr. Wŭge nánde, wŭge nǚde. (/446/regular_1411181498097_by_6.wav, /446/slow_1411181508275_by_6.wav)
+1: Nà, nĭmen yŏu jĭwèi lăoshī ne? (/448/regular_1411182074862_by_6.wav, /448/slow_1411182082658_by_6.wav)
+2: Yígòng yŏu sānwèi. Liăngwèi shi nǚlăoshī, yíwèi shi nánlăoshī. (/459/regular_1411182204835_by_6.wav, /459/slow_1411182219021_by_6.wav)
 
 Title: Unit 3: Part 2
 
 Speaker 1: Teacher
 Speaker 2: Thompson
 
-1: Zhè shi nĭ fùqin ma? Tā duō dà niánji le?
-2: Wŏ xiángxiang kàn. Tā jīnnián wŭshisānsuì le--bù, wŭshisìsuì le.
-1: Ò. Nà, zhèiwèi shi nĭ mŭqin ba?
-2: Duì, tā jīnnián sìshibāsuì le.
-1: Zhè shi nĭ mèimei, duì bu dui? Tā hĕn kĕ'ài! Tā jĭsuì le?
-2: Tā bāsuì. Xiàge yuè jiù jiŭsuì le.
-
+1: Zhè shi nĭ fùqin ma? Tā duō dà niánji le? (/478/regular_1411225958788_by_6.wav, /478/slow_1411225940951_by_6.wav)
+2: Wŏ xiángxiang kàn. Tā jīnnián wŭshisānsuì le--bù, wŭshisìsuì le. (/488/regular_1411226099431_by_6.wav, /488/slow_1411226089961_by_6.wav)
+1: Ò. Nà, zhèiwèi shi nĭ mŭqin ba? (/490/regular_1411226382106_by_6.wav, /490/slow_1411226358196_by_6.wav)
+2: Duì, tā jīnnián sìshibāsuì le. (/493/regular_1411226423539_by_6.wav, /493/slow_1411226431876_by_6.wav)
+1: Zhè shi nĭ mèimei, duì bu dui? Tā hĕn kĕ'ài! Tā jĭsuì le? (/502/regular_1411226674835_by_6.wav, /502/slow_1411226650376_by_6.wav)
+2: Tā bāsuì. Xiàge yuè jiù jiŭsuì le. (/510/regular_1411226507164_by_6.wav, /510/slow_1411226515233_by_6.wav)
 Title: Unit 3: Part 3
 
 Speaker 1: Little
 Speaker 2: Salesman
 
-1: Qĭng wèn, zhèige duōshăo qián?
-2: Yìbăi jiŭshibākuài.
-1: Yò, tài guìle!
-1: Zhèige bēizi duōshăo qián?
-2: Nèige zhĭ yào sānkuài wŭ.
-1: Wŏ kànkan, xíng bu xíng?
-2: Xíng, nín kàn ba.
-1: Hăo, wŏ măi liăngge.
+1: Qĭng wèn, zhèige duōshăo qián? (/529/regular_1411227214576_by_6.wav, /529/slow_1411227238271_by_6.wav)
+2: Yìbăi jiŭshibākuài. (/534/regular_1411227584635_by_6.wav, /534/slow_1411227591689_by_6.wav)
+1: Yò, tài guìle! (/538/regular_1411227290562_by_6.wav, /538/slow_1411227285892_by_6.wav)
+1: Zhèige bēizi duōshăo qián? (/541/regular_1411227305048_by_6.wav, /541/slow_1411227338293_by_6.wav)
+2: Nèige zhĭ yào sānkuài wŭ. (/547/regular_1411227850021_by_6.wav, /547/slow_1411227857209_by_6.wav)
+1: Wŏ kànkan, xíng bu xíng? (/551/regular_1411228091152_by_6.wav, /551/slow_1411228077277_by_6.wav)
+2: Xíng, nín kàn ba. (/554/regular_1411227776540_by_6.wav, /554/slow_1411227762805_by_6.wav)
+1: Hăo, wŏ măi liăngge. (/557/regular_1411227551924_by_6.wav, /557/slow_1411227557881_by_6.wav)
 
 Title: Unit 3: Part 4
 
 Speaker 1: Haynes
 Speaker 2: Ticket Agent
 
-1: Qĭng wèn, xiàyítàng dào Tiānjīnde huŏchē jĭdiăn kāi?
-2: Jiŭdiăn èrshí. Kĕshi xiànzài yĭjīng jiŭdiăn yíkè le, kŏngpà nín láibujíle.
-1: Nèmme, zài xiàyítàng ne?
-2: Wŏ kànkàn. Zài xiàyítàng shi shídiăn bàn.
-1: Hăo. Nà, wŏ jiù zuò shídiăn bànde.
-1: Duōshăo qián?
-2: Shíyīkuài wŭ.
-1: Dào Tiānjīn yào duō cháng shíjiān?
-2: Chàbuduō yào liăngge bàn zhōngtóu.
-1: Hăo, xièxie nín.
+1: Qĭng wèn, xiàyítàng dào Tiānjīnde huŏchē jĭdiăn kāi? (/597/regular_1411228709840_by_6.wav, /597/slow_1411228702408_by_6.wav)
+2: Jiŭdiăn èrshí. Kĕshi xiànzài yĭjīng jiŭdiăn yíkè le, kŏngpà nín láibujíle. (/610/regular_1411229177452_by_6.wav, /610/slow_1411229159081_by_6.wav)
+1: Nèmme, zài xiàyítàng ne? (/614/regular_1411229636869_by_6.wav, /614/slow_1411229643458_by_6.wav)
+2: Wŏ kànkàn. Zài xiàyítàng shi shídiăn bàn. (/616/regular_1411229078926_by_6.wav, /616/slow_1411229071236_by_6.wav)
+1: Hăo. Nà, wŏ jiù zuò shídiăn bànde. (/620/regular_1411229292886_by_6.wav, /620/slow_1411229285530_by_6.wav)
+1: Duōshăo qián? (/621/regular_1411228846639_by_6.wav, /621/slow_1411228851261_by_6.wav)
+2: Shíyīkuài wŭ. (/622/regular_1411228674625_by_6.wav, /622/slow_1411228679964_by_6.wav)
+1: Dào Tiānjīn yào duō cháng shíjiān? (/627/regular_1411228826868_by_6.wav, /627/slow_1411228820212_by_6.wav)
+2: Chàbuduō yào liăngge bàn zhōngtóu. (/631/regular_1411228902183_by_6.wav, /631/slow_1411228890218_by_6.wav)
+1: Hăo, xièxie nín. (/632/regular_1411229312766_by_6.wav, /632/slow_1411229318465_by_6.wav)
 
 Title: Unit 4: Part 1
 
 Speaker 1: American
 Speaker 2: Language Lab Attendant
 
-1: Qĭng wèn, yŭyán shíyànshì mĕitiān jĭdiăn zhōng kāimén, jĭdiăn zhōng guānmén?
-2: Zăoshang bādiăn kāimén, wănshang jiŭdiăn bàn guānmén.
-1: Xīngqīliù kāi bu kāi?
-2: Xīngqīliù kāi bàntiān. Shàngwŭ kāi, xiàwŭ bù kāi.
-1: Xīngqītiān ne?
-2: Xīngqītiān xiūxi.
-1: Xièxie nĭ.
-2: Náli.
+1: Qĭng wèn, yŭyán shíyànshì mĕitiān jĭdiăn zhōng kāimén, jĭdiăn zhōng guānmén? (/662/regular_1411262880448_by_6.wav, /662/slow_1411262844923_by_6.wav)
+2: Zăoshang bādiăn kāimén, wănshang jiŭdiăn bàn guānmén. (/667/regular_1411263236792_by_6.wav, /667/slow_1411263228916_by_6.wav)
+1: Xīngqīliù kāi bu kāi? (/670/regular_1411263212800_by_6.wav, /670/slow_1411263190845_by_6.wav)
+2: Xīngqīliù kāi bàntiān. Shàngwŭ kāi, xiàwŭ bù kāi. (/4-1.wav, /4-1.wav)
+1: Xīngqītiān ne? (/679/regular_1411262609818_by_6.wav, /679/slow_1411262599867_by_6.wav)
+2: Xīngqītiān xiūxi. (/681/regular_1411263300998_by_6.wav, /681/slow_1411263289663_by_6.wav)
+1: Xièxie nĭ. (/682/regular_1411263813283_by_6.wav, /682/slow_1411263818028_by_6.wav)
+2: Náli. (/684/regular_1411263799454_by_6.wav, /684/slow_1411263804056_by_6.wav)
 
 Title: Unit 4: Part 2
 
 Speaker 1: Nurse
 Speaker 2: Johns
 
-1: Nǐ jiào shémme míngzi?
-2: Wŏ jiào Zhāng Wényīng.
-2: Zhāng shi gōng cháng Zhāng, wén shi wénhuàde wén, yīng shi Yīngguode yīng.
-1: Nĭ shi nĕinián chūshēngde?
-2: Yī-jiŭ-bā-líng-nián, jiù shi Mínguó liùshijiŭnián.
-1: Jĭyuè jĭhào?
-2: Sìyuè shísānhào.
-1: Nĭde dìzhĭ shi...
-2: Hépíng Dōng Lù yīduàn, èrshiqīxiàng, sānnòng, yībăi wŭshisìhào, bālóu.
-1: Hăo, qĭng dĕng yíxià.
+1: Nǐ jiào shémme míngzi? (/721/regular_1411265548808_by_6.wav, /721/slow_1411265556217_by_6.wav)
+2: Wŏ jiào Zhāng Wényīng. (/724/regular_1411265081710_by_6.wav, /724/slow_1411265087634_by_6.wav)
+2: Zhāng shi gōng cháng Zhāng, wén shi wénhuàde wén, yīng shi Yīngguode yīng. (/729/regular_1411265406432_by_6.wav, /729/slow_1411265395882_by_6.wav)
+1: Nĭ shi nĕinián chūshēngde? (/734/regular_1411265633760_by_6.wav, /734/slow_1411265640694_by_6.wav)
+2: Yī-jiŭ-bā-líng-nián, jiù shi Mínguó liùshijiŭnián. (/740/regular_1411264916882_by_6.wav, /740/slow_1411264906908_by_6.wav)
+1: Jĭyuè jĭhào? (/744/regular_1411265584705_by_6.wav, /744/slow_1411265591145_by_6.wav)
+2: Sìyuè shísānhào. (/747/regular_1411264461878_by_6.wav, /747/slow_1411264467785_by_6.wav)
+1: Nĭde dìzhĭ shi... (/749/regular_1411265691435_by_6.wav, /749/slow_1411265697886_by_6.wav)
+2: Hépíng Dōng Lù yīduàn, èrshiqīxiàng, sānnòng, yībăi wŭshisìhào, bālóu. (/764/regular_1411264851371_by_6.wav, /764/slow_1411264833266_by_6.wav)
+1: Hăo, qĭng dĕng yíxià. (/767/regular_1411264409681_by_6.wav, /767/slow_1411264415948_by_6.wav)
 
 Title: Unit 4: Part 3
 
 Speaker 1: Ross
 Speaker 2: Bellhop
 
-1: Nĭ hăo!
-2: Nĭ hăo! Nĭ shi Mĕiguo rén ma?
-1: Duì, wŏ shi Mĕiguo rén.
-2: Zhè shi nĭ dìyīcì dào Zhōngguo lái ma?
-1: Bù, zhè shi dì'èrcì. Wŏ qùnián láiguo yícì.
-2: M, nĭ zhèicì yào zhù duō jiŭ?
-1: Dàyuē bàn'ge yuè. Wŏ shí'èrhào huíguó.
-2: Nĭ zhù nĕige fángjiān?
-1: Wŏ zhù sān líng liù.
-2: Ò, duìbuqĭ, wŏ dĕi zŏule. Zàijiàn!
-1: Zàijiàn!
+1: Nĭ hăo! (/788/regular_1411268347706_by_6.wav, /788/slow_1411268352448_by_6.wav)
+2: Nĭ hăo! Nĭ shi Mĕiguo rén ma? (/789/regular_1411268363857_by_6.wav, /789/slow_1411268371731_by_6.wav)
+1: Duì, wŏ shi Mĕiguo rén. (/790/regular_1411269067335_by_6.wav, /790/slow_1411269074227_by_6.wav)
+2: Zhè shi nĭ dìyīcì dào Zhōngguo lái ma? (/796/regular_1411268475838_by_6.wav, /796/slow_1411268484407_by_6.wav)
+1: Bù, zhè shi dì'èrcì. Wŏ qùnián láiguo yícì. (/802/regular_1411268599745_by_6.wav, /802/slow_1411268580827_by_6.wav)
+2: M, nĭ zhèicì yào zhù duō jiŭ? (/810/regular_1411268921781_by_6.wav, /810/slow_1411268929660_by_6.wav)
+1: Dàyuē bàn'ge yuè. Wŏ shí'èrhào huíguó. (/816/regular_1411266211535_by_6.wav, /816/slow_1411266203537_by_6.wav)
+2: Nĭ zhù nĕige fángjiān? (/819/regular_1411268985661_by_6.wav, /819/slow_1411268992528_by_6.wav)
+1: Wŏ zhù sān líng liù. (/820/regular_1411268449048_by_6.wav, /820/slow_1411268438086_by_6.wav)
+2: Ò, duìbuqĭ, wŏ dĕi zŏule. Zàijiàn! (/821/regular_1411268640899_by_6.wav, /821/slow_1411268649403_by_6.wav)
+1: Zàijiàn! (/70/regular_1403654964412_by_4.wav, /70/slow_1403654938909_by_4.wav)
 
 Title: Unit 4: Part 4
 
 Speaker 1: Miller
 Speaker 2: Sun
 
-1: Sūn Lăoshī, qĭng wèn, Zhōngguo yŏu duōshăo rén? 
-2: Zhōngguo chàbuduō yŏu shísānyì rén.
-1: Bĕijīng yŏu duōshăo rén?
-2: Bĕijīng yŏu yìqiānduōwàn rén.
-1: Nèmme, Nánjīng ne?
-2: Nánjīng de rénkŏu bĭjiào shăo.
-2: Hǎoxiàng zhĭ yŏu wŭbăiwàn.
+1: Sūn Lăoshī, qĭng wèn, Zhōngguo yŏu duōshăo rén? (/839/regular_1411269368133_by_6.wav, /839/slow_1411269378348_by_6.wav)
+2: Zhōngguo chàbuduō yŏu shísānyì rén. (/843/regular_1411269312568_by_6.wav, /843/slow_1411269320632_by_6.wav)
+1: Bĕijīng yŏu duōshăo rén? (/845/regular_1411269494518_by_6.wav, /845/slow_1411269501131_by_6.wav)
+2: Bĕijīng yŏu yìqiānduōwàn rén. (/852/regular_1411269286037_by_6.wav, /852/slow_1411269294272_by_6.wav)
+1: Nèmme, Nánjīng ne? (/854/regular_1411269188503_by_6.wav, /854/slow_1411269194605_by_6.wav)
+2: Nánjīng de rénkŏu bĭjiào shăo. (/865/regular_1411270065286_by_6.wav, /865/slow_1411270052130_by_6.wav)
+2: Hǎoxiàng zhĭ yŏu wŭbăiwàn. (/866/regular_1411269694394_by_6.wav, /866/slow_1411269701172_by_6.wav)
 
 Title: Unit 5: Part 1
 
 Speaker 1: Chinese
 Speaker 2: American
 
-1: Qĭng wèn.
-2: Duìbuqĭ, wŏ xiăng zhăo yixiar Wáng Xiáojie.
-2: Qĭng wèn, tā zài bu zai?
-1: Nĕiwèi Wáng Xiáojie?
-2: Shízài bàoqiàn.
-2: Wŏ shi Mĕiguo Huáqiáo, Zhōngwén bú tài hăo.
-2: Wŏ bù zhīdào tāde Zhōngwén míngzi.
-2: Búguò, tāde Yīngwén míngzi jiào Mary Wang.
-1: Ò, wŏ zhīdaole. Shi Wáng Guólì.
-1: Búguò, tā xiànzài bú zài zhèr.
-2: Qĭng wèn, nĭ zhīdao tā zài năr ma?
-1: Tā zài lăobănde bàngōngshì.
-2: Nà, wŏ kĕ bu kéyi gĕi tā liú yíge tiáozi?
-1: Dāngrán kéyi.
-2: Xièxie
+1: Qĭng wèn. (/182/regular_1409235429596_by_6.wav, /182/slow_1409235448553_by_6.wav)
+2: Duìbuqĭ, wŏ xiăng zhăo yixiar Wáng Xiáojie. (/892/regular_1414254585383_by_4.wav, /892/slow_1414254592735_by_4.wav)
+2: Qĭng wèn, tā zài bu zai? (/893/regular_1414255035009_by_4.wav, /893/slow_1414255040713_by_4.wav)
+1: Nĕiwèi Wáng Xiáojie? (/894/regular_1414255431428_by_4.wav, /894/slow_1414255436557_by_4.wav)
+2: Shízài bàoqiàn. (/897/regular_1414255228386_by_4.wav, /897/slow_1414255233109_by_4.wav)
+2: Wŏ shi Mĕiguo Huáqiáo, Zhōngwén bú tài hăo. (/910/regular_1414254783456_by_4.wav, /910/slow_1414254791674_by_4.wav)
+2: Wŏ bù zhīdào tāde Zhōngwén míngzi. (/911/regular_1414254726324_by_4.wav, /911/slow_1414254733440_by_4.wav)
+2: Búguò, tāde Yīngwén míngzi jiào Mary Wang. (/912/regular_1414254444764_by_4.wav, /912/slow_1414254453161_by_4.wav)
+1: Ò, wŏ zhīdaole. Shi Wáng Guólì. (/919/regular_1414255166050_by_4.wav, /919/slow_1414255188188_by_4.wav)
+1: Búguò, tā xiànzài bú zài zhèr. (/920/regular_1414254481166_by_4.wav, /920/slow_1414254487909_by_4.wav)
+2: Qĭng wèn, nĭ zhīdao tā zài năr ma? (/923/regular_1414254632039_by_4.wav, /923/slow_1414254617292_by_4.wav)
+1: Tā zài lăobănde bàngōngshì. (/927/regular_1414255257570_by_4.wav, /927/slow_1414255264119_by_4.wav)
+2: Nà, wŏ kĕ bu kéyi gĕi tā liú yíge tiáozi? (/934/regular_1414254895274_by_4.wav, /934/slow_1414254904193_by_4.wav)
+1: Dāngrán kéyi. (/936/regular_1414255136505_by_4.wav, /936/slow_1414255141041_by_4.wav)
+2: Xièxie (/62/regular_1403655382533_by_4.wav, /62/slow_1403655389478_by_4.wav)
 
 Title: Unit 5: Part 2
 
 Speaker 1: American
 Speaker 2: Chinese
 
-1: Qĭng wèn, zhèige wèizi yŏu rén ma?
-2: Méiyou, méiyou. Nín zùo ba.
-1: Nín cháng lái zhèr chī wŭfàn ma?
-2: Wŏ cháng lái. Nín ne?
-1: Wŏ yĕ cháng zài zhèr chī. Nín shi xuésheng ma?
-2: Bù, wŏ shi gōngrén, zài Bĕijīng Dìyī Píxié Chăng gōngzuò. Nín ne?
-1: Wŏ zài Mĕiguo shi dàxuéshēng, xiànzài zài zhèr xué Zhōngwén.
-2: Nín zài năr xuéxí?
-1: Zài Bĕidàde Hànyŭ péixùn zhōngxīn.
-2: Yò! Kuài yīdiăn le. Wŏ dĕi zŏule. Zàijiàn!
-1: Zàijiàn!
+1: Qĭng wèn, zhèige wèizi yŏu rén ma? (/951/regular_1415630059034_by_4.wav, /951/slow_1415630041850_by_4.wav)
+2: Méiyou, méiyou. Nín zùo ba. (/952/regular_1415630501759_by_4.wav, /952/slow_1415630494265_by_4.wav)
+1: Nín cháng lái zhèr chī wŭfàn ma? (/958/regular_1415629892709_by_4.wav, /958/slow_1415629881875_by_4.wav)
+2: Wŏ cháng lái. Nín ne? (/959/regular_1415630135839_by_4.wav, /959/slow_1415630131207_by_4.wav)
+1: Wŏ yĕ cháng zài zhèr chī. Nín shi xuésheng ma? (/963/regular_1415630227493_by_4.wav, /963/slow_1415630220413_by_4.wav)
+2: Bù, wŏ shi gōngrén, zài Bĕijīng Dìyī Píxié Chăng gōngzuò. Nín ne? (/971/regular_1415630465812_by_4.wav, /971/slow_1415630457858_by_4.wav)
+1: Wŏ zài Mĕiguo shi dàxuéshēng, xiànzài zài zhèr xué Zhōngwén. (/977/regular_1415630298570_by_4.wav, /977/slow_1415630291392_by_4.wav)
+2: Nín zài năr xuéxí? (/978/regular_1415630764757_by_4.wav, /978/slow_1415630758816_by_4.wav)
+1: Zài Bĕidàde Hànyŭ péixùn zhōngxīn. (/984/regular_1415629699492_by_4.wav, /984/slow_1415629682549_by_4.wav)
+2: Yò! Kuài yīdiăn le. Wŏ dĕi zŏule. Zàijiàn! (/987/regular_1415630115280_by_4.wav, /987/slow_1415630109395_by_4.wav)
+1: Zàijiàn! (/70/regular_1403654964412_by_4.wav, /70/slow_1403654938909_by_4.wav)
 
 Title: Unit 5: Part 3
 
@@ -275,33 +274,33 @@ Speaker 1: Norris
 Speaker 2: Cashier
 Speaker 3: Li
 
-1: Qĭng wèn, cèsuŏ zài năr?
-2: Zài nèibianr.
-1: Xiăo Lĭ, dùibuqĭ, ràng nĭ jiŭ dĕngle.
-3: Méi shìr, méi shìr. Xiăo Luó, hăo jiŭ bú jiànle!
-3: Nĭ zhèihuí lái Bĕijīng zhùzai năr?"
-1: Zhùzài Cháng Chéng Fàndiàn, qī-yāo-wŭ-hào fángjiān.
-1: Nĭ hái shi zhùzai lăo dìfang ma?
-3: Bù, wŏmen qùnián jiù bāndao Xiāng Shān le.
-1: Xiāng Shān zài năr?
-3: Zài Bĕijīng chéngde bĕibiānr.
+1: Qĭng wèn, cèsuŏ zài năr? (/1002/regular_1415631214967_by_4.wav, /1002/slow_1415631209901_by_4.wav)
+2: Zài nèibianr. (/1005/regular_1415631477020_by_4.wav, /1005/slow_1415631468521_by_4.wav)
+1: Xiăo Lĭ, dùibuqĭ, ràng nĭ jiŭ dĕngle. (/1009/regular_1415631573217_by_4.wav, /1009/slow_1415631566554_by_4.wav)
+3: Méi shìr, méi shìr. Xiăo Luó, hăo jiŭ bú jiànle! (/1022/regular_1415632027900_by_4.wav, /1022/slow_1415632020964_by_4.wav)
+3: Nĭ zhèihuí lái Bĕijīng zhùzai năr? (/1024/regular_1415632336371_by_4.wav, /1024/slow_1415632329433_by_4.wav)
+1: Zhùzài Cháng Chéng Fàndiàn, qī-yāo-wŭ-hào fángjiān. (/1034/regular_1415631416029_by_4.wav, /1034/slow_1415631409023_by_4.wav)
+1: Nĭ hái shi zhùzai lăo dìfang ma? (/1035/regular_1415631060610_by_4.wav, /1035/slow_1415631055266_by_4.wav)
+3: Bù, wŏmen qùnián jiù bāndao Xiāng Shān le. (/1043/regular_1415631713088_by_4.wav, /1043/slow_1415631706100_by_4.wav)
+1: Xiāng Shān zài năr? (/1044/regular_1415632376147_by_4.wav, /1044/slow_1415632371759_by_4.wav)
+3: Zài Bĕijīng chéngde bĕibiānr. (/1050/regular_1415632183401_by_4.wav, /1050/slow_1415632161980_by_4.wav)
 
 Title: Unit 5: Part 4
 
 Speaker 1: Guo
 Speaker 2: Walters
 
-1: Peter, wŏ măile yìtái diànnăo, zài shūfángli.
-1: Nĭ yào bu yao kànkan?
-2: Hăo a!
-2: E, shi yìtái wŭ-bā-liù ma?
-2: Lĭmiàn yŏu duōshăo RAM?
-1: Sānshi'èrge.
-2: Kāiguān yīnggāi zài pángbiān ba?
-1: Bú duì, zài qiánmian.
-2: Ò. E, wŏ kĕ bu kéyi kànkan shĭyòng shŏucè?
-1: Dāngrán kéyĭ.
-1: Jiù zài nĭ zuŏbiānde nèige shūjiàshang
-1: ò, bú duì, bú duì, shi zài nĭ hòumiande nèibă yĭzishang.
-2: Āiyò, zhuōzi dĭxia shi shémme dōngxi a?
-1: Ò, shi Láifú, wŏmen jiāde gŏu. Nĭ búyào guăn ta.
+1: Peter, wŏ măile yìtái diànnăo, zài shūfángli. (/1082/regular_1415634859810_by_4.wav, /1082/slow_1415634851800_by_4.wav)
+1: Nĭ yào bu yao kànkan? (/1083/regular_1415633449332_by_4.wav, /1083/slow_1415633442995_by_4.wav)
+2: Hăo a! (/1084/regular_1415634968820_by_4.wav, /1084/slow_1415634965753_by_4.wav)
+2: E, shi yìtái wŭ-bā-liù ma? (/1090/regular_1415635058807_by_4.wav, /1090/slow_1415635053418_by_4.wav)
+2: Lĭmiàn yŏu duōshăo RAM? (/1091/regular_1415633568377_by_4.wav, /1091/slow_1415633562473_by_4.wav)
+1: Sānshi'èrge. (/1092/regular_1415633261684_by_4.wav, /1092/slow_1415633271455_by_4.wav)
+2: Kāiguān yīnggāi zài pángbiān ba? (/1097/regular_1415635001137_by_4.wav, /1097/slow_1415634995609_by_4.wav)
+1: Bú duì, zài qiánmian. (/1101/regular_1415634309561_by_4.wav, /1101/slow_1415634300555_by_4.wav)
+2: Ò. E, wŏ kĕ bu kéyi kànkan shĭyòng shŏucè? (/1106/regular_1415634453251_by_4.wav, /1106/slow_1415634424140_by_4.wav)
+1: Dāngrán kéyĭ. (/1115/regular_1415634338874_by_4.wav, /1115/slow_1415634333448_by_4.wav)
+1: Jiù zài nĭ zuŏbiānde nèige shūjiàshang (/1116/regular_1415634091286_by_4.wav, /1116/slow_1415634084799_by_4.wav)
+1: ò, bú duì, bú duì, shi zài nĭ hòumiande nèibă yĭzishang. (/1117/regular_1415634396890_by_4.wav, /1117/slow_1415634387961_by_4.wav)
+2: Āiyò, zhuōzi dĭxia shi shémme dōngxi a? (/1125/regular_1415633544254_by_4.wav, /1125/slow_1415633535971_by_4.wav)
+1: Ò, shi Láifú, wŏmen jiāde gŏu. Nĭ búyào guăn ta. (/1133/regular_1415634363365_by_4.wav, /1133/slow_1415634356668_by_4.wav)
