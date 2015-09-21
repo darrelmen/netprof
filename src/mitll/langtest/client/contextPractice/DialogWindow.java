@@ -164,12 +164,6 @@ public class DialogWindow {
      Button startDialog = new Button("Start Recording!", new ClickHandler() {
     	 public void onClick(ClickEvent event) {
     		 if((availableSpeakers.getSelectedIndex() < 1) || (availableDialogs.getSelectedIndex() < 1)){
-				 Window.alert("sent to audio path "+cpw.getSentToAudioPath().toString());
-				 Window.alert("dia to parts map " +cpw.getDialogToPartsMap().toString());
-				 Window.alert("dia to sent index to sent "+cpw.getDialogToSentIndexToSent().toString());
-				 Window.alert("dia to sent index to speaker "+cpw.getDialogToSentIndexToSpeaker().toString());
-				 Window.alert("dia to speaker to last "+cpw.getDialogToSpeakerToLast().toString());
-				 Window.alert("sent to slow audio "+cpw.getSentToSlowAudioPath().toString());
     			 Window.alert("Select a dialog and part first!");
     		 }
     		 else
