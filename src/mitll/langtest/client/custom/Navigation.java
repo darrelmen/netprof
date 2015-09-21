@@ -39,6 +39,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
 
@@ -99,7 +100,7 @@ public class Navigation implements RequiresResize {
   private ScrollPanel listScrollPanel;
   private final NPFHelper npfHelper;
   private final NPFHelper avpHelper;
-  private final DialogWindow dialogWindow;
+  private DialogWindow dialogWindow;
 
   private final EditItem editItem;
 
@@ -141,8 +142,16 @@ public class Navigation implements RequiresResize {
     npfHelper = new NPFHelper(service, feedback, userManager, controller, false);
 
     avpHelper = new AVPHelper(service, feedback, userManager, controller);
-    
-    dialogWindow = new DialogWindow(service, controller);
+
+    service.getContextPractice(new AsyncCallback<ContextPractice>(){
+      public void onSuccess(ContextPractice cpw){
+        dialogWindow = new DialogWindow(service, controller, cpw);
+      }
+
+      public void onFailure(Throwable caught){
+        logger.info("getContextPractice failed");
+      }; //TODO: this is naughty
+    });
 
     defectHelper = new ChapterNPFHelper(service, feedback, userManager, controller, true);
 
