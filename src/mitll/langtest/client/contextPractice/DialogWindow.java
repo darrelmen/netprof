@@ -13,10 +13,10 @@ import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.scoring.SimplePostAudioRecordButton;
 import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.client.sound.PlayAudioPanel;
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.contextPractice.ContextPracticeImport;
+import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.AudioAnswer;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.ListBox;
@@ -47,13 +47,13 @@ public class DialogWindow {
 	
     private ExerciseController controller;
     private LangTestDatabaseAsync service;
-	private ContextPracticeImport cpi;
 	private final NumberFormat decF = NumberFormat.getFormat("#.####");
-	
-  public DialogWindow(LangTestDatabaseAsync service, ExerciseController controller) {
+	private ContextPractice cpw;
+
+  public DialogWindow(LangTestDatabaseAsync service, ExerciseController controller, ContextPractice cpw) {
 	  this.controller = controller;
 	  this.service    = service;
-	  this.cpi = new ContextPracticeImport(controller.getProps().dialogFile());
+	  this.cpw = cpw;
   }
 
   public void viewDialog(final Panel contentPanel) {
@@ -78,7 +78,7 @@ public class DialogWindow {
      availableSpeakers.getElement().getStyle().setProperty("margin", "10px");
      final String CHOOSE_PART = "Choose a part to read";
      final String CHOOSE_DIALOG = "Choose a dialog to practice";
-     final Map<String, String[]> dialogToParts = cpi.getDialogToPartsMap();
+	  final Map<String, String[]> dialogToParts = cpw.getDialogToPartsMap();
      final Map<Integer, String> dialogIndex = new HashMap<Integer, String>();
      final RadioButton yesDia = new RadioButton("showDia", "Show your part");
      final RadioButton noDia = new RadioButton("showDia", "Hide your part");
@@ -164,6 +164,12 @@ public class DialogWindow {
      Button startDialog = new Button("Start Recording!", new ClickHandler() {
     	 public void onClick(ClickEvent event) {
     		 if((availableSpeakers.getSelectedIndex() < 1) || (availableDialogs.getSelectedIndex() < 1)){
+				 Window.alert("sent to audio path "+cpw.getSentToAudioPath().toString());
+				 Window.alert("dia to parts map " +cpw.getDialogToPartsMap().toString());
+				 Window.alert("dia to sent index to sent "+cpw.getDialogToSentIndexToSent().toString());
+				 Window.alert("dia to sent index to speaker "+cpw.getDialogToSentIndexToSpeaker().toString());
+				 Window.alert("dia to speaker to last "+cpw.getDialogToSpeakerToLast().toString());
+				 Window.alert("sent to slow audio "+cpw.getSentToSlowAudioPath().toString());
     			 Window.alert("Select a dialog and part first!");
     		 }
     		 else
@@ -309,10 +315,10 @@ public class DialogWindow {
   
   private Grid displayDialog(final String dialog, String part, FlowPanel cp, final FlowPanel goodPhonePanel, final FlowPanel badPhonePanel, boolean showPart, boolean regAudio){
 
-	  Map<String, String> sentToAudioPath = regAudio ? cpi.getSentToAudioPath() : cpi.getSentToSlowAudioPath();
-	  Map<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = cpi.getDialogToSentIndexToSpeaker();
-	  final Map<String, HashMap<Integer, String>> dialogToSentIndexToSent = cpi.getDialogToSentIndexToSent();
-	  Map<String, HashMap<String, Integer>> dialogToSpeakerToLast = cpi.getDialogToSpeakerToLast();
+	  Map<String, String> sentToAudioPath = regAudio ? cpw.getSentToAudioPath() : cpw.getSentToSlowAudioPath();
+	  Map<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = cpw.getDialogToSentIndexToSpeaker();
+	  final Map<String, HashMap<Integer, String>> dialogToSentIndexToSent = cpw.getDialogToSentIndexToSent();
+	  Map<String, HashMap<String, Integer>> dialogToSpeakerToLast = cpw.getDialogToSpeakerToLast();
 
 	  int sentIndex = 0;
 	  final Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 9);
