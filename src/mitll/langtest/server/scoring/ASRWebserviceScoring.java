@@ -534,7 +534,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     long timeToRunHydra = System.currentTimeMillis() - then;
 
     if (results[0].isEmpty()) {
-      String input = decode ? transcript : lmSentences.toString();
+      String input = decode ? lmSentences == null ? "huh? no sentences to decode???" : lmSentences.toString() : transcript;
       String which = decode ? " DECODING " : " ALIGNMENT ";
       String message = "Failure during running of hydra on " + audioPath + which + " with " + input;
       logger.error(message);
