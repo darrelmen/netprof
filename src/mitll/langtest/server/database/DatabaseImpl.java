@@ -9,6 +9,7 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
+import mitll.langtest.server.database.contextPractice.ContextPracticeImport;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.AnnotationDAO;
 import mitll.langtest.server.database.custom.ReviewedDAO;
@@ -21,13 +22,7 @@ import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonUserExercise;
-import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.MonitorResult;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
@@ -38,6 +33,7 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -82,6 +78,7 @@ public class DatabaseImpl implements Database {
   private UserExerciseDAO userExerciseDAO;
   private AddRemoveDAO addRemoveDAO;
   private EventDAO eventDAO;
+  private ContextPractice contextPractice;
 
   private DatabaseConnection connection = null;
   private MonitoringSupport monitoringSupport;
@@ -312,6 +309,7 @@ public class DatabaseImpl implements Database {
    * @see #getExercises(boolean, String)
    */
   private void makeDAO(String lessonPlanFile, String mediaDir, String installPath) {
+    logger.debug(lessonPlanFile);
     if (exerciseDAO == null) {
       synchronized (this) {
         this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, serverProps, userListManager, installPath, addDefects);
@@ -327,6 +325,15 @@ public class DatabaseImpl implements Database {
       userExerciseDAO.setAudioDAO(audioDAO);
     }
   }
+
+  private void makeContextPractice(String contextPracticeFile, String installPath) {
+    if (contextPractice == null) {
+      synchronized (this) {
+        this.contextPractice = new ContextPracticeImport(installPath + File.separator + contextPracticeFile).getContextPractice();
+      }
+    }
+  }
+
 
   /**
    * @param userExercise
@@ -454,7 +461,7 @@ public class DatabaseImpl implements Database {
   public JSONObject getJsonScoreHistoryRecorded(long userid,
                                                 Map<String, Collection<String>> typeToSection,
                                                 Collator collator) {
-    return jsonSupport.getJsonScoreHistoryRecorded(userid,typeToSection,collator);
+    return jsonSupport.getJsonScoreHistoryRecorded(userid, typeToSection, collator);
   }
 
   /**
@@ -583,6 +590,15 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#init
    */
   public void preloadExercises() {  getExercises(useFile, lessonPlanFile); }
+
+  public void preloadContextPractice() {makeContextPractice(serverProps.getDialogFile(), installPath);}
+
+  public ContextPractice getContextPractice() {
+    if(this.contextPractice == null){
+      makeContextPractice(serverProps.getDialogFile(), installPath);
+    }
+    return this.contextPractice;
+  }
 
   /**
    * Check other sites to see if the user exists somewhere else, and if so go ahead and use that person
