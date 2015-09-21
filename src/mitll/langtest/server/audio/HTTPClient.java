@@ -1,16 +1,15 @@
 package mitll.langtest.server.audio;
 
-import java.net.*;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.CodingErrorAction;
-import java.io.*;
-
-import mitll.langtest.server.scoring.ASRWebserviceScoring;
-
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.*;
+import java.net.ConnectException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CodingErrorAction;
 
 // closes and reopens the connection after every call to sendAndReceive()
 public class HTTPClient {
@@ -21,25 +20,46 @@ public class HTTPClient {
 
 	/* Constructor */
 
-  /**
-   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra
-   * @param webserviceIP
-   * @param webservicePort
-   */
-	public HTTPClient(String webserviceIP, int webservicePort) {
-		String url = "http://" + webserviceIP + ":" + webservicePort + "/dcodr";
+	public HTTPClient(String url) {
+		logger.debug("connect to " + url);
 		try {
 			httpConn = setupHttpConn(url);
+		} catch (IOException e) {
+			logger.error("Error constructing HTTPClient:\n" + e, e);
 		}
-		catch(IOException e) {
-			logger.error("Error constructing HTTPClient:\n" + e,e);
+	}
+
+	public HTTPClient(String webserviceIP, int webservicePort) {
+		String url = "http://" + webserviceIP + ":" + webservicePort;
+
+		logger.debug("connect to " + url);
+		try {
+			httpConn = setupHttpConn(url);
+		} catch (IOException e) {
+			logger.error("Error constructing HTTPClient:\n" + e, e);
 		}
 	}
 
 	/**
-	 * @see mitll.langtest.server.database.DatabaseImpl#userExists(HttpServletRequest, String, String)
+	 * @param webserviceIP
+	 * @param webservicePort
+	 * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra
+	 */
+	public HTTPClient(String webserviceIP, int webservicePort, String service) {
+		String url = "http://" + webserviceIP + ":" + webservicePort + "/" + service;
+
+		//  logger.debug("connect to " + url);
+		try {
+			httpConn = setupHttpConn(url);
+		} catch (IOException e) {
+			logger.error("Error constructing HTTPClient:\n" + e, e);
+		}
+	}
+
+	/**
 	 * @param url
 	 * @return
+	 * @see mitll.langtest.server.database.DatabaseImpl#userExists(HttpServletRequest, String, String)
 	 */
 	public String readFromGET(String url) {
 		try {
@@ -51,7 +71,7 @@ public class HTTPClient {
 	}
 
 	private HttpURLConnection setupHttpConn(String url) throws IOException {
-		HttpURLConnection httpConn = (HttpURLConnection)(new URL(url)).openConnection();
+		HttpURLConnection httpConn = (HttpURLConnection) (new URL(url)).openConnection();
 		httpConn.setRequestMethod("POST");
 		httpConn.setDoOutput(true);
 		httpConn.setConnectTimeout(5000);
@@ -64,7 +84,7 @@ public class HTTPClient {
 	}
 
 	private HttpURLConnection setupGetHttpConn(String url) throws IOException {
-		HttpURLConnection httpConn = (HttpURLConnection)(new URL(url)).openConnection();
+		HttpURLConnection httpConn = (HttpURLConnection) (new URL(url)).openConnection();
 		httpConn.setRequestMethod("GET");
 		httpConn.setConnectTimeout(1000);
 		//httpConn.setReadTimeout(20000);
@@ -79,11 +99,7 @@ public class HTTPClient {
 		return receive(conn);
 	}
 
-	//private void resetConn() throws IOException {
-	//	setupHttpConn(url);
-	//}
-
-	public void closeConn() throws IOException {
+	public void closeConn() {
 		httpConn.disconnect();
 		httpConn = null;
 	}
@@ -98,9 +114,8 @@ public class HTTPClient {
 		encoder.onUnmappableCharacter(CodingErrorAction.REPORT);
 		BufferedWriter sender = new BufferedWriter(new OutputStreamWriter(outputStream, encoder));
 		sender.write(input);
-		sender.flush();    
+		sender.flush();
 		sender.close();
-		sender = null;
 	}
 
 	private String receive() throws IOException {
@@ -139,18 +154,22 @@ public class HTTPClient {
 		return new BufferedReader(new InputStreamReader(httpConn.getInputStream(), "UTF8"));
 	}
 
-	public String sendAndReceive(String input) {
+	public String sendAndReceive(String input) throws IOException {
 		try {
 			send(input);
 			return receive();
-		}
-    catch (ConnectException ce) {
-      logger.error("sending " +input +" couldn't connect to server at  " +httpConn.getURL());
-      return "";
-    }
-		catch(IOException e) {
-			logger.error("sending " +input +" got " +e,e);
+		} catch (ConnectException ce) {
+			logger.error("sending " + input + " couldn't connect to server at  " + httpConn.getURL() + " got " + ce);
 			return "";
+		} catch (IOException e) {
+			logger.error("sending " + input + " got " + e, e);
+			throw e;
 		}
+	}
+
+	public String sendAndReceiveAndClose(String input) throws IOException {
+		String s = sendAndReceive(input);
+		closeConn();
+		return s;
 	}
 }
