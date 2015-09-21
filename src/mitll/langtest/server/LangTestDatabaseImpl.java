@@ -107,9 +107,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 	public void logAndNotifyServerException(Exception e, String additionalMessage) {
 		String message1 = e == null ? "null_ex" : e.getMessage() == null ? "null_msg" : e.getMessage();
 		if (!message1.contains("Broken Pipe")) {
-			String message = "Server Exception : " + ExceptionUtils.getStackTrace(e);
+			//String message = "Server Exception : " + ExceptionUtils.getStackTrace(e);
 			String prefix = additionalMessage.isEmpty() ? "" : additionalMessage + "\n";
-			String prefixedMessage = prefix + "for " + pathHelper.getInstallPath() + " got " + message;
+			String prefixedMessage = prefix + "for " + pathHelper.getInstallPath() +
+					(e != null ? " got " + "Server Exception : " + ExceptionUtils.getStackTrace(e) : "");
 			String subject = "Server Exception on " + pathHelper.getInstallPath();
 			sendEmail(subject, prefixedMessage);
 
