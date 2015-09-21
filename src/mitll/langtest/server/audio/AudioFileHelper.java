@@ -3,6 +3,7 @@ package mitll.langtest.server.audio;
 import com.google.common.io.Files;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.server.LangTestDatabaseImpl;
+import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.autocrt.AutoCRT;
@@ -43,7 +44,7 @@ public class AudioFileHelper implements CollationSort {
   private ASRWebserviceScoring webserviceScoring;
   private AutoCRT autoCRT;
   private final DatabaseImpl db;
-  private final LangTestDatabaseImpl langTestDatabase;
+  private final LogAndNotify langTestDatabase;
   private boolean checkedLTS = false;
   private Map<String, Integer> phoneToCount;
   private boolean useOldSchoolServiceOnly = false;
@@ -56,7 +57,7 @@ public class AudioFileHelper implements CollationSort {
    * @see mitll.langtest.server.ScoreServlet#getAudioFileHelper()
    */
   public AudioFileHelper(PathHelper pathHelper, ServerProperties serverProperties, DatabaseImpl db,
-                         LangTestDatabaseImpl langTestDatabase) {
+                         LogAndNotify langTestDatabase) {
     this.pathHelper = pathHelper;
     this.serverProps = serverProperties;
     this.db = db;
@@ -857,8 +858,8 @@ public class AudioFileHelper implements CollationSort {
   // TODO: gross
   private void makeASRScoring() {
     if (webserviceScoring == null) {
-      webserviceScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps);
-      oldschoolScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps, langTestDatabase);
+      webserviceScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps, langTestDatabase);
+      oldschoolScoring  = new ASRScoring(pathHelper.getInstallPath(), serverProps, langTestDatabase);
     }
     asrScoring = oldschoolScoring;
   }
