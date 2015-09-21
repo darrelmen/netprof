@@ -805,6 +805,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		return exercises;
 	}
 
+	public ContextPractice getContextPractice() {
+		return db.getContextPractice();
+	}
+
     /**
      * @param wavFile
      * @param title
@@ -2086,6 +2090,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
         try {
             db.preloadExercises();
+			db.preloadContextPractice();
             db.getUserListManager().setStateOnExercises();
             db.doReport(serverProps, getServletContext().getRealPath(""), getMailSupport(), pathHelper);
         } catch (Exception e) {
