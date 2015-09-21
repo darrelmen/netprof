@@ -27,40 +27,40 @@ Title: Unit 1: Part 3
 Speaker 1: Kao
 Speaker 2: He
 
-1: 
-2: 
-1: 
-2: 
-1: 
-2: 
-1: 
+1: Èi, Lăo Hé!
+2: Xiăo Gāo!
+1: Zuìjìn zěmmeyàng a?
+2: Hái kéyi. Nĭ ne?
+1: Hái shi lăo yàngzi. Nĭ gōngzuò máng bu máng?
+2: Bú tài máng. Nĭ xuéxí zěmmeyàng?
+1: Tĭng jĭnzhāngde.
 
 Title: Unit 1: Part 4
 
 Speaker 1: Mrs. Li
 Speaker 2: Mrs. Smith
 
-1: 
-2: 
-1: 
-2: 
-2: 
-2: 
-1: 
-2: 
+1: Xiè Tàitai, huānyíng, huānyíng! Qĭng jìn, qĭng jìn.
+2: Xièxie.
+1: Qĭng zuò, qĭng zuò.
+2: Xièxie.
+2: Lĭ Tàitai, wŏ yŏu yìdiăn shì, děi zŏule.
+2: Lĭ Tàitai, xièxie nín le.
+1: Bú kèqi. Màn zŏu a!
+2: Zàijiàn, zàijiàn!
 
 Title: Unit 2: Part 1
 
 Speaker 1: Taiwanese Student
 Speaker 2: Parsons
 
-1: 
-2: 
-1: 
-2: 
-1: 
-2: 
-2: 
+1: Qĭng wèn, nĭ shì něiguó rén?
+2: Wŏ shi Měiguo rén.
+1: Nĭ jiào shémme míngzi?
+2: Wŏ jiào Bái Jiéruì.
+1: Nĭmen dōu shi Měiguo rén ma?
+2: Wŏmen bù dōu shi Měiguo rén.
+2: Zhèiwèi tóngxué yě shi Měiguo rén, kěshi nèiwèi tóngxué shi Jiā'nádà rén. 
 
 Title: Unit 2: Part 2
 
@@ -68,34 +68,34 @@ Speaker 1: First Chinese
 Speaker 2: Second Chinese
 Speaker 3: American
 
-1: 
-2: 
-1: 
-1: 
-1: 
-2: 
-3: 
-2: 
-2: 
-3: 
-2: 
+1: Qĭng jìn!
+2: Èi, Xiăo Mă. Ò.
+1: Ò, Xiăo Chén, wŏ gĕi nĭ jièshao yixiar.
+1: Zhè shi wŏde xīn tóngwū, tā jiào Wáng Àihuá.
+1: Wáng Àihuá, zhè shi wŏde lăo tóngxué, Xiăo Chén.
+2: Ò, huānyíng nĭ dào Zhōngguo lái!
+3: Hĕn gāoxìng rènshi nĭ, Chén Xiáojie!
+2: Ò, bié zhèmme chēnghu wŏ.
+2: Hái shi jiào wŏ Xiăo Chén hăole.
+3: Xíng. Nà nĭ yě jiào wŏ Xiăo Wáng hăole.
+2: Hăo.
 
 Title: Unit 2: Part 3
 
 Speaker 1: American
 Speaker 2: Chinese
 
-1: 
-2: 
-1: 
-1: 
-2: 
-1: 
-2: 
-1: 
-2: 
-2: 
-1: 
+1: Nín guìxìng?
+2: Wŏ xìng Gāo. Nín guìxìng?
+1: Wŏ xìng Wú, Wú Sùshān.
+1: Gāo Xiānsheng, nín zài nĕige dānwèi gōngzuò?
+2: Wŏ zài Wàijiāobù gōngzuò. Nín ne?
+1: Wŏ zài Měiguo Dàshĭguăn gōngzuò.
+2: Nèiwèi shi nínde xiānsheng ba?
+1: Bú shì, bú shì! Tā shì wŏde tóngshì.
+2: Ò, Wú nǚshì, duìbuqĭ.
+2: Wŏ yŏu yìdiănshìr, xiān zŏule. Zàijiàn!
+1: Zàijiàn! 
 
 Title: Unit 2: Part 4
 
@@ -103,171 +103,171 @@ Speaker 1: Rogers
 Speaker 2: Taiwanese Guest
 Speaker 3: Holbrooke
 
-1: 
-1: 
-2: 
-2: 
-1: 
-3: 
-2: 
-3: 
-3: 
-2: 
-3: 
+1: Nĭ hăo! Wŏ jiào Luó Jiésī.
+1: Qĭng duō zhĭ jiào.
+2: Wŏ xìng Shī. Duìbuqĭ, wŏ méi dài míngpiàn.
+2: Wŏ zài Zhōng-Měi Màoyì Gōngsī gōngzuò.
+1: Zŏngjīnglĭ, zhè shì Zhōng-Měi Màoyì Gōngsī de Shī Xiáojie.
+3: À, huānyíng, huānyíng! Wŏ xìng Hóu.
+2: Xièxie. Zŏngjīnglĭ yě shi Yīngguo rén ba?
+3: Bù, wŏ gēn Luó Xiáojie dōu bú shi Yīngguo rén.
+3: Wŏmen shi Měiguo rén.
+2: Ò, duìbuqĭ, wŏ găocuòle.
+3: Méi guānxi.
 
 Title: Unit 3: Part 1
 
 Speaker 1: Chinese
 Speaker 2: American
 
-1: 
-2: 
-1: 
-2: 
-1: 
-2: 
-1: 
-2: 
+1: Nĭmen bānshang yŏu jĭwèi tóngxué?
+2: Yŏu shíwèi.
+1: Dōu shi Mĕiguo rén ma?
+2: Bù dōu shi Mĕiguó rén. Yŏu qíge Mĕiguo rén, liăngge Déguo rén gēn yíge Făguo rén.
+1: Jĭge nánshēng, jĭge nǚshēng?
+2: Yíbànr yíbànr. Wŭge nánde, wŭge nǚde.
+1: Nà, nĭmen yŏu jĭwèi lăoshī ne?
+2: Yígòng yŏu sānwèi. Liăngwèi shi nǚlăoshī, yíwèi shi nánlăoshī.
 
 Title: Unit 3: Part 2
 
 Speaker 1: Teacher
 Speaker 2: Thompson
 
-1: 
-2: 
-1: 
-2: 
-1: 
-2: 
+1: Zhè shi nĭ fùqin ma? Tā duō dà niánji le?
+2: Wŏ xiángxiang kàn. Tā jīnnián wŭshisānsuì le--bù, wŭshisìsuì le.
+1: Ò. Nà, zhèiwèi shi nĭ mŭqin ba?
+2: Duì, tā jīnnián sìshibāsuì le.
+1: Zhè shi nĭ mèimei, duì bu dui? Tā hĕn kĕ'ài! Tā jĭsuì le?
+2: Tā bāsuì. Xiàge yuè jiù jiŭsuì le.
 
 Title: Unit 3: Part 3
 
 Speaker 1: Little
 Speaker 2: Salesman
 
-1: 
-2: 
-1: 
-1: 
-2: 
-1: 
-2: 
-1: 
+1: Qĭng wèn, zhèige duōshăo qián?
+2: Yìbăi jiŭshibākuài.
+1: Yò, tài guìle!
+1: Zhèige bēizi duōshăo qián?
+2: Nèige zhĭ yào sānkuài wŭ.
+1: Wŏ kànkan, xíng bu xíng?
+2: Xíng, nín kàn ba.
+1: Hăo, wŏ măi liăngge.
 
 Title: Unit 3: Part 4
 
 Speaker 1: Haynes
 Speaker 2: Ticket Agent
 
-1: 
-2:
-1: 
-2:
-1: 
-1: 
-2:
-1: 
-2:
-1: 
+1: Qĭng wèn, xiàyítàng dào Tiānjīnde huŏchē jĭdiăn kāi?
+2: Jiŭdiăn èrshí. Kĕshi xiànzài yĭjīng jiŭdiăn yíkè le, kŏngpà nín láibujíle.
+1: Nèmme, zài xiàyítàng ne?
+2: Wŏ kànkàn. Zài xiàyítàng shi shídiăn bàn.
+1: Hăo. Nà, wŏ jiù zuò shídiăn bànde.
+1: Duōshăo qián?
+2: Shíyīkuài wŭ.
+1: Dào Tiānjīn yào duō cháng shíjiān?
+2: Chàbuduō yào liăngge bàn zhōngtóu.
+1: Hăo, xièxie nín.
 
 Title: Unit 4: Part 1
 
 Speaker 1: American
 Speaker 2: Language Lab Attendant
 
-1: 
-2: 
-1: 
-2: 
-1: 
-2: 
-1: 
-2: 
+1: Qĭng wèn, yŭyán shíyànshì mĕitiān jĭdiăn zhōng kāimén, jĭdiăn zhōng guānmén?
+2: Zăoshang bādiăn kāimén, wănshang jiŭdiăn bàn guānmén.
+1: Xīngqīliù kāi bu kāi?
+2: Xīngqīliù kāi bàntiān. Shàngwŭ kāi, xiàwŭ bù kāi.
+1: Xīngqītiān ne?
+2: Xīngqītiān xiūxi.
+1: Xièxie nĭ.
+2: Náli.
 
 Title: Unit 4: Part 2
 
 Speaker 1: Nurse
 Speaker 2: Johns
 
-1: 
-2: 
-2: 
-1: 
-2: 
-1: 
-2: 
-1: 
-2: 
-1: 
+1: Nǐ jiào shémme míngzi?
+2: Wŏ jiào Zhāng Wényīng.
+2: Zhāng shi gōng cháng Zhāng, wén shi wénhuàde wén, yīng shi Yīngguode yīng.
+1: Nĭ shi nĕinián chūshēngde?
+2: Yī-jiŭ-bā-líng-nián, jiù shi Mínguó liùshijiŭnián.
+1: Jĭyuè jĭhào?
+2: Sìyuè shísānhào.
+1: Nĭde dìzhĭ shi...
+2: Hépíng Dōng Lù yīduàn, èrshiqīxiàng, sānnòng, yībăi wŭshisìhào, bālóu.
+1: Hăo, qĭng dĕng yíxià.
 
 Title: Unit 4: Part 3
 
 Speaker 1: Ross
 Speaker 2: Bellhop
 
-1: 
-2: 
-1: 
-2: 
-1: 
-2: 
-1: 
-2: 
-1: 
-2: 
-1: 
+1: Nĭ hăo!
+2: Nĭ hăo! Nĭ shi Mĕiguo rén ma?
+1: Duì, wŏ shi Mĕiguo rén.
+2: Zhè shi nĭ dìyīcì dào Zhōngguo lái ma?
+1: Bù, zhè shi dì'èrcì. Wŏ qùnián láiguo yícì.
+2: M, nĭ zhèicì yào zhù duō jiŭ?
+1: Dàyuē bàn'ge yuè. Wŏ shí'èrhào huíguó.
+2: Nĭ zhù nĕige fángjiān?
+1: Wŏ zhù sān líng liù.
+2: Ò, duìbuqĭ, wŏ dĕi zŏule. Zàijiàn!
+1: Zàijiàn!
 
 Title: Unit 4: Part 4
 
 Speaker 1: Miller
 Speaker 2: Sun
 
-1: 
-2: 
-1: 
-2: 
-1: 
-2: 
-2: 
+1: Sūn Lăoshī, qĭng wèn, Zhōngguo yŏu duōshăo rén? 
+2: Zhōngguo chàbuduō yŏu shísānyì rén.
+1: Bĕijīng yŏu duōshăo rén?
+2: Bĕijīng yŏu yìqiānduōwàn rén.
+1: Nèmme, Nánjīng ne?
+2: Nánjīng de rénkŏu bĭjiào shăo.
+2: Hǎoxiàng zhĭ yŏu wŭbăiwàn.
 
 Title: Unit 5: Part 1
 
 Speaker 1: Chinese
 Speaker 2: American
 
-1: 
-2: 
-2: 
-1: 
-2: 
-2: 
-2: 
-2: 
-1: 
-1: 
-2: 
-1: 
-2: 
-1: 
-2: 
+1: Qĭng wèn.
+2: Duìbuqĭ, wŏ xiăng zhăo yixiar Wáng Xiáojie.
+2: Qĭng wèn, tā zài bu zai?
+1: Nĕiwèi Wáng Xiáojie?
+2: Shízài bàoqiàn.
+2: Wŏ shi Mĕiguo Huáqiáo, Zhōngwén bú tài hăo.
+2: Wŏ bù zhīdào tāde Zhōngwén míngzi.
+2: Búguò, tāde Yīngwén míngzi jiào Mary Wang.
+1: Ò, wŏ zhīdaole. Shi Wáng Guólì.
+1: Búguò, tā xiànzài bú zài zhèr.
+2: Qĭng wèn, nĭ zhīdao tā zài năr ma?
+1: Tā zài lăobănde bàngōngshì.
+2: Nà, wŏ kĕ bu kéyi gĕi tā liú yíge tiáozi?
+1: Dāngrán kéyi.
+2: Xièxie
 
 Title: Unit 5: Part 2
 
 Speaker 1: American
 Speaker 2: Chinese
 
-1: 
-2: 
-1: 
-2: 
-1: 
-2: 
-1: 
-2: 
-1: 
-2: 
-1: 
+1: Qĭng wèn, zhèige wèizi yŏu rén ma?
+2: Méiyou, méiyou. Nín zùo ba.
+1: Nín cháng lái zhèr chī wŭfàn ma?
+2: Wŏ cháng lái. Nín ne?
+1: Wŏ yĕ cháng zài zhèr chī. Nín shi xuésheng ma?
+2: Bù, wŏ shi gōngrén, zài Bĕijīng Dìyī Píxié Chăng gōngzuò. Nín ne?
+1: Wŏ zài Mĕiguo shi dàxuéshēng, xiànzài zài zhèr xué Zhōngwén.
+2: Nín zài năr xuéxí?
+1: Zài Bĕidàde Hànyŭ péixùn zhōngxīn.
+2: Yò! Kuài yīdiăn le. Wŏ dĕi zŏule. Zàijiàn!
+1: Zàijiàn!
 
 Title: Unit 5: Part 3
 
@@ -275,33 +275,33 @@ Speaker 1: Norris
 Speaker 2: Cashier
 Speaker 3: Li
 
-1: 
-2: 
-1: 
-3: 
-3: 
-1: 
-1: 
-3: 
-1: 
-3: 
+1: Qĭng wèn, cèsuŏ zài năr?
+2: Zài nèibianr.
+1: Xiăo Lĭ, dùibuqĭ, ràng nĭ jiŭ dĕngle.
+3: Méi shìr, méi shìr. Xiăo Luó, hăo jiŭ bú jiànle!
+3: Nĭ zhèihuí lái Bĕijīng zhùzai năr?"
+1: Zhùzài Cháng Chéng Fàndiàn, qī-yāo-wŭ-hào fángjiān.
+1: Nĭ hái shi zhùzai lăo dìfang ma?
+3: Bù, wŏmen qùnián jiù bāndao Xiāng Shān le.
+1: Xiāng Shān zài năr?
+3: Zài Bĕijīng chéngde bĕibiānr.
 
 Title: Unit 5: Part 4
 
 Speaker 1: Guo
 Speaker 2: Walters
 
-1: 
-1: 
-2: 
-2: 
-2: 
-1: 
-2: 
-1: 
-2: 
-1: 
-1: 
-1: 
-2: 
-1: 
+1: Peter, wŏ măile yìtái diànnăo, zài shūfángli.
+1: Nĭ yào bu yao kànkan?
+2: Hăo a!
+2: E, shi yìtái wŭ-bā-liù ma?
+2: Lĭmiàn yŏu duōshăo RAM?
+1: Sānshi'èrge.
+2: Kāiguān yīnggāi zài pángbiān ba?
+1: Bú duì, zài qiánmian.
+2: Ò. E, wŏ kĕ bu kéyi kànkan shĭyòng shŏucè?
+1: Dāngrán kéyĭ.
+1: Jiù zài nĭ zuŏbiānde nèige shūjiàshang
+1: ò, bú duì, bú duì, shi zài nĭ hòumiande nèibă yĭzishang.
+2: Āiyò, zhuōzi dĭxia shi shémme dōngxi a?
+1: Ò, shi Láifú, wŏmen jiāde gŏu. Nĭ búyào guăn ta.
