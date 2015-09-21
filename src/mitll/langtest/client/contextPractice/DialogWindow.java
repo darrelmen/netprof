@@ -13,8 +13,10 @@ import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.scoring.SimplePostAudioRecordButton;
 import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.client.sound.PlayAudioPanel;
+import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.AudioAnswer;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.ListBox;
@@ -43,14 +45,15 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class DialogWindow {
 	
-  private ExerciseController controller;
-  private LangTestDatabaseAsync service;
+    private ExerciseController controller;
+    private LangTestDatabaseAsync service;
+	private final NumberFormat decF = NumberFormat.getFormat("#.####");
+	private ContextPractice cpw;
 
-  private final NumberFormat decF = NumberFormat.getFormat("#.####");	
-	
-  public DialogWindow(LangTestDatabaseAsync service, ExerciseController controller) {
+  public DialogWindow(LangTestDatabaseAsync service, ExerciseController controller, ContextPractice cpw) {
 	  this.controller = controller;
 	  this.service    = service;
+	  this.cpw = cpw;
   }
 
   public void viewDialog(final Panel contentPanel) {
@@ -75,8 +78,8 @@ public class DialogWindow {
      availableSpeakers.getElement().getStyle().setProperty("margin", "10px");
      final String CHOOSE_PART = "Choose a part to read";
      final String CHOOSE_DIALOG = "Choose a dialog to practice";
-     final HashMap<String, String[]> dialogToParts = getDialogToPartsMap();
-     final HashMap<Integer, String> dialogIndex = new HashMap<Integer, String>();
+	  final Map<String, String[]> dialogToParts = cpw.getDialogToPartsMap();
+     final Map<Integer, String> dialogIndex = new HashMap<Integer, String>();
      final RadioButton yesDia = new RadioButton("showDia", "Show your part");
      final RadioButton noDia = new RadioButton("showDia", "Hide your part");
      final RadioButton regular = new RadioButton("audioSpeed", "Regular speed");
@@ -187,7 +190,7 @@ public class DialogWindow {
   }
 
   
-  public void mkNewDialog(ListBox availableSpeakers, ListBox availableDialogs, FlowPanel forSents, FlowPanel forGoodPhoneScores, FlowPanel forBadPhoneScores, HashMap<Integer, String> dialogIndex, RadioButton yesDia, RadioButton regular, boolean fromButton){
+  public void mkNewDialog(ListBox availableSpeakers, ListBox availableDialogs, FlowPanel forSents, FlowPanel forGoodPhoneScores, FlowPanel forBadPhoneScores, Map<Integer, String> dialogIndex, RadioButton yesDia, RadioButton regular, boolean fromButton){
 	  if((availableSpeakers.getSelectedIndex() < 1) || (availableDialogs.getSelectedIndex() < 1)){
 		  forSents.clear();
 		  forGoodPhoneScores.clear();
@@ -305,11 +308,11 @@ public class DialogWindow {
   }
   
   private Grid displayDialog(final String dialog, String part, FlowPanel cp, final FlowPanel goodPhonePanel, final FlowPanel badPhonePanel, boolean showPart, boolean regAudio){
-	  
-	  HashMap<String, String> sentToAudioPath = regAudio ? getSentToAudioPath() : getSentToSlowAudioPath();
-	  HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = getDialogToSentIndexToSpeaker();
-	  final HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent = getDialogToSentIndexToSent();
-	  HashMap<String, HashMap<String, Integer>> dialogToSpeakerToLast = getDialogToSpeakerToLast();
+
+	  Map<String, String> sentToAudioPath = regAudio ? cpw.getSentToAudioPath() : cpw.getSentToSlowAudioPath();
+	  Map<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = cpw.getDialogToSentIndexToSpeaker();
+	  final Map<String, HashMap<Integer, String>> dialogToSentIndexToSent = cpw.getDialogToSentIndexToSent();
+	  Map<String, HashMap<String, Integer>> dialogToSpeakerToLast = cpw.getDialogToSpeakerToLast();
 
 	  int sentIndex = 0;
 	  final Grid sentPanel = new Grid(dialogToSentIndexToSent.get(dialog).size(), 9);
@@ -325,7 +328,6 @@ public class DialogWindow {
 	  final ArrayList<SimplePostAudioRecordButton> recoButtons = new ArrayList<SimplePostAudioRecordButton>();
 	  final ArrayList<Integer> sentIndexes = new ArrayList<Integer>();
 	  final ArrayList<Image> prevResponses = new ArrayList<Image>();
-	  boolean yourFirstReco = true;
 	  
 	  while(dialogToSentIndexToSent.get(dialog).containsKey(sentIndex)){
 		  String sentence = dialogToSentIndexToSent.get(dialog).get(sentIndex);
@@ -358,7 +360,7 @@ public class DialogWindow {
 				  prevResponses.add(somethingIsHappening);
 			  }
 			  if(sentIndex != yourLast){
-			     recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), score, continueButton, check, x, somethingIsHappening);
+			     recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex).replaceAll("-", " "), score, continueButton, check, x, somethingIsHappening);
 			     continueButton.addClickHandler(new ClickHandler() {
 			    	 @Override
 			    	 public void onClick(ClickEvent e){
@@ -369,7 +371,7 @@ public class DialogWindow {
 			     });
 			  }
 			  else{
-				 recordButton = getFinalRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex), continueButton, check, x, somethingIsHappening, scoreElements, score, avg);
+				 recordButton = getFinalRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex).replaceAll("-", " "), continueButton, check, x, somethingIsHappening, scoreElements, score, avg);
 				  
 				  continueButton.addClickHandler(new ClickHandler() {
 					  @Override
@@ -449,7 +451,7 @@ public class DialogWindow {
 	  return sentPanel;
   }
   
-  private void displayResults(String dialog, ArrayList<HTML> scoreElements, ArrayList<Integer> sentIndexes, HashMap<String, HashMap<Integer, String>> dialogToSentIndexToSent, ArrayList<SimplePostAudioRecordButton> recoButtons, Grid sentPanel, FlowPanel rp, FlowPanel goodPhonePanel, FlowPanel badPhonePanel){
+  private void displayResults(String dialog, ArrayList<HTML> scoreElements, ArrayList<Integer> sentIndexes, Map<String, HashMap<Integer, String>> dialogToSentIndexToSent, ArrayList<SimplePostAudioRecordButton> recoButtons, Grid sentPanel, FlowPanel rp, FlowPanel goodPhonePanel, FlowPanel badPhonePanel){
 	     final HashMap<String, ArrayList<Float>> phonesToScores = new HashMap<String, ArrayList<Float>>();
 	     HashMap<String, PlayAudioPanel> phoneToAudioExample = getPlayAudioWidget();
 	     rp.setVisible(true);
@@ -641,340 +643,6 @@ public class DialogWindow {
 	  return "Your average score was: "+decF.format(sum/scoreElements.size());
   }
   
-  private HashMap<String, String[]> getDialogToPartsMap(){
-	  HashMap<String, String[]> m = new HashMap<String, String[]>();
-	  m.put("Unit 1: Part 1", new String[] {"Crane", "Wang"});
-	  m.put("Unit 1: Part 2", new String[] {"Smith", "Zhao"});
-	  m.put("Unit 1: Part 3", new String[] {"Kao", "He"});
-	  m.put("Unit 1: Part 4", new String[] {"Mrs. Li", "Mrs. Smith"});
-	  m.put("Unit 2: Part 1", new String[] {"Taiwanese Student", "Parsons"});
-	  m.put("Unit 2: Part 2", new String[] {"First Chinese", "Second Chinese", "American"});
-	  m.put("Unit 2: Part 3", new String[] {"American", "Chinese"});
-	  m.put("Unit 2: Part 4", new String[] {"Rogers", "Taiwanese Guest", "Holbrooke"});
-	  m.put("Unit 3: Part 1", new String[] {"Chinese", "American"});
-	  m.put("Unit 3: Part 2", new String[] {"Teacher", "Thompson"});
-	  m.put("Unit 3: Part 3", new String[] {"Little", "Salesman"});
-	  m.put("Unit 3: Part 4", new String[] {"Haynes", "Ticket Agent"});
-	  m.put("Unit 4: Part 1", new String[] {"American", "Language Lab Attendant"});
-	  m.put("Unit 4: Part 2", new String[] {"Nurse", "Johns"});
-	  m.put("Unit 4: Part 3", new String[] {"Ross", "Bellhop"});
-	  m.put("Unit 4: Part 4", new String[] {"Miller", "Sun"});
-	  return m;
-  }
-  
-
-  private HashMap<String, String> getSentToAudioPath() {
-	  HashMap<String, String> m = new HashMap<String, String>();
-	  m.put("Kē Léi'ēn, nǐ hăo!", "/4/regular_1403800547484_by_8.wav");
-	  m.put("Nǐ dào năr qù a?", "/13/regular_1403801120710_by_8.wav");
-	  m.put("Wŏ huí sùshè.", "/24/regular_1403800638873_by_8.wav");
-	  m.put("Wáng Jīngshēng, nǐ hăo!", "/7/regular_1403800587874_by_8.wav");
-	  m.put("Wŏ qù túshūguăn. Nĭ ne?", "/20/regular_1403800718502_by_8.wav");
-	  
-	  m.put("Zhào Guócái, nĭ hăo a!", "/40/regular_1403793765777_by_8.wav");
-	  m.put("Hái xíng. Nĭ àirén, háizi dōu hăo ma?", "/57/regular_1403793281208_by_8.wav"); //hi
-	  m.put("Wŏ yŏu yìdiănr shìr, xiān zŏule. Zàijiàn!", "/71/regular_1403792961229_by_8.wav");
-	  m.put("Nĭ hăo! Hăo jiŭ bú jiànle.", "/44/regular_1403792777589_by_8.wav");
-	  m.put("Zěmmeyàng a?", "/45/regular_1403792803630_by_8.wav");
-	  m.put("Tāmen dōu hěn hăo, xièxie.", "/63/regular_1403793540903_by_8.wav");
-	  m.put("Zàijiàn.", "/72/regular_1403792398921_by_8.wav");
-	  
-	  m.put("Èi, Lăo Hé!", "/90/regular_1403794727635_by_8.wav");
-	  m.put("Xiăo Gāo!", "/93/regular_1403794869759_by_8.wav");
-	  m.put("Zuìjìn zěmmeyàng a?", "/96/regular_1403794766781_by_8.wav");
-	  m.put("Hái kéyi. Nĭ ne?", "/99/regular_1403795159594_by_8.wav");
-	  m.put("Hái shi lăo yàngzi. Nĭ gōngzuò máng bu máng?", "/109/regular_1403795348397_by_8.wav");
-	  m.put("Bú tài máng. Nĭ xuéxí zěmmeyàng?", "/115/regular_1403795085285_by_8.wav");
-	  m.put("Tĭng jĭnzhāngde.", "/119/regular_1403795511433_by_8.wav");
-	  
-	  m.put("Xiè Tàitai, huānyíng, huānyíng! Qĭng jìn, qĭng jìn.", "/145/regular_1403797935594_by_8.wav");
-	  m.put("Xièxie.", "/146/regular_1403798184425_by_8.wav");
-	  m.put("Qĭng zuò, qĭng zuò.", "149/regular_1403798074844_by_8.wav");
-	  m.put("Xièxie.", "/146/regular_1403798184425_by_8.wav");
-	  m.put("Lĭ Tàitai, wŏ yŏu yìdiăn shì, děi zŏule.", "/154/regular_1403797865456_by_8.wav");
-	  m.put("Lĭ Tàitai, xièxie nín le.", "/158/regular_1403797900178_by_8.wav");
-	  m.put("Bú kèqi. Màn zŏu a!", "/161/regular_1403798275036_by_8.wav");
-	  m.put("Zàijiàn, zàijiàn!", "/162/regular_1403797559758_by_8.wav");
-	  
-	  m.put("Qĭng wèn, nĭ shì něiguó rén?", "/188/regular_1409322875786_by_8.wav");
-	  m.put("Wŏ shi Měiguo rén.", "/191/regular_1409322897089_by_8.wav");
-	  m.put("Nĭ jiào shémme míngzi?", "/196/regular_1409323764263_by_8.wav");
-	  m.put("Wŏ jiào Bái Jiéruì.", "/199/regular_1409323274311_by_8.wav");
-	  m.put("Nĭmen dōu shi Měiguo rén ma?", "/200/regular_1409321590091_by_8.wav");
-	  m.put("Wŏmen bù dōu shi Měiguo rén.", "/202/regular_1409323704609_by_8.wav");
-	  m.put("Zhèiwèi tóngxué yě shi Měiguo rén, kěshi nèiwèi tóngxué shi Jiā'nádà rén.", "/215/regular_1409323661836_by_8.wav");
-	  
-	  m.put("Qĭng jìn!", "/242/regular_1409324867082_by_8.wav");
-	  m.put("Èi, Xiăo Mă. Ò.", "/243/missing2_2.wav");
-	  m.put("Ò, Xiăo Chén, wŏ gĕi nĭ jièshao yixiar.", "/261/regular_1409325498732_by_8.wav");
-	  m.put("Zhè shi wŏde xīn tóngwū, tā jiào Wáng Àihuá.", "/262/regular_1409325719045_by_8.wav");
-	  m.put("Wáng Àihuá, zhè shi wŏde lăo tóngxué, Xiăo Chén.", "/263/regular_1409325343747_by_8.wav");
-	  m.put("Ò, huānyíng nĭ dào Zhōngguo lái!", "/268/regular_1409325523740_by_8.wav");
-	  m.put("Hĕn gāoxìng rènshi nĭ, Chén Xiáojie!", "/272/regular_1409325037171_by_8.wav");
-	  m.put("Ò, bié zhèmme chēnghu wŏ.", "/280/regular_1409325476239_by_8.wav");
-	  m.put("Hái shi jiào wŏ Xiăo Chén hăole.", "/281/regular_1409325318317_by_8.wav");
-	  m.put("Xíng. Nà nĭ yě jiào wŏ Xiăo Wáng hăole.", "/284/regular_1409325429191_by_8.wav");
-	  m.put("Hăo.", "/285/regular_1409324474164_by_8.wav");
-	  
-	  m.put("Nín guìxìng?", "/296/regular_1409328095788_by_8.wav");
-	  m.put("Wŏ xìng Gāo. Nín guìxìng?", "/299/regular_1409327839500_by_8.wav");
-	  m.put("Wŏ xìng Wú, Wú Sùshān.", "/310/regular_1409327869935_by_8.wav");
-	  m.put("Gāo Xiānsheng, nín zài nĕige dānwèi gōngzuò?", "/311/regular_1409327753895_by_8.wav");
-	  m.put("Wŏ zài Wàijiāobù gōngzuò. Nín ne?", "/314/regular_1409327615970_by_8.wav");
-	  m.put("Wŏ zài Měiguo Dàshĭguăn gōngzuò.", "/317/regular_1409327653722_by_8.wav");
-	  m.put("Nèiwèi shi nínde xiānsheng ba?", "/323/regular_1409327593572_by_8.wav");
-	  m.put("Bú shì, bú shì! Tā shì wŏde tóngshì.", "/328/regular_1409327910091_by_8.wav");
-	  m.put("Ò, Wú nǚshì, duìbuqĭ.", "/332/regular_1409327942560_by_8.wav");
-	  m.put("Wŏ yŏu yìdiănshìr, xiān zŏule. Zàijiàn!", "/333/regular_1409327507146_by_8.wav");
-	  m.put("Zàijiàn!", "/334/regular_1409327365810_by_8.wav");
-	  
-	  m.put("Nĭ hăo! Wŏ jiào Luó Jiésī.", "/355/regular_1409329603821_by_8.wav");
-	  m.put("Qĭng duō zhĭ jiào.", "/357/regular_1409330000487_by_8.wav");
-	  m.put("Wŏ xìng Shī. Duìbuqĭ, wŏ méi dài míngpiàn.", "/368/regular_1409329841202_by_8.wav");
-	  m.put("Wŏ zài Zhōng-Měi Màoyì Gōngsī gōngzuò.", "/369/regular_1409329682905_by_8.wav");
-	  m.put("Zŏngjīnglĭ, zhè shì Zhōng-Měi Màoyì Gōngsī de Shī Xiáojie.", "/374/regular_1409329793024_by_8.wav");
-	  m.put("À, huānyíng, huānyíng! Wŏ xìng Hóu.", "/378/regular_1409329975201_by_8.wav");
-	  m.put("Xièxie. Zŏngjīnglĭ yě shi Yīngguo rén ba?", "/382/regular_1409330116515_by_8.wav");
-	  m.put("Bù, wŏ gēn Luó Xiáojie dōu bú shi Yīngguo rén.", "/387/regular_1409329916452_by_8.wav");
-	  m.put("Wŏmen shi Měiguo rén.", "/388/regular_1409330281249_by_8.wav");
-	  m.put("Ò, duìbuqĭ, wŏ găocuòle.", "/395/regular_1409329951250_by_8.wav");
-	  m.put("Méi guānxi.", "/397/regular_1409330196368_by_8.wav");
-	  
-	  m.put("Nĭmen bānshang yŏu jĭwèi tóngxué?", "/415/regular_1411181687843_by_6.wav");
-	  m.put("Yŏu shíwèi.", "/418/regular_1411182172767_by_6.wav");
-	  m.put("Dōu shi Mĕiguo rén ma?", "/419/regular_1411181176755_by_6.wav");
-	  m.put("Bù dōu shi Mĕiguó rén. Yŏu qíge Mĕiguo rén, liăngge Déguo rén gēn yíge Făguo rén.", "/432/regular_1411182280591_by_6.wav");
-	  m.put("Jĭge nánshēng, jĭge nǚshēng?", "/436/regular_1411181675630_by_6.wav");
-	  m.put("Yíbànr yíbànr. Wŭge nánde, wŭge nǚde.", "/446/regular_1411181498097_by_6.wav");
-	  m.put("Nà, nĭmen yŏu jĭwèi lăoshī ne?", "/448/regular_1411182074862_by_6.wav");
-	  m.put("Yígòng yŏu sānwèi. Liăngwèi shi nǚlăoshī, yíwèi shi nánlăoshī.", "/459/regular_1411182204835_by_6.wav");
-	  
-	  m.put("Zhè shi nĭ fùqin ma? Tā duō dà niánji le?", "/478/regular_1411225958788_by_6.wav");
-	  m.put("Wŏ xiángxiang kàn. Tā jīnnián wŭshisānsuì le--bù, wŭshisìsuì le.", "/488/regular_1411226099431_by_6.wav");
-	  m.put("Ò. Nà, zhèiwèi shi nĭ mŭqin ba?", "/490/regular_1411226382106_by_6.wav");
-	  m.put("Duì, tā jīnnián sìshibāsuì le.", "/493/regular_1411226423539_by_6.wav");
-	  m.put("Zhè shi nĭ mèimei, duì bu dui? Tā hĕn kĕ'ài! Tā jĭsuì le?", "/502/regular_1411226674835_by_6.wav");
-	  m.put("Tā bāsuì. Xiàge yuè jiù jiŭsuì le.", "/510/regular_1411226507164_by_6.wav");
-	  
-	  m.put("Qĭng wèn, zhèige duōshăo qián?", "/529/regular_1411227214576_by_6.wav");
-	  m.put("Yìbăi jiŭshibākuài.", "/534/regular_1411227584635_by_6.wav");
-	  m.put("Yò, tài guìle!", "/538/regular_1411227290562_by_6.wav");
-	  m.put("Zhèige bēizi duōshăo qián?", "/541/regular_1411227305048_by_6.wav");
-	  m.put("Nèige zhĭ yào sānkuài wŭ.", "/547/regular_1411227850021_by_6.wav");
-	  m.put("Wŏ kànkan, xíng bu xíng?", "/551/regular_1411228091152_by_6.wav");
-	  m.put("Xíng, nín kàn ba.", "/554/regular_1411227776540_by_6.wav");
-	  m.put("Hăo, wŏ măi liăngge.", "/557/regular_1411227551924_by_6.wav");
-	  
-	  m.put("Qĭng wèn, xiàyítàng dào Tiānjīnde huŏchē jĭdiăn kāi?", "/597/regular_1411228709840_by_6.wav");
-	  m.put("Jiŭdiăn èrshí. Kĕshi xiànzài yĭjīng jiŭdiăn yíkè le, kŏngpà nín láibujíle.", "/610/regular_1411229177452_by_6.wav");
-	  m.put("Nèmme, zài xiàyítàng ne?", "/614/regular_1411229636869_by_6.wav");
-	  m.put("Wŏ kànkàn. Zài xiàyítàng shi shídiăn bàn.", "/616/regular_1411229078926_by_6.wav");
-	  m.put("Hăo. Nà, wŏ jiù zuò shídiăn bànde.", "/620/regular_1411229292886_by_6.wav");
-	  m.put("Duōshăo qián?", "/621/regular_1411228846639_by_6.wav");
-	  m.put("Shíyīkuài wŭ.", "/622/regular_1411228674625_by_6.wav");
-	  m.put("Dào Tiānjīn yào duō cháng shíjiān?", "/627/regular_1411228826868_by_6.wav");
-	  m.put("Chàbuduō yào liăngge bàn zhōngtóu.", "/631/regular_1411228902183_by_6.wav");
-	  m.put("Hăo, xièxie nín.", "/632/regular_1411229312766_by_6.wav");
-	  
-	  m.put("Qĭng wèn, yŭyán shíyànshì mĕitiān jĭdiăn zhōng kāimén, jĭdiăn zhōng guānmén?", "/662/regular_1411262880448_by_6.wav");
-	  m.put("Zăoshang bādiăn kāimén, wănshang jiŭdiăn bàn guānmén.", "/667/regular_1411263236792_by_6.wav");
-	  m.put("Xīngqīliù kāi bu kāi?", "/670/regular_1411263212800_by_6.wav");
-	  m.put("Xīngqīliù kāi bàntiān. Shàngwŭ kāi, xiàwŭ bù kāi.", "/4-1.wav");
-	  m.put("Xīngqītiān ne?", "/679/regular_1411262609818_by_6.wav");
-	  m.put("Xīngqītiān xiūxi.", "/681/regular_1411263300998_by_6.wav");
-	  m.put("Xièxie nĭ.", "/682/regular_1411263813283_by_6.wav");
-	  m.put("Náli.", "/684/regular_1411263799454_by_6.wav");
-	  
-	  m.put("Nǐ jiào shémme míngzi?", "/721/regular_1411265548808_by_6.wav");
-	  m.put("Wŏ jiào Zhāng Wényīng.", "/724/regular_1411265081710_by_6.wav");
-	  m.put("Zhāng shi gōng cháng Zhāng, wén shi wénhuàde wén, yīng shi Yīngguode yīng.", "/729/regular_1411265406432_by_6.wav");
-	  m.put("Nĭ shi nĕinián chūshēngde?", "/734/regular_1411265633760_by_6.wav");
-	  m.put("Yī-jiŭ-bā-líng-nián, jiù shi Mínguó liùshijiŭnián.", "/740/regular_1411264916882_by_6.wav");
-	  m.put("Jĭyuè jĭhào?", "/744/regular_1411265584705_by_6.wav");
-	  m.put("Sìyuè shísānhào.", "/747/regular_1411264461878_by_6.wav");
-	  m.put("Nĭde dìzhĭ shi...", "/749/regular_1411265691435_by_6.wav");
-	  m.put("Hépíng Dōng Lù yīduàn, èrshiqīxiàng, sānnòng, yībăi wŭshisìhào, bālóu.", "/764/regular_1411264851371_by_6.wav");
-	  m.put("Hăo, qĭng dĕng yíxià.", "/767/regular_1411264409681_by_6.wav");
-	  
-	  m.put("Nĭ hăo!", "/788/regular_1411268347706_by_6.wav");
-	  m.put("Nĭ hăo! Nĭ shi Mĕiguo rén ma?", "/789/regular_1411268363857_by_6.wav");
-	  m.put("Duì, wŏ shi Mĕiguo rén.", "/790/regular_1411269067335_by_6.wav");
-	  m.put("Zhè shi nĭ dìyīcì dào Zhōngguo lái ma?", "/796/regular_1411268475838_by_6.wav");
-	  m.put("Bù, zhè shi dì'èrcì. Wŏ qùnián láiguo yícì.", "/802/regular_1411268599745_by_6.wav");
-	  m.put("M, nĭ zhèicì yào zhù duō jiŭ?", "/810/regular_1411268921781_by_6.wav");
-	  m.put("Dàyuē bàn'ge yuè. Wŏ shí'èrhào huíguó.", "/816/regular_1411266211535_by_6.wav");
-	  m.put("Nĭ zhù nĕige fángjiān?", "/819/regular_1411268985661_by_6.wav");
-	  m.put("Wŏ zhù sān líng liù.", "/820/regular_1411268449048_by_6.wav");
-	  m.put("Ò, duìbuqĭ, wŏ dĕi zŏule. Zàijiàn!", "/821/regular_1411268640899_by_6.wav");
-	  m.put("Zàijiàn!", "/70/regular_1403654964412_by_4.wav");
-	  
-	  m.put("Sūn Lăoshī, qĭng wèn, Zhōngguo yŏu duōshăo rén?", "/839/regular_1411269368133_by_6.wav");
-	  m.put("Zhōngguo chàbuduō yŏu shísānyì rén.", "/843/regular_1411269312568_by_6.wav");
-	  m.put("Bĕijīng yŏu duōshăo rén?", "/845/regular_1411269494518_by_6.wav");
-	  m.put("Bĕijīng yŏu yìqiānduōwàn rén.", "/852/regular_1411269286037_by_6.wav");
-	  m.put("Nèmme, Nánjīng ne?", "/854/regular_1411269188503_by_6.wav");
-	  m.put("Nánjīng de rénkŏu bĭjiào shăo.", "/865/regular_1411270065286_by_6.wav");
-	  m.put("Hǎoxiàng zhĭ yŏu wŭbăiwàn.", "/866/regular_1411269694394_by_6.wav");
-	  
-	  return m;
-  }
-  
-  private HashMap<String, String> getSentToSlowAudioPath() {
-	  HashMap<String, String> m = new HashMap<String, String>();
-	  m.put("Kē Léi'ēn, nǐ hăo!", "/4/slow_1403800571291_by_8.wav");
-	  m.put("Nǐ dào năr qù a?", "/13/slow_1403801128819_by_8.wav");
-	  m.put("Wŏ huí sùshè.", "/24/slow_1403800649832_by_8.wav");
-	  m.put("Wáng Jīngshēng, nǐ hăo!", "/7/slow_1403800597192_by_8.wav");
-	  m.put("Wŏ qù túshūguăn. Nĭ ne?", "/20/slow_1403800730216_by_8.wav");
-	  
-	  m.put("Zhào Guócái, nĭ hăo a!", "/40/slow_1403793805369_by_8.wav");
-	  m.put("Hái xíng. Nĭ àirén, háizi dōu hăo ma?", "/57/slow_1403793264402_by_8.wav"); //hi
-	  m.put("Wŏ yŏu yìdiănr shìr, xiān zŏule. Zàijiàn!", "/71/slow_1403792972693_by_8.wav");
-	  m.put("Nĭ hăo! Hăo jiŭ bú jiànle.", "/44/slow_1403792786355_by_8.wav");
-	  m.put("Zěmmeyàng a?", "/45/slow_1403792847063_by_8.wav");
-	  m.put("Tāmen dōu hěn hăo, xièxie.", "/63/slow_1403793604382_by_8.wav");
-	  m.put("Zàijiàn.", "/72/slow_1403792425728_by_8.wav");
-	  
-	  m.put("Èi, Lăo Hé!", "/90/slow_1403794714026_by_8.wav");
-	  m.put("Xiăo Gāo!", "/93/slow_1403794875313_by_8.wav");
-	  m.put("Zuìjìn zěmmeyàng a?", "/96/slow_1403794750850_by_8.wav");
-	  m.put("Hái kéyi. Nĭ ne?", "/99/slow_1403795185981_by_8.wav");
-	  m.put("Hái shi lăo yàngzi. Nĭ gōngzuò máng bu máng?", "/109/slow_1403795359109_by_8.wav");
-	  m.put("Bú tài máng. Nĭ xuéxí zěmmeyàng?", "/115/slow_1403795093515_by_8.wav");
-	  m.put("Tĭng jĭnzhāngde.", "/119/slow_1403795517517_by_8.wav");
-	  
-	  m.put("Xiè Tàitai, huānyíng, huānyíng! Qĭng jìn, qĭng jìn.", "/145/slow_1403797946854_by_8.wav");
-	  m.put("Xièxie.", "/146/slow_1403798188972_by_8.wav");
-	  m.put("Qĭng zuò, qĭng zuò.", "/149/slow_1403798082119_by_8.wav");
-	  m.put("Xièxie.", "/146/slow_1403798188972_by_8.wav");
-	  m.put("Lĭ Tàitai, wŏ yŏu yìdiăn shì, děi zŏule.", "/154/slow_1403797874655_by_8.wav");
-	  m.put("Lĭ Tàitai, xièxie nín le.", "/158/slow_1403797916593_by_8.wav");
-	  m.put("Bú kèqi. Màn zŏu a!", "/161/slow_1403798282629_by_8.wav");
-	  m.put("Zàijiàn, zàijiàn!", "/162/slow_1403797569320_by_8.wav");
-	  
-	  m.put("Qĭng wèn, nĭ shì něiguó rén?", "/188/slow_1409322882550_by_8.wav");
-	  m.put("Wŏ shi Měiguo rén.", "/191/slow_1409322902819_by_8.wav");
-	  m.put("Nĭ jiào shémme míngzi?", "/196/slow_1409323768824_by_8.wav");
-	  m.put("Wŏ jiào Bái Jiéruì.", "/199/slow_1409323280017_by_8.wav");
-	  m.put("Nĭmen dōu shi Měiguo rén ma?", "/200/slow_1409321642660_by_8.wav");
-	  m.put("Wŏmen bù dōu shi Měiguo rén.", "/202/slow_1409323710820_by_8.wav");
-	  m.put("Zhèiwèi tóngxué yě shi Měiguo rén, kěshi nèiwèi tóngxué shi Jiā'nádà rén.", "/215/slow_1409323675900_by_8.wav");
-	  
-	  m.put("Qĭng jìn!", "/242/slow_1409324871090_by_8.wav");
-	  m.put("Èi, Xiăo Mă. Ò.", "/243/missing2_2.wav");
-	  m.put("Ò, Xiăo Chén, wŏ gĕi nĭ jièshao yixiar.", "/261/slow_1409325506235_by_8.wav");
-	  m.put("Zhè shi wŏde xīn tóngwū, tā jiào Wáng Àihuá.", "/262/slow_1409325727429_by_8.wav");
-	  m.put("Wáng Àihuá, zhè shi wŏde lăo tóngxué, Xiăo Chén.", "/263/slow_1409325351489_by_8.wav");
-	  m.put("Ò, huānyíng nĭ dào Zhōngguo lái!", "/268/slow_1409325530229_by_8.wav");
-	  m.put("Hĕn gāoxìng rènshi nĭ, Chén Xiáojie!", "/272/slow_1409325044588_by_8.wav");
-	  m.put("Ò, bié zhèmme chēnghu wŏ.", "/280/slow_1409325482468_by_8.wav");
-	  m.put("Hái shi jiào wŏ Xiăo Chén hăole.", "/281/slow_1409325324176_by_8.wav");
-	  m.put("Xíng. Nà nĭ yě jiào wŏ Xiăo Wáng hăole.", "/284/slow_1409325437152_by_8.wav");
-	  m.put("Hăo.", "/285/slow_1409324477262_by_8.wav");
-	  
-	  m.put("Nín guìxìng?", "/296/slow_1409328100134_by_8.wav");
-	  m.put("Wŏ xìng Gāo. Nín guìxìng?", "/299/slow_1409327855443_by_8.wav");
-	  m.put("Wŏ xìng Wú, Wú Sùshān.", "/310/slow_1409327876439_by_8.wav");
-	  m.put("Gāo Xiānsheng, nín zài nĕige dānwèi gōngzuò?", "/311/slow_1409327769824_by_8.wav");
-	  m.put("Wŏ zài Wàijiāobù gōngzuò. Nín ne?", "/314/slow_1409327623622_by_8.wav");
-	  m.put("Wŏ zài Měiguo Dàshĭguăn gōngzuò.", "/317/slow_1409327660792_by_8.wav");
-	  m.put("Nèiwèi shi nínde xiānsheng ba?", "/323/slow_1409327599327_by_8.wav");
-	  m.put("Bú shì, bú shì! Tā shì wŏde tóngshì.", "/328/slow_1409327926507_by_8.wav");
-	  m.put("Ò, Wú nǚshì, duìbuqĭ.", "/332/slow_1409327948820_by_8.wav");
-	  m.put("Wŏ yŏu yìdiănshìr, xiān zŏule. Zàijiàn!", "/333/slow_1409327522521_by_8.wav");
-	  m.put("Zàijiàn!", "/334/slow_1409327369250_by_8.wav");
-	  
-	  m.put("Nĭ hăo! Wŏ jiào Luó Jiésī.", "/355/slow_1409329610608_by_8.wav");
-	  m.put("Qĭng duō zhĭ jiào.", "/357/slow_1409330005743_by_8.wav");
-	  m.put("Wŏ xìng Shī. Duìbuqĭ, wŏ méi dài míngpiàn.", "/368/slow_1409329849454_by_8.wav");
-	  m.put("Wŏ zài Zhōng-Měi Màoyì Gōngsī gōngzuò.", "/369/slow_1409329689735_by_8.wav");
-	  m.put("Zŏngjīnglĭ, zhè shì Zhōng-Měi Màoyì Gōngsī de Shī Xiáojie.", "/374/slow_1409329769057_by_8.wav");
-	  m.put("À, huānyíng, huānyíng! Wŏ xìng Hóu.", "/378/slow_1409329982278_by_8.wav");
-	  m.put("Xièxie. Zŏngjīnglĭ yě shi Yīngguo rén ba?", "/382/slow_1409330123914_by_8.wav");
-	  m.put("Bù, wŏ gēn Luó Xiáojie dōu bú shi Yīngguo rén.", "/387/slow_1409329924825_by_8.wav");
-	  m.put("Wŏmen shi Měiguo rén.", "/388/slow_1409330286656_by_8.wav");
-	  m.put("Ò, duìbuqĭ, wŏ găocuòle.", "/395/slow_1409329957821_by_8.wav");
-	  m.put("Méi guānxi.", "/397/slow_1409330185688_by_8.wav");
-	  
-	  m.put("Nĭmen bānshang yŏu jĭwèi tóngxué?", "/415/slow_1411181695953_by_6.wav");
-	  m.put("Yŏu shíwèi.", "/418/slow_1411182177877_by_6.wav");
-	  m.put("Dōu shi Mĕiguo rén ma?", "/419/slow_1411181183573_by_6.wav");
-	  m.put("Bù dōu shi Mĕiguó rén. Yŏu qíge Mĕiguo rén, liăngge Déguo rén gēn yíge Făguo rén.", "/432/slow_1411182270715_by_6.wav");
-	  m.put("Jĭge nánshēng, jĭge nǚshēng?", "/436/slow_1411181659446_by_6.wav");
-	  m.put("Yíbànr yíbànr. Wŭge nánde, wŭge nǚde.", "/446/slow_1411181508275_by_6.wav");
-	  m.put("Nà, nĭmen yŏu jĭwèi lăoshī ne?", "/448/slow_1411182082658_by_6.wav");
-	  m.put("Yígòng yŏu sānwèi. Liăngwèi shi nǚlăoshī, yíwèi shi nánlăoshī.", "/459/slow_1411182219021_by_6.wav");
-	  
-	  m.put("Zhè shi nĭ fùqin ma? Tā duō dà niánji le?", "/478/slow_1411225940951_by_6.wav");
-	  m.put("Wŏ xiángxiang kàn. Tā jīnnián wŭshisānsuì le--bù, wŭshisìsuì le.", "/488/slow_1411226089961_by_6.wav");
-	  m.put("Ò. Nà, zhèiwèi shi nĭ mŭqin ba?", "/490/slow_1411226358196_by_6.wav");
-	  m.put("Duì, tā jīnnián sìshibāsuì le.", "/493/slow_1411226431876_by_6.wav");
-	  m.put("Zhè shi nĭ mèimei, duì bu dui? Tā hĕn kĕ'ài! Tā jĭsuì le?", "/502/slow_1411226650376_by_6.wav");
-	  m.put("Tā bāsuì. Xiàge yuè jiù jiŭsuì le.", "/510/slow_1411226515233_by_6.wav");
-	  
-	  m.put("Qĭng wèn, zhèige duōshăo qián?", "/529/slow_1411227238271_by_6.wav");
-	  m.put("Yìbăi jiŭshibākuài.", "/534/slow_1411227591689_by_6.wav");
-	  m.put("Yò, tài guìle!", "/538/slow_1411227285892_by_6.wav");
-	  m.put("Zhèige bēizi duōshăo qián?", "/541/slow_1411227338293_by_6.wav");
-	  m.put("Nèige zhĭ yào sānkuài wŭ.", "/547/slow_1411227857209_by_6.wav");
-	  m.put("Wŏ kànkan, xíng bu xíng?", "/551/slow_1411228077277_by_6.wav");
-	  m.put("Xíng, nín kàn ba.", "/554/slow_1411227762805_by_6.wav");
-	  m.put("Hăo, wŏ măi liăngge.", "/557/slow_1411227557881_by_6.wav");
-	  
-	  m.put("Qĭng wèn, xiàyítàng dào Tiānjīnde huŏchē jĭdiăn kāi?", "/597/slow_1411228702408_by_6.wav");
-	  m.put("Jiŭdiăn èrshí. Kĕshi xiànzài yĭjīng jiŭdiăn yíkè le, kŏngpà nín láibujíle.", "/610/slow_1411229159081_by_6.wav");
-	  m.put("Nèmme, zài xiàyítàng ne?", "/614/slow_1411229643458_by_6.wav");
-	  m.put("Wŏ kànkàn. Zài xiàyítàng shi shídiăn bàn.", "/616/slow_1411229071236_by_6.wav");
-	  m.put("Hăo. Nà, wŏ jiù zuò shídiăn bànde.", "/620/slow_1411229285530_by_6.wav");
-	  m.put("Duōshăo qián?", "/621/slow_1411228851261_by_6.wav");
-	  m.put("Shíyīkuài wŭ.", "/622/slow_1411228679964_by_6.wav");
-	  m.put("Dào Tiānjīn yào duō cháng shíjiān?", "/627/slow_1411228820212_by_6.wav");
-	  m.put("Chàbuduō yào liăngge bàn zhōngtóu.", "/631/slow_1411228890218_by_6.wav");
-	  m.put("Hăo, xièxie nín.", "/632/slow_1411229318465_by_6.wav");
-	  
-	  m.put("Qĭng wèn, yŭyán shíyànshì mĕitiān jĭdiăn zhōng kāimén, jĭdiăn zhōng guānmén?", "/662/slow_1411262844923_by_6.wav");
-	  m.put("Zăoshang bādiăn kāimén, wănshang jiŭdiăn bàn guānmén.", "/667/slow_1411263228916_by_6.wav");
-	  m.put("Xīngqīliù kāi bu kāi?", "/670/slow_1411263190845_by_6.wav");
-	  m.put("Xīngqīliù kāi bàntiān. Shàngwŭ kāi, xiàwŭ bù kāi.", "/4-1.wav");
-	  m.put("Xīngqītiān ne?", "/679/slow_1411262599867_by_6.wav");
-	  m.put("Xīngqītiān xiūxi.", "/681/slow_1411263289663_by_6.wav");
-	  m.put("Xièxie nĭ.", "/682/slow_1411263818028_by_6.wav");
-	  m.put("Náli.", "/684/slow_1411263804056_by_6.wav");
-	  
-	  m.put("Nǐ jiào shémme míngzi?", "/721/slow_1411265556217_by_6.wav");
-	  m.put("Wŏ jiào Zhāng Wényīng.", "/724/slow_1411265087634_by_6.wav");
-	  m.put("Zhāng shi gōng cháng Zhāng, wén shi wénhuàde wén, yīng shi Yīngguode yīng.", "/729/slow_1411265395882_by_6.wav");
-	  m.put("Nĭ shi nĕinián chūshēngde?", "/734/slow_1411265640694_by_6.wav");
-	  m.put("Yī-jiŭ-bā-líng-nián, jiù shi Mínguó liùshijiŭnián.", "/740/slow_1411264906908_by_6.wav");
-	  m.put("Jĭyuè jĭhào?", "/744/slow_1411265591145_by_6.wav");
-	  m.put("Sìyuè shísānhào.", "/747/slow_1411264467785_by_6.wav");
-	  m.put("Nĭde dìzhĭ shi...", "/749/slow_1411265697886_by_6.wav");
-	  m.put("Hépíng Dōng Lù yīduàn, èrshiqīxiàng, sānnòng, yībăi wŭshisìhào, bālóu.", "/764/slow_1411264833266_by_6.wav");
-	  m.put("Hăo, qĭng dĕng yíxià.", "/767/slow_1411264415948_by_6.wav");
-	  
-	  m.put("Nĭ hăo!", "/788/slow_1411268352448_by_6.wav");
-	  m.put("Nĭ hăo! Nĭ shi Mĕiguo rén ma?", "/789/slow_1411268371731_by_6.wav");
-	  m.put("Duì, wŏ shi Mĕiguo rén.", "/790/slow_1411269074227_by_6.wav");
-	  m.put("Zhè shi nĭ dìyīcì dào Zhōngguo lái ma?", "/796/slow_1411268484407_by_6.wav");
-	  m.put("Bù, zhè shi dì'èrcì. Wŏ qùnián láiguo yícì.", "/802/slow_1411268580827_by_6.wav");
-	  m.put("M, nĭ zhèicì yào zhù duō jiŭ?", "/810/slow_1411268929660_by_6.wav");
-	  m.put("Dàyuē bàn'ge yuè. Wŏ shí'èrhào huíguó.", "/816/slow_1411266203537_by_6.wav");
-	  m.put("Nĭ zhù nĕige fángjiān?", "/819/slow_1411268992528_by_6.wav");
-	  m.put("Wŏ zhù sān líng liù.", "/820/slow_1411268438086_by_6.wav");
-	  m.put("Ò, duìbuqĭ, wŏ dĕi zŏule. Zàijiàn!", "/821/slow_1411268649403_by_6.wav");
-	  m.put("Zàijiàn!", "/70/slow_1403654938909_by_4.wav");
-	  
-	  m.put("Sūn Lăoshī, qĭng wèn, Zhōngguo yŏu duōshăo rén?", "/839/slow_1411269378348_by_6.wav");
-	  m.put("Zhōngguo chàbuduō yŏu shísānyì rén.", "/843/slow_1411269320632_by_6.wav");
-	  m.put("Bĕijīng yŏu duōshăo rén?", "/845/slow_1411269501131_by_6.wav");
-	  m.put("Bĕijīng yŏu yìqiānduōwàn rén.", "/852/slow_1411269294272_by_6.wav");
-	  m.put("Nèmme, Nánjīng ne?", "/854/slow_1411269194605_by_6.wav");
-	  m.put("Nánjīng de rénkŏu bĭjiào shăo.", "/865/slow_1411270052130_by_6.wav");
-	  m.put("Hǎoxiàng zhĭ yŏu wŭbăiwàn.", "/866/slow_1411269701172_by_6.wav");
-	  
-	  return m;
-  }
-  
   private HashMap<String, PlayAudioPanel> getPlayAudioWidget(){
 	  HashMap<String, PlayAudioPanel> pw = new HashMap<String, PlayAudioPanel>();
 	  //at the moment, this list seems complete. wu3 is the only phone recorded by Haohsiang.
@@ -1032,456 +700,5 @@ public class DialogWindow {
 		  controller.register(pw.get(k).getPlayButton(), "playing example phone for "+k);
 	  }
 	  return pw;
-  }
-  
-  private HashMap<String, HashMap<String, Integer>> getDialogToSpeakerToLast(){
-	  HashMap<String, HashMap<String, Integer>> m = new HashMap<String, HashMap<String, Integer>>();
-	  String up1 = "Unit 1: Part 1";
-	  String up2 = "Unit 1: Part 2";
-	  String up3 = "Unit 1: Part 3";
-	  String up4 = "Unit 1: Part 4";
-	  String u2p1 = "Unit 2: Part 1";
-	  String u2p2 = "Unit 2: Part 2";
-	  String u2p3 = "Unit 2: Part 3";
-	  String u2p4 = "Unit 2: Part 4";
-	  String u3p1 = "Unit 3: Part 1";
-	  String u3p2 = "Unit 3: Part 2";
-	  String u3p3 = "Unit 3: Part 3";
-	  String u3p4 = "Unit 3: Part 4";
-	  String u4p1 = "Unit 4: Part 1";
-	  String u4p2 = "Unit 4: Part 2";
-	  String u4p3 = "Unit 4: Part 3";
-	  String u4p4 = "Unit 4: Part 4";
-	  m.put(up1, new HashMap<String, Integer>());
-	  m.put(up2, new HashMap<String, Integer>());
-	  m.put(up3, new HashMap<String, Integer>());
-	  m.put(up4, new HashMap<String, Integer>());
-	  m.put(u2p1, new HashMap<String, Integer>());
-	  m.put(u2p2, new HashMap<String, Integer>());
-	  m.put(u2p3, new HashMap<String, Integer>());
-	  m.put(u2p4, new HashMap<String, Integer>());
-	  m.put(u3p1, new HashMap<String, Integer>());
-	  m.put(u3p2, new HashMap<String, Integer>());
-	  m.put(u3p3, new HashMap<String, Integer>());
-	  m.put(u3p4, new HashMap<String, Integer>());
-	  m.put(u4p1, new HashMap<String, Integer>());
-	  m.put(u4p2, new HashMap<String, Integer>());
-	  m.put(u4p3, new HashMap<String, Integer>());
-	  m.put(u4p4, new HashMap<String, Integer>());
-	  m.get(up1).put("Wang", 4);
-	  m.get(up1).put("Crane", 3);
-	  m.get(up2).put("Smith", 5);
-	  m.get(up2).put("Zhao", 6);
-	  m.get(up3).put("He", 5);
-	  m.get(up3).put("Kao", 6);
-	  m.get(up4).put("Mrs. Smith", 7);
-	  m.get(up4).put("Mrs. Li", 6);
-	  m.get(u2p1).put("Taiwanese Student", 4);
-	  m.get(u2p1).put("Parsons", 6);
-	  m.get(u2p2).put("First Chinese", 4);
-	  m.get(u2p2).put("American", 9);
-	  m.get(u2p2).put("Second Chinese", 10);
-	  m.get(u2p3).put("Chinese", 9);
-	  m.get(u2p3).put("American", 10);
-	  m.get(u2p4).put("Rogers", 4);
-	  m.get(u2p4).put("Taiwanese Guest", 9);
-	  m.get(u2p4).put("Holbrooke", 10);
-	  m.get(u3p1).put("Chinese", 6);
-	  m.get(u3p1).put("American", 7);
-	  m.get(u3p2).put("Teacher", 4);
-	  m.get(u3p2).put("Thompson", 5);
-	  m.get(u3p3).put("Salesman", 6);
-	  m.get(u3p3).put("Little", 7);
-	  m.get(u3p4).put("Ticket Agent", 8);
-	  m.get(u3p4).put("Haynes", 9);
-	  m.get(u4p1).put("American", 6);
-	  m.get(u4p1).put("Language Lab Attendant", 7);
-      m.get(u4p2).put("Johns", 8);
-      m.get(u4p2).put("Nurse", 9);
-      m.get(u4p3).put("Bellhop", 9);
-      m.get(u4p3).put("Ross", 10);
-      m.get(u4p4).put("Miller", 4);
-      m.get(u4p4).put("Sun", 6);
-	  
-	  return m;
-  }
-  
-  private HashMap<String, HashMap<Integer, String>> getDialogToSentIndexToSpeaker() {
-	  HashMap<String, HashMap<Integer, String>> m = new HashMap<String, HashMap<Integer, String>>();
-	  String up1 = "Unit 1: Part 1";
-	  String up2 = "Unit 1: Part 2";
-	  String up3 = "Unit 1: Part 3";
-	  String up4 = "Unit 1: Part 4";
-	  String u2p1 = "Unit 2: Part 1";
-	  String u2p2 = "Unit 2: Part 2";
-	  String u2p3 = "Unit 2: Part 3";
-	  String u2p4 = "Unit 2: Part 4";
-	  String u3p1 = "Unit 3: Part 1";
-	  String u3p2 = "Unit 3: Part 2";
-	  String u3p3 = "Unit 3: Part 3";
-	  String u3p4 = "Unit 3: Part 4";
-	  String u4p1 = "Unit 4: Part 1";
-	  String u4p2 = "Unit 4: Part 2";
-	  String u4p3 = "Unit 4: Part 3";
-	  String u4p4 = "Unit 4: Part 4";
-	  m.put(up1, new HashMap<Integer, String>());
-	  m.put(up2, new HashMap<Integer, String>());
-	  m.put(up3, new HashMap<Integer, String>());
-	  m.put(up4, new HashMap<Integer, String>());
-	  m.put(u2p1, new HashMap<Integer, String>());
-	  m.put(u2p2, new HashMap<Integer, String>());
-	  m.put(u2p3, new HashMap<Integer, String>());
-	  m.put(u2p4, new HashMap<Integer, String>());
-	  m.put(u3p1, new HashMap<Integer, String>());
-	  m.put(u3p2, new HashMap<Integer, String>());
-	  m.put(u3p3, new HashMap<Integer, String>());
-	  m.put(u3p4, new HashMap<Integer, String>());
-	  m.put(u4p1, new HashMap<Integer, String>());
-	  m.put(u4p2, new HashMap<Integer, String>());
-	  m.put(u4p3, new HashMap<Integer, String>());
-	  m.put(u4p4, new HashMap<Integer, String>());
-	  
-	  m.get(up1).put(0, "Wang");
-	  m.get(up1).put(1, "Crane");
-	  m.get(up1).put(2, "Wang");
-	  m.get(up1).put(3, "Crane");
-	  m.get(up1).put(4, "Wang");
-	  
-	  m.get(up2).put(0, "Smith");
-	  m.get(up2).put(1, "Zhao");
-	  m.get(up2).put(2, "Zhao");
-	  m.get(up2).put(3, "Smith");
-	  m.get(up2).put(4, "Zhao");
-	  m.get(up2).put(5, "Smith");
-	  m.get(up2).put(6, "Zhao");
-	  
-	  m.get(up3).put(0, "Kao");
-	  m.get(up3).put(1, "He");
-	  m.get(up3).put(2, "Kao");
-	  m.get(up3).put(3, "He");
-	  m.get(up3).put(4, "Kao");
-	  m.get(up3).put(5, "He");
-	  m.get(up3).put(6, "Kao");
-	  
-	  m.get(up4).put(0, "Mrs. Li");
-	  m.get(up4).put(1, "Mrs. Smith");
-	  m.get(up4).put(2, "Mrs. Li");
-	  m.get(up4).put(3, "Mrs. Smith");
-	  m.get(up4).put(4, "Mrs. Smith");
-	  m.get(up4).put(5, "Mrs. Smith");
-	  m.get(up4).put(6, "Mrs. Li");
-	  m.get(up4).put(7, "Mrs. Smith");
-	  
-	  m.get(u2p1).put(0, "Taiwanese Student");
-	  m.get(u2p1).put(1, "Parsons");
-	  m.get(u2p1).put(2, "Taiwanese Student");
-	  m.get(u2p1).put(3, "Parsons");
-	  m.get(u2p1).put(4, "Taiwanese Student");
-	  m.get(u2p1).put(5, "Parsons");
-	  m.get(u2p1).put(6, "Parsons");
-	  
-	  m.get(u2p2).put(0, "First Chinese");
-	  m.get(u2p2).put(1, "Second Chinese");
-	  m.get(u2p2).put(2, "First Chinese");
-	  m.get(u2p2).put(3, "First Chinese");
-	  m.get(u2p2).put(4, "First Chinese");
-	  m.get(u2p2).put(5, "Second Chinese");
-	  m.get(u2p2).put(6, "American");
-	  m.get(u2p2).put(7, "Second Chinese");
-	  m.get(u2p2).put(8, "Second Chinese");
-	  m.get(u2p2).put(9, "American");
-	  m.get(u2p2).put(10, "Second Chinese");
-	  
-	  m.get(u2p3).put(0, "American");
-	  m.get(u2p3).put(1, "Chinese");
-	  m.get(u2p3).put(2, "American");
-	  m.get(u2p3).put(3, "American");
-	  m.get(u2p3).put(4, "Chinese");
-	  m.get(u2p3).put(5, "American");
-	  m.get(u2p3).put(6, "Chinese");
-	  m.get(u2p3).put(7, "American");
-	  m.get(u2p3).put(8, "Chinese");
-	  m.get(u2p3).put(9, "Chinese");
-	  m.get(u2p3).put(10, "American");
-	  
-	  m.get(u2p4).put(0, "Rogers");
-	  m.get(u2p4).put(1, "Rogers");
-	  m.get(u2p4).put(2, "Taiwanese Guest");
-	  m.get(u2p4).put(3, "Taiwanese Guest");
-	  m.get(u2p4).put(4, "Rogers");
-	  m.get(u2p4).put(5, "Holbrooke");
-	  m.get(u2p4).put(6, "Taiwanese Guest");
-	  m.get(u2p4).put(7, "Holbrooke");
-	  m.get(u2p4).put(8, "Holbrooke");
-	  m.get(u2p4).put(9, "Taiwanese Guest");
-	  m.get(u2p4).put(10, "Holbrooke");
-	  
-	  m.get(u3p1).put(0, "Chinese");
-	  m.get(u3p1).put(1, "American");
-	  m.get(u3p1).put(2, "Chinese");
-	  m.get(u3p1).put(3, "American");
-	  m.get(u3p1).put(4, "Chinese");
-	  m.get(u3p1).put(5, "American");
-	  m.get(u3p1).put(6, "Chinese");
-	  m.get(u3p1).put(7, "American");
-	  
-	  m.get(u3p2).put(0, "Teacher");
-	  m.get(u3p2).put(1, "Thompson");
-	  m.get(u3p2).put(2, "Teacher");
-	  m.get(u3p2).put(3, "Thompson");
-	  m.get(u3p2).put(4, "Teacher");
-	  m.get(u3p2).put(5, "Thompson");
-	  
-	  m.get(u3p3).put(0, "Little");
-	  m.get(u3p3).put(1, "Salesman");
-	  m.get(u3p3).put(2, "Little");
-	  m.get(u3p3).put(3, "Little");
-	  m.get(u3p3).put(4, "Salesman");
-	  m.get(u3p3).put(5, "Little");
-	  m.get(u3p3).put(6, "Salesman");
-	  m.get(u3p3).put(7, "Little");
-	  
-	  m.get(u3p4).put(0, "Haynes");
-	  m.get(u3p4).put(1, "Ticket Agent");
-	  m.get(u3p4).put(2, "Haynes");
-	  m.get(u3p4).put(3, "Ticket Agent");
-	  m.get(u3p4).put(4, "Haynes");
-	  m.get(u3p4).put(5, "Haynes");
-	  m.get(u3p4).put(6, "Ticket Agent");
-	  m.get(u3p4).put(7, "Haynes");
-	  m.get(u3p4).put(8, "Ticket Agent");
-	  m.get(u3p4).put(9, "Haynes");
-	  
-	  m.get(u4p1).put(0, "American");
-	  m.get(u4p1).put(1, "Language Lab Attendant");
-	  m.get(u4p1).put(2, "American");
-	  m.get(u4p1).put(3, "Language Lab Attendant");
-	  m.get(u4p1).put(4, "American");
-	  m.get(u4p1).put(5, "Language Lab Attendant");
-	  m.get(u4p1).put(6, "American");
-	  m.get(u4p1).put(7, "Language Lab Attendant");
-	  
-	  m.get(u4p2).put(0, "Nurse");
-	  m.get(u4p2).put(1, "Johns");
-	  m.get(u4p2).put(2, "Johns");
-	  m.get(u4p2).put(3, "Nurse");
-	  m.get(u4p2).put(4, "Johns");
-	  m.get(u4p2).put(5, "Nurse");
-	  m.get(u4p2).put(6, "Johns");
-	  m.get(u4p2).put(7, "Nurse");
-	  m.get(u4p2).put(8, "Johns");
-	  m.get(u4p2).put(9, "Nurse");
-	  
-	  m.get(u4p3).put(0, "Ross");
-	  m.get(u4p3).put(1, "Bellhop");
-	  m.get(u4p3).put(2, "Ross");
-	  m.get(u4p3).put(3, "Bellhop");
-	  m.get(u4p3).put(4, "Ross");
-	  m.get(u4p3).put(5, "Bellhop");
-	  m.get(u4p3).put(6, "Ross");
-	  m.get(u4p3).put(7, "Bellhop");
-	  m.get(u4p3).put(8, "Ross");
-	  m.get(u4p3).put(9, "Bellhop");
-	  m.get(u4p3).put(10, "Ross");
-	  
-	  m.get(u4p4).put(0, "Miller");
-	  m.get(u4p4).put(1, "Sun");
-	  m.get(u4p4).put(2, "Miller");
-	  m.get(u4p4).put(3, "Sun");
-	  m.get(u4p4).put(4, "Miller");
-	  m.get(u4p4).put(5, "Sun");
-	  m.get(u4p4).put(6, "Sun");
-	  
-	  return m;
-  }
-  
-  private HashMap<String, HashMap<Integer, String>> getDialogToSentIndexToSent() {
-	  HashMap<String, HashMap<Integer, String>> m = new HashMap<String, HashMap<Integer, String>>();
-	  String up1 = "Unit 1: Part 1";
-	  String up2 = "Unit 1: Part 2";
-	  String up3 = "Unit 1: Part 3";
-	  String up4 = "Unit 1: Part 4";
-	  String u2p1 = "Unit 2: Part 1";
-	  String u2p2 = "Unit 2: Part 2";
-	  String u2p3 = "Unit 2: Part 3";
-	  String u2p4 = "Unit 2: Part 4";
-	  String u3p1 = "Unit 3: Part 1";
-	  String u3p2 = "Unit 3: Part 2";
-	  String u3p3 = "Unit 3: Part 3";
-	  String u3p4 = "Unit 3: Part 4";
-	  String u4p1 = "Unit 4: Part 1";
-	  String u4p2 = "Unit 4: Part 2";
-	  String u4p3 = "Unit 4: Part 3";
-	  String u4p4 = "Unit 4: Part 4";
-	  
-	  m.put(up1, new HashMap<Integer, String>());
-	  m.put(up2, new HashMap<Integer, String>());
-	  m.put(up3, new HashMap<Integer, String>());
-	  m.put(up4, new HashMap<Integer, String>());
-	  m.put(u2p1, new HashMap<Integer, String>());
-	  m.put(u2p2, new HashMap<Integer, String>());
-	  m.put(u2p3, new HashMap<Integer, String>());
-	  m.put(u2p4, new HashMap<Integer, String>());
-	  m.put(u3p1, new HashMap<Integer, String>());
-	  m.put(u3p2, new HashMap<Integer, String>());
-	  m.put(u3p3, new HashMap<Integer, String>());
-	  m.put(u3p4, new HashMap<Integer, String>());
-	  m.put(u4p1, new HashMap<Integer, String>());
-	  m.put(u4p2, new HashMap<Integer, String>());
-	  m.put(u4p3, new HashMap<Integer, String>());
-	  m.put(u4p4, new HashMap<Integer, String>());
-	  
-	  m.get(up1).put(0, "Kē Léi'ēn, nǐ hăo!");
-	  m.get(up1).put(1, "Wáng Jīngshēng, nǐ hăo!");
-	  m.get(up1).put(2, "Nǐ dào năr qù a?");
-	  m.get(up1).put(3, "Wŏ qù túshūguăn. Nĭ ne?");
-	  m.get(up1).put(4, "Wŏ huí sùshè.");
-	  
-	  m.get(up2).put(0, "Zhào Guócái, nĭ hăo a!");
-	  m.get(up2).put(1, "Nĭ hăo! Hăo jiŭ bú jiànle.");
-	  m.get(up2).put(2, "Zěmmeyàng a?");
-	  m.get(up2).put(3, "Hái xíng. Nĭ àirén, háizi dōu hăo ma?");
-	  m.get(up2).put(4, "Tāmen dōu hěn hăo, xièxie.");
-	  m.get(up2).put(5, "Wŏ yŏu yìdiănr shìr, xiān zŏule. Zàijiàn!");
-	  m.get(up2).put(6, "Zàijiàn.");
-	  
-	  m.get(up3).put(0, "Èi, Lăo Hé!");
-	  m.get(up3).put(1, "Xiăo Gāo!");
-	  m.get(up3).put(2, "Zuìjìn zěmmeyàng a?");
-	  m.get(up3).put(3, "Hái kéyi. Nĭ ne?");
-	  m.get(up3).put(4, "Hái shi lăo yàngzi. Nĭ gōngzuò máng bu máng?");
-	  m.get(up3).put(5, "Bú tài máng. Nĭ xuéxí zěmmeyàng?");
-	  m.get(up3).put(6, "Tĭng jĭnzhāngde.");
-	  
-	  m.get(up4).put(0, "Xiè Tàitai, huānyíng, huānyíng! Qĭng jìn, qĭng jìn.");
-	  m.get(up4).put(1, "Xièxie.");
-	  m.get(up4).put(2, "Qĭng zuò, qĭng zuò.");
-	  m.get(up4).put(3, "Xièxie.");
-	  m.get(up4).put(4, "Lĭ Tàitai, wŏ yŏu yìdiăn shì, děi zŏule.");
-	  m.get(up4).put(5, "Lĭ Tàitai, xièxie nín le.");
-	  m.get(up4).put(6, "Bú kèqi. Màn zŏu a!");
-	  m.get(up4).put(7, "Zàijiàn, zàijiàn!");
-	  
-	  m.get(u2p1).put(0, "Qĭng wèn, nĭ shì něiguó rén?");
-	  m.get(u2p1).put(1, "Wŏ shi Měiguo rén.");
-	  m.get(u2p1).put(2, "Nĭ jiào shémme míngzi?");
-	  m.get(u2p1).put(3, "Wŏ jiào Bái Jiéruì.");
-	  m.get(u2p1).put(4, "Nĭmen dōu shi Měiguo rén ma?");
-	  m.get(u2p1).put(5, "Wŏmen bù dōu shi Měiguo rén.");
-	  m.get(u2p1).put(6, "Zhèiwèi tóngxué yě shi Měiguo rén, kěshi nèiwèi tóngxué shi Jiā'nádà rén.");
-	  
-	  m.get(u2p2).put(0, "Qĭng jìn!");
-	  m.get(u2p2).put(1, "Èi, Xiăo Mă. Ò.");
-	  m.get(u2p2).put(2, "Ò, Xiăo Chén, wŏ gĕi nĭ jièshao yixiar.");
-	  m.get(u2p2).put(3, "Zhè shi wŏde xīn tóngwū, tā jiào Wáng Àihuá.");
-	  m.get(u2p2).put(4, "Wáng Àihuá, zhè shi wŏde lăo tóngxué, Xiăo Chén.");
-	  m.get(u2p2).put(5, "Ò, huānyíng nĭ dào Zhōngguo lái!");
-	  m.get(u2p2).put(6, "Hĕn gāoxìng rènshi nĭ, Chén Xiáojie!");
-	  m.get(u2p2).put(7, "Ò, bié zhèmme chēnghu wŏ.");
-	  m.get(u2p2).put(8, "Hái shi jiào wŏ Xiăo Chén hăole.");
-	  m.get(u2p2).put(9, "Xíng. Nà nĭ yě jiào wŏ Xiăo Wáng hăole.");
-	  m.get(u2p2).put(10, "Hăo.");
-	  
-	  m.get(u2p3).put(0, "Nín guìxìng?");
-	  m.get(u2p3).put(1, "Wŏ xìng Gāo. Nín guìxìng?");
-	  m.get(u2p3).put(2, "Wŏ xìng Wú, Wú Sùshān.");
-	  m.get(u2p3).put(3, "Gāo Xiānsheng, nín zài nĕige dānwèi gōngzuò?");
-	  m.get(u2p3).put(4, "Wŏ zài Wàijiāobù gōngzuò. Nín ne?");
-	  m.get(u2p3).put(5, "Wŏ zài Měiguo Dàshĭguăn gōngzuò.");
-	  m.get(u2p3).put(6, "Nèiwèi shi nínde xiānsheng ba?");
-	  m.get(u2p3).put(7, "Bú shì, bú shì! Tā shì wŏde tóngshì.");
-	  m.get(u2p3).put(8, "Ò, Wú nǚshì, duìbuqĭ.");
-	  m.get(u2p3).put(9, "Wŏ yŏu yìdiănshìr, xiān zŏule. Zàijiàn!");
-	  m.get(u2p3).put(10, "Zàijiàn!");
-	  
-	  m.get(u2p4).put(0, "Nĭ hăo! Wŏ jiào Luó Jiésī.");
-	  m.get(u2p4).put(1, "Qĭng duō zhĭ jiào.");
-	  m.get(u2p4).put(2, "Wŏ xìng Shī. Duìbuqĭ, wŏ méi dài míngpiàn.");
-	  m.get(u2p4).put(3, "Wŏ zài Zhōng-Měi Màoyì Gōngsī gōngzuò.");
-	  m.get(u2p4).put(4, "Zŏngjīnglĭ, zhè shì Zhōng-Měi Màoyì Gōngsī de Shī Xiáojie.");
-	  m.get(u2p4).put(5, "À, huānyíng, huānyíng! Wŏ xìng Hóu.");
-	  m.get(u2p4).put(6, "Xièxie. Zŏngjīnglĭ yě shi Yīngguo rén ba?");
-	  m.get(u2p4).put(7, "Bù, wŏ gēn Luó Xiáojie dōu bú shi Yīngguo rén.");
-	  m.get(u2p4).put(8, "Wŏmen shi Měiguo rén.");
-	  m.get(u2p4).put(9, "Ò, duìbuqĭ, wŏ găocuòle.");
-	  m.get(u2p4).put(10, "Méi guānxi.");
-	  
-	  m.get(u3p1).put(0, "Nĭmen bānshang yŏu jĭwèi tóngxué?");
-	  m.get(u3p1).put(1, "Yŏu shíwèi.");
-	  m.get(u3p1).put(2, "Dōu shi Mĕiguo rén ma?");
-	  m.get(u3p1).put(3, "Bù dōu shi Mĕiguó rén. Yŏu qíge Mĕiguo rén, liăngge Déguo rén gēn yíge Făguo rén.");
-	  m.get(u3p1).put(4, "Jĭge nánshēng, jĭge nǚshēng?");
-	  m.get(u3p1).put(5, "Yíbànr yíbànr. Wŭge nánde, wŭge nǚde.");
-	  m.get(u3p1).put(6, "Nà, nĭmen yŏu jĭwèi lăoshī ne?");
-	  m.get(u3p1).put(7, "Yígòng yŏu sānwèi. Liăngwèi shi nǚlăoshī, yíwèi shi nánlăoshī.");
-	  
-	  m.get(u3p2).put(0, "Zhè shi nĭ fùqin ma? Tā duō dà niánji le?");
-	  m.get(u3p2).put(1, "Wŏ xiángxiang kàn. Tā jīnnián wŭshisānsuì le--bù, wŭshisìsuì le.");
-	  m.get(u3p2).put(2, "Ò. Nà, zhèiwèi shi nĭ mŭqin ba?");
-	  m.get(u3p2).put(3, "Duì, tā jīnnián sìshibāsuì le.");
-	  m.get(u3p2).put(4, "Zhè shi nĭ mèimei, duì bu dui? Tā hĕn kĕ'ài! Tā jĭsuì le?");
-	  m.get(u3p2).put(5, "Tā bāsuì. Xiàge yuè jiù jiŭsuì le.");
-	  
-	  m.get(u3p3).put(0, "Qĭng wèn, zhèige duōshăo qián?");
-	  m.get(u3p3).put(1, "Yìbăi jiŭshibākuài.");
-	  m.get(u3p3).put(2, "Yò, tài guìle!");
-	  m.get(u3p3).put(3, "Zhèige bēizi duōshăo qián?");
-	  m.get(u3p3).put(4, "Nèige zhĭ yào sānkuài wŭ.");
-	  m.get(u3p3).put(5, "Wŏ kànkan, xíng bu xíng?");
-	  m.get(u3p3).put(6, "Xíng, nín kàn ba.");
-	  m.get(u3p3).put(7, "Hăo, wŏ măi liăngge.");
-	  
-	  m.get(u3p4).put(0, "Qĭng wèn, xiàyítàng dào Tiānjīnde huŏchē jĭdiăn kāi?");
-	  m.get(u3p4).put(1, "Jiŭdiăn èrshí. Kĕshi xiànzài yĭjīng jiŭdiăn yíkè le, kŏngpà nín láibujíle.");
-	  m.get(u3p4).put(2, "Nèmme, zài xiàyítàng ne?");
-	  m.get(u3p4).put(3, "Wŏ kànkàn. Zài xiàyítàng shi shídiăn bàn.");
-	  m.get(u3p4).put(4, "Hăo. Nà, wŏ jiù zuò shídiăn bànde.");
-	  m.get(u3p4).put(5, "Duōshăo qián?");
-	  m.get(u3p4).put(6, "Shíyīkuài wŭ.");
-	  m.get(u3p4).put(7, "Dào Tiānjīn yào duō cháng shíjiān?");
-	  m.get(u3p4).put(8, "Chàbuduō yào liăngge bàn zhōngtóu.");
-	  m.get(u3p4).put(9, "Hăo, xièxie nín.");
-	  
-	  m.get(u4p1).put(0, "Qĭng wèn, yŭyán shíyànshì mĕitiān jĭdiăn zhōng kāimén, jĭdiăn zhōng guānmén?");
-	  m.get(u4p1).put(1, "Zăoshang bādiăn kāimén, wănshang jiŭdiăn bàn guānmén.");
-	  m.get(u4p1).put(2, "Xīngqīliù kāi bu kāi?");
-	  m.get(u4p1).put(3, "Xīngqīliù kāi bàntiān. Shàngwŭ kāi, xiàwŭ bù kāi.");
-	  m.get(u4p1).put(4, "Xīngqītiān ne?");
-	  m.get(u4p1).put(5, "Xīngqītiān xiūxi.");
-	  m.get(u4p1).put(6, "Xièxie nĭ.");
-	  m.get(u4p1).put(7, "Náli.");
-	  
-	  m.get(u4p2).put(0, "Nǐ jiào shémme míngzi?");
-	  m.get(u4p2).put(1, "Wŏ jiào Zhāng Wényīng.");
-	  m.get(u4p2).put(2, "Zhāng shi gōng cháng Zhāng, wén shi wénhuàde wén, yīng shi Yīngguode yīng.");
-	  m.get(u4p2).put(3, "Nĭ shi nĕinián chūshēngde?");
-	  m.get(u4p2).put(4, "Yī-jiŭ-bā-líng-nián, jiù shi Mínguó liùshijiŭnián.");
-	  m.get(u4p2).put(5, "Jĭyuè jĭhào?");
-	  m.get(u4p2).put(6, "Sìyuè shísānhào.");
-	  m.get(u4p2).put(7, "Nĭde dìzhĭ shi...");
-	  m.get(u4p2).put(8, "Hépíng Dōng Lù yīduàn, èrshiqīxiàng, sānnòng, yībăi wŭshisìhào, bālóu.");
-	  m.get(u4p2).put(9, "Hăo, qĭng dĕng yíxià.");
-	  
-	  m.get(u4p3).put(0, "Nĭ hăo!");
-	  m.get(u4p3).put(1, "Nĭ hăo! Nĭ shi Mĕiguo rén ma?");
-	  m.get(u4p3).put(2, "Duì, wŏ shi Mĕiguo rén.");
-	  m.get(u4p3).put(3, "Zhè shi nĭ dìyīcì dào Zhōngguo lái ma?");
-	  m.get(u4p3).put(4, "Bù, zhè shi dì'èrcì. Wŏ qùnián láiguo yícì.");
-	  m.get(u4p3).put(5, "M, nĭ zhèicì yào zhù duō jiŭ?");
-	  m.get(u4p3).put(6, "Dàyuē bàn'ge yuè. Wŏ shí'èrhào huíguó.");
-	  m.get(u4p3).put(7, "Nĭ zhù nĕige fángjiān?");
-	  m.get(u4p3).put(8, "Wŏ zhù sān líng liù.");
-	  m.get(u4p3).put(9, "Ò, duìbuqĭ, wŏ dĕi zŏule. Zàijiàn!");
-	  m.get(u4p3).put(10, "Zàijiàn!");
-	  
-	  m.get(u4p4).put(0, "Sūn Lăoshī, qĭng wèn, Zhōngguo yŏu duōshăo rén?");
-	  m.get(u4p4).put(1, "Zhōngguo chàbuduō yŏu shísānyì rén.");
-	  m.get(u4p4).put(2, "Bĕijīng yŏu duōshăo rén?");
-	  m.get(u4p4).put(3, "Bĕijīng yŏu yìqiānduōwàn rén.");
-	  m.get(u4p4).put(4, "Nèmme, Nánjīng ne?");
-	  m.get(u4p4).put(5, "Nánjīng de rénkŏu bĭjiào shăo.");
-	  m.get(u4p4).put(6, "Hǎoxiàng zhĭ yŏu wŭbăiwàn.");
-	  
-	  return m;
   }
 }
