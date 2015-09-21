@@ -138,4 +138,6 @@ public interface LangTestDatabase extends RemoteService {
 
   boolean resetPassword(String userid, String text, String url);
   String enableCDUser(String cdToken, String emailR, String url);
+
+  ContextPractice getContextPractice();
 }
