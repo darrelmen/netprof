@@ -83,6 +83,7 @@ public class ServerProperties {
       "sandra.wagner@dliflc.edu",
       GORDON_VIDAVER);
 
+
   private static final Set<String> ADMINLIST = new HashSet<String>(Arrays.asList("gvidaver", "tmarius",
       "drandolph", "swagner", "gmarkovic", "djones", "jmelot", "rbudd", "jray", "pgatewood"));
 
@@ -435,6 +436,10 @@ public class ServerProperties {
     String s = phoneToDisplay.get(phone);
     if (s == null) return phone;
     else return s;
+  }
+
+  public String getDialogFile(){
+      return props.getProperty("dialog");
   }
 
   private void readPhonemeMap(String configDir) {
