@@ -5,6 +5,7 @@ import audio.image.TranscriptEvent;
 import audio.image.TranscriptReader;
 import audio.imagewriter.EventAndFileInfo;
 import audio.imagewriter.TranscriptWriter;
+import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import net.sf.json.JSONArray;
@@ -36,15 +37,17 @@ public abstract class Scoring {
   protected final String scoringDir;
   protected final String deployPath;
   protected final ServerProperties props;
+  protected final LogAndNotify langTestDatabase;
 
   /**
    * @param deployPath
    * @see ASRScoring#ASRScoring
    */
-  protected Scoring(String deployPath, ServerProperties props) {
+  Scoring(String deployPath, ServerProperties props, LogAndNotify langTestDatabase) {
     this.deployPath = deployPath;
     this.scoringDir = getScoringDir(deployPath);
     this.props = props;
+    this.langTestDatabase = langTestDatabase;
   }
 
   private static String getScoringDir(String deployPath) {
@@ -128,9 +131,9 @@ public abstract class Scoring {
    * @see ASRScoring#getPretestScore
    */
   EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
-                                              String audioFileNoSuffix, boolean useScoreToColorBkg,
-                                              String prefix, String suffix, boolean decode, boolean useWebservice,
-                                              boolean usePhoneToDisplay) {
+                                    String audioFileNoSuffix, boolean useScoreToColorBkg,
+                                    String prefix, String suffix, boolean decode, boolean useWebservice,
+                                    boolean usePhoneToDisplay) {
     logger.debug("writeTranscripts - decode " + decode + " file " + audioFileNoSuffix + " width " + imageWidth + " prefix " + prefix);
 
     boolean foundATranscript = false;
@@ -159,7 +162,7 @@ public abstract class Scoring {
     // logger.debug("typeToFile " + typeToFile);
 
     if (decode || imageWidth < 0) {  // hack to skip image generation
-      return getEventInfo(typeToFile, useWebservice,usePhoneToDisplay || props.usePhoneToDisplay()); // if align, don't use webservice regardless
+      return getEventInfo(typeToFile, useWebservice, usePhoneToDisplay || props.usePhoneToDisplay()); // if align, don't use webservice regardless
     } else {
       String pathname = audioFileNoSuffix + ".wav";
       pathname = prependDeploy(pathname);
@@ -273,13 +276,13 @@ public abstract class Scoring {
   private void getEventsFromJson(SortedMap<Float, TranscriptEvent> phoneEvents, JSONArray phones, String tokenKey, boolean usePhone) {
     for (int j = 0; j < phones.size(); j++) {
       JSONObject phone = phones.getJSONObject(j);
-      objectToEvent(phoneEvents, tokenKey, phone,usePhone);
+      objectToEvent(phoneEvents, tokenKey, phone, usePhone);
     }
   }
 
   private void objectToEvent(SortedMap<Float, TranscriptEvent> phoneEvents, String tokenKey, JSONObject phone,
                              boolean usePhone) {
-    String token  = phone.getString(tokenKey);
+    String token = phone.getString(tokenKey);
     double pscore = phone.getDouble("s");
     double pstart = phone.getDouble("str");
     double pend = phone.getDouble("end");
