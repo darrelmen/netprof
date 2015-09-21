@@ -438,6 +438,10 @@ public class ServerProperties {
     else return s;
   }
 
+  public String getDialogFile(){
+      return props.getProperty("dialog");
+  }
+
   private void readPhonemeMap(String configDir) {
     String phonemeMapping = props.getProperty("phonemeMapping");
 
