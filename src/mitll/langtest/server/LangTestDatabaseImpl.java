@@ -103,6 +103,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 		logAndNotifyServerException(e, "");
 	}
 
+	@Override
 	public void logAndNotifyServerException(Exception e, String additionalMessage) {
 		String message1 = e == null ? "null_ex" : e.getMessage() == null ? "null_msg" : e.getMessage();
 		if (!message1.contains("Broken Pipe")) {
