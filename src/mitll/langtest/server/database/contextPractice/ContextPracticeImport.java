@@ -73,6 +73,10 @@ public class ContextPracticeImport {
                     sentIndex += 1;
                 }
             }
+            dialogToPartsMap.put(currTitle, parts.toArray(new String[parts.size()]));
+            dialogToSpeakerToLast.put(currTitle, speakerToLast);
+            dialogToSentIndexToSent.put(currTitle, sentIndexToSent);
+            dialogToSentIndexToSpeaker.put(currTitle, sentIndexToSpeaker);
             this.contextPractice = new ContextPractice(dialogToPartsMap, sentToSlowAudioPath,
                     sentToAudioPath, dialogToSpeakerToLast, dialogToSentIndexToSpeaker,
                     dialogToSentIndexToSent);
