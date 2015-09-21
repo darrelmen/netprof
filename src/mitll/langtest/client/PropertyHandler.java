@@ -124,7 +124,7 @@ public class PropertyHandler {
   private String nameForAnswer = "Recording";
   private String nameForRecorder = "Speaker";
   private String language = "";
-  private boolean dialog = false;
+  private String dialog = "";
 
   private String releaseDate;
   private String turkID = "";
@@ -178,7 +178,7 @@ public class PropertyHandler {
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
 
       else if (key.equals(NO_MODEL)) noModel = getBoolean(value);
-      else if (key.equals(DIALOG)) dialog = getBoolean(value);
+      else if (key.equals(DIALOG)) dialog = value;
       else if (key.equals(QUIET_AUDIO_OK)) quietAudioOK = getBoolean(value);
       else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
       else if (key.equals(ENABLE_ALL_USERS)) enableAllUsers = getBoolean(value);
@@ -372,8 +372,10 @@ public class PropertyHandler {
   }
 
   public boolean hasDialog(){
-	  return dialog;
+	  return (dialog != "");
   }
+
+  public String dialogFile() {return dialog;}
 
   public String getLanguage() {
     return language;
