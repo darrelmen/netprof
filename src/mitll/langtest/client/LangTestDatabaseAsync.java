@@ -149,4 +149,6 @@ public interface LangTestDatabaseAsync {
 
   void getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
                                    int width, int height, boolean useScoreToColorBkg, String exerciseID, AsyncCallback<PretestScore> async);
+
+  void getContextPractice(AsyncCallback<ContextPractice> async);
 }
