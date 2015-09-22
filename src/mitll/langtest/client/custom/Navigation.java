@@ -535,14 +535,14 @@ public class Navigation implements RequiresResize {
     return tabAndContent;
   }
 
-  private int getSafeTabIndexFor(String tabName) {
+/*  private int getSafeTabIndexFor(String tabName) {
     Integer integer = nameToIndex.get(tabName);
     if (integer == null) {
       logger.warning("Can't find index for " + tabName + " in " + nameToIndex.keySet());
       return 0;
     }
     else return integer;
-  }
+  }*/
 
   private void checkAndMaybeClearTab(String value) {
  //   String value1 = storage.getValue(CLICKED_TAB);
