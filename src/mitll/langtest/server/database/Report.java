@@ -57,22 +57,13 @@ public class Report {
    */
   public void doReport(ServerProperties serverProps, String site, MailSupport mailSupport,
                        PathHelper pathHelper) {
-    Calendar calendar = Calendar.getInstance();
-    int i = calendar.get(Calendar.DAY_OF_WEEK);
     List<String> reportEmails = serverProps.getReportEmails();
-    SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
-    String today = simpleDateFormat2.format(new Date());
-
-    String suffix = "";
-    if (site != null && site.contains("npfClassroom")) {
-      site = site.substring(site.indexOf("npfClassroom"));
-      suffix = " at " + site;
-    }
-    String subject = "Weekly Usage Report for " + serverProps.getLanguage() + suffix;
 
     // check if it's a monday
-    if (i == Calendar.MONDAY
-        && !reportEmails.isEmpty()) {
+    if (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY &&
+        !reportEmails.isEmpty()) {
+      SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
+      String today = simpleDateFormat2.format(new Date());
       File file = getReportFile(pathHelper, today);
       //logger.debug("checking file " + file.getAbsolutePath());
       if (file.exists()) {
@@ -81,15 +72,26 @@ public class Report {
         logger.debug("Site real path " + site);
         try {
           String message = writeReport(file, pathHelper);
-          for (String dest : reportEmails) {
-            mailSupport.sendEmail(NP_SERVER, dest, MY_EMAIL, subject, message);
-          }
+          sendEmails(serverProps.getLanguage(), site, mailSupport, reportEmails, message);
         } catch (IOException e) {
           logger.error("got " + e, e);
         }
       }
     } else {
       logger.debug("not sending email report since this is cmMIT");
+    }
+  }
+
+  private void sendEmails(String language, String site, MailSupport mailSupport, List<String> reportEmails, String message) {
+    String suffix = "";
+    if (site != null && site.contains("npfClassroom")) {
+      site = site.substring(site.indexOf("npfClassroom"));
+      suffix = " at " + site;
+    }
+
+    String subject = "Weekly Usage Report for " + language + suffix;
+    for (String dest : reportEmails) {
+      mailSupport.sendEmail(NP_SERVER, dest, MY_EMAIL, subject, message);
     }
   }
 
@@ -111,7 +113,6 @@ public class Report {
 
   private File getReportFile(PathHelper pathHelper, String today) {
     File reports = pathHelper.getAbsoluteFile("reports");
-    //File test = new File("reports");
     if (!reports.exists()) {
       logger.debug("making dir " + reports.getAbsolutePath());
       reports.mkdirs();
@@ -191,9 +192,6 @@ public class Report {
       } else {
         logger.warn("skipping teacher " + user);
       }
-      //} catch (ParseException e) {
-      //   e.printStackTrace();
-      // }
     }
     String users1 = "New Users";// (users enrolled after 10/8)";
     builder.append("<html><head><body>" +
@@ -324,7 +322,6 @@ public class Report {
 //      logger.debug("wrote to " + file.getAbsolutePath());
       BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 
-      //refAudio = new ArrayList<Result>();
       teacherAudio = 0;
       invalid = 0;
       calendar = getCal();
@@ -568,7 +565,10 @@ public class Report {
     return creatorID != 1;
   }
 
-  private void statsForEvent(Calendar calendar, Map<Integer, Set<Long>> monthToCount, Map<Integer, Map<Long, Set<Event>>> monthToCount2, Map<Integer, Map<Long, Set<Event>>> weekToCount2, Map<Integer, Set<Long>> weekToCount, Event event, long creatorID) {
+  private void statsForEvent(Calendar calendar, Map<Integer, Set<Long>> monthToCount,
+                             Map<Integer, Map<Long, Set<Event>>> monthToCount2,
+                             Map<Integer, Map<Long, Set<Event>>> weekToCount2,
+                             Map<Integer, Set<Long>> weekToCount, Event event, long creatorID) {
     calendar.setTimeInMillis(event.getTimestamp());
 
     // months
