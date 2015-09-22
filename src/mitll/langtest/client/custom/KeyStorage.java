@@ -28,7 +28,7 @@ public class KeyStorage {
     this.controller = controller;
   }
 
-  boolean showedAlert = false;
+  private final boolean showedAlert = false;
   public void storeValue(String name, String toStore) {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
