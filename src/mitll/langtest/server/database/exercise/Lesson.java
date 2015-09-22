@@ -18,18 +18,16 @@ public class Lesson {
   private final List<CommonExercise> exerciseList = new ArrayList<CommonExercise>();
   private String unit;
 
-  //public Lesson(){}
   public Lesson(String unit) { this.unit = unit; }
   public void addExercise(CommonExercise e) { exerciseList.add(e); }
+  public boolean remove(CommonExercise exercise) {
+    return exerciseList.remove(exercise);
+  }
   public Collection<CommonExercise> getExercises() { return Collections.unmodifiableList(exerciseList); }
 
   public String toString() {
     return "Lesson '" + unit + "' " + exerciseList.size() + " exercises" +
         (exerciseList.isEmpty() ? "" :
         ", first is " + exerciseList.iterator().next());
-  }
-
-  public boolean remove(CommonExercise exercise) {
-   return exerciseList.remove(exercise);
   }
 }
