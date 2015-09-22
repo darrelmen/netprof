@@ -92,8 +92,7 @@ public class ServerProperties {
    */
   private static final String REPORT_EMAILS = "reportEmails";
 
-  private List<String> REPORT_DEFAULT = Arrays.asList(TAMAS_1, TAMAS_2, GORDON_VIDAVER, DOUG_JONES, RAY_BUDD);
-  private List<String> reportEmails = REPORT_DEFAULT;
+  private List<String> reportEmails = Arrays.asList(TAMAS_1, TAMAS_2, GORDON_VIDAVER, DOUG_JONES, RAY_BUDD);;
 
   private List<String> approvers = DLI_APPROVERS;
   private List<String> approverEmails = DLI_EMAILS;
