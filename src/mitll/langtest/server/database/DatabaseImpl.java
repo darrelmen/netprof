@@ -248,11 +248,12 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath
    */
   public void setInstallPath(String installPath, String lessonPlanFile, boolean useFile, String mediaDir) {
-    // logger.debug("got install path " + installPath + " media " + mediaDir);
+    logger.debug("got install path " + installPath + " media " + mediaDir);
     this.installPath = installPath;
     this.lessonPlanFile = lessonPlanFile;
     this.mediaDir = mediaDir;
     this.useFile = useFile;
+    makeDAO(lessonPlanFile, mediaDir, installPath);
     this.jsonSupport = new JsonSupport(getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
         getPhoneDAO(), configDir, installPath);
   }
@@ -292,7 +293,7 @@ public class DatabaseImpl implements Database {
     }
     //logger.debug("using lesson plan file " +lessonPlanFile + " at " + installPath);
 //    boolean isExcel = lessonPlanFile.endsWith(".xlsx");
-    makeDAO(lessonPlanFile, mediaDir, installPath);
+ //   makeDAO(lessonPlanFile, mediaDir, installPath);
 
     List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
     if (rawExercises.isEmpty()) {
@@ -302,13 +303,16 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * Lazy, latchy instantiation of DAOs.
+   * Not sure why it really has to be this way.
+   *
    * @param lessonPlanFile
    * @param mediaDir
    * @see #getExercises(boolean, String)
    */
   private void makeDAO(String lessonPlanFile, String mediaDir, String installPath) {
-    logger.debug(lessonPlanFile);
     if (exerciseDAO == null) {
+      logger.debug(lessonPlanFile);
       synchronized (this) {
         this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, serverProps, userListManager, installPath, addDefects);
       }
@@ -327,13 +331,12 @@ public class DatabaseImpl implements Database {
   }
 
   private void makeContextPractice(String contextPracticeFile, String installPath) {
-    if (contextPractice == null) {
+    if (contextPractice == null && contextPracticeFile != null) {
       synchronized (this) {
         this.contextPractice = new ContextPracticeImport(installPath + File.separator + contextPracticeFile).getContextPractice();
       }
     }
   }
-
 
   /**
    * @param userExercise
