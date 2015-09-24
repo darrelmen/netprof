@@ -139,15 +139,16 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   public Panel getExercisePanel(CommonExercise e) {
     currentExercise = e;
     sticky.storeCurrent(e);
-    if (!controller.isRecordingEnabled()) {
+    boolean recordingEnabled = controller.isRecordingEnabled();
+    if (!recordingEnabled) {
       logger.warning("Recording is *not* enabled!");
     }
-    if (controller.getProps().isNoModel()) {
+    boolean noModel = controller.getProps().isNoModel();
+    if (noModel) {
       logger.warning("No model?");
     }
 
-    boolean b = controller.getProps().isNoModel() || !controller.isRecordingEnabled();
-    if (b) logger.warning("showing empty record box");
+    boolean b = noModel || !recordingEnabled;
 
     return b ?
         new FlashcardPanel(e,
