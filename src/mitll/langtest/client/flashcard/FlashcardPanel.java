@@ -34,7 +34,7 @@ import java.util.logging.Logger;
  * Created by GO22670 on 6/26/2014.
  */
 class FlashcardPanel extends HorizontalPanel {
-  private Logger logger = Logger.getLogger("FlashcardPanel");
+  private final Logger logger = Logger.getLogger("FlashcardPanel");
 
   protected static final String PLAYING_AUDIO_HIGHLIGHT = "playingAudioHighlight";
   private static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. " +
@@ -50,9 +50,9 @@ class FlashcardPanel extends HorizontalPanel {
   private static final String ENGLISH = "English";
   private static final String PLAY = "AUDIO";
   private static final String BOTH = "Both";
-  private static final int LEFT_MARGIN_FOR_FOREIGN_PHRASE = 17;
+  //private static final int LEFT_MARGIN_FOR_FOREIGN_PHRASE = 17;
   private static final String CLICK_TO_FLIP = "Click to flip";
-  public static final String SHUFFLE = "Shuffle";
+  private static final String SHUFFLE = "Shuffle";
 
   final CommonExercise exercise;
   Widget english;
@@ -71,7 +71,6 @@ class FlashcardPanel extends HorizontalPanel {
   private final DivWidget prevNextRow;
   final LangTestDatabaseAsync service;
   boolean showOnlyEnglish = false;
-  Heading foreignLanguageContent;
 
   /**
    * @param e
@@ -117,8 +116,7 @@ class FlashcardPanel extends HorizontalPanel {
 
     DivWidget lowestRow = new DivWidget();
 
-    Panel threePartContent = getThreePartContent(controlState, //firstRow,
-        contentMiddle, prevNextRow, lowestRow);
+    Panel threePartContent = getThreePartContent(controlState, contentMiddle, prevNextRow, lowestRow);
     DivWidget inner = new DivWidget();
     inner.getElement().setId("threePartContent_Container");
     add(inner);
@@ -202,7 +200,7 @@ class FlashcardPanel extends HorizontalPanel {
    * @return
    * @see #FlashcardPanel
    */
-  DivWidget getFinalWidgets() {
+  private DivWidget getFinalWidgets() {
     clickToFlipContainer = new DivWidget();
     setClickToFlipHeight(clickToFlipContainer);
     clickToFlip = new HTML(CLICK_TO_FLIP);
@@ -293,7 +291,7 @@ class FlashcardPanel extends HorizontalPanel {
    * @return
    * @see #FlashcardPanel
    */
-  Panel getCardContent() {
+  private Panel getCardContent() {
     final ClickableSimplePanel contentMiddle = new ClickableSimplePanel();
 
     contentMiddle.getElement().setId("Focusable_content");
@@ -386,7 +384,7 @@ class FlashcardPanel extends HorizontalPanel {
    * @param toAddTo
    * @see #FlashcardPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ControlState, StatsFlashcardFactory.MySoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener, String, mitll.langtest.client.list.ListInterface)
    */
-  void addPrevNextWidgets(Panel toAddTo) {
+  private void addPrevNextWidgets(Panel toAddTo) {
     toAddTo.add(getPrevButton());
     toAddTo.add(getProgressBarWidget());
     toAddTo.add(getNextButton());
@@ -456,7 +454,7 @@ class FlashcardPanel extends HorizontalPanel {
     exerciseList.loadNext();
   }
 
-  void showAdvance(ListInterface exerciseList, ProgressBar progressBar) {
+  private void showAdvance(ListInterface exerciseList, ProgressBar progressBar) {
     int complete = exerciseList.getComplete();
     //  System.out.println("complete " +complete);
 
@@ -684,9 +682,9 @@ class FlashcardPanel extends HorizontalPanel {
    * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
    */
   private Widget getForeignLanguageContent(String foreignSentence, boolean hasRefAudio) {
-    foreignLanguageContent = new Heading(1, foreignSentence);
+    Heading foreignLanguageContent = new Heading(1, foreignSentence);
     foreignLanguageContent.getElement().setId("ForeignLanguageContent");
-    foreignLanguageContent.getElement().getStyle().setMarginLeft(LEFT_MARGIN_FOR_FOREIGN_PHRASE, Style.Unit.PX);
+    foreignLanguageContent.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
 
     FocusPanel container = new FocusPanel();   // TODO : remove???
     container.getElement().setId("FLPhrase_container");
@@ -714,9 +712,11 @@ class FlashcardPanel extends HorizontalPanel {
     return container;
   }
 
+/*
   private void setForeignLanguageContentText(String text) { this.foreignLanguageContent.setText(text); }
+*/
 
-  DivWidget getCenteringRow() {
+  private DivWidget getCenteringRow() {
     DivWidget status = new DivWidget();
     status.getElement().setId("statusRow");
     status.addStyleName("alignCenter");
@@ -785,8 +785,6 @@ class FlashcardPanel extends HorizontalPanel {
       if (clickToFlip != null) {
         clickToFlipContainer.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
       }
-    } else {
-//      System.err.println("huh? show english or foreign " + controlState);
     }
   }
 
@@ -840,9 +838,8 @@ class FlashcardPanel extends HorizontalPanel {
    * @param path
    * @see #playRef()
    */
-  void playRef(String path) {
+  private void playRef(String path) {
     //  System.out.println("playRef... ---------- " + exercise.getID() + " path " + path );
-
     path = getPath(path);
     final Widget textWidget = isSiteEnglish() ? english : foreign;
     getSoundFeedback().queueSong(path, new SoundFeedback.EndListener() {
