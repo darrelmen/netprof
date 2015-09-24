@@ -73,8 +73,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int MAX_EXCEPTION_STRING = 300;
   private static final int MAX_CACHE_SIZE = 100;
   private static final int NO_USER_INITIAL = -2;
-  private static final String PLEASE_ALLOW_ACCESS_TO_THE_MICROPHONE = "Please allow access to the microphone.";
-  private static final String TRY_AGAIN = "Try Again";
+ // private static final String PLEASE_ALLOW_ACCESS_TO_THE_MICROPHONE = "Please allow access to the microphone.";
+//  private static final String TRY_AGAIN = "Try Again";
 
   private UserManager userManager;
   private FlashRecordPanelHeadless flashRecordPanel;
