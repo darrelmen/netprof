@@ -26,6 +26,7 @@ public class AutoCRT {
   private final AutoCRTScoring autoCRTScoring;
   private final double minPronScore;
   private final SmallVocabDecoder svd = new SmallVocabDecoder();
+  private static final boolean DEBUG = false;
 
   /**
    * @param db
@@ -118,12 +119,12 @@ public class AutoCRT {
    * @return
    */
   private boolean isCorrect(Collection<String> answerSentences, String recoSentence) {
-    //logger.debug("isCorrect - expected " + answerSentences + " vs heard " + recoSentence);
+    if (DEBUG) logger.debug("isCorrect - expected '" + answerSentences + "' vs heard '" + recoSentence +"'");
 
     List<String> recoTokens = svd.getTokens(recoSentence);
     for (String answer : answerSentences) {
       String converted = answer.replaceAll("-", " ").replaceAll("\\.\\.\\.", " ").replaceAll("\\.", "").replaceAll(":", "").toLowerCase();
-      // logger.debug("isCorrect - converted " + converted + " vs " + answer);
+      if (DEBUG) logger.debug("isCorrect - converted '" + converted + "' vs '" + answer + "'");
 
       List<String> answerTokens = svd.getTokens(converted);
       if (answerTokens.size() == recoTokens.size()) {
@@ -131,15 +132,15 @@ public class AutoCRT {
         for (int i = 0; i < answerTokens.size() && same; i++) {
           String s = answerTokens.get(i);
           String anotherString = recoTokens.get(i);
-          //    logger.debug("comparing '" + s + "' " +s.length()+ " to '" + anotherString  +"' "  +anotherString.length());
+          if (DEBUG)  logger.debug("comparing '" + s + "' " +s.length()+ " to '" + anotherString  +"' "  +anotherString.length());
           same = s.equalsIgnoreCase(anotherString);
           if (!same) {
-            //logger.debug("comparing '" + s + "' " + s.length() + " to '" + anotherString + "' " + anotherString.length());
+            if (DEBUG) logger.debug("comparing '" + s + "' " + s.length() + " to '" + anotherString + "' " + anotherString.length());
           }
         }
         if (same) return true;
       } else {
-        //logger.debug("not same number of tokens " + answerTokens + " " + answerTokens.size() + " vs " + recoTokens + " " + recoTokens.size());
+        if (DEBUG) logger.debug("not same number of tokens " + answerTokens + " " + answerTokens.size() + " vs " + recoTokens + " " + recoTokens.size());
       }
     }
     return false;
@@ -175,6 +176,11 @@ public class AutoCRT {
         rawRefSentence.trim().toUpperCase();
   }
 
+  /**
+   * @see #getFlashcardAnswer(File, Collection, AudioAnswer, boolean, boolean)
+   * @param possibleSentences
+   * @return
+   */
   private List<String> removePunct(Collection<String> possibleSentences) {
     List<String> foreground = new ArrayList<String>();
     for (String ref : possibleSentences) {
@@ -186,10 +192,11 @@ public class AutoCRT {
   /**
    * Replace elipsis with space. Then remove all punct.
    *
+   *  Deal with forward slashes like in english.
    * @param t
    * @return
    */
   private String removePunct(String t) {
-    return t.replaceAll("\\.\\.\\.", " ").replaceAll("\\p{P}", "");
+    return t.replaceAll("\\.\\.\\.", " ").replaceAll("/", " ").replaceAll("\\p{P}", "");
   }
 }
