@@ -1033,7 +1033,7 @@ public class ExcelImport implements ExerciseDAO {
           } else {
             missing++;
             c++;
-            if (c < 5 || test.getAbsolutePath().contains("17")) {
+            if (c < 5) {
               logger.warn("file " + test.getAbsolutePath() + " does not exist - \t" + audio.getAudioRef());
               if (c < 2) {
                 logger.warn("installPath " + installPath + "mediaDir " + mediaDir +" mediaDir1 " + mediaDir1);
