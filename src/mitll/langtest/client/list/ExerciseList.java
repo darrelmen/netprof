@@ -1,9 +1,11 @@
 package mitll.langtest.client.list;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -684,11 +686,16 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see #rememberAndLoadFirst(java.util.List, mitll.langtest.shared.CommonExercise, String)
    * @see ExerciseAsyncCallback#onSuccess(mitll.langtest.shared.CommonExercise)
    */
-  protected void useExercise(CommonExercise commonExercise) {
-    //logger.info("ExerciseList.useExercise : commonExercise " +commonExercise);
+  protected void useExercise(final CommonExercise commonExercise) {
+    logger.info("ExerciseList.useExercise : commonExercise " + commonExercise.getID());
     String itemID = commonExercise.getID();
     markCurrentExercise(itemID);
-    createdPanel = makeExercisePanel(commonExercise);
+
+    Scheduler.get().scheduleDeferred(new Command() {
+      public void execute() {
+        createdPanel = makeExercisePanel(commonExercise);
+      }
+    });
 /*    logger.info("ExerciseList.useExercise : item id " + itemID + " currentExercise " +getCurrentExercise() +
       " or " + getCurrentExerciseID() + " instance " + instance);*/
   }
