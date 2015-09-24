@@ -37,7 +37,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswerListener {
-  private Logger logger;// = Logger.getLogger("BootstrapExercisePanel");
+  private Logger logger;
 
   private Heading recoOutput;
   private static final int DELAY_MILLIS_LONG = 3000;
@@ -392,7 +392,9 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
     showOtherText();
     getSoundFeedback().queueSong(SoundFeedback.CORRECT);
 
-    showHeard(heard);
+   // if (showOnlyEnglish) {
+      showHeard(heard);
+    //}
   }
 
   /**
@@ -401,10 +403,14 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @param heard
    */
   private void showHeard(String heard) {
-    if (!removePunct(heard).equalsIgnoreCase(removePunct(exercise.getForeignLanguage()))) {
-//      logger.info("heard '" + heard +
-//          "' vs '" + exercise.getForeignLanguage() +
-//          "'");
+    String removedTruth = removePunct(exercise.getForeignLanguage());
+    String removedHeard = removePunct(heard);
+    if (!removedHeard.equalsIgnoreCase(removedTruth)) {
+      logger.info("heard '" + heard + "' '" +removedHeard +
+          "'" +
+          " vs '" + exercise.getForeignLanguage() + " '" + removedTruth+
+          "'"+
+          "'");
       Heading recoOutput = getRecoOutput();
       if (recoOutput != null) {
         recoOutput.setText("Heard " + heard);
@@ -414,7 +420,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
   }
 
   private String removePunct(String t) {
-    return t.replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
+    return t.replaceAll("/", " ").replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
   }
 
   /**
