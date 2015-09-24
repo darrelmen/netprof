@@ -118,7 +118,14 @@ public class SmallVocabDecoder {
     sentence = sentence.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("/", " ");
     // logger.debug("after  convert " + sentence);
 
-    return sentence.replaceAll("'", "").replaceAll("\\p{P}", " ").replaceAll("\\s+", " ").trim();
+    String trim = sentence.replaceAll("'", "").replaceAll("\\p{P}", " ").replaceAll("\\s+", " ").trim();
+/*
+    logger.debug("from '" +sentence+
+        "' => '" +trim+
+        "'");
+*/
+
+    return trim;
   }
 
   /**
