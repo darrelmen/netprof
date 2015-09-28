@@ -8,13 +8,15 @@ import audio.imagewriter.TranscriptWriter;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Base class for the two types of scoring : DTW (Dynamic Time Warping, using "sv") and ASR (Speech Recognition).
@@ -74,8 +76,7 @@ public abstract class Scoring {
                                               String prefix, String suffix, boolean decode,
                                               String phoneLab, String wordLab, boolean useWebservice,
                                               boolean usePhoneToDisplay) {
-    logger.debug("writeTranscripts - " + audioFileNoSuffix + " prefix " + prefix);
-
+   // logger.debug("writeTranscripts - " + audioFileNoSuffix + " prefix " + prefix);
     boolean foundATranscript = false;
     // These may not all exist. The speech file is created only by multisv right now.
     String phoneLabFile = prependDeploy(audioFileNoSuffix + ".phones.lab");
@@ -213,7 +214,7 @@ public abstract class Scoring {
       }
       return getEventInfo(typeToFile, useWebservice, usePhoneToDisplay); // if align, don't use webservice regardless
     } else {
-      Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseJson(object, "words", "w", usePhoneToDisplay);
+      Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = new ParseResultJson(props).parseJson(object, "words", "w", usePhoneToDisplay);
 
       String pathname = audioFileNoSuffix + ".wav";
       pathname = prependDeploy(pathname);
@@ -227,68 +228,6 @@ public abstract class Scoring {
       return new TranscriptWriter().getEventAndFileInfo(pathname,
           imageOutDir, imageWidth, imageHeight, expectedTypes, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, imageTypeMapMap);
     }
-  }
-
-  /**
-   * TODOx : actually use the parsed json to get transcript info
-   *
-   * @param jsonObject
-   * @param words1
-   * @param w1
-   * @paramx eventScores
-   * @see ASRScoring#getCachedScores
-   * @see #writeTranscripts(String, int, int, String, boolean, String, String, boolean, boolean, boolean)
-   */
-  Map<ImageType, Map<Float, TranscriptEvent>> parseJson(JSONObject jsonObject, String words1, String w1, boolean usePhones) {
-    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
-    SortedMap<Float, TranscriptEvent> wordEvents = new TreeMap<Float, TranscriptEvent>();
-    SortedMap<Float, TranscriptEvent> phoneEvents = new TreeMap<Float, TranscriptEvent>();
-
-    typeToEvent.put(ImageType.WORD_TRANSCRIPT, wordEvents);
-    typeToEvent.put(ImageType.PHONE_TRANSCRIPT, phoneEvents);
-
-    boolean valid = true;
-    if (jsonObject.containsKey(words1)) {
-      try {
-        JSONArray words = jsonObject.getJSONArray(words1);
-        for (int i = 0; i < words.size() && valid; i++) {
-          JSONObject word = words.getJSONObject(i);
-          if (word.containsKey("str")) {
-            objectToEvent(wordEvents, w1, word, false);
-            JSONArray phones = word.getJSONArray("phones");
-            getPhones(phoneEvents, phones, usePhones);
-          } else {
-            valid = false;
-          }
-        }
-      } catch (Exception e) {
-        logger.debug("no json array at " + words1 + " in " + jsonObject, e);
-      }
-    }
-
-    return valid ? typeToEvent : new HashMap<>();
-  }
-
-  private void getPhones(SortedMap<Float, TranscriptEvent> phoneEvents, JSONArray phones, boolean usePhone) {
-    getEventsFromJson(phoneEvents, phones, "p", usePhone);
-  }
-
-  private void getEventsFromJson(SortedMap<Float, TranscriptEvent> phoneEvents, JSONArray phones, String tokenKey, boolean usePhone) {
-    for (int j = 0; j < phones.size(); j++) {
-      JSONObject phone = phones.getJSONObject(j);
-      objectToEvent(phoneEvents, tokenKey, phone, usePhone);
-    }
-  }
-
-  private void objectToEvent(SortedMap<Float, TranscriptEvent> phoneEvents, String tokenKey, JSONObject phone,
-                             boolean usePhone) {
-    String token = phone.getString(tokenKey);
-    double pscore = phone.getDouble("s");
-    double pstart = phone.getDouble("str");
-    double pend = phone.getDouble("end");
-    if (usePhone) token = props.getDisplayPhoneme(token);
-
-    phoneEvents.put((float) pstart, new TranscriptEvent((float) pstart, (float) pend, token, (float) pscore));
   }
 
   // JESS reupdate here
