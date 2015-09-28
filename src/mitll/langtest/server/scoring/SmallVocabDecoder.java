@@ -135,7 +135,14 @@ public class SmallVocabDecoder {
    */
   //warning -- this will filter out UNKNOWNMODEL - where this matters, add it 
   //back in
-  public String segmentation(String phrase){  return longest_prefix(phrase, 0);  }
+  public String segmentation(String phrase) {
+    String s = longest_prefix(phrase, 0);
+    if (s.trim().isEmpty()) {
+      return phrase;
+    } else {
+      return s;
+    }
+  }
 
   private String longest_prefix(String phrase, int i) {
     if (i == phrase.length())
