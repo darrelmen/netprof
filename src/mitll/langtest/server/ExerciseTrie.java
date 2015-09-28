@@ -6,6 +6,7 @@ import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.CommonExercise;
 import org.apache.log4j.Logger;
 
+import java.text.Normalizer;
 import java.util.Collection;
 
 /**
@@ -18,7 +19,7 @@ import java.util.Collection;
 public class ExerciseTrie extends Trie<CommonExercise> {
   private static final Logger logger = Logger.getLogger(ExerciseTrie.class);
 
-  private static final int MB = (1024 * 1024);
+//  private static final int MB = (1024 * 1024);
   private static final int TOOLONG_TO_WAIT = 150;
   private static final String MANDARIN = "Mandarin";
   private static final String ENGLISH = "English";
@@ -26,17 +27,16 @@ public class ExerciseTrie extends Trie<CommonExercise> {
   /**
    * Tokens are normalized to lower case.
    *
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseListWrapperForPrefix
    * @param exercisesForState
    * @param language
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseListWrapperForPrefix
    */
   public ExerciseTrie(Collection<CommonExercise> exercisesForState, String language, SmallVocabDecoder smallVocabDecoder) {
     boolean includeForeign = !language.equals(ENGLISH);
     startMakingNodes();
-    Runtime rt = Runtime.getRuntime();
-    long free = rt.freeMemory()/ MB ;
-   // logger.debug("ExerciseTrie : searching over " + exercisesForState.size());
+  //  Runtime rt = Runtime.getRuntime();
+  //  long free = rt.freeMemory() / MB;
 
     long then = System.currentTimeMillis();
     boolean isMandarin = language.equalsIgnoreCase(MANDARIN);
@@ -57,10 +57,9 @@ public class ExerciseTrie extends Trie<CommonExercise> {
           addEntryToTrie(new ExerciseWrapper(exercise, false));
 
           Collection<String> tokens = isMandarin ? getFLTokens(smallVocabDecoder, exercise) : smallVocabDecoder.getTokens(exercise.getForeignLanguage());
-          if (tokens.size() > 1) {
-            for (String token : tokens) {
-              addEntryToTrie(new ExerciseWrapper(token, exercise));
-            }
+          for (String token : tokens) {
+            addEntryToTrie(new ExerciseWrapper(token, exercise));
+            addEntryToTrie(new ExerciseWrapper(removeDiacritics(token), exercise));
           }
         }
       }
@@ -71,11 +70,11 @@ public class ExerciseTrie extends Trie<CommonExercise> {
     if (now - then > TOOLONG_TO_WAIT) {
       logger.debug("getExercisesForSelectionState : took " + (now - then) + " millis to build ");
     }
-    long freeAfter = rt.freeMemory()/ MB ;
+/*    long freeAfter = rt.freeMemory() / MB;
 
-    if (freeAfter-free > 40) {
+    if (freeAfter - free > 40) {
       logMemory();
-    }
+    }*/
   }
 
   private Collection<String> getFLTokens(SmallVocabDecoder smallVocabDecoder, CommonExercise e) {
@@ -83,11 +82,11 @@ public class ExerciseTrie extends Trie<CommonExercise> {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseListWrapperForPrefix
    * @param prefix
    * @param smallVocabDecoder
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseListWrapperForPrefix
    */
   public Collection<CommonExercise> getExercises(String prefix, SmallVocabDecoder smallVocabDecoder) {
     return getMatches(smallVocabDecoder.getTrimmed(prefix.toLowerCase()));
@@ -98,9 +97,9 @@ public class ExerciseTrie extends Trie<CommonExercise> {
     private final CommonExercise e;
 
     /**
-     * @see ExerciseTrie#ExerciseTrie
      * @param e
      * @param useEnglish
+     * @see ExerciseTrie#ExerciseTrie
      */
     public ExerciseWrapper(CommonExercise e, boolean useEnglish) {
       this((useEnglish ? e.getEnglish().toLowerCase() : e.getForeignLanguage()), e);
@@ -112,19 +111,41 @@ public class ExerciseTrie extends Trie<CommonExercise> {
     }
 
     @Override
-    public CommonExercise getValue() { return e; }
+    public CommonExercise getValue() {
+      return e;
+    }
 
     @Override
-    public String getNormalizedValue() { return value; }
-    public String toString() { return "e " +e.getID() + " : " + value; }
+    public String getNormalizedValue() {
+      return value;
+    }
+
+    public String toString() {
+      return "e " + e.getID() + " : " + value;
+    }
   }
 
-  private void logMemory() {
+  /**
+   * So we can match when we don't type with accent marks in search box.
+   * @param input
+   * @return
+   */
+  private String removeDiacritics(String input) {
+    String nrml = Normalizer.normalize(input, Normalizer.Form.NFD);
+    StringBuilder stripped = new StringBuilder();
+    for (int i = 0; i < nrml.length(); ++i) {
+      if (Character.getType(nrml.charAt(i)) != Character.NON_SPACING_MARK) {
+        stripped.append(nrml.charAt(i));
+      }
+    }
+    return stripped.toString();
+  }
+
+/*  private void logMemory() {
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory();
     long used = rt.totalMemory() - free;
     long max = rt.maxMemory();
     logger.debug("heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
-    //return free;
-  }
+  }*/
 }
