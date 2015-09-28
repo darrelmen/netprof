@@ -483,6 +483,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") + (reallyUsePhone ? "_phoneToDisp" : "");
 
     //logger.debug("getPretestScore prefix " + prefix1);
+if (jsonObject != null) logger.debug("generating images from " + jsonObject);
 
     EventAndFileInfo eventAndFileInfo = jsonObject == null ?
         writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
