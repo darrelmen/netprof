@@ -22,6 +22,13 @@ class PrecalcScores {
   private boolean isValid;
   private ParseResultJson parseResultJson;
 
+  /**
+   * TODO : use this with webservice scoring too
+   * @see ASRScoring#scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result, boolean)
+   * @param serverProperties
+   * @param precalcResult
+   * @param usePhoneToDisplay
+   */
   public PrecalcScores(ServerProperties serverProperties, Result precalcResult, boolean usePhoneToDisplay) {
     this.parseResultJson = new ParseResultJson(serverProperties);
     this.precalcResult = precalcResult;
@@ -29,13 +36,11 @@ class PrecalcScores {
     boolean valid = isValidPrecalc();
 
     if (valid) {
-//        this.usePhoneToDisplay = usePhoneToDisplay;
-      //Result precalcResult = getPrecalcResult();
-      logger.debug("for cached result " + precalcResult);// + "\n\tgot json : " + precalcResult.getJsonScore());
       jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
       scores = getCachedScores(precalcResult, jsonObject, usePhoneToDisplay);
 
       isValid = isPrecalcValidCheck();
+//      logger.debug("for cached result " + precalcResult + " is valid " + isValid + " : " + precalcResult.getJsonScore());
     } else {
       isValid = false;
     }
@@ -45,7 +50,6 @@ class PrecalcScores {
    * @param precalcResult
    * @param jsonObject
    * @return
-   * @see #scoreRepeatExercise
    */
   private Scores getCachedScores(Result precalcResult, JSONObject jsonObject, boolean usePhones) {
     Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseResultJson.parseJson(jsonObject, "words", "w", usePhones);
@@ -107,9 +111,6 @@ class PrecalcScores {
       value2.put(key, pair.getValue() / cvalue.get(key));
     }
   }
-/*    private boolean isPrecalcValidCheck() {
-    return isPrecalcValidCheck(getPrecalcResult(), getScores());
-  }*/
 
   private boolean isValidPrecalc() {
     boolean isInvalid = precalcResult == null ||
@@ -118,15 +119,13 @@ class PrecalcScores {
     return !isInvalid;
   }
 
-  private boolean isPrecalcValidCheck(/*Result precalcResult, Scores scores*/) {
-    return precalcResult.isValid() &&
-        (scores.eventScores.isEmpty() ||
-            (scores.eventScores.get(Scores.WORDS).isEmpty() &&
-                (!precalcResult.getAudioType().equals("avp") || precalcResult.isCorrect())
-            )
+  private boolean isPrecalcValidCheck() {
+    boolean avp = scores.eventScores.isEmpty() ||
+        (scores.eventScores.get(Scores.WORDS).isEmpty() &&
+            (!precalcResult.getAudioType().equals("avp") || precalcResult.isCorrect())
         );
+    return !avp;
   }
-
 
   public Scores getScores() {
     return scores;
@@ -134,18 +133,6 @@ class PrecalcScores {
 
   public JSONObject getJsonObject() {
     return jsonObject;
-  }
-
-/*    public PrecalcScores invoke() {
-    Result precalcResult = getPrecalcResult();
-    logger.debug("for cached result " + precalcResult);// + "\n\tgot json : " + precalcResult.getJsonScore());
-    jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
-    scores = getCachedScores(precalcResult, jsonObject, usePhoneToDisplay);
-    return this;
-  }*/
-
-  public Result getPrecalcResult() {
-    return precalcResult;
   }
 
   public boolean isValid() {
