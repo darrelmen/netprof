@@ -36,8 +36,8 @@ import java.util.*;
  */
 public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR {
   private static final Logger logger = Logger.getLogger(ASRWebserviceScoring.class);
- // private static final double KEEP_THRESHOLD = 0.3;
-//	private static final boolean DEBUG = false;
+  // private static final double KEEP_THRESHOLD = 0.3;
+  //private static final boolean DEBUG = false;
 
   private static final int FOREGROUND_VOCAB_LIMIT = 100;
   private static final int VOCAB_SIZE_LIMIT = 200;
@@ -138,6 +138,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 
   /**
    * So chinese is special -- it doesn't do lts -- it just uses a dictionary
+   * TODO : get rid of code duplication!
    *
    * @param lts
    * @param foreignLanguagePhrase
@@ -307,7 +308,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
         sentence, lmSentences,
         imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
         decode, tmpDir,
-        useCache, prefix, usePhoneToDisplay);
+        useCache, prefix, precalcResult, usePhoneToDisplay);
   }
 
   /**
@@ -334,8 +335,8 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    * @param tmpDir                where to run hydec
    * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
    * @param prefix                on the names of the image files, if they are written
-   * @param usePhoneToDisplay
-   * @return score info coming back from alignment/reco
+   * @param precalcResult
+   * @param usePhoneToDisplay     @return score info coming back from alignment/reco
    * @paramx scoringDir            where the hydec subset is (models, bin.linux64, etc.)
    * @see ASR#scoreRepeat
    */
@@ -348,7 +349,9 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
                                            int imageWidth, int imageHeight,
                                            boolean useScoreForBkgColor,
                                            boolean decode, String tmpDir,
-                                           boolean useCache, String prefix, boolean usePhoneToDisplay) {
+                                           boolean useCache, String prefix,
+                                           Result precalcResult,
+                                           boolean usePhoneToDisplay) {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
 
@@ -422,6 +425,23 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
         scores, phoneLab, wordLab, duration, processDur, usePhoneToDisplay);
   }
 
+  /**
+   * TODO : don't copy this method in both ASRScoring and ASRWebserviceScoring
+   * @param imageOutDir
+   * @param imageWidth
+   * @param imageHeight
+   * @param useScoreForBkgColor
+   * @param decode
+   * @param prefix
+   * @param noSuffix
+   * @param scores
+   * @param phoneLab
+   * @param wordLab
+   * @param duration
+   * @param processDur
+   * @param usePhoneToDisplay
+   * @return
+   */
   private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
                                        boolean decode, String prefix, String noSuffix, Scores scores, String phoneLab,
                                        String wordLab, double duration, int processDur, boolean usePhoneToDisplay) {
@@ -504,9 +524,9 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    * @param lmSentences
    * @param tmpDir
    * @param decode
-   * @param end frame number of end of file (I think)
+   * @param end         frame number of end of file (I think)
    * @return
-   * @see #scoreRepeatExercise(String, String, String, Collection, String, int, int, boolean, boolean, String, boolean, String, boolean)
+   * @see #scoreRepeatExercise(String, String, String, Collection, String, int, int, boolean, boolean, String, boolean, String, Result, boolean)
    */
   private Object[] runHydra(String audioPath, String transcript, Collection<String> lmSentences, String tmpDir, boolean decode, int end) {
     // reference trans
@@ -547,7 +567,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     // clean up tmp directory if above score threshold
     logger.debug("Took " + timeToRunHydra + " millis to run hydra - overall score: " + split[0]);
     /*if (Float.parseFloat(split[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
-			try {
+      try {
 				logger.debug("deleting " + tmpDir + " since score is " + split[0]);
 				FileUtils.deleteDirectory(new File(tmpDir));
 			} catch (IOException e) {
@@ -563,7 +583,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
       try {
         resultsStr = httpClient.sendAndReceiveAndClose(hydraInput);
       } catch (IOException e) {
-        logger.error("Error closing http connection " + e,e);
+        logger.error("Error closing http connection " + e, e);
         langTestDatabase.logAndNotifyServerException(e, "running hydra with " + hydraInput);
         resultsStr = "";
       }
@@ -708,7 +728,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 			return phoneToScore;
 		}
 	}*/
-
   private Map<String, Float> getPhoneToScore(Scores scores) {
     Map<String, Float> phones = scores.eventScores.get("phones");
     return getTokenToScore(scores, phones, true);
