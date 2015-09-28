@@ -1,0 +1,110 @@
+package mitll.langtest.server.scoring;
+
+import audio.image.ImageType;
+import audio.image.TranscriptEvent;
+import audio.image.TranscriptReader;
+import audio.imagewriter.EventAndFileInfo;
+import mitll.langtest.server.ServerProperties;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import org.apache.log4j.Logger;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+/**
+ * Created by go22670 on 9/28/15.
+ */
+public class ParseResultJson {
+  private static final Logger logger = Logger.getLogger(ParseResultJson.class);
+  ServerProperties props;
+
+  public ParseResultJson(ServerProperties properties) {
+    this.props = properties;
+  }
+  /**
+   * TODOx : actually use the parsed json to get transcript info
+   *
+   * @param jsonObject
+   * @param words1
+   * @param w1
+   * @paramx eventScores
+   * @see ASRScoring#getCachedScores
+   * @see #writeTranscripts(String, int, int, String, boolean, String, String, boolean, boolean, boolean)
+   */
+  Map<ImageType, Map<Float, TranscriptEvent>> parseJson(JSONObject jsonObject, String words1, String w1, boolean usePhones) {
+    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
+    SortedMap<Float, TranscriptEvent> wordEvents = new TreeMap<Float, TranscriptEvent>();
+    SortedMap<Float, TranscriptEvent> phoneEvents = new TreeMap<Float, TranscriptEvent>();
+
+    typeToEvent.put(ImageType.WORD_TRANSCRIPT, wordEvents);
+    typeToEvent.put(ImageType.PHONE_TRANSCRIPT, phoneEvents);
+
+    boolean valid = true;
+    if (jsonObject.containsKey(words1)) {
+      try {
+        JSONArray words = jsonObject.getJSONArray(words1);
+        for (int i = 0; i < words.size() && valid; i++) {
+          JSONObject word = words.getJSONObject(i);
+          if (word.containsKey("str")) {
+            objectToEvent(wordEvents, w1, word, false);
+            JSONArray phones = word.getJSONArray("phones");
+            getPhones(phoneEvents, phones, usePhones);
+          } else {
+            valid = false;
+          }
+        }
+      } catch (Exception e) {
+        logger.debug("no json array at " + words1 + " in " + jsonObject, e);
+      }
+    }
+
+    return valid ? typeToEvent : new HashMap<>();
+  }
+
+  private void getPhones(SortedMap<Float, TranscriptEvent> phoneEvents, JSONArray phones, boolean usePhone) {
+    getEventsFromJson(phoneEvents, phones, "p", usePhone);
+  }
+
+  private void getEventsFromJson(SortedMap<Float, TranscriptEvent> phoneEvents, JSONArray phones, String tokenKey, boolean usePhone) {
+    for (int j = 0; j < phones.size(); j++) {
+      JSONObject phone = phones.getJSONObject(j);
+      objectToEvent(phoneEvents, tokenKey, phone, usePhone);
+    }
+  }
+
+  private void objectToEvent(SortedMap<Float, TranscriptEvent> phoneEvents, String tokenKey, JSONObject phone,
+                             boolean usePhone) {
+    String token = phone.getString(tokenKey);
+    double pscore = phone.getDouble("s");
+    double pstart = phone.getDouble("str");
+    double pend = phone.getDouble("end");
+    if (usePhone) token = props.getDisplayPhoneme(token);
+
+    phoneEvents.put((float) pstart, new TranscriptEvent((float) pstart, (float) pend, token, (float) pscore));
+  }
+
+  // JESS reupdate here
+ /* private EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes, boolean useWebservice,
+                                        boolean usePhoneToDisplay) {
+    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
+    try {
+      for (Map.Entry<ImageType, String> o : imageTypes.entrySet()) {
+        ImageType imageType = o.getKey();
+        boolean isPhone = imageType.equals(ImageType.PHONE_TRANSCRIPT) && usePhoneToDisplay;
+        TranscriptReader transcriptReader = new TranscriptReader();
+        typeToEvent.put(imageType, useWebservice ? transcriptReader.readEventsFromString(o.getValue(), isPhone, props.getPhoneToDisplay()) :
+            transcriptReader.readEventsFromFile(o.getValue(), isPhone, props.getPhoneToDisplay()));
+
+      }
+      return new EventAndFileInfo(new HashMap<ImageType, String>(), typeToEvent);
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+*/
+}
