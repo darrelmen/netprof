@@ -95,7 +95,9 @@ public class AutoCRT {
    */
   private PretestScore getFlashcardAnswer(File audioFile, Collection<String> possibleSentences, AudioAnswer answer,
                                           boolean canUseCache, boolean useOldSchool) {
-    PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, removePunct(possibleSentences), canUseCache, useOldSchool);
+    List<String> lmSentences = removePunct(possibleSentences);
+//    logger.debug("getFlashcardAnswer " + possibleSentences + " : '" + lmSentences + "'");
+    PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, lmSentences, canUseCache, useOldSchool);
 
     String recoSentence =
         asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
@@ -159,6 +161,9 @@ public class AutoCRT {
       return ret;
     } else {
       String phraseToDecode = getPhraseToDecode(other.getForeignLanguage(), language);
+/*      logger.debug("(" + language +
+          ") for " + other.getID() + " fl is '" + other.getForeignLanguage() + "' / '" +other.getForeignLanguage().trim()+
+          "' -> '" + phraseToDecode +          "'");*/
       return Collections.singleton(phraseToDecode);
     }
   }
