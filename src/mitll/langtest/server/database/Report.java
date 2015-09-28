@@ -30,11 +30,13 @@ public class Report {
   private static final int MIN_MILLIS = (1000 * 60);
   private static final int TEN_SECONDS = 1000 * 10;
   private static final boolean WRITE_RESULTS_TO_FILE = false;
-  private static final String ACTIVE_USERS = "# Active Users";
+  private static final String ACTIVE_USERS = "Active Users";
   private static final String TIME_ON_TASK_MINUTES = "Time on Task Minutes ";
   private static final String TOTAL_TIME_ON_TASK_HOURS = "Total time on task (hours)";
-  private static final String MONTH = "month";
-  private static final String WEEK = "week";
+  private static final String MONTH = "By Month";
+  private static final String WEEK = "By Week";
+  private static final String top = "<td style='vertical-align: top;'>";
+
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
   private final EventDAO eventDAO;
@@ -82,6 +84,19 @@ public class Report {
     }
   }
 
+  /**
+   * @param pathHelper
+   * @throws IOException
+   * @see DatabaseImpl#doReport(PathHelper)
+   */
+  public void writeReport(PathHelper pathHelper) throws IOException {
+    SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
+    String today = simpleDateFormat2.format(new Date());
+    File file = getReportFile(pathHelper, today);
+    writeReport(file, pathHelper);
+    logger.debug("wrote to " + file.getAbsolutePath());
+  }
+
   private void sendEmails(String language, String site, MailSupport mailSupport, List<String> reportEmails, String message) {
     String suffix = "";
     if (site != null && site.contains("npfClassroom")) {
@@ -93,14 +108,6 @@ public class Report {
     for (String dest : reportEmails) {
       mailSupport.sendEmail(NP_SERVER, dest, MY_EMAIL, subject, message);
     }
-  }
-
-  public void writeReport(PathHelper pathHelper) throws IOException {
-    SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
-    String today = simpleDateFormat2.format(new Date());
-    File file = getReportFile(pathHelper, today);
-    writeReport(file, pathHelper);
-    logger.debug("wrote to " + file.getAbsolutePath());
   }
 
   private String writeReport(File file, PathHelper pathHelper) throws IOException {
@@ -195,17 +202,32 @@ public class Report {
     }
     String users1 = "New Users";// (users enrolled after 10/8)";
     builder.append("<html><head><body>" +
-            getYTD(ytd, users1) +
-            getMC(monthToCount, MONTH, users1) +
-            getWC(weekToCount, WEEK, users1)
+            getSectionReport(ytd, monthToCount, weekToCount, users1)
     );
 
     return students;
   }
 
+  private String getSectionReport(int ytd, Map<Integer, ?> monthToCount, Map<Integer, ?> weekToCount, String users1) {
+    //String yearCol = /*ytd > -1 ? top +*/ getYTD(ytd, users1) /*+ "</td>" : ""*/;
+    String yearCol = ytd > -1 ?  getYTD(ytd, users1) : "";
+    String monthCol = getMC(monthToCount, MONTH, users1);
+    String weekCol  = getWC(weekToCount,  WEEK, users1);
+    return getYearMonthWeekTable(users1, yearCol, monthCol, weekCol);
+  }
+
+  private String getYearMonthWeekTable(String users1, String yearCol, String monthCol, String weekCol) {
+    return "<h2>" + users1 + "</h2>" +
+        "<table ><tr>" +
+        top + yearCol  + "</td>"+
+        top + monthCol + "</td>" +
+        top + weekCol  + "</td>" +
+        "</tr></table>";
+  }
+
   private String getYTD(int ytd, String users1) {
     int i = getCal().get(Calendar.YEAR);
-    return "<table>" +
+    return "<table style='background-color: #eaf5fb'>" +
         "<tr>" +
         "<th>" +
         users1 +
@@ -228,7 +250,7 @@ public class Report {
       String month = getMonth(key);
       s += "<tr><td>" + month + "</td><td>" + value + "</td></tr>";
     }
-    return "<table>" +
+    return "<table style='background-color: #eaf5fb' >" +
         "<tr>" +
         "<th>" +
         unit +
@@ -272,7 +294,7 @@ public class Report {
           "</span>" +
           "</td><td>" + value + "</td></tr>";
     }
-    return "<table>" +
+    return "<table style='background-color: #eaf5fb'>" +
         "<tr>" +
         "<th>" +
         unit +
@@ -374,9 +396,12 @@ public class Report {
 
     builder.append("\n<br/><span>Valid student recordings</span>");
     builder.append(
-        getYTD(ytd, recordings) +
-            getMC(monthToCount, MONTH, recordings) +
-            getWC(weekToCount, WEEK, recordings));
+//        getYTD(ytd, recordings) +
+//            getMC(monthToCount, MONTH, recordings) +
+//            getWC(weekToCount, WEEK, recordings)
+
+        getSectionReport(ytd, monthToCount, weekToCount, recordings)
+    );
 
     Collection<AudioAttribute> audioAttributes = audioDAO.getAudioAttributes();
     logger.debug("got " + audioAttributes.size() + " audio attributes.");
@@ -387,11 +412,11 @@ public class Report {
   }
 
   /**
-   * @see #getResults(StringBuilder, Set, PathHelper)
    * @param builder
    * @param calendar
    * @param january1st
    * @param refAudio
+   * @see #getResults(StringBuilder, Set, PathHelper)
    */
   private <T extends UserAndTime> void addRefAudio(StringBuilder builder, Calendar calendar, Date january1st, Collection<T> refAudio) {
     int ytd = 0;
@@ -408,9 +433,13 @@ public class Report {
 
     String refAudioRecs = "Ref Audio Recordings";
     builder.append(
-        getYTD(ytd, refAudioRecs) +
-            getMC(monthToCount, MONTH, refAudioRecs) +
-            getWC(weekToCount, WEEK, refAudioRecs));
+//        getYTD(ytd, refAudioRecs) +
+//            getMC(monthToCount, MONTH, refAudioRecs) +
+//            getWC(weekToCount, WEEK, refAudioRecs)
+
+        getSectionReport(ytd, monthToCount, weekToCount, refAudioRecs)
+
+    );
   }
 
   /**
@@ -542,8 +571,14 @@ public class Report {
     logger.debug("skipped  " + skipped + " events from teachers " + teachers);
 
     String activeUsers = ACTIVE_USERS;
-    builder.append(getMC(monthToCount, MONTH, activeUsers) +
-        getWC(weekToCount, WEEK, activeUsers));
+    builder.append(
+      //  getMC(monthToCount, MONTH, activeUsers) +
+     //       getWC(weekToCount, WEEK, activeUsers)
+
+        getSectionReport(-1, monthToCount, weekToCount, ACTIVE_USERS)
+
+        //  getSectionReport(-1, monthToCount, weekToCount, activeUsers)
+    );
     Map<Integer, Long> monthToDur = getMonthToDur(monthToCount2);
     long total = 0;
     for (Long v : monthToDur.values()) total += v;
@@ -556,9 +591,19 @@ public class Report {
     getMinMap(monthToDur);
 
     String timeOnTaskMinutes = TIME_ON_TASK_MINUTES;
-    builder.append(getYTD(Math.round(total / 60), TOTAL_TIME_ON_TASK_HOURS) +
-        getMC(getMinMap(monthToDur), MONTH, timeOnTaskMinutes) +
-        getWC(getMinMap(weekToDur), WEEK, timeOnTaskMinutes));
+    String yearMonthWeekTable = getYearMonthWeekTable("Time on Task",
+        getYTD(Math.round(total / 60), TOTAL_TIME_ON_TASK_HOURS),
+        getMC(getMinMap(monthToDur), MONTH, timeOnTaskMinutes),
+        getWC(getMinMap(weekToDur), WEEK, timeOnTaskMinutes)
+    );
+    builder.append(
+//        getYTD(Math.round(total / 60), TOTAL_TIME_ON_TASK_HOURS) +
+//            getMC(getMinMap(monthToDur), MONTH, timeOnTaskMinutes) +
+//            getWC(getMinMap(weekToDur), WEEK, timeOnTaskMinutes)
+//
+//        getSectionReport(ytd, monthToCount, weekToCount, users1)
+         yearMonthWeekTable
+    );
   }
 
   private boolean isValidUser(long creatorID) {
