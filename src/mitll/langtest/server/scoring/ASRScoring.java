@@ -85,7 +85,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
   public ASRScoring(String deployPath, ServerProperties serverProperties, LogAndNotify langTestDatabase) {
     super(deployPath, serverProperties, langTestDatabase);
 
-    logger.debug("Creating ASRScoring object");
+   // logger.debug("Creating ASRScoring object");
     lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
@@ -405,27 +405,18 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 
     Scores scores;
     JSONObject jsonObject = null;
-    if (precalcResult == null ||
-        (precalcResult.isValid() &&
-            (precalcResult.getPronScore() < 0 || precalcResult.getJsonScore() == null || precalcResult.getJsonScore().isEmpty()))) {
+
+    PrecalcScores precalcScores = new PrecalcScores(props, precalcResult, usePhoneToDisplay);
+
+    if (precalcScores.isValid()) {
+      scores = precalcScores.getScores();
+      jsonObject = precalcScores.getJsonObject();
+    }
+    else {
       if (precalcResult != null) {
         logger.debug("unusable precalc result, so recalculating : " + precalcResult);
       }
       scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
-    } else {
-      logger.debug("for cached result " + precalcResult);// + "\n\tgot json : " + precalcResult.getJsonScore());
-      jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
-      scores = getCachedScores(precalcResult, jsonObject, usePhoneToDisplay);
-
-      boolean isDecode = precalcResult.getAudioType().equals("avp");
-      if (precalcResult.isValid() &&
-          (scores.eventScores.isEmpty() || (scores.eventScores.get(Scores.WORDS).isEmpty() && (!isDecode || precalcResult.isCorrect())))) {
-        logger.debug("no valid precalc result, so recalculating : " + precalcResult);
-        jsonObject = null;
-        scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
-      } else {
-        //logger.debug("precalc : events " + scores.eventScores);
-      }
     }
     if (scores == null) {
       logger.error("getScoreForAudio failed to generate scores.");
@@ -433,45 +424,6 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     }
     return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile,
         scores, jsonObject, usePhoneToDisplay);
-  }
-
-  /**
-   * @param precalcResult
-   * @param jsonObject
-   * @return
-   * @see #scoreRepeatExercise
-   */
-  private Scores getCachedScores(Result precalcResult, JSONObject jsonObject, boolean usePhones) {
-    Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseJson(jsonObject, "words", "w", usePhones);
-    Map<String, Map<String, Float>> eventScores = getEventAverages(imageTypeMapMap);
-
-    Scores scores = new Scores(precalcResult.getPronScore(), eventScores, 0);
-    //logger.debug("got cached scores " + scores + " json " + jsonObject);
-    return scores;
-  }
-
-  /**
-   * @param imageTypeMapMap
-   * @return
-   * @see #getCachedScores
-   */
-  private Map<String, Map<String, Float>> getEventAverages(Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap) {
-    Map<String, Map<String, Float>> eventScores = new HashMap<String, Map<String, Float>>();
-    // phones
-    Map<Float, TranscriptEvent> floatTranscriptEventMap = imageTypeMapMap.get(ImageType.PHONE_TRANSCRIPT);
-    Map<String, Float> value2 = new HashMap<>();
-    eventScores.put(Scores.PHONES, value2);
-    if (floatTranscriptEventMap != null) {
-      getEventAverages(floatTranscriptEventMap, value2);
-    }
-    // words
-    floatTranscriptEventMap = imageTypeMapMap.get(ImageType.WORD_TRANSCRIPT);
-    value2 = new HashMap<>();
-    eventScores.put(Scores.WORDS, value2);
-    if (floatTranscriptEventMap != null) {
-      getEventAverages(floatTranscriptEventMap, value2);
-    }
-    return eventScores;
   }
 
   /**
@@ -519,7 +471,8 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @see #scoreRepeatExercise
    */
   private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-                                       boolean decode, String prefix, String noSuffix, File wavFile, Scores scores, JSONObject jsonObject,
+                                       boolean decode, String prefix, String noSuffix, File wavFile, Scores scores,
+                                       JSONObject jsonObject,
                                        boolean usePhoneToDisplay) {
     //  logger.debug("getPretestScore jsonObject " + jsonObject);
     //  logger.debug("getPretestScore scores     " + scores);
