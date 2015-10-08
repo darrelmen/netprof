@@ -1,6 +1,7 @@
 package mitll.langtest.server.scoring;
 
 import corpus.HTKDictionary;
+import mitll.langtest.shared.CommonExercise;
 import org.apache.log4j.Logger;
 import pronz.speech.Audio;
 
@@ -103,6 +104,10 @@ public class SmallVocabDecoder {
     return all;
   }
 
+  public Collection<String> getMandarinTokens( String foreignLanguage) {
+  //  String foreignLanguage = e.getForeignLanguage();
+    return getTokens(segmentation(foreignLanguage));
+  }
 
   /**
    * Tries to remove junky characters from the sentence so hydec won't choke on them.
@@ -132,6 +137,7 @@ public class SmallVocabDecoder {
    * @param phrase
    * @return
    * @see mitll.langtest.server.scoring.ASRScoring#checkLTS(corpus.LTS, String)
+   * @see mitll.langtest.server.ExerciseTrie#getFLTokens(SmallVocabDecoder, CommonExercise)
    */
   //warning -- this will filter out UNKNOWNMODEL - where this matters, add it 
   //back in
@@ -165,8 +171,8 @@ public class SmallVocabDecoder {
     scala.collection.immutable.List<String[]> apply = htkDictionary.apply(token);
     return apply != null && !apply.isEmpty();
   }
-  public static void main(String [] arg) {
+/*  public static void main(String [] arg) {
     String b = "barber/barbers";
     System.out.println(new SmallVocabDecoder().getTrimmed(b));
-  }
+  }*/
 }
