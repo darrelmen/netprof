@@ -89,7 +89,7 @@ public class LTSFactory implements CollationSort {
    * @see mitll.langtest.server.scoring.ASRScoring#getCollator
    * @return
    */
-  @Override
+  //@Override
   public Collator getCollator() {
     return Collator.getInstance(getLocale(thisLanguage));
   }
