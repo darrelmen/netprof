@@ -24,8 +24,10 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -279,4 +281,5 @@ public class NPFExercise extends GoodwaveExercisePanel {
       }
     });
   }
+
 }
