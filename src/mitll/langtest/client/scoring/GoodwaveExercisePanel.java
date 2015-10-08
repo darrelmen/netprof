@@ -22,6 +22,7 @@ import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
@@ -124,7 +125,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
   }
 
-  private void addBelowPlaybackWidget(CommonExercise e, Panel toAddTo) {}
+  private void addBelowPlaybackWidget(CommonExercise e, Panel toAddTo) {
+  }
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller,
                                                  final ListInterface listContainer, boolean addKeyHandler) {
@@ -227,20 +229,20 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   }
 
   public void onResize() {
-   // logger.info("got onResize for" + instance);
+    // logger.info("got onResize for" + instance);
     if (contentAudio != null) {
-    //  logger.info("got onResize  contentAudio for" + instance);
+      //  logger.info("got onResize  contentAudio for" + instance);
       contentAudio.onResize();
     }
     if (answerAudio != null) {
-   //   logger.info("got onResize answerAudio for" + instance);
+      //   logger.info("got onResize answerAudio for" + instance);
       answerAudio.onResize();
     }
   }
 
   /**
    * Show the instructions and the audio panel.<br></br>
-   * <p/>
+   * <p>
    * Replace the html 5 audio tag with our fancy waveform widget.
    *
    * @param e for this exercise
@@ -341,7 +343,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   @Override
   public void addCorrectComment(final String field) {
-  //  System.out.println(new Date() + " : post to server " + exercise.getID() + " field " + field + " is correct");
+    //  System.out.println(new Date() + " : post to server " + exercise.getID() + " field " + field + " is correct");
     addAnnotation(field, CORRECT, "");
   }
 
@@ -360,6 +362,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   }
 
   /**
+   * TODO : also should get back button to work... maybe needs to encode the text box state?
    * @param label
    * @param value
    * @param includeLabel
@@ -379,15 +382,83 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       nameValueRow.add(labelWidget);
     }
 
-    InlineHTML englishPhrase = new InlineHTML(value, WordCountDirectionEstimator.get().estimateDirection(value));
-    englishPhrase.addStyleName("Instruction-data-with-wrap");
-    if (label.contains("Meaning")) {
-      englishPhrase.addStyleName("englishFont");
+    // TODO : for now, since we need to deal with underline... somehow...
+    // and when clicking inside dialog, seems like we need to dismiss dialog...
+
+    if (label.contains("Context")) {
+      InlineHTML englishPhrase = new InlineHTML(value, WordCountDirectionEstimator.get().estimateDirection(value));
+      englishPhrase.addStyleName("Instruction-data-with-wrap");
+      if (label.contains("Meaning")) {
+        englishPhrase.addStyleName("englishFont");
+      }
+      nameValueRow.add(englishPhrase);
+      addTooltip(englishPhrase, label.replaceAll(":", ""));
+      englishPhrase.addStyleName("leftFiveMargin");
     }
-    nameValueRow.add(englishPhrase);
-    addTooltip(englishPhrase, label.replaceAll(":", ""));
-    englishPhrase.addStyleName("leftFiveMargin");
+    else {
+      String language = controller.getLanguage();
+      boolean isMandarinOrKorean = language.equalsIgnoreCase("Mandarin") || language.equals("Korean");
+
+      DivWidget horizontal = new DivWidget();
+
+      List<String> tokens = new ArrayList<>();
+      boolean flLine = label.contains("Say");
+      boolean isChineseCharacter = flLine && isMandarinOrKorean;
+      if (isChineseCharacter) {
+        for (int i = 0, n = value.length(); i < n; i++) {
+          char c = value.charAt(i);
+          Character character = c;
+          final String html = character.toString();
+          tokens.add(html);
+        }
+      } else {
+        tokens = getTokens(value);
+      }
+
+      for (String token : tokens) {
+        InlineHTML w = makeClickableText(label, value, token, isChineseCharacter);
+        horizontal.add(w);
+      }
+
+      nameValueRow.add(horizontal);
+      horizontal.addStyleName("leftFiveMargin");
+    }
+/*    } else {
+      InlineHTML englishPhrase = new InlineHTML(value, WordCountDirectionEstimator.get().estimateDirection(value));
+      englishPhrase.addStyleName("Instruction-data-with-wrap");
+      if (label.contains("Meaning")) {
+        englishPhrase.addStyleName("englishFont");
+      }
+      nameValueRow.add(englishPhrase);
+      addTooltip(englishPhrase, label.replaceAll(":", ""));
+      englishPhrase.addStyleName("leftFiveMargin");
+    }*/
+
     return nameValueRow;
+  }
+
+  private InlineHTML makeClickableText(String label, String value, final String html, boolean chineseCharacter) {
+    InlineHTML w = new InlineHTML(html, WordCountDirectionEstimator.get().estimateDirection(value));
+    w.getElement().getStyle().setCursor(Style.Cursor.POINTER);
+
+    w.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent clickEvent) {
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+          public void execute() {
+            listContainer.searchBoxEntry(html);
+          }
+        });
+      }
+    });
+
+    w.addStyleName("Instruction-data-with-wrap");
+    if (label.contains("Meaning")) {
+      w.addStyleName("englishFont");
+    }
+    if (!chineseCharacter) w.addStyleName("rightFiveMargin");
+    addTooltip(w, "Click to search");
+    return w;
   }
 
   /**
@@ -422,6 +493,24 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     answerAudio.setScreenPortion(screenPortion);
 
     return widgets;
+  }
+
+  protected List<String> getTokens(String sentence) {
+    List<String> all = new ArrayList<String>();
+    sentence = sentence.replaceAll(CommentNPFExercise.PUNCT_REGEX, " ");
+    for (String untrimedToken : sentence.split(CommentNPFExercise.SPACE_REGEX)) { // split on spaces
+      String tt = untrimedToken.replaceAll(CommentNPFExercise.PUNCT_REGEX, ""); // remove all punct
+      String token = tt.trim();  // necessary?
+      if (token.length() > 0) {
+        all.add(token);
+      }
+    }
+
+    return all;
+  }
+
+  protected String removePunct(String t) {
+    return t.replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
   }
 
   /**
@@ -661,7 +750,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     /**
      * Add choices to control which audio cut is chosen/gets played.
-     *
+     * <p>
      * Be careful not to assume all audio associated with an item is either fast or slow speed audio.
      * It could be context sentence audio.
      *
@@ -681,9 +770,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       } else {
         // add gender choices
         Set<Long> preferredVoices = controller.getProps().getPreferredVoices();
-        Map<MiniUser, List<AudioAttribute>> malesMap   = exercise.getMostRecentAudio(true,  preferredVoices);
+        Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
         Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
-        Collection<AudioAttribute> defaultUserAudio    = exercise.getDefaultUserAudio();
+        Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
 
         List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
         boolean maleEmpty = maleUsers.isEmpty();
@@ -715,7 +804,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
 
     /**
-     *
      * @param rightSide
      * @param malesMap
      * @param femalesMap
@@ -866,7 +954,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
 
     /**
-     *
      * @param vp
      * @see #getAfterPlayWidget()
      */

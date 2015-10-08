@@ -43,6 +43,7 @@ public class ExerciseTrie extends Trie<CommonExercise> {
 
     long then = System.currentTimeMillis();
     boolean isMandarin = language.equalsIgnoreCase(MANDARIN);
+    boolean isKorean   = language.equalsIgnoreCase("Korean");
 
     for (CommonExercise exercise : exercisesForState) {
       String english = exercise.getEnglish();
@@ -67,7 +68,7 @@ public class ExerciseTrie extends Trie<CommonExercise> {
             addEntry(exercise, removeDiacritics(token));
           }
 
-          if (isMandarin) {
+          if (isMandarin || isKorean) {
             final CharacterIterator it = new StringCharacterIterator(fl);
 
             for(char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
