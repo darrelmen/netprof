@@ -5,12 +5,12 @@ import audio.image.TranscriptEvent;
 import audio.imagewriter.EventAndFileInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import corpus.HTKDictionary;
-import corpus.LTS;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.*;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.server.audio.AudioCheck;
+import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.audio.HTTPClient;
+import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -20,7 +20,6 @@ import org.apache.log4j.Logger;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
-import java.text.Collator;
 import java.util.*;
 
 /**
@@ -35,35 +34,33 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR {
+  //private static final double KEEP_THRESHOLD = 0.3;
   private static final Logger logger = Logger.getLogger(ASRWebserviceScoring.class);
-  // private static final double KEEP_THRESHOLD = 0.3;
-  //private static final boolean DEBUG = false;
-
+//  private static final boolean DEBUG = false;
+//
   private static final int FOREGROUND_VOCAB_LIMIT = 100;
   private static final int VOCAB_SIZE_LIMIT = 200;
 
-  private static SmallVocabDecoder svDecoderHelper = null;
+//	public static final String SMALL_LM_SLF = "smallLM.slf";
+
+  private static final SmallVocabDecoder svDecoderHelper = null;
+//	private LangTestDatabaseImpl langTestDatabase;
 
   /**
    * By keeping these here, we ensure that we only ever read the dictionary once
    */
-  private HTKDictionary htkDictionary;
-  private final LTS letterToSoundClass;
+  //private HTKDictionary htkDictionary;
 
   // TODO make Scores + phoneLab + wordLab an object so have something more descriptive than Object[]
   private final Cache<String, Object[]> audioToScore; // key => (Scores, wordLab, phoneLab)
-  private final ConfigFileCreator configFileCreator;
-  private final boolean isMandarin;
 
   /**
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
    * If the score was below a threshold, or the magic -1, we keep it around for future study.
    */
 //	private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
-  private final LTSFactory ltsFactory;
   private final String ip;
   private final int port;
-  private final String languageProperty;
 
   /**
    * @param deployPath
@@ -78,211 +75,9 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     logger.debug("Creating ASRWebserviceScoring object");
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
-    languageProperty = properties.getLanguage();
     ip = properties.getWebserviceIP();
     port = properties.getWebservicePort();
-
-    String language = languageProperty != null ? languageProperty : "";
-    isMandarin = language.equalsIgnoreCase("mandarin");
-    ltsFactory = new LTSFactory(languageProperty);
-    this.letterToSoundClass = ltsFactory.getLTSClass(language);
-//		logger.debug(this + " LTS is " + letterToSoundClass);
-
-    this.configFileCreator = new ConfigFileCreator(properties.getProperties(), letterToSoundClass, scoringDir);
-    readDictionary();
-    makeDecoder();
   }
-
-  /**
-   * @param toSort
-   * @param <T>
-   * @see AudioFileHelper#sort
-   */
-  public <T extends CommonExercise> void sort(List<T> toSort) {
-    ltsFactory.sort(toSort);
-  }
-
-  @Override
-  public Collator getCollator() {
-    return ltsFactory.getCollator();
-  }
-
-  private void makeDecoder() {
-    if (svDecoderHelper == null && htkDictionary != null) {
-      svDecoderHelper = new SmallVocabDecoder(htkDictionary);
-    }
-  }
-
-  public SmallVocabDecoder getSmallVocabDecoder() {
-    return svDecoderHelper;
-  }
-
-  /**
-   * @param foreignLanguagePhrase
-   * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTS(String)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
-   */
-  public boolean checkLTS(String foreignLanguagePhrase) {
-    return checkLTS(letterToSoundClass, foreignLanguagePhrase);
-  }
-
-  /**
-   * @param foreignLanguagePhrase
-   * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTS
-   */
-  public PhoneInfo getBagOfPhones(String foreignLanguagePhrase) {
-    return checkLTS2(letterToSoundClass, foreignLanguagePhrase);
-  }
-
-  /**
-   * So chinese is special -- it doesn't do lts -- it just uses a dictionary
-   * TODO : get rid of code duplication!
-   *
-   * @param lts
-   * @param foreignLanguagePhrase
-   * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
-   * @see #checkLTS(String)
-   */
-  private boolean checkLTS(LTS lts, String foreignLanguagePhrase) {
-    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
-    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
-
-    String language = isMandarin ? " MANDARIN " : "";
-
-    try {
-      int i = 0;
-      for (String token : tokens) {
-        if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL))
-          return true;
-        if (isMandarin) {
-          String segmentation = smallVocabDecoder.segmentation(token.trim());
-          if (segmentation.isEmpty()) {
-            logger.debug("checkLTS: mandarin token : " + token + " invalid!");
-            return false;
-          }
-        } else {
-          String[][] process = lts.process(token);
-          if (process == null || process.length == 0 || process[0].length == 0 ||
-              process[0][0].length() == 0 || (process.length == 1 && process[0].length == 1 && process[0][0].equals("aa"))) {
-            boolean htkEntry = htkDictionary.contains(token);
-            if (!htkEntry && !htkDictionary.isEmpty()) {
-              logger.warn("checkLTS with " + lts + "/" + languageProperty + " token #" + i +
-                  " : '" + token + "' hash " + token.hashCode() +
-                  " is invalid in " + foreignLanguagePhrase +
-                  " and not in dictionary (" + htkDictionary.size() +
-                  ")");
-              return false;
-            }
-          }
-        }
-        i++;
-      }
-    } catch (Exception e) {
-      logger.error("lts " + language + "/" + lts + " failed on '" + foreignLanguagePhrase + "'", e);
-      return false;
-    }
-
-    return true;
-  }
-
-  private int multiple = 0;
-
-  /**
-   * Might be n1 x n2 x n3 different possible combinations of pronunciations of a phrase
-   * Consider running ASR on all ref audio to get actual phone sequence.
-   *
-   * @param lts
-   * @param foreignLanguagePhrase
-   */
-  private PhoneInfo checkLTS2(LTS lts, String foreignLanguagePhrase) {
-    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
-    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
-
-    List<String> firstPron = new ArrayList<String>();
-    Set<String> uphones = new TreeSet<String>();
-
-    if (isMandarin) {
-      List<String> token2 = new ArrayList<String>();
-      for (String token : tokens) {
-        String segmentation = smallVocabDecoder.segmentation(token.trim());
-        if (segmentation.isEmpty()) {
-          logger.warn("no segmentation for " + foreignLanguagePhrase + " token " + token);
-        } else {
-          Collections.addAll(token2, segmentation.split(" "));
-        }
-      }
-      tokens = token2;
-    }
-
-    for (String token : tokens) {
-      if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL))
-        return new PhoneInfo(firstPron, uphones);
-
-      boolean htkEntry = htkDictionary.contains(token);
-      if (htkEntry) {
-        scala.collection.immutable.List<String[]> pronunciationList = htkDictionary.apply(token);
-        scala.collection.Iterator iter = pronunciationList.iterator();
-        boolean first = true;
-        while (iter.hasNext()) {
-          Object next = iter.next();
-
-          String[] tt = (String[]) next;
-          for (String t : tt) {
-            uphones.add(t);
-
-            if (first) {
-              firstPron.add(t);
-            }
-          }
-          if (!first) multiple++;
-          first = false;
-        }
-      } else {
-        String[][] process = lts.process(token);
-        if (process != null) {
-
-          boolean first = true;
-          for (String[] onePronunciation : process) {
-            // each pronunciation
-            for (String phoneme : onePronunciation) {
-              uphones.add(phoneme);
-
-              if (first) {
-                firstPron.add(phoneme);
-              }
-            }
-            if (!first) multiple++;
-            first = false;
-          }
-        }
-      }
-    }
-    return new PhoneInfo(firstPron, uphones);
-  }
-
-  /**
-   * For chinese, maybe later other languages.
-   *
-   * @param longPhrase
-   * @return
-   * @seex AutoCRT#getRefs
-   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra
-   */
-  private static String getSegmented(String longPhrase) {
-    Collection<String> tokens = svDecoderHelper.getTokens(longPhrase);
-    StringBuilder builder = new StringBuilder();
-    for (String token : tokens) {
-      builder.append(svDecoderHelper.segmentation(token.trim()));
-      builder.append(" ");
-    }
-    String s = builder.toString();
-
-    return s;
-  }
-
 
   /**
    * @param testAudioDir
@@ -355,7 +150,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
 
-    boolean b = checkLTS(sentence);
+    boolean b = validLTS(sentence);
     // audio conversion stuff
     File wavFile = new File(pathname);
     boolean mustPrepend = false;
@@ -577,6 +372,12 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     return new Object[]{scores, results[1].replaceAll("#", ""), results[2].replaceAll("#", "")}; // where are the # coming from?
   }
 
+  /**
+   * @see #runHydra(String, String, Collection, String, boolean, int)
+   * @param hydraInput
+   * @param httpClient
+   * @return
+   */
   private String runHydra(String hydraInput, HTTPClient httpClient) {
     try {
       String resultsStr;
@@ -608,6 +409,14 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     List<String> backgroundVocab = svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT);
     return getUniqueTokensInLM(lmSentences, backgroundVocab);
   }
+
+/*
+  @Override
+  public Collection<String> getValidPhrases(Collection<String> phrases) {
+    logger.warn("huh? valid phrases " + phrases + " is null?");
+    return null;
+  }
+*/
 
   /**
    * Get the unique set of tokens to use to filter against our full dictionary.
@@ -755,31 +564,4 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
       return phoneToScore;
     }
   }
-
-  /**
-   * @see #ASRWebserviceScoring
-   */
-  private void readDictionary() {
-    htkDictionary = makeDict();
   }
-
-  /**
-   * @return
-   * @see #readDictionary()
-   */
-  private HTKDictionary makeDict() {
-    String dictFile = configFileCreator.getDictFile();
-    if (new File(dictFile).exists()) {
-      long then = System.currentTimeMillis();
-      HTKDictionary htkDictionary = new HTKDictionary(dictFile);
-      long now = System.currentTimeMillis();
-      int size = htkDictionary.size(); // force read from lazy val
-      logger.info("for " + languageProperty +
-          " read dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
-      return htkDictionary;
-    } else {
-      logger.warn("makeDict : Can't find dict file at " + dictFile);
-      return new HTKDictionary();
-    }
-  }
-}
