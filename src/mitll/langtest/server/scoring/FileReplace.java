@@ -15,7 +15,7 @@ import java.util.Map;
  * Time: 4:38 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FileReplace {
+class FileReplace {
   private static final Logger logger = Logger.getLogger(FileReplace.class);
 
   public void doTemplateReplace(String infile, String outfile, Map<String,String> replaceMap) {
