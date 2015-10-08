@@ -7,11 +7,7 @@ import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListManager;
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonUserExercise;
-import mitll.langtest.shared.Exercise;
-import mitll.langtest.shared.ExerciseFormatter;
+import mitll.langtest.shared.*;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -19,23 +15,12 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 
 /**
  * Reads an excel spreadsheet from DLI.
- * <p/>
+ * <p>
  * User: GO22670
  * Date: 2/6/13
  * Time: 8:07 PM
@@ -80,7 +65,6 @@ public class ExcelImport implements ExerciseDAO {
   private final boolean DEBUG = false;
 
   /**
-   *
    * @param file
    * @param userListManager
    * @param addDefects
@@ -93,7 +77,7 @@ public class ExcelImport implements ExerciseDAO {
     this.serverProps = serverProps;
     maxExercises = serverProps.getMaxNumExercises();
     this.mediaDir = mediaDir;
-    mediaDir1 = mediaDir.replaceAll("bestAudio","");
+    mediaDir1 = mediaDir.replaceAll("bestAudio", "");
     this.addDefects = addDefects;
     this.installPath = new File(installPath);
     if (!this.installPath.exists()) {
@@ -109,20 +93,24 @@ public class ExcelImport implements ExerciseDAO {
     this.unitIndex = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
     this.weekIndex = serverProps.getUnitChapterWeek()[2];
-    if (DEBUG) logger.debug("unit " + unitIndex + " chapter " +chapterIndex + " week " +weekIndex);
+    if (DEBUG) logger.debug("unit " + unitIndex + " chapter " + chapterIndex + " week " + weekIndex);
   }
 
   @Override
-  public SectionHelper getSectionHelper() { return sectionHelper;  }
+  public SectionHelper getSectionHelper() {
+    return sectionHelper;
+  }
 
   private Map<String, List<AudioAttribute>> exToAudio;
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO(boolean, String, boolean, String, String)
    * @param audioDAO
+   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
    */
   @Override
-  public void setAudioDAO(AudioDAO audioDAO) {  exToAudio = audioDAO.getExToAudio();  }
+  public void setAudioDAO(AudioDAO audioDAO) {
+    exToAudio = audioDAO.getExToAudio();
+  }
 
   /**
    * @return
@@ -177,10 +165,9 @@ public class ExcelImport implements ExerciseDAO {
         for (String id : addRemoveDAO.getAdds()) {
           CommonUserExercise where = userExerciseDAO.getWhere(id);
           if (where == null) {
-            logger.error("huh? couldn't find user exercise dup " + id);
+            logger.error("getRawExercises huh? couldn't find user exercise from add exercise table in user exercise table : " + id);
           } else {
-           // logger.debug("adding new user exercise " + where.getID());
-
+            // logger.debug("adding new user exercise " + where.getID());
             add(where);
             sectionHelper.addExercise(where);
           }
@@ -195,12 +182,12 @@ public class ExcelImport implements ExerciseDAO {
    * Keep track of possible alternatives for each english word - e.g. Good Bye = Ciao OR Adios
    */
   private void addAlternates() {
-    Map<String,Set<String>> englishToFL = new HashMap<>();
+    Map<String, Set<String>> englishToFL = new HashMap<>();
     for (CommonExercise e : exercises) {
       idToExercise.put(e.getID(), e);
 
       Set<String> refs = englishToFL.getOrDefault(e.getEnglish(), new HashSet<>());
-      if (refs.isEmpty()) englishToFL.put(e.getEnglish(),refs);
+      if (refs.isEmpty()) englishToFL.put(e.getEnglish(), refs);
       refs.add(e.getForeignLanguage());
     }
 
@@ -208,19 +195,18 @@ public class ExcelImport implements ExerciseDAO {
       Set<String> orDefault = englishToFL.getOrDefault(e.getEnglish(), new HashSet<>());
       if (orDefault.isEmpty()) {
         logger.error("huh? no fl for " + e);
-      }
-      else {
+      } else {
         e.setRefSentences(orDefault);
-     //   if (orDefault.size() > 1) logger.info("For " + e.getID() + " found " + orDefault.size());
+        //   if (orDefault.size() > 1) logger.info("For " + e.getID() + " found " + orDefault.size());
       }
     }
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
-   * @see #getRawExercises()
    * @param userExercise
    * @return old exercises
+   * @see mitll.langtest.server.database.DatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
+   * @see #getRawExercises()
    */
   @Override
   public CommonExercise addOverlay(CommonUserExercise userExercise) {
@@ -228,20 +214,18 @@ public class ExcelImport implements ExerciseDAO {
 
     if (exercise == null) {
       logger.error("addOverlay : huh? can't find " + userExercise);
-    }
-    else {
+    } else {
       //logger.debug("addOverlay at " +userExercise.getID() + " found " +exercise);
       synchronized (this) {
         int i = exercises.indexOf(exercise);
         if (i == -1) {
-          logger.error ("addOverlay : huh? couldn't find " + exercise);
-        }
-        else {
+          logger.error("addOverlay : huh? couldn't find " + exercise);
+        } else {
           exercises.set(i, userExercise);
         }
         idToExercise.put(userExercise.getID(), userExercise);
 
-      //  logger.debug("addOverlay : after " + getExercise(userExercise.getID()));
+        //  logger.debug("addOverlay : after " + getExercise(userExercise.getID()));
       }
     }
     return exercise;
@@ -268,15 +252,20 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   @Override
-  public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) { this.userExerciseDAO = userExerciseDAO; }
+  public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
+    this.userExerciseDAO = userExerciseDAO;
+  }
+
   @Override
-  public void setAddRemoveDAO(AddRemoveDAO addRemoveDAO) { this.addRemoveDAO = addRemoveDAO; }
+  public void setAddRemoveDAO(AddRemoveDAO addRemoveDAO) {
+    this.addRemoveDAO = addRemoveDAO;
+  }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserExerciseDAO#getPredefExercise(String)
-   * @see mitll.langtest.server.database.DatabaseImpl#getExercise(String)
    * @param id
    * @return
+   * @see mitll.langtest.server.database.custom.UserExerciseDAO#getPredefExercise(String)
+   * @see mitll.langtest.server.database.DatabaseImpl#getExercise(String)
    */
   public CommonExercise getExercise(String id) {
     if (idToExercise.isEmpty()) {
@@ -297,7 +286,7 @@ public class ExcelImport implements ExerciseDAO {
    */
   private List<CommonExercise> readExercises(File file) {
     try {
-      logger.debug("Excel reading " +language +" from " + file.getAbsolutePath());
+      logger.debug("Excel reading " + language + " from " + file.getAbsolutePath());
       return readExercises(new FileInputStream(file));
     } catch (FileNotFoundException e) {
       logger.error("looking for " + file.getAbsolutePath() + " got " + e, e);
@@ -328,13 +317,13 @@ public class ExcelImport implements ExerciseDAO {
     String language1 = serverProps.getLanguage();
     try {
       long then = System.currentTimeMillis();
-     // logger.debug("starting to read spreadsheet for " + language1 + " on " + Thread.currentThread() + " at " + System.currentTimeMillis());
+      // logger.debug("starting to read spreadsheet for " + language1 + " on " + Thread.currentThread() + " at " + System.currentTimeMillis());
 
       XSSFWorkbook wb = new XSSFWorkbook(inp);
 //      logger.debug("finished reading spreadsheet for " + language1 + " on " + Thread.currentThread() + " at " + System.currentTimeMillis());
 
       long now = System.currentTimeMillis();
-      if (now-then > 1000) {
+      if (now - then > 1000) {
         logger.info("took " + (now - then) + " millis to open spreadsheet for " + language1 + " on " + Thread.currentThread());
       }
       then = now;
@@ -363,7 +352,7 @@ public class ExcelImport implements ExerciseDAO {
       sectionHelper.allKeysValid();
       inp.close();
       now = System.currentTimeMillis();
-      if (now-then > 1000) {
+      if (now - then > 1000) {
         logger.info("took " + (now - then) + " millis to make " + exercises.size() + " exercises for " + language1);
       }
     } catch (IOException e) {
@@ -412,7 +401,7 @@ public class ExcelImport implements ExerciseDAO {
         Row next = iter.next();
         if (id > maxExercises) break;
         boolean inMergedRow = rowToRange.keySet().contains(next.getRowNum());
-        Map<String,String> fieldToDefect = new HashMap<String, String>();
+        Map<String, String> fieldToDefect = new HashMap<String, String>();
         List<String> columns = new ArrayList<String>();
         if (!gotHeader) {
           Iterator<Cell> cellIterator = next.cellIterator();
@@ -432,7 +421,7 @@ public class ExcelImport implements ExerciseDAO {
             } else if (colNormalized.contains("transliteration")) {
               transliterationIndex = columns.indexOf(col);
 //            } else if (colNormalized.contains("weight")) {
- //             weightIndex = columns.indexOf(col);
+              //             weightIndex = columns.indexOf(col);
             } else if (colNormalized.contains(MEANING)) {
               meaningIndex = columns.indexOf(col);
             } else if (colNormalized.contains(ID)) {
@@ -475,11 +464,11 @@ public class ExcelImport implements ExerciseDAO {
           }
 
           if (DEBUG) logger.debug("columns word index " + colIndexOffset +
-            " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
-            " meaning " + meaningIndex +
-            " transliterationIndex " + transliterationIndex +
-            " contextIndex " + contextIndex +
-            " id " + idIndex + " audio " + audioIndex
+                  " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
+                  " meaning " + meaningIndex +
+                  " transliterationIndex " + transliterationIndex +
+                  " contextIndex " + contextIndex +
+                  " id " + idIndex + " audio " + audioIndex
           );
         } else {
           int colIndex = colIndexOffset;
@@ -500,13 +489,13 @@ public class ExcelImport implements ExerciseDAO {
           }
           if (english.length() == 0) {
             //if (serverProps.isClassroomMode()) {
-              //english = "NO ENGLISH";    // DON'T DO THIS - it messes up the indexing.
-              fieldToDefect.put("english", "missing english");
-           // }
+            //english = "NO ENGLISH";    // DON'T DO THIS - it messes up the indexing.
+            fieldToDefect.put("english", "missing english");
+            // }
             //logger.info("-------- > for row " + next.getRowNum() + " english is blank ");
-           // else {
-           //   englishSkipped++;
-           // }
+            // else {
+            //   englishSkipped++;
+            // }
           }
           if (gotHeader && english.length() > 0) {
             if (inMergedRow) logger.info("got merged row ------------ ");
@@ -541,7 +530,7 @@ public class ExcelImport implements ExerciseDAO {
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
 
               CommonExercise imported = isDelete ? null : getExercise(idToUse, english, foreignLanguagePhrase, translit,
-                meaning, context, contextTranslation, false, hasAudioIndex ? getCell(next, audioIndex) : "", true);
+                  meaning, context, contextTranslation, false, hasAudioIndex ? getCell(next, audioIndex) : "", true);
 
               if (!isDelete &&
                   (imported.hasRefAudio() || !shouldHaveRefAudio)) {  // skip items without ref audio, for now.
@@ -549,8 +538,7 @@ public class ExcelImport implements ExerciseDAO {
 
                 if (knownIds.contains(imported.getID())) {
                   logger.warn("found duplicate entry under " + imported.getID() + " " + imported);
-                }
-                else {
+                } else {
                   knownIds.add(imported.getID());
                   rememberExercise(exercises, englishToExercises, imported);
                   if (!fieldToDefect.isEmpty()) {
@@ -560,8 +548,7 @@ public class ExcelImport implements ExerciseDAO {
               } else {
                 if (isDelete) {
                   deleted++;
-                }
-                else {
+                } else {
                   if (logging++ < 3) {
                     logger.info("skipping exercise " + imported.getID() + " : '" + imported.getEnglish() + "' since no audio.");
                   }
@@ -605,7 +592,7 @@ public class ExcelImport implements ExerciseDAO {
     int colIndexOffset = -1;
 
     int transliterationIndex = -1;
-   // int weightIndex = -1;
+    // int weightIndex = -1;
     int meaningIndex = -1;
     int idIndex = -1;
     int contextIndex = -1;
@@ -622,7 +609,7 @@ public class ExcelImport implements ExerciseDAO {
       boolean gotUCW = unitIndex != -1;
       for (; iter.hasNext(); ) {
         Row next = iter.next();
-        Map<String,String> fieldToDefect = new HashMap<String, String>();
+        Map<String, String> fieldToDefect = new HashMap<String, String>();
         List<String> columns = new ArrayList<String>();
         if (!gotHeader) {
           Iterator<Cell> cellIterator = next.cellIterator();
@@ -646,17 +633,17 @@ public class ExcelImport implements ExerciseDAO {
               idIndex = columns.indexOf(col);
             } else if (colNormalized.contains(CONTEXT)) {
               contextIndex = columns.indexOf(col);
-            } else if (contextTransMatch(colNormalized)){
+            } else if (contextTransMatch(colNormalized)) {
               contextTranslationIndex = columns.indexOf(col);
             } else if (colNormalized.contains("audio_index")) {
               audioIndex = columns.indexOf(col);
             } else if (gotUCW) {
-              if(columns.indexOf(col) == unitIndex){
-                  unitName = col;
-              } else if(columns.indexOf(col) == chapterIndex){
-                  chapterName = col;
-              } else if(columns.indexOf(col) == weekIndex){
-                  weekName = col;
+              if (columns.indexOf(col) == unitIndex) {
+                unitName = col;
+              } else if (columns.indexOf(col) == chapterIndex) {
+                chapterName = col;
+              } else if (columns.indexOf(col) == weekIndex) {
+                weekName = col;
               }
             } else if (colNormalized.contains("unit") || colNormalized.contains("book")) {
               unitIndex = columns.indexOf(col);
@@ -673,12 +660,12 @@ public class ExcelImport implements ExerciseDAO {
           }
 
           if (DEBUG) logger.debug("columns word index " + colIndexOffset +
-              " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
-              " meaning " + meaningIndex +
-              " transliterationIndex " + transliterationIndex +
-              " contextIndex " + contextIndex +
-              " contextTranslationIndex "+contextTranslationIndex+
-              " id " + idIndex + " audio " + audioIndex
+                  " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
+                  " meaning " + meaningIndex +
+                  " transliterationIndex " + transliterationIndex +
+                  " contextIndex " + contextIndex +
+                  " contextTranslationIndex " + contextTranslationIndex +
+                  " id " + idIndex + " audio " + audioIndex
           );
         } else {
           int colIndex = colIndexOffset;
@@ -691,14 +678,14 @@ public class ExcelImport implements ExerciseDAO {
           //logger.info("for row " + next.getRowNum() + " english = " + english + " in merged " + inMergedRow + " last row " + lastRowValues.size());
 
           if (english.length() == 0) {
-           /// if (serverProps.isClassroomMode()) {
-              //english = "NO ENGLISH";    // DON'T DO THIS - it messes up the indexing.
-              fieldToDefect.put("english", "missing english");
-           // }
+            /// if (serverProps.isClassroomMode()) {
+            //english = "NO ENGLISH";    // DON'T DO THIS - it messes up the indexing.
+            fieldToDefect.put("english", "missing english");
+            // }
             //logger.info("-------- > for row " + next.getRowNum() + " english is blank ");
-           // else {
-           //   englishSkipped++;
-           // }
+            // else {
+            //   englishSkipped++;
+            // }
           }
           if (gotHeader && english.length() > 0) {
             if (skipSemicolons && (foreignLanguagePhrase.contains(";") || translit.contains(";"))) {
@@ -740,19 +727,19 @@ public class ExcelImport implements ExerciseDAO {
     try {
       isDelete = sheet.getWorkbook().getFontAt(next.getCell(colIndex).getCellStyle().getFontIndex()).getStrikeout();
     } catch (Exception e) {
-      logger.debug("got error reading delete strikeout at row " + next.getRowNum() + " for " +serverProps.getLanguage());
+      logger.debug("got error reading delete strikeout at row " + next.getRowNum() + " for " + serverProps.getLanguage());
     }
     return isDelete;
   }
 
   private void logStatistics(int id, int semis, int skipped, int englishSkipped, int deleted) {
     logger.info("max exercise id = " + id);
-   // logger.info("missing audio files = " +c);
+    // logger.info("missing audio files = " +c);
     if (skipped > 0) {
       logger.info("Skipped " + skipped + " entries with missing audio. " + getPercent(skipped, id));
     }
     if (englishSkipped > 0) {
-      logger.info("Skipped " + englishSkipped + " entries with missing english. " +  getPercent(englishSkipped, id));
+      logger.info("Skipped " + englishSkipped + " entries with missing english. " + getPercent(englishSkipped, id));
     }
     if (semis > 0) {
       logger.info("Skipped " + semis + " entries with semicolons or " + getPercent(semis, id));
@@ -762,13 +749,15 @@ public class ExcelImport implements ExerciseDAO {
     }
   }
 
-  private String getPercent(float skipped, float total) { return (100f * skipped / total) + "%"; }
+  private String getPercent(float skipped, float total) {
+    return (100f * skipped / total) + "%";
+  }
 
-  private void addDefects(Map<String,Map<String, String>> exTofieldToDefect) {
+  private void addDefects(Map<String, Map<String, String>> exTofieldToDefect) {
     if (addDefects) {
       int count = 0;
       for (Map.Entry<String, Map<String, String>> pair : exTofieldToDefect.entrySet()) {
-        for (Map.Entry<String, String> fieldToDefect: pair.getValue().entrySet()) {
+        for (Map.Entry<String, String> fieldToDefect : pair.getValue().entrySet()) {
           if (userListManager.addDefect(pair.getKey(), fieldToDefect.getKey(), fieldToDefect.getValue())) {
             count++;
           }
@@ -777,8 +766,7 @@ public class ExcelImport implements ExerciseDAO {
       if (count > 0) {
         logger.info("Automatically added " + exTofieldToDefect.size() + "/" + count + " defects");
       }
-    }
-    else {
+    } else {
       logger.info("NOT Automatically adding " + exTofieldToDefect.size() + " defects");
     }
   }
@@ -849,7 +837,7 @@ public class ExcelImport implements ExerciseDAO {
 //    logger.debug("id " + id + " context " + context);
     imported = getExercise(id, english, foreignLanguagePhrase, translit, meaning, context, contextTranslation,
         audioIndex, lookForOldAudio);
- //   logger.debug("id " + id + " context " + imported.getContext());
+    //   logger.debug("id " + id + " context " + imported.getContext());
 
     imported.setEnglishSentence(english);
     if (translit.length() > 0) {
@@ -939,13 +927,13 @@ public class ExcelImport implements ExerciseDAO {
   /**
    * Go looking for audio in the media directory ("bestAudio") and if there's a file there
    * under a matching exercise id, attach Fast and/or slow versions to this exercise.
-   *
+   * <p>
    * Can override audio file directory with a non-empty refAudioIndex.
-   *
+   * <p>
    * Also uses audioOffset - audio index is an integer.
    *
    * @param refAudioIndex override place to look for audio
-   * @param imported to attach audio to
+   * @param imported      to attach audio to
    * @see #getExercise(String, String, String, String, String, String, String, String, boolean)
    */
   private void addOldSchoolAudio(String refAudioIndex, Exercise imported) {
@@ -985,9 +973,10 @@ public class ExcelImport implements ExerciseDAO {
 
   /**
    * Make sure every audio file we attach is a valid audio file -- it's really where it says it's supposed to be.
-   *
+   * <p>
    * TODOx : rationalize media path -- don't force hack on bestAudio replacement
    * Why does it sometimes have the config dir on the front?
+   *
    * @param id
    * @param imported
    * @see #getExercise(String, String, String, String, String, String, String, String, boolean)
@@ -1016,11 +1005,11 @@ public class ExcelImport implements ExerciseDAO {
 
           boolean exists = test.exists();
           if (!exists) {
-         //   logger.debug("child " + test.getAbsolutePath() + " doesn't exist");
+            //   logger.debug("child " + test.getAbsolutePath() + " doesn't exist");
             test = new File(installPath, audio.getAudioRef());
             exists = test.exists();
             if (!exists) {
-         //     logger.debug("child " + test.getAbsolutePath() + " doesn't exist");
+              //     logger.debug("child " + test.getAbsolutePath() + " doesn't exist");
             }
             child = audio.getAudioRef();
           }
@@ -1036,7 +1025,7 @@ public class ExcelImport implements ExerciseDAO {
             if (c < 5) {
               logger.warn("file " + test.getAbsolutePath() + " does not exist - \t" + audio.getAudioRef());
               if (c < 2) {
-                logger.warn("installPath " + installPath + "mediaDir " + mediaDir +" mediaDir1 " + mediaDir1);
+                logger.warn("installPath " + installPath + "mediaDir " + mediaDir + " mediaDir1 " + mediaDir1);
               }
             }
           }
@@ -1071,10 +1060,10 @@ public class ExcelImport implements ExerciseDAO {
     if (cell == null) return "";
     if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
       double numericCellValue = cell.getNumericCellValue();
-      if((new Double(numericCellValue).intValue()) < numericCellValue)
-         return "" + numericCellValue;
+      if ((new Double(numericCellValue).intValue()) < numericCellValue)
+        return "" + numericCellValue;
       else
-         return "" + new Double(numericCellValue).intValue();
+        return "" + new Double(numericCellValue).intValue();
     } else if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
       return cell.getStringCellValue().trim();
     } else {
