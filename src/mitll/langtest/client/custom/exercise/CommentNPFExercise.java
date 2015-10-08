@@ -197,25 +197,7 @@ public class CommentNPFExercise extends NPFExercise {
     return context;
   }
 
-  private List<String> getTokens(String sentence) {
-    List<String> all = new ArrayList<String>();
-    sentence = sentence.replaceAll(PUNCT_REGEX, " ");
-    for (String untrimedToken : sentence.split(SPACE_REGEX)) { // split on spaces
-      String tt = untrimedToken.replaceAll(PUNCT_REGEX, ""); // remove all punct
-      String token = tt.trim();  // necessary?
-      if (token.length() > 0) {
-        all.add(token);
-      }
-    }
-
-    return all;
-  }
-
-  private String removePunct(String t) {
-    return t.replaceAll(PUNCT_REGEX, "");
-  }
-
-/*
+  /*
   private void log(String message) {
     System.out.println(message);
     console(message);
