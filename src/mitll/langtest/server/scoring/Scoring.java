@@ -378,7 +378,7 @@ public abstract class Scoring {
     return checkLTSHelper.checkLTS(foreignLanguagePhrase);
   }
 
-  boolean validLTS(String fl) {
+  public boolean validLTS(String fl) {
     return checkLTS(fl).isEmpty();
   }
 
