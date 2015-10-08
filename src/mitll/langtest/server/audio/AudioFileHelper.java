@@ -749,7 +749,7 @@ public class AudioFileHelper implements CollationSort {
       sentence = sentence.toUpperCase();  // hack for English
     }
 
-    ASR asrScoring = useOldSchool ? oldschoolScoring : getASRScoring();
+    ASR asrScoring = useOldSchool || isEnglishSite() ? oldschoolScoring : getASRScoring();
     //logger.info("using " +asrScoring);
 
     logger.info("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
