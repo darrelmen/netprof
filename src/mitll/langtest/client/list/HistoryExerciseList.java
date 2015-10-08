@@ -10,6 +10,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonShell;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,6 +20,8 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class HistoryExerciseList extends PagingExerciseList {
+  private Logger logger = Logger.getLogger("HistoryExerciseList");
+
   public static final String ANY = "Clear";
   private static final boolean debugOnValueChange = false;
   private static final boolean DEBUG = false;
@@ -49,11 +52,11 @@ public class HistoryExerciseList extends PagingExerciseList {
     if (typeToBox.isEmpty()) {
       return History.getToken();
     }
-    //System.out.println("getHistoryToken for " + id + " examining " +typeToBox.size() + " boxes.");
+    //logger.info("getHistoryToken for " + id + " examining " +typeToBox.size() + " boxes.");
     StringBuilder builder = new StringBuilder();
     for (String type : typeToBox.keySet()) {
       String section = getCurrentSelection(type);
-      //System.out.println("\tHistoryExerciseList.getHistoryToken for " + type + " section = " +section);
+      //logger.info("\tHistoryExerciseList.getHistoryToken for " + type + " section = " +section);
       if (!section.equals(HistoryExerciseList.ANY)) {
         builder.append(type + "=" + section + ";");
       }
@@ -61,11 +64,11 @@ public class HistoryExerciseList extends PagingExerciseList {
 
 /*    if (id != null && INCLUDE_ITEM_IN_BOOKMARK) {
       String historyToken = super.getHistoryToken(id);
-      //System.out.println("getHistoryToken for " + id + " would add " +historyToken);
+      //logger.info("getHistoryToken for " + id + " would add " +historyToken);
 
       builder.append(historyToken);
     }*/
-    //System.out.println("\tgetHistoryToken for " + id + " is '" +builder.toString() + "'");
+    //logger.info("\tgetHistoryToken for " + id + " is '" +builder.toString() + "'");
     String instanceSuffix = ";" + SelectionState.INSTANCE + "=" + getInstance();
     boolean hasItemID = id != null && id.length() > 0;
     return (hasItemID ? super.getHistoryToken(id) + ";" : "") + builder + instanceSuffix;
@@ -82,7 +85,7 @@ public class HistoryExerciseList extends PagingExerciseList {
   }
 
   protected void setHistoryItem(String historyToken) {
-    //System.out.println("------------ HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
+    //logger.info("------------ HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
     History.newItem(historyToken);
   }
 
@@ -94,18 +97,18 @@ public class HistoryExerciseList extends PagingExerciseList {
   protected void pushNewItem(String exerciseID) {
     String historyToken = getHistoryToken(exerciseID);
     String trimmedToken = historyToken.length() > 2? historyToken.substring(0,historyToken.length()-2) : historyToken;
-    if (DEBUG) System.out.println(new Date() + "------------ HistoryExerciseList.pushNewItem : push history '" + historyToken + "' -------------- ");
+    if (DEBUG) logger.info(new Date() + "------------ HistoryExerciseList.pushNewItem : push history '" + historyToken + "' -------------- ");
 
     String token = History.getToken();
-    //System.out.println("\tpushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
+    //logger.info("\tpushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
 
     token = getSelectionFromToken(token);
-    if (DEBUG) System.out.println("\tHistoryExerciseList.pushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
+    if (DEBUG) logger.info("\tHistoryExerciseList.pushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
     if (token != null && (historyToken.equals(token) || trimmedToken.equals(token))) {
-      System.out.println("\tHistoryExerciseList.pushNewItem : current token '" + token + "' same as new " + historyToken);
+      logger.info("\tHistoryExerciseList.pushNewItem : current token '" + token + "' same as new " + historyToken);
       checkAndAskServer(exerciseID);
     } else {
-      System.out.println("\tHistoryExerciseList.pushNewItem : current token '" + token + "' different menu state '" +historyToken+ "' from new " + exerciseID);
+      logger.info("\tHistoryExerciseList.pushNewItem : current token '" + token + "' different menu state '" +historyToken+ "' from new " + exerciseID);
       setHistoryItem(historyToken);
     }
   }
@@ -118,11 +121,11 @@ public class HistoryExerciseList extends PagingExerciseList {
   protected void pushFirstListBoxSelection() {
     String initToken = History.getToken();
     if (initToken.length() == 0) {
-      //System.out.println("pushFirstListBoxSelection : history token is blank " + getInstance());
+      //logger.info("pushFirstListBoxSelection : history token is blank " + getInstance());
 
       pushNewSectionHistoryToken();
     } else {
-      System.out.println("pushFirstListBoxSelection fire history for token from URL: " +initToken + " instance " + getInstance());
+      logger.info("pushFirstListBoxSelection fire history for token from URL: " +initToken + " instance " + getInstance());
       History.fireCurrentHistoryState();
     }
   }
@@ -137,15 +140,15 @@ public class HistoryExerciseList extends PagingExerciseList {
 
     if (currentToken.equals(historyToken)) {
       if (isEmpty() || historyToken.isEmpty()) {
-        System.out.println("pushNewSectionHistoryToken : noSectionsGetExercises for token '" + historyToken +
+        logger.info("pushNewSectionHistoryToken : noSectionsGetExercises for token '" + historyToken +
           "' " + "current has " + getSize() + " instance " + getInstance());
 
         noSectionsGetExercises(userID);
       } else {
-        System.out.println("pushNewSectionHistoryToken : skipping same token '" + historyToken + "'" + " instance " + getInstance());
+        logger.info("pushNewSectionHistoryToken : skipping same token '" + historyToken + "'" + " instance " + getInstance());
       }
     } else {
-      //System.out.println("pushNewSectionHistoryToken : currentToken " + currentToken + " instance " + getInstance());
+      //logger.info("pushNewSectionHistoryToken : currentToken " + currentToken + " instance " + getInstance());
 
       setHistoryItem(historyToken);
     }
@@ -167,7 +170,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    */
   @Override
   protected void gotClickOnItem(CommonShell e) {
-    //System.out.println("----------- got click on " + e.getID() + " -------------- ");
+    //logger.info("----------- got click on " + e.getID() + " -------------- ");
     //if (!INCLUDE_ITEM_IN_BOOKMARK) {
       loadByID(e.getID());
    // }
@@ -203,10 +206,10 @@ public class HistoryExerciseList extends PagingExerciseList {
       Collection<String> selections = selectionState2.get(type);
       if (selections.iterator().next().equals(HistoryExerciseList.ANY)) {
         if (hasNonClearSelection) {
-          //System.out.println("restoreListBoxState : skipping type since below a selection = " + type);
+          //logger.info("restoreListBoxState : skipping type since below a selection = " + type);
         }
         else {
-          //System.out.println("restoreListBoxState : clearing " + type);
+          //logger.info("restoreListBoxState : clearing " + type);
 
           selectItem(type, selections);
         }
@@ -228,7 +231,7 @@ public class HistoryExerciseList extends PagingExerciseList {
       }
     }
 
-    //System.out.println("restoreListBoxState :typesWithSelections " + typesWithSelections);
+    //logger.info("restoreListBoxState :typesWithSelections " + typesWithSelections);
 
     // clear enabled state for all items below first selection...
     if (!typesWithSelections.isEmpty()) {
@@ -240,10 +243,10 @@ public class HistoryExerciseList extends PagingExerciseList {
          if (type.equals(first)) start = true;
       }
 
-      //System.out.println("restoreListBoxState : afterFirst " + afterFirst);
+      //logger.info("restoreListBoxState : afterFirst " + afterFirst);
 
       for (String type : afterFirst) {
-        //System.out.println("restoreListBoxState : clearing enabled on " + type);
+        //logger.info("restoreListBoxState : clearing enabled on " + type);
 
         clearEnabled(type);
       }
@@ -266,7 +269,7 @@ public class HistoryExerciseList extends PagingExerciseList {
      */
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
-    //if (debugOnValueChange && false) System.out.println(new Date() +" HistoryExerciseList.onValueChange : ------ start ---- " + getInstance());
+    //if (debugOnValueChange && false) logger.info(new Date() +" HistoryExerciseList.onValueChange : ------ start ---- " + getInstance());
 
     String originalValue = event.getValue();
     String rawToken = getTokenFromEvent(event);
@@ -275,7 +278,7 @@ public class HistoryExerciseList extends PagingExerciseList {
     String instance1 = selectionState1.getInstance();
 
     if (!instance1.equals(getInstance()) && instance1.length() > 0) {
-/*      if (debugOnValueChange)  System.out.println("onValueChange : skipping event " + rawToken + " for instance '" + instance1 +
+/*      if (debugOnValueChange)  logger.info("onValueChange : skipping event " + rawToken + " for instance '" + instance1 +
           "' that is not mine "+ getInstance());*/
       if (getCreatedPanel() == null) {
         noSectionsGetExercises(controller.getUser());
@@ -283,7 +286,7 @@ public class HistoryExerciseList extends PagingExerciseList {
       return;
     }
 /*    if (debugOnValueChange) {
-      System.out.println(new Date() + " HistoryExerciseList.onValueChange : originalValue '" +originalValue+
+      logger.info(new Date() + " HistoryExerciseList.onValueChange : originalValue '" +originalValue+
         "'" +
         " token is '" + rawToken + "' for " + instance1 + " vs my instance " + getInstance());
     }*/
@@ -295,7 +298,7 @@ public class HistoryExerciseList extends PagingExerciseList {
         checkAndAskServer(item);
   /*    }
       else {
-        System.out.println("onValueChange : skipping item " + item);
+        logger.info("onValueChange : skipping item " + item);
       }*/
     } else {
       String token = event.getValue();
@@ -303,7 +306,7 @@ public class HistoryExerciseList extends PagingExerciseList {
         SelectionState selectionState = getSelectionState(token);
         restoreListBoxState(selectionState);
         if (debugOnValueChange) {
-          System.out.println(new Date() + " HistoryExerciseList.onValueChange : selectionState '" + selectionState + "'");
+          logger.info(new Date() + " HistoryExerciseList.onValueChange : selectionState '" + selectionState + "'");
         }
 
         loadExercises(selectionState.getTypeToSection(), selectionState.getItem());
@@ -321,13 +324,13 @@ public class HistoryExerciseList extends PagingExerciseList {
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
-    //System.out.println("HistoryExerciseList.loadExercises : instance " + getInstance() + " " + typeToSection + " and item '" + item + "'");
+    //logger.info("HistoryExerciseList.loadExercises : instance " + getInstance() + " " + typeToSection + " and item '" + item + "'");
     loadExercisesUsingPrefix(typeToSection, getPrefix(), false);
   }
 
   protected void loadExercises(String selectionState, String prefix, boolean onlyWithAudioAnno) {
     Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
-/*    System.out.println("HistoryExerciseList.loadExercises : looking for " +
+/*    logger.info("HistoryExerciseList.loadExercises : looking for " +
       "'" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());*/
     loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno);
   }
@@ -345,7 +348,7 @@ public class HistoryExerciseList extends PagingExerciseList {
                                           boolean onlyWithAudioAnno) {
     lastReqID++;
     if (DEBUG) {
-      System.out.println("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
+      logger.info("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
         "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID +
         " instance " + getInstance() + " user " + controller.getUser() + " unrecorded " + getUnrecorded() +
           " only examples " +isOnlyExamples());
