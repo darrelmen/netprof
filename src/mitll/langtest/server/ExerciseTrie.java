@@ -56,7 +56,7 @@ public class ExerciseTrie extends Trie<CommonExercise> {
         if (exercise.getForeignLanguage() != null && !exercise.getForeignLanguage().isEmpty()) {
           addEntryToTrie(new ExerciseWrapper(exercise, false));
 
-          Collection<String> tokens = isMandarin ? getFLTokens(smallVocabDecoder, exercise) : smallVocabDecoder.getTokens(exercise.getForeignLanguage());
+          Collection<String> tokens = isMandarin ? getMandarinTokens(smallVocabDecoder, exercise) : smallVocabDecoder.getTokens(exercise.getForeignLanguage());
           for (String token : tokens) {
             addEntryToTrie(new ExerciseWrapper(token, exercise));
             addEntryToTrie(new ExerciseWrapper(removeDiacritics(token), exercise));
@@ -77,8 +77,8 @@ public class ExerciseTrie extends Trie<CommonExercise> {
     }*/
   }
 
-  private Collection<String> getFLTokens(SmallVocabDecoder smallVocabDecoder, CommonExercise e) {
-    return smallVocabDecoder.getTokens(smallVocabDecoder.segmentation(e.getForeignLanguage()));
+  private Collection<String> getMandarinTokens(SmallVocabDecoder smallVocabDecoder, CommonExercise e) {
+    return smallVocabDecoder.getMandarinTokens(e.getForeignLanguage());
   }
 
   /**
