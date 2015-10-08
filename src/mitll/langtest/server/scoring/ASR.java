@@ -1,24 +1,25 @@
 package mitll.langtest.server.scoring;
 
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.Result;
+import mitll.langtest.shared.scoring.PretestScore;
+
 import java.text.Collator;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import corpus.LTS;
-//import mitll.langtest.server.scoring.ASRWebserviceScoring.PhoneInfo;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.scoring.PretestScore;
-
 // TODO make this actually have method signatures...
 public interface ASR {
 	<T extends CommonExercise> void sort(List<T> toSort);
 	Collator getCollator();
-	boolean checkLTS(String foreignLanguagePhrase);
+//	Set<String> checkLTS(String foreignLanguagePhrase);
+	boolean validLTS(String foreignLanguagePhrase);
 	PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
 	SmallVocabDecoder getSmallVocabDecoder();
 	String getUsedTokens(Collection<String> lmSentences, List<String> background);
+
+	//Collection<String> getValidPhrases(Collection<String> phrases);
 
 	/**
 	 * @see mitll.langtest.server.audio.AudioFileHelper#getASRScoreForAudio(int, String, String, Collection, int, int, boolean, boolean, String, boolean, String, Result)
@@ -45,8 +46,8 @@ public interface ASR {
 													 boolean useCache, String prefix, Result precalcResult, boolean usePhoneToDisplay);
 	
 	class PhoneInfo {
-		private List<String> firstPron;
-		private Set<String> phoneSet;
+		private final List<String> firstPron;
+		private final Set<String> phoneSet;
 
 		public PhoneInfo(List<String> firstPron, Set<String> phoneSet) {
 			this.firstPron = firstPron;
