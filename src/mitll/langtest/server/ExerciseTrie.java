@@ -6,7 +6,9 @@ import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.CommonExercise;
 import org.apache.log4j.Logger;
 
+import java.text.CharacterIterator;
 import java.text.Normalizer;
+import java.text.StringCharacterIterator;
 import java.util.Collection;
 
 /**
@@ -19,13 +21,16 @@ import java.util.Collection;
 public class ExerciseTrie extends Trie<CommonExercise> {
   private static final Logger logger = Logger.getLogger(ExerciseTrie.class);
 
-//  private static final int MB = (1024 * 1024);
   private static final int TOOLONG_TO_WAIT = 150;
   private static final String MANDARIN = "Mandarin";
   private static final String ENGLISH = "English";
 
   /**
    * Tokens are normalized to lower case.
+   *
+   * Also allow lookup by transliteration.
+   *
+   * For mandarin, add each individual character.
    *
    * @param exercisesForState
    * @param language
@@ -35,8 +40,6 @@ public class ExerciseTrie extends Trie<CommonExercise> {
   public ExerciseTrie(Collection<CommonExercise> exercisesForState, String language, SmallVocabDecoder smallVocabDecoder) {
     boolean includeForeign = !language.equals(ENGLISH);
     startMakingNodes();
-  //  Runtime rt = Runtime.getRuntime();
-  //  long free = rt.freeMemory() / MB;
 
     long then = System.currentTimeMillis();
     boolean isMandarin = language.equalsIgnoreCase(MANDARIN);
@@ -48,18 +51,38 @@ public class ExerciseTrie extends Trie<CommonExercise> {
         Collection<String> tokens = smallVocabDecoder.getTokens(english.toLowerCase());
         if (tokens.size() > 1) {
           for (String token : tokens) {
-            addEntryToTrie(new ExerciseWrapper(token, exercise));
+            addEntry(exercise, token);
           }
         }
       }
       if (includeForeign) {
-        if (exercise.getForeignLanguage() != null && !exercise.getForeignLanguage().isEmpty()) {
+        String fl = exercise.getForeignLanguage();
+        if (fl != null && !fl.isEmpty()) {
           addEntryToTrie(new ExerciseWrapper(exercise, false));
 
-          Collection<String> tokens = isMandarin ? getMandarinTokens(smallVocabDecoder, exercise) : smallVocabDecoder.getTokens(exercise.getForeignLanguage());
+          Collection<String> tokens = isMandarin ?
+              getMandarinTokens(smallVocabDecoder, exercise) : smallVocabDecoder.getTokens(fl);
           for (String token : tokens) {
-            addEntryToTrie(new ExerciseWrapper(token, exercise));
-            addEntryToTrie(new ExerciseWrapper(removeDiacritics(token), exercise));
+            addEntry(exercise, token);
+            addEntry(exercise, removeDiacritics(token));
+          }
+
+          if (isMandarin) {
+            final CharacterIterator it = new StringCharacterIterator(fl);
+
+            for(char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
+              Character character = c;
+              if (!Character.isSpaceChar(c)) {
+                addEntry(exercise, character.toString());
+              }
+            }
+          }
+
+          String transliteration = exercise.getTransliteration();
+
+          for (String t : smallVocabDecoder.getTokens(transliteration)) {
+            addEntry(exercise, t);
+            addEntry(exercise, removeDiacritics(t));
           }
         }
       }
@@ -70,11 +93,10 @@ public class ExerciseTrie extends Trie<CommonExercise> {
     if (now - then > TOOLONG_TO_WAIT) {
       logger.debug("getExercisesForSelectionState : took " + (now - then) + " millis to build ");
     }
-/*    long freeAfter = rt.freeMemory() / MB;
+  }
 
-    if (freeAfter - free > 40) {
-      logMemory();
-    }*/
+  private boolean addEntry(CommonExercise exercise, String token) {
+    return addEntryToTrie(new ExerciseWrapper(token, exercise));
   }
 
   private Collection<String> getMandarinTokens(SmallVocabDecoder smallVocabDecoder, CommonExercise e) {
@@ -127,6 +149,7 @@ public class ExerciseTrie extends Trie<CommonExercise> {
 
   /**
    * So we can match when we don't type with accent marks in search box.
+   *
    * @param input
    * @return
    */
@@ -140,12 +163,4 @@ public class ExerciseTrie extends Trie<CommonExercise> {
     }
     return stripped.toString();
   }
-
-/*  private void logMemory() {
-    Runtime rt = Runtime.getRuntime();
-    long free = rt.freeMemory();
-    long used = rt.totalMemory() - free;
-    long max = rt.maxMemory();
-    logger.debug("heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
-  }*/
 }
