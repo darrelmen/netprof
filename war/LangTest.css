@@ -1109,3 +1109,7 @@ body .btn-toolbar > .btn-group > .btn.active {
     font-weight: bold;
     font-size: 1.2em;
 }
+
+.underline {
+    text-decoration: underline;
+}
