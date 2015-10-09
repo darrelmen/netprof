@@ -294,6 +294,7 @@ class FlashcardPanel extends HorizontalPanel {
   private Panel getCardContent() {
     final ClickableSimplePanel contentMiddle = new ClickableSimplePanel();
 
+    contentMiddle.setHeight("320px");
     contentMiddle.getElement().setId("Focusable_content");
     contentMiddle.addClickHandler(new ClickHandler() {
       @Override
