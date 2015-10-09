@@ -391,7 +391,7 @@ public class NPFHelper implements RequiresResize {
     protected class MyFlexSectionExerciseList extends FlexSectionExerciseList {
       /**
        * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
-       * @see mitll.langtest.client.custom.Navigation.RecorderNPFHelper#getMyListLayout(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.custom.SimpleChapterNPFHelper)
+       * @seex mitll.langtest.client.custom.Navigation.RecorderNPFHelper#getMyListLayout(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.custom.SimpleChapterNPFHelper)
        * @see mitll.langtest.client.custom.content.NPFHelper.FlexListLayout#makeExerciseList(com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel, String, boolean)
        * @param topRow
        * @param currentExercisePanel
@@ -414,15 +414,15 @@ public class NPFHelper implements RequiresResize {
 
       @Override
       protected void noSectionsGetExercises(long userID) {
-        loadExercises(getHistoryToken(""), getPrefix(),false);
+        loadExercises(getHistoryToken("",""), getPrefix(),false);
       }
 
-      @Override
+/*      @Override
       protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
-/*        System.out.println(getClass() + ".loadExercises : instance " + getInstance() + " " + typeToSection +
-            " and item '" + item + "'" + " for list " + userListID);*/
+*//*        System.out.println(getClass() + ".loadExercises : instance " + getInstance() + " " + typeToSection +
+            " and item '" + item + "'" + " for list " + userListID);*//*
         loadExercisesUsingPrefix(typeToSection, getPrefix(), false);
-      }
+      }*/
     }
   }
 }
