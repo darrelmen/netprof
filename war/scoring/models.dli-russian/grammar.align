@@ -1,0 +1,592 @@
+Grammar hybrid
+StartWord <s>
+EndWord </s>
+Dictionary models/phones.dict
+
+########################################################
+# Model: a
+########################################################
+Model a
+HybridState a-0
+	Prior 0.036936495
+	Index 27
+EndState a-0
+HybridState a-1
+	Prior 0.036936495
+	Index 27
+EndState a-1
+HybridState a-2
+	Prior 0.036936495
+	Index 27
+EndState a-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: ii
+########################################################
+Model ii
+HybridState ii-0
+	Prior 0.0057872348
+	Index 20
+EndState ii-0
+HybridState ii-1
+	Prior 0.0057872348
+	Index 20
+EndState ii-1
+HybridState ii-2
+	Prior 0.0057872348
+	Index 20
+EndState ii-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: ts
+########################################################
+Model ts
+HybridState ts-0
+	Prior 0.0037612694
+	Index 7
+EndState ts-0
+HybridState ts-1
+	Prior 0.0037612694
+	Index 7
+EndState ts-1
+HybridState ts-2
+	Prior 0.0037612694
+	Index 7
+EndState ts-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: tsj
+########################################################
+Model tsj
+HybridState tsj-0
+	Prior 0.004177012
+	Index 6
+EndState tsj-0
+HybridState tsj-1
+	Prior 0.004177012
+	Index 6
+EndState tsj-1
+HybridState tsj-2
+	Prior 0.004177012
+	Index 6
+EndState tsj-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: e
+########################################################
+Model e
+HybridState e-0
+	Prior 0.014736597
+	Index 24
+EndState e-0
+HybridState e-1
+	Prior 0.014736597
+	Index 24
+EndState e-1
+HybridState e-2
+	Prior 0.014736597
+	Index 24
+EndState e-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: j
+########################################################
+Model j
+HybridState j-0
+	Prior 0.0077112187
+	Index 19
+EndState j-0
+HybridState j-1
+	Prior 0.0077112187
+	Index 19
+EndState j-1
+HybridState j-2
+	Prior 0.0077112187
+	Index 19
+EndState j-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: f
+########################################################
+Model f
+HybridState f-0
+	Prior 0.0028407502
+	Index 23
+EndState f-0
+HybridState f-1
+	Prior 0.0028407502
+	Index 23
+EndState f-1
+HybridState f-2
+	Prior 0.0028407502
+	Index 23
+EndState f-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: x
+########################################################
+Model x
+HybridState x-0
+	Prior 0.002771897
+	Index 2
+EndState x-0
+HybridState x-1
+	Prior 0.002771897
+	Index 2
+EndState x-1
+HybridState x-2
+	Prior 0.002771897
+	Index 2
+EndState x-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: v
+########################################################
+Model v
+HybridState v-0
+	Prior 0.009115381
+	Index 3
+EndState v-0
+HybridState v-1
+	Prior 0.009115381
+	Index 3
+EndState v-1
+HybridState v-2
+	Prior 0.009115381
+	Index 3
+EndState v-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: z
+########################################################
+Model z
+HybridState z-0
+	Prior 0.0035910865
+	Index 1
+EndState z-0
+HybridState z-1
+	Prior 0.0035910865
+	Index 1
+EndState z-1
+HybridState z-2
+	Prior 0.0035910865
+	Index 1
+EndState z-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: i
+########################################################
+Model i
+HybridState i-0
+	Prior 0.022685066
+	Index 21
+EndState i-0
+HybridState i-1
+	Prior 0.022685066
+	Index 21
+EndState i-1
+HybridState i-2
+	Prior 0.022685066
+	Index 21
+EndState i-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: n
+########################################################
+Model n
+HybridState n-0
+	Prior 0.014700455
+	Index 15
+EndState n-0
+HybridState n-1
+	Prior 0.014700455
+	Index 15
+EndState n-1
+HybridState n-2
+	Prior 0.014700455
+	Index 15
+EndState n-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: d
+########################################################
+Model d
+HybridState d-0
+	Prior 0.0069565778
+	Index 25
+EndState d-0
+HybridState d-1
+	Prior 0.0069565778
+	Index 25
+EndState d-1
+HybridState d-2
+	Prior 0.0069565778
+	Index 25
+EndState d-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: r
+########################################################
+Model r
+HybridState r-0
+	Prior 0.010950566
+	Index 12
+EndState r-0
+HybridState r-1
+	Prior 0.010950566
+	Index 12
+EndState r-1
+HybridState r-2
+	Prior 0.010950566
+	Index 12
+EndState r-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: uh
+########################################################
+Model uh
+HybridState uh-0
+	Prior 0.0060026865
+	Index 4
+EndState uh-0
+HybridState uh-1
+	Prior 0.0060026865
+	Index 4
+EndState uh-1
+HybridState uh-2
+	Prior 0.0060026865
+	Index 4
+EndState uh-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: m
+########################################################
+Model m
+HybridState m-0
+	Prior 0.007512813
+	Index 16
+EndState m-0
+HybridState m-1
+	Prior 0.007512813
+	Index 16
+EndState m-1
+HybridState m-2
+	Prior 0.007512813
+	Index 16
+EndState m-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: o
+########################################################
+Model o
+HybridState o-0
+	Prior 0.017190138
+	Index 14
+EndState o-0
+HybridState o-1
+	Prior 0.017190138
+	Index 14
+EndState o-1
+HybridState o-2
+	Prior 0.017190138
+	Index 14
+EndState o-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: sil
+########################################################
+Model sil
+HybridState sil-0
+	Prior 0.078279026
+	Index 9
+EndState sil-0
+HybridState sil-1
+	Prior 0.078279026
+	Index 9
+EndState sil-1
+HybridState sil-2
+	Prior 0.078279026
+	Index 9
+EndState sil-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: t
+########################################################
+Model t
+HybridState t-0
+	Prior 0.017524194
+	Index 8
+EndState t-0
+HybridState t-1
+	Prior 0.017524194
+	Index 8
+EndState t-1
+HybridState t-2
+	Prior 0.017524194
+	Index 8
+EndState t-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: sh
+########################################################
+Model sh
+HybridState sh-0
+	Prior 0.0038783047
+	Index 10
+EndState sh-0
+HybridState sh-1
+	Prior 0.0038783047
+	Index 10
+EndState sh-1
+HybridState sh-2
+	Prior 0.0038783047
+	Index 10
+EndState sh-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: s
+########################################################
+Model s
+HybridState s-0
+	Prior 0.015720887
+	Index 11
+EndState s-0
+HybridState s-1
+	Prior 0.015720887
+	Index 11
+EndState s-1
+HybridState s-2
+	Prior 0.015720887
+	Index 11
+EndState s-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: b
+########################################################
+Model b
+HybridState b-0
+	Prior 0.0035446964
+	Index 26
+EndState b-0
+HybridState b-1
+	Prior 0.0035446964
+	Index 26
+EndState b-1
+HybridState b-2
+	Prior 0.0035446964
+	Index 26
+EndState b-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: l
+########################################################
+Model l
+HybridState l-0
+	Prior 0.008685729
+	Index 17
+EndState l-0
+HybridState l-1
+	Prior 0.008685729
+	Index 17
+EndState l-1
+HybridState l-2
+	Prior 0.008685729
+	Index 17
+EndState l-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: g
+########################################################
+Model g
+HybridState g-0
+	Prior 0.003064905
+	Index 22
+EndState g-0
+HybridState g-1
+	Prior 0.003064905
+	Index 22
+EndState g-1
+HybridState g-2
+	Prior 0.003064905
+	Index 22
+EndState g-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: k
+########################################################
+Model k
+HybridState k-0
+	Prior 0.009359243
+	Index 18
+EndState k-0
+HybridState k-1
+	Prior 0.009359243
+	Index 18
+EndState k-1
+HybridState k-2
+	Prior 0.009359243
+	Index 18
+EndState k-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: p
+########################################################
+Model p
+HybridState p-0
+	Prior 0.006102931
+	Index 13
+EndState p-0
+HybridState p-1
+	Prior 0.006102931
+	Index 13
+EndState p-1
+HybridState p-2
+	Prior 0.006102931
+	Index 13
+EndState p-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: u
+########################################################
+Model u
+HybridState u-0
+	Prior 0.007463693
+	Index 5
+EndState u-0
+HybridState u-1
+	Prior 0.007463693
+	Index 5
+EndState u-1
+HybridState u-2
+	Prior 0.007463693
+	Index 5
+EndState u-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
+
+########################################################
+# Model: zh
+########################################################
+Model zh
+HybridState zh-0
+	Prior 0.0022824907
+	Index 0
+EndState zh-0
+HybridState zh-1
+	Prior 0.0022824907
+	Index 0
+EndState zh-1
+HybridState zh-2
+	Prior 0.0022824907
+	Index 0
+EndState zh-2
+Trans
+	 0.5 0.5 0.0 0.0
+	 0.0 0.5 0.5 0.0
+	 0.0 0.0 0.5 0.5
