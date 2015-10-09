@@ -1,7 +1,7 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.ExerciseSorter;
 import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -13,14 +13,7 @@ import org.apache.log4j.Logger;
 import java.math.BigDecimal;
 import java.text.CollationKey;
 import java.text.Collator;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by go22670 on 4/7/15.
