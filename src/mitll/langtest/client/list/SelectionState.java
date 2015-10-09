@@ -1,6 +1,7 @@
 package mitll.langtest.client.list;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
 * Created with IntelliJ IDEA.
@@ -10,21 +11,14 @@ import java.util.*;
 * To change this template use File | Settings | File Templates.
 */
 public class SelectionState {
+  private Logger logger = Logger.getLogger("SelectionState");
+
   public static final String INSTANCE = "instance";
   private String item;
   private final Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
   private String instance = "";
+  private String search = "";
   private final boolean debug = false;
-
-  /**
-   * Populated from history token!
-   * @seex mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#getExercises(long, boolean)
-   */
-/*
-  public SelectionState( boolean removePlus) {
-    this(History.getToken(), removePlus);
-  }
-*/
 
   /**
    * @see ExerciseList#getIDFromToken(String)
@@ -34,7 +28,6 @@ public class SelectionState {
    */
   public SelectionState(String token, boolean removePlus) {
     String token1 = removePlus ? unencodeToken(token) : unencodeToken2(token);
-    //System.out.println("SelectionState : selection state token " + token1);
     parseToken(token1);
   }
 
@@ -65,33 +58,35 @@ public class SelectionState {
     String[] parts = token.split(";");
 
     for (String part : parts) {
-      if (debug) System.out.println("parseToken : part " + part + " : " + Arrays.asList(parts));
+      if (debug) logger.info("parseToken : part " + part + " : " + Arrays.asList(parts));
 
       if (part.contains("=")) {
         String[] segments = part.split("=");
-        if (debug) System.out.println("\tpart " + part + " : " + Arrays.asList(segments));
+        if (debug) logger.info("\tpart " + part + " : " + Arrays.asList(segments));
         if (segments.length >1) {
-          String type = segments[0].trim();
+          String type    = segments[0].trim();
           String section = segments[1].trim();
 
           if (type.equals("#item") || type.equals("item")) {
             setItem(section);
+          } else if (type.equals("#search") || type.equals("search")) {
+            search = section;
           } else {
             String[] split = section.split(",");
             List<String> sections = Arrays.asList(split);
 
             if (sections.isEmpty()) {
-              System.err.println("\t\tparseToken : part " + part + " is badly formed ");
+              logger.warning("\t\tparseToken : part " + part + " is badly formed ");
             } else {
-              if (debug) System.out.println("\t\tparseToken : add " + type + " : " + sections);
+              if (debug) logger.info("\t\tparseToken : add " + type + " : " + sections);
               if (type.equals(INSTANCE)) instance = section;
               else add(type, sections);
             }
-            if (debug) System.out.println("\tparseToken : part " + part + " : " + type + "->" + section);
+            if (debug) logger.info("\tparseToken : part " + part + " : " + type + "->" + section);
           }
         }
       } else if (part.length() > 0) {
-        System.err.println("parseToken skipping part '" + part + "'");
+        logger.warning("parseToken skipping part '" + part + "'");
       }
     }
 
@@ -99,11 +94,12 @@ public class SelectionState {
       int item1 = token.indexOf("item=");
       String itemValue = token.substring(item1+"item=".length());
       itemValue = itemValue.split(";")[0];
-      if (debug) System.out.println("parseToken : got item = '" + itemValue +"'");
+      if (debug) logger.info("parseToken : got item = '" + itemValue +"'");
       setItem(itemValue);
     }*/
 
-    if (debug) System.out.println("parseToken : got " + this + " from token '" +token + "'");
+    if (debug) logger.info("parseToken : got " + this + " from token '" + token + "'");
+  //  logger.info(getInfo());
   }
 
   private void add(String type, Collection<String> section) {
@@ -127,6 +123,9 @@ public class SelectionState {
   public String getInstance() {
     return instance;
   }
+  public String getSearch() {
+    return search;
+  }
 
   public String toString() {
     StringBuilder builder = new StringBuilder();
@@ -135,5 +134,9 @@ public class SelectionState {
     }
     String s = builder.toString();
     return s.substring(0, Math.max(0,s.length() - 2));
+  }
+
+  public String getInfo() {
+    return "parseToken : instance " + instance + " : search " + search + " : item " + item + " : unit->chapter " + getTypeToSection();
   }
 }
