@@ -8,9 +8,12 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
+import mitll.langtest.shared.sorter.ExerciseComparator;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -28,19 +31,26 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
   private static final int MAX_LENGTH_ID = 20;
   private static final boolean DEBUG = false;
   private final Map<String, CommonShell> idToExercise = new HashMap<String, CommonShell>();
+  private final boolean isRecorder;
+  private ExerciseComparator sorter;
 
-  public PagingContainer(ExerciseController controller) {
+/*  private PagingContainer(ExerciseController controller) {
     super(controller);
-  }
+    sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
+    role = "";
+  }*/
 
   /**
    * @param controller
    * @param verticalUnaccountedFor
+   * @param isRecorder
    * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer()
    */
-  public PagingContainer(ExerciseController controller, int verticalUnaccountedFor) {
-    this(controller);
+  public PagingContainer(ExerciseController controller, int verticalUnaccountedFor, boolean isRecorder) {
+    super(controller);
+    sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
     this.verticalUnaccountedFor = verticalUnaccountedFor;
+    this.isRecorder = isRecorder;
   }
 
   public void redraw() {
@@ -112,81 +122,72 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
   public CommonShell getAt(int i) {
     return getList().get(i);
   }
-/*
-  public int getMouseX() {
-    return mouseX;
-  }
-
-  public int getMouseY() {
-    return mouseY;
-  }
-
-  public String getClickedExerciseID() {
-    return clickedExerciseID;
-  }*/
-
-  /*  private List<Image> getImgTags(Node child) {
-    NodeList<Node> childNodes = child.getChildNodes();
-    List<Image> images = new ArrayList<Image>();
-    for (int j = 0; j < childNodes.getLength(); j++) {
-      Node item = childNodes.getItem(j);
-      System.out.println("\tchild " + j+ " " + item.getNodeName() + " " + item.getNodeValue() + " " +item.getNodeType());
-      if (item.getNodeName().equalsIgnoreCase("img")) {
-
-   *//*     Element as = ImageElement.as(item);
-        images.add(Image.wrap(as));*//*
-
-        images.add(new MyImage(ImageElement.as(item)));
-      }
-      else {
-        images.addAll(getImgTags(item));
-      }
-    }
-    System.out.println("got  " + images);
-
-    return images;
-  }*/
-
-/*  private static class MyImage extends Image {
-    public MyImage(Element element) {
-      super(element);
-    }
-  }*/
-
-  /*  public com.github.gwtbootstrap.client.ui.CellTable<CommonShell> makeBootstrapCellTable(com.github.gwtbootstrap.client.ui.CellTable.Resources resources) {
-    com.github.gwtbootstrap.client.ui.CellTable<CommonShell> bootstrapCellTable = createBootstrapCellTable(resources);
-    this.table = bootstrapCellTable;
-    configureTable();
-
-    return bootstrapCellTable;
-  }*/
 
   public CommonShell getCurrentSelection() {
     return selectionModel.getSelectedObject();
   }
 
-  /*  private com.github.gwtbootstrap.client.ui.CellTable<CommonShell> createBootstrapCellTable(com.github.gwtbootstrap.client.ui.CellTable.Resources o) {
-     int pageSize = PAGE_SIZE;
-    return new com.github.gwtbootstrap.client.ui.CellTable<CommonShell>(pageSize, o);
-  }*/
-
   protected void addColumnsToTable() {
-    //System.out.println("addColumnsToTable : completed " + controller.showCompleted() +  " now " + getCompleted().size());
+    Column<CommonShell, SafeHtml> englishCol = getEnglishColumn();
+    englishCol.setSortable(true);
 
-    Column<CommonShell, SafeHtml> id2 = getExerciseIdColumn2();
-    addColumn(id2);
-    addColumn(getExerciseIdColumnFL());
-    // this would be better, but want to consume clicks
-  /*  TextColumn<ExerciseShell> id2 = new TextColumn<ExerciseShell>() {
-      @Override
-      public String getValue(ExerciseShell exerciseShell) {
-        String columnText =  exerciseShell.getTooltip();
-        if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0,MAX_LENGTH_ID-3)+"...";
+    String language = controller.getLanguage();
+    String english = language.equals("English") ? "Meaning" : "English";
+    addColumn(englishCol, new TextHeader(english));
 
-        return columnText;
-      }
-    };*/
+    Column<CommonShell, SafeHtml> flColumn = getFLColumn();
+    flColumn.setSortable(true);
+    addColumn(flColumn, new TextHeader(language));
+    List<CommonShell> dataList = getList();
+
+    ColumnSortEvent.ListHandler<CommonShell> columnSortHandler = new ColumnSortEvent.ListHandler<CommonShell>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<CommonShell>() {
+          public int compare(CommonShell o1, CommonShell o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+
+            // Compare the name columns.
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return sorter.simpleCompare(o1, o2, isRecorder);
+              }
+            }
+            return -1;
+          }
+        });
+    table.addColumnSortHandler(columnSortHandler);
+
+    ColumnSortEvent.ListHandler<CommonShell> columnSortHandler2 = new ColumnSortEvent.ListHandler<CommonShell>(dataList);
+
+    columnSortHandler2.setComparator(flColumn,
+        new Comparator<CommonShell>() {
+          public int compare(CommonShell o1, CommonShell o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+
+            // Compare the name columns.
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                String id1 = o1.getForeignLanguage();
+                String id2 = o2.getForeignLanguage();
+                return id1.toLowerCase().compareTo(id2.toLowerCase());
+              }
+            }
+            return -1;
+          }
+        });
+
+    table.addColumnSortHandler(columnSortHandler2);
+
+    // We know that the data is sorted alphabetically by default.
+    table.getColumnSortList().push(englishCol);
   }
+
 
   @Override
   protected void addSelectionModel() {
@@ -198,7 +199,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
    * @return
    * @see #addColumnsToTable()
    */
-  private Column<CommonShell, SafeHtml> getExerciseIdColumn2() {
+  private Column<CommonShell, SafeHtml> getEnglishColumn() {
     return new Column<CommonShell, SafeHtml>(new MySafeHtmlCell(true)) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, CommonShell object, NativeEvent event) {
@@ -210,10 +211,10 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
 
       @Override
       public SafeHtml getValue(CommonShell shell) {
+        String columnText = shell.getEnglish();
         if (!controller.showCompleted()) {
-          return getColumnToolTip(shell.getEnglish());
+          return getColumnToolTip(columnText);
         } else {
-          String columnText = shell.getEnglish();
           String html = shell.getID();
           if (columnText != null) {
             columnText = truncate(columnText);
@@ -278,7 +279,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     return columnText;
   }
 
-  private Column<CommonShell, SafeHtml> getExerciseIdColumnFL() {
+  private Column<CommonShell, SafeHtml> getFLColumn() {
     return new Column<CommonShell, SafeHtml>(new MySafeHtmlCell(true)) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, CommonShell object, NativeEvent event) {
@@ -309,15 +310,23 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     return idToExercise.get(id);
   }
 
+  /**
+   * @param exercise
+   * @see mitll.langtest.client.list.PagingExerciseList#addExercise(CommonShell)
+   */
   public void addExercise(CommonShell exercise) {
     idToExercise.put(exercise.getID(), exercise);
     getList().add(exercise);
     //System.out.println("data now has "+list.size() + " after adding " + exercise.getID());
   }
 
+  /**
+   * @param afterThisOne
+   * @param exercise
+   * @see mitll.langtest.client.list.PagingExerciseList#addExerciseAfter(CommonShell, CommonShell)
+   */
   public void addExerciseAfter(CommonShell afterThisOne, CommonShell exercise) {
     //System.out.println("addExercise adding " + exercise);
-
     List<CommonShell> list = getList();
     int before = list.size();
     String id = exercise.getID();
@@ -333,7 +342,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     return idToExercise.keySet();
   }
 
-  protected void markCurrent(CommonShell currentExercise) {
+  private void markCurrent(CommonShell currentExercise) {
     if (currentExercise != null) {
       markCurrentExercise(currentExercise.getID());
     }
