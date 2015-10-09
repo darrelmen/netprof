@@ -5,6 +5,7 @@ import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
@@ -28,17 +29,12 @@ import java.util.logging.Logger;
 public class PagingContainer extends SimplePagingContainer<CommonShell> {
   private final Logger logger = Logger.getLogger("PagingContainer");
 
-  private static final int MAX_LENGTH_ID = 20;
+  private static final int MAX_LENGTH_ID = 18;
   private static final boolean DEBUG = false;
   private final Map<String, CommonShell> idToExercise = new HashMap<String, CommonShell>();
   private final boolean isRecorder;
   private ExerciseComparator sorter;
-
-/*  private PagingContainer(ExerciseController controller) {
-    super(controller);
-    sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
-    role = "";
-  }*/
+  private boolean english;
 
   /**
    * @param controller
@@ -51,6 +47,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
     this.verticalUnaccountedFor = verticalUnaccountedFor;
     this.isRecorder = isRecorder;
+    english = controller.getLanguage().equals("English");
   }
 
   public void redraw() {
@@ -132,34 +129,35 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     englishCol.setSortable(true);
 
     String language = controller.getLanguage();
-    String english = language.equals("English") ? "Meaning" : "English";
-    addColumn(englishCol, new TextHeader(english));
+    addColumn(englishCol, new TextHeader("English"));
+
 
     Column<CommonShell, SafeHtml> flColumn = getFLColumn();
     flColumn.setSortable(true);
-    addColumn(flColumn, new TextHeader(language));
+
+    String headerForFL = language.equals("English") ? "Meaning" : language;
+    addColumn(flColumn, new TextHeader(headerForFL));
+
+
     List<CommonShell> dataList = getList();
 
-    ColumnSortEvent.ListHandler<CommonShell> columnSortHandler = new ColumnSortEvent.ListHandler<CommonShell>(dataList);
-    columnSortHandler.setComparator(englishCol,
-        new Comparator<CommonShell>() {
-          public int compare(CommonShell o1, CommonShell o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            // Compare the name columns.
-            if (o1 != null) {
-              if (o2 == null) return 1;
-              else {
-                return sorter.simpleCompare(o1, o2, isRecorder);
-              }
-            }
-            return -1;
-          }
-        });
+    ColumnSortEvent.ListHandler<CommonShell> columnSortHandler = getEnglishSorter(englishCol, dataList);
     table.addColumnSortHandler(columnSortHandler);
 
+    ColumnSortEvent.ListHandler<CommonShell> columnSortHandler2 = getFLSorter(flColumn, dataList);
+    table.addColumnSortHandler(columnSortHandler2);
+
+    // We know that the data is sorted alphabetically by default.
+    table.getColumnSortList().push(englishCol);
+
+    table.setWidth("100%", true);
+
+    // Set the width of each column.
+    table.setColumnWidth(englishCol, 50.0, Style.Unit.PCT);
+    table.setColumnWidth(flColumn, 50.0, Style.Unit.PCT);
+  }
+
+  private ColumnSortEvent.ListHandler<CommonShell> getFLSorter(Column<CommonShell, SafeHtml> flColumn, List<CommonShell> dataList) {
     ColumnSortEvent.ListHandler<CommonShell> columnSortHandler2 = new ColumnSortEvent.ListHandler<CommonShell>(dataList);
 
     columnSortHandler2.setComparator(flColumn,
@@ -181,11 +179,29 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
             return -1;
           }
         });
+    return columnSortHandler2;
+  }
 
-    table.addColumnSortHandler(columnSortHandler2);
+  private ColumnSortEvent.ListHandler<CommonShell> getEnglishSorter(Column<CommonShell, SafeHtml> englishCol, List<CommonShell> dataList) {
+    ColumnSortEvent.ListHandler<CommonShell> columnSortHandler = new ColumnSortEvent.ListHandler<CommonShell>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<CommonShell>() {
+          public int compare(CommonShell o1, CommonShell o2) {
+            if (o1 == o2) {
+              return 0;
+            }
 
-    // We know that the data is sorted alphabetically by default.
-    table.getColumnSortList().push(englishCol);
+            // Compare the name columns.
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return sorter.simpleCompare(o1, o2, isRecorder);
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
   }
 
 
@@ -291,7 +307,12 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
 
       @Override
       public SafeHtml getValue(CommonShell shell) {
-        String columnText = truncate(shell.getForeignLanguage());
+        String toShow = shell.getForeignLanguage();
+        if (english) {
+          toShow = shell.getMeaning();
+          logger.info("meaning for fl " + toShow);
+        }
+        String columnText = truncate(toShow);
         return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
       }
     };
