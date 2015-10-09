@@ -53,6 +53,7 @@
       <excludeFolder url="file://$MODULE_DIR$/old" />
       <excludeFolder url="file://$MODULE_DIR$/test-classes" />
       <excludeFolder url="file://$MODULE_DIR$/war/WEB-INF/classes" />
+      <excludeFolder url="file://$MODULE_DIR$/war/WEB-INF/deploy" />
       <excludeFolder url="file://$MODULE_DIR$/war/bestAudio" />
       <excludeFolder url="file://$MODULE_DIR$/war/bin" />
       <excludeFolder url="file://$MODULE_DIR$/war/langtest" />
