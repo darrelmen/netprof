@@ -5,18 +5,20 @@ import audio.image.TranscriptEvent;
 import audio.image.TranscriptReader;
 import audio.imagewriter.EventAndFileInfo;
 import audio.imagewriter.TranscriptWriter;
+import corpus.HTKDictionary;
+import corpus.LTS;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.SLFFile;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.text.Collator;
+import java.util.*;
 
 /**
  * Base class for the two types of scoring : DTW (Dynamic Time Warping, using "sv") and ASR (Speech Recognition).
@@ -33,13 +35,44 @@ import java.util.Map;
 public abstract class Scoring {
   private static final Logger logger = Logger.getLogger(Scoring.class);
 
-  protected static final float SCORE_SCALAR = 1.0f;
+  private static final float SCORE_SCALAR = 1.0f;
   private static final String SCORING = "scoring";
 
-  protected final String scoringDir;
-  protected final String deployPath;
-  protected final ServerProperties props;
-  protected final LogAndNotify langTestDatabase;
+  final String scoringDir;
+  final String deployPath;
+ // private final Map<String, String> phoneToDisplay = new HashMap<>();
+  final ServerProperties props;
+  final LogAndNotify langTestDatabase;
+
+  private static final double KEEP_THRESHOLD = 0.3;
+
+  static final int FOREGROUND_VOCAB_LIMIT = 100;
+  static final int VOCAB_SIZE_LIMIT = 200;
+
+  /**
+   * @see SLFFile#createSimpleSLFFile(Collection, String, float)
+   */
+  public static final String SMALL_LM_SLF = "smallLM.slf";
+
+  private static SmallVocabDecoder svDecoderHelper = null;
+  private final CheckLTS checkLTSHelper;
+  final SmallVocabDecoder svd = new SmallVocabDecoder();
+
+  /**
+   * By keeping these here, we ensure that we only ever read the dictionary once
+   */
+  HTKDictionary htkDictionary;
+  final LTS letterToSoundClass;
+  final ConfigFileCreator configFileCreator;
+  final boolean isMandarin;
+
+  /**
+   * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
+   * If the score was below a threshold, or the magic -1, we keep it around for future study.
+   */
+  double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
+  private final LTSFactory ltsFactory;
+  final String languageProperty;
 
   /**
    * @param deployPath
@@ -50,10 +83,49 @@ public abstract class Scoring {
     this.scoringDir = getScoringDir(deployPath);
     this.props = props;
     this.langTestDatabase = langTestDatabase;
+
+    // logger.debug("Creating ASRScoring object");
+    lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
+
+    Map<String, String> properties = props.getProperties();
+    languageProperty = properties.get("language");
+    String language = languageProperty != null ? languageProperty : "";
+
+    isMandarin = language.equalsIgnoreCase("mandarin");
+    if (isMandarin) logger.warn("using mandarin segmentation.");
+    ltsFactory = new LTSFactory(languageProperty);
+    this.letterToSoundClass = ltsFactory.getLTSClass(language);
+
+    this.configFileCreator = new ConfigFileCreator(properties, letterToSoundClass, scoringDir);
+
+    readDictionary();
+    makeDecoder();
+    checkLTSHelper = new CheckLTS(letterToSoundClass, htkDictionary, language, svDecoderHelper);
   }
 
   private static String getScoringDir(String deployPath) {
     return deployPath + File.separator + SCORING;
+  }
+
+  /**
+   * For chinese, maybe later other languages.
+   *
+   * @param longPhrase
+   * @return
+   * @seex AutoCRT#getRefs
+   * @see ASRScoring#getScoreForAudio
+   */
+  public static String getSegmented(String longPhrase) {
+    Collection<String> tokens = svDecoderHelper.getTokens(longPhrase);
+/*    System.err.println("got '" + longPhrase +
+        "' -> '" +tokens +
+        "'");*/
+    StringBuilder builder = new StringBuilder();
+    for (String token : tokens) {
+      builder.append(svDecoderHelper.segmentation(token.trim()));
+      builder.append(" ");
+    }
+    return builder.toString();
   }
 
   /**
@@ -71,12 +143,12 @@ public abstract class Scoring {
    * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
    * @see ASRScoring#scoreRepeatExercise
    */
-  protected EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
-                                              String audioFileNoSuffix, boolean useScoreToColorBkg,
-                                              String prefix, String suffix, boolean decode,
-                                              String phoneLab, String wordLab, boolean useWebservice,
-                                              boolean usePhoneToDisplay) {
-   // logger.debug("writeTranscripts - " + audioFileNoSuffix + " prefix " + prefix);
+  EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
+                                    String audioFileNoSuffix, boolean useScoreToColorBkg,
+                                    String prefix, String suffix, boolean decode,
+                                    String phoneLab, String wordLab, boolean useWebservice,
+                                    boolean usePhoneToDisplay) {
+    // logger.debug("writeTranscripts - " + audioFileNoSuffix + " prefix " + prefix);
     boolean foundATranscript = false;
     // These may not all exist. The speech file is created only by multisv right now.
     String phoneLabFile = prependDeploy(audioFileNoSuffix + ".phones.lab");
@@ -195,11 +267,11 @@ public abstract class Scoring {
    * @param object             TODO Actually use it
    * @return
    */
-  protected EventAndFileInfo writeTranscriptsCached(String imageOutDir, int imageWidth, int imageHeight,
-                                                    String audioFileNoSuffix, boolean useScoreToColorBkg,
-                                                    String prefix, String suffix, boolean decode, boolean useWebservice,
-                                                    JSONObject object,
-                                                    boolean usePhoneToDisplay) {
+  EventAndFileInfo writeTranscriptsCached(String imageOutDir, int imageWidth, int imageHeight,
+                                          String audioFileNoSuffix, boolean useScoreToColorBkg,
+                                          String prefix, String suffix, boolean decode, boolean useWebservice,
+                                          JSONObject object,
+                                          boolean usePhoneToDisplay) {
     // logger.debug("writeTranscriptsCached " + object);
     if (decode || imageWidth < 0) {  // hack to skip image generation
       // These may not all exist. The speech file is created only by multisv right now.
@@ -258,7 +330,7 @@ public abstract class Scoring {
    * @param typeToImageFile
    * @return map of image type to URL
    */
-  protected Map<NetPronImageType, String> getTypeToRelativeURLMap(Map<ImageType, String> typeToImageFile) {
+  Map<NetPronImageType, String> getTypeToRelativeURLMap(Map<ImageType, String> typeToImageFile) {
     Map<NetPronImageType, String> sTypeToImage = new HashMap<NetPronImageType, String>();
     if (typeToImageFile == null) {
       logger.error("huh? typeToImageFile is null?");
@@ -289,5 +361,80 @@ public abstract class Scoring {
       pathname = deployPath + File.separator + pathname;
     }
     return pathname;
+  }
+
+  private void makeDecoder() {
+    if (svDecoderHelper == null && htkDictionary != null) {
+      svDecoderHelper = new SmallVocabDecoder(htkDictionary);
+    }
+  }
+
+  /**
+   * @param foreignLanguagePhrase
+   * @return
+   * @see mitll.langtest.server.audio.AudioFileHelper#inDictOrLTS(String)
+   */
+  Set<String> checkLTS(String foreignLanguagePhrase) {
+    return checkLTSHelper.checkLTS(foreignLanguagePhrase);
+  }
+
+  public boolean validLTS(String fl) {
+    return checkLTS(fl).isEmpty();
+  }
+
+  /**
+   * @param foreignLanguagePhrase
+   * @return
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTS
+   */
+  public ASR.PhoneInfo getBagOfPhones(String foreignLanguagePhrase) {
+    return checkLTSHelper.getBagOfPhones(foreignLanguagePhrase);
+  }
+
+  /**
+   * @see #ASRScoring
+   */
+  private void readDictionary() {
+    htkDictionary = makeDict();
+    logger.info(this + " dict now " + htkDictionary);
+  }
+
+  /**
+   * @return
+   * @see #readDictionary()
+   */
+  private HTKDictionary makeDict() {
+    String dictFile = configFileCreator.getDictFile();
+    if (new File(dictFile).exists()) {
+      long then = System.currentTimeMillis();
+      HTKDictionary htkDictionary = new HTKDictionary(dictFile);
+      long now = System.currentTimeMillis();
+      int size = htkDictionary.size(); // force read from lazy val
+      //if (now - then > 300) {
+      logger.info("for " + languageProperty +
+          " read dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
+      //}
+      return htkDictionary;
+    } else {
+      logger.error("\n\n\n---> makeDict : Can't find dict file at " + dictFile);
+      return new HTKDictionary();
+    }
+  }
+
+  public SmallVocabDecoder getSmallVocabDecoder() {
+    return svDecoderHelper;
+  }
+
+  /**
+   * @see ASR#sort(List)
+   * @param toSort
+   * @param <T>
+   */
+  public <T extends CommonExercise> void sort(List<T> toSort) {
+    ltsFactory.sort(toSort);
+  }
+
+  public Collator getCollator() {
+    return ltsFactory.getCollator();
   }
 }
