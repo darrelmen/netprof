@@ -750,9 +750,8 @@ public class AudioFileHelper implements CollationSort {
     }
 
     ASR asrScoring = useOldSchool || isEnglishSite() ? oldschoolScoring : getASRScoring();
-    //logger.info("using " +asrScoring);
 
-    logger.info("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
+    //logger.info("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
 
     PretestScore pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
