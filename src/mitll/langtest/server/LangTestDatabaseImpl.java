@@ -18,6 +18,7 @@ import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
+import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.*;
@@ -210,7 +211,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, userID, audioFileHelper.getCollator());
         } else {
           commonExercises = new ArrayList<CommonExercise>(exercises);
+        //  logger.warn("before " + commonExercises);
           sortExercises(role, commonExercises);
+        //  logger.warn("after " + commonExercises);
         }
 
         return makeExerciseListWrapper(reqID, commonExercises, userID, role, onlyExamples, incorrectFirstOrder);
