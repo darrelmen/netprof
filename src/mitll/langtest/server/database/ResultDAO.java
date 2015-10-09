@@ -103,6 +103,21 @@ public class ResultDAO extends DAO {
     return new ArrayList<Result>();
   }
 
+  public List<Result> getResultsDevices() {
+    try {
+      String sql = "SELECT * FROM " + RESULTS + " where devicetype like 'i%'";
+      List<Result> resultsForQuery = getResultsSQL(sql);
+
+//      logger.debug("getResultsDevices : " +resultsForQuery.size());
+      return resultsForQuery;
+    } catch (Exception ee) {
+      logger.error("got " +ee,ee);
+      logException(ee);
+    }
+    return new ArrayList<Result>();
+  }
+
+
   private List<CorrectAndScore> getCorrectAndScores() {
     try {
       synchronized (this) {
