@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 public class PagingContainer extends SimplePagingContainer<CommonShell> {
   private final Logger logger = Logger.getLogger("PagingContainer");
 
-  private static final int MAX_LENGTH_ID = 18;
+  private static final int MAX_LENGTH_ID = 17;
   private static final boolean DEBUG = false;
   private final Map<String, CommonShell> idToExercise = new HashMap<String, CommonShell>();
   private final boolean isRecorder;
@@ -310,7 +310,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
         String toShow = shell.getForeignLanguage();
         if (english) {
           toShow = shell.getMeaning();
-          logger.info("meaning for fl " + toShow);
+        //  logger.info("meaning for fl " + toShow);
         }
         String columnText = truncate(toShow);
         return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
