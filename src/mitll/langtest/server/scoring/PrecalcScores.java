@@ -16,11 +16,11 @@ import java.util.Map;
 class PrecalcScores {
   private static final Logger logger = Logger.getLogger(PrecalcScores.class);
 
-  private Result precalcResult;
+  private final Result precalcResult;
   private Scores scores;
   private JSONObject jsonObject;
-  private boolean isValid;
-  private ParseResultJson parseResultJson;
+  private final boolean isValid;
+  private final ParseResultJson parseResultJson;
 
   /**
    * TODO : use this with webservice scoring too
