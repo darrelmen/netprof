@@ -1,4 +1,4 @@
-package mitll.langtest.server;
+package mitll.langtest.server.trie;
 
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.TextEntityValue;
