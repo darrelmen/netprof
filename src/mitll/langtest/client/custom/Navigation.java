@@ -89,7 +89,7 @@ public class Navigation implements RequiresResize {
   private static final String RECORD_AUDIO = "Record Audio";
   private static final String RECORD_EXAMPLE = "Record In-context Audio";
   private static final String CONTENT1 = "content";
- // public static final String CLASSROOM = "classroom";
+  // public static final String CLASSROOM = "classroom";
   private static final String MARK_DEFECTS1 = "markDefects";
 
   private final ExerciseController controller;
@@ -116,8 +116,8 @@ public class Navigation implements RequiresResize {
    * @param service
    * @param userManager
    * @param controller
-   * @paramx predefinedContentList
    * @param feedback
+   * @paramx predefinedContentList
    * @see mitll.langtest.client.LangTest#populateRootPanel()
    */
   public Navigation(final LangTestDatabaseAsync service, final UserManager userManager,
@@ -143,14 +143,16 @@ public class Navigation implements RequiresResize {
 
     avpHelper = new AVPHelper(service, feedback, userManager, controller);
 
-    service.getContextPractice(new AsyncCallback<ContextPractice>(){
-      public void onSuccess(ContextPractice cpw){
+    service.getContextPractice(new AsyncCallback<ContextPractice>() {
+      public void onSuccess(ContextPractice cpw) {
         dialogWindow = new DialogWindow(service, controller, cpw);
       }
 
-      public void onFailure(Throwable caught){
+      public void onFailure(Throwable caught) {
         logger.info("getContextPractice failed");
-      }; //TODO: this is naughty
+      }
+
+      ; //TODO: this is naughty
     });
 
     defectHelper = new ChapterNPFHelper(service, feedback, userManager, controller, true);
@@ -173,7 +175,7 @@ public class Navigation implements RequiresResize {
     ListInterface exerciseList = npfHelper.getExerciseList();
     logger.info("Navigation : npfHelper exercise list is " + exerciseList);
     reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, exerciseList, npfHelper);
-   // logger.info("Navigation : made review item helper " + reviewItem);
+    // logger.info("Navigation : made review item helper " + reviewItem);
 
     editItem = new EditItem(service, userManager, controller, exerciseList, feedback, npfHelper);
 
@@ -183,12 +185,12 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see #Navigation(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
    * @param service
    * @param userManager
    * @param controller
    * @param feedback
    * @return
+   * @see #Navigation(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
    */
   private SimpleChapterNPFHelper makePracticeHelper(final LangTestDatabaseAsync service, final UserManager userManager,
                                                     final ExerciseController controller, final UserFeedback feedback) {
@@ -233,23 +235,29 @@ public class Navigation implements RequiresResize {
                   if (shell == null) {
                     logger.warning("huh? can't find " + currentExerciseID);
                     return super.findFirstExercise();
-                  }
-                  else {
+                  } else {
                     statsFlashcardFactory.populateCorrectMap();
                     return shell;
                   }
-                }
-                else {
+                } else {
                   return super.findFirstExercise();
                 }
               }
 
               @Override
-             protected void onLastItem() {  statsFlashcardFactory.resetStorage();  }
+              protected void onLastItem() {
+                statsFlashcardFactory.resetStorage();
+              }
 
-              @Override
+ /*             @Override
               protected void loadExercises(Map<String, Collection<String>> typeToSection, String item) {
                 super.loadExercises(typeToSection, item);
+                statsFlashcardFactory.setSelection(typeToSection);
+              }*/
+
+              @Override
+              protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno) {
+                super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno);
                 statsFlashcardFactory.setSelection(typeToSection);
               }
             };
@@ -257,7 +265,7 @@ public class Navigation implements RequiresResize {
 
           @Override
           protected void styleBottomRow(Panel bottomRow) {
-        //    logger.info("-----\n\n Adding style to " + bottomRow.getElement().getId());
+            //    logger.info("-----\n\n Adding style to " + bottomRow.getElement().getId());
             bottomRow.addStyleName("centerPractice");
             outerBottomRow = bottomRow;
           }
@@ -273,8 +281,8 @@ public class Navigation implements RequiresResize {
   private final List<TabAndContent> tabs = new ArrayList<TabAndContent>();
 
   /**
-   * @see #getNav
    * @return
+   * @see #getNav
    * @see mitll.langtest.client.LangTest#populateRootPanel()
    */
   public Widget getNav() {
@@ -297,7 +305,7 @@ public class Navigation implements RequiresResize {
         boolean hasCreated = createdPanel != null;
         // logger.info("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "' hasCreated " + hasCreated);
         if (hasCreated && wasChapters && (createdPanel instanceof GoodwaveExercisePanel)) {
-       //   logger.info("\taddShowHandler got chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
+          //   logger.info("\taddShowHandler got chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
           ((GoodwaveExercisePanel) createdPanel).wasRevealed();
         } else {
      /*     logger.info("\taddShowHandler ignoring target " + targetName);
@@ -353,7 +361,7 @@ public class Navigation implements RequiresResize {
       @Override
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTab(STUDY_LISTS);
-        showFirstUserListTab(subListTabPanel,0);
+        showFirstUserListTab(subListTabPanel, 0);
         logEvent(studyLists, STUDY_LISTS);
       }
     });
@@ -408,10 +416,10 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see #addTabs()
-   * @see #selectPreviousTab(String)
    * @param w
    * @param tab
+   * @see #addTabs()
+   * @see #selectPreviousTab(String)
    */
   private void showFirstUserListTab(TabPanel w, int tab) {
     clickOnTab(yourStuff);
@@ -420,8 +428,8 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see #addTabs
    * @param tabPanel
+   * @see #addTabs
    */
   private void addListTabs(TabPanel tabPanel) {
     // your list tab
@@ -473,6 +481,7 @@ public class Navigation implements RequiresResize {
 
   /**
    * Make the practice tab...
+   *
    * @see #addTabs
    */
   private void addPracticeTab() {
@@ -496,26 +505,28 @@ public class Navigation implements RequiresResize {
       practiceHelper.hideList();
     }
 //    else {
-      //logger.warning(" ------- showPracticeTab make practice tab  - " + practiceTab);
+    //logger.warning(" ------- showPracticeTab make practice tab  - " + practiceTab);
 
-  //  }
-  }
-  
-  private void addDialogTab(){
-	  if(controller.getProps().hasDialog()){
-	    	dialog = makeFirstLevelTab(tabPanel, IconType.TH_LIST, PRACTICE_DIALOG);
-	    	dialog.getTab().addClickHandler(new ClickHandler() {
-	    		@Override
-	    		public void onClick(ClickEvent event) {
-	    			checkAndMaybeClearTab(PRACTICE_DIALOG);
-	    			logEvent(dialog, PRACTICE_DIALOG);
-	    			dialogWindow.viewDialog(dialog.getContent());
-	    		}
-	    	});
-	    }
+    //  }
   }
 
-  private boolean isQC() {  return controller.getPermissions().contains(User.Permission.QUALITY_CONTROL); }
+  private void addDialogTab() {
+    if (controller.getProps().hasDialog()) {
+      dialog = makeFirstLevelTab(tabPanel, IconType.TH_LIST, PRACTICE_DIALOG);
+      dialog.getTab().addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          checkAndMaybeClearTab(PRACTICE_DIALOG);
+          logEvent(dialog, PRACTICE_DIALOG);
+          dialogWindow.viewDialog(dialog.getContent());
+        }
+      });
+    }
+  }
+
+  private boolean isQC() {
+    return controller.getPermissions().contains(User.Permission.QUALITY_CONTROL);
+  }
 
   private void logEvent(TabAndContent yourStuff, String context) {
     if (yourStuff != null && yourStuff.getTab() != null) {
@@ -545,26 +556,25 @@ public class Navigation implements RequiresResize {
   }*/
 
   private void checkAndMaybeClearTab(String value) {
- //   String value1 = storage.getValue(CLICKED_TAB);
+    //   String value1 = storage.getValue(CLICKED_TAB);
     //logger.info("checkAndMaybeClearTab " + value1 + " vs "+value + " clearing " + CLICKED_USER_LIST);
     storage.removeValue(CLICKED_USER_LIST);
     storage.storeValue(CLICKED_TAB, value);
   }
 
   /**
+   * @param onlyMine
+   * @param onlyVisited
    * @see #getNav()
    * @see #showMyLists
    * @see #deleteList(com.github.gwtbootstrap.client.ui.Button, mitll.langtest.shared.custom.UserList, boolean)
    * @see #clickOnYourLists(long)
-   * @param onlyMine
-   * @param onlyVisited
    */
   private void refreshViewLessons(boolean onlyMine, boolean onlyVisited) {
     viewLessons(onlyMine ? yourStuff.getContent() : othersStuff.getContent(), false, onlyMine, onlyVisited);
   }
 
   /**
-   *
    * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
    */
   public void showInitialState() {
@@ -607,8 +617,7 @@ public class Navigation implements RequiresResize {
     String value = storage.getValue(CLICKED_TAB);
     if (value.isEmpty()) {   // no previous tab
       showDefaultInitialTab();
-    }
-    else {
+    } else {
       selectPreviousTab(value);
     }
   }
@@ -634,29 +643,26 @@ public class Navigation implements RequiresResize {
       clickOnTab(tabAndContent);
 
       if (value.equals(YOUR_LISTS)) {
-        showMyLists(true, false,subListTabPanel);
+        showMyLists(true, false, subListTabPanel);
       } else if (value.equals(OTHERS_LISTS)) {
-        showMyLists(false, true,subListTabPanel);
+        showMyLists(false, true, subListTabPanel);
       } else if (value.equals(STUDY_LISTS)/* || value.equals(OTHERS_LISTS) || value.equals(YOUR_LISTS)*/) {
         //showMyLists(false, true);
         clickOnTab(yourStuff);
-       // refreshViewLessons(true, false);
+        // refreshViewLessons(true, false);
         DivWidget content = studyLists.getContent();
         Widget widget = content.getWidget(0);
 
-        int tab = orig.equals(YOUR_LISTS) ? 0 : orig.equals(OTHERS_LISTS) ? 1 :orig.equals(CREATE) ? 2: orig.equals(BROWSE) ? 3:0;
+        int tab = orig.equals(YOUR_LISTS) ? 0 : orig.equals(OTHERS_LISTS) ? 1 : orig.equals(CREATE) ? 2 : orig.equals(BROWSE) ? 3 : 0;
         logger.info("selectPreviousTab Select tab " + tab + " orig " + orig);
         showFirstUserListTab((TabPanel) widget, tab);
         if (tab == 0) {
-          showMyLists(true, false,subListTabPanel);
-        }
-        else if (tab == 1) {
-          showMyLists(false, true,subListTabPanel);
-        }
-        else if (tab == 2) {
+          showMyLists(true, false, subListTabPanel);
+        } else if (tab == 1) {
+          showMyLists(false, true, subListTabPanel);
+        } else if (tab == 2) {
           clickOnTab(create);
-        }
-        else {
+        } else {
           viewBrowse(); // CHAPTERS
         }
       } else if (value.equals(BROWSE)) {
@@ -702,26 +708,25 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see #showInitialState()
    * @param onlyCreated
    * @param onlyVisited
+   * @see #showInitialState()
    */
   private void showMyLists(boolean onlyCreated, boolean onlyVisited, TabPanel tabPanel) {
     String value = storage.getValue(CLICKED_TAB);
-  //  logger.info("showMyLists '" + value + "' created " + onlyCreated + " visited " + onlyVisited);
+    //  logger.info("showMyLists '" + value + "' created " + onlyCreated + " visited " + onlyVisited);
 
     if (!value.isEmpty()) {
       if (value.equals(YOUR_LISTS)) {
         onlyCreated = true;
         onlyVisited = false;
-      }
-      else if (value.equals(OTHERS_LISTS)) {
+      } else if (value.equals(OTHERS_LISTS)) {
         onlyCreated = false;
         onlyVisited = true;
       }
     }
 
-    int tabToSelect = onlyCreated ? 0:1;//getSafeTabIndexFor(YOUR_LISTS) : getSafeTabIndexFor(OTHERS_LISTS);
+    int tabToSelect = onlyCreated ? 0 : 1;//getSafeTabIndexFor(YOUR_LISTS) : getSafeTabIndexFor(OTHERS_LISTS);
 
     logger.info("showMyLists Select tab " + tabToSelect + " only " + onlyCreated);
 
@@ -733,14 +738,14 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList
    * @param userListID
+   * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList
    */
   public void clickOnYourLists(long userListID) {
     storeCurrentClickedList(userListID);
-  //  checkAndMaybeClearTab(YOUR_LISTS);
+    //  checkAndMaybeClearTab(YOUR_LISTS);
     storage.storeValue(SUB_TAB, EDIT_ITEM);
-  //  showMyLists(true, false, subListTabPanel);
+    //  showMyLists(true, false, subListTabPanel);
 
     subListTabPanel.selectTab(0);
     clickOnTab(yourStuff);
@@ -748,11 +753,11 @@ public class Navigation implements RequiresResize {
   }
 
   /**
+   * @param toUse
    * @see #clickOnYourLists(long)
    * @see #selectPreviouslyClickedSubTab(com.github.gwtbootstrap.client.ui.TabPanel, TabAndContent, TabAndContent, TabAndContent, mitll.langtest.shared.custom.UserList, String, boolean, boolean, boolean, boolean)
    * @see #selectPreviousTab(String)
    * @see #showMyLists
-   * @param toUse
    */
   private void clickOnTab(final TabAndContent toUse) {
     if (toUse == null) {
@@ -766,12 +771,12 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see mitll.langtest.client.custom.Navigation#getNav()
-   * @see Navigation#getListOperations(mitll.langtest.shared.custom.UserList, String)
    * @param tabPanel
    * @param iconType
    * @param label
    * @return
+   * @see mitll.langtest.client.custom.Navigation#getNav()
+   * @see Navigation#getListOperations(mitll.langtest.shared.custom.UserList, String)
    */
   private TabAndContent makeTab(TabPanel tabPanel, IconType iconType, String label) {
     TabAndContent tabAndContent = new TabAndContent(iconType, label);
@@ -784,19 +789,21 @@ public class Navigation implements RequiresResize {
   }
 
   /*To call click() function for Programmatic equivalent of the user clicking the button.*/
-  private class ButtonClickEvent extends ClickEvent {}
+  private class ButtonClickEvent extends ClickEvent {
+  }
 
-  private void viewBrowse() { viewLessons(browse.getContent(), true, false, false); }
-  
+  private void viewBrowse() {
+    viewLessons(browse.getContent(), true, false, false);
+  }
 
-  
-/**
-   * @see #viewBrowse()
-   * @see #refreshViewLessons(boolean, boolean)
+
+  /**
    * @param contentPanel
    * @param getAll
    * @param onlyMine
    * @param onlyVisited
+   * @see #viewBrowse()
+   * @see #refreshViewLessons(boolean, boolean)
    */
   private void viewLessons(final Panel contentPanel, boolean getAll, boolean onlyMine, boolean onlyVisited) {
     contentPanel.clear();
@@ -816,15 +823,16 @@ public class Navigation implements RequiresResize {
       service.getListsForUser(userManager.getUser(), onlyMine,
           onlyVisited,
           new UserListCallback(this, contentPanel, child, listScrollPanel,
-              LESSONS + (onlyMine ? "_Mine":"_Others"), onlyMine, false, userManager, onlyMine));
+              LESSONS + (onlyMine ? "_Mine" : "_Others"), onlyMine, false, userManager, onlyMine));
     }
   }
 
   /**
    * Return all the review lists -- defects (by teachers/QA), comments (by students), and attention LL.
+   *
+   * @param contentPanel
    * @see #getNav()
    * @see #addTabs
-   * @param contentPanel
    */
   private void viewReview(final Panel contentPanel) {
     final Panel child = getContentChild(contentPanel);
@@ -847,9 +855,9 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see #viewReview
    * @param contentPanel
    * @return
+   * @see #viewReview
    */
   private Panel getContentChild(Panel contentPanel) {
     contentPanel.clear();
@@ -863,7 +871,7 @@ public class Navigation implements RequiresResize {
 
   @Override
   public void onResize() {
-  //  logger.info("got onResize");
+    //  logger.info("got onResize");
     setScrollPanelWidth(listScrollPanel);
     learnHelper.onResize();
     npfHelper.onResize();
@@ -878,10 +886,10 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see UserListCallback#getDisplayRowPerList(mitll.langtest.shared.custom.UserList, boolean, boolean)
-   * @see UserListCallback#selectPreviousList
    * @param ul
    * @param contentPanel
+   * @see UserListCallback#getDisplayRowPerList(mitll.langtest.shared.custom.UserList, boolean, boolean)
+   * @see UserListCallback#selectPreviousList
    */
   void showList(final UserList ul, Panel contentPanel, final String instanceName) {
     //logger.info("showList " + ul + " instance " + instanceName);
@@ -893,7 +901,7 @@ public class Navigation implements RequiresResize {
 
     // if select a new list, clear the subtab selection
     if (previousList != null && !previousList.equals(currentValue)) {
-    //  logger.info("\tshowList " +previousList + " vs " + currentValue + " remove " + SUB_TAB);
+      //  logger.info("\tshowList " +previousList + " vs " + currentValue + " remove " + SUB_TAB);
 
       storage.removeValue(SUB_TAB);
     }
@@ -904,10 +912,10 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see #showList(mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.Panel, String)
    * @param ul
    * @param instanceName
    * @return
+   * @see #showList(mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.Panel, String)
    */
   private Panel makeTabContent(UserList ul, String instanceName) {
     FluidContainer container = new FluidContainer();
@@ -940,11 +948,11 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see #makeTabContent
    * @param listid
    * @param linkid
    * @param name
    * @return
+   * @see #makeTabContent
    */
   private Anchor getDownloadLink(long listid, String linkid, final String name) {
     final Anchor downloadLink = new Anchor(getURLForDownload(listid));
@@ -961,9 +969,9 @@ public class Navigation implements RequiresResize {
   }
 
   /**
+   * @return
    * @seex #showSelectionState(mitll.langtest.client.list.SelectionState)
    * @paramx xselectionState
-   * @return
    */
   private SafeHtml getURLForDownload(long listid) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
@@ -1001,8 +1009,9 @@ public class Navigation implements RequiresResize {
 
   /**
    * Avoid marking lists that you have created as also visited by you.
-   * @see #showList(mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.Panel, String)
+   *
    * @param ul
+   * @see #showList(mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.Panel, String)
    */
   private void addVisitor(UserList ul) {
     long user = (long) controller.getUser();
@@ -1020,10 +1029,10 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see #showList(mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.Panel, String)
    * @param ul
    * @param instanceName
    * @return
+   * @see #showList(mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.Panel, String)
    */
   private TabPanel getListOperations(final UserList ul, final String instanceName) {
     boolean created = createdByYou(ul) || instanceName.equals(REVIEW) || instanceName.equals(COMMENT);
@@ -1075,21 +1084,21 @@ public class Navigation implements RequiresResize {
       final TabAndContent editTab = makeTab(tabPanel, IconType.EDIT, isReview ? ADD_DELETE_EDIT_ITEM : ADD_OR_EDIT_ITEM);
       editItemTab = editTab;
 
-    //  logger.info("getListOperations : making editTab");
+      //  logger.info("getListOperations : making editTab");
 
       editTab.getTab().addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-      //    logger.info("getListOperations : got click on edit tab ");
+          //    logger.info("getListOperations : got click on edit tab ");
 
           storage.storeValue(SUB_TAB, EDIT_ITEM);
           controller.logEvent(editTab.getTab(), "Tab", "UserList_" + ul.getID(), EDIT_ITEM);
           if ((isReview || isComment)) {
-        //    logger.info("getListOperations : showNPF ");
+            //    logger.info("getListOperations : showNPF ");
 
             reviewItem.showNPF(ul, editTab, (isReview ? REVIEW : COMMENT) + "_edit", false);
           } else {
-         //   logger.info("getListOperations : showEditItem ");
+            //   logger.info("getListOperations : showEditItem ");
 
             showEditItem(ul, editTab, Navigation.this.editItem, !ul.isFavorite());
           }
@@ -1107,7 +1116,6 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see #getListOperations
    * @param tabPanel
    * @param learn
    * @param practice
@@ -1118,6 +1126,7 @@ public class Navigation implements RequiresResize {
    * @param isComment
    * @param isAttention
    * @param isNormalList
+   * @see #getListOperations
    */
   private void selectTabGivenHistory(TabPanel tabPanel, TabAndContent learn, TabAndContent practice,
                                      TabAndContent edit,
@@ -1127,22 +1136,21 @@ public class Navigation implements RequiresResize {
         ul, instanceName1, isReview, isComment, isAttention, isNormalList);
 
     if (!chosePrev) {
-    //  logger.info("selectTabGivenHistory ul " + ul.getName() + " private " + ul.isPrivate() + " empty " + ul.isEmpty() + " ");
+      //  logger.info("selectTabGivenHistory ul " + ul.getName() + " private " + ul.isPrivate() + " empty " + ul.isEmpty() + " ");
 
       if (createdByYou(ul) &&
           //!ul.isPrivate() &&
           ul.isEmpty() && edit != null) {
         tabPanel.selectTab(ul.getName().equals(FIX_DEFECTS) ? 0 : SUBTAB_EDIT_INDEX);    // 2 = add/edit item
-     //   logger.info("selectTabGivenHistory doing showEditReviewOrComment");
+        //   logger.info("selectTabGivenHistory doing showEditReviewOrComment");
         showEditReviewOrComment(ul, isNormalList, edit, isReview, isComment);
       } else {
-       // logger.info("selectTabGivenHistory doing sublearn");
+        // logger.info("selectTabGivenHistory doing sublearn");
 
         tabPanel.selectTab(SUBTAB_LEARN_INDEX);
         showLearnTab(learn, ul, instanceName1, isReview, isComment, isAttention);
       }
-    }
-    else {
+    } else {
       logger.info("selectTabGivenHistory choose prev ");
     }
   }
@@ -1153,31 +1161,30 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see #getListOperations
-   * @see #selectTabGivenHistory
    * @param isReview
    * @param ul
    * @param learn
    * @param instanceName1
+   * @see #getListOperations
+   * @see #selectTabGivenHistory
    */
   private void showLearnTab(boolean isReview, UserList ul, TabAndContent learn, String instanceName1) {
     if (isReview) {
       //logger.info("showLearnTab : onClick using defect helper " + instanceName1 + " and " +ul);
       defectHelper.showNPF(ul, learn, instanceName1, false);
-    }
-    else {
+    } else {
       //logger.info("showLearnTab : onClick using npf helper " + instanceName1 + " and " +ul);
       npfHelper.showNPF(ul, learn, instanceName1, true);
     }
   }
 
   /**
-   * @see #selectTabGivenHistory(com.github.gwtbootstrap.client.ui.TabPanel, TabAndContent, TabAndContent, TabAndContent, mitll.langtest.shared.custom.UserList, String, boolean, boolean, boolean, boolean)
    * @param ul
    * @param isNormalList
    * @param finalEditItem
    * @param isReview
    * @param isComment
+   * @see #selectTabGivenHistory(com.github.gwtbootstrap.client.ui.TabPanel, TabAndContent, TabAndContent, TabAndContent, mitll.langtest.shared.custom.UserList, String, boolean, boolean, boolean, boolean)
    */
   private void showEditReviewOrComment(UserList ul, boolean isNormalList, TabAndContent finalEditItem,
                                        boolean isReview, boolean isComment) {
@@ -1190,7 +1197,6 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see #selectTabGivenHistory
    * @param tabPanel
    * @param learnTab
    * @param practiceTab
@@ -1202,6 +1208,7 @@ public class Navigation implements RequiresResize {
    * @param isAttention
    * @param isNormalList
    * @return true if we have stored what tab we clicked on before
+   * @see #selectTabGivenHistory
    */
   private boolean selectPreviouslyClickedSubTab(TabPanel tabPanel,
                                                 TabAndContent learnTab,
@@ -1248,9 +1255,9 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see #getListOperations
    * @param ul
    * @param addItem
+   * @see #getListOperations
    */
   private void showEditItem(UserList ul, TabAndContent addItem, EditItem editItem, boolean includeAddItem) {
     addItem.getContent().clear();
@@ -1260,8 +1267,8 @@ public class Navigation implements RequiresResize {
   }
 
   /**
-   * @see #onResize()
    * @param row
+   * @see #onResize()
    */
   private void setScrollPanelWidth(ScrollPanel row) {
     if (row != null) {
@@ -1273,7 +1280,8 @@ public class Navigation implements RequiresResize {
     controller.logEvent(delete, "Button", "UserList_" + ul.getID(), "Delete");
     service.deleteList(ul.getUniqueID(), new AsyncCallback<Boolean>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
       public void onSuccess(Boolean result) {
@@ -1289,10 +1297,12 @@ public class Navigation implements RequiresResize {
   void setPublic(long uniqueID, boolean isPublic) {
     service.setPublicOnList(uniqueID, isPublic, new AsyncCallback<Void>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
-      public void onSuccess(Void result) {}
+      public void onSuccess(Void result) {
+      }
     });
   }
 
