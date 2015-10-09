@@ -1,22 +1,14 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.ExerciseSorter;
+import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.contextPractice.ContextPracticeImport;
-import mitll.langtest.server.database.custom.AddRemoveDAO;
-import mitll.langtest.server.database.custom.AnnotationDAO;
-import mitll.langtest.server.database.custom.ReviewedDAO;
-import mitll.langtest.server.database.custom.UserExerciseDAO;
-import mitll.langtest.server.database.custom.UserListDAO;
-import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
-import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.custom.*;
 import mitll.langtest.server.database.exercise.ExcelImport;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
@@ -40,7 +32,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.CollationKey;
 import java.text.Collator;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
