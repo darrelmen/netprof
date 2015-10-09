@@ -176,6 +176,19 @@ public class EventDAO extends DAO {
     return Collections.emptyList();
   }
 
+  public List<Event> getAllDevices() {
+    try {
+      return getEvents("SELECT * from " + EVENT + " where length(device)=36");
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+      if (logAndNotify != null) {
+        logAndNotify.logAndNotifyServerException(ee);
+      }
+    }
+    return Collections.emptyList();
+  }
+
+
   public void addPlayedMarkings(long userID, CommonExercise firstExercise) {
     List<Event> allForUserAndExercise = getAllForUserAndExercise(userID, firstExercise.getID());
     Map<String, AudioAttribute> audioToAttr = firstExercise.getAudioRefToAttr();
