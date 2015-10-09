@@ -1,9 +1,12 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.ExerciseSorter;
+import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.MonitorResult;
+import mitll.langtest.shared.Result;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.monitoring.Session;
