@@ -1,10 +1,10 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.ExerciseSorter;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.scoring.LTSFactory;
+import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
@@ -18,14 +18,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
