@@ -206,7 +206,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
           ") current token " + token + " same as new " + exerciseID);
       checkAndAskServer(exerciseID);
     } else {
-      pushNewItem(exerciseID);
+      pushNewItem("", exerciseID);
     }
   }
 
@@ -223,14 +223,17 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   /**
    * Calling this will result in an immediate call to onValueChange (reacting to the history change)
    *
+   *
+   * @param search
    * @param exerciseID
    * @see ListInterface#loadExercise(String)
    * @see #pushFirstSelection(String)
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
-  void pushNewItem(String exerciseID) {
-   // logger.info("------------ ExerciseList.pushNewItem : (" + instance + ") push history " + exerciseID + " - ");
-    History.newItem("#item=" + exerciseID + ";instance=" + instance);
+  void pushNewItem(String search, String exerciseID) {
+    logger.info("------------ ExerciseList.pushNewItem : (" + instance + ") push history " + exerciseID + " - ");
+    History.newItem("#" + "search="+search +";"+
+        "item=" + exerciseID + ";instance=" + instance);
   }
 
   public void onResize() {
@@ -500,18 +503,17 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   /**
    * @param itemID
-   * @seex #addExerciseToList(mitll.langtest.shared.ExerciseShell)
    * @see #loadFirstExercise()
    * @see #loadNextExercise
    * @see #loadPreviousExercise
    */
-  public void loadExercise(String itemID) { pushNewItem(itemID);  }
+  public void loadExercise(String itemID) { pushNewItem("", itemID);  }
 
   /**
    * This method is called whenever the application's history changes.
    *
    * @param event
-   * @see #pushNewItem(String)
+   * @see #pushNewItem(String, String)
    */
   public void onValueChange(ValueChangeEvent<String> event) {
     // Set the label to reflect the current history token. (?)
@@ -653,7 +655,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see ExerciseAsyncCallback#onSuccess(mitll.langtest.shared.CommonExercise)
    */
   protected void useExercise(final CommonExercise commonExercise) {
-    logger.info("ExerciseList.useExercise : commonExercise " + commonExercise.getID());
+  //  logger.info("ExerciseList.useExercise : commonExercise " + commonExercise.getID());
     String itemID = commonExercise.getID();
     markCurrentExercise(itemID);
 
@@ -677,7 +679,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see #useExercise(mitll.langtest.shared.CommonExercise)
    */
   private Panel makeExercisePanel(CommonExercise exercise) {
-    logger.info("ExerciseList.makeExercisePanel : " + exercise + " instance " + instance);
+   // logger.info("ExerciseList.makeExercisePanel : " + exercise + " instance " + instance);
 
     Panel exercisePanel = factory.getExercisePanel(exercise);
     innerContainer.setWidget(exercisePanel);
