@@ -40,7 +40,7 @@ public abstract class Scoring {
 
   final String scoringDir;
   final String deployPath;
- // private final Map<String, String> phoneToDisplay = new HashMap<>();
+  // private final Map<String, String> phoneToDisplay = new HashMap<>();
   final ServerProperties props;
   final LogAndNotify langTestDatabase;
 
@@ -100,7 +100,7 @@ public abstract class Scoring {
 
     readDictionary();
     makeDecoder();
-    checkLTSHelper = new CheckLTS(letterToSoundClass, htkDictionary, language, svDecoderHelper);
+    checkLTSHelper = new CheckLTS(letterToSoundClass, htkDictionary, language);
   }
 
   private static String getScoringDir(String deployPath) {
@@ -396,7 +396,7 @@ public abstract class Scoring {
    */
   private void readDictionary() {
     htkDictionary = makeDict();
-    logger.info(this + " dict now " + htkDictionary);
+    //logger.info(this + " dict now " + htkDictionary);
   }
 
   /**
@@ -410,10 +410,9 @@ public abstract class Scoring {
       HTKDictionary htkDictionary = new HTKDictionary(dictFile);
       long now = System.currentTimeMillis();
       int size = htkDictionary.size(); // force read from lazy val
-      //if (now - then > 300) {
-      logger.info("for " + languageProperty +
-          " read dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
-      //}
+      if (now - then > 300) {
+        logger.info("for " + languageProperty + " read dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
+      }
       return htkDictionary;
     } else {
       logger.error("\n\n\n---> makeDict : Can't find dict file at " + dictFile);
@@ -426,9 +425,9 @@ public abstract class Scoring {
   }
 
   /**
-   * @see ASR#sort(List)
    * @param toSort
    * @param <T>
+   * @see ASR#sort(List)
    */
   public <T extends CommonExercise> void sort(List<T> toSort) {
     ltsFactory.sort(toSort);
