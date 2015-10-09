@@ -2,14 +2,11 @@ package mitll.langtest.server.scoring;
 
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
-import audio.image.TranscriptReader;
-import audio.imagewriter.EventAndFileInfo;
 import mitll.langtest.server.ServerProperties;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
@@ -18,9 +15,9 @@ import java.util.TreeMap;
 /**
  * Created by go22670 on 9/28/15.
  */
-public class ParseResultJson {
+class ParseResultJson {
   private static final Logger logger = Logger.getLogger(ParseResultJson.class);
-  ServerProperties props;
+  private final ServerProperties props;
 
   public ParseResultJson(ServerProperties properties) {
     this.props = properties;
