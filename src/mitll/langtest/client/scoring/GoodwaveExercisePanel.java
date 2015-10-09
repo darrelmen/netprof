@@ -412,7 +412,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
           tokens.add(html);
         }
       } else {
-        tokens = getTokens(value);
+       // tokens = getTokens(value);
+        tokens = Arrays.asList(value.split(CommentNPFExercise.SPACE_REGEX));
       }
 
       for (String token : tokens) {
