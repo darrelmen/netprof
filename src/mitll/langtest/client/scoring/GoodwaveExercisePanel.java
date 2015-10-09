@@ -384,7 +384,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     // TODO : for now, since we need to deal with underline... somehow...
     // and when clicking inside dialog, seems like we need to dismiss dialog...
-
     if (label.contains("Context")) {
       InlineHTML englishPhrase = new InlineHTML(value, WordCountDirectionEstimator.get().estimateDirection(value));
       englishPhrase.addStyleName("Instruction-data-with-wrap");
@@ -395,46 +394,41 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       addTooltip(englishPhrase, label.replaceAll(":", ""));
       englishPhrase.addStyleName("leftFiveMargin");
     } else {
-      String language = controller.getLanguage();
-      boolean isMandarinOrKorean = language.equalsIgnoreCase("Mandarin") || language.equals("Korean");
-
-      DivWidget horizontal = new DivWidget();
-
-      List<String> tokens = new ArrayList<>();
-      boolean flLine = label.contains("Say");
-      boolean isChineseCharacter = flLine && isMandarinOrKorean;
-      if (isChineseCharacter) {
-        for (int i = 0, n = value.length(); i < n; i++) {
-          char c = value.charAt(i);
-          Character character = c;
-          final String html = character.toString();
-          tokens.add(html);
-        }
-      } else {
-        // tokens = getTokens(value);
-        tokens = Arrays.asList(value.split(CommentNPFExercise.SPACE_REGEX));
-      }
-
-      for (String token : tokens) {
-        InlineHTML w = makeClickableText(label, value, token, isChineseCharacter);
-        horizontal.add(w);
-      }
-
-      nameValueRow.add(horizontal);
-      horizontal.addStyleName("leftFiveMargin");
+      getClickableWords(label, value, nameValueRow);
     }
-/*    } else {
-      InlineHTML englishPhrase = new InlineHTML(value, WordCountDirectionEstimator.get().estimateDirection(value));
-      englishPhrase.addStyleName("Instruction-data-with-wrap");
-      if (label.contains("Meaning")) {
-        englishPhrase.addStyleName("englishFont");
-      }
-      nameValueRow.add(englishPhrase);
-      addTooltip(englishPhrase, label.replaceAll(":", ""));
-      englishPhrase.addStyleName("leftFiveMargin");
-    }*/
 
     return nameValueRow;
+  }
+
+  private void getClickableWords(String label, String value, Panel nameValueRow) {
+    String language = controller.getLanguage();
+    boolean isMandarinOrKorean = language.equalsIgnoreCase("Mandarin") || language.equals("Korean");
+
+    DivWidget horizontal = new DivWidget();
+    horizontal.setWidth("80%");
+    horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+
+    List<String> tokens = new ArrayList<>();
+    boolean flLine = label.contains("Say");
+    boolean isChineseCharacter = flLine && isMandarinOrKorean;
+    if (isChineseCharacter) {
+      for (int i = 0, n = value.length(); i < n; i++) {
+        char c = value.charAt(i);
+        Character character = c;
+        final String html = character.toString();
+        tokens.add(html);
+      }
+    } else {
+      tokens = Arrays.asList(value.split(CommentNPFExercise.SPACE_REGEX));
+    }
+
+    for (String token : tokens) {
+      InlineHTML w = makeClickableText(label, value, token, isChineseCharacter);
+      horizontal.add(w);
+    }
+
+    nameValueRow.add(horizontal);
+    horizontal.addStyleName("leftFiveMargin");
   }
 
   private InlineHTML makeClickableText(String label, String value, final String html, boolean chineseCharacter) {
@@ -467,7 +461,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
       }
     });
-    w.addStyleName("Instruction-data-with-wrap");
+    w.addStyleName("Instruction-data-with-wrap-keep-word");
     if (label.contains("Meaning")) {
       w.addStyleName("englishFont");
     }
