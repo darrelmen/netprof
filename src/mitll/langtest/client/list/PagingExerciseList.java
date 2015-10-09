@@ -204,9 +204,18 @@ public class PagingExerciseList extends ExerciseList {
         @Override
         public void gotTypeAheadEntry(String text) {
           controller.logEvent(getTypeAhead(), "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
+          //searchBoxEntry(text);
+          logger.info("load for " + text);
           loadExercises(getHistoryToken(""), text, false);
         }
       };
+    }
+  }
+
+  public void searchBoxEntry(String text) {
+    if (showTypeAhead) {
+      typeAhead.setText(text);
+      loadExercises(getHistoryToken(""), text, false);
     }
   }
 
