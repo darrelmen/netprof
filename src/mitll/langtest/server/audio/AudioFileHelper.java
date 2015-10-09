@@ -74,7 +74,7 @@ public class AudioFileHelper implements CollationSort {
    * @return
    * @see mitll.langtest.server.scoring.ASRScoring#getCollator
    */
-  @Override
+ // @Override
   public Collator getCollator() {
     makeASRScoring();
     return asrScoring.getCollator();
@@ -111,7 +111,7 @@ public class AudioFileHelper implements CollationSort {
   }
 
   private boolean isInDictOrLTS(CommonExercise exercise) {
-    return asrScoring.checkLTS(exercise.getForeignLanguage());
+    return asrScoring.validLTS(exercise.getForeignLanguage());
   }
 
   private void countPhones(CommonExercise exercise) {
@@ -132,7 +132,7 @@ public class AudioFileHelper implements CollationSort {
    */
   public boolean checkLTS(String foreignLanguagePhrase) {
     makeASRScoring();
-    return asrScoring.checkLTS(foreignLanguagePhrase);
+    return asrScoring.validLTS(foreignLanguagePhrase);
   }
 
   public SmallVocabDecoder getSmallVocabDecoder() {
@@ -749,7 +749,7 @@ public class AudioFileHelper implements CollationSort {
       sentence = sentence.toUpperCase();  // hack for English
     }
 
-    ASR asrScoring = useOldSchool ? oldschoolScoring : getASRScoring();
+    ASR asrScoring = useOldSchool || isEnglishSite() ? oldschoolScoring : getASRScoring();
     //logger.info("using " +asrScoring);
 
     logger.info("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
