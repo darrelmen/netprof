@@ -445,7 +445,7 @@ public class ServerProperties {
     String phonemeMapping = props.getProperty("phonemeMapping");
 
     if (phonemeMapping == null) {
-      logger.debug("no phoneme mapping file property");
+   //   logger.debug("no phoneme mapping file property");
       return;
     }
 
