@@ -21,6 +21,8 @@ import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
+import mitll.langtest.server.trie.ExerciseTrie;
+import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -50,7 +52,7 @@ import java.util.*;
  * Time: 5:49 PM
  */
 @SuppressWarnings("serial")
-public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, AutoCRTScoring, LogAndNotify, LoadTesting {
+public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, AutoCRTScoring, LogAndNotify/*, LoadTesting*/ {
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
@@ -633,7 +635,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @see mitll.langtest.server.LoadTestServlet#doGet
    */
-  @Override
+/*  @Override
   public CommonExercise getRandomExercise() {
     List<User> users = db.getUserDAO().getUsers();
     if (users.isEmpty()) return null;
@@ -664,7 +666,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     CommonShell shell = exercises.get(0);
 
     return getExercise(shell.getID(), user.getId(), false);
-  }
+  }*/
 
   private ExerciseListWrapper getExerciseIDs(int userID) {
     Map<String, Collection<String>> objectObjectMap = Collections.emptyMap();
