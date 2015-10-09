@@ -4,13 +4,9 @@ import corpus.HTKDictionary;
 import org.apache.log4j.Logger;
 import pronz.speech.Audio;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
+import java.util.*;
 
 /**
  * Creates the LM for a small vocab decoder from foreground and background sentences.
@@ -44,8 +40,33 @@ public class SmallVocabDecoder {
    * @param background sentences
    * @return most frequent vocabulary words
    */
-  public List<String> getVocab(List<String> background, int vocabSizeLimit) {
+  public List<String> getVocab(Collection<String> background, int vocabSizeLimit) {
     return getSimpleVocab(background, vocabSizeLimit);
+  }
+
+  /**
+   * @see ASRScoring#getValidSentences(Collection)
+   * @param s
+   * @return
+   */
+  private String toFull(String s) {
+    StringBuilder builder = new StringBuilder();
+
+    char fullWidthZero = '\uFF10';
+
+    final CharacterIterator it = new StringCharacterIterator(s);
+    for(char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
+      if (c >= '0' && c <= '9') {
+        int offset = c-'0';
+        int full = fullWidthZero + offset;
+        Character character = Character.valueOf((char)full);
+        builder.append(character.toString());
+      }
+      else {
+        builder.append(c);
+      }
+    }
+    return builder.toString();
   }
 
   /**
@@ -96,13 +117,20 @@ public class SmallVocabDecoder {
       //String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
       String token = untrimedToken.trim();  // necessary?
       if (token.length() > 0) {
-        all.add(token);
+        all.add(toFull(token));
+//        if (!token.equals("UNKNOWNMODEL")) {
+//          logger.debug("\ttoken " + token);
+//        }
       }
     }
 
     return all;
   }
 
+  public Collection<String> getMandarinTokens( String foreignLanguage) {
+  //  String foreignLanguage = e.getForeignLanguage();
+    return getTokens(segmentation(foreignLanguage));
+  }
 
   /**
    * Tries to remove junky characters from the sentence so hydec won't choke on them.
@@ -132,6 +160,7 @@ public class SmallVocabDecoder {
    * @param phrase
    * @return
    * @see mitll.langtest.server.scoring.ASRScoring#checkLTS(corpus.LTS, String)
+   * @see mitll.langtest.server.ExerciseTrie#getFLTokens(SmallVocabDecoder, CommonExercise)
    */
   //warning -- this will filter out UNKNOWNMODEL - where this matters, add it 
   //back in
@@ -162,11 +191,13 @@ public class SmallVocabDecoder {
   }
 
   private boolean inDict(String token) {
-    scala.collection.immutable.List<String[]> apply = htkDictionary.apply(token);
-    return apply != null && !apply.isEmpty();
+    try {
+      scala.collection.immutable.List<?> apply = htkDictionary.apply(token);
+      boolean b = (apply != null) && apply.nonEmpty();
+      return b;
+    } catch (Exception e) {
+      logger.error("isDict - " + token + " got " + e);
+      return false;
   }
-  public static void main(String [] arg) {
-    String b = "barber/barbers";
-    System.out.println(new SmallVocabDecoder().getTrimmed(b));
   }
 }
