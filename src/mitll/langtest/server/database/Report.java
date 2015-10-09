@@ -80,7 +80,7 @@ public class Report {
         }
       }
     } else {
-      logger.debug("not sending email report since this is cmMIT");
+//      logger.debug("not sending email report since this is not monday");
     }
   }
 
