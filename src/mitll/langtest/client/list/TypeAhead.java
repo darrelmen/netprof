@@ -17,21 +17,23 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 
+import java.util.logging.Logger;
+
 /**
  * Created by go22670 on 9/25/14.
  */
 public class TypeAhead {
-  private final TextBox typeAhead = new TextBox();
-  private String lastTypeAheadValue = "";
-
+  private Logger logger = Logger.getLogger("TypeAhead");
   private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
 
+  private final TextBox typeAhead = new TextBox();
+
   /**
-   * @see mitll.langtest.client.list.PagingExerciseList#addTypeAhead(com.google.gwt.user.client.ui.Panel)
    * @param column
    * @param waitCursor
    * @param title
    * @param hasFirstFocus
+   * @see mitll.langtest.client.list.PagingExerciseList#addTypeAhead(com.google.gwt.user.client.ui.Panel)
    */
   public TypeAhead(Panel column, Image waitCursor, String title, boolean hasFirstFocus) {
     makeTypeAhead();
@@ -51,8 +53,13 @@ public class TypeAhead {
     }
   }
 
-  public String getText() { return typeAhead.getText(); }
-  public Widget getWidget() { return typeAhead; }
+  public String getText() {
+    return typeAhead.getText();
+  }
+
+  public Widget getWidget() {
+    return typeAhead;
+  }
 
   /**
    * On key up, do something, like go get a new list given a search term.
@@ -63,20 +70,18 @@ public class TypeAhead {
     getTypeAhead().addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
         String text = getTypeAhead().getText();
-        if (!text.equals(lastTypeAheadValue)) {
-          //System.out.println("addTypeAhead : looking for '" + text + "' (" + text.length() + " chars)");
-          gotTypeAheadEntry(text);
-          lastTypeAheadValue = text;
-        }
+        gotTypeAheadEntry(text);
       }
     });
   }
 
   /**
    * Subclass please.
+   *
    * @param text
    */
-  public void gotTypeAheadEntry(String text) {}
+  public void gotTypeAheadEntry(String text) {
+  }
 
   private Widget getControlGroup(Image waitCursor, String title) {
     Panel flow = new HorizontalPanel();
@@ -92,17 +97,11 @@ public class TypeAhead {
     waitCursor.setUrl(white);
   }
 
-/*
-  public ControlGroup getControlGroup(String label) {
-    return getControlGroup(label, getTypeAhead());
-  }
-*/
-
   /**
-   * @see mitll.langtest.client.result.ResultManager#populateTable
    * @param label
    * @param user
    * @return
+   * @see mitll.langtest.client.result.ResultManager#populateTable
    */
   public static ControlGroup getControlGroup(String label, Widget user) {
     final ControlGroup userGroup = new ControlGroup();
@@ -117,5 +116,9 @@ public class TypeAhead {
 
   public TextBox getTypeAhead() {
     return typeAhead;
+  }
+
+  public void setText(String text) {
+    typeAhead.setText(text);
   }
 }
