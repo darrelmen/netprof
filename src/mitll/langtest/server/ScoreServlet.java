@@ -4,6 +4,7 @@ import com.google.common.io.Files;
 import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.load.LoadTesting;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.sorter.ExerciseSorter;
