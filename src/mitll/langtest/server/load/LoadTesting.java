@@ -1,4 +1,4 @@
-package mitll.langtest.server;
+package mitll.langtest.server.load;
 
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
