@@ -34,22 +34,12 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR {
-  //private static final double KEEP_THRESHOLD = 0.3;
   private static final Logger logger = Logger.getLogger(ASRWebserviceScoring.class);
-//  private static final boolean DEBUG = false;
-//
   private static final int FOREGROUND_VOCAB_LIMIT = 100;
   private static final int VOCAB_SIZE_LIMIT = 200;
 
-//	public static final String SMALL_LM_SLF = "smallLM.slf";
-
   private static final SmallVocabDecoder svDecoderHelper = null;
-//	private LangTestDatabaseImpl langTestDatabase;
-
-  /**
-   * By keeping these here, we ensure that we only ever read the dictionary once
-   */
-  //private HTKDictionary htkDictionary;
+  private final SLFFile slfFile = new SLFFile();
 
   // TODO make Scores + phoneLab + wordLab an object so have something more descriptive than Object[]
   private final Cache<String, Object[]> audioToScore; // key => (Scores, wordLab, phoneLab)
@@ -72,7 +62,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
   public ASRWebserviceScoring(String deployPath, ServerProperties properties, LogAndNotify langTestDatabase) {
     super(deployPath, properties, langTestDatabase);
 
-    logger.debug("Creating ASRWebserviceScoring object");
+//    logger.debug("Creating ASRWebserviceScoring object");
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
 
     ip = properties.getWebserviceIP();
@@ -310,8 +300,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     dict += ";UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil]";
     return dict;
   }
-
-  private final SLFFile slfFile = new SLFFile();
 
   /**
    * @param audioPath
