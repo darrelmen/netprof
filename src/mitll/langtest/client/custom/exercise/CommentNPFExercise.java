@@ -155,9 +155,12 @@ public class CommentNPFExercise extends NPFExercise {
   /**
    * Add underlines of item tokens in context sentence.
    *
+   * TODO : don't do this - make spans with different colors
+   *
    * @param e
    * @param context
    * @return
+   * @see #getContext(CommonExercise)
    */
   private String highlightVocabItemInContext(CommonExercise e, String context) {
     String trim = e.getRefSentence().trim();
