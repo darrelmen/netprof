@@ -2,10 +2,7 @@ package mitll.langtest.client.exercise;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
-import com.google.gwt.user.cellview.client.SimplePager;
+import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -22,6 +19,7 @@ import java.util.logging.Logger;
 public class SimplePagingContainer<T> implements RequiresResize {
   private final Logger logger = Logger.getLogger("SimplePagingContainer");
 
+  public static final int MAX_WIDTH = 310;
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
   private static final int VERTICAL_SLOP = 35;
   protected static final int ID_LINE_WRAP_LENGTH = 20;
@@ -29,7 +27,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
   private static final float MAX_PAGES = 2f;
   private static final int MIN_PAGE_SIZE = 3;
   private static final float DEFAULT_PAGE_SIZE = 15f;
-  private static final boolean debug = false;
+//  private static final boolean debug = false;
   protected final ExerciseController controller;
   protected ListDataProvider<T> dataProvider;
   protected CellTable<T> table;
@@ -44,17 +42,9 @@ public class SimplePagingContainer<T> implements RequiresResize {
    * @return
    */
   public Panel getTableWithPager() {
+    this.dataProvider = new ListDataProvider<T>();
+
     makeCellTable();
-
-    // Create a data provider.
-    this.dataProvider = new ListDataProvider<T>() {
-      @Override
-      protected void updateRowData(int start, List<T> values) {
-        super.updateRowData(start, values);
-
-        //System.out.println("updateRowData " + start);
-      }
-    };
 
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);
@@ -70,7 +60,8 @@ public class SimplePagingContainer<T> implements RequiresResize {
     column.add(table);
     table.addStyleName("floatLeft");
 
-    table.getElement().getStyle().setProperty("maxWidth","270px");
+    table.getElement().getStyle().setProperty("maxWidth", MAX_WIDTH +
+        "px");
 /*    Scheduler.get().scheduleDeferred(new Command() {
       @Override
       public void execute() {
@@ -78,8 +69,6 @@ public class SimplePagingContainer<T> implements RequiresResize {
       }
     });*/
 
-//    /pager.getWidget();
-    //System.out.println("pager " + pager);
     return column;
   }
 
@@ -106,7 +95,6 @@ public class SimplePagingContainer<T> implements RequiresResize {
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
     table.setWidth("100%");
     table.setHeight("auto");
-   // table.getElement().getStyle().setProperty("maxWidth","270px");
 
     // Add a selection model to handle user selection.
     addSelectionModel();
@@ -120,10 +108,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
   protected void addColumnsToTable() {}
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
-    int pageSize = PAGE_SIZE;
-    //logger.info("making cell table with " + o);
-
-    return new CellTable<T>(pageSize, o);
+    return new CellTable<T>(PAGE_SIZE, o);
   }
 
   public void flush() {
@@ -131,8 +116,13 @@ public class SimplePagingContainer<T> implements RequiresResize {
     table.setRowCount(getList().size());
   }
 
-  protected void addColumn(Column<T, SafeHtml> id2) {
-    table.addColumn(id2);
+  /**
+   * @see PagingContainer#addColumnsToTable()
+   * @param id2
+   * @param header
+   */
+  protected void addColumn(Column<T, SafeHtml> id2, Header<?> header) {
+    table.addColumn(id2, header);
   }
 
   public void clear() {
@@ -149,8 +139,6 @@ public class SimplePagingContainer<T> implements RequiresResize {
    * @see mitll.langtest.client.list.PagingExerciseList#onResize()
    */
   public void onResize() {
-    //System.out.println("PagingContainer : onResize");
-
     int numRows = getNumTableRowsGivenScreenHeight();
     if (table.getPageSize() != numRows) {
       table.setPageSize(numRows);
@@ -166,22 +154,26 @@ public class SimplePagingContainer<T> implements RequiresResize {
     }
     int leftOver = Window.getClientHeight() - pixelsAbove;
 
+/*
     if (debug) System.out.println("getNumTableRowsGivenScreenHeight Got on resize window height " + Window.getClientHeight() +
        " header " + header + " result = " + leftOver + "( vert unaccount " +
        verticalUnaccountedFor+ " vs absolute top " + table.getElement().getAbsoluteTop()+ " pix above " + pixelsAbove+
        ")");
+*/
 
     float rawRatio = ((float) leftOver) / (float) heightOfCellTableWith15Rows();
     float tableRatio = Math.min(MAX_PAGES, rawRatio);
     float ratio = DEFAULT_PAGE_SIZE * tableRatio;
 
-    if (debug) System.out.println("getNumTableRowsGivenScreenHeight : left over " + leftOver + " raw " + rawRatio +
-      " table ratio " + tableRatio + " ratio " + ratio);
+/*    if (debug) System.out.println("getNumTableRowsGivenScreenHeight : left over " + leftOver + " raw " + rawRatio +
+      " table ratio " + tableRatio + " ratio " + ratio);*/
 
     ratio = adjustVerticalRatio(ratio);
     int rows = Math.max(MIN_PAGE_SIZE, (int)Math.floor(ratio));
 
+/*
     if (debug) System.out.println("getNumTableRowsGivenScreenHeight : rows " + rows);
+*/
     return rows;
   }
 

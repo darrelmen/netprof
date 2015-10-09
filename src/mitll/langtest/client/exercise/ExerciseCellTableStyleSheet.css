@@ -10,5 +10,6 @@
     padding: 2px 5px;
     overflow: hidden;
     cursor:pointer;
+    font-size: larger;
     font-family: sans-serif;
 }
