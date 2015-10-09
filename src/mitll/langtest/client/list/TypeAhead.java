@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 9/25/14.
  */
 public class TypeAhead {
-  private Logger logger = Logger.getLogger("TypeAhead");
+//  private Logger logger = Logger.getLogger("TypeAhead");
   private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
 
   private final TextBox typeAhead = new TextBox();
@@ -65,7 +65,9 @@ public class TypeAhead {
    * On key up, do something, like go get a new list given a search term.
    */
   private void makeTypeAhead() {
+    typeAhead.setWidth("240px");
     getTypeAhead().getElement().setId("ExerciseList_TypeAhead");
+
     getTypeAhead().setDirectionEstimator(true);   // automatically detect whether text is RTL
     getTypeAhead().addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
