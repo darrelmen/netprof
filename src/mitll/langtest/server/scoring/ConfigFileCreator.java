@@ -1,6 +1,5 @@
 package mitll.langtest.server.scoring;
 
-import corpus.EnglishLTS;
 import corpus.LTS;
 
 import java.io.File;
@@ -142,7 +141,7 @@ public class ConfigFileCreator {
     return tmpDir.replaceAll("\\\\","\\\\\\\\");
   }
 
-  public String getProp(String var, String defaultValue) {
+  private String getProp(String var, String defaultValue) {
     return properties.containsKey(var) ? properties.get(var) : defaultValue;
   }
 }
