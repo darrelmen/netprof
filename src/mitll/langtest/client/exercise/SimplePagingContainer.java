@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 public class SimplePagingContainer<T> implements RequiresResize {
   private final Logger logger = Logger.getLogger("SimplePagingContainer");
 
-  public static final int MAX_WIDTH = 310;
+  public static final int MAX_WIDTH = 320;
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
   private static final int VERTICAL_SLOP = 35;
   protected static final int ID_LINE_WRAP_LENGTH = 20;
@@ -60,15 +60,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
     column.add(table);
     table.addStyleName("floatLeft");
 
-    table.getElement().getStyle().setProperty("maxWidth", MAX_WIDTH +
-        "px");
-/*    Scheduler.get().scheduleDeferred(new Command() {
-      @Override
-      public void execute() {
-        pager.getImages();
-      }
-    });*/
-
+    table.getElement().getStyle().setProperty("maxWidth", MAX_WIDTH + "px");
     return column;
   }
 
