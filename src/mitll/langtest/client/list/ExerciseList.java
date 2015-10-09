@@ -61,7 +61,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private final ExerciseController controller;
 
   protected Panel createdPanel;
- // private UserManager user;
   int lastReqID = 0;
   final boolean allowPlusInURL;
   private String instance;
@@ -97,7 +96,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   @Override
   protected void onLoad() {
     super.onLoad();
-//    System.out.println("ExerciseList : History onLoad  " + instance);
     addHistoryListener();
   }
 
@@ -141,7 +139,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   public void setFactory(ExercisePanelFactory factory, UserManager user) {
     this.factory = factory;
-    //this.user = user;
     addHistoryListener();
   }
 
@@ -243,9 +240,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
         //logger.info("resizing right side for " + instance + " "+ current.getClass());
         ((RequiresResize) current).onResize();
       }
-      else {
+//      else {
         //logger.warning("huh?  right side is not resizable " + instance + " "+ current.getClass());
-      }
+  //    }
     }
  //   else {
 //      logger.warning("huh? no right side of exercise list");
@@ -476,8 +473,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   private void loadFirstExercise() {
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
-     // noMatches();
-      logger.info("loadFirstExercise : current exercises is empty?");
+//      logger.info("loadFirstExercise : current exercises is empty?");
       removeCurrentExercise();
     } else {
       CommonShell toLoad = findFirstExercise();
@@ -487,36 +483,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   protected abstract boolean isEmpty();
-
-  /**
-   * @see #loadFirstExercise
-   */
-/*  private void noMatches() {
-    String message = isEmpty() ? "No items yet." : "No matches found. Please try a different search.";
-    final PopupPanel pleaseWait = showPleaseWait(message, null);
-
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        pleaseWait.hide();
-      }
-    };
-
-    // Schedule the timer to run once in 1 seconds.
-    t.schedule(3000);
-  }*/
-
-/*
-  protected PopupPanel showPleaseWait(String message, UIObject widget) {
-    final PopupPanel pleaseWait = new DecoratedPopupPanel();
-    pleaseWait.setAutoHideEnabled(false);
-    pleaseWait.add(new HTML(message));
-    if (widget == null) {
-      pleaseWait.center();
-    }
-    return pleaseWait;
-  }
-*/
 
   /**
    * Sometimes you want to change which exercise is loaded first.
@@ -570,7 +536,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     if (hasExercise(id)) {
       askServerForExercise(id);
     } else if (!id.equals(EditItem.NEW_EXERCISE_ID)) {
-      System.err.println("checkAndAskServer : can't load " + id);
+      logger.warning("checkAndAskServer : can't load " + id);
     }
   }
 
@@ -737,7 +703,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
     int i = getIndex(current.getID());
     if (i == -1) {
-      System.err.println("ExerciseList.getNextExercise : huh? couldn't find " + current +
+      logger.warning("ExerciseList.getNextExercise : huh? couldn't find " + current +
         " in " + getSize() + " exercises : " + getKeys());
     } else {
       CommonShell next = getAt(i + 1);
@@ -779,10 +745,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     Widget current = innerContainer.getWidget();
     if (current != null) {
       if (!innerContainer.remove(current)) {
-        System.err.println("\tdidn't remove current widget");
+        logger.warning("\tdidn't remove current widget");
       } else innerContainer.getParent().removeStyleName("shadowBorder");
     } else {
-      System.err.println("\tremoveCurrentExercise : no inner current widget for " + report());
+      logger.warning("\tremoveCurrentExercise : no inner current widget for " + report());
     }
   }
 

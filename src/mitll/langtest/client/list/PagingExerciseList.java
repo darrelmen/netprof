@@ -1,5 +1,6 @@
 package mitll.langtest.client.list;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Timer;
@@ -16,6 +17,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.STATE;
 
 import java.util.ArrayList;
@@ -126,8 +128,10 @@ public class PagingExerciseList extends ExerciseList {
    */
   protected PagingContainer makePagingContainer() {
     final PagingExerciseList outer = this;
+
+
     PagingContainer pagingContainer1 =
-        new PagingContainer(controller, getVerticalUnaccountedFor()) {
+        new PagingContainer(controller, getVerticalUnaccountedFor(),getRole().equals(Result.AUDIO_TYPE_RECORDER)) {
           @Override
           protected void gotClickOnItem(CommonShell e) {
             outer.gotClickOnItem(e);
@@ -359,6 +363,10 @@ public class PagingExerciseList extends ExerciseList {
     return pagingContainer.getAt(i);
   }
 
+  /**
+   * @see PagingExerciseList#rememberExercises(List)
+   * @param es
+   */
   @Override
   public void addExercise(CommonShell es) {
 /*    if (pagingContainer.getSize() < 5) {
@@ -367,6 +375,11 @@ public class PagingExerciseList extends ExerciseList {
     pagingContainer.addExercise(es);
   }
 
+  /**
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise(Button)
+   * @param after
+   * @param es
+   */
   public void addExerciseAfter(CommonShell after, CommonShell es) {
     pagingContainer.addExerciseAfter(after, es);
   }
