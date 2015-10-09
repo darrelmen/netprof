@@ -273,12 +273,12 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   }
 
   private SafeHtml getDownloadURL() {
-    SelectionState selectionState = getSelectionState(getHistoryToken(""));
+    SelectionState selectionState = getSelectionState(getHistoryToken("",""));
     return getURLForDownload(selectionState);
   }
 
   private SafeHtml getDownloadContextURL() {
-    SelectionState selectionState = getSelectionState(getHistoryToken(""));
+    SelectionState selectionState = getSelectionState(getHistoryToken("",""));
     return getURLForContextDownload(selectionState);
   }
 
