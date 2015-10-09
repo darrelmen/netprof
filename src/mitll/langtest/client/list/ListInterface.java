@@ -68,7 +68,7 @@ public interface ListInterface extends RequiresResize {
 
   void checkAndAskServer(String id);
 
-  public String getCurrentExerciseID();
+  String getCurrentExerciseID();
 
   boolean onFirst();
   boolean onFirst(CommonShell current);
@@ -115,4 +115,6 @@ public interface ListInterface extends RequiresResize {
   void simpleSetShuffle(boolean doShuffle);
 
   void reload(Map<String, Collection<String>> typeToSection);
+
+  void searchBoxEntry(String text);
 }
