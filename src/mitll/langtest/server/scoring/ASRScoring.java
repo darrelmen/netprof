@@ -6,14 +6,11 @@ import audio.image.TranscriptEvent;
 import audio.imagewriter.EventAndFileInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import corpus.HTKDictionary;
-import corpus.LTS;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.SLFFile;
-import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -29,7 +26,6 @@ import scala.Tuple2;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
-import java.text.Collator;
 import java.util.*;
 
 /**
@@ -45,36 +41,9 @@ import java.util.*;
  */
 public class ASRScoring extends Scoring implements CollationSort, ASR {
   private static final Logger logger = Logger.getLogger(ASRScoring.class);
-  private static final boolean DEBUG = false;
-
-  private static final double KEEP_THRESHOLD = 0.3;
-
-  private static final int FOREGROUND_VOCAB_LIMIT = 100;
-  private static final int VOCAB_SIZE_LIMIT = 200;
-
-  /**
-   * @see SLFFile#createSimpleSLFFile(Collection, String, float)
-   */
-  public static final String SMALL_LM_SLF = "smallLM.slf";
-
-  private static SmallVocabDecoder svDecoderHelper = null;
-
-  /**
-   * By keeping these here, we ensure that we only ever read the dictionary once
-   */
-  private HTKDictionary htkDictionary;
-  private final LTS letterToSoundClass;
   private final Cache<String, Scores> audioToScore;
-  private final ConfigFileCreator configFileCreator;
-  private final boolean isMandarin;
 
-  /**
-   * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
-   * If the score was below a threshold, or the magic -1, we keep it around for future study.
-   */
-  private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
-  private final LTSFactory ltsFactory;
-  private final String languageProperty;
+  private static final boolean DEBUG = false;
 
   /**
    * @param deployPath
@@ -84,217 +53,9 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    */
   public ASRScoring(String deployPath, ServerProperties serverProperties, LogAndNotify langTestDatabase) {
     super(deployPath, serverProperties, langTestDatabase);
-
-   // logger.debug("Creating ASRScoring object");
-    lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
-
-    Map<String, String> properties = serverProperties.getProperties();
-    languageProperty = properties.get("language");
-    String language = languageProperty != null ? languageProperty : "";
-
-    isMandarin = language.equalsIgnoreCase("mandarin");
-    ltsFactory = new LTSFactory(languageProperty);
-    this.letterToSoundClass = ltsFactory.getLTSClass(language);
-
-    this.configFileCreator = new ConfigFileCreator(properties, letterToSoundClass, scoringDir);
-
-    readDictionary();
-    makeDecoder();
   }
 
-  private void makeDecoder() {
-    if (svDecoderHelper == null && htkDictionary != null) {
-      svDecoderHelper = new SmallVocabDecoder(htkDictionary);
-    }
-  }
-
-  public SmallVocabDecoder getSmallVocabDecoder() {
-    return svDecoderHelper;
-  }
-
-  public <T extends CommonExercise> void sort(List<T> toSort) {
-    ltsFactory.sort(toSort);
-  }
-
-  @Override
-  public Collator getCollator() {
-    return ltsFactory.getCollator();
-  }
-
-  /**
-   * @param foreignLanguagePhrase
-   * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTS(String)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
-   */
-  public boolean checkLTS(String foreignLanguagePhrase) {
-    return checkLTS(letterToSoundClass, foreignLanguagePhrase);
-  }
-
-  /**
-   * @param foreignLanguagePhrase
-   * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTS
-   */
-  public PhoneInfo getBagOfPhones(String foreignLanguagePhrase) {
-    return checkLTS2(letterToSoundClass, foreignLanguagePhrase);
-  }
-
-  /**
-   * So chinese is special -- it doesn't do lts -- it just uses a dictionary
-   *
-   * @param lts
-   * @param foreignLanguagePhrase
-   * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
-   * @see #checkLTS(String)
-   */
-  private boolean checkLTS(LTS lts, String foreignLanguagePhrase) {
-    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
-    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
-
-    String language = isMandarin ? " MANDARIN " : "";
-    //logger.debug("checkLTS '" + language + "' tokens : '" +tokens +"'");
-
-    try {
-      int i = 0;
-      for (String token : tokens) {
-        if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL))
-          return true;
-        if (isMandarin) {
-          String segmentation = smallVocabDecoder.segmentation(token.trim());
-          if (segmentation.isEmpty()) {
-            logger.debug("checkLTS: mandarin token : " + token + " invalid!");
-            return false;
-          }
-        } else {
-          String[][] process = lts.process(token);
-          if (process == null || process.length == 0 || process[0].length == 0 ||
-              process[0][0].length() == 0 || (process.length == 1 && process[0].length == 1 && process[0][0].equals("aa"))) {
-            boolean htkEntry = htkDictionary.contains(token);
-            if (!htkEntry && !htkDictionary.isEmpty()) {
-              logger.warn("checkLTS with " + lts + "/" + languageProperty + " token #" + i +
-                  " : '" + token + "' hash " + token.hashCode() +
-                  " is invalid in " + foreignLanguagePhrase +
-                  " and not in dictionary (" + htkDictionary.size() +
-                  ")");
-              return false;
-            }
-          }
-        }
-        i++;
-      }
-    } catch (Exception e) {
-      logger.error("lts " + language + "/" + lts + " failed on '" + foreignLanguagePhrase + "'", e);
-      return false;
-    }
-    return true;
-  }
-
-  private int multiple = 0;
-
-  /**
-   * Might be n1 x n2 x n3 different possible combinations of pronunciations of a phrase
-   * Consider running ASR on all ref audio to get actual phone sequence.
-   *
-   * @param lts
-   * @param foreignLanguagePhrase
-   */
-  private PhoneInfo checkLTS2(LTS lts, String foreignLanguagePhrase) {
-    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
-    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
-
-    List<String> firstPron = new ArrayList<String>();
-    Set<String> uphones = new TreeSet<String>();
-
-    if (isMandarin) {
-      List<String> token2 = new ArrayList<String>();
-      for (String token : tokens) {
-        String segmentation = smallVocabDecoder.segmentation(token.trim());
-        if (segmentation.isEmpty()) {
-          logger.warn("no segmentation for " + foreignLanguagePhrase + " token " + token);
-        } else {
-          Collections.addAll(token2, segmentation.split(" "));
-        }
-      }
-      //    logger.debug("Tokens were " + tokens + " now " + token2);
-      tokens = token2;
-    }
-
-    for (String token : tokens) {
-      if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL))
-        return new PhoneInfo(firstPron, uphones);
-      // either lts can handle it or the dictionary can...
-
-      boolean htkEntry = htkDictionary.contains(token);
-      if (htkEntry) {
-        scala.collection.immutable.List<String[]> pronunciationList = htkDictionary.apply(token);
-        //   logger.debug("token " + pronunciationList);
-        scala.collection.Iterator iter = pronunciationList.iterator();
-        boolean first = true;
-        while (iter.hasNext()) {
-          Object next = iter.next();
-          //    logger.debug(next);
-
-          String[] tt = (String[]) next;
-          for (String t : tt) {
-            //logger.debug(t);
-            uphones.add(t);
-
-            if (first) {
-              firstPron.add(t);
-            }
-          }
-          if (!first) multiple++;
-          first = false;
-        }
-      } else {
-        String[][] process = lts.process(token);
-        //logger.debug("token " + token);
-        if (process != null) {
-
-          boolean first = true;
-          for (String[] onePronunciation : process) {
-            // each pronunciation
-            //          ArrayList<String> pronunciation = new ArrayList<String>();
-            //        pronunciations.add(pronunciation);
-            for (String phoneme : onePronunciation) {
-              //logger.debug("phoneme " +phoneme);
-              //        pronunciation.add(phoneme);
-              uphones.add(phoneme);
-
-              if (first) {
-                firstPron.add(phoneme);
-              }
-            }
-            if (!first) multiple++;
-            first = false;
-          }
-        }
-      }
-    }
-    //if (multiple % 1000 == 0) logger.debug("mult " + multiple);
-    return new PhoneInfo(firstPron, uphones);
-  }
-
-  /**
-   * For chinese, maybe later other languages.
-   *
-   * @param longPhrase
-   * @return
-   * @seex AutoCRT#getRefs
-   * @see mitll.langtest.server.scoring.ASRScoring#getScoreForAudio
-   */
-  public static String getSegmented(String longPhrase) {
-    Collection<String> tokens = svDecoderHelper.getTokens(longPhrase);
-    StringBuilder builder = new StringBuilder();
-    for (String token : tokens) {
-      builder.append(svDecoderHelper.segmentation(token.trim()));
-      builder.append(" ");
-    }
-    return builder.toString();
-  }
 
   /**
    * @param testAudioDir
@@ -368,7 +129,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
 
-    boolean b = checkLTS(sentence);
+    boolean b = checkLTS(sentence).isEmpty();
 
     if (!b) {
       logger.info("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir + " '" + sentence + "' is not in lts");
@@ -431,7 +192,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @param value2
    * @see #getEventAverages(Map, Map)
    */
-  private void getEventAverages(Map<Float, TranscriptEvent> floatTranscriptEventMap, Map<String, Float> value2) {
+/*  private void getEventAverages(Map<Float, TranscriptEvent> floatTranscriptEventMap, Map<String, Float> value2) {
     Map<String, Float> value = new HashMap<>();
     Map<String, Float> cvalue = new HashMap<>();
 
@@ -452,7 +213,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
       String key = pair.getKey();
       value2.put(key, pair.getValue() / cvalue.get(key));
     }
-  }
+  }*/
 
   /**
    * Make image files for words, and phones, find out the reco sentence from the events.
@@ -577,7 +338,7 @@ if (jsonObject != null) logger.debug("generating images from " + jsonObject);
    * @see AutoCRTScoring#getASRScoreForAudio(File, Collection, boolean, boolean)
    */
   public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
-    return getUniqueTokensInLM(lmSentences, svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT));
+    return getUniqueTokensInLM(lmSentences, getSmallVocabDecoder().getVocab(background, VOCAB_SIZE_LIMIT));
   }
 
   /**
@@ -596,7 +357,7 @@ if (jsonObject != null) logger.debug("generating images from " + jsonObject);
     String sentence;
     Set<String> backSet = new HashSet<String>(backgroundVocab);
     List<String> mergedVocab = new ArrayList<String>(backgroundVocab);
-    List<String> foregroundVocab = svDecoderHelper.getSimpleVocab(lmSentences, FOREGROUND_VOCAB_LIMIT);
+    List<String> foregroundVocab = getSmallVocabDecoder().getSimpleVocab(lmSentences, FOREGROUND_VOCAB_LIMIT);
     for (String foregroundToken : foregroundVocab) {
       if (!backSet.contains(foregroundToken)) {
         mergedVocab.add(foregroundToken);
@@ -744,37 +505,6 @@ if (jsonObject != null) logger.debug("generating images from " + jsonObject);
   }
 
   /**
-   * @see #ASRScoring(String, java.util.Map, mitll.langtest.server.LangTestDatabaseImpl)
-   */
-  private void readDictionary() {
-    htkDictionary = makeDict();
-  }
-
-  /**
-   * @return
-   * @see #readDictionary()
-   */
-  private HTKDictionary makeDict() {
-    String dictFile = configFileCreator.getDictFile();
-    if (new File(dictFile).exists()) {
-      long then = System.currentTimeMillis();
-      HTKDictionary htkDictionary = new HTKDictionary(dictFile);
-      long now = System.currentTimeMillis();
-      int size = htkDictionary.size(); // force read from lazy val
-      //if (now - then > 300) {
-      logger.info("for " + languageProperty +
-          " read dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
-      //}
-      return htkDictionary;
-    } else {
-      logger.warn("makeDict : Can't find dict file at " + dictFile);
-      return new HTKDictionary();
-    }
-  }
-
-  private SmallVocabDecoder svd = new SmallVocabDecoder();
-
-  /**
    * Tries to remove junky characters from the sentence so hydec won't choke on them.
    *
    * @param testAudio
@@ -826,4 +556,101 @@ if (jsonObject != null) logger.debug("generating images from " + jsonObject);
     Map<String, Map<String, Float>> eventScores = Collections.emptyMap();
     return new Scores(0f, eventScores, 0);
   }
+
+  /**
+   * @param phrases
+   * @return
+   * @see mitll.langtest.server.audio.AudioFileHelper#getValidPhrases(java.util.Collection)
+   */
+/*  public Collection<String> getValidPhrases(Collection<String> phrases) {
+    return getValidSentences(phrases);
+  }*/
+
+  /**
+   * @param phrase
+   * @return
+   * @see #isValid(String)
+   */
+//  private boolean isPhraseInDict(String phrase) { return checkLTS(phrase).isEmpty();  }
+
+  /**
+   * @param sentences
+   * @return lc of sentence...?
+   * @see #getValidPhrases(java.util.Collection)
+   */
+/*  private Collection<String> getValidSentences(Collection<String> sentences) {
+   // logger.info("getValidSentences checking " + sentences.size() + " sentences");
+    Set<String> filtered = new TreeSet<String>();
+    Set<String> skipped  = new TreeSet<String>();
+
+    for (String sentence : sentences) {
+      boolean valid = allValid(sentence);
+      if (!valid) {
+        sentence = getSmallVocabDecoder().toFull(sentence);
+        valid = allValid(sentence);
+      }
+      if (valid) {
+        filtered.add(sentence.toLowerCase());
+      }
+      else {
+        skipped.add(sentence);
+        logger.warn("getValidSentences : skipping '" + sentence + "' which is not in dictionary.");
+      }
+    }
+
+    if (!skipped.isEmpty()) {
+      logger.warn("getValidSentences : skipped " + skipped.size() + " of " + sentences.size() +
+          " sentences, skipped : " + skipped);
+    }
+    else {
+    //  logger.debug("getValidSentences : found " + filtered.size() + " from sentences : " + sentences.size());
+    }
+
+    return filtered;
+  }*/
+
+/*  private boolean allValid(String sentence) {
+    Collection<String> tokens = getSmallVocabDecoder().getTokens(sentence);
+    if (tokens.isEmpty() && !sentence.isEmpty()) logger.error("huh? no tokens from " + sentence);
+
+    return allTokensValid(tokens);
+  }*/
+
+/*  private boolean allTokensValid(Collection<String> tokens) {
+    boolean valid = true;
+    for (String token : tokens) {
+      if (!isValid(token)) {
+        logger.warn("\tgetValidSentences : token '" + token + "' is not in dictionary.");
+        valid = false;
+      }
+      else {
+//        logger.info("token '" + token +  "' is in dict");
+      }
+    }
+    return valid;
+  }*/
+
+  /**
+   * @param token
+   * @return
+   * @see #getValidSentences(java.util.Collection)
+   */
+/*  private boolean isValid(String token) {
+    return *//*checkToken(token) &&*//* isPhraseInDict(token);
+  }*/
+
+/*  private boolean checkToken(String token) {
+    boolean valid = true;
+    if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL)) return true;
+    for (int i = 0; i < token.length() && valid; i++) {
+      char c = token.charAt(i);
+      if (Character.isDigit(c)) {
+        valid = false;
+      }
+      if (Character.UnicodeBlock.of(c) == Character.UnicodeBlock.BASIC_LATIN) {
+        valid = false;
+      }
+    }
+    return valid;
+  }*/
 }
