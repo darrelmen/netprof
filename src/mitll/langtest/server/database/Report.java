@@ -136,19 +136,29 @@ public class Report {
    */
   private String doReport(PathHelper pathHelper) {
     StringBuilder builder = new StringBuilder();
+    builder.append("<html><head><body>");
 
     Set<Long> users = getUsers(builder);
+
+    getUsers(builder, userDAO.getUsersDevices(), "New iPad/iPhone Users");
+
     getEvents(builder, users);
 
+    getEventsDevices(builder,users);
+
     getResults(builder, users, pathHelper);
+    getResultsDevices(builder, users, pathHelper);
+
+    Collection<AudioAttribute> audioAttributes = audioDAO.getAudioAttributes();
+    // logger.debug("got " + audioAttributes.size() + " audio attributes.");
+
+    Calendar calendar = getCal();
+    Date january1st = getJanuaryFirst(calendar);
+    addRefAudio(builder, calendar, january1st, audioAttributes);
 
     builder.append("</body></head></html>");
     return builder.toString();
   }
-
-/*  public Map<Long, Map<String, Integer>> getUserToDayToRecordings(PathHelper pathHelper) {
-    return getResults(new StringBuilder(), getUsers(new StringBuilder()), pathHelper);
-  }*/
 
   /**
    * @param builder
@@ -157,22 +167,25 @@ public class Report {
    */
   private Set<Long> getUsers(StringBuilder builder) {
     List<User> users = userDAO.getUsers();
+    String users1 = "All New Users";// (users enrolled after 10/8)";
+
+    return getUsers(builder, users, users1);
+  }
+
+  private Set<Long> getUsers(StringBuilder builder, List<User> users, String users1) {
     Calendar calendar = getCal();
     Date january1st = getJanuaryFirst(calendar);
 
     int ytd = 0;
 
-    // SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM/dd/yy h:mm aaa");
     Map<Integer, Integer> monthToCount = new TreeMap<Integer, Integer>();
     Map<Integer, Integer> weekToCount = new TreeMap<Integer, Integer>();
     Set<Long> students = new HashSet<Long>();
     for (User user : users) {
-      // try {
       boolean isStudent = (user.getAge() == 89 && user.getUserID().isEmpty()) || user.getAge() == 0 || user.getUserKind() == User.Kind.STUDENT;
 
       if (user.getId() == 3 || user.getId() == 1) {
         logger.warn("skipping ? " + user);
-
         continue;
       }
       if (isStudent) {
@@ -197,31 +210,29 @@ public class Report {
         }
         //}
       } else {
-        logger.warn("skipping teacher " + user);
+        if (false) logger.warn("skipping teacher " + user);
       }
     }
-    String users1 = "New Users";// (users enrolled after 10/8)";
-    builder.append("<html><head><body>" +
-            getSectionReport(ytd, monthToCount, weekToCount, users1)
+    builder.append(
+        getSectionReport(ytd, monthToCount, weekToCount, users1)
     );
 
     return students;
   }
 
   private String getSectionReport(int ytd, Map<Integer, ?> monthToCount, Map<Integer, ?> weekToCount, String users1) {
-    //String yearCol = /*ytd > -1 ? top +*/ getYTD(ytd, users1) /*+ "</td>" : ""*/;
-    String yearCol = ytd > -1 ?  getYTD(ytd, users1) : "";
+    String yearCol = ytd > -1 ? getYTD(ytd, users1) : "";
     String monthCol = getMC(monthToCount, MONTH, users1);
-    String weekCol  = getWC(weekToCount,  WEEK, users1);
+    String weekCol = getWC(weekToCount, WEEK, users1);
     return getYearMonthWeekTable(users1, yearCol, monthCol, weekCol);
   }
 
   private String getYearMonthWeekTable(String users1, String yearCol, String monthCol, String weekCol) {
     return "<h2>" + users1 + "</h2>" +
         "<table ><tr>" +
-        top + yearCol  + "</td>"+
+        top + yearCol + "</td>" +
         top + monthCol + "</td>" +
-        top + weekCol  + "</td>" +
+        top + weekCol + "</td>" +
         "</tr></table>";
   }
 
@@ -318,11 +329,25 @@ public class Report {
    * @see #doReport
    */
   private Map<Long, Map<String, Integer>> getResults(StringBuilder builder, Set<Long> students, PathHelper pathHelper) {
+    List<Result> results = resultDAO.getResults();
+
+    String recordings = "All Recordings";
+    return getResultsForSet(builder, students, pathHelper, results, recordings);
+  }
+
+  private Map<Long, Map<String, Integer>> getResultsDevices(StringBuilder builder, Set<Long> students, PathHelper pathHelper) {
+    List<Result> results = resultDAO.getResultsDevices();
+
+//    new Exception().printStackTrace();
+    String recordings = "Device Recordings";
+    return getResultsForSet(builder, students, pathHelper, results, recordings);
+  }
+
+  private Map<Long, Map<String, Integer>> getResultsForSet(StringBuilder builder, Set<Long> students, PathHelper pathHelper, List<Result> results, String recordings) {
     Calendar calendar = getCal();
     Date january1st = getJanuaryFirst(getCal());
     int ytd = 0;
 
-    List<Result> results = resultDAO.getResults();
     Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
 
     //logger.debug("found " + exToAudio.size() + " ref audio exercises");
@@ -341,7 +366,6 @@ public class Report {
       SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
       String today = simpleDateFormat2.format(new Date());
       File file = getReportFile(pathHelper, today + "_all");
-//      logger.debug("wrote to " + file.getAbsolutePath());
       BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 
       teacherAudio = 0;
@@ -366,9 +390,6 @@ public class Report {
                 } else {
                   invalidScore++;
                 }
-                //} else {
-                //  scoresByTeachers++;
-                //}
               } else {
                 skipped.add(result.getUserid());
                 teacherAudio++;
@@ -386,27 +407,15 @@ public class Report {
       logger.error("got " + e, e);
     }
 
-    logger.debug("Skipped " + invalid + " invalid recordings, " + invalidScore + " -1 score items, " +
-        //scoresByTeachers + " scores by teachers(?) " + scoresBeforeOctober + " before 10/8 " +
-        beforeJanuary + " beforeJan1st");
+    logger.debug("Skipped " + invalid + " invalid recordings, " + invalidScore + " -1 score items, " + beforeJanuary + " beforeJan1st");
     logger.debug("skipped " + teacherAudio + " teacher recordings by " + skipped);
     logger.debug("userToDayToCount " + userToDayToCount);
 
-    String recordings = "Recordings";
-
     builder.append("\n<br/><span>Valid student recordings</span>");
     builder.append(
-//        getYTD(ytd, recordings) +
-//            getMC(monthToCount, MONTH, recordings) +
-//            getWC(weekToCount, WEEK, recordings)
-
         getSectionReport(ytd, monthToCount, weekToCount, recordings)
     );
 
-    Collection<AudioAttribute> audioAttributes = audioDAO.getAudioAttributes();
-    logger.debug("got " + audioAttributes.size() + " audio attributes.");
-
-    addRefAudio(builder, calendar, january1st, audioAttributes);
 
     return userToDayToCount;
   }
@@ -432,14 +441,7 @@ public class Report {
     }
 
     String refAudioRecs = "Ref Audio Recordings";
-    builder.append(
-//        getYTD(ytd, refAudioRecs) +
-//            getMC(monthToCount, MONTH, refAudioRecs) +
-//            getWC(weekToCount, WEEK, refAudioRecs)
-
-        getSectionReport(ytd, monthToCount, weekToCount, refAudioRecs)
-
-    );
+    builder.append(getSectionReport(ytd, monthToCount, weekToCount, refAudioRecs));
   }
 
   /**
@@ -544,10 +546,23 @@ public class Report {
    * @see #doReport
    */
   private void getEvents(StringBuilder builder, Set<Long> students) {
-    Calendar calendar = getCal();
-    Date january1st = getJanuaryFirst(calendar);
 
     List<Event> all = eventDAO.getAll();
+    String activeUsers = ACTIVE_USERS;
+    String tableLabel = "Time on Task";
+
+    getEvents(builder, students, all, activeUsers, tableLabel);
+  }
+  private void getEventsDevices(StringBuilder builder, Set<Long> students) {
+
+    List<Event> all = eventDAO.getAllDevices();
+    String activeUsers = "Active iPad/iPhone Users";
+    String tableLabel = "iPad/iPhone Time on Task";
+
+    getEvents(builder, students, all, activeUsers, tableLabel);
+  }
+
+  private void getEvents(StringBuilder builder, Set<Long> students, List<Event> all, String activeUsers, String tableLabel) {
     Map<Integer, Set<Long>> monthToCount = new TreeMap<Integer, Set<Long>>();
 
     Map<Integer, Map<Long, Set<Event>>> monthToCount2 = new TreeMap<Integer, Map<Long, Set<Event>>>();
@@ -556,6 +571,9 @@ public class Report {
     Map<Integer, Set<Long>> weekToCount = new TreeMap<Integer, Set<Long>>();
     Set<Long> teachers = new HashSet<Long>();
     int skipped = 0;
+
+    Calendar calendar = getCal();
+    Date january1st = getJanuaryFirst(calendar);
 
     for (Event event : all) {
       long creatorID = event.getCreatorID();
@@ -570,15 +588,8 @@ public class Report {
     }
     logger.debug("skipped  " + skipped + " events from teachers " + teachers);
 
-    String activeUsers = ACTIVE_USERS;
-    builder.append(
-      //  getMC(monthToCount, MONTH, activeUsers) +
-     //       getWC(weekToCount, WEEK, activeUsers)
+    builder.append(getSectionReport(-1, monthToCount, weekToCount, activeUsers));
 
-        getSectionReport(-1, monthToCount, weekToCount, ACTIVE_USERS)
-
-        //  getSectionReport(-1, monthToCount, weekToCount, activeUsers)
-    );
     Map<Integer, Long> monthToDur = getMonthToDur(monthToCount2);
     long total = 0;
     for (Long v : monthToDur.values()) total += v;
@@ -586,24 +597,16 @@ public class Report {
     total /= MIN_MILLIS;
 
     Map<Integer, Long> weekToDur = getWeekToDur(weekToCount2);
-    //logger.debug("week to dur " + weekToDur);
 
     getMinMap(monthToDur);
 
     String timeOnTaskMinutes = TIME_ON_TASK_MINUTES;
-    String yearMonthWeekTable = getYearMonthWeekTable("Time on Task",
+    String yearMonthWeekTable = getYearMonthWeekTable(tableLabel,
         getYTD(Math.round(total / 60), TOTAL_TIME_ON_TASK_HOURS),
         getMC(getMinMap(monthToDur), MONTH, timeOnTaskMinutes),
         getWC(getMinMap(weekToDur), WEEK, timeOnTaskMinutes)
     );
-    builder.append(
-//        getYTD(Math.round(total / 60), TOTAL_TIME_ON_TASK_HOURS) +
-//            getMC(getMinMap(monthToDur), MONTH, timeOnTaskMinutes) +
-//            getWC(getMinMap(weekToDur), WEEK, timeOnTaskMinutes)
-//
-//        getSectionReport(ytd, monthToCount, weekToCount, users1)
-         yearMonthWeekTable
-    );
+    builder.append(yearMonthWeekTable);
   }
 
   private boolean isValidUser(long creatorID) {
