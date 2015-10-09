@@ -518,6 +518,17 @@ fieldset > legend {
     line-height: 100%;
 }
 
+.Instruction-data-with-wrap-keep-word  {
+    color: #CC6600;
+    font-size: 28px;
+    font-weight: bold;
+    word-wrap: normal;       /* Internet Explorer 5.5+ */
+    word-break: keep-all;
+    white-space: normal;
+    font-family: sans-serif;
+    line-height: 100%;
+}
+
 .blueColor {
     color: #6192bb;
 }
