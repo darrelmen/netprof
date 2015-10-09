@@ -448,17 +448,13 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     w.addMouseOverHandler(new MouseOverHandler() {
       @Override
       public void onMouseOver(MouseOverEvent mouseOverEvent) {
-
         w.addStyleName("underline");
-        logger.info("got mouse over");
       }
     });
     w.addMouseOutHandler(new MouseOutHandler() {
       @Override
       public void onMouseOut(MouseOutEvent mouseOutEvent) {
         w.removeStyleName("underline");
-        logger.info("got mouse out");
-
       }
     });
     w.addStyleName("Instruction-data-with-wrap-keep-word");
@@ -466,7 +462,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       w.addStyleName("englishFont");
     }
     if (!chineseCharacter) w.addStyleName("rightFiveMargin");
-    //  addTooltip(w, "Click to search");
+
     return w;
   }
 
@@ -477,7 +473,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   protected Label getCommentLabel() {
     final Label commentLabel = new Label("comment?");
     commentLabel.getElement().getStyle().setBackgroundColor("#ff0000");
-    //commentLabel.setVisible(true);
     commentLabel.addStyleName("ImageOverlay");
     return commentLabel;
   }
