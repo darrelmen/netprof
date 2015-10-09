@@ -208,18 +208,21 @@ public class PagingExerciseList extends ExerciseList {
         @Override
         public void gotTypeAheadEntry(String text) {
           controller.logEvent(getTypeAhead(), "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
-          //searchBoxEntry(text);
-          logger.info("load for " + text);
-          loadExercises(getHistoryToken(""), text, false);
+          loadExercises(getHistoryToken(text, ""), text, false);
         }
       };
     }
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#makeClickableText(String, String, String, boolean)
+   * @param text
+   */
   public void searchBoxEntry(String text) {
     if (showTypeAhead) {
       typeAhead.setText(text);
-      loadExercises(getHistoryToken(""), text, false);
+      pushNewItem(text,"");
+//      loadExercises(getHistoryToken(text, ""), text, false);
     }
   }
 
@@ -239,6 +242,8 @@ public class PagingExerciseList extends ExerciseList {
   protected String getTypeAheadText() {
     return typeAhead.getText();
   }
+
+  protected void setTypeAheadText(String t) { typeAhead.setText(t);}
 
   @Override
   protected void gotExercises(boolean success) {
@@ -272,8 +277,8 @@ public class PagingExerciseList extends ExerciseList {
     Window.alert("Please stop recording before changing items.");
   }
 
-  String getHistoryToken(String id) {
-    return "item=" + id;
+  String getHistoryToken(String search, String id) {
+    return "search="+search +";item=" + id;
   }
 
   void gotClickOnItem(final CommonShell e) {
@@ -283,7 +288,7 @@ public class PagingExerciseList extends ExerciseList {
     } else {
       controller.logEvent(this, "ExerciseList", e.getID(), "Clicked on item '" + e.getTooltip() + "'");
 
-      pushNewItem(e.getID());
+      pushNewItem(getTypeAheadText(), e.getID());
     }
   }
 
