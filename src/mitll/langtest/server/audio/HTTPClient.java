@@ -19,16 +19,22 @@ public class HTTPClient {
 	private BufferedReader receiver;
 
 	/* Constructor */
+  public HTTPClient() {}
 
-	public HTTPClient(String url) {
+/*	public HTTPClient(String url) {
 		logger.debug("connect to " + url);
 		try {
 			httpConn = setupHttpConn(url);
 		} catch (IOException e) {
 			logger.error("Error constructing HTTPClient:\n" + e, e);
 		}
-	}
+	}*/
 
+	/**
+	 * @see mitll.langtest.server.database.UserManagement#userExists(HttpServletRequest, String, String)
+	 * @param webserviceIP
+	 * @param webservicePort
+	 */
 	public HTTPClient(String webserviceIP, int webservicePort) {
 		String url = "http://" + webserviceIP + ":" + webservicePort;
 
@@ -95,11 +101,13 @@ public class HTTPClient {
 		return httpConn;
 	}
 
+/*
 	private String read(HttpURLConnection conn) {
 		return receive(conn);
 	}
+*/
 
-	public void closeConn() {
+	private void closeConn() {
 		httpConn.disconnect();
 		httpConn = null;
 	}
@@ -154,7 +162,7 @@ public class HTTPClient {
 		return new BufferedReader(new InputStreamReader(httpConn.getInputStream(), "UTF8"));
 	}
 
-	public String sendAndReceive(String input) throws IOException {
+	private String sendAndReceive(String input) throws IOException {
 		try {
 			send(input);
 			return receive();
