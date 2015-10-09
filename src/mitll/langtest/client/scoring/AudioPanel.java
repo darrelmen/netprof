@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -34,7 +35,7 @@ import java.util.logging.Logger;
  */
 public class AudioPanel extends VerticalPanel implements RequiresResize {
 
-  public static final int LEFT_COLUMN_WIDTH = 275;
+  public static final int LEFT_COLUMN_WIDTH = PagingContainer.MAX_WIDTH;
   private Logger logger = Logger.getLogger("AudioPanel");
 
     static final int MIN_WIDTH = 256;
