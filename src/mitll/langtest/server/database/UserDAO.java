@@ -499,6 +499,12 @@ public class UserDAO extends DAO {
     return getUsers("SELECT * from users order by " + ID + " ASC");
   }
 
+  public List<User> getUsersDevices() {
+    return getUsers("SELECT * from users" +
+            " where device like 'i%'"+
+        " order by " + ID + " ASC"
+    );
+  }
   /**
    * @return
    * @see AudioDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
