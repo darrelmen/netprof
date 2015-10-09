@@ -45,6 +45,8 @@ public class ExerciseTrie extends Trie<CommonExercise> {
     boolean isMandarin = language.equalsIgnoreCase(MANDARIN);
     boolean isKorean   = language.equalsIgnoreCase("Korean");
 
+    logger.warn("lang " + language + " looking at " + exercisesForState.size());
+
     for (CommonExercise exercise : exercisesForState) {
       String english = exercise.getEnglish();
       if (english != null && !english.isEmpty()) {
@@ -85,6 +87,11 @@ public class ExerciseTrie extends Trie<CommonExercise> {
             addEntry(exercise, t);
             addEntry(exercise, removeDiacritics(t));
           }
+        }
+      }
+      else {
+        for (String t : smallVocabDecoder.getTokens(exercise.getMeaning())) {
+          addEntry(exercise, t);
         }
       }
     }
