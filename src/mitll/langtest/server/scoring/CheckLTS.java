@@ -17,20 +17,19 @@ class CheckLTS {
   private final String languageProperty;
 
   private final HTKDictionary htkDictionary;
- // private SmallVocabDecoder svDecoderHelper = null;
   private final boolean isMandarin;
   private static final boolean DEBUG = false;
 
-  public CheckLTS(LTS lts, HTKDictionary htkDictionary, String languageProperty, SmallVocabDecoder svDecoderHelper) {
+  public CheckLTS(LTS lts, HTKDictionary htkDictionary, String languageProperty) {
     this.letterToSoundClass = lts;
     this.htkDictionary = htkDictionary;
     if (htkDictionary.isEmpty()) logger.warn("\n\n\n dict is empty?");
     String language = languageProperty != null ? languageProperty : "";
     this.languageProperty = language;
-    //this.svDecoderHelper = svDecoderHelper;
     isMandarin = language.equalsIgnoreCase("mandarin");
     if (isMandarin) logger.warn("using mandarin segmentation.");
   }
+
   /**
    * @param foreignLanguagePhrase
    * @return
@@ -77,7 +76,6 @@ class CheckLTS {
           if (segmentation.isEmpty()) {
             logger.warn("checkLTS: mandarin token : '" + token + "' invalid!");
             oov.add(trim);
-            // return false;
           }
         } else {
           String[][] process = lts.process(token);
@@ -91,12 +89,10 @@ class CheckLTS {
                       "' and not in dictionary of size " + htkDictionary.size()
               );
               oov.add(trim);
-            }
-            else {
+            } else {
               indict.add(trim);
             }
-          }
-          else {
+          } else {
             //  logger.info("for " + token + " got " + (process.length));
 //            for (String [] first : process) {
 //              for (String  second : first) logger.info("\t" + second);
@@ -113,8 +109,7 @@ class CheckLTS {
     }
     if (foreignLanguagePhrase.trim().isEmpty()) {
       //logger.warn("huh fl is empty?");
-    }
-    else {
+    } else {
       if (DEBUG) logger.info("for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
     }
     return oov;
@@ -205,25 +200,4 @@ class CheckLTS {
     //if (multiple % 1000 == 0) logger.debug("mult " + multiple);
     return new ASR.PhoneInfo(firstPron, uphones);
   }
-
-  /**
-   * For chinese, maybe later other languages.
-   *
-   * @param longPhrase
-   * @return
-   * @seex AutoCRT#getRefs
-   * @see mitll.langtest.server.scoring.ASRScoring#getScoreForAudio
-   */
-/*  public String getSegmented(String longPhrase) {
-    Collection<String> tokens = svDecoderHelper.getTokens(longPhrase);
-*//*    System.err.println("got '" + longPhrase +
-        "' -> '" +tokens +
-        "'");*//*
-    StringBuilder builder = new StringBuilder();
-    for (String token : tokens) {
-      builder.append(svDecoderHelper.segmentation(token.trim()));
-      builder.append(" ");
-    }
-    return builder.toString();
-  }*/
 }
