@@ -392,6 +392,7 @@ public class ExcelImport implements ExerciseDAO {
     int skipped = 0;
     int deleted = 0;
     int englishSkipped = 0;
+
     String unitName = null, chapterName = null, weekName = null;
     try {
       Iterator<Row> iter = sheet.rowIterator();
