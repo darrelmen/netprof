@@ -12,8 +12,7 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -363,6 +362,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   /**
    * TODO : also should get back button to work... maybe needs to encode the text box state?
+   *
    * @param label
    * @param value
    * @param includeLabel
@@ -394,8 +394,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       nameValueRow.add(englishPhrase);
       addTooltip(englishPhrase, label.replaceAll(":", ""));
       englishPhrase.addStyleName("leftFiveMargin");
-    }
-    else {
+    } else {
       String language = controller.getLanguage();
       boolean isMandarinOrKorean = language.equalsIgnoreCase("Mandarin") || language.equals("Korean");
 
@@ -412,7 +411,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
           tokens.add(html);
         }
       } else {
-       // tokens = getTokens(value);
+        // tokens = getTokens(value);
         tokens = Arrays.asList(value.split(CommentNPFExercise.SPACE_REGEX));
       }
 
@@ -439,7 +438,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   }
 
   private InlineHTML makeClickableText(String label, String value, final String html, boolean chineseCharacter) {
-    InlineHTML w = new InlineHTML(html, WordCountDirectionEstimator.get().estimateDirection(value));
+    final InlineHTML w = new InlineHTML(html, WordCountDirectionEstimator.get().estimateDirection(value));
     w.getElement().getStyle().setCursor(Style.Cursor.POINTER);
 
     w.addClickHandler(new ClickHandler() {
@@ -452,13 +451,28 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
         });
       }
     });
+    w.addMouseOverHandler(new MouseOverHandler() {
+      @Override
+      public void onMouseOver(MouseOverEvent mouseOverEvent) {
 
+        w.addStyleName("underline");
+        logger.info("got mouse over");
+      }
+    });
+    w.addMouseOutHandler(new MouseOutHandler() {
+      @Override
+      public void onMouseOut(MouseOutEvent mouseOutEvent) {
+        w.removeStyleName("underline");
+        logger.info("got mouse out");
+
+      }
+    });
     w.addStyleName("Instruction-data-with-wrap");
     if (label.contains("Meaning")) {
       w.addStyleName("englishFont");
     }
     if (!chineseCharacter) w.addStyleName("rightFiveMargin");
-    addTooltip(w, "Click to search");
+    //  addTooltip(w, "Click to search");
     return w;
   }
 
