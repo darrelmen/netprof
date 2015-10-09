@@ -1,5 +1,7 @@
-package mitll.langtest.server;
+package mitll.langtest.server.decoder;
 
+import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.AudioAttribute;
