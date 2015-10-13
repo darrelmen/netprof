@@ -1353,7 +1353,7 @@ public class ScoreServlet extends DatabaseServlet {
     String lessonPlanFile = getLessonPlan();
     if (!new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
-    db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile, true,
+    db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile,
         relativeConfigDir + File.separator + serverProps.getMediaDir());
   }
 
