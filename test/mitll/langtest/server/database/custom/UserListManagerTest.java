@@ -50,7 +50,7 @@ public class UserListManagerTest {
     logger.debug("made " + database);
     String media = parent + File.separator + "media";
     logger.debug("media " + media);
-    database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(), true, "media");
+    database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(), "media");
     List<CommonExercise> exercises = database.getExercises();
   }
 
