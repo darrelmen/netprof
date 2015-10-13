@@ -1,5 +1,6 @@
 package mitll.langtest.server;
 
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
@@ -31,9 +32,7 @@ public class ServerProperties {
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
   private static final String H2_DATABASE = "h2Database";
   private static final String H2_DATABASE_DEFAULT = "vlr-parle";   //likely never what you want
-  private static final String READ_FROM_FILE = "readFromFile";
   private static final String LANGUAGE = "language";
-
 
   private static final String MEDIA_DIR = "mediaDir";
   private static final String RECO_TEST = "recoTest";
@@ -45,12 +44,10 @@ public class ServerProperties {
   private static final String EMAIL_ADDRESS = "emailAddress";
   private static final String AUDIO_OFFSET = "audioOffset";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
-  private static final String MAPPING_FILE = "mappingFile";
   private static final String NO_MODEL = "noModel";
   private static final String TIER_INDEX = "tierIndex";
-  private static final String VLR_PARLE_PILOT_ITEMS_TXT = "vlr-parle-pilot-items.txt";
   private static final String QUIET_AUDIO_OK = "quietAudioOK";
-  private static final String UNKNOWN_MODEL_BIAS = "unknownModelBias";
+ // private static final String UNKNOWN_MODEL_BIAS = "unknownModelBias";
 
   private static final String CONFIG_FILE = "configFile";
 
@@ -74,8 +71,8 @@ public class ServerProperties {
       "Sandy",
       "Gordon");
 
-  public static final String TAMAS_1 = "tamas.g.marius.civ@mail.mil";
-  public static final String TAMAS_2 = "tamas.marius@dliflc.edu";
+  private static final String TAMAS_1 = "tamas.g.marius.civ@mail.mil";
+  private static final String TAMAS_2 = "tamas.marius@dliflc.edu";
   private static final List<String> DLI_EMAILS = Arrays.asList(
       TAMAS_1,
       TAMAS_2,
@@ -85,15 +82,14 @@ public class ServerProperties {
 
 
   private static final Set<String> ADMINLIST = new HashSet<String>(Arrays.asList("gvidaver", "tmarius",
-      "drandolph", "swagner", "gmarkovic", "djones", "jmelot", "rbudd", "jray", "pgatewood"));
+      "drandolph", "swagner", "gmarkovic", "djones", "jmelot", "rbudd", "pgatewood"));
 
   /**
    * Set this property for non-DLI deployments.
    */
   private static final String REPORT_EMAILS = "reportEmails";
 
-  private List<String> reportEmails = Arrays.asList(TAMAS_1, TAMAS_2, GORDON_VIDAVER, DOUG_JONES, RAY_BUDD);;
-
+  private List<String> reportEmails = Arrays.asList(TAMAS_1, TAMAS_2, GORDON_VIDAVER, DOUG_JONES, RAY_BUDD);
   private List<String> approvers = DLI_APPROVERS;
   private List<String> approverEmails = DLI_EMAILS;
   private Set<String> admins = ADMINLIST;
@@ -175,10 +171,6 @@ public class ServerProperties {
     return props.getProperty("lessonPlanFile", "lesson.plan");
   }
 
-  public boolean getUseFile() {
-    return getDefaultTrue(READ_FROM_FILE);
-  }
-
   public boolean doRecoTest() {
     return getDefaultFalse(RECO_TEST);
   }
@@ -209,6 +201,11 @@ public class ServerProperties {
   //--note that depending on how many unique elements are in each column, the 
   //rows that appear on the classroom site may not be in the order 
   //"unit,chapter,week"
+
+  /**
+   * @see mitll.langtest.server.database.exercise.ExcelImport#ExcelImport(String, String, ServerProperties, UserListManager, String, boolean)
+   * @return
+   */
   public int[] getUnitChapterWeek() {
     int[] parsedUCW = new int[]{-1, -1, -1};
     String[] ucw = props.getProperty(TIER_INDEX, "-1,-1,-1").replaceAll("\\s+", "").split(",");
