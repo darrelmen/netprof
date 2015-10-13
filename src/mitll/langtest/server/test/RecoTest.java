@@ -1,5 +1,8 @@
-package mitll.langtest.server;
+package mitll.langtest.server.test;
 
+import mitll.langtest.server.LangTestDatabaseImpl;
+import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
