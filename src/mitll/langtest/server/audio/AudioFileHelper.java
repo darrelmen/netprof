@@ -783,7 +783,7 @@ public class AudioFileHelper implements CollationSort {
    * @param e
    * @param audioFile
    * @param answer
-   * @see mitll.langtest.server.RecoTest#isMatch
+   * @see mitll.langtest.server.test.RecoTest#isMatch
    */
   public PretestScore getFlashcardAnswer(CommonExercise e, File audioFile, AudioAnswer answer) {
     return this.autoCRT.getFlashcardAnswer(e, audioFile, answer, this.serverProps.getLanguage(), true, false, false);
