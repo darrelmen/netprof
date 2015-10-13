@@ -198,7 +198,7 @@ public class RefResultTest {
     String media = parent + File.separator + "media";
     logger.debug("made " + war + " media " + media);
 
-    war.setInstallPath(".", parent + File.separator + war.getServerProps().getLessonPlan(), true, "media");
+    war.setInstallPath(".", parent + File.separator + war.getServerProps().getLessonPlan(), "media");
     List<CommonExercise> exercises = war.getExercises();
     return war;
   }
