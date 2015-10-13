@@ -244,7 +244,7 @@ public class PropertyHandler {
    * @see #PropertyHandler(java.util.Map)
    * @return
    */
-  private boolean checkParams() {
+  private void checkParams() {
     String isGrading = Window.Location.getParameter(GRADING);
     String numGrades = Window.Location.getParameter(NUM_GRADES_TO_COLLECT_PARAM);
     String bkgColorForRefParam = Window.Location.getParameter(BKG_COLOR_FOR_REF);
@@ -317,7 +317,7 @@ public class PropertyHandler {
       }
     }
 
-    return grading;
+   // return grading;
   }
 
   /**
@@ -372,7 +372,7 @@ public class PropertyHandler {
   }
 
   public boolean hasDialog(){
-	  return (dialog != "");
+	  return !dialog.isEmpty();
   }
 
   public String dialogFile() {return dialog;}
