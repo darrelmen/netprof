@@ -15,14 +15,15 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.sorter.ExerciseSorter;
+import mitll.langtest.server.test.RecoTest;
+import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
-import mitll.langtest.server.trie.ExerciseTrie;
-import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -64,7 +65,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final int SLOW_MILLIS = 40;
   private RefResultDecoder refResultDecoder;
 
-  public static final String REGULAR = "regular";
+ // private static final String REGULAR = "regular";
   private static final boolean warnMissingFile = true;
 
 
@@ -668,10 +669,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return getExercise(shell.getID(), user.getId(), false);
   }*/
 
-  private ExerciseListWrapper getExerciseIDs(int userID) {
+/*  private ExerciseListWrapper getExerciseIDs(int userID) {
     Map<String, Collection<String>> objectObjectMap = Collections.emptyMap();
     return getExerciseIds(0, objectObjectMap, "", -1, userID, "", false, false, false, false);
-  }
+  }*/
 
   /**
    * Joins with annotation data when doing QC.
@@ -796,7 +797,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @see mitll.langtest.client.list.ListInterface#getExercises
    */
-  List<CommonExercise> getExercises() {
+  public List<CommonExercise> getExercises() {
     long then = System.currentTimeMillis();
     List<CommonExercise> exercises = db.getExercises();
     makeAutoCRT();   // side effect of db.getExercises is to make the exercise DAO which is needed here...
@@ -1903,17 +1904,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * Just for appen recording.
-   *
-   * @param user
-   * @param exercise1
-   * @param audioAnswer
-   */
-  public void addToAudioTable(int user, CommonExercise exercise1, AudioAnswer audioAnswer) {
-    addToAudioTable(user, REGULAR, exercise1, exercise1.getID(), audioAnswer);
-  }
-
-  /**
    * Remember this audio as reference audio for this exercise, and possibly clear the APRROVED (inspected) state
    * on the exercise indicating it needs to be inspected again (we've added new audio).
    *
@@ -1960,7 +1950,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @see #getExercises
    */
-  void makeAutoCRT() {
+  public void makeAutoCRT() {
     audioFileHelper.makeAutoCRT(this);
   }
 
@@ -2108,7 +2098,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public void init() {
     this.pathHelper = new PathHelper(getServletContext());
     readProperties(getServletContext());
-    setInstallPath(serverProps.getUseFile(), db);
+    setInstallPath(db);
     audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this);
     if (serverProps.doRecoTest() || serverProps.doRecoTest2()) {
       new RecoTest(this, serverProps, pathHelper, audioFileHelper);
@@ -2196,16 +2186,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @param useFile
    * @param db
    * @return
    * @see LangTestDatabaseImpl#init()
    */
-  private void setInstallPath(boolean useFile, DatabaseImpl db) {
+  private void setInstallPath(DatabaseImpl db) {
     String lessonPlanFile = getLessonPlan();
-    if (useFile && !new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
+    if (!new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
-    db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile, useFile,
+    db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile,
         relativeConfigDir + File.separator + serverProps.getMediaDir());
   }
 
