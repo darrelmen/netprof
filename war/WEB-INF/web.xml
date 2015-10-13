@@ -68,7 +68,7 @@
 
     <servlet>
         <servlet-name>loadTestServlet</servlet-name>
-        <servlet-class>mitll.langtest.server.LoadTestServlet</servlet-class>
+        <servlet-class>mitll.langtest.server.load.LoadTestServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>loadTestServlet</servlet-name>
@@ -77,7 +77,7 @@
 
     <context-param>
         <param-name>config</param-name>
-        <param-value>mandarin</param-value>
+        <param-value>korean</param-value>
     </context-param>
 
     <context-param>
