@@ -1,11 +1,11 @@
 package mitll.langtest.client.scoring;
 
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.HashSet;
@@ -21,7 +21,6 @@ import java.util.logging.Logger;
  */
 public class ASRScoringAudioPanel extends ScoringAudioPanel {
   private Logger logger = Logger.getLogger("ASRScoringAudioPanel");
-
   public static final String SCORE = "score";
   private final Set<String> tested = new HashSet<String>();
   private boolean useScoreToColorBkg = true;
@@ -33,10 +32,12 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @param gaugePanel
    * @param playButtonSuffix
    * @param exerciseID
+   * @param exercise
+   * @param instance
    */
   public ASRScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel,
-                              String playButtonSuffix, String exerciseID) {
-    super(refSentence, service, controller, gaugePanel, playButtonSuffix, exerciseID);
+                              String playButtonSuffix, String exerciseID, CommonExercise exercise, String instance) {
+    super(refSentence, service, controller, gaugePanel, playButtonSuffix, exerciseID, exercise, instance);
   }
 
   /**
@@ -50,11 +51,13 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @param rightMargin
    * @param playButtonSuffix
    * @param exerciseID
+   * @param exercise
+   * @param instance
    */
   public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                               ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
-                              int rightMargin, String playButtonSuffix, String exerciseID) {
-    super(path, refSentence, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, exerciseID);
+                              int rightMargin, String playButtonSuffix, String exerciseID, CommonExercise exercise, String instance) {
+    super(path, refSentence, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, exerciseID, exercise, instance);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
@@ -100,7 +103,6 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
         //  Window.alert("Server error -- couldn't contact server.");
         //}
         //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " failure? "+ caught.getMessage());
-
         wordTranscript.image.setVisible(false);
         phoneTranscript.image.setVisible(false);
       }
