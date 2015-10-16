@@ -33,11 +33,12 @@ public class WaveformExercisePanel extends ExercisePanel {
    * @param service
    * @param controller
    * @param doNormalRecording
+   * @param instance
    * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#getFactory(mitll.langtest.client.list.PagingExerciseList)
    */
   public WaveformExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service,
-                               final ExerciseController controller, ListInterface exerciseList, boolean doNormalRecording) {
-    super(e, service, controller, exerciseList, doNormalRecording ? "" : EXAMPLE_RECORD);
+                               final ExerciseController controller, ListInterface exerciseList, boolean doNormalRecording, String instance) {
+    super(e, service, controller, exerciseList, doNormalRecording ? "" : EXAMPLE_RECORD, instance);
     getElement().setId("WaveformExercisePanel");
   }
 
@@ -57,7 +58,7 @@ public class WaveformExercisePanel extends ExercisePanel {
   }
 
   /**
-   * @see ExercisePanel#ExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, mitll.langtest.client.list.ListInterface, String)
+   * @see ExercisePanel#ExercisePanel(CommonExercise, LangTestDatabaseAsync, ExerciseController, ListInterface, String, String)
    *
    */
   protected void addInstructions() {
@@ -79,7 +80,6 @@ public class WaveformExercisePanel extends ExercisePanel {
   protected String getExerciseContent(CommonExercise e) {
     //System.out.println("normal recording for " +e.getID());
     String context = isNormalRecord() ? e.getForeignLanguage() : hasContext(exercise) ? exercise.getContext() : "No in-context audio for this exercise.";
-
     return ExerciseFormatter.getArabic(context);
   }
 
@@ -115,7 +115,7 @@ public class WaveformExercisePanel extends ExercisePanel {
   }
 
   private void addExampleSentenceRecorder(CommonExercise exercise, LangTestDatabaseAsync service, ExerciseController controller, int index, Panel vp) {
-    RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, false, "context=" + Result.AUDIO_TYPE_REGULAR);
+    RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, false, "context=" + Result.AUDIO_TYPE_REGULAR, instance);
     audioPanels.add(fast);
     vp.add(fast);
 
@@ -126,7 +126,7 @@ public class WaveformExercisePanel extends ExercisePanel {
   private VerticalPanel addRecordAudioPanelNoCaption(CommonExercise exercise, LangTestDatabaseAsync service,
                                             ExerciseController controller, int index, Panel vp, String audioType) {
 //    System.out.println("addRecordAudioPanel " + exercise + " audioType " +audioType);
-    RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, false, audioType);
+    RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, false, audioType, instance);
     audioPanels.add(fast);
     vp.add(fast);
 
