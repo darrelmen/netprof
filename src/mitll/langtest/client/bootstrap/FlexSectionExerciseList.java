@@ -528,7 +528,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     Panel status = getStatusRow();
     container.add(status);
     status.addStyleName("leftFiftyPercentMargin");
-   // return status;
   }
 
   Panel getStatusRow() {
