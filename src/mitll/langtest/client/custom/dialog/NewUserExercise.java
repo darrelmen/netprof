@@ -64,6 +64,7 @@ public class NewUserExercise extends BasicDialog {
   ListInterface listInterface;
   private Panel toAddTo;
   private boolean clickedCreate = false;
+  String instance;
 
   /**
    * @see EditItem#getAddOrEditPanel
@@ -72,14 +73,16 @@ public class NewUserExercise extends BasicDialog {
    * @param itemMarker
    * @param editItem
    * @param newExercise
+   * @param instance
    */
   public NewUserExercise(final LangTestDatabaseAsync service,
-                         ExerciseController controller, HasText itemMarker, EditItem editItem, CommonUserExercise newExercise) {
+                         ExerciseController controller, HasText itemMarker, EditItem editItem, CommonUserExercise newExercise, String instance) {
     this.controller = controller;
     this.service = service;
     this.itemMarker = itemMarker;
     this.editItem = editItem;
     this.newUserExercise = newExercise.toUserExercise();
+    this.instance = instance;
   }
 
   /**
@@ -190,12 +193,12 @@ public class NewUserExercise extends BasicDialog {
    * @return
    */
   ControlGroup makeRegularAudioPanel(Panel row) {
-    rap = makeRecordAudioPanel(row, true);
+    rap = makeRecordAudioPanel(row, true, instance);
     return addControlGroupEntrySimple(row, NORMAL_SPEED_REFERENCE_RECORDING, rap);
   }
 
   ControlGroup makeSlowAudioPanel(Panel row) {
-    rapSlow = makeRecordAudioPanel(row, false);
+    rapSlow = makeRecordAudioPanel(row, false, instance);
     return addControlGroupEntrySimple(row, SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL, rapSlow);
   }
 
@@ -515,10 +518,11 @@ public class NewUserExercise extends BasicDialog {
    * @see #makeRegularAudioPanel(com.google.gwt.user.client.ui.Panel)
    * @param row
    * @param recordRegularSpeed
+   * @param instance
    * @return
    */
-  CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row, boolean recordRegularSpeed) {
-    return new CreateFirstRecordAudioPanel(newUserExercise, row,  recordRegularSpeed);
+  CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row, boolean recordRegularSpeed, String instance) {
+    return new CreateFirstRecordAudioPanel(newUserExercise, row,  recordRegularSpeed, instance);
   }
 
   protected class CreateFirstRecordAudioPanel extends RecordAudioPanel {
@@ -527,8 +531,8 @@ public class NewUserExercise extends BasicDialog {
     private WaveformPostAudioRecordButton postAudioButton;
 
     public CreateFirstRecordAudioPanel(CommonExercise newExercise, Panel row,
-                                       boolean recordRegularSpeed) {
-      super(newExercise, NewUserExercise.this.controller, row, NewUserExercise.this.service, 0, false, NewUserExercise.this.controller.getAudioType());
+                                       boolean recordRegularSpeed, String instance) {
+      super(newExercise, NewUserExercise.this.controller, row, NewUserExercise.this.service, 0, false, NewUserExercise.this.controller.getAudioType(), instance);
       this.recordRegularSpeed = recordRegularSpeed;
       setExercise(newExercise);
 
