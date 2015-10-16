@@ -15,6 +15,8 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonExercise;
 
+import java.util.logging.Logger;
+
 /**
  * Lets you show a user list with a paging container...
  * User: GO22670
@@ -23,6 +25,8 @@ import mitll.langtest.shared.CommonExercise;
  * To change this template use File | Settings | File Templates.
  */
 class SimpleChapterNPFHelper implements RequiresResize {
+  private Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
+
   private boolean madeNPFContent = false;
 
   protected final LangTestDatabaseAsync service;
@@ -69,12 +73,12 @@ class SimpleChapterNPFHelper implements RequiresResize {
    * @see mitll.langtest.client.custom.Navigation#selectPreviousTab(String)
    */
   public void showNPF(TabAndContent tabAndContent, String instanceName) {
-   // System.out.println(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
+   // logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
       madeNPFContent = true;
-      //System.out.println("\t: adding npf content instanceName = " + instanceName + " loadExercises " + loadExercises);
+      //logger.info("\t: adding npf content instanceName = " + instanceName + " loadExercises " + loadExercises);
       addNPFToContent(content, instanceName);
     }
   }
@@ -93,7 +97,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
    * @return
    */
   private Panel doNPF(String instanceName) {
-    //System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list loadExercises " + loadExercises);
+    //logger.info(getClass() + " : doNPF instanceName = " + instanceName + " for list loadExercises " + loadExercises);
     Panel widgets = flexListLayout.doInternalLayout(null, instanceName);
     npfExerciseList = flexListLayout.npfExerciseList;
     return widgets;
@@ -119,10 +123,11 @@ class SimpleChapterNPFHelper implements RequiresResize {
    * @see mitll.langtest.client.exercise.WaveformExercisePanel
    */
   protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
+    final String instance = exerciseList.getInstance();
     return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(final CommonExercise e) {
-        return new WaveformExercisePanel(e, service, controller, exerciseList, true) {
+        return new WaveformExercisePanel(e, service, controller, exerciseList, true, instance) {
           @Override
           public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
             super.postAnswers(controller, completedExercise);
@@ -135,11 +140,11 @@ class SimpleChapterNPFHelper implements RequiresResize {
 
   protected void tellOtherListExerciseDirty(CommonExercise e) {
     if (predefinedContentList != null && e.getID().equals(predefinedContentList.getCurrentExerciseID())) {
-      System.out.println("WaveformExercisePanel.reloading " + e.getID());
+      logger.info("WaveformExercisePanel.reloading " + e.getID());
 
       predefinedContentList.loadExercise(e.getID());
     } else {
-      System.out.println("WaveformExercisePanel.not reloading " + e.getID());
+      logger.info("WaveformExercisePanel.not reloading " + e.getID());
     }
   }
 
@@ -150,12 +155,12 @@ class SimpleChapterNPFHelper implements RequiresResize {
     } else if (npfExerciseList != null) {
       npfExerciseList.onResize();
     } else {
-      System.out.println("SimpleChapterNPFHelper.onResize : not sending resize event - flexListLayout is null?");
+      logger.info("SimpleChapterNPFHelper.onResize : not sending resize event - flexListLayout is null?");
     }
   }
 
   public void setContentPanel(DivWidget contentPanel) {
-  //  System.out.println("SimpleChapterNPFHelper.setContentPanel : got " + contentPanel);
+  //  logger.info("SimpleChapterNPFHelper.setContentPanel : got " + contentPanel);
   //  DivWidget contentPanel1 = contentPanel;
   }
 
