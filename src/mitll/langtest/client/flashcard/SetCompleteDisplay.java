@@ -52,6 +52,7 @@ public class SetCompleteDisplay {
    * @param numExercises
    * @return
    */
+/*
   public Widget showFeedbackCharts(List<AVPHistoryForList> result,
                                    Map<String, Double> exToScore, int numCorrect, int numIncorrect, int numExercises) {
     Panel container = new HorizontalPanel();
@@ -60,6 +61,7 @@ public class SetCompleteDisplay {
 
     return container;
   }
+*/
 
   public void addLeftAndRightCharts(List<AVPHistoryForList> result, Map<String, Double> exToScore, int numCorrect, int numIncorrect, int numExercises, Panel container) {
     // add left chart and table
@@ -225,19 +227,25 @@ public class SetCompleteDisplay {
       @Override
       protected void addColumnsToTable() {
         Column<ExerciseCorrectAndScore, SafeHtml> column = getColumn();
+        column.setSortable(true);
 
         table.setWidth("100%", true);
         table.addColumn(column, "Item");
         table.setColumnWidth(column, "180px");
+
         Column<ExerciseCorrectAndScore, SafeHtml> column2 = getColumn2();
+        column2.setSortable(true);
         table.addColumn(column2, "History");
         table.setColumnWidth(column2, "88px");
-        new TooltipHelper().addTooltip(table,"Correct/Incorrect history and average pronunciation score");
+
 
         Column<ExerciseCorrectAndScore, SafeHtml> column3 = getColumn3();
         table.addColumn(column3, "Score");
         column3.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        column3.setSortable(true);
         table.setColumnWidth(column3, "70" + "px");
+
+        new TooltipHelper().addTooltip(table,"Correct/Incorrect history and average pronunciation score");
       }
 
       private Column<ExerciseCorrectAndScore, SafeHtml> getColumn() {
@@ -265,9 +273,7 @@ public class SetCompleteDisplay {
 
           @Override
           public SafeHtml getValue(ExerciseCorrectAndScore shell) {
-
             String history = SetCompleteDisplay.this.getScoreHistory(shell);
-
             String s = shell.getCorrectAndScores().isEmpty() ? "" : "<span style='float:right;" +
                // "margin-right:-10px;" +
                 "'>" + history +
