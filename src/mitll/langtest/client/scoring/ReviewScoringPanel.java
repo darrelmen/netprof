@@ -12,6 +12,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.SimpleColumnChart;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -33,10 +34,11 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
    * @param service
    * @param controller
    * @param exerciseID
-   * @see mitll.langtest.client.result.ResultManager#getAsyncTable(int, Widget)
+   * @param exercise
+   *@param instance @see mitll.langtest.client.result.ResultManager#getAsyncTable(int, Widget)
    */
-  public ReviewScoringPanel(String path, String refSentence, LangTestDatabaseAsync service, ExerciseController controller, String exerciseID) {
-    super(path, refSentence, service, controller, false, new EmptyScoreListener(), 23, "", exerciseID);
+  public ReviewScoringPanel(String path, String refSentence, LangTestDatabaseAsync service, ExerciseController controller, String exerciseID, CommonExercise exercise, String instance) {
+    super(path, refSentence, service, controller, false, new EmptyScoreListener(), 23, "", exerciseID, exercise, instance);
     tablesContainer = new HorizontalPanel();
     tablesContainer.getElement().setId("TablesContainer");
     belowContainer = new DivWidget();
