@@ -73,22 +73,28 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   protected final ExerciseController controller;
   private boolean showSpectrogram = false;
   private final int rightMargin;
+
+  protected CommonExercise exercise;
+  protected String instance;
+
   private static final boolean debug = false;
   private static final boolean DEBUG_GET_IMAGES = false;
 
   /**
-   * @see ScoringAudioPanel#ScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String, String)
+   * @see ScoringAudioPanel#ScoringAudioPanel(String, String, LangTestDatabaseAsync, ExerciseController, boolean, ScoreListener, int, String, String, CommonExercise, String)
    * @param service
    * @param showSpectrogram
    * @param gaugePanel
    * @param rightMargin
    * @param playButtonSuffix
    * @param exerciseID
+   * @param exercise
+   * @param instance
    */
   AudioPanel(String path, LangTestDatabaseAsync service,
              ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin,
-             String playButtonSuffix, String audioType, String exerciseID) {
-    this(service, controller, showSpectrogram, gaugePanel, 1.0f, rightMargin, exerciseID);
+             String playButtonSuffix, String audioType, String exerciseID, CommonExercise exercise, String instance) {
+    this(service, controller, showSpectrogram, gaugePanel, 1.0f, rightMargin, exerciseID, exercise, instance);
     this.audioPath = path;
 
     addWidgets(playButtonSuffix, audioType, "Record");
@@ -100,7 +106,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   public Button getPlayButton() {return hasAudio() ? playAudio.getPlayButton() : null;}
 
     /**
-     * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(CommonExercise, ExerciseController, Panel, LangTestDatabaseAsync, int, boolean, String)
+     * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(CommonExercise, ExerciseController, Panel, LangTestDatabaseAsync, int, boolean, String, String)
      * @param service
      * @param controller
      * @param showSpectrogram
@@ -108,10 +114,12 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
      * @param screenPortion
      * @param rightMargin
      * @param exerciseID
+     * @param exercise
+     * @param instance
      */
   protected AudioPanel(LangTestDatabaseAsync service,
                        ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
-                       float screenPortion, int rightMargin, String exerciseID) {
+                       float screenPortion, int rightMargin, String exerciseID, CommonExercise exercise, String instance) {
     this.screenPortion = screenPortion;
     this.soundManager = controller.getSoundManager();
     this.service = service;
@@ -122,6 +130,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     this.showSpectrogram = showSpectrogram;
     this.rightMargin = rightMargin;
     this.exerciseID = exerciseID;
+    this.exercise = exercise;
+    this.instance = instance;
     getElement().setId("AudioPanel_exercise_" + exerciseID);
   }
 
@@ -135,9 +145,11 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
-   * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.LangTestDatabaseAsync, int, boolean, String)
+   * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(CommonExercise, ExerciseController, Panel, LangTestDatabaseAsync, int, boolean, String, String)
    * @see mitll.langtest.client.scoring.AudioPanel#AudioPanel
    * @return
+   * @param exercise
+   * @param instance
    * @param playButtonSuffix
    * @param recordButtonTitle
    */
@@ -198,7 +210,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     add(divWithRelativePosition);
   }
 
-  boolean hasAudio() {  return true;  }
+  boolean hasAudio() {  return hasAudio(exercise);  }
+
+  boolean hasAudio(CommonExercise exercise) {  return true;  }
 
   public boolean isAudioPathSet() { return audioPath != null; }
   public void doPause() { if (playAudio != null) playAudio.doPause(); }
