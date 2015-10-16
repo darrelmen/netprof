@@ -18,15 +18,11 @@ import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.WaveformExercisePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.list.Shuffler;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -54,10 +50,11 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
 
   @Override
   protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
+    final String oinstance = exerciseList.getInstance();
     return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(final CommonExercise e) {
-        return new MyWaveformExercisePanel(e, controller, exerciseList);
+        return new MyWaveformExercisePanel(e, controller, exerciseList, oinstance);
       }
     };
   }
@@ -184,10 +181,10 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
   }
 
   private class MyWaveformExercisePanel extends WaveformExercisePanel {
-    private final CommonExercise e;
+    private final CommonExercise e; // TODO REMOVE!
 
-    public MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface exerciseList1) {
-      super(e, service, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording);
+    public MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface exerciseList1, String instance) {
+      super(e, service, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
       this.e = e;
     }
 
