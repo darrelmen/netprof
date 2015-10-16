@@ -51,6 +51,7 @@ public class NPFHelper implements RequiresResize {
   public PagingExerciseList npfExerciseList;
   private final boolean showQC;
   DivWidget contentPanel;
+  protected String instanceName;
 
   /**
    * @see mitll.langtest.client.custom.Navigation#Navigation
@@ -68,7 +69,7 @@ public class NPFHelper implements RequiresResize {
     this.userManager = userManager;
     this.showQC = showQC;
   }
-  String instanceName;
+
   /**
    * Add npf widget to content of a tab - here marked tabAndContent
    * @see mitll.langtest.client.custom.Navigation#getListOperations
@@ -263,6 +264,10 @@ public class NPFHelper implements RequiresResize {
 
   public void setContentPanel(DivWidget content) {
     this.contentPanel = content;
+  }
+
+  public String getInstanceName() {
+    return instanceName;
   }
 
   /**
