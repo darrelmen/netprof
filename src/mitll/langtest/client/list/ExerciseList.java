@@ -151,7 +151,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see mitll.langtest.client.list.HistoryExerciseList#noSectionsGetExercises(long)
    */
   public boolean getExercises(long userID) {
-    logger.info("ExerciseList.getExercises for user " + userID + " instance " + instance);
+    logger.info("ExerciseList.getExercises for user " + userID + " instance " + getInstance());
     lastReqID++;
     service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, false,
         incorrectFirstOrder, false, new SetExercisesCallback(""));
@@ -177,7 +177,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   @Override
   public void reloadWith(String id) {
-    logger.info("ExerciseList.reloadWith id = " + id + " for user " + controller.getUser() + " instance " + instance);
+    logger.info("ExerciseList.reloadWith id = " + id + " for user " + controller.getUser() + " instance " + getInstance());
     service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, false,
         incorrectFirstOrder, false, new SetExercisesCallbackWithID(id));
   }
@@ -200,9 +200,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     token = getSelectionFromToken(token);
     String idFromToken = getIDFromToken(token);
     logger.info("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
-        "' vs new exercise " + exerciseID + " instance " + instance);
+        "' vs new exercise " + exerciseID + " instance " + getInstance());
     if (token != null && idFromToken.equals(exerciseID)) {
-      logger.info("\tpushFirstSelection : (" + instance +
+      logger.info("\tpushFirstSelection : (" + getInstance() +
           ") current token " + token + " same as new " + exerciseID);
       checkAndAskServer(exerciseID);
     } else {
@@ -231,9 +231,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   void pushNewItem(String search, String exerciseID) {
-    logger.info("------------ ExerciseList.pushNewItem : (" + instance + ") push history " + exerciseID + " - ");
+    logger.info("------------ ExerciseList.pushNewItem : (" + getInstance() + ") push history " + exerciseID + " - ");
     History.newItem("#" + "search="+search +";"+
-        "item=" + exerciseID + ";instance=" + instance);
+        "item=" + exerciseID + ";instance=" + getInstance());
   }
 
   public void onResize() {
@@ -272,7 +272,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   protected String getRole() {
     String audioTypeRecorder = Result.AUDIO_TYPE_RECORDER;
-    return instance == null || instance.startsWith("record") ? audioTypeRecorder : instance;
+    return getInstance() == null || getInstance().startsWith("record") ? audioTypeRecorder : getInstance();
   }
 
   public String getInstance() {
@@ -406,7 +406,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see #rememberAndLoadFirst(java.util.List)
    */
   private void rememberAndLoadFirst(List<CommonShell> exercises, CommonExercise firstExercise, String selectionID) {
-    logger.info("ExerciseList : rememberAndLoadFirst instance '" + instance +
+    logger.info("ExerciseList : rememberAndLoadFirst instance '" + getInstance() +
         "' remembering " + exercises.size() + " exercises, first = " + firstExercise);
 
     exercises = rememberExercises(exercises);
@@ -521,7 +521,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     String token = getTokenFromEvent(event);
     String id = getIDFromToken(token);
     logger.info("ExerciseList.onValueChange got " + event.getAssociatedType() +
-        " " + value + " token " + token + " id '" + id + "'" + " instance " + instance);
+        " " + value + " token " + token + " id '" + id + "'" + " instance " + getInstance());
 
     if (id.length() > 0) {
       checkAndAskServer(id);
@@ -558,7 +558,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   private String getIDFromToken(String token) {
     if (token.startsWith("#item=") || token.startsWith("item=")) {
       SelectionState selectionState = new SelectionState(token, !allowPlusInURL);
-      if (!selectionState.getInstance().equals(instance)) {
+      if (!selectionState.getInstance().equals(getInstance())) {
         //logger.info("got history item for another instance '" + selectionState.getInstance() + "' vs me '" + instance +"'");
       } else {
         String item = selectionState.getItem();
@@ -755,7 +755,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   }
 
   String report() {
-    return "list " + instance + " id " + getElement().getId();
+    return "list " + getInstance() + " id " + getElement().getId();
   }
 
   void removeComponents() {
