@@ -397,7 +397,7 @@ public class ResultManager extends PagerTable {
        // logger.info("audio type " + audioType);
         String foreignText =  selectedObject.getForeignText();
 
-        ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(), foreignText, service, controller, selectedObject.getId());
+        ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(), foreignText, service, controller, selectedObject.getId(), null, "instance");
 
         w.setResultID(selectedObject.getUniqueID());
 
