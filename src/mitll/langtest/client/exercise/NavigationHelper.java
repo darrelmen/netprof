@@ -4,7 +4,6 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.list.ListInterface;
@@ -21,16 +20,12 @@ import mitll.langtest.shared.CommonExercise;
  */
 public class NavigationHelper extends HorizontalPanel {
   private static final String LEFT_ARROW_TOOLTIP = "Press the left arrow key to go to the previous item.";
-  private static final String RIGHT_ARROW_TOOLTIP = "Press enter to go to the next item.";
-  public static final String PASHTO = "Pashto";
 
   private Button prev;
   protected Button next;
-  private HandlerRegistration keyHandler;
-  private final boolean debug = false;
+//  private final boolean debug = false;
   private boolean enableNextOnlyWhenAllCompleted = true;
   private final PostAnswerProvider provider;
-  private final boolean bindEnterKey = true;
   private final ListInterface listContainer;
 
   /**
@@ -69,14 +64,8 @@ public class NavigationHelper extends HorizontalPanel {
    */
   private void getNextAndPreviousButtons(final CommonExercise e,
                                          final ExerciseController controller, boolean addButtons, boolean addKeyHandler) {
-    //boolean useKeyHandler = controller.isCollectAudio();
-
     makePrevButton(e, controller, addButtons, addKeyHandler);
     makeNextButton(e, controller, addButtons);
-
-//    if (addKeyHandler) {
- //     addKeyHandler(e, controller, f);
- //   }
   }
 
   private void makePrevButton(final CommonExercise exercise, ExerciseController controller, boolean addButtons, boolean useKeyHandler) {
@@ -104,7 +93,6 @@ public class NavigationHelper extends HorizontalPanel {
     enableNext(exercise);
 
     if (addButtons)  add(next);
-    //if (controller.getProps().isBindNextToEnter()) next.setTitle(RIGHT_ARROW_TOOLTIP);
 
     next.getElement().setId("nextButton");
 
@@ -128,7 +116,6 @@ public class NavigationHelper extends HorizontalPanel {
   void clickPrev(CommonExercise e) {
     if (getPrev().isEnabled() && getPrev().isVisible()) {
       getPrev().setEnabled(false);
-      //System.out.println("clickPrev " +keyHandler+ " click on prev " + getPrev());
       listContainer.loadPreviousExercise(e);
     }
   }
@@ -145,63 +132,12 @@ public class NavigationHelper extends HorizontalPanel {
       if (provider != null) {
         provider.postAnswers(controller, exercise);
       }
-    } else {
-      System.out.println("\t\tNavigationHelper.clickNext " + keyHandler + " ignoring next");
     }
   }
 
   protected String getNextButtonText() {
     return "Next";
   }
-
-  /**
-   * Enter key advances to next item, left arrow goes to previous
-   * @paramx e
-   * @paramx controller
-   * @paramx useKeyHandler
-   */
-/*  private void addKeyHandler(final CommonExercise e, final ExerciseController controller, final boolean useKeyHandler) {
-    keyHandler = Event.addNativePreviewHandler(new
-                                                 Event.NativePreviewHandler() {
-
-                                                   @Override
-                                                   public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                                                     NativeEvent ne = event.getNativeEvent();
-                                                     int keyCode = ne.getKeyCode();
-                                                     boolean isLeft = keyCode == KeyCodes.KEY_LEFT;
-                                                     //   boolean isRight = keyCode == KeyCodes.KEY_RIGHT;
-                                                     boolean isEnter =
-                                                        (bindEnterKey && keyCode == KeyCodes.KEY_ENTER) ||
-                                                       (!bindEnterKey && keyCode == KeyCodes.KEY_RIGHT);
-                                                     //   System.out.println("key code is " +keyCode);
-                                                     if (((useKeyHandler && isLeft) || isEnter) && event.getTypeInt() == 512 &&
-                                                       "[object KeyboardEvent]".equals(ne.getString())) {
-                                                       ne.preventDefault();
-
-                                                       if (debug) {
-                                                         System.out.println(new Date() +
-                                                           " : getNextAndPreviousButtons - key handler : " + keyHandler +
-                                                           " Got " + event + " type int " +
-                                                           event.getTypeInt() + " assoc " + event.getAssociatedType() +
-                                                           " native " + event.getNativeEvent() +
-                                                           " source " + event.getSource());
-                                                       }
-
-                                                       if (isLeft) {
-                                                         clickPrev(e);
-                                                       } else {
-                                                         clickNext(controller, e);
-                                                       }
-                                                     }
-                                                   }
-                                                 });
-   // System.out.println("addKeyHandler made click handler " + keyHandler);
-  }*/
-
-/*  public void removeKeyHandler() {
-   // System.out.println("removeKeyHandler : " + keyHandler);
-    if (keyHandler != null) keyHandler.removeHandler();
-  }*/
 
   public void enableNextButton(boolean val) {
     next.setEnabled(val);
