@@ -1,8 +1,9 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.database.excel.ResultDAOToExcel;
+import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.Result;
@@ -12,10 +13,7 @@ import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.monitoring.Session;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.*;
 import java.text.CollationKey;
@@ -48,10 +46,10 @@ public class ResultDAO extends DAO {
 
   static final String FLQ = "flq";
   static final String SPOKEN = "spoken";
-  static final String AUDIO_TYPE = "audioType";
-  static final String DURATION = "duration";
-  static final String CORRECT = "correct";
-  static final String PRON_SCORE = "pronscore";
+  public static final String AUDIO_TYPE = "audioType";
+  public static final String DURATION = "duration";
+  public static final String CORRECT = "correct";
+  public static final String PRON_SCORE = "pronscore";
   static final String STIMULUS = "stimulus";
   static final String DEVICE_TYPE = "deviceType";  // iPad, iPhone, browser, etc.
   static final String DEVICE = "device"; // device id, or browser type
@@ -59,6 +57,7 @@ public class ResultDAO extends DAO {
   private static final String NO = "No";
   public static final String PROCESS_DUR = "processDur";
   public static final String ROUND_TRIP_DUR = "roundTripDur";
+  public static final int FIVE_MINUTES = 5 * 60 * 1000;
   private final LogAndNotify logAndNotify;
 
   private final boolean debug = false;
@@ -76,6 +75,44 @@ public class ResultDAO extends DAO {
   private List<Result> cachedResultsForQuery = null;
   private List<CorrectAndScore> cachedResultsForQuery2 = null;
   private List<MonitorResult> cachedMonitorResultsForQuery = null;
+
+
+  public List<BestScore> getResultForUser(long id) {
+    try {
+      String sql = "SELECT " +  Database.EXID + "," + PRON_SCORE + "," + Database.TIME +
+          " FROM " + RESULTS +
+          " where " + USERID + "=" +id+
+          " order by " + Database.EXID + ", " + Database.TIME + " limit 100";
+
+     List<BestScore> resultsForQuery = getBest(sql);
+
+      return resultsForQuery;
+    } catch (Exception ee) {
+      logException(ee);
+    }
+    return new ArrayList<BestScore>();
+  }
+
+  public static class BestScore implements Comparable<BestScore> {
+    private String id;
+    private long timestamp;
+    private float pronScore;
+
+    public BestScore(String id, float pronScore, long timestamp) {
+      this.id = id;
+      this.pronScore = pronScore;
+      this.timestamp = timestamp;
+    }
+
+    @Override
+    public int compareTo(BestScore o) {
+      int c = id.compareTo(o.id);
+      if (c == 0) return -1 * Long.valueOf(timestamp).compareTo(o.timestamp);
+      else return c;
+    }
+    public String toString() { return id + " : " + new Date(timestamp) + " : " +pronScore;}
+  }
+
 
   /**
    * Pulls the list of results out of the database.
@@ -106,17 +143,13 @@ public class ResultDAO extends DAO {
   public List<Result> getResultsDevices() {
     try {
       String sql = "SELECT * FROM " + RESULTS + " where devicetype like 'i%'";
-      List<Result> resultsForQuery = getResultsSQL(sql);
-
-//      logger.debug("getResultsDevices : " +resultsForQuery.size());
-      return resultsForQuery;
+      return getResultsSQL(sql);
     } catch (Exception ee) {
-      logger.error("got " +ee,ee);
+      logger.error("got " + ee, ee);
       logException(ee);
     }
     return new ArrayList<Result>();
   }
-
 
   private List<CorrectAndScore> getCorrectAndScores() {
     try {
@@ -163,8 +196,7 @@ public class ResultDAO extends DAO {
       List<Result> resultsSQL = getResultsSQL(sql);
       if (resultsSQL.size() > 1) {
         logger.error("for " + id + " got " + resultsSQL);
-      }
-      else if (resultsSQL.isEmpty()) {
+      } else if (resultsSQL.isEmpty()) {
         logger.error("no result for " + id);
       }
       return resultsSQL.isEmpty() ? null : resultsSQL.iterator().next();
@@ -178,9 +210,9 @@ public class ResultDAO extends DAO {
   /**
    * Add info from exercises.
    *
-   * @see mitll.langtest.server.database.DatabaseImpl#getMonitorResultsWithText(java.util.List)
    * @param monitorResults
    * @param join
+   * @see mitll.langtest.server.database.DatabaseImpl#getMonitorResultsWithText(java.util.List)
    */
   public void addUnitAndChapterToResults(List<MonitorResult> monitorResults, Map<String, CommonExercise> join) {
     int n = 0;
@@ -197,16 +229,13 @@ public class ResultDAO extends DAO {
         n++;
         result.setUnitToValue(EMPTY_MAP);
         result.setForeignText("");
-        //result.setContext("");
       } else {
         result.setUnitToValue(exercise.getUnitToValue());
         result.setForeignText(exercise.getForeignLanguage());
-        //result.setContext(exercise.getContext());
-        //logger.info("for " + exercise.getID() + " ft " + exercise.getForeignLanguage() + " context " + exercise.getContext());
       }
     }
     if (n > 0) {
-      logger.warn("addUnitAndChapterToResults : skipped " + n + " out of " + monitorResults.size() + " bad join ids = " +unknownIDs);
+      logger.warn("addUnitAndChapterToResults : skipped " + n + " out of " + monitorResults.size() + " bad join ids = " + unknownIDs);
     }
   }
 
@@ -221,16 +250,15 @@ public class ResultDAO extends DAO {
     return new ArrayList<MonitorResult>();
   }
 
-
   /**
    * For a set of exercise ids, find the results for each and make a map of user->results
    * Then for each user's results, make a list of sessions representing a sequence of grouped results
    * A session will have statistics - # correct, avg pronunciation score, maybe duration, etc.
    *
-   * @param ids only those items that were actually practiced (or scored)
+   * @param ids            only those items that were actually practiced (or scored)
    * @param latestResultID
-   * @param userid who did them
-   * @param allIds all the item ids in the chapter or set of chapters that were covered
+   * @param userid         who did them
+   * @param allIds         all the item ids in the chapter or set of chapters that were covered
    * @param idToKey
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList
@@ -259,21 +287,21 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
    * @param exercises
    * @param userid
    * @param collator
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
    */
   public List<CommonExercise> getExercisesSortedIncorrectFirst(Collection<CommonExercise> exercises, long userid, Collator collator) {
     List<String> allIds = new ArrayList<String>();
     Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
-    Map<String,CollationKey> idToKey = new HashMap<String, CollationKey>();
+    Map<String, CollationKey> idToKey = new HashMap<String, CollationKey>();
     for (CommonExercise exercise : exercises) {
       String id = exercise.getID();
       allIds.add(id);
       idToEx.put(id, exercise);
-    //  idToKey.put(id,exercise.getForeignLanguage());
+      //  idToKey.put(id,exercise.getForeignLanguage());
       CollationKey collationKey = collator.getCollationKey(exercise.getForeignLanguage());
       idToKey.put(id, collationKey);
     }
@@ -288,22 +316,22 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory
-   * @see ResultDAO#getExercisesSortedIncorrectFirst
    * @param userid
    * @param allIds
    * @param idToKey
    * @return
+   * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory
+   * @see ResultDAO#getExercisesSortedIncorrectFirst
    */
   private List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(long userid, List<String> allIds,
-                                                                   Map<String, CollationKey> idToKey) {
+                                                                    Map<String, CollationKey> idToKey) {
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
-   // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
+    // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
     return getSortedAVPHistory(results, allIds, idToKey);
   }
 
   public List<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(long userid, List<String> allIds,
-                                                                           Map<String,CommonExercise> idToEx,
+                                                                           Map<String, CommonExercise> idToEx,
                                                                            ExerciseSorter sorter) {
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
     // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
@@ -311,7 +339,6 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   *
    * @param results
    * @param allIds
    * @param idToKey
@@ -343,12 +370,12 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see #getExerciseCorrectAndScoresByPhones
    * @param results
    * @param allIds
    * @param idToEx
    * @param sorter
    * @return
+   * @see #getExerciseCorrectAndScoresByPhones
    */
   private List<ExerciseCorrectAndScore> getSortedAVPHistoryByPhones(List<CorrectAndScore> results, Collection<String> allIds,
                                                                     final Map<String, CommonExercise> idToEx,
@@ -378,10 +405,10 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see #compareTo
    * @param o1
    * @param o2
    * @return
+   * @see #compareTo
    */
   private int compScores(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2) {
     int myI = o1.getDiff();
@@ -398,13 +425,13 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see #compareUsingPhones
    * @param o1
    * @param o2
    * @param o1Ex
    * @param o2Ex
    * @param sorter
    * @return
+   * @see #compareUsingPhones
    */
   private int compScoresPhones(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2,
                                CommonExercise o1Ex, CommonExercise o2Ex, final ExerciseSorter sorter) {
@@ -422,10 +449,10 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see #getSortedAVPHistory(List, Collection, Map)
    * @param results
    * @param allIds
    * @return
+   * @see #getSortedAVPHistory(List, Collection, Map)
    */
   private List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(List<CorrectAndScore> results, Collection<String> allIds) {
     SortedMap<String, ExerciseCorrectAndScore> idToScores = new TreeMap<String, ExerciseCorrectAndScore>();
@@ -458,10 +485,10 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#attachScoreHistory(long, mitll.langtest.shared.CommonExercise, boolean)
    * @param userID
    * @param firstExercise
    * @param isFlashcardRequest
+   * @see mitll.langtest.server.LangTestDatabaseImpl#attachScoreHistory(long, mitll.langtest.shared.CommonExercise, boolean)
    */
   public void attachScoreHistory(long userID, CommonExercise firstExercise, boolean isFlashcardRequest) {
     List<CorrectAndScore> resultsForExercise = getCorrectAndScores(userID, firstExercise, isFlashcardRequest);
@@ -481,11 +508,11 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see #attachScoreHistory
    * @param userID
    * @param firstExercise
    * @param isFlashcardRequest
    * @return
+   * @see #attachScoreHistory
    */
   private List<CorrectAndScore> getCorrectAndScores(long userID, CommonExercise firstExercise, boolean isFlashcardRequest) {
     String id = firstExercise.getID();
@@ -495,10 +522,10 @@ public class ResultDAO extends DAO {
   /**
    * Only take latest five.
    *
-   * @see mitll.langtest.server.ScoreServlet#doGet
    * @param userID
    * @param id
    * @return
+   * @see mitll.langtest.server.ScoreServlet#doGet
    */
   public JSONObject getHistoryAsJson(long userID, String id) {
     List<CorrectAndScore> resultsForExercise = getResultsForExIDInForUser(userID, true, id);
@@ -521,8 +548,8 @@ public class ResultDAO extends DAO {
     }
 
     JSONObject jsonObject = new JSONObject();
-    jsonObject.put("score",  total == 0 ? 0f : scoreTotal / new Integer(total).floatValue());
-    jsonObject.put("history",jsonArray);
+    jsonObject.put("score", total == 0 ? 0f : scoreTotal / new Integer(total).floatValue());
+    jsonObject.put("history", jsonArray);
     return jsonObject;
   }
 
@@ -611,12 +638,12 @@ public class ResultDAO extends DAO {
   }
 
   private String getAVPClause(boolean matchAVP) {
-    return "("+AUDIO_TYPE + (matchAVP ? "" : " NOT ") + " LIKE " + "'avp%'" +" OR "+AUDIO_TYPE + (matchAVP ? "=" : "<>") + " 'flashcard' "+")";
+    return "(" + AUDIO_TYPE + (matchAVP ? "" : " NOT ") + " LIKE " + "'avp%'" + " OR " + AUDIO_TYPE + (matchAVP ? "=" : "<>") + " 'flashcard' " + ")";
   }
 
   private String getCSSelect() {
     return "SELECT " + ID + ", " + USERID + ", " +
-        Database.EXID + ", " + Database.TIME + ", " + CORRECT + ", " + PRON_SCORE + ", " + ANSWER + ", " +SCORE_JSON;
+        Database.EXID + ", " + Database.TIME + ", " + CORRECT + ", " + PRON_SCORE + ", " + ANSWER + ", " + SCORE_JSON;
   }
 
   /**
@@ -637,6 +664,14 @@ public class ResultDAO extends DAO {
     PreparedStatement statement = connection.prepareStatement(sql);
 
     return getMonitorResultsForQuery(connection, statement);
+  }
+
+  private List<BestScore> getBest(String sql) throws SQLException {
+    logger.info("got "+ sql);
+    Connection connection = database.getConnection(this.getClass().toString());
+    PreparedStatement statement = connection.prepareStatement(sql);
+
+    return getBestForQuery(connection, statement);
   }
 
   /**
@@ -747,6 +782,42 @@ public class ResultDAO extends DAO {
 
     return results;
   }
+
+
+  private List<BestScore> getBestForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+    ResultSet rs = statement.executeQuery();
+    List<BestScore> results = new ArrayList<BestScore>();
+    String last = null;
+
+    long lastTimestamp = 0;
+
+    BestScore lastBest = null;
+    while (rs.next()) {
+      String exid = rs.getString(Database.EXID);
+      Timestamp timestamp = rs.getTimestamp(Database.TIME);
+      float pronScore = rs.getFloat(PRON_SCORE);
+
+      long time = timestamp.getTime();
+      if ((last != null && !last.equals(exid)) || (lastTimestamp > 0 && time - lastTimestamp > FIVE_MINUTES)) {
+
+        results.add(lastBest);
+        lastTimestamp = time;
+      }
+      if (lastTimestamp == 0) lastTimestamp = time;
+      last = exid;
+      lastBest = new BestScore(exid, pronScore, time);;
+    }
+    finish(connection, statement, rs);
+
+    if (results.isEmpty()) {
+      if (lastBest != results.get(results.size() - 1)) {
+        results.add(lastBest);
+      }
+    }
+
+    return results;
+  }
+
 
   private List<CorrectAndScore> getScoreResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
@@ -877,14 +948,12 @@ public class ResultDAO extends DAO {
    * Determine sessions per user.  If two consecutive items are more than {@link #SESSION_GAP} seconds
    * apart, then we've reached a session boundary.
    * Remove all sessions that have just one answer - must be test sessions.
-   * <p/>
+   * <p>
    * Multiple answers to the same exercise count as one answer.
    *
    * @return list of duration and numAnswer pairs
    */
   public SessionInfo getSessions() {
-    // List<Result> results = getResults();
-
     Map<Long, List<CorrectAndScore>> userToAnswers = populateUserToAnswers(getCorrectAndScores());
     List<Session> sessions = new ArrayList<Session>();
 
@@ -1063,9 +1132,9 @@ public class ResultDAO extends DAO {
     if (numColumns < 14) {
       addFlashcardColumnsToTable(connection);
     }
-    if (numColumns < 15) {
+/*    if (numColumns < 15) {
       addStimulus(connection);
-    }
+    }*/
     Collection<String> columns = getColumns(RESULTS);
     if (!columns.contains(DEVICE_TYPE.toLowerCase())) {
       addVarchar(connection, RESULTS, DEVICE_TYPE);
@@ -1209,25 +1278,12 @@ public class ResultDAO extends DAO {
     }
   }
 
-  private void addStimulus(Connection connection) {
-    try {
-      PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
-          STIMULUS +
-          " " +
-          "CLOB");
-      statement.execute();
-      statement.close();
-    } catch (SQLException e) {
-      logger.warn("addStimulus : got " + e);
-    }
-  }
-
   public Map<Long, Map<String, Result>> getUserToResults(boolean isRegular, UserDAO userDAO) {
     String typeToUse = isRegular ? Result.AUDIO_TYPE_REGULAR : Result.AUDIO_TYPE_SLOW;
     return getUserToResults(typeToUse, userDAO);
   }
 
-  Map<Long, Map<String, Result>> getUserToResults(String typeToUse, UserDAO userDAO) {
+  private Map<Long, Map<String, Result>> getUserToResults(String typeToUse, UserDAO userDAO) {
     List<Result> results = getResults();
     Map<Long, Map<String, Result>> userToResult = new HashMap<Long, Map<String, Result>>();
 
@@ -1251,152 +1307,12 @@ public class ResultDAO extends DAO {
     return userToResult;
   }
 
-/*  Map<Long, Map<String, Result>> getUserToResults2(String typeToUse, UserDAO userDAO) {
-    List<Result> results = getResults();
-    Map<Long, Map<String, Result>> userToResult = new HashMap<Long, Map<String, Result>>();
-
-    Map<Long, User> userMap = userDAO.getUserMap();
-
-    for (Result r : results) {
-      if (r.isValid() && r.getAudioType().equals(typeToUse)) {
-        User user = userMap.get(r.getUserid());
-        if (user != null && user.getExperience() == 240) {    // only natives!
-          Map<String, Result> results1 = userToResult.get(r.getUserid());
-          if (results1 == null)
-            userToResult.put(r.getUserid(), results1 = new HashMap<String, Result>());
-          String exerciseID = r.getExerciseID();
-          Result result = results1.get(exerciseID);
-          if (result == null || (r.getTimestamp() > result.getTimestamp())) {
-            results1.put(exerciseID, r);
-          }
-        }
-      }
-    }
-    return userToResult;
-  }*/
-
-
   /**
-   *
    * @param typeOrder
    * @param out
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   public void writeExcelToStream(Collection<MonitorResult> results, List<String> typeOrder, OutputStream out) {
-    writeToStream(out, writeExcel(results, typeOrder));
-  }
-
-  private SXSSFWorkbook writeExcel(Collection<MonitorResult> results,  List<String> typeOrder
-  ) {
-    long now;
-    long then = System.currentTimeMillis();
-
-    SXSSFWorkbook wb = new SXSSFWorkbook(10000); // keep 100 rows in memory, exceeding rows will be flushed to disk
-    Sheet sheet = wb.createSheet("Results");
-    int rownum = 0;
-    CellStyle cellStyle = wb.createCellStyle();
-    DataFormat dataFormat = wb.createDataFormat();
-
-    cellStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss 'yy"));
-    //DateTimeFormat format = DateTimeFormat.getFormat("MMM dd h:mm:ss a z ''yy");
-    Row headerRow = sheet.createRow(rownum++);
-
-    List<String> columns = new ArrayList<String>(Arrays.asList(
-        USERID, "Exercise", "Text"));
-
-
-    for (final String type : typeOrder) {  columns.add(type);  }
-
-    List<String> columns2 = Arrays.asList(
-        "Recording",
-        Database.TIME,
-        AUDIO_TYPE,
-        DURATION,
-        "Valid",
-        CORRECT,
-        PRON_SCORE,
-        "Device",
-        "w/Flash",
-        "Process",
-        "RoundTrip"
-    );
-
-    columns.addAll(columns2);
-
-    for (int i = 0; i < columns.size(); i++) {
-      Cell headerCell = headerRow.createCell(i);
-      headerCell.setCellValue(columns.get(i));
-    }
-
-    for (MonitorResult result : results) {
-      Row row = sheet.createRow(rownum++);
-      int j = 0;
-      Cell cell = row.createCell(j++);
-      cell.setCellValue(result.getUserid());
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getId());
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getForeignText());
-
-      for (String type : typeOrder) {
-        cell = row.createCell(j++);
-        cell.setCellValue(result.getUnitToValue().get(type));
-      }
-
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getAnswer());
-
-      cell = row.createCell(j++);
-      cell.setCellValue(new Date(result.getTimestamp()));
-      cell.setCellStyle(cellStyle);
-
-      cell = row.createCell(j++);
-      String audioType = result.getAudioType();
-      cell.setCellValue(audioType.equals("avp") ? "flashcard" : audioType);
-
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getDurationInMillis());
-
-      cell = row.createCell(j++);
-      cell.setCellValue(result.isValid() ? YES : NO);
-
-      cell = row.createCell(j++);
-      cell.setCellValue(result.isCorrect() ? YES : NO);
-
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getPronScore());
-
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getDevice());
-
-      cell = row.createCell(j++);
-      cell.setCellValue(result.isWithFlash() ? YES : NO);
-
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getProcessDur());
-
-      cell = row.createCell(j++);
-      cell.setCellValue(result.getRoundTripDur());
-    }
-    now = System.currentTimeMillis();
-    if (now - then > 100) {
-      logger.warn("toXLSX : took " + (now - then) + " millis to add " + rownum + " rows to sheet, or " + (now - then) / rownum + " millis/row");
-    }
-    return wb;
-  }
-
-  private void writeToStream(OutputStream out, SXSSFWorkbook wb) {
-    long then = System.currentTimeMillis();
-    try {
-      wb.write(out);
-      long now2 = System.currentTimeMillis();
-      if (now2 - then > 100) {
-        logger.warn("toXLSX : took " + (now2 - then) + " millis to write excel to output stream ");
-      }
-      out.close();
-      wb.dispose();
-    } catch (IOException e) {
-      logger.error("got " + e, e);
-    }
+    new ResultDAOToExcel().writeExcelToStream(results, typeOrder, out);
   }
 }
