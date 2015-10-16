@@ -300,7 +300,7 @@ public class EditItem {
   private NewUserExercise getAddOrEditPanel(CommonUserExercise exercise, HasText itemMarker, UserList originalList, boolean doNewExercise) {
     NewUserExercise editableExercise;
     if (doNewExercise) {
-      editableExercise = new NewUserExercise(service, controller, itemMarker, this, exercise);
+      editableExercise = new NewUserExercise(service, controller, itemMarker, this, exercise, getInstance());
     } else {
       boolean iCreatedThisItem = didICreateThisItem(exercise, originalList);
       if (iCreatedThisItem) {
@@ -311,7 +311,7 @@ public class EditItem {
           npfHelper);
       }
       else {
-        editableExercise = new NewUserExercise(service, controller, itemMarker, this, exercise) {
+        editableExercise = new NewUserExercise(service, controller, itemMarker, this, exercise, getInstance()) {
           @Override
           public Panel addNew(final UserList ul, final UserList originalList, ListInterface listInterface, Panel toAddTo) {
             final FluidContainer container = new FluidContainer();
@@ -348,6 +348,10 @@ public class EditItem {
       }
     }
     return editableExercise;
+  }
+
+  private String getInstance() {
+    return npfHelper.getInstanceName();
   }
 
   private boolean didICreateThisItem(CommonUserExercise exercise, UserList originalList) {
