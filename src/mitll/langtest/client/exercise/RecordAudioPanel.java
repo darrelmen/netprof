@@ -45,17 +45,18 @@ public class RecordAudioPanel extends AudioPanel {
    * @param index
    * @param showSpectrogram
    * @param audioType
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#CreateFirstRecordAudioPanel(mitll.langtest.shared.CommonExercise, com.google.gwt.user.client.ui.Panel, boolean)
+   * @param instance
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#CreateFirstRecordAudioPanel(CommonExercise, Panel, boolean, String)
    * @see mitll.langtest.client.exercise.WaveformExercisePanel#getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
    */
   public RecordAudioPanel(CommonExercise exercise, ExerciseController controller, Panel widgets,
-                          LangTestDatabaseAsync service, int index, boolean showSpectrogram, String audioType) {
+                          LangTestDatabaseAsync service, int index, boolean showSpectrogram, String audioType, String instance) {
     super(service,
       // use full screen width
       // use keyboard
       controller, showSpectrogram,
       null // no gauge panel
-      , 1.0f, 23, exercise.getID());
+      , 1.0f, 23, exercise.getID(), exercise, instance);
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
