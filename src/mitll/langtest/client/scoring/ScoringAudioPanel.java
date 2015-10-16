@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -15,7 +16,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Asks server to score the audio.  Gets back transcript image URLs, phonem scores and end times.
@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 public abstract class ScoringAudioPanel extends AudioPanel {
    // private Logger logger = Logger.getLogger("ScoringAudioPanel");
 
-    private static final int ANNOTATION_HEIGHT = 20;
+  private static final int ANNOTATION_HEIGHT = 20;
   private static final boolean SHOW_SPECTROGRAM = false;
 
   private final String refSentence;
@@ -40,20 +40,22 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   public static final float MP3_HEADER_OFFSET = 0f;//0.048f;
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, ScoreListener, String, String)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, LangTestDatabaseAsync, ExerciseController, ScoreListener, String, String, CommonExercise, String)
    * @param refSentence
    * @param service
    * @param gaugePanel
    * @param playButtonSuffix
    * @param exerciseID
+   * @param exercise
+   * @param instance
    */
   ScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller,
-                    ScoreListener gaugePanel, String playButtonSuffix, String exerciseID) {
-    this(null, refSentence, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix, exerciseID);
+                    ScoreListener gaugePanel, String playButtonSuffix, String exerciseID, CommonExercise exercise, String instance) {
+    this(null, refSentence, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix, exerciseID, exercise, instance);
   }
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ScoreListener, int, String, String)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, LangTestDatabaseAsync, ExerciseController, boolean, ScoreListener, int, String, String, CommonExercise, String)
    * @param path
    * @param refSentence
    * @param service
@@ -62,11 +64,13 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param rightMargin
    * @param playButtonSuffix
    * @param exerciseID
+   * @param exercise
+   * @param instance
    */
   ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                     ExerciseController controller,
-                    boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix, String exerciseID) {
-    super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, controller.getAudioType(), exerciseID);
+                    boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix, String exerciseID, CommonExercise exercise, String instance) {
+    super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, controller.getAudioType(), exerciseID, exercise, instance);
     this.refSentence = refSentence;
     showOnlyOneExercise = controller.showOnlyOneExercise();
     addClickHandlers();
