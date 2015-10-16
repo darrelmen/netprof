@@ -4,6 +4,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.ResultDAO;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.Result;
@@ -40,12 +41,13 @@ public class ReportTest {
   public static void setup() {
     logger.debug("setup called");
 
-    String config = "english";//"mandarin";
+    String config = "spanish";//"mandarin";
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParent();
     logger.debug("config dir " + parent);
     logger.debug("config     " + file.getName());
-    dbName = "npfEnglish";//"mandarin";// "mandarin";
+  //  dbName = "npfEnglish";//"mandarin";// "mandarin";
+    dbName = "npfSpanish";//"mandarin";// "mandarin";
     database = new DatabaseImpl(parent, file.getName(), dbName, new ServerProperties(parent, file.getName()), new PathHelper("war"), false, null);
     logger.debug("made " + database);
     String media = parent + File.separator + "media";
@@ -64,6 +66,14 @@ public class ReportTest {
     return audioFileHelper;
   }
 */
+
+  @Test
+  public void testBest() {
+    List<ResultDAO.BestScore> resultForUser = database.getResultDAO().getResultForUser(71);
+    for (ResultDAO.BestScore bestScore : resultForUser) {
+      logger.info("got " + bestScore);
+    }
+  }
 
   @Test
   public void testReport() {
