@@ -13,12 +13,11 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.*;
+import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.table.PagerTable;
@@ -29,6 +28,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class UserTable extends PagerTable {
+  public static final String REGISTERED_USERS = "Registered Users";
   private Logger logger = Logger.getLogger("UserTable");
 
   private static final int PAGE_SIZE = 5;
@@ -46,13 +46,17 @@ public class UserTable extends PagerTable {
   private Button closeButton;
   private final PropertyHandler props;
   private boolean isAdmin;
- // private final LangTestDatabaseAsync service;
+  // private final LangTestDatabaseAsync service;
 
   /**
-   * @see mitll.langtest.client.LangTest.UsersClickHandler#onClick(ClickEvent)
    * @param props
+   * @see mitll.langtest.client.LangTest.UsersClickHandler#onClick(ClickEvent)
    */
-  public UserTable(PropertyHandler props, boolean isAdmin) { this.props = props; this.isAdmin = isAdmin; }
+  public UserTable(PropertyHandler props, boolean isAdmin) {
+    this.props = props;
+    this.isAdmin = isAdmin;
+  }
+
   /**
    * @see mitll.langtest.client.LangTest.UsersClickHandler
    */
@@ -63,7 +67,7 @@ public class UserTable extends PagerTable {
   private void showDialog(final LangTestDatabaseAsync service) {
     // Create the resetEmailPopup dialog box
     final DialogBox dialogBox = new DialogBox();
-    dialogBox.setText("Registered Users");
+    dialogBox.setText(REGISTERED_USERS);
 
     // Enable glass background.
     dialogBox.setGlassEnabled(true);
@@ -75,7 +79,7 @@ public class UserTable extends PagerTable {
     final VerticalPanel dialogVPanel = new VerticalPanel();
 
     int left = (Window.getClientWidth()) / INSET_PERCENT;
-    int top  = (Window.getClientHeight()) / INSET_PERCENT;
+    int top = (Window.getClientHeight()) / INSET_PERCENT;
     dialogBox.setPopupPosition(left, top);
 
     service.getUsers(new AsyncCallback<List<User>>() {
@@ -111,12 +115,12 @@ public class UserTable extends PagerTable {
     });
   }
 
-    @Override
-    protected SafeHtml getURL2() {
-      return getAnchorHTML("downloadUsers", "Download Excel");
+  @Override
+  protected SafeHtml getURL2() {
+    return getAnchorHTML("downloadUsers", "Download Excel");
   }
 
-    private Widget getTable(List<User> result, final LangTestDatabaseAsync service, Widget rightOfPager) {
+  private Widget getTable(List<User> result, final LangTestDatabaseAsync service, Widget rightOfPager) {
     final CellTable<User> table = new CellTable<User>();
     table.setPageSize(PAGE_SIZE);
     int width = (int) (Window.getClientWidth() * 0.9);
@@ -171,8 +175,8 @@ public class UserTable extends PagerTable {
     TextColumn<User> complete = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
-        return contact.isComplete() ? "Yes":("No (" +Math.round(100*contact.getCompletePercent())+
-          "%)");
+        return contact.isComplete() ? "Yes" : ("No (" + Math.round(100 * contact.getCompletePercent()) +
+            "%)");
       }
     };
     complete.setSortable(true);
@@ -180,10 +184,12 @@ public class UserTable extends PagerTable {
 
     TextColumn<User> items = new TextColumn<User>() {
       @Override
-      public String getValue(User contact) { return "" + contact.getNumResults(); }
+      public String getValue(User contact) {
+        return "" + contact.getNumResults();
+      }
     };
     items.setSortable(true);
-    table.addColumn(items, "Num " + props.getNameForAnswer() +"s");
+    table.addColumn(items, "Num " + props.getNameForAnswer() + "s");
 
     TextColumn<User> rate = new TextColumn<User>() {
       @Override
@@ -265,7 +271,7 @@ public class UserTable extends PagerTable {
         @Override
         public void update(int index, User object, Boolean value) {
 //          logger.info("update " + object.getUserID() + " " + value);
-          service.changeEnabledFor((int)object.getId(), value, new AsyncCallback<Void>() {
+          service.changeEnabledFor((int) object.getId(), value, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
 
@@ -309,21 +315,21 @@ public class UserTable extends PagerTable {
     // Add a ColumnSortEvent.ListHandler to connect sorting to the
     // java.util.List.
     ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(
-      list);
+        list);
     columnSortHandler.setComparator(id,
-      new Comparator<User>() {
-        public int compare(User o1, User o2) {
-          if (o1 == o2) {
-            return 0;
-          }
+        new Comparator<User>() {
+          public int compare(User o1, User o2) {
+            if (o1 == o2) {
+              return 0;
+            }
 
-          // Compare the name columns.
-          if (o1 != null) {
-            return (o2 != null) ? (int) (o1.getId() - o2.getId()) : 0;
+            // Compare the name columns.
+            if (o1 != null) {
+              return (o2 != null) ? (int) (o1.getId() - o2.getId()) : 0;
+            }
+            return -1;
           }
-          return -1;
-        }
-      });
+        });
     table.addColumnSortHandler(columnSortHandler);
 
     // We know that the data is sorted alphabetically by default.
@@ -336,7 +342,7 @@ public class UserTable extends PagerTable {
 
   private void getDateColumn(CellTable<User> table) {
     SafeHtmlCell cell = new SafeHtmlCell();
-    Column<User,SafeHtml> dateCol = new Column<User, SafeHtml>(cell) {
+    Column<User, SafeHtml> dateCol = new Column<User, SafeHtml>(cell) {
       @Override
       public SafeHtml getValue(User answer) {
         return getSafeHTMLForTimestamp(answer.getTimestampMillis());
@@ -346,7 +352,9 @@ public class UserTable extends PagerTable {
     dateCol.setSortable(true);
   }
 
-  private float roundToHundredth(double totalHours) { return ((float) ((Math.round(totalHours * 100)))) / 100f;  }
+  private float roundToHundredth(double totalHours) {
+    return ((float) ((Math.round(totalHours * 100)))) / 100f;
+  }
 
   private void addUserIDColumns(CellTable<User> table) {
     TextColumn<User> userID = new TextColumn<User>() {
