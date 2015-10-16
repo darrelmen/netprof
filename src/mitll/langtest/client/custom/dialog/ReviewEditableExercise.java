@@ -127,7 +127,7 @@ public class ReviewEditableExercise extends EditableExercise {
   }
 
   private Panel getRecordAudioWithAnno(DivWidget widget, String audioTypeRegular) {
-    MyRecordAudioPanel w = new MyRecordAudioPanel(widget, audioTypeRegular);
+    MyRecordAudioPanel w = new MyRecordAudioPanel(widget, audioTypeRegular, instance);
 
     if (w.getAudioAttribute() == null) {
       return w;
@@ -226,14 +226,14 @@ public class ReviewEditableExercise extends EditableExercise {
   private final Set<Widget> audioWasPlayed = new HashSet<Widget>();
   private final Set<Widget> toResize = new HashSet<Widget>();
 
-  private Widget getPanelForAudio(final CommonExercise e, final AudioAttribute audio, RememberTabAndContent tabAndContent) {
+  private Widget getPanelForAudio(final CommonExercise exercise, final AudioAttribute audio, RememberTabAndContent tabAndContent) {
     String audioRef = audio.getAudioRef();
     if (audioRef != null) {
       audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
     }
-    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, e.getRefSentence(), service, controller,
-      controller.getProps().showSpectrogram(), new EmptyScoreListener(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED, e.getID()
-    ) {
+    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, exercise.getRefSentence(), service, controller,
+      controller.getProps().showSpectrogram(), new EmptyScoreListener(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED, exercise.getID(),
+        exercise, npfHelper.getInstanceName()) {
 
       /**
        * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, String, String)
@@ -241,18 +241,18 @@ public class ReviewEditableExercise extends EditableExercise {
        */
       @Override
       protected Widget getAfterPlayWidget() {
-        return getDeleteButton(this, audio, e.getID(), "Delete this audio cut.  Original recorder can re-record.");
+        return getDeleteButton(this, audio, exercise.getID(), "Delete this audio cut.  Original recorder can re-record.");
       }
     };
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
-    noteAudioHasBeenPlayed(e.getID(), audio, audioPanel);
+    noteAudioHasBeenPlayed(exercise.getID(), audio, audioPanel);
     tabAndContent.addWidget(audioPanel);
     toResize.add(audioPanel);
 
     Panel vert = new VerticalPanel();
     vert.add(audioPanel);
-    Widget commentLine = getCommentLine(e, audio);
+    Widget commentLine = getCommentLine(exercise, audio);
     if (commentLine != null) {
       vert.add(commentLine);
     }
@@ -550,11 +550,10 @@ public class ReviewEditableExercise extends EditableExercise {
     private Button deleteButton;
     private Widget comment;
 
-    public MyRecordAudioPanel(DivWidget widget, String audioType) {
+    public MyRecordAudioPanel(DivWidget widget, String audioType, String instance) {
       super(ReviewEditableExercise.this.newUserExercise, ReviewEditableExercise.this.controller, widget,
-        ReviewEditableExercise.this.service, 0, false, audioType);
+        ReviewEditableExercise.this.service, 0, false, audioType, instance);
       this.audioType = audioType;
-      //if (getAudioAttribute() == null)
     }
 
     public void setComment(Widget comment) {
