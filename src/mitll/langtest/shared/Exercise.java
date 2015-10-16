@@ -221,8 +221,6 @@ public class Exercise extends AudioExercise implements CommonExercise {
   }
 
   public String toString() {
-    //  String moreAboutQuestions = DEBUG ? " : " +  getQuestionToString() : "";
-    //  String questionInfo = langToQuestion == null ? " no questions" : " num questions " + langToQuestion.size() + moreAboutQuestions;
     Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
 
     // warn about attr that have no user
@@ -237,7 +235,6 @@ public class Exercise extends AudioExercise implements CommonExercise {
         "'/'" + getRefSentence() + "' context " + getContext() + "/" + getContextTranslation() +
         " audio count = " + audioAttributes1.size() +
         (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
-        //    " : " + questionInfo +
         " unit->lesson " + getUnitToValue();
   }
 }
