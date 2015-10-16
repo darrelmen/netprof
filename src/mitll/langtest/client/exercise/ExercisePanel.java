@@ -3,8 +3,6 @@ package mitll.langtest.client.exercise;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
@@ -35,6 +33,7 @@ public abstract class ExercisePanel extends VerticalPanel implements
   protected final ListInterface exerciseList;
   private final Map<Integer,Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
   protected final String message;
+  protected final String instance;
 
   /**
    * @see ExercisePanelFactory#getExercisePanel
@@ -44,14 +43,17 @@ public abstract class ExercisePanel extends VerticalPanel implements
    * @param controller
    * @param exerciseList
    * @param instructionMessage
+   * @param instance
    */
   public ExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service,
-                       final ExerciseController controller, ListInterface exerciseList, String instructionMessage) {
+                       final ExerciseController controller, ListInterface exerciseList, String instructionMessage, String instance) {
     this.exercise = e;
     this.controller = controller;
   //  this.service = service;
     this.exerciseList = exerciseList;
     this.message = instructionMessage;
+    this.instance = instance;
+
     this.navigationHelper = getNavigationHelper(controller);
 
     // attempt to left justify
@@ -84,7 +86,7 @@ public abstract class ExercisePanel extends VerticalPanel implements
   protected void addInstructions() {  add(new Heading(4, PROMPT));  }
 
   /**
-   * @see #ExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, mitll.langtest.client.list.ListInterface, String)
+   * @see #ExercisePanel(CommonExercise, LangTestDatabaseAsync, ExerciseController, ListInterface, String, String)
    * @param e
    * @return
    */
