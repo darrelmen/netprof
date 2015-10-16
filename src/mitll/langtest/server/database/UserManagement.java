@@ -24,7 +24,6 @@ public class UserManagement {
       "Mandarin",
       "MSA", "Pashto1", "Pashto2", "Pashto3", "Spanish", "Sudanese", "Tagalog", "Urdu");
 
-
   private final ExerciseDAO exerciseDAO;
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
@@ -36,6 +35,7 @@ public class UserManagement {
     this.resultDAO = resultDAO;
     this.userListManager = userListManager;
   }
+
   /**
    * Check other sites to see if the user exists somewhere else, and if so go ahead and use that person
    * here.
@@ -48,7 +48,6 @@ public class UserManagement {
    * @see mitll.langtest.server.LangTestDatabaseImpl#userExists(String, String)
    */
   public User userExists(HttpServletRequest request, String login, String passwordH) {
-   // UserDAO userDAO = getUserDAO();
     User user = userDAO.getUser(login, passwordH);
 
     if (user == null && !passwordH.isEmpty()) {
@@ -58,7 +57,6 @@ public class UserManagement {
         String url = "https://np.ll.mit.edu/npfClassroom" + site.replaceAll("Mandarin", "CM") + "/scoreServlet";
         String json = new HTTPClient("", 0).readFromGET(url + "?hasUser=" + login + "&passwordH=" + passwordH);
 
-//        logger.info("asking " + site + " got '" + json + "'");
         if (!json.isEmpty()) {
           try {
             JSONObject jsonObject = JSONObject.fromObject(json);
@@ -234,6 +232,10 @@ public class UserManagement {
     return users;
   }
 
+  /**
+   * So multiple recordings for the same item are counted as 1.
+   * @return
+   */
   private Pair populateUserToNumAnswers() {
     Map<Long, Integer> idToCount = new HashMap<Long, Integer>();
     Map<Long, Set<String>> idToUniqueCount = new HashMap<Long, Set<String>>();
