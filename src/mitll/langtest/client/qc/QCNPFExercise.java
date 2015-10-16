@@ -539,7 +539,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
     }
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, e.getRefSentence(), service, controller,
-      controller.getProps().showSpectrogram(), scorePanel, 70, audio.isRegularSpeed()?" Regular speed":" Slow speed", e.getID());
+      controller.getProps().showSpectrogram(), scorePanel, 70, audio.isRegularSpeed()?" Regular speed":" Slow speed", e.getID(), e, instance);
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     audioPanel.addPlayListener(new PlayListener() {
