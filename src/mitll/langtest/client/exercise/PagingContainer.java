@@ -131,13 +131,11 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     String language = controller.getLanguage();
     addColumn(englishCol, new TextHeader("English"));
 
-
     Column<CommonShell, SafeHtml> flColumn = getFLColumn();
     flColumn.setSortable(true);
 
     String headerForFL = language.equals("English") ? "Meaning" : language;
     addColumn(flColumn, new TextHeader(headerForFL));
-
 
     List<CommonShell> dataList = getList();
 
