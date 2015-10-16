@@ -61,7 +61,7 @@ class EditableExercise extends NewUserExercise {
                           PagingExerciseList exerciseList,
                           ListInterface predefinedContent,
                           NPFHelper npfHelper) {
-    super(service, controller, itemMarker, editItem, changedUserExercise);
+    super(service, controller, itemMarker, editItem, changedUserExercise, npfHelper.getInstanceName());
     fastAnno.addStyleName("editComment");
     slowAnno.addStyleName("editComment");
     this.originalList = originalList;
@@ -197,7 +197,7 @@ class EditableExercise extends NewUserExercise {
    */
   @Override
   protected ControlGroup makeRegularAudioPanel(Panel row) {
-    rap = makeRecordAudioPanel(row, true);
+    rap = makeRecordAudioPanel(row, true, instance);
     fastAnno.addStyleName("topFiveMargin");
     return addControlGroupEntrySimple(row, NORMAL_SPEED_REFERENCE_RECORDING, rap, fastAnno);
   }
@@ -208,7 +208,7 @@ class EditableExercise extends NewUserExercise {
    */
   @Override
   protected ControlGroup makeSlowAudioPanel(Panel row) {
-    rapSlow = makeRecordAudioPanel(row, false);
+    rapSlow = makeRecordAudioPanel(row, false, instance);
     slowAnno.addStyleName("topFiveMargin");
 
     return addControlGroupEntrySimple(row, SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL, rapSlow, slowAnno);
