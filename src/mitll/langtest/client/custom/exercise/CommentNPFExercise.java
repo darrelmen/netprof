@@ -20,6 +20,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
+import mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
@@ -69,7 +70,7 @@ public class CommentNPFExercise extends NPFExercise {
   @Override
   protected Widget getQuestionContent(final CommonExercise e, String content) {
     if (commentBox == null) // defensive...
-     this.commentBox = new CommentBox(e, controller, this);
+      this.commentBox = new CommentBox(e, controller, this);
 
     Panel column = new VerticalPanel();
     column.getElement().setId("QuestionContent");
@@ -125,9 +126,9 @@ public class CommentNPFExercise extends NPFExercise {
   }
 
   /**
-   * @see #addContextButton
    * @param e
    * @return
+   * @see #addContextButton
    */
   private Panel getContext(CommonExercise e) {
     String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
@@ -154,7 +155,7 @@ public class CommentNPFExercise extends NPFExercise {
 
   /**
    * Add underlines of item tokens in context sentence.
-   *
+   * <p>
    * TODO : don't do this - make spans with different colors
    *
    * @param e
@@ -222,7 +223,7 @@ public class CommentNPFExercise extends NPFExercise {
 
   /**
    * For context audio!
-   *
+   * <p>
    * From all the reference audio recorded, show male and female, and default (unknown gender) audio.
    * TODO : why show default audio if we have both male and female ???
    * Choose latest recording, unless we have a preferred user id match.
@@ -265,6 +266,7 @@ public class CommentNPFExercise extends NPFExercise {
 
   /**
    * choose male first if multiple choices
+   *
    * @param hp
    */
   private void addPlayAndVoiceChoices(Panel hp) {
@@ -293,9 +295,9 @@ public class CommentNPFExercise extends NPFExercise {
   }
 
   /**
-   * @see #addPlayAndVoiceChoices
    * @param choices
    * @return
+   * @see #addPlayAndVoiceChoices
    */
   private DivWidget getShowGroup(List<String> choices) {
     ButtonToolbar w = new ButtonToolbar();
@@ -376,7 +378,7 @@ public class CommentNPFExercise extends NPFExercise {
    */
   @Override
   protected ASRScoringAudioPanel makeFastAndSlowAudio(final String path) {
-    return new FastAndSlowASRScoringAudioPanel(exercise, path, service, controller, scorePanel) {
+    return new FastAndSlowASRScoringAudioPanel(getLocalExercise(), path, service, controller, scorePanel, instance) {
       @Override
       protected void addAudioRadioButton(Panel vp, RadioButton fast) {
         vp.add(commentBox.getEntry(audioPath, fast, exercise.getAnnotation(path)));
