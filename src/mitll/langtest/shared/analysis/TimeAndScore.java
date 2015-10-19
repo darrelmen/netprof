@@ -8,6 +8,8 @@ import java.util.List;
  */
 
 public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
+  private String id;
+
   private long timestamp;
   private float score;
   private int count = 0;
@@ -19,6 +21,7 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
    * @param cumulativeAverage
    */
   public TimeAndScore(BestScore bs, float cumulativeAverage) {
+    this.id = bs.getId();
     timestamp = bs.getTimestamp();
     score = bs.getScore();
     count = bs.getCount();
@@ -79,5 +82,9 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
 
   public float getCumulativeAverage() {
     return cumulativeAverage;
+  }
+
+  public String getId() {
+    return id;
   }
 }
