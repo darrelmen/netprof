@@ -18,13 +18,13 @@ import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.test.RecoTest;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.*;
+import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
@@ -53,7 +53,7 @@ import java.util.*;
  * Time: 5:49 PM
  */
 @SuppressWarnings("serial")
-public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, AutoCRTScoring, LogAndNotify/*, LoadTesting*/ {
+public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, LogAndNotify {
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
@@ -65,7 +65,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final int SLOW_MILLIS = 40;
   private RefResultDecoder refResultDecoder;
 
- // private static final String REGULAR = "regular";
   private static final boolean warnMissingFile = true;
 
 
@@ -800,7 +799,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public List<CommonExercise> getExercises() {
     long then = System.currentTimeMillis();
     List<CommonExercise> exercises = db.getExercises();
-    makeAutoCRT();   // side effect of db.getExercises is to make the exercise DAO which is needed here...
     if (fullTrie == null) {
       fullTrie = new ExerciseTrie(exercises, getLanguage(), audioFileHelper.getSmallVocabDecoder());
     }
@@ -1051,23 +1049,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public void addRoundTrip(long resultID, int roundTrip) {
     db.getAnswerDAO().addRoundTrip(resultID, roundTrip);
-  }
-
-  /**
-   * Get score when doing autoCRT on an audio file.
-   *
-   * @param testAudioFile audio file to score
-   * @param lmSentences   to look for in the audio
-   * @param canUseCache
-   * @param useOldSchool
-   * @return PretestScore for audio
-   * @see mitll.langtest.server.autocrt.AutoCRT#getFlashcardAnswer
-   */
-  // JESS: this is entered for the flashcards (decoding)
-  public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache, boolean useOldSchool) {
-//		for(String sent : lmSentences)
-//			logger.debug("sent: " + sent);
-    return audioFileHelper.getASRScoreForAudio(testAudioFile, lmSentences, canUseCache, serverProps.usePhoneToDisplay(), useOldSchool);
   }
 
   // Users ---------------------
@@ -1947,13 +1928,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  /**
-   * @see #getExercises
-   */
-  public void makeAutoCRT() {
-    audioFileHelper.makeAutoCRT(this);
-  }
-
   @Override
   public Map<User, Integer> getUserToResultCount() {
     return db.getUserToResultCount();
@@ -2070,6 +2044,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     CollationKey collationKey = collator.getCollationKey(exercise.getForeignLanguage());
     idToKey.put(id, collationKey);
   }
+
+  @Override
+  public UserPerformance getPerformanceForUser(long id) { return db.getResultDAO().getPerformanceForUser(id); }
 
   public void logMessage(String message) {
     String prefixedMessage = "for " + pathHelper.getInstallPath() + " from client " + message;
