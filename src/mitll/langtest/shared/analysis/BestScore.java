@@ -19,13 +19,13 @@ public class BestScore implements Comparable<BestScore> {
 
   @Override
   public int compareTo(BestScore o) {
-    int c = id.compareTo(o.id);
+    int c = getId().compareTo(o.getId());
     if (c == 0) return -1 * Long.valueOf(getTimestamp()).compareTo(o.getTimestamp());
     else return c;
   }
 
   public String toString() {
-    return id + " : " + new Date(getTimestamp()) + " # " + count + " : " + pronScore;
+    return getId() + " : " + new Date(getTimestamp()) + " # " + count + " : " + pronScore;
   }
 
   public float getScore() {
@@ -48,7 +48,11 @@ public class BestScore implements Comparable<BestScore> {
 //    SimpleDateFormat df = new SimpleDateFormat("MM-dd-yy HH:mm:ss");
 //    String s = df.format(timestamp) + ",";
     String s = "";
-    return id + "," + s + timestamp + "," + count + "," + pronScore;
+    return getId() + "," + s + timestamp + "," + count + "," + pronScore;
+  }
+
+  public String getId() {
+    return id;
   }
 }
 
