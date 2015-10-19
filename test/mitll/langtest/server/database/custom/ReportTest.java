@@ -56,25 +56,6 @@ public class ReportTest {
     List<CommonExercise> exercises = database.getExercises();
   }
 
-  private static AudioFileHelper audioFileHelper;
-/*
-  private static AudioFileHelper getAudioFileHelper(PathHelper pathHelper) {
-    if (audioFileHelper == null) {
-      ServerProperties serverProps = database.getServerProps();
-      audioFileHelper = new AudioFileHelper(pathHelper, serverProps, database, null);
-    }
-    return audioFileHelper;
-  }
-*/
-
-  @Test
-  public void testBest() {
-    List<ResultDAO.BestScore> resultForUser = database.getResultDAO().getResultForUser(71);
-    for (ResultDAO.BestScore bestScore : resultForUser) {
-      logger.info("got " + bestScore);
-    }
-  }
-
   @Test
   public void testReport() {
    // Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
