@@ -110,7 +110,7 @@ public class Navigation implements RequiresResize {
   private final ReviewItemHelper reviewItem;
 
   private final KeyStorage storage;
-
+  AnalysisPlot analysisPlot;
 
   /**
    * @param service
@@ -374,7 +374,8 @@ public class Navigation implements RequiresResize {
         checkAndMaybeClearTab(ANALYSIS);
         logEvent(dialog, ANALYSIS);
         analysis.getContent().clear();
-        analysis.getContent().add(new AnalysisPlot(service,userManager.getUser()));
+        analysisPlot = new AnalysisPlot(service, userManager.getUser());
+        analysis.getContent().add(analysisPlot);
       }
     });
 
