@@ -1,7 +1,6 @@
 package mitll.langtest.shared.analysis;
 
 import mitll.langtest.server.database.ResultDAO;
-import mitll.langtest.server.database.analysis.BestScore;
 
 import java.io.Serializable;
 import java.util.*;
