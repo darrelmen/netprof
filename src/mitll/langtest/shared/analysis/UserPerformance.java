@@ -15,7 +15,6 @@ public class UserPerformance implements Serializable {
 
   private long userID;
 
-
   public UserPerformance(long userID) {
     this.userID = userID;
   }
@@ -65,7 +64,7 @@ public class UserPerformance implements Serializable {
     return total;
   }
 
-  private int getRawTotal() {
+  public int getRawTotal() {
     return getTotal(rawTimeAndScores);
 
   }
@@ -75,7 +74,7 @@ public class UserPerformance implements Serializable {
     return total / (float) getTotal();
   }
 
-  private float getRawAverage() {
+  public float getRawAverage() {
     float total = getTotalScore(rawTimeAndScores);
     return total / (float) getRawTotal();
   }
