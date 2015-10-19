@@ -32,7 +32,7 @@ import java.util.*;
  * Time: 5:08 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AudioFileHelper implements CollationSort {
+public class AudioFileHelper implements CollationSort, AutoCRTScoring {
   private static final Logger logger = Logger.getLogger(AudioFileHelper.class);
   private static final String POSTED_AUDIO = "postedAudio";
 
@@ -64,17 +64,17 @@ public class AudioFileHelper implements CollationSort {
     this.langTestDatabase = langTestDatabase;
     this.useOldSchoolServiceOnly = serverProperties.getOldSchoolService();
     this.mp3Support = new MP3Support(pathHelper);
+    makeAutoCRT();
   }
 
-  public <T extends CommonExercise> void sort(List<T> toSort) {
+/*  public <T extends CommonExercise> void sort(List<T> toSort) {
     asrScoring.sort(toSort);
-  }
+  }*/
 
   /**
    * @return
    * @see mitll.langtest.server.scoring.ASRScoring#getCollator
    */
- // @Override
   public Collator getCollator() {
     makeASRScoring();
     return asrScoring.getCollator();
@@ -82,6 +82,7 @@ public class AudioFileHelper implements CollationSort {
 
   /**
    * @param exercises
+   * @see LangTestDatabaseImpl#getExercises()
    */
   public void checkLTS(List<CommonExercise> exercises) {
     synchronized (this) {
@@ -359,7 +360,7 @@ public class AudioFileHelper implements CollationSort {
                                          boolean isMale, String speed) {
     AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(AudioAnswer.Validity.OK, duration);
 
-   // logger.debug("validity dur " + validity.durationInMillis);
+    // logger.debug("validity dur " + validity.durationInMillis);
 
     db.addRefAnswer(user, exercise1.getID(), file.getPath(),
         validity.durationInMillis,
@@ -461,9 +462,9 @@ public class AudioFileHelper implements CollationSort {
       return isCorrect;
     }
 
-    public boolean isDecode() {
+ /*   public boolean isDecode() {
       return isDecode;
-    }
+    }*/
   }
 
   private void checkValidity(String exerciseID, int questionID, int user, File file, AudioCheck.ValidityAndDur validity,
@@ -616,6 +617,11 @@ public class AudioFileHelper implements CollationSort {
         validity.validity, reqid, validity.durationInMillis);
   }
 
+  @Override
+  public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache, boolean useOldSchool) {
+    return getASRScoreForAudio(testAudioFile, lmSentences, canUseCache, serverProps.usePhoneToDisplay(), useOldSchool);
+  }
+
   /**
    * Get score when doing autoCRT on an audio file.
    * <p>
@@ -630,7 +636,7 @@ public class AudioFileHelper implements CollationSort {
    * @see AutoCRT#getFlashcardAnswer
    * @see AutoCRTScoring#getASRScoreForAudio(File, Collection, boolean, boolean)
    */
-  public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache, boolean usePhoneToDisplay, boolean useOldSchool) {
+  private PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache, boolean usePhoneToDisplay, boolean useOldSchool) {
     String tmpDir = Files.createTempDir().getAbsolutePath();
     makeASRScoring();
     List<String> unk = new ArrayList<String>();
@@ -858,21 +864,18 @@ public class AudioFileHelper implements CollationSort {
   private void makeASRScoring() {
     if (webserviceScoring == null) {
       webserviceScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps, langTestDatabase);
-      oldschoolScoring  = new ASRScoring(pathHelper.getInstallPath(), serverProps, langTestDatabase);
+      oldschoolScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps, langTestDatabase);
     }
     asrScoring = oldschoolScoring;
   }
 
   /**
-   * @param crtScoring
-   * @paramx studentAnswersDB
-   * @paramx langTestDatabase
    * @see mitll.langtest.server.LangTestDatabaseImpl#makeAutoCRT()
    */
-  public void makeAutoCRT(AutoCRTScoring crtScoring) {
-    if (autoCRT == null) {
-      autoCRT = new AutoCRT(crtScoring, serverProps.getMinPronScore());
-    }
+  private void makeAutoCRT() {
+  //  if (autoCRT == null) {
+      autoCRT = new AutoCRT(this, serverProps.getMinPronScore());
+    //}
   }
 
   /**
