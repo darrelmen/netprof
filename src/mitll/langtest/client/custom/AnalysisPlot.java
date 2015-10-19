@@ -5,7 +5,6 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.analysis.TimeAndScore;
@@ -54,7 +53,10 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
       public void onSuccess(UserPerformance userPerformance) {
         clear();
         List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
-        add(getChart("Pronunciation over time", "Score and average", "Cumulative Average", rawBestScores));
+        float v = userPerformance.getRawAverage() * 100;
+        add(getChart("Pronunciation over time (Drag to zoom in)",
+            "Score and average (" + userPerformance.getRawTotal() + " items : avg score " + (int)v +
+            " %)", "Cumulative Average", rawBestScores));
         setRawBestScores(rawBestScores);
       }
     });
