@@ -1,13 +1,5 @@
 package mitll.langtest.client.gauge;
 
-import com.google.gwt.user.client.ui.Widget;
-import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.Series;
-import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
-import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
-
-import java.util.List;
-
 /**
  * Created by GO22670 on 5/21/2014.
  */
