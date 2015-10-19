@@ -11,19 +11,18 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
   private long timestamp;
   private float score;
   private int count = 0;
-  private float movingAverage;
-
+  private float cumulativeAverage;
 
   /**
    * @see UserPerformance#setRawBestScores(List)
    * @param bs
-   * @param movingAverage
+   * @param cumulativeAverage
    */
-  public TimeAndScore(BestScore bs, float movingAverage) {
+  public TimeAndScore(BestScore bs, float cumulativeAverage) {
     timestamp = bs.getTimestamp();
     score = bs.getScore();
     count = bs.getCount();
-    this.movingAverage = movingAverage;
+    this.cumulativeAverage = cumulativeAverage;
   }
 
   /**
@@ -56,7 +55,7 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
 
   public String toString() {
     String format = getTimeString();
-    return " at " + format + " avg score for " + count + "\t=\t" + score +"\t"+movingAverage;
+    return " at " + format + " avg score for " + count + "\t=\t" + score +"\t"+ getCumulativeAverage();
   }
 
   private String getTimeString() {
@@ -66,7 +65,7 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
   }
 
   public String toCSV() {
-    return getTimeString() + "," + count + "," + score +","+movingAverage;
+    return getTimeString() + "," + count + "," + score +","+ getCumulativeAverage();
   }
 
   @Override
@@ -75,6 +74,10 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
   }
 
   public void setMoving(float moving) {
-    this.movingAverage = moving;
+    this.cumulativeAverage = moving;
+  }
+
+  public float getCumulativeAverage() {
+    return cumulativeAverage;
   }
 }
