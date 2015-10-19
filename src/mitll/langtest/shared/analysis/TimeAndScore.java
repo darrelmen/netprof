@@ -1,9 +1,6 @@
 package mitll.langtest.shared.analysis;
 
-import mitll.langtest.server.database.analysis.BestScore;
-
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
@@ -17,6 +14,11 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
   private float movingAverage;
 
 
+  /**
+   * @see UserPerformance#setRawBestScores(List)
+   * @param bs
+   * @param movingAverage
+   */
   public TimeAndScore(BestScore bs, float movingAverage) {
     timestamp = bs.getTimestamp();
     score = bs.getScore();
@@ -25,7 +27,7 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
   }
 
   /**
-   * @see UserPerformance#addBestScores(List)
+   * @see UserPerformance#addBestScores
    * @param bestScoreList
    * @param binSize
    */
@@ -53,13 +55,18 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
   }
 
   public String toString() {
-    SimpleDateFormat df = new SimpleDateFormat("MM-dd-yy HH:mm:ss");
-    return " at " + df.format(getTimestamp()) + " avg score for " + count + "\t=\t" + score +"\t"+movingAverage;
+    String format = getTimeString();
+    return " at " + format + " avg score for " + count + "\t=\t" + score +"\t"+movingAverage;
+  }
+
+  private String getTimeString() {
+   // SimpleDateFormat df = new SimpleDateFormat("MM-dd-yy HH:mm:ss");
+   // String format = df.format(getTimestamp());
+    return ""+getTimestamp();
   }
 
   public String toCSV() {
-    SimpleDateFormat df = new SimpleDateFormat("MM-dd-yy HH:mm:ss");
-    return df.format(getTimestamp()) + "," + count + "," + score +","+movingAverage;
+    return getTimeString() + "," + count + "," + score +","+movingAverage;
   }
 
   @Override
