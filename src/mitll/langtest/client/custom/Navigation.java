@@ -373,7 +373,8 @@ public class Navigation implements RequiresResize {
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTab(ANALYSIS);
         logEvent(dialog, ANALYSIS);
-        //dialogWindow.viewDialog(dialog.getContent());
+        analysis.getContent().clear();
+        analysis.getContent().add(new AnalysisPlot(service,userManager.getUser()));
       }
     });
 
