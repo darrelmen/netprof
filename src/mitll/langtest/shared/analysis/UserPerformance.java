@@ -154,7 +154,7 @@ public class UserPerformance implements Serializable {
     }
   }
 
-  private List<TimeAndScore> getRawBestScores() {
+  public List<TimeAndScore> getRawBestScores() {
     return rawTimeAndScores;
   }
 }
