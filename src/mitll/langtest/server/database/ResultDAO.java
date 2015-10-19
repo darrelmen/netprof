@@ -8,6 +8,7 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.monitoring.Session;
@@ -18,6 +19,7 @@ import java.io.OutputStream;
 import java.sql.*;
 import java.text.CollationKey;
 import java.text.Collator;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 
@@ -58,6 +60,10 @@ public class ResultDAO extends DAO {
   public static final String PROCESS_DUR = "processDur";
   public static final String ROUND_TRIP_DUR = "roundTripDur";
   public static final int FIVE_MINUTES = 5 * 60 * 1000;
+
+  //  public static final int HOUR = 60 * 60 * 1000;
+  public static final int HOUR = 60 * 60 * 1000;
+  public static final int DAY = 24 * HOUR;
   private final LogAndNotify logAndNotify;
 
   private final boolean debug = false;
@@ -79,12 +85,15 @@ public class ResultDAO extends DAO {
 
   public List<BestScore> getResultForUser(long id) {
     try {
-      String sql = "SELECT " +  Database.EXID + "," + PRON_SCORE + "," + Database.TIME +
+      String sql = "SELECT " + Database.EXID + "," + PRON_SCORE + "," + Database.TIME +
           " FROM " + RESULTS +
-          " where " + USERID + "=" +id+
-          " order by " + Database.EXID + ", " + Database.TIME + " limit 100";
+          " where " + USERID + "=" + id +
+          " AND " + PRON_SCORE + ">0"+
+          " order by " + Database.EXID + ", " + Database.TIME
+          //+ " limit 200"
+          ;
 
-     List<BestScore> resultsForQuery = getBest(sql);
+      List<BestScore> resultsForQuery = getBest(sql);
 
       return resultsForQuery;
     } catch (Exception ee) {
@@ -93,24 +102,84 @@ public class ResultDAO extends DAO {
     return new ArrayList<BestScore>();
   }
 
+  public UserPerformance getResultForUserByBin(long id, int binSize) {
+    try {
+      String sql = "SELECT " + Database.EXID + "," + PRON_SCORE + "," + Database.TIME +
+          " FROM " + RESULTS +
+          " where " + USERID + "=" + id +
+          " AND " + PRON_SCORE + ">0"+
+          " order by " + Database.EXID + ", " + Database.TIME
+          //+ " limit 100"
+          ;
+
+      List<BestScore> resultsForQuery = getBest(sql);
+
+      Map<Long, List<BestScore>> bins = new TreeMap<>();
+      for (BestScore bs : resultsForQuery) {
+        long dayBin = bs.getTimestamp() / binSize;
+        List<BestScore> bestScores = bins.get(dayBin);
+        if (bestScores == null) bins.put(dayBin, bestScores = new ArrayList<BestScore>());
+        bestScores.add(bs);
+      }
+
+      UserPerformance up = new UserPerformance(id);
+      for (Map.Entry<Long, List<BestScore>> pair : bins.entrySet()) {
+        up.addBestScores(pair.getValue());
+      }
+      up.setRawBestScores(resultsForQuery);
+
+      return up;
+    } catch (Exception ee) {
+      logException(ee);
+    }
+    return new UserPerformance();
+  }
+
   public static class BestScore implements Comparable<BestScore> {
     private String id;
     private long timestamp;
     private float pronScore;
+    private int count;
 
     public BestScore(String id, float pronScore, long timestamp) {
       this.id = id;
-      this.pronScore = pronScore;
+      this.pronScore = (pronScore < 0) ? 0 : pronScore;
       this.timestamp = timestamp;
     }
 
     @Override
     public int compareTo(BestScore o) {
       int c = id.compareTo(o.id);
-      if (c == 0) return -1 * Long.valueOf(timestamp).compareTo(o.timestamp);
+      if (c == 0) return -1 * Long.valueOf(getTimestamp()).compareTo(o.getTimestamp());
       else return c;
     }
-    public String toString() { return id + " : " + new Date(timestamp) + " : " +pronScore;}
+
+    public String toString() {
+      return id + " : " + new Date(getTimestamp()) + " # " + count +
+          " : " + pronScore;
+    }
+
+    public float getScore() {
+      return pronScore;
+    }
+
+    public long getTimestamp() {
+      return timestamp;
+    }
+
+    public void setCount(int count) {
+      this.count = count;
+    }
+
+    public int getCount() {
+      return count;
+    }
+
+    public String toCSV() {
+      SimpleDateFormat df = new SimpleDateFormat("MM-dd-yy HH:mm:ss");
+
+      return id + "," + df.format(timestamp) + "," + timestamp + "," + count + "," + pronScore;
+    }
   }
 
 
@@ -667,7 +736,7 @@ public class ResultDAO extends DAO {
   }
 
   private List<BestScore> getBest(String sql) throws SQLException {
-    logger.info("got "+ sql);
+    logger.info("got " + sql);
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
 
@@ -790,7 +859,7 @@ public class ResultDAO extends DAO {
     String last = null;
 
     long lastTimestamp = 0;
-
+    int count = 0;
     BestScore lastBest = null;
     while (rs.next()) {
       String exid = rs.getString(Database.EXID);
@@ -799,13 +868,16 @@ public class ResultDAO extends DAO {
 
       long time = timestamp.getTime();
       if ((last != null && !last.equals(exid)) || (lastTimestamp > 0 && time - lastTimestamp > FIVE_MINUTES)) {
-
         results.add(lastBest);
+
+        lastBest.setCount(count);
         lastTimestamp = time;
+        count = 0;
       }
       if (lastTimestamp == 0) lastTimestamp = time;
       last = exid;
-      lastBest = new BestScore(exid, pronScore, time);;
+      lastBest = new BestScore(exid, pronScore, time);
+      count++;
     }
     finish(connection, statement, rs);
 
