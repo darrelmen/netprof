@@ -1,6 +1,5 @@
-package mitll.langtest.server.database.analysis;
+package mitll.langtest.shared.analysis;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -46,8 +45,10 @@ public class BestScore implements Comparable<BestScore> {
   }
 
   public String toCSV() {
-    SimpleDateFormat df = new SimpleDateFormat("MM-dd-yy HH:mm:ss");
-    return id + "," + df.format(timestamp) + "," + timestamp + "," + count + "," + pronScore;
+//    SimpleDateFormat df = new SimpleDateFormat("MM-dd-yy HH:mm:ss");
+//    String s = df.format(timestamp) + ",";
+    String s = "";
+    return id + "," + s + timestamp + "," + count + "," + pronScore;
   }
 }
 
