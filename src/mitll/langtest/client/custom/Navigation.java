@@ -54,6 +54,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class Navigation implements RequiresResize {
+  public static final String ANALYSIS = "Analysis";
   private final Logger logger = Logger.getLogger("Navigation");
 
   private static final String CHAPTERS = "Learn Pronunciation";
@@ -89,7 +90,6 @@ public class Navigation implements RequiresResize {
   private static final String RECORD_AUDIO = "Record Audio";
   private static final String RECORD_EXAMPLE = "Record In-context Audio";
   private static final String CONTENT1 = "content";
-  // public static final String CLASSROOM = "classroom";
   private static final String MARK_DEFECTS1 = "markDefects";
 
   private final ExerciseController controller;
@@ -277,6 +277,7 @@ public class Navigation implements RequiresResize {
   private TabPanel tabPanel;
   private TabAndContent yourStuff, othersStuff, studyLists;
   private TabAndContent browse, dialog, chapters, create;
+  private TabAndContent analysis;
   private TabAndContent review, recorderTab, recordExampleTab, markDefectsTab, practiceTab;
   private final List<TabAndContent> tabs = new ArrayList<TabAndContent>();
 
@@ -365,6 +366,17 @@ public class Navigation implements RequiresResize {
         logEvent(studyLists, STUDY_LISTS);
       }
     });
+
+    analysis = makeFirstLevelTab(tabPanel, IconType.TROPHY, ANALYSIS);
+    analysis.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        checkAndMaybeClearTab(ANALYSIS);
+        logEvent(dialog, ANALYSIS);
+        //dialogWindow.viewDialog(dialog.getContent());
+      }
+    });
+
 
     if (isQC()) {
       markDefectsTab = makeFirstLevelTab(tabPanel, IconType.FLAG, MARK_DEFECTS);
@@ -1306,9 +1318,7 @@ public class Navigation implements RequiresResize {
     });
   }
 
-
   private boolean createdByYou(UserList ul) {
     return ul.getCreator().getId() == userManager.getUser();
   }
-
 }
