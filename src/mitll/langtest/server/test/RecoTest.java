@@ -43,7 +43,7 @@ public class RecoTest {
    */
   private void doRecoTest() {
     List<CommonExercise> exercises = langTest.getExercises();
-    langTest.makeAutoCRT();
+    //langTest.makeAutoCRT();
 
     int incorrect = 0;
     try {
@@ -65,7 +65,7 @@ public class RecoTest {
 
   private void doRecoTest2() {
     List<CommonExercise> exercises = langTest.getExercises();
-    langTest.makeAutoCRT();
+   // langTest.makeAutoCRT();
 
     int incorrect = 0;
     int total = 0;
