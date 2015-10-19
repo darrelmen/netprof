@@ -2,8 +2,8 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.analysis.BestScore;
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.analysis.BestScore;
 import mitll.langtest.shared.analysis.UserPerformance;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
