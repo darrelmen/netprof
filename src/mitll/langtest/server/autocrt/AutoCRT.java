@@ -2,11 +2,11 @@ package mitll.langtest.server.autocrt;
 
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.scoring.AutoCRTScoring;
+import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
-import mitll.langtest.server.scoring.ASRScoring;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -29,12 +29,12 @@ public class AutoCRT {
   private static final boolean DEBUG = false;
 
   /**
-   * @param db
+   * @param autoCRTScoring
    * @param minPronScore
    * @see mitll.langtest.server.audio.AudioFileHelper#makeAutoCRT
    */
-  public AutoCRT(AutoCRTScoring db, double minPronScore) {
-    this.autoCRTScoring = db;
+  public AutoCRT(AutoCRTScoring autoCRTScoring, double minPronScore) {
+    this.autoCRTScoring = autoCRTScoring;
     this.minPronScore = minPronScore;
   }
 
@@ -177,7 +177,7 @@ public class AutoCRT {
    */
   private String getPhraseToDecode(String rawRefSentence, String language) {
     return language.equalsIgnoreCase("mandarin") && !rawRefSentence.trim().equalsIgnoreCase(SLFFile.UNKNOWN_MODEL) ?
-        ASRScoring.getSegmented(rawRefSentence.trim().toUpperCase()) :
+        Scoring.getSegmented(rawRefSentence.trim().toUpperCase()) :
         rawRefSentence.trim().toUpperCase();
   }
 
