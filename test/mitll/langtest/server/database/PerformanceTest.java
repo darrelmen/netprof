@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.analysis.BestScore;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.analysis.UserPerformance;
 import org.apache.log4j.Logger;
@@ -13,6 +14,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -20,8 +23,6 @@ import java.util.List;
  * Created by GO22670 on 1/30/14.
  */
 public class PerformanceTest {
-  private static final String CHANGED = "changed";
-  private static final String ENGLISH = "english";
   private static final Logger logger = Logger.getLogger(PerformanceTest.class);
   private static DatabaseImpl database;
   private static String dbName;
@@ -49,18 +50,37 @@ public class PerformanceTest {
   public void testBest() {
     try {
       BufferedWriter writer = getWriter("bestScore");
-      List<ResultDAO.BestScore> resultForUser = database.getResultDAO().getResultForUser(71);
-      for (ResultDAO.BestScore bestScore : resultForUser) {
+      List<BestScore> resultForUser = database.getResultDAO().getResultForUser(71);
+      Collections.sort(resultForUser, new Comparator<BestScore>() {
+        @Override
+        public int compare(BestScore o1, BestScore o2) {
+          return Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp());
+        }
+      });
+      for (BestScore bestScore : resultForUser) {
         logger.info("got " + bestScore);
         writer.write(bestScore.toCSV() + "\n");
       }
       writer.close();
 
       UserPerformance performance = database.getResultDAO().getResultForUserByBin(71, ResultDAO.FIVE_MINUTES);
-      writer = getWriter("UserPerformance");
+      writer = getWriter("UserPerformance_5_Min");
       writer.write(performance.toCSV());
       writer.close();
 
+
+      performance = database.getResultDAO().getResultForUserByBin(71, ResultDAO.HOUR);
+      writer = getWriter("UserPerformance_Hour");
+      writer.write(performance.toCSV());
+      writer.close();
+
+      performance = database.getResultDAO().getResultForUserByBin(71, ResultDAO.DAY);
+      writer = getWriter("UserPerformance_Day");
+      writer.write(performance.toCSV());
+      writer.close();
+
+
+      performance = database.getResultDAO().getPerformanceForUser(71);
       writer = getWriter("RawUserPerformance");
       writer.write(performance.toRawCSV());
       writer.close();
