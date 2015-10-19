@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.database.analysis.BestScore;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.CommonExercise;
@@ -19,9 +20,7 @@ import java.io.OutputStream;
 import java.sql.*;
 import java.text.CollationKey;
 import java.text.Collator;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.Date;
 
 /**
  * Create, drop, alter, read from the results table.
@@ -85,13 +84,7 @@ public class ResultDAO extends DAO {
 
   public List<BestScore> getResultForUser(long id) {
     try {
-      String sql = "SELECT " + Database.EXID + "," + PRON_SCORE + "," + Database.TIME +
-          " FROM " + RESULTS +
-          " where " + USERID + "=" + id +
-          " AND " + PRON_SCORE + ">0"+
-          " order by " + Database.EXID + ", " + Database.TIME
-          //+ " limit 200"
-          ;
+      String sql = getPerfSQL(id);
 
       List<BestScore> resultsForQuery = getBest(sql);
 
@@ -102,86 +95,40 @@ public class ResultDAO extends DAO {
     return new ArrayList<BestScore>();
   }
 
+  private String getPerfSQL(long id) {
+    return "SELECT " + Database.EXID + "," + PRON_SCORE + "," + Database.TIME +
+            " FROM " + RESULTS +
+            " where " + USERID + "=" + id +
+            " AND " + PRON_SCORE + ">0" + // discard when they got it wrong in avp
+            " order by " + Database.EXID + ", " + Database.TIME;
+  }
+
   public UserPerformance getResultForUserByBin(long id, int binSize) {
     try {
-      String sql = "SELECT " + Database.EXID + "," + PRON_SCORE + "," + Database.TIME +
-          " FROM " + RESULTS +
-          " where " + USERID + "=" + id +
-          " AND " + PRON_SCORE + ">0"+
-          " order by " + Database.EXID + ", " + Database.TIME
-          //+ " limit 100"
-          ;
+      String sql = getPerfSQL(id);
 
       List<BestScore> resultsForQuery = getBest(sql);
-
-      Map<Long, List<BestScore>> bins = new TreeMap<>();
-      for (BestScore bs : resultsForQuery) {
-        long dayBin = bs.getTimestamp() / binSize;
-        List<BestScore> bestScores = bins.get(dayBin);
-        if (bestScores == null) bins.put(dayBin, bestScores = new ArrayList<BestScore>());
-        bestScores.add(bs);
-      }
-
       UserPerformance up = new UserPerformance(id);
-      for (Map.Entry<Long, List<BestScore>> pair : bins.entrySet()) {
-        up.addBestScores(pair.getValue());
-      }
-      up.setRawBestScores(resultsForQuery);
-
+      up.setAtBinSize(resultsForQuery, binSize);
       return up;
     } catch (Exception ee) {
       logException(ee);
     }
-    return new UserPerformance();
+    return new UserPerformance(id);
   }
 
-  public static class BestScore implements Comparable<BestScore> {
-    private String id;
-    private long timestamp;
-    private float pronScore;
-    private int count;
+  public UserPerformance getPerformanceForUser(long id) {
+    try {
+      String sql = getPerfSQL(id);
 
-    public BestScore(String id, float pronScore, long timestamp) {
-      this.id = id;
-      this.pronScore = (pronScore < 0) ? 0 : pronScore;
-      this.timestamp = timestamp;
+      List<BestScore> resultsForQuery = getBest(sql);
+      UserPerformance up = new UserPerformance(id,resultsForQuery);
+      return up;
+    } catch (Exception ee) {
+      logException(ee);
     }
-
-    @Override
-    public int compareTo(BestScore o) {
-      int c = id.compareTo(o.id);
-      if (c == 0) return -1 * Long.valueOf(getTimestamp()).compareTo(o.getTimestamp());
-      else return c;
-    }
-
-    public String toString() {
-      return id + " : " + new Date(getTimestamp()) + " # " + count +
-          " : " + pronScore;
-    }
-
-    public float getScore() {
-      return pronScore;
-    }
-
-    public long getTimestamp() {
-      return timestamp;
-    }
-
-    public void setCount(int count) {
-      this.count = count;
-    }
-
-    public int getCount() {
-      return count;
-    }
-
-    public String toCSV() {
-      SimpleDateFormat df = new SimpleDateFormat("MM-dd-yy HH:mm:ss");
-
-      return id + "," + df.format(timestamp) + "," + timestamp + "," + count + "," + pronScore;
-    }
+    return new UserPerformance(id);
   }
-
 
   /**
    * Pulls the list of results out of the database.
