@@ -10,6 +10,8 @@ import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.analysis.TimeAndScore;
 import mitll.langtest.shared.analysis.UserPerformance;
 import org.moxieapps.gwt.highcharts.client.*;
+import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
+import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -55,8 +57,8 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
         List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
         float v = userPerformance.getRawAverage() * 100;
         add(getChart("Pronunciation over time (Drag to zoom in)",
-            "Score and average (" + userPerformance.getRawTotal() + " items : avg score " + (int)v +
-            " %)", "Cumulative Average", rawBestScores));
+            "Score and average (" + userPerformance.getRawTotal() + " items : avg score " + (int) v +
+                " %)", "Cumulative Average", rawBestScores));
         setRawBestScores(rawBestScores);
       }
     });
@@ -67,13 +69,34 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
       List<TimeAndScore> yValuesForUser) {
     Chart chart = new Chart()
         .setZoomType(BaseChart.ZoomType.X)
-        .setType(Series.Type.LINE)
+        .setType(Series.Type.SCATTER)
         .setChartTitleText(title)
         .setChartSubtitleText(subtitle)
         .setMarginRight(10)
         .setOption("/credits/enabled", false)
         .setOption("/plotOptions/series/pointStart", 1)
         .setOption("/legend/enabled", false)
+        .setLegend(new Legend()
+                .setLayout(Legend.Layout.VERTICAL)
+                .setAlign(Legend.Align.LEFT)
+                .setVerticalAlign(Legend.VerticalAlign.TOP)
+                .setX(100)
+                .setY(70)
+                .setBorderWidth(1)
+                .setFloating(true)
+                .setBackgroundColor("#FFFFFF")
+        )
+        .setScatterPlotOptions(new ScatterPlotOptions()
+            .setMarker(new Marker()
+                    .setRadius(5)
+                    .setHoverState(new Marker()
+                            .setEnabled(true)
+                            .setLineColor(new Color(100, 100, 100))
+                    )
+            )
+            .setHoverStateMarker(new Marker()
+                    .setEnabled(false)
+            ))
         .setToolTip(new ToolTip()
             .setFormatter(new ToolTipFormatter() {
               public String format(ToolTipData toolTipData) {
@@ -132,7 +155,8 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
 
     Series series = chart.createSeries()
         .setName(seriesTitle)
-        .setPoints(data);
+        .setPoints(data)
+        .setType(Series.Type.LINE);
 
     chart.addSeries(series);
 
