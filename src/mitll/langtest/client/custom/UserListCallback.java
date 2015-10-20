@@ -29,7 +29,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
   private static final String DELETE = "Delete";
   private static final String REVIEWERS = "Reviewers";
 
-  private final Navigation navigation;
+  private final ListManager navigation;
   private final Panel contentPanel;
   private final Panel child;
   private final ScrollPanel listScrollPanel;
@@ -40,8 +40,8 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
   final boolean showIsPublic;
 
   /**
-   * @see mitll.langtest.client.custom.Navigation#viewLessons(com.google.gwt.user.client.ui.Panel, boolean, boolean, boolean)
-   * @see Navigation#viewReview(com.google.gwt.user.client.ui.Panel)
+   * @see ListManager#viewLessons(com.google.gwt.user.client.ui.Panel, boolean, boolean, boolean)
+   * @see ListManager#viewReview(com.google.gwt.user.client.ui.Panel)
    * @param contentPanel
    * @param child
    * @param listScrollPanel
@@ -51,10 +51,10 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
    * @param userManager
    * @param showIsPublic
    */
-  public UserListCallback(Navigation navigation, Panel contentPanel, Panel child, ScrollPanel listScrollPanel, String instanceName,
+  public UserListCallback(ListManager navigation, Panel contentPanel, Panel child, ScrollPanel listScrollPanel, String instanceName,
                           boolean onlyMyLists, boolean allLists, UserManager userManager, boolean showIsPublic) {
     this.navigation = navigation;
-    logger.info("UserListCallback instance " +instanceName + " only my lists " + onlyMyLists);
+    logger.info("UserListCallback instance '" +instanceName + "' only my lists " + onlyMyLists);
     this.contentPanel = contentPanel;
     this.child = child;
     this.listScrollPanel = listScrollPanel;
