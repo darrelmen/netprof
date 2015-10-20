@@ -79,5 +79,6 @@
     <orderEntry type="library" name="servlet-api (2)" level="project" />
     <orderEntry type="library" name="commons-beanutils-1.8.0" level="project" />
     <orderEntry type="library" name="xmlbeans-2.3.0" level="project" />
+    <orderEntry type="library" name="org.moxieapps.gwt.highcharts-1.7.0" level="project" />
   </component>
 </module>
