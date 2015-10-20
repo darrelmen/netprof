@@ -25,9 +25,8 @@ public interface ListInterface extends RequiresResize {
   /**
    * @see mitll.langtest.client.LangTest#reallySetFactory()
    * @param factory
-   * @param user
    */
-  void setFactory(ExercisePanelFactory factory, UserManager user);
+  void setFactory(ExercisePanelFactory factory);
 
     /**
      * @see mitll.langtest.client.LangTest#gotUser(long)
