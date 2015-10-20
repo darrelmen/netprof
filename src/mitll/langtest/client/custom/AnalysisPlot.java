@@ -14,14 +14,13 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 10/19/15.
  */
 public class AnalysisPlot extends DivWidget implements IsWidget {
-  public static final String PRONUNCIATION_SCORE = "Pronunciation Score";
-  private final Logger logger = Logger.getLogger("AnalysisPlot");
+  //  private final Logger logger = Logger.getLogger("AnalysisPlot");
+  private static final String PRONUNCIATION_SCORE = "Pronunciation Score";
 
   private Map<Long, String> timeToId = new TreeMap<>();
   private Map<String, CommonShell> idToEx = new TreeMap<>();
@@ -136,15 +135,6 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
    * @see #getChart
    */
   private void addSeries(List<TimeAndScore> yValuesForUser, Chart chart, String seriesTitle) {
-    //  Float[] yValues = yValuesForUser.toArray(new Float[0]);
-
-    if (yValuesForUser.isEmpty()) {
-      System.err.println("huh??? addSeries is empty for " + seriesTitle);
-    }
-    //else {
-    //   //System.out.println("addSeries " + yValuesForUser);
-    // }
-
     Number[][] data = new Number[yValuesForUser.size()][2];
 
     int i = 0;
@@ -181,16 +171,15 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
    * @param title
    * @see #getChart(int, String, String, String, float, float, float, float, java.util.List)
    */
-  private void configureChart(//float top,
-                              Chart chart, String title) {
+  private void configureChart(Chart chart, String title) {
     chart.getYAxis().setAxisTitleText(title)
-        .setAllowDecimals(true)
+      //  .setAllowDecimals(true)
         .setMin(0);
     chart.getXAxis()
         .setType(Axis.Type.DATE_TIME);
   }
 
-  public void setRawBestScores(List<TimeAndScore> rawBestScores) {
+  private void setRawBestScores(List<TimeAndScore> rawBestScores) {
     for (TimeAndScore timeAndScore : rawBestScores) {
       timeToId.put(timeAndScore.getTimestamp(), timeAndScore.getId());
     }
