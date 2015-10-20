@@ -77,7 +77,6 @@ public class Navigation implements RequiresResize {
   private final UserManager userManager;
   private final SimpleChapterNPFHelper practiceHelper;
 
-//  private ScrollPanel listScrollPanel;
   private final NPFHelper npfHelper;
   private final NPFHelper avpHelper;
   private DialogWindow dialogWindow;
@@ -320,7 +319,7 @@ public class Navigation implements RequiresResize {
 
     addStudyLists();
 
-    addAnalysis();
+//    addAnalysis();
 
     if (isQC()) {
       markDefectsTab = makeFirstLevelTab(tabPanel, IconType.FLAG, MARK_DEFECTS);
