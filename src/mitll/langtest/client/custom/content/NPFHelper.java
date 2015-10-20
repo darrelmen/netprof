@@ -1,6 +1,7 @@
 package mitll.langtest.client.custom.content;
 
 import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
@@ -13,6 +14,7 @@ import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
@@ -24,8 +26,6 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -60,6 +60,7 @@ public class NPFHelper implements RequiresResize {
    * @param controller
    * @param showQC
    * @see mitll.langtest.client.custom.Navigation#Navigation
+   * @see mitll.langtest.client.custom.ListManager#ListManager(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback, TabPanel)
    */
   public NPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
                    ExerciseController controller, boolean showQC) {
@@ -198,7 +199,6 @@ public class NPFHelper implements RequiresResize {
    * @see #showNPF(mitll.langtest.shared.custom.UserList, TabAndContent, String, boolean)
    */
   private void rememberAndLoadFirst(final UserList ul) {
-    //  System.out.println(getClass() + ".rememberAndLoadFirst : for " +ul);
     npfExerciseList.setUserListID(ul.getUniqueID());
     npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
     npfExerciseList.setWidth("270px");
@@ -212,7 +212,7 @@ public class NPFHelper implements RequiresResize {
    * @see #makeNPFExerciseList
    */
   PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
-    return new PagingExerciseList(right, service, feedback, null, controller,
+    return new HistoryExerciseList(right, service, feedback, controller,
         true, instanceName, false) {
       @Override
       protected void onLastItem() {
@@ -233,7 +233,7 @@ public class NPFHelper implements RequiresResize {
    * @see #makeNPFExerciseList(com.google.gwt.user.client.ui.Panel, String)
    */
   void setFactory(final PagingExerciseList exerciseList, final String instanceName, boolean showQC) {
-    exerciseList.setFactory(getFactory(exerciseList, instanceName, showQC), userManager);
+    exerciseList.setFactory(getFactory(exerciseList, instanceName, showQC));
   }
 
   protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList, final String instanceName, final boolean showQC) {
@@ -256,7 +256,6 @@ public class NPFHelper implements RequiresResize {
 //    logger.info("Got resize " + instanceName);
     if (npfExerciseList != null) {
 //      logger.info("Got resize for " +npfExerciseList.getCreatedPanel().getClass());
-
       npfExerciseList.onResize();
     } else {
       //    logger.info("no exercise list " +instanceName + "  for " + getClass());
@@ -369,7 +368,7 @@ public class NPFHelper implements RequiresResize {
       final FlexSectionExerciseList exerciseList = makeExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst);
       exerciseList.setUserListID(userListID);
 
-      exerciseList.setFactory(getFactory(exerciseList, instanceName), userManager);
+      exerciseList.setFactory(getFactory(exerciseList, instanceName));
       Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
         @Override
         public void execute() {
