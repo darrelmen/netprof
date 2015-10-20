@@ -37,7 +37,7 @@ public class SelectionState {
   public boolean isEmpty() { return getTypeToSection().isEmpty(); }
 
   private String unencodeToken(String token) {
-    token = token.replaceAll("%3D", "=").replaceAll("%3B", ";").replaceAll("%2", " ").replaceAll("\\+", " ");
+    token = unencodeToken2(token).replaceAll("\\+", " ");
     return token;
   }
 
@@ -54,7 +54,6 @@ public class SelectionState {
   private void parseToken(String token) {
     //token = token.contains("###") ? token.split("###")[0] : token;
    // token = token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0]; // remove any other parameters
-
     String[] parts = token.split(";");
 
     for (String part : parts) {
