@@ -16,6 +16,7 @@ import mitll.langtest.client.custom.content.NPFHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
@@ -135,7 +136,7 @@ public class EditItem {
     }
 
     final PagingExerciseList exerciseList =
-      new PagingExerciseList(right, service, feedback, null, controller,
+      new HistoryExerciseList(right, service, feedback, controller,
         true, instanceName, false) {
         @Override
         protected void onLastItem() {
@@ -210,7 +211,7 @@ public class EditItem {
         populatePanel(new UserExercise(e), panel, ul, originalList, itemMarker, outer);
         return panel;
       }
-    }, userManager);
+    });
   }
 
   /**
@@ -240,7 +241,6 @@ public class EditItem {
    */
   private void populatePanel(CommonUserExercise exercise, final Panel right, final UserList ul, final UserList originalList, final HasText itemMarker,
                              final ListInterface pagingContainer) {
-   // logger.info("exercise audio attributes : " + exercise.getAudioAttributes());
     if (exercise.getID().equals(NEW_EXERCISE_ID)) {
       if (newExercise == null) {
         newExercise = createNewItem(userManager.getUser());

@@ -16,7 +16,9 @@ public class ChapterNPFHelper extends NPFHelper {
   private final FlexListLayout flexListLayout;
 
   /**
-   * @see mitll.langtest.client.custom.Navigation#Navigation(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, mitll.langtest.client.user.UserFeedback)
+   * Makes defect helper.
+   *
+   * @see mitll.langtest.client.custom.Navigation#Navigation(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback)
    * @param service
    * @param feedback
    * @param userManager
