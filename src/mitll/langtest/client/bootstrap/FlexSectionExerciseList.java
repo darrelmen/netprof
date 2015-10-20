@@ -90,11 +90,10 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
   /**
    * @see mitll.langtest.client.list.PagingExerciseList#PagingExerciseList
    */
-  @Override
+/*  @Override
   protected void addComponents() {
-    PagingContainer exerciseShellPagingContainer = makePagingContainer();
-    addTableWithPager(exerciseShellPagingContainer);
-  }
+    addTableWithPager(makePagingContainer());
+  }*/
 
   /**
    *
