@@ -340,10 +340,7 @@ public class ListManager implements RequiresResize {
    */
   public void clickOnYourLists(long userListID) {
     storeCurrentClickedList(userListID);
-    //  checkAndMaybeClearTab(YOUR_LISTS);
     storage.storeValue(SUB_TAB, EDIT_ITEM);
-    //  showMyLists(true, false, subListTabPanel);
-
     subListTabPanel.selectTab(0);
     yourStuff.clickOnTab();
     refreshViewLessons(true, false);
