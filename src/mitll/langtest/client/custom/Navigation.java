@@ -48,14 +48,15 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class Navigation implements RequiresResize {
-  private static final String ANALYSIS = "Analysis";
   private final Logger logger = Logger.getLogger("Navigation");
 
   private static final String CHAPTERS = "Learn Pronunciation";
   private static final String YOUR_LISTS = "Study Your Lists";
-  private static final String STUDY_LISTS = "Study Lists";// and Favorites";
+  private static final String STUDY_LISTS = "Study Lists";
   private static final String OTHERS_LISTS = "Study Visited Lists";
-  private static final String PRACTICE = "Audio Vocabulary Practice"; //"Audio Flashcards"; // "Do Flashcards";
+  private static final String PRACTICE = "Audio Vocabulary Practice";
+  private static final String ANALYSIS = "Analysis";
+
   public static final String REVIEW = "review";
   public static final String COMMENT = "comment";
   private static final String MARK_DEFECTS = "Mark Defects";
@@ -92,6 +93,18 @@ public class Navigation implements RequiresResize {
   private ListManager listManager;
   private AnalysisPlot analysisPlot;
   private UserFeedback feedback;
+
+  private TabPanel tabPanel;
+  private TabAndContent studyLists;
+  private TabAndContent dialog;
+  private TabAndContent chapters;
+  private TabAndContent analysis;
+  private TabAndContent review, recorderTab, recordExampleTab, markDefectsTab, practiceTab;
+
+  private final Map<String, TabAndContent> nameToTab = new HashMap<String, TabAndContent>();
+  private final Map<String, Integer> nameToIndex = new HashMap<String, Integer>();
+
+  private final List<TabAndContent> tabs = new ArrayList<TabAndContent>();
 
   /**
    * @param service
@@ -247,14 +260,6 @@ public class Navigation implements RequiresResize {
     };
   }
 
-  private TabPanel tabPanel;
-  private TabAndContent studyLists;
-  private TabAndContent dialog;
-  private TabAndContent chapters;
-  private TabAndContent analysis;
-  private TabAndContent review, recorderTab, recordExampleTab, markDefectsTab, practiceTab;
-  private final List<TabAndContent> tabs = new ArrayList<TabAndContent>();
-
   /**
    * @return
    * @see #getNav
@@ -319,7 +324,9 @@ public class Navigation implements RequiresResize {
 
     addStudyLists();
 
-//    addAnalysis();
+    if (controller.getProps().useAnalysis()) {
+      addAnalysis();
+    }
 
     if (isQC()) {
       markDefectsTab = makeFirstLevelTab(tabPanel, IconType.FLAG, MARK_DEFECTS);
@@ -377,11 +384,15 @@ public class Navigation implements RequiresResize {
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTab(ANALYSIS);
         logEvent(dialog, ANALYSIS);
-        analysis.getContent().clear();
-        analysisPlot = new AnalysisPlot(service, userManager.getUser());
-        analysis.getContent().add(analysisPlot);
+        showAnalysis();
       }
     });
+  }
+
+  private void showAnalysis() {
+    analysis.getContent().clear();
+    analysisPlot = new AnalysisPlot(service, userManager.getUser());
+    analysis.getContent().add(analysisPlot);
   }
 
   private void addStudyLists() {
@@ -421,7 +432,7 @@ public class Navigation implements RequiresResize {
   private void showPracticeTab() {
     if (practiceTab != null) {
       checkAndMaybeClearTab(PRACTICE);
-      logger.info(" ------- showPracticeTab make practice tab  - ");
+  //    logger.info(" ------- showPracticeTab make practice tab  - ");
       practiceHelper.showNPF(practiceTab, PRACTICE);
       practiceHelper.setContentPanel(practiceTab.getContent());
       practiceHelper.hideList();
@@ -451,9 +462,6 @@ public class Navigation implements RequiresResize {
       controller.logEvent(yourStuff.getTab().asWidget(), "Tab", "", context);
     }
   }
-
-  private final Map<String, TabAndContent> nameToTab = new HashMap<String, TabAndContent>();
-  private final Map<String, Integer> nameToIndex = new HashMap<String, Integer>();
 
   private TabAndContent makeFirstLevelTab(TabPanel tabPanel, IconType iconType, String label) {
     TabAndContent tabAndContent = makeTab(tabPanel, iconType, label);
@@ -503,7 +511,6 @@ public class Navigation implements RequiresResize {
         }
       });
     } else {
-      //logger.info("previous selection was " + value);
       selectPreviousTab(value);
     }
   }
@@ -574,6 +581,8 @@ public class Navigation implements RequiresResize {
         markDefectsHelper.showNPF(markDefectsTab, CONTENT1);
       } else if (value.equals(PRACTICE) && practiceTab != null) {
         showPracticeTab();
+      } else if (value.equals(ANALYSIS) && analysis != null) {
+        showAnalysis();
       } else {
         logger.info("selectPreviousTab got unknown value '" + value + "'");
         showDefaultInitialTab();
@@ -613,7 +622,7 @@ public class Navigation implements RequiresResize {
       logger.warning("huh? toUse has a null tab? " + toUse);
     } else {
       logger.info("click on tab " + toUse);
-      toUse.getTab().fireEvent(new ButtonClickEvent());
+      toUse.clickOnTab();
     }
   }
 
@@ -626,13 +635,7 @@ public class Navigation implements RequiresResize {
    * @see Navigation#getListOperations(mitll.langtest.shared.custom.UserList, String)
    */
   private TabAndContent makeTab(TabPanel tabPanel, IconType iconType, String label) {
-    TabAndContent tabAndContent = new TabAndContent(iconType, label);
-    tabPanel.add(tabAndContent.getTab().asTabLink());
-    return tabAndContent;
-  }
-
-  /*To call click() function for Programmatic equivalent of the user clicking the button.*/
-  private class ButtonClickEvent extends ClickEvent {
+    return new TabAndContent(tabPanel, iconType, label);
   }
 
   @Override
@@ -650,7 +653,6 @@ public class Navigation implements RequiresResize {
     practiceHelper.onResize();
     listManager.onResize();
   }
-
 
   private boolean createdByYou(UserList ul) {
     return ul.getCreator().getId() == userManager.getUser();
