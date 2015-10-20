@@ -308,7 +308,6 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
         String toShow = shell.getForeignLanguage();
         if (english) {
           toShow = shell.getMeaning();
-        //  logger.info("meaning for fl " + toShow);
         }
         String columnText = truncate(toShow);
         return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
