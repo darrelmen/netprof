@@ -457,11 +457,8 @@ class FlashcardPanel extends HorizontalPanel {
 
   private void showAdvance(ListInterface exerciseList, ProgressBar progressBar) {
     int complete = exerciseList.getComplete();
-    //  System.out.println("complete " +complete);
-
     int i = (complete == -1 ? 1 : complete + 1);
     double percent = 100d * ((double) i / (double) exerciseList.getSize());
-//    System.out.println("i " +i + " pct " + percent);
     progressBar.setPercent(percent);
   }
 
@@ -470,7 +467,6 @@ class FlashcardPanel extends HorizontalPanel {
    * @see #getQuestionContent
    */
   private void playRefLater() {
-    // System.out.println("playRefLater... ---------- " + exercise.getID());
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         playRef();
