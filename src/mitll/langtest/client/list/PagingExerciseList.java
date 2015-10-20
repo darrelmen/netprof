@@ -235,7 +235,7 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   protected String getTypeAheadText() {
-    return typeAhead.getText();
+    return typeAhead != null ? typeAhead.getText() : "";
   }
 
   protected void setTypeAheadText(String t) { typeAhead.setText(t);}
