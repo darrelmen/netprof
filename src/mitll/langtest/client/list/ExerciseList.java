@@ -24,7 +24,6 @@ import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseListWrapper;
@@ -80,14 +79,14 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
                ExercisePanelFactory factory,
                ExerciseController controller,
                String instance, boolean incorrectFirst) {
-    addWidgets(currentExerciseVPanel);
+    this.instance = instance;
     this.service = service;
     this.feedback = feedback;
     this.factory = factory;
     this.allowPlusInURL = controller.getProps().shouldAllowPlusInURL();
     this.controller = controller;
-    this.instance = instance;
     this.incorrectFirstOrder = incorrectFirst;
+    addWidgets(currentExerciseVPanel);
     getElement().setId("ExerciseList_" + instance);
   }
 
@@ -116,7 +115,6 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   @Override
   protected void onUnload() {
     super.onUnload();
-    //  System.out.println("ExerciseList : History onUnload  " + instance);
     removeHistoryListener();
   }
 
@@ -125,6 +123,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see #ExerciseList
    */
   private void addWidgets(final Panel currentExerciseVPanel) {
+    logger.info("ExerciseList.addWidgets for currentExerciseVPanel " + currentExerciseVPanel.getElement().getId() + " instance " + getInstance());
+
     this.innerContainer = new SimplePanel();
     innerContainer.getElement().setId("ExerciseList_innerContainer");
     currentExerciseVPanel.add(innerContainer);
@@ -134,10 +134,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   /**
    * @param factory
-   * @param user
    * @see mitll.langtest.client.LangTest#reallySetFactory()
    */
-  public void setFactory(ExercisePanelFactory factory, UserManager user) {
+  public void setFactory(ExercisePanelFactory factory) {
     this.factory = factory;
     addHistoryListener();
   }
@@ -202,10 +201,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     logger.info("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
         "' vs new exercise " + exerciseID + " instance " + getInstance());
     if (token != null && idFromToken.equals(exerciseID)) {
-      logger.info("\tpushFirstSelection : (" + getInstance() +
-          ") current token " + token + " same as new " + exerciseID);
+      logger.info("\tpushFirstSelection : (" + getInstance() + ") current token " + token + " same as new " + exerciseID);
       checkAndAskServer(exerciseID);
     } else {
+      logger.info("\tpushFirstSelection : (" + getInstance() + ") pushNewItem " + exerciseID);
+
       pushNewItem("", exerciseID);
     }
   }
@@ -425,10 +425,10 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     if (firstExercise != null) {
       CommonShell firstExerciseShell = findFirstExercise();
       if (firstExerciseShell.getID().equals(firstExercise.getID())) {
-        //logger.info("ExerciseList : rememberAndLoadFirst using first = " +firstExercise);
+         logger.info("ExerciseList : rememberAndLoadFirst using first = " +firstExercise);
         useExercise(firstExercise);   // allows us to skip another round trip with the server to ask for the first exercise
       } else {
-        //logger.info("ExerciseList : rememberAndLoadFirst finding first...");
+         logger.info("ExerciseList : rememberAndLoadFirst finding first...");
         loadFirstExercise();
       }
     } else {
@@ -476,11 +476,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    */
   private void loadFirstExercise() {
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
-//      logger.info("loadFirstExercise : current exercises is empty?");
+       logger.info("loadFirstExercise : current exercises is empty?");
       removeCurrentExercise();
     } else {
       CommonShell toLoad = findFirstExercise();
-     // logger.info("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
+      logger.info("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
       pushFirstSelection(toLoad.getID());
     }
   }
@@ -679,8 +679,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see #useExercise(mitll.langtest.shared.CommonExercise)
    */
   private Panel makeExercisePanel(CommonExercise exercise) {
-   // logger.info("ExerciseList.makeExercisePanel : " + exercise + " instance " + instance);
-
+    logger.info("ExerciseList.makeExercisePanel : " + exercise + " instance " + instance);
     Panel exercisePanel = factory.getExercisePanel(exercise);
     innerContainer.setWidget(exercisePanel);
     return exercisePanel;
