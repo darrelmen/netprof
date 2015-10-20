@@ -23,19 +23,22 @@ public class HistoryExerciseList extends PagingExerciseList {
   private Logger logger = Logger.getLogger("HistoryExerciseList");
 
   public static final String ANY = "Clear";
-  private static final boolean debugOnValueChange = false;
-  private static final boolean DEBUG = false;
+  private static final boolean debugOnValueChange = true;
+  private static final boolean DEBUG = true;
 
   protected final Map<String, SectionWidget> typeToBox = new HashMap<String, SectionWidget>();
-  /**
-   * So the concern is that if we allow people to send bookmarks with items, we can allow them to skip
-   * forward in a list we're trying to present in a certain order.
-   * I.e. when a new user logs in, we want them to do all of their items in the order we've chosen
-   * for them (least answered/recorded first), and not let them skip forward in the list.
-   */
-  // private static final boolean INCLUDE_ITEM_IN_BOOKMARK = false;
   protected long userID;
 
+  /**
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList(Panel, Panel, LangTestDatabaseAsync, UserFeedback, ExerciseController, String, boolean)
+   * @param currentExerciseVPanel
+   * @param service
+   * @param feedback
+   * @param controller
+   * @param showTypeAhead
+   * @param instance
+   * @param incorrectFirst
+   */
   protected HistoryExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                                 ExerciseController controller,
                                 boolean showTypeAhead, String instance, boolean incorrectFirst) {
@@ -110,16 +113,16 @@ public class HistoryExerciseList extends PagingExerciseList {
       logger.info("------------ HistoryExerciseList.pushNewItem : push history '" + historyToken + "' -------------- " + search + " : " + exerciseID);
 
     String token = History.getToken();
-    //logger.info("\tpushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
+    logger.info("\tpushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
 
     token = getSelectionFromToken(token);
     if (DEBUG)
       logger.info("\tHistoryExerciseList.pushNewItem : current token '" + token + "' vs new id '" + exerciseID + "'");
     if (token != null && (historyToken.equals(token) || trimmedToken.equals(token))) {
-     // logger.info("\tHistoryExerciseList.pushNewItem : current token '" + token + "' same as new " + historyToken);
+      logger.info("\tHistoryExerciseList.pushNewItem : current token '" + token + "' same as new " + historyToken);
       checkAndAskServer(exerciseID);
     } else {
-     // logger.info("\tHistoryExerciseList.pushNewItem : current token '" + token + "' different menu state '" + historyToken + "' from new " + exerciseID);
+      logger.info("\tHistoryExerciseList.pushNewItem : current token '" + token + "' different menu state '" + historyToken + "' from new " + exerciseID);
       setHistoryItem(historyToken);
     }
   }
@@ -133,7 +136,7 @@ public class HistoryExerciseList extends PagingExerciseList {
   protected void pushFirstListBoxSelection() {
     String initToken = History.getToken();
     if (initToken.length() == 0) {
-      //logger.info("pushFirstListBoxSelection : history token is blank " + getInstance());
+      logger.info("pushFirstListBoxSelection : history token is blank " + getInstance());
 
       pushNewSectionHistoryToken();
     } else {
@@ -295,18 +298,18 @@ public class HistoryExerciseList extends PagingExerciseList {
     String instance1 = selectionState1.getInstance();
 
     if (!instance1.equals(getInstance()) && instance1.length() > 0) {
-/*      if (debugOnValueChange)  logger.info("onValueChange : skipping event " + rawToken + " for instance '" + instance1 +
-          "' that is not mine "+ getInstance());*/
+      if (debugOnValueChange)  logger.info("onValueChange : skipping event " + rawToken + " for instance '" + instance1 +
+          "' that is not mine "+ getInstance());
       if (getCreatedPanel() == null) {
         noSectionsGetExercises(controller.getUser());
       }
       return;
     }
-/*    if (debugOnValueChange) {
+    if (debugOnValueChange) {
       logger.info(new Date() + " HistoryExerciseList.onValueChange : originalValue '" +originalValue+
         "'" +
         " token is '" + rawToken + "' for " + instance1 + " vs my instance " + getInstance());
-    }*/
+    }
 
     String item = selectionState1.getItem();
 
@@ -326,8 +329,6 @@ public class HistoryExerciseList extends PagingExerciseList {
           logger.info("HistoryExerciseList.onValueChange : selectionState '" + selectionState + "'");
         }
 
-        // ignore item?
-        //loadExercises(selectionState.getTypeToSection(), selectionState.getItem());
         setTypeAheadText(selectionState.getSearch());
         loadExercisesUsingPrefix(selectionState.getTypeToSection(), selectionState.getSearch(), false);
       } catch (Exception e) {
