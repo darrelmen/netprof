@@ -23,8 +23,8 @@ public class HistoryExerciseList extends PagingExerciseList {
   private Logger logger = Logger.getLogger("HistoryExerciseList");
 
   public static final String ANY = "Clear";
-  private static final boolean debugOnValueChange = true;
-  private static final boolean DEBUG = true;
+  private static final boolean debugOnValueChange = false;
+  private static final boolean DEBUG = false;
 
   protected final Map<String, SectionWidget> typeToBox = new HashMap<String, SectionWidget>();
   protected long userID;
@@ -107,6 +107,8 @@ public class HistoryExerciseList extends PagingExerciseList {
    * @see #pushFirstSelection(String)
    */
   protected void pushNewItem(String search, String exerciseID) {
+    logger.info("------------ HistoryExerciseList.pushNewItem : -- " + search + " : " + exerciseID);
+
     String historyToken = getHistoryToken(search, exerciseID);
     String trimmedToken = historyToken.length() > 2 ? historyToken.substring(0, historyToken.length() - 2) : historyToken;
     if (DEBUG)
@@ -164,7 +166,6 @@ public class HistoryExerciseList extends PagingExerciseList {
       }
     } else {
       //logger.info("pushNewSectionHistoryToken : currentToken " + currentToken + " instance " + getInstance());
-
       setHistoryItem(historyToken);
     }
   }
@@ -341,14 +342,8 @@ public class HistoryExerciseList extends PagingExerciseList {
   /**
    * When we get a history token push, select the exercise type, section, and optionally item.
    *
-   * @param typeToSection
-   * @param item          null is OK
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
-/*  protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
-    logger.info("HistoryExerciseList.loadExercises : instance " + getInstance() + " " + typeToSection + " and item '" + item + "'");
-    loadExercisesUsingPrefix(typeToSection, getPrefix(), false);
-  }*/
   protected void loadExercises(String selectionState, String prefix, boolean onlyWithAudioAnno) {
     Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
 /*    logger.info("HistoryExerciseList.loadExercises : looking for " +
