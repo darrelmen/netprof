@@ -72,6 +72,10 @@ public class ExerciseComparator {
   protected <T extends CommonShell> int tooltipComp(T o1, T o2) {
     String id1 = o1.getTooltip();
     String id2 = o2.getTooltip();
+    return compareStrings(id1, id2);
+  }
+
+  public int compareStrings(String id1, String id2) {
     String t = id1.toLowerCase();
     if (t.startsWith("a ")) t = t.substring(2);
     String t1 = id2.toLowerCase();
