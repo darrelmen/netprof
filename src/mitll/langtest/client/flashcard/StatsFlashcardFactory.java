@@ -84,12 +84,6 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     controlState = new ControlState();
     this.instance = instance;
     this.ul = ul;
-   // logger.info("made factory ---------------------\n");
-/*    boolean sharedList = exerciseList == null;
-    if (sharedList) {   // when does this happen??
-      exerciseList = controller.getExerciseList();
-    }*/
-
     if (exerciseList != null) { // TODO ? can this ever happen?
       exerciseList.addListChangedListener(new ListChangeListener<CommonShell>() {
         /**
