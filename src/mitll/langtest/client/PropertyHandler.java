@@ -42,6 +42,7 @@ public class PropertyHandler {
   private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
   private static final String EXERCISE_TITLE = "exercise_title";
   private static final String ADMIN_PARAM = "admin";
+  private static final String ANALYSIS = "analysis";
   private static final String TURK_PARAM = "turk";
   private static final String NUM_GRADES_TO_COLLECT_PARAM = NUM_GRADES_TO_COLLECT;
 
@@ -70,14 +71,13 @@ public class PropertyHandler {
   private static final String NO_MODEL = "noModel";
   private static final String PREFERRED_VOICES = "preferredVoices";
 
-//  public static final String SIGN_UP = "Sign Up";
-  private boolean adminView;
+  private boolean adminView, analysis = true;
   private boolean enableAllUsers;
   private boolean usePhoneToDisplay;
 
   /**
-   * @see mitll.langtest.client.recorder.RecordButton#showTooLoud
    * @return
+   * @see mitll.langtest.client.recorder.RecordButton#showTooLoud
    */
   public String getTooLoudMessage() {
     return "If your recording is too loud, please follow the following steps to adjust your microphone level settings in Windows on your MacBook: <br/>" +
@@ -91,15 +91,19 @@ public class PropertyHandler {
         "8.\tClick OK<br/>";
   }
 
-  public Set<Long> getPreferredVoices() {  return preferredVoices;  }
+  public Set<Long> getPreferredVoices() {
+    return preferredVoices;
+  }
 
-  public boolean enableAllUsers() {  return enableAllUsers;  }
+  public boolean enableAllUsers() {
+    return enableAllUsers;
+  }
 
   public boolean shouldUsePhoneToDisplay() {
     return usePhoneToDisplay;
   }
 
-  public enum LOGIN_TYPE { ANONYMOUS, STUDENT }
+  public enum LOGIN_TYPE {ANONYMOUS, STUDENT}
 
   private boolean spectrogram = false;
   private boolean clickAndHold = true;
@@ -143,10 +147,10 @@ public class PropertyHandler {
   private boolean noModel = false;
 
   /**
-   * @see mitll.langtest.client.LangTest#onModuleLoad()
    * @param props
+   * @see mitll.langtest.client.LangTest#onModuleLoad()
    */
-  public PropertyHandler(Map<String,String> props) {
+  public PropertyHandler(Map<String, String> props) {
     this.props = props;
     useProps();
     checkParams();
@@ -168,7 +172,8 @@ public class PropertyHandler {
       else if (key.equals(NAME_FOR_ITEM)) nameForItem = value;
       else if (key.equals(NAME_FOR_ANSWER)) nameForAnswer = value;
       else if (key.equals(NAME_FOR_RECORDER)) nameForRecorder = value;
-      else if (key.equals(NUM_GRADES_TO_COLLECT)) numGradesToCollect = getInt(value, NUM_GRADES_TO_COLLECT_DEFAULT, NUM_GRADES_TO_COLLECT);
+      else if (key.equals(NUM_GRADES_TO_COLLECT))
+        numGradesToCollect = getInt(value, NUM_GRADES_TO_COLLECT_DEFAULT, NUM_GRADES_TO_COLLECT);
       else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
       else if (key.equals(LANGUAGE)) language = value;
       else if (key.equals(SPLASH_TITLE)) splashTitle = value;
@@ -183,20 +188,18 @@ public class PropertyHandler {
       else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
       else if (key.equals(ENABLE_ALL_USERS)) enableAllUsers = getBoolean(value);
       else if (key.equals(USE_PHONE_TO_DISPLAY)) {
-        logger.info("found " + USE_PHONE_TO_DISPLAY +  " = " + value);
+        logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
         usePhoneToDisplay = getBoolean(value);
-      }
-      else if (key.equals(PREFERRED_VOICES)) {
+      } else if (key.equals(PREFERRED_VOICES)) {
         for (String userid : value.split(",")) {
           try {
             preferredVoices.add(Long.parseLong(userid));
-          //  logger.info("pref users " + preferredVoices);
+            //  logger.info("pref users " + preferredVoices);
           } catch (NumberFormatException e) {
             logger.warning("couldn't parse userid " + userid);
           }
         }
-      }
-      else if (key.equals(LOGIN_TYPE_PARAM)) {
+      } else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
         } catch (IllegalArgumentException e) {
@@ -215,7 +218,7 @@ public class PropertyHandler {
       }
       return i;
     } catch (NumberFormatException e) {
-      System.err.println("couldn't parse " + value + "using " + defValue +" for " + propName);
+      System.err.println("couldn't parse " + value + "using " + defValue + " for " + propName);
     }
     return defValue;
   }
@@ -241,8 +244,8 @@ public class PropertyHandler {
    * <br></br>
    * exercise_title=nl0002_lms&transform_score_c1=68.51101&transform_score_c2=2.67174
    *
-   * @see #PropertyHandler(java.util.Map)
    * @return
+   * @see #PropertyHandler(java.util.Map)
    */
   private void checkParams() {
     String isGrading = Window.Location.getParameter(GRADING);
@@ -254,8 +257,7 @@ public class PropertyHandler {
     String exercise_title = Window.Location.getParameter(EXERCISE_TITLE);
     if (exercise_title != null) {
       this.exercise_title = exercise_title;
-    }
-    else {
+    } else {
       this.exercise_title = DEFAULT_EXERCISE;
     }
 
@@ -274,6 +276,10 @@ public class PropertyHandler {
     if (adminParam != null) {
       adminView = !adminParam.equals("false");
     }
+    String p = Window.Location.getParameter(ANALYSIS);
+    if (p != null) {
+      analysis = !p.equals("false");
+    }
 
     String turkParam = Window.Location.getParameter(TURK_PARAM);
     if (turkParam != null) {
@@ -281,13 +287,19 @@ public class PropertyHandler {
     }
 
     String resetPasswordID = Window.Location.getParameter(RP);
-    if (resetPasswordID != null) { resetPassToken = resetPasswordID; }
+    if (resetPasswordID != null) {
+      resetPassToken = resetPasswordID;
+    }
 
     String cdEnable = Window.Location.getParameter(CD);
-    if (cdEnable != null) { cdEnableToken = cdEnable; }
+    if (cdEnable != null) {
+      cdEnableToken = cdEnable;
+    }
 
     String emailR = Window.Location.getParameter(ER);
-    if (emailR != null) { emailRToken = emailR; }
+    if (emailR != null) {
+      emailRToken = emailR;
+    }
 
     if (Window.Location.getParameter(CLICK_AND_HOLD) != null) {
       clickAndHold = !Window.Location.getParameter(CLICK_AND_HOLD).equals("false");
@@ -313,32 +325,33 @@ public class PropertyHandler {
       try {
         this.loginType = LOGIN_TYPE.valueOf(loginType);
       } catch (IllegalArgumentException e) {
-        System.err.println("couldn't parse " +loginType );
+        System.err.println("couldn't parse " + loginType);
       }
     }
 
-   // return grading;
+    // return grading;
   }
 
   /**
+   * @return
    * @see mitll.langtest.client.LangTest#modeSelect()
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
-   *
-   * @return
    */
   public boolean isGrading() {
     return grading;
   }
 
-  private void setGrading(boolean v) { this.grading = v; }
+  private void setGrading(boolean v) {
+    this.grading = v;
+  }
 
   public boolean isBkgColorForRef() {
     return bkgColorForRef;
   }
 
   /**
-   *
    * For headstart integration.
+   *
    * @return
    */
   public String getExercise_title() {
@@ -353,29 +366,49 @@ public class PropertyHandler {
     return demoMode;
   }
 
-  public boolean isAdminView() {  return adminView;  }
+  public boolean isAdminView() {
+    return adminView;
+  }
 
-  public String getTurkID() { return  turkID; }
+  public boolean useAnalysis() {
+    return analysis;
+  }
+
+  public String getTurkID() {
+    return turkID;
+  }
 
   public String getReleaseDate() {
     return releaseDate;
   }
 
-  public int getRecordTimeout() {  return recordTimeout;  }
+  public int getRecordTimeout() {
+    return recordTimeout;
+  }
 
-  public String getNameForItem() { return nameForItem; }
-  public String getNameForAnswer() { return nameForAnswer; }
-  public String getNameForRecorder() { return nameForRecorder; }
+  public String getNameForItem() {
+    return nameForItem;
+  }
+
+  public String getNameForAnswer() {
+    return nameForAnswer;
+  }
+
+  public String getNameForRecorder() {
+    return nameForRecorder;
+  }
 
   public boolean isLogClientMessages() {
     return logClientMessages;
   }
 
-  public boolean hasDialog(){
-	  return !dialog.isEmpty();
+  public boolean hasDialog() {
+    return !dialog.isEmpty();
   }
 
-  public String dialogFile() {return dialog;}
+  public String dialogFile() {
+    return dialog;
+  }
 
   public String getLanguage() {
     return language;
@@ -389,23 +422,29 @@ public class PropertyHandler {
     return rightAlignContent;
   }
 
-  public LOGIN_TYPE getLoginType() { return getExercise_title() != null ? LOGIN_TYPE.ANONYMOUS : loginType; }
+  public LOGIN_TYPE getLoginType() {
+    return getExercise_title() != null ? LOGIN_TYPE.ANONYMOUS : loginType;
+  }
 
   public boolean showFlashcardAnswer() {
     return showFlashcardAnswer;
   }
 
-  public boolean shouldAllowPlusInURL() { return allowPlusInURL;  }
+  public boolean shouldAllowPlusInURL() {
+    return allowPlusInURL;
+  }
 
-  public boolean showSpectrogram() { return spectrogram; }
+  public boolean showSpectrogram() {
+    return spectrogram;
+  }
 
   public boolean isNoModel() {
     return noModel;
   }
 
   /**
-   * @see LangTest#showLogin()
    * @return
+   * @see LangTest#showLogin()
    */
   public String getResetPassToken() {
     return resetPassToken;
@@ -414,11 +453,14 @@ public class PropertyHandler {
   public String getCdEnableToken() {
     return cdEnableToken;
   }
+
   public String getEmailRToken() {
     return emailRToken;
   }
 
-  public boolean doClickAndHold() { return clickAndHold; }
+  public boolean doClickAndHold() {
+    return clickAndHold;
+  }
 
   public boolean isQuietAudioOK() {
     return quietAudioOK;
@@ -428,10 +470,13 @@ public class PropertyHandler {
     return showContext;
   }
 
-  public boolean shouldShowWelcome() { return showWelcome; }
+  public boolean shouldShowWelcome() {
+    return showWelcome;
+  }
 
   /**
    * TODO : Consider rewording for other customers...
+   *
    * @return
    */
   public String getHelpMessage() {
@@ -455,28 +500,29 @@ public class PropertyHandler {
             "<b>Teachers who are <i>audio recorders</i></b>: After you register and get approval, use the ‘Login’ box to access the site. <br/><br/>" +
             "The site will remember your login information on this computer for up to one year. " +
             "You will need to login with your username and password again if you access Classroom from a different machine.<br/>";*/
-  return "If you are a first-time user of this site, or an existing user of an earlier version of NetProF " +
-      "(either as a student, teacher, or audio recorder), you will need to use the \"Sign Up\" box to add a" +
-      " password and an email address to your account. Your email is only used if you ever forget your" +
-      " password.<br/>" +
-      "<br/>" +
-      "If you are a teacher assigned to record <u>course material</u> - " +
-      "check the box next to ‘<i>assigned reference audio recorder</i>.’" +
-      " Once you have submitted this form, LTEA personnel will approve your account. " +
-      "You will receive an email once it's approved. " +
-      "You will not be able to access the NetProF site until approval is granted. " +
-      "Students do not need approval to access the site.<br/>" +
-      "<br/>" +
-      "<b>Students and Teachers</b>: After you register, use the ‘Login’ box to access the site. <br/>" +
-      "<b>Teachers who are <i>audio recorders</i></b>: After you register and get approval, use the ‘Login’ box to access the site. <br/>" +
-      "<br/>" +
-      "The site will remember your login information on this computer for up to one year. " +
-      "You will need to login with your username and password again if you access NetProF from a different machine.";
+    return "If you are a first-time user of this site, or an existing user of an earlier version of NetProF " +
+        "(either as a student, teacher, or audio recorder), you will need to use the \"Sign Up\" box to add a" +
+        " password and an email address to your account. Your email is only used if you ever forget your" +
+        " password.<br/>" +
+        "<br/>" +
+        "If you are a teacher assigned to record <u>course material</u> - " +
+        "check the box next to ‘<i>assigned reference audio recorder</i>.’" +
+        " Once you have submitted this form, LTEA personnel will approve your account. " +
+        "You will receive an email once it's approved. " +
+        "You will not be able to access the NetProF site until approval is granted. " +
+        "Students do not need approval to access the site.<br/>" +
+        "<br/>" +
+        "<b>Students and Teachers</b>: After you register, use the ‘Login’ box to access the site. <br/>" +
+        "<b>Teachers who are <i>audio recorders</i></b>: After you register and get approval, use the ‘Login’ box to access the site. <br/>" +
+        "<br/>" +
+        "The site will remember your login information on this computer for up to one year. " +
+        "You will need to login with your username and password again if you access NetProF from a different machine.";
   }
 
 
   /**
    * TODO : Consider rewording for other customers...
+   *
    * @return
    */
   public String getRecordAudioPopoverText() {
