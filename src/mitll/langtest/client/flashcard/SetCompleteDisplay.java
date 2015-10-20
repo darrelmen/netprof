@@ -2,34 +2,29 @@ package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.incubator.Table;
 import com.github.gwtbootstrap.client.ui.incubator.TableHeader;
-import com.google.gwt.cell.client.SafeHtmlCell;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.custom.TooltipHelper;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
-import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import org.moxieapps.gwt.highcharts.client.Chart;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 9/8/14.
  */
 public class SetCompleteDisplay {
+  private final Logger logger = Logger.getLogger("SetCompleteDisplay");
+
   private static final String CORRECT_NBSP = "Correct&nbsp;%";
-  private static final int MAX_LENGTH_ID = 30;
+//  private static final int MAX_LENGTH_ID = 30;
 
   private static final String RANK = "Rank";
   private static final String NAME = "Name";
@@ -38,30 +33,10 @@ public class SetCompleteDisplay {
   private static final String CORRECT_SUBTITLE = "% correct";
   private static final int ROWS_IN_TABLE = 7;
   private static final int TABLE_HISTORY_WIDTH = 326;
-  public static final int ONE_TABLE_WIDTH = 275;//-(TABLE_HISTORY_WIDTH/2);//275;
+  private static final int ONE_TABLE_WIDTH = 275;//-(TABLE_HISTORY_WIDTH/2);//275;
   private static final int TABLE_WIDTH = 2 * ONE_TABLE_WIDTH;
   private static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH - TABLE_HISTORY_WIDTH);
-  public static final int MAX_TO_SHOW = 5;
-
-  /**
-   * @see StatsFlashcardFactory.StatsPracticePanel#showFeedbackCharts(java.util.List, java.util.List)
-   * @param result
-   * @param exToScore
-   * @param numCorrect
-   * @param numIncorrect
-   * @param numExercises
-   * @return
-   */
-/*
-  public Widget showFeedbackCharts(List<AVPHistoryForList> result,
-                                   Map<String, Double> exToScore, int numCorrect, int numIncorrect, int numExercises) {
-    Panel container = new HorizontalPanel();
-    container.getElement().setId("correctAndPron_Charts");
-    addLeftAndRightCharts(result, exToScore, numCorrect, numIncorrect, numExercises, container);
-
-    return container;
-  }
-*/
+  private static final int MAX_TO_SHOW = 5;
 
   public void addLeftAndRightCharts(List<AVPHistoryForList> result, Map<String, Double> exToScore, int numCorrect, int numIncorrect, int numExercises, Panel container) {
     // add left chart and table
@@ -80,10 +55,10 @@ public class SetCompleteDisplay {
   private Chart makeCorrectChart(List<AVPHistoryForList> result, AVPHistoryForList sessionAVPHistoryForList,
                                  int totalCorrect, int totalIncorrect, int numExercises) {
     int all = totalCorrect + totalIncorrect;
-    System.out.println("onSetComplete.onSuccess : results " + result + " " + (numExercises) +
+    logger.info("onSetComplete.onSuccess : results " + result + " " + (numExercises) +
         " all " + all + " correct " + totalCorrect + " inc " + totalIncorrect);
 
-    return makeChart(totalCorrect, all, sessionAVPHistoryForList,totalIncorrect,numExercises);
+    return makeChart(totalCorrect, all, sessionAVPHistoryForList, totalIncorrect, numExercises);
   }
 
   private Chart makePronChart(double avgScore, AVPHistoryForList sessionAVPHistoryForListScore) {
@@ -101,8 +76,8 @@ public class SetCompleteDisplay {
    * @see #makeCorrectChart(java.util.List, mitll.langtest.shared.flashcard.AVPHistoryForList, int, int, int)
    */
   private Chart makeChart(int totalCorrect, int numAttempted, AVPHistoryForList sessionAVPHistoryForList,
-                           int incorrent, int numExercises) {
-    String suffix = getSkippedSuffix(totalCorrect,incorrent,numExercises);
+                          int incorrent, int numExercises) {
+    String suffix = getSkippedSuffix(totalCorrect, incorrent, numExercises);
     String correct = totalCorrect + " of " + numAttempted +
         " Correct (" + toPercent(totalCorrect, numAttempted) + ")" + suffix;
     Chart chart = new LeaderboardPlot().getChart(sessionAVPHistoryForList, correct, CORRECT_SUBTITLE);
@@ -162,7 +137,7 @@ public class SetCompleteDisplay {
    */
   private Table makeTable(AVPHistoryForList sessionAVPHistoryForList, String scoreColHeader) {
     Table table = new Table();
-    table.getElement().setId("LeaderboardTable_"+scoreColHeader.substring(0,3));
+    table.getElement().setId("LeaderboardTable_" + scoreColHeader.substring(0, 3));
     TableHeader w = new TableHeader(RANK);
     table.add(w);
     table.add(new TableHeader(NAME));
@@ -172,7 +147,7 @@ public class SetCompleteDisplay {
     List<AVPHistoryForList.UserScore> scores = sessionAVPHistoryForList.getScores();
     int size = scale ? Math.min(ROWS_IN_TABLE, scores.size()) : scores.size();
 
-/*      if (scale) System.out.println("scale! client " +Window.getClientWidth()+
+/*      if (scale) logger.info("scale! client " +Window.getClientWidth()+
         " : using " + size + " vs " + scores.size());*/
 
     int used = 0;
@@ -207,120 +182,23 @@ public class SetCompleteDisplay {
     return table;
   }
 
+  /**
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#showFeedbackCharts(List, List)
+   * @param sortedHistory
+   * @param allExercises
+   * @param controller
+   * @return
+   */
   public Panel getScoreHistory(List<ExerciseCorrectAndScore> sortedHistory,
-                                List<CommonShell> allExercises, ExerciseController controller) {
-    final Map<String, String> idToExercise = new HashMap<String, String>();
-    for (CommonShell commonShell : allExercises) {
-      idToExercise.put(commonShell.getID(), commonShell.getTooltip());
-    }
-
-    SimplePagingContainer<ExerciseCorrectAndScore> container = new SimplePagingContainer<ExerciseCorrectAndScore>(controller) {
-
-      @Override
-      protected CellTable.Resources chooseResources() {
-        CellTable.Resources o;
-
-        o = GWT.create(LocalTableResources.class);
-        return o;
-      }
-
-      @Override
-      protected void addColumnsToTable() {
-        Column<ExerciseCorrectAndScore, SafeHtml> column = getColumn();
-        column.setSortable(true);
-
-        table.setWidth("100%", true);
-        table.addColumn(column, "Item");
-        table.setColumnWidth(column, "180px");
-
-        Column<ExerciseCorrectAndScore, SafeHtml> column2 = getColumn2();
-        column2.setSortable(true);
-        table.addColumn(column2, "History");
-        table.setColumnWidth(column2, "88px");
-
-
-        Column<ExerciseCorrectAndScore, SafeHtml> column3 = getColumn3();
-        table.addColumn(column3, "Score");
-        column3.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        column3.setSortable(true);
-        table.setColumnWidth(column3, "70" + "px");
-
-        new TooltipHelper().addTooltip(table,"Correct/Incorrect history and average pronunciation score");
-      }
-
-      private Column<ExerciseCorrectAndScore, SafeHtml> getColumn() {
-        return new Column<ExerciseCorrectAndScore, SafeHtml>(new SafeHtmlCell()) {
-          @Override
-          public SafeHtml getValue(ExerciseCorrectAndScore shell) {
-            String columnText = idToExercise.get(shell.getId());
-            String html = shell.getId();
-            if (columnText != null) {
-              if (columnText.length() > MAX_LENGTH_ID)
-                columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
-
-              html = "<span style='float:left;" +
-                  //"margin-left:-10px;" +
-                  "'>" + columnText + "</span>";
-            }
-            return new SafeHtmlBuilder().appendHtmlConstant(html).toSafeHtml();
-          }
-        };
-      }
-
-      private Column<ExerciseCorrectAndScore, SafeHtml> getColumn2() {
-
-        return new Column<ExerciseCorrectAndScore, SafeHtml>(new SafeHtmlCell()) {
-
-          @Override
-          public SafeHtml getValue(ExerciseCorrectAndScore shell) {
-            String history = SetCompleteDisplay.this.getScoreHistory(shell);
-            String s = shell.getCorrectAndScores().isEmpty() ? "" : "<span style='float:right;" +
-               // "margin-right:-10px;" +
-                "'>" + history +
-                "</span>";
-
-            return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
-          }
-        };
-      }
-
-      private Column<ExerciseCorrectAndScore, SafeHtml> getColumn3() {
-
-        return new Column<ExerciseCorrectAndScore, SafeHtml>(new SafeHtmlCell()) {
-
-          @Override
-          public SafeHtml getValue(ExerciseCorrectAndScore shell) {
-           // String s = "<span>" + shell.getAvgScorePercent() + "</span>";
-
-            String s = shell.getCorrectAndScores().isEmpty() ? "" : "<span " +
-                "style='" +
-                //"float:right;" +
-                "margin-left:10px;" +
-                "'" +
-                ">" + shell.getAvgScorePercent()+
-                "</span>";
-
-            return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
-          }
-        };
-      }
-    };
-    Panel tableWithPager = container.getTableWithPager();
-    tableWithPager.getElement().setId("TableScoreHistory");
-    tableWithPager.setWidth(TABLE_HISTORY_WIDTH + "px");
-    tableWithPager.addStyleName("floatLeft");
-    for (ExerciseCorrectAndScore exerciseCorrectAndScore : sortedHistory) {
-      container.addItem(exerciseCorrectAndScore);
-    }
-    container.flush();
-
-    return tableWithPager;
+                               List<CommonShell> allExercises, ExerciseController controller) {
+    ScoreHistoryContainer scoreHistoryContainer = new ScoreHistoryContainer(controller, allExercises);
+    return scoreHistoryContainer.getTableWithPager(sortedHistory);
   }
 
-  protected String getScoreHistory(ExerciseCorrectAndScore shell) {
+/*  protected String getScoreHistory(ExerciseCorrectAndScore shell) {
     List<CorrectAndScore> correctAndScores = shell.getCorrectAndScores();
     return getScoreHistory(correctAndScores);
-  }
+  }*/
 
   public static String getScoreHistory(List<CorrectAndScore> correctAndScores) {
     int size = correctAndScores.size();
@@ -332,7 +210,6 @@ public class SetCompleteDisplay {
       String icon =
           correct ? "icon-plus-sign" :
               "icon-minus-sign";
-     // String color = SimpleColumnChart.getColor(((float)correctAndScore.getScore())/100f);
       builder.append("<i " +
           (correct ? "style='color:" +
               "green" +
@@ -353,12 +230,11 @@ public class SetCompleteDisplay {
     return score.isCurrent() ? "<b>" + html + "</b>" : html;
   }
 
-
   /**
-   * @see StatsFlashcardFactory.StatsPracticePanel#showFeedbackCharts
    * @return
+   * @see StatsFlashcardFactory.StatsPracticePanel#showFeedbackCharts
    */
-  private double getAvgScore(Map<String,Double> exToScore) {
+  private double getAvgScore(Map<String, Double> exToScore) {
     double count = 0;
     float num = 0f;
     for (Double val : exToScore.values()) {
@@ -367,25 +243,26 @@ public class SetCompleteDisplay {
         num++;
       }
     }
-    return count/num;
+    return count / num;
   }
 
   private String toPercent(int numer, int denom) {
-    return ((int) ((((float)numer) * 100f) / denom)) + "%";
+    return ((int) ((((float) numer) * 100f) / denom)) + "%";
   }
+
   private String toPercent(double num) {
     return ((int) (num * 100f)) + "%";
   }
 
-  public interface LocalTableResources extends CellTable.Resources {
-    /**
+/*  public interface LocalTableResources extends CellTable.Resources {
+    *//**
      * The styles applied to the table.
-     */
+     *//*
     interface TableStyle extends CellTable.Style {
     }
 
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
     PagingContainer.TableResources.TableStyle cellTableStyle();
-  }
+  }*/
 }
