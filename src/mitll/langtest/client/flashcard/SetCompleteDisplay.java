@@ -24,7 +24,6 @@ public class SetCompleteDisplay {
   private final Logger logger = Logger.getLogger("SetCompleteDisplay");
 
   private static final String CORRECT_NBSP = "Correct&nbsp;%";
-//  private static final int MAX_LENGTH_ID = 30;
 
   private static final String RANK = "Rank";
   private static final String NAME = "Name";
@@ -32,13 +31,14 @@ public class SetCompleteDisplay {
   private static final String SCORE_SUBTITLE = "score %";
   private static final String CORRECT_SUBTITLE = "% correct";
   private static final int ROWS_IN_TABLE = 7;
-  private static final int TABLE_HISTORY_WIDTH = 326;
+  private static final int TABLE_HISTORY_WIDTH = ScoreHistoryContainer.TABLE_HISTORY_WIDTH;
   private static final int ONE_TABLE_WIDTH = 275;//-(TABLE_HISTORY_WIDTH/2);//275;
   private static final int TABLE_WIDTH = 2 * ONE_TABLE_WIDTH;
   private static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH - TABLE_HISTORY_WIDTH);
   private static final int MAX_TO_SHOW = 5;
 
-  public void addLeftAndRightCharts(List<AVPHistoryForList> result, Map<String, Double> exToScore, int numCorrect, int numIncorrect, int numExercises, Panel container) {
+  public void addLeftAndRightCharts(List<AVPHistoryForList> result, Map<String, Double> exToScore,
+                                    int numCorrect, int numIncorrect, int numExercises, Panel container) {
     // add left chart and table
     AVPHistoryForList sessionAVPHistoryForList = result.get(0);
     Chart chart = makeCorrectChart(result, sessionAVPHistoryForList, numCorrect, numIncorrect, numExercises);
@@ -83,7 +83,6 @@ public class SetCompleteDisplay {
     Chart chart = new LeaderboardPlot().getChart(sessionAVPHistoryForList, correct, CORRECT_SUBTITLE);
 
     scaleCharts(chart);
-
     return chart;
   }
 
@@ -100,11 +99,12 @@ public class SetCompleteDisplay {
   private void scaleCharts(Chart chart) {
     float yRatio = needToScaleY();
 
-    boolean neither = true;
-
     int chartWidth = getChartWidth() / 2 - 10;
+    chartWidth = Math.max(200, chartWidth);
+    logger.warning("got chartWidth " + chartWidth);
     chart.setWidth(chartWidth);
 
+    boolean neither = true;
     if (yRatio < 1) {
       chart.setHeight(Math.min(400f, Math.round(400f * yRatio)));
       neither = false;
@@ -195,11 +195,6 @@ public class SetCompleteDisplay {
     return scoreHistoryContainer.getTableWithPager(sortedHistory);
   }
 
-/*  protected String getScoreHistory(ExerciseCorrectAndScore shell) {
-    List<CorrectAndScore> correctAndScores = shell.getCorrectAndScores();
-    return getScoreHistory(correctAndScores);
-  }*/
-
   public static String getScoreHistory(List<CorrectAndScore> correctAndScores) {
     int size = correctAndScores.size();
     if (size > MAX_TO_SHOW) correctAndScores = correctAndScores.subList(size - MAX_TO_SHOW, size);
@@ -253,16 +248,4 @@ public class SetCompleteDisplay {
   private String toPercent(double num) {
     return ((int) (num * 100f)) + "%";
   }
-
-/*  public interface LocalTableResources extends CellTable.Resources {
-    *//**
-     * The styles applied to the table.
-     *//*
-    interface TableStyle extends CellTable.Style {
-    }
-
-    @Override
-    @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
-    PagingContainer.TableResources.TableStyle cellTableStyle();
-  }*/
 }
