@@ -59,6 +59,8 @@ public class PagingExerciseList extends ExerciseList {
    * @param showTypeAhead
    * @param instance
    * @param incorrectFirst
+   * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList(Panel, String)
+   * @see mitll.langtest.client.custom.content.NPFHelper#makeExerciseList(Panel, String)
    */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                             ExercisePanelFactory factory, ExerciseController controller,
@@ -86,16 +88,13 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   @Override
-  public void reload(Map<String, Collection<String>> typeToSection) {
-
-  }
+  public void reload(Map<String, Collection<String>> typeToSection) {}
 
   /**
    * Add two rows -- the search box and then the item list
    */
   protected void addComponents() {
-    PagingContainer exerciseShellPagingContainer = makePagingContainer();
-    addTableWithPager(exerciseShellPagingContainer);
+    addTableWithPager(makePagingContainer());
   }
 
   /**
@@ -128,22 +127,18 @@ public class PagingExerciseList extends ExerciseList {
    */
   protected PagingContainer makePagingContainer() {
     final PagingExerciseList outer = this;
-
-
-    PagingContainer pagingContainer1 =
+    pagingContainer =
         new PagingContainer(controller, getVerticalUnaccountedFor(),getRole().equals(Result.AUDIO_TYPE_RECORDER)) {
           @Override
           protected void gotClickOnItem(CommonShell e) {
             outer.gotClickOnItem(e);
           }
         };
-    pagingContainer = pagingContainer1;
-    return pagingContainer1;
+    return pagingContainer;
   }
 
   @Override
   protected CommonShell findFirstExercise() {
-    //logger.info("findFirstExercise : completed " + controller.showCompleted());
     return controller.showCompleted() ? getFirstNotCompleted() : super.findFirstExercise();
   }
 
@@ -247,8 +242,6 @@ public class PagingExerciseList extends ExerciseList {
 
   @Override
   protected void gotExercises(boolean success) {
-//    long now = System.currentTimeMillis();
-    // logger.info("took " + (now - then) + " millis");
     if (waitTimer != null) {
       waitTimer.cancel();
     }
@@ -374,9 +367,6 @@ public class PagingExerciseList extends ExerciseList {
    */
   @Override
   public void addExercise(CommonShell es) {
-/*    if (pagingContainer.getSize() < 5) {
-      logger.info(getInstance() +" : addExercise adding " + es.getID() + " state " + es.getState() + "/" + es.getSecondState());
-    }*/
     pagingContainer.addExercise(es);
   }
 
@@ -390,7 +380,6 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   public CommonShell forgetExercise(String id) {
-    // logger.info("PagingExerciseList.forgetExercise " + id + " on " + getElement().getId() + " ul " +userListID);
     CommonShell es = byID(id);
     if (es != null) {
       return removeExercise(es);
