@@ -63,7 +63,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   private final String instance;
   final StickyState sticky;
   Panel scoreHistory;
-  private Map<String, Collection<String>> selection;
+  private Map<String, Collection<String>> selection = new HashMap<>();
   UserList ul;
   private Widget contentPanel;
 
@@ -550,12 +550,11 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     protected void gotClickOnNext() {
       abortPlayback();
 
-      //logger.info("on last " + exerciseList.onLast());
+      logger.info("on last " + exerciseList.onLast());
       if (exerciseList.onLast()) {
         onSetComplete();
       } else {
-        //logger.info("load next " + exerciseList.getCurrentExerciseID());
-
+        logger.info("load next " + exerciseList.getCurrentExerciseID());
         exerciseList.loadNext();
       }
     }
