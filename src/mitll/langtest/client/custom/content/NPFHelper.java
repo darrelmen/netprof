@@ -119,7 +119,6 @@ public class NPFHelper implements RequiresResize {
   private Panel doNPF(UserList ul, String instanceName, boolean loadExercises) {
     // System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul);
     Panel hp = doInternalLayout(ul, instanceName);
-
     if (loadExercises) {
       rememberAndLoadFirst(ul);
     }
@@ -241,10 +240,8 @@ public class NPFHelper implements RequiresResize {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
         if (showQC) {
-          // System.out.println("\nNPFHelper : making new QCNPFExercise for " +e + " instance " + instanceName);
           return new QCNPFExercise(e, controller, exerciseList, instanceName);
         } else {
-          // System.out.println("\nmaking new CommentNPFExercise for " +e + " instance " + instanceName);
           return new CommentNPFExercise(e, controller, exerciseList, false, instanceName);
         }
       }
@@ -253,19 +250,16 @@ public class NPFHelper implements RequiresResize {
 
   @Override
   public void onResize() {
-//    logger.info("Got resize " + instanceName);
     if (npfExerciseList != null) {
-//      logger.info("Got resize for " +npfExerciseList.getCreatedPanel().getClass());
       npfExerciseList.onResize();
     } else {
-      //    logger.info("no exercise list " +instanceName + "  for " + getClass());
+      logger.info("no exercise list " +instanceName + "  for " + getClass());
     }
   }
 
   public void setContentPanel(DivWidget content) {
     this.contentPanel = content;
   }
-
   public String getInstanceName() {
     return instanceName;
   }
@@ -420,13 +414,6 @@ public class NPFHelper implements RequiresResize {
       protected void noSectionsGetExercises(long userID) {
         loadExercises(getHistoryToken("", ""), getPrefix(), false);
       }
-
-/*      @Override
-      protected void loadExercises(final Map<String, Collection<String>> typeToSection, final String item) {
-*//*        System.out.println(getClass() + ".loadExercises : instance " + getInstance() + " " + typeToSection +
-            " and item '" + item + "'" + " for list " + userListID);*//*
-        loadExercisesUsingPrefix(typeToSection, getPrefix(), false);
-      }*/
     }
   }
 }
