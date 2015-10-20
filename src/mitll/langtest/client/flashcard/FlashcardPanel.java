@@ -50,7 +50,6 @@ class FlashcardPanel extends HorizontalPanel {
   private static final String ENGLISH = "English";
   private static final String PLAY = "AUDIO";
   private static final String BOTH = "Both";
-  //private static final int LEFT_MARGIN_FOR_FOREIGN_PHRASE = 17;
   private static final String CLICK_TO_FLIP = "Click to flip";
   private static final String SHUFFLE = "Shuffle";
 
@@ -231,7 +230,7 @@ class FlashcardPanel extends HorizontalPanel {
   }
 
   void addRecordingAndFeedbackWidgets(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller, Panel contentMiddle) {
-     logger.warning("adding empty recording and feedback widgets");
+     logger.warning("adding empty recording and feedback widgets " + this.getClass());
   }
 
   /**
