@@ -13,6 +13,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.custom.ListManager;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -32,12 +33,12 @@ public class CreateListDialog extends BasicDialog {
 /*  private static final boolean REQUIRE_DESC = false;
   private static final boolean REQUIRE_CLASS = false;*/
 
-  private final Navigation navigation;
+  private final ListManager navigation;
   private final LangTestDatabaseAsync service;
   private final UserManager userManager;
   private final ExerciseController controller;
 
-  public CreateListDialog(Navigation navigation, LangTestDatabaseAsync service, UserManager userManager, ExerciseController controller) {
+  public CreateListDialog(ListManager navigation, LangTestDatabaseAsync service, UserManager userManager, ExerciseController controller) {
     this.navigation = navigation;
     this.service = service;
     this.userManager = userManager;
