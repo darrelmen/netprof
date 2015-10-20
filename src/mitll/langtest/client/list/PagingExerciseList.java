@@ -217,7 +217,6 @@ public class PagingExerciseList extends ExerciseList {
     if (showTypeAhead) {
       typeAhead.setText(text);
       pushNewItem(text,"");
-//      loadExercises(getHistoryToken(text, ""), text, false);
     }
   }
 
