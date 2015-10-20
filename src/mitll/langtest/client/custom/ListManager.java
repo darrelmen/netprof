@@ -130,12 +130,23 @@ public class ListManager implements RequiresResize {
    * @param w
    * @param tab
    * @see #addTabs()
-   * @see #selectPreviousTab(String)
+   * @see Navigation#selectPreviousTab(String)
    */
   public void showFirstUserListTab(TabPanel w, int tab) {
     yourStuff.clickOnTab();
     w.selectTab(tab);
     refreshViewLessons(true, false);
+  }
+
+  public void clickOnYourStuff() {
+    yourStuff.clickOnTab();
+  }
+  public void clickOnCreate() {
+    create.clickOnTab();
+  }
+
+  public void clickOnTab(final TabAndContent toUse) {
+    toUse.clickOnTab();
   }
 
   /**
@@ -202,13 +213,14 @@ public class ListManager implements RequiresResize {
     storage.removeValue(CLICKED_USER_LIST);
     storage.storeValue(CLICKED_TAB, value);
   }
+
   /**
    * @param onlyCreated
    * @param onlyVisited
    * @see #showInitialState
    */
   public void showMyLists(boolean onlyCreated, boolean onlyVisited
-  //    , TabPanel tabPanel
+                          //    , TabPanel tabPanel
   ) {
     TabPanel tabPanel = subListTabPanel;
     String value = storage.getValue(CLICKED_TAB);
@@ -346,6 +358,7 @@ public class ListManager implements RequiresResize {
     reviewItem.onResize();
     editItem.onResize();
   }
+
   /**
    * @param row
    * @see #onResize()
@@ -355,6 +368,7 @@ public class ListManager implements RequiresResize {
       row.setHeight((Window.getClientHeight() * 0.7) + "px");
     }
   }
+
   /**
    * @param ul
    * @param contentPanel
@@ -554,7 +568,7 @@ public class ListManager implements RequiresResize {
   }
 
   private void showLearnTab(boolean isReview, UserList ul, TabAndContent learn, String instanceName1) {
-     npfHelper.showNPF(ul, learn, instanceName1, true);
+    npfHelper.showNPF(ul, learn, instanceName1, true);
   }
 
   private boolean createdByYou(UserList ul) {
@@ -630,16 +644,16 @@ public class ListManager implements RequiresResize {
         ul, instanceName1, isReview, isComment, isAttention, isNormalList);
 
     if (!chosePrev) {
-        logger.info("selectTabGivenHistory ul " + ul.getName() + " private " + ul.isPrivate() + " empty " + ul.isEmpty() + " ");
+      logger.info("selectTabGivenHistory ul " + ul.getName() + " private " + ul.isPrivate() + " empty " + ul.isEmpty() + " ");
 
       if (createdByYou(ul) &&
           //!ul.isPrivate() &&
           ul.isEmpty() && edit != null) {
         tabPanel.selectTab(ul.getName().equals(FIX_DEFECTS) ? 0 : SUBTAB_EDIT_INDEX);    // 2 = add/edit item
-           logger.info("selectTabGivenHistory doing showEditReviewOrComment");
+        logger.info("selectTabGivenHistory doing showEditReviewOrComment");
         showEditReviewOrComment(ul, isNormalList, edit, isReview, isComment);
       } else {
-         logger.info("selectTabGivenHistory doing sublearn");
+        logger.info("selectTabGivenHistory doing sublearn");
 
         tabPanel.selectTab(SUBTAB_LEARN_INDEX);
         showLearnTab(learn, ul, instanceName1, isReview, isComment, isAttention);
@@ -672,7 +686,7 @@ public class ListManager implements RequiresResize {
                                                 boolean isReview, boolean isComment, boolean isAttention,
                                                 boolean isNormalList) {
     String subTab = storage.getValue(SUB_TAB);
-    logger.info("selectPreviouslyClickedSubTab : subtab '" + subTab +"'");
+    logger.info("selectPreviouslyClickedSubTab : subtab '" + subTab + "'");
 
     boolean chosePrev = false;
     if (subTab != null) {
