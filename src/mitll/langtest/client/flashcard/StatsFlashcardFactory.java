@@ -144,21 +144,24 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
 
     boolean b = noModel || !recordingEnabled;
 
-    return b ?
-        new FlashcardPanel(e,
-            StatsFlashcardFactory.this.service,
-            StatsFlashcardFactory.this.controller,
-            ADD_KEY_BINDING,
-            StatsFlashcardFactory.this.controlState,
-            soundFeedback,
-            soundFeedback.endListener, StatsFlashcardFactory.this.instance, exerciseList) {
-          @Override
-          protected void gotShuffleClick(boolean b) {
-            sticky.resetStorage();
-            super.gotShuffleClick(b);
-          }
-        } :
+    return b ? getNoRecordFlashcardPanel(e) :
         new StatsPracticePanel(e, exerciseList);
+  }
+
+  private FlashcardPanel getNoRecordFlashcardPanel(final CommonExercise e) {
+    return new FlashcardPanel(e,
+        StatsFlashcardFactory.this.service,
+        StatsFlashcardFactory.this.controller,
+        ADD_KEY_BINDING,
+        StatsFlashcardFactory.this.controlState,
+        soundFeedback,
+        soundFeedback.endListener, StatsFlashcardFactory.this.instance, exerciseList) {
+      @Override
+      protected void gotShuffleClick(boolean b) {
+        sticky.resetStorage();
+        super.gotShuffleClick(b);
+      }
+    };
   }
 
   private void reset() {
