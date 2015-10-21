@@ -1,12 +1,9 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
-import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
