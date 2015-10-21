@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.LogAndNotify;
+import mitll.langtest.server.ServerProperties;
 
 import java.sql.Connection;
 
@@ -20,6 +21,8 @@ public interface Database {
 
   String TIME = "time";
   String EXID = "exid";
+
+  ServerProperties getServerProps();
 
   String getLanguage();
 
