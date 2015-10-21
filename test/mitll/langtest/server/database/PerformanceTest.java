@@ -5,6 +5,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.analysis.BestScore;
 import mitll.langtest.shared.analysis.UserPerformance;
+import mitll.langtest.shared.analysis.WordScore;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -85,11 +86,21 @@ public class PerformanceTest {
       writer.write(performance.toRawCSV());
       writer.close();
 
+      List<WordScore> wordScoresForUser = database.getAnalysis().getWordScoresForUser(71);
+      for(WordScore ws : wordScoresForUser) logger.info("got " + ws);
+
     } catch (IOException e) {
 
 
     }
   }
+
+  @Test
+  public void testWords() {
+      List<WordScore> wordScoresForUser = database.getAnalysis().getWordScoresForUser(71);
+      for(WordScore ws : wordScoresForUser) logger.info("got " + ws);
+  }
+
 
   private BufferedWriter getWriter(String prefix) throws IOException {
     SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy_HH_mm_ss");
