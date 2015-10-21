@@ -42,12 +42,12 @@ public class UserExerciseDAO extends DAO {
   private static final String CONTEXT_TRANSLATION = "contextTranslation";
 
   private ExerciseDAO exerciseDAO;
-  private final LogAndNotify logAndNotify;
+//  private final LogAndNotify logAndNotify;
   private static final boolean DEBUG = false;
 
-  public UserExerciseDAO(Database database,LogAndNotify logAndNotify) {
+  public UserExerciseDAO(Database database) {
     super(database);
-    this.logAndNotify = logAndNotify;
+   // this.logAndNotify = logAndNotify;
     try {
       createUserTable(database);
       Collection<String> columns = getColumns(USEREXERCISE);
@@ -202,10 +202,12 @@ public class UserExerciseDAO extends DAO {
     }
   }
 
+/*
   private void logException(Exception ee) {
     logger.error("got " + ee, ee);
     logAndNotify.logAndNotifyServerException(ee);
   }
+*/
 
   private String fixSingleQuote(String s) { return s == null ? "" : s.replaceAll("'","''"); }
 
