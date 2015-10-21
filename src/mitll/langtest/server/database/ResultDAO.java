@@ -800,6 +800,13 @@ public class ResultDAO extends DAO {
   }
 
 
+  /**
+   * @see #getBest(String) 
+   * @param connection
+   * @param statement
+   * @return
+   * @throws SQLException
+   */
   private List<BestScore> getBestForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
     List<BestScore> results = new ArrayList<BestScore>();
@@ -828,7 +835,7 @@ public class ResultDAO extends DAO {
     }
     finish(connection, statement, rs);
 
-    if (results.isEmpty()) {
+    if (!results.isEmpty()) {
       if (lastBest != results.get(results.size() - 1)) {
         results.add(lastBest);
       }
