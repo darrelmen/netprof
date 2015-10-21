@@ -1,6 +1,5 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -14,6 +13,7 @@ import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.server.mail.MailSupport;
+import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -31,7 +31,6 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.CollationKey;
-import java.text.Collator;
 import java.util.*;
 
 /**
@@ -451,11 +450,11 @@ public class DatabaseImpl implements Database {
    * @param collator
    * @return
    */
-  public JSONObject getJsonScoreHistoryRecorded(long userid,
+/*  public JSONObject getJsonScoreHistoryRecorded(long userid,
                                                 Map<String, Collection<String>> typeToSection,
                                                 Collator collator) {
     return jsonSupport.getJsonScoreHistoryRecorded(userid, typeToSection, collator);
-  }
+  }*/
 
   /**
    * For all the exercises in a chapter
