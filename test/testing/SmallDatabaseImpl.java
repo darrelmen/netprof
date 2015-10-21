@@ -1,5 +1,6 @@
 package testing;
 
+import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.UserDAO;
@@ -20,7 +21,7 @@ import java.sql.SQLException;
  * * it's not a good idea to close connections, especially in the context of a servlet inside a container, since
  * H2 will return "new" connections that have already been closed.   <br></br>
  * * it's not a good idea to reuse one connection...?  <br></br>
- * <p/>
+ * <p>
  * User: go22670
  * Date: 5/14/12
  * Time: 11:44 PM
@@ -35,7 +36,7 @@ public class SmallDatabaseImpl implements Database {
   // h2 config info
   private String url = "jdbc:h2:" + H2_DB_NAME + ";IFEXISTS=TRUE;QUERY_CACHE_SIZE=0;";
   private final String dbOptions = "";//"?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull",
-      private final String driver = "org.h2.Driver";
+  private final String driver = "org.h2.Driver";
 
   private HttpServlet servlet;
   private String h2DbName = H2_DB_NAME;
@@ -56,12 +57,17 @@ public class SmallDatabaseImpl implements Database {
 
   }
 
-    @Override
-    public String getLanguage() {
-        return "";
-    }
+  @Override
+  public String getLanguage() {
+    return "";
+  }
 
-    /**
+  @Override
+  public LogAndNotify getLogAndNotify() {
+    return null;
+  }
+
+  /**
    * @param s
    * @see mitll.langtest.server.LangTestDatabaseImpl#init
    */
@@ -99,10 +105,11 @@ public class SmallDatabaseImpl implements Database {
     }
   }
 
-    /**
-     * Just for dbLogin
-     */
+  /**
+   * Just for dbLogin
+   */
   private Connection localConnection;
+
   /**
    * Not necessary if we use the h2 DBStarter service -- see web.xml reference
    *
@@ -120,13 +127,13 @@ public class SmallDatabaseImpl implements Database {
       }
       logger.info("connecting to " + url);
 
-     // GWT.log("connecting to " + url);
+      // GWT.log("connecting to " + url);
       File f = new java.io.File(h2DbName + ".h2.db");
       if (!f.exists()) {
         String s = "huh? no file at " + f.getAbsolutePath();
         logger.warn(s);
 
-       // GWT.log(s);
+        // GWT.log(s);
       }
       Connection connection = DriverManager.getConnection(url + dbOptions);
       connection.setAutoCommit(false);
@@ -137,7 +144,7 @@ public class SmallDatabaseImpl implements Database {
       this.localConnection = connection;
       return connection;
     } catch (Exception ex) {
-      logger.error("Got " +ex,ex);
+      logger.error("Got " + ex, ex);
     }
     return null;
   }
@@ -164,11 +171,12 @@ public class SmallDatabaseImpl implements Database {
         logger.warn("getConnection : conn " + c + " is closed!");
       }
     } catch (SQLException e) {
-      logger.error("got " +e,e);
+      logger.error("got " + e, e);
     }
     return c;
   }
 
 
-  public void closeConnection(Connection connection)  {}
+  public void closeConnection(Connection connection) {
+  }
 }
