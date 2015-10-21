@@ -22,10 +22,12 @@ public class ParseResultJson {
     this.props = properties;
   }
 
+/*
   public Map<ImageType, Map<Float, TranscriptEvent>> parseJsonString(String json, String words1, String w1, boolean usePhones) {
     Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseJson(JSONObject.fromObject(json), words1, w1, usePhones);
     return imageTypeMapMap;
   }
+*/
 
   public Map<NetPronImageType, List<TranscriptSegment>> getNetPronImageTypeToEndTimes(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
@@ -44,7 +46,7 @@ public class ParseResultJson {
     return typeToEndTimes;
   }
 
-  public Map<ImageType, Map<Float, TranscriptEvent>> parseJsonString(String json, boolean usePhones) {
+  private Map<ImageType, Map<Float, TranscriptEvent>> parseJsonString(String json, boolean usePhones) {
     return parseJson(JSONObject.fromObject(json), "words", "w", usePhones);
   }
 
@@ -114,25 +116,4 @@ public class ParseResultJson {
 
     phoneEvents.put((float) pstart, new TranscriptEvent((float) pstart, (float) pend, token, (float) pscore));
   }
-
-  // JESS reupdate here
- /* private EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes, boolean useWebservice,
-                                        boolean usePhoneToDisplay) {
-    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
-    try {
-      for (Map.Entry<ImageType, String> o : imageTypes.entrySet()) {
-        ImageType imageType = o.getKey();
-        boolean isPhone = imageType.equals(ImageType.PHONE_TRANSCRIPT) && usePhoneToDisplay;
-        TranscriptReader transcriptReader = new TranscriptReader();
-        typeToEvent.put(imageType, useWebservice ? transcriptReader.readEventsFromString(o.getValue(), isPhone, props.getPhoneToDisplay()) :
-            transcriptReader.readEventsFromFile(o.getValue(), isPhone, props.getPhoneToDisplay()));
-
-      }
-      return new EventAndFileInfo(new HashMap<ImageType, String>(), typeToEvent);
-    } catch (IOException e) {
-      e.printStackTrace();
-      return null;
-    }
-  }
-*/
 }
