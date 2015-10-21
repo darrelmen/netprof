@@ -40,7 +40,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
 
           @Override
           public void onSuccess(ExerciseListWrapper exerciseListWrapper) {
-            for (CommonShell shell : exerciseListWrapper.getExercises()) idToEx.put(shell.getID(), shell);
+            for (CommonShell shell : exerciseListWrapper.getExercises()) getIdToEx().put(shell.getID(), shell);
           }
         });
 
@@ -100,7 +100,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
             .setFormatter(new ToolTipFormatter() {
               public String format(ToolTipData toolTipData) {
                 String s = timeToId.get(toolTipData.getXAsLong());
-                CommonShell commonShell = idToEx.get(s);
+                CommonShell commonShell = getIdToEx().get(s);
                 String foreignLanguage = commonShell == null ? "" : commonShell.getForeignLanguage();
                 String english = commonShell == null ? "" : commonShell.getEnglish();
 
@@ -183,5 +183,9 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
     for (TimeAndScore timeAndScore : rawBestScores) {
       timeToId.put(timeAndScore.getTimestamp(), timeAndScore.getId());
     }
+  }
+
+  public Map<String, CommonShell> getIdToEx() {
+    return idToEx;
   }
 }
