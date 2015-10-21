@@ -32,16 +32,12 @@ public class PhoneDAO extends DAO {
 
   private static final boolean DEBUG = false;
 
-  private final LogAndNotify logAndNotify;
-
   /**
    * @param database
-   * @param logAndNotify
    * @see DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
    */
-  public PhoneDAO(Database database, LogAndNotify logAndNotify) {
+  public PhoneDAO(Database database) {
     super(database);
-    this.logAndNotify = logAndNotify;
     try {
       createTable(database);
       createIndex(database, RID, PHONE);
