@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.contextPractice.DialogWindow;
 import mitll.langtest.client.custom.content.AVPHelper;
@@ -391,8 +392,16 @@ public class Navigation implements RequiresResize {
 
   private void showAnalysis() {
     analysis.getContent().clear();
-    analysisPlot = new AnalysisPlot(service, userManager.getUser());
-    analysis.getContent().add(analysisPlot);
+//    analysisPlot = new AnalysisPlot(service, userManager.getUser());
+//    analysis.getContent().add(analysisPlot);
+//    learnHelper.getExerciseList().getExercises();
+//    new VerticalPanel();
+
+    ListInterface exerciseList = npfHelper.getExerciseList();
+
+    logger.info("Got " + exerciseList);
+    analysis.getContent().add(new AnalysisTab(service,controller,exerciseList,userManager.getUser()));
+
   }
 
   private void addStudyLists() {
@@ -610,10 +619,10 @@ public class Navigation implements RequiresResize {
 
   /**
    * @param toUse
-   * @see #clickOnYourLists(long)
-   * @see #selectPreviouslyClickedSubTab(com.github.gwtbootstrap.client.ui.TabPanel, TabAndContent, TabAndContent, TabAndContent, mitll.langtest.shared.custom.UserList, String, boolean, boolean, boolean, boolean)
+   * @seex #clickOnYourLists(long)
+   * @seex #selectPreviouslyClickedSubTab(com.github.gwtbootstrap.client.ui.TabPanel, TabAndContent, TabAndContent, TabAndContent, mitll.langtest.shared.custom.UserList, String, boolean, boolean, boolean, boolean)
    * @see #selectPreviousTab(String)
-   * @see #showMyLists
+   * @seex #showMyLists
    */
   private void clickOnTab(final TabAndContent toUse) {
     if (toUse == null) {
