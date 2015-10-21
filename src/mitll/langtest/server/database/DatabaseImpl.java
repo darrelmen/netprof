@@ -4,6 +4,7 @@ import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.contextPractice.ContextPracticeImport;
@@ -142,12 +143,12 @@ public class DatabaseImpl implements Database {
     UserListDAO userListDAO = new UserListDAO(this, userDAO);
     addRemoveDAO = new AddRemoveDAO(this);
 
-    userExerciseDAO = new UserExerciseDAO(this, logAndNotify);
+    userExerciseDAO = new UserExerciseDAO(this);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
-    resultDAO = new ResultDAO(this, logAndNotify);
-    refresultDAO = new RefResultDAO(this, logAndNotify, getServerProps().shouldDropRefResult());
-    wordDAO = new WordDAO(this, logAndNotify);
-    phoneDAO = new PhoneDAO(this, logAndNotify);
+    resultDAO = new ResultDAO(this);
+    refresultDAO = new RefResultDAO(this, getServerProps().shouldDropRefResult());
+    wordDAO = new WordDAO(this);
+    phoneDAO = new PhoneDAO(this);
     audioDAO = new AudioDAO(this, userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
     userListManager = new UserListManager(userDAO, userListDAO, userListExerciseJoinDAO,
@@ -156,7 +157,7 @@ public class DatabaseImpl implements Database {
         new ReviewedDAO(this, ReviewedDAO.SECOND_STATE),
         pathHelper);
 
-    eventDAO = new EventDAO(this, userDAO, logAndNotify);
+    eventDAO = new EventDAO(this, userDAO);
 
     Connection connection1 = getConnection();
     try {
@@ -179,6 +180,9 @@ public class DatabaseImpl implements Database {
 
   public ResultDAO getResultDAO() {
     return resultDAO;
+  }
+
+  public Analysis getAnalysis() { return new Analysis(this);
   }
 
   public RefResultDAO getRefResultDAO() {  return refresultDAO;  }
@@ -443,20 +447,6 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * A special, slimmed down history just for the Appen recording app.
-   * @see mitll.langtest.server.ScoreServlet#getRecordHistory
-   * @param userid
-   * @param typeToSection
-   * @param collator
-   * @return
-   */
-/*  public JSONObject getJsonScoreHistoryRecorded(long userid,
-                                                Map<String, Collection<String>> typeToSection,
-                                                Collator collator) {
-    return jsonSupport.getJsonScoreHistoryRecorded(userid, typeToSection, collator);
-  }*/
-
-  /**
    * For all the exercises in a chapter
 
    Get latest results
@@ -714,7 +704,7 @@ public class DatabaseImpl implements Database {
     return eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, hitID, device));
   }
 
-  public void logAndNotify(Exception e) { logAndNotify.logAndNotifyServerException(e);  }
+  public void logAndNotify(Exception e) { getLogAndNotify().logAndNotifyServerException(e);  }
 
   public EventDAO getEventDAO() {
     return eventDAO;
@@ -1131,11 +1121,11 @@ public class DatabaseImpl implements Database {
       logger.error("got " +e);
     }
   }
-/*
-  public Map<Long, Map<String, Integer>> getUserToDayToRecordings() {
-    return new Report(userDAO, resultDAO, eventDAO, audioDAO).getUserToDayToRecordings(null);
-  }
-*/
 
   public String toString() {   return "Database : " + this.getClass().toString();  }
+
+  @Override
+  public LogAndNotify getLogAndNotify() {
+    return logAndNotify;
+  }
 }
