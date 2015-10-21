@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/17/15.
  */
 public class ReviewScoringPanel extends ScoringAudioPanel {
-  public static final int WIDTH_MARGIN = 230;
+  private static final int WIDTH_MARGIN = 230;
   private Logger logger = Logger.getLogger("ReviewScoringPanel");
   private HTML scoreInfo;
   private Panel tablesContainer, belowContainer;
@@ -55,9 +55,16 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
     return scoreInfo;
   }
 
+  /**
+   * @see #scoreAudio(String, long, String, ImageAndCheck, ImageAndCheck, int, int, int)
+   * @param label
+   * @param scoreColHeader
+   * @param scores
+   * @return
+   */
   private Table makeTable(String label, String scoreColHeader, Map<String, Float> scores) {
     Table table = new Table();
-    table.getElement().setId("LeaderboardTable_" + label + "_" + scoreColHeader.substring(0, 3));
+    table.getElement().setId("ReviewScoreTable_" + label + "_" + scoreColHeader.substring(0, 3));
     table.add(new TableHeader(label));
     table.add(new TableHeader(scoreColHeader));
 
@@ -67,7 +74,6 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
       List<String> keys = new ArrayList<String>(scores.keySet());
       Collections.sort(keys);
       for (String key : keys) {
-
         HTMLPanel row = new HTMLPanel("tr", "");
 
         // add index col
@@ -151,9 +157,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
   protected void scoreAudio(String path, long resultID, String refSentence, final ImageAndCheck wordTranscript,
                             final ImageAndCheck phoneTranscript, int width, int height, int reqid) {
     // logger.info("ReviewScoringPanel.scoreAudio : path " + path + " width " + width + " height " + height);
-
     boolean wasVisible = wordTranscript.image.isVisible();
-
     belowContainer.setWidth(width + "px");
 
     // only show the spinning icon if it's going to take awhile
@@ -184,8 +188,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
 
           float hydecScore = result.getHydecScore();
           float zeroToHundred = hydecScore * 100f;
-          String html = "Score : <b>" + getScore(Math.min(100.0f, zeroToHundred)) +
-              "%</b>";
+          String html = "Score : <b>" + getScore(Math.min(100.0f, zeroToHundred)) + "%</b>";
           scoreInfo.setHTML(html);
 
           // logger.info("Setting " + scoreInfo.getElement().getId() + " to " + html);
@@ -213,7 +216,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
               left.add(phoneTable);
 
               belowContainer.add(left);
-              Widget table2 = getTable2(result);
+              Widget table2 = getWordTable(result);
               table2.addStyleName("topFiveMargin");
               table2.addStyleName("leftFiveMargin");
               table2.addStyleName("floatLeft");
@@ -226,11 +229,16 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
     });
   }
 
-  private Map<TranscriptSegment, List<TranscriptSegment>> getWordToPhones(PretestScore score) {
-    Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = new HashMap<>();
+/*  private Map<TranscriptSegment, List<TranscriptSegment>> getWordToPhones(PretestScore score) {
+    Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime = score.getsTypeToEndTimes();
+    return getWordToPhones(netPronImageTypeToEndTime);
+  }*/
 
-    List<TranscriptSegment> words = score.getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
-    List<TranscriptSegment> phones = score.getsTypeToEndTimes().get(NetPronImageType.PHONE_TRANSCRIPT);
+  private Map<TranscriptSegment, List<TranscriptSegment>> getWordToPhones(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
+    List<TranscriptSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
+    List<TranscriptSegment> phones = netPronImageTypeToEndTime.get(NetPronImageType.PHONE_TRANSCRIPT);
+
+    Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = new HashMap<>();
     for (TranscriptSegment word : words) {
       String event = word.getEvent();
       if (event.equals("sil") || event.equals("<s>") || event.equals("</s>")) {
@@ -248,13 +256,23 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
     return wordToPhones;
   }
 
-  private Widget getTable2(PretestScore score) {
+  /**
+   * @see #scoreAudio(String, long, String, ImageAndCheck, ImageAndCheck, int, int, int)
+   * @param score
+   * @return
+   */
+  private Widget getWordTable(PretestScore score) {
+    Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime = score.getsTypeToEndTimes();
+    return getWordTable(netPronImageTypeToEndTime);
+  }
+
+  private Widget getWordTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
+    Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
+
     Table table = new Table();
     table.getElement().setId("WordTable");
     table.getElement().getStyle().clearWidth();
     table.removeStyleName("table");
-
-    Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(score);
 
     HTMLPanel srow = new HTMLPanel("tr", "");
     table.add(srow);
@@ -326,9 +344,5 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
   public Widget getTables() {
     return tablesContainer;
   }
-
-  public Widget getBelow() {
-
-    return belowContainer;
-  }
+  public Widget getBelow() { return belowContainer; }
 }
