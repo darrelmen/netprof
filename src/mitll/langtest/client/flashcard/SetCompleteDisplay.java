@@ -21,6 +21,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 9/8/14.
  */
 public class SetCompleteDisplay {
+  public static final String PRONUNCIATION = "Pronunciation ";
   private final Logger logger = Logger.getLogger("SetCompleteDisplay");
 
   private static final String CORRECT_NBSP = "Correct&nbsp;%";
@@ -55,14 +56,14 @@ public class SetCompleteDisplay {
   private Chart makeCorrectChart(List<AVPHistoryForList> result, AVPHistoryForList sessionAVPHistoryForList,
                                  int totalCorrect, int totalIncorrect, int numExercises) {
     int all = totalCorrect + totalIncorrect;
-    logger.info("onSetComplete.onSuccess : results " + result + " " + (numExercises) +
-        " all " + all + " correct " + totalCorrect + " inc " + totalIncorrect);
+/*    logger.info("onSetComplete.onSuccess : results " + result + " " + (numExercises) +
+        " all " + all + " correct " + totalCorrect + " inc " + totalIncorrect);*/
 
     return makeChart(totalCorrect, all, sessionAVPHistoryForList, totalIncorrect, numExercises);
   }
 
   private Chart makePronChart(double avgScore, AVPHistoryForList sessionAVPHistoryForListScore) {
-    String pronunciation = "Pronunciation " + toPercent(avgScore);
+    String pronunciation = PRONUNCIATION + toPercent(avgScore);
     Chart chart2 = new LeaderboardPlot().getChart(sessionAVPHistoryForListScore, pronunciation, SCORE_SUBTITLE);
     scaleCharts(chart2);
     return chart2;
@@ -100,8 +101,8 @@ public class SetCompleteDisplay {
     float yRatio = needToScaleY();
 
     int chartWidth = getChartWidth() / 2 - 10;
-    chartWidth = Math.max(200, chartWidth);
-    logger.warning("got chartWidth " + chartWidth);
+    chartWidth = Math.max(280, chartWidth);
+    // logger.warning("got chartWidth " + chartWidth);
     chart.setWidth(chartWidth);
 
     boolean neither = true;
@@ -183,11 +184,11 @@ public class SetCompleteDisplay {
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#showFeedbackCharts(List, List)
    * @param sortedHistory
    * @param allExercises
    * @param controller
    * @return
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#showFeedbackCharts(List, List)
    */
   public Panel getScoreHistory(List<ExerciseCorrectAndScore> sortedHistory,
                                List<CommonShell> allExercises, ExerciseController controller) {
