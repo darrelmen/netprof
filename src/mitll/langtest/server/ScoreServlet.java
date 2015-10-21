@@ -45,22 +45,9 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String ROUND_TRIP = "roundTrip";
   private static final String PHONE_REPORT = "phoneReport";
 
-  /**
-   * Where is this used ???
-   */
-//  private static final String EXERCISE_HISTORY = "exerciseHistory";
-//  private static final String EXPECTING_TWO_QUERY_PARAMETERS = "expecting two query parameters";
   private static final String ERROR = "ERROR";
   private static final String USER = "user";
 
-  /**
-   * @see DatabaseImpl#userExists(HttpServletRequest, String, String)
-   */
-//  public static final String EMAIL_H = "emailH";
-  /**
-   * @see DatabaseImpl#userExists(HttpServletRequest, String, String)
-   */
- // public static final String USERID = "userid";
   private static final String DEVICE_TYPE = "deviceType";
   private static final String DEVICE = "device";
   private static final String EVENT = "event";
@@ -68,10 +55,6 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String HAS_MODEL = "hasModel";
   private static final long REFRESH_CONTENT_INTERVAL = 12 * 60 * 60 * 1000l;
 
-  /**
-   * @see DatabaseImpl#userExists(HttpServletRequest, String, String)
-   */
-  //public static final String PASSWORD_CORRECT = "passwordCorrect";
   private static final String IS_CORRECT = "isCorrect";
   private static final String SAID_WORD = "saidWord";
 
@@ -86,7 +69,6 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String CONTEXT = "context";
   private static final String WIDGET = "widget";
   private static final String CHILDREN = "children";
-  //public static final String KIND = "kind";
 
   //  private LoadTesting loadTesting;
   private RestUserManagement userManagement;
@@ -147,34 +129,12 @@ public class ScoreServlet extends DatabaseServlet {
             userManagement.doGet(request, response, queryString, toReturn)
             ) {
           logger.info("handled user command for " + queryString);
-//        } else if (queryString.startsWith(EXERCISE_HISTORY)) { // TODO : who calls this???
-//          String[] split1 = queryString.split("&");
-//          if (split1.length != 2) {
-//            toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
-//          } else {
-//            String first = split1[0];
-//            String user = first.split("=")[1];
-//
-//            String second = split1[1];
-//            String exercise = second.split("=")[1];
-//
-//            logger.debug("exerciseHistory " + user + " pass " + exercise);
-//            try {
-//              long l = Long.parseLong(user);
-//              toReturn = db.getResultDAO().getHistoryAsJson(l, exercise);
-//            } catch (NumberFormatException e) {
-//              toReturn.put(ERROR, "User id should be a number");
-//            }
-//          }
         } else if (queryString.startsWith(CHAPTER_HISTORY) || queryString.startsWith("request=" + CHAPTER_HISTORY)) {
           queryString = queryString.substring(queryString.indexOf(CHAPTER_HISTORY) + CHAPTER_HISTORY.length());
           toReturn = getChapterHistory(queryString, toReturn);
         } else if (queryString.startsWith(REF_INFO) || queryString.startsWith("request=" + REF_INFO)) {
           queryString = queryString.substring(queryString.indexOf(REF_INFO) + REF_INFO.length());
           toReturn = getRefInfo(queryString, toReturn);
-//        } else if (queryString.startsWith(RECORD_HISTORY) || queryString.startsWith("request=" + RECORD_HISTORY)) {
-//          queryString = queryString.substring(queryString.indexOf(RECORD_HISTORY) + RECORD_HISTORY.length());
-//          toReturn = getRecordHistory(queryString, toReturn);
         } else if (queryString.startsWith(PHONE_REPORT) || queryString.startsWith("request=" + PHONE_REPORT)) {
           queryString = queryString.substring(queryString.indexOf(PHONE_REPORT) + PHONE_REPORT.length());
           String[] split1 = queryString.split("&");
@@ -287,46 +247,6 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * This is for Appen.
-   *
-   * @param queryString
-   * @param toReturn
-   * @return
-   * @see #doGet
-   */
-/*  private JSONObject getRecordHistory(String queryString, JSONObject toReturn) {
-    String[] split1 = queryString.split("&");
-    if (split1.length < 2) {
-      toReturn.put(ERROR, "expecting at least two query parameters");
-    } else {
-      String user = "";
-      Map<String, Collection<String>> selection = new TreeMap<String, Collection<String>>();
-      for (String param : split1) {
-        //logger.debug("param '" +param+               "'");
-        String[] split = param.split("=");
-        if (split.length == 2) {
-          String key = split[0];
-          String value = split[1];
-          if (key.equals(USER)) {
-            user = value;
-          } else {
-            selection.put(key, Collections.singleton(value));
-          }
-        }
-      }
-
-      //logger.debug("chapterHistory " + user + " selection " + selection);
-      try {
-        long l = Long.parseLong(user);
-        toReturn = db.getJsonScoreHistoryRecorded(l, selection, audioFileHelper.getCollator());
-      } catch (NumberFormatException e) {
-        toReturn.put(ERROR, "User id should be a number");
-      }
-    }
-    return toReturn;
-  }*/
-
-  /**
    * Don't die if audio file helper is not available.
    *
    * @return
@@ -350,11 +270,6 @@ public class ScoreServlet extends DatabaseServlet {
   private void reply(HttpServletResponse response, String x) {
     try {
       PrintWriter writer = response.getWriter();
-//      if (x.length() > 1000) {
-//        logger.debug("Reply " + x.substring(0, 1000));
-//      } else {
-//        logger.debug("Reply " + x);
-//      }
       writer.println(x);
       writer.close();
     } catch (IOException e) {
