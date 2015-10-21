@@ -1,9 +1,9 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import net.sf.json.JSONObject;
@@ -60,8 +60,8 @@ public class UserManagement {
         if (!json.isEmpty()) {
           try {
             JSONObject jsonObject = JSONObject.fromObject(json);
-            Object userid = jsonObject.get(ScoreServlet.USERID);
-            Object pc = jsonObject.get(ScoreServlet.PASSWORD_CORRECT);
+            Object userid = jsonObject.get(RestUserManagement.USERID);
+            Object pc = jsonObject.get(RestUserManagement.PASSWORD_CORRECT);
 
             if (!userid.toString().equals("-1")) {
               logger.info(site + " : found user " + userid);
@@ -70,8 +70,8 @@ public class UserManagement {
                 logger.info("\tmatching password for " + site);
 
                 String ip = getIPInfo(request);
-                Object emailH = jsonObject.get(ScoreServlet.EMAIL_H);
-                Object kind = jsonObject.get(ScoreServlet.KIND);
+                Object emailH = jsonObject.get(RestUserManagement.EMAIL_H);
+                Object kind = jsonObject.get(RestUserManagement.KIND);
                 User.Kind realKind = kind == null ? User.Kind.STUDENT : User.Kind.valueOf(kind.toString());
 
                 user = addUser(login, passwordH, emailH.toString(), "browser", ip, realKind, true);
