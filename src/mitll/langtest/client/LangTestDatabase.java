@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.analysis.UserPerformance;
+import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
@@ -101,6 +102,8 @@ public interface LangTestDatabase extends RemoteService {
   Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts();
 
   UserPerformance getPerformanceForUser(long id);
+
+  List<WordScore> getWordScores(long id);
 
   void logMessage(String message);
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device);
