@@ -1,7 +1,7 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.CommonExercise;
@@ -13,7 +13,6 @@ import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.monitoring.Session;
-import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.OutputStream;
@@ -31,10 +30,10 @@ public class ResultDAO extends DAO {
 
   private static final Map<String, String> EMPTY_MAP = new HashMap<String, String>();
   private static final int MINUTE = 60 * 1000;
-  private static final int LAST_NUM_RESULTS = 5;
+ // private static final int LAST_NUM_RESULTS = 5;
   private static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
 
-  private static final String ID = "id";
+  public static final String ID = "id";
   public static final String USERID = "userid";
   private static final String PLAN = "plan";
   private static final String QID = "qid";
@@ -54,8 +53,8 @@ public class ResultDAO extends DAO {
   static final String STIMULUS = "stimulus";
   static final String DEVICE_TYPE = "deviceType";  // iPad, iPhone, browser, etc.
   static final String DEVICE = "device"; // device id, or browser type
-  private static final String YES = "Yes";
-  private static final String NO = "No";
+//  private static final String YES = "Yes";
+//  private static final String NO = "No";
   public static final String PROCESS_DUR = "processDur";
   public static final String ROUND_TRIP_DUR = "roundTripDur";
   public static final int FIVE_MINUTES = 5 * 60 * 1000;
@@ -63,71 +62,23 @@ public class ResultDAO extends DAO {
   //  public static final int HOUR = 60 * 60 * 1000;
   public static final int HOUR = 60 * 60 * 1000;
   public static final int DAY = 24 * HOUR;
-  private final LogAndNotify logAndNotify;
 
   private final boolean debug = false;
 
   /**
    * @param database
-   * @param logAndNotify
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
    */
-  public ResultDAO(Database database, LogAndNotify logAndNotify) {
+  public ResultDAO(Database database) {
     super(database);
-    this.logAndNotify = logAndNotify;
   }
 
   private List<Result> cachedResultsForQuery = null;
   private List<CorrectAndScore> cachedResultsForQuery2 = null;
   private List<MonitorResult> cachedMonitorResultsForQuery = null;
 
-
-  public List<BestScore> getResultForUser(long id) {
-    try {
-      String sql = getPerfSQL(id);
-
-      List<BestScore> resultsForQuery = getBest(sql);
-
-      return resultsForQuery;
-    } catch (Exception ee) {
-      logException(ee);
-    }
-    return new ArrayList<BestScore>();
-  }
-
-  private String getPerfSQL(long id) {
-    return "SELECT " + Database.EXID + "," + PRON_SCORE + "," + Database.TIME +
-            " FROM " + RESULTS +
-            " where " + USERID + "=" + id +
-            " AND " + PRON_SCORE + ">0" + // discard when they got it wrong in avp
-            " order by " + Database.EXID + ", " + Database.TIME;
-  }
-
-  public UserPerformance getResultForUserByBin(long id, int binSize) {
-    try {
-      String sql = getPerfSQL(id);
-
-      List<BestScore> resultsForQuery = getBest(sql);
-      UserPerformance up = new UserPerformance(id);
-      up.setAtBinSize(resultsForQuery, binSize);
-      return up;
-    } catch (Exception ee) {
-      logException(ee);
-    }
-    return new UserPerformance(id);
-  }
-
   public UserPerformance getPerformanceForUser(long id) {
-    try {
-      String sql = getPerfSQL(id);
-
-      List<BestScore> resultsForQuery = getBest(sql);
-      UserPerformance up = new UserPerformance(id,resultsForQuery);
-      return up;
-    } catch (Exception ee) {
-      logException(ee);
-    }
-    return new UserPerformance(id);
+    return new Analysis(database).getPerformanceForUser(id);
   }
 
   /**
@@ -543,7 +494,7 @@ public class ResultDAO extends DAO {
    * @return
    * @see mitll.langtest.server.ScoreServlet#doGet
    */
-  public JSONObject getHistoryAsJson(long userID, String id) {
+/*  public JSONObject getHistoryAsJson(long userID, String id) {
     List<CorrectAndScore> resultsForExercise = getResultsForExIDInForUser(userID, true, id);
     int size = resultsForExercise.size();
     if (size > LAST_NUM_RESULTS) {
@@ -567,7 +518,7 @@ public class ResultDAO extends DAO {
     jsonObject.put("score", total == 0 ? 0f : scoreTotal / new Integer(total).floatValue());
     jsonObject.put("history", jsonArray);
     return jsonObject;
-  }
+  }*/
 
   private List<CorrectAndScore> getResultsForExIDInForUser(long userID, boolean isFlashcardRequest, String id) {
     return getResultsForExIDInForUser(Collections.singleton(id), isFlashcardRequest, userID);
@@ -605,11 +556,6 @@ public class ResultDAO extends DAO {
       logException(ee);
     }
     return new ArrayList<CorrectAndScore>();
-  }
-
-  private void logException(Exception ee) {
-    logger.error("got " + ee, ee);
-    logAndNotify.logAndNotifyServerException(ee);
   }
 
 
@@ -680,14 +626,6 @@ public class ResultDAO extends DAO {
     PreparedStatement statement = connection.prepareStatement(sql);
 
     return getMonitorResultsForQuery(connection, statement);
-  }
-
-  private List<BestScore> getBest(String sql) throws SQLException {
-    logger.info("got " + sql);
-    Connection connection = database.getConnection(this.getClass().toString());
-    PreparedStatement statement = connection.prepareStatement(sql);
-
-    return getBestForQuery(connection, statement);
   }
 
   /**
@@ -798,52 +736,6 @@ public class ResultDAO extends DAO {
 
     return results;
   }
-
-
-  /**
-   * @see #getBest(String) 
-   * @param connection
-   * @param statement
-   * @return
-   * @throws SQLException
-   */
-  private List<BestScore> getBestForQuery(Connection connection, PreparedStatement statement) throws SQLException {
-    ResultSet rs = statement.executeQuery();
-    List<BestScore> results = new ArrayList<BestScore>();
-    String last = null;
-
-    long lastTimestamp = 0;
-    int count = 0;
-    BestScore lastBest = null;
-    while (rs.next()) {
-      String exid = rs.getString(Database.EXID);
-      Timestamp timestamp = rs.getTimestamp(Database.TIME);
-      float pronScore = rs.getFloat(PRON_SCORE);
-
-      long time = timestamp.getTime();
-      if ((last != null && !last.equals(exid)) || (lastTimestamp > 0 && time - lastTimestamp > FIVE_MINUTES)) {
-        results.add(lastBest);
-
-        lastBest.setCount(count);
-        lastTimestamp = time;
-        count = 0;
-      }
-      if (lastTimestamp == 0) lastTimestamp = time;
-      last = exid;
-      lastBest = new BestScore(exid, pronScore, time);
-      count++;
-    }
-    finish(connection, statement, rs);
-
-    if (!results.isEmpty()) {
-      if (lastBest != results.get(results.size() - 1)) {
-        results.add(lastBest);
-      }
-    }
-
-    return results;
-  }
-
 
   private List<CorrectAndScore> getScoreResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
@@ -1149,7 +1041,7 @@ public class ResultDAO extends DAO {
     if (numColumns == 8) {
       addColumnToTable(connection);
     }
-    if (numColumns <= 11) {//!columnExists(connection,RESULTS, AUDIO_TYPE)) {
+    if (numColumns <= 11) {
       addTypeColumnToTable(connection);
     }
     if (numColumns < 12) {
@@ -1202,10 +1094,8 @@ public class ResultDAO extends DAO {
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " +
         RESULTS +
         " (" +
-        ID +
-        " IDENTITY, " +
-        USERID +
-        " INT, " +
+        ID + " IDENTITY, " +
+        USERID +" INT, " +
         "plan VARCHAR, " +
         Database.EXID + " VARCHAR, " +
         "qid INT," +
