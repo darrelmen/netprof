@@ -43,19 +43,16 @@ public class RefResultDAO extends DAO {
   public static final String HYDEC_ALIGN_PRON_SCORE = "hydecAlignPronScore";
   public static final String HYDEC_ALIGN_PROCESS_DUR = "hydecAlignProcessDur";
   public static final String HYDEC_ALIGN_NUM_PHONES = "hydecAlignNumPhones";
-  private final LogAndNotify logAndNotify;
   private final boolean dropTable;
 //  private final boolean debug = false;
 
   /**
    * @param database
-   * @param logAndNotify
    * @param dropTable
    * @see DatabaseImpl#initializeDAOs(PathHelper)
    */
-  public RefResultDAO(Database database, LogAndNotify logAndNotify, boolean dropTable) {
+  public RefResultDAO(Database database, boolean dropTable) {
     super(database);
-    this.logAndNotify = logAndNotify;
     this.dropTable = dropTable;
   }
 
@@ -248,10 +245,10 @@ public class RefResultDAO extends DAO {
     return new ArrayList<Result>();
   }
 
-  private void logException(Exception ee) {
+/*  private void logException(Exception ee) {
     logger.error("got " + ee, ee);
     logAndNotify.logAndNotifyServerException(ee);
-  }
+  }*/
 
   public Result getResult(String exid, String answer) {
     String sql = "SELECT * FROM " + REFRESULT + " WHERE " + Database.EXID + "='" + exid + "' AND " + ANSWER + " like '%" + answer + "'";
