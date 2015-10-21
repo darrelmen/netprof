@@ -168,6 +168,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
 
             if (o1 != null) {
               if (o2 == null) {
+                logger.warning("------- o2 is null?");
                 return -1;
               }
               else {
@@ -178,6 +179,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
                 if (i == 0) {
                   CommonShell shell1 = idToExercise.get(o1.getId());
                   CommonShell shell2 = idToExercise.get(o2.getId());
+                  if (o1.getId().equals(o2.getId())) logger.warning("same id " + o1.getId());
                   return shell1.getEnglish().compareTo(shell2.getEnglish());
                 }
                 else {
@@ -186,6 +188,8 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
               }
             }
             else {
+              logger.warning("------- o1 is null?");
+
               return -1;
             }
           }
