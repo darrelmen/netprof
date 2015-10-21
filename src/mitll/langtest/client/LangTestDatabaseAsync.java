@@ -3,6 +3,7 @@ package mitll.langtest.client;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.analysis.UserPerformance;
+import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
@@ -154,4 +155,6 @@ public interface LangTestDatabaseAsync {
   void getContextPractice(AsyncCallback<ContextPractice> async);
 
   void getPerformanceForUser(long id, AsyncCallback<UserPerformance> async);
+
+  void getWordScores(long id, AsyncCallback<List<WordScore>> async);
 }
