@@ -234,7 +234,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
     return getWordToPhones(netPronImageTypeToEndTime);
   }*/
 
-  private Map<TranscriptSegment, List<TranscriptSegment>> getWordToPhones(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
+/*  private Map<TranscriptSegment, List<TranscriptSegment>> getWordToPhones(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
     List<TranscriptSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
     List<TranscriptSegment> phones = netPronImageTypeToEndTime.get(NetPronImageType.PHONE_TRANSCRIPT);
 
@@ -254,7 +254,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
       }
     }
     return wordToPhones;
-  }
+  }*/
 
   /**
    * @see #scoreAudio(String, long, String, ImageAndCheck, ImageAndCheck, int, int, int)
@@ -263,10 +263,10 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
    */
   private Widget getWordTable(PretestScore score) {
     Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime = score.getsTypeToEndTimes();
-    return getWordTable(netPronImageTypeToEndTime);
+    return new WordTable().getWordTable(netPronImageTypeToEndTime);
   }
 
-  private Widget getWordTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
+ /* private Widget getWordTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
 
     Table table = new Table();
@@ -335,7 +335,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
     }
 
     return table;
-  }
+  }*/
 
   /**
    * @return
