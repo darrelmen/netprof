@@ -13,16 +13,13 @@ import java.util.Set;
 public interface ASR {
 	<T extends CommonExercise> void sort(List<T> toSort);
 	Collator getCollator();
-//	Set<String> checkLTS(String foreignLanguagePhrase);
 	boolean validLTS(String foreignLanguagePhrase);
 	PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
 	SmallVocabDecoder getSmallVocabDecoder();
 	String getUsedTokens(Collection<String> lmSentences, List<String> background);
 
-	//Collection<String> getValidPhrases(Collection<String> phrases);
-
 	/**
-	 * @see mitll.langtest.server.audio.AudioFileHelper#getASRScoreForAudio(int, String, String, Collection, int, int, boolean, boolean, String, boolean, String, Result)
+	 * @see mitll.langtest.server.audio.AudioFileHelper#getASRScoreForAudio
 	 * @param testAudioDir
 	 * @param testAudioFileNoSuffix
 	 * @param sentence
