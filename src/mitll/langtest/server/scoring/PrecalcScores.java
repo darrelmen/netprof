@@ -14,7 +14,7 @@ import java.util.Map;
  * Created by go22670 on 9/28/15.
  */
 class PrecalcScores {
-  private static final Logger logger = Logger.getLogger(PrecalcScores.class);
+//  private static final Logger logger = Logger.getLogger(PrecalcScores.class);
 
   private final Result precalcResult;
   private Scores scores;
@@ -56,7 +56,6 @@ class PrecalcScores {
     Map<String, Map<String, Float>> eventScores = getEventAverages(imageTypeMapMap);
 
     Scores scores = new Scores(precalcResult.getPronScore(), eventScores, 0);
-    //logger.debug("got cached scores " + scores + " json " + jsonObject);
     return scores;
   }
 
