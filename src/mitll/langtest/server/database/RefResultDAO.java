@@ -3,6 +3,7 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.shared.Result;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -75,11 +76,11 @@ public class RefResultDAO extends DAO {
                         long durationInMillis,
                         boolean correct,
 
-                        AudioFileHelper.DecodeAlignOutput alignOutput,
-                        AudioFileHelper.DecodeAlignOutput decodeOutput,
+                        DecodeAlignOutput alignOutput,
+                        DecodeAlignOutput decodeOutput,
 
-                        AudioFileHelper.DecodeAlignOutput alignOutputOld,
-                        AudioFileHelper.DecodeAlignOutput decodeOutputOld,
+                        DecodeAlignOutput alignOutputOld,
+                        DecodeAlignOutput decodeOutputOld,
 
                         boolean isMale, String speed) {
     Connection connection = database.getConnection(this.getClass().toString());
@@ -127,11 +128,11 @@ public class RefResultDAO extends DAO {
                                 long durationInMillis,
                                 boolean correct,
 
-                                AudioFileHelper.DecodeAlignOutput alignOutput,
-                                AudioFileHelper.DecodeAlignOutput decodeOutput,
+                                DecodeAlignOutput alignOutput,
+                                DecodeAlignOutput decodeOutput,
 
-                                AudioFileHelper.DecodeAlignOutput alignOutputOld,
-                                AudioFileHelper.DecodeAlignOutput decodeOutputOld,
+                                DecodeAlignOutput alignOutputOld,
+                                DecodeAlignOutput decodeOutputOld,
 
                                 boolean isMale, String speed) throws SQLException {
     //  logger.debug("adding answer for exid #" + id + " correct " + correct + " score " + pronScore + " audio type " +
