@@ -42,17 +42,15 @@ public class EventDAO extends DAO {
   private static final String EVENTS = "Events";
   private static final String DEVICE = "device";
   private final UserDAO userDAO;
-  private final LogAndNotify logAndNotify;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
    * @param database
    * @param userDAO
    */
-  public EventDAO(Database database, UserDAO userDAO, LogAndNotify logAndNotify) {
+  public EventDAO(Database database, UserDAO userDAO) {
     super(database);
     this.userDAO = userDAO;
-    this.logAndNotify = logAndNotify;
     try {
       createTable(database);
       createIndex(database, WIDGETTYPE, EVENT);
