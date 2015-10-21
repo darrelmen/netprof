@@ -51,8 +51,8 @@ public class ResultDAO extends DAO {
   public static final String CORRECT = "correct";
   public static final String PRON_SCORE = "pronscore";
   static final String STIMULUS = "stimulus";
-  static final String DEVICE_TYPE = "deviceType";  // iPad, iPhone, browser, etc.
-  static final String DEVICE = "device"; // device id, or browser type
+  public static final String DEVICE_TYPE = "deviceType";  // iPad, iPhone, browser, etc.
+  public static final String DEVICE = "device"; // device id, or browser type
 //  private static final String YES = "Yes";
 //  private static final String NO = "No";
   public static final String PROCESS_DUR = "processDur";
@@ -674,9 +674,6 @@ public class ResultDAO extends DAO {
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       String answer = rs.getString(ANSWER);
       boolean valid = rs.getBoolean(VALID);
-      // boolean flq = rs.getBoolean(FLQ);
-      //  boolean spoken = rs.getBoolean(SPOKEN);
-
       String type = rs.getString(AUDIO_TYPE);
       int dur = rs.getInt(DURATION);
 
