@@ -61,10 +61,8 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    */
   public ASRWebserviceScoring(String deployPath, ServerProperties properties, LogAndNotify langTestDatabase) {
     super(deployPath, properties, langTestDatabase);
-
 //    logger.debug("Creating ASRWebserviceScoring object");
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
-
     ip = properties.getWebserviceIP();
     port = properties.getWebservicePort();
   }
@@ -212,6 +210,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 
   /**
    * TODO : don't copy this method in both ASRScoring and ASRWebserviceScoring
+   *
    * @param imageOutDir
    * @param imageWidth
    * @param imageHeight
@@ -361,10 +360,10 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
   }
 
   /**
-   * @see #runHydra(String, String, Collection, String, boolean, int)
    * @param hydraInput
    * @param httpClient
    * @return
+   * @see #runHydra(String, String, Collection, String, boolean, int)
    */
   private String runHydra(String hydraInput, HTTPClient httpClient) {
     try {
@@ -383,7 +382,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     }
   }
 
-
   ////////////////////////////////
   ////////////////////////////////
 
@@ -397,14 +395,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     List<String> backgroundVocab = svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT);
     return getUniqueTokensInLM(lmSentences, backgroundVocab);
   }
-
-/*
-  @Override
-  public Collection<String> getValidPhrases(Collection<String> phrases) {
-    logger.warn("huh? valid phrases " + phrases + " is null?");
-    return null;
-  }
-*/
 
   /**
    * Get the unique set of tokens to use to filter against our full dictionary.
@@ -501,30 +491,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     return b.toString().trim();
   }
 
-  /**
-   * Make sure that when we scale the phone scores by {@link #SCORE_SCALAR} we do it for both the scores and the image.
-   * <br></br>
-   * get the phones for display in the phone accuracy pane
-   *
-   * @param scores from hydec
-   * @return map of phone name to score
-   */
-/*	private Map<String, Float> getPhoneToScore(Scores scores) {
-		Map<String, Float> phones = scores.eventScores.get("phones");
-		if (phones == null) {
-			return Collections.emptyMap();
-		}
-		else {
-			Map<String, Float> phoneToScore = new HashMap<String, Float>();
-			for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
-				String key = phoneScorePair.getKey();
-				if (!key.equals("sil")) {
-					phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue()));
-				}
-			}
-			return phoneToScore;
-		}
-	}*/
   private Map<String, Float> getPhoneToScore(Scores scores) {
     Map<String, Float> phones = scores.eventScores.get("phones");
     return getTokenToScore(scores, phones, true);
@@ -552,4 +518,4 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
       return phoneToScore;
     }
   }
-  }
+}
