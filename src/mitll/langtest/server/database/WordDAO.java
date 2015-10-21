@@ -23,17 +23,14 @@ public class WordDAO extends DAO {
   public static final String RID = "rid";
   public static final String SEQ = "seq";
   public static final String SCORE = "score";
-//  private final UserDAO userDAO;
-  private LogAndNotify logAndNotify;
 
   /**
    * @param database
    * @paramx
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
    */
-  public WordDAO(Database database, LogAndNotify logAndNotify) {
+  public WordDAO(Database database) {
     super(database);
-    this.logAndNotify = logAndNotify;
     try {
       createTable(database);
       createIndex(database, RID, WORD);
