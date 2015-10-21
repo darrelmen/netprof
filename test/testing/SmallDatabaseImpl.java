@@ -1,6 +1,7 @@
 package testing;
 
 import mitll.langtest.server.LogAndNotify;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.UserDAO;
@@ -55,6 +56,11 @@ public class SmallDatabaseImpl implements Database {
   @Override
   public void logEvent(String exid, String context, long userid, String device) {
 
+  }
+
+  @Override
+  public ServerProperties getServerProps() {
+    return null;
   }
 
   @Override
