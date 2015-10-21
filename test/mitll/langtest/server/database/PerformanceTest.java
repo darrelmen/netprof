@@ -50,7 +50,7 @@ public class PerformanceTest {
   public void testBest() {
     try {
       BufferedWriter writer = getWriter("bestScore");
-      List<BestScore> resultForUser = database.getResultDAO().getResultForUser(71);
+      List<BestScore> resultForUser = database.getAnalysis().getResultForUser(71);
       Collections.sort(resultForUser, new Comparator<BestScore>() {
         @Override
         public int compare(BestScore o1, BestScore o2) {
@@ -63,24 +63,24 @@ public class PerformanceTest {
       }
       writer.close();
 
-      UserPerformance performance = database.getResultDAO().getResultForUserByBin(71, ResultDAO.FIVE_MINUTES);
+      UserPerformance performance = database.getAnalysis().getResultForUserByBin(71, ResultDAO.FIVE_MINUTES);
       writer = getWriter("UserPerformance_5_Min");
       writer.write(performance.toCSV());
       writer.close();
 
 
-      performance = database.getResultDAO().getResultForUserByBin(71, ResultDAO.HOUR);
+      performance = database.getAnalysis().getResultForUserByBin(71, ResultDAO.HOUR);
       writer = getWriter("UserPerformance_Hour");
       writer.write(performance.toCSV());
       writer.close();
 
-      performance = database.getResultDAO().getResultForUserByBin(71, ResultDAO.DAY);
+      performance = database.getAnalysis().getResultForUserByBin(71, ResultDAO.DAY);
       writer = getWriter("UserPerformance_Day");
       writer.write(performance.toCSV());
       writer.close();
 
 
-      performance = database.getResultDAO().getPerformanceForUser(71);
+      performance = database.getAnalysis().getPerformanceForUser(71);
       writer = getWriter("RawUserPerformance");
       writer.write(performance.toRawCSV());
       writer.close();
