@@ -25,6 +25,7 @@ import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.analysis.UserPerformance;
+import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
@@ -110,7 +111,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public void logAndNotifyServerException(Exception e, String additionalMessage) {
     String message1 = e == null ? "null_ex" : e.getMessage() == null ? "null_msg" : e.getMessage();
     if (!message1.contains("Broken Pipe")) {
-      //String message = "Server Exception : " + ExceptionUtils.getStackTrace(e);
       String prefix = additionalMessage.isEmpty() ? "" : additionalMessage + "\n";
       String prefixedMessage = prefix + "for " + pathHelper.getInstallPath() +
           (e != null ? " got " + "Server Exception : " + ExceptionUtils.getStackTrace(e) : "");
@@ -2047,6 +2047,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public UserPerformance getPerformanceForUser(long id) { return db.getResultDAO().getPerformanceForUser(id); }
+
+  @Override
+  public List<WordScore> getWordScores(long id) { return db.getAnalysis().getWordScoresForUser(id); }
 
   public void logMessage(String message) {
     String prefixedMessage = "for " + pathHelper.getInstallPath() + " from client " + message;
