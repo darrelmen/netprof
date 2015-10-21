@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.LogAndNotify;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -21,10 +22,11 @@ import java.util.Set;
  */
 public class DAO {
   private static final Logger logger = Logger.getLogger(DAO.class);
+  protected final LogAndNotify logAndNotify;
 
   protected final Database database;
 
-  protected DAO(Database database) { this.database = database;  }
+  protected DAO(Database database) { this.database = database; this.logAndNotify = database.getLogAndNotify(); }
 
   protected int getNumColumns(Connection connection, String table) throws SQLException {
     Statement stmt = connection.createStatement();
@@ -237,6 +239,11 @@ public class DAO {
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  protected void logException(Exception ee) {
+    logger.error("got " + ee, ee);
+    logAndNotify.logAndNotifyServerException(ee);
   }
 
 
