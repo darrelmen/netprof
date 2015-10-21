@@ -6,15 +6,24 @@ import java.util.Date;
  * Created by go22670 on 10/19/15.
  */
 public class BestScore implements Comparable<BestScore> {
-  private String id;
-  private long timestamp;
-  private float pronScore;
+  private final String id;
+  private final long timestamp;
+  private final float pronScore;
   private int count;
+  private final int resultID;
 
-  public BestScore(String id, float pronScore, long timestamp) {
+
+  /**
+   * @see mitll.langtest.server.database.ResultDAO#getBestForQuery
+   * @param id
+   * @param pronScore
+   * @param timestamp
+   */
+  public BestScore(String id, float pronScore, long timestamp, int resultID) {
     this.id = id;
     this.pronScore = (pronScore < 0) ? 0 : pronScore;
     this.timestamp = timestamp;
+    this.resultID = resultID;
   }
 
   @Override
@@ -25,7 +34,8 @@ public class BestScore implements Comparable<BestScore> {
   }
 
   public String toString() {
-    return getId() + " : " + new Date(getTimestamp()) + " # " + count + " : " + pronScore;
+    return getId() + "/" +getResultID() +
+        " : " + new Date(getTimestamp()) + " # " + count + " : " + pronScore;
   }
 
   public float getScore() {
@@ -53,6 +63,10 @@ public class BestScore implements Comparable<BestScore> {
 
   public String getId() {
     return id;
+  }
+
+  public int getResultID() {
+    return resultID;
   }
 }
 
