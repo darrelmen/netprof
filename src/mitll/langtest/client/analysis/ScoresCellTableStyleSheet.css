@@ -1,0 +1,6 @@
+.cellTableCell {
+    padding: 2px 5px;
+    overflow: hidden;
+    text-align: left;
+    font-family: sans-serif;
+}
