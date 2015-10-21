@@ -172,8 +172,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     if (precalcScores.isValid()) {
       scores = precalcScores.getScores();
       jsonObject = precalcScores.getJsonObject();
-    }
-    else {
+    } else {
       if (precalcResult != null) {
         logger.debug("unusable precalc result, so recalculating : " + precalcResult);
       }
@@ -186,34 +185,6 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile,
         scores, jsonObject, usePhoneToDisplay);
   }
-
-  /**
-   * @param floatTranscriptEventMap
-   * @param value2
-   * @see #getEventAverages(Map, Map)
-   */
-/*  private void getEventAverages(Map<Float, TranscriptEvent> floatTranscriptEventMap, Map<String, Float> value2) {
-    Map<String, Float> value = new HashMap<>();
-    Map<String, Float> cvalue = new HashMap<>();
-
-    for (TranscriptEvent ev : floatTranscriptEventMap.values()) {
-      String event = ev.event;
-      if (event.equals("sil") || event.equals("<s>") || event.equals("</s>")) {
-      } else {
-        Float orDefault = cvalue.getOrDefault(event, 0.0f);
-        orDefault += 1.0f;
-        cvalue.put(event, orDefault);
-
-        Float orDefault1 = value.getOrDefault(event, 0.0f);
-        value.put(event, orDefault1 + ev.score);
-      }
-    }
-
-    for (Map.Entry<String, Float> pair : value.entrySet()) {
-      String key = pair.getKey();
-      value2.put(key, pair.getValue() / cvalue.get(key));
-    }
-  }*/
 
   /**
    * Make image files for words, and phones, find out the reco sentence from the events.
@@ -244,7 +215,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") + (reallyUsePhone ? "_phoneToDisp" : "");
 
     //logger.debug("getPretestScore prefix " + prefix1);
-if (jsonObject != null) logger.debug("generating images from " + jsonObject);
+    if (jsonObject != null) logger.debug("generating images from " + jsonObject);
 
     EventAndFileInfo eventAndFileInfo = jsonObject == null ?
         writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
@@ -382,8 +353,14 @@ if (jsonObject != null) logger.debug("generating images from " + jsonObject);
    * @see #scoreRepeatExercise
    */
   private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(EventAndFileInfo eventAndFileInfo) {
+    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = eventAndFileInfo.typeToEvent;
+
+    return new ParseResultJson(props).getNetPronImageTypeToEndTimes(typeToEvent);
+  }
+
+/*  private Map<NetPronImageType, List<TranscriptSegment>> getNetPronImageTypeToEndTimes(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
-    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
+    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
       List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
       if (endTimes == null) {
@@ -396,7 +373,7 @@ if (jsonObject != null) logger.debug("generating images from " + jsonObject);
     }
 
     return typeToEndTimes;
-  }
+  }*/
 
   /**
    * Take the events (originally from a .lab file generated in pronz) for WORDS and string them together into a
@@ -556,101 +533,4 @@ if (jsonObject != null) logger.debug("generating images from " + jsonObject);
     Map<String, Map<String, Float>> eventScores = Collections.emptyMap();
     return new Scores(0f, eventScores, 0);
   }
-
-  /**
-   * @param phrases
-   * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#getValidPhrases(java.util.Collection)
-   */
-/*  public Collection<String> getValidPhrases(Collection<String> phrases) {
-    return getValidSentences(phrases);
-  }*/
-
-  /**
-   * @param phrase
-   * @return
-   * @see #isValid(String)
-   */
-//  private boolean isPhraseInDict(String phrase) { return checkLTS(phrase).isEmpty();  }
-
-  /**
-   * @param sentences
-   * @return lc of sentence...?
-   * @see #getValidPhrases(java.util.Collection)
-   */
-/*  private Collection<String> getValidSentences(Collection<String> sentences) {
-   // logger.info("getValidSentences checking " + sentences.size() + " sentences");
-    Set<String> filtered = new TreeSet<String>();
-    Set<String> skipped  = new TreeSet<String>();
-
-    for (String sentence : sentences) {
-      boolean valid = allValid(sentence);
-      if (!valid) {
-        sentence = getSmallVocabDecoder().toFull(sentence);
-        valid = allValid(sentence);
-      }
-      if (valid) {
-        filtered.add(sentence.toLowerCase());
-      }
-      else {
-        skipped.add(sentence);
-        logger.warn("getValidSentences : skipping '" + sentence + "' which is not in dictionary.");
-      }
-    }
-
-    if (!skipped.isEmpty()) {
-      logger.warn("getValidSentences : skipped " + skipped.size() + " of " + sentences.size() +
-          " sentences, skipped : " + skipped);
-    }
-    else {
-    //  logger.debug("getValidSentences : found " + filtered.size() + " from sentences : " + sentences.size());
-    }
-
-    return filtered;
-  }*/
-
-/*  private boolean allValid(String sentence) {
-    Collection<String> tokens = getSmallVocabDecoder().getTokens(sentence);
-    if (tokens.isEmpty() && !sentence.isEmpty()) logger.error("huh? no tokens from " + sentence);
-
-    return allTokensValid(tokens);
-  }*/
-
-/*  private boolean allTokensValid(Collection<String> tokens) {
-    boolean valid = true;
-    for (String token : tokens) {
-      if (!isValid(token)) {
-        logger.warn("\tgetValidSentences : token '" + token + "' is not in dictionary.");
-        valid = false;
-      }
-      else {
-//        logger.info("token '" + token +  "' is in dict");
-      }
-    }
-    return valid;
-  }*/
-
-  /**
-   * @param token
-   * @return
-   * @see #getValidSentences(java.util.Collection)
-   */
-/*  private boolean isValid(String token) {
-    return *//*checkToken(token) &&*//* isPhraseInDict(token);
-  }*/
-
-/*  private boolean checkToken(String token) {
-    boolean valid = true;
-    if (token.equalsIgnoreCase(SLFFile.UNKNOWN_MODEL)) return true;
-    for (int i = 0; i < token.length() && valid; i++) {
-      char c = token.charAt(i);
-      if (Character.isDigit(c)) {
-        valid = false;
-      }
-      if (Character.UnicodeBlock.of(c) == Character.UnicodeBlock.BASIC_LATIN) {
-        valid = false;
-      }
-    }
-    return valid;
-  }*/
 }
