@@ -11,7 +11,8 @@ public class BestScore implements Comparable<BestScore> {
   private final float pronScore;
   private int count;
   private final int resultID;
-
+  private String json;
+  private boolean isiPad;
 
   /**
    * @see mitll.langtest.server.database.ResultDAO#getBestForQuery
@@ -19,11 +20,13 @@ public class BestScore implements Comparable<BestScore> {
    * @param pronScore
    * @param timestamp
    */
-  public BestScore(String id, float pronScore, long timestamp, int resultID) {
+  public BestScore(String id, float pronScore, long timestamp, int resultID, String json, boolean isiPad) {
     this.id = id;
     this.pronScore = (pronScore < 0) ? 0 : pronScore;
     this.timestamp = timestamp;
     this.resultID = resultID;
+    this.json = json;
+    this.isiPad =isiPad;
   }
 
   @Override
@@ -67,6 +70,14 @@ public class BestScore implements Comparable<BestScore> {
 
   public int getResultID() {
     return resultID;
+  }
+
+  public String getJson() {
+    return json;
+  }
+
+  public boolean isiPad() {
+    return isiPad;
   }
 }
 
