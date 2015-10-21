@@ -44,7 +44,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
   private ASRWebserviceScoring webserviceScoring;
   private AutoCRT autoCRT;
   private final DatabaseImpl db;
-  private final LogAndNotify langTestDatabase;
+  private final LogAndNotify logAndNotify;
   private boolean checkedLTS = false;
   private Map<String, Integer> phoneToCount;
   private boolean useOldSchoolServiceOnly = false;
@@ -61,15 +61,11 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
     this.pathHelper = pathHelper;
     this.serverProps = serverProperties;
     this.db = db;
-    this.langTestDatabase = langTestDatabase;
+    this.logAndNotify = langTestDatabase;
     this.useOldSchoolServiceOnly = serverProperties.getOldSchoolService();
     this.mp3Support = new MP3Support(pathHelper);
     makeAutoCRT();
   }
-
-/*  public <T extends CommonExercise> void sort(List<T> toSort) {
-    asrScoring.sort(toSort);
-  }*/
 
   /**
    * @return
@@ -256,6 +252,11 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
     if (recordInResults) {
       long then = System.currentTimeMillis();
       JSONObject json = new ScoreToJSON().getJsonFromAnswer(answer);
+      if (answer.isValid() && answer.getPretestScore() == null) {
+        String message = "no pretest score on " + answer + "?";
+        logger.warn(message);
+        logAndNotify.logAndNotifyServerException(new Exception("Empty pretest score for answer"),message);
+      }
       // logger.debug("json is " + json);
       long now = System.currentTimeMillis();
       if (now - then > 10) {
@@ -359,7 +360,6 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
 
                                          boolean isMale, String speed) {
     AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(AudioAnswer.Validity.OK, duration);
-
     // logger.debug("validity dur " + validity.durationInMillis);
 
     db.addRefAnswer(user, exercise1.getID(), file.getPath(),
@@ -374,7 +374,6 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
         decodeOutputOld,
 
         isMale, speed);
-
     // TODO : add word and phone table for refs
     //	recordWordAndPhoneInfo(decodeAnswer, answerID);
     //   logger.debug("getRefAudioAnswerDecoding decodeAnswer " + decodeAnswer);
@@ -382,89 +381,6 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
 
   private AudioAnswer getRefDecodeAnswer(CommonExercise exercise1, String wavPath, File file, long duration, boolean useOldSchool) {
     return getAudioAnswer(exercise1, 1, true, wavPath, file, new AudioCheck.ValidityAndDur(AudioAnswer.Validity.OK, duration), true, false, false, useOldSchool);
-  }
-
-  public class DecodeAlignOutput {
-    private float score;
-    private String json;
-    private int numPhones;
-    private long processDurInMillis;
-    private boolean isCorrect;
-    private boolean isDecode;
-
-    /**
-     * @param alignmentScore
-     */
-    public DecodeAlignOutput(PretestScore alignmentScore, boolean isDecode) {
-      this(alignmentScore.getHydecScore(), new ScoreToJSON().getJsonObject(alignmentScore).toString(),
-          //numPhones(alignmentScore),
-          alignmentScore.getProcessDur(), false, isDecode, alignmentScore);
-    }
-
-    public DecodeAlignOutput(AudioAnswer decodeAnswer, boolean isDecode) {
-      this((float) decodeAnswer.getScore(),
-          new ScoreToJSON().getJsonFromAnswer(decodeAnswer).toString(),
-          //     numPhones(decodeAnswer.getPretestScore()),
-          decodeAnswer.getPretestScore().getProcessDur(), decodeAnswer.isCorrect(), isDecode, decodeAnswer.getPretestScore());
-    }
-
-    public DecodeAlignOutput(float score, String json,
-                             //int numPhones,
-                             long processDurInMillis, boolean isCorrect, boolean isDecode, PretestScore pretestScore) {
-      this.score = score;
-      this.json = json;
-      this.numPhones = numPhones(pretestScore);
-      this.processDurInMillis = processDurInMillis;
-      this.isCorrect = isCorrect;
-      this.isDecode = isDecode;
-    }
-
-    private int numPhones(PretestScore pretestScore) {
-      int c = 0;
-      if (pretestScore != null) {
-        Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getsTypeToEndTimes();
-        List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
-
-        if (phones != null) {
-          for (TranscriptSegment pseg : phones) {
-            String pevent = pseg.getEvent();
-            if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals("sil")) {
-              c++;
-            }
-          }
-        }
-      }
-      return c;
-    }
-
-    public float getScore() {
-      return score;
-    }
-
-    public String getJson() {
-      return json;
-    }
-
-    public int getNumPhones() {
-      return numPhones;
-    }
-
-    @Override
-    public String toString() {
-      return "Took " + processDurInMillis + " to score " + score + " # phones " + numPhones;
-    }
-
-    public int getProcessDurInMillis() {
-      return (int) processDurInMillis;
-    }
-
-    public boolean isCorrect() {
-      return isCorrect;
-    }
-
- /*   public boolean isDecode() {
-      return isDecode;
-    }*/
   }
 
   private void checkValidity(String exerciseID, int questionID, int user, File file, AudioCheck.ValidityAndDur validity,
@@ -863,8 +779,8 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
   // TODO: gross
   private void makeASRScoring() {
     if (webserviceScoring == null) {
-      webserviceScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps, langTestDatabase);
-      oldschoolScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps, langTestDatabase);
+      webserviceScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps, logAndNotify);
+      oldschoolScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps, logAndNotify);
     }
     asrScoring = oldschoolScoring;
   }
