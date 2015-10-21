@@ -253,7 +253,7 @@ public class NPFHelper implements RequiresResize {
     if (npfExerciseList != null) {
       npfExerciseList.onResize();
     } else {
-      logger.info("no exercise list " +instanceName + "  for " + getClass());
+      //logger.info("no exercise list " +instanceName + "  for " + getClass());
     }
   }
 
