@@ -83,9 +83,9 @@ public class AVPHistoryForList implements IsSerializable {
       totalCorrect += value;
     }
 
-    if (yValuesForUser.isEmpty()) {
-      System.err.println("huh? yValuesForUser (" + userID + ") is empty???");
-    }
+//    if (yValuesForUser.isEmpty()) {
+   //   System.err.println("huh? yValuesForUser (" + userID + ") is empty???");
+  //  }
   }
 
   private float getValue(SetScore score) {
