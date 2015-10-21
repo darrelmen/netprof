@@ -3,25 +3,56 @@ package mitll.langtest.server.scoring;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.NetPronImageType;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Created by go22670 on 9/28/15.
  */
-class ParseResultJson {
+public class ParseResultJson {
   private static final Logger logger = Logger.getLogger(ParseResultJson.class);
   private final ServerProperties props;
 
   public ParseResultJson(ServerProperties properties) {
     this.props = properties;
   }
+
+  public Map<ImageType, Map<Float, TranscriptEvent>> parseJsonString(String json, String words1, String w1, boolean usePhones) {
+    Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseJson(JSONObject.fromObject(json), words1, w1, usePhones);
+    return imageTypeMapMap;
+  }
+
+  public Map<NetPronImageType, List<TranscriptSegment>> getNetPronImageTypeToEndTimes(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
+    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
+    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
+      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
+      List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
+      if (endTimes == null) {
+        typeToEndTimes.put(key, endTimes = new ArrayList<TranscriptSegment>());
+      }
+      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
+        TranscriptEvent value = event.getValue();
+        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));
+      }
+    }
+
+    return typeToEndTimes;
+  }
+
+  public Map<ImageType, Map<Float, TranscriptEvent>> parseJsonString(String json, boolean usePhones) {
+    return parseJson(JSONObject.fromObject(json), "words", "w", usePhones);
+  }
+
+  public  Map<NetPronImageType, List<TranscriptSegment>> parseJson(String json) {
+    return getNetPronImageTypeToEndTimes(parseJsonString(json,true));
+  }
+
+
   /**
    * TODOx : actually use the parsed json to get transcript info
    *
