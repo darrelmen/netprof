@@ -1146,10 +1146,9 @@ public class ScoreServlet extends DatabaseServlet {
       db = getDatabase();
       serverProps = db.getServerProps();
       audioFileHelper = getAudioFileHelperRef();
-      loadTesting = getLoadTesting();
+      //loadTesting = getLoadTesting();
       REMOVE_EXERCISES_WITH_MISSING_AUDIO = serverProps.removeExercisesWithMissingAudio();
     }
-   // return audioFileHelper;
   }
 
   /**
@@ -1184,7 +1183,7 @@ public class ScoreServlet extends DatabaseServlet {
     return fileHelper;
   }
 
-  private LoadTesting getLoadTesting() {
+/*  private LoadTesting getLoadTesting() {
     LoadTesting ref = null;
     Object databaseReference = getServletContext().getAttribute(LOAD_TESTING);
     if (databaseReference != null) {
@@ -1194,7 +1193,7 @@ public class ScoreServlet extends DatabaseServlet {
       logger.error("huh? for " + db.getServerProps().getLanguage() + " no existing load test reference?");
     }
     return ref;
-  }
+  }*/
 
   /**
    * TODO : this is wacky -- have to do this for alignment but not for decoding
