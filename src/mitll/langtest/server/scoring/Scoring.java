@@ -40,7 +40,6 @@ public abstract class Scoring {
 
   final String scoringDir;
   final String deployPath;
-  // private final Map<String, String> phoneToDisplay = new HashMap<>();
   final ServerProperties props;
   final LogAndNotify langTestDatabase;
 
@@ -266,6 +265,7 @@ public abstract class Scoring {
    * @param useWebservice
    * @param object             TODO Actually use it
    * @return
+   * @see ASRScoring#getPretestScore(String, int, int, boolean, boolean, String, String, File, Scores, JSONObject, boolean)
    */
   EventAndFileInfo writeTranscriptsCached(String imageOutDir, int imageWidth, int imageHeight,
                                           String audioFileNoSuffix, boolean useScoreToColorBkg,
@@ -286,7 +286,7 @@ public abstract class Scoring {
       }
       return getEventInfo(typeToFile, useWebservice, usePhoneToDisplay); // if align, don't use webservice regardless
     } else {
-      Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = new ParseResultJson(props).parseJson(object, "words", "w", usePhoneToDisplay);
+      Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = getTypeToTranscriptEvents(object, usePhoneToDisplay);
 
       String pathname = audioFileNoSuffix + ".wav";
       pathname = prependDeploy(pathname);
@@ -300,6 +300,10 @@ public abstract class Scoring {
       return new TranscriptWriter().getEventAndFileInfo(pathname,
           imageOutDir, imageWidth, imageHeight, expectedTypes, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, imageTypeMapMap);
     }
+  }
+
+  private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JSONObject object, boolean usePhoneToDisplay) {
+    return new ParseResultJson(props).parseJson(object, "words", "w", usePhoneToDisplay);
   }
 
   // JESS reupdate here
