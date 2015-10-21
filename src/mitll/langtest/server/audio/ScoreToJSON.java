@@ -1,12 +1,15 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -15,16 +18,19 @@ import java.util.Map;
  * Created by go22670 on 9/3/15.
  */
 public class ScoreToJSON {
+  private static final Logger logger = Logger.getLogger(ScoreToJSON.class);
 
   /**
    * We skip sils, since we wouldn't want to show them to the user.
    *
    * @param answer
    * @return
-   * @see #getAudioAnswerDecoding
+   * @see AudioFileHelper#getAudioAnswerAlignment(String, CommonExercise, int, int, int, String, boolean, boolean, boolean, String, File, AudioCheck.ValidityAndDur, boolean, float, String, String, boolean)
+   * @see AudioFileHelper#getAudioAnswerDecoding
    */
   public JSONObject getJsonFromAnswer(AudioAnswer answer) {
     PretestScore pretestScore = answer.getPretestScore();
+
     return getJsonObject(pretestScore);
   }
 
@@ -32,7 +38,7 @@ public class ScoreToJSON {
     JSONObject jsonObject = new JSONObject();
     if (pretestScore != null) {
       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getsTypeToEndTimes();
-      List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
+      List<TranscriptSegment> words  = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
       List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
       if (words != null) {
         int windex = 0;
@@ -73,6 +79,13 @@ public class ScoreToJSON {
 
         jsonObject.put("words", jsonWords);
       }
+      else {
+        logger.warn("no word transcript for " + pretestScore);
+      }
+    }
+    else {
+      logger.warn("pretest score is null?");
+
     }
     return jsonObject;
   }
