@@ -4,6 +4,7 @@ import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
@@ -139,7 +140,7 @@ public class DatabaseImpl implements Database {
    * Create or alter tables as needed.
    */
   private void initializeDAOs(PathHelper pathHelper) {
-    userDAO = new UserDAO(this, serverProps);
+    userDAO = new UserDAO(this, getServerProps());
     UserListDAO userListDAO = new UserListDAO(this, userDAO);
     addRemoveDAO = new AddRemoveDAO(this);
 
@@ -307,7 +308,7 @@ public class DatabaseImpl implements Database {
     if (exerciseDAO == null) {
       logger.debug(lessonPlanFile);
       synchronized (this) {
-        this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, serverProps, userListManager, installPath, addDefects);
+        this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, getServerProps(), userListManager, installPath, addDefects);
       }
       userExerciseDAO.setExerciseDAO(exerciseDAO);
       exerciseDAO.setUserExerciseDAO(userExerciseDAO);
@@ -337,13 +338,13 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.client.custom.dialog.EditableExercise#postEditItem
    */
   public void editItem(UserExercise userExercise) {
-    logger.debug("editItem ex #" + userExercise.getID() + " mediaDir : " + serverProps.getMediaDir() + " initially audio was\n\t " + userExercise.getAudioAttributes());
+    logger.debug("editItem ex #" + userExercise.getID() + " mediaDir : " + getServerProps().getMediaDir() + " initially audio was\n\t " + userExercise.getAudioAttributes());
 
     userExercise.setTooltip();
 
     logger.debug("tooltip now " + userExercise.getTooltip());
 
-    getUserListManager().editItem(userExercise, true, serverProps.getMediaDir());
+    getUserListManager().editItem(userExercise, true, getServerProps().getMediaDir());
 
     Set<AudioAttribute> original = new HashSet<AudioAttribute>(userExercise.getAudioAttributes());
     Set<AudioAttribute> defects = getAndMarkDefects(userExercise, userExercise.getFieldToAnnotation());
@@ -573,11 +574,11 @@ public class DatabaseImpl implements Database {
    */
   public void preloadExercises() {  getExercises(lessonPlanFile); }
 
-  public void preloadContextPractice() {makeContextPractice(serverProps.getDialogFile(), installPath);}
+  public void preloadContextPractice() {makeContextPractice(getServerProps().getDialogFile(), installPath);}
 
   public ContextPractice getContextPractice() {
     if(this.contextPractice == null){
-      makeContextPractice(serverProps.getDialogFile(), installPath);
+      makeContextPractice(getServerProps().getDialogFile(), installPath);
     }
     return this.contextPractice;
   }
@@ -802,8 +803,11 @@ public class DatabaseImpl implements Database {
                              String audioType, long durationInMillis, boolean correct, float score,
                              boolean recordedWithFlash, String deviceType, String device, String scoreJson, int processDur) {
     //logger.debug("addAudioAnser json = " + scoreJson);
+    if (valid && scoreJson.isEmpty()) {
+      logger.warn("huh? no score json for valid audio " + audioFile + " on " +exerciseID);
+    }
     return answerDAO.addAnswer(this, userID, exerciseID, questionID, "", audioFile, valid,
-        audioType,// + (recordedWithFlash ? "" : "_by_WebRTC"),
+        audioType,
         durationInMillis, correct, score, deviceType, device, scoreJson, recordedWithFlash, processDur, 0);
   }
 
@@ -821,11 +825,11 @@ public class DatabaseImpl implements Database {
   public long addRefAnswer(int userID, String exerciseID,
                            String audioFile,
                            long durationInMillis, boolean correct,
-                           AudioFileHelper.DecodeAlignOutput alignOutput,
-                           AudioFileHelper.DecodeAlignOutput decodeOutput,
+                           DecodeAlignOutput alignOutput,
+                           DecodeAlignOutput decodeOutput,
 
-                           AudioFileHelper.DecodeAlignOutput alignOutputOld,
-                           AudioFileHelper.DecodeAlignOutput decodeOutputOld,
+                           DecodeAlignOutput alignOutputOld,
+                           DecodeAlignOutput decodeOutputOld,
 
                            boolean isMale, String speed) {
     return refresultDAO.addAnswer(this, userID, exerciseID, audioFile, durationInMillis, correct,
@@ -1004,6 +1008,7 @@ public class DatabaseImpl implements Database {
     return where != null ? where : null;
   }
 
+  @Override
   public ServerProperties getServerProps() {
     return serverProps;
   }
@@ -1023,7 +1028,7 @@ public class DatabaseImpl implements Database {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
         getExercises() :
         getSectionHelper().getExercisesForSelectionState(typeToSection);
-    new AudioExport(serverProps).writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getLanguage(),
+    new AudioExport(getServerProps()).writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getLanguage(),
         getAudioDAO(), installPath, configDir, false);
   }
 
@@ -1036,12 +1041,12 @@ public class DatabaseImpl implements Database {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
         getExercises() :
         getSectionHelper().getExercisesForSelectionState(typeToSection);
-    new AudioExport(serverProps).writeContextZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getLanguage(),
+    new AudioExport(getServerProps()).writeContextZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getLanguage(),
         getAudioDAO(), installPath, configDir);
   }
 
   public void writeZip(OutputStream out) throws Exception {
-    new AudioExport(serverProps).writeZipJustOneAudio(out, getSectionHelper(), getExercises(), installPath);
+    new AudioExport(getServerProps()).writeZipJustOneAudio(out, getSectionHelper(), getExercises(), installPath);
   }
 
   /**
@@ -1074,7 +1079,7 @@ public class DatabaseImpl implements Database {
       }
       long now = System.currentTimeMillis();
       logger.debug("\nTook " +(now-then) + " millis to annotate and attach.");
-      new AudioExport(serverProps).writeZip(out, userListByID.getName(), getSectionHelper(), exercises, language1,
+      new AudioExport(getServerProps()).writeZip(out, userListByID.getName(), getSectionHelper(), exercises, language1,
           getAudioDAO(), installPath, configDir, listid == UserListManager.REVIEW_MAGIC_ID);
     }
     return language1 + "_" + userListByID.getName();
@@ -1100,7 +1105,7 @@ public class DatabaseImpl implements Database {
   }
 
   public String getPrefix(Map<String, Collection<String>> typeToSection) {
-    return new AudioExport(serverProps).getPrefix(getSectionHelper(), typeToSection);
+    return new AudioExport(getServerProps()).getPrefix(getSectionHelper(), typeToSection);
   }
 
   /**
