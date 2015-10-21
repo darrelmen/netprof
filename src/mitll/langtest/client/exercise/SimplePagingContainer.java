@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 9/16/14.
  */
 public class SimplePagingContainer<T> implements RequiresResize {
-  private final Logger logger = Logger.getLogger("SimplePagingContainer");
+ // private final Logger logger = Logger.getLogger("SimplePagingContainer");
 
   public static final int MAX_WIDTH = 320;
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
