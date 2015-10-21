@@ -1,7 +1,8 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.LogAndNotify;
+
 import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,11 +13,15 @@ import java.sql.SQLException;
  */
 public interface Database {
   Connection getConnection(String who);
+
   void closeConnection(Connection connection);
+
   void logEvent(String exid, String context, long userid, String device);
 
   String TIME = "time";
   String EXID = "exid";
 
-    String getLanguage();
+  String getLanguage();
+
+  LogAndNotify getLogAndNotify();
 }
