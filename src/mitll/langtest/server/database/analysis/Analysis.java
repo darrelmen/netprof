@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -158,6 +159,7 @@ public class Analysis extends DAO {
       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(bs.getJson());
       results.add(new WordScore(bs, netPronImageTypeListMap));
     }
+    Collections.sort(results);
     return results;
   }
 }
