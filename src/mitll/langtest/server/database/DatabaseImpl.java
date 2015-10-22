@@ -3,7 +3,6 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.connection.DatabaseConnection;
@@ -183,7 +182,7 @@ public class DatabaseImpl implements Database {
     return resultDAO;
   }
 
-  public Analysis getAnalysis() { return new Analysis(this);
+  public Analysis getAnalysis() { return new Analysis(this, phoneDAO);
   }
 
   public RefResultDAO getRefResultDAO() {  return refresultDAO;  }
