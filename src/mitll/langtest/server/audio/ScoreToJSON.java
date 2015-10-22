@@ -30,7 +30,6 @@ public class ScoreToJSON {
    */
   public JSONObject getJsonFromAnswer(AudioAnswer answer) {
     PretestScore pretestScore = answer.getPretestScore();
-
     return getJsonObject(pretestScore);
   }
 
@@ -84,8 +83,7 @@ public class ScoreToJSON {
       }
     }
     else {
-      logger.warn("pretest score is null?");
-
+//      logger.warn("pretest score is null?");
     }
     return jsonObject;
   }
