@@ -27,6 +27,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PagingContainer extends SimplePagingContainer<CommonShell> {
+  public static final String ENGLISH = "English";
   private final Logger logger = Logger.getLogger("PagingContainer");
 
   private static final int MAX_LENGTH_ID = 17;
@@ -47,7 +48,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
     this.verticalUnaccountedFor = verticalUnaccountedFor;
     this.isRecorder = isRecorder;
-    english = controller.getLanguage().equals("English");
+    english = controller.getLanguage().equals(ENGLISH);
   }
 
   public void redraw() {
@@ -129,12 +130,12 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     englishCol.setSortable(true);
 
     String language = controller.getLanguage();
-    addColumn(englishCol, new TextHeader("English"));
+    addColumn(englishCol, new TextHeader(ENGLISH));
 
     Column<CommonShell, SafeHtml> flColumn = getFLColumn();
     flColumn.setSortable(true);
 
-    String headerForFL = language.equals("English") ? "Meaning" : language;
+    String headerForFL = language.equals(ENGLISH) ? "Meaning" : language;
     addColumn(flColumn, new TextHeader(headerForFL));
 
     List<CommonShell> dataList = getList();
@@ -214,7 +215,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
    * @see #addColumnsToTable()
    */
   private Column<CommonShell, SafeHtml> getEnglishColumn() {
-    return new Column<CommonShell, SafeHtml>(new MySafeHtmlCell(true)) {
+    return new Column<CommonShell, SafeHtml>(new ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, CommonShell object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
@@ -294,7 +295,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
   }
 
   private Column<CommonShell, SafeHtml> getFLColumn() {
-    return new Column<CommonShell, SafeHtml>(new MySafeHtmlCell(true)) {
+    return new Column<CommonShell, SafeHtml>(new ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, CommonShell object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
@@ -428,17 +429,11 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     }
   }
 
-  private static class MySafeHtmlCell extends SafeHtmlCell {
-    private final boolean consumeClicks;
-
-    public MySafeHtmlCell(boolean consumeClicks) {
-      this.consumeClicks = consumeClicks;
-    }
-
+  public static class ClickableCell extends SafeHtmlCell {
     @Override
     public Set<String> getConsumedEvents() {
       Set<String> events = new HashSet<String>();
-      if (consumeClicks) events.add(BrowserEvents.CLICK);
+      events.add(BrowserEvents.CLICK);
       return events;
     }
   }
