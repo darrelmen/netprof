@@ -67,6 +67,8 @@ public interface ListInterface extends RequiresResize {
 
   void checkAndAskServer(String id);
 
+  boolean loadByID(String id);
+
   String getCurrentExerciseID();
 
   boolean onFirst();
