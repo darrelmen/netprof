@@ -8,8 +8,6 @@ import mitll.langtest.client.list.HistoryExerciseList;
 
 import java.util.*;
 
-//import mitll.langtest.client.list.section.SectionExerciseList;
-
 /**
  * A group of buttons that need to maintain
  * User: GO22670
