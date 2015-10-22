@@ -1,7 +1,11 @@
 package mitll.langtest.client.analysis;
 
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -13,8 +17,10 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.AnalysisPlot;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.SetCompleteDisplay;
+import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.sorter.ExerciseComparator;
@@ -38,10 +44,11 @@ class WordContainer extends SimplePagingContainer<WordScore> {
   private ExerciseComparator sorter;
   //ListInterface listInterface;
   AnalysisPlot plot;
+
   public WordContainer(ExerciseController controller, AnalysisPlot plot) {
     super(controller);
     sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
-  this.plot = plot;
+    this.plot = plot;
     //  this.listInterface = listInterface;
 //    for (CommonShell commonShell : allExercises) {
 //      idToExercise.put(commonShell.getID(), commonShell);
@@ -49,9 +56,9 @@ class WordContainer extends SimplePagingContainer<WordScore> {
   }
 
   /**
-   * @see SetCompleteDisplay#getScoreHistory(List, List, ExerciseController)
    * @param sortedHistory
    * @return
+   * @see SetCompleteDisplay#getScoreHistory(List, List, ExerciseController)
    */
   public Panel getTableWithPager(List<WordScore> sortedHistory) {
     Panel tableWithPager = getTableWithPager();
@@ -75,13 +82,13 @@ class WordContainer extends SimplePagingContainer<WordScore> {
     return o;
   }
 
-  private void addEnglishAndFL() {
+  private void addReview() {
     Column<WordScore, SafeHtml> itemCol = getItemColumn();
     itemCol.setSortable(true);
-   // table.setColumnWidth(itemCol, COL_WIDTH + "px");
+    table.setColumnWidth(itemCol, 300 + "px");
 
     String language = controller.getLanguage();
- //   addColumn(itemCol, new TextHeader("English"));
+    //   addColumn(itemCol, new TextHeader("English"));
 
     String headerForFL = language.equals("English") ? "Meaning" : language;
     addColumn(itemCol, new TextHeader(headerForFL));
@@ -106,13 +113,13 @@ class WordContainer extends SimplePagingContainer<WordScore> {
 //    table.getColumnSortList().push(itemCol);
   }
 
-  private String truncate(String columnText) {
+/*  private String truncate(String columnText) {
     if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
     return columnText;
-  }
+  }*/
 
   private ColumnSortEvent.ListHandler<WordScore> getEnglishSorter(Column<WordScore, SafeHtml> englishCol,
-                                                                                List<WordScore> dataList) {
+                                                                  List<WordScore> dataList) {
     ColumnSortEvent.ListHandler<WordScore> columnSortHandler = new ColumnSortEvent.ListHandler<WordScore>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<WordScore>() {
@@ -166,7 +173,7 @@ class WordContainer extends SimplePagingContainer<WordScore> {
   }*/
 
   private ColumnSortEvent.ListHandler<WordScore> getScoreSorter(Column<WordScore, SafeHtml> scoreCol,
-                                                                                List<WordScore> dataList) {
+                                                                List<WordScore> dataList) {
     ColumnSortEvent.ListHandler<WordScore> columnSortHandler = new ColumnSortEvent.ListHandler<WordScore>(dataList);
     columnSortHandler.setComparator(scoreCol,
         new Comparator<WordScore>() {
@@ -179,21 +186,18 @@ class WordContainer extends SimplePagingContainer<WordScore> {
               if (o2 == null) {
                 logger.warning("------- o2 is null?");
                 return -1;
-              }
-              else {
+              } else {
                 float a1 = o1.getPronScore();
                 float a2 = o2.getPronScore();
                 int i = Float.valueOf(a1).compareTo(a2);
-               // logger.info("a1 " + a1 + " vs " + a2 + " i " + i);
+                // logger.info("a1 " + a1 + " vs " + a2 + " i " + i);
                 if (i == 0) {
                   return Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp());
-                }
-                else {
+                } else {
                   return i;
                 }
               }
-            }
-            else {
+            } else {
               logger.warning("------- o1 is null?");
 
               return -1;
@@ -205,11 +209,7 @@ class WordContainer extends SimplePagingContainer<WordScore> {
 
   @Override
   protected void addColumnsToTable() {
-    addEnglishAndFL();
-
-//    Column<WordScore, SafeHtml> column2 = getHistoryColumn();
-//    table.addColumn(column2, "History");
-//    table.setColumnWidth(column2, "88px");
+    addReview();
 
     Column<WordScore, SafeHtml> scoreColumn = getScoreColumn();
     table.addColumn(scoreColumn, "Score");
@@ -219,22 +219,61 @@ class WordContainer extends SimplePagingContainer<WordScore> {
     table.setColumnWidth(scoreColumn, "70" + "px");
     table.setWidth("100%", true);
 
-    ColumnSortEvent.ListHandler<WordScore> columnSortHandler2 = getScoreSorter(scoreColumn,  getList());
+    ColumnSortEvent.ListHandler<WordScore> columnSortHandler2 = getScoreSorter(scoreColumn, getList());
     table.addColumnSortHandler(columnSortHandler2);
 
     new TooltipHelper().addTooltip(table, "Word Scores");
   }
 
   private Column<WordScore, SafeHtml> getItemColumn() {
-    return new Column<WordScore, SafeHtml>(new SafeHtmlCell()) {
+    return new Column<WordScore, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, WordScore object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        if (BrowserEvents.CLICK.equals(event.getType())) {
+          gotClickOnItem(object);
+        }
+//        else {
+//          logger.info("ignoring " + event.getType());
+//        }
+      }
+
       @Override
       public SafeHtml getValue(WordScore shell) {
-     //   String columnText = new WordTable().toHTML(shell.getNetPronImageTypeListMap());
-       // logger.info("col " +columnText);
+        String columnText = new WordTable().toHTML2(shell.getNetPronImageTypeListMap());
+        if (columnText.isEmpty()) {
+          CommonShell exercise = plot.getIdToEx().get(shell.getId());
+          columnText = new WordTable().getColoredSpan(exercise.getForeignLanguage(), shell.getPronScore());
+        }
+        // logger.info("col " +columnText);
+        //String columnText = "<span style='color:blue'>" + plot.getIdToEx().get(shell.getId()).getForeignLanguage() + "</span>";
+        return getSafeHtml(shell, columnText);
+      }
+    };
+  }
+
+/*  private Column<WordScore, SafeHtml> getItemColumn2() {
+    return new Column<WordScore, SafeHtml>(new TextCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, WordScore object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        if (BrowserEvents.CLICK.equals(event.getType())) {
+          gotClickOnItem(object);
+        }
+      }
+
+      @Override
+      public SafeHtml getValue(WordScore shell) {
+        //   String columnText = new WordTable().toHTML(shell.getNetPronImageTypeListMap());
+        // logger.info("col " +columnText);
         String columnText = plot.getIdToEx().get(shell.getId()).getForeignLanguage();
         return getSafeHtml(shell, columnText);
       }
     };
+  }*/
+
+  protected void gotClickOnItem(final WordScore e) {
+    logger.warning("got click on " + e);
   }
 
 /*
@@ -257,13 +296,13 @@ class WordContainer extends SimplePagingContainer<WordScore> {
 */
 
   private SafeHtml getSafeHtml(WordScore shell, String columnText) {
-    String html = shell.getId();
-    if (columnText != null) {
+    //  String html = shell.getId();
+/*    if (columnText != null) {
       if (columnText.length() > MAX_LENGTH_ID)
         columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
       html = "<span style='float:left;" + "'>" + columnText + "</span>";
-    }
-    return new SafeHtmlBuilder().appendHtmlConstant(html).toSafeHtml();
+    }*/
+    return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
   }
 
 /*
@@ -287,11 +326,11 @@ class WordContainer extends SimplePagingContainer<WordScore> {
       @Override
       public SafeHtml getValue(WordScore shell) {
         float v = shell.getPronScore() * 100;
-        String s =   "<span " +
+        String s = "<span " +
             "style='" +
             "margin-left:10px;" +
             "'" +
-            ">" + ((int)v) +
+            ">" + ((int) v) +
             "</span>";
 
         return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
