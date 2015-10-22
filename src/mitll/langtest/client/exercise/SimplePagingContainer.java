@@ -59,8 +59,12 @@ public class SimplePagingContainer<T> implements RequiresResize {
     column.add(table);
     table.addStyleName("floatLeft");
 
-    table.getElement().getStyle().setProperty("maxWidth", MAX_WIDTH + "px");
+    setMaxWidth();
     return column;
+  }
+
+  protected void setMaxWidth() {
+    table.getElement().getStyle().setProperty("maxWidth", MAX_WIDTH + "px");
   }
 
   protected void makeCellTable() {
