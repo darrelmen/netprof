@@ -107,7 +107,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    * @see #pushFirstSelection(String)
    */
   protected void pushNewItem(String search, String exerciseID) {
-    logger.info("------------ HistoryExerciseList.pushNewItem : -- " + search + " : " + exerciseID);
+    if (DEBUG) logger.info("------------ HistoryExerciseList.pushNewItem : -- " + search + " : " + exerciseID);
 
     String historyToken = getHistoryToken(search, exerciseID);
     String trimmedToken = historyToken.length() > 2 ? historyToken.substring(0, historyToken.length() - 2) : historyToken;
@@ -121,10 +121,10 @@ public class HistoryExerciseList extends PagingExerciseList {
     if (DEBUG)
       logger.info("\tHistoryExerciseList.pushNewItem : current token '" + token + "' vs new id '" + exerciseID + "'");
     if (token != null && (historyToken.equals(token) || trimmedToken.equals(token))) {
-      logger.info("\tHistoryExerciseList.pushNewItem : current token '" + token + "' same as new " + historyToken);
+      if (DEBUG) logger.info("\tHistoryExerciseList.pushNewItem : current token '" + token + "' same as new " + historyToken);
       checkAndAskServer(exerciseID);
     } else {
-      logger.info("\tHistoryExerciseList.pushNewItem : current token '" + token + "' different menu state '" + historyToken + "' from new " + exerciseID);
+      if (DEBUG) logger.info("\tHistoryExerciseList.pushNewItem : current token '" + token + "' different menu state '" + historyToken + "' from new " + exerciseID);
       setHistoryItem(historyToken);
     }
   }
