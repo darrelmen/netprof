@@ -8,7 +8,6 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.analysis.BestScore;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
@@ -77,15 +76,22 @@ public class ResultDAO extends DAO {
   private List<CorrectAndScore> cachedResultsForQuery2 = null;
   private List<MonitorResult> cachedMonitorResultsForQuery = null;
 
-  public UserPerformance getPerformanceForUser(long id) {
-    return new Analysis(database).getPerformanceForUser(id);
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getPerformanceForUser(long)
+   * @param id
+   * @param phoneDAO
+   * @return
+   */
+  public UserPerformance getPerformanceForUser(long id, PhoneDAO phoneDAO) {
+    return new Analysis(database, phoneDAO).getPerformanceForUser(id);
   }
 
   /**
    * Pulls the list of results out of the database.
    *
    * @return
-   * @see DatabaseImpl#populateUserToNumAnswers
+   * @see UserManagement#populateUserToNumAnswers
+   * @see #getUserToResults
    */
   public List<Result> getResults() {
     try {
