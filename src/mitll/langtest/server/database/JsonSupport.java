@@ -239,7 +239,11 @@ public class JsonSupport {
     bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
     return bd.floatValue();
   }
+
   /**
+   * Wasteful... - why do we do attach audio on every call?
+   * And exToAudio is wasteful too...
+   *
    * For all the exercises in a chapter
 
    Get latest results
@@ -276,6 +280,10 @@ public class JsonSupport {
       ids.add(id);
       idToRef.put(id, exercise.getRefAudio());
     }
+
+    now = System.currentTimeMillis();
+
+    if (now-then > 300) logger.warn("getJsonPhoneReport : took " + (now-then) + " millis to attach audio again!");
 
     return phoneDAO.getWorstPhonesJson(userid, ids, idToRef);
   }
