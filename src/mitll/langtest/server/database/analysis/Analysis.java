@@ -1,36 +1,36 @@
 package mitll.langtest.server.database.analysis;
 
-import mitll.langtest.server.database.DAO;
-import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.ResultDAO;
+import mitll.langtest.server.database.*;
 import mitll.langtest.server.scoring.ParseResultJson;
-import mitll.langtest.shared.analysis.BestScore;
-import mitll.langtest.shared.analysis.UserPerformance;
-import mitll.langtest.shared.analysis.WordScore;
+import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by go22670 on 10/21/15.
  */
 public class Analysis extends DAO {
+  public static final int MAX_EXAMPLES = 50;
   private static final Logger logger = Logger.getLogger(Analysis.class);
 
-  public static final int FIVE_MINUTES = 5 * 60 * 1000;
+  private static final int FIVE_MINUTES = 5 * 60 * 1000;
 
-  ParseResultJson parseResultJson;
+  private ParseResultJson parseResultJson;
+  PhoneDAO phoneDAO;
 
-  public Analysis(Database database) {
+  /**
+   * @param database
+   * @param phoneDAO
+   * @see DatabaseImpl#getAnalysis()
+   */
+  public Analysis(Database database, PhoneDAO phoneDAO) {
     super(database);
     parseResultJson = new ParseResultJson(database.getServerProps());
-
+    this.phoneDAO = phoneDAO;
   }
 
   public List<BestScore> getResultForUser(long id) {
@@ -53,7 +53,11 @@ public class Analysis extends DAO {
     logger.info("got " + sql);
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
+    long then = System.currentTimeMillis();
     List<BestScore> bestForQuery = getBestForQuery(connection, statement);
+    long now = System.currentTimeMillis();
+    logger.debug("getBest took " + (now - then) + " millis to return " + bestForQuery.size() + " items");
+
     return bestForQuery;
   }
 
@@ -101,6 +105,49 @@ public class Analysis extends DAO {
       logException(ee);
     }
     return new ArrayList<>();
+  }
+
+  public PhoneReport getPhonesForUser(long id) {
+    try {
+      String sql = getPerfSQL(id);
+      List<BestScore> resultsForQuery = getBest(sql);
+      List<Integer> ids = new ArrayList<>();
+      for (BestScore bs : resultsForQuery) {
+        ids.add(bs.getResultID());
+      }
+      PhoneReport phoneReport = phoneDAO.getWorstPhonesForResults(id, ids, Collections.emptyMap());
+
+
+    //  PhoneReport phoneReport = database.getAnalysis().getPhonesForUser(71);
+
+      Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
+      long now = System.currentTimeMillis();
+
+      //logger.info("took " + (now - then) + " to get " + phonesForUser);
+
+
+      for (Map.Entry<String, List<WordAndScore>> pair : phonesForUser.entrySet()) {
+        List<WordAndScore> value = pair.getValue();
+        String phone = pair.getKey();
+        logger.info(phone + " = " + value.size() + " first " + value.get(0));
+        List<WordAndScore> subset = new ArrayList<>();
+
+        Set<String> unique = new HashSet<>();
+        for (WordAndScore ws :value) {
+          if (!unique.contains(ws.getWord())) {
+            unique.add(ws.getWord());
+            subset.add(ws);
+            if (unique.size() == MAX_EXAMPLES) break;
+          }
+        }
+        phonesForUser.put(phone,subset);
+      }
+
+      return phoneReport;
+    } catch (Exception ee) {
+      logException(ee);
+    }
+    return null;
   }
 
   /**
@@ -152,7 +199,7 @@ public class Analysis extends DAO {
     return results;
   }
 
-  public List<WordScore> getWordScore(List<BestScore> bestScores) {
+  private List<WordScore> getWordScore(List<BestScore> bestScores) {
     List<WordScore> results = new ArrayList<WordScore>();
 
     for (BestScore bs : bestScores) {
