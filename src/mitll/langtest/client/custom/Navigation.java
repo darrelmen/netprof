@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.analysis.AnalysisTab;
+import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.contextPractice.DialogWindow;
 import mitll.langtest.client.custom.content.AVPHelper;
@@ -48,7 +49,7 @@ import java.util.logging.Logger;
  * Time: 8:50 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Navigation implements RequiresResize {
+public class Navigation implements RequiresResize, ShowTab {
   private final Logger logger = Logger.getLogger("Navigation");
 
   private static final String CHAPTERS = "Learn Pronunciation";
@@ -92,7 +93,7 @@ public class Navigation implements RequiresResize {
 
   private final KeyStorage storage;
   private ListManager listManager;
-  private AnalysisPlot analysisPlot;
+ // private AnalysisPlot analysisPlot;
   private UserFeedback feedback;
 
   private TabPanel tabPanel;
@@ -397,10 +398,12 @@ public class Navigation implements RequiresResize {
 //    learnHelper.getExerciseList().getExercises();
 //    new VerticalPanel();
 
-    ListInterface exerciseList = npfHelper.getExerciseList();
+    //ListInterface exerciseList = npfHelper.getExerciseList();
 
-    logger.info("Got " + exerciseList);
-    analysis.getContent().add(new AnalysisTab(service,controller,exerciseList,userManager.getUser()));
+    //logger.info("Got " + exerciseList);
+    ShowTab showTab = this;
+    AnalysisTab w = new AnalysisTab(service, controller, userManager.getUser(), showTab);
+    analysis.getContent().add(w);
 
   }
 
@@ -414,6 +417,7 @@ public class Navigation implements RequiresResize {
     chapters.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
+        logger.info("got click on" + chapters);
         checkAndMaybeClearTab(CHAPTERS);
         learnHelper.showNPF(chapters, LEARN);
         logEvent(chapters, CHAPTERS);
@@ -607,7 +611,7 @@ public class Navigation implements RequiresResize {
    * What to do when we don't know which tab to select
    * Right now show the learn pronunciation tab.
    */
-  private void showDefaultInitialTab() {
+  public void showDefaultInitialTab() {
     checkAndMaybeClearTab(CHAPTERS);
     learnHelper.showNPF(chapters, LEARN);
 
@@ -615,6 +619,12 @@ public class Navigation implements RequiresResize {
     Integer tabIndex = nameToIndex.get(CHAPTERS);
     tabPanel.selectTab(tabIndex);
     clickOnTab(tabAndContent);
+  }
+
+  @Override
+  public void showLearnAndItem(String id) {
+    showDefaultInitialTab();
+    learnHelper.getExerciseList().loadByID(id);
   }
 
   /**
