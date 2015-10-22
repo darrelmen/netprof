@@ -302,8 +302,7 @@ public class PhoneDAO extends DAO {
   }
 
   private PhoneReport getPhoneReport(String sql, Map<String, String> idToRef) throws SQLException {
-    //logger.debug("getWorstPhones query is " + sql);
-
+    logger.debug("getPhoneReport query is " + sql);
     Connection connection = getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
@@ -328,6 +327,9 @@ public class PhoneDAO extends DAO {
       float wscore = rs.getFloat(i++);
 
       long rid = rs.getLong("RID");
+
+      logger.info("Got " + exid + " rid " + rid + " word " + word);
+
       if (!exid.equals(currentExercise)) {
         currentRID = rid;
         currentExercise = exid;
@@ -349,10 +351,9 @@ public class PhoneDAO extends DAO {
         }
         wordAndScores.add(new WordAndScore(word, wscore, rid, wseq, seq, trimPathForWebPage(audioAnswer),
             idToRef.get(exid), scoreJson));
+      } else {
+        logger.debug("skipping " + exid + " " + rid + " word " + word);
       }
-      //else {
-      //logger.debug("skipping " + exid + " " + rid + " phone " + phone);
-      // }
     }
     finish(connection, statement, rs);
 
@@ -391,6 +392,14 @@ public class PhoneDAO extends DAO {
         " order by results.exid, results.time desc";
   }
 
+  /**
+   * @param phoneToScores
+   * @param phoneToWordAndScore
+   * @param totalScore
+   * @param totalItems
+   * @return
+   * @see #getPhoneReport(String, Map)
+   */
   private PhoneReport getPhoneReport(Map<String, List<Float>> phoneToScores,
                                      Map<String, List<WordAndScore>> phoneToWordAndScore,
                                      float totalScore, float totalItems) {
@@ -453,76 +462,8 @@ public class PhoneDAO extends DAO {
     return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted);
   }
 
-/*  public static class PhoneReport {
-    final int overallPercent;
-    private final Map<String, List<WordAndScore>> phoneToWordAndScoreSorted;
-    Map<String, Float> phoneToAvgSorted;
-
-    *//**
-     * @paramx overallPercent
-     * @paramx phoneToWordAndScoreSorted
-     * @see #getWorstPhones
-     *//*
-    public PhoneReport(int overallPercent, Map<String, List<WordAndScore>> phoneToWordAndScoreSorted, Map<String, Float> phoneToAvgSorted) {
-      this.overallPercent = overallPercent;
-      this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
-      this.phoneToAvgSorted = phoneToAvgSorted;
-    }
-
-    public Map<String, List<WordAndScore>> getPhoneToWordAndScoreSorted() {
-      return phoneToWordAndScoreSorted;
-    }
-
-    public String toString() { return phoneToAvgSorted.toString(); }
-  }*/
-
   private String trimPathForWebPage(String path) {
     int answer = path.indexOf(PathHelper.ANSWERS);
     return (answer == -1) ? path : path.substring(answer);
   }
-
-  /**
-   * @see #getWorstPhones(long, List, Map)
-   */
-/*  public static class WordAndScore implements Comparable<WordAndScore> {
-    final int wseq;
-    final int seq;
-    final String word;
-    final float score;
-    final long resultID;
-    final String answerAudio;
-    final String refAudio;
-    final String scoreJson;
-
-    *//**
-     * @param word
-     * @param score
-     * @param resultID
-     * @param wseq        which word in phrase
-     * @param seq         which phoneme in phrase (not in word)
-     * @param answerAudio
-     * @param refAudio
-     * @param scoreJson
-     * @see #getPhoneReport(String, Map)
-     *//*
-    public WordAndScore(String word, float score, long resultID, int wseq, int seq, String answerAudio, String refAudio, String scoreJson) {
-      this.word = word;
-      this.score = score;
-      this.resultID = resultID;
-      this.wseq = wseq;
-      this.seq = seq;
-      this.answerAudio = answerAudio;
-      this.refAudio = refAudio;
-      this.scoreJson = scoreJson;
-    }
-
-    @Override
-    public int compareTo(WordAndScore o) {
-      return score < o.score ? -1 : score > o.score ? +1 : 0;
-    }
-
-    public String toString() {
-      return "#" + wseq + " : " + word + " s " + score + " res " + resultID;// + " answer " + answerAudio + " ref " + refAudio;
-    }
-  }*/
 }
