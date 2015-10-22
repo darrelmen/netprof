@@ -3,6 +3,7 @@ package mitll.langtest.client;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.*;
+import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserExercise;
@@ -104,6 +105,8 @@ public interface LangTestDatabase extends RemoteService {
   UserPerformance getPerformanceForUser(long id);
 
   List<WordScore> getWordScores(long id);
+
+  PhoneReport getPhoneScores(long id);
 
   void logMessage(String message);
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device);
