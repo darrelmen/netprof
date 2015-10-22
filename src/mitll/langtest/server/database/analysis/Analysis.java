@@ -115,9 +115,13 @@ public class Analysis extends DAO {
       for (BestScore bs : resultsForQuery) {
         ids.add(bs.getResultID());
       }
+
+      logger.info("getPhonesForUser from " + resultsForQuery.size() + " added " + ids.size() + " ids ");
       PhoneReport phoneReport = phoneDAO.getWorstPhonesForResults(id, ids, Collections.emptyMap());
 
       Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
+
+      logger.info("getPhonesForUser report phonesForUser " + phonesForUser);
       long now = System.currentTimeMillis();
 
       for (Map.Entry<String, List<WordAndScore>> pair : phonesForUser.entrySet()) {
@@ -136,6 +140,7 @@ public class Analysis extends DAO {
         }
         phonesForUser.put(phone,subset);
       }
+      logger.info("getPhonesForUser report phoneReport " + phoneReport);
 
       return phoneReport;
     } catch (Exception ee) {
