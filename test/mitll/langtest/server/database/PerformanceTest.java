@@ -3,9 +3,7 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.analysis.BestScore;
-import mitll.langtest.shared.analysis.UserPerformance;
-import mitll.langtest.shared.analysis.WordScore;
+import mitll.langtest.shared.analysis.*;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -15,10 +13,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by GO22670 on 1/30/14.
@@ -87,7 +82,7 @@ public class PerformanceTest {
       writer.close();
 
       List<WordScore> wordScoresForUser = database.getAnalysis().getWordScoresForUser(71);
-      for(WordScore ws : wordScoresForUser) logger.info("got " + ws);
+      for (WordScore ws : wordScoresForUser) logger.info("got " + ws);
 
     } catch (IOException e) {
 
@@ -97,8 +92,26 @@ public class PerformanceTest {
 
   @Test
   public void testWords() {
-      List<WordScore> wordScoresForUser = database.getAnalysis().getWordScoresForUser(71);
-      for(WordScore ws : wordScoresForUser) logger.info("got " + ws);
+    List<WordScore> wordScoresForUser = database.getAnalysis().getWordScoresForUser(71);
+    for (WordScore ws : wordScoresForUser) logger.info("got " + ws);
+  }
+
+  @Test
+  public void testPhones() {
+    long then = System.currentTimeMillis();
+    PhoneReport phoneReport = database.getAnalysis().getPhonesForUser(71);
+
+    Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
+    long now = System.currentTimeMillis();
+
+    logger.info("took " + (now - then) + " to get " + phonesForUser);
+
+    for (Map.Entry<String, List<WordAndScore>> pair : phonesForUser.entrySet()) {
+      List<WordAndScore> value = pair.getValue();
+      logger.info(pair.getKey() + " = " + value.size() + " first " + value.get(0));
+      for (int i = 0; i < 10; i++) logger.info("\t" + value.get(i));
+    }
+//    for(WordScore ws : wordScoresForUser) logger.info("got " + ws);
   }
 
 
