@@ -24,6 +24,7 @@ import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.*;
+import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserExercise;
@@ -2046,10 +2047,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public UserPerformance getPerformanceForUser(long id) { return db.getResultDAO().getPerformanceForUser(id); }
+  public UserPerformance getPerformanceForUser(long id) { return db.getResultDAO().getPerformanceForUser(id, db.getPhoneDAO()); }
 
   @Override
   public List<WordScore> getWordScores(long id) { return db.getAnalysis().getWordScoresForUser(id); }
+
+  @Override
+  public PhoneReport getPhoneScores(long id) { return db.getAnalysis().getPhonesForUser(id); }
 
   public void logMessage(String message) {
     String prefixedMessage = "for " + pathHelper.getInstallPath() + " from client " + message;
