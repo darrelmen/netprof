@@ -35,24 +35,21 @@ import java.util.logging.Logger;
 class WordContainer extends SimplePagingContainer<WordScore> {
   private final Logger logger = Logger.getLogger("WordContainer");
 
-  private static final int MAX_LENGTH_ID = 15;
   public static final int TABLE_HISTORY_WIDTH = 420;
-  public static final int COL_WIDTH = 120;
-  public static final String CORRECT_INCORRECT_HISTORY_AND_AVERAGE_PRONUNCIATION_SCORE = "Correct/Incorrect history and average pronunciation score";
-
-  //private final Map<String, CommonShell> idToExercise = new HashMap<String, CommonShell>();
   private ExerciseComparator sorter;
-  //ListInterface listInterface;
   AnalysisPlot plot;
+  ShowTab learnTab;
 
-  public WordContainer(ExerciseController controller, AnalysisPlot plot) {
+  /**
+   *
+   * @param controller
+   * @param plot
+   */
+  public WordContainer(ExerciseController controller, AnalysisPlot plot,ShowTab learnTab) {
     super(controller);
     sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
     this.plot = plot;
-    //  this.listInterface = listInterface;
-//    for (CommonShell commonShell : allExercises) {
-//      idToExercise.put(commonShell.getID(), commonShell);
-//    }
+    this.learnTab = learnTab;
   }
 
   /**
@@ -88,35 +85,15 @@ class WordContainer extends SimplePagingContainer<WordScore> {
     table.setColumnWidth(itemCol, 300 + "px");
 
     String language = controller.getLanguage();
-    //   addColumn(itemCol, new TextHeader("English"));
 
     String headerForFL = language.equals("English") ? "Meaning" : language;
     addColumn(itemCol, new TextHeader(headerForFL));
-
-//
-//    Column<WordScore, SafeHtml> flColumn = getFLColumn();
-//    flColumn.setSortable(true);
-//    table.setColumnWidth(flColumn,COL_WIDTH + "px");
-//
-//    String headerForFL = language.equals("English") ? "Meaning" : language;
-//    addColumn(flColumn, new TextHeader(headerForFL));
 
     List<WordScore> dataList = getList();
 
     ColumnSortEvent.ListHandler<WordScore> columnSortHandler = getEnglishSorter(itemCol, dataList);
     table.addColumnSortHandler(columnSortHandler);
-
-/*    ColumnSortEvent.ListHandler<WordScore> columnSortHandler2 = getFLSorter(flColumn, dataList);
-    table.addColumnSortHandler(columnSortHandler2);*/
-
-    // We know that the data is sorted alphabetically by default.
-//    table.getColumnSortList().push(itemCol);
   }
-
-/*  private String truncate(String columnText) {
-    if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
-    return columnText;
-  }*/
 
   private ColumnSortEvent.ListHandler<WordScore> getEnglishSorter(Column<WordScore, SafeHtml> englishCol,
                                                                   List<WordScore> dataList) {
@@ -142,35 +119,6 @@ class WordContainer extends SimplePagingContainer<WordScore> {
         });
     return columnSortHandler;
   }
-
-/*  private ColumnSortEvent.ListHandler<WordScore> getFLSorter(Column<WordScore, SafeHtml> flColumn,
-                                                                           List<WordScore> dataList) {
-    ColumnSortEvent.ListHandler<WordScore> columnSortHandler2 = new ColumnSortEvent.ListHandler<WordScore>(dataList);
-
-    columnSortHandler2.setComparator(flColumn,
-        new Comparator<WordScore>() {
-          public int compare(WordScore o1, WordScore o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            // Compare the name columns.
-            if (o1 != null) {
-              if (o2 == null) return 1;
-              else {
-                CommonShell shell1 = idToExercise.get(o1.getId());
-                CommonShell shell2 = idToExercise.get(o2.getId());
-
-                String id1 = shell1.getForeignLanguage();
-                String id2 = shell2.getForeignLanguage();
-                return id1.toLowerCase().compareTo(id2.toLowerCase());
-              }
-            }
-            return -1;
-          }
-        });
-    return columnSortHandler2;
-  }*/
 
   private ColumnSortEvent.ListHandler<WordScore> getScoreSorter(Column<WordScore, SafeHtml> scoreCol,
                                                                 List<WordScore> dataList) {
@@ -222,7 +170,7 @@ class WordContainer extends SimplePagingContainer<WordScore> {
     ColumnSortEvent.ListHandler<WordScore> columnSortHandler2 = getScoreSorter(scoreColumn, getList());
     table.addColumnSortHandler(columnSortHandler2);
 
-    new TooltipHelper().addTooltip(table, "Word Scores");
+    new TooltipHelper().addTooltip(table, "Click on an item to review.");
   }
 
   private Column<WordScore, SafeHtml> getItemColumn() {
@@ -233,9 +181,6 @@ class WordContainer extends SimplePagingContainer<WordScore> {
         if (BrowserEvents.CLICK.equals(event.getType())) {
           gotClickOnItem(object);
         }
-//        else {
-//          logger.info("ignoring " + event.getType());
-//        }
       }
 
       @Override
@@ -243,83 +188,22 @@ class WordContainer extends SimplePagingContainer<WordScore> {
         String columnText = new WordTable().toHTML2(shell.getNetPronImageTypeListMap());
         if (columnText.isEmpty()) {
           CommonShell exercise = plot.getIdToEx().get(shell.getId());
-          columnText = new WordTable().getColoredSpan(exercise.getForeignLanguage(), shell.getPronScore());
+          String foreignLanguage = exercise.getForeignLanguage();
+          if (controller.getLanguage().equalsIgnoreCase("Spanish")) foreignLanguage = foreignLanguage.toUpperCase();
+          columnText = new WordTable().getColoredSpan(foreignLanguage, shell.getPronScore());
         }
-        // logger.info("col " +columnText);
-        //String columnText = "<span style='color:blue'>" + plot.getIdToEx().get(shell.getId()).getForeignLanguage() + "</span>";
         return getSafeHtml(shell, columnText);
       }
     };
   }
-
-/*  private Column<WordScore, SafeHtml> getItemColumn2() {
-    return new Column<WordScore, SafeHtml>(new TextCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, WordScore object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getType())) {
-          gotClickOnItem(object);
-        }
-      }
-
-      @Override
-      public SafeHtml getValue(WordScore shell) {
-        //   String columnText = new WordTable().toHTML(shell.getNetPronImageTypeListMap());
-        // logger.info("col " +columnText);
-        String columnText = plot.getIdToEx().get(shell.getId()).getForeignLanguage();
-        return getSafeHtml(shell, columnText);
-      }
-    };
-  }*/
 
   protected void gotClickOnItem(final WordScore e) {
-    logger.warning("got click on " + e);
+    learnTab.showLearnAndItem(e.getId());
   }
-
-/*
-  private Column<WordScore, SafeHtml> getFLColumn() {
-    return new Column<WordScore, SafeHtml>(new SafeHtmlCell()) {
-      @Override
-      public SafeHtml getValue(WordScore shell) {
-        CommonShell shell1 = idToExercise.get(shell.getId());
-        String toShow = shell1.getForeignLanguage();
-
-        if (controller.getLanguage().equalsIgnoreCase("english")) {
-          toShow = shell1.getMeaning();
-        }
-        String columnText = truncate(toShow);
-
-        return getSafeHtml(shell, columnText);
-      }
-    };
-  }
-*/
 
   private SafeHtml getSafeHtml(WordScore shell, String columnText) {
-    //  String html = shell.getId();
-/*    if (columnText != null) {
-      if (columnText.length() > MAX_LENGTH_ID)
-        columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
-      html = "<span style='float:left;" + "'>" + columnText + "</span>";
-    }*/
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
   }
-
-/*
-  private Column<WordScore, SafeHtml> getHistoryColumn() {
-    return new Column<WordScore, SafeHtml>(new SafeHtmlCell()) {
-      @Override
-      public SafeHtml getValue(WordScore shell) {
-        String history = SetCompleteDisplay.getScoreHistory(shell.getCorrectAndScores());
-        String s = shell.getCorrectAndScores().isEmpty() ? "" : "<span style='float:right;" +
-            "'>" + history +
-            "</span>";
-
-        return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
-      }
-    };
-  }
-*/
 
   private Column<WordScore, SafeHtml> getScoreColumn() {
     return new Column<WordScore, SafeHtml>(new SafeHtmlCell()) {
