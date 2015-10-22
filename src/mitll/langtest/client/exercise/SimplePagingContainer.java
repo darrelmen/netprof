@@ -18,7 +18,6 @@ import java.util.logging.Logger;
  */
 public class SimplePagingContainer<T> implements RequiresResize {
  // private final Logger logger = Logger.getLogger("SimplePagingContainer");
-
   public static final int MAX_WIDTH = 320;
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
   private static final int VERTICAL_SLOP = 35;
@@ -145,14 +144,12 @@ public class SimplePagingContainer<T> implements RequiresResize {
       pixelsAbove = table.getElement().getAbsoluteTop() + VERTICAL_SLOP;
     }
     int leftOver = Window.getClientHeight() - pixelsAbove;
-
 /*
     if (debug) System.out.println("getNumTableRowsGivenScreenHeight Got on resize window height " + Window.getClientHeight() +
        " header " + header + " result = " + leftOver + "( vert unaccount " +
        verticalUnaccountedFor+ " vs absolute top " + table.getElement().getAbsoluteTop()+ " pix above " + pixelsAbove+
        ")");
 */
-
     float rawRatio = ((float) leftOver) / (float) heightOfCellTableWith15Rows();
     float tableRatio = Math.min(MAX_PAGES, rawRatio);
     float ratio = DEFAULT_PAGE_SIZE * tableRatio;
