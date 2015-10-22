@@ -564,7 +564,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return "";
   }
 
-  protected boolean loadByID(String id) {
+  @Override
+  public boolean loadByID(String id) {
     if (hasExercise(id)) {
       // logger.info("loading exercise " + id);
       loadExercise(id);
