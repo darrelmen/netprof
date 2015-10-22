@@ -155,6 +155,12 @@ public class ScoreServlet extends DatabaseServlet {
     reply(response, x);
   }
 
+  /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
+   * @param toReturn
+   * @param split1
+   * @return
+   */
   private JSONObject getPhoneReport(JSONObject toReturn, String[] split1) {
     String user = "";
     Map<String, Collection<String>> selection = new TreeMap<String, Collection<String>>();
