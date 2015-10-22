@@ -1,11 +1,13 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.LangTestDatabaseImpl;
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.shared.*;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.io.OutputStream;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -112,6 +114,8 @@ public class AudioDAO extends DAO {
    * @param installPath
    * @param relativeConfigDir
    * @see mitll.langtest.server.LangTestDatabaseImpl#attachAudio(mitll.langtest.shared.CommonExercise)
+   * @see DatabaseImpl#attachAudio(CommonExercise)
+   * @see DatabaseImpl#writeZip(OutputStream, long, PathHelper)
    */
   public int attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir) {
     Collection<AudioAttribute> audioAttributes = getAudioAttributes(firstExercise.getID());
@@ -145,6 +149,8 @@ public class AudioDAO extends DAO {
    * @param audioAttributes
    * @see mitll.langtest.server.database.AudioExport#writeFolderContents(java.util.zip.ZipOutputStream, java.util.List, AudioDAO, String, String, String, boolean)
    * @see #attachAudio
+   * @see mitll.langtest.server.ScoreServlet#getJsonArray(List)
+   * @see
    */
   public void attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir,
                           Collection<AudioAttribute> audioAttributes) {
