@@ -71,20 +71,19 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
   public void forgetExercise(CommonShell es) {
     List<CommonShell> list = getList();
     int before = getList().size();
-    //System.out.println("PagingContainer.forgetExercise, before size = " + before + " : "+ es);
 
     if (!list.remove(es)) {
       if (!list.remove(getByID(es.getID()))) {
         logger.warning("forgetExercise couldn't remove " + es);
-        for (CommonShell t : list) {
-          System.out.println("\tnow has " + t.getID());
-        }
+//        for (CommonShell t : list) {
+//          logger.info("\tnow has " + t.getID());
+//        }
       } else {
         idToExercise.remove(es.getID());
       }
     } else {
       if (list.size() == before - 1) {
-        //System.out.println("\tPagingContainer : now has " + list.size()+ " items");
+        //logger.info("\tPagingContainer : now has " + list.size()+ " items");
       } else {
         logger.warning("\tPagingContainer.forgetExercise : now has " + list.size() + " items vs " + before);
       }
@@ -245,16 +244,6 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
             boolean approved = state == STATE.APPROVED || recorded;
 
             boolean isSet = isDefect || isFixed || approved;
-    /*        if (controller.getAudioType().equals(Result.AUDIO_TYPE_RECORDER)) {
-              isSet = recorded;
-            }
-*/
-/*            if (isSet) {
-              System.out.println(table.getParent().getParent().getElement().getId()+" shell " + shell.getID() + " state " + state + "/" + shell.getSecondState()+
-                " defect " +isDefect +
-                " fixed " + isFixed + " recorded " + recorded);
-           }*/
-
             String icon =
                 approved ? "icon-check" :
                     isDefect ? "icon-bug" :
@@ -316,8 +305,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     };
   }
 
-  protected void gotClickOnItem(final CommonShell e) {
-  }
+  protected void gotClickOnItem(final CommonShell e) {}
 
   @Override
   public void clear() {
@@ -336,7 +324,6 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
   public void addExercise(CommonShell exercise) {
     idToExercise.put(exercise.getID(), exercise);
     getList().add(exercise);
-    //System.out.println("data now has "+list.size() + " after adding " + exercise.getID());
   }
 
   /**
@@ -345,7 +332,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
    * @see mitll.langtest.client.list.PagingExerciseList#addExerciseAfter(CommonShell, CommonShell)
    */
   public void addExerciseAfter(CommonShell afterThisOne, CommonShell exercise) {
-    //System.out.println("addExercise adding " + exercise);
+    //logger.info("addExercise adding " + exercise);
     List<CommonShell> list = getList();
     int before = list.size();
     String id = exercise.getID();
@@ -353,7 +340,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     int i = list.indexOf(afterThisOne);
     list.add(i + 1, exercise);
     int after = list.size();
-    // System.out.println("data now has "+ after + " after adding " + exercise.getID());
+    // logger.info("data now has "+ after + " after adding " + exercise.getID());
     if (before + 1 != after) logger.warning("didn't add " + exercise.getID());
   }
 
@@ -388,11 +375,11 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
   }
 
   private void markCurrent(int i, CommonShell itemToSelect) {
-    if (DEBUG) System.out.println(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect.getID());
+    if (DEBUG) logger.info(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect.getID());
     table.getSelectionModel().setSelected(itemToSelect, true);
     if (DEBUG) {
       int pageEnd = table.getPageStart() + table.getPageSize();
-      System.out.println("marking " + i + " out of " + table.getRowCount() + " page start " + table.getPageStart() +
+      logger.info("marking " + i + " out of " + table.getRowCount() + " page start " + table.getPageStart() +
           " end " + pageEnd);
     }
 
@@ -400,13 +387,13 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     int newIndex = pageNum * table.getPageSize();
     if (i < table.getPageStart()) {
       int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());
-      if (DEBUG) System.out.println("new start of prev page " + newStart + " vs current " + table.getVisibleRange());
+      if (DEBUG) logger.info("new start of prev page " + newStart + " vs current " + table.getVisibleRange());
       table.setVisibleRange(newStart, table.getPageSize());
     } else {
       int pageEnd = table.getPageStart() + table.getPageSize();
       if (i >= pageEnd) {
         int newStart = Math.max(0, Math.min(table.getRowCount() - table.getPageSize(), newIndex));   // not sure how this happens, but need Math.max(0,...)
-        if (DEBUG) System.out.println("new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
+        if (DEBUG) logger.info("new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
             " vs current " + table.getVisibleRange());
         table.setVisibleRange(newStart, table.getPageSize());
       }
@@ -419,8 +406,6 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
    * @see mitll.langtest.client.list.PagingExerciseList#onResize()
    */
   public void onResize(CommonShell currentExercise) {
-    //System.out.println("PagingContainer : onResize");
-
     int numRows = getNumTableRowsGivenScreenHeight();
     if (table.getPageSize() != numRows) {
       table.setPageSize(numRows);
