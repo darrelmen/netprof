@@ -69,7 +69,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
    * @param tabAndContent in this tab
    * @param instanceName  flex, review, etc.
    * @see Navigation#addPracticeTab()
-   * @see Navigation#addTabs(com.google.gwt.user.client.ui.Panel)
+   * @see Navigation#addTabs
    * @see mitll.langtest.client.custom.Navigation#selectPreviousTab(String)
    */
   public void showNPF(TabAndContent tabAndContent, String instanceName) {
