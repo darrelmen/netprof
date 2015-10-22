@@ -37,6 +37,29 @@ public class WordTable {
     return builder.toString();
   }
 
+  public String toHTML2(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
+    Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
+    StringBuilder builder = new StringBuilder();
+    for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
+      TranscriptSegment word = pair.getKey();
+      float score = word.getScore();
+      String event = word.getEvent();
+      String coloredSpan = getColoredSpan(event, score);
+      builder.append(coloredSpan);
+    }
+
+    return builder.toString();
+  }
+
+  public String getColoredSpan(String event, float score) {
+    StringBuilder builder = new StringBuilder();
+    builder.append("<span style='padding:3px; margin-left:3px; text-align:center; background-color:" + SimpleColumnChart.getColor(score)+
+        "'>");
+    builder.append(event);
+    builder.append("</span>");
+    return builder.toString();
+  }
+
 
   public Widget getWordTable(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
