@@ -117,14 +117,8 @@ public class Analysis extends DAO {
       }
       PhoneReport phoneReport = phoneDAO.getWorstPhonesForResults(id, ids, Collections.emptyMap());
 
-
-    //  PhoneReport phoneReport = database.getAnalysis().getPhonesForUser(71);
-
       Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
       long now = System.currentTimeMillis();
-
-      //logger.info("took " + (now - then) + " to get " + phonesForUser);
-
 
       for (Map.Entry<String, List<WordAndScore>> pair : phonesForUser.entrySet()) {
         List<WordAndScore> value = pair.getValue();
