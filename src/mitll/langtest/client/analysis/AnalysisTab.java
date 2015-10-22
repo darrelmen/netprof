@@ -3,11 +3,12 @@ package mitll.langtest.client.analysis;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.AnalysisPlot;
 import mitll.langtest.client.custom.Navigation;
-import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordScore;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public class AnalysisTab extends DivWidget {
    * @param controller
    * @param userid
    */
-  public AnalysisTab(LangTestDatabaseAsync service, ExerciseController controller, int userid, ShowTab showTab) {
+  public AnalysisTab(final LangTestDatabaseAsync service, final ExerciseController controller, final int userid, ShowTab showTab) {
     AnalysisPlot analysisPlot = new AnalysisPlot(service, userid);
     final WordContainer wordContainer = new WordContainer(controller,analysisPlot,showTab);
 
@@ -39,6 +40,27 @@ public class AnalysisTab extends DivWidget {
         HorizontalPanel lowerHalf = new HorizontalPanel();
         add(lowerHalf);
         lowerHalf.add(wordContainer.getTableWithPager(wordScores));
+
+        getPhoneReport(service,controller,userid,lowerHalf);
+      }
+    });
+  }
+
+  private void getPhoneReport(LangTestDatabaseAsync service,
+                              final ExerciseController controller,
+                              int userid,final Panel lowerHalf) {
+    final PhoneContainer phoneContainer = new PhoneContainer(controller);
+
+    service.getPhoneScores(userid, new AsyncCallback<PhoneReport>() {
+      @Override
+      public void onFailure(Throwable throwable) {
+
+      }
+
+      @Override
+      public void onSuccess(PhoneReport phoneReport) {
+        lowerHalf.add(phoneContainer.getTableWithPager(phoneReport));
+
       }
     });
   }
