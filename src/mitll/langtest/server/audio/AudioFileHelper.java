@@ -252,11 +252,15 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
     if (recordInResults) {
       long then = System.currentTimeMillis();
       JSONObject json = new ScoreToJSON().getJsonFromAnswer(answer);
+
+/*
       if (answer.isValid() && answer.getPretestScore() == null) {
         String message = "no pretest score on " + answer + "?";
         logger.warn(message);
+        logger.warn("json is " +json);
         logAndNotify.logAndNotifyServerException(new Exception("Empty pretest score for answer"),message);
       }
+*/
       // logger.debug("json is " + json);
       long now = System.currentTimeMillis();
       if (now - then > 10) {
@@ -269,6 +273,9 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
 
       if (pretestScore != null) {
         logger.info("getAudioAnswerDecoding got pretest score = " + pretestScore + " and duration = " + processDur);
+      }
+      else {
+        logger.warn("no pretest score");
       }
 
       long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
@@ -470,7 +477,10 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    */
   private void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
     PretestScore pretestScore = answer.getPretestScore();
-    List<TranscriptSegment> words = pretestScore == null ? null : pretestScore.getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
+
+    if (pretestScore == null) logger.error("huh? pretest score is null for " + answer + " and " + answerID);
+
+    List<TranscriptSegment> words  = pretestScore == null ? null : pretestScore.getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
     List<TranscriptSegment> phones = pretestScore == null ? null : pretestScore.getsTypeToEndTimes().get(NetPronImageType.PHONE_TRANSCRIPT);
     if (words != null) {
       int windex = 0;
@@ -673,7 +683,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
 
     ASR asrScoring = useOldSchool || isEnglishSite() ? oldschoolScoring : getASRScoring();
 
-    //logger.info("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
+    logger.info("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
 
     PretestScore pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
