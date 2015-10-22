@@ -190,6 +190,7 @@ public class AnswerDAO extends DAO {
    * @param processDur
    */
   public void changeAnswer(long id, float score, int processDur, String json) {
+    logger.info("Setting id " + id + " score " + score  + " process dur " + processDur + " json " +json );
       Connection connection = getConnection();
       try {
           String sql = "UPDATE " +
