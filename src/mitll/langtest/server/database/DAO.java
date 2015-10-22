@@ -208,9 +208,9 @@ public class DAO {
     return database.getConnection(this.getClass().toString());
   }
 
-  protected String getInList(Collection<String> toExclude) {
+  protected <T> String getInList(Collection<T> ids) {
     StringBuilder b = new StringBuilder();
-    for (String id : toExclude) b.append("'").append(id).append("'").append(",");
+    for (T id : ids) b.append("'").append(id).append("'").append(",");
     String list = b.toString();
     list = list.substring(0, Math.max(0, list.length() - 1));
     return list;
