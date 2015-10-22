@@ -1,7 +1,10 @@
 package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.shared.scoring.PretestScore;
+
+import java.io.File;
 
 /**
  * What a client might want to know about some audio that was just posted.
@@ -148,7 +151,9 @@ public class AudioAnswer implements IsSerializable {
   public PretestScore getPretestScore() {  return pretestScore;  }
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment(String, String, String, int)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(CommonExercise, int, File, AudioCheck.ValidityAndDur, String, boolean, boolean, boolean, boolean)
+   * @see mitll.langtest.server.ScoreServlet#getAudioAnswer(int, String, int, boolean, String, File, String, String, CommonExercise, boolean, boolean)
    * @param pretestScore
    */
   public void setPretestScore(PretestScore pretestScore) {
