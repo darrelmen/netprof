@@ -392,15 +392,9 @@ public class Navigation implements RequiresResize, ShowTab {
   }
 
   private void showAnalysis() {
+    learnHelper.showNPF(chapters, LEARN);
+
     analysis.getContent().clear();
-//    analysisPlot = new AnalysisPlot(service, userManager.getUser());
-//    analysis.getContent().add(analysisPlot);
-//    learnHelper.getExerciseList().getExercises();
-//    new VerticalPanel();
-
-    //ListInterface exerciseList = npfHelper.getExerciseList();
-
-    //logger.info("Got " + exerciseList);
     ShowTab showTab = this;
     AnalysisTab w = new AnalysisTab(service, controller, userManager.getUser(), showTab);
     analysis.getContent().add(w);
