@@ -102,7 +102,11 @@ public class SimplePagingContainer<T> implements RequiresResize {
   protected void addColumnsToTable() {}
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
-    return new CellTable<T>(PAGE_SIZE, o);
+    return new CellTable<T>(getPageSize(), o);
+  }
+
+  protected int getPageSize() {
+    return PAGE_SIZE;
   }
 
   public void flush() {
