@@ -31,7 +31,7 @@ public class PhoneDAO extends DAO {
   private static final String SEQ = "seq";
   private static final String SCORE = "score";
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param database
@@ -58,13 +58,12 @@ public class PhoneDAO extends DAO {
     final int seq;
     final float score;
 
-    public Phone(long id, long rid, long wid, String phone, int seq, float score) {
+/*    public Phone(long id, long rid, long wid, String phone, int seq, float score) {
       this(rid, wid, phone, seq, score);
       this.id = id;
-    }
+    }*/
 
     public Phone(long rid, long wid, String phone, int seq, float score) {
-
       this.rid = rid;
       this.wid = wid;
       this.phone = phone;
@@ -181,7 +180,7 @@ public class PhoneDAO extends DAO {
    * @param idToRef
    * @return
    */
-  public PhoneReport getPhoneReport(long userid, List<String> exids, Map<String, String> idToRef) {
+  private PhoneReport getPhoneReport(long userid, List<String> exids, Map<String, String> idToRef) {
     PhoneReport worstPhonesAndScore = null;
     try {
       worstPhonesAndScore = getWorstPhones(userid, exids, idToRef);
@@ -328,7 +327,7 @@ public class PhoneDAO extends DAO {
 
       long rid = rs.getLong("RID");
 
-      logger.info("Got " + exid + " rid " + rid + " word " + word);
+//      logger.info("Got " + exid + " rid " + rid + " word " + word);
 
       if (!exid.equals(currentExercise)) {
         currentRID = rid;
