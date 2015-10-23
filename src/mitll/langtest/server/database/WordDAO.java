@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.LogAndNotify;
+import mitll.langtest.shared.AudioAnswer;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -20,9 +21,9 @@ public class WordDAO extends DAO {
 
   public static final String WORD = "word";
 //  private static final String WORDS = "Words";
-  public static final String RID = "rid";
-  public static final String SEQ = "seq";
-  public static final String SCORE = "score";
+  private static final String RID = "rid";
+  private static final String SEQ = "seq";
+  private static final String SCORE = "score";
 
   /**
    * @param database
@@ -73,7 +74,7 @@ public class WordDAO extends DAO {
    * @param database
    * @throws java.sql.SQLException
    */
-  void createTable(Database database) throws SQLException {
+  private void createTable(Database database) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " +
         WORD +
@@ -95,9 +96,9 @@ public class WordDAO extends DAO {
     finish(database, connection, statement);
   }
 
-
   /**
    * @return id of new row
+   * @see mitll.langtest.server.audio.AudioFileHelper#recordWordAndPhoneInfo(AudioAnswer, long)
    */
   public long addWord(Word word) {
     Connection connection = getConnection();
@@ -144,7 +145,7 @@ public class WordDAO extends DAO {
     return 0;
   }
 
-  public List<Word> getAll() {
+/*  public List<Word> getAll() {
     try {
       return getWords("SELECT * from " + WORD);
     } catch (Exception ee) {
@@ -152,7 +153,7 @@ public class WordDAO extends DAO {
       logAndNotify.logAndNotifyServerException(ee);
     }
     return Collections.emptyList();
-  }
+  }*/
 
 /*  public List<Event> getAllForUserAndExercise(long userid, String exid) {
     try {
