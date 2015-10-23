@@ -14,13 +14,15 @@ import java.util.*;
  * Created by go22670 on 10/21/15.
  */
 public class Analysis extends DAO {
-  public static final int MAX_EXAMPLES = 50;
   private static final Logger logger = Logger.getLogger(Analysis.class);
+
+  private static final int MAX_EXAMPLES = 50;
+  private static final boolean DEBUG = false;
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
 
   private ParseResultJson parseResultJson;
-  PhoneDAO phoneDAO;
+  private PhoneDAO phoneDAO;
 
   /**
    * @param database
@@ -50,7 +52,7 @@ public class Analysis extends DAO {
    * @throws SQLException
    */
   private List<BestScore> getBest(String sql) throws SQLException {
-    logger.info("got " + sql);
+    //logger.info("got " + sql);
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     long then = System.currentTimeMillis();
@@ -62,13 +64,20 @@ public class Analysis extends DAO {
   }
 
   private String getPerfSQL(long id) {
-    return "SELECT " + Database.EXID + "," + ResultDAO.PRON_SCORE + "," + Database.TIME + "," + ResultDAO.ID + "," + ResultDAO.DEVICE_TYPE + "," + ResultDAO.SCORE_JSON +
+    return "SELECT " + Database.EXID + "," + ResultDAO.PRON_SCORE + "," + Database.TIME + "," + ResultDAO.ID + "," +
+        ResultDAO.DEVICE_TYPE + "," + ResultDAO.SCORE_JSON +
         " FROM " + ResultDAO.RESULTS +
         " where " + ResultDAO.USERID + "=" + id +
         " AND " + ResultDAO.PRON_SCORE + ">0" + // discard when they got it wrong in avp
         " order by " + Database.EXID + ", " + Database.TIME;
   }
 
+  /**
+   * TODO : JUST FOR TESTING
+   * @param id
+   * @param binSize
+   * @return
+   */
   public UserPerformance getResultForUserByBin(long id, int binSize) {
     try {
       String sql = getPerfSQL(id);
@@ -83,6 +92,11 @@ public class Analysis extends DAO {
     return new UserPerformance(id);
   }
 
+  /**
+   * @see ResultDAO#getPerformanceForUser(long, PhoneDAO)
+   * @param id
+   * @return
+   */
   public UserPerformance getPerformanceForUser(long id) {
     try {
       String sql = getPerfSQL(id);
@@ -96,6 +110,11 @@ public class Analysis extends DAO {
     return new UserPerformance(id);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getWordScores(long)
+   * @param id
+   * @return
+   */
   public List<WordScore> getWordScoresForUser(long id) {
     try {
       String sql = getPerfSQL(id);
@@ -107,6 +126,11 @@ public class Analysis extends DAO {
     return new ArrayList<>();
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getPhoneScores(long)
+   * @param id
+   * @return
+   */
   public PhoneReport getPhonesForUser(long id) {
     try {
       String sql = getPerfSQL(id);
@@ -116,18 +140,18 @@ public class Analysis extends DAO {
         ids.add(bs.getResultID());
       }
 
-      logger.info("getPhonesForUser from " + resultsForQuery.size() + " added " + ids.size() + " ids ");
+      if (DEBUG) logger.info("getPhonesForUser from " + resultsForQuery.size() + " added " + ids.size() + " ids ");
       PhoneReport phoneReport = phoneDAO.getWorstPhonesForResults(id, ids, Collections.emptyMap());
 
       Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
 
-      logger.info("getPhonesForUser report phonesForUser " + phonesForUser);
+      if (DEBUG) logger.info("getPhonesForUser report phonesForUser " + phonesForUser);
       long now = System.currentTimeMillis();
 
       for (Map.Entry<String, List<WordAndScore>> pair : phonesForUser.entrySet()) {
         List<WordAndScore> value = pair.getValue();
         String phone = pair.getKey();
-        logger.info(phone + " = " + value.size() + " first " + value.get(0));
+        if (DEBUG) logger.info(phone + " = " + value.size() + " first " + value.get(0));
         List<WordAndScore> subset = new ArrayList<>();
 
         Set<String> unique = new HashSet<>();
@@ -140,7 +164,7 @@ public class Analysis extends DAO {
         }
         phonesForUser.put(phone,subset);
       }
-      logger.info("getPhonesForUser report phoneReport " + phoneReport);
+      if (DEBUG) logger.info("getPhonesForUser report phoneReport " + phoneReport);
 
       return phoneReport;
     } catch (Exception ee) {
@@ -172,7 +196,7 @@ public class Analysis extends DAO {
 
       String json = rs.getString(ResultDAO.SCORE_JSON);
       String device = rs.getString(ResultDAO.DEVICE_TYPE);
-      boolean isiPad = device.startsWith("i");
+      boolean isiPad = device != null && device.startsWith("i");
 
       long time = timestamp.getTime();
       if ((last != null && !last.equals(exid)) || (lastTimestamp > 0 && time - lastTimestamp > FIVE_MINUTES)) {
