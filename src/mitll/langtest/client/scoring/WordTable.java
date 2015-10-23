@@ -20,19 +20,49 @@ import java.util.Map;
  */
 public class WordTable {
 
-  public String toHTML(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
+  public String toHTML(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime, String filter) {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
     StringBuilder builder = new StringBuilder();
     builder.append("<table>");
     builder.append("<thead>");
     for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
       TranscriptSegment word = pair.getKey();
-      builder.append("<th style='text-align:center; background-color:" +SimpleColumnChart.getColor(word.getScore())+
+      builder.append("<th style='text-align:center; background-color:" + SimpleColumnChart.getColor(word.getScore()) +
           "'>");
       builder.append(word.getEvent());
       builder.append("</th>");
     }
+
+
     builder.append("</thead>");
+
+    builder.append("<tr>");
+
+    for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
+      builder.append("<td>");
+      builder.append("<table>");
+      builder.append("<thead>");
+
+      for (TranscriptSegment phone : pair.getValue()) {
+        String event = phone.getEvent();
+        if (!event.equals("sil")) {
+          String color = " background-color:" + SimpleColumnChart.getColor(phone.getScore());
+          boolean match = event.equals(filter);
+          if (!match) color = "";
+          builder.append("<th style='text-align:center;" +
+              color +
+              "'>");
+          builder.append(event);
+          builder.append("</th>");
+        }
+      }
+
+      builder.append("</thead>");
+      builder.append("</table>");
+      builder.append("</td>");
+    }
+
+    builder.append("</tr>");
     builder.append("</table>");
     return builder.toString();
   }
@@ -53,7 +83,7 @@ public class WordTable {
 
   public String getColoredSpan(String event, float score) {
     StringBuilder builder = new StringBuilder();
-    builder.append("<span style='padding:3px; margin-left:3px; text-align:center; background-color:" + SimpleColumnChart.getColor(score)+
+    builder.append("<span style='padding:3px; margin-left:3px; text-align:center; background-color:" + SimpleColumnChart.getColor(score) +
         "'>");
     builder.append(event);
     builder.append("</span>");
@@ -92,6 +122,7 @@ public class WordTable {
 
       col.add(wscore);
 
+
       Table pTable = new Table();
       pTable.removeStyleName("table");
 
@@ -100,11 +131,12 @@ public class WordTable {
       col.add(pTable);
       row.add(col);
 
+      // TODO : remove this???
       HTMLPanel row2 = new HTMLPanel("tr", "");
       pTable.add(row2);
 
-      HTMLPanel row3 = new HTMLPanel("tr", "");
-      pTable.add(row3);
+      HTMLPanel scoreRow = new HTMLPanel("tr", "");
+      pTable.add(scoreRow);
 
       for (TranscriptSegment phone : pair.getValue()) {
         String event = phone.getEvent();
@@ -115,30 +147,32 @@ public class WordTable {
           String color1 = SimpleColumnChart.getColor(phone.getScore());
           h.getElement().getStyle().setBackgroundColor(color1);
 
-          //  HTML widget = new HTML(" <b>" + getPercent(phone.getScore()) +"</b>");
-          HTML widget = new HTML("" + getPercent(phone.getScore()));
-          widget.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
-          widget.getElement().getStyle().setWidth(25, Style.Unit.PX);
+          //  HTML score = new HTML(" <b>" + getPercent(phone.getScore()) +"</b>");
+          HTML score = new HTML("" + getPercent(phone.getScore()));
+          score.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+          score.getElement().getStyle().setWidth(25, Style.Unit.PX);
 
           col = new HTMLPanel("td", "");
-          col.add(widget);
-          row3.add(col);
+          col.add(score);
+          scoreRow.add(col);
         }
       }
     }
 
     return table;
   }
+
   private int getPercent(Float aFloat) {
     return getScore(aFloat * 100);
   }
+
   private int getScore(float a) {
     return Math.round(a);
   }
 
   private Map<TranscriptSegment, List<TranscriptSegment>> getWordToPhones(
       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
-    List<TranscriptSegment> words  = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
+    List<TranscriptSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
     List<TranscriptSegment> phones = netPronImageTypeToEndTime.get(NetPronImageType.PHONE_TRANSCRIPT);
 
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = new HashMap<>();
