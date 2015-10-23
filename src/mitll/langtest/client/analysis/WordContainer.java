@@ -73,9 +73,7 @@ class WordContainer extends SimplePagingContainer<WordScore> {
   @Override
   protected CellTable.Resources chooseResources() {
     CellTable.Resources o;
-
     o = GWT.create(LocalTableResources.class);
-
     return o;
   }
 
