@@ -20,6 +20,11 @@ public class WordScore implements Serializable, Comparable<WordScore>{
   public WordScore() {
   }
 
+  /**
+   * @see mitll.langtest.server.database.analysis.Analysis#getWordScore(List)
+   * @param bs
+   * @param netPronImageTypeListMap
+   */
   public WordScore(BestScore bs, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
     this(bs.getId(), bs.getScore(), bs.getTimestamp(), bs.getResultID(), netPronImageTypeListMap);
   }
