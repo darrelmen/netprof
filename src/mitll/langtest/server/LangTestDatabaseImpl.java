@@ -1037,6 +1037,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     if (resultID > -1 && result == null) { // alignment has two steps : 1) post the audio, then 2) do alignment
       db.getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson());
+      db.recordWordAndPhoneInfo(resultID, asrScoreForAudio);
     }
     return asrScoreForAudio;
   }
