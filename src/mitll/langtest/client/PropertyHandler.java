@@ -71,7 +71,7 @@ public class PropertyHandler {
   private static final String NO_MODEL = "noModel";
   private static final String PREFERRED_VOICES = "preferredVoices";
 
-  private boolean adminView, analysis = true;
+  private boolean adminView, analysis = false;
   private boolean enableAllUsers;
   private boolean usePhoneToDisplay;
 
