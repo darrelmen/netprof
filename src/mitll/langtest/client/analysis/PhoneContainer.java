@@ -3,6 +3,7 @@ package mitll.langtest.client.analysis;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -14,13 +15,17 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.view.client.SingleSelectionModel;
+import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.client.scoring.WordTable;
+import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.analysis.PhoneReport;
+import mitll.langtest.shared.analysis.WordAndScore;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -34,21 +39,23 @@ import java.util.logging.Logger;
 class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   private final Logger logger = Logger.getLogger("WordContainer");
   private static final int COL_WIDTH = 55;
-
- // private static final int TABLE_HISTORY_WIDTH = 420;
-//  private ExerciseComparator sorter;
-//  private AnalysisPlot plot;
-//  private ShowTab learnTab;
+  PhoneExampleContainer exampleContainer;
 
   /**
-   *
    * @param controller
    */
-  public PhoneContainer(ExerciseController controller) {
+  public PhoneContainer(ExerciseController controller, PhoneExampleContainer exampleContainer) {
     super(controller);
 //    sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
 //    this.plot = plot;
-  //  this.learnTab = learnTab;
+    //  this.learnTab = learnTab;
+    this.exampleContainer = exampleContainer;
+  }
+
+  @Override
+  protected void addSelectionModel() {
+    selectionModel = new SingleSelectionModel<PhoneAndScore>();
+    table.setSelectionModel(selectionModel);
   }
 
   @Override
@@ -56,29 +63,83 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     table.getElement().getStyle().setProperty("maxWidth", 150 + "px");
   }
 
+  PhoneReport phoneReport;
+  /**
+   * @see AnalysisTab#getPhoneReport(LangTestDatabaseAsync, ExerciseController, int, Panel)
+   * @param phoneReport
+   * @return
+   */
   public Panel getTableWithPager(PhoneReport phoneReport) {
     List<PhoneAndScore> phoneAndScores = new ArrayList<>();
-    for (Map.Entry<String,Float> ps : phoneReport.getPhoneToAvgSorted().entrySet()) {
-      phoneAndScores.add(new PhoneAndScore(ps.getKey(),ps.getValue()));
+    for (Map.Entry<String, Float> ps : phoneReport.getPhoneToAvgSorted().entrySet()) {
+      phoneAndScores.add(new PhoneAndScore(ps.getKey(), ps.getValue()));
     }
+    this.phoneReport = phoneReport;
+    logger.info("examples " +phoneReport.getPhoneToWordAndScoreSorted());
     return getTableWithPager(phoneAndScores);
   }
+
   /**
    * @param sortedHistory
    * @return
    * @see SetCompleteDisplay#getScoreHistory(List, List, ExerciseController)
    */
   public Panel getTableWithPager(List<PhoneAndScore> sortedHistory) {
+    logger.info("PhoneContainer.getTableWithPager " + sortedHistory.size());
+
     Panel tableWithPager = getTableWithPager();
     tableWithPager.getElement().setId("TableScoreHistory");
- //   tableWithPager.setWidth(TABLE_HISTORY_WIDTH + "px");
+    //   tableWithPager.setWidth(TABLE_HISTORY_WIDTH + "px");
     tableWithPager.addStyleName("floatLeft");
 
-    for (PhoneAndScore PhoneAndScore : sortedHistory) {
-      addItem(PhoneAndScore);
+    addItems(sortedHistory);
+    return tableWithPager;
+  }
+
+  private void addItems(List<PhoneAndScore> sortedHistory) {
+    logger.info("PhoneContainer.addItems " + sortedHistory.size());
+
+    for (PhoneAndScore ps : sortedHistory) {
+      addItem(ps);
     }
     flush();
-    return tableWithPager;
+
+    try {
+      if (!sortedHistory.isEmpty()) {
+        table.getSelectionModel().setSelected(sortedHistory.get(0), true);
+      }
+    } catch (Exception e) {
+      logger.warning("Got " +e);
+    }
+    // showExamplesForSelectedSound();
+  }
+
+  public void showExamplesForSelectedSound() {
+    logger.info("PhoneContainer.showExamplesForSelectedSound ");
+    List<PhoneAndScore> list = getList();
+    if (list.isEmpty()) {
+      logger.info("list empty?");
+
+    }
+    else {
+   //   String phone = selectionModel.getSelectedObject().getPhone();
+      String phone = list.get(0).getPhone();
+      logger.info("first phone " + phone);
+
+      List<WordAndScore> wordExamples = phoneReport.getWordExamples(phone);
+      logger.info("showExamplesForSelectedSound adding " + phone + " num examples " + wordExamples.size());
+
+      exampleContainer.addItems(phone, wordExamples);
+    }
+
+//    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+//      public void execute() {
+//        String phone = selectionModel.getSelectedObject().getPhone();
+//
+//        logger.info("adding " + phone);
+//        exampleContainer.addItems(phone, phoneReport.getWordExamples(phone));
+//      }
+//    });
   }
 
   @Override
@@ -97,7 +158,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
 
 //    String language = controller.getLanguage();
 
-  //  String headerForFL = language.equals("English") ? "Meaning" : language;
+    //  String headerForFL = language.equals("English") ? "Meaning" : language;
     addColumn(itemCol, new TextHeader("Sound"));
 
     List<PhoneAndScore> dataList = getList();
@@ -107,7 +168,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   }
 
   private ColumnSortEvent.ListHandler<PhoneAndScore> getEnglishSorter(Column<PhoneAndScore, SafeHtml> englishCol,
-                                                                  List<PhoneAndScore> dataList) {
+                                                                      List<PhoneAndScore> dataList) {
     ColumnSortEvent.ListHandler<PhoneAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndScore>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<PhoneAndScore>() {
@@ -130,7 +191,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   }
 
   private ColumnSortEvent.ListHandler<PhoneAndScore> getScoreSorter(Column<PhoneAndScore, SafeHtml> scoreCol,
-                                                                List<PhoneAndScore> dataList) {
+                                                                    List<PhoneAndScore> dataList) {
     ColumnSortEvent.ListHandler<PhoneAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndScore>(dataList);
     columnSortHandler.setComparator(scoreCol,
         new Comparator<PhoneAndScore>() {
@@ -173,7 +234,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
 
     scoreColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     scoreColumn.setSortable(true);
-   // table.setColumnWidth(scoreColumn, "70" + "px");
+    // table.setColumnWidth(scoreColumn, "70" + "px");
     table.setWidth("100%", true);
 
     ColumnSortEvent.ListHandler<PhoneAndScore> columnSortHandler2 = getScoreSorter(scoreColumn, getList());
@@ -194,14 +255,14 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
 
       @Override
       public SafeHtml getValue(PhoneAndScore shell) {
-        String          columnText = new WordTable().getColoredSpan(shell.getPhone(), shell.getScore());
+        String columnText = new WordTable().getColoredSpan(shell.getPhone(), shell.getScore());
         return getSafeHtml(columnText);
       }
     };
   }
 
   private void gotClickOnItem(final PhoneAndScore e) {
-    //learnTab.showLearnAndItem(e.getId());
+    exampleContainer.addItems(e.getPhone(), phoneReport.getWordExamples(e.getPhone()));
   }
 
   private SafeHtml getSafeHtml(String columnText) {
