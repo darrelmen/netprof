@@ -67,7 +67,7 @@ public class ServerProperties {
   private static final List<String> DLI_APPROVERS = Arrays.asList(
       "Tamas",
       "Tamas",
-      "David",
+      "Michael",
       "Sandy",
       "Gordon");
 
@@ -76,13 +76,15 @@ public class ServerProperties {
   private static final List<String> DLI_EMAILS = Arrays.asList(
       TAMAS_1,
       TAMAS_2,
-      "david.randolph@dliflc.edu",
+      "michael.grimmer1@dliflc.edu",
       "sandra.wagner@dliflc.edu",
       GORDON_VIDAVER);
 
 
   private static final Set<String> ADMINLIST = new HashSet<String>(Arrays.asList("gvidaver", "tmarius",
-      "drandolph", "swagner", "gmarkovic", "djones", "jmelot", "rbudd", "pgatewood"));
+      //"drandolph",
+      "mgrimmer",
+      "swagner", "gmarkovic", "djones", "jmelot", "rbudd", "pgatewood"));
 
   /**
    * Set this property for non-DLI deployments.
