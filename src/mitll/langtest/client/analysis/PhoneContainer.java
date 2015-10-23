@@ -32,8 +32,8 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
-  public static final int COL_WIDTH = 40;
   private final Logger logger = Logger.getLogger("WordContainer");
+  private static final int COL_WIDTH = 55;
 
  // private static final int TABLE_HISTORY_WIDTH = 420;
 //  private ExerciseComparator sorter;
@@ -43,7 +43,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   /**
    *
    * @param controller
-   * @param plot
    */
   public PhoneContainer(ExerciseController controller) {
     super(controller);
