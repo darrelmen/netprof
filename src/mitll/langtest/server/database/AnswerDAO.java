@@ -2,11 +2,7 @@ package mitll.langtest.server.database;
 
 import org.apache.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import java.sql.*;
 
 /**
  * Does writing to the results table.
@@ -14,9 +10,7 @@ import java.sql.Timestamp;
  */
 public class AnswerDAO extends DAO {
   private static final Logger logger = Logger.getLogger(AnswerDAO.class);
-  public static final String PLAN = "plan";
-  //public static final String AVP_SKIP = "avp_skip";
-
+  private static final String PLAN = "plan";
   private final ResultDAO resultDAO;
 
   public AnswerDAO(Database database, ResultDAO resultDAO) {
@@ -25,7 +19,6 @@ public class AnswerDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @param database
    * @param userID
    * @param id
@@ -42,6 +35,7 @@ public class AnswerDAO extends DAO {
    * @param processDur
    * @param roundTripDur
    * @return id of new row in result table
+   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    */
   public long addAnswer(Database database, int userID, String id, int questionID, String answer,
                         String audioFile, boolean valid, String audioType, long durationInMillis,
@@ -55,7 +49,6 @@ public class AnswerDAO extends DAO {
       long now = System.currentTimeMillis();
       if (now - then > 100) System.out.println("took " + (now - then) + " millis to record answer.");
       return newid;
-
     } catch (Exception ee) {
       logger.error("addAnswer got " + ee, ee);
     } finally {
@@ -68,7 +61,6 @@ public class AnswerDAO extends DAO {
    * Add a row to the table.
    * Each insert is marked with a timestamp.
    * This allows us to determine user completion rate.
-   *
    *
    * @param connection
    * @param userid
@@ -94,7 +86,7 @@ public class AnswerDAO extends DAO {
                                 boolean correct, float pronScore, String deviceType, String device, String scoreJson,
                                 boolean withFlash, int processDur, int roundTripDur) throws SQLException {
     logger.debug("adding answer for exid #" + id + " correct " + correct + " score " + pronScore +
-            " audio type " +audioType + " answer " + answer + " process " + processDur + " json " + scoreJson);
+        " audio type " + audioType + " answer " + answer + " process " + processDur + " json " + scoreJson);
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
         ResultDAO.RESULTS +
@@ -116,9 +108,9 @@ public class AnswerDAO extends DAO {
         ResultDAO.DEVICE_TYPE + "," +
         ResultDAO.DEVICE + "," +
         ResultDAO.SCORE_JSON + "," +
-        ResultDAO.WITH_FLASH + ","+
-        ResultDAO.PROCESS_DUR + ","+
-        ResultDAO.ROUND_TRIP_DUR+
+        ResultDAO.WITH_FLASH + "," +
+        ResultDAO.PROCESS_DUR + "," +
+        ResultDAO.ROUND_TRIP_DUR +
         ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
     int i = 1;
@@ -166,7 +158,7 @@ public class AnswerDAO extends DAO {
           "results" +
           " " +
           "SET " +
-          ResultDAO.ROUND_TRIP_DUR+"='" + roundTrip + "' " +
+          ResultDAO.ROUND_TRIP_DUR + "='" + roundTrip + "' " +
           "WHERE id=" + resultID;
       PreparedStatement statement = connection.prepareStatement(sql);
 
@@ -178,40 +170,37 @@ public class AnswerDAO extends DAO {
 
       statement.close();
     } catch (Exception e) {
-      logger.error("got " +e,e);
+      logger.error("got " + e, e);
     } finally {
       database.closeConnection(connection);
     }
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
    * @param id
    * @param processDur
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
    */
   public void changeAnswer(long id, float score, int processDur, String json) {
-    logger.info("Setting id " + id + " score " + score  + " process dur " + processDur + " json " +json );
-      Connection connection = getConnection();
-      try {
-          String sql = "UPDATE " +
-                  "results" +
-                  " " +
-                  "SET " +
-                  ResultDAO.PRON_SCORE + "='" + score + "', " +
-                  ResultDAO.PROCESS_DUR + "='" + processDur + "', " +
-                  ResultDAO.SCORE_JSON + "='" + json + "' " +
-                  "WHERE id=" + id;
-          PreparedStatement statement = connection.prepareStatement(sql);
+    //logger.info("Setting id " + id + " score " + score + " process dur " + processDur + " json " + json);
+    Connection connection = getConnection();
+    try {
+      String sql = "UPDATE " +
+          "results " +
+          "SET " +
+          ResultDAO.PRON_SCORE +  "='" + score + "', " +
+          ResultDAO.PROCESS_DUR + "='" + processDur + "', " +
+          ResultDAO.SCORE_JSON +  "='" + json + "' " +
+          "WHERE id=" + id;
 
-      int i = statement.executeUpdate();
-
-      if (i == 0) {
+      PreparedStatement statement = connection.prepareStatement(sql);
+      if (statement.executeUpdate() == 0) {
         logger.error("huh? didn't change the answer for " + id + " sql " + sql);
       }
 
       statement.close();
     } catch (Exception e) {
-      logger.error("got " +e,e);
+      logger.error("got " + e, e);
     } finally {
       database.closeConnection(connection);
     }
@@ -221,51 +210,7 @@ public class AnswerDAO extends DAO {
     return database.getConnection(this.getClass().toString());
   }
 
-  /**
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#setAVPSkip(java.util.Collection)
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#getRepeatButton()
-   * @paramx ids
-   */
-/*  public void changeType(Collection<Long> ids) {
-    if (ids.isEmpty()) return;
-    Connection connection = getConnection();
-    try {
-      String list = getInList(ids);
-
-      String sql = "UPDATE " +
-        ResultDAO.RESULTS +
-        " " +
-        "SET " +
-        ResultDAO.AUDIO_TYPE + "='" + AVP_SKIP + "' " +
-        " where " + ResultDAO.ID + " in (" +
-        list + ") ";
-      PreparedStatement statement = connection.prepareStatement(sql);
-
-      int i = statement.executeUpdate();
-
-      if (i == 0) {
-        logger.error("huh? didn't update the results for " + ids + " sql " + sql);
-      }
-      else {
-        logger.debug("Altered " + i + " rows, given " + ids.size() + " ids");
-      }
-
-      statement.close();
-    } catch (Exception e) {
-      logger.error("got " +e,e);
-    } finally {
-      database.closeConnection(connection);
-    }
-  }*/
-
-/*  private String getInList(Collection<Long> ids) {
-    StringBuilder b = new StringBuilder();
-    for (Long id : ids) b.append(id).append(",");
-    String list = b.toString();
-    list = list.substring(0, Math.max(0, list.length() - 1));
-    return list;
-  }*/
-
-  private String copyStringChar(String plan) { return new String(plan.toCharArray());  }
-
+  private String copyStringChar(String plan) {
+    return new String(plan.toCharArray());
+  }
 }
