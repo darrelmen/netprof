@@ -1,8 +1,12 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.NetPronImageType;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -32,6 +36,7 @@ public class PhoneDAO extends DAO {
   private static final String SCORE = "score";
 
   private static final boolean DEBUG = false;
+  private ParseResultJson parseResultJson;
 
   /**
    * @param database
@@ -45,6 +50,7 @@ public class PhoneDAO extends DAO {
       createIndex(database, WID, PHONE);
       Connection connection = database.getConnection(this.getClass().toString());
       database.closeConnection(connection);
+      parseResultJson = new ParseResultJson(database.getServerProps());
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
@@ -283,9 +289,17 @@ public class PhoneDAO extends DAO {
     return bd.floatValue();
   }
 
+  /**
+   * @see Analysis#getPhonesForUser
+   * @param userid
+   * @param ids
+   * @param idToRef
+   * @return
+   * @throws SQLException
+   */
   public PhoneReport getWorstPhonesForResults(long userid, List<Integer> ids, Map<String, String> idToRef) throws SQLException {
     String sql = getResultIDJoinSQL(userid, ids);
-    return getPhoneReport(sql, idToRef);
+    return getPhoneReport(sql, idToRef, true);
   }
 
   /**
@@ -297,11 +311,11 @@ public class PhoneDAO extends DAO {
    */
   private PhoneReport getWorstPhones(long userid, List<String> exids, Map<String, String> idToRef) throws SQLException {
     String sql = getJoinSQL(userid, exids);
-    return getPhoneReport(sql, idToRef);
+    return getPhoneReport(sql, idToRef, false);
   }
 
-  private PhoneReport getPhoneReport(String sql, Map<String, String> idToRef) throws SQLException {
-    logger.debug("getPhoneReport query is " + sql);
+  private PhoneReport getPhoneReport(String sql, Map<String, String> idToRef, boolean addTranscript) throws SQLException {
+   // logger.debug("getPhoneReport query is " + sql);
     Connection connection = getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
@@ -348,8 +362,16 @@ public class PhoneDAO extends DAO {
         if (wordAndScores == null) {
           phoneToWordAndScore.put(phone, wordAndScores = new ArrayList<WordAndScore>());
         }
-        wordAndScores.add(new WordAndScore(word, wscore, rid, wseq, seq, trimPathForWebPage(audioAnswer),
-            idToRef.get(exid), scoreJson));
+
+        WordAndScore e = new WordAndScore(word, wscore, rid, wseq, seq, trimPathForWebPage(audioAnswer),
+            idToRef.get(exid), scoreJson);
+        wordAndScores.add(e);
+
+        if (addTranscript) {
+          Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(scoreJson);
+          e.setTranscript(netPronImageTypeListMap);
+          e.clearJSON();
+        }
       } else {
         logger.debug("skipping " + exid + " " + rid + " word " + word);
       }
@@ -397,7 +419,7 @@ public class PhoneDAO extends DAO {
    * @param totalScore
    * @param totalItems
    * @return
-   * @see #getPhoneReport(String, Map)
+   * @see #getPhoneReport(String, Map, boolean)
    */
   private PhoneReport getPhoneReport(Map<String, List<Float>> phoneToScores,
                                      Map<String, List<WordAndScore>> phoneToWordAndScore,
