@@ -411,7 +411,7 @@ public class Navigation implements RequiresResize, ShowTab {
     chapters.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        logger.info("got click on" + chapters);
+      //  logger.info("got click on" + chapters);
         checkAndMaybeClearTab(CHAPTERS);
         learnHelper.showNPF(chapters, LEARN);
         logEvent(chapters, CHAPTERS);
@@ -634,7 +634,7 @@ public class Navigation implements RequiresResize, ShowTab {
     } else if (toUse.getTab() == null) {
       logger.warning("huh? toUse has a null tab? " + toUse);
     } else {
-      logger.info("click on tab " + toUse);
+     // logger.info("click on tab " + toUse);
       toUse.clickOnTab();
     }
   }
