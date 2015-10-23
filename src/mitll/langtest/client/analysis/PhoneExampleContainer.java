@@ -12,7 +12,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -20,7 +19,6 @@ import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.client.scoring.WordTable;
-import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.analysis.WordAndScore;
 
 import java.util.Comparator;
@@ -44,6 +42,13 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
     //  this.learnTab = learnTab;
   }
 
+  /**
+   * Two rows each
+   * @return
+   */
+  protected int getPageSize() {
+    return 5;
+  }
 /*
   @Override
   protected void setMaxWidth() {
@@ -72,12 +77,16 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
     return tableWithPager;
   }
 
+  String phone;
+
   /**
    * @see PhoneContainer#showExamplesForSelectedSound()
+   * @see PhoneContainer#gotClickOnItem(PhoneAndScore)
    * @param phone
    * @param sortedHistory
    */
   public void addItems(String phone, List<WordAndScore> sortedHistory) {
+    this.phone = phone;
     if (sortedHistory != null) {
       logger.info("PhoneExampleContainer.addItems " + sortedHistory.size() + " items");
     }
@@ -208,7 +217,7 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
 
       @Override
       public SafeHtml getValue(WordAndScore shell) {
-        String columnText = new WordTable().toHTML2(shell.getTranscript());
+        String columnText = new WordTable().toHTML(shell.getTranscript(), phone);
         if (columnText.isEmpty()) {
           //CommonShell exercise = plot.getIdToEx().get(shell.getId());
           String foreignLanguage = shell.getWord();//exercise == null ? "" : exercise.getForeignLanguage();
