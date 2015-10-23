@@ -1,6 +1,11 @@
 package mitll.langtest.shared.analysis;
 
+import mitll.langtest.server.database.PhoneDAO;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.NetPronImageType;
+
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,6 +20,7 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
   private String answerAudio;
   private String refAudio;
   private String scoreJson;
+  private Map<NetPronImageType, List<TranscriptSegment>> transcript;
 
   /**
    * @param word
@@ -25,7 +31,7 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
    * @param answerAudio
    * @param refAudio
    * @param scoreJson
-   * @see #getPhoneReport(String, Map)
+   * @see PhoneDAO#getPhoneReport
    */
   public WordAndScore(String word, float score, long resultID, int wseq, int seq, String answerAudio, String refAudio, String scoreJson) {
     this.word = word;
@@ -80,5 +86,17 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
 
   public String getScoreJson() {
     return scoreJson;
+  }
+
+  public void setTranscript(Map<NetPronImageType, List<TranscriptSegment>> transcript) {
+    this.transcript = transcript;
+  }
+
+  public Map<NetPronImageType, List<TranscriptSegment>> getTranscript() {
+    return transcript;
+  }
+
+  public void clearJSON() {
+    scoreJson = "";
   }
 }
