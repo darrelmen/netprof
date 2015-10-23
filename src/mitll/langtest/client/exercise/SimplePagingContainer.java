@@ -99,7 +99,6 @@ public class SimplePagingContainer<T> implements RequiresResize {
   }
 
   protected void addSelectionModel() {}
-
   protected void addColumnsToTable() {}
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
