@@ -35,6 +35,7 @@ import java.util.*;
 public class AudioFileHelper implements CollationSort, AutoCRTScoring {
   private static final Logger logger = Logger.getLogger(AudioFileHelper.class);
   private static final String POSTED_AUDIO = "postedAudio";
+  public static final String SIL = "sil";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -283,7 +284,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
           recordedWithFlash, deviceType, device, scoreJson, processDur);
       answer.setResultID(answerID);
 
-      recordWordAndPhoneInfo(answer, answerID);
+      db.recordWordAndPhoneInfo(answer, answerID);
     }
     //   logger.debug("getAudioAnswerDecoding answer " + answer);
     return answer;
@@ -475,10 +476,12 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    * @param answerID
    * @see #getAudioAnswerDecoding
    */
-  private void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
+/*  private void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
     PretestScore pretestScore = answer.getPretestScore();
 
-    if (pretestScore == null) logger.error("huh? pretest score is null for " + answer + " and " + answerID);
+    if (pretestScore == null) {
+      logger.error("huh? pretest score is null for " + answer + " and " + answerID);
+    }
 
     List<TranscriptSegment> words  = pretestScore == null ? null : pretestScore.getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
     List<TranscriptSegment> phones = pretestScore == null ? null : pretestScore.getsTypeToEndTimes().get(NetPronImageType.PHONE_TRANSCRIPT);
@@ -488,12 +491,12 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
 
       for (TranscriptSegment segment : words) {
         String event = segment.getEvent();
-        if (!event.equals(SLFFile.UNKNOWN_MODEL) && !event.equals("sil")) {
+        if (!event.equals(SLFFile.UNKNOWN_MODEL) && !event.equals(SIL)) {
           long wid = db.getWordDAO().addWord(new WordDAO.Word(answerID, event, windex++, segment.getScore()));
           for (TranscriptSegment pseg : phones) {
             if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
               String pevent = pseg.getEvent();
-              if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals("sil")) {
+              if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals(SIL)) {
                 db.getPhoneDAO().addPhone(new PhoneDAO.Phone(answerID, wid, pevent, pindex++, pseg.getScore()));
               }
             }
@@ -501,7 +504,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
         }
       }
     }
-  }
+  }*/
 
   /**
    * @param base64EncodedString
