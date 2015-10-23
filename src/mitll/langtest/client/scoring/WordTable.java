@@ -132,13 +132,13 @@ public class WordTable {
   private int getPercent(Float aFloat) {
     return getScore(aFloat * 100);
   }
-
   private int getScore(float a) {
     return Math.round(a);
   }
 
-  private Map<TranscriptSegment, List<TranscriptSegment>> getWordToPhones(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
-    List<TranscriptSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
+  private Map<TranscriptSegment, List<TranscriptSegment>> getWordToPhones(
+      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
+    List<TranscriptSegment> words  = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
     List<TranscriptSegment> phones = netPronImageTypeToEndTime.get(NetPronImageType.PHONE_TRANSCRIPT);
 
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = new HashMap<>();
