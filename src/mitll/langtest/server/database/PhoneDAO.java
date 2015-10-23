@@ -325,6 +325,8 @@ public class PhoneDAO extends DAO {
 
     String currentExercise = "";
     Map<String, List<WordAndScore>> phoneToWordAndScore = new HashMap<String, List<WordAndScore>>();
+    Map<String, Set<Long>> phoneToRID = new HashMap<String, Set<Long>>();
+
     float totalScore = 0;
     float totalItems = 0;
 
@@ -359,13 +361,18 @@ public class PhoneDAO extends DAO {
         scores.add(rs.getFloat(SCORE));
 
         List<WordAndScore> wordAndScores = phoneToWordAndScore.get(phone);
+        Set<Long> ridsForPhone = phoneToRID.get(phone);
         if (wordAndScores == null) {
           phoneToWordAndScore.put(phone, wordAndScores = new ArrayList<WordAndScore>());
+          phoneToRID.put(phone, ridsForPhone = new HashSet<Long>());
         }
 
         WordAndScore e = new WordAndScore(word, wscore, rid, wseq, seq, trimPathForWebPage(audioAnswer),
             idToRef.get(exid), scoreJson);
-        wordAndScores.add(e);
+        if (!ridsForPhone.contains(rid)) { // get rid of duplicates
+          wordAndScores.add(e);
+        }
+        ridsForPhone.add(rid);
 
         if (addTranscript) {
           Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(scoreJson);
