@@ -18,7 +18,7 @@ public class PhoneReport implements Serializable {
   /**
    * @param overallPercent
    * @param phoneToWordAndScoreSorted
-   * @see #getWorstPhones
+   * @see mitll.langtest.server.database.PhoneDAO#getPhoneReport(Map, Map, float, float)
    */
   public PhoneReport(int overallPercent, Map<String, List<WordAndScore>> phoneToWordAndScoreSorted, Map<String, Float> phoneToAvgSorted) {
     this.overallPercent = overallPercent;
