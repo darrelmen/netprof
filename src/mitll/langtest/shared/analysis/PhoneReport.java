@@ -3,6 +3,7 @@ package mitll.langtest.shared.analysis;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 10/22/15.
@@ -29,6 +30,7 @@ public class PhoneReport implements Serializable {
     return phoneToWordAndScoreSorted;
   }
 
+  public List<WordAndScore> getWordExamples(String phone) { return phoneToWordAndScoreSorted.get(phone);}
   public String toString() { return getPhoneToAvgSorted().toString(); }
 
   public int getOverallPercent() {
