@@ -1,5 +1,6 @@
 package mitll.langtest.client.analysis;
 
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -37,7 +38,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
-  private final Logger logger = Logger.getLogger("WordContainer");
+  private final Logger logger = Logger.getLogger("PhoneContainer");
   private static final int COL_WIDTH = 55;
   PhoneExampleContainer exampleContainer;
 
@@ -75,7 +76,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
       phoneAndScores.add(new PhoneAndScore(ps.getKey(), ps.getValue()));
     }
     this.phoneReport = phoneReport;
-    logger.info("examples " +phoneReport.getPhoneToWordAndScoreSorted());
+  //  logger.info("examples " +phoneReport.getPhoneToWordAndScoreSorted());
     return getTableWithPager(phoneAndScores);
   }
 
@@ -85,7 +86,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
    * @see SetCompleteDisplay#getScoreHistory(List, List, ExerciseController)
    */
   public Panel getTableWithPager(List<PhoneAndScore> sortedHistory) {
-    logger.info("PhoneContainer.getTableWithPager " + sortedHistory.size());
+  //  logger.info("PhoneContainer.getTableWithPager " + sortedHistory.size());
 
     Panel tableWithPager = getTableWithPager();
     tableWithPager.getElement().setId("TableScoreHistory");
@@ -97,7 +98,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   }
 
   private void addItems(List<PhoneAndScore> sortedHistory) {
-    logger.info("PhoneContainer.addItems " + sortedHistory.size());
+   // logger.info("PhoneContainer.addItems " + sortedHistory.size());
 
     for (PhoneAndScore ps : sortedHistory) {
       addItem(ps);
@@ -115,31 +116,21 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   }
 
   public void showExamplesForSelectedSound() {
-    logger.info("PhoneContainer.showExamplesForSelectedSound ");
+  // logger.info("PhoneContainer.showExamplesForSelectedSound ");
     List<PhoneAndScore> list = getList();
     if (list.isEmpty()) {
       logger.info("list empty?");
-
     }
     else {
    //   String phone = selectionModel.getSelectedObject().getPhone();
       String phone = list.get(0).getPhone();
-      logger.info("first phone " + phone);
+  //    logger.info("first phone " + phone);
 
       List<WordAndScore> wordExamples = phoneReport.getWordExamples(phone);
-      logger.info("showExamplesForSelectedSound adding " + phone + " num examples " + wordExamples.size());
+    //  logger.info("showExamplesForSelectedSound adding " + phone + " num examples " + wordExamples.size());
 
       exampleContainer.addItems(phone, wordExamples);
     }
-
-//    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-//      public void execute() {
-//        String phone = selectionModel.getSelectedObject().getPhone();
-//
-//        logger.info("adding " + phone);
-//        exampleContainer.addItems(phone, phoneReport.getWordExamples(phone));
-//      }
-//    });
   }
 
   @Override
@@ -155,9 +146,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     Column<PhoneAndScore, SafeHtml> itemCol = getItemColumn();
     itemCol.setSortable(true);
     table.setColumnWidth(itemCol, COL_WIDTH + "px");
-
 //    String language = controller.getLanguage();
-
     //  String headerForFL = language.equals("English") ? "Meaning" : language;
     addColumn(itemCol, new TextHeader("Sound"));
 
@@ -240,7 +229,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     ColumnSortEvent.ListHandler<PhoneAndScore> columnSortHandler2 = getScoreSorter(scoreColumn, getList());
     table.addColumnSortHandler(columnSortHandler2);
 
-    new TooltipHelper().addTooltip(table, "Click on an item to review.");
+    new TooltipHelper().createAddTooltip(table, "Click on an item to review.", Placement.BOTTOM);
   }
 
   private Column<PhoneAndScore, SafeHtml> getItemColumn() {
