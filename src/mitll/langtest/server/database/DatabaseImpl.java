@@ -4,6 +4,7 @@ import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.DecodeAlignOutput;
+import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
@@ -21,7 +22,10 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.monitoring.Session;
+import mitll.langtest.shared.scoring.NetPronImageType;
+import mitll.langtest.shared.scoring.PretestScore;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
@@ -52,6 +56,7 @@ public class DatabaseImpl implements Database {
   private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
   private static final int LOG_THRESHOLD = 10;
   private static final String UNKNOWN = "unknown";
+  public static final String SIL = "sil";
 
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
@@ -1123,6 +1128,38 @@ public class DatabaseImpl implements Database {
       new Report(userDAO, resultDAO, eventDAO, audioDAO).writeReport(pathHelper);
     } catch (IOException e) {
       logger.error("got " +e);
+    }
+  }
+
+  public void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
+    PretestScore pretestScore = answer.getPretestScore();
+    if (pretestScore == null) {
+      logger.error("huh? pretest score is null for " + answer + " and " + answerID);
+    }
+    recordWordAndPhoneInfo(answerID, pretestScore);
+  }
+
+  public void recordWordAndPhoneInfo(long answerID, PretestScore pretestScore) {
+    List<TranscriptSegment> words  = pretestScore == null ? null : pretestScore.getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
+    List<TranscriptSegment> phones = pretestScore == null ? null : pretestScore.getsTypeToEndTimes().get(NetPronImageType.PHONE_TRANSCRIPT);
+    if (words != null) {
+      int windex = 0;
+      int pindex = 0;
+
+      for (TranscriptSegment segment : words) {
+        String event = segment.getEvent();
+        if (!event.equals(SLFFile.UNKNOWN_MODEL) && !event.equals(SIL)) {
+          long wid = getWordDAO().addWord(new WordDAO.Word(answerID, event, windex++, segment.getScore()));
+          for (TranscriptSegment pseg : phones) {
+            if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
+              String pevent = pseg.getEvent();
+              if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals(SIL)) {
+                getPhoneDAO().addPhone(new PhoneDAO.Phone(answerID, wid, pevent, pindex++, pseg.getScore()));
+              }
+            }
+          }
+        }
+      }
     }
   }
 

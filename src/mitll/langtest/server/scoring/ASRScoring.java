@@ -145,7 +145,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
       logger.error("scoreRepeatExercise : Can't find audio wav file at : " + wavFile.getAbsolutePath());
       return new PretestScore();
     }
-    logger.info("duration of " + wavFile.getAbsolutePath());// + " is " + duration + " secs or " + duration*1000 + " millis");
+//    logger.info("duration of " + wavFile.getAbsolutePath());// + " is " + duration + " secs or " + duration*1000 + " millis");
 
     // resample if needed
     try {
@@ -177,7 +177,6 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
         logger.debug("unusable precalc result, so recalculating : " + precalcResult);
       }
       //logger.debug("recalculating : " + precalcResult);
-
       scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
     }
     if (scores == null) {
@@ -186,7 +185,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     }
     PretestScore pretestScore = getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile,
         scores, jsonObject, usePhoneToDisplay);
-    logger.info("now we have pretest score " +pretestScore);
+   // logger.info("now we have pretest score " +pretestScore);
     return pretestScore;
   }
 
@@ -211,7 +210,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
                                        JSONObject jsonObject,
                                        boolean usePhoneToDisplay) {
     //  logger.debug("getPretestScore jsonObject " + jsonObject);
-    logger.debug("getPretestScore scores     " + scores);
+//    logger.debug("getPretestScore scores     " + scores);
 
     boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay();
 

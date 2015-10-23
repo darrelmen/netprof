@@ -46,7 +46,7 @@ public class AnalysisTab extends DivWidget {
     });
   }
 
-  private void getPhoneReport(LangTestDatabaseAsync service,
+  public void getPhoneReport(LangTestDatabaseAsync service,
                               final ExerciseController controller,
                               int userid,final Panel lowerHalf) {
     final PhoneContainer phoneContainer = new PhoneContainer(controller);
@@ -60,7 +60,6 @@ public class AnalysisTab extends DivWidget {
       @Override
       public void onSuccess(PhoneReport phoneReport) {
         lowerHalf.add(phoneContainer.getTableWithPager(phoneReport));
-
       }
     });
   }
