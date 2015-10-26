@@ -3,6 +3,7 @@ package mitll.langtest.client.analysis;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -21,6 +22,7 @@ import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.client.scoring.WordTable;
+import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.sorter.ExerciseComparator;
@@ -41,11 +43,10 @@ class WordContainer extends SimplePagingContainer<WordScore> {
   private ShowTab learnTab;
 
   /**
-   *
    * @param controller
    * @param plot
    */
-  public WordContainer(ExerciseController controller, AnalysisPlot plot,ShowTab learnTab) {
+  public WordContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab) {
     super(controller);
     sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
     this.plot = plot;
@@ -67,6 +68,13 @@ class WordContainer extends SimplePagingContainer<WordScore> {
       addItem(WordScore);
     }
     flush();
+
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        PlayAudioWidget.addPlayer();
+      }
+    });
+
     return tableWithPager;
   }
 
@@ -107,8 +115,9 @@ class WordContainer extends SimplePagingContainer<WordScore> {
             if (o1 != null) {
               if (o2 == null) return 1;
               else {
-                CommonShell shell1 = plot.getIdToEx().get(o1.getId());
-                CommonShell shell2 = plot.getIdToEx().get(o2.getId());
+                String id = o1.getId();
+                CommonShell shell1 = getShell(id);
+                CommonShell shell2 = getShell(o2.getId());
                 return sorter.compareStrings(shell1.getForeignLanguage(), shell2.getForeignLanguage());
               }
             }
@@ -116,6 +125,10 @@ class WordContainer extends SimplePagingContainer<WordScore> {
           }
         });
     return columnSortHandler;
+  }
+
+  private CommonShell getShell(String id) {
+    return plot.getIdToEx().get(id);
   }
 
   private ColumnSortEvent.ListHandler<WordScore> getScoreSorter(Column<WordScore, SafeHtml> scoreCol,
@@ -163,6 +176,11 @@ class WordContainer extends SimplePagingContainer<WordScore> {
     scoreColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     scoreColumn.setSortable(true);
     table.setColumnWidth(scoreColumn, "70" + "px");
+
+    Column<WordScore, SafeHtml> column = getPlayAudio();
+    table.addColumn(column, "Play");
+    table.setColumnWidth(column, 50 + "px");
+
     table.setWidth("100%", true);
 
     ColumnSortEvent.ListHandler<WordScore> columnSortHandler2 = getScoreSorter(scoreColumn, getList());
@@ -185,9 +203,8 @@ class WordContainer extends SimplePagingContainer<WordScore> {
       public SafeHtml getValue(WordScore shell) {
         String columnText = new WordTable().toHTML2(shell.getNetPronImageTypeListMap());
         if (columnText.isEmpty()) {
-          CommonShell exercise = plot.getIdToEx().get(shell.getId());
-
-          String foreignLanguage = exercise == null ? "":exercise.getForeignLanguage();
+          CommonShell exercise = getShell(shell.getId());
+          String foreignLanguage = exercise == null ? "" : exercise.getForeignLanguage();
           if (controller.getLanguage().equalsIgnoreCase("Spanish")) foreignLanguage = foreignLanguage.toUpperCase();
           columnText = new WordTable().getColoredSpan(foreignLanguage, shell.getPronScore());
         }
@@ -217,6 +234,38 @@ class WordContainer extends SimplePagingContainer<WordScore> {
             "</span>";
 
         return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
+      }
+    };
+  }
+
+  private Column<WordScore, SafeHtml> getPlayAudio() {
+    return new Column<WordScore, SafeHtml>(new SafeHtmlCell()) {
+      @Override
+      public SafeHtml getValue(WordScore shell) {
+        CommonShell exercise = getShell(shell.getId());
+        logger.info("Got " + shell.getId() + "  : " + exercise);
+        String title = exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
+        SafeHtml audioTagHTML1 = PlayAudioWidget.getAudioTagHTML(shell.getFileRef(), title);
+        return audioTagHTML1;
+
+//        SafeHtml audioTagHTML = audioTagHTML1;
+//        String link = audioTagHTML.toString();
+//        String nested = "<a id=''>" + link +
+//            "</a>";
+//        return new SafeHtmlBuilder().appendHtmlConstant(nested).toSafeHtml();
+
+        //audioTagHTML;
+/*
+        float v = shell.getPronScore() * 100;
+        String s = "<span " +
+            "style='" +
+            "margin-left:10px;" +
+            "'" +
+            ">" + ((int) v) +
+            "</span>";
+*/
+
+        //    return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
       }
     };
   }
