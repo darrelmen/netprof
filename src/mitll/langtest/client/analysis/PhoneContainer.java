@@ -4,7 +4,6 @@ import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -24,7 +23,6 @@ import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.client.scoring.WordTable;
-import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordAndScore;
 
@@ -40,16 +38,13 @@ import java.util.logging.Logger;
 class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   private final Logger logger = Logger.getLogger("PhoneContainer");
   private static final int COL_WIDTH = 55;
-  PhoneExampleContainer exampleContainer;
+  private PhoneExampleContainer exampleContainer;
 
   /**
    * @param controller
    */
   public PhoneContainer(ExerciseController controller, PhoneExampleContainer exampleContainer) {
     super(controller);
-//    sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
-//    this.plot = plot;
-    //  this.learnTab = learnTab;
     this.exampleContainer = exampleContainer;
   }
 
@@ -64,7 +59,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     table.getElement().getStyle().setProperty("maxWidth", 150 + "px");
   }
 
-  PhoneReport phoneReport;
+  private PhoneReport phoneReport;
   /**
    * @see AnalysisTab#getPhoneReport(LangTestDatabaseAsync, ExerciseController, int, Panel)
    * @param phoneReport
@@ -85,9 +80,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
    * @return
    * @see SetCompleteDisplay#getScoreHistory(List, List, ExerciseController)
    */
-  public Panel getTableWithPager(List<PhoneAndScore> sortedHistory) {
-  //  logger.info("PhoneContainer.getTableWithPager " + sortedHistory.size());
-
+  private Panel getTableWithPager(List<PhoneAndScore> sortedHistory) {
     Panel tableWithPager = getTableWithPager();
     tableWithPager.getElement().setId("TableScoreHistory");
     //   tableWithPager.setWidth(TABLE_HISTORY_WIDTH + "px");
@@ -99,7 +92,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
 
   private void addItems(List<PhoneAndScore> sortedHistory) {
    // logger.info("PhoneContainer.addItems " + sortedHistory.size());
-
     for (PhoneAndScore ps : sortedHistory) {
       addItem(ps);
     }
@@ -125,10 +117,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
    //   String phone = selectionModel.getSelectedObject().getPhone();
       String phone = list.get(0).getPhone();
   //    logger.info("first phone " + phone);
-
       List<WordAndScore> wordExamples = phoneReport.getWordExamples(phone);
     //  logger.info("showExamplesForSelectedSound adding " + phone + " num examples " + wordExamples.size());
-
       exampleContainer.addItems(phone, wordExamples);
     }
   }
