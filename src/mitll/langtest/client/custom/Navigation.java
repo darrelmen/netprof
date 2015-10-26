@@ -93,7 +93,6 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private final KeyStorage storage;
   private ListManager listManager;
- // private AnalysisPlot analysisPlot;
   private UserFeedback feedback;
 
   private TabPanel tabPanel;
@@ -326,7 +325,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
     addStudyLists();
 
-    if (controller.getProps().useAnalysis()) {
+    if (controller.getProps().useAnalysis() || true) {
       addAnalysis();
     }
 
