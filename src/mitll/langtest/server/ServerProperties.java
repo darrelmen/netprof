@@ -1,6 +1,9 @@
 package mitll.langtest.server;
 
 import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.mail.EmailList;
+import mitll.langtest.server.mail.MailSupport;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
@@ -23,10 +26,10 @@ import java.util.jar.Manifest;
 public class ServerProperties {
   private static final Logger logger = Logger.getLogger(ServerProperties.class);
 
+  /**
+   * I.e. the hydra web service for ASR
+   */
   private static final String WEBSERVICE_HOST_IP = "127.0.0.1";
-
-  private static final String DEBUG_EMAIL = "debugEmail";
-  private static final String TEST_EMAIL = "testEmail";
   private static final String USE_SCORE_CACHE = "useScoreCache";
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
@@ -41,60 +44,17 @@ public class ServerProperties {
   private static final String MIN_PRON_SCORE_DEFAULT = "0.20";
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
-  private static final String EMAIL_ADDRESS = "emailAddress";
   private static final String AUDIO_OFFSET = "audioOffset";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
   private static final String NO_MODEL = "noModel";
   private static final String TIER_INDEX = "tierIndex";
   private static final String QUIET_AUDIO_OK = "quietAudioOK";
- // private static final String UNKNOWN_MODEL_BIAS = "unknownModelBias";
-
   private static final String CONFIG_FILE = "configFile";
 
-  private static final String APPROVAL_EMAIL = "approvalEmail";
-  private static final String GORDON_VIDAVER = "gordon.vidaver@ll.mit.edu";
-  private static final String DOUG_JONES = "daj@ll.mit.edu";
-  private static final String RAY_BUDD = "Raymond.Budd@ll.mit.edu";
-  private static final String DEFAULT_EMAIL = GORDON_VIDAVER;
-  private static final String APPROVERS = "approvers";
-  private static final String APPROVER_EMAILS = "approverEmails";
-  private static final String ADMINS = "admins";
   private static final String PREFERRED_VOICES = "preferredVoices";
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
   private static final String ENABLE_ALL_USERS = "enableAllUsers";
   private static final String DO_DECODE = "dodecode";
-
-  private static final List<String> DLI_APPROVERS = Arrays.asList(
-      "Tamas",
-      "Tamas",
-      "Michael",
-      "Sandy",
-      "Gordon");
-
-  private static final String TAMAS_1 = "tamas.g.marius.civ@mail.mil";
-  private static final String TAMAS_2 = "tamas.marius@dliflc.edu";
-  private static final List<String> DLI_EMAILS = Arrays.asList(
-      TAMAS_1,
-      TAMAS_2,
-      "michael.grimmer1@dliflc.edu",
-      "sandra.wagner@dliflc.edu",
-      GORDON_VIDAVER);
-
-
-  private static final Set<String> ADMINLIST = new HashSet<String>(Arrays.asList("gvidaver", "tmarius",
-      //"drandolph",
-      "mgrimmer",
-      "swagner", "gmarkovic", "djones", "jmelot", "rbudd", "pgatewood"));
-
-  /**
-   * Set this property for non-DLI deployments.
-   */
-  private static final String REPORT_EMAILS = "reportEmails";
-
-  private List<String> reportEmails = Arrays.asList(TAMAS_1, TAMAS_2, GORDON_VIDAVER, DOUG_JONES, RAY_BUDD);
-  private List<String> approvers = DLI_APPROVERS;
-  private List<String> approverEmails = DLI_EMAILS;
-  private Set<String> admins = ADMINLIST;
 
   private Properties props = new Properties();
 
@@ -103,6 +63,7 @@ public class ServerProperties {
   // just for automated testing
   private boolean quietAudioOK;
   private Set<Long> preferredVoices = new HashSet<Long>();
+  private EmailList emailList;
 
   /**
    * @param servletContext
@@ -143,6 +104,7 @@ public class ServerProperties {
       try {
         props = new Properties();
         props.load(new FileInputStream(configFileFullPath));
+        emailList = new EmailList(props);
         readProperties(dateFromManifest);
       } catch (IOException e) {
         logger.error("got " + e, e);
@@ -185,14 +147,6 @@ public class ServerProperties {
     return getDefaultTrue(USE_SCORE_CACHE);
   }
 
-  public boolean isDebugEMail() {
-    return getDefaultFalse(DEBUG_EMAIL);
-  }
-
-  public boolean isTestEmail() {
-    return getDefaultFalse(TEST_EMAIL);
-  }
-
   public String getLanguage() {
     return props.getProperty(LANGUAGE);
   }
@@ -205,8 +159,8 @@ public class ServerProperties {
   //"unit,chapter,week"
 
   /**
-   * @see mitll.langtest.server.database.exercise.ExcelImport#ExcelImport(String, String, ServerProperties, UserListManager, String, boolean)
    * @return
+   * @see mitll.langtest.server.database.exercise.ExcelImport#ExcelImport(String, String, ServerProperties, UserListManager, String, boolean)
    */
   public int[] getUnitChapterWeek() {
     int[] parsedUCW = new int[]{-1, -1, -1};
@@ -250,13 +204,6 @@ public class ServerProperties {
     return getDefaultFalse(ENABLE_ALL_USERS);
   }
 
-  public String getEmailAddress() {
-    return props.getProperty(EMAIL_ADDRESS, DEFAULT_EMAIL);
-  }
-
-  public String getApprovalEmailAddress() {
-    return props.getProperty(APPROVAL_EMAIL, DEFAULT_EMAIL);
-  }
 
   public boolean shouldDoDecode() {
     return getDefaultFalse(DO_DECODE);
@@ -338,22 +285,6 @@ public class ServerProperties {
         }
       }
     }
-
-
-    property = props.getProperty(APPROVERS);
-    if (property != null) approvers = Arrays.asList(property.split(","));
-
-    property = props.getProperty(APPROVER_EMAILS);
-    if (property != null) approverEmails = Arrays.asList(property.split(","));
-
-    property = props.getProperty(ADMINS);
-    if (property != null) admins = new HashSet<String>(Arrays.asList(property.split(",")));
-
-    property = props.getProperty(REPORT_EMAILS);
-    if (property != null) {
-      if (property.trim().isEmpty()) reportEmails = Collections.emptyList();
-      else reportEmails = Arrays.asList(property.split(","));
-    }
   }
 
   private boolean getDefaultFalse(String param) {
@@ -393,26 +324,6 @@ public class ServerProperties {
     return quietAudioOK;
   }
 
-  public List<String> getApprovers() {
-    return approvers;
-  }
-
-  public List<String> getApproverEmails() {
-    return approverEmails;
-  }
-
-  /**
-   * @return
-   * @see mitll.langtest.server.database.UserDAO#UserDAO
-   */
-  public Set<String> getAdmins() {
-    return admins;
-  }
-
-  public List<String> getReportEmails() {
-    return reportEmails;
-  }
-
   public Set<Long> getPreferredVoices() {
     return preferredVoices;
   }
@@ -423,12 +334,14 @@ public class ServerProperties {
 
   private Map<String, String> phoneToDisplay = new HashMap<>();
 
-  public Map<String,String> getPhoneToDisplay() { return phoneToDisplay; }
+  public Map<String, String> getPhoneToDisplay() {
+    return phoneToDisplay;
+  }
 
   /**
-   * @see ScoreServlet#getJsonForScore(PretestScore, boolean)
    * @param phone
    * @return
+   * @see ScoreServlet#getJsonForScore(PretestScore, boolean)
    */
   public String getDisplayPhoneme(String phone) {
     String s = phoneToDisplay.get(phone);
@@ -436,15 +349,15 @@ public class ServerProperties {
     else return s;
   }
 
-  public String getDialogFile(){
-      return props.getProperty("dialog");
+  public String getDialogFile() {
+    return props.getProperty("dialog");
   }
 
   private void readPhonemeMap(String configDir) {
     String phonemeMapping = props.getProperty("phonemeMapping");
 
     if (phonemeMapping == null) {
-   //   logger.debug("no phoneme mapping file property");
+      //   logger.debug("no phoneme mapping file property");
       return;
     }
 
@@ -461,7 +374,8 @@ public class ServerProperties {
       file = new FileReader(file1);
       BufferedReader reader = new BufferedReader(file);
 
-      line = reader.readLine(); // skip header
+      /*line =*/
+      reader.readLine(); // skip header
 
       while ((line = reader.readLine()) != null) {
         String[] split = line.split("\\s++");
@@ -469,7 +383,7 @@ public class ServerProperties {
           String key = split[0].trim();
           String value = split[1].trim();
           phoneToDisplay.put(key, value);
-         // phoneToDisplay.put(key.toLowerCase(), value);
+          // phoneToDisplay.put(key.toLowerCase(), value);
           //phoneToDisplay.put(key.toUpperCase(), value);
         }
       }
@@ -481,5 +395,52 @@ public class ServerProperties {
 
   public boolean usePhoneToDisplay() {
     return getDefaultFalse("usePhoneToDisplay");
+  }
+
+  // EMAIL ------------------------
+
+  public EmailList getEmailList() {
+    return emailList;
+  }
+
+  public boolean isDebugEMail() {
+    return getEmailList().isDebugEMail();
+  }
+
+  public boolean isTestEmail() {
+    return getEmailList().isTestEmail();
+  }
+
+  public String getEmailAddress() {
+    return emailList.getEmailAddress();
+  }
+
+  public String getApprovalEmailAddress() {
+    return emailList.getApprovalEmailAddress();
+  }
+
+  /**
+   * @return
+   * @see mitll.langtest.server.mail.EmailHelper#addContentDeveloper(String, String, User, MailSupport)
+   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String)
+   */
+  public List<String> getApprovers() {
+    return emailList.getApprovers();
+  }
+
+  public List<String> getApproverEmails() {
+    return emailList.getApproverEmails();
+  }
+
+  /**
+   * @return
+   * @see mitll.langtest.server.database.UserDAO#UserDAO
+   */
+  public Set<String> getAdmins() {
+    return emailList.getAdmins();
+  }
+
+  public List<String> getReportEmails() {
+    return emailList.getReportEmails();
   }
 }
