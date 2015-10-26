@@ -46,7 +46,6 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private final Panel phoneList;
   private final List<CorrectAndScore> scores2 = new ArrayList<CorrectAndScore>();
   private final SimplePanel scoreHistoryPanel;
-  //private final SimpleColumnChart chart = new SimpleColumnChart();
   private float classAvg = 0f;
   private String refAudio;
   private final ExerciseController controller;
@@ -79,12 +78,9 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     phoneList.getElement().getStyle().setFloat(Style.Float.LEFT);
 
     captionPanel.add(phoneList);
-    //add(new Heading(4,SOUND_ACCURACY));
-    //add(phoneList);
     add(captionPanel);
 
     CaptionPanel gaugeCaptionPanel = new CaptionPanel(SCORE);
-    //  add(new Heading(4,SCORE));
 
     Panel gaugePanel = new FlowPanel();
     gaugePanel.setHeight("100%");
@@ -94,7 +90,6 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
 
     gaugeCaptionPanel.add(gaugePanel);
     add(gaugeCaptionPanel);
-    //add(gaugePanel);
 
     Panel instructionsPanel = new FlowPanel();
     add(instructionsPanel);
@@ -195,13 +190,15 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     }
 
     if (refAudio != null && !scoreAndPaths.isEmpty()) { // show audio to compare yours against
-      Panel hp = getRefAudio();
-
-      vp.add(hp);
+      vp.add(getRefAudio());
     }
     scoreHistoryPanel.add(vp);
   }
 
+  /**
+   * @see #showChart(boolean)
+   * @return
+   */
   private Panel getRefAudio() {
     Widget audioWidget = getAudioWidget(new CorrectAndScore(classAvg, refAudio), PLAY_REFERENCE);
     makeChildGreen(audioWidget);
@@ -215,15 +212,9 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   }
 
   private Panel getClassAverage(TooltipHelper tooltipHelper, boolean addLeftMargin) {
-    String prefix = /*classAvg < 0.001f ? "No Class Avg Yet" :*/ "Class Avg";
+    String prefix = "Class Avg";
     CorrectAndScore scoreAndPath = new CorrectAndScore(classAvg, "");
-    // if (classAvg < 0.001f) {
-//      classAvg = 1f;
-    // }
-    // else {
     prefix += " " + scoreAndPath.getPercentScore() + "%";
-    // }
-    //System.out.println("class avg " + classAvg);
 
     Widget widget = makeRow2(tooltipHelper, scoreAndPath, prefix);
     if (addLeftMargin) {
@@ -251,10 +242,6 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private Panel getAudioAndScore(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath, String title,
                                  int i) {
     Widget w = getAudioWidget(scoreAndPath, title);
-   // if (false) {
-   //   makeChildGreen(w);
-   // }
-
     Widget row = makeRow(tooltipHelper, scoreAndPath);
     row.addStyleName("leftFiveMargin");
 
@@ -317,6 +304,13 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     new TooltipHelper().createAddTooltip(w, DOWNLOAD_YOUR_RECORDING, Placement.LEFT);
   }
 
+  /**
+   * @see #getAudioAndScore(TooltipHelper, CorrectAndScore, String, int)
+   * @see #getRefAudio()
+   * @param scoreAndPath
+   * @param title
+   * @return
+   */
   private Anchor getAudioWidget(CorrectAndScore scoreAndPath, String title) {
     return new PlayAudioWidget().getAudioWidgetWithEventRecording(scoreAndPath.getPath(), title,
         exerciseID, controller);

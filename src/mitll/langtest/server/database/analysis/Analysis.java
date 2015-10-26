@@ -64,8 +64,14 @@ public class Analysis extends DAO {
   }
 
   private String getPerfSQL(long id) {
-    return "SELECT " + Database.EXID + "," + ResultDAO.PRON_SCORE + "," + Database.TIME + "," + ResultDAO.ID + "," +
-        ResultDAO.DEVICE_TYPE + "," + ResultDAO.SCORE_JSON +
+    return "SELECT " +
+        Database.EXID + "," +
+        ResultDAO.PRON_SCORE + "," +
+        Database.TIME + "," +
+        ResultDAO.ID + "," +
+        ResultDAO.DEVICE_TYPE + "," +
+        ResultDAO.SCORE_JSON + ","+
+        ResultDAO.ANSWER +
         " FROM " + ResultDAO.RESULTS +
         " where " + ResultDAO.USERID + "=" + id +
         " AND " + ResultDAO.PRON_SCORE + ">0" + // discard when they got it wrong in avp
@@ -196,6 +202,7 @@ public class Analysis extends DAO {
 
       String json = rs.getString(ResultDAO.SCORE_JSON);
       String device = rs.getString(ResultDAO.DEVICE_TYPE);
+      String path = rs.getString(ResultDAO.ANSWER);
       boolean isiPad = device != null && device.startsWith("i");
 
       long time = timestamp.getTime();
@@ -208,7 +215,7 @@ public class Analysis extends DAO {
       }
       if (lastTimestamp == 0) lastTimestamp = time;
       last = exid;
-      lastBest = new BestScore(exid, pronScore, time, id, json, isiPad);
+      lastBest = new BestScore(exid, pronScore, time, id, json, isiPad, path);
       count++;
     }
     finish(connection, statement, rs);
