@@ -11,7 +11,6 @@ import mitll.langtest.client.instrumentation.EventRegistration;
  * Created by go22670 on 7/25/14.
  */
 public class PlayAudioWidget {
-
   public static native void addPlayer() /*-{
       $wnd.basicMP3Player.init();
   }-*/;
@@ -21,9 +20,9 @@ public class PlayAudioWidget {
    * @param path
    * @return
    */
-  public Anchor getAudioWidget(String path) {
+/*  public Anchor getAudioWidget(String path) {
     return getAudioWidget(path, "play");
-  }
+  }*/
 
   /**
    * Add event tracking - every play is logged
@@ -32,9 +31,9 @@ public class PlayAudioWidget {
    * @param eventRegistration
    * @return
    */
-  public Anchor getAudioWidgetWithEventRecording(String path, String title, EventRegistration eventRegistration) {
+/*  public Anchor getAudioWidgetWithEventRecording(String path, String title, EventRegistration eventRegistration) {
     return getAudioWidgetWithEventRecording(path, title, "N/A", eventRegistration);
-  }
+  }*/
 
   /**
    * Log with the exercise it's associated with.
@@ -57,7 +56,7 @@ public class PlayAudioWidget {
    * @param title to label the widget with
    * @return
    */
-  public Anchor getAudioWidget(String path, String title) {
+  private Anchor getAudioWidget(String path, String title) {
     SafeHtml html = getAudioTagHTML(path, title);
     Anchor anchor = new Anchor(html);
     anchor.getElement().setId("PlayAudioWidget_"+title);
