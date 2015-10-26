@@ -393,7 +393,8 @@ public class PhoneDAO extends DAO {
           times.add(new PhoneAndScore(phoneScore,resultTime));
         }
       } else {
-        logger.debug("------> skipping " + exid + " " + rid + " word " + word + "<-------------- ");
+        logger.debug("------> current " + currentRID +
+            " skipping " + exid + " " + rid + " word " + word + "<-------------- ");
       }
     }
     finish(connection, statement, rs);
