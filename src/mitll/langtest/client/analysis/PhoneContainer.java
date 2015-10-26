@@ -85,6 +85,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     tableWithPager.getElement().setId("TableScoreHistory");
     //   tableWithPager.setWidth(TABLE_HISTORY_WIDTH + "px");
     tableWithPager.addStyleName("floatLeft");
+    tableWithPager.addStyleName("leftTenMargin");
 
     addItems(sortedHistory);
     return tableWithPager;
