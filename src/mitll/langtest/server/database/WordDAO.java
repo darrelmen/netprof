@@ -20,10 +20,11 @@ public class WordDAO extends DAO {
   private static final Logger logger = Logger.getLogger(WordDAO.class);
 
   public static final String WORD = "word";
-//  private static final String WORDS = "Words";
   private static final String RID = "rid";
   private static final String SEQ = "seq";
   private static final String SCORE = "score";
+  private static final String RID1 = "RID";
+  private static final String ID = "ID";
 
   /**
    * @param database
@@ -98,14 +99,12 @@ public class WordDAO extends DAO {
 
   /**
    * @return id of new row
-   * @see mitll.langtest.server.audio.AudioFileHelper#recordWordAndPhoneInfo(AudioAnswer, long)
+   * @see mitll.langtest.server.database.DatabaseImpl#recordWordAndPhoneInfo
    */
   public long addWord(Word word) {
     Connection connection = getConnection();
-    //boolean val = true;
     try {
       // there are much better ways of doing this...
-
       PreparedStatement statement = connection.prepareStatement(
           "INSERT INTO " + WORD +
               "(" +
@@ -145,7 +144,7 @@ public class WordDAO extends DAO {
     return 0;
   }
 
-/*  public List<Word> getAll() {
+  public List<Word> getAll() {
     try {
       return getWords("SELECT * from " + WORD);
     } catch (Exception ee) {
@@ -153,7 +152,7 @@ public class WordDAO extends DAO {
       logAndNotify.logAndNotifyServerException(ee);
     }
     return Collections.emptyList();
-  }*/
+  }
 
 /*  public List<Event> getAllForUserAndExercise(long userid, String exid) {
     try {
@@ -179,8 +178,8 @@ public class WordDAO extends DAO {
 
     while (rs.next()) {
       lists.add(new Word(
-              rs.getLong("ID"),
-              rs.getLong("RID"),
+              rs.getLong(ID),
+              rs.getLong(RID1),
               rs.getString(WORD),
               rs.getInt(SEQ),
               rs.getFloat(SCORE)
