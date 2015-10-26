@@ -27,13 +27,13 @@ public class PerformanceTest {
   public static void setup() {
     logger.debug("setup called");
 
-    String config = "spanish";//"mandarin";
+    String config = "mandarinClassroom";//"spanish";//"mandarin";
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParent();
     logger.debug("config dir " + parent);
     logger.debug("config     " + file.getName());
     //  dbName = "npfEnglish";//"mandarin";// "mandarin";
-    dbName = "npfSpanish";//"mandarin";// "mandarin";
+    dbName = "mandarin";// "npfSpanish";//"mandarin";// "mandarin";
     database = new DatabaseImpl(parent, file.getName(), dbName, new ServerProperties(parent, file.getName()), new PathHelper("war"), false, null);
     logger.debug("made " + database);
     String media = parent + File.separator + "media";
@@ -99,7 +99,9 @@ public class PerformanceTest {
   @Test
   public void testPhones() {
     long then = System.currentTimeMillis();
-    PhoneReport phoneReport = database.getAnalysis().getPhonesForUser(71);
+ //   int id = 71; // psanish
+    int id = 41;
+    PhoneReport phoneReport = database.getAnalysis().getPhonesForUser(id);
 
     Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
     long now = System.currentTimeMillis();
@@ -109,7 +111,8 @@ public class PerformanceTest {
     for (Map.Entry<String, List<WordAndScore>> pair : phonesForUser.entrySet()) {
       List<WordAndScore> value = pair.getValue();
       logger.info(pair.getKey() + " = " + value.size() + " first " + value.get(0));
-      for (int i = 0; i < 10; i++) logger.info("\t" + value.get(i));
+      int i1 = Math.min(10,value.size());
+      for (int i = 0; i < i1; i++) logger.info("\t" + value.get(i));
     }
 //    for(WordScore ws : wordScoresForUser) logger.info("got " + ws);
   }
