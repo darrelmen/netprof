@@ -438,7 +438,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     exercisesForState = filterByUnrecorded(userID, onlyUnrecordedByMe, onlyExamples, exercisesForState);
     //exercisesForState = filterByOnlyAudioAnno(forgotUsername(), exercisesForState);
-
     return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID, role, onlyExamples, incorrectFirst);
   }
 
