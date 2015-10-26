@@ -108,6 +108,8 @@ public class ResultDAO extends DAO {
     return new ArrayList<Result>();
   }
 
+
+
   public List<Result> getResultsDevices() {
     try {
       String sql = "SELECT * FROM " + RESULTS + " where devicetype like 'i%'";
