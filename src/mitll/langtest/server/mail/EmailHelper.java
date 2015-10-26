@@ -8,6 +8,7 @@ import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -139,6 +140,16 @@ public class EmailHelper {
     }
   }
 
+  /**
+   * @see #sendUserApproval(String, String, String)
+   * @see #resetPassword(String, String, String)
+   * @see #getUserNameEmail(String, String, User)
+   * @param link
+   * @param to
+   * @param subject
+   * @param message
+   * @param linkText
+   */
   private void sendEmail(String link, String to, String subject, String message, String linkText) {
     mailSupport.sendEmail(NP_SERVER,
         link,
@@ -146,8 +157,8 @@ public class EmailHelper {
         REPLY_TO,
         subject,
         message,
-        linkText
-    );
+        linkText,
+        Collections.emptyList());
   }
 
   /**
@@ -254,6 +265,7 @@ public class EmailHelper {
    * @param user
    * @param mailSupport
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
+   * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, mitll.langtest.shared.User.Kind)
    */
   public void addContentDeveloper(String url, String email, User user, MailSupport mailSupport) {
     url = trimURL(url);
@@ -273,7 +285,8 @@ public class EmailHelper {
     }
   }
 
-  private void sendApprovalEmail(String url, String email, String userID1, String hash, String message, String approvalEmailAddress, MailSupport mailSupport) {
+  private void sendApprovalEmail(String url, String email, String userID1, String hash, String message,
+                                 String approvalEmailAddress, MailSupport mailSupport) {
     mailSupport.sendEmail(NP_SERVER,
         url + "?" +
             CD +
@@ -284,8 +297,8 @@ public class EmailHelper {
         serverProperties.getApprovalEmailAddress(),
         "Content Developer approval for " + userID1 + " for " + language,
         message,
-        "Click to approve" // link text
-    );
+        "Click to approve", // link text
+        Collections.singleton(EmailList.RAY_BUDD));
   }
 
   private String getEmailApproval(String userID1, String tamas, String email) {
