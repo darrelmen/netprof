@@ -3,6 +3,7 @@ package mitll.langtest.server.scoring;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import net.sf.json.JSONArray;
@@ -18,16 +19,13 @@ public class ParseResultJson {
   private static final Logger logger = Logger.getLogger(ParseResultJson.class);
   private final ServerProperties props;
 
+  /**
+   * @see mitll.langtest.server.database.PhoneDAO#PhoneDAO(Database)
+   * @param properties
+   */
   public ParseResultJson(ServerProperties properties) {
     this.props = properties;
   }
-
-/*
-  public Map<ImageType, Map<Float, TranscriptEvent>> parseJsonString(String json, String words1, String w1, boolean usePhones) {
-    Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseJson(JSONObject.fromObject(json), words1, w1, usePhones);
-    return imageTypeMapMap;
-  }
-*/
 
   public Map<NetPronImageType, List<TranscriptSegment>> getNetPronImageTypeToEndTimes(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
@@ -50,10 +48,14 @@ public class ParseResultJson {
     return parseJson(JSONObject.fromObject(json), "words", "w", usePhones);
   }
 
-  public  Map<NetPronImageType, List<TranscriptSegment>> parseJson(String json) {
+  /**
+   * @see mitll.langtest.server.database.PhoneDAO#getPhoneReport(String, Map, boolean)
+   * @param json
+   * @return
+   */
+  public Map<NetPronImageType, List<TranscriptSegment>> parseJson(String json) {
     return getNetPronImageTypeToEndTimes(parseJsonString(json,true));
   }
-
 
   /**
    * TODOx : actually use the parsed json to get transcript info
