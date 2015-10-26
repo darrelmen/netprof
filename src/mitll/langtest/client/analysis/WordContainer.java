@@ -245,27 +245,7 @@ class WordContainer extends SimplePagingContainer<WordScore> {
         CommonShell exercise = getShell(shell.getId());
         logger.info("Got " + shell.getId() + "  : " + exercise);
         String title = exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
-        SafeHtml audioTagHTML1 = PlayAudioWidget.getAudioTagHTML(shell.getFileRef(), title);
-        return audioTagHTML1;
-
-//        SafeHtml audioTagHTML = audioTagHTML1;
-//        String link = audioTagHTML.toString();
-//        String nested = "<a id=''>" + link +
-//            "</a>";
-//        return new SafeHtmlBuilder().appendHtmlConstant(nested).toSafeHtml();
-
-        //audioTagHTML;
-/*
-        float v = shell.getPronScore() * 100;
-        String s = "<span " +
-            "style='" +
-            "margin-left:10px;" +
-            "'" +
-            ">" + ((int) v) +
-            "</span>";
-*/
-
-        //    return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
+        return PlayAudioWidget.getAudioTagHTML(shell.getFileRef(), title);
       }
     };
   }
