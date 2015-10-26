@@ -9,24 +9,26 @@ public class BestScore implements Comparable<BestScore> {
   private final String id;
   private final long timestamp;
   private final float pronScore;
+  private final String fileRef;
   private int count;
   private final int resultID;
   private String json;
   private boolean isiPad;
 
   /**
-   * @see mitll.langtest.server.database.ResultDAO#getBestForQuery
+   * @see mitll.langtest.server.database.analysis.Analysis#getBestForQuery
    * @param id
    * @param pronScore
    * @param timestamp
    */
-  public BestScore(String id, float pronScore, long timestamp, int resultID, String json, boolean isiPad) {
+  public BestScore(String id, float pronScore, long timestamp, int resultID, String json, boolean isiPad, String fileRef) {
     this.id = id;
     this.pronScore = (pronScore < 0) ? 0 : pronScore;
     this.timestamp = timestamp;
     this.resultID = resultID;
     this.json = json;
     this.isiPad =isiPad;
+    this.fileRef = fileRef;
   }
 
   @Override
@@ -78,6 +80,10 @@ public class BestScore implements Comparable<BestScore> {
 
   public boolean isiPad() {
     return isiPad;
+  }
+
+  public String getFileRef() {
+    return fileRef;
   }
 }
 
