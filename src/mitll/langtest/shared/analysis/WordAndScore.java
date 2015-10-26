@@ -33,7 +33,8 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
    * @param scoreJson
    * @see PhoneDAO#getPhoneReport
    */
-  public WordAndScore(String word, float score, long resultID, int wseq, int seq, String answerAudio, String refAudio, String scoreJson) {
+  public WordAndScore(String word, float score, long resultID, int wseq, int seq, String answerAudio,
+                      String refAudio, String scoreJson) {
     this.word = word;
     this.score = score;
     this.resultID = resultID;
@@ -52,9 +53,7 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
     return getScore() < o.getScore() ? -1 : getScore() > o.getScore() ? +1 : 0;
   }
 
-  public String toString() {
-    return "#" + getWseq() + " : " + getWord() + " s " + getScore() + " res " + getResultID();// + " answer " + answerAudio + " ref " + refAudio;
-  }
+
 
   public int getWseq() {
     return wseq;
@@ -99,4 +98,10 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
   public void clearJSON() {
     scoreJson = "";
   }
+
+  public String toString() {
+    return "#" + getWseq() + " : " + getWord() + " s " + getScore() + " res " + getResultID() + " answer " + answerAudio + " ref " + refAudio;
+  }
+
+
 }
