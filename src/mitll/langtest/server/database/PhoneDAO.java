@@ -3,6 +3,7 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.scoring.ParseResultJson;
+import mitll.langtest.shared.analysis.PhoneAndScore;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -12,10 +13,7 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 
 /**
@@ -63,11 +61,6 @@ public class PhoneDAO extends DAO {
     final String phone;
     final int seq;
     final float score;
-
-/*    public Phone(long id, long rid, long wid, String phone, int seq, float score) {
-      this(rid, wid, phone, seq, score);
-      this.id = id;
-    }*/
 
     public Phone(long rid, long wid, String phone, int seq, float score) {
       this.rid = rid;
@@ -129,7 +122,6 @@ public class PhoneDAO extends DAO {
     boolean val = true;
     try {
       // there are much better ways of doing this...
-
       PreparedStatement statement = connection.prepareStatement(
           "INSERT INTO " + PHONE +
               "(" +
@@ -314,6 +306,14 @@ public class PhoneDAO extends DAO {
     return getPhoneReport(sql, idToRef, false);
   }
 
+  /**
+   *
+   * @param sql
+   * @param idToRef
+   * @param addTranscript true if going to analysis tab
+   * @return
+   * @throws SQLException
+   */
   private PhoneReport getPhoneReport(String sql, Map<String, String> idToRef, boolean addTranscript) throws SQLException {
    // logger.debug("getPhoneReport query is " + sql);
     Connection connection = getConnection();
@@ -326,6 +326,7 @@ public class PhoneDAO extends DAO {
     String currentExercise = "";
     Map<String, List<WordAndScore>> phoneToWordAndScore = new HashMap<String, List<WordAndScore>>();
     Map<String, Set<Long>> phoneToRID = new HashMap<String, Set<Long>>();
+    Map<String, List<PhoneAndScore>> phoneToTimeStamp = new HashMap<String, List<PhoneAndScore>>();
 
     float totalScore = 0;
     float totalItems = 0;
@@ -336,13 +337,20 @@ public class PhoneDAO extends DAO {
       String audioAnswer = rs.getString(i++);
       String scoreJson = rs.getString(i++);
       float pronScore = rs.getFloat(i++);
-      i++;
+      long resultTime = -1;
+
+      if (addTranscript) {
+        Timestamp timestamp = rs.getTimestamp(i++);
+        if (timestamp != null) resultTime = timestamp.getTime();
+      }
+      else {
+        i++;
+      }
       int wseq = rs.getInt(i++);
       String word = rs.getString(i++);
       float wscore = rs.getFloat(i++);
 
       long rid = rs.getLong("RID");
-
 //      logger.info("Got " + exid + " rid " + rid + " word " + word);
 
       if (!exid.equals(currentExercise)) {
@@ -353,12 +361,13 @@ public class PhoneDAO extends DAO {
         totalItems++;
       }
 
-      if (currentRID == rid) {
+      if (currentRID == rid) {   // TODO : ? WHY ?
         String phone = rs.getString(PHONE);
         int seq = rs.getInt(SEQ);
         List<Float> scores = phoneToScores.get(phone);
         if (scores == null) phoneToScores.put(phone, scores = new ArrayList<Float>());
-        scores.add(rs.getFloat(SCORE));
+        float phoneScore = rs.getFloat(SCORE);
+        scores.add(phoneScore);
 
         List<WordAndScore> wordAndScores = phoneToWordAndScore.get(phone);
         Set<Long> ridsForPhone = phoneToRID.get(phone);
@@ -367,23 +376,33 @@ public class PhoneDAO extends DAO {
           phoneToRID.put(phone, ridsForPhone = new HashSet<Long>());
         }
 
-        WordAndScore e = new WordAndScore(word, wscore, rid, wseq, seq, trimPathForWebPage(audioAnswer),
+        WordAndScore wordAndScore = new WordAndScore(word, wscore, rid, wseq, seq, trimPathForWebPage(audioAnswer),
             idToRef.get(exid), scoreJson);
         if (!ridsForPhone.contains(rid)) { // get rid of duplicates
-          wordAndScores.add(e);
+          wordAndScores.add(wordAndScore);
         }
         ridsForPhone.add(rid);
 
         if (addTranscript) {
           Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(scoreJson);
-          e.setTranscript(netPronImageTypeListMap);
-          e.clearJSON();
+          wordAndScore.setTranscript(netPronImageTypeListMap);
+          wordAndScore.clearJSON();
+
+          List<PhoneAndScore> times = phoneToTimeStamp.get(phone);
+          if (times == null) phoneToTimeStamp.put(phone, times = new ArrayList<PhoneAndScore>());
+          times.add(new PhoneAndScore(phoneScore,resultTime));
         }
       } else {
-        logger.debug("skipping " + exid + " " + rid + " word " + word);
+        logger.debug("------> skipping " + exid + " " + rid + " word " + word + "<-------------- ");
       }
     }
     finish(connection, statement, rs);
+
+    for (Map.Entry<String,List<PhoneAndScore>> pair : phoneToTimeStamp.entrySet()) {
+      Collections.sort(pair.getValue());
+    }
+
+    // TODO : use phone time&score info
 
     return getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems);
   }
@@ -431,12 +450,12 @@ public class PhoneDAO extends DAO {
   private PhoneReport getPhoneReport(Map<String, List<Float>> phoneToScores,
                                      Map<String, List<WordAndScore>> phoneToWordAndScore,
                                      float totalScore, float totalItems) {
-    if (DEBUG) logger.debug("total items " + totalItems);
     float overallScore = totalItems > 0 ? totalScore / totalItems : 0;
     int percentOverall = (int) (100f * round(overallScore, 2));
-    if (DEBUG) logger.debug("score " + overallScore + " items " + totalItems + " percent " + percentOverall);
-
-    if (DEBUG) logger.debug("phoneToScores " + phoneToScores.size() + " : " + phoneToScores);
+    if (DEBUG) {
+      logger.debug("score " + overallScore + " items " + totalItems + " percent " + percentOverall +
+          " phoneToScores " + phoneToScores.size() + " : " + phoneToScores);
+    }
 
     final Map<String, Float> phoneToAvg = new HashMap<String, Float>();
     for (Map.Entry<String, List<Float>> pair : phoneToScores.entrySet()) {
