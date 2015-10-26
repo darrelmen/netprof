@@ -29,14 +29,13 @@ public class ResultDAO extends DAO {
 
   private static final Map<String, String> EMPTY_MAP = new HashMap<String, String>();
   private static final int MINUTE = 60 * 1000;
- // private static final int LAST_NUM_RESULTS = 5;
   private static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
 
   public static final String ID = "id";
   public static final String USERID = "userid";
   private static final String PLAN = "plan";
   private static final String QID = "qid";
-  private static final String ANSWER = "answer";
+  public static final String ANSWER = "answer";
   public static final String SCORE_JSON = "scoreJson";
   public static final String WITH_FLASH = "withFlash";
   private static final String VALID = "valid";
@@ -52,13 +51,9 @@ public class ResultDAO extends DAO {
   static final String STIMULUS = "stimulus";
   public static final String DEVICE_TYPE = "deviceType";  // iPad, iPhone, browser, etc.
   public static final String DEVICE = "device"; // device id, or browser type
-//  private static final String YES = "Yes";
-//  private static final String NO = "No";
   public static final String PROCESS_DUR = "processDur";
   public static final String ROUND_TRIP_DUR = "roundTripDur";
   public static final int FIVE_MINUTES = 5 * 60 * 1000;
-
-  //  public static final int HOUR = 60 * 60 * 1000;
   public static final int HOUR = 60 * 60 * 1000;
   public static final int DAY = 24 * HOUR;
 
