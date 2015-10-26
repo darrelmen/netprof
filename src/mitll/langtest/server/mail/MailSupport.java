@@ -1,14 +1,13 @@
 package mitll.langtest.server.mail;
 
+import mitll.langtest.server.database.Report;
+import mitll.langtest.server.rest.RestUserManagement;
 import org.apache.log4j.Logger;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 public class MailSupport {
   private static final String RECIPIENT_NAME = "Gordon Vidaver";
@@ -27,6 +26,7 @@ public class MailSupport {
    * @param debugEmail
    * @param testEmail
    * @see mitll.langtest.server.LangTestDatabaseImpl#getMailSupport()
+   * @see RestUserManagement#getMailSupport()
    */
   public MailSupport(boolean debugEmail, boolean testEmail) {
     this.debugEmail = debugEmail;
@@ -36,6 +36,7 @@ public class MailSupport {
 
   /**
    * @see EmailHelper#enableCDUser(String, String, String)
+   * @see Report#sendEmails
    * @param serverName
    * @param to
    * @param replyTo
@@ -43,7 +44,7 @@ public class MailSupport {
    * @param message
    */
   public void sendEmail(String serverName, String to, String replyTo, String subject, String message) {
-    sendEmail(serverName, null, to, replyTo, subject, message, null);
+    sendEmail(serverName, null, to, replyTo, subject, message, null, Collections.emptyList());
   }
 
   /**
@@ -54,10 +55,12 @@ public class MailSupport {
    * @param subject
    * @param message
    * @param linkText
+   * @param ccEmails
    * @see EmailHelper#sendApprovalEmail(String, String, String, String, String, String, MailSupport)
    * @see EmailHelper#sendEmail
    */
-  public void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message, String linkText) {
+  public void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message,
+                        String linkText, Collection<String> ccEmails) {
     List<String> toAddresses = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<String>();
     if (toAddresses.isEmpty()) {
       toAddresses.add(to);
@@ -66,7 +69,7 @@ public class MailSupport {
     String body = getHTMLEmail(linkText, message, baseURL);
 
     String fromEmail = "admin@" + serverName;
-    normalFullEmail(fromEmail, fromEmail, replyTo, toAddresses, subject, body);
+    normalFullEmail(fromEmail, fromEmail, replyTo, ccEmails, toAddresses, subject, body);
   }
 
   private String getHTMLEmail(String linkText, String message, String link2) {
@@ -146,6 +149,15 @@ public class MailSupport {
     normalEmail(RECIPIENT_NAME, receiver, new ArrayList<String>(), subject, message, LOCALHOST);
   }
 
+  /**
+   * @see #email(String, String, String)
+   * @param recipientName
+   * @param recipientEmail
+   * @param ccEmails
+   * @param subject
+   * @param message
+   * @param email_server
+   */
   private void normalEmail(String recipientName, String recipientEmail, List<String> ccEmails,
                            String subject, String message, String email_server) {
     try {
@@ -168,15 +180,17 @@ public class MailSupport {
   /**
    * @param senderName
    * @param senderEmail
+   * @param ccEmails
    * @param recipientEmails
    * @param subject
    * @param message
-   * @see #sendEmail(String, String, String, String, String, String, String)
+   * @see #sendEmail(String, String, String, String, String, String, String, Collection)
    */
   private void normalFullEmail(String senderName,
                                String senderEmail,
                                String replyToEmail,
-                               List<String> recipientEmails,
+                               Collection<String> ccEmails,
+                               Collection<String> recipientEmails,
 
                                String subject, String message) {
     try {
@@ -188,20 +202,16 @@ public class MailSupport {
         props.put(MAIL_SMTP_PORT, ""+MAIL_PORT);
         logger.debug("Testing : using port " + MAIL_PORT);
       }
-//      logger.debug("props " + props);
-
       Session session = Session.getDefaultInstance(props, null);
-
   //    logger.debug("session props " + session.getProperties());
       String property = session.getProperty(MAIL_SMTP_PORT);
       if (testEmail && property == null) {
-      //  logger.warn("\n\n\nsetting mail port " + MAIL_PORT);
         session.getProperties().setProperty(MAIL_SMTP_PORT, ""+MAIL_PORT);
       }
 
       Message msg = makeHTMLMessage(session,
           senderName, senderEmail, replyToEmail, recipientEmails,
-          subject, message);
+          ccEmails, subject, message);
       Transport.send(msg);
     } catch (Exception e) {
       if (e.getMessage().contains("Could not connect to SMTP")) {
@@ -242,36 +252,55 @@ public class MailSupport {
    */
   private Message makeMessage(Session session,
                               String recipientName, String recipientEmail,
-                              List<String> ccEmails,
+                              Collection<String> ccEmails,
                               String subject, String message) throws Exception {
     Message msg = new MimeMessage(session);
     msg.setFrom(new InternetAddress(EMAIL, DATA_COLLECT_WEBMASTER));
     InternetAddress address = new InternetAddress(recipientEmail, recipientName);
     logger.debug("Sending to " + address);
     msg.addRecipient(Message.RecipientType.TO, address);
-    for (String ccEmail : ccEmails) {
-      msg.addRecipient(Message.RecipientType.CC, new InternetAddress(ccEmail));
-    }
+    addCC(ccEmails, msg);
     msg.setSubject(subject);
     msg.setText(message);
 
     return msg;
   }
 
+  private void addCC(Collection<String> ccEmails, Message msg) throws MessagingException {
+    for (String ccEmail : ccEmails) {
+      msg.addRecipient(Message.RecipientType.CC, new InternetAddress(ccEmail));
+    }
+  }
+
+  /**
+   * @see #normalFullEmail(String, String, String, Collection, Collection, String, String)
+   * @param session
+   * @param senderName
+   * @param senderEmail
+   * @param replyToEmail
+   * @param recipientEmails
+   * @param ccEmails
+   * @param subject
+   * @param message
+   * @return
+   * @throws Exception
+   */
   private Message makeHTMLMessage(Session session,
                                   String senderName,
                                   String senderEmail,
                                   String replyToEmail,
-                                  List<String> recipientEmails,
+                                  Collection<String> recipientEmails,
+                                  Collection<String> ccEmails,
                                   String subject, String message) throws Exception {
-    Message msg = new MimeMessage(session);
+    logger.info("Sending from " + senderEmail + " " + senderName + " to " + recipientEmails + " sub " + subject);
 
-    logger.info("Sending from " + senderEmail + " " + senderName + " to " + recipientEmails + " sub " + subject);// + " " + message);
+    Message msg = new MimeMessage(session);
     msg.setFrom(new InternetAddress(senderEmail, senderName));
     for (String receiver : recipientEmails) {
       //logger.info("\tSending  to " + receiver);
       msg.addRecipient(Message.RecipientType.TO, new InternetAddress(receiver));
     }
+    addCC(ccEmails, msg);
     msg.setSubject(subject);
     msg.setText(message);
     msg.addHeader("Content-Type", "text/html");
@@ -282,9 +311,8 @@ public class MailSupport {
 
   private void addReplyTo(String replyToEmail, Message msg) throws MessagingException {
     if (replyToEmail != null && replyToEmail.length() > 0) {
-      InternetAddress internetAddress = new InternetAddress(replyToEmail);
       Address[] replies = new Address[1];
-      replies[0] = internetAddress;
+      replies[0] = new InternetAddress(replyToEmail);
       msg.setReplyTo(replies);
     }
   }
