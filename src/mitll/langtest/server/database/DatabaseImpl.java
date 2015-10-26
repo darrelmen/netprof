@@ -15,6 +15,7 @@ import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.server.mail.MailSupport;
+import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
@@ -46,7 +47,7 @@ import java.util.*;
  * * it's not a good idea to close connections, especially in the context of a servlet inside a container, since
  * H2 will return "new" connections that have already been closed.   <br></br>
  * * it's not a good idea to reuse one connection...?  <br></br>
- * <p/>
+ * <p>
  * User: go22670
  * Date: 5/14/12
  * Time: 11:44 PM
@@ -77,10 +78,7 @@ public class DatabaseImpl implements Database {
   private MonitoringSupport monitoringSupport;
 
   private String lessonPlanFile;
- // private boolean useFile;
   private final String configDir;
-
- // private String mediaDir;
   private final ServerProperties serverProps;
   private final LogAndNotify logAndNotify;
 
@@ -110,7 +108,7 @@ public class DatabaseImpl implements Database {
     this.configDir = relativeConfigDir;
     this.serverProps = serverProps;
     this.lessonPlanFile = serverProps.getLessonPlan();
-  //  this.useFile = lessonPlanFile != null;
+    //  this.useFile = lessonPlanFile != null;
     this.logAndNotify = logAndNotify;
 
     try {
@@ -181,18 +179,25 @@ public class DatabaseImpl implements Database {
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
+
+    putBackWordAndPhone();
   }
 
   public ResultDAO getResultDAO() {
     return resultDAO;
   }
 
-  public Analysis getAnalysis() { return new Analysis(this, phoneDAO);
+  public Analysis getAnalysis() {
+    return new Analysis(this, phoneDAO);
   }
 
-  public RefResultDAO getRefResultDAO() {  return refresultDAO;  }
+  public RefResultDAO getRefResultDAO() {
+    return refresultDAO;
+  }
 
-  public UserDAO getUserDAO() {    return userDAO;  }
+  public UserDAO getUserDAO() {
+    return userDAO;
+  }
 
   @Override
   public Connection getConnection(String who) {
@@ -238,7 +243,37 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  private MonitoringSupport getMonitoringSupport() { return new MonitoringSupport(userDAO, resultDAO);  }
+  /**
+   * TODO : IS this right? Lots of skipping...
+   */
+  public void putBackWordAndPhone() {
+    List<Result> results = resultDAO.getResults();
+    Map<Integer, Result> idToResult = new HashMap<>();
+    for (Result r : results) idToResult.put(r.getUniqueID(), r);
+
+    List<WordDAO.Word> all = wordDAO.getAll();
+    Set<Integer> already = new HashSet<>();
+    for (WordDAO.Word word : all) {
+      long rid = word.rid;
+      already.add((int) rid);
+    }
+    logger.debug("current word results " + already.size());
+    Set<Integer> allKeys = new HashSet<>(idToResult.keySet());
+    logger.debug("before " + allKeys.size());
+    allKeys.removeAll(already);
+    logger.debug("after " + allKeys.size());
+    ParseResultJson parseResultJson = new ParseResultJson(getServerProps());
+    for (Integer key : allKeys) {
+      Result result = idToResult.get(key);
+      String jsonScore = result.getJsonScore();
+      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(jsonScore);
+      recordWordAndPhoneInfo(result.getUniqueID(), netPronImageTypeListMap);
+    }
+  }
+
+  private MonitoringSupport getMonitoringSupport() {
+    return new MonitoringSupport(userDAO, resultDAO);
+  }
 
   /**
    * @param installPath
@@ -247,11 +282,11 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath
    */
   public void setInstallPath(String installPath, String lessonPlanFile, String mediaDir) {
-   // logger.debug("got install path " + installPath + " media " + mediaDir);
+    // logger.debug("got install path " + installPath + " media " + mediaDir);
     this.installPath = installPath;
     this.lessonPlanFile = lessonPlanFile;
-  //  this.mediaDir = mediaDir;
-  //  this.useFile = useFile;
+    //  this.mediaDir = mediaDir;
+    //  this.useFile = useFile;
     makeDAO(lessonPlanFile, mediaDir, installPath);
     this.jsonSupport = new JsonSupport(getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
         getPhoneDAO(), configDir, installPath);
@@ -291,7 +326,7 @@ public class DatabaseImpl implements Database {
     }
     //logger.debug("using lesson plan file " +lessonPlanFile + " at " + installPath);
 //    boolean isExcel = lessonPlanFile.endsWith(".xlsx");
- //   makeDAO(lessonPlanFile, mediaDir, installPath);
+    //   makeDAO(lessonPlanFile, mediaDir, installPath);
 
     List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
     if (rawExercises.isEmpty()) {
@@ -324,7 +359,7 @@ public class DatabaseImpl implements Database {
       userDAO.checkForFavorites(userListManager);
       userExerciseDAO.setAudioDAO(audioDAO);
 
-      userManagement = new UserManagement(userDAO,exerciseDAO,resultDAO,userListManager);
+      userManagement = new UserManagement(userDAO, exerciseDAO, resultDAO, userListManager);
     }
   }
 
@@ -370,7 +405,7 @@ public class DatabaseImpl implements Database {
       logger.error("huh? couldn't make overlay or find user exercise for " + userExercise);
     } else {
       boolean b = original.removeAll(defects);  // TODO - does this work really without a compareTo?
-      logger.debug(b?"removed defects " +original.size() + " now" : " didn't remove any defects - " + defects.size());
+      logger.debug(b ? "removed defects " + original.size() + " now" : " didn't remove any defects - " + defects.size());
 
       for (AudioAttribute attribute : defects) {
         if (!exercise.removeAudio(attribute)) {
@@ -435,11 +470,11 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    * @param userid
    * @param typeToSection
-   * @paramx collator
    * @return
+   * @paramx collator
+   * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   public JSONObject getJsonScoreHistory(long userid,
                                         Map<String, Collection<String>> typeToSection,
@@ -453,18 +488,19 @@ public class DatabaseImpl implements Database {
 
   /**
    * For all the exercises in a chapter
-
-   Get latest results
-   Get phones for latest
-
-   //Score phones
-   Sort phone scores – asc
-
-   Map phone->example
-
-   Join phone->word
-
-   Sort word by score asc
+   * <p>
+   * Get latest results
+   * Get phones for latest
+   * <p>
+   * //Score phones
+   * Sort phone scores – asc
+   * <p>
+   * Map phone->example
+   * <p>
+   * Join phone->word
+   * <p>
+   * Sort word by score asc
+   *
    * @return
    * @see mitll.langtest.server.ScoreServlet#getPhoneReport
    */
@@ -576,12 +612,16 @@ public class DatabaseImpl implements Database {
    * @return unmodifiable list of exercises
    * @see mitll.langtest.server.LangTestDatabaseImpl#init
    */
-  public void preloadExercises() {  getExercises(lessonPlanFile); }
+  public void preloadExercises() {
+    getExercises(lessonPlanFile);
+  }
 
-  public void preloadContextPractice() {makeContextPractice(getServerProps().getDialogFile(), installPath);}
+  public void preloadContextPractice() {
+    makeContextPractice(getServerProps().getDialogFile(), installPath);
+  }
 
   public ContextPractice getContextPractice() {
-    if(this.contextPractice == null){
+    if (this.contextPractice == null) {
       makeContextPractice(getServerProps().getDialogFile(), installPath);
     }
     return this.contextPractice;
@@ -603,7 +643,6 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   *
    * @param userID
    * @param passwordH
    * @param emailH
@@ -636,7 +675,7 @@ public class DatabaseImpl implements Database {
    */
   public User addUser(HttpServletRequest request, String userID, String passwordH, String emailH, User.Kind kind,
                       boolean isMale, int age, String dialect, String device) {
-    return userManagement.addUser(request, userID, passwordH, emailH,  kind, isMale, age, dialect,device);
+    return userManagement.addUser(request, userID, passwordH, emailH, kind, isMale, age, dialect, device);
   }
 
   /**
@@ -650,9 +689,9 @@ public class DatabaseImpl implements Database {
 
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
-   * <p/>
+   * <p>
    * Uses return generated keys to get the user id
-   *
+   * <p>
    * JUST FOR TESTING
    *
    * @param age
@@ -666,14 +705,16 @@ public class DatabaseImpl implements Database {
    */
   public long addUser(int age, String gender, int experience, String ipAddr,
                       String nativeLang, String dialect, String userID, Collection<User.Permission> permissions, String device) {
-    return userManagement.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID,permissions,device);
+    return userManagement.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, permissions, device);
   }
 
   /**
-   * @see mitll.langtest.server.DownloadServlet
    * @param out
+   * @see mitll.langtest.server.DownloadServlet
    */
-  public void usersToXLSX(OutputStream out) {  userManagement.usersToXLSX(out);  }
+  public void usersToXLSX(OutputStream out) {
+    userManagement.usersToXLSX(out);
+  }
 
   /**
    * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
@@ -691,7 +732,6 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.ScoreServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    * @param id
    * @param widgetType
    * @param exid
@@ -699,27 +739,36 @@ public class DatabaseImpl implements Database {
    * @param userid
    * @param device
    * @return
+   * @see mitll.langtest.server.ScoreServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   public boolean logEvent(String id, String widgetType, String exid, String context, long userid, String device) {
     return logEvent(id, widgetType, exid, context, userid, UNKNOWN, device);
   }
 
   public boolean logEvent(String id, String widgetType, String exid, String context, long userid, String hitID,
-                          String device)  {
+                          String device) {
     return eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, hitID, device));
   }
 
-  public void logAndNotify(Exception e) { getLogAndNotify().logAndNotifyServerException(e);  }
+  public void logAndNotify(Exception e) {
+    getLogAndNotify().logAndNotifyServerException(e);
+  }
 
   public EventDAO getEventDAO() {
     return eventDAO;
   }
+
   public AudioDAO getAudioDAO() {
     return audioDAO;
   }
 
-  public WordDAO getWordDAO() { return wordDAO;  }
-  public PhoneDAO getPhoneDAO() { return phoneDAO;  }
+  public WordDAO getWordDAO() {
+    return wordDAO;
+  }
+
+  public PhoneDAO getPhoneDAO() {
+    return phoneDAO;
+  }
 
 /*  public List<Result> getResultsWithGrades() {
     List<Result> results = resultDAO.getResults();
@@ -753,10 +802,10 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(java.util.Map, long, String)
-   * @see #getMonitorResults()
    * @param monitorResults
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(java.util.Map, long, String)
+   * @see #getMonitorResults()
    */
   public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults) {
     Map<String, CommonExercise> join = getIdToExerciseMap();
@@ -808,7 +857,7 @@ public class DatabaseImpl implements Database {
                              boolean recordedWithFlash, String deviceType, String device, String scoreJson, int processDur) {
     //logger.debug("addAudioAnser json = " + scoreJson);
     if (valid && scoreJson.isEmpty()) {
-      logger.warn("huh? no score json for valid audio " + audioFile + " on " +exerciseID);
+      logger.warn("huh? no score json for valid audio " + audioFile + " on " + exerciseID);
     }
     return answerDAO.addAnswer(this, userID, exerciseID, questionID, "", audioFile, valid,
         audioType,
@@ -816,7 +865,6 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#getRefAudioAnswerDecoding
    * @param userID
    * @param exerciseID
    * @param audioFile
@@ -825,6 +873,7 @@ public class DatabaseImpl implements Database {
    * @param isMale
    * @param speed
    * @return
+   * @see mitll.langtest.server.audio.AudioFileHelper#getRefAudioAnswerDecoding
    */
   public long addRefAnswer(int userID, String exerciseID,
                            String audioFile,
@@ -837,7 +886,7 @@ public class DatabaseImpl implements Database {
 
                            boolean isMale, String speed) {
     return refresultDAO.addAnswer(this, userID, exerciseID, audioFile, durationInMillis, correct,
-        alignOutput,decodeOutput,
+        alignOutput, decodeOutput,
         alignOutputOld, decodeOutputOld,
         isMale, speed);
   }
@@ -1020,7 +1069,10 @@ public class DatabaseImpl implements Database {
   private AddRemoveDAO getAddRemoveDAO() {
     return addRemoveDAO;
   }
-  private ExerciseDAO getExerciseDAO()   { return exerciseDAO; }
+
+  private ExerciseDAO getExerciseDAO() {
+    return exerciseDAO;
+  }
 
   /**
    * @param out
@@ -1082,7 +1134,7 @@ public class DatabaseImpl implements Database {
         //logger.debug("ex " + ex.getID() + " females " + ex.getUserMap(false));
       }
       long now = System.currentTimeMillis();
-      logger.debug("\nTook " +(now-then) + " millis to annotate and attach.");
+      logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
       new AudioExport(getServerProps()).writeZip(out, userListByID.getName(), getSectionHelper(), exercises, language1,
           getAudioDAO(), installPath, configDir, listid == UserListManager.REVIEW_MAGIC_ID);
     }
@@ -1127,7 +1179,7 @@ public class DatabaseImpl implements Database {
     try {
       new Report(userDAO, resultDAO, eventDAO, audioDAO).writeReport(pathHelper);
     } catch (IOException e) {
-      logger.error("got " +e);
+      logger.error("got " + e);
     }
   }
 
@@ -1140,8 +1192,15 @@ public class DatabaseImpl implements Database {
   }
 
   public void recordWordAndPhoneInfo(long answerID, PretestScore pretestScore) {
-    List<TranscriptSegment> words  = pretestScore == null ? null : pretestScore.getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
-    List<TranscriptSegment> phones = pretestScore == null ? null : pretestScore.getsTypeToEndTimes().get(NetPronImageType.PHONE_TRANSCRIPT);
+    if (pretestScore != null) {
+      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getsTypeToEndTimes();
+      recordWordAndPhoneInfo(answerID, netPronImageTypeListMap);
+    }
+  }
+
+  private void recordWordAndPhoneInfo(long answerID, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
+    List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
+    List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
     if (words != null) {
       int windex = 0;
       int pindex = 0;
@@ -1163,7 +1222,9 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  public String toString() {   return "Database : " + this.getClass().toString();  }
+  public String toString() {
+    return "Database : " + this.getClass().toString();
+  }
 
   @Override
   public LogAndNotify getLogAndNotify() {
