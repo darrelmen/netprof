@@ -12,7 +12,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.User;
 
 import java.util.Collection;
@@ -21,41 +20,41 @@ import java.util.Collection;
  * Does fancy font sizing depending on available width...
  */
 public class Flashcard implements RequiresResize {
-    private static final String PRONUNCIATION_FEEDBACK = "NetProF – Networked Pronunciation Feedback";//"Classroom";//NetProF";//"PRONUNCIATION FEEDBACK";
+  private static final String PRONUNCIATION_FEEDBACK = "NetProF – Networked Pronunciation Feedback";//"Classroom";//NetProF";//"PRONUNCIATION FEEDBACK";
   private static final double MAX_FONT_EM = 1.7d;
   private static final int SLOP = 55;
   private static final String NEW_PRO_F1_PNG = "NewProF1.png";
   private static final String RECORDING_DISABLED = "RECORDING DISABLED";
   private static final int MIN_SCREEN_WIDTH = 1100;
-    private static final String LOG_OUT = "Log Out";
-    private static final double MIN_RATIO = 0.7;
-    private static final int min = 720;
-    private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@ll.mit.edu";
-    private final String HREF;
-    public static final String NEED_HELP_QUESTIONS_CONTACT_US = "Need Help? Questions? Contact us.";
+  private static final String LOG_OUT = "Log Out";
+  private static final double MIN_RATIO = 0.7;
+  private static final int min = 720;
+  private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@ll.mit.edu";
+  private final String HREF;
+  public static final String NEED_HELP_QUESTIONS_CONTACT_US = "Need Help? Questions? Contact us.";
 
-    private final boolean isAnonymous;
-    private Paragraph appName;
-    private Image flashcardImage;
-    private Image collab;
-    private HTML userNameWidget;
-    private final String nameForAnswer;
-    private Paragraph subtitle;
-    private HTML browserInfo;
-    private Panel qc, recordAudio;
-    private Dropdown cogMenu;
+  private final boolean isAnonymous;
+  private Paragraph appName;
+  private Image flashcardImage;
+  private Image collab;
+  private HTML userNameWidget;
+  private final String nameForAnswer;
+  private Paragraph subtitle;
+  private HTML browserInfo;
+  private Panel qc, recordAudio;
+  private Dropdown cogMenu;
 
-    /**
-     * @see mitll.langtest.client.LangTest#makeHeaderRow()
-     */
-    public Flashcard(PropertyHandler props) {
-        this.nameForAnswer = props.getNameForAnswer() + "s";
-        isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
-        HREF = "mailto:" +
-                NETPROF_HELP_LL_MIT_EDU + "?Subject=Question%20about%20" + props.getLanguage() + "%20NetProF";
-    }
+  /**
+   * @see mitll.langtest.client.LangTest#makeHeaderRow()
+   */
+  public Flashcard(PropertyHandler props) {
+    this.nameForAnswer = props.getNameForAnswer() + "s";
+    isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
+    HREF = "mailto:" +
+        NETPROF_HELP_LL_MIT_EDU + "?Subject=Question%20about%20" + props.getLanguage() + "%20NetProF";
+  }
 
-    /**
+  /**
    * @param splashText
    * @param userName
    * @return
@@ -67,11 +66,10 @@ public class Flashcard implements RequiresResize {
                                 ClickHandler monitoring,
                                 ClickHandler events) {
     return getHeaderRow(splashText, isBeta, userName, browserInfo, logoutClickHandler,
-      users, results, monitoring,events);
+        users, results, monitoring, events);
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#makeHeaderRow()
    * @param splashText
    * @param isBeta
    * @param userName
@@ -82,16 +80,17 @@ public class Flashcard implements RequiresResize {
    * @param monitoring
    * @param events
    * @return
+   * @see mitll.langtest.client.LangTest#makeHeaderRow()
    */
   private Panel getHeaderRow(String splashText,
-                            boolean isBeta, String userName,
-                            HTML browserInfo,
-                            ClickHandler logoutClickHandler,
+                             boolean isBeta, String userName,
+                             HTML browserInfo,
+                             ClickHandler logoutClickHandler,
 
-                            ClickHandler users,
-                            ClickHandler results,
-                            ClickHandler monitoring,
-                            ClickHandler events) {
+                             ClickHandler users,
+                             ClickHandler results,
+                             ClickHandler monitoring,
+                             ClickHandler events) {
     HorizontalPanel headerRow = new HorizontalPanel();
     headerRow.setWidth("100%");
     headerRow.addStyleName("headerBackground");
@@ -113,7 +112,7 @@ public class Flashcard implements RequiresResize {
     subtitle.addStyleName("subtitleForeground");
     subtitle.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
 
-      flashcard.add(subtitle);
+    flashcard.add(subtitle);
 
     flashcardImage = new Image(LangTest.LANGTEST_IMAGES + Flashcard.NEW_PRO_F1_PNG);
     flashcardImage.addStyleName("floatLeft");
@@ -190,11 +189,10 @@ public class Flashcard implements RequiresResize {
   }
 
   /**
+   * @param val
    * @see mitll.langtest.client.LangTest#gotUser(mitll.langtest.shared.User)
    * @see mitll.langtest.client.LangTest#handleCDToken(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, String)
    * @see mitll.langtest.client.LangTest#showLogin(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel)
-   *
-   * @param val
    */
   public void setCogVisible(boolean val) {
     cogMenu.setVisible(val);
@@ -202,15 +200,17 @@ public class Flashcard implements RequiresResize {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
    * @param v
+   * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
    */
-  public void setBrowserInfo(String v) { browserInfo.setHTML(v);}
+  public void setBrowserInfo(String v) {
+    browserInfo.setHTML(v);
+  }
 
   /**
-   * @see #getHeaderRow
    * @param userName
    * @return
+   * @see #getHeaderRow
    */
   private HTML getUserNameWidget(String userName) {
     userNameWidget = new HTML(userName);
@@ -235,11 +235,11 @@ public class Flashcard implements RequiresResize {
   private NavLink userC, resultsC, monitoringC, eventsC;
 
   /**
-   * @see #getHeaderRow
    * @param users
    * @param results
    * @param monitoring
    * @return
+   * @see #getHeaderRow
    */
   private Dropdown makeMenu(ClickHandler users, ClickHandler results, ClickHandler monitoring, ClickHandler events) {
     Dropdown w = new Dropdown();
@@ -274,11 +274,15 @@ public class Flashcard implements RequiresResize {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#gotUser
    * @param name
+   * @see mitll.langtest.client.LangTest#gotUser
    */
-  public void setUserName(String name) {  this.userNameWidget.setText(name);  }
-  public void setSplash() {  this.subtitle.setText(RECORDING_DISABLED);
+  public void setUserName(String name) {
+    this.userNameWidget.setText(name);
+  }
+
+  public void setSplash() {
+    this.subtitle.setText(RECORDING_DISABLED);
 
     subtitle.removeStyleName("subtitleForeground");
     subtitle.addStyleName("subtitleNoRecordingForeground");
@@ -307,7 +311,7 @@ public class Flashcard implements RequiresResize {
     ratio = Math.floor(ratio);
     ratio /= 10;
     if (ratio < MIN_RATIO) ratio = MIN_RATIO;
-    if (ratio > MAX_FONT_EM) ratio =  MAX_FONT_EM;
+    if (ratio > MAX_FONT_EM) ratio = MAX_FONT_EM;
     appName.getElement().getStyle().setFontSize(ratio, Style.Unit.EM);
   }
 }
