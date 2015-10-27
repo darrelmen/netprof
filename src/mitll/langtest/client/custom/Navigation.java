@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.ShowTab;
+import mitll.langtest.client.analysis.StudentAnalysis;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.contextPractice.DialogWindow;
 import mitll.langtest.client.custom.content.AVPHelper;
@@ -50,6 +51,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class Navigation implements RequiresResize, ShowTab {
+  public static final String STUDENT_ANALYSIS = "Student Analysis";
   private final Logger logger = Logger.getLogger("Navigation");
 
   private static final String CHAPTERS = "Learn Pronunciation";
@@ -99,7 +101,7 @@ public class Navigation implements RequiresResize, ShowTab {
   private TabAndContent studyLists;
   private TabAndContent dialog;
   private TabAndContent chapters;
-  private TabAndContent analysis;
+  private TabAndContent analysis, studentAnalysis;
   private TabAndContent review, recorderTab, recordExampleTab, markDefectsTab, practiceTab;
 
   private final Map<String, TabAndContent> nameToTab = new HashMap<String, TabAndContent>();
@@ -317,8 +319,6 @@ public class Navigation implements RequiresResize, ShowTab {
 
     addDialogTab();
 
-    // learn tab
-
     addLearnTab();
 
     addPracticeTab();
@@ -327,6 +327,9 @@ public class Navigation implements RequiresResize, ShowTab {
 
     if (controller.getProps().useAnalysis() || true) {
       addAnalysis();
+      if (userManager.isTeacher()) {
+        addTeacherAnalysis();
+      }
     }
 
     if (isQC()) {
@@ -378,18 +381,39 @@ public class Navigation implements RequiresResize, ShowTab {
     }
   }
 
+  /**
+   * @see #addTabs()
+   */
   private void addAnalysis() {
     analysis = makeFirstLevelTab(tabPanel, IconType.TROPHY, ANALYSIS);
     analysis.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTab(ANALYSIS);
-        logEvent(dialog, ANALYSIS);
+        logEvent(analysis, ANALYSIS);
         showAnalysis();
       }
     });
   }
 
+  /**
+   * @see #addTabs()
+   */
+  private void addTeacherAnalysis() {
+    studentAnalysis = makeFirstLevelTab(tabPanel, IconType.TROPHY, STUDENT_ANALYSIS);
+    studentAnalysis.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        checkAndMaybeClearTab(STUDENT_ANALYSIS);
+        logEvent(studentAnalysis, STUDENT_ANALYSIS);
+        showStudentAnalysis();
+      }
+    });
+  }
+
+  /**
+   * @see #addAnalysis()
+   */
   private void showAnalysis() {
     learnHelper.showNPF(chapters, LEARN);
 
@@ -397,7 +421,18 @@ public class Navigation implements RequiresResize, ShowTab {
     ShowTab showTab = this;
     AnalysisTab w = new AnalysisTab(service, controller, userManager.getUser(), showTab);
     analysis.getContent().add(w);
+  }
 
+  /**
+   * @see #addAnalysis()
+   */
+  private void showStudentAnalysis() {
+    learnHelper.showNPF(chapters, LEARN);
+
+    studentAnalysis.getContent().clear();
+    ShowTab showTab = this;
+    StudentAnalysis w = new StudentAnalysis(service, controller, showTab);
+    studentAnalysis.getContent().add(w);
   }
 
   private void addStudyLists() {
@@ -589,6 +624,8 @@ public class Navigation implements RequiresResize, ShowTab {
         showPracticeTab();
       } else if (value.equals(ANALYSIS) && analysis != null) {
         showAnalysis();
+      } else if (value.equals(STUDENT_ANALYSIS) && studentAnalysis != null) {
+        showStudentAnalysis();
       } else {
         logger.info("selectPreviousTab got unknown value '" + value + "'");
         showDefaultInitialTab();
