@@ -42,7 +42,11 @@ public class WordScore implements Serializable, Comparable<WordScore>{
 
   @Override
   public int compareTo(WordScore o) {
-    return Float.valueOf(getPronScore()).compareTo(o.getPronScore());
+    int i = Float.valueOf(getPronScore()).compareTo(o.getPronScore());
+    if (i == 0) {
+      i = Long.valueOf(timestamp).compareTo(o.timestamp);
+    }
+    return i;
   }
 
   public String getId() {
