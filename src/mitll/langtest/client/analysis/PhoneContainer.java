@@ -37,6 +37,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
+  public static final int TABLE_WIDTH = 150;
   private final Logger logger = Logger.getLogger("PhoneContainer");
   private static final int COL_WIDTH = 55;
   private PhoneExampleContainer exampleContainer;
@@ -57,7 +58,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
 
   @Override
   protected void setMaxWidth() {
-    table.getElement().getStyle().setProperty("maxWidth", 150 + "px");
+    table.getElement().getStyle().setProperty("maxWidth", TABLE_WIDTH + "px");
   }
 
   private PhoneReport phoneReport;
