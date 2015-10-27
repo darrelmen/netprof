@@ -270,9 +270,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndScore object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getType())) {
-          gotClickOnItem(object);
-        }
+        checkForClick(object, event);
       }
 
       @Override
@@ -281,6 +279,12 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
         return getSafeHtml(columnText);
       }
     };
+  }
+
+  private void checkForClick(PhoneAndScore object, NativeEvent event) {
+    if (BrowserEvents.CLICK.equals(event.getType())) {
+      gotClickOnItem(object);
+    }
   }
 
   private void gotClickOnItem(final PhoneAndScore e) {
@@ -292,7 +296,13 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   }
 
   private Column<PhoneAndScore, SafeHtml> getScoreColumn() {
-    return new Column<PhoneAndScore, SafeHtml>(new SafeHtmlCell()) {
+    return new Column<PhoneAndScore, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndScore object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkForClick(object, event);
+      }
+
       @Override
       public SafeHtml getValue(PhoneAndScore shell) {
         float v = shell.getScore() * 100;
@@ -309,12 +319,15 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   }
 
   private Column<PhoneAndScore, SafeHtml> getCountColumn() {
-    return new Column<PhoneAndScore, SafeHtml>(new SafeHtmlCell()) {
+    return new Column<PhoneAndScore, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndScore object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkForClick(object, event);
+      }
       @Override
       public SafeHtml getValue(PhoneAndScore shell) {
-        //float v = shell.getScore() * 100;
         String s = "" + shell.getCount();
-
         return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
       }
     };
