@@ -291,6 +291,7 @@ public class PhoneDAO extends DAO {
    */
   public PhoneReport getWorstPhonesForResults(long userid, List<Integer> ids, Map<String, String> idToRef) throws SQLException {
     String sql = getResultIDJoinSQL(userid, ids);
+  //  logger.info("sql " +sql);
     return getPhoneReport(sql, idToRef, true);
   }
 
@@ -303,6 +304,8 @@ public class PhoneDAO extends DAO {
    */
   private PhoneReport getWorstPhones(long userid, List<String> exids, Map<String, String> idToRef) throws SQLException {
     String sql = getJoinSQL(userid, exids);
+    //logger.info("sql " +sql);
+
     return getPhoneReport(sql, idToRef, false);
   }
 
@@ -361,7 +364,7 @@ public class PhoneDAO extends DAO {
         totalItems++;
       }
 
-      if (currentRID == rid) {   // TODO : ? WHY ?
+//      if (currentRID == rid) {   // TODO : ? WHY ?
         String phone = rs.getString(PHONE);
         int seq = rs.getInt(SEQ);
         List<Float> scores = phoneToScores.get(phone);
@@ -376,7 +379,7 @@ public class PhoneDAO extends DAO {
           phoneToRID.put(phone, ridsForPhone = new HashSet<Long>());
         }
 
-        WordAndScore wordAndScore = new WordAndScore(word, wscore, rid, wseq, seq, trimPathForWebPage(audioAnswer),
+        WordAndScore wordAndScore = new WordAndScore(exid, word, wscore, rid, wseq, seq, trimPathForWebPage(audioAnswer),
             idToRef.get(exid), scoreJson);
         if (!ridsForPhone.contains(rid)) { // get rid of duplicates
           wordAndScores.add(wordAndScore);
@@ -392,17 +395,24 @@ public class PhoneDAO extends DAO {
           if (times == null) phoneToTimeStamp.put(phone, times = new ArrayList<PhoneAndScore>());
           times.add(new PhoneAndScore(phoneScore,resultTime));
         }
-      } else {
-        logger.debug("------> current " + currentRID +
-            " skipping " + exid + " " + rid + " word " + word + "<-------------- ");
-      }
+  //    } else {
+     /*   logger.debug("------> current " + currentRID +
+            " skipping " + exid + " " + rid + " word " + word + "<-------------- ");*/
+    //  }
     }
     finish(connection, statement, rs);
 
+    // TODO : add this info to phone report
     for (Map.Entry<String,List<PhoneAndScore>> pair : phoneToTimeStamp.entrySet()) {
       Collections.sort(pair.getValue());
+  //    logger.info(pair.getKey() + "\t" + pair.getValue().size());
     }
+//    logger.warn("for o4 " + phoneToTimeStamp.get("o4").size());
 
+//    for (Map.Entry<String, List<Float>> pair : phoneToScores.entrySet()) {
+//      //Collections.sort(pair.getValue());
+//      logger.info("scores : " +pair.getKey() + "\t" + pair.getValue().size());
+//    }
     // TODO : use phone time&score info
 
     return getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems);
