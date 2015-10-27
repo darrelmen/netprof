@@ -81,11 +81,11 @@ public class UserManager {
    */
   public void checkLogin() {
     //logger.info("loginType " + loginType);
-    if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
-      anonymousLogin();
-    } else {
+//    if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
+//      anonymousLogin();
+//    } else {
       login();
-    }
+//    }
   }
 
   /**
@@ -129,17 +129,18 @@ public class UserManager {
     service.getUserBy(user, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
-
       }
 
       @Override
       public void onSuccess(User result) {
 //        logger.info("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
-
-        if (loginType == PropertyHandler.LOGIN_TYPE.ANONYMOUS && result.getUserKind() != User.Kind.ANONYMOUS) {
-          clearUser();
-          addAnonymousUser();
-        } else if (loginType != PropertyHandler.LOGIN_TYPE.ANONYMOUS && result.getUserKind() == User.Kind.ANONYMOUS) {
+//        if (loginType == PropertyHandler.LOGIN_TYPE.ANONYMOUS && result.getUserKind() != User.Kind.ANONYMOUS) {
+//          clearUser();
+//          addAnonymousUser();
+//        } else
+//
+        if (//loginType != PropertyHandler.LOGIN_TYPE.ANONYMOUS &&
+            result.getUserKind() == User.Kind.ANONYMOUS) {
           clearUser();
           userNotification.showLogin();
         } else {
@@ -170,9 +171,9 @@ public class UserManager {
           userNotification.setPermission(permission, true);
         }
       }
-      isMale = result.isMale();
+      isMale    = result.isMale();
       isTeacher = (result.getUserKind() == User.Kind.TEACHER)|| isCD;
-      isAdmin = result.isAdmin();
+      isAdmin   = result.isAdmin();
       //logger.info("\t is male " + isMale + " is CD " + isCD + " is teacher " + isTeacher);
 
       userNotification.gotUser(result);
@@ -186,21 +187,21 @@ public class UserManager {
    * @see #checkLogin()
    * @see mitll.langtest.client.LangTest#checkLogin
    */
+/*
   private void anonymousLogin() {
     int user = getUser();
     if (user != NO_USER_SET) {
       //logger.info("UserManager.anonymousLogin : current user : " + user);
       rememberAudioType(); // TODO : necessary?
-    //  userNotification.gotUser(user);
       getPermissionsAndSetUser(user);
     } else {
       logger.info("UserManager.anonymousLogin : make new user, since user = " + user);
-
       addAnonymousUser();
     }
   }
+*/
 
-  private void addAnonymousUser() {
+/*  private void addAnonymousUser() {
     logger.info("UserManager.addAnonymousUser : adding anonymous user");
 
     service.addUser("anonymous", "", "", User.Kind.ANONYMOUS, Window.Location.getHref(), "", true, 0, "unknown", false, "browser", new AsyncCallback<User>() {
@@ -215,7 +216,7 @@ public class UserManager {
         storeUser(result, Result.AUDIO_TYPE_PRACTICE);
       }
     });
-  }
+  }*/
 
   private void setDefaultControlValues(int user) {
     ControlState controlState = new ControlState();
@@ -248,28 +249,6 @@ public class UserManager {
       userNotification.rememberAudioType(audioType);
     }
   }
-
-/*
-  private void addBinaryKey(boolean val, String unansweredKey) {
-    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-    localStorageIfSupported.setItem(unansweredKey, val ? "true" : "false");
-  }*/
-
-
-/*  private boolean getBinaryKey(String unansweredKey) {
-    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-
-    boolean showUnansweredFirst = false;
-    String unanswered = localStorageIfSupported.getItem(unansweredKey);
-    if (unanswered != null) {
-      //logger.info("found key " +unansweredKey + " = " + unanswered);
-      showUnansweredFirst = unanswered.equalsIgnoreCase("true");
-    }
-    else {
-      //logger.info("===> no key " +unansweredKey);
-    }
-    return showUnansweredFirst;
-  }*/
 
   /**
    * @return id of user
@@ -445,13 +424,10 @@ public class UserManager {
    * @see #rememberUserSessionEnd(long)
    */
   private void rememberUserSessionEnd(Storage localStorageIfSupported, long futureMoment) {
-
     localStorageIfSupported.setItem(getExpires(), "" + futureMoment);
-
     String expires = getExpiresCookie();
-
     long expirationDate = Long.parseLong(expires);
-    logger.info("rememberUserSessionEnd : user will expire on " + new Date(expirationDate));
+//    logger.info("rememberUserSessionEnd : user will expire on " + new Date(expirationDate));
   }
 
   private long getUserSessionEnd() {
