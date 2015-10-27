@@ -7,6 +7,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -24,6 +25,7 @@ import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.shared.User;
 
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -71,13 +73,8 @@ class UserContainer extends SimplePagingContainer<User> {
     }
     flush();
 
-
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-//        PlayAudioWidget.addPlayer();
-        User selectedObject = selectionModel.getSelectedObject();
-        logger.info("seleceted is " +selectedObject);
-
         if (!users.isEmpty()) {
           table.getSelectionModel().setSelected(users.get(0), true);
           gotClickOnItem(users.get(0));
@@ -90,7 +87,7 @@ class UserContainer extends SimplePagingContainer<User> {
 
   @Override
   protected void setMaxWidth() {
-    table.getElement().getStyle().setProperty("maxWidth", 150 + "px");
+    table.getElement().getStyle().setProperty("maxWidth", 320 + "px");
   }
 
   @Override
@@ -107,18 +104,22 @@ class UserContainer extends SimplePagingContainer<User> {
   }
 
   private void addReview() {
-    Column<User, SafeHtml> itemCol = getUserColumn();
-    itemCol.setSortable(true);
-   // table.setColumnWidth(itemCol, 300 + "px");
-
-   // String language = controller.getLanguage();
-
-  //  String headerForFL = language.equals("English") ? "Meaning" : language;
-    addColumn(itemCol, new TextHeader("Students"));
-    table.setWidth("100%", true);
-
-    ColumnSortEvent.ListHandler<User> columnSortHandler = getUserSorter(itemCol,  getList());
+    Column<User, SafeHtml> userCol = getUserColumn();
+    userCol.setSortable(true);
+    table.setColumnWidth(userCol, 140 + "px");
+    addColumn(userCol, new TextHeader("Students"));
+    ColumnSortEvent.ListHandler<User> columnSortHandler = getUserSorter(userCol,  getList());
     table.addColumnSortHandler(columnSortHandler);
+
+    Column<User, SafeHtml> dateCol = getDateColumn();
+    dateCol.setSortable(true);
+    // table.setColumnWidth(userCol, 300 + "px");
+    addColumn(dateCol, new TextHeader("Signed Up At"));
+
+    ColumnSortEvent.ListHandler<User> date = getDateSorter(dateCol, getList());
+    table.addColumnSortHandler(date);
+
+    table.setWidth("100%", true);
   }
 
   private ColumnSortEvent.ListHandler<User> getUserSorter(Column<User, SafeHtml> englishCol,
@@ -136,6 +137,29 @@ class UserContainer extends SimplePagingContainer<User> {
               if (o2 == null) return 1;
               else {
                 return o1.getUserID().compareTo(o2.getUserID());
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
+  }
+
+  private ColumnSortEvent.ListHandler<User> getDateSorter(Column<User, SafeHtml> englishCol,
+                                                          List<User> dataList) {
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<User>() {
+          public int compare(User o1, User o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+
+            // Compare the name columns.
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
               }
             }
             return -1;
@@ -224,6 +248,28 @@ class UserContainer extends SimplePagingContainer<User> {
       }
     };
   }
+
+  private Column<User, SafeHtml> getDateColumn() {
+    return new Column<User, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, User object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        if (BrowserEvents.CLICK.equals(event.getType())) {
+          gotClickOnItem(object);
+        }
+      }
+
+      @Override
+      public SafeHtml getValue(User shell) {
+        String signedUp = DateTimeFormat.getFormat("MMM d yy h:mm a").format(
+            new Date(shell.getTimestampMillis())
+        );
+
+        return getSafeHtml(signedUp);
+      }
+    };
+  }
+
 
   private void gotClickOnItem(final User user) {
     AnalysisTab widgets = new AnalysisTab(service, controller, (int)user.getId(), learnTab);
