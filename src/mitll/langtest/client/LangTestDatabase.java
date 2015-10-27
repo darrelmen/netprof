@@ -75,6 +75,8 @@ public interface LangTestDatabase extends RemoteService {
 
   Map<User, Integer> getUserToResultCount();
 
+  Collection<User> getUsersWithRecordings();
+
   Map<Integer, Integer> getResultCountToCount();
 
   Map<String,Integer> getResultByDay();
