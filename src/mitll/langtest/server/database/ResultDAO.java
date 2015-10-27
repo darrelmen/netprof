@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
@@ -72,11 +73,11 @@ public class ResultDAO extends DAO {
   private List<MonitorResult> cachedMonitorResultsForQuery = null;
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getPerformanceForUser(long)
-   * @see mitll.langtest.client.custom.AnalysisPlot#AnalysisPlot
    * @param id
    * @param phoneDAO
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getPerformanceForUser(long)
+   * @see mitll.langtest.client.custom.AnalysisPlot#AnalysisPlot
    */
   public UserPerformance getPerformanceForUser(long id, PhoneDAO phoneDAO) {
     return new Analysis(database, phoneDAO).getPerformanceForUser(id);
@@ -116,8 +117,7 @@ public class ResultDAO extends DAO {
           return cachedResultsForQuery;
         }
       }
-      String sql = "SELECT * FROM " + RESULTS + " where " + AUDIO_TYPE + " is not null";// AND LEN(" +SCORE_JSON+
-          //") > 13";
+      String sql = "SELECT * FROM " + RESULTS + " where " + AUDIO_TYPE + " is not null";
       List<Result> resultsForQuery = getResultsSQL(sql);
 
       synchronized (this) {
@@ -542,7 +542,6 @@ public class ResultDAO extends DAO {
     jsonObject.put("history", jsonArray);
     return jsonObject;
   }*/
-
   private List<CorrectAndScore> getResultsForExIDInForUser(long userID, boolean isFlashcardRequest, String id) {
     return getResultsForExIDInForUser(Collections.singleton(id), isFlashcardRequest, userID);
   }
@@ -636,6 +635,7 @@ public class ResultDAO extends DAO {
    * @return
    * @throws SQLException
    * @see #getResults()
+   * @see #getResultsDevices()
    */
   private List<Result> getResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
@@ -674,6 +674,32 @@ public class ResultDAO extends DAO {
       logException(ee);
     }
     return numResults;
+  }
+
+  /**
+   * @param userDAO
+   * @return
+   * @see LangTestDatabaseImpl#getUsersWithRecordings()
+   * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis
+   */
+  public Collection<User> getUsersWithRecordings(UserDAO userDAO) {
+    Set<User> users = new HashSet<>();
+    try {
+      Connection connection = database.getConnection(this.getClass().toString());
+      PreparedStatement statement = connection.prepareStatement("SELECT DISTINCT " + USERID +
+          " FROM " + RESULTS + " where " + PRON_SCORE + " > -0.1");
+      ResultSet rs = statement.executeQuery();
+
+      Map<Long, User> userMap = userDAO.getUserMap();
+
+      while (rs.next()) {
+        users.add(userMap.get(rs.getLong(1)));
+      }
+      finish(connection, statement, rs);
+    } catch (Exception ee) {
+      logException(ee);
+    }
+    return users;
   }
 
   /**
@@ -1115,7 +1141,7 @@ public class ResultDAO extends DAO {
         RESULTS +
         " (" +
         ID + " IDENTITY, " +
-        USERID +" INT, " +
+        USERID + " INT, " +
         "plan VARCHAR, " +
         Database.EXID + " VARCHAR, " +
         "qid INT," +
