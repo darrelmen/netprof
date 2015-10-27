@@ -66,6 +66,7 @@ public class TypeAhead {
    */
   private void makeTypeAhead() {
     typeAhead.setWidth("240px");
+    typeAhead.getElement().getStyle().setFontSize(14, Style.Unit.PT );
     getTypeAhead().getElement().setId("ExerciseList_TypeAhead");
 
     getTypeAhead().setDirectionEstimator(true);   // automatically detect whether text is RTL
