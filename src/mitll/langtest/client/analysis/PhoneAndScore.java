@@ -5,9 +5,11 @@ package mitll.langtest.client.analysis;
  */
 public class PhoneAndScore {
   private final String phone;
-  private final float score;
 
-  public PhoneAndScore(String phone, float score) { this.phone = phone; this.score = score;}
+  private final float score;
+  private final int count;
+
+  public PhoneAndScore(String phone, float score, int count) { this.phone = phone; this.score = score; this.count = count;}
 
   public String getPhone() {
     return phone;
@@ -15,5 +17,9 @@ public class PhoneAndScore {
 
   public float getScore() {
     return score;
+  }
+
+  public int getCount() {
+    return count;
   }
 }
