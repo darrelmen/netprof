@@ -50,6 +50,7 @@ public class Analysis extends DAO {
    * @param sql
    * @return
    * @throws SQLException
+   * @see #getPerformanceForUser(long)
    */
   private List<BestScore> getBest(String sql) throws SQLException {
   //  logger.info("got " + sql);
@@ -100,6 +101,7 @@ public class Analysis extends DAO {
 
   /**
    * @see ResultDAO#getPerformanceForUser(long, PhoneDAO)
+   * @see mitll.langtest.client.custom.AnalysisPlot#AnalysisPlot
    * @param id
    * @return
    */
@@ -108,8 +110,7 @@ public class Analysis extends DAO {
       String sql = getPerfSQL(id);
 
       List<BestScore> resultsForQuery = getBest(sql);
-      UserPerformance up = new UserPerformance(id, resultsForQuery);
-      return up;
+      return new UserPerformance(id, resultsForQuery);
     } catch (Exception ee) {
       logException(ee);
     }
