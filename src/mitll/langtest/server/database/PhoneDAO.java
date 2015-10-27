@@ -510,14 +510,16 @@ public class PhoneDAO extends DAO {
 
     Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = new LinkedHashMap<String, List<WordAndScore>>();
 
+    Map<String, Integer> phoneToCount = new HashMap<>();
     for (String phone : sorted) {
       List<WordAndScore> value = phoneToWordAndScore.get(phone);
       phoneToWordAndScoreSorted.put(phone, value);
+      phoneToCount.put(phone, value.size());
     }
 
     if (DEBUG) logger.debug("phone->words " + phoneToWordAndScore);
 
-    return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted);
+    return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted,phoneToCount);
   }
 
   private String trimPathForWebPage(String path) {
