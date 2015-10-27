@@ -3,9 +3,14 @@ package mitll.langtest.server;
 import audio.image.ImageType;
 import audio.imagewriter.SimpleImageWriter;
 import com.google.common.io.Files;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
+import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.analysis.ShowTab;
+import mitll.langtest.client.custom.AnalysisPlot;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
@@ -2046,9 +2051,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     idToKey.put(id, collationKey);
   }
 
+  /**
+   * @see mitll.langtest.client.custom.AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long)
+   * @param id
+   * @return
+   */
   @Override
   public UserPerformance getPerformanceForUser(long id) { return db.getResultDAO().getPerformanceForUser(id, db.getPhoneDAO()); }
 
+  /**
+   * @see mitll.langtest.client.analysis.AnalysisTab#getWordScores(LangTestDatabaseAsync, ExerciseController, int, ShowTab, AnalysisPlot, Panel)
+   * @param id
+   * @return
+   */
   @Override
   public List<WordScore> getWordScores(long id) { return db.getAnalysis().getWordScoresForUser(id); }
 
