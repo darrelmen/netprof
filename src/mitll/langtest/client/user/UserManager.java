@@ -17,11 +17,11 @@ import java.util.logging.Logger;
 
 /**
  * Handles storing cookies for users, etc. IF user ids are stored as cookies.
- * <p/>
+ * <p>
  * Prompts user for login info.
- * <p/>
+ * <p>
  * NOTE : will keep prompting them if the browser doesn't let you store cookies.
- * <p/>
+ * <p>
  * User: GO22670
  * Date: 5/15/12
  * Time: 11:32 AM
@@ -36,8 +36,8 @@ public class UserManager {
   private static final long WEEK_HOURS = DAY_HOURS * 7;
   //private static final int ONE_YEAR = 24 * 365;
 
-  private static final long EXPIRATION_HOURS = 52*WEEK_HOURS * HOUR_IN_MILLIS;
- // private static final int SHORT_EXPIRATION_HOURS = DAY_HOURS;
+  private static final long EXPIRATION_HOURS = 52 * WEEK_HOURS * HOUR_IN_MILLIS;
+  // private static final int SHORT_EXPIRATION_HOURS = DAY_HOURS;
 //  private static final int FOREVER_HOURS = ONE_YEAR;
 
   private static final int NO_USER_SET = -1;
@@ -56,7 +56,7 @@ public class UserManager {
   private final String appTitle;
   private final PropertyHandler props;
   private boolean isMale;
-  private boolean isTeacher,isAdmin;
+  private boolean isTeacher, isAdmin;
 
   /**
    * @param lt
@@ -74,18 +74,18 @@ public class UserManager {
 
   /**
    * Keeping option to do an anonymous login...
-   * for egyptian class...
+   * for egyptian class and headstart?
    * 8/22/14
    *
    * @see mitll.langtest.client.LangTest#checkLogin()
    */
   public void checkLogin() {
     //logger.info("loginType " + loginType);
-//    if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
-//      anonymousLogin();
-//    } else {
+    if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
+      anonymousLogin();
+    } else {
       login();
-//    }
+    }
   }
 
   /**
@@ -98,8 +98,7 @@ public class UserManager {
       console("UserManager.login : current user : " + user);
       rememberAudioType();
       getPermissionsAndSetUser(user);
-    }
-    else {
+    } else {
       userNotification.showLogin();
     }
   }
@@ -118,13 +117,14 @@ public class UserManager {
 
   /**
    * TODOx : instead have call to get permissions for a user.
+   *
    * @param user
    * @see #login()
    * @see #storeUser
    */
   private void getPermissionsAndSetUser(final int user) {
     console("getPermissionsAndSetUser : " + user);
-   // logger.info("UserManager.getPermissionsAndSetUser " + user + " asking server for info...");
+    // logger.info("UserManager.getPermissionsAndSetUser " + user + " asking server for info...");
 
     service.getUserBy(user, new AsyncCallback<User>() {
       @Override
@@ -152,11 +152,11 @@ public class UserManager {
 
   /**
    * Only content developers can do quality control or record audio.
-   *
+   * <p>
    * Legacy people must get approval.
    *
-   * @see #storeUser
    * @param result
+   * @see #storeUser
    */
   private void gotNewUser(User result) {
     logger.info("UserManager.gotNewUser " + result);
@@ -171,9 +171,9 @@ public class UserManager {
           userNotification.setPermission(permission, true);
         }
       }
-      isMale    = result.isMale();
-      isTeacher = (result.getUserKind() == User.Kind.TEACHER)|| isCD;
-      isAdmin   = result.isAdmin();
+      isMale = result.isMale();
+      isTeacher = (result.getUserKind() == User.Kind.TEACHER) || isCD;
+      isAdmin = result.isAdmin();
       //logger.info("\t is male " + isMale + " is CD " + isCD + " is teacher " + isTeacher);
 
       userNotification.gotUser(result);
@@ -184,10 +184,11 @@ public class UserManager {
   /**
    * So if there's a current user, ask the server about them.
    * If not add a new anonymous user.
+   *
    * @see #checkLogin()
    * @see mitll.langtest.client.LangTest#checkLogin
    */
-/*
+
   private void anonymousLogin() {
     int user = getUser();
     if (user != NO_USER_SET) {
@@ -199,9 +200,11 @@ public class UserManager {
       addAnonymousUser();
     }
   }
-*/
 
-/*  private void addAnonymousUser() {
+  /**
+   * This is useful in headstart context.
+   */
+  private void addAnonymousUser() {
     logger.info("UserManager.addAnonymousUser : adding anonymous user");
 
     service.addUser("anonymous", "", "", User.Kind.ANONYMOUS, Window.Location.getHref(), "", true, 0, "unknown", false, "browser", new AsyncCallback<User>() {
@@ -212,11 +215,11 @@ public class UserManager {
 
       @Override
       public void onSuccess(User result) {
-        setDefaultControlValues((int)result.getId());
+        setDefaultControlValues((int) result.getId());
         storeUser(result, Result.AUDIO_TYPE_PRACTICE);
       }
     });
-  }*/
+  }
 
   private void setDefaultControlValues(int user) {
     ControlState controlState = new ControlState();
@@ -227,6 +230,7 @@ public class UserManager {
 
   /**
    * For display purposes
+   *
    * @return
    * @see mitll.langtest.client.LangTest#getGreeting()
    */
@@ -276,7 +280,7 @@ public class UserManager {
   public boolean isUserExpired() {
     String sid = getUserFromStorage();
     //String shownHello = Storage.getLocalStorageIfSupported().getItem(UserPassLogin.SHOWN_HELLO);
-   // logger.info("user id cookie for " + getUserIDCookie() + " is " + sid + " shown hello " + shownHello);
+    // logger.info("user id cookie for " + getUserIDCookie() + " is " + sid + " shown hello " + shownHello);
     return (sid == null || sid.equals("" + NO_USER_SET)) ||
         //shownHello == null ||
         checkUserExpired(sid);
@@ -306,13 +310,18 @@ public class UserManager {
    *
    * @return
    */
-  private String getUserIDCookie() { return appTitle + ":" + USER_ID;  }
+  private String getUserIDCookie() {
+    return appTitle + ":" + USER_ID;
+  }
+
   private String getUserChosenID() {
     return appTitle + ":" + USER_CHOSEN_ID;
   }
+
   private String getAudioType() {
     return appTitle + ":" + AUDIO_TYPE;
   }
+
   private String getExpires() {
     return appTitle + ":" + "expires";
   }
@@ -379,9 +388,9 @@ public class UserManager {
   }
 
   /**
-   * @see mitll.langtest.client.user.UserPassLogin#storeUser(mitll.langtest.shared.User)
    * @param user
    * @param audioType
+   * @see mitll.langtest.client.user.UserPassLogin#storeUser(mitll.langtest.shared.User)
    */
   void storeUser(User user, String audioType) {
     logger.info("storeUser : user now " + user + " audio type '" + audioType + "'");
@@ -425,8 +434,8 @@ public class UserManager {
    */
   private void rememberUserSessionEnd(Storage localStorageIfSupported, long futureMoment) {
     localStorageIfSupported.setItem(getExpires(), "" + futureMoment);
-    String expires = getExpiresCookie();
-    long expirationDate = Long.parseLong(expires);
+    //  String expires = getExpiresCookie();
+    // long expirationDate = Long.parseLong(expires);
 //    logger.info("rememberUserSessionEnd : user will expire on " + new Date(expirationDate));
   }
 
@@ -440,7 +449,7 @@ public class UserManager {
 
   /**
    * If we have lots of students moving through stations quickly, we want to auto logout once a day, once an hour?
-   * <p/>
+   * <p>
    * Egyptian should never time out -- for anonymous students
    *
    * @return one year for anonymous
