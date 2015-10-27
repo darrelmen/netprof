@@ -27,7 +27,7 @@ public class AnalysisTab extends DivWidget {
    * @see Navigation#showAnalysis()
    */
   public AnalysisTab(final LangTestDatabaseAsync service, final ExerciseController controller, final int userid,
-                     ShowTab showTab) {
+                     final ShowTab showTab) {
     final AnalysisPlot analysisPlot = new AnalysisPlot(service, userid);
     final WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab);
 
@@ -45,9 +45,9 @@ public class AnalysisTab extends DivWidget {
         add(lowerHalf);
         lowerHalf.add(wordContainer.getTableWithPager(wordScores));
 
-     //   logger.info("getWordScores " + wordScores.size());
+        //   logger.info("getWordScores " + wordScores.size());
 
-        getPhoneReport(service, controller, userid, lowerHalf, analysisPlot);
+        getPhoneReport(service, controller, userid, lowerHalf, analysisPlot, showTab);
       }
     });
   }
@@ -56,8 +56,9 @@ public class AnalysisTab extends DivWidget {
                              final ExerciseController controller,
                              int userid,
                              final Panel lowerHalf,
-                             AnalysisPlot analysisPlot) {
-    final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, analysisPlot);
+                             AnalysisPlot analysisPlot,
+                             final ShowTab showTab) {
+    final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, analysisPlot, showTab);
     final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer);
 
     service.getPhoneScores(userid, new AsyncCallback<PhoneReport>() {
@@ -68,7 +69,7 @@ public class AnalysisTab extends DivWidget {
 
       @Override
       public void onSuccess(PhoneReport phoneReport) {
-       // logger.info("getPhoneScores " + phoneReport);
+        // logger.info("getPhoneScores " + phoneReport);
         lowerHalf.add(phoneContainer.getTableWithPager(phoneReport));
         lowerHalf.add(exampleContainer.getTableWithPager());
         phoneContainer.showExamplesForSelectedSound();
