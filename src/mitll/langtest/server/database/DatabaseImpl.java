@@ -57,7 +57,7 @@ public class DatabaseImpl implements Database {
   private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
   private static final int LOG_THRESHOLD = 10;
   private static final String UNKNOWN = "unknown";
-  public static final String SIL = "sil";
+  private static final String SIL = "sil";
 
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
@@ -244,12 +244,23 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * TODO : IS this right? Lots of skipping...
+   * Fixes after the fact a bug where we didn't record info in the phone and word tables.
+   * @see #initializeDAOs(PathHelper)
    */
-  public void putBackWordAndPhone() {
-    List<Result> results = resultDAO.getResults();
+  private void putBackWordAndPhone() {
+    List<Result> results = resultDAO.getResultsForPractice();
     Map<Integer, Result> idToResult = new HashMap<>();
-    for (Result r : results) idToResult.put(r.getUniqueID(), r);
+    int skipped = 0;
+    for (Result r : results) {
+      if (r.getJsonScore() != null && r.getJsonScore().length() > 13) {
+        idToResult.put(r.getUniqueID(), r);
+      }
+      else {
+        skipped++;
+      }
+    }
+
+    //logger.info("skipped " + skipped);
 
     List<WordDAO.Word> all = wordDAO.getAll();
     Set<Integer> already = new HashSet<>();
@@ -257,18 +268,21 @@ public class DatabaseImpl implements Database {
       long rid = word.rid;
       already.add((int) rid);
     }
-    logger.debug("current word results " + already.size());
+    //logger.debug("putBackWordAndPhone current word results " + already.size());
     Set<Integer> allKeys = new HashSet<>(idToResult.keySet());
-    logger.debug("before " + allKeys.size());
+   // logger.debug("before " + allKeys.size());
     allKeys.removeAll(already);
-    logger.debug("after " + allKeys.size());
+   // logger.debug("after " + allKeys.size());
     ParseResultJson parseResultJson = new ParseResultJson(getServerProps());
+    int count =0;
     for (Integer key : allKeys) {
+      count++;
       Result result = idToResult.get(key);
       String jsonScore = result.getJsonScore();
       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(jsonScore);
       recordWordAndPhoneInfo(result.getUniqueID(), netPronImageTypeListMap);
     }
+    logger.debug("putBackWordAndPhone fixed " + count);
   }
 
   private MonitoringSupport getMonitoringSupport() {
@@ -762,7 +776,7 @@ public class DatabaseImpl implements Database {
     return audioDAO;
   }
 
-  public WordDAO getWordDAO() {
+  private WordDAO getWordDAO() {
     return wordDAO;
   }
 
@@ -1198,6 +1212,11 @@ public class DatabaseImpl implements Database {
     }
   }
 
+  /**
+   * @see #putBackWordAndPhone()
+   * @param answerID
+   * @param netPronImageTypeListMap
+   */
   private void recordWordAndPhoneInfo(long answerID, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
     List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
     List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
