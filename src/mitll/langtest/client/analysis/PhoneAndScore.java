@@ -9,6 +9,12 @@ public class PhoneAndScore {
   private final float score;
   private final int count;
 
+  /**
+   * @see PhoneContainer#getTableWithPager
+   * @param phone
+   * @param score
+   * @param count
+   */
   public PhoneAndScore(String phone, float score, int count) { this.phone = phone; this.score = score; this.count = count;}
 
   public String getPhone() {
