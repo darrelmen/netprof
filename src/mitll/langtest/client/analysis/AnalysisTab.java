@@ -20,6 +20,8 @@ import java.util.logging.Logger;
 public class AnalysisTab extends DivWidget {
   private final Logger logger = Logger.getLogger("AnalysisTab");
 
+  public AnalysisTab() {}
+
   /**
    * @param service
    * @param controller
@@ -29,10 +31,17 @@ public class AnalysisTab extends DivWidget {
   public AnalysisTab(final LangTestDatabaseAsync service, final ExerciseController controller, final int userid,
                      final ShowTab showTab) {
     final AnalysisPlot analysisPlot = new AnalysisPlot(service, userid);
-    final WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab);
 
     add(analysisPlot);
+    HorizontalPanel lowerHalf = new HorizontalPanel();
+    add(lowerHalf);
 
+    getWordScores(service, controller, userid, showTab, analysisPlot, lowerHalf);
+  }
+
+  private void getWordScores(final LangTestDatabaseAsync service, final ExerciseController controller,
+                             final int userid, final ShowTab showTab, final AnalysisPlot analysisPlot,
+                             final Panel lowerHalf) {
     service.getWordScores(userid, new AsyncCallback<List<WordScore>>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -41,12 +50,8 @@ public class AnalysisTab extends DivWidget {
 
       @Override
       public void onSuccess(List<WordScore> wordScores) {
-        HorizontalPanel lowerHalf = new HorizontalPanel();
-        add(lowerHalf);
+        final WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab);
         lowerHalf.add(wordContainer.getTableWithPager(wordScores));
-
-        //   logger.info("getWordScores " + wordScores.size());
-
         getPhoneReport(service, controller, userid, lowerHalf, analysisPlot, showTab);
       }
     });
