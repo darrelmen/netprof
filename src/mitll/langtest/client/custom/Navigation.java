@@ -325,7 +325,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
     addStudyLists();
 
-    if (controller.getProps().useAnalysis() || true) {
+    if (controller.getProps().useAnalysis() || false) {
       addAnalysis();
       if (userManager.isTeacher()) {
         addTeacherAnalysis();
