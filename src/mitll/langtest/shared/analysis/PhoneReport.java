@@ -12,6 +12,7 @@ public class PhoneReport implements Serializable {
   private int overallPercent;
   private Map<String, List<WordAndScore>> phoneToWordAndScoreSorted;
   private Map<String, Float> phoneToAvgSorted;
+  private Map<String, Integer> phoneToCount;
 
   public PhoneReport() {}
 
@@ -20,10 +21,12 @@ public class PhoneReport implements Serializable {
    * @param phoneToWordAndScoreSorted
    * @see mitll.langtest.server.database.PhoneDAO#getPhoneReport(Map, Map, float, float)
    */
-  public PhoneReport(int overallPercent, Map<String, List<WordAndScore>> phoneToWordAndScoreSorted, Map<String, Float> phoneToAvgSorted) {
+  public PhoneReport(int overallPercent, Map<String, List<WordAndScore>> phoneToWordAndScoreSorted, Map<String, Float> phoneToAvgSorted,
+                     Map<String, Integer> phoneToCount) {
     this.overallPercent = overallPercent;
     this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
     this.phoneToAvgSorted = phoneToAvgSorted;
+    this.phoneToCount = phoneToCount;
   }
 
   public Map<String, List<WordAndScore>> getPhoneToWordAndScoreSorted() {
@@ -39,5 +42,9 @@ public class PhoneReport implements Serializable {
 
   public Map<String, Float> getPhoneToAvgSorted() {
     return phoneToAvgSorted;
+  }
+
+  public Map<String, Integer> getPhoneToCount() {
+    return phoneToCount;
   }
 }
