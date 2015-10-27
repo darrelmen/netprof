@@ -1939,7 +1939,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getUserToResultCount();
   }
 
+  /**
+   * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis(LangTestDatabaseAsync, ExerciseController, ShowTab)
+   * @return
+   */
   @Override
+  public Collection<User> getUsersWithRecordings() { return db.getResultDAO().getUsersWithRecordings(db.getUserDAO()); }
   public Map<Integer, Integer> getResultCountToCount() {
     return db.getResultCountToCount();
   }
