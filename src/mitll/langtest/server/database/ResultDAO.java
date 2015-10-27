@@ -73,6 +73,7 @@ public class ResultDAO extends DAO {
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPerformanceForUser(long)
+   * @see mitll.langtest.client.custom.AnalysisPlot#AnalysisPlot
    * @param id
    * @param phoneDAO
    * @return
@@ -108,7 +109,26 @@ public class ResultDAO extends DAO {
     return new ArrayList<Result>();
   }
 
+  public List<Result> getResultsForPractice() {
+    try {
+      synchronized (this) {
+        if (cachedResultsForQuery != null) {
+          return cachedResultsForQuery;
+        }
+      }
+      String sql = "SELECT * FROM " + RESULTS + " where " + AUDIO_TYPE + " is not null";// AND LEN(" +SCORE_JSON+
+          //") > 13";
+      List<Result> resultsForQuery = getResultsSQL(sql);
 
+      synchronized (this) {
+        cachedResultsForQuery = resultsForQuery;
+      }
+      return resultsForQuery;
+    } catch (Exception ee) {
+      logException(ee);
+    }
+    return new ArrayList<Result>();
+  }
 
   public List<Result> getResultsDevices() {
     try {
