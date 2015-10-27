@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 public class AnalysisTab extends DivWidget {
   private final Logger logger = Logger.getLogger("AnalysisTab");
 
-  public AnalysisTab() {}
+//  public AnalysisTab() {}
 
   /**
    * @param service
@@ -57,12 +57,12 @@ public class AnalysisTab extends DivWidget {
     });
   }
 
-  public void getPhoneReport(LangTestDatabaseAsync service,
-                             final ExerciseController controller,
-                             int userid,
-                             final Panel lowerHalf,
-                             AnalysisPlot analysisPlot,
-                             final ShowTab showTab) {
+  private void getPhoneReport(LangTestDatabaseAsync service,
+                              final ExerciseController controller,
+                              int userid,
+                              final Panel lowerHalf,
+                              AnalysisPlot analysisPlot,
+                              final ShowTab showTab) {
     final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, analysisPlot, showTab);
     final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer);
 
