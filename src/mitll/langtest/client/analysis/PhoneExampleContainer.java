@@ -33,7 +33,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
-  public static final int ITEM_WIDTH = 350;
+  private static final int ITEM_WIDTH = 350;
   private final Logger logger = Logger.getLogger("WordContainer");
 //  private static final int COL_WIDTH = 55;
   //private AnalysisPlot plot;
@@ -117,9 +117,6 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
     Column<WordAndScore, SafeHtml> itemCol = getItemColumn();
     itemCol.setSortable(true);
     table.setColumnWidth(itemCol, ITEM_WIDTH + "px");
-
-    //  String language = controller.getLanguage();
-    //  String headerForFL = language.equals("English") ? "Meaning" : language;
     addColumn(itemCol, header);
 
     try {
