@@ -10,8 +10,10 @@ import java.util.Map;
 
 /**
  * Created by go22670 on 10/22/15.
+ * @see mitll.langtest.client.analysis.PhoneExampleContainer
  */
 public class WordAndScore implements Comparable<WordAndScore>, Serializable {
+  private String exid;
   private int wseq;
   private int seq;
   private String word;
@@ -31,10 +33,11 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
    * @param answerAudio
    * @param refAudio
    * @param scoreJson
-   * @see PhoneDAO#getPhoneReport
+   * @see PhoneDAO#getPhoneReport(String, Map, boolean)
    */
-  public WordAndScore(String word, float score, long resultID, int wseq, int seq, String answerAudio,
+  public WordAndScore(String exid, String word, float score, long resultID, int wseq, int seq, String answerAudio,
                       String refAudio, String scoreJson) {
+    this.exid = exid;
     this.word = word;
     this.score = score;
     this.resultID = resultID;
@@ -45,15 +48,22 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
     this.scoreJson = scoreJson;
   }
 
-  public WordAndScore() {
-  }
+  public WordAndScore() {}
 
   @Override
   public int compareTo(WordAndScore o) {
-    return getScore() < o.getScore() ? -1 : getScore() > o.getScore() ? +1 : 0;
+    int i = getScore() < o.getScore() ? -1 : getScore() > o.getScore() ? +1 : 0;
+    if (i == 0) {
+      i = word.compareTo(o.word);
+    }
+    if (i == 0) {
+      i = Long.valueOf(resultID).compareTo(o.resultID);
+    }
+    if (i == 0) {
+      i = Integer.valueOf(wseq).compareTo(o.wseq);
+    }
+    return i;
   }
-
-
 
   public int getWseq() {
     return wseq;
@@ -100,8 +110,10 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
   }
 
   public String toString() {
-    return "#" + getWseq() + " : " + getWord() + " s " + getScore() + " res " + getResultID() + " answer " + answerAudio + " ref " + refAudio;
+    return exid + " #" + getWseq() + " : " + getWord() + "\ts " + getScore() + "\tres " + getResultID() + "\tanswer " + answerAudio + " ref " + refAudio;
   }
 
-
+  public String getExid() {
+    return exid;
+  }
 }
