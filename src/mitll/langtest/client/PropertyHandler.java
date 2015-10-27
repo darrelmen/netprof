@@ -137,10 +137,7 @@ public class PropertyHandler {
 
   private String splashTitle;
   private boolean rightAlignContent;
-
-  // do we bind the record key to space -- problematic if we have text entry anywhere else on the page, say in a search
-  // box
-  private LOGIN_TYPE loginType = LOGIN_TYPE.ANONYMOUS;
+  private LOGIN_TYPE loginType = LOGIN_TYPE.STUDENT;
 
   private boolean showFlashcardAnswer = true;
   private boolean allowPlusInURL;
