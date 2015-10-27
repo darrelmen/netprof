@@ -248,7 +248,7 @@ class WordContainer extends SimplePagingContainer<WordScore> {
       @Override
       public SafeHtml getValue(WordScore shell) {
         CommonShell exercise = getShell(shell.getId());
-        logger.info("getPlayAudio : Got " + shell.getId() + "  : " + exercise);
+       // logger.info("getPlayAudio : Got " + shell.getId() + "  : " + exercise);
         String title = exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
         return PlayAudioWidget.getAudioTagHTML(shell.getFileRef(), title);
       }
