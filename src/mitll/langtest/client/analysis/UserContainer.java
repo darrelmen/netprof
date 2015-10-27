@@ -24,6 +24,7 @@ import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.shared.User;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -36,23 +37,21 @@ class UserContainer extends SimplePagingContainer<User> {
   private final Logger logger = Logger.getLogger("UserContainer");
 
   private static final int TABLE_HISTORY_WIDTH = 420;
- // private ExerciseComparator sorter;
+  // private ExerciseComparator sorter;
   //private AnalysisPlot plot;
   private ShowTab learnTab;
   DivWidget rightSide;
   LangTestDatabaseAsync service;
+
   /**
    * @param controller
    * @param rightSide
+   * @see StudentAnalysis#StudentAnalysis(LangTestDatabaseAsync, ExerciseController, ShowTab)
    */
-  public UserContainer(LangTestDatabaseAsync service, ExerciseController controller, DivWidget rightSide
-  //    , AnalysisPlot plot,
-                       ,ShowTab learnTab
+  public UserContainer(LangTestDatabaseAsync service, ExerciseController controller, DivWidget rightSide, ShowTab learnTab
   ) {
     super(controller);
-   // sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
     this.rightSide = rightSide;
-    //this.plot = plot;
     this.learnTab = learnTab;
     this.service = service;
   }
@@ -62,10 +61,9 @@ class UserContainer extends SimplePagingContainer<User> {
    * @return
    * @see SetCompleteDisplay#getScoreHistory(List, List, ExerciseController)
    */
-  public Panel getTableWithPager(final List<User> users) {
+  public Panel getTableWithPager(final Collection<User> users) {
     Panel tableWithPager = getTableWithPager();
     tableWithPager.getElement().setId("TableScoreHistory");
-    //tableWithPager.setWidth(TABLE_HISTORY_WIDTH + "px");
     tableWithPager.addStyleName("floatLeft");
 
     for (User User : users) {
@@ -76,8 +74,9 @@ class UserContainer extends SimplePagingContainer<User> {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         if (!users.isEmpty()) {
-          table.getSelectionModel().setSelected(users.get(0), true);
-          gotClickOnItem(users.get(0));
+          User next = users.iterator().next();
+          table.getSelectionModel().setSelected(next, true);
+          gotClickOnItem(next);
         }
       }
     });
@@ -108,7 +107,7 @@ class UserContainer extends SimplePagingContainer<User> {
     userCol.setSortable(true);
     table.setColumnWidth(userCol, 140 + "px");
     addColumn(userCol, new TextHeader("Students"));
-    ColumnSortEvent.ListHandler<User> columnSortHandler = getUserSorter(userCol,  getList());
+    ColumnSortEvent.ListHandler<User> columnSortHandler = getUserSorter(userCol, getList());
     table.addColumnSortHandler(columnSortHandler);
 
     Column<User, SafeHtml> dateCol = getDateColumn();
@@ -123,7 +122,7 @@ class UserContainer extends SimplePagingContainer<User> {
   }
 
   private ColumnSortEvent.ListHandler<User> getUserSorter(Column<User, SafeHtml> englishCol,
-                                                                  List<User> dataList) {
+                                                          List<User> dataList) {
     ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<User>() {
@@ -272,7 +271,7 @@ class UserContainer extends SimplePagingContainer<User> {
 
 
   private void gotClickOnItem(final User user) {
-    AnalysisTab widgets = new AnalysisTab(service, controller, (int)user.getId(), learnTab);
+    AnalysisTab widgets = new AnalysisTab(service, controller, (int) user.getId(), learnTab);
     rightSide.clear();
     rightSide.add(widgets);
   }
