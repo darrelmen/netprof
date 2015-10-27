@@ -33,23 +33,23 @@ public abstract class PagerTable {
     return vPanel;
   }*/
 
-    protected Panel getOldSchoolPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows, Widget toRightOfPager) {
-        SimplePager.Resources DEFAULT_RESOURCES = GWT.create(SimplePager.Resources.class);
-        SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, DEFAULT_RESOURCES, true, fastForwardRows, true);
-        pager.getElement().setId("SimplePager");
-        // Set the cellList as the display.
-        pager.setDisplay(table);
-        pager.setPageSize(pageSize);
-        // Add the pager and list to the page.
+  protected Panel getOldSchoolPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows, Widget toRightOfPager) {
+    SimplePager.Resources DEFAULT_RESOURCES = GWT.create(SimplePager.Resources.class);
+    SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, DEFAULT_RESOURCES, true, fastForwardRows, true);
+    pager.getElement().setId("SimplePager");
+    // Set the cellList as the display.
+    pager.setDisplay(table);
+    pager.setPageSize(pageSize);
+    // Add the pager and list to the page.
 
-        VerticalPanel vPanel = new VerticalPanel();
-        HorizontalPanel horizontalPanel = new HorizontalPanel();
-        horizontalPanel.add(pager);
-        if (toRightOfPager != null) horizontalPanel.add(toRightOfPager);
-        vPanel.add(horizontalPanel);
-        vPanel.add(tableAsPanel);
+    VerticalPanel vPanel = new VerticalPanel();
+    HorizontalPanel horizontalPanel = new HorizontalPanel();
+    horizontalPanel.add(pager);
+    if (toRightOfPager != null) horizontalPanel.add(toRightOfPager);
+    vPanel.add(horizontalPanel);
+    vPanel.add(tableAsPanel);
 
-        return vPanel;
+    return vPanel;
   }
 
   private final DateTimeFormat yformat = DateTimeFormat.getFormat("yy");
@@ -69,29 +69,29 @@ public abstract class PagerTable {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
         noWrapContent +
-        "</span>" );
+        "</span>");
 
     sb.appendHtmlConstant("</div>");
     return sb.toSafeHtml();
   }
 
-    protected SafeHtml getAnchorHTML(String href, String label) {
-        SafeHtmlBuilder sb = new SafeHtmlBuilder();
-        sb.appendHtmlConstant("<a href='" +
-                href +
-        //   name +
+  protected SafeHtml getAnchorHTML(String href, String label) {
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+    sb.appendHtmlConstant("<a href='" +
+        href +
         "'" +
         ">");
-        sb.appendEscaped(label);
-        sb.appendHtmlConstant("</a>");
-        return sb.toSafeHtml();
-    }
+    sb.appendEscaped(label);
+    sb.appendHtmlConstant("</a>");
+    return sb.toSafeHtml();
+  }
 
-    protected Anchor getDownloadAnchor() {
-        Anchor w = new Anchor(getURL2());
-        w.addStyleName("leftFiveMargin");
-        w.addStyleName("topFiveMargin");
-        return w;
-    }
-    protected abstract SafeHtml getURL2();
+  protected Anchor getDownloadAnchor() {
+    Anchor w = new Anchor(getURL2());
+    w.addStyleName("leftFiveMargin");
+    w.addStyleName("topFiveMargin");
+    return w;
+  }
+
+  protected abstract SafeHtml getURL2();
 }
