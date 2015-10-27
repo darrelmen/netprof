@@ -299,8 +299,6 @@ public class DatabaseImpl implements Database {
     // logger.debug("got install path " + installPath + " media " + mediaDir);
     this.installPath = installPath;
     this.lessonPlanFile = lessonPlanFile;
-    //  this.mediaDir = mediaDir;
-    //  this.useFile = useFile;
     makeDAO(lessonPlanFile, mediaDir, installPath);
     this.jsonSupport = new JsonSupport(getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
         getPhoneDAO(), configDir, installPath);
@@ -339,9 +337,6 @@ public class DatabaseImpl implements Database {
       return Collections.emptyList();
     }
     //logger.debug("using lesson plan file " +lessonPlanFile + " at " + installPath);
-//    boolean isExcel = lessonPlanFile.endsWith(".xlsx");
-    //   makeDAO(lessonPlanFile, mediaDir, installPath);
-
     List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
     if (rawExercises.isEmpty()) {
       logger.warn("no exercises in " + lessonPlanFile + " at " + installPath);
@@ -800,10 +795,6 @@ public class DatabaseImpl implements Database {
       }
     }*//*
     return results;
-  }*/
-
-/*  public int getNumResults() {
-    return resultDAO.getNumResults();
   }*/
 
   /**
