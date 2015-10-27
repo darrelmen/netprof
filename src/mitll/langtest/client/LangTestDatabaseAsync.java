@@ -160,4 +160,6 @@ public interface LangTestDatabaseAsync {
   void getWordScores(long id, AsyncCallback<List<WordScore>> async);
 
   void getPhoneScores(long id, AsyncCallback<PhoneReport> async);
+
+  void getUsersWithRecordings(AsyncCallback<Collection<User>> async);
 }
