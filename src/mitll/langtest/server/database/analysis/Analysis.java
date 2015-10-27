@@ -17,7 +17,7 @@ public class Analysis extends DAO {
   private static final Logger logger = Logger.getLogger(Analysis.class);
 
   private static final int MAX_EXAMPLES = 50;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
 
@@ -52,13 +52,13 @@ public class Analysis extends DAO {
    * @throws SQLException
    */
   private List<BestScore> getBest(String sql) throws SQLException {
-    logger.info("got " + sql);
+  //  logger.info("got " + sql);
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     long then = System.currentTimeMillis();
     List<BestScore> bestForQuery = getBestForQuery(connection, statement);
     long now = System.currentTimeMillis();
-    logger.debug("getBest took " + (now - then) + " millis to return " + bestForQuery.size() + " items");
+    logger.debug("getBest took " + (now - then) + " millis to return\t" + bestForQuery.size() + " items");
 
     return bestForQuery;
   }

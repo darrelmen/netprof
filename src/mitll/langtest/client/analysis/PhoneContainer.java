@@ -7,6 +7,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -60,18 +61,19 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   }
 
   private PhoneReport phoneReport;
+
   /**
-   * @see AnalysisTab#getPhoneReport(LangTestDatabaseAsync, ExerciseController, int, Panel)
    * @param phoneReport
    * @return
+   * @see AnalysisTab#getPhoneReport(LangTestDatabaseAsync, ExerciseController, int, Panel)
    */
   public Panel getTableWithPager(PhoneReport phoneReport) {
     List<PhoneAndScore> phoneAndScores = new ArrayList<>();
     for (Map.Entry<String, Float> ps : phoneReport.getPhoneToAvgSorted().entrySet()) {
-      phoneAndScores.add(new PhoneAndScore(ps.getKey(), ps.getValue()));
+      phoneAndScores.add(new PhoneAndScore(ps.getKey(), ps.getValue(), phoneReport.getPhoneToWordAndScoreSorted().get(ps.getKey()).size()));
     }
     this.phoneReport = phoneReport;
-  //  logger.info("examples " +phoneReport.getPhoneToWordAndScoreSorted());
+    //  logger.info("examples " +phoneReport.getPhoneToWordAndScoreSorted());
     return getTableWithPager(phoneAndScores);
   }
 
@@ -92,7 +94,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   }
 
   private void addItems(List<PhoneAndScore> sortedHistory) {
-   // logger.info("PhoneContainer.addItems " + sortedHistory.size());
+    // logger.info("PhoneContainer.addItems " + sortedHistory.size());
     for (PhoneAndScore ps : sortedHistory) {
       addItem(ps);
     }
@@ -103,23 +105,22 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
         table.getSelectionModel().setSelected(sortedHistory.get(0), true);
       }
     } catch (Exception e) {
-      logger.warning("Got " +e);
+      logger.warning("Got " + e);
     }
     // showExamplesForSelectedSound();
   }
 
   public void showExamplesForSelectedSound() {
-  // logger.info("PhoneContainer.showExamplesForSelectedSound ");
+    // logger.info("PhoneContainer.showExamplesForSelectedSound ");
     List<PhoneAndScore> list = getList();
     if (list.isEmpty()) {
       logger.info("list empty?");
-    }
-    else {
-   //   String phone = selectionModel.getSelectedObject().getPhone();
+    } else {
+      //   String phone = selectionModel.getSelectedObject().getPhone();
       String phone = list.get(0).getPhone();
-  //    logger.info("first phone " + phone);
+      //    logger.info("first phone " + phone);
       List<WordAndScore> wordExamples = phoneReport.getWordExamples(phone);
-    //  logger.info("showExamplesForSelectedSound adding " + phone + " num examples " + wordExamples.size());
+      //  logger.info("showExamplesForSelectedSound adding " + phone + " num examples " + wordExamples.size());
       exampleContainer.addItems(phone, wordExamples);
     }
   }
@@ -140,10 +141,9 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
 //    String language = controller.getLanguage();
     //  String headerForFL = language.equals("English") ? "Meaning" : language;
     addColumn(itemCol, new TextHeader("Sound"));
+    table.setWidth("100%", true);
 
-    List<PhoneAndScore> dataList = getList();
-
-    ColumnSortEvent.ListHandler<PhoneAndScore> columnSortHandler = getEnglishSorter(itemCol, dataList);
+    ColumnSortEvent.ListHandler<PhoneAndScore> columnSortHandler = getEnglishSorter(itemCol, getList());
     table.addColumnSortHandler(columnSortHandler);
   }
 
@@ -205,16 +205,61 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     return columnSortHandler;
   }
 
+  private ColumnSortEvent.ListHandler<PhoneAndScore> getCountSorter(Column<PhoneAndScore, SafeHtml> scoreCol,
+                                                                    List<PhoneAndScore> dataList) {
+    ColumnSortEvent.ListHandler<PhoneAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndScore>(dataList);
+    columnSortHandler.setComparator(scoreCol,
+        new Comparator<PhoneAndScore>() {
+          public int compare(PhoneAndScore o1, PhoneAndScore o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+
+            if (o1 != null) {
+              if (o2 == null) {
+                logger.warning("------- o2 is null?");
+                return -1;
+              } else {
+                int a1 = o1.getCount();
+                int a2 = o2.getCount();
+                int i = Integer.valueOf(a1).compareTo(a2);
+                // logger.info("a1 " + a1 + " vs " + a2 + " i " + i);
+                if (i == 0) {
+                  return o1.getPhone().compareTo(o2.getPhone());
+                } else {
+                  return i;
+                }
+              }
+            } else {
+              logger.warning("------- o1 is null?");
+
+              return -1;
+            }
+          }
+        });
+    return columnSortHandler;
+  }
+
+
   @Override
   protected void addColumnsToTable() {
     addReview();
 
+    Column<PhoneAndScore, SafeHtml> countColumn = getCountColumn();
+    table.addColumn(countColumn, "#");
+
+    ColumnSortEvent.ListHandler<PhoneAndScore> countSorter = getCountSorter(countColumn, getList());
+    table.addColumnSortHandler(countSorter);
+    countColumn.setSortable(true);
+
+
     Column<PhoneAndScore, SafeHtml> scoreColumn = getScoreColumn();
+    table.setColumnWidth(scoreColumn, 60, Style.Unit.PX);
     table.addColumn(scoreColumn, "Score");
 
     scoreColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     scoreColumn.setSortable(true);
-    // table.setColumnWidth(scoreColumn, "70" + "px");
+
     table.setWidth("100%", true);
 
     ColumnSortEvent.ListHandler<PhoneAndScore> columnSortHandler2 = getScoreSorter(scoreColumn, getList());
@@ -260,6 +305,18 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
             "'" +
             ">" + ((int) v) +
             "</span>";
+
+        return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
+      }
+    };
+  }
+
+  private Column<PhoneAndScore, SafeHtml> getCountColumn() {
+    return new Column<PhoneAndScore, SafeHtml>(new SafeHtmlCell()) {
+      @Override
+      public SafeHtml getValue(PhoneAndScore shell) {
+        //float v = shell.getScore() * 100;
+        String s = "" + shell.getCount();
 
         return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
       }
