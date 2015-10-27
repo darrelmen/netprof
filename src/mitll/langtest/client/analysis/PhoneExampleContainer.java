@@ -14,6 +14,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.AnalysisPlot;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -34,17 +35,20 @@ import java.util.logging.Logger;
  */
 class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
   private final Logger logger = Logger.getLogger("WordContainer");
-  private static final int COL_WIDTH = 55;
-  private AnalysisPlot plot;
+//  private static final int COL_WIDTH = 55;
+  //private AnalysisPlot plot;
+  private ShowTab learnTab;
+  private String phone;
 
   /**
    * @param controller
+   * @see AnalysisTab#getPhoneReport(LangTestDatabaseAsync, ExerciseController, int, Panel, AnalysisPlot)
    */
-  public PhoneExampleContainer(ExerciseController controller, AnalysisPlot plot) {
+  public PhoneExampleContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab) {
     super(controller);
 //    sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
-    this.plot = plot;
-    //  this.learnTab = learnTab;
+    //this.plot = plot;
+    this.learnTab = learnTab;
   }
 
   /**
@@ -56,22 +60,8 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
     return 5;
   }
 
-  private CommonShell getShell(String id) {
+/*  private CommonShell getShell(String id) {
     return plot.getIdToEx().get(id);
-  }
-/*
-  @Override
-  protected void setMaxWidth() {
-    table.getElement().getStyle().setProperty("maxWidth", 150 + "px");
-  }
-*/
-
-/*  public Panel getTableWithPager(PhoneReport phoneReport) {
-    List<WordAndScore> WordAndScores = new ArrayList<>();
-    for (Map.Entry<String,Float> ps : phoneReport.getPhoneToAvgSorted().entrySet()) {
-      WordAndScores.add(new WordAndScore(ps.getKey(),ps.getValue()));
-    }
-    return getTableWithPager(WordAndScores);
   }*/
 
   /**
@@ -87,7 +77,6 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
     return tableWithPager;
   }
 
-  String phone;
 
   /**
    * @param phone
@@ -118,13 +107,11 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
   @Override
   protected CellTable.Resources chooseResources() {
     CellTable.Resources o;
-
     o = GWT.create(LocalTableResources.class);
-
     return o;
   }
 
-  TextHeader header = new TextHeader("Examples of sound");
+  private TextHeader header = new TextHeader("Examples of sound");
 
   private void addReview() {
     Column<WordAndScore, SafeHtml> itemCol = getItemColumn();
@@ -263,7 +250,7 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
   }
 
   private void gotClickOnItem(final WordAndScore e) {
-    //learnTab.showLearnAndItem(e.getId());
+    learnTab.showLearnAndItem(e.getExid());
   }
 
   private SafeHtml getSafeHtml(String columnText) {
@@ -287,6 +274,9 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
     };
   }*/
 
+  /**
+   * Must be public
+   */
   public interface LocalTableResources extends CellTable.Resources {
     /**
      * The styles applied to the table.
