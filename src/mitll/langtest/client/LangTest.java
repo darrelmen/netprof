@@ -58,7 +58,7 @@ import java.util.logging.Logger;
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private Logger logger = Logger.getLogger("LangTest");
-  private static final List<String> SITE_LIST = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean",
+  private static final List<String> SITE_LIST = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean","Iraqi",
       "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Russian", "Spanish", "Sudanese", "Tagalog", "Urdu");
 
   /**
@@ -73,8 +73,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final int MAX_EXCEPTION_STRING = 300;
   private static final int MAX_CACHE_SIZE = 100;
   private static final int NO_USER_INITIAL = -2;
- // private static final String PLEASE_ALLOW_ACCESS_TO_THE_MICROPHONE = "Please allow access to the microphone.";
-//  private static final String TRY_AGAIN = "Try Again";
 
   private UserManager userManager;
   private FlashRecordPanelHeadless flashRecordPanel;
@@ -349,14 +347,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     navigation = new Navigation(service, userManager, this, this);
 
     firstRow.add(navigation.getNav());
-
-/*    if (SHOW_STATUS) {
-      DivWidget w = new DivWidget();
-      w.getElement().setId("status");
-      verticalContainer.add(w);
-    }*/
     verticalContainer.add(getLinksToSites());
-
   }
 
   private Panel getLinksToSites() {
