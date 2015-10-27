@@ -37,7 +37,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
-  public static final int TABLE_WIDTH = 150;
+  public static final int TABLE_WIDTH = 170;
   private final Logger logger = Logger.getLogger("PhoneContainer");
   private static final int COL_WIDTH = 55;
   private PhoneExampleContainer exampleContainer;
@@ -129,9 +129,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   @Override
   protected CellTable.Resources chooseResources() {
     CellTable.Resources o;
-
     o = GWT.create(LocalTableResources.class);
-
     return o;
   }
 
@@ -139,8 +137,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     Column<PhoneAndScore, SafeHtml> itemCol = getItemColumn();
     itemCol.setSortable(true);
     table.setColumnWidth(itemCol, COL_WIDTH + "px");
-//    String language = controller.getLanguage();
-    //  String headerForFL = language.equals("English") ? "Meaning" : language;
     addColumn(itemCol, new TextHeader("Sound"));
     table.setWidth("100%", true);
 
