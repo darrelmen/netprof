@@ -2,7 +2,6 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
@@ -71,10 +70,9 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   public Panel getTableWithPager(PhoneReport phoneReport) {
     List<PhoneAndScore> phoneAndScores = new ArrayList<>();
     for (Map.Entry<String, Float> ps : phoneReport.getPhoneToAvgSorted().entrySet()) {
-      phoneAndScores.add(new PhoneAndScore(ps.getKey(), ps.getValue(), phoneReport.getPhoneToWordAndScoreSorted().get(ps.getKey()).size()));
+      phoneAndScores.add(new PhoneAndScore(ps.getKey(), ps.getValue(), phoneReport.getPhoneToCount().get(ps.getKey())));
     }
     this.phoneReport = phoneReport;
-    //  logger.info("examples " +phoneReport.getPhoneToWordAndScoreSorted());
     return getTableWithPager(phoneAndScores);
   }
 
@@ -86,7 +84,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   private Panel getTableWithPager(List<PhoneAndScore> sortedHistory) {
     Panel tableWithPager = getTableWithPager();
     tableWithPager.getElement().setId("TableScoreHistory");
-    //   tableWithPager.setWidth(TABLE_HISTORY_WIDTH + "px");
     tableWithPager.addStyleName("floatLeft");
     tableWithPager.addStyleName("leftTenMargin");
 
