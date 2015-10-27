@@ -70,6 +70,26 @@ public class MonitoringSupport {
     return idToCount;
   }
 
+  public Map<User, Integer> getUserToPractice() {
+    List<User> users = getUsers();
+    List<Result> results = getResults();
+
+    Map<User,Integer> idToCount = new HashMap<User, Integer>();
+    Map<Long,User> idToUser = new HashMap<Long, User>();
+    for (User u : users) {
+      idToUser.put(u.getId(),u);
+      idToCount.put(u,0);
+    }
+    for (Result r : results) {
+      User user = idToUser.get(r.getUserid());
+      Integer c = idToCount.get(user);
+      if (c != null) {
+        idToCount.put(user, c + 1);
+      }
+    }
+    return idToCount;
+  }
+
   /**
    * Determine sessions per user.  If two consecutive items are more than {@link ResultDAO#SESSION_GAP} seconds
    * apart, then we've reached a session boundary.
