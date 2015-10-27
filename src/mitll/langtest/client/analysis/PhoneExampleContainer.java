@@ -14,7 +14,6 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.AnalysisPlot;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -34,6 +33,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
+  public static final int ITEM_WIDTH = 350;
   private final Logger logger = Logger.getLogger("WordContainer");
 //  private static final int COL_WIDTH = 55;
   //private AnalysisPlot plot;
@@ -42,7 +42,7 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
 
   /**
    * @param controller
-   * @see AnalysisTab#getPhoneReport(LangTestDatabaseAsync, ExerciseController, int, Panel, AnalysisPlot)
+   * @see AnalysisTab#getPhoneReport
    */
   public PhoneExampleContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab) {
     super(controller);
@@ -116,7 +116,7 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
   private void addReview() {
     Column<WordAndScore, SafeHtml> itemCol = getItemColumn();
     itemCol.setSortable(true);
-    table.setColumnWidth(itemCol, 300 + "px");
+    table.setColumnWidth(itemCol, ITEM_WIDTH + "px");
 
     //  String language = controller.getLanguage();
     //  String headerForFL = language.equals("English") ? "Meaning" : language;
