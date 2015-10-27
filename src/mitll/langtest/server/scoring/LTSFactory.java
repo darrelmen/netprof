@@ -23,7 +23,7 @@ public class LTSFactory implements CollationSort {
 
   // known languages
   public enum Language {
-    ARABIC, DARI, EGYPTIAN, ENGLISH, FARSI, JAPANESE, LEVANTINE, KOREAN, MANDARIN, MSA, PASHTO, RUSSIAN, SPANISH, SUDANESE, TAGALOG, URDU
+    ARABIC, DARI, EGYPTIAN, ENGLISH, FARSI, JAPANESE, IRAQI, LEVANTINE, KOREAN, MANDARIN, MSA, PASHTO, RUSSIAN, SPANISH, SUDANESE, TAGALOG, URDU
   }
   // TODO : what about Japanese, Korean, ... for LTS?
 
@@ -45,10 +45,11 @@ public class LTSFactory implements CollationSort {
     languageToLTS.put(Language.LEVANTINE.name().toLowerCase(), new LevantineLTS());
     languageToLTS.put(Language.MANDARIN.name().toLowerCase(), unknown);
     languageToLTS.put(Language.MSA.name().toLowerCase(), new ModernStandardArabicLTS());
+    languageToLTS.put(Language.IRAQI.name().toLowerCase(), new ModernStandardArabicLTS());
     try {
       languageToLTS.put(Language.PASHTO.name().toLowerCase(), new PashtoLTS());
     } catch (Exception e) {
-     logger.warn("got " +e);
+      logger.warn("got " + e);
     }
     try {
       languageToLTS.put(Language.RUSSIAN.name().toLowerCase(), new RussianLTS());
@@ -63,31 +64,31 @@ public class LTSFactory implements CollationSort {
     try {
       languageToLTS.put(Language.SUDANESE.name().toLowerCase(), new SudaneseLTS());
     } catch (Exception e) {
-     logger.warn("got " +e);
+      logger.warn("got " + e);
     }
     try {
       languageToLTS.put(Language.TAGALOG.name().toLowerCase(), unknown);
     } catch (Exception e) {
-     logger.warn("got " +e);
+      logger.warn("got " + e);
     }
     try {
       languageToLTS.put(Language.URDU.name().toLowerCase(), new UrduLTS());
     } catch (Exception e) {
-     logger.warn("got " +e);
+      logger.warn("got " + e);
     }
   }
 
   /**
-   * @see mitll.langtest.server.scoring.ASRScoring#ASRScoring
    * @param thisLanguage
+   * @see mitll.langtest.server.scoring.ASRScoring#ASRScoring
    */
   public LTSFactory(String thisLanguage) {
     this(Language.valueOf(thisLanguage.toUpperCase()));
   }
 
   /**
-   * @see mitll.langtest.server.scoring.ASRScoring#getCollator
    * @return
+   * @see mitll.langtest.server.scoring.ASRScoring#getCollator
    */
   //@Override
   public Collator getCollator() {
@@ -113,9 +114,9 @@ public class LTSFactory implements CollationSort {
   }
 
   /**
-   * @see AudioExport#writeContextToStream
    * @param lang
    * @return
+   * @see AudioExport#writeContextToStream
    */
   public static String getID(Language lang) {
     String locale = "en";
@@ -175,9 +176,9 @@ public class LTSFactory implements CollationSort {
   }
 
   /**
-   * @see #getCollator
    * @param lang
    * @return
+   * @see #getCollator
    */
   private Locale getLocale(Language lang) {
     Locale locale = Locale.ENGLISH;
@@ -232,7 +233,6 @@ public class LTSFactory implements CollationSort {
 //    logger.debug("Name of Locale: " + locale.getDisplayName());
 //    logger.debug("Language Code: " + locale.getLanguage() + ", Language Display Name: " + locale.getDisplayLanguage());
 //    logger.debug("Country Code: " + locale.getCountry() + ", Country Display Name: " + locale.getDisplayCountry());
-
     return locale;
   }
 
@@ -251,5 +251,4 @@ public class LTSFactory implements CollationSort {
     }
     return letterToSoundClass;
   }
-
 }
