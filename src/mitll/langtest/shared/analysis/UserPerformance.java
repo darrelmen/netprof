@@ -1,7 +1,5 @@
 package mitll.langtest.shared.analysis;
 
-import mitll.langtest.server.database.ResultDAO;
-
 import java.io.Serializable;
 import java.util.*;
 
@@ -12,22 +10,30 @@ import java.util.*;
 public class UserPerformance implements Serializable {
   private List<TimeAndScore> timeAndScores = new ArrayList<>();
   private List<TimeAndScore> rawTimeAndScores = new ArrayList<>();
+  private List<TimeAndScore> iPadTimeAndScores = new ArrayList<>();
+  private List<TimeAndScore> browserTimeAndScores = new ArrayList<>();
 
   private long userID;
+
+  public UserPerformance() {
+  }
 
   public UserPerformance(long userID) {
     this.userID = userID;
   }
 
-  public UserPerformance(long userID,List<BestScore> resultsForQuery) {
+  public UserPerformance(long userID, List<BestScore> resultsForQuery) {
     this(userID);
     setRawBestScores(resultsForQuery);
   }
 
-  public UserPerformance() {
-  }
 
-  public void setAtBinSize(List<BestScore> resultsForQuery, long binSize) {
+  /**
+   * @see mitll.langtest.server.database.analysis.Analysis#getResultForUserByBin(long, int)
+   * @param resultsForQuery
+   * @param binSize
+   */
+/*  public void setAtBinSize(List<BestScore> resultsForQuery, long binSize) {
     Map<Long, List<BestScore>> bins = new TreeMap<>();
     for (BestScore bs : resultsForQuery) {
       long dayBin = bs.getTimestamp() / binSize;
@@ -40,20 +46,21 @@ public class UserPerformance implements Serializable {
       addBestScores(pair.getValue(), binSize);
     }
     setRawBestScores(resultsForQuery);
-  }
+  }*/
 
   /**
    * @param bestScores
-   * @see ResultDAO#getResultForUserByBin(long, int)
+   * @see #setAtBinSize(List, long)
    */
-  private void addBestScores(List<BestScore> bestScores, long binSize) {
+ /* private void addBestScores(List<BestScore> bestScores, long binSize) {
     addTimeAndScore(new TimeAndScore(bestScores, binSize));
-  }
+  }*/
 
+/*
   private void addTimeAndScore(TimeAndScore ts) {
     timeAndScores.add(ts);
   }
-
+*/
   private int getTotal() {
     return getTotal(timeAndScores);
   }
@@ -149,11 +156,26 @@ public class UserPerformance implements Serializable {
       total += bs.getScore();
       count++;
       float moving = total / count;
-      rawTimeAndScores.add(new TimeAndScore(bs, moving));
+
+      TimeAndScore e = new TimeAndScore(bs, moving);
+      rawTimeAndScores.add(e);
+      if (bs.isiPad()) {
+        iPadTimeAndScores.add(e);
+      } else {
+        getBrowserTimeAndScores().add(e);
+      }
     }
   }
 
   public List<TimeAndScore> getRawBestScores() {
     return rawTimeAndScores;
+  }
+
+  public List<TimeAndScore> getiPadTimeAndScores() {
+    return iPadTimeAndScores;
+  }
+
+  public List<TimeAndScore> getBrowserTimeAndScores() {
+    return browserTimeAndScores;
   }
 }
