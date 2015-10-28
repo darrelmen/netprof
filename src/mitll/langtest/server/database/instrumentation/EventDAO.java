@@ -186,7 +186,6 @@ public class EventDAO extends DAO {
     return Collections.emptyList();
   }
 
-
   public void addPlayedMarkings(long userID, CommonExercise firstExercise) {
     List<Event> allForUserAndExercise = getAllForUserAndExercise(userID, firstExercise.getID());
     Map<String, AudioAttribute> audioToAttr = firstExercise.getAudioRefToAttr();
