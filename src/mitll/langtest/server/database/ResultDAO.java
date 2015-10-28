@@ -57,6 +57,7 @@ public class ResultDAO extends DAO {
   public static final int FIVE_MINUTES = 5 * 60 * 1000;
   public static final int HOUR = 60 * 60 * 1000;
   public static final int DAY = 24 * HOUR;
+  public static final String DEVICETYPE = "devicetype";
 
   private final boolean debug = false;
 
@@ -132,7 +133,9 @@ public class ResultDAO extends DAO {
 
   public List<Result> getResultsDevices() {
     try {
-      String sql = "SELECT * FROM " + RESULTS + " where devicetype like 'i%'";
+      String sql = "SELECT * FROM " + RESULTS + " where " +
+          DEVICETYPE +
+          " like 'i%'";
       return getResultsSQL(sql);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
