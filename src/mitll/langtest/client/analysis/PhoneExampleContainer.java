@@ -33,9 +33,7 @@ import java.util.logging.Logger;
  */
 class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
   private static final int ITEM_WIDTH = 350;
-  private final Logger logger = Logger.getLogger("WordContainer");
-//  private static final int COL_WIDTH = 55;
-  //private AnalysisPlot plot;
+  private final Logger logger = Logger.getLogger("PhoneExampleContainer");
   private ShowTab learnTab;
   private String phone;
 
@@ -45,8 +43,6 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
    */
   public PhoneExampleContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab) {
     super(controller);
-//    sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
-    //this.plot = plot;
     this.learnTab = learnTab;
   }
 
@@ -58,10 +54,6 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
   protected int getPageSize() {
     return 5;
   }
-
-/*  private CommonShell getShell(String id) {
-    return plot.getIdToEx().get(id);
-  }*/
 
   /**
    * @param
@@ -135,10 +127,9 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
       @Override
       public SafeHtml getValue(WordAndScore shell) {
         CommonShell exercise = null;//getShell(shell.getId());
-        logger.info("Got " + shell + "  : " + exercise);
+       // logger.info("Got " + shell + "  : " + exercise);
         String title = exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
-        SafeHtml audioTagHTML1 = PlayAudioWidget.getAudioTagHTML(shell.getAnswerAudio(), title);
-        return audioTagHTML1;
+        return PlayAudioWidget.getAudioTagHTML(shell.getAnswerAudio(), title);
       }
     };
   }
