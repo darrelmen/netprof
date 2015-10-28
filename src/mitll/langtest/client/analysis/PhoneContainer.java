@@ -259,7 +259,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     ColumnSortEvent.ListHandler<PhoneAndScore> columnSortHandler2 = getScoreSorter(scoreColumn, getList());
     table.addColumnSortHandler(columnSortHandler2);
 
-    new TooltipHelper().createAddTooltip(table, "Click on an item to review.", Placement.BOTTOM);
+    new TooltipHelper().createAddTooltip(table, "Click on an item to review.", Placement.TOP);
   }
 
   private Column<PhoneAndScore, SafeHtml> getItemColumn() {
