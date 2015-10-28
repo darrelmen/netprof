@@ -201,6 +201,7 @@ public class UserManagement {
    *
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUsers()
+   * @see #usersToXLSX(OutputStream)
    */
   public List<User> getUsers() {
     Map<Long, Float> userToRate = resultDAO.getSessions().userToRate;
