@@ -689,14 +689,32 @@ public class ResultDAO extends DAO {
     Set<User> users = new HashSet<>();
     try {
       Connection connection = database.getConnection(this.getClass().toString());
-      PreparedStatement statement = connection.prepareStatement("SELECT DISTINCT " + USERID +
-          " FROM " + RESULTS + " where " + PRON_SCORE + " > -0.1");
+      String sql = "SELECT " +
+          USERID +
+          ", count(" +
+          USERID +
+          ") FROM " +
+          RESULTS +
+          " where " +
+          PRON_SCORE +
+          " > 0 group by " +
+          USERID +
+          " order by " +
+          USERID;
+
+//      String sql1 = "SELECT DISTINCT " + USERID +
+//          " FROM " + RESULTS + " where " + PRON_SCORE + " > -0.1";
+      PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
 
       Map<Long, User> userMap = userDAO.getUserMap();
 
       while (rs.next()) {
-        users.add(userMap.get(rs.getLong(1)));
+        long userid = rs.getLong(1);
+        int count = rs.getInt(2);
+        if (count > 1) {
+          users.add(userMap.get(userid));
+        }
       }
       finish(connection, statement, rs);
     } catch (Exception ee) {
