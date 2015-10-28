@@ -33,7 +33,7 @@ public class PerformanceTest {
     logger.debug("config dir " + parent);
     logger.debug("config     " + file.getName());
     //  dbName = "npfEnglish";//"mandarin";// "mandarin";
-    dbName = "mandarin";// "npfSpanish";//"mandarin";// "mandarin";
+    dbName = "mandarinCopy";// "npfSpanish";//"mandarin";// "mandarin";
     database = new DatabaseImpl(parent, file.getName(), dbName, new ServerProperties(parent, file.getName()), new PathHelper("war"), false, null);
     logger.debug("made " + database);
     String media = parent + File.separator + "media";
@@ -59,7 +59,7 @@ public class PerformanceTest {
       }
       writer.close();
 
-      UserPerformance performance = database.getAnalysis().getResultForUserByBin(71, ResultDAO.FIVE_MINUTES);
+/*      UserPerformance performance = database.getAnalysis().getResultForUserByBin(71, ResultDAO.FIVE_MINUTES);
       writer = getWriter("UserPerformance_5_Min");
       writer.write(performance.toCSV());
       writer.close();
@@ -73,10 +73,10 @@ public class PerformanceTest {
       performance = database.getAnalysis().getResultForUserByBin(71, ResultDAO.DAY);
       writer = getWriter("UserPerformance_Day");
       writer.write(performance.toCSV());
-      writer.close();
+      writer.close();*/
 
 
-      performance = database.getAnalysis().getPerformanceForUser(71);
+      UserPerformance performance = database.getAnalysis().getPerformanceForUser(71);
       writer = getWriter("RawUserPerformance");
       writer.write(performance.toRawCSV());
       writer.close();
@@ -92,15 +92,18 @@ public class PerformanceTest {
 
   @Test
   public void testWords() {
-    List<WordScore> wordScoresForUser = database.getAnalysis().getWordScoresForUser(71);
-    for (WordScore ws : wordScoresForUser) logger.info("got " + ws);
+   // int id = 71;
+    int id = 26;
+    List<WordScore> wordScoresForUser = database.getAnalysis().getWordScoresForUser(id);
+    for (WordScore ws : wordScoresForUser) logger.info("testWords got " + ws);
   }
 
   @Test
   public void testPhones() {
     long then = System.currentTimeMillis();
  //   int id = 71; // psanish
-    int id = 41;
+    //int id = 41; // big mandarin classroom user
+    int id = 26;
     PhoneReport phoneReport = database.getAnalysis().getPhonesForUser(id);
 
     Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
