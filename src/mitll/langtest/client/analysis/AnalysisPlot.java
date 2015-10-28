@@ -1,4 +1,4 @@
-package mitll.langtest.client.custom;
+package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -168,8 +168,9 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
     if (!iPadData.isEmpty()) {
       data = getDataForTimeAndScore(iPadData);
 
+      String iPadName = "iPad/iPhone " + PRONUNCIATION_SCORE;
       series = chart.createSeries()
-          .setName("iPad/iPhone " + PRONUNCIATION_SCORE)
+          .setName(iPadName)
           .setPoints(data)
           .setOption("color","#00B800");
 
@@ -181,8 +182,9 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
     if (!browserData.isEmpty()) {
       data = getDataForTimeAndScore(browserData);
 
+      String browserName = "Browser " + PRONUNCIATION_SCORE;
       series = chart.createSeries()
-          .setName("Browser " + PRONUNCIATION_SCORE)
+          .setName(browserName)
           .setPoints(data);
 
       chart.addSeries(series);
