@@ -36,6 +36,8 @@ public class Report {
   private static final String MONTH = "By Month";
   private static final String WEEK = "By Week";
   private static final String top = "<td style='vertical-align: top;'>";
+  public static final String DEVICE_RECORDINGS = "Device Recordings";
+  public static final String ALL_RECORDINGS = "All Recordings";
 
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
@@ -144,7 +146,7 @@ public class Report {
 
     getEvents(builder, users);
 
-    getEventsDevices(builder,users);
+    getEventsDevices(builder, users);
 
     getResults(builder, users, pathHelper);
     getResultsDevices(builder, users, pathHelper);
@@ -330,17 +332,12 @@ public class Report {
    */
   private Map<Long, Map<String, Integer>> getResults(StringBuilder builder, Set<Long> students, PathHelper pathHelper) {
     List<Result> results = resultDAO.getResults();
-
-    String recordings = "All Recordings";
-    return getResultsForSet(builder, students, pathHelper, results, recordings);
+    return getResultsForSet(builder, students, pathHelper, results, ALL_RECORDINGS);
   }
 
   private Map<Long, Map<String, Integer>> getResultsDevices(StringBuilder builder, Set<Long> students, PathHelper pathHelper) {
     List<Result> results = resultDAO.getResultsDevices();
-
-//    new Exception().printStackTrace();
-    String recordings = "Device Recordings";
-    return getResultsForSet(builder, students, pathHelper, results, recordings);
+    return getResultsForSet(builder, students, pathHelper, results, DEVICE_RECORDINGS);
   }
 
   private Map<Long, Map<String, Integer>> getResultsForSet(StringBuilder builder, Set<Long> students, PathHelper pathHelper, List<Result> results, String recordings) {
@@ -553,8 +550,8 @@ public class Report {
 
     getEvents(builder, students, all, activeUsers, tableLabel);
   }
-  private void getEventsDevices(StringBuilder builder, Set<Long> students) {
 
+  private void getEventsDevices(StringBuilder builder, Set<Long> students) {
     List<Event> all = eventDAO.getAllDevices();
     String activeUsers = "Active iPad/iPhone Users";
     String tableLabel = "iPad/iPhone Time on Task";
