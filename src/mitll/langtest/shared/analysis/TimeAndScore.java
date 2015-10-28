@@ -1,10 +1,13 @@
 package mitll.langtest.shared.analysis;
 
+import org.moxieapps.gwt.highcharts.client.Chart;
+
 import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by go22670 on 10/19/15.
+ * @see mitll.langtest.client.custom.AnalysisPlot#addSeries(List, Chart, String)
  */
 
 public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
@@ -14,6 +17,7 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
   private float score;
   private int count = 0;
   private float cumulativeAverage;
+  private boolean isIPad;
 
   /**
    * @see UserPerformance#setRawBestScores(List)
@@ -25,21 +29,22 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
     timestamp = bs.getTimestamp();
     score = bs.getScore();
     count = bs.getCount();
+    isIPad = bs.isiPad();
     this.cumulativeAverage = cumulativeAverage;
   }
 
   /**
-   * @see UserPerformance#addBestScores
-   * @param bestScoreList
-   * @param binSize
+   * @seex UserPerformance#addBestScores
+   * @paramx bestScoreList
+   * @paramx binSize
    */
-  public TimeAndScore(List<BestScore> bestScoreList, long binSize) {
+/*  public TimeAndScore(List<BestScore> bestScoreList, long binSize) {
     float total = 0;
     for (BestScore bs : bestScoreList) total += bs.getScore();
     score = total / (float) bestScoreList.size();
     count = bestScoreList.size();
     this.timestamp = (bestScoreList.get(0).getTimestamp()/binSize)*binSize;
-  }
+  }*/
 
   public TimeAndScore() {
   }
@@ -62,8 +67,6 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
   }
 
   private String getTimeString() {
-   // SimpleDateFormat df = new SimpleDateFormat("MM-dd-yy HH:mm:ss");
-   // String format = df.format(getTimestamp());
     return ""+getTimestamp();
   }
 
@@ -86,5 +89,9 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
 
   public String getId() {
     return id;
+  }
+
+  public boolean isIPad() {
+    return isIPad;
   }
 }
