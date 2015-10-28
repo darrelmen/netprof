@@ -1,5 +1,6 @@
 package mitll.langtest.shared;
 
+import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import org.apache.log4j.Logger;
 
@@ -32,7 +33,6 @@ public class MonitorResult implements IsSerializable {
   private String id;
 
   private String foreignText;
- // private String context;
 
   private String answer;
   private boolean valid;
@@ -84,7 +84,6 @@ public class MonitorResult implements IsSerializable {
     this.withFlash = withFlash;
     this.processDur   = processDur;
     this.roundTripDur = roundTripDur;
-  //  this.context = "";
   }
 
   public int getUniqueID() {
@@ -286,6 +285,10 @@ public class MonitorResult implements IsSerializable {
     }
   }
 
+  /**
+   * @see mitll.langtest.client.result.ResultManager#addResultColumn(CellTable)
+   * @return
+   */
   public String getDevice() {
     return device;
   }
@@ -312,8 +315,4 @@ public class MonitorResult implements IsSerializable {
   public int getRoundTripDur() {
     return roundTripDur;
   }
-
-/*  public String getContext() {
-    return context;
-  }*/
 }
