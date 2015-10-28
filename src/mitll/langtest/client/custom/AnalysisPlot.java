@@ -14,12 +14,13 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 10/19/15.
  */
 public class AnalysisPlot extends DivWidget implements IsWidget {
-  //  private final Logger logger = Logger.getLogger("AnalysisPlot");
+  private final Logger logger = Logger.getLogger("AnalysisPlot");
   private static final String PRONUNCIATION_SCORE = "Pronunciation Score";
 
   private Map<Long, String> timeToId = new TreeMap<>();
@@ -57,15 +58,25 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
         float v = userPerformance.getRawAverage() * 100;
         add(getChart("Pronunciation over time (Drag to zoom in)",
             "Score and average (" + userPerformance.getRawTotal() + " items : avg score " + (int) v +
-                " %)", "Cumulative Average", rawBestScores));
+                " %)", "Cumulative Average", userPerformance));
         setRawBestScores(rawBestScores);
       }
     });
   }
 
+  /**
+   * @param title
+   * @param subtitle
+   * @param seriesName
+   * @param yValuesForUser
+   * @return
+   * @see AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long)
+   */
   private Chart getChart(
-      String title, String subtitle, String seriesName,
-      List<TimeAndScore> yValuesForUser) {
+      String title, String subtitle, String seriesName, UserPerformance userPerformance
+  ) {
+   // List<TimeAndScore> yValuesForUser;
+
     Chart chart = new Chart()
         .setZoomType(BaseChart.ZoomType.X)
         .setType(Series.Type.SCATTER)
@@ -105,7 +116,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
                 String english = commonShell == null ? "" : commonShell.getEnglish();
 
                 String seriesName1 = toolTipData.getSeriesName();
-                boolean showEx = (seriesName1.equals(PRONUNCIATION_SCORE));
+                boolean showEx = (seriesName1.contains(PRONUNCIATION_SCORE));
                 return "<b>" + seriesName1 + "</b><br/>" +
                     DateTimeFormat.getFormat("E MMM d h:mm a").format(
                         new Date(toolTipData.getXAsLong())
@@ -120,7 +131,8 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
               }
             }));
 
-    addSeries(yValuesForUser, chart, seriesName);
+    addSeries(userPerformance.getRawBestScores(), userPerformance.getiPadTimeAndScores(), userPerformance.getBrowserTimeAndScores(),
+        chart, seriesName);
 
     configureChart(
         chart, subtitle);
@@ -134,9 +146,10 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
    * @paramx gameTimeSeconds
    * @see #getChart
    */
-  private void addSeries(List<TimeAndScore> yValuesForUser, Chart chart, String seriesTitle) {
+  private void addSeries(List<TimeAndScore> yValuesForUser, List<TimeAndScore> iPadData, List<TimeAndScore> browserData, Chart chart, String seriesTitle) {
     Number[][] data = new Number[yValuesForUser.size()][2];
 
+    logger.info("got " + yValuesForUser.size());
     int i = 0;
     for (TimeAndScore ts : yValuesForUser) {
       data[i][0] = ts.getTimestamp();
@@ -150,6 +163,35 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
 
     chart.addSeries(series);
 
+    logger.info("iPadData " + iPadData.size());
+
+    if (!iPadData.isEmpty()) {
+      data = getDataForTimeAndScore(iPadData);
+
+      series = chart.createSeries()
+          .setName("iPad/iPhone " + PRONUNCIATION_SCORE)
+          .setPoints(data)
+          .setOption("color","#00B800");
+
+      chart.addSeries(series);
+    }
+
+    logger.info("browserData " + browserData.size());
+
+    if (!browserData.isEmpty()) {
+      data = getDataForTimeAndScore(browserData);
+
+      series = chart.createSeries()
+          .setName("Browser " + PRONUNCIATION_SCORE)
+          .setPoints(data);
+
+      chart.addSeries(series);
+    }
+  }
+
+  private Number[][] getDataForTimeAndScore(List<TimeAndScore> yValuesForUser) {
+    Number[][] data;
+    int i;
     data = new Number[yValuesForUser.size()][2];
 
     i = 0;
@@ -157,12 +199,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
       data[i][0] = ts.getTimestamp();
       data[i++][1] = ts.getScore() * 100;
     }
-
-    series = chart.createSeries()
-        .setName(PRONUNCIATION_SCORE)
-        .setPoints(data);
-
-    chart.addSeries(series);
+    return data;
   }
 
   /**
@@ -173,8 +210,8 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
    */
   private void configureChart(Chart chart, String title) {
     chart.getYAxis().setAxisTitleText(title)
-      //  .setAllowDecimals(true)
         .setMin(0);
+
     chart.getXAxis()
         .setType(Axis.Type.DATE_TIME);
   }
