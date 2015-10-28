@@ -5,7 +5,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.custom.AnalysisPlot;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.analysis.PhoneReport;
@@ -19,8 +18,6 @@ import java.util.logging.Logger;
  */
 public class AnalysisTab extends DivWidget {
   private final Logger logger = Logger.getLogger("AnalysisTab");
-
-//  public AnalysisTab() {}
 
   /**
    * @param service
