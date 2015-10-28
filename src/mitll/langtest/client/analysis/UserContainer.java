@@ -21,7 +21,6 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
-import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.shared.User;
 
 import java.util.Collection;
@@ -36,9 +35,7 @@ import java.util.logging.Logger;
 class UserContainer extends SimplePagingContainer<User> {
   private final Logger logger = Logger.getLogger("UserContainer");
 
-  private static final int TABLE_HISTORY_WIDTH = 420;
-  // private ExerciseComparator sorter;
-  //private AnalysisPlot plot;
+  //private static final int TABLE_HISTORY_WIDTH = 420;
   private ShowTab learnTab;
   DivWidget rightSide;
   LangTestDatabaseAsync service;
@@ -59,13 +56,15 @@ class UserContainer extends SimplePagingContainer<User> {
   /**
    * @param users
    * @return
-   * @see SetCompleteDisplay#getScoreHistory(List, List, ExerciseController)
+   * @see StudentAnalysis#StudentAnalysis
    */
   public Panel getTableWithPager(final Collection<User> users) {
     Panel tableWithPager = getTableWithPager();
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeft");
 
+//    Collections.sort(users, new Comparator<User>() {
+//    });
     for (User User : users) {
       addItem(User);
     }
