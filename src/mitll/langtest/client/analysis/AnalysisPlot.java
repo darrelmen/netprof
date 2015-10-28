@@ -36,7 +36,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
         (int) id, "", false, false, false, false, new AsyncCallback<ExerciseListWrapper>() {
           @Override
           public void onFailure(Throwable throwable) {
-
+            logger.warning("\n\n\n-> getExerciseIds " + throwable);
           }
 
           @Override
@@ -48,7 +48,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
     service.getPerformanceForUser(id, new AsyncCallback<UserPerformance>() {
       @Override
       public void onFailure(Throwable throwable) {
-
+        logger.warning("\n\n\n-> getPerformanceForUser " + throwable);
       }
 
       @Override
@@ -56,8 +56,12 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
         clear();
         List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
         float v = userPerformance.getRawAverage() * 100;
+        int rawTotal =  rawBestScores.size();//userPerformance.getRawTotal();
+
+//        logger.info("getPerformanceForUser raw total " + rawTotal + " num " + rawBestScores.size());
+
         add(getChart("Pronunciation over time (Drag to zoom in)",
-            "Score and average (" + userPerformance.getRawTotal() + " items : avg score " + (int) v +
+            "Score and average (" + rawTotal + " items : avg score " + (int) v +
                 " %)", "Cumulative Average", userPerformance));
         setRawBestScores(rawBestScores);
       }
@@ -75,8 +79,6 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
   private Chart getChart(
       String title, String subtitle, String seriesName, UserPerformance userPerformance
   ) {
-   // List<TimeAndScore> yValuesForUser;
-
     Chart chart = new Chart()
         .setZoomType(BaseChart.ZoomType.X)
         .setType(Series.Type.SCATTER)
