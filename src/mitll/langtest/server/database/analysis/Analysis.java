@@ -85,10 +85,9 @@ public class Analysis extends DAO {
    * @param binSize
    * @return
    */
-  public UserPerformance getResultForUserByBin(long id, int binSize) {
+/*  public UserPerformance getResultForUserByBin(long id, int binSize) {
     try {
       String sql = getPerfSQL(id);
-
       List<BestScore> resultsForQuery = getBest(sql);
       UserPerformance up = new UserPerformance(id);
       up.setAtBinSize(resultsForQuery, binSize);
@@ -97,7 +96,7 @@ public class Analysis extends DAO {
       logException(ee);
     }
     return new UserPerformance(id);
-  }
+  }*/
 
   /**
    * @see ResultDAO#getPerformanceForUser(long, PhoneDAO)
@@ -107,9 +106,7 @@ public class Analysis extends DAO {
    */
   public UserPerformance getPerformanceForUser(long id) {
     try {
-      String sql = getPerfSQL(id);
-
-      List<BestScore> resultsForQuery = getBest(sql);
+      List<BestScore> resultsForQuery = getBest(getPerfSQL(id));
       return new UserPerformance(id, resultsForQuery);
     } catch (Exception ee) {
       logException(ee);
