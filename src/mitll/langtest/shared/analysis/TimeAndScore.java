@@ -63,7 +63,7 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
 
   public String toString() {
     String format = getTimeString();
-    return " at " + format + " avg score for " + count + "\t=\t" + score +"\t"+ getCumulativeAverage();
+    return id + " at " + format + " avg score for " + count + "\t=\t" + score +"\t"+ getCumulativeAverage();
   }
 
   private String getTimeString() {
@@ -79,9 +79,11 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
     return new Long(timestamp).compareTo(o.getTimestamp());
   }
 
+/*
   public void setMoving(float moving) {
     this.cumulativeAverage = moving;
   }
+*/
 
   public float getCumulativeAverage() {
     return cumulativeAverage;
@@ -91,7 +93,9 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
     return id;
   }
 
+/*
   public boolean isIPad() {
     return isIPad;
   }
+*/
 }
