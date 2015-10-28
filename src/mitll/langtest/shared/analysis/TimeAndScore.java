@@ -17,7 +17,7 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
   private float score;
   private int count = 0;
   private float cumulativeAverage;
-  private boolean isIPad;
+//  private boolean isIPad;
 
   /**
    * @see UserPerformance#setRawBestScores(List)
@@ -29,7 +29,7 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
     timestamp = bs.getTimestamp();
     score = bs.getScore();
     count = bs.getCount();
-    isIPad = bs.isiPad();
+  //  isIPad = bs.isiPad();
     this.cumulativeAverage = cumulativeAverage;
   }
 
