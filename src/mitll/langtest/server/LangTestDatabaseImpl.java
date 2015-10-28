@@ -9,7 +9,6 @@ import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.analysis.ShowTab;
-import mitll.langtest.client.custom.AnalysisPlot;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.server.audio.AudioCheck;
