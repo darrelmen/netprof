@@ -32,8 +32,11 @@ public class StudentAnalysis extends DivWidget {
         UserContainer userContainer = new UserContainer(service, controller, rightSide, showTab);
         List<User> filtered = new ArrayList<User>();
         for (User user : users) {
-          if (!user.getUserID().equals("defectDetector")) {
+          if (user != null && user.getUserID() != null && !user.getUserID().equals("defectDetector")) {
             filtered.add(user);
+          }
+          else {
+            logger.warning("skip " + user);
           }
         }
         add(userContainer.getTableWithPager(filtered));
