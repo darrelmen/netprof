@@ -6,6 +6,7 @@ import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.apache.log4j.Logger;
+import scala.Int;
 
 import java.sql.*;
 import java.util.*;
@@ -53,7 +54,7 @@ public class Analysis extends DAO {
    * @see #getPerformanceForUser(long)
    */
   private List<BestScore> getBest(String sql) throws SQLException {
-  //  logger.info("got " + sql);
+    logger.info("got " + sql);
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     long then = System.currentTimeMillis();
@@ -192,11 +193,14 @@ public class Analysis extends DAO {
     long lastTimestamp = 0;
     int count = 0;
     BestScore lastBest = null;
+    Set<Integer> seen = new HashSet<>();
     while (rs.next()) {
       String exid = rs.getString(Database.EXID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       float pronScore = rs.getFloat(ResultDAO.PRON_SCORE);
       int id = rs.getInt(ResultDAO.ID);
+
+      if (pronScore < 0) logger.warn("huh? got " +pronScore + " for " + exid + " and " +id);
 
       String json = rs.getString(ResultDAO.SCORE_JSON);
       String device = rs.getString(ResultDAO.DEVICE_TYPE);
@@ -205,8 +209,13 @@ public class Analysis extends DAO {
 
       long time = timestamp.getTime();
       if ((last != null && !last.equals(exid)) || (lastTimestamp > 0 && time - lastTimestamp > FIVE_MINUTES)) {
-        results.add(lastBest);
-
+        if (seen.contains(id)) {
+          logger.warn("skipping " +id);
+        }
+        else {
+          results.add(lastBest);
+          seen.add(id);
+        }
         lastBest.setCount(count);
         lastTimestamp = time;
         count = 0;
@@ -219,8 +228,13 @@ public class Analysis extends DAO {
     finish(connection, statement, rs);
 
     if (!results.isEmpty()) {
-      if (lastBest != results.get(results.size() - 1)) {
-        results.add(lastBest);
+      if (lastBest != null && lastBest != results.get(results.size() - 1)) {
+        if (seen.contains(lastBest.getResultID())) {
+          logger.warn("skipping " +lastBest.getResultID());
+        }
+        else {
+          results.add(lastBest);
+        }
       }
     }
 
