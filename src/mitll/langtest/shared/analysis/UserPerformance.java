@@ -1,13 +1,18 @@
 package mitll.langtest.shared.analysis;
 
+import mitll.langtest.client.LangTestDatabaseAsync;
+
 import java.io.Serializable;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 10/19/15.
  */
 
 public class UserPerformance implements Serializable {
+  private transient final Logger logger = Logger.getLogger("UserPerformance");
+
   private List<TimeAndScore> timeAndScores = new ArrayList<>();
   private List<TimeAndScore> rawTimeAndScores = new ArrayList<>();
   private List<TimeAndScore> iPadTimeAndScores = new ArrayList<>();
@@ -15,18 +20,20 @@ public class UserPerformance implements Serializable {
 
   private long userID;
 
-  public UserPerformance() {
-  }
-
+  public UserPerformance() {}
   public UserPerformance(long userID) {
     this.userID = userID;
   }
 
+  /**
+   * @see mitll.langtest.server.database.analysis.Analysis#getPerformanceForUser(long)
+   * @param userID
+   * @param resultsForQuery
+   */
   public UserPerformance(long userID, List<BestScore> resultsForQuery) {
     this(userID);
     setRawBestScores(resultsForQuery);
   }
-
 
   /**
    * @see mitll.langtest.server.database.analysis.Analysis#getResultForUserByBin(long, int)
@@ -66,14 +73,25 @@ public class UserPerformance implements Serializable {
   }
 
   private int getTotal(Collection<TimeAndScore> timeAndScores) {
+    logger.info("getTotal " + timeAndScores.size());
+
     int total = 0;
-    for (TimeAndScore ts : timeAndScores) total += ts.getCount();
+    for (TimeAndScore ts : timeAndScores) {
+      //logger.info("got " + ts);
+      total += ts.getCount();
+    }
     return total;
   }
 
+  /**
+   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long)
+   * @return
+   * @see #getRawAverage()
+   */
   public int getRawTotal() {
-    return getTotal(rawTimeAndScores);
+    logger.info("Raw total " + rawTimeAndScores.size());
 
+    return getTotal(rawTimeAndScores);
   }
 
   private float getAverage() {
@@ -116,7 +134,7 @@ public class UserPerformance implements Serializable {
     return userID;
   }
 
-  private void setMoving() {
+/*  private void setMoving() {
     float total = 0;
     float count = 0;
     for (TimeAndScore ts : getTimeAndScores()) {
@@ -125,15 +143,15 @@ public class UserPerformance implements Serializable {
       float moving = total / count;
       ts.setMoving(moving);
     }
-  }
+  }*/
 
-  public String toCSV() {
+/*  public String toCSV() {
     setMoving();
     StringBuilder builder = new StringBuilder();
     builder.append(",,,," + userID + "," + getTotal() + "," + getAverage());
     for (TimeAndScore ts : getTimeAndScores()) builder.append("\n").append(ts.toCSV());
     return builder.toString();
-  }
+  }*/
 
   public String toRawCSV() {
     StringBuilder builder = new StringBuilder();
@@ -142,6 +160,10 @@ public class UserPerformance implements Serializable {
     return builder.toString();
   }
 
+  /**
+   * @see #UserPerformance()
+   * @param rawBestScores
+   */
   private void setRawBestScores(List<BestScore> rawBestScores) {
     Collections.sort(rawBestScores, new Comparator<BestScore>() {
       @Override
@@ -170,11 +192,9 @@ public class UserPerformance implements Serializable {
   public List<TimeAndScore> getRawBestScores() {
     return rawTimeAndScores;
   }
-
   public List<TimeAndScore> getiPadTimeAndScores() {
     return iPadTimeAndScores;
   }
-
   public List<TimeAndScore> getBrowserTimeAndScores() {
     return browserTimeAndScores;
   }
