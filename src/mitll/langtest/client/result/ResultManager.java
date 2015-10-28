@@ -619,8 +619,6 @@ public class ResultManager extends PagerTable {
       table.addColumn(unit, type);
       colToField.put(unit, type);
     }
-
-    // return id;
   }
 
   /**
