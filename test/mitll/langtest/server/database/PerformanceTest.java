@@ -2,7 +2,9 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.analysis.*;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
@@ -12,8 +14,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 
 /**
  * Created by GO22670 on 1/30/14.
@@ -92,7 +96,7 @@ public class PerformanceTest {
 
   @Test
   public void testWords() {
-   // int id = 71;
+    // int id = 71;
     int id = 26;
     List<WordScore> wordScoresForUser = database.getAnalysis().getWordScoresForUser(id);
     for (WordScore ws : wordScoresForUser) logger.info("testWords got " + ws);
@@ -101,7 +105,7 @@ public class PerformanceTest {
   @Test
   public void testPhones() {
     long then = System.currentTimeMillis();
- //   int id = 71; // psanish
+    //   int id = 71; // psanish
     //int id = 41; // big mandarin classroom user
     int id = 26;
     PhoneReport phoneReport = database.getAnalysis().getPhonesForUser(id);
@@ -114,7 +118,7 @@ public class PerformanceTest {
     for (Map.Entry<String, List<WordAndScore>> pair : phonesForUser.entrySet()) {
       List<WordAndScore> value = pair.getValue();
       logger.info(pair.getKey() + " = " + value.size() + " first " + value.get(0));
-      int i1 = Math.min(10,value.size());
+      int i1 = Math.min(10, value.size());
       for (int i = 0; i < i1; i++) logger.info("\t" + value.get(i));
     }
 //    for(WordScore ws : wordScoresForUser) logger.info("got " + ws);
