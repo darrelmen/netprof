@@ -204,7 +204,7 @@ class WordContainer extends SimplePagingContainer<WordScore> {
         String columnText = new WordTable().toHTML2(shell.getNetPronImageTypeListMap());
         if (columnText.isEmpty()) {
           CommonShell exercise = getShell(shell.getId());
-          logger.info("getItemColumn : column text empty for id " + shell.getId() + " and found ex " + exercise);
+         // logger.info("getItemColumn : column text empty for id " + shell.getId() + " and found ex " + exercise);
 
           String foreignLanguage = exercise == null ? "" : exercise.getForeignLanguage();
           if (controller.getLanguage().equalsIgnoreCase("Spanish")) foreignLanguage = foreignLanguage.toUpperCase();
