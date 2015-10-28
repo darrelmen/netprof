@@ -30,12 +30,12 @@ public class RefResultDAO extends DAO {
   private static final String CORRECT = "correct";
   private static final String PRON_SCORE = "pronscore";
 
-  private static final String ALIGNSCORE = "ALIGNSCORE";
+  public static final String ALIGNSCORE = "ALIGNSCORE";
   private static final String ALIGNJSON = "ALIGNJSON";
   private static final String NUMDECODE_PHONES = "NUMDECODEPHONES";
   private static final String NUM_ALIGN_PHONES = "NUMALIGNPHONES";
   private static final String MALE = "male";
-  private static final String SPEED = "speed";
+  public static final String SPEED = "speed";
   public static final String DECODE_PROCESS_DUR = "decodeProcessDur";
   public static final String ALIGN_PROCESS_DUR = "alignProcessDur";
   public static final String HYDEC_DECODE_PRON_SCORE = "hydecDecodePronScore";
