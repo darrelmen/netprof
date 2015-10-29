@@ -2,9 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.analysis.*;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
@@ -14,16 +12,15 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.Date;
 
 /**
  * Created by GO22670 on 1/30/14.
  */
 public class PerformanceTest {
   private static final Logger logger = Logger.getLogger(PerformanceTest.class);
+  public static final int CHINESE_DUDE = 71;
   private static DatabaseImpl database;
   private static String dbName;
 
@@ -31,13 +28,15 @@ public class PerformanceTest {
   public static void setup() {
     logger.debug("setup called");
 
-    String config = "mandarinClassroom";//"spanish";//"mandarin";
+    //  String config = "mandarinClassroom";//"spanish";//"mandarin";
+    String config = "spanish";//"mandarin";
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParent();
     logger.debug("config dir " + parent);
     logger.debug("config     " + file.getName());
     //  dbName = "npfEnglish";//"mandarin";// "mandarin";
-    dbName = "mandarinCopy";// "npfSpanish";//"mandarin";// "mandarin";
+    //  dbName = "mandarinCopy";// "npfSpanish";//"mandarin";// "mandarin";
+    dbName = "npfSpanish";// "npfSpanish";//"mandarin";// "mandarin";
     database = new DatabaseImpl(parent, file.getName(), dbName, new ServerProperties(parent, file.getName()), new PathHelper("war"), false, null);
     logger.debug("made " + database);
     String media = parent + File.separator + "media";
@@ -50,7 +49,11 @@ public class PerformanceTest {
   public void testBest() {
     try {
       BufferedWriter writer = getWriter("bestScore");
-      List<BestScore> resultForUser = database.getAnalysis().getResultForUser(71);
+      int chineseDude = CHINESE_DUDE;
+         int id = 71;
+
+      //int id = 1;//116;
+      List<BestScore> resultForUser = database.getAnalysis().getResultForUser(id);
       Collections.sort(resultForUser, new Comparator<BestScore>() {
         @Override
         public int compare(BestScore o1, BestScore o2) {
@@ -80,12 +83,12 @@ public class PerformanceTest {
       writer.close();*/
 
 
-      UserPerformance performance = database.getAnalysis().getPerformanceForUser(71);
+      UserPerformance performance = database.getAnalysis().getPerformanceForUser(id);
       writer = getWriter("RawUserPerformance");
       writer.write(performance.toRawCSV());
       writer.close();
 
-      List<WordScore> wordScoresForUser = database.getAnalysis().getWordScoresForUser(71);
+      List<WordScore> wordScoresForUser = database.getAnalysis().getWordScoresForUser(id);
       for (WordScore ws : wordScoresForUser) logger.info("got " + ws);
 
     } catch (IOException e) {
@@ -107,7 +110,7 @@ public class PerformanceTest {
     long then = System.currentTimeMillis();
     //   int id = 71; // psanish
     //int id = 41; // big mandarin classroom user
-    int id = 26;
+    int id = 71;
     PhoneReport phoneReport = database.getAnalysis().getPhonesForUser(id);
 
     Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
@@ -115,11 +118,39 @@ public class PerformanceTest {
 
     logger.info("took " + (now - then) + " to get " + phonesForUser);
 
-    for (Map.Entry<String, List<WordAndScore>> pair : phonesForUser.entrySet()) {
-      List<WordAndScore> value = pair.getValue();
-      logger.info(pair.getKey() + " = " + value.size() + " first " + value.get(0));
-      int i1 = Math.min(10, value.size());
-      for (int i = 0; i < i1; i++) logger.info("\t" + value.get(i));
+    if (!phonesForUser.isEmpty()) {
+      for (Map.Entry<String, List<WordAndScore>> pair : phonesForUser.entrySet()) {
+        List<WordAndScore> value = pair.getValue();
+        logger.info(pair.getKey() + " = " + value.size() + " first " + value.get(0));
+        int i1 = Math.min(10, value.size());
+        for (int i = 0; i < i1; i++) logger.info("\t" + value.get(i));
+      }
+    }
+//    for(WordScore ws : wordScoresForUser) logger.info("got " + ws);
+  }
+
+  @Test
+  public void testUsers() {
+    long then = System.currentTimeMillis();
+    //   int id = 71; // psanish
+    //int id = 41; // big mandarin classroom user
+//    int id = 71;
+    List<UserInfo> userInfo = database.getAnalysis().getUserInfo(database.getUserDAO());
+    // PhoneReport phoneReport = (PhoneReport) userInfo;
+
+    // Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
+    long now = System.currentTimeMillis();
+
+    logger.info("took " + (now - then) + " to get " + userInfo.size());
+
+    if (!userInfo.isEmpty()) {
+      for (UserInfo userInfo1 : userInfo) {
+        logger.info("got " + userInfo1);
+        //   List<WordAndScore> value = pair.getValue();
+        // logger.info(pair.getKey() + " = " + value.size() + " first " + value.get(0));
+        // int i1 = Math.min(10, value.size());
+        // for (int i = 0; i < i1; i++) logger.info("\t" + value.get(i));
+      }
     }
 //    for(WordScore ws : wordScoresForUser) logger.info("got " + ws);
   }
