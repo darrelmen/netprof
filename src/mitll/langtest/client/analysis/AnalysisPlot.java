@@ -1,10 +1,12 @@
 package mitll.langtest.client.analysis;
 
+import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.analysis.TimeAndScore;
@@ -29,7 +31,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
   /**
    * @param service
    * @param id
-   * @see Navigation#addTabs()
+   * @see AnalysisTab#AnalysisTab(LangTestDatabaseAsync, ExerciseController, int, ShowTab)
    */
   public AnalysisPlot(LangTestDatabaseAsync service, long id) {
     service.getExerciseIds(1, new HashMap<String, Collection<String>>(), "", -1,
@@ -56,13 +58,16 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
         clear();
         List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
         float v = userPerformance.getRawAverage() * 100;
-        int rawTotal =  rawBestScores.size();//userPerformance.getRawTotal();
+        int rawTotal = rawBestScores.size();//userPerformance.getRawTotal();
 
+        if (rawBestScores.isEmpty()) {
+          add(new Label("No Recordings yet to analyze. Please record yourself."));
+        } else {
 //        logger.info("getPerformanceForUser raw total " + rawTotal + " num " + rawBestScores.size());
-
-        add(getChart("Pronunciation over time (Drag to zoom in)",
-            "Score and average (" + rawTotal + " items : avg score " + (int) v +
-                " %)", "Cumulative Average", userPerformance));
+          add(getChart("Pronunciation over time (Drag to zoom in)",
+              "Score and average (" + rawTotal + " items : avg score " + (int) v +
+                  " %)", "Cumulative Average", userPerformance));
+        }
         setRawBestScores(rawBestScores);
       }
     });
@@ -136,8 +141,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
     addSeries(userPerformance.getRawBestScores(), userPerformance.getiPadTimeAndScores(), userPerformance.getBrowserTimeAndScores(),
         chart, seriesName);
 
-    configureChart(
-        chart, subtitle);
+    configureChart(chart, subtitle);
     return chart;
   }
 
@@ -174,7 +178,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
       series = chart.createSeries()
           .setName(iPadName)
           .setPoints(data)
-          .setOption("color","#00B800");
+          .setOption("color", "#00B800");
 
       chart.addSeries(series);
     }
@@ -226,6 +230,10 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
     }
   }
 
+  /**
+   * @return
+   * @see WordContainer#getShell(String)
+   */
   public Map<String, CommonShell> getIdToEx() {
     return idToEx;
   }
