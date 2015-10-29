@@ -125,7 +125,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
                 String seriesName1 = toolTipData.getSeriesName();
                 boolean showEx = (seriesName1.contains(PRONUNCIATION_SCORE));
                 return "<b>" + seriesName1 + "</b><br/>" +
-                    DateTimeFormat.getFormat("E MMM d h:mm a").format(
+                    DateTimeFormat.getFormat("E MMM d yy h:mm a").format(
                         new Date(toolTipData.getXAsLong())
                     ) +
                     (showEx ?
