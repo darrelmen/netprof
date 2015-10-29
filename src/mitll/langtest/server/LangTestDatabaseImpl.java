@@ -3,7 +3,6 @@ package mitll.langtest.server;
 import audio.image.ImageType;
 import audio.imagewriter.SimpleImageWriter;
 import com.google.common.io.Files;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
@@ -29,6 +28,7 @@ import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.analysis.PhoneReport;
+import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserExercise;
@@ -1943,7 +1943,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    */
   @Override
-  public Collection<User> getUsersWithRecordings() { return db.getResultDAO().getUsersWithRecordings(db.getUserDAO()); }
+  public Collection<UserInfo> getUsersWithRecordings() {
+   // return db.getResultDAO().getUsersWithRecordings(db.getUserDAO());
+    return db.getAnalysis().getUserInfo(db.getUserDAO());
+  }
   public Map<Integer, Integer> getResultCountToCount() {
     return db.getResultCountToCount();
   }
@@ -2056,7 +2059,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.custom.AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long)
+   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    * @param id
    * @return
    */
@@ -2064,7 +2067,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public UserPerformance getPerformanceForUser(long id) { return db.getResultDAO().getPerformanceForUser(id, db.getPhoneDAO()); }
 
   /**
-   * @see mitll.langtest.client.analysis.AnalysisTab#getWordScores(LangTestDatabaseAsync, ExerciseController, int, ShowTab, AnalysisPlot, Panel)
+   * @see mitll.langtest.client.analysis.AnalysisTab#getWordScores
    * @param id
    * @return
    */
