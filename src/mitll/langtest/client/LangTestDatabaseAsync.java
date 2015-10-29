@@ -3,6 +3,7 @@ package mitll.langtest.client;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.analysis.PhoneReport;
+import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserExercise;
@@ -161,5 +162,5 @@ public interface LangTestDatabaseAsync {
 
   void getPhoneScores(long id, AsyncCallback<PhoneReport> async);
 
-  void getUsersWithRecordings(AsyncCallback<Collection<User>> async);
+  void getUsersWithRecordings(AsyncCallback<Collection<UserInfo>> async);
 }
