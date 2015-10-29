@@ -123,7 +123,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
 */
 
   private ColumnSortEvent.ListHandler<UserInfo> getUserSorter(Column<UserInfo, SafeHtml> englishCol,
-                                                          List<UserInfo> dataList) {
+                                                              List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<UserInfo>() {
@@ -146,7 +146,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
   }
 
   private ColumnSortEvent.ListHandler<UserInfo> getDateSorter(Column<UserInfo, SafeHtml> englishCol,
-                                                          List<UserInfo> dataList) {
+                                                              List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<UserInfo>() {
@@ -160,6 +160,102 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
               if (o2 == null) return 1;
               else {
                 return Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
+  }
+
+
+  private ColumnSortEvent.ListHandler<UserInfo> getNumSorter(Column<UserInfo, SafeHtml> englishCol,
+                                                          List<UserInfo> dataList) {
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<UserInfo>() {
+          public int compare(UserInfo o1, UserInfo o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+
+            // Compare the name columns.
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return Integer.valueOf(o1.getNum()).compareTo(o2.getNum());
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
+  }
+
+  private ColumnSortEvent.ListHandler<UserInfo> getStartSorter(Column<UserInfo, SafeHtml> englishCol,
+                                                             List<UserInfo> dataList) {
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<UserInfo>() {
+          public int compare(UserInfo o1, UserInfo o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+
+            // Compare the name columns.
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return Integer.valueOf(o1.getStart()).compareTo(o2.getStart());
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
+  }
+
+
+
+  private ColumnSortEvent.ListHandler<UserInfo> getCurrentSorter(Column<UserInfo, SafeHtml> englishCol,
+                                                               List<UserInfo> dataList) {
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<UserInfo>() {
+          public int compare(UserInfo o1, UserInfo o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+
+            // Compare the name columns.
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return Integer.valueOf(o1.getCurrent()).compareTo(o2.getCurrent());
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
+  }
+
+
+  private ColumnSortEvent.ListHandler<UserInfo> getDiffSorter(Column<UserInfo, SafeHtml> englishCol,
+                                                              List<UserInfo> dataList) {
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<UserInfo>() {
+          public int compare(UserInfo o1, UserInfo o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+
+            // Compare the name columns.
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return Integer.valueOf(o1.getDiff()).compareTo(o2.getDiff());
               }
             }
             return -1;
@@ -219,27 +315,29 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     Column<UserInfo, SafeHtml> dateCol = getDateColumn();
     dateCol.setSortable(true);
     addColumn(dateCol, new TextHeader("Signed Up At"));
-    table.setColumnWidth(dateCol, 150 + "px");
+    table.setColumnWidth(dateCol, 100 + "px");
+    table.addColumnSortHandler(getDateSorter(dateCol, getList()));
 
     Column<UserInfo, SafeHtml> num = getNum();
     num.setSortable(true);
     addColumn(num, new TextHeader("#"));
+    table.addColumnSortHandler(getNumSorter(num, getList()));
 
     Column<UserInfo, SafeHtml> start = getStart();
     start.setSortable(true);
     addColumn(start, new TextHeader("Initial Score"));
+    table.addColumnSortHandler(getStartSorter(start, getList()));
 
     Column<UserInfo, SafeHtml> current = getCurrent();
     current.setSortable(true);
     addColumn(current, new TextHeader("Current"));
+    table.addColumnSortHandler(getCurrentSorter(current, getList()));
 
     Column<UserInfo, SafeHtml> diff = getDiff();
     diff.setSortable(true);
     addColumn(diff, new TextHeader("Diff"));
+    table.addColumnSortHandler(getDiffSorter(diff, getList()));
 
-    ColumnSortEvent.ListHandler<UserInfo> date = getDateSorter(dateCol, getList());
-
-    table.addColumnSortHandler(date);
 
     table.setWidth("100%", true);
 
@@ -275,7 +373,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        String signedUp = DateTimeFormat.getFormat("MM d yy").format(
+        String signedUp = DateTimeFormat.getFormat("MMM d, yy").format(
             new Date(shell.getUser().getTimestampMillis())
         );
 
@@ -296,7 +394,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml(""+shell.getStart());
+        return getSafeHtml("" + shell.getStart());
       }
     };
   }
@@ -313,7 +411,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml(""+shell.getCurrent());
+        return getSafeHtml("" + shell.getCurrent());
       }
     };
   }
@@ -330,7 +428,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml(""+shell.getDiff());
+        return getSafeHtml("" + shell.getDiff());
       }
     };
   }
@@ -347,7 +445,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml(""+shell.getNum());
+        return getSafeHtml("" + shell.getNum());
       }
     };
   }
