@@ -63,11 +63,9 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
   public Panel getTableWithPager() {
     Panel tableWithPager = super.getTableWithPager();
     tableWithPager.getElement().setId("TableScoreHistory");
-    //   tableWithPager.setWidth(TABLE_HISTORY_WIDTH + "px");
     tableWithPager.addStyleName("floatLeft");
     return tableWithPager;
   }
-
 
   /**
    * @param phone
@@ -104,24 +102,6 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
 
   private TextHeader header = new TextHeader("Examples of sound");
 
-  private void addReview() {
-    Column<WordAndScore, SafeHtml> itemCol = getItemColumn();
-    itemCol.setSortable(true);
-    table.setColumnWidth(itemCol, ITEM_WIDTH + "px");
-    addColumn(itemCol, header);
-
-    try {
-      Column<WordAndScore, SafeHtml> column = getPlayAudio();
-      table.addColumn(column, "Play");
-      table.setColumnWidth(column, 50 + "px");
-      table.setWidth("100%", true);
-      ColumnSortEvent.ListHandler<WordAndScore> columnSortHandler = getEnglishSorter(itemCol, getList());
-      table.addColumnSortHandler(columnSortHandler);
-    } catch (Exception e) {
-      logger.warning("Got " +e);
-    }
-  }
-
   private Column<WordAndScore, SafeHtml> getPlayAudio() {
     return new Column<WordAndScore, SafeHtml>(new SafeHtmlCell()) {
       @Override
@@ -157,57 +137,23 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
     return columnSortHandler;
   }
 
-/*
-  private ColumnSortEvent.ListHandler<WordAndScore> getScoreSorter(Column<WordAndScore, SafeHtml> scoreCol,
-                                                                   List<WordAndScore> dataList) {
-    ColumnSortEvent.ListHandler<WordAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<WordAndScore>(dataList);
-    columnSortHandler.setComparator(scoreCol,
-        new Comparator<WordAndScore>() {
-          public int compare(WordAndScore o1, WordAndScore o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            if (o1 != null) {
-              if (o2 == null) {
-                logger.warning("------- o2 is null?");
-                return -1;
-              } else {
-                float a1 = o1.getScore();
-                float a2 = o2.getScore();
-                int i = Float.valueOf(a1).compareTo(a2);
-                // logger.info("a1 " + a1 + " vs " + a2 + " i " + i);
-                if (i == 0) {
-                  return o1.getPhone().compareTo(o2.getPhone());
-                } else {
-                  return i;
-                }
-              }
-            } else {
-              logger.warning("------- o1 is null?");
-
-              return -1;
-            }
-          }
-        });
-    return columnSortHandler;
-  }
-*/
-
   @Override
   protected void addColumnsToTable() {
-    addReview();
+    Column<WordAndScore, SafeHtml> itemCol = getItemColumn();
+    itemCol.setSortable(true);
+    table.setColumnWidth(itemCol, ITEM_WIDTH + "px");
+    addColumn(itemCol, header);
 
-//    Column<WordAndScore, SafeHtml> scoreColumn = getScoreColumn();
-//    table.addColumn(scoreColumn, "Score");
-//
-//    scoreColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-//    scoreColumn.setSortable(true);
-//    // table.setColumnWidth(scoreColumn, "70" + "px");
-//    table.setWidth("100%", true);
-//
-//    ColumnSortEvent.ListHandler<WordAndScore> columnSortHandler2 = getScoreSorter(scoreColumn, getList());
-//    table.addColumnSortHandler(columnSortHandler2);
+    try {
+      Column<WordAndScore, SafeHtml> column = getPlayAudio();
+      table.addColumn(column, "Play");
+      table.setColumnWidth(column, 50 + "px");
+      table.setWidth("100%", true);
+      ColumnSortEvent.ListHandler<WordAndScore> columnSortHandler = getEnglishSorter(itemCol, getList());
+      table.addColumnSortHandler(columnSortHandler);
+    } catch (Exception e) {
+      logger.warning("Got " +e);
+    }
 
     new TooltipHelper().addTooltip(table, "Click on an item to review.");
   }
@@ -243,23 +189,6 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
   private SafeHtml getSafeHtml(String columnText) {
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
   }
-
-/*  private Column<WordAndScore, SafeHtml> getScoreColumn() {
-    return new Column<WordAndScore, SafeHtml>(new SafeHtmlCell()) {
-      @Override
-      public SafeHtml getValue(WordAndScore shell) {
-        float v = shell.getScore() * 100;
-        String s = "<span " +
-            "style='" +
-            "margin-left:10px;" +
-            "'" +
-            ">" + ((int) v) +
-            "</span>";
-
-        return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
-      }
-    };
-  }*/
 
   /**
    * Must be public
