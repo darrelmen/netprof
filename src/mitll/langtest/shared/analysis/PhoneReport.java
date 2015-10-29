@@ -13,8 +13,9 @@ public class PhoneReport implements Serializable {
   private Map<String, List<WordAndScore>> phoneToWordAndScoreSorted;
   private Map<String, Float> phoneToAvgSorted;
   private Map<String, Integer> phoneToCount;
+  private boolean valid = false;
 
-  public PhoneReport() {}
+  public PhoneReport() { valid = false; }
 
   /**
    * @param overallPercent
@@ -27,6 +28,7 @@ public class PhoneReport implements Serializable {
     this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
     this.phoneToAvgSorted = phoneToAvgSorted;
     this.phoneToCount = phoneToCount;
+    valid = true;
   }
 
   public Map<String, List<WordAndScore>> getPhoneToWordAndScoreSorted() {
@@ -46,5 +48,9 @@ public class PhoneReport implements Serializable {
 
   public Map<String, Integer> getPhoneToCount() {
     return phoneToCount;
+  }
+
+  public boolean isValid() {
+    return valid;
   }
 }
