@@ -14,25 +14,33 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 10/21/15.
  */
 public class WordTable {
+  private final Logger logger = Logger.getLogger("WordTable");
 
   public String toHTML(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime, String filter) {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
     StringBuilder builder = new StringBuilder();
     builder.append("<table>");
+   // builder.append("<table cellspacing='5'>");
+
     builder.append("<thead>");
     for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
       TranscriptSegment word = pair.getKey();
       builder.append("<th style='text-align:center; background-color:" + SimpleColumnChart.getColor(word.getScore()) +
           "'>");
-      builder.append(word.getEvent());
+      builder.append(
+       //   "&nbsp;"+
+          word.getEvent()
+         //     +"&nbsp;"
+      );
       builder.append("</th>");
+ //     builder.append("<th>&nbsp;</th>");
     }
-
 
     builder.append("</thead>");
 
@@ -60,6 +68,8 @@ public class WordTable {
       builder.append("</thead>");
       builder.append("</table>");
       builder.append("</td>");
+  //    builder.append("<td>&nbsp;</td>");
+
     }
 
     builder.append("</tr>");
@@ -176,19 +186,24 @@ public class WordTable {
     List<TranscriptSegment> phones = netPronImageTypeToEndTime.get(NetPronImageType.PHONE_TRANSCRIPT);
 
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = new HashMap<>();
-    for (TranscriptSegment word : words) {
-      String event = word.getEvent();
-      if (event.equals("sil") || event.equals("<s>") || event.equals("</s>")) {
+    if (words != null) {
+      for (TranscriptSegment word : words) {
+        String event = word.getEvent();
+        if (event.equals("sil") || event.equals("<s>") || event.equals("</s>")) {
 
-      } else {
-        for (TranscriptSegment phone : phones) {
-          if (phone.getStart() >= word.getStart() && phone.getEnd() <= word.getEnd()) {
-            List<TranscriptSegment> orDefault = wordToPhones.get(word);
-            if (orDefault == null) wordToPhones.put(word, orDefault = new ArrayList<TranscriptSegment>());
-            orDefault.add(phone);
+        } else {
+          for (TranscriptSegment phone : phones) {
+            if (phone.getStart() >= word.getStart() && phone.getEnd() <= word.getEnd()) {
+              List<TranscriptSegment> orDefault = wordToPhones.get(word);
+              if (orDefault == null) wordToPhones.put(word, orDefault = new ArrayList<TranscriptSegment>());
+              orDefault.add(phone);
+            }
           }
         }
       }
+    }
+    else {
+      logger.warning("getWordToPhones no words in " + netPronImageTypeToEndTime);
     }
     return wordToPhones;
   }
