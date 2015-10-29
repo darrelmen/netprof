@@ -1,6 +1,7 @@
 package mitll.langtest.shared.analysis;
 
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.server.database.analysis.Analysis;
 
 import java.io.Serializable;
 import java.util.*;
@@ -11,16 +12,23 @@ import java.util.logging.Logger;
  */
 
 public class UserPerformance implements Serializable {
-  private transient final Logger logger = Logger.getLogger("UserPerformance");
+//  private transient final Logger logger = Logger.getLogger("UserPerformance");
 
   private List<TimeAndScore> timeAndScores = new ArrayList<>();
   private List<TimeAndScore> rawTimeAndScores = new ArrayList<>();
   private List<TimeAndScore> iPadTimeAndScores = new ArrayList<>();
   private List<TimeAndScore> browserTimeAndScores = new ArrayList<>();
+  private int start;
+  private int diff;
 
   private long userID;
 
   public UserPerformance() {}
+
+  /**
+   * @see Analysis#getPerformanceForUser
+   * @param userID
+   */
   public UserPerformance(long userID) {
     this.userID = userID;
   }
@@ -30,7 +38,7 @@ public class UserPerformance implements Serializable {
    * @param userID
    * @param resultsForQuery
    */
-  public UserPerformance(long userID, List<BestScore> resultsForQuery) {
+  public UserPerformance(long userID, List<BestScore> resultsForQuery, int start, int diff) {
     this(userID);
     setRawBestScores(resultsForQuery);
   }
@@ -73,14 +81,15 @@ public class UserPerformance implements Serializable {
   }
 
   private int getTotal(Collection<TimeAndScore> timeAndScores) {
-    logger.info("getTotal " + timeAndScores.size());
+    return timeAndScores.size();
+//    logger.info("getTotal " + timeAndScores.size());
 
-    int total = 0;
+/*    int total = 0;
     for (TimeAndScore ts : timeAndScores) {
       //logger.info("got " + ts);
       total += ts.getCount();
     }
-    return total;
+    return total;*/
   }
 
   /**
@@ -89,8 +98,7 @@ public class UserPerformance implements Serializable {
    * @see #getRawAverage()
    */
   public int getRawTotal() {
-    logger.info("Raw total " + rawTimeAndScores.size());
-
+//    logger.info("Raw total " + rawTimeAndScores.size());
     return getTotal(rawTimeAndScores);
   }
 
@@ -99,6 +107,10 @@ public class UserPerformance implements Serializable {
     return total / (float) getTotal();
   }
 
+  /**
+   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long)
+   * @return
+   */
   public float getRawAverage() {
     float total = getTotalScore(rawTimeAndScores);
     return total / (float) getRawTotal();
@@ -113,7 +125,7 @@ public class UserPerformance implements Serializable {
 
   private float getTotalScore(Collection<TimeAndScore> timeAndScores) {
     float total = 0;
-    for (TimeAndScore ts : timeAndScores) total += ts.getScore() * ts.getCount();
+    for (TimeAndScore ts : timeAndScores) total += ts.getScore();// * ts.getCount();
     return total;
   }
 
@@ -179,12 +191,12 @@ public class UserPerformance implements Serializable {
       count++;
       float moving = total / count;
 
-      TimeAndScore e = new TimeAndScore(bs, moving);
-      rawTimeAndScores.add(e);
+      TimeAndScore timeAndScore = new TimeAndScore(bs, moving);
+      rawTimeAndScores.add(timeAndScore);
       if (bs.isiPad()) {
-        iPadTimeAndScores.add(e);
+        iPadTimeAndScores.add(timeAndScore);
       } else {
-        getBrowserTimeAndScores().add(e);
+        browserTimeAndScores.add(timeAndScore);
       }
     }
   }
