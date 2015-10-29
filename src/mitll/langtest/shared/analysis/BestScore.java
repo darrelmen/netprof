@@ -10,7 +10,7 @@ public class BestScore implements Comparable<BestScore> {
   private final long timestamp;
   private final float pronScore;
   private final String fileRef;
-  private int count;
+//  private int count;
   private final int resultID;
   private String json;
   private boolean isiPad;
@@ -39,8 +39,10 @@ public class BestScore implements Comparable<BestScore> {
   }
 
   public String toString() {
-    return getId() + "/" +getResultID() +
-        " : " + new Date(getTimestamp()) + " # " + count + " : " + pronScore;
+    return "ex " + getId() + "/ res " +getResultID() +
+        " : " + new Date(getTimestamp()) + " # " +
+        //count +
+        " : " + pronScore;
   }
 
   public float getScore() {
@@ -51,6 +53,7 @@ public class BestScore implements Comparable<BestScore> {
     return timestamp;
   }
 
+/*
   public void setCount(int count) {
     this.count = count;
   }
@@ -58,12 +61,16 @@ public class BestScore implements Comparable<BestScore> {
   public int getCount() {
     return count;
   }
+*/
 
   public String toCSV() {
 //    SimpleDateFormat df = new SimpleDateFormat("MM-dd-yy HH:mm:ss");
 //    String s = df.format(timestamp) + ",";
-    String s = "";
-    return getId() + "," + s + timestamp + "," + count + "," + pronScore;
+    //String s = "";
+    return getId() + "," + //s +
+        timestamp + "," +
+        //count + "," +
+        pronScore;
   }
 
   public String getId() {
