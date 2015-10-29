@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.analysis.PhoneReport;
+import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserExercise;
@@ -75,7 +76,7 @@ public interface LangTestDatabase extends RemoteService {
 
   Map<User, Integer> getUserToResultCount();
 
-  Collection<User> getUsersWithRecordings();
+  Collection<UserInfo> getUsersWithRecordings();
 
   Map<Integer, Integer> getResultCountToCount();
 
