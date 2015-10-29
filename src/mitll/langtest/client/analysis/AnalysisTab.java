@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordScore;
 
@@ -24,6 +25,7 @@ public class AnalysisTab extends DivWidget {
    * @param controller
    * @param userid
    * @see Navigation#showAnalysis()
+   * @see UserContainer#gotClickOnItem(User)
    */
   public AnalysisTab(final LangTestDatabaseAsync service, final ExerciseController controller, final int userid,
                      final ShowTab showTab) {
