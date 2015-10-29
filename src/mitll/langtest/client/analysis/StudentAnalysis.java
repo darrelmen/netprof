@@ -5,6 +5,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.analysis.UserInfo;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,21 +20,22 @@ public class StudentAnalysis extends DivWidget {
 
   public StudentAnalysis(final LangTestDatabaseAsync service, final ExerciseController controller,
                          final ShowTab showTab) {
-    service.getUsersWithRecordings(new AsyncCallback<Collection<User>>() {
+    service.getUsersWithRecordings(new AsyncCallback<Collection<UserInfo>>() {
       @Override
       public void onFailure(Throwable throwable) {
         logger.warning("Got " + throwable);
       }
 
       @Override
-      public void onSuccess(Collection<User> users) {
+      public void onSuccess(Collection<UserInfo> users) {
 //        logger.info("got users num =  " + users.size());
         DivWidget rightSide = new DivWidget();
         UserContainer userContainer = new UserContainer(service, controller, rightSide, showTab);
-        List<User> filtered = new ArrayList<User>();
-        for (User user : users) {
+        List<UserInfo> filtered = new ArrayList<UserInfo>();
+        for (UserInfo userInfo : users) {
+          User user = userInfo.getUser();
           if (user != null && user.getUserID() != null && !user.getUserID().equals("defectDetector")) {
-            filtered.add(user);
+            filtered.add(userInfo);
           }
           else {
             logger.warning("skip " + user);
