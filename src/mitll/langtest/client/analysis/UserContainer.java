@@ -21,7 +21,7 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.analysis.UserInfo;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -32,7 +32,8 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 10/20/15.
  */
-class UserContainer extends SimplePagingContainer<User> {
+class UserContainer extends SimplePagingContainer<UserInfo> {
+  public static final int TABLE_WIDTH = 440;
   private final Logger logger = Logger.getLogger("UserContainer");
 
   //private static final int TABLE_HISTORY_WIDTH = 420;
@@ -58,22 +59,20 @@ class UserContainer extends SimplePagingContainer<User> {
    * @return
    * @see StudentAnalysis#StudentAnalysis
    */
-  public Panel getTableWithPager(final Collection<User> users) {
+  public Panel getTableWithPager(final Collection<UserInfo> users) {
     Panel tableWithPager = getTableWithPager();
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeft");
 
-//    Collections.sort(users, new Comparator<User>() {
-//    });
-    for (User User : users) {
-      addItem(User);
+    for (UserInfo user : users) {
+      addItem(user);
     }
     flush();
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         if (!users.isEmpty()) {
-          User next = users.iterator().next();
+          UserInfo next = users.iterator().next();
           table.getSelectionModel().setSelected(next, true);
           gotClickOnItem(next);
         }
@@ -85,12 +84,12 @@ class UserContainer extends SimplePagingContainer<User> {
 
   @Override
   protected void setMaxWidth() {
-    table.getElement().getStyle().setProperty("maxWidth", 320 + "px");
+    table.getElement().getStyle().setProperty("maxWidth", TABLE_WIDTH + "px");
   }
 
   @Override
   protected void addSelectionModel() {
-    selectionModel = new SingleSelectionModel<User>();
+    selectionModel = new SingleSelectionModel<UserInfo>();
     table.setSelectionModel(selectionModel);
   }
 
@@ -101,31 +100,34 @@ class UserContainer extends SimplePagingContainer<User> {
     return o;
   }
 
+/*
   private void addReview() {
-    Column<User, SafeHtml> userCol = getUserColumn();
+    Column<UserInfo, SafeHtml> userCol = getUserColumn();
     userCol.setSortable(true);
     table.setColumnWidth(userCol, 140 + "px");
     addColumn(userCol, new TextHeader("Students"));
-    ColumnSortEvent.ListHandler<User> columnSortHandler = getUserSorter(userCol, getList());
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = getUserSorter(userCol, getList());
     table.addColumnSortHandler(columnSortHandler);
 
-    Column<User, SafeHtml> dateCol = getDateColumn();
+    Column<UserInfo, SafeHtml> dateCol = getDateColumn();
     dateCol.setSortable(true);
-    // table.setColumnWidth(userCol, 300 + "px");
     addColumn(dateCol, new TextHeader("Signed Up At"));
+    table.setColumnWidth(dateCol, 140 + "px");
 
-    ColumnSortEvent.ListHandler<User> date = getDateSorter(dateCol, getList());
+    ColumnSortEvent.ListHandler<UserInfo> date = getDateSorter(dateCol, getList());
+
     table.addColumnSortHandler(date);
 
     table.setWidth("100%", true);
   }
+*/
 
-  private ColumnSortEvent.ListHandler<User> getUserSorter(Column<User, SafeHtml> englishCol,
-                                                          List<User> dataList) {
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+  private ColumnSortEvent.ListHandler<UserInfo> getUserSorter(Column<UserInfo, SafeHtml> englishCol,
+                                                          List<UserInfo> dataList) {
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
     columnSortHandler.setComparator(englishCol,
-        new Comparator<User>() {
-          public int compare(User o1, User o2) {
+        new Comparator<UserInfo>() {
+          public int compare(UserInfo o1, UserInfo o2) {
             if (o1 == o2) {
               return 0;
             }
@@ -143,12 +145,12 @@ class UserContainer extends SimplePagingContainer<User> {
     return columnSortHandler;
   }
 
-  private ColumnSortEvent.ListHandler<User> getDateSorter(Column<User, SafeHtml> englishCol,
-                                                          List<User> dataList) {
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+  private ColumnSortEvent.ListHandler<UserInfo> getDateSorter(Column<UserInfo, SafeHtml> englishCol,
+                                                          List<UserInfo> dataList) {
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
     columnSortHandler.setComparator(englishCol,
-        new Comparator<User>() {
-          public int compare(User o1, User o2) {
+        new Comparator<UserInfo>() {
+          public int compare(UserInfo o1, UserInfo o2) {
             if (o1 == o2) {
               return 0;
             }
@@ -207,33 +209,47 @@ class UserContainer extends SimplePagingContainer<User> {
 
   @Override
   protected void addColumnsToTable() {
-    addReview();
+    Column<UserInfo, SafeHtml> userCol = getUserColumn();
+    userCol.setSortable(true);
+    table.setColumnWidth(userCol, 140 + "px");
+    addColumn(userCol, new TextHeader("Students"));
+    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = getUserSorter(userCol, getList());
+    table.addColumnSortHandler(columnSortHandler);
 
-/*
-    Column<User, SafeHtml> scoreColumn = getScoreColumn();
-    table.addColumn(scoreColumn, "Score");
+    Column<UserInfo, SafeHtml> dateCol = getDateColumn();
+    dateCol.setSortable(true);
+    addColumn(dateCol, new TextHeader("Signed Up At"));
+    table.setColumnWidth(dateCol, 150 + "px");
 
-    scoreColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-    scoreColumn.setSortable(true);
-    table.setColumnWidth(scoreColumn, "70" + "px");
+    Column<UserInfo, SafeHtml> num = getNum();
+    num.setSortable(true);
+    addColumn(num, new TextHeader("#"));
 
-    Column<User, SafeHtml> column = getPlayAudio();
-    table.addColumn(column, "Play");
-    table.setColumnWidth(column, 50 + "px");
+    Column<UserInfo, SafeHtml> start = getStart();
+    start.setSortable(true);
+    addColumn(start, new TextHeader("Initial Score"));
+
+    Column<UserInfo, SafeHtml> current = getCurrent();
+    current.setSortable(true);
+    addColumn(current, new TextHeader("Current"));
+
+    Column<UserInfo, SafeHtml> diff = getDiff();
+    diff.setSortable(true);
+    addColumn(diff, new TextHeader("Diff"));
+
+    ColumnSortEvent.ListHandler<UserInfo> date = getDateSorter(dateCol, getList());
+
+    table.addColumnSortHandler(date);
 
     table.setWidth("100%", true);
-
-    ColumnSortEvent.ListHandler<User> columnSortHandler2 = getScoreSorter(scoreColumn, getList());
-    table.addColumnSortHandler(columnSortHandler2);
-*/
 
     new TooltipHelper().addTooltip(table, "Click on a student.");
   }
 
-  private Column<User, SafeHtml> getUserColumn() {
-    return new Column<User, SafeHtml>(new PagingContainer.ClickableCell()) {
+  private Column<UserInfo, SafeHtml> getUserColumn() {
+    return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, User object, NativeEvent event) {
+      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
         if (BrowserEvents.CLICK.equals(event.getType())) {
           gotClickOnItem(object);
@@ -241,16 +257,16 @@ class UserContainer extends SimplePagingContainer<User> {
       }
 
       @Override
-      public SafeHtml getValue(User shell) {
-        return getSafeHtml(shell.getUserID());
+      public SafeHtml getValue(UserInfo shell) {
+        return getSafeHtml(shell.getUser().getUserID());
       }
     };
   }
 
-  private Column<User, SafeHtml> getDateColumn() {
-    return new Column<User, SafeHtml>(new PagingContainer.ClickableCell()) {
+  private Column<UserInfo, SafeHtml> getDateColumn() {
+    return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, User object, NativeEvent event) {
+      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
         if (BrowserEvents.CLICK.equals(event.getType())) {
           gotClickOnItem(object);
@@ -258,9 +274,9 @@ class UserContainer extends SimplePagingContainer<User> {
       }
 
       @Override
-      public SafeHtml getValue(User shell) {
-        String signedUp = DateTimeFormat.getFormat("MMM d yy h:mm a").format(
-            new Date(shell.getTimestampMillis())
+      public SafeHtml getValue(UserInfo shell) {
+        String signedUp = DateTimeFormat.getFormat("MM d yy").format(
+            new Date(shell.getUser().getTimestampMillis())
         );
 
         return getSafeHtml(signedUp);
@@ -268,9 +284,77 @@ class UserContainer extends SimplePagingContainer<User> {
     };
   }
 
+  private Column<UserInfo, SafeHtml> getStart() {
+    return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        if (BrowserEvents.CLICK.equals(event.getType())) {
+          gotClickOnItem(object);
+        }
+      }
 
-  private void gotClickOnItem(final User user) {
-    AnalysisTab widgets = new AnalysisTab(service, controller, (int) user.getId(), learnTab);
+      @Override
+      public SafeHtml getValue(UserInfo shell) {
+        return getSafeHtml(""+shell.getStart());
+      }
+    };
+  }
+
+  private Column<UserInfo, SafeHtml> getCurrent() {
+    return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        if (BrowserEvents.CLICK.equals(event.getType())) {
+          gotClickOnItem(object);
+        }
+      }
+
+      @Override
+      public SafeHtml getValue(UserInfo shell) {
+        return getSafeHtml(""+shell.getCurrent());
+      }
+    };
+  }
+
+  private Column<UserInfo, SafeHtml> getDiff() {
+    return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        if (BrowserEvents.CLICK.equals(event.getType())) {
+          gotClickOnItem(object);
+        }
+      }
+
+      @Override
+      public SafeHtml getValue(UserInfo shell) {
+        return getSafeHtml(""+shell.getDiff());
+      }
+    };
+  }
+
+  private Column<UserInfo, SafeHtml> getNum() {
+    return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, UserInfo object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        if (BrowserEvents.CLICK.equals(event.getType())) {
+          gotClickOnItem(object);
+        }
+      }
+
+      @Override
+      public SafeHtml getValue(UserInfo shell) {
+        return getSafeHtml(""+shell.getNum());
+      }
+    };
+  }
+
+
+  private void gotClickOnItem(final UserInfo user) {
+    AnalysisTab widgets = new AnalysisTab(service, controller, (int) user.getUser().getId(), learnTab);
     rightSide.clear();
     rightSide.add(widgets);
   }
