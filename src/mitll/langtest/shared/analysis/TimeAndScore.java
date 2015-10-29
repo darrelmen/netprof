@@ -15,7 +15,7 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
 
   private long timestamp;
   private float score;
-  private int count = 0;
+ // private int count = 0;
   private float cumulativeAverage;
 //  private boolean isIPad;
 
@@ -28,7 +28,7 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
     this.id = bs.getId();
     timestamp = bs.getTimestamp();
     score = bs.getScore();
-    count = bs.getCount();
+   // count = bs.getCount();
   //  isIPad = bs.isiPad();
     this.cumulativeAverage = cumulativeAverage;
   }
@@ -57,13 +57,17 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
     return score;
   }
 
+/*
   public int getCount() {
     return count;
   }
+*/
 
   public String toString() {
     String format = getTimeString();
-    return id + " at " + format + " avg score for " + count + "\t=\t" + score +"\t"+ getCumulativeAverage();
+    return id + " at " + format + " avg score for " +
+        //count + "\t" +
+        "=\t" + score +"\t"+ getCumulativeAverage();
   }
 
   private String getTimeString() {
@@ -71,7 +75,9 @@ public class TimeAndScore implements Serializable,Comparable<TimeAndScore>{
   }
 
   public String toCSV() {
-    return getTimeString() + "," + count + "," + score +","+ getCumulativeAverage();
+    return getTimeString() +
+        //"," + count +
+        "," + score +","+ getCumulativeAverage();
   }
 
   @Override
