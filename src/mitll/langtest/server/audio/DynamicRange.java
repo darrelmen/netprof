@@ -61,8 +61,8 @@ public class DynamicRange {
   private static final Logger logger = Logger.getLogger(DynamicRange.class);
   private static final int MinRecordLength = (10000 / 2); // 10000 = 0.7 second
   private static final int WinSize = 10;
-  private static final float PowerThreshold = -79.50f;//-55.0f;
-  private static final float VarianceThreshold = 20.0f;
+  private static final double PowerThreshold = -79.50f;//-55.0f;
+  private static final double VarianceThreshold = 20.0f;
   private static final double CLIPPED_RATIO = 0.005; // 1/2 %
   private static final double LOG_OF_TEN = Math.log(10.0);
 
@@ -71,7 +71,7 @@ public class DynamicRange {
   private static final short ct = 32112;
   // private static final short clippedThreshold2 = 32752; // 32768-16
   // private static final short clippedThreshold2Minus = -32752; // 32768-16
-  private static final float MAX_VALUE = 32768.0f;
+  private static final double MAX_VALUE = 32768.0f;
 
   private double dB(double power) {
     return 20.0 * Math.log(power < 0.0001f ? 0.0001f : power) / LOG_OF_TEN;
@@ -140,26 +140,26 @@ public class DynamicRange {
       assert (format.getChannels() == 1);
 
       // frames per second
-      float frameRate = format.getFrameRate();
-      float secPerFrame = 1f / frameRate;
+      double frameRate = format.getFrameRate();
+      double secPerFrame = 1d / frameRate;
 
       logger.info(" frameRate" + frameRate);
       logger.info(" secPerFrame" + secPerFrame);
       logger.info(" fsize" + fsize);
 
       short window = Double.valueOf(Math.floor(.05f / secPerFrame)).shortValue();
-      short slide = Double.valueOf(Math.floor((float) window / 10f)).shortValue();
+      short slide  = Double.valueOf(Math.floor((double) window / 10f)).shortValue();
 
       //     int a = 1;
 //      int o = a + window;
 
-      float minrms = 1;
-      float maxrms = 0;
+      double minrms = 1;
+      double maxrms = 0;
 
 //      long frameLength = ais.getFrameLength();
 
       // Verify audio power
-      //  float pm = 0.0f, p2 = 0.0f, n = 0.0f;
+      //  double pm = 0.0f, p2 = 0.0f, n = 0.0f;
       int bufSize = WinSize * fsize;
       //   int bufSize = window * fsize;
       byte[] buf = new byte[bufSize];
@@ -172,18 +172,18 @@ public class DynamicRange {
       short minSample = Short.MAX_VALUE;
       short maxSample = Short.MIN_VALUE;
 
-      //float[] samples = new float[bufSize / 2];
+      //double[] samples = new double[bufSize / 2];
 
       int first = 0;
       int last = 0;
       int windowCount = 0;
 
-      float firstTotal = 0;
-      //float firstTotalCopy = 0;
-      float lastTotal = 0;
-      float windowTotal = 0;
+      double firstTotal = 0;
+      //double firstTotalCopy = 0;
+      double lastTotal = 0;
+      double windowTotal = 0;
       int lastStart = window - slide;
-      float allTotal = 0;
+      double allTotal = 0;
       int allCount = 0;
       int sIndex = 0;
       boolean valid = true;
@@ -204,14 +204,15 @@ public class DynamicRange {
             if (tmp < minSample) minSample = tmp;
             if (tmp > maxSample) maxSample = tmp;
 
-            float r = ((float) tmp) / MAX_VALUE;
+            double r = ((double) tmp) / MAX_VALUE;
             sIndex++;
             //        samples[sIndex++] = tmp;
-            float squared = r * r;
+            double squared = r * r;
 
             allTotal += squared;
             allCount++;
 
+            // TODO : DUDE - don't do this - how can you be adding two both front and back at the same time????
             if (first < slide) {
               firstTotal += squared;
               first++;
@@ -224,7 +225,9 @@ public class DynamicRange {
             windowTotal += squared;
             windowCount++;
 
-            if (first == slide && last == slide) {
+            // GAH - check last separate of first...
+            if (first == slide// && last == slide
+                ) {
               double fres = srms(firstTotal, slide);
               if (fres < 0.000032) { // start over
                 logger.info("start over first");
@@ -240,11 +243,11 @@ public class DynamicRange {
                     logger.warn("huh? windowCount " + windowCount + " vs " + window);
                   }
 
-                  double res = srms(windowTotal, (float) windowCount);
+                  double res = srms(windowTotal, (double) windowCount);
                   //logger.info("c " + c + " " + sIndex + " res " + res + " total " + windowTotal + " " + windowCount);
 
-                  if (res > maxrms) maxrms = (float) res;
-                  else if (res < minrms) minrms = (float) res;
+                  if (res > maxrms) maxrms = res;
+                  else if (res < minrms) minrms = res;
                 }
               }
 
@@ -312,7 +315,7 @@ public class DynamicRange {
     return Math.sqrt(rms / len);
   }
 
-  private double srms(float rms, float len) {
+  private double srms(double rms, double len) {
     return Math.sqrt(rms / len);
   }
 
@@ -338,9 +341,9 @@ public class DynamicRange {
   }
 
   public static class RMSInfo {
-    float maxMin;
+    double maxMin;
     int max, min;
-    float totalRMS, minRMS, maxRMS;
+    double totalRMS, minRMS, maxRMS;
 
     public RMSInfo() {
     }
