@@ -1,5 +1,6 @@
 package mitll.langtest.server.database.analysis;
 
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.*;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.User;
@@ -63,8 +64,13 @@ public class Analysis extends DAO {
       List<UserInfo> userInfos = new ArrayList<>();
       for (Map.Entry<Long, UserInfo> pair : best.entrySet()) {
         User user = userMap.get(pair.getKey());
-        pair.getValue().setUser(user);
-        userInfos.add(pair.getValue());
+        if (user == null) {
+          logger.warn("huh? no user for " + pair.getKey());
+        }
+        else {
+          pair.getValue().setUser(user);
+          userInfos.add(pair.getValue());
+        }
       }
       Collections.sort(userInfos, new Comparator<UserInfo>() {
         @Override
@@ -345,7 +351,7 @@ public class Analysis extends DAO {
       boolean isiPad = device != null && device.startsWith("i");
       long time = timestamp.getTime();
 
-      results.add(new BestScore(exid, pronScore, time, id, json, isiPad, path));
+      results.add(new BestScore(exid, pronScore, time, id, json, isiPad, trimPathForWebPage(path)));
 
      /*
       if ((last != null && !last.equals(exid)) || (lastTimestamp > 0 && time - lastTimestamp > FIVE_MINUTES)) {
@@ -411,6 +417,11 @@ public class Analysis extends DAO {
     return (int) Math.ceil(100 * total / size);
   }
 */
+
+  private String trimPathForWebPage(String path) {
+    int answer = path.indexOf(PathHelper.ANSWERS);
+    return (answer == -1) ? path : path.substring(answer);
+  }
 
   /**
    * TODO : why do we parse json when we could just get it out of word and phone tables????
