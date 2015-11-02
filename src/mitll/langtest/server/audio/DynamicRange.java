@@ -125,11 +125,11 @@ public class DynamicRange {
   public RMSInfo getDynamicRange(File file) {
     AudioInputStream ais = null;
     try {
-      logger.info("opening " + file.getName());
+//      logger.info("opening " + file.getName());
 
       ais = AudioSystem.getAudioInputStream(file);
       AudioFormat format = ais.getFormat();
-      logger.info("file " + file.getName() + " sample rate " + format.getSampleRate());
+  //    logger.info("file " + file.getName() + " sample rate " + format.getSampleRate());
 
       boolean bigEndian = format.isBigEndian();
       if (bigEndian) {
@@ -143,77 +143,63 @@ public class DynamicRange {
       double frameRate = format.getFrameRate();
       double secPerFrame = 1d / frameRate;
 
-      logger.info(" frameRate" + frameRate);
-      logger.info(" secPerFrame" + secPerFrame);
-      logger.info(" fsize" + fsize);
+//      logger.info(" frameRate" + frameRate);
+//      logger.info(" secPerFrame" + secPerFrame);
+   //   logger.info(" fsize" + fsize);
 
       double floor = Math.floor(.05f / secPerFrame);
-      logger.info("floor " + floor);
       double actualFloor = Math.ceil(floor / 10) * 10;
-      logger.info("10x floor " + actualFloor);
       int window = Double.valueOf(actualFloor).shortValue();
-     // int window = Double.valueOf(floor).shortValue();
 
       int numBufs = 10;
-     // window *= numBufs;
-     // logger.info("10x " + window);
-     // window /= numBufs;
-      logger.info("after 10x " + window);
+      int slide = window / numBufs;
 
-      int slide = window/ numBufs;
-
-      double [] bufs = new double[numBufs];
+      double[] bufs = new double[numBufs];
       int currentBuf = 0;
-
-//      short slide  = Double.valueOf(Math.floor((double) window / 10f)).shortValue();
-      //     int a = 1;
-//      int o = a + window;
 
       double minrms = 1;
       double maxrms = 0;
 
-//      long frameLength = ais.getFrameLength();
-      int bufSize = WinSize * fsize;
-      //   int bufSize = window * fsize;
+      int bufSize = 4096;//WinSize * fsize;
       byte[] buf = new byte[bufSize];
 
       short minSample = Short.MAX_VALUE;
       short maxSample = Short.MIN_VALUE;
-      //double[] samples = new double[bufSize / 2];
 
-      int first = 0;
-      int last = 0;
       int windowCount = 0;
 
-      double firstTotal = 0;
-      //double firstTotalCopy = 0;
       double lastTotal = 0;
       double windowTotal = 0;
       int lastStart = window - slide;
       double allTotal = 0;
       int allCount = 0;
       int sIndex = 0;
-  //    boolean valid = true;
 
-      logger.info("bufSize " + bufSize);
-      logger.info("fsize " + fsize);
-      logger.info("slide " + slide);
-      logger.info("window " + window);
-      logger.info("lastStart " + lastStart);
+//      logger.info("bufSize " + bufSize);
+//      logger.info("fsize " + fsize);
+//      logger.info("slide " + slide);
+//      logger.info("window " + window);
+//      logger.info("lastStart " + lastStart);
       int c = 0;
-      while (ais.read(buf) == bufSize) {
+      int charsRead;
+      while ((charsRead = ais.read(buf)) != -1) {
         c++;
-        for (int i = 0; i < bufSize; i += fsize)
+        for (int i = 0; i < charsRead; i += fsize)
           for (int s = 0; s < fsize; s += 2) {
             // short tmp = (short) ((buf[i + s] << 8) | buf[i + s + 1]); // BIG ENDIAN
-            short tmp = (short) ((buf[i + s] & 0xFF) | (buf[i + s + 1] << 8)); // LITTLE ENDIAN
+            byte firstByte  = buf[i + s];
+            byte secondByte = buf[i + s + 1];
+            short tmp = (short) ((firstByte & 0xFF) | (secondByte << 8)); // LITTLE ENDIAN
 
-            if (tmp < minSample) minSample = tmp;
+            if (tmp < minSample) {
+              minSample = tmp;
+              //logger.info("c : at " + sIndex + "\tnow\t" + minSample + " at i " + i + " s " + s + " i + s " + (i+s) + " f\t" + firstByte + " s\t" + secondByte + " second shifted\t" + (secondByte << 8) );
+            }
             if (tmp > maxSample) maxSample = tmp;
 
             double r = ((double) tmp) / MAX_VALUE;
 
-            int bufIndex = sIndex/slide;
+            int bufIndex = sIndex / slide;
             bufIndex = bufIndex % numBufs;
 
             double squared = r * r;
@@ -225,7 +211,6 @@ public class DynamicRange {
 
             if (sIndex > lastStart) {
               lastTotal += squared;
-              //last++;
             }
 
             windowTotal += squared;
@@ -243,8 +228,7 @@ public class DynamicRange {
 
                 if (fres < 0.000032) { // start over
                   logger.info("start over first ----------> ");
-                }
-                else {
+                } else {
                   double lres = srms(lastTotal, slide);
                   lastTotal = 0;
                   if (lres < 0.000032) { // start over
@@ -260,55 +244,43 @@ public class DynamicRange {
                     }
                     if (res > maxrms) maxrms = res;
                     else if (res < minrms) minrms = res;
-
-                    //if (sIndex > 5000) return null;
                   }
                 }
 
                 windowTotal -= currTotal;
-               // logger.info("before current " + currentBuf);
-
                 bufs[currentBuf] = 0; // we've checked this total, now get ready to use it again
                 currentBuf = (currentBuf + 1) % numBufs;
-
-               // logger.info("after current " + currentBuf);
-              }
-              else {
+              } else {
                 //logger.info("skip " +sIndex);
               }
             }
           }
       }
 
-      logger.info("did " + c);
-      DecimalFormat decimalFormat = new DecimalFormat("##.##");
+     // logger.info("did " + c);
+   //   DecimalFormat decimalFormat = new DecimalFormat("##.##");
 
-      logger.info("maxrms:\t" + maxrms);
-
-      logger.info("minrms:\t" + minrms);
-      logger.info("allTotal:\t" + allTotal);
-
-      logger.info("allCount:\t" + allCount);
+//      logger.info("maxrms:\t" + maxrms);
+//      logger.info("minrms:\t" + minrms);
+//      logger.info("allTotal:\t" + allTotal);
+//      logger.info("allCount:\t" + allCount);
 
       double range = 20 * Math.log10(maxrms) - 20 * Math.log10(minrms);
-
       double totalRMS = 20 * Math.log10(srms(allTotal, allCount));
       double minRMS = 20 * Math.log10(minrms);
       double maxRMS = 20 * Math.log10(maxrms);
 
-      logger.info("Max-Min Range:\t" + decimalFormat.format(range) + "dB");
+//      logger.info("Max-Min Range:\t" + decimalFormat.format(range) + "dB");
+//      logger.info("Maximum Sample Value:\t" + maxSample);
+//      logger.info("Minimum Sample Value:\t" + minSample);
+//      logger.info("Total RMS Value:\t" + decimalFormat.format(totalRMS) + "dBFS");
+//      logger.info("Minimum RMS Value:\t" + decimalFormat.format(minRMS) + "dBFS");
+//      logger.info("Maximum RMS Value:\t" + decimalFormat.format(maxRMS) + "dBFS");
 
-      logger.info("Maximum Sample Value:\t" +
-              maxSample
-      );
-      logger.info("Minimum Sample Value:\t" + minSample);
+      RMSInfo rmsInfo = new RMSInfo(range, maxSample, minSample, totalRMS, minRMS, maxRMS);
 
-      logger.info("Total RMS Value:\t" + decimalFormat.format(totalRMS) + "dBFS");
-      logger.info("Minimum RMS Value:\t" + decimalFormat.format(minRMS) + "dBFS");
-      logger.info("Maximum RMS Value:\t" + decimalFormat.format(maxRMS) + "dBFS");
-
-
-      return new RMSInfo();
+      logger.info("got\n" + rmsInfo);
+      return rmsInfo;
     } catch (Exception e) {
       logger.error("Got " + e, e);
     } finally {
@@ -321,59 +293,37 @@ public class DynamicRange {
     return null;
   }
 
-  private double rms(short[] samples) {
-    double rms = 0;
-    double len = samples.length;
-    for (short sample : samples) {
-      double fsample = (double) sample;
-      rms += (fsample * fsample);
-    }
-
-    return Math.sqrt(rms / len);
-  }
-
   private double srms(double rms, double len) {
     return Math.sqrt(rms / len);
-  }
-
-  private short max(short[] samples) {
-    short max = Short.MIN_VALUE;
-
-    for (short sample : samples) {
-      if (sample > max) max = sample;
-    }
-
-    return max;
-  }
-
-
-  private short min(short[] samples) {
-    short min = Short.MAX_VALUE;
-
-    for (short sample : samples) {
-      if (sample < min) min = sample;
-    }
-
-    return min;
   }
 
   public static class RMSInfo {
     double maxMin;
     int max, min;
     double totalRMS, minRMS, maxRMS;
+    DecimalFormat decimalFormat = new DecimalFormat("##.##");
 
-    public RMSInfo() {
+    public RMSInfo(double maxMin, int max, int min, double totalRMS, double minRMS, double maxRMS) {
+      this.maxMin = maxMin;
+      this.max = max;
+      this.min = min;
+      this.totalRMS = totalRMS;
+      this.minRMS = minRMS;
+      this.maxRMS = maxRMS;
     }
 
     public String toString() {
       return "Max-Min Range:\t" +
-          "55.00dB" +
-          "\n" +
-          "Maximum Sample Value:\t14060\n" +
-          "Minimum Sample Value:\t-15087\n" +
-          "Total RMS Value:\t-24.03dBFS\n" +
-          "Minimum RMS Value:\t-69.26dBFS\n" +
-          "Maximum RMS Value:\t-14.26dBFS";
+          format(maxMin) +"dB" +    "\n" +
+          "Maximum Sample Value:\t" + max + "\n" +
+          "Minimum Sample Value:\t" + min + "\n" +
+          "Total RMS Value:\t" + format(totalRMS) + "dBFS\n" +
+          "Minimum RMS Value:\t" + format(minRMS) + "dBFS" +   "\n" +
+          "Maximum RMS Value:\t" + format(maxRMS) + "dBFS";
+    }
+
+    private String format(double maxMin) {
+      return decimalFormat.format(maxMin);
     }
   }
 }
