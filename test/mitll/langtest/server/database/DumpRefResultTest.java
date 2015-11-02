@@ -63,7 +63,16 @@ public class DumpRefResultTest {
 
       try {
         BufferedWriter writer = getWriter(db + ".csv");
-        writer.write("id,exid,hydraDecode,hydraAlign,hydecDecode,hydecAlign,speed,path\n");
+        writer.write("id,exid," +
+            "hydraDecode," +
+            "hydraDecodeDur," +
+            "hydraAlign," +
+            "hydraAlignDur," +
+            "hydecDecode," +
+            "hydecDecodeDur," +
+            "hydecAlign," +
+            "hydecAlignDur," +
+            "speed,path\n");
         getResults(connection, writer);
         writer.close();
       } catch (IOException e) {
@@ -91,7 +100,7 @@ public class DumpRefResultTest {
     Connection connection = h2.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
 
-      logger.debug("running " + sql );
+    logger.debug("running " + sql );
     return getResultsForQuery(connection, statement, writer);
   }
 
@@ -105,15 +114,31 @@ public class DumpRefResultTest {
       String exID = rs.getString(Database.EXID);
 
       float pronScore = rs.getFloat(ResultDAO.PRON_SCORE);
+      long hydraDecodeDur = rs.getLong(RefResultDAO.DECODE_PROCESS_DUR);
       float alignScore = rs.getFloat(RefResultDAO.ALIGNSCORE);
+      long hydraAlignDur = rs.getLong(RefResultDAO.ALIGN_PROCESS_DUR);
 
       float hpronScore = rs.getFloat(RefResultDAO.HYDEC_DECODE_PRON_SCORE);
+      long hydecDecodeDur = rs.getLong(RefResultDAO.HYDEC_DECODE_PROCESS_DUR);
+
       float halignScore = rs.getFloat(RefResultDAO.HYDEC_ALIGN_PRON_SCORE);
+      long hydecAlignDur = rs.getLong(RefResultDAO.HYDEC_ALIGN_PROCESS_DUR);
+
       String path = rs.getString(ResultDAO.ANSWER);
       String speed = rs.getString(RefResultDAO.SPEED);
 
-      writer.write(uniqueID + "," + exID+","+pronScore + "," + alignScore + "," + hpronScore + "," + halignScore+
-          ","+speed+
+      writer.write(uniqueID + "," + exID+","+
+          pronScore + "," +
+          hydraDecodeDur + "," +
+          alignScore + "," +
+          hydraAlignDur + "," +
+
+          hpronScore + "," +
+          hydecDecodeDur + "," +
+
+          halignScore+ ","+
+          hydecAlignDur + "," +
+          speed+
           ","+path+
           "\n");
       i++;
