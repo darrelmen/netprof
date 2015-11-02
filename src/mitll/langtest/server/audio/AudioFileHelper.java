@@ -177,7 +177,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
     if (diff > 20) {
       logger.debug("took " + diff + " millis to write wav file " + validity.durationInMillis + " millis long");
     }
-    boolean isValid = validity.validity == AudioAnswer.Validity.OK || (serverProps.isQuietAudioOK() && validity.validity == AudioAnswer.Validity.TOO_QUIET);
+    boolean isValid = validity.getValidity() == AudioAnswer.Validity.OK || (serverProps.isQuietAudioOK() && validity.getValidity() == AudioAnswer.Validity.TOO_QUIET);
     return getAudioAnswerDecoding(exerciseID, exercise1, questionID, user, reqid, audioType, doFlashcard, recordInResults,
         recordedWithFlash, wavPath, file, validity, isValid
         , deviceType, device,
@@ -206,8 +206,8 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
     String audioType = doFlashcard ? "flashcard" : "learn";
     AudioCheck.ValidityAndDur validity = new AudioConversion().isValid(file, false);
     boolean isValid =
-        validity.validity == AudioAnswer.Validity.OK ||
-            (serverProps.isQuietAudioOK() && validity.validity == AudioAnswer.Validity.TOO_QUIET);
+        validity.getValidity() == AudioAnswer.Validity.OK ||
+            (serverProps.isQuietAudioOK() && validity.getValidity() == AudioAnswer.Validity.TOO_QUIET);
 
     return doFlashcard ?
         getAudioAnswerDecoding(exerciseID, exercise1, 0, user, reqid, audioType, doFlashcard, true, true, wavPath, file,
@@ -295,7 +295,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    *
    * @param exercise
    * @param attribute
-   * @see mitll.langtest.server.RefResultDecoder#doDecode
+   * @see mitll.langtest.server.decoder.RefResultDecoder#doDecode
    */
   public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute) {
     if (isInDictOrLTS(exercise)) {
@@ -466,7 +466,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
         getAudioAnswer(
             exercise1,
             reqid, file, validity, url, doFlashcard, canUseCache, allowAlternates, useOldSchool) :
-        new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
+        new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
   }
 
   /**
@@ -543,7 +543,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
     AudioCheck.ValidityAndDur validity = new AudioConversion().convertBase64ToAudioFiles(base64EncodedString, file, false);
     //logger.debug("writing to " + file.getAbsolutePath() + " answer " + audioAnswer);
     return new AudioAnswer(pathHelper.ensureForwardSlashes(pathHelper.getWavPathUnder(POSTED_AUDIO)),
-        validity.validity, reqid, validity.durationInMillis);
+        validity.getValidity(), reqid, validity.durationInMillis);
   }
 
   @Override
@@ -751,7 +751,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
                                      int reqid,
                                      File file, AudioCheck.ValidityAndDur validity, String url, boolean doFlashcard,
                                      boolean canUseCache, boolean allowAlternates, boolean useOldSchool) {
-    AudioAnswer audioAnswer = new AudioAnswer(url, validity.validity, reqid, validity.durationInMillis);
+    AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
     if (doFlashcard) {
       makeASRScoring();
       PretestScore flashcardAnswer = autoCRT.getFlashcardAnswer(exercise, file, audioAnswer, serverProps.getLanguage(),
