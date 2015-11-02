@@ -147,9 +147,25 @@ public class DynamicRange {
       logger.info(" secPerFrame" + secPerFrame);
       logger.info(" fsize" + fsize);
 
-      short window = Double.valueOf(Math.floor(.05f / secPerFrame)).shortValue();
-      short slide  = Double.valueOf(Math.floor((double) window / 10f)).shortValue();
+      double floor = Math.floor(.05f / secPerFrame);
+      logger.info("floor " + floor);
+      double actualFloor = Math.ceil(floor / 10) * 10;
+      logger.info("10x floor " + actualFloor);
+      int window = Double.valueOf(actualFloor).shortValue();
+     // int window = Double.valueOf(floor).shortValue();
 
+      int numBufs = 10;
+     // window *= numBufs;
+     // logger.info("10x " + window);
+     // window /= numBufs;
+      logger.info("after 10x " + window);
+
+      int slide = window/ numBufs;
+
+      double [] bufs = new double[numBufs];
+      int currentBuf = 0;
+
+//      short slide  = Double.valueOf(Math.floor((double) window / 10f)).shortValue();
       //     int a = 1;
 //      int o = a + window;
 
@@ -157,21 +173,12 @@ public class DynamicRange {
       double maxrms = 0;
 
 //      long frameLength = ais.getFrameLength();
-
-      // Verify audio power
-      //  double pm = 0.0f, p2 = 0.0f, n = 0.0f;
       int bufSize = WinSize * fsize;
       //   int bufSize = window * fsize;
       byte[] buf = new byte[bufSize];
-      //   int countClipped = 0;
-      //    int cc = 0;
-//
-      //short max = 0;
-      //short nmax = 0;
 
       short minSample = Short.MAX_VALUE;
       short maxSample = Short.MIN_VALUE;
-
       //double[] samples = new double[bufSize / 2];
 
       int first = 0;
@@ -186,7 +193,7 @@ public class DynamicRange {
       double allTotal = 0;
       int allCount = 0;
       int sIndex = 0;
-      boolean valid = true;
+  //    boolean valid = true;
 
       logger.info("bufSize " + bufSize);
       logger.info("fsize " + fsize);
@@ -205,60 +212,70 @@ public class DynamicRange {
             if (tmp > maxSample) maxSample = tmp;
 
             double r = ((double) tmp) / MAX_VALUE;
-            sIndex++;
-            //        samples[sIndex++] = tmp;
+
+            int bufIndex = sIndex/slide;
+            bufIndex = bufIndex % numBufs;
+
             double squared = r * r;
 
             allTotal += squared;
             allCount++;
 
-            // TODO : DUDE - don't do this - how can you be adding two both front and back at the same time????
-            if (first < slide) {
-              firstTotal += squared;
-              first++;
-            }
-            if (windowCount > lastStart) {
+            bufs[bufIndex] += squared;
+
+            if (sIndex > lastStart) {
               lastTotal += squared;
-              last++;
+              //last++;
             }
 
             windowTotal += squared;
             windowCount++;
 
-            // GAH - check last separate of first...
-            if (first == slide// && last == slide
-                ) {
-              double fres = srms(firstTotal, slide);
-              if (fres < 0.000032) { // start over
-                logger.info("start over first");
-              } else {
-                //logger.info(c + " first res " + fres + " total " + firstTotal);
-                double lres = srms(lastTotal, slide);
-                if (lres < 0.000032) { // start over
-                  logger.info("start over last");
-                } else {
-//                  logger.info("last res " + lres);
-                  if (windowCount != window) {
-                    if (c < 100)
-                    logger.warn("huh? windowCount " + windowCount + " vs " + window);
-                  }
+            sIndex++;
 
-                  double res = srms(windowTotal, (double) windowCount);
-                  //logger.info("c " + c + " " + sIndex + " res " + res + " total " + windowTotal + " " + windowCount);
+            if (sIndex >= window) {
+              if (sIndex % slide == 0) {
+                double currTotal = bufs[currentBuf];
+                double fres = srms(currTotal, slide);
+//
+//                logger.info("c " + c + " " + sIndex + " fres " + fres + " currTotal " + currTotal +
+//                    " currentBuf " + currentBuf);
 
-                  if (res > maxrms) maxrms = res;
-                  else if (res < minrms) minrms = res;
+                if (fres < 0.000032) { // start over
+                  logger.info("start over first ----------> ");
                 }
+                else {
+                  double lres = srms(lastTotal, slide);
+                  lastTotal = 0;
+                  if (lres < 0.000032) { // start over
+                    logger.info("start over last -------> ");
+                  } else {
+                    double res = srms(windowTotal, window);
+                    if (false) {
+                      logger.info("c " + c + " " + sIndex +
+                          " fres " + fres +
+                          " lres " + lres +
+                          " res " + res + " currTotal " + currTotal +
+                          " currentBuf " + currentBuf + " total " + windowTotal + " " + windowCount + " vs " + window);
+                    }
+                    if (res > maxrms) maxrms = res;
+                    else if (res < minrms) minrms = res;
+
+                    //if (sIndex > 5000) return null;
+                  }
+                }
+
+                windowTotal -= currTotal;
+               // logger.info("before current " + currentBuf);
+
+                bufs[currentBuf] = 0; // we've checked this total, now get ready to use it again
+                currentBuf = (currentBuf + 1) % numBufs;
+
+               // logger.info("after current " + currentBuf);
               }
-
-              windowTotal -= firstTotal;
-              windowCount -= slide;
-
-              firstTotal = 0;
-              first = 0;
-
-              lastTotal = 0;
-              last = 0;
+              else {
+                //logger.info("skip " +sIndex);
+              }
             }
           }
       }
