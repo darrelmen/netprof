@@ -13,41 +13,39 @@ import java.io.InputStreamReader;
  * To change this template use File | Settings | File Templates.
  */
 public class ProcessRunner {
- // private static final Logger logger = Logger.getLogger(ProcessRunner.class);
+  // private static final Logger logger = Logger.getLogger(ProcessRunner.class);
   //private static final boolean SHOW_OUTPUT = true;
 
   public boolean runProcess(ProcessBuilder shellProc) throws IOException {
-    return runProcess(shellProc,false);
+    return runProcess(shellProc, false);
   }
 
-    public boolean runProcess(ProcessBuilder shellProc, boolean showOutput) throws IOException {
-        //logger.debug(new Date() + " : proc " + shellProc.command() + " started...");
+  public boolean runProcess(ProcessBuilder shellProc, boolean showOutput) throws IOException {
+    //logger.debug(new Date() + " : proc " + shellProc.command() + " started...");
+    shellProc.redirectErrorStream(true);
+    Process process2 = shellProc.start();
 
-        shellProc.redirectErrorStream(true);
-        Process process2 = shellProc.start();
+    // read the output
+    InputStream stdout = process2.getInputStream();
+    readFromStream(stdout, showOutput);
+    InputStream errorStream = process2.getErrorStream();
+    readFromStream(errorStream, true);
 
-        // read the output
-        InputStream stdout = process2.getInputStream();
-        readFromStream(stdout, showOutput);
-        InputStream errorStream = process2.getErrorStream();
-        readFromStream(errorStream, true);
-
-        try {
-            int i = process2.waitFor();
-            if (i != 0) {
-                //  log.warning("got exit status " + i + " from " + shellProc.command());
-                return false;
-            }
-            //System.out.println("got " + i + " for " +shellProc);
-        } catch (InterruptedException e) {
-            // log.warning("got " +e);
-
-        }
-
-        process2.destroy();
-        return true;
-        //  System.out.println(new Date() + " : proc " + shellProc.command() + " finished");
+    try {
+      int i = process2.waitFor();
+      if (i != 0) {
+        //  log.warning("got exit status " + i + " from " + shellProc.command());
+        return false;
+      }
+      //System.out.println("got " + i + " for " +shellProc);
+    } catch (InterruptedException e) {
+      // log.warning("got " +e);
     }
+
+    process2.destroy();
+    return true;
+    //  System.out.println(new Date() + " : proc " + shellProc.command() + " finished");
+  }
 
   private void readFromStream(InputStream is2, boolean showOutput) throws IOException {
     InputStreamReader isr2 = new InputStreamReader(is2);
