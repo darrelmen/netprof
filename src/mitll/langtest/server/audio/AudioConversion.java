@@ -12,6 +12,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.*;
+import java.util.List;
 
 /**
  * Does mp3 conversion using a shell call to lame.
@@ -36,8 +37,16 @@ public class AudioConversion {
   private final AudioCheck audioCheck = new AudioCheck();
   private static final boolean DEBUG = false;
 
-//  public AudioConversion() {
-//  }
+  private File tempDir;
+
+  public AudioConversion() {
+    try {
+      tempDir = createTempDirectory();
+    } catch (IOException e) {
+      logger.error("couldn't make temp dir?");
+      //tempDir = null;
+    }
+  }
 
   /**
    * Converts base 64 string into bytes and writes them to a file.
@@ -48,7 +57,7 @@ public class AudioConversion {
    * @param useSensitiveTooLoudCheck
    * @return true if audio is valid (not too short, not silence)
    * @see AudioFileHelper#writeAudioFile(String, String, CommonExercise, int, int, int, String, boolean, boolean, boolean, String, String, boolean, boolean)
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment(String, String, String, int)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment
    */
   public AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString, File file, boolean useSensitiveTooLoudCheck) {
     file.getParentFile().mkdirs();
@@ -125,6 +134,15 @@ public class AudioConversion {
     return removeSuffix(name1);
   }
 
+  public String getHighPassFilterFile(String wavFile) {
+    try {
+      return doHighPassFilter(getSox(), wavFile);
+    } catch (IOException e) {
+      logger.error("Got " + e, e);
+    }
+    return null;
+  }
+
   /**
    * @param wavFile
    * @return
@@ -142,9 +160,8 @@ public class AudioConversion {
       float sampleRate = audioFileFormat.getFormat().getSampleRate();
       if (sampleRate != 16000f) {
         long then = System.currentTimeMillis();
-        String binPath = getBinPath();
         //     String convertTo16KHZ = new AudioConverter().convertTo16KHZ(binPath, wavFile.getAbsolutePath());
-        String convertTo16KHZ = convertTo16KHZ(binPath, wavFile.getAbsolutePath());
+        String convertTo16KHZ = convertTo16KHZ(getBinPath(), wavFile.getAbsolutePath());
         String name1 = wavFile.getName();
         String sampled = wavFile.getParent() + File.separator + removeSuffix(name1) + SIXTEEN_K_SUFFIX + ".wav";
         if (new FileCopier().copy(convertTo16KHZ, sampled)) {
@@ -165,6 +182,13 @@ public class AudioConversion {
     return wavFile;
   }
 
+  /**
+   * @param binPath
+   * @param pathToAudioFile
+   * @return
+   * @throws IOException
+   * @see #convertTo16Khz(File)
+   */
   private String convertTo16KHZ(String binPath, String pathToAudioFile) throws IOException {
     return sampleAt16KHZ(getSox(binPath), pathToAudioFile, createTempDirectory());
   }
@@ -200,6 +224,34 @@ public class AudioConversion {
     }
 
     //   log.info("EXIT running sox on " + tempForWavz + " : " + soxFirst);
+
+    return tempForWavz;
+  }
+
+  private String doHighPassFilter(String soxPath, String pathToAudioFile) throws IOException {
+    final String tempForWavz = tempDir + File.separator + "tempHighPass.wav";
+
+    if (tempDir == null || !tempDir.exists()) {
+      tempDir = createTempDirectory();
+    }
+    boolean exists = tempDir.exists();
+    //log.info("running sox on " + tempForWavz);
+    //sox audio-in audio-out silence 1 0.01 -90d gain -3 highpass 80.0
+
+    ProcessBuilder soxFirst = new ProcessBuilder(
+        soxPath,
+        pathToAudioFile,
+        tempForWavz,
+        "silence", "1", "0.01", "-90d", "gain", "-3", "highpass", "80.0");
+    List<String> command = soxFirst.command();
+    String asRunnable = command.toString().replaceAll(",", " ");
+    boolean b = new ProcessRunner().runProcess(soxFirst);
+    if (!b) {
+      logger.info("Exists " + exists);
+      logger.error("couldn't do high pass filter on " + pathToAudioFile);
+      logger.info("path " + asRunnable);
+    }
+//    logger.info("path " + asRunnable);
 
     return tempForWavz;
   }
