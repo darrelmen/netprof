@@ -43,9 +43,12 @@
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/.settings" />
+      <excludeFolder url="file://$MODULE_DIR$/audio" />
+      <excludeFolder url="file://$MODULE_DIR$/bestAudio" />
       <excludeFolder url="file://$MODULE_DIR$/bogus" />
       <excludeFolder url="file://$MODULE_DIR$/crash" />
       <excludeFolder url="file://$MODULE_DIR$/dbAnalysis" />
+      <excludeFolder url="file://$MODULE_DIR$/egypian" />
       <excludeFolder url="file://$MODULE_DIR$/gwt-unitCache" />
       <excludeFolder url="file://$MODULE_DIR$/imagewriter/bin" />
       <excludeFolder url="file://$MODULE_DIR$/korean" />
@@ -61,24 +64,17 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="gwt" level="project" />
-    <orderEntry type="library" name="lib2" level="project" />
     <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="library" name="lib1" level="project" />
-    <orderEntry type="module" module-name="audioimage" />
     <orderEntry type="module" module-name="imagewriter" />
     <orderEntry type="library" name="org.moxieapps.gwt.highcharts-1.5.0" level="project" />
-    <orderEntry type="library" name="json-lib-2.4-jdk15" level="project" />
     <orderEntry type="library" name="gwt-dev" level="project" />
-    <orderEntry type="library" name="mailapi" level="project" />
-    <orderEntry type="library" name="pronz" level="project" />
-    <orderEntry type="library" name="commons-fileupload-1.2.2 (2)" level="project" />
-    <orderEntry type="library" name="jtransforms-2.3 (2)" level="project" />
     <orderEntry type="library" name="commons-beanutils-1.8.0 (2)" level="project" />
     <orderEntry type="library" name="servlet-api (2)" level="project" />
     <orderEntry type="library" name="servlet-api (2)" level="project" />
     <orderEntry type="library" name="commons-beanutils-1.8.0" level="project" />
     <orderEntry type="library" name="xmlbeans-2.3.0" level="project" />
     <orderEntry type="library" name="org.moxieapps.gwt.highcharts-1.7.0" level="project" />
+    <orderEntry type="module" module-name="Audioimage" />
   </component>
 </module>
