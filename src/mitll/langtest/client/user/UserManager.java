@@ -139,7 +139,8 @@ public class UserManager {
 //          addAnonymousUser();
 //        } else
 //
-        if (//loginType != PropertyHandler.LOGIN_TYPE.ANONYMOUS &&
+
+        if (result == null || //loginType != PropertyHandler.LOGIN_TYPE.ANONYMOUS &&
             result.getUserKind() == User.Kind.ANONYMOUS) {
           clearUser();
           userNotification.showLogin();
