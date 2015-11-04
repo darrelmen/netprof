@@ -3,6 +3,8 @@ package mitll.langtest.shared.analysis;
 import mitll.langtest.shared.User;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -17,16 +19,22 @@ public class UserInfo implements Serializable {
   private User user;
   private int start;
   private int current;
-//  private int diff;
   private int num;
   private transient List<BestScore> bestScores;
+  long startTime;
 
   public UserInfo() {
   }
 
-  public UserInfo(List<BestScore> bestScores) {
+  /**
+   * @see mitll.langtest.server.database.analysis.Analysis#getBestForQuery(Connection, PreparedStatement)
+   * @param bestScores
+   */
+  public UserInfo(List<BestScore> bestScores,long startTime) {
     this.bestScores = bestScores;
     this.num = bestScores.size();
+    this.startTime = startTime;
+
     Collections.sort(bestScores, new Comparator<BestScore>() {
       @Override
       public int compare(BestScore o1, BestScore o2) {
@@ -65,9 +73,9 @@ public class UserInfo implements Serializable {
   }
 
   public long getTimestampMillis() {
-    return getUser().getTimestampMillis();
+    return startTime;
+//    return getUser().getTimestampMillis();
   }
-
 
   public User getUser() {
     return user;
