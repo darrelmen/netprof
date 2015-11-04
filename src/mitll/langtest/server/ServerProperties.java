@@ -437,7 +437,7 @@ public class ServerProperties {
    * @see mitll.langtest.server.database.UserDAO#UserDAO
    */
   public Set<String> getAdmins() {
-    return emailList.getAdmins();
+    return emailList == null ? Collections.emptySet(): emailList.getAdmins();
   }
 
   public List<String> getReportEmails() {
