@@ -10,6 +10,7 @@ import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.*;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -726,7 +727,13 @@ public class ExcelImport implements ExerciseDAO {
   private boolean isDeletedRow(Sheet sheet, Row next, int colIndex) {
     boolean isDelete = false;
     try {
-      isDelete = sheet.getWorkbook().getFontAt(next.getCell(colIndex).getCellStyle().getFontIndex()).getStrikeout();
+      Cell cell = next.getCell(colIndex);
+      if (cell != null) {
+        CellStyle cellStyle = cell.getCellStyle();
+        if (cellStyle != null) {
+          isDelete = sheet.getWorkbook().getFontAt(cellStyle.getFontIndex()).getStrikeout();
+        }
+      }
     } catch (Exception e) {
       logger.debug("got error reading delete strikeout at row " + next.getRowNum() + " for " + serverProps.getLanguage());
     }
