@@ -2,6 +2,7 @@ package mitll.langtest.server.database.analysis;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.*;
+import mitll.langtest.server.scoring.CollationSort;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.*;
@@ -176,10 +177,16 @@ public class Analysis extends DAO {
     try {
       Map<Long, UserInfo> best = getBest(getPerfSQL(id));
 
-      UserInfo next = best.values().iterator().next();
-      List<BestScore> resultsForQuery = next.getBestScores();
+      Collection<UserInfo> values = best.values();
+      if (values.isEmpty()) {
+        return new UserPerformance();
+      }
+      else {
+        UserInfo next = values.iterator().next();
+        List<BestScore> resultsForQuery = next.getBestScores();
 
-      return new UserPerformance(id, resultsForQuery, next.getStart(), next.getDiff());
+        return new UserPerformance(id, resultsForQuery, next.getStart(), next.getDiff());
+      }
     } catch (Exception ee) {
       logException(ee);
     }
@@ -195,9 +202,17 @@ public class Analysis extends DAO {
     try {
       String sql = getPerfSQL(id);
       Map<Long, UserInfo> best = getBest(sql);
-      UserInfo next = best.values().iterator().next();
-      List<BestScore> resultsForQuery = next.getBestScores();
-      return getWordScore(resultsForQuery);
+
+      Collection<UserInfo> values = best.values();
+      if (values.isEmpty()) {
+        logger.warn("no best values for " + id);
+        return getWordScore(Collections.emptyList());
+      }
+      else {
+        UserInfo next = values.iterator().next();
+        List<BestScore> resultsForQuery = next.getBestScores();
+        return getWordScore(resultsForQuery);
+      }
     } catch (Exception ee) {
       logException(ee);
     }
