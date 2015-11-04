@@ -4,6 +4,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
+import mitll.langtest.server.scoring.CollationSort;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
@@ -16,10 +17,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by GO22670 on 1/30/14.
@@ -67,10 +66,27 @@ public class DumpRefResultTest {
     List<String> strings = getDBs();
     logger.debug("Got " + strings);
 
-    List<String> configs = Arrays.asList("iraqi", "mandarin", "msa", "egyptian", "dari", "english",
-        "farsi", "korean", "levantine", "russian", "spanish", "tagalog", "urdu", "pashto2", "pashto3", "pashto1", "sudanese");
+    List<String> configs = Arrays.asList(
+        "dari",
+        "egyptian",
+        "english",
+        "farsi",
+        "iraqi",
+        "korean",
+        "levantine",
+        "mandarin",
+        "msa",
+        "pashto1", "pashto2", "pashto3",
+
+        "russian"
+
+        , "spanish", "sudanese", "tagalog", "urdu"
+    );
     int i = 0;
     PathHelper war = new PathHelper("war");
+
+ //   configs = Collections.singletonList("spanish");
+
     for (String db : strings) {
       //String path = "/Users/go22670/Development/asr/performance-reports/dbs/" + db;
       String config = configs.get(i++);
@@ -82,6 +98,11 @@ public class DumpRefResultTest {
       DatabaseImpl database = getDatabase(connection, config, db);
       database.doReport(war);
 
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
       //  break;
     }
   }
@@ -93,27 +114,30 @@ public class DumpRefResultTest {
   }
 
   private List<String> getDBs() {
-    String s = "iraqi.h2.db\n" +
-        "mandarin.h2.db\n" +
-//        "mandarin.h2.db.h2.db\n" +
-//        "mandarin.h2.db.trace.db\n" +
-        "msaClassroom.h2.db\n" +
-        "npfClassroomEgyptian.h2.db\n" +
+    String s =
         "npfDari.h2.db\n" +
-        "npfEnglish.h2.db\n" +
-        "npfFarsi.h2.db\n" +
-        "npfKorean.h2.db\n" +
-        "npfLevantine.h2.db\n" +
-        "npfRussian.h2.db\n" +
-        "npfSpanish.h2.db\n" +
-        "npfTagalog.h2.db\n" +
-        "npfUrdu.h2.db\n" +
-        "pashto2.h2.db\n" +
-        "pashto3.h2.db\n" +
-        "pashtoCE.h2.db\n" +
-        "sudaneseToday.h2.db";
+            "npfClassroomEgyptian.h2.db\n" +
+            "npfEnglish.h2.db\n" +
+            "npfFarsi.h2.db\n" +
+            "iraqi.h2.db\n" +
+            "npfLevantine.h2.db\n" +
+            "npfKorean.h2.db\n" +
+            "mandarin.h2.db\n" +
+            "msaClassroom.h2.db\n" +
+            "pashtoCE.h2.db\n" +
+            "pashto2.h2.db\n" +
+            "pashto3.h2.db\n" +
+            "npfRussian.h2.db\n"
+            +
+            "npfSpanish.h2.db\n" +
+
+            "sudaneseToday.h2.db\n" +
+            "npfTagalog.h2.db\n" +
+            "npfUrdu.h2.db\n";
     String[] split = s.split("\n");
-    return Arrays.asList(split);
+    List<String> strings = Arrays.asList(split);
+ //   strings = Collections.singletonList("npfSpanish.h2.db");
+    return strings;
   }
 
   private DatabaseImpl getDatabase(DatabaseConnection connection, String config, String dbName) {
