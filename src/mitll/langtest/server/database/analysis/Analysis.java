@@ -22,6 +22,7 @@ public class Analysis extends DAO {
   private static final boolean DEBUG = false;
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
+  private static final int MIN_RECORDINGS = 5;
 
   private ParseResultJson parseResultJson;
   private PhoneDAO phoneDAO;
@@ -56,6 +57,15 @@ public class Analysis extends DAO {
     return new ArrayList<BestScore>();
   }
 
+  Set<String> lincoln = new HashSet<>(Arrays.asList("gvidaver", "rbudd", "jmelot", "esalesky", "gatewood",
+      "testing", "grading", "fullperm",
+      //"0001abcd",
+      "egodoy",
+      "rb2rb2",
+      "dajone3",
+      //"WagnerSandy",
+      "rbtrbt"));
+
   public List<UserInfo> getUserInfo(UserDAO userDAO) {
     String sql = getPerfSQL();
     try {
@@ -64,18 +74,22 @@ public class Analysis extends DAO {
       List<UserInfo> userInfos = new ArrayList<>();
       for (Map.Entry<Long, UserInfo> pair : best.entrySet()) {
         User user = userMap.get(pair.getKey());
+
         if (user == null) {
           logger.warn("huh? no user for " + pair.getKey());
         }
         else {
-          pair.getValue().setUser(user);
-          userInfos.add(pair.getValue());
+          boolean isLL = lincoln.contains(user.getUserID());
+          if (!isLL) {
+            pair.getValue().setUser(user);
+            userInfos.add(pair.getValue());
+          }
         }
       }
       Collections.sort(userInfos, new Comparator<UserInfo>() {
         @Override
         public int compare(UserInfo o1, UserInfo o2) {
-          return Long.valueOf(o1.getUser().getId()).compareTo(o2.getUser().getId());
+          return -1*Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
         }
       });
       return userInfos;
@@ -255,11 +269,13 @@ public class Analysis extends DAO {
     logger.info("got " + userToBest.values().iterator().next().size());
 
     Map<Long, List<BestScore>> userToBest2 = new HashMap<>();
+    Map<Long, Long> userToEarliest = new HashMap<>();
 
     for (Long key : userToBest.keySet()) userToBest2.put(key, new ArrayList<>());
 
     for (Map.Entry<Long, List<BestScore>> pair : userToBest.entrySet()) {
-      List<BestScore> bestScores = userToBest2.get(pair.getKey());
+      Long userID = pair.getKey();
+      List<BestScore> bestScores = userToBest2.get(userID);
 
       String last = null;
 
@@ -272,6 +288,9 @@ public class Analysis extends DAO {
         int id = bs.getResultID();
         String exid = bs.getId();
         long time = bs.getTimestamp();
+
+        Long aLong = userToEarliest.get(userID);
+        if (aLong == null || time < aLong) userToEarliest.put(userID,time);
 
         if ((last != null && !last.equals(exid)) || (lastTimestamp > 0 && time - lastTimestamp > FIVE_MINUTES)) {
           if (seen.contains(id)) {
@@ -299,9 +318,7 @@ public class Analysis extends DAO {
           bestScores.add(lastBest);
         }
       }
-
     }
-
 
     /*if (!lastResults.isEmpty()) {
       if (lastBest != null && lastBest != lastResults.get(lastResults.size() - 1)) {
@@ -315,7 +332,12 @@ public class Analysis extends DAO {
 
     Map<Long, UserInfo> userToUserInfo = new HashMap<>();
     for (Map.Entry<Long, List<BestScore>> pair : userToBest2.entrySet()) {
-      userToUserInfo.put(pair.getKey(), new UserInfo(pair.getValue()));
+      List<BestScore> value = pair.getValue();
+      if (value.size() >= MIN_RECORDINGS) {
+        Long userID = pair.getKey();
+        Long aLong = userToEarliest.get(userID);
+        userToUserInfo.put(userID, new UserInfo(value,aLong));
+      }
     }
 
     return userToUserInfo;
@@ -323,13 +345,6 @@ public class Analysis extends DAO {
 
   private Map<Long, List<BestScore>> getUserToResults(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
-//    List<BestScore> lastResults = new ArrayList<BestScore>();
-//    String last = null;
-//
-//    long lastTimestamp = 0;
-//    int count = 0;
-//    BestScore lastBest = null;
-//    Set<Integer> seen = new HashSet<>();
     Map<Long, List<BestScore>> userToBest = new HashMap<>();
 
     while (rs.next()) {
