@@ -1190,12 +1190,16 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#init
    */
   public void doReport(ServerProperties serverProps, String site, MailSupport mailSupport, PathHelper pathHelper) {
-    new Report(userDAO, resultDAO, eventDAO, audioDAO).doReport(serverProps, site, mailSupport, pathHelper);
+    getReport().doReport(serverProps, site, mailSupport, pathHelper);
+  }
+
+  public Report getReport() {
+    return new Report(userDAO, resultDAO, eventDAO, audioDAO);
   }
 
   public void doReport(PathHelper pathHelper) {
     try {
-      new Report(userDAO, resultDAO, eventDAO, audioDAO).writeReport(pathHelper, serverProps.getLanguage());
+      getReport().writeReport(pathHelper, serverProps.getLanguage());
     } catch (IOException e) {
       logger.error("got " + e);
     }
