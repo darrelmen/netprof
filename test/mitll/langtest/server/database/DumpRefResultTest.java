@@ -85,7 +85,7 @@ public class DumpRefResultTest {
     int i = 0;
     PathHelper war = new PathHelper("war");
 
- //   configs = Collections.singletonList("spanish");
+    //  configs = Collections.singletonList("spanish");
 
     for (String db : strings) {
       //String path = "/Users/go22670/Development/asr/performance-reports/dbs/" + db;
@@ -105,6 +105,55 @@ public class DumpRefResultTest {
       }
       //  break;
     }
+  }
+
+  @Test
+  public void testYTD() {
+    List<String> strings = getDBs();
+    logger.debug("Got " + strings);
+
+    List<String> configs = Arrays.asList(
+        "dari",
+        "egyptian",
+        "english",
+        "farsi",
+        "iraqi",
+        "korean",
+        "levantine",
+        "mandarin",
+        "msa",
+        "pashto1", "pashto2", "pashto3",
+
+        "russian"
+
+        , "spanish", "sudanese", "tagalog", "urdu"
+    );
+    int i = 0;
+   // PathHelper war = new PathHelper("war");
+
+    //  configs = Collections.singletonList("spanish");
+    Map<String, Integer> configToUsers = new TreeMap<>();
+    for (String db : strings) {
+      //String path = "/Users/go22670/Development/asr/performance-reports/dbs/" + db;
+      String config = configs.get(i++);
+
+      logger.info("doing " + config + " ------- ");
+
+      H2Connection connection = getH2(db);
+
+      DatabaseImpl database = getDatabase(connection, config, db);
+      int activeUsersYTD = database.getReport().getActiveUsersYTD();
+      logger.info(config + "," + activeUsersYTD);
+      configToUsers.put(config, activeUsersYTD);
+
+//      try {
+//      //  Thread.sleep(1000);
+//      } catch (InterruptedException e) {
+//        e.printStackTrace();
+//      }
+      //  break;
+    }
+    logger.info(configToUsers);
   }
 
   private H2Connection getH2(String db) {
@@ -136,7 +185,7 @@ public class DumpRefResultTest {
             "npfUrdu.h2.db\n";
     String[] split = s.split("\n");
     List<String> strings = Arrays.asList(split);
- //   strings = Collections.singletonList("npfSpanish.h2.db");
+    //  strings = Collections.singletonList("npfSpanish.h2.db");
     return strings;
   }
 
@@ -150,14 +199,14 @@ public class DumpRefResultTest {
     File file = new File("war" + File.separator + "config" + File.separator + config1 + File.separator + quizlet +
         ".properties");
     String parent = file.getParent();
-    logger.debug("config dir " + parent);
-    logger.debug("config     " + file.getName());
+ //   logger.debug("config dir " + parent);
+ //   logger.debug("config     " + file.getName());
     //  dbName = "npfEnglish";//"mandarin";// "mandarin";
     DatabaseImpl database =
         new DatabaseImpl(connection, parent, file.getName(), dbName, new ServerProperties(parent, file.getName()), new PathHelper("war"), null);
-    logger.debug("made " + database);
+   // logger.debug("made " + database);
     String media = parent + File.separator + "media";
-    logger.debug("media " + media);
+   // logger.debug("media " + media);
     database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(), "media");
     List<CommonExercise> exercises = database.getExercises();
     return database;
