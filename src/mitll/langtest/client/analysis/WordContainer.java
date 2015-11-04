@@ -15,6 +15,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
@@ -55,7 +56,7 @@ class WordContainer extends SimplePagingContainer<WordScore> {
   /**
    * @param sortedHistory
    * @return
-   * @see SetCompleteDisplay#getScoreHistory(List, List, ExerciseController)
+   * @see AnalysisTab#getWordScores(LangTestDatabaseAsync, ExerciseController, int, ShowTab, AnalysisPlot, Panel)
    */
   public Panel getTableWithPager(List<WordScore> sortedHistory) {
     Panel tableWithPager = getTableWithPager();
