@@ -1,5 +1,6 @@
 package mitll.langtest.client.analysis;
 
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -7,7 +8,6 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordScore;
 
@@ -25,11 +25,16 @@ public class AnalysisTab extends DivWidget {
    * @param controller
    * @param userid
    * @see Navigation#showAnalysis()
-   * @see UserContainer#gotClickOnItem(User)
+   * @see UserContainer#gotClickOnItem
    */
   public AnalysisTab(final LangTestDatabaseAsync service, final ExerciseController controller, final int userid,
-                     final ShowTab showTab) {
-    final AnalysisPlot analysisPlot = new AnalysisPlot(service, userid);
+                     final ShowTab showTab, String userChosenID) {
+    final AnalysisPlot analysisPlot = new AnalysisPlot(service, userid, userChosenID);
+//
+//
+//    DivWidget vert = new DivWidget();
+//    vert.add(new Heading(3, userChosenID));
+//    vert.add(analysisPlot);
 
     add(analysisPlot);
     HorizontalPanel lowerHalf = new HorizontalPanel();
@@ -50,7 +55,11 @@ public class AnalysisTab extends DivWidget {
       @Override
       public void onSuccess(List<WordScore> wordScores) {
         final WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab);
-        lowerHalf.add(wordContainer.getTableWithPager(wordScores));
+        Panel tableWithPager = wordContainer.getTableWithPager(wordScores);
+        DivWidget vert = new DivWidget();
+        vert.add(new Heading(3, "Words"));
+        vert.add(tableWithPager);
+        lowerHalf.add(vert);
         getPhoneReport(service, controller, userid, lowerHalf, analysisPlot, showTab);
       }
     });
@@ -74,8 +83,23 @@ public class AnalysisTab extends DivWidget {
       @Override
       public void onSuccess(PhoneReport phoneReport) {
         // logger.info("getPhoneScores " + phoneReport);
-        lowerHalf.add(phoneContainer.getTableWithPager(phoneReport));
-        lowerHalf.add(exampleContainer.getTableWithPager());
+        Panel phones = phoneContainer.getTableWithPager(phoneReport);
+
+        DivWidget vert = new DivWidget();
+        vert.add(new Heading(3, "Sounds"));
+        vert.add(phones);
+        vert.addStyleName("leftThirtyMargin");
+
+        lowerHalf.add(vert);
+
+        Panel examples = exampleContainer.getTableWithPager();
+
+        DivWidget vert2 = new DivWidget();
+        vert2.add(new Heading(3, "Words using Sound"));
+        vert2.add(examples);
+
+        lowerHalf.add(vert2);
+
         phoneContainer.showExamplesForSelectedSound();
       }
     });
