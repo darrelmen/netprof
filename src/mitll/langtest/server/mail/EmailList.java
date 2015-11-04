@@ -79,7 +79,6 @@ public class EmailList {
     return getDefaultFalse(TEST_EMAIL);
   }
 
-
   /**
    * @return
    * @see mitll.langtest.server.mail.EmailHelper#addContentDeveloper
