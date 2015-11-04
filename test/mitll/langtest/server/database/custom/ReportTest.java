@@ -42,12 +42,17 @@ public class ReportTest {
     logger.debug("setup called");
 
     String config = "spanish";//"mandarin";
+    dbName = "npfSpanish";//"mandarin";// "mandarin";
+
+    getDatabase(config,"npfSpanish");
+  }
+
+  private static void getDatabase(String config, String dbName) {
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParent();
     logger.debug("config dir " + parent);
     logger.debug("config     " + file.getName());
-  //  dbName = "npfEnglish";//"mandarin";// "mandarin";
-    dbName = "npfSpanish";//"mandarin";// "mandarin";
+    //  dbName = "npfEnglish";//"mandarin";// "mandarin";
     database = new DatabaseImpl(parent, file.getName(), dbName, new ServerProperties(parent, file.getName()), new PathHelper("war"), false, null);
     logger.debug("made " + database);
     String media = parent + File.separator + "media";
@@ -58,8 +63,6 @@ public class ReportTest {
 
   @Test
   public void testReport() {
-   // Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
-  //  typeToValues.put("Lesson", Arrays.asList("1-1"));
     database.doReport(new PathHelper("war"));
   }
 
