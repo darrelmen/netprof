@@ -1944,7 +1944,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public Collection<UserInfo> getUsersWithRecordings() {
-   // return db.getResultDAO().getUsersWithRecordings(db.getUserDAO());
     return db.getAnalysis().getUserInfo(db.getUserDAO());
   }
   public Map<Integer, Integer> getResultCountToCount() {
