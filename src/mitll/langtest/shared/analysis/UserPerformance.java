@@ -5,7 +5,6 @@ import mitll.langtest.server.database.analysis.Analysis;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 10/19/15.
@@ -93,7 +92,7 @@ public class UserPerformance implements Serializable {
   }
 
   /**
-   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long)
+   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long, String)
    * @return
    * @see #getRawAverage()
    */
@@ -108,7 +107,7 @@ public class UserPerformance implements Serializable {
   }
 
   /**
-   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long)
+   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long, String)
    * @return
    */
   public float getRawAverage() {
