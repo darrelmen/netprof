@@ -33,10 +33,11 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class UserContainer extends SimplePagingContainer<UserInfo> {
-  public static final int TABLE_WIDTH = 440;
   private final Logger logger = Logger.getLogger("UserContainer");
 
-  //private static final int TABLE_HISTORY_WIDTH = 420;
+  public static final int ID_WIDTH = 130;
+  public static final int TABLE_WIDTH = 460;
+
   private ShowTab learnTab;
   DivWidget rightSide;
   LangTestDatabaseAsync service;
@@ -100,28 +101,6 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     return o;
   }
 
-/*
-  private void addReview() {
-    Column<UserInfo, SafeHtml> userCol = getUserColumn();
-    userCol.setSortable(true);
-    table.setColumnWidth(userCol, 140 + "px");
-    addColumn(userCol, new TextHeader("Students"));
-    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = getUserSorter(userCol, getList());
-    table.addColumnSortHandler(columnSortHandler);
-
-    Column<UserInfo, SafeHtml> dateCol = getDateColumn();
-    dateCol.setSortable(true);
-    addColumn(dateCol, new TextHeader("Signed Up At"));
-    table.setColumnWidth(dateCol, 140 + "px");
-
-    ColumnSortEvent.ListHandler<UserInfo> date = getDateSorter(dateCol, getList());
-
-    table.addColumnSortHandler(date);
-
-    table.setWidth("100%", true);
-  }
-*/
-
   private ColumnSortEvent.ListHandler<UserInfo> getUserSorter(Column<UserInfo, SafeHtml> englishCol,
                                                               List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
@@ -170,7 +149,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
 
 
   private ColumnSortEvent.ListHandler<UserInfo> getNumSorter(Column<UserInfo, SafeHtml> englishCol,
-                                                          List<UserInfo> dataList) {
+                                                             List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<UserInfo>() {
@@ -193,7 +172,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
   }
 
   private ColumnSortEvent.ListHandler<UserInfo> getStartSorter(Column<UserInfo, SafeHtml> englishCol,
-                                                             List<UserInfo> dataList) {
+                                                               List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<UserInfo>() {
@@ -216,9 +195,8 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
   }
 
 
-
   private ColumnSortEvent.ListHandler<UserInfo> getCurrentSorter(Column<UserInfo, SafeHtml> englishCol,
-                                                               List<UserInfo> dataList) {
+                                                                 List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<UserInfo>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<UserInfo>() {
@@ -264,50 +242,11 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     return columnSortHandler;
   }
 
-//  private CommonShell getShell(String id) {
-//    return plot.getIdToEx().get(id);
-//  }
-
-/*  private ColumnSortEvent.ListHandler<User> getScoreSorter(Column<User, SafeHtml> scoreCol,
-                                                                List<User> dataList) {
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
-    columnSortHandler.setComparator(scoreCol,
-        new Comparator<User>() {
-          public int compare(User o1, User o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            if (o1 != null) {
-              if (o2 == null) {
-                logger.warning("------- o2 is null?");
-                return -1;
-              } else {
-                float a1 = o1.getPronScore();
-                float a2 = o2.getPronScore();
-                int i = Float.valueOf(a1).compareTo(a2);
-                // logger.info("a1 " + a1 + " vs " + a2 + " i " + i);
-                if (i == 0) {
-                  return Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp());
-                } else {
-                  return i;
-                }
-              }
-            } else {
-              logger.warning("------- o1 is null?");
-
-              return -1;
-            }
-          }
-        });
-    return columnSortHandler;
-  }*/
-
   @Override
   protected void addColumnsToTable() {
     Column<UserInfo, SafeHtml> userCol = getUserColumn();
     userCol.setSortable(true);
-    table.setColumnWidth(userCol, 140 + "px");
+    table.setColumnWidth(userCol, ID_WIDTH + "px");
     addColumn(userCol, new TextHeader("Students"));
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = getUserSorter(userCol, getList());
     table.addColumnSortHandler(columnSortHandler);
@@ -322,22 +261,29 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     num.setSortable(true);
     addColumn(num, new TextHeader("#"));
     table.addColumnSortHandler(getNumSorter(num, getList()));
+    table.setColumnWidth(num, 50 + "px");
 
     Column<UserInfo, SafeHtml> start = getStart();
     start.setSortable(true);
     addColumn(start, new TextHeader("Initial Score"));
+    table.setColumnWidth(start, 75 + "px");
+
     table.addColumnSortHandler(getStartSorter(start, getList()));
 
     Column<UserInfo, SafeHtml> current = getCurrent();
     current.setSortable(true);
     addColumn(current, new TextHeader("Current"));
+    table.setColumnWidth(current, 75 + "px");
+
     table.addColumnSortHandler(getCurrentSorter(current, getList()));
 
     Column<UserInfo, SafeHtml> diff = getDiff();
     diff.setSortable(true);
     addColumn(diff, new TextHeader("Diff"));
     table.addColumnSortHandler(getDiffSorter(diff, getList()));
+    table.setColumnWidth(diff, 75 + "px");
 
+    table.getColumnSortList().push(dateCol);
 
     table.setWidth("100%", true);
 
@@ -372,9 +318,15 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
       }
 
       @Override
+      public boolean isDefaultSortAscending() {
+        return false;
+      }
+
+      @Override
       public SafeHtml getValue(UserInfo shell) {
         String signedUp = DateTimeFormat.getFormat("MMM d, yy").format(
-            new Date(shell.getUser().getTimestampMillis())
+            //     new Date(shell.getUser().getTimestampMillis())
+            new Date(shell.getTimestampMillis())
         );
 
         return getSafeHtml(signedUp);
@@ -452,7 +404,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
 
 
   private void gotClickOnItem(final UserInfo user) {
-    AnalysisTab widgets = new AnalysisTab(service, controller, (int) user.getUser().getId(), learnTab);
+    AnalysisTab widgets = new AnalysisTab(service, controller, (int) user.getUser().getId(), learnTab, user.getUser().getUserID());
     rightSide.clear();
     rightSide.add(widgets);
   }
@@ -460,23 +412,6 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
   private SafeHtml getSafeHtml(String columnText) {
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
   }
-
-/*  private Column<User, SafeHtml> getScoreColumn() {
-    return new Column<User, SafeHtml>(new SafeHtmlCell()) {
-      @Override
-      public SafeHtml getValue(User shell) {
-        float v = shell.getPronScore() * 100;
-        String s = "<span " +
-            "style='" +
-            "margin-left:10px;" +
-            "'" +
-            ">" + ((int) v) +
-            "</span>";
-
-        return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
-      }
-    };
-  }*/
 
   public interface LocalTableResources extends CellTable.Resources {
     /**
