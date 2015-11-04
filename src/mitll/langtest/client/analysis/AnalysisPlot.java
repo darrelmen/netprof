@@ -22,6 +22,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/19/15.
  */
 public class AnalysisPlot extends DivWidget implements IsWidget {
+  public static final int Y_OFFSET_FOR_LEGEND = 30;
   private final Logger logger = Logger.getLogger("AnalysisPlot");
   private static final String PRONUNCIATION_SCORE = "Pronunciation Score";
 
@@ -31,9 +32,10 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
   /**
    * @param service
    * @param id
-   * @see AnalysisTab#AnalysisTab(LangTestDatabaseAsync, ExerciseController, int, ShowTab)
+   * @param userChosenID
+   * @see AnalysisTab#AnalysisTab
    */
-  public AnalysisPlot(LangTestDatabaseAsync service, long id) {
+  public AnalysisPlot(LangTestDatabaseAsync service, long id, final String userChosenID) {
     service.getExerciseIds(1, new HashMap<String, Collection<String>>(), "", -1,
         (int) id, "", false, false, false, false, new AsyncCallback<ExerciseListWrapper>() {
           @Override
@@ -64,7 +66,9 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
           add(new Label("No Recordings yet to analyze. Please record yourself."));
         } else {
 //        logger.info("getPerformanceForUser raw total " + rawTotal + " num " + rawBestScores.size());
-          add(getChart("Pronunciation over time (Drag to zoom in)",
+          add(getChart("<b>" +
+              userChosenID +"</b>" +
+              " pronunciation score (Drag to zoom in)",
               "Score and average (" + rawTotal + " items : avg score " + (int) v +
                   " %)", "Cumulative Average", userPerformance));
         }
@@ -79,7 +83,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
    * @param seriesName
    * @param yValuesForUser
    * @return
-   * @see AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long)
+   * @see AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long, String)
    */
   private Chart getChart(
       String title, String subtitle, String seriesName, UserPerformance userPerformance
@@ -98,7 +102,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
                 .setAlign(Legend.Align.LEFT)
                 .setVerticalAlign(Legend.VerticalAlign.TOP)
                 .setX(100)
-                .setY(70)
+                .setY(Y_OFFSET_FOR_LEGEND)
                 .setBorderWidth(1)
                 .setFloating(true)
                 .setBackgroundColor("#FFFFFF")
