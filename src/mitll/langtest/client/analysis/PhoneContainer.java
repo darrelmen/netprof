@@ -69,8 +69,14 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
    */
   public Panel getTableWithPager(PhoneReport phoneReport) {
     List<PhoneAndScore> phoneAndScores = new ArrayList<>();
-    for (Map.Entry<String, Float> ps : phoneReport.getPhoneToAvgSorted().entrySet()) {
-      phoneAndScores.add(new PhoneAndScore(ps.getKey(), ps.getValue(), phoneReport.getPhoneToCount().get(ps.getKey())));
+    Map<String, Float> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
+    if (phoneToAvgSorted == null) {
+      logger.warning("huh? phoneToAvgSorted is null ");
+    }
+    else {
+      for (Map.Entry<String, Float> ps : phoneToAvgSorted.entrySet()) {
+        phoneAndScores.add(new PhoneAndScore(ps.getKey(), ps.getValue(), phoneReport.getPhoneToCount().get(ps.getKey())));
+      }
     }
     this.phoneReport = phoneReport;
     return getTableWithPager(phoneAndScores);
