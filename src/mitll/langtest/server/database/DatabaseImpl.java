@@ -99,12 +99,25 @@ public class DatabaseImpl implements Database {
    */
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
                       PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify) {
-    long then = System.currentTimeMillis();
-    connection = new H2Connection(configDir, dbName, mustAlreadyExist);
-    long now = System.currentTimeMillis();
-    if (now - then > 300)
-      logger.info("took " + (now - then) + " millis to open database for " + serverProps.getLanguage());
+//    long then = System.currentTimeMillis();
+//    connection = new H2Connection(configDir, dbName, mustAlreadyExist);
+//    long now = System.currentTimeMillis();
+//    if (now - then > 300)
+//      logger.info("took " + (now - then) + " millis to open database for " + serverProps.getLanguage());
 
+    this(new H2Connection(configDir, dbName, mustAlreadyExist), configDir, relativeConfigDir, dbName, serverProps, pathHelper, logAndNotify);
+  }
+
+  public DatabaseImpl(DatabaseConnection connection,
+                      String configDir,
+                      String relativeConfigDir,
+                      String dbName,
+                      ServerProperties serverProps,
+                      PathHelper pathHelper,
+                      LogAndNotify logAndNotify) {
+    long then;
+    long now;
+    this.connection = connection;
     this.configDir = relativeConfigDir;
     this.serverProps = serverProps;
     this.lessonPlanFile = serverProps.getLessonPlan();
@@ -245,6 +258,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * Fixes after the fact a bug where we didn't record info in the phone and word tables.
+   *
    * @see #initializeDAOs(PathHelper)
    */
   private void putBackWordAndPhone() {
@@ -254,8 +268,7 @@ public class DatabaseImpl implements Database {
     for (Result r : results) {
       if (r.getJsonScore() != null && r.getJsonScore().length() > 13) {
         idToResult.put(r.getUniqueID(), r);
-      }
-      else {
+      } else {
         skipped++;
       }
     }
@@ -270,11 +283,11 @@ public class DatabaseImpl implements Database {
     }
     //logger.debug("putBackWordAndPhone current word results " + already.size());
     Set<Integer> allKeys = new HashSet<>(idToResult.keySet());
-   // logger.debug("before " + allKeys.size());
+    // logger.debug("before " + allKeys.size());
     allKeys.removeAll(already);
-   // logger.debug("after " + allKeys.size());
+    // logger.debug("after " + allKeys.size());
     ParseResultJson parseResultJson = new ParseResultJson(getServerProps());
-    int count =0;
+    int count = 0;
     for (Integer key : allKeys) {
       count++;
       Result result = idToResult.get(key);
@@ -756,7 +769,7 @@ public class DatabaseImpl implements Database {
 
   public boolean logEvent(String id, String widgetType, String exid, String context, long userid, String hitID,
                           String device) {
-    return eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, hitID, device));
+    return eventDAO !=null && eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, hitID, device));
   }
 
   public void logAndNotify(Exception e) {
@@ -1182,7 +1195,7 @@ public class DatabaseImpl implements Database {
 
   public void doReport(PathHelper pathHelper) {
     try {
-      new Report(userDAO, resultDAO, eventDAO, audioDAO).writeReport(pathHelper);
+      new Report(userDAO, resultDAO, eventDAO, audioDAO).writeReport(pathHelper, serverProps.getLanguage());
     } catch (IOException e) {
       logger.error("got " + e);
     }
@@ -1204,9 +1217,9 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see #putBackWordAndPhone()
    * @param answerID
    * @param netPronImageTypeListMap
+   * @see #putBackWordAndPhone()
    */
   private void recordWordAndPhoneInfo(long answerID, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
     List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
