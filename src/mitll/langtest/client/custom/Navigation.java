@@ -419,7 +419,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
     analysis.getContent().clear();
     ShowTab showTab = this;
-    AnalysisTab w = new AnalysisTab(service, controller, userManager.getUser(), showTab);
+    AnalysisTab w = new AnalysisTab(service, controller, userManager.getUser(), showTab, userManager.getUserID());
     analysis.getContent().add(w);
   }
 
