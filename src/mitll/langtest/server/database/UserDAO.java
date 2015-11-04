@@ -434,8 +434,7 @@ public class UserDAO extends DAO {
           "nativeLang VARCHAR, " +
           "dialect VARCHAR, " +
           USER_ID + " VARCHAR, " +
-          TIMESTAMP +
-          " TIMESTAMP AS CURRENT_TIMESTAMP, " +
+          TIMESTAMP +" TIMESTAMP, "+//" AS CURRENT_TIMESTAMP, " +
           "enabled BOOLEAN, " +
           RESET_PASSWORD_KEY + " VARCHAR, " +
           ENABLED_REQ_KEY + " VARCHAR, " +
@@ -458,7 +457,7 @@ public class UserDAO extends DAO {
       if (!expected.isEmpty()) logger.info("adding columns for " + expected);
       for (String missing : expected) {
         if (missing.equalsIgnoreCase(TIMESTAMP)) {
-          addColumn(connection, TIMESTAMP, "TIMESTAMP AS CURRENT_TIMESTAMP");
+          addColumn(connection, TIMESTAMP, "TIMESTAMP");
         }
         if (missing.equalsIgnoreCase(ENABLED)) {
           addColumn(connection, ENABLED, "BOOLEAN");
