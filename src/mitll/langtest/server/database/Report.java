@@ -38,6 +38,7 @@ public class Report {
   private static final String top = "<td style='vertical-align: top;'>";
   public static final String DEVICE_RECORDINGS = "Device Recordings";
   public static final String ALL_RECORDINGS = "All Recordings";
+  public static final String MM_DD_YY_HH_MM_SS = "MM_dd_yy_hh_mm_ss";
 
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
@@ -66,36 +67,42 @@ public class Report {
     // check if it's a monday
     if (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY &&
         !reportEmails.isEmpty()) {
-      SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
-      String today = simpleDateFormat2.format(new Date());
-      File file = getReportFile(pathHelper, today);
-      //logger.debug("checking file " + file.getAbsolutePath());
-      if (file.exists()) {
-        logger.debug("already did report for " + today + " : " + file.getAbsolutePath());
-      } else {
-        logger.debug("Site real path " + site);
-        try {
-          String message = writeReport(file, pathHelper);
-          sendEmails(serverProps.getLanguage(), site, mailSupport, reportEmails, message);
-        } catch (IOException e) {
-          logger.error("got " + e, e);
-        }
-      }
+      writeAndSendReport(serverProps.getLanguage(), site, mailSupport, pathHelper, reportEmails);
     } else {
 //      logger.debug("not sending email report since this is not monday");
     }
   }
 
+  private void writeAndSendReport(String language, String site, MailSupport mailSupport,
+                                  PathHelper pathHelper, List<String> reportEmails) {
+    SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
+    String today = simpleDateFormat2.format(new Date());
+    File file = getReportFile(pathHelper, today, language);
+    //logger.debug("checking file " + file.getAbsolutePath());
+    if (file.exists()) {
+      logger.debug("already did report for " + today + " : " + file.getAbsolutePath());
+    } else {
+      logger.debug("Site real path " + site);
+      try {
+        String message = writeReport(file, pathHelper, language);
+        sendEmails(language, site, mailSupport, reportEmails, message);
+      } catch (IOException e) {
+        logger.error("got " + e, e);
+      }
+    }
+  }
+
   /**
    * @param pathHelper
+   * @param language
    * @throws IOException
    * @see DatabaseImpl#doReport(PathHelper)
    */
-  public void writeReport(PathHelper pathHelper) throws IOException {
-    SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
+  public void writeReport(PathHelper pathHelper, String language) throws IOException {
+    SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat(MM_DD_YY_HH_MM_SS);
     String today = simpleDateFormat2.format(new Date());
-    File file = getReportFile(pathHelper, today);
-    writeReport(file, pathHelper);
+    File file = getReportFile(pathHelper, today, language);
+    writeReport(file, pathHelper, language);
     logger.debug("wrote to " + file.getAbsolutePath());
   }
 
@@ -112,15 +119,15 @@ public class Report {
     }
   }
 
-  private String writeReport(File file, PathHelper pathHelper) throws IOException {
+  private String writeReport(File file, PathHelper pathHelper, String language) throws IOException {
     BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-    String message = doReport(pathHelper);
+    String message = doReport(pathHelper, language);
     writer.write(message);
     writer.close();
     return message;
   }
 
-  private File getReportFile(PathHelper pathHelper, String today) {
+  private File getReportFile(PathHelper pathHelper, String today, String language) {
     File reports = pathHelper.getAbsoluteFile("reports");
     if (!reports.exists()) {
       logger.debug("making dir " + reports.getAbsolutePath());
@@ -128,7 +135,7 @@ public class Report {
     } else {
       logger.debug("reports dir exists at " + reports.getAbsolutePath());
     }
-    String fileName = "report_" + today + ".html";
+    String fileName = language + "_report_" + today + ".html";
     return new File(reports, fileName);
   }
 
@@ -136,7 +143,7 @@ public class Report {
    * @return
    * @see #writeReport
    */
-  private String doReport(PathHelper pathHelper) {
+  private String doReport(PathHelper pathHelper, String language) {
     StringBuilder builder = new StringBuilder();
     builder.append("<html><head><body>");
 
@@ -148,8 +155,8 @@ public class Report {
 
     getEventsDevices(builder, users);
 
-    getResults(builder, users, pathHelper);
-    getResultsDevices(builder, users, pathHelper);
+    getResults(builder, users, pathHelper, language);
+    getResultsDevices(builder, users, pathHelper, language);
 
     Collection<AudioAttribute> audioAttributes = audioDAO.getAudioAttributes();
     // logger.debug("got " + audioAttributes.size() + " audio attributes.");
@@ -328,20 +335,22 @@ public class Report {
 
   /**
    * @param builder
+   * @param language
    * @see #doReport
    */
-  private Map<Long, Map<String, Integer>> getResults(StringBuilder builder, Set<Long> students, PathHelper pathHelper) {
+  private Map<Long, Map<String, Integer>> getResults(StringBuilder builder, Set<Long> students, PathHelper pathHelper, String language) {
     List<Result> results = resultDAO.getResults();
-    return getResultsForSet(builder, students, pathHelper, results, ALL_RECORDINGS);
+    return getResultsForSet(builder, students, pathHelper, results, ALL_RECORDINGS, language);
   }
 
-  private Map<Long, Map<String, Integer>> getResultsDevices(StringBuilder builder, Set<Long> students, PathHelper pathHelper) {
+  private Map<Long, Map<String, Integer>> getResultsDevices(StringBuilder builder, Set<Long> students, PathHelper pathHelper, String language) {
     List<Result> results = resultDAO.getResultsDevices();
-    return getResultsForSet(builder, students, pathHelper, results, DEVICE_RECORDINGS);
+    return getResultsForSet(builder, students, pathHelper, results, DEVICE_RECORDINGS, language);
   }
 
-  private Map<Long, Map<String, Integer>> getResultsForSet(StringBuilder builder, Set<Long> students, PathHelper pathHelper, List<Result> results, String recordings) {
-    Calendar calendar = getCal();
+  private Map<Long, Map<String, Integer>> getResultsForSet(StringBuilder builder, Set<Long> students,
+                                                           PathHelper pathHelper, List<Result> results, String recordings, String language) {
+    Calendar calendar;// = getCal();
     Date january1st = getJanuaryFirst(getCal());
     int ytd = 0;
 
@@ -362,8 +371,13 @@ public class Report {
     try {
       SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
       String today = simpleDateFormat2.format(new Date());
-      File file = getReportFile(pathHelper, today + "_all");
-      BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+
+      BufferedWriter writer = null;
+
+      if (WRITE_RESULTS_TO_FILE) {
+        File file = getReportFile(pathHelper, today + "_all", language);
+        writer = new BufferedWriter(new FileWriter(file));
+      }
 
       teacherAudio = 0;
       invalid = 0;
@@ -399,7 +413,9 @@ public class Report {
           beforeJanuary++;
         }
       }
-      writer.close();
+      if (WRITE_RESULTS_TO_FILE) {
+        writer.close();
+      }
     } catch (IOException e) {
       logger.error("got " + e, e);
     }
@@ -422,7 +438,7 @@ public class Report {
    * @param calendar
    * @param january1st
    * @param refAudio
-   * @see #getResults(StringBuilder, Set, PathHelper)
+   * @see #getResults(StringBuilder, Set, PathHelper, String)
    */
   private <T extends UserAndTime> void addRefAudio(StringBuilder builder, Calendar calendar, Date january1st, Collection<T> refAudio) {
     int ytd = 0;
@@ -488,7 +504,7 @@ public class Report {
    * @param exToAudio
    * @param result
    * @return
-   * @see #getResults(StringBuilder, Set, PathHelper)
+   * @see #getResults(StringBuilder, Set, PathHelper, String)
    */
   private boolean isRefAudioResult(Map<String, List<AudioAttribute>> exToAudio, Result result) {
     boolean skip = false;
