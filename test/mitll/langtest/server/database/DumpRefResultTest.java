@@ -2,10 +2,10 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.analysis.*;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -16,8 +16,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.*;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by GO22670 on 1/30/14.
@@ -32,34 +34,12 @@ public class DumpRefResultTest {
 
   @Test
   public void dump() {
-    String s = "iraqi.h2.db\n" +
-        "mandarin.h2.db\n" +
-        "mandarin.h2.db.h2.db\n" +
-        "mandarin.h2.db.trace.db\n" +
-        "msaClassroom.h2.db\n" +
-        "npfClassroomEgyptian.h2.db\n" +
-        "npfDari.h2.db\n" +
-        "npfEnglish.h2.db\n" +
-        "npfFarsi.h2.db\n" +
-        "npfKorean.h2.db\n" +
-        "npfLevantine.h2.db\n" +
-        "npfRussian.h2.db\n" +
-        "npfSpanish.h2.db\n" +
-        "npfTagalog.h2.db\n" +
-        "npfUrdu.h2.db\n" +
-        "pashto2.h2.db\n" +
-        "pashto3.h2.db\n" +
-        "pashtoCE.h2.db\n" +
-        "sudaneseToday.h2.db";
-    String[] split = s.split("\n");
-    List<String> strings = Arrays.asList(split);
+    List<String> strings = getDBs();
     logger.debug("Got " + strings);
 
     for (String db : strings) {
       //String path = "/Users/go22670/Development/asr/performance-reports/dbs/" + db;
-      String path = "../Development/asr/performance-reports/dbs/" + db.replaceAll(".h2.db","");
-      logger.debug("got " + path);
-      H2Connection connection = new H2Connection(".", path, true);
+      H2Connection connection = getH2(db);
 
       try {
         BufferedWriter writer = getWriter(db + ".csv");
@@ -81,11 +61,96 @@ public class DumpRefResultTest {
     }
   }
 
+
+  @Test
+  public void testReports() {
+    List<String> strings = getDBs();
+    logger.debug("Got " + strings);
+
+    List<String> configs = Arrays.asList("iraqi", "mandarin", "msa", "egyptian", "dari", "english",
+        "farsi", "korean", "levantine", "russian", "spanish", "tagalog", "urdu", "pashto2", "pashto3", "pashto1", "sudanese");
+    int i = 0;
+    PathHelper war = new PathHelper("war");
+    for (String db : strings) {
+      //String path = "/Users/go22670/Development/asr/performance-reports/dbs/" + db;
+      String config = configs.get(i++);
+
+      logger.info("doing " + config + " ------- ");
+
+      H2Connection connection = getH2(db);
+
+      DatabaseImpl database = getDatabase(connection, config, db);
+      database.doReport(war);
+
+      //  break;
+    }
+  }
+
+  private H2Connection getH2(String db) {
+    String path = "../Development/asr/performance-reports/dbs/" + db.replaceAll(".h2.db", "");
+    logger.debug("got " + path);
+    return new H2Connection(".", path, true);
+  }
+
+  private List<String> getDBs() {
+    String s = "iraqi.h2.db\n" +
+        "mandarin.h2.db\n" +
+//        "mandarin.h2.db.h2.db\n" +
+//        "mandarin.h2.db.trace.db\n" +
+        "msaClassroom.h2.db\n" +
+        "npfClassroomEgyptian.h2.db\n" +
+        "npfDari.h2.db\n" +
+        "npfEnglish.h2.db\n" +
+        "npfFarsi.h2.db\n" +
+        "npfKorean.h2.db\n" +
+        "npfLevantine.h2.db\n" +
+        "npfRussian.h2.db\n" +
+        "npfSpanish.h2.db\n" +
+        "npfTagalog.h2.db\n" +
+        "npfUrdu.h2.db\n" +
+        "pashto2.h2.db\n" +
+        "pashto3.h2.db\n" +
+        "pashtoCE.h2.db\n" +
+        "sudaneseToday.h2.db";
+    String[] split = s.split("\n");
+    return Arrays.asList(split);
+  }
+
+  private DatabaseImpl getDatabase(DatabaseConnection connection, String config, String dbName) {
+    String quizlet = "quizlet";
+    if (config.equals("msa")) quizlet = "classroom";
+    else if (config.equals("pashto1")) quizlet = "pashtoQuizlet1";
+    else if (config.equals("pashto2")) quizlet = "pashtoQuizlet2";
+    else if (config.equals("pashto3")) quizlet = "pashtoQuizlet3";
+    String config1 = config.startsWith("pashto") ? "pashto" : config;
+    File file = new File("war" + File.separator + "config" + File.separator + config1 + File.separator + quizlet +
+        ".properties");
+    String parent = file.getParent();
+    logger.debug("config dir " + parent);
+    logger.debug("config     " + file.getName());
+    //  dbName = "npfEnglish";//"mandarin";// "mandarin";
+    DatabaseImpl database =
+        new DatabaseImpl(connection, parent, file.getName(), dbName, new ServerProperties(parent, file.getName()), new PathHelper("war"), null);
+    logger.debug("made " + database);
+    String media = parent + File.separator + "media";
+    logger.debug("media " + media);
+    database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(), "media");
+    List<CommonExercise> exercises = database.getExercises();
+    return database;
+  }
+
+//  @Test
+//  public void testReport() {
+//
+//    new Report(userDAO, resultDAO, eventDAO, audioDAO).writeReport(new PathHelper("war"));
+//
+//  }
+
   public List<Result> getResults(H2Connection h2, BufferedWriter writer) {
     try {
       String sql = "SELECT * FROM " + "REFRESULT order by " +
-          ResultDAO.PRON_SCORE+ ","+
-          RefResultDAO.ALIGNSCORE+ ","+
+          ResultDAO.PRON_SCORE + "," +
+          RefResultDAO.ALIGNSCORE + "," +
           RefResultDAO.SPEED;
 
       List<Result> resultsForQuery = getResultsSQL(sql, h2, writer);
@@ -100,7 +165,7 @@ public class DumpRefResultTest {
     Connection connection = h2.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
 
-    logger.debug("running " + sql );
+    logger.debug("running " + sql);
     return getResultsForQuery(connection, statement, writer);
   }
 
@@ -127,7 +192,7 @@ public class DumpRefResultTest {
       String path = rs.getString(ResultDAO.ANSWER);
       String speed = rs.getString(RefResultDAO.SPEED);
 
-      writer.write(uniqueID + "," + exID+","+
+      writer.write(uniqueID + "," + exID + "," +
           pronScore + "," +
           hydraDecodeDur + "," +
           alignScore + "," +
@@ -136,10 +201,10 @@ public class DumpRefResultTest {
           hpronScore + "," +
           hydecDecodeDur + "," +
 
-          halignScore+ ","+
+          halignScore + "," +
           hydecAlignDur + "," +
-          speed+
-          ","+path+
+          speed +
+          "," + path +
           "\n");
       i++;
     }
