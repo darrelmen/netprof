@@ -143,7 +143,10 @@ public class ExcelImport implements ExerciseDAO {
 
         Collection<CommonUserExercise> overrides = userExerciseDAO.getOverrides();
 
-        logger.debug("found " + overrides.size() + " overrides...");
+        if (overrides.size() > 0) {
+          logger.debug("found " + overrides.size() + " overrides...");
+        }
+
         int override = 0;
         for (CommonUserExercise userExercise : overrides) {
           if (!removes.contains(userExercise.getID())) {
@@ -160,7 +163,9 @@ public class ExcelImport implements ExerciseDAO {
             //}
           }
         }
-        logger.debug("overlay count was " + override);
+        if (override > 0) {
+          logger.debug("overlay count was " + override);
+        }
 
         // add new items
         for (String id : addRemoveDAO.getAdds()) {
