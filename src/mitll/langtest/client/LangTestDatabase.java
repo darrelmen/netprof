@@ -105,11 +105,11 @@ public interface LangTestDatabase extends RemoteService {
   Map<String, Map<Integer, Integer>> getResultCountsByGender();
   Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts();
 
-  UserPerformance getPerformanceForUser(long id);
+  UserPerformance getPerformanceForUser(long id, int minRecordings);
 
-  List<WordScore> getWordScores(long id);
+  List<WordScore> getWordScores(long id, int minRecordings);
 
-  PhoneReport getPhoneScores(long id);
+  PhoneReport getPhoneScores(long id, int minRecordings);
 
   void logMessage(String message);
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device);
