@@ -25,19 +25,24 @@ public class DecodeAlignOutput {
   public DecodeAlignOutput(PretestScore alignmentScore, boolean isDecode) {
     this(alignmentScore.getHydecScore(), new ScoreToJSON().getJsonObject(alignmentScore).toString(),
         //numPhones(alignmentScore),
-        alignmentScore.getProcessDur(), false, isDecode, alignmentScore);
+        alignmentScore.getProcessDur(), false,
+        //isDecode,
+        alignmentScore);
   }
 
   public DecodeAlignOutput(AudioAnswer decodeAnswer, boolean isDecode) {
     this((float) decodeAnswer.getScore(),
         new ScoreToJSON().getJsonFromAnswer(decodeAnswer).toString(),
         //     numPhones(decodeAnswer.getPretestScore()),
-        decodeAnswer.getPretestScore().getProcessDur(), decodeAnswer.isCorrect(), isDecode, decodeAnswer.getPretestScore());
+        decodeAnswer.getPretestScore().getProcessDur(), decodeAnswer.isCorrect(),
+        //isDecode,
+        decodeAnswer.getPretestScore());
   }
 
   public DecodeAlignOutput(float score, String json,
                            //int numPhones,
-                           long processDurInMillis, boolean isCorrect, boolean isDecode, PretestScore pretestScore) {
+                           long processDurInMillis, boolean isCorrect,// boolean isDecode,
+                           PretestScore pretestScore) {
     this.score = score;
     this.json = json;
     this.numPhones = numPhones(pretestScore);
