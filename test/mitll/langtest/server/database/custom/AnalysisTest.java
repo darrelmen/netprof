@@ -36,10 +36,8 @@ public class AnalysisTest {
     List<CommonExercise> exercises = war.getExercises();
     logger.warn("found " + exercises.size() + " exercises");
 
-
     Map<String,CommonExercise> idToEx = new HashMap<String,CommonExercise>();
     for (CommonExercise ex : exercises) idToEx.put(ex.getID(),ex);
-
 
     Map<Long, Map<String, Result>> userToResults = war.getResultDAO().getUserToResults(true, war.getUserDAO());
     Map<String, Result> stringResultMap = userToResults.get(71l);
