@@ -65,11 +65,14 @@ public class UserInfo implements Serializable {
   }
 
   public String toString() {
-    return getUser().getId() + "/"+getUserID() + " : "+ getNum() + " : " +getStart() + " " + getCurrent() + " " + getDiff();
+    User user = getUser();
+
+    String id = user == null ? "UNK" :""+user.getId();
+    return id + "/"+getUserID() + " : "+ getNum() + " : " +getStart() + " " + getCurrent() + " " + getDiff();
   }
 
   public String getUserID() {
-    return getUser().getUserID();
+    return getUser() == null ? "UNK" : getUser().getUserID();
   }
 
   public long getTimestampMillis() {
