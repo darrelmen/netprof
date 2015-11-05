@@ -145,6 +145,31 @@ public class ResultDAO extends DAO {
     return new ArrayList<Result>();
   }
 
+  public List<Result> getResultsToDecode() {
+    try {
+      String sql = "SELECT" +
+          " * " +
+//        "id" +
+//        "," +
+//        "answer" +
+          " FROM " +
+          RESULTS +
+          " where " +
+          PRON_SCORE +
+          ">0 AND " +
+          "(" +
+          SCORE_JSON +
+          " = '{}' " +
+          "OR " + SCORE_JSON + " = '{\"words\":[]}')";
+      logger.info("sql\n" +sql);
+      return getResultsSQL(sql);
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+      logException(ee);
+    }
+    return new ArrayList<Result>();
+  }
+
   private List<CorrectAndScore> getCorrectAndScores() {
     try {
       synchronized (this) {
