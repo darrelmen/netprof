@@ -769,7 +769,7 @@ public class DatabaseImpl implements Database {
 
   public boolean logEvent(String id, String widgetType, String exid, String context, long userid, String hitID,
                           String device) {
-    return eventDAO !=null && eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, hitID, device));
+    return eventDAO != null && eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, hitID, device));
   }
 
   public void logAndNotify(Exception e) {
@@ -1205,6 +1205,11 @@ public class DatabaseImpl implements Database {
     }
   }
 
+  public void rememberScore(long resultID, PretestScore asrScoreForAudio) {
+    getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson());
+    recordWordAndPhoneInfo(resultID, asrScoreForAudio);
+  }
+
   public void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
     PretestScore pretestScore = answer.getPretestScore();
     if (pretestScore == null) {
@@ -1213,7 +1218,7 @@ public class DatabaseImpl implements Database {
     recordWordAndPhoneInfo(answerID, pretestScore);
   }
 
-  public void recordWordAndPhoneInfo(long answerID, PretestScore pretestScore) {
+  private void recordWordAndPhoneInfo(long answerID, PretestScore pretestScore) {
     if (pretestScore != null) {
       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getsTypeToEndTimes();
       recordWordAndPhoneInfo(answerID, netPronImageTypeListMap);
