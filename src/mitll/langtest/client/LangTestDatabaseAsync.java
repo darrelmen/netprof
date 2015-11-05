@@ -156,11 +156,11 @@ public interface LangTestDatabaseAsync {
 
   void getContextPractice(AsyncCallback<ContextPractice> async);
 
-  void getPerformanceForUser(long id, AsyncCallback<UserPerformance> async);
+  void getPerformanceForUser(long id, int minRecordings, AsyncCallback<UserPerformance> async);
 
-  void getWordScores(long id, AsyncCallback<List<WordScore>> async);
+  void getWordScores(long id, int minRecordings, AsyncCallback<List<WordScore>> async);
 
-  void getPhoneScores(long id, AsyncCallback<PhoneReport> async);
+  void getPhoneScores(long id, int minRecordings, AsyncCallback<PhoneReport> async);
 
   void getUsersWithRecordings(AsyncCallback<Collection<UserInfo>> async);
 }
