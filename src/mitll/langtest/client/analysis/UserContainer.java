@@ -55,6 +55,11 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     this.service = service;
   }
 
+  protected int getPageSize() {
+    return 25;
+  }
+
+
   /**
    * @param users
    * @return
