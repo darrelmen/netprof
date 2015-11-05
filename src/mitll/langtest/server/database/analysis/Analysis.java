@@ -1,8 +1,8 @@
 package mitll.langtest.server.database.analysis;
 
+import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.*;
-import mitll.langtest.server.scoring.CollationSort;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.*;
@@ -20,7 +20,7 @@ public class Analysis extends DAO {
   private static final Logger logger = Logger.getLogger(Analysis.class);
 
   private static final int MAX_EXAMPLES = 50;
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
   private static final int MIN_RECORDINGS = 5;
@@ -45,10 +45,10 @@ public class Analysis extends DAO {
    * @param id
    * @return
    */
-  public List<BestScore> getResultForUser(long id) {
+/*  public List<BestScore> getResultForUser(long id) {
     try {
       String sql = getPerfSQL(id);
-      Map<Long, UserInfo> best = getBest(sql);
+      Map<Long, UserInfo> best = getBest(sql, minRecordings);
 
       List<BestScore> resultsForQuery = best.values().iterator().next().getBestScores();
       return resultsForQuery;
@@ -56,7 +56,7 @@ public class Analysis extends DAO {
       logException(ee);
     }
     return new ArrayList<BestScore>();
-  }
+  }*/
 
   Set<String> lincoln = new HashSet<>(Arrays.asList("gvidaver", "rbudd", "jmelot", "esalesky", "gatewood",
       "testing", "grading", "fullperm",
@@ -67,10 +67,16 @@ public class Analysis extends DAO {
       //"WagnerSandy",
       "rbtrbt"));
 
-  public List<UserInfo> getUserInfo(UserDAO userDAO) {
+  /**
+   * @see LangTestDatabaseImpl#getUsersWithRecordings()
+   * @param userDAO
+   * @param minRecordings
+   * @return
+   */
+  public List<UserInfo> getUserInfo(UserDAO userDAO, int minRecordings) {
     String sql = getPerfSQL();
     try {
-      Map<Long, UserInfo> best = getBest(sql);
+      Map<Long, UserInfo> best = getBest(sql, minRecordings);
       Map<Long, User> userMap = userDAO.getUserMap();
       List<UserInfo> userInfos = new ArrayList<>();
       for (Map.Entry<Long, UserInfo> pair : best.entrySet()) {
@@ -78,8 +84,7 @@ public class Analysis extends DAO {
 
         if (user == null) {
           logger.warn("huh? no user for " + pair.getKey());
-        }
-        else {
+        } else {
           boolean isLL = lincoln.contains(user.getUserID());
           if (!isLL) {
             pair.getValue().setUser(user);
@@ -90,7 +95,7 @@ public class Analysis extends DAO {
       Collections.sort(userInfos, new Comparator<UserInfo>() {
         @Override
         public int compare(UserInfo o1, UserInfo o2) {
-          return -1*Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
+          return -1 * Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
         }
       });
       return userInfos;
@@ -102,19 +107,20 @@ public class Analysis extends DAO {
 
   /**
    * @param sql
+   * @param minRecordings
    * @return
    * @throws SQLException
-   * @see #getPerformanceForUser(long)
-   * @see #getPhonesForUser(long)
+   * @see #getPerformanceForUser(long, int)
+   * @see #getPhonesForUser(long, int)
    * @see #getResultForUser(long)
-   * @see #getWordScoresForUser(long)
+   * @see #getWordScoresForUser(long, int)
    */
-  private Map<Long, UserInfo> getBest(String sql) throws SQLException {
-     logger.info("got " + sql);
+  private Map<Long, UserInfo> getBest(String sql, int minRecordings) throws SQLException {
+    logger.info("getBest sql =\n" + sql);
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     long then = System.currentTimeMillis();
-    Map<Long, UserInfo> bestForQuery = getBestForQuery(connection, statement);
+    Map<Long, UserInfo> bestForQuery = getBestForQuery(connection, statement, minRecordings);
     long now = System.currentTimeMillis();
     logger.debug("getBest took " + (now - then) + " millis to return\t" + bestForQuery.size() + " items");
 
@@ -169,19 +175,19 @@ public class Analysis extends DAO {
 
   /**
    * @param id
+   * @param minRecordings
    * @return
-   * @see ResultDAO#getPerformanceForUser(long, PhoneDAO)
+   * @see ResultDAO#getPerformanceForUser(long, PhoneDAO, int)
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
-  public UserPerformance getPerformanceForUser(long id) {
+  public UserPerformance getPerformanceForUser(long id, int minRecordings) {
     try {
-      Map<Long, UserInfo> best = getBest(getPerfSQL(id));
+      Map<Long, UserInfo> best = getBest(getPerfSQL(id), minRecordings);
 
       Collection<UserInfo> values = best.values();
       if (values.isEmpty()) {
         return new UserPerformance();
-      }
-      else {
+      } else {
         UserInfo next = values.iterator().next();
         List<BestScore> resultsForQuery = next.getBestScores();
 
@@ -195,20 +201,20 @@ public class Analysis extends DAO {
 
   /**
    * @param id
+   * @param minRecordings
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getWordScores(long)
    */
-  public List<WordScore> getWordScoresForUser(long id) {
+  public List<WordScore> getWordScoresForUser(long id, int minRecordings) {
     try {
       String sql = getPerfSQL(id);
-      Map<Long, UserInfo> best = getBest(sql);
+      Map<Long, UserInfo> best = getBest(sql, minRecordings);
 
       Collection<UserInfo> values = best.values();
       if (values.isEmpty()) {
         logger.warn("no best values for " + id);
         return getWordScore(Collections.emptyList());
-      }
-      else {
+      } else {
         UserInfo next = values.iterator().next();
         List<BestScore> resultsForQuery = next.getBestScores();
         return getWordScore(resultsForQuery);
@@ -221,13 +227,14 @@ public class Analysis extends DAO {
 
   /**
    * @param id
+   * @param minRecordings
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPhoneScores(long)
    */
-  public PhoneReport getPhonesForUser(long id) {
+  public PhoneReport getPhonesForUser(long id, int minRecordings) {
     try {
       String sql = getPerfSQL(id);
-      Map<Long, UserInfo> best = getBest(sql);
+      Map<Long, UserInfo> best = getBest(sql, minRecordings);
       if (best.isEmpty()) return new PhoneReport();
 
       UserInfo next = best.values().iterator().next();
@@ -274,14 +281,15 @@ public class Analysis extends DAO {
   /**
    * @param connection
    * @param statement
+   * @param minRecordings
    * @return
    * @throws SQLException
-   * @see #getBest(String)
+   * @see #getBest(String, int)
    */
-  private Map<Long, UserInfo> getBestForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+  private Map<Long, UserInfo> getBestForQuery(Connection connection, PreparedStatement statement, int minRecordings) throws SQLException {
     Map<Long, List<BestScore>> userToBest = getUserToResults(connection, statement);
 
-    logger.info("got " + userToBest.values().iterator().next().size());
+    logger.info("getBestForQuery got " + userToBest.values().iterator().next().size());
 
     Map<Long, List<BestScore>> userToBest2 = new HashMap<>();
     Map<Long, Long> userToEarliest = new HashMap<>();
@@ -295,7 +303,7 @@ public class Analysis extends DAO {
       String last = null;
 
       long lastTimestamp = 0;
-     // int count = 0;
+      // int count = 0;
       BestScore lastBest = null;
       Set<Integer> seen = new HashSet<>();
 
@@ -305,30 +313,30 @@ public class Analysis extends DAO {
         long time = bs.getTimestamp();
 
         Long aLong = userToEarliest.get(userID);
-        if (aLong == null || time < aLong) userToEarliest.put(userID,time);
+        if (aLong == null || time < aLong) userToEarliest.put(userID, time);
 
         if ((last != null && !last.equals(exid)) || (lastTimestamp > 0 && time - lastTimestamp > FIVE_MINUTES)) {
           if (seen.contains(id)) {
             logger.warn("skipping " + id);
           } else {
             bestScores.add(lastBest);
-           // logger.info("Adding " + lastBest);
+            // logger.info("Adding " + lastBest);
             seen.add(id);
           }
-  //        lastBest.setCount(count);
+          //        lastBest.setCount(count);
           lastTimestamp = time;
-       //   count = 0;
+          //   count = 0;
         }
         if (lastTimestamp == 0) lastTimestamp = time;
         last = exid;
         lastBest = bs;
 //        lastBest = new BestScore(exid, pronScore, time, id, json, isiPad, path);
-       // count++;
+        // count++;
       }
 
       if (lastBest != null) {
         if (seen.contains(lastBest.getResultID())) {
-          logger.warn("skipping " + lastBest.getResultID());
+          logger.warn("getBestForQuery skipping " + lastBest.getResultID());
         } else {
           bestScores.add(lastBest);
         }
@@ -348,10 +356,10 @@ public class Analysis extends DAO {
     Map<Long, UserInfo> userToUserInfo = new HashMap<>();
     for (Map.Entry<Long, List<BestScore>> pair : userToBest2.entrySet()) {
       List<BestScore> value = pair.getValue();
-      if (value.size() >= MIN_RECORDINGS) {
+      if (value.size() >= minRecordings) {
         Long userID = pair.getKey();
         Long aLong = userToEarliest.get(userID);
-        userToUserInfo.put(userID, new UserInfo(value,aLong));
+        userToUserInfo.put(userID, new UserInfo(value, aLong));
       }
     }
 
@@ -371,7 +379,7 @@ public class Analysis extends DAO {
 
       List<BestScore> results = userToBest.get(userid);
       if (results == null) userToBest.put(userid, results = new ArrayList<BestScore>());
-    //  lastResults = results;
+      //  lastResults = results;
 
       if (pronScore < 0.01) logger.warn("huh? got " + pronScore + " for " + exid + " and " + id);
 
@@ -458,7 +466,7 @@ public class Analysis extends DAO {
    *
    * @param bestScores
    * @return
-   * @see #getWordScoresForUser(long)
+   * @see #getWordScoresForUser(long, int)
    */
   private List<WordScore> getWordScore(List<BestScore> bestScores) {
     List<WordScore> results = new ArrayList<WordScore>();
