@@ -33,7 +33,7 @@ public class UserPerformance implements Serializable {
   }
 
   /**
-   * @see mitll.langtest.server.database.analysis.Analysis#getPerformanceForUser(long)
+   * @see Analysis#getPerformanceForUser(long, int)
    * @param userID
    * @param resultsForQuery
    */
@@ -92,7 +92,7 @@ public class UserPerformance implements Serializable {
   }
 
   /**
-   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long, String)
+   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long, String, int)
    * @return
    * @see #getRawAverage()
    */
@@ -107,7 +107,7 @@ public class UserPerformance implements Serializable {
   }
 
   /**
-   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long, String)
+   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long, String, int)
    * @return
    */
   public float getRawAverage() {
