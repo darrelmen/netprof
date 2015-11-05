@@ -13,31 +13,32 @@ import java.util.*;
 public class UserPerformance implements Serializable {
 //  private transient final Logger logger = Logger.getLogger("UserPerformance");
 
-  private List<TimeAndScore> timeAndScores = new ArrayList<>();
+  //private List<TimeAndScore> timeAndScores = new ArrayList<>();
   private List<TimeAndScore> rawTimeAndScores = new ArrayList<>();
   private List<TimeAndScore> iPadTimeAndScores = new ArrayList<>();
   private List<TimeAndScore> browserTimeAndScores = new ArrayList<>();
-  private int start;
-  private int diff;
+  //private int start;
+ // private int diff;
 
   private long userID;
 
-  public UserPerformance() {}
+  public UserPerformance() {
+  }
 
   /**
-   * @see Analysis#getPerformanceForUser
    * @param userID
+   * @see Analysis#getPerformanceForUser
    */
   public UserPerformance(long userID) {
     this.userID = userID;
   }
 
   /**
-   * @see Analysis#getPerformanceForUser(long, int)
    * @param userID
    * @param resultsForQuery
+   * @see Analysis#getPerformanceForUser(long, int)
    */
-  public UserPerformance(long userID, List<BestScore> resultsForQuery, int start, int diff) {
+  public UserPerformance(long userID, List<BestScore> resultsForQuery) {
     this(userID);
     setRawBestScores(resultsForQuery);
   }
@@ -63,8 +64,8 @@ public class UserPerformance implements Serializable {
   }*/
 
   /**
-   * @param bestScores
-   * @see #setAtBinSize(List, long)
+   * @paramx bestScores
+   * @seex #setAtBinSize(List, long)
    */
  /* private void addBestScores(List<BestScore> bestScores, long binSize) {
     addTimeAndScore(new TimeAndScore(bestScores, binSize));
@@ -75,40 +76,43 @@ public class UserPerformance implements Serializable {
     timeAndScores.add(ts);
   }
 */
-  private int getTotal() {
+/*  private int getTotal() {
     return getTotal(timeAndScores);
-  }
+  }*/
 
-  private int getTotal(Collection<TimeAndScore> timeAndScores) {
+/*  private int getTotal(Collection<TimeAndScore> timeAndScores) {
     return timeAndScores.size();
 //    logger.info("getTotal " + timeAndScores.size());
 
-/*    int total = 0;
+*//*    int total = 0;
     for (TimeAndScore ts : timeAndScores) {
       //logger.info("got " + ts);
       total += ts.getCount();
     }
-    return total;*/
-  }
+    return total;*//*
+  }*/
 
   /**
-   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long, String, int)
    * @return
+   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long, String, int)
    * @see #getRawAverage()
    */
   public int getRawTotal() {
 //    logger.info("Raw total " + rawTimeAndScores.size());
-    return getTotal(rawTimeAndScores);
+  //  return getTotal(rawTimeAndScores);
+    return rawTimeAndScores.size();
   }
 
-  private float getAverage() {
+/*  private float getAverage() {
     float total = getTotalScore(timeAndScores);
-    return total / (float) getTotal();
-  }
+    int total1 = getTotal();
+    if (total1 == 0) total1 = 1;
+    return total / (float) total1;
+  }*/
 
   /**
-   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long, String, int)
    * @return
+   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long, String, int)
    */
   public float getRawAverage() {
     float total = getTotalScore(rawTimeAndScores);
@@ -128,18 +132,13 @@ public class UserPerformance implements Serializable {
     return total;
   }
 
+/*
   private List<TimeAndScore> getTimeAndScores() {
     return timeAndScores;
   }
+*/
 
-  public String toString() {
-    StringBuilder builder = new StringBuilder();
-    builder.append("For user " + getUserID() + " " + getTotal() + " items, avg score " + getAverage());
-    for (TimeAndScore ts : getTimeAndScores()) {
-      builder.append("\n").append(ts);
-    }
-    return builder.toString();
-  }
+
 
   private long getUserID() {
     return userID;
@@ -172,8 +171,8 @@ public class UserPerformance implements Serializable {
   }
 
   /**
-   * @see #UserPerformance()
    * @param rawBestScores
+   * @see #UserPerformance()
    */
   private void setRawBestScores(List<BestScore> rawBestScores) {
     Collections.sort(rawBestScores, new Comparator<BestScore>() {
@@ -203,10 +202,23 @@ public class UserPerformance implements Serializable {
   public List<TimeAndScore> getRawBestScores() {
     return rawTimeAndScores;
   }
+
   public List<TimeAndScore> getiPadTimeAndScores() {
     return iPadTimeAndScores;
   }
+
   public List<TimeAndScore> getBrowserTimeAndScores() {
     return browserTimeAndScores;
+  }
+
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("User " + getUserID() + " " + getRawTotal() + " items, avg score " + getRawAverage() );
+    int count = 0;
+    for (TimeAndScore ts : getRawBestScores()) {
+      builder.append("\n").append(ts);
+      if (count++ > 10) break;
+    }
+    return builder.toString();
   }
 }
