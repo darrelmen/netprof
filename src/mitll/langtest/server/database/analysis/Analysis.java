@@ -112,7 +112,7 @@ public class Analysis extends DAO {
    * @throws SQLException
    * @see #getPerformanceForUser(long, int)
    * @see #getPhonesForUser(long, int)
-   * @see #getResultForUser(long)
+   * @seex #getResultForUser(long)
    * @see #getWordScoresForUser(long, int)
    */
   private Map<Long, UserInfo> getBest(String sql, int minRecordings) throws SQLException {
@@ -186,12 +186,17 @@ public class Analysis extends DAO {
 
       Collection<UserInfo> values = best.values();
       if (values.isEmpty()) {
+        if (DEBUG) logger.debug("no results for " + id);
         return new UserPerformance();
       } else {
         UserInfo next = values.iterator().next();
-        List<BestScore> resultsForQuery = next.getBestScores();
 
-        return new UserPerformance(id, resultsForQuery, next.getStart(), next.getDiff());
+        if (DEBUG)  logger.debug(" results for " + values.size() + "  first  " + next);
+
+        List<BestScore> resultsForQuery = next.getBestScores();
+        if (DEBUG) logger.debug(" resultsForQuery for " + resultsForQuery.size());
+
+        return new UserPerformance(id, resultsForQuery);
       }
     } catch (Exception ee) {
       logException(ee);
@@ -203,7 +208,7 @@ public class Analysis extends DAO {
    * @param id
    * @param minRecordings
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getWordScores(long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getWordScores
    */
   public List<WordScore> getWordScoresForUser(long id, int minRecordings) {
     try {
@@ -320,7 +325,7 @@ public class Analysis extends DAO {
             logger.warn("skipping " + id);
           } else {
             bestScores.add(lastBest);
-            // logger.info("Adding " + lastBest);
+            if (DEBUG) logger.info("Adding " + lastBest);
             seen.add(id);
           }
           //        lastBest.setCount(count);
@@ -338,6 +343,8 @@ public class Analysis extends DAO {
         if (seen.contains(lastBest.getResultID())) {
           logger.warn("getBestForQuery skipping " + lastBest.getResultID());
         } else {
+          if (DEBUG) logger.debug("getBestForQuery bestScores now " + bestScores.size());
+
           bestScores.add(lastBest);
         }
       }
@@ -356,12 +363,17 @@ public class Analysis extends DAO {
     Map<Long, UserInfo> userToUserInfo = new HashMap<>();
     for (Map.Entry<Long, List<BestScore>> pair : userToBest2.entrySet()) {
       List<BestScore> value = pair.getValue();
+      Long userID = pair.getKey();
       if (value.size() >= minRecordings) {
-        Long userID = pair.getKey();
         Long aLong = userToEarliest.get(userID);
         userToUserInfo.put(userID, new UserInfo(value, aLong));
       }
+      else {
+        if (DEBUG) logger.debug("skipping  " +userID + ": " + value.size());
+      }
     }
+
+    if (DEBUG) logger.info("Return " + userToUserInfo);
 
     return userToUserInfo;
   }
