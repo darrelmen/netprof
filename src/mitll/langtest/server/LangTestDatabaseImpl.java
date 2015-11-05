@@ -218,9 +218,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, userID, audioFileHelper.getCollator());
         } else {
           commonExercises = new ArrayList<CommonExercise>(exercises);
-        //  logger.warn("before " + commonExercises);
+          //  logger.warn("before " + commonExercises);
           sortExercises(role, commonExercises);
-        //  logger.warn("after " + commonExercises);
+          //  logger.warn("after " + commonExercises);
         }
 
         return makeExerciseListWrapper(reqID, commonExercises, userID, role, onlyExamples, incorrectFirstOrder);
@@ -1039,8 +1039,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         " took " + timeToRunHydec + " millis " + " usePhoneToDisplay " + usePhoneToDisplay1);
 
     if (resultID > -1 && result == null) { // alignment has two steps : 1) post the audio, then 2) do alignment
-      db.getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson());
-      db.recordWordAndPhoneInfo(resultID, asrScoreForAudio);
+      db.rememberScore(resultID, asrScoreForAudio);
     }
     return asrScoreForAudio;
   }
@@ -1214,7 +1213,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public boolean isValidForeignPhrase(String foreign) {
     boolean b = audioFileHelper.checkLTS(foreign);
-		/*    logger.debug("'" +foreign +
+    /*    logger.debug("'" +foreign +
       "' is valid phrase = "+b);*/
     return b;
   }
@@ -1939,13 +1938,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis(LangTestDatabaseAsync, ExerciseController, ShowTab)
    * @return
+   * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis(LangTestDatabaseAsync, ExerciseController, ShowTab)
    */
   @Override
   public Collection<UserInfo> getUsersWithRecordings() {
     return db.getAnalysis().getUserInfo(db.getUserDAO(), 5);
   }
+
   public Map<Integer, Integer> getResultCountToCount() {
     return db.getResultCountToCount();
   }
@@ -2058,25 +2058,31 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    * @param id
    * @param minRecordings
    * @return
+   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
   @Override
-  public UserPerformance getPerformanceForUser(long id, int minRecordings) { return db.getResultDAO().getPerformanceForUser(id, db.getPhoneDAO(), minRecordings); }
+  public UserPerformance getPerformanceForUser(long id, int minRecordings) {
+    return db.getResultDAO().getPerformanceForUser(id, db.getPhoneDAO(), minRecordings);
+  }
 
   /**
-   * @see mitll.langtest.client.analysis.AnalysisTab#getWordScores
    * @param id
    * @param minRecordings
    * @return
+   * @see mitll.langtest.client.analysis.AnalysisTab#getWordScores
    */
   @Override
-  public List<WordScore> getWordScores(long id, int minRecordings) { return db.getAnalysis().getWordScoresForUser(id, minRecordings); }
+  public List<WordScore> getWordScores(long id, int minRecordings) {
+    return db.getAnalysis().getWordScoresForUser(id, minRecordings);
+  }
 
   @Override
-  public PhoneReport getPhoneScores(long id, int minRecordings) { return db.getAnalysis().getPhonesForUser(id, minRecordings); }
+  public PhoneReport getPhoneScores(long id, int minRecordings) {
+    return db.getAnalysis().getPhonesForUser(id, minRecordings);
+  }
 
   public void logMessage(String message) {
     String prefixedMessage = "for " + pathHelper.getInstallPath() + " from client " + message;
