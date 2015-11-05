@@ -1,30 +1,26 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.shared.analysis.*;
 import org.apache.log4j.Logger;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
  * Created by GO22670 on 1/30/14.
  */
-public class PerformanceTest {
+public class PerformanceTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(PerformanceTest.class);
   public static final int CHINESE_DUDE = 71;
   private static DatabaseImpl database;
   private static String dbName;
 
-  @BeforeClass
+/*  @BeforeClass
   public static void setup() {
     logger.debug("setup called");
 
@@ -43,16 +39,18 @@ public class PerformanceTest {
     logger.debug("media " + media);
     database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(), "media");
     List<CommonExercise> exercises = database.getExercises();
-  }
+  }*/
 
   @Test
   public void testBest() {
     try {
       BufferedWriter writer = getWriter("bestScore");
       int chineseDude = CHINESE_DUDE;
-         int id = 71;
+      //int id = 71;
+      int id = 107;
 
       //int id = 1;//116;
+/*
       List<BestScore> resultForUser = database.getAnalysis().getResultForUser(id);
       Collections.sort(resultForUser, new Comparator<BestScore>() {
         @Override
@@ -65,6 +63,7 @@ public class PerformanceTest {
         writer.write(bestScore.toCSV() + "\n");
       }
       writer.close();
+*/
 
 /*      UserPerformance performance = database.getAnalysis().getResultForUserByBin(71, ResultDAO.FIVE_MINUTES);
       writer = getWriter("UserPerformance_5_Min");
@@ -83,25 +82,32 @@ public class PerformanceTest {
       writer.close();*/
 
 
-      UserPerformance performance = database.getAnalysis().getPerformanceForUser(id);
+      UserPerformance performance = database.getAnalysis().getPerformanceForUser(id, 1);
       writer = getWriter("RawUserPerformance");
       writer.write(performance.toRawCSV());
       writer.close();
 
-      List<WordScore> wordScoresForUser = database.getAnalysis().getWordScoresForUser(id);
+      List<WordScore> wordScoresForUser = database.getAnalysis().getWordScoresForUser(id, 1);
       for (WordScore ws : wordScoresForUser) logger.info("got " + ws);
 
     } catch (IOException e) {
-
-
     }
+  }
+
+  @Test
+  public void testSpecific() {
+    String path = "npfSpanish";//.replaceAll(".h2.db", "");
+
+    H2Connection connection = getH2Connection(path);
+    DatabaseImpl database = getDatabase(connection,"spanish",path);
+    database.getAnalysis().getPerformanceForUser(107, 1);
   }
 
   @Test
   public void testWords() {
     // int id = 71;
     int id = 26;
-    List<WordScore> wordScoresForUser = database.getAnalysis().getWordScoresForUser(id);
+    List<WordScore> wordScoresForUser = database.getAnalysis().getWordScoresForUser(id, 1);
     for (WordScore ws : wordScoresForUser) logger.info("testWords got " + ws);
   }
 
@@ -111,7 +117,7 @@ public class PerformanceTest {
     //   int id = 71; // psanish
     //int id = 41; // big mandarin classroom user
     int id = 71;
-    PhoneReport phoneReport = database.getAnalysis().getPhonesForUser(id);
+    PhoneReport phoneReport = database.getAnalysis().getPhonesForUser(id, 1);
 
     Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
     long now = System.currentTimeMillis();
@@ -135,7 +141,7 @@ public class PerformanceTest {
     //   int id = 71; // psanish
     //int id = 41; // big mandarin classroom user
 //    int id = 71;
-    List<UserInfo> userInfo = database.getAnalysis().getUserInfo(database.getUserDAO());
+    List<UserInfo> userInfo = database.getAnalysis().getUserInfo(database.getUserDAO(), 5);
     // PhoneReport phoneReport = (PhoneReport) userInfo;
 
     // Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
@@ -155,14 +161,14 @@ public class PerformanceTest {
 //    for(WordScore ws : wordScoresForUser) logger.info("got " + ws);
   }
 
-
+  /*
   private BufferedWriter getWriter(String prefix) throws IOException {
     SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy_HH_mm_ss");
     String today = simpleDateFormat2.format(new Date());
     File file = getReportFile(new PathHelper("war"), today, prefix);
     logger.info("writing to " + file.getAbsolutePath());
     return new BufferedWriter(new FileWriter(file));
-  }
+  }*/
 
   private File getReportFile(PathHelper pathHelper, String today, String prefix) {
     File reports = pathHelper.getAbsoluteFile("reports");
