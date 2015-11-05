@@ -33,14 +33,14 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class UserContainer extends SimplePagingContainer<UserInfo> {
-  private final Logger logger = Logger.getLogger("UserContainer");
+  //private final Logger logger = Logger.getLogger("UserContainer");
 
-  public static final int ID_WIDTH = 130;
-  public static final int TABLE_WIDTH = 460;
+  private static final int ID_WIDTH = 130;
+  private static final int TABLE_WIDTH = 460;
 
-  private ShowTab learnTab;
-  DivWidget rightSide;
-  LangTestDatabaseAsync service;
+  private final ShowTab learnTab;
+  private final DivWidget rightSide;
+  private final LangTestDatabaseAsync service;
 
   /**
    * @param controller
@@ -402,9 +402,8 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     };
   }
 
-
   private void gotClickOnItem(final UserInfo user) {
-    AnalysisTab widgets = new AnalysisTab(service, controller, (int) user.getUser().getId(), learnTab, user.getUser().getUserID());
+    AnalysisTab widgets = new AnalysisTab(service, controller, (int) user.getUser().getId(), learnTab, user.getUser().getUserID(), 5);
     rightSide.clear();
     rightSide.add(widgets);
   }
@@ -413,6 +412,9 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
   }
 
+  /**
+   * MUST BE PUBLIC
+   */
   public interface LocalTableResources extends CellTable.Resources {
     /**
      * The styles applied to the table.
