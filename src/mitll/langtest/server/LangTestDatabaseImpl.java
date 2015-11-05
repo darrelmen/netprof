@@ -778,7 +778,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @param byID
-   * @see LoadTesting#getExercise(String, long, boolean)
+   * @seex LoadTesting#getExercise
    * @see #makeExerciseListWrapper(int, java.util.Collection, long, String, boolean, boolean)
    */
   private void ensureMP3s(CommonExercise byID) {
@@ -1086,7 +1086,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @param userListID
    * @param isPublic
-   * @see mitll.langtest.client.custom.Navigation#setPublic(long, boolean)
+   * @see mitll.langtest.client.custom.Navigation#setPublic
    */
   @Override
   public void setPublicOnList(long userListID, boolean isPublic) {
@@ -1944,7 +1944,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public Collection<UserInfo> getUsersWithRecordings() {
-    return db.getAnalysis().getUserInfo(db.getUserDAO());
+    return db.getAnalysis().getUserInfo(db.getUserDAO(), 5);
   }
   public Map<Integer, Integer> getResultCountToCount() {
     return db.getResultCountToCount();
@@ -2060,21 +2060,23 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    * @param id
+   * @param minRecordings
    * @return
    */
   @Override
-  public UserPerformance getPerformanceForUser(long id) { return db.getResultDAO().getPerformanceForUser(id, db.getPhoneDAO()); }
+  public UserPerformance getPerformanceForUser(long id, int minRecordings) { return db.getResultDAO().getPerformanceForUser(id, db.getPhoneDAO(), minRecordings); }
 
   /**
    * @see mitll.langtest.client.analysis.AnalysisTab#getWordScores
    * @param id
+   * @param minRecordings
    * @return
    */
   @Override
-  public List<WordScore> getWordScores(long id) { return db.getAnalysis().getWordScoresForUser(id); }
+  public List<WordScore> getWordScores(long id, int minRecordings) { return db.getAnalysis().getWordScoresForUser(id, minRecordings); }
 
   @Override
-  public PhoneReport getPhoneScores(long id) { return db.getAnalysis().getPhonesForUser(id); }
+  public PhoneReport getPhoneScores(long id, int minRecordings) { return db.getAnalysis().getPhonesForUser(id, minRecordings); }
 
   public void logMessage(String message) {
     String prefixedMessage = "for " + pathHelper.getInstallPath() + " from client " + message;
