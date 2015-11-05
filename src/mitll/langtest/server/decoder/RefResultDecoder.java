@@ -1,5 +1,6 @@
 package mitll.langtest.server.decoder;
 
+import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
@@ -8,6 +9,7 @@ import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -33,6 +35,11 @@ public class RefResultDecoder {
     this.audioFileHelper = audioFileHelper;
   }
 
+  /**
+   * @param exercises
+   * @param relativeConfigDir
+   * @see LangTestDatabaseImpl#init()
+   */
   public void doRefDecode(final List<CommonExercise> exercises, final String relativeConfigDir) {
     if (serverProps.shouldDoDecode()) {
       new Thread(new Runnable() {
@@ -55,10 +62,44 @@ public class RefResultDecoder {
     return serverProps.getLanguage();
   }
 
+  private void doMissingInfo(final List<CommonExercise> exercises) {
+    List<Result> resultsToDecode = db.getResultDAO().getResultsToDecode();
+    int count = 0;
+
+    Map<String, CommonExercise> idToEx = new HashMap<>();
+    for (CommonExercise exercise : exercises) {
+      if (stopDecode) return;
+      idToEx.put(exercise.getID(), exercise);
+    }
+
+    logger.info("found " + resultsToDecode.size() + " with missing info");
+
+    for (Result res : resultsToDecode) {
+      if (count++ < 20) {
+        logger.debug("\t doMissingInfo found " + res);
+      }
+
+      String[] bestAudios = res.getAnswer().split(File.separator);
+      if (bestAudios.length > 1) {
+//        String bestAudio = bestAudios[bestAudios.length - 1];
+        //		logger.debug("added " + bestAudio);
+      //  decodedFiles.add(bestAudio);
+        CommonExercise exercise = idToEx.get(res.getExerciseID());
+        if (exercise != null) {
+          logger.info("\talign " + exercise.getID() + " and result " + res.getUniqueID());
+          PretestScore alignmentScore = audioFileHelper.getAlignmentScore(exercise, res.getAnswer(), serverProps.usePhoneToDisplay(), false);
+          db.rememberScore(res.getUniqueID(),alignmentScore);
+        }
+        if (stopDecode) break;
+        //	logger.debug("previously found " + res);
+      }
+    }
+  }
+
   /**
    * Do alignment and decoding on all the reference audio and store the results in the RefResult table.
    *
-   * @see #doDecode(Set, CommonExercise, Collection)
+   * @see #doRefDecode(List, String)
    */
   private void writeRefDecode(List<CommonExercise> exercises, String relativeConfigDir) {
     if (DO_REF_DECODE) {
@@ -120,7 +161,24 @@ public class RefResultDecoder {
       }
       logger.debug("Out of " + attrc + " best audio files, " + maleAudio + " male, " + femaleAudio + " female, " +
           defaultAudio + " default " + "decoded " + count);
+
+
+      runMissingInfo(exercises);
     }
+  }
+
+  private void runMissingInfo(final List<CommonExercise> exercises) {
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          Thread.sleep(2000); // ???
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        doMissingInfo(exercises);
+      }
+    }).start();
   }
 
   /**
@@ -152,6 +210,13 @@ public class RefResultDecoder {
     return decodedFiles;
   }
 
+  /**
+   * @param decodedFiles
+   * @param exercise
+   * @param audioAttributes
+   * @return
+   * @see #writeRefDecode(List, String)
+   */
   private int doDecode(Set<String> decodedFiles, CommonExercise exercise, Collection<AudioAttribute> audioAttributes) {
     int count = 0;
     List<AudioAttribute> toDecode = new ArrayList<AudioAttribute>();
