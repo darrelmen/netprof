@@ -76,17 +76,14 @@ public class ResultDAO extends DAO {
   /**
    * @param id
    * @param phoneDAO
+   * @param minRecordings
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPerformanceForUser(long)
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
-  public UserPerformance getPerformanceForUser(long id, PhoneDAO phoneDAO) {
-    return new Analysis(database, phoneDAO).getPerformanceForUser(id);
+  public UserPerformance getPerformanceForUser(long id, PhoneDAO phoneDAO, int minRecordings) {
+    return new Analysis(database, phoneDAO).getPerformanceForUser(id, minRecordings);
   }
-
-/*  public List<UserInfo> getPerformanceForUser(long id, PhoneDAO phoneDAO, UserDAO userDAO) {
-    return new Analysis(database, phoneDAO).getPerformanceForUser(id);
-  }*/
 
   /**
    * Pulls the list of results out of the database.
