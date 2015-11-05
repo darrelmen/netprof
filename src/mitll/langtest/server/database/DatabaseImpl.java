@@ -281,11 +281,11 @@ public class DatabaseImpl implements Database {
       long rid = word.rid;
       already.add((int) rid);
     }
-    //logger.debug("putBackWordAndPhone current word results " + already.size());
+    logger.debug("putBackWordAndPhone current word results " + already.size());
     Set<Integer> allKeys = new HashSet<>(idToResult.keySet());
-    // logger.debug("before " + allKeys.size());
+    logger.debug("putBackWordAndPhone before " + allKeys.size());
     allKeys.removeAll(already);
-    // logger.debug("after " + allKeys.size());
+    logger.debug("putBackWordAndPhone after " + allKeys.size());
     ParseResultJson parseResultJson = new ParseResultJson(getServerProps());
     int count = 0;
     for (Integer key : allKeys) {
