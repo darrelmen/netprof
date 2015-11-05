@@ -1,5 +1,6 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -180,6 +181,7 @@ public class AnswerDAO extends DAO {
    * @param id
    * @param processDur
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
+   * @see mitll.langtest.server.database.DatabaseImpl#rememberScore(long, PretestScore)
    */
   public void changeAnswer(long id, float score, int processDur, String json) {
     //logger.info("Setting id " + id + " score " + score + " process dur " + processDur + " json " + json);
