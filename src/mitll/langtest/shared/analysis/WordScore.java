@@ -9,9 +9,10 @@ import java.util.Map;
 
 /**
  * Created by go22670 on 10/21/15.
+ *
  * @see mitll.langtest.client.analysis.WordContainer#getTableWithPager(List)
  */
-public class WordScore implements Serializable, Comparable<WordScore>{
+public class WordScore implements Serializable, Comparable<WordScore> {
   private String fileRef;
   private String id;
   private long timestamp;
@@ -23,9 +24,9 @@ public class WordScore implements Serializable, Comparable<WordScore>{
   }
 
   /**
-   * @see mitll.langtest.server.database.analysis.Analysis#getWordScore(List)
    * @param bs
    * @param netPronImageTypeListMap
+   * @see mitll.langtest.server.database.analysis.Analysis#getWordScore(List)
    */
   public WordScore(BestScore bs, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
     this(bs.getId(), bs.getScore(), bs.getTimestamp(), bs.getResultID(), bs.getFileRef(), netPronImageTypeListMap);
@@ -60,19 +61,16 @@ public class WordScore implements Serializable, Comparable<WordScore>{
   public float getPronScore() {
     return pronScore;
   }
-/*
-  public int getResultID() {
-    return resultID;
-  }*/
 
   public Map<NetPronImageType, List<TranscriptSegment>> getNetPronImageTypeListMap() {
     return netPronImageTypeListMap;
   }
 
-  public String toString() { return id +"/" +resultID + " score " + pronScore+
-      "  : " + netPronImageTypeListMap; }
-
   public String getFileRef() {
     return fileRef;
+  }
+
+  public String toString() {
+    return id + "/" + resultID + " score " + pronScore + "  : " + netPronImageTypeListMap;
   }
 }
