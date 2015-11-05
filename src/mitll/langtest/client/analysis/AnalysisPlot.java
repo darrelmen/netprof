@@ -6,7 +6,6 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.analysis.TimeAndScore;
@@ -33,9 +32,10 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
    * @param service
    * @param id
    * @param userChosenID
+   * @param minRecordings
    * @see AnalysisTab#AnalysisTab
    */
-  public AnalysisPlot(LangTestDatabaseAsync service, long id, final String userChosenID) {
+  public AnalysisPlot(LangTestDatabaseAsync service, long id, final String userChosenID, final int minRecordings) {
     service.getExerciseIds(1, new HashMap<String, Collection<String>>(), "", -1,
         (int) id, "", false, false, false, false, new AsyncCallback<ExerciseListWrapper>() {
           @Override
@@ -49,7 +49,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
           }
         });
 
-    service.getPerformanceForUser(id, new AsyncCallback<UserPerformance>() {
+    service.getPerformanceForUser(id, minRecordings, new AsyncCallback<UserPerformance>() {
       @Override
       public void onFailure(Throwable throwable) {
         logger.warning("\n\n\n-> getPerformanceForUser " + throwable);
@@ -81,13 +81,10 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
    * @param title
    * @param subtitle
    * @param seriesName
-   * @param yValuesForUser
    * @return
-   * @see AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long, String)
+   * @see AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long, String, int)
    */
-  private Chart getChart(
-      String title, String subtitle, String seriesName, UserPerformance userPerformance
-  ) {
+  private Chart getChart(String title, String subtitle, String seriesName, UserPerformance userPerformance) {
     Chart chart = new Chart()
         .setZoomType(BaseChart.ZoomType.X)
         .setType(Series.Type.SCATTER)
