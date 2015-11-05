@@ -24,13 +24,13 @@ public class AnalysisTab extends DivWidget {
    * @param service
    * @param controller
    * @param userid
+   * @param minRecordings
    * @see Navigation#showAnalysis()
    * @see UserContainer#gotClickOnItem
    */
   public AnalysisTab(final LangTestDatabaseAsync service, final ExerciseController controller, final int userid,
-                     final ShowTab showTab, String userChosenID) {
-    final AnalysisPlot analysisPlot = new AnalysisPlot(service, userid, userChosenID);
-//
+                     final ShowTab showTab, String userChosenID, int minRecordings) {
+    final AnalysisPlot analysisPlot = new AnalysisPlot(service, userid, userChosenID, minRecordings);
 //
 //    DivWidget vert = new DivWidget();
 //    vert.add(new Heading(3, userChosenID));
@@ -40,13 +40,13 @@ public class AnalysisTab extends DivWidget {
     HorizontalPanel lowerHalf = new HorizontalPanel();
     add(lowerHalf);
 
-    getWordScores(service, controller, userid, showTab, analysisPlot, lowerHalf);
+    getWordScores(service, controller, userid, showTab, analysisPlot, lowerHalf, minRecordings);
   }
 
   private void getWordScores(final LangTestDatabaseAsync service, final ExerciseController controller,
                              final int userid, final ShowTab showTab, final AnalysisPlot analysisPlot,
-                             final Panel lowerHalf) {
-    service.getWordScores(userid, new AsyncCallback<List<WordScore>>() {
+                             final Panel lowerHalf, final int minRecordings) {
+    service.getWordScores(userid, minRecordings, new AsyncCallback<List<WordScore>>() {
       @Override
       public void onFailure(Throwable throwable) {
         logger.warning("Got " + throwable);
@@ -60,7 +60,7 @@ public class AnalysisTab extends DivWidget {
         vert.add(new Heading(3, "Words"));
         vert.add(tableWithPager);
         lowerHalf.add(vert);
-        getPhoneReport(service, controller, userid, lowerHalf, analysisPlot, showTab);
+        getPhoneReport(service, controller, userid, lowerHalf, analysisPlot, showTab, minRecordings);
       }
     });
   }
@@ -70,11 +70,12 @@ public class AnalysisTab extends DivWidget {
                               int userid,
                               final Panel lowerHalf,
                               AnalysisPlot analysisPlot,
-                              final ShowTab showTab) {
+                              final ShowTab showTab,
+                              final int minRecordings) {
     final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, analysisPlot, showTab);
     final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer);
 
-    service.getPhoneScores(userid, new AsyncCallback<PhoneReport>() {
+    service.getPhoneScores(userid, minRecordings, new AsyncCallback<PhoneReport>() {
       @Override
       public void onFailure(Throwable throwable) {
         logger.warning("Got " + throwable);
