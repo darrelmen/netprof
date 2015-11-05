@@ -598,7 +598,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    * @return
    * @see #decodeOneAttribute(CommonExercise, AudioAttribute)
    */
-  private PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, boolean usePhoneToDisplay, boolean useOldSchool) {
+  public PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, boolean usePhoneToDisplay, boolean useOldSchool) {
     return getASRScoreForAudio(0, testAudioPath, exercise.getRefSentence(), 128, 128, false,
         false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exercise.getID(), null, usePhoneToDisplay, useOldSchool);
   }
