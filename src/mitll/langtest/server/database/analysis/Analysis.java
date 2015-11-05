@@ -20,10 +20,10 @@ public class Analysis extends DAO {
   private static final Logger logger = Logger.getLogger(Analysis.class);
 
   private static final int MAX_EXAMPLES = 50;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
-  private static final int MIN_RECORDINGS = 5;
+ // private static final int MIN_RECORDINGS = 5;
 
   private ParseResultJson parseResultJson;
   private PhoneDAO phoneDAO;
