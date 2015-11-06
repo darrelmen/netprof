@@ -325,8 +325,6 @@ public class PropertyHandler {
         System.err.println("couldn't parse " + loginType);
       }
     }
-
-    // return grading;
   }
 
   /**
