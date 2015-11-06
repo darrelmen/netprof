@@ -27,7 +27,7 @@ public class UserInfo implements Serializable {
   }
 
   /**
-   * @see mitll.langtest.server.database.analysis.Analysis#getBestForQuery(Connection, PreparedStatement)
+   * @see mitll.langtest.server.database.analysis.Analysis#getBestForQuery
    * @param bestScores
    */
   public UserInfo(List<BestScore> bestScores,long startTime) {
