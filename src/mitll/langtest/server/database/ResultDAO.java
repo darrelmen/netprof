@@ -156,7 +156,7 @@ public class ResultDAO extends DAO {
           RESULTS +
           " where " +
           PRON_SCORE +
-          ">0 AND " +
+          ">=0 AND " +
           "(" +
           SCORE_JSON +
           " = '{}' " +
