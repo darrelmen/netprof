@@ -201,7 +201,7 @@ public class Report {
     Date january1st = getJanuaryFirst(calendar);
     Date january1stNextYear = getJanuaryFirstNextYear();
 
-    logger.info("between " + january1st + " and " + january1stNextYear);
+    logger.info("doReport : between " + january1st + " and " + january1stNextYear);
 
     addRefAudio(builder, calendar, january1st, january1stNextYear, audioAttributes, language);
 
@@ -248,7 +248,7 @@ public class Report {
     Date january1st = getJanuaryFirst(calendar);
     Date january1stNextYear = getJanuaryFirstNextYear();
 
-    logger.info("getUsers between " + january1st + " and " + january1stNextYear);
+   // logger.info("getUsers between " + january1st + " and " + january1stNextYear);
 
     int ytd = 0;
 
@@ -312,7 +312,7 @@ public class Report {
     }
     builder.append(getSectionReport(ytd, monthToCount, weekToCount, users1, language));
 
-    logger.info("Students " + students);
+//    logger.info("Students " + students);
     return students;
   }
 
@@ -476,7 +476,7 @@ public class Report {
     Calendar calendar;
     Date january1st = getJanuaryFirst(getCal());
     Date january1stNextYear = getJanuaryFirstNextYear();
-    logger.info("between " + january1st + " and " + january1stNextYear);
+  //  logger.info("between " + january1st + " and " + january1stNextYear);
 
     int ytd = 0;
 
@@ -554,8 +554,8 @@ public class Report {
     }
 
     logger.debug("Skipped " + invalid + " invalid recordings, " + invalidScore + " -1 score items, " + beforeJanuary + " beforeJan1st");
-    logger.debug("skipped " + teacherAudio + " teacher recordings by " + skipped);
-    logger.debug("userToDayToCount " + userToDayToCount.size());
+    if (teacherAudio > 0) logger.debug("skipped " + teacherAudio + " teacher recordings by " + skipped);
+    //logger.debug("userToDayToCount " + userToDayToCount.size());
 
     builder.append("\n<br/><span>Valid student recordings</span>");
     builder.append(
