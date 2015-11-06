@@ -21,8 +21,10 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/19/15.
  */
 public class AnalysisPlot extends DivWidget implements IsWidget {
-  public static final int Y_OFFSET_FOR_LEGEND = 30;
+  public static final int CHART_HEIGHT = 340;
   private final Logger logger = Logger.getLogger("AnalysisPlot");
+
+  private static final int Y_OFFSET_FOR_LEGEND = 60;
   private static final String PRONUNCIATION_SCORE = "Pronunciation Score";
 
   private Map<Long, String> timeToId = new TreeMap<>();
@@ -36,6 +38,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
    * @see AnalysisTab#AnalysisTab
    */
   public AnalysisPlot(LangTestDatabaseAsync service, long id, final String userChosenID, final int minRecordings) {
+    //setHeight("350px");
     service.getExerciseIds(1, new HashMap<String, Collection<String>>(), "", -1,
         (int) id, "", false, false, false, false, new AsyncCallback<ExerciseListWrapper>() {
           @Override
@@ -212,17 +215,19 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
   }
 
   /**
-   * @param top
    * @param chart
    * @param title
-   * @see #getChart(int, String, String, String, float, float, float, float, java.util.List)
+   * @see #getChart
    */
   private void configureChart(Chart chart, String title) {
     chart.getYAxis().setAxisTitleText(title)
-        .setMin(0);
+        .setMin(0).setMax(100);
 
     chart.getXAxis()
         .setType(Axis.Type.DATE_TIME);
+
+    chart.setHeight(CHART_HEIGHT +
+        "px");
   }
 
   private void setRawBestScores(List<TimeAndScore> rawBestScores) {
