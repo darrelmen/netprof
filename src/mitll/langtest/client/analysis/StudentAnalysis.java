@@ -21,6 +21,8 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/27/15.
  */
 public class StudentAnalysis extends DivWidget {
+  public static final int LEFT_MARGIN = UserContainer.TABLE_WIDTH+55;
+  public static final int TOP_MARGIN = -55;
   private final Logger logger = Logger.getLogger("StudentAnalysis");
 
   public StudentAnalysis(final LangTestDatabaseAsync service, final ExerciseController controller,
@@ -54,8 +56,8 @@ public class StudentAnalysis extends DivWidget {
         leftSide.add(tableWithPager);
 
         add(leftSide);
-        rightSide.getElement().getStyle().setMarginTop(-40, Style.Unit.PX);
-        rightSide.getElement().getStyle().setMarginLeft(540, Style.Unit.PX);
+        rightSide.getElement().getStyle().setMarginTop(TOP_MARGIN, Style.Unit.PX);
+        rightSide.getElement().getStyle().setMarginLeft(LEFT_MARGIN, Style.Unit.PX);
         add(rightSide);
       }
     });
