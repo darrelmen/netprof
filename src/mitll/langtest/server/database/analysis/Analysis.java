@@ -116,7 +116,7 @@ public class Analysis extends DAO {
    * @see #getWordScoresForUser(long, int)
    */
   private Map<Long, UserInfo> getBest(String sql, int minRecordings) throws SQLException {
-    logger.info("getBest sql =\n" + sql);
+    if (DEBUG) logger.info("getBest sql =\n" + sql);
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     long then = System.currentTimeMillis();
@@ -222,7 +222,12 @@ public class Analysis extends DAO {
       } else {
         UserInfo next = values.iterator().next();
         List<BestScore> resultsForQuery = next.getBestScores();
-        return getWordScore(resultsForQuery);
+        if  (DEBUG) logger.warn("resultsForQuery " + resultsForQuery.size());
+
+        List<WordScore> wordScore = getWordScore(resultsForQuery);
+        if  (DEBUG) logger.warn("wordScore " + wordScore.size());
+
+        return wordScore;
       }
     } catch (Exception ee) {
       logException(ee);
@@ -294,7 +299,7 @@ public class Analysis extends DAO {
   private Map<Long, UserInfo> getBestForQuery(Connection connection, PreparedStatement statement, int minRecordings) throws SQLException {
     Map<Long, List<BestScore>> userToBest = getUserToResults(connection, statement);
 
-    logger.info("getBestForQuery got " + userToBest.values().iterator().next().size());
+    if (DEBUG) logger.info("getBestForQuery got " + userToBest.values().iterator().next().size());
 
     Map<Long, List<BestScore>> userToBest2 = new HashMap<>();
     Map<Long, Long> userToEarliest = new HashMap<>();
@@ -391,7 +396,6 @@ public class Analysis extends DAO {
 
       List<BestScore> results = userToBest.get(userid);
       if (results == null) userToBest.put(userid, results = new ArrayList<BestScore>());
-      //  lastResults = results;
 
       if (pronScore < 0.01) logger.warn("huh? got " + pronScore + " for " + exid + " and " + id);
 
@@ -402,71 +406,10 @@ public class Analysis extends DAO {
       long time = timestamp.getTime();
 
       results.add(new BestScore(exid, pronScore, time, id, json, isiPad, trimPathForWebPage(path)));
-
-     /*
-      if ((last != null && !last.equals(exid)) || (lastTimestamp > 0 && time - lastTimestamp > FIVE_MINUTES)) {
-        if (seen.contains(id)) {
-          logger.warn("skipping " + id);
-        } else {
-          results.add(lastBest);
-          seen.add(id);
-        }
-        lastBest.setCount(count);
-        lastTimestamp = time;
-        count = 0;
-      }
-      if (lastTimestamp == 0) lastTimestamp = time;
-      last = exid;
-      lastBest = new BestScore(exid, pronScore, time, id, json, isiPad, path);
-      count++;*/
     }
     finish(connection, statement, rs);
     return userToBest;
   }
-
-/*
-  public static class BestInfo {
-    int start;
-    int current;
-    int diff;
-    int num;
-    List<BestScore> bestScores;
-
-    public BestInfo(List<BestScore> bestScores) {
-      this.bestScores = bestScores;
-      this.num = bestScores.size();
-      Collections.sort(bestScores, new Comparator<BestScore>() {
-        @Override
-        public int compare(BestScore o1, BestScore o2) {
-          return Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp());
-        }
-      });
-      List<BestScore> bestScores1 = bestScores.subList(0, Math.min(10, bestScores.size()));
-      float total = 0;
-      for (BestScore bs : bestScores1) total += bs.getScore();
-      int size = bestScores1.size();
-      start = toPercent(total, size);
-
-
-      total = 0;
-      float count = 0;
-      for (BestScore bs : bestScores) {
-        total += bs.getScore();
-        count++;
-      }
-      current = toPercent(total, count);
-      diff = current - start;
-    }
-
-    public String toString() {
-      return "" + start + " " + current + " " + diff + " " + num;
-    }
-  }
-
-  private static int toPercent(float total, float size) {
-    return (int) Math.ceil(100 * total / size);
-  }
-*/
 
   private String trimPathForWebPage(String path) {
     int answer = path.indexOf(PathHelper.ANSWERS);
@@ -484,8 +427,14 @@ public class Analysis extends DAO {
     List<WordScore> results = new ArrayList<WordScore>();
 
     for (BestScore bs : bestScores) {
-      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(bs.getJson());
-      results.add(new WordScore(bs, netPronImageTypeListMap));
+      if (bs.getJson() == null) {
+        logger.error("huh? no json for " + bs);
+      }
+      else {
+        if (bs.getJson().isEmpty()) logger.warn("no json for " + bs);
+        Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(bs.getJson());
+        results.add(new WordScore(bs, netPronImageTypeListMap));
+      }
     }
     Collections.sort(results);
     return results;
