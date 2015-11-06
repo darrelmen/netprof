@@ -48,11 +48,7 @@ public class RefResultDecoder {
       new Thread(new Runnable() {
         @Override
         public void run() {
-          try {
-            Thread.sleep(5000); // ???
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-          }
+          sleep(5000);
           writeRefDecode(exercises, relativeConfigDir);
         }
       }).start();
@@ -181,14 +177,18 @@ public class RefResultDecoder {
     new Thread(new Runnable() {
       @Override
       public void run() {
-        try {
-          Thread.sleep(2000); // ???
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
+        sleep(2000);
         doMissingInfo(exercises);
       }
     }).start();
+  }
+
+  public void sleep(int millis) {
+    try {
+      Thread.sleep(millis); // ???
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -243,6 +243,7 @@ public class RefResultDecoder {
 
       try {
         audioFileHelper.decodeOneAttribute(exercise, attribute);
+        sleep(2000);
         count++;
       } catch (Exception e) {
         logger.error("Got " + e, e);
