@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -17,8 +18,9 @@ import java.util.TreeMap;
 /**
  * Created by GO22670 on 1/30/14.
  */
-public class ReportAllTest extends  BaseTest {
+public class ReportAllTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(ReportAllTest.class);
+  public static final boolean DO_ONE = false;
 
   @Test
   public void testReports() {
@@ -44,8 +46,9 @@ public class ReportAllTest extends  BaseTest {
     int i = 0;
     PathHelper war = new PathHelper("war");
 
-    //  configs = Collections.singletonList("spanish");
-
+    if (DO_ONE) {
+      configs = Collections.singletonList("spanish");
+    }
     for (String db : strings) {
       //String path = "/Users/go22670/Development/asr/performance-reports/dbs/" + db;
       String config = configs.get(i++);
@@ -55,7 +58,7 @@ public class ReportAllTest extends  BaseTest {
       H2Connection connection = getH2(db);
 
       DatabaseImpl database = getDatabase(connection, config, db);
-      database.doReport(war);
+      database.doReport(war, config);
 
       try {
         Thread.sleep(1000);
@@ -90,7 +93,7 @@ public class ReportAllTest extends  BaseTest {
     int i = 0;
     // PathHelper war = new PathHelper("war");
 
-    //  configs = Collections.singletonList("spanish");
+ //   configs = Collections.singletonList("spanish");
     Map<String, Integer> configToUsers = new TreeMap<>();
     for (String db : strings) {
       //String path = "/Users/go22670/Development/asr/performance-reports/dbs/" + db;
@@ -101,22 +104,15 @@ public class ReportAllTest extends  BaseTest {
       H2Connection connection = getH2(db);
 
       DatabaseImpl database = getDatabase(connection, config, db);
-      int activeUsersYTD = database.getReport().getActiveUsersYTD();
+      int activeUsersYTD = database.getReport(config).getActiveUsersYTD();
       logger.info(config + "," + activeUsersYTD);
       configToUsers.put(config, activeUsersYTD);
-
-//      try {
-//      //  Thread.sleep(1000);
-//      } catch (InterruptedException e) {
-//        e.printStackTrace();
-//      }
-      //  break;
     }
     logger.info(configToUsers);
   }
 
   private H2Connection getH2(String db) {
-    String path = "../Development/asr/performance-reports/dbs/" + db.replaceAll(".h2.db", "");
+    String path = "../dbs/" + db.replaceAll(".h2.db", "");
     logger.debug("got " + path);
     return getH2Connection(path);
   }
@@ -144,7 +140,9 @@ public class ReportAllTest extends  BaseTest {
             "npfUrdu.h2.db\n";
     String[] split = s.split("\n");
     List<String> strings = Arrays.asList(split);
-    //  strings = Collections.singletonList("npfSpanish.h2.db");
+    if (DO_ONE) {
+      strings = Collections.singletonList("npfSpanish.h2.db");
+    }
     return strings;
   }
 }
