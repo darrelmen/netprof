@@ -93,7 +93,7 @@ public class ReportAllTest extends BaseTest {
     int i = 0;
     // PathHelper war = new PathHelper("war");
 
- //   configs = Collections.singletonList("spanish");
+    //   configs = Collections.singletonList("spanish");
     Map<String, Integer> configToUsers = new TreeMap<>();
     for (String db : strings) {
       //String path = "/Users/go22670/Development/asr/performance-reports/dbs/" + db;
@@ -131,10 +131,8 @@ public class ReportAllTest extends BaseTest {
             "pashtoCE.h2.db\n" +
             "pashto2.h2.db\n" +
             "pashto3.h2.db\n" +
-            "npfRussian.h2.db\n"
-            +
+            "npfRussian.h2.db\n"  +
             "npfSpanish.h2.db\n" +
-
             "sudaneseToday.h2.db\n" +
             "npfTagalog.h2.db\n" +
             "npfUrdu.h2.db\n";
