@@ -63,7 +63,7 @@ public class ReportTest {
 
   @Test
   public void testReport() {
-    database.doReport(new PathHelper("war"));
+    database.doReport(new PathHelper("war"),"");
   }
 
   @Test
@@ -74,7 +74,6 @@ public class ReportTest {
     typeToValues.put("Chapter", Arrays.asList("1A"));
     int userid = 113;
     database.getJsonPhoneReport(userid, typeToValues);
-   // database.getJsonScoreHistory(userid, typeToValues);
   }
 //
 //  @Test
