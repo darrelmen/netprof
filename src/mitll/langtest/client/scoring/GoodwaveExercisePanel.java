@@ -424,8 +424,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       tokens = Arrays.asList(value.split(CommentNPFExercise.SPACE_REGEX));
     }
 
-    if (controller.isRightAlignContent()) {
-      /*tokens =*/ Collections.reverse(tokens);
+    if (controller.isRightAlignContent() && flLine) {
+      Collections.reverse(tokens);
     }
     for (String token : tokens) {
       horizontal.add(makeClickableText(label, value, token, isChineseCharacter));
