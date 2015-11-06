@@ -247,6 +247,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
   ////////////////////////////////
 
   /**
+   * TODO : Some phrases seem to break lts process?
    * @param transcript
    * @return
    * @see #runHydra(String, String, Collection, String, boolean, int)
@@ -280,17 +281,25 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
           if (letterToSoundClass == null) {
             logger.warn(this + " " + languageProperty + " : LTS is null???");
           } else {
-            for (String[] pron : letterToSoundClass.process(word.toLowerCase())) {
-              if (ctr != 0) dict += ";";
-              ctr++;
-              dict += word + ",";
-              int ctr2 = 0;
-              for (String p : pron) {
-                if (ctr2 != 0) dict += " ";
-                ctr2 += 1;
-                dict += p;
+
+            String word1 = word.toLowerCase();
+            String[][] process = letterToSoundClass.process(word1);
+            if (process == null) {
+              logger.error("couldn't get letter to sound map from " +letterToSoundClass + " for " + word1);
+            }
+            else {
+              for (String[] pron : process) {
+                if (ctr != 0) dict += ";";
+                ctr++;
+                dict += word + ",";
+                int ctr2 = 0;
+                for (String p : pron) {
+                  if (ctr2 != 0) dict += " ";
+                  ctr2 += 1;
+                  dict += p;
+                }
+                dict += " sp";
               }
-              dict += " sp";
             }
           }
         }
