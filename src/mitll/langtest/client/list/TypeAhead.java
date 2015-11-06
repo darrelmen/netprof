@@ -17,8 +17,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 
-import java.util.logging.Logger;
-
 /**
  * Created by go22670 on 9/25/14.
  */
