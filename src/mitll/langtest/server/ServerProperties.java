@@ -57,6 +57,7 @@ public class ServerProperties {
   private static final String DO_DECODE = "dodecode";
   public static final String FALSE = "false";
   public static final String TRUE = "true";
+  public static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
 
   private Properties props = new Properties();
 
@@ -396,7 +397,7 @@ public class ServerProperties {
   }
 
   public boolean usePhoneToDisplay() {
-    return getDefaultFalse("usePhoneToDisplay");
+    return getDefaultFalse(USE_PHONE_TO_DISPLAY);
   }
 
   // EMAIL ------------------------
