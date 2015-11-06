@@ -32,7 +32,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
 
   private static final int MAX_LENGTH_ID = 15;
   public static final int TABLE_HISTORY_WIDTH = 420;
-  public static final int COL_WIDTH = 120;
+  public static final int COL_WIDTH = 130;
   public static final String CORRECT_INCORRECT_HISTORY_AND_AVERAGE_PRONUNCIATION_SCORE = "Correct/Incorrect history and average pronunciation score";
 
   private final Map<String, CommonShell> idToExercise = new HashMap<String, CommonShell>();
@@ -56,7 +56,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
     Panel tableWithPager = getTableWithPager();
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.setWidth(TABLE_HISTORY_WIDTH + "px");
-    tableWithPager.addStyleName("floatLeft");
+   // tableWithPager.addStyleName("floatLeft");
 
     for (ExerciseCorrectAndScore exerciseCorrectAndScore : sortedHistory) {
       addItem(exerciseCorrectAndScore);
@@ -68,7 +68,14 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   @Override
   protected CellTable.Resources chooseResources() {
     CellTable.Resources o;
-    o = GWT.create(LocalTableResources.class);
+//    o = GWT.create(LocalTableResources.class);
+
+    if (controller.isRightAlignContent()) {   // so when we truncate long entries, the ... appears on the correct end
+      logger.info("chooseResources RTL - content");
+      o = GWT.create(RTLLocalTableResources.class);
+    } else {
+      o = GWT.create(LocalTableResources.class);
+    }
     return o;
   }
 
@@ -78,14 +85,14 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
     table.setColumnWidth(englishCol, COL_WIDTH + "px");
 
     String language = controller.getLanguage();
-    addColumn(englishCol, new TextHeader("English"));
 
     Column<ExerciseCorrectAndScore, SafeHtml> flColumn = getFLColumn();
     flColumn.setSortable(true);
     table.setColumnWidth(flColumn,COL_WIDTH + "px");
 
     String headerForFL = language.equals("English") ? "Meaning" : language;
-    addColumn(flColumn, new TextHeader(headerForFL));
+    addColumn(flColumn,   new TextHeader(headerForFL));
+    addColumn(englishCol, new TextHeader("English"));
 
     List<ExerciseCorrectAndScore> dataList = getList();
 
@@ -94,6 +101,8 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
 
     ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> columnSortHandler2 = getFLSorter(flColumn, dataList);
     table.addColumnSortHandler(columnSortHandler2);
+
+    table.setWidth("100%", true);
 
     // We know that the data is sorted alphabetically by default.
 //    table.getColumnSortList().push(englishCol);
@@ -255,7 +264,9 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
     if (columnText != null) {
       if (columnText.length() > MAX_LENGTH_ID)
         columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
-      html = "<span style='float:left;" + "'>" + columnText + "</span>";
+      html = "<span " +
+          //"style='float:left;'" +
+          ">" + columnText + "</span>";
     }
     return new SafeHtmlBuilder().appendHtmlConstant(html).toSafeHtml();
   }
@@ -299,6 +310,18 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
 
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
+    PagingContainer.TableResources.TableStyle cellTableStyle();
+  }
+
+  public interface RTLLocalTableResources extends CellTable.Resources {
+    /**
+     * The styles applied to the table.
+     */
+    interface TableStyle extends CellTable.Style {
+    }
+
+    @Override
+    @Source({CellTable.Style.DEFAULT_CSS, "RTLScoresCellTableStyleSheet.css"})
     PagingContainer.TableResources.TableStyle cellTableStyle();
   }
 }
