@@ -97,4 +97,6 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
         (isAdmin() ? "ADMIN" : "")
         ;
   }
+
+
 }
