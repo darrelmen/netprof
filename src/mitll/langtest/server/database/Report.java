@@ -39,6 +39,7 @@ public class Report {
   private static final String top = "<td style='vertical-align: top;'>";
   public static final String DEVICE_RECORDINGS = "Device Recordings";
   public static final String ALL_RECORDINGS = "All Recordings";
+  public static final String MM_DD_YY = "MM_dd_yy";
   public static final String MM_DD_YY_HH_MM_SS = "MM_dd_yy_hh_mm_ss";
   public static final boolean SHOW_TEACHER_SKIPS = false;
   public static final boolean DO_2014 = false;
@@ -47,12 +48,19 @@ public class Report {
   private final ResultDAO resultDAO;
   private final EventDAO eventDAO;
   private final AudioDAO audioDAO;
+  String prefix;
+  String language;
+  BufferedWriter csv;
+  private Map<Long, Long> userToStart = new HashMap<>();
 
-  public Report(UserDAO userDAO, ResultDAO resultDAO, EventDAO eventDAO, AudioDAO audioDAO) {
+  public Report(UserDAO userDAO, ResultDAO resultDAO, EventDAO eventDAO, AudioDAO audioDAO, String language,
+                String prefix) {
     this.userDAO = userDAO;
     this.resultDAO = resultDAO;
     this.eventDAO = eventDAO;
     this.audioDAO = audioDAO;
+    this.language = language;
+    this.prefix = prefix;
   }
 
   /**
@@ -99,14 +107,18 @@ public class Report {
    * @param pathHelper
    * @param language
    * @throws IOException
-   * @see DatabaseImpl#doReport(PathHelper)
+   * @see DatabaseImpl#doReport
    */
   public void writeReport(PathHelper pathHelper, String language) throws IOException {
-    SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat(MM_DD_YY_HH_MM_SS);
-    String today = simpleDateFormat2.format(new Date());
-    File file = getReportFile(pathHelper, today, language);
+    File file = getReportPath(pathHelper, language);
     writeReport(file, pathHelper, language);
     logger.debug("wrote to " + file.getAbsolutePath());
+  }
+
+  private File getReportPath(PathHelper pathHelper, String language) {
+    SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat(MM_DD_YY);
+    String today = simpleDateFormat2.format(new Date());
+    return getReportFile(pathHelper, today, language);
   }
 
   private void sendEmails(String language, String site, MailSupport mailSupport, List<String> reportEmails, String message) {
@@ -122,11 +134,13 @@ public class Report {
     }
   }
 
+
   private String writeReport(File file, PathHelper pathHelper, String language) throws IOException {
     BufferedWriter writer = new BufferedWriter(new FileWriter(file));
     String message = doReport(pathHelper, language);
     writer.write(message);
     writer.close();
+    csv.close();
     return message;
   }
 
@@ -138,7 +152,7 @@ public class Report {
     } else {
       logger.debug("reports dir exists at " + reports.getAbsolutePath());
     }
-    String fileName = language + "_report_" + today + ".html";
+    String fileName = prefix + "_" + language + "_report_" + today + ".html";
     return new File(reports, fileName);
   }
 
@@ -150,8 +164,17 @@ public class Report {
     StringBuilder builder = new StringBuilder();
     builder.append("<html><head><body>");
 
-    Set<Long> users = getUsers(builder);
-    getUsers(builder, userDAO.getUsersDevices(), "New iPad/iPhone Users");
+    setUserStart();
+    File reportPath = getReportPath(pathHelper, language);
+    String s = reportPath.getAbsolutePath().replaceAll(".html", ".csv");
+    try {
+      this.csv = new BufferedWriter(new FileWriter(s));
+    } catch (IOException e) {
+      logger.error("got " + e, e);
+    }
+
+    Set<Long> users = getUsers(builder, language);
+    getUsers(builder, userDAO.getUsersDevices(), "New iPad/iPhone Users", language);
 
     Set<Long> events = getEvents(builder, users);
     Set<Long> eventsDevices = getEventsDevices(builder, users);
@@ -160,9 +183,9 @@ public class Report {
 
     SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM/dd/yy");
     String start = simpleDateFormat2.format(getJanuaryFirst(getCal()));
-    String end   = simpleDateFormat2.format(getJanuaryFirstNextYear());
+    String end = simpleDateFormat2.format(getJanuaryFirstNextYear());
 
-    builder.append("<h2>Unique Active Users between " + start + " and " + end+
+    builder.append("<h2>Unique Active Users between " + start + " and " + end +
         "</h2>" +
         "<table ><tr>" +
         top + events.size() + "</td>" +
@@ -180,7 +203,7 @@ public class Report {
 
     logger.info("between " + january1st + " and " + january1stNextYear);
 
-    addRefAudio(builder, calendar, january1st, january1stNextYear, audioAttributes);
+    addRefAudio(builder, calendar, january1st, january1stNextYear, audioAttributes, language);
 
     builder.append("</body></head></html>");
     return builder.toString();
@@ -190,8 +213,8 @@ public class Report {
     StringBuilder builder = new StringBuilder();
     builder.append("<html><head><body>");
 
-    Set<Long> users = getUsers(builder);
- //   getUsers(builder, userDAO.getUsersDevices(), "New iPad/iPhone Users");
+    Set<Long> users = getUsers(builder, language);
+    //   getUsers(builder, userDAO.getUsersDevices(), "New iPad/iPhone Users");
 
     Set<Long> events = getEvents(builder, users);
     Set<Long> eventsDevices = getEventsDevices(builder, users);
@@ -206,14 +229,21 @@ public class Report {
    * @return
    * @see #doReport
    */
-  private Set<Long> getUsers(StringBuilder builder) {
+  private Set<Long> getUsers(StringBuilder builder, String language) {
     List<User> users = userDAO.getUsers();
+    for (User user : users) {
+      Long aLong = userToStart.get(user.getId());
+      if (aLong != null) user.setTimestampMillis(aLong);
+      else {
+        logger.error("no events for " + user.getId());
+      }
+    }
     String users1 = "All New Users";// (users enrolled after 10/8)";
 
-    return getUsers(builder, users, users1);
+    return getUsers(builder, users, users1, language);
   }
 
-  private Set<Long> getUsers(StringBuilder builder, List<User> users, String users1) {
+  private Set<Long> getUsers(StringBuilder builder, List<User> users, String users1, String language) {
     Calendar calendar = getCal();
     Date january1st = getJanuaryFirst(calendar);
     Date january1stNextYear = getJanuaryFirstNextYear();
@@ -277,17 +307,50 @@ public class Report {
         if (SHOW_TEACHER_SKIPS) logger.warn("skipping teacher " + user);
       }
     }
-    builder.append(
-        getSectionReport(ytd, monthToCount, weekToCount, users1)
-    );
+    builder.append(getSectionReport(ytd, monthToCount, weekToCount, users1, language));
 
     logger.info("Students " + students);
     return students;
   }
 
-  private String getSectionReport(int ytd, Map<Integer, ?> monthToCount, Map<Integer, ?> weekToCount, String users1) {
+  private String getSectionReport(int ytd, Map<Integer, ?> monthToCount, Map<Integer, ?> weekToCount, String users1,
+                                  String language) {
     String yearCol = ytd > -1 ? getYTD(ytd, users1) : "";
     String monthCol = getMC(monthToCount, MONTH, users1);
+
+    StringBuilder builder = new StringBuilder();
+    int i = getYear();
+
+    String otherPrefix = this.prefix;
+    String prefix = otherPrefix + "," + language + "," + i + "," + users1 + ",";
+    builder.append(prefix);
+
+    if (false) {
+      for (int j = 0; j < 12; j++) {
+        String month = getMonth(j);
+        builder.append(month + ",");
+      }
+      builder.append("\n");
+
+      builder.append(prefix);
+    }
+    for (int j = 0; j < 12; j++) {
+      Object o = monthToCount.get(j);
+      Object o1 = o == null ? "0" : o;
+      if (o1 instanceof Collection<?>) {
+        o1 = ((Collection<?>) o1).size();
+      }
+      builder.append(o1 + ",");
+    }
+    builder.append("\n");
+
+    logger.info(builder.toString());
+
+    try {
+      csv.write(builder.toString());
+    } catch (IOException e) {
+      logger.error("Got " + e, e);
+    }
     String weekCol = getWC(weekToCount, WEEK, users1);
     return getYearMonthWeekTable(users1, yearCol, monthCol, weekCol);
   }
@@ -383,7 +446,6 @@ public class Report {
   }
 
 
-
   /**
    * @param builder
    * @param language
@@ -401,7 +463,7 @@ public class Report {
 
   private Map<Long, Map<String, Integer>> getResultsForSet(StringBuilder builder, Set<Long> students,
                                                            PathHelper pathHelper, List<Result> results, String recordings, String language) {
-    Calendar calendar;// = getCal();
+    Calendar calendar;
     Date january1st = getJanuaryFirst(getCal());
     Date january1stNextYear = getJanuaryFirstNextYear();
     logger.info("between " + january1st + " and " + january1stNextYear);
@@ -487,7 +549,7 @@ public class Report {
 
     builder.append("\n<br/><span>Valid student recordings</span>");
     builder.append(
-        getSectionReport(ytd, monthToCount, weekToCount, recordings)
+        getSectionReport(ytd, monthToCount, weekToCount, recordings, language)
     );
 
 
@@ -499,10 +561,11 @@ public class Report {
    * @param calendar
    * @param january1st
    * @param refAudio
+   * @param language
    * @see #getResults(StringBuilder, Set, PathHelper, String)
    */
   private <T extends UserAndTime> void addRefAudio(StringBuilder builder, Calendar calendar, Date january1st,
-                                                   Date january1stThisYear, Collection<T> refAudio) {
+                                                   Date january1stThisYear, Collection<T> refAudio, String language) {
     int ytd = 0;
     Map<Integer, Integer> monthToCount = new TreeMap<Integer, Integer>();
     Map<Integer, Integer> weekToCount = new TreeMap<Integer, Integer>();
@@ -521,7 +584,7 @@ public class Report {
     }
 
     String refAudioRecs = "Ref Audio Recordings";
-    builder.append(getSectionReport(ytd, monthToCount, weekToCount, refAudioRecs));
+    builder.append(getSectionReport(ytd, monthToCount, weekToCount, refAudioRecs, language));
   }
 
   /**
@@ -627,17 +690,19 @@ public class Report {
   private Calendar getCal() {
     Calendar instance = Calendar.getInstance();
     instance.clear();
-    instance.set(Calendar.YEAR, getYear2(instance));
+    int year2 = getYear2(instance);
+    //  logger.info("getCal year " + year2);
+    instance.set(Calendar.YEAR, year2);
     return instance;
   }
 
   private int getYear2(Calendar calendar) {
-    return DO_2014 ? 2014 : calendar.get(Calendar.YEAR);
+    return DO_2014 ? 2014 : Calendar.getInstance().get(Calendar.YEAR);
   }
 
   private Date getJanuaryFirstNextYear() {
     Calendar instance = Calendar.getInstance();
-     int year = getYear2(instance);
+    int year = getYear2(instance);
     // logger.debug("year " + year);
     instance.set(Calendar.YEAR, year);
     if (CLEAR_DAY_HOUR_MINUTE) {
@@ -657,16 +722,32 @@ public class Report {
     List<Event> all = eventDAO.getAll();
     String activeUsers = ACTIVE_USERS;
     String tableLabel = "Time on Task";
+//    for (Event event : all) {
+//      long creatorID = event.getCreatorID();
+//      long timestamp = event.getTimestamp();
+//      if (!userToStart.containsKey(creatorID) || timestamp < userToStart.get(creatorID)) {
+//        userToStart.put(creatorID, timestamp);
+//      }
+//    }
+    return getEvents(builder, students, all, activeUsers, tableLabel, language);
+  }
 
-    return getEvents(builder, students, all, activeUsers, tableLabel);
+  private void setUserStart() {
+    List<Event> all = eventDAO.getAll();
+    for (Event event : all) {
+      long creatorID = event.getCreatorID();
+      long timestamp = event.getTimestamp();
+      if (!userToStart.containsKey(creatorID) || timestamp < userToStart.get(creatorID)) {
+        userToStart.put(creatorID, timestamp);
+      }
+    }
   }
 
   private Set<Long> getEventsDevices(StringBuilder builder, Set<Long> students) {
     List<Event> all = eventDAO.getAllDevices();
     String activeUsers = "Active iPad/iPhone Users";
     String tableLabel = "iPad/iPhone Time on Task";
-
-    return getEvents(builder, students, all, activeUsers, tableLabel);
+    return getEvents(builder, students, all, activeUsers, tableLabel, language);
   }
 
   /**
@@ -675,9 +756,11 @@ public class Report {
    * @param all
    * @param activeUsers
    * @param tableLabel
+   * @param language
    * @see #getEvents(StringBuilder, Set)
    */
-  private Set<Long> getEvents(StringBuilder builder, Set<Long> students, List<Event> all, String activeUsers, String tableLabel) {
+  private Set<Long> getEvents(StringBuilder builder, Set<Long> students, List<Event> all, String activeUsers,
+                              String tableLabel, String language) {
     Map<Integer, Set<Long>> monthToCount = new TreeMap<Integer, Set<Long>>();
     Map<Integer, Map<Long, Set<Event>>> monthToCount2 = new TreeMap<Integer, Map<Long, Set<Event>>>();
     Map<Integer, Map<Long, Set<Event>>> weekToCount2 = new TreeMap<Integer, Map<Long, Set<Event>>>();
@@ -717,7 +800,7 @@ public class Report {
     Collections.sort(longs);
     logger.debug(activeUsers + " getEvents skipped " + skipped + " events from teachers " + teachers + "\nusers " + longs);
 
-    builder.append(getSectionReport(-1, monthToCount, weekToCount, activeUsers));
+    builder.append(getSectionReport(-1, monthToCount, weekToCount, activeUsers, language));
 
     Map<Integer, Long> monthToDur = getMonthToDur(monthToCount2);
     long total = 0;
