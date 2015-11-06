@@ -373,7 +373,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @see mitll.langtest.client.qc.QCNPFExercise#getEntry
    */
   protected Panel getContentWidget(String label, String value, boolean includeLabel) {
-    //System.out.println("label " + label + " value " + value);
     Panel nameValueRow = new FlowPanel();
     nameValueRow.getElement().setId("nameValueRow_" + label);
     nameValueRow.addStyleName("Instruction");
