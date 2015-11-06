@@ -20,9 +20,12 @@ import java.util.*;
  */
 public class RefResultDecoder {
   private static final Logger logger = Logger.getLogger(RefResultDecoder.class);
+  public static final boolean DO_REF_DECODE = true;
+  private static final boolean RUN_MISSING_INFO = false;
+
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
-  public static final boolean DO_REF_DECODE = true;
+
   private final AudioFileHelper audioFileHelper;
   private boolean stopDecode = false;
   private PathHelper pathHelper;
@@ -62,6 +65,10 @@ public class RefResultDecoder {
     return serverProps.getLanguage();
   }
 
+  /**
+   * @see #runMissingInfo(List)
+   * @param exercises
+   */
   private void doMissingInfo(final List<CommonExercise> exercises) {
     List<Result> resultsToDecode = db.getResultDAO().getResultsToDecode();
     int count = 0;
@@ -72,27 +79,28 @@ public class RefResultDecoder {
       idToEx.put(exercise.getID(), exercise);
     }
 
-    logger.info("found " + resultsToDecode.size() + " with missing info");
+    int size = resultsToDecode.size();
+    logger.info("found " + size + " with missing info");
 
     for (Result res : resultsToDecode) {
       if (count++ < 20) {
         logger.debug("\t doMissingInfo found " + res);
       }
 
-      String[] bestAudios = res.getAnswer().split(File.separator);
-      if (bestAudios.length > 1) {
-//        String bestAudio = bestAudios[bestAudios.length - 1];
-        //		logger.debug("added " + bestAudio);
-      //  decodedFiles.add(bestAudio);
+//      String[] bestAudios = res.getAnswer().split(File.separator);
+  //    if (bestAudios.length > 1) {
         CommonExercise exercise = idToEx.get(res.getExerciseID());
         if (exercise != null) {
-          logger.info("\talign " + exercise.getID() + " and result " + res.getUniqueID());
+          logger.info("doMissingInfo #" +count + " of " + size + " align " + exercise.getID() + " and result " + res.getUniqueID());
           PretestScore alignmentScore = audioFileHelper.getAlignmentScore(exercise, res.getAnswer(), serverProps.usePhoneToDisplay(), false);
           db.rememberScore(res.getUniqueID(),alignmentScore);
         }
+        else {
+          logger.warn("no exercise for " + res.getExerciseID()+ " from result?");
+        }
         if (stopDecode) break;
         //	logger.debug("previously found " + res);
-      }
+    //  }
     }
   }
 
@@ -163,7 +171,9 @@ public class RefResultDecoder {
           defaultAudio + " default " + "decoded " + count);
 
 
-      runMissingInfo(exercises);
+      if (RUN_MISSING_INFO) {
+        runMissingInfo(exercises);
+      }
     }
   }
 
