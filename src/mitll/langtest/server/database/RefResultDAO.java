@@ -1,8 +1,6 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.shared.Result;
 import net.sf.json.JSONArray;
@@ -245,11 +243,6 @@ public class RefResultDAO extends DAO {
     }
     return new ArrayList<Result>();
   }
-
-/*  private void logException(Exception ee) {
-    logger.error("got " + ee, ee);
-    logAndNotify.logAndNotifyServerException(ee);
-  }*/
 
   public Result getResult(String exid, String answer) {
     String sql = "SELECT * FROM " + REFRESULT + " WHERE " + Database.EXID + "='" + exid + "' AND " + ANSWER + " like '%" + answer + "'";
