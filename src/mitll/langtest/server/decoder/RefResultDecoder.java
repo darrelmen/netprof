@@ -111,12 +111,13 @@ public class RefResultDecoder {
       String installPath = pathHelper.getInstallPath();
 
       int numResults = db.getRefResultDAO().getNumResults();
-      logger.debug(getLanguage() + "writeRefDecode : found " +
+      String language = getLanguage();
+      logger.debug(language + "writeRefDecode : found " +
           numResults + " in ref results table vs " + exToAudio.size() + " exercises with audio");
 
       Set<String> decodedFiles = getDecodedFiles();
       //       List<CommonExercise> exercises = getExercises();
-      logger.debug(getLanguage() + " found " + decodedFiles.size() + " previous ref results, checking " +
+      logger.debug(language + " found " + decodedFiles.size() + " previous ref results, checking " +
           exercises.size() + " exercises ");
 
       if (stopDecode) logger.debug("Stop decode true");
@@ -167,7 +168,11 @@ public class RefResultDecoder {
           defaultAudio + " default " + "decoded " + count);
 
 
-      if (RUN_MISSING_INFO) {
+      if (RUN_MISSING_INFO ||
+          language.equalsIgnoreCase("msa") ||
+          language.equalsIgnoreCase("egyptian") ||
+          language.equalsIgnoreCase("spanish")
+          ) {
         runMissingInfo(exercises);
       }
     }
