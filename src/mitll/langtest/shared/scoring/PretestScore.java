@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -119,6 +120,10 @@ public class PretestScore implements IsSerializable {
     return json;
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#getASRScoreForAudio(int, String, String, Collection, int, int, boolean, boolean, String, boolean, String, Result, boolean, boolean)
+   * @param json
+   */
   public void setJson(String json) {
     this.json = json;
   }
