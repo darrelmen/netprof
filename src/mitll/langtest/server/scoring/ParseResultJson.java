@@ -4,6 +4,7 @@ import audio.image.ImageType;
 import audio.image.TranscriptEvent;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import net.sf.json.JSONArray;
@@ -11,6 +12,7 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by go22670 on 9/28/15.
@@ -49,9 +51,24 @@ public class ParseResultJson {
     return typeToEndTimes;
   }
 
+  /**
+   * @see #parseJson(String)
+   * @param json
+   * @param usePhones
+   * @return
+   */
   private Map<ImageType, Map<Float, TranscriptEvent>> parseJsonString(String json, boolean usePhones) {
+    if (json.isEmpty()) throw new IllegalArgumentException("json is empty");
+ //   else {
+//      logger.warn("json = " + json);
+   // }
     Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseJson(JSONObject.fromObject(json), "words", "w", usePhones);
+
     if (imageTypeMapMap.isEmpty()) logger.warn("json " + json + " produced empty events map");
+    else if (imageTypeMapMap.get(ImageType.WORD_TRANSCRIPT).isEmpty()) {
+      logger.warn("no words for " +json);
+     // throw new Exception();
+    }
     return imageTypeMapMap;
   }
 
@@ -59,9 +76,17 @@ public class ParseResultJson {
    * @param json
    * @return
    * @see mitll.langtest.server.database.PhoneDAO#getPhoneReport(String, Map, boolean)
+   * @see DatabaseImpl#putBackWordAndPhone()
+   * @see mitll.langtest.server.database.analysis.Analysis#getWordScore(List)
    */
   public Map<NetPronImageType, List<TranscriptSegment>> parseJson(String json) {
-    return getNetPronImageTypeToEndTimes(parseJsonString(json, true));
+    if (json.isEmpty()) {
+      logger.warn("json is empty?");
+    }
+    if (json.equals("{}")) {
+      logger.warn("json is " +json);
+    }
+    return getNetPronImageTypeToEndTimes(parseJsonString(json, false));
   }
 
   /**
@@ -71,6 +96,7 @@ public class ParseResultJson {
    * @param words1
    * @param w1
    * @paramx eventScores
+   * @see #parseJsonString(String, boolean)
    * @see ASRScoring#getCachedScores
    * @see #writeTranscripts(String, int, int, String, boolean, String, String, boolean, boolean, boolean)
    */
@@ -79,7 +105,7 @@ public class ParseResultJson {
     SortedMap<Float, TranscriptEvent> wordEvents = new TreeMap<Float, TranscriptEvent>();
     SortedMap<Float, TranscriptEvent> phoneEvents = new TreeMap<Float, TranscriptEvent>();
 
-    typeToEvent.put(ImageType.WORD_TRANSCRIPT, wordEvents);
+    typeToEvent.put(ImageType.WORD_TRANSCRIPT,  wordEvents);
     typeToEvent.put(ImageType.PHONE_TRANSCRIPT, phoneEvents);
 
     boolean valid = true;
@@ -99,6 +125,9 @@ public class ParseResultJson {
       } catch (Exception e) {
         logger.debug("no json array at " + words1 + " in " + jsonObject, e);
       }
+    }
+    else {
+      logger.warn("skipping " + words1 + " " + w1 + " has " +jsonObject.keySet());
     }
 
    // return valid ? typeToEvent : new HashMap<>();
