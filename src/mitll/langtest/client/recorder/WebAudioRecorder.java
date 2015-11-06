@@ -1,7 +1,6 @@
 package mitll.langtest.client.recorder;
 
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.WavCallback;
 
