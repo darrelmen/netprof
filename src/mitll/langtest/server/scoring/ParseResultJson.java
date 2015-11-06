@@ -17,11 +17,16 @@ import java.util.*;
  */
 public class ParseResultJson {
   private static final Logger logger = Logger.getLogger(ParseResultJson.class);
+  private static final String STR = "str";
+  private static final String END = "end";
+  private static final String S = "s";
+  private static final String P = "p";
+  private static final String PHONES = "phones";
   private final ServerProperties props;
 
   /**
-   * @see mitll.langtest.server.database.PhoneDAO#PhoneDAO(Database)
    * @param properties
+   * @see mitll.langtest.server.database.PhoneDAO#PhoneDAO(Database)
    */
   public ParseResultJson(ServerProperties properties) {
     this.props = properties;
@@ -45,16 +50,18 @@ public class ParseResultJson {
   }
 
   private Map<ImageType, Map<Float, TranscriptEvent>> parseJsonString(String json, boolean usePhones) {
-    return parseJson(JSONObject.fromObject(json), "words", "w", usePhones);
+    Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseJson(JSONObject.fromObject(json), "words", "w", usePhones);
+    if (imageTypeMapMap.isEmpty()) logger.warn("json " + json + " produced empty events map");
+    return imageTypeMapMap;
   }
 
   /**
-   * @see mitll.langtest.server.database.PhoneDAO#getPhoneReport(String, Map, boolean)
    * @param json
    * @return
+   * @see mitll.langtest.server.database.PhoneDAO#getPhoneReport(String, Map, boolean)
    */
   public Map<NetPronImageType, List<TranscriptSegment>> parseJson(String json) {
-    return getNetPronImageTypeToEndTimes(parseJsonString(json,true));
+    return getNetPronImageTypeToEndTimes(parseJsonString(json, true));
   }
 
   /**
@@ -79,26 +86,27 @@ public class ParseResultJson {
     if (jsonObject.containsKey(words1)) {
       try {
         JSONArray words = jsonObject.getJSONArray(words1);
-        for (int i = 0; i < words.size() && valid; i++) {
+        for (int i = 0; i < words.size() /*&& valid*/; i++) {
           JSONObject word = words.getJSONObject(i);
-          if (word.containsKey("str")) {
+          //if (word.containsKey(STR)) {
             objectToEvent(wordEvents, w1, word, false);
-            JSONArray phones = word.getJSONArray("phones");
+            JSONArray phones = word.getJSONArray(PHONES);
             getPhones(phoneEvents, phones, usePhones);
-          } else {
-            valid = false;
-          }
+         // } else {
+         //   valid = false;
+         // }
         }
       } catch (Exception e) {
         logger.debug("no json array at " + words1 + " in " + jsonObject, e);
       }
     }
 
-    return valid ? typeToEvent : new HashMap<>();
+   // return valid ? typeToEvent : new HashMap<>();
+    return typeToEvent;
   }
 
   private void getPhones(SortedMap<Float, TranscriptEvent> phoneEvents, JSONArray phones, boolean usePhone) {
-    getEventsFromJson(phoneEvents, phones, "p", usePhone);
+    getEventsFromJson(phoneEvents, phones, P, usePhone);
   }
 
   private void getEventsFromJson(SortedMap<Float, TranscriptEvent> phoneEvents, JSONArray phones, String tokenKey, boolean usePhone) {
@@ -110,11 +118,13 @@ public class ParseResultJson {
 
   private void objectToEvent(SortedMap<Float, TranscriptEvent> phoneEvents, String tokenKey, JSONObject phone,
                              boolean usePhone) {
-    String token = phone.getString(tokenKey);
-    double pscore = phone.getDouble("s");
-    double pstart = phone.getDouble("str");
-    double pend = phone.getDouble("end");
-    if (usePhone) token = props.getDisplayPhoneme(token);
+    String token  = phone.getString(tokenKey);
+    double pscore = phone.getDouble(S);
+    double pstart = phone.containsKey(STR) ? phone.getDouble(STR) : 0d;
+    double pend   = phone.containsKey(END) ? phone.getDouble(END) : 0d;
+    if (usePhone) {
+      token = props.getDisplayPhoneme(token);
+    }
 
     phoneEvents.put((float) pstart, new TranscriptEvent((float) pstart, (float) pend, token, (float) pscore));
   }
