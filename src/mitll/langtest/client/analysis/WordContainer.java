@@ -35,9 +35,10 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class WordContainer extends SimplePagingContainer<WordScore> {
+  public static final int ITEM_COL_WIDTH = 260;
   private final Logger logger = Logger.getLogger("WordContainer");
 
-  private static final int TABLE_HISTORY_WIDTH = 420;
+  private static final int TABLE_HISTORY_WIDTH = 380;
   private ExerciseComparator sorter;
   private AnalysisPlot plot;
   private ShowTab learnTab;
@@ -45,12 +46,17 @@ class WordContainer extends SimplePagingContainer<WordScore> {
   /**
    * @param controller
    * @param plot
+   * @see AnalysisTab#getWordScores(LangTestDatabaseAsync, ExerciseController, int, ShowTab, AnalysisPlot, Panel, int)
    */
   public WordContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab) {
     super(controller);
     sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
     this.plot = plot;
     this.learnTab = learnTab;
+  }
+
+  protected int getPageSize() {
+    return 8;
   }
 
   /**
@@ -88,7 +94,7 @@ class WordContainer extends SimplePagingContainer<WordScore> {
   private void addReview() {
     Column<WordScore, SafeHtml> itemCol = getItemColumn();
     itemCol.setSortable(true);
-    table.setColumnWidth(itemCol, 300 + "px");
+    table.setColumnWidth(itemCol, ITEM_COL_WIDTH + "px");
 
     String language = controller.getLanguage();
 
