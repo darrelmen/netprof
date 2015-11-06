@@ -2,6 +2,7 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -31,11 +32,6 @@ public class AnalysisTab extends DivWidget {
   public AnalysisTab(final LangTestDatabaseAsync service, final ExerciseController controller, final int userid,
                      final ShowTab showTab, String userChosenID, int minRecordings) {
     final AnalysisPlot analysisPlot = new AnalysisPlot(service, userid, userChosenID, minRecordings);
-//
-//    DivWidget vert = new DivWidget();
-//    vert.add(new Heading(3, userChosenID));
-//    vert.add(analysisPlot);
-
     add(analysisPlot);
     HorizontalPanel lowerHalf = new HorizontalPanel();
     add(lowerHalf);
@@ -89,7 +85,7 @@ public class AnalysisTab extends DivWidget {
         DivWidget vert = new DivWidget();
         vert.add(new Heading(3, "Sounds"));
         vert.add(phones);
-        vert.addStyleName("leftThirtyMargin");
+      //  vert.addStyleName("leftTenMargin");
 
         lowerHalf.add(vert);
 
@@ -98,7 +94,7 @@ public class AnalysisTab extends DivWidget {
         DivWidget vert2 = new DivWidget();
         vert2.add(new Heading(3, "Words using Sound"));
         vert2.add(examples);
-
+        vert2.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
         lowerHalf.add(vert2);
 
         phoneContainer.showExamplesForSelectedSound();
