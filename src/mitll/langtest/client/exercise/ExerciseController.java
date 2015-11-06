@@ -6,7 +6,6 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ImageResponse;
