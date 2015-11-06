@@ -32,8 +32,8 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
-  private static final int ITEM_WIDTH = 350;
   private final Logger logger = Logger.getLogger("PhoneExampleContainer");
+  private static final int ITEM_WIDTH = 300;
   private ShowTab learnTab;
   private String phone;
 
@@ -52,7 +52,7 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
    * @return
    */
   protected int getPageSize() {
-    return 5;
+    return 4;
   }
 
   /**
