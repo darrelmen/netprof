@@ -36,9 +36,11 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
-  public static final int TABLE_WIDTH = 170;
+  public static final int TABLE_WIDTH = 180;
+  public static final int SCORE_COL_WIDTH = 60;
+  public static final String SOUND = "Sound";
   private final Logger logger = Logger.getLogger("PhoneContainer");
-  private static final int COL_WIDTH = 55;
+  private static final int SOUND_WIDTH = 75;
   private PhoneExampleContainer exampleContainer;
 
   /**
@@ -53,6 +55,10 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   protected void addSelectionModel() {
     selectionModel = new SingleSelectionModel<PhoneAndScore>();
     table.setSelectionModel(selectionModel);
+  }
+
+  protected int getPageSize() {
+    return 8;
   }
 
   @Override
@@ -139,8 +145,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   private void addReview() {
     Column<PhoneAndScore, SafeHtml> itemCol = getItemColumn();
     itemCol.setSortable(true);
-    table.setColumnWidth(itemCol, COL_WIDTH + "px");
-    addColumn(itemCol, new TextHeader("Sound"));
+    table.setColumnWidth(itemCol, SOUND_WIDTH + "px");
+    addColumn(itemCol, new TextHeader(SOUND));
     table.setWidth("100%", true);
 
     ColumnSortEvent.ListHandler<PhoneAndScore> columnSortHandler = getEnglishSorter(itemCol, getList());
@@ -254,7 +260,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
 
 
     Column<PhoneAndScore, SafeHtml> scoreColumn = getScoreColumn();
-    table.setColumnWidth(scoreColumn, 60, Style.Unit.PX);
+    table.setColumnWidth(scoreColumn, SCORE_COL_WIDTH, Style.Unit.PX);
     table.addColumn(scoreColumn, "Score");
 
     scoreColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
