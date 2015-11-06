@@ -1,6 +1,6 @@
 package mitll.langtest.client.custom.content;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
