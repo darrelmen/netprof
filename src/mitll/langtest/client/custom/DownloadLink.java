@@ -6,7 +6,6 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Anchor;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.Exercise;
 
 /**
  * Created by go22670 on 10/20/15.
