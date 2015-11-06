@@ -29,7 +29,7 @@ public class Report {
 
   private static final int MIN_MILLIS = (1000 * 60);
   private static final int TEN_SECONDS = 1000 * 10;
-  public static final boolean CLEAR_DAY_HOUR_MINUTE = false;
+  public static final boolean CLEAR_DAY_HOUR_MINUTE = true;
   private static final boolean WRITE_RESULTS_TO_FILE = false;
   private static final String ACTIVE_USERS = "Active Users";
   private static final String TIME_ON_TASK_MINUTES = "Time on Task Minutes ";
@@ -40,7 +40,7 @@ public class Report {
   public static final String DEVICE_RECORDINGS = "Device Recordings";
   public static final String ALL_RECORDINGS = "All Recordings";
   public static final String MM_DD_YY = "MM_dd_yy";
-  public static final String MM_DD_YY_HH_MM_SS = "MM_dd_yy_hh_mm_ss";
+//  public static final String MM_DD_YY_HH_MM_SS = "MM_dd_yy_hh_mm_ss";
   public static final boolean SHOW_TEACHER_SKIPS = false;
   public static final boolean DO_2014 = false;
 
@@ -235,7 +235,7 @@ public class Report {
       Long aLong = userToStart.get(user.getId());
       if (aLong != null) user.setTimestampMillis(aLong);
       else {
-        logger.error("no events for " + user.getId());
+        //  logger.error("no events for " + user.getId());
       }
     }
     String users1 = "All New Users";// (users enrolled after 10/8)";
@@ -293,6 +293,9 @@ public class Report {
           calendar.setTimeInMillis(userCreated);
           int month = calendar.get(Calendar.MONTH);
           Integer integer = monthToCount.get(month);
+          // if (month >= 11) {
+         // logger.warn(user.getUserID() + "\ton\t" + month);
+          // }
           monthToCount.put(month, (integer == null) ? 1 : integer + 1);
 
           int w = calendar.get(Calendar.WEEK_OF_YEAR);
@@ -316,8 +319,14 @@ public class Report {
   private String getSectionReport(int ytd, Map<Integer, ?> monthToCount, Map<Integer, ?> weekToCount, String users1,
                                   String language) {
     String yearCol = ytd > -1 ? getYTD(ytd, users1) : "";
-    String monthCol = getMC(monthToCount, MONTH, users1);
+    String monthCol = getMC(monthToCount, MONTH, users1, "");
 
+    //writeMonth(monthToCount, users1, language);
+    String weekCol = getWC(weekToCount, WEEK, users1);
+    return getYearMonthWeekTable(users1, yearCol, monthCol, weekCol);
+  }
+
+  private void writeMonth(Map<Integer, ?> monthToCount, String users1, String language) {
     StringBuilder builder = new StringBuilder();
     int i = getYear();
 
@@ -325,17 +334,18 @@ public class Report {
     String prefix = otherPrefix + "," + language + "," + i + "," + users1 + ",";
     builder.append(prefix);
 
-    if (false) {
-      for (int j = 0; j < 12; j++) {
-        String month = getMonth(j);
-        builder.append(month + ",");
-      }
-      builder.append("\n");
-
-      builder.append(prefix);
-    }
+//    if (false) {
+//      for (int j = 0; j < 12; j++) {
+//        String month = getMonth(j);
+//        builder.append(month + ",");
+//      }
+//      builder.append("\n");
+//
+//      builder.append(prefix);
+//    }
     for (int j = 0; j < 12; j++) {
       Object o = monthToCount.get(j);
+      //  if (o == null) logger.error("no data for " +j);
       Object o1 = o == null ? "0" : o;
       if (o1 instanceof Collection<?>) {
         o1 = ((Collection<?>) o1).size();
@@ -351,8 +361,6 @@ public class Report {
     } catch (IOException e) {
       logger.error("Got " + e, e);
     }
-    String weekCol = getWC(weekToCount, WEEK, users1);
-    return getYearMonthWeekTable(users1, yearCol, monthCol, weekCol);
   }
 
   private String getYearMonthWeekTable(String users1, String yearCol, String monthCol, String weekCol) {
@@ -379,7 +387,9 @@ public class Report {
   }
 
 
-  private String getMC(Map<Integer, ?> monthToCount, String unit, String count) {
+  private String getMC(Map<Integer, ?> monthToCount, String unit, String count, String tableLabel) {
+    writeMonth(monthToCount, tableLabel.isEmpty() ? count : tableLabel, language);
+
     String s = "";
     for (Map.Entry<Integer, ?> pair : monthToCount.entrySet()) {
       Object value = pair.getValue();
@@ -709,6 +719,9 @@ public class Report {
       instance.set(Calendar.DAY_OF_YEAR, 1);
       instance.set(Calendar.HOUR_OF_DAY, 0);
       instance.set(Calendar.MINUTE, 0);
+      instance.set(Calendar.YEAR, year + 1);
+    } else {
+
     }
     return instance.getTime();
   }
@@ -727,7 +740,7 @@ public class Report {
 //      long timestamp = event.getTimestamp();
 //      if (!userToStart.containsKey(creatorID) || timestamp < userToStart.get(creatorID)) {
 //        userToStart.put(creatorID, timestamp);
-//      }
+//      }297
 //    }
     return getEvents(builder, students, all, activeUsers, tableLabel, language);
   }
@@ -815,7 +828,7 @@ public class Report {
     String timeOnTaskMinutes = TIME_ON_TASK_MINUTES;
     String yearMonthWeekTable = getYearMonthWeekTable(tableLabel,
         getYTD(Math.round(total / 60), TOTAL_TIME_ON_TASK_HOURS),
-        getMC(getMinMap(monthToDur), MONTH, timeOnTaskMinutes),
+        getMC(getMinMap(monthToDur), MONTH, timeOnTaskMinutes, tableLabel),
         getWC(getMinMap(weekToDur), WEEK, timeOnTaskMinutes)
     );
     builder.append(yearMonthWeekTable);
