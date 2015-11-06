@@ -36,7 +36,12 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
   //private final Logger logger = Logger.getLogger("UserContainer");
 
   private static final int ID_WIDTH = 130;
-  private static final int TABLE_WIDTH = 460;
+  public static final int TABLE_WIDTH = 420;
+  public static final int SIGNED_UP = 90;
+  public static final String CURRENT = "Curr.";
+  public static final int CURRENT_WIDTH = 60;
+  public static final int DIFF_WIDTH = 55;
+  public static final int INITIAL_SCORE_WIDTH = 75;
 
   private final ShowTab learnTab;
   private final DivWidget rightSide;
@@ -56,9 +61,8 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
   }
 
   protected int getPageSize() {
-    return 25;
+    return 20;
   }
-
 
   /**
    * @param users
@@ -259,7 +263,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     Column<UserInfo, SafeHtml> dateCol = getDateColumn();
     dateCol.setSortable(true);
     addColumn(dateCol, new TextHeader("Signed Up At"));
-    table.setColumnWidth(dateCol, 100 + "px");
+    table.setColumnWidth(dateCol, SIGNED_UP + "px");
     table.addColumnSortHandler(getDateSorter(dateCol, getList()));
 
     Column<UserInfo, SafeHtml> num = getNum();
@@ -271,14 +275,14 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     Column<UserInfo, SafeHtml> start = getStart();
     start.setSortable(true);
     addColumn(start, new TextHeader("Initial Score"));
-    table.setColumnWidth(start, 75 + "px");
+    table.setColumnWidth(start, INITIAL_SCORE_WIDTH + "px");
 
     table.addColumnSortHandler(getStartSorter(start, getList()));
 
     Column<UserInfo, SafeHtml> current = getCurrent();
     current.setSortable(true);
-    addColumn(current, new TextHeader("Current"));
-    table.setColumnWidth(current, 75 + "px");
+    addColumn(current, new TextHeader(CURRENT));
+    table.setColumnWidth(current, CURRENT_WIDTH + "px");
 
     table.addColumnSortHandler(getCurrentSorter(current, getList()));
 
@@ -286,10 +290,9 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     diff.setSortable(true);
     addColumn(diff, new TextHeader("Diff"));
     table.addColumnSortHandler(getDiffSorter(diff, getList()));
-    table.setColumnWidth(diff, 75 + "px");
+    table.setColumnWidth(diff, DIFF_WIDTH + "px");
 
     table.getColumnSortList().push(dateCol);
-
     table.setWidth("100%", true);
 
     new TooltipHelper().addTooltip(table, "Click on a student.");
