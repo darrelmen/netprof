@@ -110,9 +110,7 @@ public class CommentNPFExercise extends NPFExercise {
       show.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          new ModalInfoDialog(CONTEXT_SENTENCE, Collections.EMPTY_LIST, getContext(e),
-              null
-          );
+          new ModalInfoDialog(CONTEXT_SENTENCE, Collections.EMPTY_LIST, getContext(e), null);
         }
       });
 
@@ -133,6 +131,7 @@ public class CommentNPFExercise extends NPFExercise {
   private Panel getContext(CommonExercise e) {
     String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
     String contextTranslation = e.getContextTranslation() != null && !e.getContextTranslation().trim().isEmpty() ? e.getContextTranslation() : "";
+    boolean same = context.equals(contextTranslation);
 
     if (!context.isEmpty()) {
       Panel hp = new HorizontalPanel();
@@ -142,7 +141,7 @@ public class CommentNPFExercise extends NPFExercise {
       Widget entry = getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, context);
       vp.add(entry);
 
-      if (!contextTranslation.isEmpty()) {
+      if (!contextTranslation.isEmpty() && !same) {
         Widget translationEntry = getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION, contextTranslation);
         vp.add(translationEntry);
       }
