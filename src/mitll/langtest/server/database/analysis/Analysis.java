@@ -23,8 +23,6 @@ public class Analysis extends DAO {
   private static final boolean DEBUG = false;
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
- // private static final int MIN_RECORDINGS = 5;
-
   private ParseResultJson parseResultJson;
   private PhoneDAO phoneDAO;
 
@@ -112,7 +110,6 @@ public class Analysis extends DAO {
    * @throws SQLException
    * @see #getPerformanceForUser(long, int)
    * @see #getPhonesForUser(long, int)
-   * @seex #getResultForUser(long)
    * @see #getWordScoresForUser(long, int)
    */
   private Map<Long, UserInfo> getBest(String sql, int minRecordings) throws SQLException {
@@ -154,24 +151,6 @@ public class Analysis extends DAO {
         " order by " + Database.EXID + ", " + Database.TIME;
   }
 
-  /**
-   * TODO : JUST FOR TESTING
-   * @param id
-   * @param binSize
-   * @return
-   */
-/*  public UserPerformance getResultForUserByBin(long id, int binSize) {
-    try {
-      String sql = getPerfSQL(id);
-      List<BestScore> resultsForQuery = getBest(sql);
-      UserPerformance up = new UserPerformance(id);
-      up.setAtBinSize(resultsForQuery, binSize);
-      return up;
-    } catch (Exception ee) {
-      logException(ee);
-    }
-    return new UserPerformance(id);
-  }*/
 
   /**
    * @param id
@@ -190,9 +169,7 @@ public class Analysis extends DAO {
         return new UserPerformance();
       } else {
         UserInfo next = values.iterator().next();
-
         if (DEBUG)  logger.debug(" results for " + values.size() + "  first  " + next);
-
         List<BestScore> resultsForQuery = next.getBestScores();
         if (DEBUG) logger.debug(" resultsForQuery for " + resultsForQuery.size());
 
@@ -397,9 +374,12 @@ public class Analysis extends DAO {
       List<BestScore> results = userToBest.get(userid);
       if (results == null) userToBest.put(userid, results = new ArrayList<BestScore>());
 
-      if (pronScore < 0.01) logger.warn("huh? got " + pronScore + " for " + exid + " and " + id);
+      if (pronScore < 0) logger.warn("huh? got " + pronScore + " for " + exid + " and " + id);
 
       String json = rs.getString(ResultDAO.SCORE_JSON);
+      if (json != null && json.equals("{}")) {
+        logger.warn("Got empty json " + json + " for " + exid  +" : " +id);
+      }
       String device = rs.getString(ResultDAO.DEVICE_TYPE);
       String path = rs.getString(ResultDAO.ANSWER);
       boolean isiPad = device != null && device.startsWith("i");
@@ -427,12 +407,16 @@ public class Analysis extends DAO {
     List<WordScore> results = new ArrayList<WordScore>();
 
     for (BestScore bs : bestScores) {
-      if (bs.getJson() == null) {
+      String json = bs.getJson();
+      if (json == null) {
         logger.error("huh? no json for " + bs);
       }
+      else if (json.equals("{}")) {
+        logger.warn("json is empty for " + bs);
+      }
       else {
-        if (bs.getJson().isEmpty()) logger.warn("no json for " + bs);
-        Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(bs.getJson());
+        if (json.isEmpty()) logger.warn("no json for " + bs);
+        Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(json);
         results.add(new WordScore(bs, netPronImageTypeListMap));
       }
     }
