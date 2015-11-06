@@ -5,7 +5,6 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 
