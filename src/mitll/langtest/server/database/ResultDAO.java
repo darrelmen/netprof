@@ -147,20 +147,23 @@ public class ResultDAO extends DAO {
 
   public List<Result> getResultsToDecode() {
     try {
+      String scoreJsonClause = " AND " +
+          "(" +
+          SCORE_JSON + " IS NULL OR " +
+          SCORE_JSON +
+          " = '{}' " +
+          "OR " + SCORE_JSON + " = '{\"words\":[]}')";
+    //  scoreJsonClause = "";
+
       String sql = "SELECT" +
           " * " +
-//        "id" +
-//        "," +
-//        "answer" +
           " FROM " +
           RESULTS +
           " where " +
           PRON_SCORE +
-          ">=0 AND " +
-          "(" +
-          SCORE_JSON +
-          " = '{}' " +
-          "OR " + SCORE_JSON + " = '{\"words\":[]}')";
+          ">=0" +
+          scoreJsonClause;
+
       logger.info("sql\n" +sql);
       return getResultsSQL(sql);
     } catch (Exception ee) {
