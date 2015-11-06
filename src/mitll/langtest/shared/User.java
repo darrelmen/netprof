@@ -107,6 +107,9 @@ public class User extends MiniUser {
   }
   public long getTimestampMillis() { return timestamp; }
 
+  public void setTimestampMillis(long timestampMillis) {
+    this.timestamp = timestampMillis;
+  }
   /**
    * @see mitll.langtest.client.user.UserTable#getTable
    * @return
