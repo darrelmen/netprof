@@ -55,6 +55,8 @@ public class ServerProperties {
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
   private static final String ENABLE_ALL_USERS = "enableAllUsers";
   private static final String DO_DECODE = "dodecode";
+  public static final String FALSE = "false";
+  public static final String TRUE = "true";
 
   private Properties props = new Properties();
 
@@ -288,11 +290,11 @@ public class ServerProperties {
   }
 
   private boolean getDefaultFalse(String param) {
-    return props.getProperty(param, "false").equals("true");
+    return props.getProperty(param, FALSE).equals(TRUE);
   }
 
-  private boolean getDefaultTrue(String param) {
-    return props.getProperty(param, "true").equals("true");
+  private boolean getDefaultTrue(String param)  {
+    return props.getProperty(param, TRUE).equals(TRUE);
   }
 
   /**
@@ -302,7 +304,7 @@ public class ServerProperties {
    * @return true if only use old school hydec decoder
    */
   public boolean getOldSchoolService() {
-    return Boolean.parseBoolean(props.getProperty("oldSchoolService", "false")) || props.getProperty("webserviceHostPort") == null;
+    return Boolean.parseBoolean(props.getProperty("oldSchoolService", FALSE)) || props.getProperty("webserviceHostPort") == null;
   }
 
   private String getDateFromManifest(ServletContext servletContext) {
