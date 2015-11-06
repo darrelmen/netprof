@@ -175,7 +175,7 @@ class WordContainer extends SimplePagingContainer<WordScore> {
 
     scoreColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     scoreColumn.setSortable(true);
-    table.setColumnWidth(scoreColumn, "70" + "px");
+    table.setColumnWidth(scoreColumn, 70 + "px");
 
     Column<WordScore, SafeHtml> column = getPlayAudio();
     table.addColumn(column, "Play");
