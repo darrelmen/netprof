@@ -47,7 +47,7 @@ import java.util.*;
  * * it's not a good idea to close connections, especially in the context of a servlet inside a container, since
  * H2 will return "new" connections that have already been closed.   <br></br>
  * * it's not a good idea to reuse one connection...?  <br></br>
- * <p>
+ * <p/>
  * User: go22670
  * Date: 5/14/12
  * Time: 11:44 PM
@@ -510,17 +510,17 @@ public class DatabaseImpl implements Database {
 
   /**
    * For all the exercises in a chapter
-   * <p>
+   * <p/>
    * Get latest results
    * Get phones for latest
-   * <p>
+   * <p/>
    * //Score phones
    * Sort phone scores – asc
-   * <p>
+   * <p/>
    * Map phone->example
-   * <p>
+   * <p/>
    * Join phone->word
-   * <p>
+   * <p/>
    * Sort word by score asc
    *
    * @return
@@ -711,9 +711,9 @@ public class DatabaseImpl implements Database {
 
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
-   * <p>
+   * <p/>
    * Uses return generated keys to get the user id
-   * <p>
+   * <p/>
    * JUST FOR TESTING
    *
    * @param age
@@ -1190,16 +1190,16 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#init
    */
   public void doReport(ServerProperties serverProps, String site, MailSupport mailSupport, PathHelper pathHelper) {
-    getReport().doReport(serverProps, site, mailSupport, pathHelper);
+    getReport("").doReport(serverProps, site, mailSupport, pathHelper);
   }
 
-  public Report getReport() {
-    return new Report(userDAO, resultDAO, eventDAO, audioDAO);
+  public Report getReport(String prefix) {
+    return new Report(userDAO, resultDAO, eventDAO, audioDAO, serverProps.getLanguage(), prefix);
   }
 
-  public void doReport(PathHelper pathHelper) {
+  public void doReport(PathHelper pathHelper, String prefix) {
     try {
-      getReport().writeReport(pathHelper, serverProps.getLanguage());
+      getReport(prefix).writeReport(pathHelper, serverProps.getLanguage());
     } catch (IOException e) {
       logger.error("got " + e);
     }
