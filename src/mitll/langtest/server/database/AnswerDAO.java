@@ -105,14 +105,14 @@ public class AnswerDAO extends DAO {
         ResultDAO.DURATION + "," +
         ResultDAO.CORRECT + "," +
         ResultDAO.PRON_SCORE + "," +
-        ResultDAO.STIMULUS + "," +
+      //  ResultDAO.STIMULUS + "," +
         ResultDAO.DEVICE_TYPE + "," +
         ResultDAO.DEVICE + "," +
         ResultDAO.SCORE_JSON + "," +
         ResultDAO.WITH_FLASH + "," +
         ResultDAO.PROCESS_DUR + "," +
         ResultDAO.ROUND_TRIP_DUR +
-        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
     int i = 1;
 
@@ -133,7 +133,7 @@ public class AnswerDAO extends DAO {
 
     statement.setBoolean(i++, correct);
     statement.setFloat(i++, pronScore);
-    statement.setString(i++, "");
+//    statement.setString(i++, "");
     statement.setString(i++, deviceType);
     statement.setString(i++, device);
     statement.setString(i++, scoreJson);
