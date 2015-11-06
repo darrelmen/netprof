@@ -12,13 +12,10 @@ import java.util.*;
 
 public class UserPerformance implements Serializable {
 //  private transient final Logger logger = Logger.getLogger("UserPerformance");
-
   //private List<TimeAndScore> timeAndScores = new ArrayList<>();
   private List<TimeAndScore> rawTimeAndScores = new ArrayList<>();
   private List<TimeAndScore> iPadTimeAndScores = new ArrayList<>();
   private List<TimeAndScore> browserTimeAndScores = new ArrayList<>();
-  //private int start;
- // private int diff;
 
   private long userID;
 
