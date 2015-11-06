@@ -292,8 +292,14 @@ public class DatabaseImpl implements Database {
       count++;
       Result result = idToResult.get(key);
       String jsonScore = result.getJsonScore();
-      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(jsonScore);
-      recordWordAndPhoneInfo(result.getUniqueID(), netPronImageTypeListMap);
+
+      if (jsonScore != null && !jsonScore.isEmpty() && !jsonScore.equals("{}")) {
+        Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(jsonScore);
+        recordWordAndPhoneInfo(result.getUniqueID(), netPronImageTypeListMap);
+      }
+      else {
+        logger.warn("skipping empty json for " +key);
+      }
     }
     logger.debug("putBackWordAndPhone fixed " + count);
   }
