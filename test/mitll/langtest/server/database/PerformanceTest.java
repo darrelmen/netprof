@@ -1,7 +1,9 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.connection.H2Connection;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.analysis.*;
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -101,6 +103,31 @@ public class PerformanceTest extends BaseTest {
     H2Connection connection = getH2Connection(path);
     DatabaseImpl database = getDatabase(connection,"spanish",path);
     database.getAnalysis().getPerformanceForUser(107, 1);
+  }
+
+
+  @Test
+  public void testJennifer() {
+    String path = "npfUrdu";
+    H2Connection connection = getH2Connection(path);
+    DatabaseImpl database = getDatabase(connection,"urdu",path);
+    Analysis analysis = database.getAnalysis();
+    UserPerformance performanceForUser = analysis.getPerformanceForUser(117, 1);
+    logger.info("perf "+ performanceForUser);
+
+    List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(117, 1);
+
+    for(WordScore ws : wordScoresForUser) logger.debug("Got " + ws);
+  }
+
+  @Test
+  public void testMissingInfo() {
+    String path = "npfSpanish";//.replaceAll(".h2.db", "");
+
+    H2Connection connection = getH2Connection(path);
+    DatabaseImpl database = getDatabase(connection,"spanish",path);
+    List<Result> resultsToDecode = database.getResultDAO().getResultsToDecode();
+   // for (Result res : resultsToDecode) logger.info("Got " + res);
   }
 
   @Test
