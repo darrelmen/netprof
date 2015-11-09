@@ -417,6 +417,9 @@ public class RefResultDAO extends DAO {
     createTable(connection);
 
     Collection<String> columns = getColumns(REFRESULT);
+//    for (String col : columns) {
+//      logger.debug(database.getLanguage() + " : " + col);
+//    }
     //  logger.debug("for " + REFRESULT + " found " + columns + " and " + getNumResults());
     if (!columns.contains(ALIGNSCORE.toLowerCase())) {
       addFloat(connection, REFRESULT, ALIGNSCORE);
@@ -442,6 +445,14 @@ public class RefResultDAO extends DAO {
     if (!columns.contains(SPEED)) {
       addVarchar(connection, REFRESULT, SPEED);
     }
+
+//    if (!columns.contains(DECODE_PROCESS_DUR.toLowerCase())) {
+//      addInt(connection, REFRESULT, DECODE_PROCESS_DUR);
+//    }
+//    if (!columns.contains(ALIGN_PROCESS_DUR)) {
+//      addInt(connection, REFRESULT, ALIGN_PROCESS_DUR);
+//    }
+
     createIndex(database, Database.EXID, REFRESULT);
     // seems to complain about index on CLOB???
     // createIndex(database, ANSWER, REFRESULT);
