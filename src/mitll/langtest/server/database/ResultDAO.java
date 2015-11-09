@@ -54,9 +54,9 @@ public class ResultDAO extends DAO {
   public static final String DEVICE = "device"; // device id, or browser type
   public static final String PROCESS_DUR = "processDur";
   public static final String ROUND_TRIP_DUR = "roundTripDur";
-  public static final int FIVE_MINUTES = 5 * 60 * 1000;
+ // public static final int FIVE_MINUTES = 5 * 60 * 1000;
   public static final int HOUR = 60 * 60 * 1000;
-  public static final int DAY = 24 * HOUR;
+ // public static final int DAY = 24 * HOUR;
   public static final String DEVICETYPE = "devicetype";
 
   private final boolean debug = false;
@@ -145,6 +145,10 @@ public class ResultDAO extends DAO {
     return new ArrayList<Result>();
   }
 
+  /**
+   * @see RefResultDAO#
+   * @return
+   */
   public List<Result> getResultsToDecode() {
     try {
       String scoreJsonClause = " AND " +
@@ -161,7 +165,9 @@ public class ResultDAO extends DAO {
           RESULTS +
           " where " +
           PRON_SCORE +
-          ">=0" +
+          ">=0" + " AND " +AUDIO_TYPE +" != 'regular' "+
+          " AND " +AUDIO_TYPE +" != 'slow' "+
+          " AND " +VALID + "=true " +
           scoreJsonClause;
 
       logger.info("sql\n" +sql);
