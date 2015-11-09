@@ -92,6 +92,10 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     redraw();
   }
 
+  /**
+   * @see mitll.langtest.client.list.PagingExerciseList#setUnaccountedForVertical(int)
+   * @param v
+   */
   public void setUnaccountedForVertical(int v) {
     verticalUnaccountedFor = v;
   }
