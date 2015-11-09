@@ -11,7 +11,8 @@ import java.util.*;
  */
 
 public class UserPerformance implements Serializable {
-//  private transient final Logger logger = Logger.getLogger("UserPerformance");
+  public static final int TOSHOW = 2;
+  //  private transient final Logger logger = Logger.getLogger("UserPerformance");
   private List<TimeAndScore> rawTimeAndScores = new ArrayList<>();
   private List<TimeAndScore> iPadTimeAndScores = new ArrayList<>();
  // private List<TimeAndScore> browserTimeAndScores = new ArrayList<>();
@@ -145,7 +146,7 @@ public class UserPerformance implements Serializable {
     int count = 0;
     for (TimeAndScore ts : getRawBestScores()) {
       builder.append("\n").append(ts);
-      if (count++ > 10) break;
+      if (count++ > TOSHOW) break;
     }
     return builder.toString();
   }
