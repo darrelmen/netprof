@@ -81,22 +81,33 @@ public class AudioCheck {
   public ValidityAndDur checkWavFileRejectAnyTooLoud(File file) {
     ValidityAndDur validityAndDur = checkWavFileWithClipThreshold(file, false);
 
+    addDynamicRange(file, /*isBrowser,*/ validityAndDur);
+
+    return validityAndDur;
+  }
+
+  private void addDynamicRange(File file, /*boolean isBrowser,*/ ValidityAndDur validityAndDur) {
     String highPassFilterFile = new AudioConversion().getHighPassFilterFile(file.getAbsolutePath());
     DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(new File(highPassFilterFile));
     if (dynamicRange.maxMin < 29) {
       logger.warn("file " + file.getName() + " doesn't meet SNR ratio threshold:\n" + dynamicRange);
       validityAndDur.validity = AudioAnswer.Validity.SNR_TOO_LOW;
     }
-    return validityAndDur;
+    validityAndDur.setMaxMinRange(dynamicRange.maxMin);
   }
 
   /**
-   * @see AudioConversion#isValid(File, boolean)
+   * TODO : consider passing in more isBrowser
+   * @see AudioConversion#isValid
    * @param file
    * @return
    */
   public ValidityAndDur checkWavFile(File file) {
-    return checkWavFileWithClipThreshold(file, true);
+    ValidityAndDur validityAndDur = checkWavFileWithClipThreshold(file, true);
+
+    addDynamicRange(file, /*false, */validityAndDur);
+
+    return validityAndDur;
   }
 
   /**
@@ -220,6 +231,7 @@ public class AudioCheck {
   public static class ValidityAndDur {
     private AudioAnswer.Validity validity;
     public final int durationInMillis;
+    private double maxMinRange;
 
     public ValidityAndDur(AudioAnswer.Validity validity) {
       this(validity, 0d);
@@ -231,10 +243,18 @@ public class AudioCheck {
     }
 
     public void setValidity(AudioAnswer.Validity validity) { this.validity = validity;}
-    public String toString() { return "valid " + getValidity() + " dur " + durationInMillis; }
+    public String toString() { return "valid " + getValidity() + " dur " + durationInMillis + " max min " + maxMinRange; }
 
     public AudioAnswer.Validity getValidity() {
       return validity;
+    }
+
+    public double getMaxMinRange() {
+      return maxMinRange;
+    }
+
+    public void setMaxMinRange(double maxMinRange) {
+      this.maxMinRange = maxMinRange;
     }
   }
 }
