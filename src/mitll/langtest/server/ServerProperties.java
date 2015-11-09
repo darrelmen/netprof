@@ -58,6 +58,7 @@ public class ServerProperties {
   public static final String FALSE = "false";
   public static final String TRUE = "true";
   public static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
+  public static final String ADD_MISSING_INFO = "addMissingInfo";
 
   private Properties props = new Properties();
 
@@ -398,6 +399,9 @@ public class ServerProperties {
 
   public boolean usePhoneToDisplay() {
     return getDefaultFalse(USE_PHONE_TO_DISPLAY);
+  }
+  public boolean addMissingInfo() {
+    return getDefaultTrue(ADD_MISSING_INFO);
   }
 
   // EMAIL ------------------------
