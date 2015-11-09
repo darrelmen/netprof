@@ -32,11 +32,12 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
    * @param seq         which phoneme in phrase (not in word)
    * @param answerAudio
    * @param refAudio
+   * @param nativeAudio
    * @param scoreJson
-   * @see PhoneDAO#getPhoneReport(String, Map, boolean)
+   * @see PhoneDAO#getPhoneReport
    */
   public WordAndScore(String exid, String word, float score, long resultID, int wseq, int seq, String answerAudio,
-                      String refAudio, String scoreJson) {
+                      String refAudio,  String scoreJson) {
     this.exid = exid;
     this.word = word;
     this.score = score;
@@ -45,6 +46,7 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
     this.seq = seq;
     this.answerAudio = answerAudio;
     this.refAudio = refAudio;
+  //  this.nativeAudio = nativeAudio;
     this.scoreJson = scoreJson;
   }
 
@@ -110,10 +112,15 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
   }
 
   public String toString() {
-    return exid + " #" + getWseq() + " : " + getWord() + "\ts " + getScore() + "\tres " + getResultID() + "\tanswer " + answerAudio + " ref " + refAudio;
+    return exid + " #" + getWseq() + " : " + getWord() + "\ts " + getScore() + "\tres " + getResultID() +
+        "\tanswer " + answerAudio + " ref " + refAudio;
   }
 
   public String getExid() {
     return exid;
   }
+
+//  public String getNativeAudio() {
+//    return nativeAudio;
+//  }
 }
