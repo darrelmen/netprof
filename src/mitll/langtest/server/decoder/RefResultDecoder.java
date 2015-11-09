@@ -168,9 +168,11 @@ public class RefResultDecoder {
           defaultAudio + " default " + "decoded " + count);
 
 
-      if (RUN_MISSING_INFO ||
+      if (serverProps.addMissingInfo() ||
           language.equalsIgnoreCase("msa") ||
           language.equalsIgnoreCase("egyptian") ||
+          language.equalsIgnoreCase("mandarin") ||
+          language.equalsIgnoreCase("levantine") ||
           language.equalsIgnoreCase("spanish")
           ) {
         runMissingInfo(exercises);
