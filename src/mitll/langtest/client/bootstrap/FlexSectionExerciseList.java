@@ -32,16 +32,15 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class FlexSectionExerciseList extends HistoryExerciseList {
-  private Logger logger = Logger.getLogger("FlexSectionExerciseList");
+//  private Logger logger = Logger.getLogger("FlexSectionExerciseList");
   private static final int LABEL_MARGIN_BOTTOM = 10;
 
   private static final int HEADING_FOR_LABEL = 4;
   private static final int UNACCOUNTED_WIDTH = 60;
-  private static final int CLASSROOM_VERTICAL_EXTRA = 270;
+  private static final int CLASSROOM_VERTICAL_EXTRA = 310;
   private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
   private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet and audio for selected sections.";
   private static final String DOWNLOAD_AUDIO = "downloadAudio";
-//  private static final String CONTEXT = "context";
 
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
   private final Map<String, ButtonType> typeToButton = new HashMap<String, ButtonType>();
@@ -85,14 +84,6 @@ public class FlexSectionExerciseList extends HistoryExerciseList {
     buttonTypes.add(ButtonType.WARNING);
     setUnaccountedForVertical(CLASSROOM_VERTICAL_EXTRA);
   }
-
-  /**
-   * @see mitll.langtest.client.list.PagingExerciseList#PagingExerciseList
-   */
-/*  @Override
-  protected void addComponents() {
-    addTableWithPager(makePagingContainer());
-  }*/
 
   /**
    *
