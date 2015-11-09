@@ -9,10 +9,7 @@ import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.*;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -179,6 +176,11 @@ public class ExcelImport implements ExerciseDAO {
           }
         }
 
+        int missing = 0;
+        for (CommonExercise ex : exercises) {
+          if (!ex.hasRefAudio()) missing++;
+        }
+        if (missing > 0) logger.warn("out of " + exercises.size() + " " + missing + " are missing ref audio.");
       }
     }
     return exercises;
