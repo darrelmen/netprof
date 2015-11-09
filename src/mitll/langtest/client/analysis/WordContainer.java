@@ -35,9 +35,13 @@ import java.util.logging.Logger;
  */
 class WordContainer extends SimplePagingContainer<WordScore> {
   public static final int ITEM_COL_WIDTH = 260;
+  public static final String SCORE = "Score";
+  public static final int PLAY_WIDTH = 45;
+  public static final int NATIVE_WIDTH = 50;
+  public static final String NATIVE = "Ref";
   private final Logger logger = Logger.getLogger("WordContainer");
 
-  private static final int TABLE_HISTORY_WIDTH = 380;
+  private static final int TABLE_HISTORY_WIDTH = 430; //380
   private ExerciseComparator sorter;
   private AnalysisPlot plot;
   private ShowTab learnTab;
@@ -176,7 +180,7 @@ class WordContainer extends SimplePagingContainer<WordScore> {
     addReview();
 
     Column<WordScore, SafeHtml> scoreColumn = getScoreColumn();
-    table.addColumn(scoreColumn, "Score");
+    table.addColumn(scoreColumn, SCORE);
 
     scoreColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     scoreColumn.setSortable(true);
@@ -184,7 +188,11 @@ class WordContainer extends SimplePagingContainer<WordScore> {
 
     Column<WordScore, SafeHtml> column = getPlayAudio();
     table.addColumn(column, "Play");
-    table.setColumnWidth(column, 50 + "px");
+    table.setColumnWidth(column, PLAY_WIDTH + "px");
+
+    column = getPlayNativeAudio();
+    table.addColumn(column, NATIVE);
+    table.setColumnWidth(column, NATIVE_WIDTH + "px");
 
     table.setWidth("100%", true);
 
@@ -248,14 +256,35 @@ class WordContainer extends SimplePagingContainer<WordScore> {
     };
   }
 
+  /**
+   * @see #addColumnsToTable()
+   * @return
+   */
   private Column<WordScore, SafeHtml> getPlayAudio() {
     return new Column<WordScore, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(WordScore shell) {
         CommonShell exercise = getShell(shell.getId());
-       // logger.info("getPlayAudio : Got " + shell.getId() + "  : " + exercise);
+        // logger.info("getPlayAudio : Got " + shell.getId() + "  : " + exercise);
         String title = exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
         return PlayAudioWidget.getAudioTagHTML(shell.getFileRef(), title);
+      }
+    };
+  }
+
+  private Column<WordScore, SafeHtml> getPlayNativeAudio() {
+    return new Column<WordScore, SafeHtml>(new SafeHtmlCell()) {
+      @Override
+      public SafeHtml getValue(WordScore shell) {
+        CommonShell exercise = getShell(shell.getId());
+        // logger.info("getPlayAudio : Got " + shell.getId() + "  : " + exercise);
+        String title = exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
+        if (shell.getNativeAudio() != null) {
+          return PlayAudioWidget.getAudioTagHTML(shell.getNativeAudio(), title);
+        }
+        else {
+          return new SafeHtmlBuilder().toSafeHtml();
+        }
       }
     };
   }
