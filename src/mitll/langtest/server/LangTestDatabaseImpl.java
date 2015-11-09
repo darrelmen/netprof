@@ -2085,6 +2085,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   public void logMessage(String message) {
+    if (message.length() > 10000) message = message.substring(0,10000);
     String prefixedMessage = "for " + pathHelper.getInstallPath() + " from client " + message;
     logger.debug(prefixedMessage);
 
