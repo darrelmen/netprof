@@ -2065,7 +2065,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public UserPerformance getPerformanceForUser(long id, int minRecordings) {
-    return db.getResultDAO().getPerformanceForUser(id, db.getPhoneDAO(), minRecordings);
+    return db.getResultDAO().getPerformanceForUser(id, db.getPhoneDAO(), minRecordings, db.getExerciseIDToRefAudio());
   }
 
   /**
