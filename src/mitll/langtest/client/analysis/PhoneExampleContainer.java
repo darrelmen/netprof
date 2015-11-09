@@ -21,7 +21,6 @@ import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.sound.PlayAudioWidget;
-import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.analysis.WordAndScore;
 
 import java.util.Comparator;
@@ -32,6 +31,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
+  public static final int PLAY_WIDTH = 42;
   private final Logger logger = Logger.getLogger("PhoneExampleContainer");
   private static final int ITEM_WIDTH = 300;
   private ShowTab learnTab;
@@ -106,10 +106,26 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
     return new Column<WordAndScore, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(WordAndScore shell) {
-        CommonShell exercise = null;//getShell(shell.getId());
-       // logger.info("Got " + shell + "  : " + exercise);
-        String title = exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
-        return PlayAudioWidget.getAudioTagHTML(shell.getAnswerAudio(), title);
+        // CommonShell exercise = null;//getShell(shell.getId());
+        // logger.info("Got " + shell + "  : " + exercise);
+        // String title = exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
+        return PlayAudioWidget.getAudioTagHTML(shell.getAnswerAudio(), "play");
+      }
+    };
+  }
+
+  private Column<WordAndScore, SafeHtml> getPlayNativeAudio() {
+    return new Column<WordAndScore, SafeHtml>(new SafeHtmlCell()) {
+      @Override
+      public SafeHtml getValue(WordAndScore shell) {
+        //  CommonShell exercise = getShell(shell.getId());
+        // logger.info("getPlayAudio : Got " + shell.getId() + "  : " + exercise);
+        //String title = exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
+        if (shell.getRefAudio() != null) {
+          return PlayAudioWidget.getAudioTagHTML(shell.getRefAudio(), "play");
+        } else {
+          return new SafeHtmlBuilder().toSafeHtml();
+        }
       }
     };
   }
@@ -143,16 +159,23 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
     itemCol.setSortable(true);
     table.setColumnWidth(itemCol, ITEM_WIDTH + "px");
     addColumn(itemCol, header);
+    ColumnSortEvent.ListHandler<WordAndScore> columnSortHandler = getEnglishSorter(itemCol, getList());
+    table.addColumnSortHandler(columnSortHandler);
 
     try {
       Column<WordAndScore, SafeHtml> column = getPlayAudio();
       table.addColumn(column, "Play");
-      table.setColumnWidth(column, 50 + "px");
+      table.setColumnWidth(column, PLAY_WIDTH + "px");
+
+      column = getPlayNativeAudio();
+      table.addColumn(column, "Ref");
+      table.setColumnWidth(column, PLAY_WIDTH + "px");
+
       table.setWidth("100%", true);
-      ColumnSortEvent.ListHandler<WordAndScore> columnSortHandler = getEnglishSorter(itemCol, getList());
-      table.addColumnSortHandler(columnSortHandler);
+
+
     } catch (Exception e) {
-      logger.warning("Got " +e);
+      logger.warning("Got " + e);
     }
 
     new TooltipHelper().addTooltip(table, "Click on an item to review.");
