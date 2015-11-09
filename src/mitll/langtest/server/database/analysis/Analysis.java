@@ -25,16 +25,18 @@ public class Analysis extends DAO {
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
   private ParseResultJson parseResultJson;
   private PhoneDAO phoneDAO;
+  Map<String,String> exToRef;
 
   /**
    * @param database
    * @param phoneDAO
    * @see DatabaseImpl#getAnalysis()
    */
-  public Analysis(Database database, PhoneDAO phoneDAO) {
+  public Analysis(Database database, PhoneDAO phoneDAO, Map<String,String> exToRef) {
     super(database);
     parseResultJson = new ParseResultJson(database.getServerProps());
     this.phoneDAO = phoneDAO;
+    this.exToRef = exToRef;
   }
 
   /**
@@ -155,7 +157,7 @@ public class Analysis extends DAO {
    * @param id
    * @param minRecordings
    * @return
-   * @see ResultDAO#getPerformanceForUser(long, PhoneDAO, int)
+   * @see ResultDAO#getPerformanceForUser(long, PhoneDAO, int, Map)
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
   public UserPerformance getPerformanceForUser(long id, int minRecordings) {
@@ -215,7 +217,7 @@ public class Analysis extends DAO {
    * @param id
    * @param minRecordings
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getPhoneScores(long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getPhoneScores
    */
   public PhoneReport getPhonesForUser(long id, int minRecordings) {
     try {
@@ -240,7 +242,7 @@ public class Analysis extends DAO {
 
       if (DEBUG) logger.info("getPhonesForUser from " + resultsForQuery.size() + " added " + ids.size() + " ids ");
       then = System.currentTimeMillis();
-      PhoneReport phoneReport = phoneDAO.getWorstPhonesForResults(id, ids, Collections.emptyMap());
+      PhoneReport phoneReport = phoneDAO.getWorstPhonesForResults(id, ids, exToRef);
 
       now = System.currentTimeMillis();
 
@@ -384,6 +386,7 @@ public class Analysis extends DAO {
     int flashcard = 0;
     int learn = 0;
     int count = 0;
+    int missing = 0;
     while (rs.next()) {
       count++;
       String exid = rs.getString(Database.EXID);
@@ -413,11 +416,15 @@ public class Analysis extends DAO {
       }
       long time = timestamp.getTime();
 
-      results.add(new BestScore(exid, pronScore, time, id, json, isiPad, isFlashcard, trimPathForWebPage(path)));
+      String nativeAudio = exToRef.get(exid);
+      if (nativeAudio == null) missing++;
+      results.add(new BestScore(exid, pronScore, time, id, json, isiPad, isFlashcard, trimPathForWebPage(path), nativeAudio));
     }
 
-    logger.info("total " + count+
-        " iPad = " + iPad + " flashcard " +flashcard + " learn " +learn);
+    if (DEBUG || true) {
+      logger.info("total " + count + " missing audio " + missing+
+          " iPad = " + iPad + " flashcard " + flashcard + " learn " + learn);
+    }
 
     finish(connection, statement, rs);
     return userToBest;
@@ -440,9 +447,11 @@ public class Analysis extends DAO {
 
     long then = System.currentTimeMillis();
 
+    int c = 0;
     for (BestScore bs : bestScores) {
       String json = bs.getJson();
       if (json == null) {
+        c++;
         logger.error("huh? no json for " + bs);
       } else if (json.equals("{}")) {
         logger.warn("json is empty for " + bs);
