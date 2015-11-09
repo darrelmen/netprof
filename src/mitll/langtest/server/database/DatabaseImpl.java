@@ -200,9 +200,7 @@ public class DatabaseImpl implements Database {
     return resultDAO;
   }
 
-  public Analysis getAnalysis() {
-    return new Analysis(this, phoneDAO);
-  }
+  public Analysis getAnalysis() { return new Analysis(this, phoneDAO, getExerciseIDToRefAudio());  }
 
   public RefResultDAO getRefResultDAO() {
     return refresultDAO;
@@ -851,6 +849,23 @@ public class DatabaseImpl implements Database {
     }
     return join;
   }
+
+  public Map<String, String> getExerciseIDToRefAudio() {
+    Map<String, String> join = new HashMap<String, String>();
+
+    for (CommonExercise exercise : getExercises()) {
+      String id = exercise.getID();
+      join.put(id, exercise.getRefAudio());
+    }
+
+    for (CommonExercise exercise : userExerciseDAO.getAll()) {
+      String id = exercise.getID();
+      join.put(id, exercise.getRefAudio());
+    }
+
+    return join;
+  }
+
 
   public AnswerDAO getAnswerDAO() {
     return answerDAO;
