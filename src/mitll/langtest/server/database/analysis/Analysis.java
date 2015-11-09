@@ -142,6 +142,7 @@ public class Analysis extends DAO {
         ResultDAO.DEVICE_TYPE + "," +
         ResultDAO.SCORE_JSON + "," +
         ResultDAO.ANSWER + "," +
+        ResultDAO.AUDIO_TYPE + "," +
         ResultDAO.USERID +
         " FROM " + ResultDAO.RESULTS +
         " where " + useridClause +
@@ -343,7 +344,6 @@ public class Analysis extends DAO {
 //          logger.warn("getBestForQuery skipping " + lastBest.getResultID());
         } else {
           if (DEBUG) logger.debug("getBestForQuery bestScores now " + bestScores.size());
-
           bestScores.add(lastBest);
         }
       }
@@ -380,12 +380,18 @@ public class Analysis extends DAO {
     ResultSet rs = statement.executeQuery();
     Map<Long, List<BestScore>> userToBest = new HashMap<>();
 
+    int iPad = 0;
+    int flashcard = 0;
+    int learn = 0;
+    int count = 0;
     while (rs.next()) {
+      count++;
       String exid = rs.getString(Database.EXID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       float pronScore = rs.getFloat(ResultDAO.PRON_SCORE);
       int id = rs.getInt(ResultDAO.ID);
       long userid = rs.getLong(ResultDAO.USERID);
+      String type =rs.getString(ResultDAO.AUDIO_TYPE);
 
       List<BestScore> results = userToBest.get(userid);
       if (results == null) userToBest.put(userid, results = new ArrayList<BestScore>());
@@ -399,10 +405,20 @@ public class Analysis extends DAO {
       String device = rs.getString(ResultDAO.DEVICE_TYPE);
       String path = rs.getString(ResultDAO.ANSWER);
       boolean isiPad = device != null && device.startsWith("i");
+      if (isiPad) iPad++;
+      boolean isFlashcard = !isiPad && (type.startsWith("avp") || type.startsWith("flashcard"));
+      if (!isiPad) {
+        if (isFlashcard) flashcard++;
+        else learn++;
+      }
       long time = timestamp.getTime();
 
-      results.add(new BestScore(exid, pronScore, time, id, json, isiPad, trimPathForWebPage(path)));
+      results.add(new BestScore(exid, pronScore, time, id, json, isiPad, isFlashcard, trimPathForWebPage(path)));
     }
+
+    logger.info("total " + count+
+        " iPad = " + iPad + " flashcard " +flashcard + " learn " +learn);
+
     finish(connection, statement, rs);
     return userToBest;
   }
