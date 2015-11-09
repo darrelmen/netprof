@@ -10,24 +10,26 @@ public class BestScore implements Comparable<BestScore> {
   private final long timestamp;
   private final float pronScore;
   private final String fileRef;
-//  private int count;
   private final int resultID;
   private String json;
   private boolean isiPad;
+  private boolean isFlashcard;
 
   /**
-   * @see mitll.langtest.server.database.analysis.Analysis#getBestForQuery
    * @param id
    * @param pronScore
    * @param timestamp
+   * @param isFlashcard
+   * @see mitll.langtest.server.database.analysis.Analysis#getBestForQuery
    */
-  public BestScore(String id, float pronScore, long timestamp, int resultID, String json, boolean isiPad, String fileRef) {
+  public BestScore(String id, float pronScore, long timestamp, int resultID, String json, boolean isiPad, boolean isFlashcard, String fileRef) {
     this.id = id;
     this.pronScore = (pronScore < 0) ? 0 : pronScore;
     this.timestamp = timestamp;
     this.resultID = resultID;
     this.json = json;
-    this.isiPad =isiPad;
+    this.isiPad = isiPad;
+    this.isFlashcard = isFlashcard;
     this.fileRef = fileRef;
   }
 
@@ -39,7 +41,7 @@ public class BestScore implements Comparable<BestScore> {
   }
 
   public String toString() {
-    return "ex " + getId() + "/ res " +getResultID() +
+    return "ex " + getId() + "/ res " + getResultID() +
         " : " + new Date(getTimestamp()) + " # " +
         //count +
         " : " + pronScore;
@@ -63,7 +65,7 @@ public class BestScore implements Comparable<BestScore> {
   }
 */
 
-  public String toCSV() {
+/*  public String toCSV() {
 //    SimpleDateFormat df = new SimpleDateFormat("MM-dd-yy HH:mm:ss");
 //    String s = df.format(timestamp) + ",";
     //String s = "";
@@ -71,7 +73,7 @@ public class BestScore implements Comparable<BestScore> {
         timestamp + "," +
         //count + "," +
         pronScore;
-  }
+  }*/
 
   public String getId() {
     return id;
@@ -91,6 +93,14 @@ public class BestScore implements Comparable<BestScore> {
 
   public String getFileRef() {
     return fileRef;
+  }
+
+//  public void setFlashcard(boolean flashcard) {
+//    isFlashcard = flashcard;
+//  }
+
+  public boolean isFlashcard() {
+    return isFlashcard;
   }
 }
 
