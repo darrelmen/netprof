@@ -21,8 +21,9 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/19/15.
  */
 public class AnalysisPlot extends DivWidget implements IsWidget {
-  private static final int CHART_HEIGHT = 340;
   private final Logger logger = Logger.getLogger("AnalysisPlot");
+
+  private static final int CHART_HEIGHT = 340;
 
   private static final int Y_OFFSET_FOR_LEGEND = 60;
   private static final String PRONUNCIATION_SCORE = "Pronunciation Score";
@@ -178,7 +179,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
   private void addCumulativeAverage(List<TimeAndScore> yValuesForUser, Chart chart, String seriesTitle) {
     Number[][] data = new Number[yValuesForUser.size()][2];
 
-    logger.info("got " + yValuesForUser.size());
+   // logger.info("got " + yValuesForUser.size());
     int i = 0;
     for (TimeAndScore ts : yValuesForUser) {
       data[i][0] = ts.getTimestamp();
@@ -194,7 +195,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
   }
 
   private void addDeviceData(List<TimeAndScore> iPadData, Chart chart) {
-    logger.info("iPadData " + iPadData.size());
+   // logger.info("iPadData " + iPadData.size());
 
     if (!iPadData.isEmpty()) {
       Number[][] data;
@@ -212,7 +213,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
   }
 
   private void addBrowserData(List<TimeAndScore> browserData, Chart chart, boolean isAVP) {
-    logger.info("browserData " + browserData.size());
+ //   logger.info("browserData " + browserData.size());
 
     if (!browserData.isEmpty()) {
       Number[][] data;
