@@ -10,7 +10,6 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.log4j.Logger;
 
 import java.math.BigDecimal;
@@ -252,7 +251,7 @@ public class PhoneDAO extends DAO {
       words.add(word);
       long resultID = wordAndScore.getResultID();
       resToAnswer.put(resultID, wordAndScore.getAnswerAudio());
-      resToRef.put(resultID, wordAndScore.getRefAudio());
+      resToRef.put(resultID,    wordAndScore.getRefAudio());
       resToResult.put(resultID, wordAndScore.getScoreJson());
 
       if (count++ > MAX_EXAMPLES) {
@@ -292,7 +291,6 @@ public class PhoneDAO extends DAO {
    */
   public PhoneReport getWorstPhonesForResults(long userid, List<Integer> ids, Map<String, String> idToRef) throws SQLException {
     String sql = getResultIDJoinSQL(userid, ids);
-    //  logger.info("sql " +sql);
     return getPhoneReport(sql, idToRef, true);
   }
 
@@ -305,8 +303,6 @@ public class PhoneDAO extends DAO {
    */
   private PhoneReport getWorstPhones(long userid, List<String> exids, Map<String, String> idToRef) throws SQLException {
     String sql = getJoinSQL(userid, exids);
-    //logger.info("sql " +sql);
-
     return getPhoneReport(sql, idToRef, false);
   }
 
