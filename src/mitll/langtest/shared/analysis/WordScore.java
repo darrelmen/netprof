@@ -14,6 +14,7 @@ import java.util.Map;
  */
 public class WordScore implements Serializable, Comparable<WordScore> {
   private String fileRef;
+  private String nativeAudio;
   private String id;
   private long timestamp;
   private float pronScore;
@@ -29,15 +30,17 @@ public class WordScore implements Serializable, Comparable<WordScore> {
    * @see mitll.langtest.server.database.analysis.Analysis#getWordScore(List)
    */
   public WordScore(BestScore bs, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
-    this(bs.getId(), bs.getScore(), bs.getTimestamp(), bs.getResultID(), bs.getFileRef(), netPronImageTypeListMap);
+    this(bs.getId(), bs.getScore(), bs.getTimestamp(), bs.getResultID(), bs.getFileRef(), bs.getNativeAudio(), netPronImageTypeListMap);
   }
 
-  private WordScore(String id, float pronScore, long timestamp, int resultID, String fileRef, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
+  private WordScore(String id, float pronScore, long timestamp, int resultID, String fileRef, String nativeAudio,
+                    Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
     this.id = id;
     this.pronScore = (pronScore < 0) ? 0 : pronScore;
     this.timestamp = timestamp;
     this.resultID = resultID;
     this.fileRef = fileRef;
+    this.nativeAudio = nativeAudio;
     this.netPronImageTypeListMap = netPronImageTypeListMap;
   }
 
@@ -70,7 +73,12 @@ public class WordScore implements Serializable, Comparable<WordScore> {
     return fileRef;
   }
 
+
+  public String getNativeAudio() {
+    return nativeAudio;
+  }
+
   public String toString() {
-    return "exid "+id + "/" + resultID + " score " + pronScore + "  : " + netPronImageTypeListMap;
+    return "exid " + id + "/" + resultID + " score " + pronScore + "  : " + netPronImageTypeListMap;
   }
 }
