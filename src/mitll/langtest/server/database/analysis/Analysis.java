@@ -66,10 +66,10 @@ public class Analysis extends DAO {
       "rbtrbt"));
 
   /**
-   * @see LangTestDatabaseImpl#getUsersWithRecordings()
    * @param userDAO
    * @param minRecordings
    * @return
+   * @see LangTestDatabaseImpl#getUsersWithRecordings()
    */
   public List<UserInfo> getUserInfo(UserDAO userDAO, int minRecordings) {
     String sql = getPerfSQL();
@@ -119,7 +119,7 @@ public class Analysis extends DAO {
     long then = System.currentTimeMillis();
     Map<Long, UserInfo> bestForQuery = getBestForQuery(connection, statement, minRecordings);
     long now = System.currentTimeMillis();
-    logger.debug("getBest took " + (now - then) + " millis to return\t" + bestForQuery.size() + " items");
+    logger.debug(getLanguage() + " : getBest took " + (now - then) + " millis to return\t" + bestForQuery.size() + " items");
 
     return bestForQuery;
   }
@@ -127,13 +127,11 @@ public class Analysis extends DAO {
   private String getPerfSQL() {
     return getPerfSQL(0, false);
   }
-
   private String getPerfSQL(long id) {
     return getPerfSQL(id, true);
   }
 
   private String getPerfSQL(long id, boolean addUserID) {
-    //String s = ResultDAO.USERID + "=1";
     String useridClause = addUserID ? //s +" OR " +
         ResultDAO.USERID + "=" + id + " AND " : "";
     return "SELECT " +
@@ -169,7 +167,7 @@ public class Analysis extends DAO {
         return new UserPerformance();
       } else {
         UserInfo next = values.iterator().next();
-        if (DEBUG)  logger.debug(" results for " + values.size() + "  first  " + next);
+        if (DEBUG) logger.debug(" results for " + values.size() + "  first  " + next);
         List<BestScore> resultsForQuery = next.getBestScores();
         if (DEBUG) logger.debug(" resultsForQuery for " + resultsForQuery.size());
 
@@ -199,10 +197,10 @@ public class Analysis extends DAO {
       } else {
         UserInfo next = values.iterator().next();
         List<BestScore> resultsForQuery = next.getBestScores();
-        if  (DEBUG) logger.warn("resultsForQuery " + resultsForQuery.size());
+        if (DEBUG) logger.warn("resultsForQuery " + resultsForQuery.size());
 
         List<WordScore> wordScore = getWordScore(resultsForQuery);
-        if  (DEBUG) logger.warn("wordScore " + wordScore.size());
+        if (DEBUG) logger.warn("wordScore " + wordScore.size());
 
         return wordScore;
       }
@@ -221,7 +219,14 @@ public class Analysis extends DAO {
   public PhoneReport getPhonesForUser(long id, int minRecordings) {
     try {
       String sql = getPerfSQL(id);
+      long then = System.currentTimeMillis();
+      long start = System.currentTimeMillis();
+
       Map<Long, UserInfo> best = getBest(sql, minRecordings);
+      long now = System.currentTimeMillis();
+
+      logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - then) + " millis to get " + best.size());
+
       if (best.isEmpty()) return new PhoneReport();
 
       UserInfo next = best.values().iterator().next();
@@ -233,12 +238,16 @@ public class Analysis extends DAO {
       }
 
       if (DEBUG) logger.info("getPhonesForUser from " + resultsForQuery.size() + " added " + ids.size() + " ids ");
+      then = System.currentTimeMillis();
       PhoneReport phoneReport = phoneDAO.getWorstPhonesForResults(id, ids, Collections.emptyMap());
+
+      now = System.currentTimeMillis();
+
+      logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - then) + " millis to phone report");
 
       Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
 
       if (DEBUG) logger.info("getPhonesForUser report phonesForUser " + phonesForUser);
-      long now = System.currentTimeMillis();
 
       for (Map.Entry<String, List<WordAndScore>> pair : phonesForUser.entrySet()) {
         List<WordAndScore> value = pair.getValue();
@@ -258,11 +267,19 @@ public class Analysis extends DAO {
       }
       if (DEBUG) logger.info("getPhonesForUser report phoneReport " + phoneReport);
 
+      now = System.currentTimeMillis();
+
+      logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - start) + " millis to get " + phonesForUser.size() + " phones");
+
       return phoneReport;
     } catch (Exception ee) {
       logException(ee);
     }
     return null;
+  }
+
+  public String getLanguage() {
+    return database.getLanguage();
   }
 
   /**
@@ -304,7 +321,7 @@ public class Analysis extends DAO {
 
         if ((last != null && !last.equals(exid)) || (lastTimestamp > 0 && time - lastTimestamp > FIVE_MINUTES)) {
           if (seen.contains(id)) {
-            logger.warn("skipping " + id);
+//            logger.warn("skipping " + id);
           } else {
             bestScores.add(lastBest);
             if (DEBUG) logger.info("Adding " + lastBest);
@@ -323,7 +340,7 @@ public class Analysis extends DAO {
 
       if (lastBest != null) {
         if (seen.contains(lastBest.getResultID())) {
-          logger.warn("getBestForQuery skipping " + lastBest.getResultID());
+//          logger.warn("getBestForQuery skipping " + lastBest.getResultID());
         } else {
           if (DEBUG) logger.debug("getBestForQuery bestScores now " + bestScores.size());
 
@@ -349,9 +366,8 @@ public class Analysis extends DAO {
       if (value.size() >= minRecordings) {
         Long aLong = userToEarliest.get(userID);
         userToUserInfo.put(userID, new UserInfo(value, aLong));
-      }
-      else {
-        if (DEBUG) logger.debug("skipping  " +userID + ": " + value.size());
+      } else {
+        if (DEBUG) logger.debug("skipping  " + userID + ": " + value.size());
       }
     }
 
@@ -378,7 +394,7 @@ public class Analysis extends DAO {
 
       String json = rs.getString(ResultDAO.SCORE_JSON);
       if (json != null && json.equals("{}")) {
-        logger.warn("Got empty json " + json + " for " + exid  +" : " +id);
+        logger.warn("Got empty json " + json + " for " + exid + " : " + id);
       }
       String device = rs.getString(ResultDAO.DEVICE_TYPE);
       String path = rs.getString(ResultDAO.ANSWER);
@@ -406,21 +422,33 @@ public class Analysis extends DAO {
   private List<WordScore> getWordScore(List<BestScore> bestScores) {
     List<WordScore> results = new ArrayList<WordScore>();
 
+    long then = System.currentTimeMillis();
+
     for (BestScore bs : bestScores) {
       String json = bs.getJson();
       if (json == null) {
         logger.error("huh? no json for " + bs);
-      }
-      else if (json.equals("{}")) {
+      } else if (json.equals("{}")) {
         logger.warn("json is empty for " + bs);
-      }
-      else {
+      } else {
         if (json.isEmpty()) logger.warn("no json for " + bs);
         Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(json);
         results.add(new WordScore(bs, netPronImageTypeListMap));
       }
     }
+
+    long now = System.currentTimeMillis();
+    if (now-then > 50) {
+      logger.debug(getDatabase().getLanguage() + " took " + (now - then) + " millis to parse json for " + bestScores.size() + " best scores");
+    }
+
+    then = System.currentTimeMillis();
     Collections.sort(results);
+    now = System.currentTimeMillis();
+    if (now-then > 50) {
+      logger.debug(getDatabase().getLanguage() + " took " + (now - then) + " millis to sort " + bestScores.size() + " best scores");
+    }
+
     return results;
   }
 }
