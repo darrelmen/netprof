@@ -10,6 +10,7 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.log4j.Logger;
 
 import java.math.BigDecimal;
@@ -282,16 +283,16 @@ public class PhoneDAO extends DAO {
   }
 
   /**
-   * @see Analysis#getPhonesForUser
    * @param userid
    * @param ids
    * @param idToRef
    * @return
    * @throws SQLException
+   * @see Analysis#getPhonesForUser
    */
   public PhoneReport getWorstPhonesForResults(long userid, List<Integer> ids, Map<String, String> idToRef) throws SQLException {
     String sql = getResultIDJoinSQL(userid, ids);
-  //  logger.info("sql " +sql);
+    //  logger.info("sql " +sql);
     return getPhoneReport(sql, idToRef, true);
   }
 
@@ -310,20 +311,20 @@ public class PhoneDAO extends DAO {
   }
 
   /**
-   *
    * @param sql
    * @param idToRef
    * @param addTranscript true if going to analysis tab
    * @return
    * @throws SQLException
+   * @see #getWorstPhonesForResults(long, List, Map)
    */
   private PhoneReport getPhoneReport(String sql, Map<String, String> idToRef, boolean addTranscript) throws SQLException {
-   // logger.debug("getPhoneReport query is " + sql);
+    // logger.debug("getPhoneReport query is " + sql);
     Connection connection = getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
 
-    long currentRID = -1;
+    // long currentRID = -1;
     Map<String, List<Float>> phoneToScores = new HashMap<String, List<Float>>();
 
     String currentExercise = "";
@@ -334,6 +335,7 @@ public class PhoneDAO extends DAO {
     float totalScore = 0;
     float totalItems = 0;
 
+    Map<String, Map<NetPronImageType, List<TranscriptSegment>>> stringToMap = new HashMap<>();
     while (rs.next()) {
       int i = 1;
       String exid = rs.getString(i++);
@@ -345,8 +347,7 @@ public class PhoneDAO extends DAO {
       if (addTranscript) {
         Timestamp timestamp = rs.getTimestamp(i++);
         if (timestamp != null) resultTime = timestamp.getTime();
-      }
-      else {
+      } else {
         i++;
       }
       int wseq = rs.getInt(i++);
@@ -357,7 +358,7 @@ public class PhoneDAO extends DAO {
 //      logger.info("Got " + exid + " rid " + rid + " word " + word);
 
       if (!exid.equals(currentExercise)) {
-        currentRID = rid;
+        //   currentRID = rid;
         currentExercise = exid;
         //logger.debug("adding " + exid + " score " + pronScore);
         totalScore += pronScore;
@@ -365,47 +366,54 @@ public class PhoneDAO extends DAO {
       }
 
 //      if (currentRID == rid) {   // TODO : ? WHY ?
-        String phone = rs.getString(PHONE);
-        int seq = rs.getInt(SEQ);
-        List<Float> scores = phoneToScores.get(phone);
-        if (scores == null) phoneToScores.put(phone, scores = new ArrayList<Float>());
-        float phoneScore = rs.getFloat(SCORE);
-        scores.add(phoneScore);
+      String phone = rs.getString(PHONE);
+      int seq = rs.getInt(SEQ);
+      List<Float> scores = phoneToScores.get(phone);
+      if (scores == null) phoneToScores.put(phone, scores = new ArrayList<Float>());
+      float phoneScore = rs.getFloat(SCORE);
+      scores.add(phoneScore);
 
-        List<WordAndScore> wordAndScores = phoneToWordAndScore.get(phone);
-        Set<Long> ridsForPhone = phoneToRID.get(phone);
-        if (wordAndScores == null) {
-          phoneToWordAndScore.put(phone, wordAndScores = new ArrayList<WordAndScore>());
-          phoneToRID.put(phone, ridsForPhone = new HashSet<Long>());
+      List<WordAndScore> wordAndScores = phoneToWordAndScore.get(phone);
+      Set<Long> ridsForPhone = phoneToRID.get(phone);
+      if (wordAndScores == null) {
+        phoneToWordAndScore.put(phone, wordAndScores = new ArrayList<WordAndScore>());
+        phoneToRID.put(phone, ridsForPhone = new HashSet<Long>());
+      }
+
+      WordAndScore wordAndScore = new WordAndScore(exid, word, wscore, rid, wseq, seq, trimPathForWebPage(audioAnswer),
+          idToRef.get(exid), scoreJson);
+      if (!ridsForPhone.contains(rid)) { // get rid of duplicates
+        wordAndScores.add(wordAndScore);
+      }
+      ridsForPhone.add(rid);
+
+      if (addTranscript) {
+        Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = stringToMap.get(scoreJson);
+        if (netPronImageTypeListMap == null) {
+          netPronImageTypeListMap = parseResultJson.parseJson(scoreJson);
+          stringToMap.put(scoreJson, netPronImageTypeListMap);
+        }
+        else {
+         // logger.debug("cache hit " + scoreJson.length());
         }
 
-        WordAndScore wordAndScore = new WordAndScore(exid, word, wscore, rid, wseq, seq, trimPathForWebPage(audioAnswer),
-            idToRef.get(exid), scoreJson);
-        if (!ridsForPhone.contains(rid)) { // get rid of duplicates
-          wordAndScores.add(wordAndScore);
-        }
-        ridsForPhone.add(rid);
+        setTranscript(wordAndScore, netPronImageTypeListMap);
 
-        if (addTranscript) {
-          Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(scoreJson);
-          wordAndScore.setTranscript(netPronImageTypeListMap);
-          wordAndScore.clearJSON();
+        //Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseJSON(scoreJson, wordAndScore);
 
-          List<PhoneAndScore> times = phoneToTimeStamp.get(phone);
-          if (times == null) phoneToTimeStamp.put(phone, times = new ArrayList<PhoneAndScore>());
-          times.add(new PhoneAndScore(phoneScore,resultTime));
-        }
-  //    } else {
+        addResultTime(phoneToTimeStamp, resultTime, phone, phoneScore);
+      }
+      //    } else {
      /*   logger.debug("------> current " + currentRID +
             " skipping " + exid + " " + rid + " word " + word + "<-------------- ");*/
-    //  }
+      //  }
     }
     finish(connection, statement, rs);
 
     // TODO : add this info to phone report
-    for (Map.Entry<String,List<PhoneAndScore>> pair : phoneToTimeStamp.entrySet()) {
+    for (Map.Entry<String, List<PhoneAndScore>> pair : phoneToTimeStamp.entrySet()) {
       Collections.sort(pair.getValue());
-  //    logger.info(pair.getKey() + "\t" + pair.getValue().size());
+      //    logger.info(pair.getKey() + "\t" + pair.getValue().size());
     }
 //    logger.warn("for o4 " + phoneToTimeStamp.get("o4").size());
 
@@ -416,6 +424,25 @@ public class PhoneDAO extends DAO {
     // TODO : use phone time&score info
 
     return getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems);
+  }
+
+/*  private Map<NetPronImageType, List<TranscriptSegment>> parseJSON(String scoreJson, WordAndScore wordAndScore) {
+    Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(scoreJson);
+    setTranscript(wordAndScore, netPronImageTypeListMap);
+    return netPronImageTypeListMap;
+
+    // addResultTime(phoneToTimeStamp, resultTime, phone, phoneScore);
+  }*/
+
+  private void setTranscript(WordAndScore wordAndScore, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
+    wordAndScore.setTranscript(netPronImageTypeListMap);
+    wordAndScore.clearJSON();
+  }
+
+  private void addResultTime(Map<String, List<PhoneAndScore>> phoneToTimeStamp, long resultTime, String phone, float phoneScore) {
+    List<PhoneAndScore> times = phoneToTimeStamp.get(phone);
+    if (times == null) phoneToTimeStamp.put(phone, times = new ArrayList<PhoneAndScore>());
+    times.add(new PhoneAndScore(phoneScore, resultTime));
   }
 
   private String getResultIDJoinSQL(long userid, List<Integer> ids) {
@@ -519,7 +546,7 @@ public class PhoneDAO extends DAO {
 
     if (DEBUG) logger.debug("phone->words " + phoneToWordAndScore);
 
-    return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted,phoneToCount);
+    return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted, phoneToCount);
   }
 
   private String trimPathForWebPage(String path) {
