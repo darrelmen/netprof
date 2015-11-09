@@ -10,6 +10,7 @@ public class BestScore implements Comparable<BestScore> {
   private final long timestamp;
   private final float pronScore;
   private final String fileRef;
+  private final String nativeAudio;
   private final int resultID;
   private String json;
   private boolean isiPad;
@@ -20,9 +21,11 @@ public class BestScore implements Comparable<BestScore> {
    * @param pronScore
    * @param timestamp
    * @param isFlashcard
+   * @param nativeAudio
    * @see mitll.langtest.server.database.analysis.Analysis#getBestForQuery
    */
-  public BestScore(String id, float pronScore, long timestamp, int resultID, String json, boolean isiPad, boolean isFlashcard, String fileRef) {
+  public BestScore(String id, float pronScore, long timestamp, int resultID, String json, boolean isiPad,
+                   boolean isFlashcard, String fileRef, String nativeAudio) {
     this.id = id;
     this.pronScore = (pronScore < 0) ? 0 : pronScore;
     this.timestamp = timestamp;
@@ -31,6 +34,7 @@ public class BestScore implements Comparable<BestScore> {
     this.isiPad = isiPad;
     this.isFlashcard = isFlashcard;
     this.fileRef = fileRef;
+    this.nativeAudio = nativeAudio;
   }
 
   @Override
@@ -95,12 +99,12 @@ public class BestScore implements Comparable<BestScore> {
     return fileRef;
   }
 
-//  public void setFlashcard(boolean flashcard) {
-//    isFlashcard = flashcard;
-//  }
-
   public boolean isFlashcard() {
     return isFlashcard;
+  }
+
+  public String getNativeAudio() {
+    return nativeAudio;
   }
 }
 
