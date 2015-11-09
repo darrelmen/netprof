@@ -105,7 +105,6 @@ public class AnswerDAO extends DAO {
         ResultDAO.DURATION + "," +
         ResultDAO.CORRECT + "," +
         ResultDAO.PRON_SCORE + "," +
-      //  ResultDAO.STIMULUS + "," +
         ResultDAO.DEVICE_TYPE + "," +
         ResultDAO.DEVICE + "," +
         ResultDAO.SCORE_JSON + "," +
@@ -133,7 +132,6 @@ public class AnswerDAO extends DAO {
 
     statement.setBoolean(i++, correct);
     statement.setFloat(i++, pronScore);
-//    statement.setString(i++, "");
     statement.setString(i++, deviceType);
     statement.setString(i++, device);
     statement.setString(i++, scoreJson);
