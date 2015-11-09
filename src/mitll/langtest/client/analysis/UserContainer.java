@@ -33,10 +33,11 @@ import java.util.List;
  */
 class UserContainer extends SimplePagingContainer<UserInfo> {
   //private final Logger logger = Logger.getLogger("UserContainer");
+  private static final int MAX_LENGTH_ID = 13;
 
   private static final int ID_WIDTH = 130;
   public static final int TABLE_WIDTH = 420;
-  public static final int SIGNED_UP = 90;
+  public static final int SIGNED_UP = 95;
   public static final String CURRENT = "Curr.";
   public static final int CURRENT_WIDTH = 60;
   public static final int DIFF_WIDTH = 55;
@@ -57,6 +58,11 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     this.rightSide = rightSide;
     this.learnTab = learnTab;
     this.service = service;
+  }
+
+  private String truncate(String columnText) {
+    if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
+    return columnText;
   }
 
   protected int getPageSize() {
@@ -255,13 +261,13 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     Column<UserInfo, SafeHtml> userCol = getUserColumn();
     userCol.setSortable(true);
     table.setColumnWidth(userCol, ID_WIDTH + "px");
-    addColumn(userCol, new TextHeader("Students"));
+    addColumn(userCol, new TextHeader("Student"));
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = getUserSorter(userCol, getList());
     table.addColumnSortHandler(columnSortHandler);
 
     Column<UserInfo, SafeHtml> dateCol = getDateColumn();
     dateCol.setSortable(true);
-    addColumn(dateCol, new TextHeader("Signed Up At"));
+    addColumn(dateCol, new TextHeader("Signed Up"));
     table.setColumnWidth(dateCol, SIGNED_UP + "px");
     table.addColumnSortHandler(getDateSorter(dateCol, getList()));
 
@@ -309,7 +315,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        return getSafeHtml(shell.getUser().getUserID());
+        return getSafeHtml(truncate(shell.getUser().getUserID()));
       }
     };
   }
