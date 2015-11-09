@@ -21,14 +21,14 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/19/15.
  */
 public class AnalysisPlot extends DivWidget implements IsWidget {
-  public static final int CHART_HEIGHT = 340;
+  private static final int CHART_HEIGHT = 340;
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
   private static final int Y_OFFSET_FOR_LEGEND = 60;
   private static final String PRONUNCIATION_SCORE = "Pronunciation Score";
 
-  private Map<Long, String> timeToId = new TreeMap<>();
-  private Map<String, CommonShell> idToEx = new TreeMap<>();
+  private final Map<Long, String> timeToId = new TreeMap<>();
+  private final Map<String, CommonShell> idToEx = new TreeMap<>();
 
   /**
    * @param service
@@ -70,8 +70,8 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
         } else {
 //        logger.info("getPerformanceForUser raw total " + rawTotal + " num " + rawBestScores.size());
           add(getChart("<b>" +
-              userChosenID +"</b>" +
-              " pronunciation score (Drag to zoom in)",
+                  userChosenID + "</b>" +
+                  " pronunciation score (Drag to zoom in)",
               "Score and average (" + rawTotal + " items : avg score " + (int) v +
                   " %)", "Cumulative Average", userPerformance));
         }
@@ -98,25 +98,25 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
         .setOption("/plotOptions/series/pointStart", 1)
         .setOption("/legend/enabled", false)
         .setLegend(new Legend()
-                .setLayout(Legend.Layout.VERTICAL)
-                .setAlign(Legend.Align.LEFT)
-                .setVerticalAlign(Legend.VerticalAlign.TOP)
-                .setX(100)
-                .setY(Y_OFFSET_FOR_LEGEND)
-                .setBorderWidth(1)
-                .setFloating(true)
-                .setBackgroundColor("#FFFFFF")
+            .setLayout(Legend.Layout.VERTICAL)
+            .setAlign(Legend.Align.LEFT)
+            .setVerticalAlign(Legend.VerticalAlign.TOP)
+            .setX(100)
+            .setY(Y_OFFSET_FOR_LEGEND)
+            .setBorderWidth(1)
+            .setFloating(true)
+            .setBackgroundColor("#FFFFFF")
         )
         .setScatterPlotOptions(new ScatterPlotOptions()
             .setMarker(new Marker()
-                    .setRadius(5)
-                    .setHoverState(new Marker()
-                            .setEnabled(true)
-                            .setLineColor(new Color(100, 100, 100))
-                    )
+                .setRadius(5)
+                .setHoverState(new Marker()
+                    .setEnabled(true)
+                    .setLineColor(new Color(100, 100, 100))
+                )
             )
             .setHoverStateMarker(new Marker()
-                    .setEnabled(false)
+                .setEnabled(false)
             ))
         .setToolTip(new ToolTip()
             .setFormatter(new ToolTipFormatter() {
@@ -142,7 +142,12 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
               }
             }));
 
-    addSeries(userPerformance.getRawBestScores(), userPerformance.getiPadTimeAndScores(), userPerformance.getBrowserTimeAndScores(),
+
+
+    addSeries(userPerformance.getRawBestScores(),
+        userPerformance.getiPadTimeAndScores(),
+        userPerformance.getLearnTimeAndScores(),
+        userPerformance.getAvpTimeAndScores(),
         chart, seriesName);
 
     configureChart(chart, subtitle);
@@ -156,7 +161,21 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
    * @paramx gameTimeSeconds
    * @see #getChart
    */
-  private void addSeries(List<TimeAndScore> yValuesForUser, List<TimeAndScore> iPadData, List<TimeAndScore> browserData, Chart chart, String seriesTitle) {
+  private void addSeries(List<TimeAndScore> yValuesForUser,
+                         List<TimeAndScore> iPadData,
+                         List<TimeAndScore> learnData,
+                         List<TimeAndScore> avpData,
+                         Chart chart,
+                         String seriesTitle) {
+    addCumulativeAverage(yValuesForUser, chart, seriesTitle);
+
+    addDeviceData(iPadData, chart);
+
+    addBrowserData(learnData, chart, false);
+    addBrowserData(avpData, chart, true);
+  }
+
+  private void addCumulativeAverage(List<TimeAndScore> yValuesForUser, Chart chart, String seriesTitle) {
     Number[][] data = new Number[yValuesForUser.size()][2];
 
     logger.info("got " + yValuesForUser.size());
@@ -172,10 +191,14 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
         .setType(Series.Type.LINE);
 
     chart.addSeries(series);
+  }
 
+  private void addDeviceData(List<TimeAndScore> iPadData, Chart chart) {
     logger.info("iPadData " + iPadData.size());
 
     if (!iPadData.isEmpty()) {
+      Number[][] data;
+      Series series;
       data = getDataForTimeAndScore(iPadData);
 
       String iPadName = "iPad/iPhone " + PRONUNCIATION_SCORE;
@@ -186,13 +209,19 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
 
       chart.addSeries(series);
     }
+  }
 
+  private void addBrowserData(List<TimeAndScore> browserData, Chart chart, boolean isAVP) {
     logger.info("browserData " + browserData.size());
 
     if (!browserData.isEmpty()) {
+      Number[][] data;
       data = getDataForTimeAndScore(browserData);
 
-      String browserName = "Browser " + PRONUNCIATION_SCORE;
+      String prefix = isAVP ? "Audio Vocab. Practice " : "Learn ";
+      String browserName = prefix + PRONUNCIATION_SCORE;
+
+      Series series;
       series = chart.createSeries()
           .setName(browserName)
           .setPoints(data);
