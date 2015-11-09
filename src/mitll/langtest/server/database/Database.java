@@ -13,14 +13,14 @@ import java.sql.Connection;
  * To change this template use File | Settings | File Templates.
  */
 public interface Database {
+  String TIME = "time";
+  String EXID = "exid";
+
   Connection getConnection(String who);
 
   void closeConnection(Connection connection);
 
   void logEvent(String exid, String context, long userid, String device);
-
-  String TIME = "time";
-  String EXID = "exid";
 
   ServerProperties getServerProps();
 
