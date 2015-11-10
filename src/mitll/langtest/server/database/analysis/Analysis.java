@@ -23,9 +23,9 @@ public class Analysis extends DAO {
   private static final boolean DEBUG = false;
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
-  private ParseResultJson parseResultJson;
-  private PhoneDAO phoneDAO;
-  Map<String,String> exToRef;
+  private final ParseResultJson parseResultJson;
+  private final PhoneDAO phoneDAO;
+  private final Map<String,String> exToRef;
 
   /**
    * @param database
@@ -58,7 +58,7 @@ public class Analysis extends DAO {
     return new ArrayList<BestScore>();
   }*/
 
-  Set<String> lincoln = new HashSet<>(Arrays.asList("gvidaver", "rbudd", "jmelot", "esalesky", "gatewood",
+  private final Set<String> lincoln = new HashSet<>(Arrays.asList("gvidaver", "rbudd", "jmelot", "esalesky", "gatewood",
       "testing", "grading", "fullperm",
       //"0001abcd",
       "egodoy",
@@ -134,8 +134,7 @@ public class Analysis extends DAO {
   }
 
   private String getPerfSQL(long id, boolean addUserID) {
-    String useridClause = addUserID ? //s +" OR " +
-        ResultDAO.USERID + "=" + id + " AND " : "";
+    String useridClause = addUserID ? ResultDAO.USERID + "=" + id + " AND " : "";
     return "SELECT " +
         Database.EXID + "," +
         ResultDAO.PRON_SCORE + "," +
@@ -268,6 +267,7 @@ public class Analysis extends DAO {
         }
         phonesForUser.put(phone, subset);
       }
+
       if (DEBUG) logger.info("getPhonesForUser report phoneReport " + phoneReport);
 
       now = System.currentTimeMillis();
@@ -281,7 +281,7 @@ public class Analysis extends DAO {
     return null;
   }
 
-  public String getLanguage() {
+  private String getLanguage() {
     return database.getLanguage();
   }
 
@@ -362,12 +362,14 @@ public class Analysis extends DAO {
     }*/
 
     Map<Long, UserInfo> userToUserInfo = new HashMap<>();
+    int userInitialScores = database.getServerProps().getUserInitialScores();
+
     for (Map.Entry<Long, List<BestScore>> pair : userToBest2.entrySet()) {
       List<BestScore> value = pair.getValue();
       Long userID = pair.getKey();
       if (value.size() >= minRecordings) {
         Long aLong = userToEarliest.get(userID);
-        userToUserInfo.put(userID, new UserInfo(value, aLong));
+        userToUserInfo.put(userID, new UserInfo(value, aLong, userInitialScores));
       } else {
         if (DEBUG) logger.debug("skipping  " + userID + ": " + value.size());
       }
