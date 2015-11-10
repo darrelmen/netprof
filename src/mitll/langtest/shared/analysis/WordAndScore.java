@@ -32,7 +32,6 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
    * @param seq         which phoneme in phrase (not in word)
    * @param answerAudio
    * @param refAudio
-   * @param nativeAudio
    * @param scoreJson
    * @see PhoneDAO#getPhoneReport
    */
@@ -46,7 +45,6 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
     this.seq = seq;
     this.answerAudio = answerAudio;
     this.refAudio = refAudio;
-  //  this.nativeAudio = nativeAudio;
     this.scoreJson = scoreJson;
   }
 
