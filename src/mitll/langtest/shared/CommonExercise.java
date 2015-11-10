@@ -55,7 +55,7 @@ public interface CommonExercise extends CommonShell {
   Map<MiniUser, List<AudioAttribute>> getUserMap(boolean isMale);
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget()
+   * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget()
    * @param isMale
    * @return
    */
@@ -74,7 +74,7 @@ public interface CommonExercise extends CommonShell {
    * @see mitll.langtest.server.database.Export#getExports
    * @return
    */
-  Exercise toExercise();
+  //Exercise toExercise();
 
   // super nice to remove these... and make read only
 
