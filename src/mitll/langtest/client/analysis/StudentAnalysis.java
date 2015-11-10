@@ -19,8 +19,11 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/27/15.
  */
 public class StudentAnalysis extends DivWidget {
-  public static final int LEFT_MARGIN = UserContainer.TABLE_WIDTH+55;
+  public static final int LEFT_MARGIN = UserContainer.TABLE_WIDTH+ 55;
   public static final int TOP_MARGIN = -55;
+  public static final String STUDENTS = "Students";
+  public static final String OR_MORE_RECORDINGS = "5 or more recordings";
+  public static final int STUDENT_WIDTH = 300;
   private final Logger logger = Logger.getLogger("StudentAnalysis");
 
   public StudentAnalysis(final LangTestDatabaseAsync service, final ExerciseController controller,
@@ -34,7 +37,10 @@ public class StudentAnalysis extends DivWidget {
       @Override
       public void onSuccess(Collection<UserInfo> users) {
         DivWidget rightSide = new DivWidget();
-        UserContainer userContainer = new UserContainer(service, controller, rightSide, showTab);
+        DivWidget top       = new DivWidget();
+        DivWidget bottom    = new DivWidget();
+        bottom.addStyleName("floatLeft");
+        UserContainer userContainer = new UserContainer(service, controller, rightSide, bottom, showTab);
         List<UserInfo> filtered = new ArrayList<UserInfo>();
         for (UserInfo userInfo : users) {
           User user = userInfo.getUser();
@@ -45,18 +51,20 @@ public class StudentAnalysis extends DivWidget {
             logger.warning("skip " + user);
           }
         }
-        Heading students = new Heading(3, "Students", "5 or more recordings");
-        students.setWidth("300px");
+        Heading students = new Heading(3, STUDENTS, OR_MORE_RECORDINGS);
+        students.setWidth(STUDENT_WIDTH + "px");
         //VerticalPanel leftSide = new VerticalPanel();
         DivWidget leftSide = new DivWidget();
         leftSide.add(students);
         Panel tableWithPager = userContainer.getTableWithPager(filtered);
         leftSide.add(tableWithPager);
 
-        add(leftSide);
+        top.add(leftSide);
+        top.add(rightSide);
+        add(top);
         rightSide.getElement().getStyle().setMarginTop(TOP_MARGIN, Style.Unit.PX);
         rightSide.getElement().getStyle().setMarginLeft(LEFT_MARGIN, Style.Unit.PX);
-        add(rightSide);
+        add(bottom);
       }
     });
   }
