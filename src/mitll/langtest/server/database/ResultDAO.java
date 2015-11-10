@@ -58,6 +58,8 @@ public class ResultDAO extends DAO {
   public static final int HOUR = 60 * 60 * 1000;
  // public static final int DAY = 24 * HOUR;
   public static final String DEVICETYPE = "devicetype";
+  public static final String VALIDITY = "validity";
+  public static final String SNR = "SNR";
 
   private final boolean debug = false;
 
@@ -822,6 +824,9 @@ public class ResultDAO extends DAO {
       float pronScore = rs.getFloat(PRON_SCORE);
       String dtype = rs.getString(DEVICE_TYPE);
       String device = dtype == null ? "Unk" : dtype.equals("browser") ? rs.getString(DEVICE) : (dtype + "/" + rs.getString(DEVICE));
+      String validity = rs.getString(VALIDITY);
+      float snr = rs.getFloat(SNR);
+
       int processDur = rs.getInt(PROCESS_DUR);
       int roundTripDur = rs.getInt(ROUND_TRIP_DUR);
 
@@ -832,7 +837,7 @@ public class ResultDAO extends DAO {
           trimPathForWebPage2(answer), // answer
           valid, // valid
           timestamp.getTime(),
-          type, dur, correct, pronScore, device, rs.getBoolean(WITH_FLASH), processDur, roundTripDur);
+          type, dur, correct, pronScore, device, rs.getBoolean(WITH_FLASH), processDur, roundTripDur,validity,snr);
       results.add(result);
     }
     finish(connection, statement, rs);
@@ -1175,6 +1180,13 @@ public class ResultDAO extends DAO {
       addInt(connection, RESULTS, ROUND_TRIP_DUR);
     }
 
+    if (!columns.contains(VALIDITY.toLowerCase())) {
+      addVarchar(connection, RESULTS, VALIDITY);
+    }
+    if (!columns.contains(SNR.toLowerCase())) {
+      addFloat(connection, RESULTS, SNR);
+    }
+
     database.closeConnection(connection);
 
     createIndex(database, Database.EXID, RESULTS);
@@ -1217,7 +1229,9 @@ public class ResultDAO extends DAO {
         SCORE_JSON + " VARCHAR," +
         WITH_FLASH + " BOOLEAN," +
         PROCESS_DUR + " INT," +
-        ROUND_TRIP_DUR + " INT" +
+        ROUND_TRIP_DUR + " INT, " +
+        VALIDITY + " VARCHAR, " +
+        SNR + " FLOAT" +
         ")");
     statement.execute();
     statement.close();
