@@ -59,7 +59,7 @@ public class TimeAndScore implements Serializable, Comparable<TimeAndScore> {
 
   public String toString() {
     String format = getTimeString();
-    return id + " at " + format + " avg score for " +
+    return id + "\tat\t" + format + " avg score for " +
         //count + "\t" +
         "=\t" + score + "\t" + getCumulativeAverage();
   }
