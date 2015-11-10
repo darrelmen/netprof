@@ -52,6 +52,7 @@ public class Report {
   String language;
   BufferedWriter csv;
   private Map<Long, Long> userToStart = new HashMap<>();
+  private static final boolean DEBUG = false;
 
   public Report(UserDAO userDAO, ResultDAO resultDAO, EventDAO eventDAO, AudioDAO audioDAO, String language,
                 String prefix) {
@@ -201,7 +202,7 @@ public class Report {
     Date january1st = getJanuaryFirst(calendar);
     Date january1stNextYear = getJanuaryFirstNextYear();
 
-    logger.info("doReport : between " + january1st + " and " + january1stNextYear);
+    if (DEBUG) logger.info("doReport : between " + january1st + " and " + january1stNextYear);
 
     addRefAudio(builder, calendar, january1st, january1stNextYear, audioAttributes, language);
 
@@ -354,7 +355,7 @@ public class Report {
     }
     builder.append("\n");
 
-    logger.info(builder.toString());
+    if (DEBUG) logger.info(builder.toString());
 
     try {
       csv.write(builder.toString());
@@ -553,8 +554,10 @@ public class Report {
       logger.error("got " + e, e);
     }
 
-    logger.debug("Skipped " + invalid + " invalid recordings, " + invalidScore + " -1 score items, " + beforeJanuary + " beforeJan1st");
-    if (teacherAudio > 0) logger.debug("skipped " + teacherAudio + " teacher recordings by " + skipped);
+    if (DEBUG) logger.debug("Skipped " + invalid + " invalid recordings, " + invalidScore + " -1 score items, " + beforeJanuary + " beforeJan1st");
+    if (teacherAudio > 0) {
+      if (DEBUG) logger.debug("skipped " + teacherAudio + " teacher recordings by " + skipped);
+    }
     //logger.debug("userToDayToCount " + userToDayToCount.size());
 
     builder.append("\n<br/><span>Valid student recordings</span>");
@@ -785,7 +788,7 @@ public class Report {
     Calendar calendar = getCal();
     Date january1st = getJanuaryFirst(calendar);
     Date january1stThisYear = getJanuaryFirstNextYear();
-    logger.info("getEvents from " + january1st + " to " + january1stThisYear);
+    if (DEBUG)  logger.info("getEvents from " + january1st + " to " + january1stThisYear);
     long time = january1st.getTime();
     long time1 = january1stThisYear.getTime();
 
