@@ -848,7 +848,6 @@ public class ResultDAO extends DAO {
   private List<CorrectAndScore> getScoreResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
-
     return getScoreResultsForQuery(connection, statement);
   }
 
