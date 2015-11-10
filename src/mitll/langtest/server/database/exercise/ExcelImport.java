@@ -3,13 +3,19 @@ package mitll.langtest.server.database.exercise;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.AudioDAO;
-import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListManager;
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.CommonUserExercise;
+import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.ExerciseFormatter;
+import mitll.langtest.shared.custom.UserExercise;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -26,8 +32,6 @@ import java.util.*;
  */
 public class ExcelImport implements ExerciseDAO {
   private static final Logger logger = Logger.getLogger(ExcelImport.class);
-  private static final String FAST_WAV = "Fast" + ".wav";
-  private static final String SLOW_WAV = "Slow" + ".wav";
   private static final String CONTEXT_TRANSLATION = "context translation";
   private static final String TRANSLATION_OF_CONTEXT = "Translation of Context";
   private static final String CONTEXT = "context";
@@ -45,7 +49,7 @@ public class ExcelImport implements ExerciseDAO {
   private final boolean usePredefinedTypeOrder;
   private final String language;
   private final boolean skipSemicolons;
-  private int audioOffset = 0;
+  //private int audioOffset = 0;
   private final int maxExercises;
   private final ServerProperties serverProps;
   private final UserListManager userListManager;
@@ -59,6 +63,7 @@ public class ExcelImport implements ExerciseDAO {
   private int chapterIndex;
   private int weekIndex;
   private final Map<String, Map<String, String>> idToDefectMap = new HashMap<String, Map<String, String>>();
+  private AttachAudio attachAudio;
 
   private final boolean DEBUG = false;
 
@@ -86,7 +91,7 @@ public class ExcelImport implements ExerciseDAO {
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
     this.language = serverProps.getLanguage();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
-    this.audioOffset = serverProps.getAudioOffset();
+  //  this.audioOffset = serverProps.getAudioOffset();
     this.userListManager = userListManager;
     this.unitIndex = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
@@ -99,15 +104,13 @@ public class ExcelImport implements ExerciseDAO {
     return sectionHelper;
   }
 
-  private Map<String, List<AudioAttribute>> exToAudio;
-
   /**
    * @param audioDAO
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
    */
   @Override
   public void setAudioDAO(AudioDAO audioDAO) {
-    exToAudio = audioDAO.getExToAudio();
+    this.attachAudio = new AttachAudio(mediaDir, mediaDir1, installPath, serverProps.getAudioOffset(), audioDAO.getExToAudio());
   }
 
   /**
@@ -124,66 +127,82 @@ public class ExcelImport implements ExerciseDAO {
         addDefects(idToDefectMap);
 
         // remove exercises to remove
-        Set<String> removes = addRemoveDAO.getRemoves();
-
-        if (!removes.isEmpty()) logger.debug("Removing " + removes.size());
-        for (String id : removes) {
-          CommonExercise remove = idToExercise.remove(id);
-          if (remove != null) {
-//            logger.debug("\tremove " + id);
-            exercises.remove(remove);
-            getSectionHelper().removeExercise(remove);
-          }
-        }
+        Set<String> removes = removeExercises();
 
         // mask over old items that have been overridden
-
-        Collection<CommonUserExercise> overrides = userExerciseDAO.getOverrides();
-
-        if (overrides.size() > 0) {
-          logger.debug("found " + overrides.size() + " overrides...");
-        }
-
-        int override = 0;
-        for (CommonUserExercise userExercise : overrides) {
-          if (!removes.contains(userExercise.getID())) {
-            CommonExercise exercise = getExercise(userExercise.getID());
-            if (exercise != null) {
-              //logger.debug("refresh exercise for " + userExercise.getID());
-              sectionHelper.removeExercise(exercise);
-              sectionHelper.addExercise(userExercise);
-              addOverlay(userExercise);
-              override++;
-            }
-            //else {
-            //logger.debug("not adding as overlay " + userExercise.getID());
-            //}
-          }
-        }
-        if (override > 0) {
-          logger.debug("overlay count was " + override);
-        }
+        addOverlays(removes);
 
         // add new items
-        for (String id : addRemoveDAO.getAdds()) {
-          CommonUserExercise where = userExerciseDAO.getWhere(id);
-          if (where == null) {
-            logger.error("getRawExercises huh? couldn't find user exercise from add exercise table in user exercise table : " + id);
-          } else {
-            // logger.debug("adding new user exercise " + where.getID());
-            add(where);
-            sectionHelper.addExercise(where);
-          }
-        }
+        addNewExercises();
 
         int missing = 0;
         for (CommonExercise ex : exercises) {
+          attachAudio.attachAudio(ex);
           if (!ex.hasRefAudio()) missing++;
+          if (ex.getID().equals("166")) {
+            logger.info("Ex " + ex.getID() + " ref " + ex.getRefAudio());
+          }
         }
         if (missing > 0) logger.warn("out of " + exercises.size() + " " + missing + " are missing ref audio.");
       }
     }
     return exercises;
+  }
+
+  private void addNewExercises() {
+    for (String id : addRemoveDAO.getAdds()) {
+      CommonUserExercise where = userExerciseDAO.getWhere(id);
+      if (where == null) {
+        logger.error("getRawExercises huh? couldn't find user exercise from add exercise table in user exercise table : " + id);
+      } else {
+        // logger.debug("adding new user exercise " + where.getID());
+        add(where);
+        sectionHelper.addExercise(where);
+      }
+    }
+  }
+
+  private void addOverlays(Set<String> removes) {
+    Collection<CommonUserExercise> overrides = userExerciseDAO.getOverrides();
+
+    if (overrides.size() > 0) {
+      logger.debug("found " + overrides.size() + " overrides...");
+    }
+
+    int override = 0;
+    for (CommonUserExercise userExercise : overrides) {
+      if (!removes.contains(userExercise.getID())) {
+        CommonExercise exercise = getExercise(userExercise.getID());
+        if (exercise != null) {
+          //logger.debug("refresh exercise for " + userExercise.getID());
+          sectionHelper.removeExercise(exercise);
+          sectionHelper.addExercise(userExercise);
+          addOverlay(userExercise);
+          override++;
+        }
+        //else {
+        //logger.debug("not adding as overlay " + userExercise.getID());
+        //}
+      }
+    }
+    if (override > 0) {
+      logger.debug("overlay count was " + override);
+    }
+  }
+
+  private Set<String> removeExercises() {
+    Set<String> removes = addRemoveDAO.getRemoves();
+
+    if (!removes.isEmpty()) logger.debug("Removing " + removes.size());
+    for (String id : removes) {
+      CommonExercise remove = idToExercise.remove(id);
+      if (remove != null) {
+//            logger.debug("\tremove " + id);
+        exercises.remove(remove);
+        getSectionHelper().removeExercise(remove);
+      }
+    }
+    return removes;
   }
 
   /**
@@ -239,6 +258,11 @@ public class ExcelImport implements ExerciseDAO {
     return exercise;
   }
 
+  /**
+   * @param ue
+   * @see mitll.langtest.server.database.DatabaseImpl#duplicateExercise(UserExercise)
+   * @see #addNewExercises()
+   */
   public void add(CommonUserExercise ue) {
     synchronized (this) {
       exercises.add(ue);
@@ -473,11 +497,11 @@ public class ExcelImport implements ExerciseDAO {
           }
 
           if (DEBUG) logger.debug("columns word index " + colIndexOffset +
-                  " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
-                  " meaning " + meaningIndex +
-                  " transliterationIndex " + transliterationIndex +
-                  " contextIndex " + contextIndex +
-                  " id " + idIndex + " audio " + audioIndex
+              " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
+              " meaning " + meaningIndex +
+              " transliterationIndex " + transliterationIndex +
+              " contextIndex " + contextIndex +
+              " id " + idIndex + " audio " + audioIndex
           );
         } else {
           int colIndex = colIndexOffset;
@@ -669,12 +693,12 @@ public class ExcelImport implements ExerciseDAO {
           }
 
           if (DEBUG) logger.debug("columns word index " + colIndexOffset +
-                  " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
-                  " meaning " + meaningIndex +
-                  " transliterationIndex " + transliterationIndex +
-                  " contextIndex " + contextIndex +
-                  " contextTranslationIndex " + contextTranslationIndex +
-                  " id " + idIndex + " audio " + audioIndex
+              " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
+              " meaning " + meaningIndex +
+              " transliterationIndex " + transliterationIndex +
+              " contextIndex " + contextIndex +
+              " contextTranslationIndex " + contextTranslationIndex +
+              " id " + idIndex + " audio " + audioIndex
           );
         } else {
           int colIndex = colIndexOffset;
@@ -727,7 +751,7 @@ public class ExcelImport implements ExerciseDAO {
     }
 
     logStatistics(id, semis, skipped, englishSkipped, deleted);
-    if (missingExerciseCount > 0) logger.debug("missing ex count " + missingExerciseCount);
+  //  if (missingExerciseCount > 0) logger.debug("missing ex count " + missingExerciseCount);
     return exercises;
   }
 
@@ -832,7 +856,6 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   /**
-   * @param weightIndex
    * @param id
    * @param english
    * @param foreignLanguagePhrase
@@ -841,6 +864,7 @@ public class ExcelImport implements ExerciseDAO {
    * @param context
    * @param lookForOldAudio
    * @return
+   * @paramx weightIndex
    * @see #readFromSheet(org.apache.poi.ss.usermodel.Sheet)
    */
   private CommonExercise getExercise(String id,
@@ -932,141 +956,11 @@ public class ExcelImport implements ExerciseDAO {
     imported.setMeaning(meaning);
 
     if (lookForOldAudio) {
-      addOldSchoolAudio(refAudioIndex, imported);
+      attachAudio.addOldSchoolAudio(refAudioIndex, imported);
     }
 
-    int i = attachAudio(id, imported);
+    // int i = attachAudio(imported);
     return imported;
-  }
-
-  /**
-   * Go looking for audio in the media directory ("bestAudio") and if there's a file there
-   * under a matching exercise id, attach Fast and/or slow versions to this exercise.
-   * <p>
-   * Can override audio file directory with a non-empty refAudioIndex.
-   * <p>
-   * Also uses audioOffset - audio index is an integer.
-   *
-   * @param refAudioIndex override place to look for audio
-   * @param imported      to attach audio to
-   * @see #getExercise(String, String, String, String, String, String, String, String, boolean)
-   */
-  private void addOldSchoolAudio(String refAudioIndex, Exercise imported) {
-    String id = imported.getID();
-    String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : id;
-    if (audioOffset != 0) {
-      audioDir = "" + (Integer.parseInt(audioDir.trim()) + audioOffset);
-    }
-
-    String parentPath = mediaDir + File.separator + audioDir + File.separator;
-    String fastAudioRef = parentPath + FAST_WAV;
-    String slowAudioRef = parentPath + SLOW_WAV;
-
-    File test = new File(fastAudioRef);
-    boolean exists = test.exists();
-    if (!exists) {
-      test = new File(installPath, fastAudioRef);
-      exists = test.exists();
-    }
-    if (exists) {
-      imported.addAudioForUser(ensureForwardSlashes(fastAudioRef), UserDAO.DEFAULT_USER);
-    }
-
-    test = new File(slowAudioRef);
-    exists = test.exists();
-    if (!exists) {
-      test = new File(installPath, slowAudioRef);
-      exists = test.exists();
-    }
-    if (exists) {
-      imported.addAudio(new AudioAttribute(ensureForwardSlashes(slowAudioRef), UserDAO.DEFAULT_USER).markSlow());
-    }
-  }
-
-  private int missingExerciseCount = 0;
-  private int c = 0;
-
-  /**
-   * Make sure every audio file we attach is a valid audio file -- it's really where it says it's supposed to be.
-   * <p>
-   * TODOx : rationalize media path -- don't force hack on bestAudio replacement
-   * Why does it sometimes have the config dir on the front?
-   *
-   * @param id
-   * @param imported
-   * @see #getExercise(String, String, String, String, String, String, String, String, boolean)
-   */
-  private int attachAudio(String id, Exercise imported) {
-    //String mediaDir1 = mediaDir.replaceAll("bestAudio","");
-    //logger.debug("media dir " + mediaDir1);
-    int missing = 0;
-    if (exToAudio.containsKey(id) || exToAudio.containsKey(id + "/1") || exToAudio.containsKey(id + "/2")) {
-      List<AudioAttribute> audioAttributes = exToAudio.get(id);
-
-      if (audioAttributes == null) {
-        missingExerciseCount++;
-        if (missingExerciseCount < 10) logger.error("attachAudio can't find " + id);
-      } else if (!audioAttributes.isEmpty()) {
-        Set<String> audioPaths = new HashSet<String>();
-        for (AudioAttribute audioAttribute : imported.getAudioAttributes()) {
-          audioPaths.add(audioAttribute.getAudioRef());
-        }
-        for (AudioAttribute audio : audioAttributes) {
-          String child = mediaDir1 + File.separator + audio.getAudioRef();
-          /*  if (child.contains("bestAudio\bestAudio")) {
-              child = child.replaceAll("bestAudio\\bestAudio","bestAudio");
-            }*/
-          File test = new File(installPath, child);
-
-          boolean exists = test.exists();
-          if (!exists) {
-            //   logger.debug("child " + test.getAbsolutePath() + " doesn't exist");
-            test = new File(installPath, audio.getAudioRef());
-            exists = test.exists();
-            if (!exists) {
-              //     logger.debug("child " + test.getAbsolutePath() + " doesn't exist");
-            }
-            child = audio.getAudioRef();
-          }
-          if (exists) {
-            if (!audioPaths.contains(child)) {
-              audio.setAudioRef(child);   // remember to prefix the path
-              imported.addAudio(audio);
-              audioPaths.add(child);
-            }
-          } else {
-            missing++;
-            c++;
-            if (c < 5) {
-              logger.warn("file " + test.getAbsolutePath() + " does not exist - \t" + audio.getAudioRef());
-              if (c < 2) {
-                logger.warn("installPath " + installPath + "mediaDir " + mediaDir + " mediaDir1 " + mediaDir1);
-              }
-            }
-          }
-        }
-      }
-      //logger.debug("added " + c + " to " + id);
-    }
-    //else {
-    // logger.debug("can't find '" + id + "' in " + exToAudio.keySet().size() + " keys, e.g. '" + exToAudio.keySet().iterator().next() +"'");
-    //}
-    return missing;
-  }
-
-  /**
-   * Assumes audio index field looks like : 11109 8723 8722 8721
-   *
-   * @param refAudioIndex
-   * @return
-   */
-  private String findBest(String refAudioIndex) {
-    String[] split = refAudioIndex.split("\\s+");
-    return (split.length == 0) ? "" : split[0];
-  }
-
-  private String ensureForwardSlashes(String wavPath) {
-    return wavPath.replaceAll("\\\\", "/");
   }
 
   private String getCell(Row next, int col) {
