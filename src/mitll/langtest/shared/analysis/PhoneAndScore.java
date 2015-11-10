@@ -9,13 +9,6 @@ public class PhoneAndScore implements Comparable<PhoneAndScore>/*, Serializable 
   private long timestamp;
   private float pronScore;
 
-//  private float initial;
-//  private float current;
-
-/*
-  public PhoneAndScore() {}
-*/
-
   /**
    * @see mitll.langtest.server.database.PhoneDAO#addResultTime(Map, long, String, float)
    * @param pronScore
