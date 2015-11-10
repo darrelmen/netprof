@@ -30,7 +30,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
   private static final int CHART_HEIGHT = 340;
 
   private static final int Y_OFFSET_FOR_LEGEND = 60;
- // private static final String PRONUNCIATION_SCORE = "Pronunciation Score";
+  // private static final String PRONUNCIATION_SCORE = "Pronunciation Score";
 
   private final Map<Long, String> timeToId = new TreeMap<>();
   private final Map<String, CommonShell> idToEx = new TreeMap<>();
@@ -96,7 +96,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
         .setZoomType(BaseChart.ZoomType.X)
         .setType(Series.Type.SCATTER)
         .setChartTitleText(title)
-   //     .setChartSubtitleText(subtitle)
+        //     .setChartSubtitleText(subtitle)
         .setMarginRight(10)
         .setOption("/credits/enabled", false)
         .setOption("/plotOptions/series/pointStart", 1)
@@ -122,31 +122,13 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
             .setHoverStateMarker(new Marker()
                 .setEnabled(false)
             ))
-        .setToolTip(new ToolTip()
-            .setFormatter(new ToolTipFormatter() {
-              public String format(ToolTipData toolTipData) {
-                String s = timeToId.get(toolTipData.getXAsLong());
-                CommonShell commonShell = getIdToEx().get(s);
-                String foreignLanguage = commonShell == null ? "" : commonShell.getForeignLanguage();
-                String english = commonShell == null ? "" : commonShell.getEnglish();
+        .setToolTip(getToolTip());
 
-                String seriesName1 = toolTipData.getSeriesName();
-                boolean showEx = (!seriesName1.contains(CUMULATIVE_AVERAGE));
-                return "<b>" + seriesName1 + "</b><br/>" +
-                    DateTimeFormat.getFormat("E MMM d yy h:mm a").format(
-                        new Date(toolTipData.getXAsLong())
-                    ) +
-                    (showEx ?
-                        "<br/>Ex " + s +
-                            "<br/>" + foreignLanguage +
-                            "<br/>" + english
-                        : "")
-                    +
-                    "<br/>Score = " + toolTipData.getYAsLong() + "%";
-              }
-            }));
-
-
+    Highcharts.setOptions(
+        new Highcharts.Options().setGlobal(
+            new Global()
+                .setUseUTC(false)
+        ));
 
     addSeries(userPerformance.getRawBestScores(),
         userPerformance.getiPadTimeAndScores(),
@@ -156,6 +138,32 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
 
     configureChart(chart, subtitle);
     return chart;
+  }
+
+  private ToolTip getToolTip() {
+    return new ToolTip()
+        .setFormatter(new ToolTipFormatter() {
+          public String format(ToolTipData toolTipData) {
+            String s = timeToId.get(toolTipData.getXAsLong());
+            CommonShell commonShell = getIdToEx().get(s);
+            String foreignLanguage = commonShell == null ? "" : commonShell.getForeignLanguage();
+            String english = commonShell == null ? "" : commonShell.getEnglish();
+
+            String seriesName1 = toolTipData.getSeriesName();
+            boolean showEx = (!seriesName1.contains(CUMULATIVE_AVERAGE));
+            return "<b>" + seriesName1 + "</b><br/>" +
+                DateTimeFormat.getFormat("E MMM d yy h:mm a").format(
+                    new Date(toolTipData.getXAsLong())
+                ) +
+                (showEx ?
+                    "<br/>Ex " + s +
+                        "<br/>" + foreignLanguage +
+                        "<br/>" + english
+                    : "")
+                +
+                "<br/>Score = " + toolTipData.getYAsLong() + "%";
+          }
+        });
   }
 
   /**
@@ -182,7 +190,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
   private void addCumulativeAverage(List<TimeAndScore> yValuesForUser, Chart chart, String seriesTitle) {
     Number[][] data = new Number[yValuesForUser.size()][2];
 
-   // logger.info("got " + yValuesForUser.size());
+    // logger.info("got " + yValuesForUser.size());
     int i = 0;
     for (TimeAndScore ts : yValuesForUser) {
       data[i][0] = ts.getTimestamp();
@@ -198,7 +206,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
   }
 
   private void addDeviceData(List<TimeAndScore> iPadData, Chart chart) {
-   // logger.info("iPadData " + iPadData.size());
+    // logger.info("iPadData " + iPadData.size());
 
     if (!iPadData.isEmpty()) {
       Number[][] data;
@@ -216,7 +224,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
   }
 
   private void addBrowserData(List<TimeAndScore> browserData, Chart chart, boolean isAVP) {
- //   logger.info("browserData " + browserData.size());
+    //   logger.info("browserData " + browserData.size());
 
     if (!browserData.isEmpty()) {
       Number[][] data;
