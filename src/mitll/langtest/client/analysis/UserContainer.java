@@ -21,18 +21,21 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.UserInfo;
 
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 10/20/15.
  */
 class UserContainer extends SimplePagingContainer<UserInfo> {
-  //private final Logger logger = Logger.getLogger("UserContainer");
+  private final Logger logger = Logger.getLogger("UserContainer");
+
   private static final int MAX_LENGTH_ID = 13;
 
   private static final int ID_WIDTH = 130;
@@ -43,9 +46,13 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
   public static final int DIFF_WIDTH = 55;
   public static final int INITIAL_SCORE_WIDTH = 75;
   public static final String DIFF_COL_HEADER = "+/-";
+  public static final int MIN_RECORDINGS = 5;
+
+  public static final int PAGE_SIZE = 7;
 
   private final ShowTab learnTab;
   private final DivWidget rightSide;
+  private final DivWidget overallBottom;
   private final LangTestDatabaseAsync service;
 
   /**
@@ -53,12 +60,16 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
    * @param rightSide
    * @see StudentAnalysis#StudentAnalysis(LangTestDatabaseAsync, ExerciseController, ShowTab)
    */
-  public UserContainer(LangTestDatabaseAsync service, ExerciseController controller, DivWidget rightSide, ShowTab learnTab
+  public UserContainer(LangTestDatabaseAsync service, ExerciseController controller,
+                       DivWidget rightSide,
+                       DivWidget overallBottom,
+                       ShowTab learnTab
   ) {
     super(controller);
     this.rightSide = rightSide;
     this.learnTab = learnTab;
     this.service = service;
+    this.overallBottom = overallBottom;
   }
 
   private String truncate(String columnText) {
@@ -67,7 +78,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
   }
 
   protected int getPageSize() {
-    return 20;
+    return PAGE_SIZE;
   }
 
   /**
@@ -91,6 +102,9 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
           UserInfo next = users.iterator().next();
           table.getSelectionModel().setSelected(next, true);
           gotClickOnItem(next);
+        }
+        else {
+          logger.warning("huh? users is empty???");
         }
       }
     });
@@ -417,7 +431,10 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
   }
 
   private void gotClickOnItem(final UserInfo user) {
-    AnalysisTab widgets = new AnalysisTab(service, controller, (int) user.getUser().getId(), learnTab, user.getUser().getUserID(), 5);
+    User user1 = user.getUser();
+    int id = (int) user1.getId();
+    overallBottom.clear();
+    AnalysisTab widgets = new AnalysisTab(service, controller, id, learnTab, user1.getUserID(), MIN_RECORDINGS, overallBottom);
     rightSide.clear();
     rightSide.add(widgets);
   }
