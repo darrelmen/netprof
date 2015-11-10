@@ -14,7 +14,6 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public interface AutoCRTScoring {
-
   /**
    * @see mitll.langtest.server.autocrt.AutoCRT#getFlashcardAnswer(File, Collection, AudioAnswer, boolean, boolean)
    * @param testAudioFile
