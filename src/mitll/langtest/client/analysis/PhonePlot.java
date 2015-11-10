@@ -3,34 +3,30 @@ package mitll.langtest.client.analysis;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.shared.CommonShell;
-import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.analysis.TimeAndScore;
-import mitll.langtest.shared.analysis.UserPerformance;
 import org.moxieapps.gwt.highcharts.client.*;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 10/19/15.
  */
-public class AnalysisPlot extends DivWidget implements IsWidget {
-  public static final String I_PAD_I_PHONE = "iPad/iPhone";
-  public static final String VOCAB_PRACTICE = "Vocab Practice";
-  public static final String LEARN = "Learn";
-  public static final String CUMULATIVE_AVERAGE = "Average";
+public class PhonePlot extends DivWidget implements IsWidget {
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
   private static final int CHART_HEIGHT = 340;
 
   private static final int Y_OFFSET_FOR_LEGEND = 60;
- // private static final String PRONUNCIATION_SCORE = "Pronunciation Score";
+  private static final String PRONUNCIATION_SCORE = "Pronunciation Score";
 
   private final Map<Long, String> timeToId = new TreeMap<>();
   private final Map<String, CommonShell> idToEx = new TreeMap<>();
@@ -42,46 +38,25 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
    * @param minRecordings
    * @see AnalysisTab#AnalysisTab
    */
-  public AnalysisPlot(LangTestDatabaseAsync service, long id, final String userChosenID, final int minRecordings) {
-    //setHeight("350px");
-    service.getExerciseIds(1, new HashMap<String, Collection<String>>(), "", -1,
-        (int) id, "", false, false, false, false, new AsyncCallback<ExerciseListWrapper>() {
-          @Override
-          public void onFailure(Throwable throwable) {
-            logger.warning("\n\n\n-> getExerciseIds " + throwable);
-          }
+  public PhonePlot() {
+    //showData(rawBestScores, userChosenID);
+  }
 
-          @Override
-          public void onSuccess(ExerciseListWrapper exerciseListWrapper) {
-            for (CommonShell shell : exerciseListWrapper.getExercises()) getIdToEx().put(shell.getID(), shell);
-          }
-        });
+  public void showData(List<TimeAndScore> rawBestScores, String userChosenID) {
+    clear();
+    int rawTotal = rawBestScores.size();//userPerformance.getRawTotal();
 
-    service.getPerformanceForUser(id, minRecordings, new AsyncCallback<UserPerformance>() {
-      @Override
-      public void onFailure(Throwable throwable) {
-        logger.warning("\n\n\n-> getPerformanceForUser " + throwable);
-      }
-
-      @Override
-      public void onSuccess(UserPerformance userPerformance) {
-        clear();
-        List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
-        float v = userPerformance.getRawAverage() * 100;
-        int rawTotal = rawBestScores.size();//userPerformance.getRawTotal();
-
-        if (rawBestScores.isEmpty()) {
-          add(new Label("No Recordings yet to analyze. Please record yourself."));
-        } else {
+    if (rawBestScores.isEmpty()) {
+      add(new Label("No Recordings yet to analyze. Please record yourself."));
+    } else {
 //        logger.info("getPerformanceForUser raw total " + rawTotal + " num " + rawBestScores.size());
-          String subtitle = "Score and average (" + rawTotal + " items : avg score " + (int) v + " %)";
-          String title = "<b>" + userChosenID + "</b>" + " pronunciation score (Drag to zoom in)";
-          add(getChart(title,
-              subtitle, CUMULATIVE_AVERAGE, userPerformance));
-        }
-        setRawBestScores(rawBestScores);
-      }
-    });
+      add(getChart("<b>" + userChosenID + "</b>" +
+              " pronunciation score (Drag to zoom in)",
+          "Score and average (" + rawTotal + " items " +
+              //": avg score " + (int) v +
+              " %)", "Cumulative Average", rawBestScores));
+    }
+    setRawBestScores(rawBestScores);
   }
 
   /**
@@ -89,14 +64,14 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
    * @param subtitle
    * @param seriesName
    * @return
-   * @see AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long, String, int)
+   * @see PhonePlot#AnalysisPlot(LangTestDatabaseAsync, long, String, int)
    */
-  private Chart getChart(String title, String subtitle, String seriesName, UserPerformance userPerformance) {
+  private Chart getChart(String title, String subtitle, String seriesName, List<TimeAndScore> rawBestScores) {
     Chart chart = new Chart()
         .setZoomType(BaseChart.ZoomType.X)
         .setType(Series.Type.SCATTER)
         .setChartTitleText(title)
-   //     .setChartSubtitleText(subtitle)
+        .setChartSubtitleText(subtitle)
         .setMarginRight(10)
         .setOption("/credits/enabled", false)
         .setOption("/plotOptions/series/pointStart", 1)
@@ -131,7 +106,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
                 String english = commonShell == null ? "" : commonShell.getEnglish();
 
                 String seriesName1 = toolTipData.getSeriesName();
-                boolean showEx = (!seriesName1.contains(CUMULATIVE_AVERAGE));
+                boolean showEx = (seriesName1.contains(PRONUNCIATION_SCORE));
                 return "<b>" + seriesName1 + "</b><br/>" +
                     DateTimeFormat.getFormat("E MMM d yy h:mm a").format(
                         new Date(toolTipData.getXAsLong())
@@ -147,12 +122,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
             }));
 
 
-
-    addSeries(userPerformance.getRawBestScores(),
-        userPerformance.getiPadTimeAndScores(),
-        userPerformance.getLearnTimeAndScores(),
-        userPerformance.getAvpTimeAndScores(),
-        chart, seriesName);
+    addSeries(rawBestScores, chart, seriesName);
 
     configureChart(chart, subtitle);
     return chart;
@@ -166,23 +136,16 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
    * @see #getChart
    */
   private void addSeries(List<TimeAndScore> yValuesForUser,
-                         List<TimeAndScore> iPadData,
-                         List<TimeAndScore> learnData,
-                         List<TimeAndScore> avpData,
                          Chart chart,
                          String seriesTitle) {
     addCumulativeAverage(yValuesForUser, chart, seriesTitle);
-
-    addDeviceData(iPadData, chart);
-
-    addBrowserData(learnData, chart, false);
-    addBrowserData(avpData, chart, true);
+    addDeviceData(yValuesForUser, chart);
   }
 
   private void addCumulativeAverage(List<TimeAndScore> yValuesForUser, Chart chart, String seriesTitle) {
     Number[][] data = new Number[yValuesForUser.size()][2];
 
-   // logger.info("got " + yValuesForUser.size());
+    // logger.info("got " + yValuesForUser.size());
     int i = 0;
     for (TimeAndScore ts : yValuesForUser) {
       data[i][0] = ts.getTimestamp();
@@ -198,37 +161,16 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
   }
 
   private void addDeviceData(List<TimeAndScore> iPadData, Chart chart) {
-   // logger.info("iPadData " + iPadData.size());
-
     if (!iPadData.isEmpty()) {
       Number[][] data;
       Series series;
       data = getDataForTimeAndScore(iPadData);
 
-      String iPadName = I_PAD_I_PHONE;// + PRONUNCIATION_SCORE;
+      String iPadName = PRONUNCIATION_SCORE;
       series = chart.createSeries()
           .setName(iPadName)
           .setPoints(data)
           .setOption("color", "#00B800");
-
-      chart.addSeries(series);
-    }
-  }
-
-  private void addBrowserData(List<TimeAndScore> browserData, Chart chart, boolean isAVP) {
- //   logger.info("browserData " + browserData.size());
-
-    if (!browserData.isEmpty()) {
-      Number[][] data;
-      data = getDataForTimeAndScore(browserData);
-
-      String prefix = isAVP ? VOCAB_PRACTICE : LEARN;
-      //String browserName = prefix + PRONUNCIATION_SCORE;
-
-      Series series;
-      series = chart.createSeries()
-          .setName(prefix)
-          .setPoints(data);
 
       chart.addSeries(series);
     }
