@@ -47,7 +47,7 @@ import java.util.*;
  * * it's not a good idea to close connections, especially in the context of a servlet inside a container, since
  * H2 will return "new" connections that have already been closed.   <br></br>
  * * it's not a good idea to reuse one connection...?  <br></br>
- * <p/>
+ * <p>
  * User: go22670
  * Date: 5/14/12
  * Time: 11:44 PM
@@ -200,7 +200,9 @@ public class DatabaseImpl implements Database {
     return resultDAO;
   }
 
-  public Analysis getAnalysis() { return new Analysis(this, phoneDAO, getExerciseIDToRefAudio());  }
+  public Analysis getAnalysis() {
+    return new Analysis(this, phoneDAO, getExerciseIDToRefAudio());
+  }
 
   public RefResultDAO getRefResultDAO() {
     return refresultDAO;
@@ -294,9 +296,8 @@ public class DatabaseImpl implements Database {
       if (jsonScore != null && !jsonScore.isEmpty() && !jsonScore.equals("{}")) {
         Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(jsonScore);
         recordWordAndPhoneInfo(result.getUniqueID(), netPronImageTypeListMap);
-      }
-      else {
-        logger.warn("skipping empty json for " +key);
+      } else {
+        logger.warn("skipping empty json for " + key);
       }
     }
     logger.debug("putBackWordAndPhone fixed " + count);
@@ -514,17 +515,17 @@ public class DatabaseImpl implements Database {
 
   /**
    * For all the exercises in a chapter
-   * <p/>
+   * <p>
    * Get latest results
    * Get phones for latest
-   * <p/>
+   * <p>
    * //Score phones
    * Sort phone scores – asc
-   * <p/>
+   * <p>
    * Map phone->example
-   * <p/>
+   * <p>
    * Join phone->word
-   * <p/>
+   * <p>
    * Sort word by score asc
    *
    * @return
@@ -715,9 +716,9 @@ public class DatabaseImpl implements Database {
 
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
-   * <p/>
+   * <p>
    * Uses return generated keys to get the user id
-   * <p/>
+   * <p>
    * JUST FOR TESTING
    *
    * @param age
@@ -893,14 +894,15 @@ public class DatabaseImpl implements Database {
                              String audioFile,
                              boolean valid,
                              String audioType, long durationInMillis, boolean correct, float score,
-                             boolean recordedWithFlash, String deviceType, String device, String scoreJson, int processDur) {
+                             boolean recordedWithFlash, String deviceType, String device, String scoreJson, int processDur
+      , String validity, double snr) {
     //logger.debug("addAudioAnser json = " + scoreJson);
     if (valid && scoreJson.isEmpty()) {
       logger.warn("huh? no score json for valid audio " + audioFile + " on " + exerciseID);
     }
     return answerDAO.addAnswer(this, userID, exerciseID, questionID, "", audioFile, valid,
         audioType,
-        durationInMillis, correct, score, deviceType, device, scoreJson, recordedWithFlash, processDur, 0);
+        durationInMillis, correct, score, deviceType, device, scoreJson, recordedWithFlash, processDur, 0, validity, snr);
   }
 
   /**
