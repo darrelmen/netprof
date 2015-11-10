@@ -22,9 +22,13 @@ public class TimeAndScore implements Serializable, Comparable<TimeAndScore> {
    * @see UserPerformance#setRawBestScores(List)
    */
   public TimeAndScore(BestScore bs, float cumulativeAverage) {
-    this.id = bs.getId();
-    timestamp = bs.getTimestamp();
-    score = bs.getScore();
+    this(bs.getId(), bs.getTimestamp(), bs.getScore(), cumulativeAverage);
+  }
+
+  public TimeAndScore(String id, long timestamp, float score, float cumulativeAverage) {
+    this.id = id;
+    this.timestamp = timestamp;
+    this.score = score;
     this.cumulativeAverage = cumulativeAverage;
   }
 
@@ -47,6 +51,10 @@ public class TimeAndScore implements Serializable, Comparable<TimeAndScore> {
     return timestamp;
   }
 
+  /**
+   * TODO : make this an int
+   * @return
+   */
   public float getScore() {
     return score;
   }
