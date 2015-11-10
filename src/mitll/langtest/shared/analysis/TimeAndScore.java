@@ -25,6 +25,13 @@ public class TimeAndScore implements Serializable, Comparable<TimeAndScore> {
     this(bs.getId(), bs.getTimestamp(), bs.getScore(), cumulativeAverage);
   }
 
+  /**
+   * @see
+   * @param id
+   * @param timestamp
+   * @param score
+   * @param cumulativeAverage
+   */
   public TimeAndScore(String id, long timestamp, float score, float cumulativeAverage) {
     this.id = id;
     this.timestamp = timestamp;
