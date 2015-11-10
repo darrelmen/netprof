@@ -1,0 +1,62 @@
+package mitll.langtest.shared.analysis;
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created by go22670 on 10/26/15.
+ */
+public class PhoneStats implements /*Comparable<PhoneStats>,*/ Serializable {
+  private int initial;
+  private int current;
+  private int count;
+  private List<TimeAndScore> timeSeries;
+
+  public PhoneStats() {
+  }
+
+  /**
+   * @param count
+   * @param initial
+   * @see mitll.langtest.server.database.PhoneDAO#getPhoneReport(Map, Map, float, float)
+   */
+  public PhoneStats(int count, int initial, int current,
+                    //long timestamp,
+                    List<TimeAndScore> timeSeries) {
+    this.count = count;
+    this.initial = initial;
+    this.current = current;
+    //this.timestamp = timestamp;
+    this.timeSeries = timeSeries;
+  }
+
+//  @Override
+//  public int compareTo(PhoneStats o) {
+//    return Long.valueOf(timestamp).compareTo(o.timestamp);
+//  }
+//
+//  public long getTimestamp() {
+//    return timestamp;
+//  }
+
+  public int getInitial() {
+    return initial;
+  }
+
+  public int getCurrent() {
+    return current;
+  }
+
+  public int getCount() {
+    return count;
+  }
+
+  public List<TimeAndScore> getTimeSeries() {
+    return timeSeries;
+  }
+
+  public String toString() {
+    return "count " + count + " initial " + initial + " current " +current;
+  }
+}

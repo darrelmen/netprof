@@ -1,6 +1,10 @@
 package mitll.langtest.shared.analysis;
 
+import mitll.langtest.client.analysis.*;
+import mitll.langtest.server.scoring.ASR;
+
 import java.io.Serializable;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -11,8 +15,8 @@ import java.util.logging.Logger;
 public class PhoneReport implements Serializable {
   private int overallPercent;
   private Map<String, List<WordAndScore>> phoneToWordAndScoreSorted;
-  private Map<String, Float> phoneToAvgSorted;
-  private Map<String, Integer> phoneToCount;
+  private Map<String, PhoneStats> phoneToAvgSorted;
+ // private Map<String, Integer> phoneToCount;
   private boolean valid = false;
 
   public PhoneReport() { valid = false; }
@@ -22,12 +26,13 @@ public class PhoneReport implements Serializable {
    * @param phoneToWordAndScoreSorted
    * @see mitll.langtest.server.database.PhoneDAO#getPhoneReport(Map, Map, float, float)
    */
-  public PhoneReport(int overallPercent, Map<String, List<WordAndScore>> phoneToWordAndScoreSorted, Map<String, Float> phoneToAvgSorted,
-                     Map<String, Integer> phoneToCount) {
+  public PhoneReport(int overallPercent, Map<String, List<WordAndScore>> phoneToWordAndScoreSorted,
+                     Map<String, PhoneStats> phoneToAvgSorted/*,
+                     Map<String, Integer> phoneToCount*/) {
     this.overallPercent = overallPercent;
     this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
     this.phoneToAvgSorted = phoneToAvgSorted;
-    this.phoneToCount = phoneToCount;
+  //  this.phoneToCount = phoneToCount;
     valid = true;
   }
 
@@ -35,6 +40,12 @@ public class PhoneReport implements Serializable {
     return phoneToWordAndScoreSorted;
   }
 
+  /**
+   * @see mitll.langtest.client.analysis.PhoneContainer#gotClickOnItem(mitll.langtest.client.analysis.PhoneAndScore)
+   * @see PhoneContainer#showExamplesForSelectedSound()
+   * @param phone
+   * @return
+   */
   public List<WordAndScore> getWordExamples(String phone) { return phoneToWordAndScoreSorted.get(phone);}
   public String toString() { return getPhoneToAvgSorted().toString(); }
 
@@ -42,13 +53,23 @@ public class PhoneReport implements Serializable {
     return overallPercent;
   }
 
-  public Map<String, Float> getPhoneToAvgSorted() {
+  /**
+   * @see mitll.langtest.client.analysis.PhoneContainer#getTableWithPager(PhoneReport)
+   * @return
+   */
+  public Map<String, PhoneStats> getPhoneToAvgSorted() {
     return phoneToAvgSorted;
   }
 
+/*
   public Map<String, Integer> getPhoneToCount() {
+    Map<String,Integer> phoneToCount = new LinkedHashMap<>();
+    for (Map.Entry<String, PhoneStats> pair : phoneToAvgSorted.entrySet()) {
+      phoneToCount.put(pair.getKey(),pair.getValue().getCount());
+    }
     return phoneToCount;
   }
+*/
 
   public boolean isValid() {
     return valid;
