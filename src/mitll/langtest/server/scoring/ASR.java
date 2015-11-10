@@ -41,7 +41,10 @@ public interface ASR {
 													 int imageWidth, int imageHeight, boolean useScoreForBkgColor,
 													 boolean decode, String tmpDir,
 													 boolean useCache, String prefix, Result precalcResult, boolean usePhoneToDisplay);
-	
+
+	/**
+	 * @see mitll.langtest.server.audio.AudioFileHelper#countPhones(CommonExercise)
+	 */
 	class PhoneInfo {
 		private final List<String> firstPron;
 		private final Set<String> phoneSet;
