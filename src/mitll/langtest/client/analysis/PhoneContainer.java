@@ -13,7 +13,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -25,12 +24,10 @@ import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.PhoneStats;
+import mitll.langtest.shared.analysis.TimeAndScore;
 import mitll.langtest.shared.analysis.WordAndScore;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -44,13 +41,15 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   private final Logger logger = Logger.getLogger("PhoneContainer");
   private static final int SOUND_WIDTH = 75;
   private PhoneExampleContainer exampleContainer;
+  private final PhonePlot phonePlot;
 
   /**
    * @param controller
    */
-  public PhoneContainer(ExerciseController controller, PhoneExampleContainer exampleContainer) {
+  public PhoneContainer(ExerciseController controller, PhoneExampleContainer exampleContainer,  PhonePlot phonePlot) {
     super(controller);
     this.exampleContainer = exampleContainer;
+    this.phonePlot = phonePlot;
   }
 
   @Override
@@ -129,16 +128,18 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
    * @see AnalysisTab#getPhoneReport(LangTestDatabaseAsync, ExerciseController, int, Panel, AnalysisPlot, ShowTab, int)
    */
   public void showExamplesForSelectedSound() {
-    logger.info("PhoneContainer.showExamplesForSelectedSound ---------- ");
+   // logger.info("PhoneContainer.showExamplesForSelectedSound ---------- ");
     List<PhoneAndScore> list = getList();
     if (list.isEmpty()) {
       logger.info("list empty?");
     } else {
       String phone = list.get(0).getPhone();
       List<WordAndScore> wordExamples = phoneReport.getWordExamples(phone);
-      for (WordAndScore ws : wordExamples) logger.info("showExamplesForSelectedSound got " + ws.getScore() + " " + ws.getWord());
+     // for (WordAndScore ws : wordExamples) logger.info("showExamplesForSelectedSound got " + ws.getScore() + " " + ws.getWord());
       //  logger.info("showExamplesForSelectedSound adding " + phone + " num examples " + wordExamples.size());
       exampleContainer.addItems(phone, wordExamples);
+      List<TimeAndScore> timeSeries = phoneReport.getPhoneToAvgSorted().get(phone).getTimeSeries();
+      phonePlot.showData(getByTime(timeSeries),phone);
     }
   }
 
@@ -148,8 +149,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     o = GWT.create(LocalTableResources.class);
     return o;
   }
-
-
 
   private ColumnSortEvent.ListHandler<PhoneAndScore> getEnglishSorter(Column<PhoneAndScore, SafeHtml> englishCol,
                                                                       List<PhoneAndScore> dataList) {
@@ -361,7 +360,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     ColumnSortEvent.ListHandler<PhoneAndScore> columnSortHandler2 = getScoreSorter(scoreColumn, getList());
     table.addColumnSortHandler(columnSortHandler2);
 
-    new TooltipHelper().createAddTooltip(table, "Click on an item to review.", Placement.TOP);
+    new TooltipHelper().createAddTooltip(table, "Click on an item to review.", Placement.RIGHT);
   }
 
   private Column<PhoneAndScore, SafeHtml> getItemColumn() {
@@ -389,12 +388,28 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   }
 
   private void gotClickOnItem(final PhoneAndScore e) {
+    String phone = e.getPhone();
+    List<WordAndScore> wordExamples = phoneReport.getWordExamples(phone);
+   // for (WordAndScore ws : wordExamples) logger.info("gotClickOnItem got " + ws.getScore() + " " + ws.getWord());
+    exampleContainer.addItems(phone, wordExamples);
+    List<TimeAndScore> timeSeries = phoneReport.getPhoneToAvgSorted().get(phone).getTimeSeries();
 
-    List<WordAndScore> wordExamples = phoneReport.getWordExamples(e.getPhone());
+    getByTime(timeSeries);
+//    DateTimeFormat format = DateTimeFormat.getFormat("E MMM d yy h:mm a");
+ //   for (TimeAndScore ts : timeSeries) logger.info("gotClickOnItem " + format.format(new Date(ts.getTimestamp())) + " " +ts.getScore());
+    phonePlot.showData(getByTime(timeSeries),phone);
+  }
 
-    for (WordAndScore ws : wordExamples) logger.info("gotClickOnItem got " + ws.getScore() + " " + ws.getWord());
-
-    exampleContainer.addItems(e.getPhone(), wordExamples);
+  private List<TimeAndScore> getByTime(List<TimeAndScore> timeSeries) {
+    List<TimeAndScore> copy = new ArrayList<>();
+    for (TimeAndScore ts : timeSeries) copy.add(ts);
+    Collections.sort(copy, new Comparator<TimeAndScore>() {
+      @Override
+      public int compare(TimeAndScore o1, TimeAndScore o2) {
+        return Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp());
+      }
+    });
+    return copy;
   }
 
   private SafeHtml getSafeHtml(String columnText) {
