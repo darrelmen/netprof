@@ -16,7 +16,7 @@ public class PhoneReport implements Serializable {
   private int overallPercent;
   private Map<String, List<WordAndScore>> phoneToWordAndScoreSorted;
   private Map<String, PhoneStats> phoneToAvgSorted;
- // private Map<String, Integer> phoneToCount;
+
   private boolean valid = false;
 
   public PhoneReport() { valid = false; }
@@ -26,7 +26,8 @@ public class PhoneReport implements Serializable {
    * @param phoneToWordAndScoreSorted
    * @see mitll.langtest.server.database.PhoneDAO#getPhoneReport(Map, Map, float, float)
    */
-  public PhoneReport(int overallPercent, Map<String, List<WordAndScore>> phoneToWordAndScoreSorted,
+  public PhoneReport(int overallPercent,
+                     Map<String, List<WordAndScore>> phoneToWordAndScoreSorted,
                      Map<String, PhoneStats> phoneToAvgSorted/*,
                      Map<String, Integer> phoneToCount*/) {
     this.overallPercent = overallPercent;
