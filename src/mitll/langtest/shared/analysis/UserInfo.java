@@ -3,8 +3,6 @@ package mitll.langtest.shared.analysis;
 import mitll.langtest.shared.User;
 
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -14,7 +12,8 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/29/15.
  */
 public class UserInfo implements Serializable {
-  private transient final Logger logger = Logger.getLogger("UserInfo");
+ // private static final int INITIAL_SAMPLE = 20;
+ // private transient final Logger logger = Logger.getLogger("UserInfo");
 
   private User user;
   private int start;
@@ -29,8 +28,9 @@ public class UserInfo implements Serializable {
   /**
    * @see mitll.langtest.server.database.analysis.Analysis#getBestForQuery
    * @param bestScores
+   * @param initialSamples
    */
-  public UserInfo(List<BestScore> bestScores,long startTime) {
+  public UserInfo(List<BestScore> bestScores, long startTime, int initialSamples) {
     this.bestScores = bestScores;
     this.num = bestScores.size();
     this.startTime = startTime;
@@ -41,11 +41,11 @@ public class UserInfo implements Serializable {
         return Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp());
       }
     });
-    List<BestScore> bestScores1 = bestScores.subList(0, Math.min(10, bestScores.size()));
+
+    List<BestScore> bestScores1 = bestScores.subList(0, Math.min(initialSamples, bestScores.size()));
     float total = 0;
 
     for (BestScore bs : bestScores1) {
-//      logger.info("initial " + bs);
       total += bs.getScore();
     }
 
