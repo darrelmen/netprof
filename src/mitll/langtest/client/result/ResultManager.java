@@ -658,6 +658,26 @@ public class ResultManager extends PagerTable {
     table.addColumn(valid, "Valid");
     colToField.put(valid, VALID);
 
+    TextColumn<MonitorResult> validity = new TextColumn<MonitorResult>() {
+      @Override
+      public String getValue(MonitorResult answer) {
+        return answer.getValidity();
+      }
+    };
+    validity.setSortable(true);
+    table.addColumn(validity, "Validity");
+    colToField.put(validity, "Validity");
+
+    TextColumn<MonitorResult> dynamicRange = new TextColumn<MonitorResult>() {
+      @Override
+      public String getValue(MonitorResult answer) {
+        return "" + roundToHundredth(answer.getSnr());
+      }
+    };
+    dynamicRange.setSortable(true);
+    table.addColumn(dynamicRange, "Dynamic Range");
+    colToField.put(dynamicRange, "Dynamic Range");
+
     TextColumn<MonitorResult> correct = new TextColumn<MonitorResult>() {
       @Override
       public String getValue(MonitorResult answer) {
