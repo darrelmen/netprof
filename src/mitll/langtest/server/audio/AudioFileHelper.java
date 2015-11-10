@@ -8,15 +8,11 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.PhoneDAO;
-import mitll.langtest.server.database.WordDAO;
 import mitll.langtest.server.scoring.*;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
-import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -274,14 +270,15 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
 
       if (pretestScore != null) {
         logger.info("getAudioAnswerDecoding got pretest score = " + pretestScore + " and duration = " + processDur);
-      }
-      else {
+      } else {
         logger.warn("no pretest score");
       }
 
       long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
           isValid, audioType, validity.durationInMillis, answer.isCorrect(), (float) answer.getScore(),
-          recordedWithFlash, deviceType, device, scoreJson, processDur);
+          recordedWithFlash, deviceType, device, scoreJson, processDur,
+          validity.getValidity().toString(),
+          (float) validity.getMaxMinRange());
       answer.setResultID(answerID);
 
       db.recordWordAndPhoneInfo(answer, answerID);
@@ -418,6 +415,8 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    * @param deviceType
    * @param device
    * @param useOldSchool
+   * @param validity
+   * @param snr
    * @return
    * @see #getAnswer(String, CommonExercise, int, boolean, String, File, String, String, float, int, boolean)
    */
@@ -436,7 +435,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
       int processDur = answer.getPretestScore() == null ? 0 : answer.getPretestScore().getProcessDur();
       long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
           isValid, audioType, validity.durationInMillis, true, score, recordedWithFlash, deviceType, device,
-          new ScoreToJSON().getJsonFromAnswer(answer).toString(), processDur);
+          new ScoreToJSON().getJsonFromAnswer(answer).toString(), processDur, validity.getValidity().name(), validity.getMaxMinRange());
       answer.setResultID(answerID);
     }
     logger.debug("getAudioAnswerAlignment answer " + answer);
@@ -802,8 +801,8 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    * @see mitll.langtest.server.LangTestDatabaseImpl#makeAutoCRT()
    */
   private void makeAutoCRT() {
-  //  if (autoCRT == null) {
-      autoCRT = new AutoCRT(this, serverProps.getMinPronScore());
+    //  if (autoCRT == null) {
+    autoCRT = new AutoCRT(this, serverProps.getMinPronScore());
     //}
   }
 
