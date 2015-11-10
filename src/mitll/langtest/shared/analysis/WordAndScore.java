@@ -33,7 +33,7 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
    * @param answerAudio
    * @param refAudio
    * @param scoreJson
-   * @see PhoneDAO#getPhoneReport
+   * @see PhoneDAO#getPhoneReport(String, Map, boolean)
    */
   public WordAndScore(String exid, String word, float score, long resultID, int wseq, int seq, String answerAudio,
                       String refAudio,  String scoreJson) {
