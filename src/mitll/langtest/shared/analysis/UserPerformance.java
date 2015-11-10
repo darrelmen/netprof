@@ -107,7 +107,6 @@ public class UserPerformance implements Serializable {
         else {
           learnTimeAndScores.add(timeAndScore);
         }
-     //   browserTimeAndScores.add(timeAndScore);
       }
     }
   }
