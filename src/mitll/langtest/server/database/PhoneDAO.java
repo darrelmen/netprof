@@ -3,9 +3,7 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.scoring.ParseResultJson;
-import mitll.langtest.shared.analysis.PhoneAndScore;
-import mitll.langtest.shared.analysis.PhoneReport;
-import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import net.sf.json.JSONArray;
@@ -34,6 +32,7 @@ public class PhoneDAO extends DAO {
   private static final String SCORE = "score";
 
   private static final boolean DEBUG = false;
+  private static final int INITIAL_SAMPLE_PHONES = 20;
   private ParseResultJson parseResultJson;
 
   /**
@@ -251,7 +250,7 @@ public class PhoneDAO extends DAO {
       words.add(word);
       long resultID = wordAndScore.getResultID();
       resToAnswer.put(resultID, wordAndScore.getAnswerAudio());
-      resToRef.put(resultID,    wordAndScore.getRefAudio());
+      resToRef.put(resultID, wordAndScore.getRefAudio());
       resToResult.put(resultID, wordAndScore.getScoreJson());
 
       if (count++ > MAX_EXAMPLES) {
@@ -321,7 +320,7 @@ public class PhoneDAO extends DAO {
     ResultSet rs = statement.executeQuery();
 
     // long currentRID = -1;
-    Map<String, List<Float>> phoneToScores = new HashMap<String, List<Float>>();
+    Map<String, List<PhoneAndScore>> phoneToScores = new HashMap<String, List<PhoneAndScore>>();
 
     String currentExercise = "";
     Map<String, List<WordAndScore>> phoneToWordAndScore = new HashMap<String, List<WordAndScore>>();
@@ -364,10 +363,11 @@ public class PhoneDAO extends DAO {
 //      if (currentRID == rid) {   // TODO : ? WHY ?
       String phone = rs.getString(PHONE);
       int seq = rs.getInt(SEQ);
-      List<Float> scores = phoneToScores.get(phone);
-      if (scores == null) phoneToScores.put(phone, scores = new ArrayList<Float>());
+
+      List<PhoneAndScore> scores = phoneToScores.get(phone);
+      if (scores == null) phoneToScores.put(phone, scores = new ArrayList<PhoneAndScore>());
       float phoneScore = rs.getFloat(SCORE);
-      scores.add(phoneScore);
+      scores.add(new PhoneAndScore(phoneScore, resultTime));
 
       List<WordAndScore> wordAndScores = phoneToWordAndScore.get(phone);
       Set<Long> ridsForPhone = phoneToRID.get(phone);
@@ -388,15 +388,11 @@ public class PhoneDAO extends DAO {
         if (netPronImageTypeListMap == null) {
           netPronImageTypeListMap = parseResultJson.parseJson(scoreJson);
           stringToMap.put(scoreJson, netPronImageTypeListMap);
-        }
-        else {
-         // logger.debug("cache hit " + scoreJson.length());
+        } else {
+          // logger.debug("cache hit " + scoreJson.length());
         }
 
         setTranscript(wordAndScore, netPronImageTypeListMap);
-
-        //Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseJSON(scoreJson, wordAndScore);
-
         addResultTime(phoneToTimeStamp, resultTime, phone, phoneScore);
       }
       //    } else {
@@ -409,32 +405,24 @@ public class PhoneDAO extends DAO {
     // TODO : add this info to phone report
     for (Map.Entry<String, List<PhoneAndScore>> pair : phoneToTimeStamp.entrySet()) {
       Collections.sort(pair.getValue());
-      //    logger.info(pair.getKey() + "\t" + pair.getValue().size());
     }
-//    logger.warn("for o4 " + phoneToTimeStamp.get("o4").size());
-
-//    for (Map.Entry<String, List<Float>> pair : phoneToScores.entrySet()) {
-//      //Collections.sort(pair.getValue());
-//      logger.info("scores : " +pair.getKey() + "\t" + pair.getValue().size());
-//    }
     // TODO : use phone time&score info
 
     return getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems);
   }
-
-/*  private Map<NetPronImageType, List<TranscriptSegment>> parseJSON(String scoreJson, WordAndScore wordAndScore) {
-    Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(scoreJson);
-    setTranscript(wordAndScore, netPronImageTypeListMap);
-    return netPronImageTypeListMap;
-
-    // addResultTime(phoneToTimeStamp, resultTime, phone, phoneScore);
-  }*/
 
   private void setTranscript(WordAndScore wordAndScore, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
     wordAndScore.setTranscript(netPronImageTypeListMap);
     wordAndScore.clearJSON();
   }
 
+  /**
+   * @param phoneToTimeStamp
+   * @param resultTime
+   * @param phone
+   * @param phoneScore
+   * @see #getPhoneReport(String, Map, boolean)
+   */
   private void addResultTime(Map<String, List<PhoneAndScore>> phoneToTimeStamp, long resultTime, String phone, float phoneScore) {
     List<PhoneAndScore> times = phoneToTimeStamp.get(phone);
     if (times == null) phoneToTimeStamp.put(phone, times = new ArrayList<PhoneAndScore>());
@@ -481,7 +469,7 @@ public class PhoneDAO extends DAO {
    * @return
    * @see #getPhoneReport(String, Map, boolean)
    */
-  private PhoneReport getPhoneReport(Map<String, List<Float>> phoneToScores,
+  private PhoneReport getPhoneReport(Map<String, List<PhoneAndScore>> phoneToScores,
                                      Map<String, List<WordAndScore>> phoneToWordAndScore,
                                      float totalScore, float totalItems) {
     float overallScore = totalItems > 0 ? totalScore / totalItems : 0;
@@ -491,16 +479,28 @@ public class PhoneDAO extends DAO {
           " phoneToScores " + phoneToScores.size() + " : " + phoneToScores);
     }
 
-    final Map<String, Float> phoneToAvg = new HashMap<String, Float>();
-    for (Map.Entry<String, List<Float>> pair : phoneToScores.entrySet()) {
-      String phone = pair.getKey();
-      float total = 0f;
-      List<Float> scores = pair.getValue();
-      for (Float f : scores) total += f;
+    final Map<String, PhoneStats> phoneToAvg = new HashMap<String, PhoneStats>();
 
-      float avg = total / ((float) scores.size());
-      if (DEBUG) logger.debug("phone " + phone + " has " + total + " n " + scores.size() + " avg " + avg);
-      phoneToAvg.put(phone, avg);
+    for (Map.Entry<String, List<PhoneAndScore>> pair : phoneToScores.entrySet()) {
+      String phone = pair.getKey();
+      List<TimeAndScore> phoneTimeSeries = getPhoneTimeSeries(pair.getValue());
+
+      int size = phoneTimeSeries.size();
+      List<TimeAndScore> initialSample = phoneTimeSeries.subList(0, Math.min(INITIAL_SAMPLE_PHONES, size));
+      float total = 0;
+
+      for (TimeAndScore bs : initialSample) {
+        total += bs.getScore();
+      }
+
+      int start = toPercent(total,  initialSample.size());
+      //  logger.info("start " + total + " " + start);
+      total = 0;
+      for (TimeAndScore bs : phoneTimeSeries) {
+        total += bs.getScore();
+      }
+      int current = toPercent(total, size);
+      phoneToAvg.put(phone, new PhoneStats(size,start,current,phoneTimeSeries));
     }
 
     if (DEBUG) logger.debug("phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
@@ -512,15 +512,15 @@ public class PhoneDAO extends DAO {
     Collections.sort(sorted, new Comparator<String>() {
       @Override
       public int compare(String o1, String o2) {
-        Float first = phoneToAvg.get(o1);
-        Float second = phoneToAvg.get(o2);
-        return first.compareTo(second);
+        PhoneStats first  = phoneToAvg.get(o1);
+        PhoneStats second = phoneToAvg.get(o2);
+        return Integer.valueOf(first.getCurrent()).compareTo(second.getCurrent());
       }
     });
 
     if (DEBUG) logger.debug("sorted " + sorted.size() + " " + sorted);
 
-    Map<String, Float> phoneToAvgSorted = new LinkedHashMap<String, Float>();
+    Map<String, PhoneStats> phoneToAvgSorted = new LinkedHashMap<String, PhoneStats>();
     for (String phone : sorted) {
       phoneToAvgSorted.put(phone, phoneToAvg.get(phone));
     }
@@ -533,16 +533,36 @@ public class PhoneDAO extends DAO {
 
     Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = new LinkedHashMap<String, List<WordAndScore>>();
 
-    Map<String, Integer> phoneToCount = new HashMap<>();
+//    Map<String, Integer> phoneToCount = new HashMap<>();
     for (String phone : sorted) {
       List<WordAndScore> value = phoneToWordAndScore.get(phone);
       phoneToWordAndScoreSorted.put(phone, value);
-      phoneToCount.put(phone, value.size());
+      //phoneToCount.put(phone, value.size());
     }
 
     if (DEBUG) logger.debug("phone->words " + phoneToWordAndScore);
 
-    return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted, phoneToCount);
+    return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted/*, phoneToCount*/);
+  }
+
+  private List<TimeAndScore> getPhoneTimeSeries(List<PhoneAndScore> rawBestScores) {
+    float total = 0;
+    float count = 0;
+    List<TimeAndScore> phoneTimeSeries = new ArrayList<>();
+    for (PhoneAndScore bs : rawBestScores) {
+      float pronScore = bs.getPronScore();
+      total += pronScore;
+      count++;
+      float moving = total / count;
+
+      TimeAndScore timeAndScore = new TimeAndScore("", bs.getTimestamp(), pronScore, moving);
+      phoneTimeSeries.add(timeAndScore);
+    }
+    return phoneTimeSeries;
+  }
+
+  private static int toPercent(float total, float size) {
+    return (int) Math.ceil(100 * total / size);
   }
 
   private String trimPathForWebPage(String path) {
