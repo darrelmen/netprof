@@ -77,7 +77,7 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
     this.phone = phone;
     clear();
     if (sortedHistory != null) {
-      logger.info("PhoneExampleContainer.addItems " + sortedHistory.size() + " items");
+     // logger.info("PhoneExampleContainer.addItems " + sortedHistory.size() + " items");
       for (WordAndScore WordAndScore : sortedHistory) {
         addItem(WordAndScore);
       }
