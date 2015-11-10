@@ -9,10 +9,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -36,7 +33,7 @@ import java.util.logging.Logger;
 class WordContainer extends SimplePagingContainer<WordScore> {
   public static final int ITEM_COL_WIDTH = 260;
   public static final String SCORE = "Score";
-  public static final int PLAY_WIDTH = 45;
+  public static final int PLAY_WIDTH = 42;
   public static final int NATIVE_WIDTH = 50;
   public static final String NATIVE = "Ref";
   public static final String PLAY = "Play";
@@ -188,12 +185,23 @@ class WordContainer extends SimplePagingContainer<WordScore> {
     table.setColumnWidth(scoreColumn, 70 + "px");
 
     Column<WordScore, SafeHtml> column = getPlayAudio();
-    table.addColumn(column, PLAY);
+
+    SafeHtmlHeader header = new SafeHtmlHeader(new SafeHtml() {
+      @Override
+      public String asString() {
+        return "<span style=\"text-align:left;\">" +PLAY+
+            "</span>";
+      }
+    });
+
+    table.addColumn(column, header);
     table.setColumnWidth(column, PLAY_WIDTH + "px");
+    column.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
     column = getPlayNativeAudio();
     table.addColumn(column, NATIVE);
     table.setColumnWidth(column, NATIVE_WIDTH + "px");
+    column.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
     table.setWidth("100%", true);
 
