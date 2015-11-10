@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
   public static final int PLAY_WIDTH = 42;
   private final Logger logger = Logger.getLogger("PhoneExampleContainer");
-  private static final int ITEM_WIDTH = 300;
+  private static final int ITEM_WIDTH = 200;
   private ShowTab learnTab;
   private String phone;
 
