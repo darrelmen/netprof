@@ -1,15 +1,26 @@
 package mitll.langtest.shared.analysis;
 
-import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Created by go22670 on 10/26/15.
  */
-public class PhoneAndScore implements Comparable<PhoneAndScore>, Serializable {
+public class PhoneAndScore implements Comparable<PhoneAndScore>/*, Serializable */{
   private long timestamp;
   private float pronScore;
 
+//  private float initial;
+//  private float current;
+
+/*
   public PhoneAndScore() {}
+*/
+
+  /**
+   * @see mitll.langtest.server.database.PhoneDAO#addResultTime(Map, long, String, float)
+   * @param pronScore
+   * @param timestamp
+   */
   public PhoneAndScore(float pronScore, long timestamp) {
     this.pronScore = pronScore;
     this.timestamp = timestamp;
