@@ -70,7 +70,6 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String WIDGET = "widget";
   private static final String CHILDREN = "children";
 
-  //  private LoadTesting loadTesting;
   private RestUserManagement userManagement;
 
   private enum Request {DECODE, ALIGN, RECORD}
