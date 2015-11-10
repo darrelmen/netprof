@@ -27,6 +27,7 @@ public class MonitorResult implements IsSerializable {
   public static final String PRON_SCORE = "pronScore";
   public static final String DEVICE = "device";
   public static final String TEXT = "text";
+  public static final String DYNAMIC_RANGE = "Dynamic Range";
 
   private int uniqueID;
   private long userid;
@@ -42,6 +43,8 @@ public class MonitorResult implements IsSerializable {
   private boolean correct;
   private float pronScore;
   private String device;
+  private String validity;
+  private float snr;
   private boolean withFlash;
   private int processDur;
   private int roundTripDur;
@@ -69,7 +72,7 @@ public class MonitorResult implements IsSerializable {
    */
   public MonitorResult(int uniqueID, long userid, String id, String answer,
                        boolean valid, long timestamp, String answerType, int durationInMillis,
-                       boolean correct, float pronScore, String device, boolean withFlash, int processDur, int roundTripDur) {
+                       boolean correct, float pronScore, String device, boolean withFlash, int processDur, int roundTripDur, String validity, float snr) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.id = id;
@@ -84,6 +87,8 @@ public class MonitorResult implements IsSerializable {
     this.withFlash = withFlash;
     this.processDur   = processDur;
     this.roundTripDur = roundTripDur;
+    this.validity = validity;
+    this.snr = snr;
   }
 
   public int getUniqueID() {
@@ -133,10 +138,6 @@ public class MonitorResult implements IsSerializable {
   public void setForeignText(String foreignText) {
     this.foreignText = foreignText;
   }
-
-/*
-  public void setContext(String context) { this.context = context;}
-*/
 
   public Map<String, String> getUnitToValue() {
     return unitToValue;
@@ -201,7 +202,7 @@ public class MonitorResult implements IsSerializable {
 
           // valid
           if (field.equals(VALID)) {
-            comp = o1.valid == o2.valid ? 0 : (!o1.valid ? -1 : +1);
+            comp = o1.valid == o2.valid ? 0 : (!o1.valid && o2.valid ? -1 : +1);
           }
           if (comp != 0) return getComp(asc, comp);
 
@@ -247,6 +248,13 @@ public class MonitorResult implements IsSerializable {
           if (field.equals(PRON_SCORE)) {
             float pronScore1 = o1.getPronScore();
             float pronScore2 = o2.getPronScore();
+            comp = pronScore1 < pronScore2 ? -1 : pronScore1 > pronScore2 ? +1 : 0;
+          }
+          if (comp != 0) return getComp(asc, comp);
+
+          if (field.equals(DYNAMIC_RANGE)) {
+            float pronScore1 = o1.getSnr();
+            float pronScore2 = o2.getSnr();
             comp = pronScore1 < pronScore2 ? -1 : pronScore1 > pronScore2 ? +1 : 0;
           }
           if (comp != 0) return getComp(asc, comp);
@@ -314,5 +322,13 @@ public class MonitorResult implements IsSerializable {
 
   public int getRoundTripDur() {
     return roundTripDur;
+  }
+
+  public String getValidity() {
+    return validity;
+  }
+
+  public float getSnr() {
+    return snr;
   }
 }
