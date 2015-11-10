@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.scoring.CollationSort;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -32,7 +33,7 @@ public class PhoneDAO extends DAO {
   private static final String SCORE = "score";
 
   private static final boolean DEBUG = false;
-  private static final int INITIAL_SAMPLE_PHONES = 20;
+  private static final int INITIAL_SAMPLE_PHONES = 30;
   private ParseResultJson parseResultJson;
 
   /**
@@ -376,7 +377,7 @@ public class PhoneDAO extends DAO {
         phoneToRID.put(phone, ridsForPhone = new HashSet<Long>());
       }
 
-      WordAndScore wordAndScore = new WordAndScore(exid, word, wscore, rid, wseq, seq, trimPathForWebPage(audioAnswer),
+      WordAndScore wordAndScore = new WordAndScore(exid, word, phoneScore, rid, wseq, seq, trimPathForWebPage(audioAnswer),
           idToRef.get(exid), scoreJson);
       if (!ridsForPhone.contains(rid)) { // get rid of duplicates
         wordAndScores.add(wordAndScore);
@@ -483,7 +484,16 @@ public class PhoneDAO extends DAO {
 
     for (Map.Entry<String, List<PhoneAndScore>> pair : phoneToScores.entrySet()) {
       String phone = pair.getKey();
-      List<TimeAndScore> phoneTimeSeries = getPhoneTimeSeries(pair.getValue());
+      List<PhoneAndScore> value = pair.getValue();
+      Collections.sort(value, new Comparator<PhoneAndScore>() {
+        @Override
+        public int compare(PhoneAndScore o1, PhoneAndScore o2) {
+          return Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp());
+        }
+      });
+
+      List<TimeAndScore> phoneTimeSeries = getPhoneTimeSeries(value);
+
 
       int size = phoneTimeSeries.size();
       List<TimeAndScore> initialSample = phoneTimeSeries.subList(0, Math.min(INITIAL_SAMPLE_PHONES, size));
@@ -493,14 +503,14 @@ public class PhoneDAO extends DAO {
         total += bs.getScore();
       }
 
-      int start = toPercent(total,  initialSample.size());
+      int start = toPercent(total, initialSample.size());
       //  logger.info("start " + total + " " + start);
       total = 0;
       for (TimeAndScore bs : phoneTimeSeries) {
         total += bs.getScore();
       }
       int current = toPercent(total, size);
-      phoneToAvg.put(phone, new PhoneStats(size,start,current,phoneTimeSeries));
+      phoneToAvg.put(phone, new PhoneStats(size, start, current, phoneTimeSeries));
     }
 
     if (DEBUG) logger.debug("phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
@@ -512,7 +522,7 @@ public class PhoneDAO extends DAO {
     Collections.sort(sorted, new Comparator<String>() {
       @Override
       public int compare(String o1, String o2) {
-        PhoneStats first  = phoneToAvg.get(o1);
+        PhoneStats first = phoneToAvg.get(o1);
         PhoneStats second = phoneToAvg.get(o2);
         return Integer.valueOf(first.getCurrent()).compareTo(second.getCurrent());
       }
@@ -545,6 +555,11 @@ public class PhoneDAO extends DAO {
     return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted/*, phoneToCount*/);
   }
 
+  /**
+   * @param rawBestScores
+   * @return
+   * @see #getPhoneReport(Map, Map, float, float)
+   */
   private List<TimeAndScore> getPhoneTimeSeries(List<PhoneAndScore> rawBestScores) {
     float total = 0;
     float count = 0;
