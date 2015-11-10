@@ -38,18 +38,28 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   public static final int SCORE_COL_WIDTH = 60;
   public static final String SOUND = "Sound";
   public static final String SCORE = "Initial";
+  public static final String COUNT_COL_HEADER = "#";
+  public static final String CURR = "Curr.";
+  public static final String DIFF_COL_HEADER = "+/-";
+  public static final int COUNT_COL_WIDTH = 45;
   private final Logger logger = Logger.getLogger("PhoneContainer");
   private static final int SOUND_WIDTH = 75;
   private PhoneExampleContainer exampleContainer;
   private final PhonePlot phonePlot;
+  boolean isNarrow;
 
   /**
+   * @see AnalysisTab#getPhoneReport(LangTestDatabaseAsync, ExerciseController, int, Panel, AnalysisPlot, ShowTab, int)
    * @param controller
+   * @param exampleContainer
+   * @param phonePlot
+   * @param isNarrow
    */
-  public PhoneContainer(ExerciseController controller, PhoneExampleContainer exampleContainer,  PhonePlot phonePlot) {
+  public PhoneContainer(ExerciseController controller, PhoneExampleContainer exampleContainer,  PhonePlot phonePlot, boolean isNarrow) {
     super(controller);
     this.exampleContainer = exampleContainer;
     this.phonePlot = phonePlot;
+    this.isNarrow = isNarrow;
   }
 
   @Override
@@ -139,7 +149,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
       //  logger.info("showExamplesForSelectedSound adding " + phone + " num examples " + wordExamples.size());
       exampleContainer.addItems(phone, wordExamples);
       List<TimeAndScore> timeSeries = phoneReport.getPhoneToAvgSorted().get(phone).getTimeSeries();
-      phonePlot.showData(getByTime(timeSeries),phone);
+      phonePlot.showData(getByTime(timeSeries),phone, isNarrow);
     }
   }
 
@@ -330,8 +340,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     addReview();
 
     Column<PhoneAndScore, SafeHtml> countColumn = getCountColumn();
-    table.setColumnWidth(countColumn, SCORE_COL_WIDTH, Style.Unit.PX);
-    table.addColumn(countColumn, "#");
+    table.setColumnWidth(countColumn, COUNT_COL_WIDTH, Style.Unit.PX);
+    table.addColumn(countColumn, COUNT_COL_HEADER);
 
     ColumnSortEvent.ListHandler<PhoneAndScore> countSorter = getCountSorter(countColumn, getList());
     table.addColumnSortHandler(countSorter);
@@ -345,13 +355,13 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
 
     Column<PhoneAndScore, SafeHtml> currentCol = getCurrentCol();
     table.setColumnWidth(currentCol, SCORE_COL_WIDTH, Style.Unit.PX);
-    table.addColumn(currentCol, "Curr.");
+    table.addColumn(currentCol, CURR);
     currentCol.setSortable(true);
     table.addColumnSortHandler(getCurrSorter(currentCol, getList()));
 
     Column<PhoneAndScore, SafeHtml> diffCol = getDiff();
     table.setColumnWidth(diffCol, SCORE_COL_WIDTH, Style.Unit.PX);
-    table.addColumn(diffCol, "+/-");
+    table.addColumn(diffCol, DIFF_COL_HEADER);
     diffCol.setSortable(true);
     table.addColumnSortHandler(getDiffSorter(diffCol, getList()));
 
@@ -397,7 +407,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     getByTime(timeSeries);
 //    DateTimeFormat format = DateTimeFormat.getFormat("E MMM d yy h:mm a");
  //   for (TimeAndScore ts : timeSeries) logger.info("gotClickOnItem " + format.format(new Date(ts.getTimestamp())) + " " +ts.getScore());
-    phonePlot.showData(getByTime(timeSeries),phone);
+    phonePlot.showData(getByTime(timeSeries),phone, isNarrow);
   }
 
   private List<TimeAndScore> getByTime(List<TimeAndScore> timeSeries) {
