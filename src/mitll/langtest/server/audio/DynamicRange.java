@@ -59,61 +59,7 @@ import java.text.DecimalFormat;
  */
 public class DynamicRange {
   private static final Logger logger = Logger.getLogger(DynamicRange.class);
-  private static final int MinRecordLength = (10000 / 2); // 10000 = 0.7 second
-  private static final int WinSize = 10;
-  private static final double PowerThreshold = -79.50f;//-55.0f;
-  private static final double VarianceThreshold = 20.0f;
-  private static final double CLIPPED_RATIO = 0.005; // 1/2 %
-  private static final double LOG_OF_TEN = Math.log(10.0);
-
-  private static final short clippedThreshold = 32704; // 32768-64
-  private static final short clippedThresholdMinus = -32704; // 32768-64
-  private static final short ct = 32112;
-  // private static final short clippedThreshold2 = 32752; // 32768-16
-  // private static final short clippedThreshold2Minus = -32752; // 32768-16
   private static final double MAX_VALUE = 32768.0f;
-
-  private double dB(double power) {
-    return 20.0 * Math.log(power < 0.0001f ? 0.0001f : power) / LOG_OF_TEN;
-  }
-
-  /**
-   * @param file
-   * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile
-   */
-  public double getDurationInSeconds(String file) {
-    return getDurationInSeconds(new File(file));
-  }
-
-  /**
-   * @param file
-   * @return
-   * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise
-   */
-  public double getDurationInSeconds(File file) {
-    AudioInputStream audioInputStream = null;
-    try {
-      audioInputStream = AudioSystem.getAudioInputStream(file);
-      double dur = getDurationInSeconds(audioInputStream);
-      audioInputStream.close();
-      return dur;
-    } catch (Exception e) {
-      try {
-        if (audioInputStream != null) audioInputStream.close();
-      } catch (IOException e1) {
-        logger.error("got " + e, e);
-      }
-      logger.error("got " + e, e);
-    }
-    return 0d;
-  }
-
-  private double getDurationInSeconds(AudioInputStream audioInputStream) {
-    long frames = audioInputStream.getFrameLength();
-    AudioFormat format = audioInputStream.getFormat();
-    return ((double) frames) / format.getFrameRate();
-  }
 
   /**
    * Verify audio messages
@@ -298,10 +244,13 @@ public class DynamicRange {
   }
 
   public static class RMSInfo {
-    double maxMin;
-    int max, min;
-    double totalRMS, minRMS, maxRMS;
-    DecimalFormat decimalFormat = new DecimalFormat("##.##");
+    final double maxMin;
+    final int max;
+    final int min;
+    final double totalRMS;
+    final double minRMS;
+    final double maxRMS;
+    final DecimalFormat decimalFormat = new DecimalFormat("##.##");
 
     public RMSInfo(double maxMin, int max, int min, double totalRMS, double minRMS, double maxRMS) {
       this.maxMin = maxMin;

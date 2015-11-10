@@ -68,6 +68,7 @@ public class ServerProperties {
   private boolean quietAudioOK;
   private Set<Long> preferredVoices = new HashSet<Long>();
   private EmailList emailList;
+  private int userInitialScores = 20;
 
   /**
    * @param servletContext
@@ -214,8 +215,21 @@ public class ServerProperties {
   }
 
   public int getAudioOffset() {
+    String audioOffset = AUDIO_OFFSET;
+    return getIntProperty(audioOffset);
+  }
+
+  public int getIntProperty(String audioOffset) {
     try {
-      return Integer.parseInt(props.getProperty(AUDIO_OFFSET));
+      return Integer.parseInt(props.getProperty(audioOffset));
+    } catch (NumberFormatException e) {
+      return 0;
+    }
+  }
+
+  public int getIntPropertyDef(String audioOffset, String defaultValue) {
+    try {
+      return Integer.parseInt(props.getProperty(audioOffset, defaultValue));
     } catch (NumberFormatException e) {
       return 0;
     }
@@ -223,8 +237,9 @@ public class ServerProperties {
 
   public int getMaxNumExercises() {
     int maxNumExercises = Integer.MAX_VALUE;
+    String maxNumExercises1 = MAX_NUM_EXERCISES;
     try {
-      String property = props.getProperty(MAX_NUM_EXERCISES);
+      String property = props.getProperty(maxNumExercises1);
       if (property == null) return maxNumExercises;
       return Integer.parseInt(property);
     } catch (NumberFormatException e) {
@@ -450,4 +465,12 @@ public class ServerProperties {
   public List<String> getReportEmails() {
     return emailList.getReportEmails();
   }
+
+  public int getUserInitialScores() {
+    return userInitialScores;
+  }
+
+//  public void setUserInitialScores(int userInitialScores) {
+//    this.userInitialScores = userInitialScores;
+//  }
 }
