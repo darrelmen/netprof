@@ -41,12 +41,13 @@ public class AnswerDAO extends DAO {
   public long addAnswer(Database database, int userID, String id, int questionID, String answer,
                         String audioFile, boolean valid, String audioType, long durationInMillis,
                         boolean correct, float pronScore, String deviceType, String device, String scoreJson,
-                        boolean withFlash, int processDur, int roundTripDur) {
+                        boolean withFlash, int processDur, int roundTripDur, String validity, double snr) {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
       long newid = addAnswerToTable(connection, userID, id, questionID, answer, audioFile, valid,
-          audioType, durationInMillis, correct, pronScore, deviceType, device, scoreJson, withFlash, processDur, roundTripDur);
+          audioType, durationInMillis, correct, pronScore, deviceType, device, scoreJson, withFlash, processDur, roundTripDur,
+          validity, snr);
       long now = System.currentTimeMillis();
       if (now - then > 100) System.out.println("took " + (now - then) + " millis to record answer.");
       return newid;
@@ -56,6 +57,49 @@ public class AnswerDAO extends DAO {
       database.closeConnection(connection);
     }
     return -1;
+  }
+
+  public static class AnswerInfo {
+    int userid;
+    String id;
+    int questionID;
+    String answer;
+    String audioFile;
+    boolean valid;
+    String audioType;
+    int durationInMillis;
+    boolean correct;
+    float pronScore;
+    String deviceType;
+    String device;
+    String scoreJson;
+    boolean withFlash;
+    String validity;
+    float snr;
+
+    public AnswerInfo(int userid, String id, int questionID,
+                      String answer, String audioFile,
+                      boolean valid, String audioType, int durationInMillis,
+                      boolean correct, float pronScore, String deviceType, String device, String scoreJson,
+                      boolean withFlash, String validity, float snr) {
+      this.userid = userid;
+      this.id = id;
+      this.questionID = questionID;
+      this.answer = answer;
+      this.audioFile = audioFile;
+      this.valid = valid;
+      this.audioType = audioType;
+      this.durationInMillis = durationInMillis;
+      this.correct = correct;
+      this.pronScore = pronScore;
+      this.deviceType = deviceType;
+      this.device = device;
+      this.scoreJson = scoreJson;
+      this.withFlash = withFlash;
+      this.validity = validity;
+      this.snr = snr;
+
+    }
   }
 
   /**
@@ -85,9 +129,13 @@ public class AnswerDAO extends DAO {
                                 String answer, String audioFile,
                                 boolean valid, String audioType, long durationInMillis,
                                 boolean correct, float pronScore, String deviceType, String device, String scoreJson,
-                                boolean withFlash, int processDur, int roundTripDur) throws SQLException {
+                                boolean withFlash, int processDur, int roundTripDur, String validity, double snr) throws SQLException {
     logger.debug("adding answer for exid #" + id + " correct " + correct + " score " + pronScore +
-        " audio type " + audioType + " answer " + answer + " process " + processDur + " json " + scoreJson);
+        " audio type " + audioType + " answer " + answer + " process " + processDur +
+
+        " validity " + validity + " snr " + snr+
+
+        " json " + scoreJson);
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
         ResultDAO.RESULTS +
@@ -110,8 +158,10 @@ public class AnswerDAO extends DAO {
         ResultDAO.SCORE_JSON + "," +
         ResultDAO.WITH_FLASH + "," +
         ResultDAO.PROCESS_DUR + "," +
-        ResultDAO.ROUND_TRIP_DUR +
-        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+        ResultDAO.ROUND_TRIP_DUR + "," +
+        ResultDAO.VALIDITY + "," +
+        ResultDAO.SNR +
+        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
     int i = 1;
 
@@ -138,6 +188,8 @@ public class AnswerDAO extends DAO {
     statement.setBoolean(i++, withFlash);
     statement.setInt(i++, processDur);
     statement.setInt(i++, roundTripDur);
+    statement.setString(i++, validity);
+    statement.setFloat(i++, (float) snr);
 
     resultDAO.invalidateCachedResults();
 
