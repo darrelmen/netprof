@@ -39,6 +39,7 @@ class WordContainer extends SimplePagingContainer<WordScore> {
   public static final int PLAY_WIDTH = 45;
   public static final int NATIVE_WIDTH = 50;
   public static final String NATIVE = "Ref";
+  public static final String PLAY = "Play";
   private final Logger logger = Logger.getLogger("WordContainer");
 
   private static final int TABLE_HISTORY_WIDTH = 430; //380
@@ -187,7 +188,7 @@ class WordContainer extends SimplePagingContainer<WordScore> {
     table.setColumnWidth(scoreColumn, 70 + "px");
 
     Column<WordScore, SafeHtml> column = getPlayAudio();
-    table.addColumn(column, "Play");
+    table.addColumn(column, PLAY);
     table.setColumnWidth(column, PLAY_WIDTH + "px");
 
     column = getPlayNativeAudio();
@@ -244,13 +245,7 @@ class WordContainer extends SimplePagingContainer<WordScore> {
       @Override
       public SafeHtml getValue(WordScore shell) {
         float v = shell.getPronScore() * 100;
-        String s = "<span " +
-            "style='" +
-            "margin-left:10px;" +
-            "'" +
-            ">" + ((int) v) +
-            "</span>";
-
+        String s = "<span " + "style='" +"margin-left:10px;" + "'" +">" + ((int) v) + "</span>";
         return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
       }
     };
