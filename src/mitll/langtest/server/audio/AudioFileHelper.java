@@ -31,7 +31,7 @@ import java.util.*;
 public class AudioFileHelper implements CollationSort, AutoCRTScoring {
   private static final Logger logger = Logger.getLogger(AudioFileHelper.class);
   private static final String POSTED_AUDIO = "postedAudio";
-  public static final String SIL = "sil";
+  //public static final String SIL = "sil";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -249,15 +249,6 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
     if (recordInResults) {
       long then = System.currentTimeMillis();
       JSONObject json = new ScoreToJSON().getJsonFromAnswer(answer);
-
-/*
-      if (answer.isValid() && answer.getPretestScore() == null) {
-        String message = "no pretest score on " + answer + "?";
-        logger.warn(message);
-        logger.warn("json is " +json);
-        logAndNotify.logAndNotifyServerException(new Exception("Empty pretest score for answer"),message);
-      }
-*/
       // logger.debug("json is " + json);
       long now = System.currentTimeMillis();
       if (now - then > 10) {
@@ -271,7 +262,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
       if (pretestScore != null) {
         logger.info("getAudioAnswerDecoding got pretest score = " + pretestScore + " and duration = " + processDur);
       } else {
-        logger.warn("no pretest score");
+        //logger.warn("no pretest score");
       }
 
       long answerID = db.addAudioAnswer(user, exerciseID, questionID, file.getPath(),
@@ -415,8 +406,6 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    * @param deviceType
    * @param device
    * @param useOldSchool
-   * @param validity
-   * @param snr
    * @return
    * @see #getAnswer(String, CommonExercise, int, boolean, String, File, String, String, float, int, boolean)
    */
@@ -467,43 +456,6 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
             reqid, file, validity, url, doFlashcard, canUseCache, allowAlternates, useOldSchool) :
         new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
   }
-
-  /**
-   * Put word and phone scores into database.
-   *
-   * @param answer
-   * @param answerID
-   * @see #getAudioAnswerDecoding
-   */
-/*  private void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
-    PretestScore pretestScore = answer.getPretestScore();
-
-    if (pretestScore == null) {
-      logger.error("huh? pretest score is null for " + answer + " and " + answerID);
-    }
-
-    List<TranscriptSegment> words  = pretestScore == null ? null : pretestScore.getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
-    List<TranscriptSegment> phones = pretestScore == null ? null : pretestScore.getsTypeToEndTimes().get(NetPronImageType.PHONE_TRANSCRIPT);
-    if (words != null) {
-      int windex = 0;
-      int pindex = 0;
-
-      for (TranscriptSegment segment : words) {
-        String event = segment.getEvent();
-        if (!event.equals(SLFFile.UNKNOWN_MODEL) && !event.equals(SIL)) {
-          long wid = db.getWordDAO().addWord(new WordDAO.Word(answerID, event, windex++, segment.getScore()));
-          for (TranscriptSegment pseg : phones) {
-            if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
-              String pevent = pseg.getEvent();
-              if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals(SIL)) {
-                db.getPhoneDAO().addPhone(new PhoneDAO.Phone(answerID, wid, pevent, pindex++, pseg.getScore()));
-              }
-            }
-          }
-        }
-      }
-    }
-  }*/
 
   /**
    * @param base64EncodedString
@@ -798,13 +750,9 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#makeAutoCRT()
+   * @see #AudioFileHelper(PathHelper, ServerProperties, DatabaseImpl, LogAndNotify)
    */
-  private void makeAutoCRT() {
-    //  if (autoCRT == null) {
-    autoCRT = new AutoCRT(this, serverProps.getMinPronScore());
-    //}
-  }
+  private void makeAutoCRT() {  autoCRT = new AutoCRT(this, serverProps.getMinPronScore());  }
 
   /**
    * @see #getASRScoreForAudio
