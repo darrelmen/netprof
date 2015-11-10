@@ -23,26 +23,23 @@ import java.util.logging.Logger;
 public class PhonePlot extends DivWidget implements IsWidget {
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
+  public static final int NARROW_WIDTH = 330;
+
   private static final int CHART_HEIGHT = 340;
 
-  private static final int Y_OFFSET_FOR_LEGEND = 60;
+//  private static final int Y_OFFSET_FOR_LEGEND = 60;
   private static final String PRONUNCIATION_SCORE = "Pronunciation Score";
 
   private final Map<Long, String> timeToId = new TreeMap<>();
   private final Map<String, CommonShell> idToEx = new TreeMap<>();
 
   /**
-   * @param service
-   * @param id
+   * @see PhoneContainer#gotClickOnItem(PhoneAndScore)
+   * @param rawBestScores
    * @param userChosenID
-   * @param minRecordings
-   * @see AnalysisTab#AnalysisTab
+   * @param isNarrow
    */
-  public PhonePlot() {
-    //showData(rawBestScores, userChosenID);
-  }
-
-  public void showData(List<TimeAndScore> rawBestScores, String userChosenID) {
+  public void showData(List<TimeAndScore> rawBestScores, String userChosenID, boolean isNarrow) {
     clear();
     int rawTotal = rawBestScores.size();//userPerformance.getRawTotal();
 
@@ -50,11 +47,14 @@ public class PhonePlot extends DivWidget implements IsWidget {
       add(new Label("No Recordings yet to analyze. Please record yourself."));
     } else {
 //        logger.info("getPerformanceForUser raw total " + rawTotal + " num " + rawBestScores.size());
-      add(getChart("<b>" + userChosenID + "</b>" +
-              " pronunciation score (Drag to zoom in)",
+      Chart chart = getChart("<b>" + userChosenID + "</b>" +
+              " pronunciation score"
+          //+ " (Drag to zoom in)"
+          ,
           "Score and average (" + rawTotal + " items " +
               //": avg score " + (int) v +
-              " %)", "Cumulative Average", rawBestScores));
+              " %)", "Cumulative Average", rawBestScores, isNarrow);
+      add(chart);
     }
     setRawBestScores(rawBestScores);
   }
@@ -66,26 +66,26 @@ public class PhonePlot extends DivWidget implements IsWidget {
    * @return
    * @see PhonePlot#AnalysisPlot(LangTestDatabaseAsync, long, String, int)
    */
-  private Chart getChart(String title, String subtitle, String seriesName, List<TimeAndScore> rawBestScores) {
+  private Chart getChart(String title, String subtitle, String seriesName, List<TimeAndScore> rawBestScores, boolean narrow) {
     Chart chart = new Chart()
         .setZoomType(BaseChart.ZoomType.X)
         .setType(Series.Type.SCATTER)
         .setChartTitleText(title)
-        .setChartSubtitleText(subtitle)
+    //    .setChartSubtitleText(subtitle)
         .setMarginRight(10)
         .setOption("/credits/enabled", false)
         .setOption("/plotOptions/series/pointStart", 1)
         .setOption("/legend/enabled", false)
-        .setLegend(new Legend()
-            .setLayout(Legend.Layout.VERTICAL)
-            .setAlign(Legend.Align.LEFT)
-            .setVerticalAlign(Legend.VerticalAlign.TOP)
-            .setX(100)
-            .setY(Y_OFFSET_FOR_LEGEND)
-            .setBorderWidth(1)
-            .setFloating(true)
-            .setBackgroundColor("#FFFFFF")
-        )
+//        .setLegend(new Legend()
+//            .setLayout(Legend.Layout.VERTICAL)
+//            .setAlign(Legend.Align.LEFT)
+//            .setVerticalAlign(Legend.VerticalAlign.TOP)
+//            .setX(100)
+//            .setY(Y_OFFSET_FOR_LEGEND)
+//            .setBorderWidth(1)
+//            .setFloating(true)
+//            .setBackgroundColor("#FFFFFF")
+//        )
         .setScatterPlotOptions(new ScatterPlotOptions()
             .setMarker(new Marker()
                 .setRadius(5)
@@ -120,7 +120,7 @@ public class PhonePlot extends DivWidget implements IsWidget {
                     "<br/>Score = " + toolTipData.getYAsLong() + "%";
               }
             }));
-
+    if (narrow) chart.setWidth(NARROW_WIDTH);
 
     addSeries(rawBestScores, chart, seriesName);
 
