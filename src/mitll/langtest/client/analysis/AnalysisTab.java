@@ -69,7 +69,8 @@ public class AnalysisTab extends DivWidget {
                               final ShowTab showTab,
                               final int minRecordings) {
     final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, analysisPlot, showTab);
-    final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer);
+    final PhonePlot child = new PhonePlot();
+    final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, child);
 
     service.getPhoneScores(userid, minRecordings, new AsyncCallback<PhoneReport>() {
       @Override
@@ -95,6 +96,9 @@ public class AnalysisTab extends DivWidget {
         vert2.add(examples);
         vert2.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
         lowerHalf.add(vert2);
+
+
+        lowerHalf.add(child);
 
         phoneContainer.showExamplesForSelectedSound();
       }
