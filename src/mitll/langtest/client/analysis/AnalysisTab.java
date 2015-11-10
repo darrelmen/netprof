@@ -86,7 +86,6 @@ public class AnalysisTab extends DivWidget {
         vert.add(new Heading(3, "Sounds"));
         vert.add(phones);
       //  vert.addStyleName("leftTenMargin");
-
         lowerHalf.add(vert);
 
         Panel examples = exampleContainer.getTableWithPager();
