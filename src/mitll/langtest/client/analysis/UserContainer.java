@@ -42,6 +42,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
   public static final int CURRENT_WIDTH = 60;
   public static final int DIFF_WIDTH = 55;
   public static final int INITIAL_SCORE_WIDTH = 75;
+  public static final String DIFF_COL_HEADER = "+/-";
 
   private final ShowTab learnTab;
   private final DivWidget rightSide;
@@ -293,7 +294,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
 
     Column<UserInfo, SafeHtml> diff = getDiff();
     diff.setSortable(true);
-    addColumn(diff, new TextHeader("Diff"));
+    addColumn(diff, new TextHeader(DIFF_COL_HEADER));
     table.addColumnSortHandler(getDiffSorter(diff, getList()));
     table.setColumnWidth(diff, DIFF_WIDTH + "px");
 
