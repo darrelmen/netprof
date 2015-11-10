@@ -35,8 +35,7 @@ public class AudioCheck {
  // private static final short clippedThreshold2 = 32752; // 32768-16
  // private static final short clippedThreshold2Minus = -32752; // 32768-16
   private static final float MAX_VALUE = 32768.0f;
-
-//  AudioConversion conversion  = new AudioConversion();
+  private static final int MIN_DYNAMIC_RANGE = 29;
 
   private double dB(double power) {
     return 20.0 * Math.log(power < 0.0001f ? 0.0001f : power) / LOG_OF_TEN;
@@ -80,20 +79,8 @@ public class AudioCheck {
 
   public ValidityAndDur checkWavFileRejectAnyTooLoud(File file) {
     ValidityAndDur validityAndDur = checkWavFileWithClipThreshold(file, false);
-
     addDynamicRange(file, /*isBrowser,*/ validityAndDur);
-
     return validityAndDur;
-  }
-
-  private void addDynamicRange(File file, /*boolean isBrowser,*/ ValidityAndDur validityAndDur) {
-    String highPassFilterFile = new AudioConversion().getHighPassFilterFile(file.getAbsolutePath());
-    DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(new File(highPassFilterFile));
-    if (dynamicRange.maxMin < 29) {
-      logger.warn("file " + file.getName() + " doesn't meet SNR ratio threshold:\n" + dynamicRange);
-      validityAndDur.validity = AudioAnswer.Validity.SNR_TOO_LOW;
-    }
-    validityAndDur.setMaxMinRange(dynamicRange.maxMin);
   }
 
   /**
@@ -104,10 +91,19 @@ public class AudioCheck {
    */
   public ValidityAndDur checkWavFile(File file) {
     ValidityAndDur validityAndDur = checkWavFileWithClipThreshold(file, true);
-
     addDynamicRange(file, /*false, */validityAndDur);
-
     return validityAndDur;
+  }
+
+  private void addDynamicRange(File file, /*boolean isBrowser,*/ ValidityAndDur validityAndDur) {
+    String highPassFilterFile = new AudioConversion().getHighPassFilterFile(file.getAbsolutePath());
+    DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(new File(highPassFilterFile));
+    if (dynamicRange.maxMin < MIN_DYNAMIC_RANGE) {
+      logger.warn("file " + file.getName() + " doesn't meet dynamic range threshold (" + MIN_DYNAMIC_RANGE+
+          "):\n" + dynamicRange);
+      validityAndDur.validity = AudioAnswer.Validity.SNR_TOO_LOW;
+    }
+    validityAndDur.setMaxMinRange(dynamicRange.maxMin);
   }
 
   /**
@@ -242,8 +238,7 @@ public class AudioCheck {
       this.durationInMillis = (int) (1000d * dur);
     }
 
-    public void setValidity(AudioAnswer.Validity validity) { this.validity = validity;}
-    public String toString() { return "valid " + getValidity() + " dur " + durationInMillis + " max min " + maxMinRange; }
+    //public void setValidity(AudioAnswer.Validity validity) { this.validity = validity;}
 
     public AudioAnswer.Validity getValidity() {
       return validity;
@@ -256,5 +251,7 @@ public class AudioCheck {
     public void setMaxMinRange(double maxMinRange) {
       this.maxMinRange = maxMinRange;
     }
+
+    public String toString() { return "valid " + getValidity() + " dur " + durationInMillis + " max min " + maxMinRange; }
   }
 }
