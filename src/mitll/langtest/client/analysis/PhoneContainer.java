@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 10/20/15.
  */
-class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
+class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
   public static final int TABLE_WIDTH = 295;
   public static final int SCORE_COL_WIDTH = 60;
   public static final String SOUND = "Sound";
@@ -64,7 +64,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
 
   @Override
   protected void addSelectionModel() {
-    selectionModel = new SingleSelectionModel<PhoneAndScore>();
+    selectionModel = new SingleSelectionModel<PhoneAndStats>();
     table.setSelectionModel(selectionModel);
   }
 
@@ -85,14 +85,14 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
    * @see AnalysisTab#getPhoneReport
    */
   public Panel getTableWithPager(PhoneReport phoneReport) {
-    List<PhoneAndScore> phoneAndScores = new ArrayList<>();
+    List<PhoneAndStats> phoneAndStatses = new ArrayList<>();
     Map<String, PhoneStats> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
     if (phoneToAvgSorted == null) {
       logger.warning("huh? phoneToAvgSorted is null ");
     } else {
       for (Map.Entry<String, PhoneStats> ps : phoneToAvgSorted.entrySet()) {
         PhoneStats value = ps.getValue();
-        phoneAndScores.add(new PhoneAndScore(ps.getKey(),
+        phoneAndStatses.add(new PhoneAndStats(ps.getKey(),
             value.getInitial(),
             value.getCurrent(),
             value.getCount()
@@ -100,7 +100,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
       }
     }
     this.phoneReport = phoneReport;
-    return getTableWithPager(phoneAndScores);
+    return getTableWithPager(phoneAndStatses);
   }
 
   /**
@@ -108,7 +108,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
    * @return
    * @see SetCompleteDisplay#getScoreHistory(List, List, ExerciseController)
    */
-  private Panel getTableWithPager(List<PhoneAndScore> sortedHistory) {
+  private Panel getTableWithPager(List<PhoneAndStats> sortedHistory) {
     Panel tableWithPager = getTableWithPager();
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeft");
@@ -118,9 +118,9 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     return tableWithPager;
   }
 
-  private void addItems(List<PhoneAndScore> sortedHistory) {
+  private void addItems(List<PhoneAndStats> sortedHistory) {
     // logger.info("PhoneContainer.addItems " + sortedHistory.size());
-    for (PhoneAndScore ps : sortedHistory) {
+    for (PhoneAndStats ps : sortedHistory) {
       addItem(ps);
     }
     flush();
@@ -139,7 +139,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
    */
   public void showExamplesForSelectedSound() {
    // logger.info("PhoneContainer.showExamplesForSelectedSound ---------- ");
-    List<PhoneAndScore> list = getList();
+    List<PhoneAndStats> list = getList();
     if (list.isEmpty()) {
       logger.info("list empty?");
     } else {
@@ -160,12 +160,12 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     return o;
   }
 
-  private ColumnSortEvent.ListHandler<PhoneAndScore> getEnglishSorter(Column<PhoneAndScore, SafeHtml> englishCol,
-                                                                      List<PhoneAndScore> dataList) {
-    ColumnSortEvent.ListHandler<PhoneAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndScore>(dataList);
+  private ColumnSortEvent.ListHandler<PhoneAndStats> getEnglishSorter(Column<PhoneAndStats, SafeHtml> englishCol,
+                                                                      List<PhoneAndStats> dataList) {
+    ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndStats>(dataList);
     columnSortHandler.setComparator(englishCol,
-        new Comparator<PhoneAndScore>() {
-          public int compare(PhoneAndScore o1, PhoneAndScore o2) {
+        new Comparator<PhoneAndStats>() {
+          public int compare(PhoneAndStats o1, PhoneAndStats o2) {
             if (o1 == o2) {
               return 0;
             }
@@ -183,12 +183,12 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     return columnSortHandler;
   }
 
-  private ColumnSortEvent.ListHandler<PhoneAndScore> getScoreSorter(Column<PhoneAndScore, SafeHtml> scoreCol,
-                                                                    List<PhoneAndScore> dataList) {
-    ColumnSortEvent.ListHandler<PhoneAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndScore>(dataList);
+  private ColumnSortEvent.ListHandler<PhoneAndStats> getScoreSorter(Column<PhoneAndStats, SafeHtml> scoreCol,
+                                                                    List<PhoneAndStats> dataList) {
+    ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndStats>(dataList);
     columnSortHandler.setComparator(scoreCol,
-        new Comparator<PhoneAndScore>() {
-          public int compare(PhoneAndScore o1, PhoneAndScore o2) {
+        new Comparator<PhoneAndStats>() {
+          public int compare(PhoneAndStats o1, PhoneAndStats o2) {
             if (o1 == o2) {
               return 0;
             }
@@ -218,12 +218,12 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     return columnSortHandler;
   }
 
-  private ColumnSortEvent.ListHandler<PhoneAndScore> getCountSorter(Column<PhoneAndScore, SafeHtml> scoreCol,
-                                                                    List<PhoneAndScore> dataList) {
-    ColumnSortEvent.ListHandler<PhoneAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndScore>(dataList);
+  private ColumnSortEvent.ListHandler<PhoneAndStats> getCountSorter(Column<PhoneAndStats, SafeHtml> scoreCol,
+                                                                    List<PhoneAndStats> dataList) {
+    ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndStats>(dataList);
     columnSortHandler.setComparator(scoreCol,
-        new Comparator<PhoneAndScore>() {
-          public int compare(PhoneAndScore o1, PhoneAndScore o2) {
+        new Comparator<PhoneAndStats>() {
+          public int compare(PhoneAndStats o1, PhoneAndStats o2) {
             if (o1 == o2) {
               return 0;
             }
@@ -254,12 +254,12 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   }
 
 
-  private ColumnSortEvent.ListHandler<PhoneAndScore> getCurrSorter(Column<PhoneAndScore, SafeHtml> scoreCol,
-                                                                    List<PhoneAndScore> dataList) {
-    ColumnSortEvent.ListHandler<PhoneAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndScore>(dataList);
+  private ColumnSortEvent.ListHandler<PhoneAndStats> getCurrSorter(Column<PhoneAndStats, SafeHtml> scoreCol,
+                                                                   List<PhoneAndStats> dataList) {
+    ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndStats>(dataList);
     columnSortHandler.setComparator(scoreCol,
-        new Comparator<PhoneAndScore>() {
-          public int compare(PhoneAndScore o1, PhoneAndScore o2) {
+        new Comparator<PhoneAndStats>() {
+          public int compare(PhoneAndStats o1, PhoneAndStats o2) {
             if (o1 == o2) {
               return 0;
             }
@@ -289,12 +289,12 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     return columnSortHandler;
   }
 
-  private ColumnSortEvent.ListHandler<PhoneAndScore> getDiffSorter(Column<PhoneAndScore, SafeHtml> scoreCol,
-                                                                   List<PhoneAndScore> dataList) {
-    ColumnSortEvent.ListHandler<PhoneAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndScore>(dataList);
+  private ColumnSortEvent.ListHandler<PhoneAndStats> getDiffSorter(Column<PhoneAndStats, SafeHtml> scoreCol,
+                                                                   List<PhoneAndStats> dataList) {
+    ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = new ColumnSortEvent.ListHandler<PhoneAndStats>(dataList);
     columnSortHandler.setComparator(scoreCol,
-        new Comparator<PhoneAndScore>() {
-          public int compare(PhoneAndScore o1, PhoneAndScore o2) {
+        new Comparator<PhoneAndStats>() {
+          public int compare(PhoneAndStats o1, PhoneAndStats o2) {
             if (o1 == o2) {
               return 0;
             }
@@ -325,13 +325,13 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   }
 
   private void addReview() {
-    Column<PhoneAndScore, SafeHtml> itemCol = getItemColumn();
+    Column<PhoneAndStats, SafeHtml> itemCol = getItemColumn();
     itemCol.setSortable(true);
     table.setColumnWidth(itemCol, SOUND_WIDTH + "px");
     addColumn(itemCol, new TextHeader(SOUND));
     table.setWidth("100%", true);
 
-    ColumnSortEvent.ListHandler<PhoneAndScore> columnSortHandler = getEnglishSorter(itemCol, getList());
+    ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler = getEnglishSorter(itemCol, getList());
     table.addColumnSortHandler(columnSortHandler);
   }
 
@@ -339,27 +339,27 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
   protected void addColumnsToTable() {
     addReview();
 
-    Column<PhoneAndScore, SafeHtml> countColumn = getCountColumn();
+    Column<PhoneAndStats, SafeHtml> countColumn = getCountColumn();
     table.setColumnWidth(countColumn, COUNT_COL_WIDTH, Style.Unit.PX);
     table.addColumn(countColumn, COUNT_COL_HEADER);
 
-    ColumnSortEvent.ListHandler<PhoneAndScore> countSorter = getCountSorter(countColumn, getList());
+    ColumnSortEvent.ListHandler<PhoneAndStats> countSorter = getCountSorter(countColumn, getList());
     table.addColumnSortHandler(countSorter);
     countColumn.setSortable(true);
 
-    Column<PhoneAndScore, SafeHtml> scoreColumn = getScoreColumn();
+    Column<PhoneAndStats, SafeHtml> scoreColumn = getScoreColumn();
     table.setColumnWidth(scoreColumn, SCORE_COL_WIDTH, Style.Unit.PX);
     table.addColumn(scoreColumn, SCORE);
     //scoreColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     scoreColumn.setSortable(true);
 
-    Column<PhoneAndScore, SafeHtml> currentCol = getCurrentCol();
+    Column<PhoneAndStats, SafeHtml> currentCol = getCurrentCol();
     table.setColumnWidth(currentCol, SCORE_COL_WIDTH, Style.Unit.PX);
     table.addColumn(currentCol, CURR);
     currentCol.setSortable(true);
     table.addColumnSortHandler(getCurrSorter(currentCol, getList()));
 
-    Column<PhoneAndScore, SafeHtml> diffCol = getDiff();
+    Column<PhoneAndStats, SafeHtml> diffCol = getDiff();
     table.setColumnWidth(diffCol, SCORE_COL_WIDTH, Style.Unit.PX);
     table.addColumn(diffCol, DIFF_COL_HEADER);
     diffCol.setSortable(true);
@@ -367,22 +367,22 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
 
     table.setWidth("100%", true);
 
-    ColumnSortEvent.ListHandler<PhoneAndScore> columnSortHandler2 = getScoreSorter(scoreColumn, getList());
+    ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler2 = getScoreSorter(scoreColumn, getList());
     table.addColumnSortHandler(columnSortHandler2);
 
     new TooltipHelper().createAddTooltip(table, "Click on an item to review.", Placement.RIGHT);
   }
 
-  private Column<PhoneAndScore, SafeHtml> getItemColumn() {
-    return new Column<PhoneAndScore, SafeHtml>(new PagingContainer.ClickableCell()) {
+  private Column<PhoneAndStats, SafeHtml> getItemColumn() {
+    return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndScore object, NativeEvent event) {
+      public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndStats object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
         checkForClick(object, event);
       }
 
       @Override
-      public SafeHtml getValue(PhoneAndScore shell) {
+      public SafeHtml getValue(PhoneAndStats shell) {
         int current = shell.getCurrent();
         float percent = ((float) current)/100f;
         String columnText = new WordTable().getColoredSpan(shell.getPhone(), percent);
@@ -391,13 +391,13 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     };
   }
 
-  private void checkForClick(PhoneAndScore object, NativeEvent event) {
+  private void checkForClick(PhoneAndStats object, NativeEvent event) {
     if (BrowserEvents.CLICK.equals(event.getType())) {
       gotClickOnItem(object);
     }
   }
 
-  private void gotClickOnItem(final PhoneAndScore e) {
+  private void gotClickOnItem(final PhoneAndStats e) {
     String phone = e.getPhone();
     List<WordAndScore> wordExamples = phoneReport.getWordExamples(phone);
    // for (WordAndScore ws : wordExamples) logger.info("gotClickOnItem got " + ws.getScore() + " " + ws.getWord());
@@ -426,16 +426,16 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
   }
 
-  private Column<PhoneAndScore, SafeHtml> getScoreColumn() {
-    return new Column<PhoneAndScore, SafeHtml>(new PagingContainer.ClickableCell()) {
+  private Column<PhoneAndStats, SafeHtml> getScoreColumn() {
+    return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndScore object, NativeEvent event) {
+      public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndStats object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
         checkForClick(object, event);
       }
 
       @Override
-      public SafeHtml getValue(PhoneAndScore shell) {
+      public SafeHtml getValue(PhoneAndStats shell) {
         //float v = shell.getScore() * 100;
         int score = shell.getInitial();
         return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(score)).toSafeHtml();
@@ -443,16 +443,16 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     };
   }
 
-  private Column<PhoneAndScore, SafeHtml> getCurrentCol() {
-    return new Column<PhoneAndScore, SafeHtml>(new PagingContainer.ClickableCell()) {
+  private Column<PhoneAndStats, SafeHtml> getCurrentCol() {
+    return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndScore object, NativeEvent event) {
+      public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndStats object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
         checkForClick(object, event);
       }
 
       @Override
-      public SafeHtml getValue(PhoneAndScore shell) {
+      public SafeHtml getValue(PhoneAndStats shell) {
         //float v = shell.getScore() * 100;
         int score = shell.getCurrent();
         return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(score)).toSafeHtml();
@@ -460,16 +460,16 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
     };
   }
 
-  private Column<PhoneAndScore, SafeHtml> getDiff() {
-    return new Column<PhoneAndScore, SafeHtml>(new PagingContainer.ClickableCell()) {
+  private Column<PhoneAndStats, SafeHtml> getDiff() {
+    return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndScore object, NativeEvent event) {
+      public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndStats object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
         checkForClick(object, event);
       }
 
       @Override
-      public SafeHtml getValue(PhoneAndScore shell) {
+      public SafeHtml getValue(PhoneAndStats shell) {
         //float v = shell.getScore() * 100;
         int score = shell.getCurrent() - shell.getInitial();
         return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(score)).toSafeHtml();
@@ -486,16 +486,16 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndScore> {
         "</span>";
   }
 
-  private Column<PhoneAndScore, SafeHtml> getCountColumn() {
-    return new Column<PhoneAndScore, SafeHtml>(new PagingContainer.ClickableCell()) {
+  private Column<PhoneAndStats, SafeHtml> getCountColumn() {
+    return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndScore object, NativeEvent event) {
+      public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndStats object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
         checkForClick(object, event);
       }
 
       @Override
-      public SafeHtml getValue(PhoneAndScore shell) {
+      public SafeHtml getValue(PhoneAndStats shell) {
         String s = "" + shell.getCount();
         return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
       }
