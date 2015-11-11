@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by go22670 on 10/22/15.
  */
-public class PhoneAndScore {
+public class PhoneAndStats {
   private final String phone;
 
   private final int score, current;
@@ -19,7 +19,7 @@ public class PhoneAndScore {
    * @param count
    * @see PhoneContainer#getTableWithPager
    */
-  public PhoneAndScore(String phone, int score, int current, int count) {
+  public PhoneAndStats(String phone, int score, int current, int count) {
     this.phone = phone;
     this.score = score;
     this.current = current;
