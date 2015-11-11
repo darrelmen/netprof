@@ -71,7 +71,7 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
    * @param phone
    * @param sortedHistory
    * @see PhoneContainer#showExamplesForSelectedSound()
-   * @see PhoneContainer#gotClickOnItem(PhoneAndScore)
+   * @see PhoneContainer#gotClickOnItem(PhoneAndStats)
    */
   public void addItems(String phone, List<WordAndScore> sortedHistory) {
     this.phone = phone;
