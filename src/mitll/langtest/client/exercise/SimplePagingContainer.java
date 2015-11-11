@@ -17,16 +17,17 @@ import java.util.logging.Logger;
  * Created by go22670 on 9/16/14.
  */
 public class SimplePagingContainer<T> implements RequiresResize {
- private final Logger logger = Logger.getLogger("SimplePagingContainer");
+  public static final boolean DEBUG = false;
+  private final Logger logger = Logger.getLogger("SimplePagingContainer");
   public static final int MAX_WIDTH = 320;
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
   private static final int VERTICAL_SLOP = 35;
   protected static final int ID_LINE_WRAP_LENGTH = 20;
-  private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 390;
+  private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 395;
   private static final float MAX_PAGES = 2f;
   private static final int MIN_PAGE_SIZE = 3;
   private static final float DEFAULT_PAGE_SIZE = 15f;
-//  private static final boolean debug = false;
+  //  private static final boolean debug = false;
   protected final ExerciseController controller;
   protected ListDataProvider<T> dataProvider;
   protected CellTable<T> table;
@@ -36,9 +37,10 @@ public class SimplePagingContainer<T> implements RequiresResize {
   public SimplePagingContainer(ExerciseController controller) {
     this.controller = controller;
   }
+
   /**
-   * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager(mitll.langtest.client.exercise.PagingContainer)
    * @return
+   * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager(mitll.langtest.client.exercise.PagingContainer)
    */
   public Panel getTableWithPager() {
     this.dataProvider = new ListDataProvider<T>();
@@ -101,8 +103,11 @@ public class SimplePagingContainer<T> implements RequiresResize {
     addColumnsToTable();
   }
 
-  protected void addSelectionModel() {}
-  protected void addColumnsToTable() {}
+  protected void addSelectionModel() {
+  }
+
+  protected void addColumnsToTable() {
+  }
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
     return new CellTable<T>(getPageSize(), o);
@@ -118,9 +123,9 @@ public class SimplePagingContainer<T> implements RequiresResize {
   }
 
   /**
-   * @see PagingContainer#addColumnsToTable()
    * @param id2
    * @param header
+   * @see PagingContainer#addColumnsToTable()
    */
   protected void addColumn(Column<T, SafeHtml> id2, Header<?> header) {
     table.addColumn(id2, header);
@@ -133,7 +138,9 @@ public class SimplePagingContainer<T> implements RequiresResize {
     table.setRowCount(list.size());
   }
 
-  protected List<T> getList() { return dataProvider.getList();  }
+  protected List<T> getList() {
+    return dataProvider.getList();
+  }
 
   /**
    * @seex #selectItem(int)
@@ -154,25 +161,27 @@ public class SimplePagingContainer<T> implements RequiresResize {
       pixelsAbove = table.getElement().getAbsoluteTop() + VERTICAL_SLOP;
     }
     int leftOver = Window.getClientHeight() - pixelsAbove;
-/*
-    if (debug) System.out.println("getNumTableRowsGivenScreenHeight Got on resize window height " + Window.getClientHeight() +
-       " header " + header + " result = " + leftOver + "( vert unaccount " +
-       verticalUnaccountedFor+ " vs absolute top " + table.getElement().getAbsoluteTop()+ " pix above " + pixelsAbove+
-       ")");
-*/
+    if (DEBUG) {
+      logger.info("getNumTableRowsGivenScreenHeight Got on resize window height " + Window.getClientHeight() +
+          " header " + header + " result = " + leftOver + "( vert unaccount " +
+          verticalUnaccountedFor + " vs absolute top " + table.getElement().getAbsoluteTop() + " pix above " + pixelsAbove +
+          ")");
+    }
+
     float rawRatio = ((float) leftOver) / (float) heightOfCellTableWith15Rows();
     float tableRatio = Math.min(MAX_PAGES, rawRatio);
     float ratio = DEFAULT_PAGE_SIZE * tableRatio;
 
-/*    if (debug) System.out.println("getNumTableRowsGivenScreenHeight : left over " + leftOver + " raw " + rawRatio +
+/*    if (DEBUG) logger.debug("getNumTableRowsGivenScreenHeight : left over " + leftOver + " raw " + rawRatio +
       " table ratio " + tableRatio + " ratio " + ratio);*/
 
     ratio = adjustVerticalRatio(ratio);
-    int rows = Math.max(MIN_PAGE_SIZE, (int)Math.floor(ratio));
+    int attempt = (int) Math.floor(ratio);
+    attempt--;
+    int rows = Math.max(MIN_PAGE_SIZE, attempt);
 
-/*
-    if (debug) System.out.println("getNumTableRowsGivenScreenHeight : rows " + rows);
-*/
+    if (DEBUG) logger.info("getNumTableRowsGivenScreenHeight : rows " + rows);
+
     return rows;
   }
 
@@ -180,9 +189,13 @@ public class SimplePagingContainer<T> implements RequiresResize {
     return ratio;
   }
 
-  private int heightOfCellTableWith15Rows() { return HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;  }
+  private int heightOfCellTableWith15Rows() {
+    return HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
+  }
 
-  private int getTableHeaderHeight() { return controller.getHeightOfTopRows(); }
+  private int getTableHeaderHeight() {
+    return controller.getHeightOfTopRows();
+  }
 
   public void addItem(T item) {
     getList().add(item);
