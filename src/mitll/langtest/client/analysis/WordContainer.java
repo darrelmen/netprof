@@ -31,18 +31,19 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class WordContainer extends SimplePagingContainer<WordScore> {
-  public static final int ITEM_COL_WIDTH = 260;
-  public static final String SCORE = "Score";
-  public static final int PLAY_WIDTH = 42;
-  public static final int NATIVE_WIDTH = 50;
-  public static final String NATIVE = "Ref";
-  public static final String PLAY = "Play";
   private final Logger logger = Logger.getLogger("WordContainer");
 
+  private static final int ITEM_COL_WIDTH = 260;
+  private static final String SCORE = "Score";
+  private static final int PLAY_WIDTH = 42;
+  private static final int NATIVE_WIDTH = 50;
+  private static final String NATIVE = "Ref";
+  private static final String PLAY = "Play";
+
   private static final int TABLE_HISTORY_WIDTH = 430; //380
-  private ExerciseComparator sorter;
-  private AnalysisPlot plot;
-  private ShowTab learnTab;
+  private final ExerciseComparator sorter;
+  private final AnalysisPlot plot;
+  private final ShowTab learnTab;
 
   /**
    * @param controller
@@ -63,7 +64,7 @@ class WordContainer extends SimplePagingContainer<WordScore> {
   /**
    * @param sortedHistory
    * @return
-   * @see AnalysisTab#getWordScores(LangTestDatabaseAsync, ExerciseController, int, ShowTab, AnalysisPlot, Panel)
+   * @see AnalysisTab#getWordScores
    */
   public Panel getTableWithPager(List<WordScore> sortedHistory) {
     Panel tableWithPager = getTableWithPager();
