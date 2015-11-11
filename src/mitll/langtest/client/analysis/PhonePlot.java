@@ -34,7 +34,7 @@ public class PhonePlot extends DivWidget implements IsWidget {
   private final Map<String, CommonShell> idToEx = new TreeMap<>();
 
   /**
-   * @see PhoneContainer#gotClickOnItem(PhoneAndScore)
+   * @see PhoneContainer#gotClickOnItem(PhoneAndStats)
    * @param rawBestScores
    * @param userChosenID
    * @param isNarrow
