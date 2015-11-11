@@ -23,6 +23,7 @@ public class Analysis extends DAO {
   private static final boolean DEBUG = false;
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
+  public static final float MIN_SCORE_TO_SHOW = 0.20f;
   private final ParseResultJson parseResultJson;
   private final PhoneDAO phoneDAO;
   private final Map<String,String> exToRef;
@@ -227,7 +228,7 @@ public class Analysis extends DAO {
       Map<Long, UserInfo> best = getBest(sql, minRecordings);
       long now = System.currentTimeMillis();
 
-      logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - then) + " millis to get " + best.size());
+      if (DEBUG) logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - then) + " millis to get " + best.size());
 
       if (best.isEmpty()) return new PhoneReport();
 
@@ -245,7 +246,7 @@ public class Analysis extends DAO {
 
       now = System.currentTimeMillis();
 
-      logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - then) + " millis to phone report");
+      if (DEBUG) logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - then) + " millis to phone report");
 
       Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
 
@@ -272,7 +273,7 @@ public class Analysis extends DAO {
 
       now = System.currentTimeMillis();
 
-      logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - start) + " millis to get " + phonesForUser.size() + " phones");
+      if (DEBUG)  logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - start) + " millis to get " + phonesForUser.size() + " phones");
 
       return phoneReport;
     } catch (Exception ee) {
@@ -450,6 +451,7 @@ public class Analysis extends DAO {
     long then = System.currentTimeMillis();
 
     int c = 0;
+    int skipped=0;
     for (BestScore bs : bestScores) {
       String json = bs.getJson();
       if (json == null) {
@@ -457,10 +459,14 @@ public class Analysis extends DAO {
         logger.error("huh? no json for " + bs);
       } else if (json.equals("{}")) {
         logger.warn("json is empty for " + bs);
-      } else {
+        // skip low scores
+      } else if (bs.getScore() > MIN_SCORE_TO_SHOW) {
         if (json.isEmpty()) logger.warn("no json for " + bs);
         Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(json);
         results.add(new WordScore(bs, netPronImageTypeListMap));
+      }
+      else {
+        skipped++;
       }
     }
 
@@ -475,6 +481,7 @@ public class Analysis extends DAO {
     if (now-then > 50) {
       logger.debug(getDatabase().getLanguage() + " took " + (now - then) + " millis to sort " + bestScores.size() + " best scores");
     }
+    logger.info("getWordScore out of " +bestScores.size() + " skipped " + skipped);
 
     return results;
   }
