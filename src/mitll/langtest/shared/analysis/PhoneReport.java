@@ -1,13 +1,10 @@
 package mitll.langtest.shared.analysis;
 
 import mitll.langtest.client.analysis.*;
-import mitll.langtest.server.scoring.ASR;
 
 import java.io.Serializable;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 10/22/15.
@@ -42,7 +39,7 @@ public class PhoneReport implements Serializable {
   }
 
   /**
-   * @see mitll.langtest.client.analysis.PhoneContainer#gotClickOnItem(mitll.langtest.client.analysis.PhoneAndScore)
+   * @see mitll.langtest.client.analysis.PhoneContainer#gotClickOnItem(PhoneAndStats)
    * @see PhoneContainer#showExamplesForSelectedSound()
    * @param phone
    * @return
