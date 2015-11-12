@@ -154,7 +154,7 @@ public class AudioDAO extends DAO {
    */
   public void attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir,
                           Collection<AudioAttribute> audioAttributes) {
-    AudioConversion audioConversion = new AudioConversion();
+    AudioConversion audioConversion = new AudioConversion(database.getServerProps());
 
     List<AudioAttribute> defaultAudio = new ArrayList<AudioAttribute>();
     Set<String> audioPaths = new HashSet<String>();
