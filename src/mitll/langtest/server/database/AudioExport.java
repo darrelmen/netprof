@@ -498,7 +498,7 @@ public class AudioExport {
     MiniUser male   = getMaxUser(maleToCount);
     MiniUser female = getMaxUser(femaleToCount);
 
-    AudioConversion audioConversion = new AudioConversion();
+    AudioConversion audioConversion = new AudioConversion(props);
 
     int numMissing = 0;
     Set<String> names = new HashSet<String>();
@@ -567,7 +567,7 @@ public class AudioExport {
       }
     }
 
-    AudioConversion audioConversion = new AudioConversion();
+    AudioConversion audioConversion = new AudioConversion(props);
 
     int numMissing = 0;
     Set<String> names = new HashSet<String>();
@@ -676,7 +676,7 @@ public class AudioExport {
                                          List<CommonExercise> toWrite,
                                          String installPath) throws Exception {
     long then = System.currentTimeMillis();
-    AudioConversion audioConversion = new AudioConversion();
+    AudioConversion audioConversion = new AudioConversion(props);
     logger.debug("writing " + toWrite.size());
     int c = 0;
     int d = 0;
