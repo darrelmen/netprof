@@ -157,7 +157,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
         if (!new File(audioDir).exists()) logger.error("Couldn't find " + audioDir);
         else testAudioDir = audioDir;
       }
-      testAudioFileNoSuffix = new AudioConversion().convertTo16Khz(audioDir, testAudioFileNoSuffix);
+      testAudioFileNoSuffix = new AudioConversion(props).convertTo16Khz(audioDir, testAudioFileNoSuffix);
     } catch (UnsupportedAudioFileException e) {
       logger.error("Got " + e, e);
     }
@@ -183,7 +183,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     AudioConversion.wav2raw(testAudioDir + File.separator + testAudioFileNoSuffix + ".wav", rawAudioPath);
     //	logger.debug("Converting: " + (testAudioDir + File.separator + testAudioFileNoSuffix + ".wav to: " + rawAudioPath));
     // TODO remove the 16k hardcoding?
-    double duration = (new AudioCheck()).getDurationInSeconds(wavFile);
+    double duration = new AudioCheck(props).getDurationInSeconds(wavFile);
     //int end = (int)((duration * 16000.0) / 100.0);
     int end = (int) (duration * 100.0);
     int processDur = 0;
