@@ -155,7 +155,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
         if (!new File(audioDir).exists()) logger.error("Couldn't find " + audioDir);
         else testAudioDir = audioDir;
       }
-      testAudioFileNoSuffix = new AudioConversion().convertTo16Khz(audioDir, testAudioFileNoSuffix);
+      testAudioFileNoSuffix = new AudioConversion(props).convertTo16Khz(audioDir, testAudioFileNoSuffix);
     } catch (UnsupportedAudioFileException e) {
       logger.error("Got " + e, e);
     }
@@ -232,7 +232,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
     String recoSentence = getRecoSentence(eventAndFileInfo);
 
-    double duration = new AudioCheck().getDurationInSeconds(wavFile);
+    double duration = new AudioCheck(props).getDurationInSeconds(wavFile);
 
     return new PretestScore(scores.hydraScore,
         getPhoneToScore(scores),
