@@ -833,7 +833,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (wavFile != null) {
       String parent = pathHelper.getInstallPath();
 
-      AudioConversion audioConversion = new AudioConversion();
+      AudioConversion audioConversion = new AudioConversion(serverProps);
       if (!audioConversion.exists(wavFile, parent)) {
         if (warnMissingFile) logger.warn("can't find " + wavFile + " under " + parent + " trying config... ");
         parent = configDir;
@@ -908,7 +908,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       relativeImagePath = relativeImagePath.substring(1);
     }
     String imageURL = relativeImagePath;
-    double duration = new AudioCheck().getDurationInSeconds(wavAudioFile);
+    double duration = new AudioCheck(serverProps).getDurationInSeconds(wavAudioFile);
     /*    logger.debug("for " + wavAudioFile + " type " + imageType + " rel path is " + relativeImagePath +
         " url " + imageURL + " duration " + duration);*/
 
@@ -1904,7 +1904,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     File fileRef = pathHelper.getAbsoluteFile(audioAnswer.getPath());
     String destFileName = audioType + "_" + System.currentTimeMillis() + "_by_" + user + ".wav";
     String foreignLanguage = exercise1 == null ? "" : exercise1.getForeignLanguage();
-    String permanentAudioPath = new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise, foreignLanguage);
+    String permanentAudioPath = new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise, foreignLanguage, serverProps);
     AudioAttribute audioAttribute =
         db.getAudioDAO().addOrUpdate(user, exercise, audioType, permanentAudioPath, System.currentTimeMillis(), audioAnswer.getDurationInMillis());
     audioAnswer.setPath(audioAttribute.getAudioRef());
