@@ -49,7 +49,7 @@ public class DatabaseServlet extends HttpServlet {
       String parent = pathHelper.getInstallPath();
       //logger.debug("ensureMP3 : wav " + wavFile + " under " + parent);
 
-      AudioConversion audioConversion = new AudioConversion();
+      AudioConversion audioConversion = new AudioConversion(serverProps);
       if (!audioConversion.exists(wavFile, parent)) {
         logger.warn("can't find " + wavFile + " under " + parent + " trying config... ");
         parent = configDir;
