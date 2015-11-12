@@ -2,6 +2,7 @@ package mitll.langtest.server.audio;
 
 import audio.tools.FileCopier;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
 import org.apache.log4j.Logger;
 import org.h2.store.fs.FileUtils;
 
@@ -25,10 +26,11 @@ public class PathWriter {
    * @param overwrite
    * @param id
    * @param title mark the mp3 meta data with this title
+   * @param serverProperties
    * @return path of file under bestAudio directory
    */
   public String getPermanentAudioPath(PathHelper pathHelper, File fileRef, String destFileName, boolean overwrite,
-                                      String id, String title) {
+                                      String id, String title, ServerProperties serverProperties) {
     final File bestDir = pathHelper.getAbsoluteFile(BEST_AUDIO);
     if (!bestDir.exists() && !bestDir.mkdir()) {
       if (!bestDir.exists()) logger.warn("huh? couldn't make " + bestDir.getAbsolutePath());
@@ -45,7 +47,7 @@ public class PathWriter {
       new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
       logger.debug("getPermanentAudioPath : normalizing levels for " + destination.getAbsolutePath());
 
-      new AudioConversion().normalizeLevels(destination);
+      new AudioConversion(serverProperties).normalizeLevels(destination);
     } else {
       if (FileUtils.size(destination.getAbsolutePath()) == 0) {
         logger.error("\ngetRefAudioPath : huh? " + destination + " is empty???");
@@ -54,15 +56,15 @@ public class PathWriter {
       logger.debug("getPermanentAudioPath : *not* normalizing levels for " + destination.getAbsolutePath());
 
     }
-    ensureMP3(pathHelper, s, overwrite, title);
+    ensureMP3(pathHelper, s, overwrite, title, serverProperties);
     return s;
   }
 
-  private void ensureMP3(PathHelper pathHelper, String wavFile, boolean overwrite, String title) {
+  private void ensureMP3(PathHelper pathHelper, String wavFile, boolean overwrite, String title, ServerProperties serverProperties) {
     if (wavFile != null) {
       String parent = pathHelper.getInstallPath();
 
-      AudioConversion audioConversion = new AudioConversion();
+      AudioConversion audioConversion = new AudioConversion(serverProperties);
       if (!audioConversion.exists(wavFile, parent)) {
         parent = pathHelper.getConfigDir();
       }
