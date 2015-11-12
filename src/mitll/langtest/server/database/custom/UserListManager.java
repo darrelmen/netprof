@@ -649,7 +649,7 @@ public class UserListManager {
    * @see #fixAudioPaths(mitll.langtest.shared.custom.UserExercise, boolean, String)
    */
   private String getRefAudioPath(String id, File fileRef, String destFileName, boolean overwrite, String title) {
-    return new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, id, title);
+    return new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, id, title, userDAO.getDatabase().getServerProps());
   }
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
