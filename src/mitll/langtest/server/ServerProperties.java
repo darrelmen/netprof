@@ -59,6 +59,8 @@ public class ServerProperties {
   public static final String TRUE = "true";
   public static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
   public static final String ADD_MISSING_INFO = "addMissingInfo";
+  public static final int MIN_DYNAMIC_RANGE_DEFAULT = 26;
+  public static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
 
   private Properties props = new Properties();
 
@@ -69,6 +71,7 @@ public class ServerProperties {
   private Set<Long> preferredVoices = new HashSet<Long>();
   private EmailList emailList;
   private int userInitialScores = 20;
+  private int minDynamicRange;
 
   /**
    * @param servletContext
@@ -310,7 +313,7 @@ public class ServerProperties {
     return props.getProperty(param, FALSE).equals(TRUE);
   }
 
-  private boolean getDefaultTrue(String param)  {
+  private boolean getDefaultTrue(String param) {
     return props.getProperty(param, TRUE).equals(TRUE);
   }
 
@@ -415,6 +418,7 @@ public class ServerProperties {
   public boolean usePhoneToDisplay() {
     return getDefaultFalse(USE_PHONE_TO_DISPLAY);
   }
+
   public boolean addMissingInfo() {
     return getDefaultTrue(ADD_MISSING_INFO);
   }
@@ -459,7 +463,7 @@ public class ServerProperties {
    * @see mitll.langtest.server.database.UserDAO#UserDAO
    */
   public Set<String> getAdmins() {
-    return emailList == null ? Collections.emptySet(): emailList.getAdmins();
+    return emailList == null ? Collections.emptySet() : emailList.getAdmins();
   }
 
   public List<String> getReportEmails() {
@@ -470,7 +474,7 @@ public class ServerProperties {
     return userInitialScores;
   }
 
-//  public void setUserInitialScores(int userInitialScores) {
-//    this.userInitialScores = userInitialScores;
-//  }
+  public int getMinDynamicRange() {
+    return getIntPropertyDef(MIN_DYNAMIC_RANGE, "" + MIN_DYNAMIC_RANGE_DEFAULT);
+  }
 }
