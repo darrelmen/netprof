@@ -1,5 +1,6 @@
 package mitll.langtest.server.audio;
 
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.AudioAnswer;
 import org.apache.log4j.Logger;
 
@@ -35,7 +36,13 @@ public class AudioCheck {
  // private static final short clippedThreshold2 = 32752; // 32768-16
  // private static final short clippedThreshold2Minus = -32752; // 32768-16
   private static final float MAX_VALUE = 32768.0f;
-  private static final int MIN_DYNAMIC_RANGE = 29;
+  private final int MIN_DYNAMIC_RANGE;
+  ServerProperties props;
+
+  public AudioCheck(ServerProperties props) {
+    this.props = props;
+    this.MIN_DYNAMIC_RANGE = props.getMinDynamicRange();
+  }
 
   private double dB(double power) {
     return 20.0 * Math.log(power < 0.0001f ? 0.0001f : power) / LOG_OF_TEN;
@@ -96,7 +103,7 @@ public class AudioCheck {
   }
 
   private void addDynamicRange(File file, /*boolean isBrowser,*/ ValidityAndDur validityAndDur) {
-    String highPassFilterFile = new AudioConversion().getHighPassFilterFile(file.getAbsolutePath());
+    String highPassFilterFile = new AudioConversion(props).getHighPassFilterFile(file.getAbsolutePath());
     DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(new File(highPassFilterFile));
     if (dynamicRange.maxMin < MIN_DYNAMIC_RANGE) {
       logger.warn("file " + file.getName() + " doesn't meet dynamic range threshold (" + MIN_DYNAMIC_RANGE+
