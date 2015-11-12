@@ -1,6 +1,7 @@
 package mitll.langtest.server.audio;
 
 import audio.tools.FileCopier;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.CommonExercise;
 import org.apache.commons.codec.binary.Base64;
@@ -34,13 +35,18 @@ public class AudioConversion {
   private static final String WINDOWS_SOX_BIN_DIR = "C:\\Users\\go22670\\sox-14-3-2";
   public static final String SIXTEEN_K_SUFFIX = "_16K";
   public static final String FILE_MISSING = "FILE_MISSING";
-  private final AudioCheck audioCheck = new AudioCheck();
+  private AudioCheck audioCheck;
   private static final boolean DEBUG = false;
 
   private File tempDir;
 
-  public AudioConversion() {
+  /**
+   *
+   * @param props
+   */
+  public AudioConversion(ServerProperties props) {
     try {
+      audioCheck = new AudioCheck(props);
       tempDir = createTempDirectory();
     } catch (IOException e) {
       logger.error("couldn't make temp dir?");
@@ -372,7 +378,7 @@ public class AudioConversion {
    *
    * @param absolutePathToWav
    * @seex mitll.langtest.server.LangTestDatabaseImpl#normalizeLevel
-   * @see PathWriter#getPermanentAudioPath(mitll.langtest.server.PathHelper, java.io.File, String, boolean, String, String)
+   * @see PathWriter#getPermanentAudioPath(mitll.langtest.server.PathHelper, File, String, boolean, String, String, ServerProperties)
    */
   public void normalizeLevels(File absolutePathToWav) {
     try {
