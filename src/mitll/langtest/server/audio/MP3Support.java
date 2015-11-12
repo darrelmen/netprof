@@ -1,7 +1,10 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.client.AudioTag;
+import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.DatabaseImpl;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -12,9 +15,16 @@ import java.io.File;
 public class MP3Support {
   private static final Logger logger = Logger.getLogger(MP3Support.class);
   private final PathHelper pathHelper;
+  ServerProperties serverProperties;
 
-  public MP3Support(PathHelper pathHelper) {
+  /**
+   * @see AudioFileHelper#AudioFileHelper(PathHelper, ServerProperties, DatabaseImpl, LogAndNotify)
+   * @param pathHelper
+   * @param serverProperties
+   */
+  public MP3Support(PathHelper pathHelper, ServerProperties serverProperties) {
     this.pathHelper = pathHelper;
+    this.serverProperties = serverProperties;
   }
 
   /**
@@ -58,7 +68,7 @@ public class MP3Support {
    * <p>
    * Gotta be a better way...
    *
-   * @param audioFile to convert
+   * @param audioFile        to convert
    * @return
    * @see #getWavForMP3(String)
    */
@@ -69,7 +79,7 @@ public class MP3Support {
     if (!new File(absolutePath).exists())
       logger.error("getWavForMP3 : expecting file at " + absolutePath);
     else {
-      AudioConversion audioConversion = new AudioConversion();
+      AudioConversion audioConversion = new AudioConversion(serverProperties);
       File file = audioConversion.convertMP3ToWav(absolutePath);
       if (file.exists()) {
         String orig = audioFile;
