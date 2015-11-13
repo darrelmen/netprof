@@ -28,13 +28,15 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class UserTable extends PagerTable {
-  public static final String REGISTERED_USERS = "Registered Users";
+  public static final String AGE = "Age";
   private Logger logger = Logger.getLogger("UserTable");
+
+  private static final String REGISTERED_USERS = "Registered Users";
 
   private static final int PAGE_SIZE = 5;
 
   private static final String USER_ID = "User ID";
-  private static final int PAGE_SIZE1 = 5;
+  private static final int PAGE_SIZE1 = 10;
   private static final int INSET_PERCENT = 50;
   private static final String IP_PREFIX = "127.0.0.1/Mozilla/5.0 ";
   private static final String PERMISSIONS = "Perm.";//issions";
@@ -45,8 +47,7 @@ public class UserTable extends PagerTable {
   private Widget lastTable = null;
   private Button closeButton;
   private final PropertyHandler props;
-  private boolean isAdmin;
-  // private final LangTestDatabaseAsync service;
+  private final boolean isAdmin;
 
   /**
    * @param props
@@ -120,11 +121,11 @@ public class UserTable extends PagerTable {
     return getAnchorHTML("downloadUsers", "Download Excel");
   }
 
-  private Widget getTable(List<User> result, final LangTestDatabaseAsync service, Widget rightOfPager) {
-    final CellTable<User> table = new CellTable<User>();
-    table.setPageSize(PAGE_SIZE);
-    int width = (int) (Window.getClientWidth() * 0.9);
-    table.setWidth(width + "px");
+  private Widget getTable(List<User> users, final LangTestDatabaseAsync service, Widget rightOfPager) {
+    final CellTable<User> table = getTable();
+
+    List<User> list = getDataProvider(users, table);
+
     TextColumn<User> id = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
@@ -134,7 +135,7 @@ public class UserTable extends PagerTable {
     id.setSortable(true);
     table.addColumn(id, "ID");
 
-    addUserIDColumns(table);
+    addUserIDColumns(table, list);
 
     TextColumn<User> dialect = new TextColumn<User>() {
       @Override
@@ -144,6 +145,7 @@ public class UserTable extends PagerTable {
     };
     dialect.setSortable(true);
     table.addColumn(dialect, "Dialect");
+    table.addColumnSortHandler(getDialectSorter(dialect, list));
 
     TextColumn<User> age = new TextColumn<User>() {
       @Override
@@ -152,7 +154,8 @@ public class UserTable extends PagerTable {
       }
     };
     age.setSortable(true);
-    table.addColumn(age, "Age");
+    table.addColumn(age, AGE);
+    table.addColumnSortHandler(getAgeSorter(age, list));
 
     TextColumn<User> gender = new TextColumn<User>() {
       @Override
@@ -162,6 +165,7 @@ public class UserTable extends PagerTable {
     };
     gender.setSortable(true);
     table.addColumn(gender, "Gender");
+    table.addColumnSortHandler(getGenderSorter(gender, list));
 
     TextColumn<User> perm = new TextColumn<User>() {
       @Override
@@ -171,16 +175,17 @@ public class UserTable extends PagerTable {
     };
     perm.setSortable(true);
     table.addColumn(perm, PERMISSIONS);
+    table.addColumnSortHandler(getPermSorter(perm, list));
 
     TextColumn<User> complete = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
-        return contact.isComplete() ? "Yes" : ("No (" + Math.round(100 * contact.getCompletePercent()) +
-            "%)");
+        return contact.isComplete() ? "Yes" : ("No (" + Math.round(100 * contact.getCompletePercent()) + "%)");
       }
     };
     complete.setSortable(true);
     table.addColumn(complete, "Items Complete?");
+    table.addColumnSortHandler(getCompleteSorter(complete, list));
 
     TextColumn<User> items = new TextColumn<User>() {
       @Override
@@ -190,6 +195,7 @@ public class UserTable extends PagerTable {
     };
     items.setSortable(true);
     table.addColumn(items, "Num " + props.getNameForAnswer() + "s");
+    table.addColumnSortHandler(getNumRecordingsSorter(items,list));
 
     TextColumn<User> rate = new TextColumn<User>() {
       @Override
@@ -199,6 +205,7 @@ public class UserTable extends PagerTable {
     };
     rate.setSortable(true);
     table.addColumn(rate, "Rate (sec)");
+    table.addColumnSortHandler(getRateSorter(rate,list));
 
     TextColumn<User> ipaddr = new TextColumn<User>() {
       @Override
@@ -221,8 +228,9 @@ public class UserTable extends PagerTable {
 
     ipaddr.setSortable(true);
     table.addColumn(ipaddr, "IP Addr");
+    table.addColumnSortHandler(getIPSorter(ipaddr,list));
 
-    getDateColumn(table);
+    getDateColumn(table,list);
 
     TextColumn<User> kind = new TextColumn<User>() {
       @Override
@@ -231,6 +239,9 @@ public class UserTable extends PagerTable {
       }
     };
     table.addColumn(kind, "Type");
+    kind.setSortable(true);
+    table.addColumnSortHandler(getKindSorter(kind,list));
+
 
     TextColumn<User> emailH = new TextColumn<User>() {
       @Override
@@ -255,39 +266,11 @@ public class UserTable extends PagerTable {
       }
     };
     table.addColumn(device, "Device");
-
+    device.setSortable(true);
+    table.addColumnSortHandler(getDeviceSorter(device,list));
 
     if (isAdmin) {
-      CheckboxCell checkboxCell = new CheckboxCell(true, false);
-
-      Column<User, Boolean> checkColumn = new Column<User, Boolean>(checkboxCell) {
-        @Override
-        public Boolean getValue(User object) {
-          return object.isEnabled() || (!object.isCD());
-        }
-      };
-
-      checkColumn.setFieldUpdater(new FieldUpdater<User, Boolean>() {
-        @Override
-        public void update(int index, User object, Boolean value) {
-//          logger.info("update " + object.getUserID() + " " + value);
-          service.changeEnabledFor((int) object.getId(), value, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-
-            }
-          });
-        }
-      });
-
-
-      table.addColumn(checkColumn, "Enabled?");
-      table.setColumnWidth(checkColumn, 40, Style.Unit.PX);
+      addAdminCol(service, table);
     } else {
       TextColumn<User> enabled = new TextColumn<User>() {
         @Override
@@ -298,24 +281,7 @@ public class UserTable extends PagerTable {
       table.addColumn(enabled, "Enabled");
     }
 
-    // Create a data provider.
-    ListDataProvider<User> dataProvider = new ListDataProvider<User>();
-
-    // Connect the table to the data provider.
-    dataProvider.addDataDisplay(table);
-
-    // Add the data to the data provider, which automatically pushes it to the
-    // widget.
-    List<User> list = dataProvider.getList();
-    for (User contact : result) {
-      list.add(contact);
-    }
-    table.setRowCount(list.size());
-
-    // Add a ColumnSortEvent.ListHandler to connect sorting to the
-    // java.util.List.
-    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(
-        list);
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(list);
     columnSortHandler.setComparator(id,
         new Comparator<User>() {
           public int compare(User o1, User o2) {
@@ -340,7 +306,65 @@ public class UserTable extends PagerTable {
     return getOldSchoolPagerAndTable(table, table, PAGE_SIZE1, PAGE_SIZE1, rightOfPager);
   }
 
-  private void getDateColumn(CellTable<User> table) {
+  private CellTable<User> getTable() {
+    final CellTable<User> table = new CellTable<User>();
+    table.setPageSize(PAGE_SIZE);
+    int width = (int) (Window.getClientWidth() * 0.9);
+    table.setWidth(width + "px");
+    return table;
+  }
+
+  private List<User> getDataProvider(List<User> users, CellTable<User> table) {
+    // Create a data provider.
+    ListDataProvider<User> dataProvider = new ListDataProvider<User>();
+
+    // Connect the table to the data provider.
+    dataProvider.addDataDisplay(table);
+
+    // Add the data to the data provider, which automatically pushes it to the
+    // widget.
+    List<User> list = dataProvider.getList();
+    for (User contact : users) {
+      list.add(contact);
+    }
+    table.setRowCount(list.size());
+    return list;
+  }
+
+  private void addAdminCol(final LangTestDatabaseAsync service, CellTable<User> table) {
+    CheckboxCell checkboxCell = new CheckboxCell(true, false);
+
+    Column<User, Boolean> checkColumn = new Column<User, Boolean>(checkboxCell) {
+      @Override
+      public Boolean getValue(User object) {
+        return object.isEnabled() || (!object.isCD());
+      }
+    };
+
+    checkColumn.setFieldUpdater(new FieldUpdater<User, Boolean>() {
+      @Override
+      public void update(int index, User object, Boolean value) {
+//          logger.info("update " + object.getUserID() + " " + value);
+        service.changeEnabledFor((int) object.getId(), value, new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+
+          }
+
+          @Override
+          public void onSuccess(Void result) {
+
+          }
+        });
+      }
+    });
+
+
+    table.addColumn(checkColumn, "Enabled?");
+    table.setColumnWidth(checkColumn, 40, Style.Unit.PX);
+  }
+
+  private void getDateColumn(CellTable<User> table, List<User> list) {
     SafeHtmlCell cell = new SafeHtmlCell();
     Column<User, SafeHtml> dateCol = new Column<User, SafeHtml>(cell) {
       @Override
@@ -350,13 +374,14 @@ public class UserTable extends PagerTable {
     };
     table.addColumn(dateCol, "Time");
     dateCol.setSortable(true);
+    table.addColumnSortHandler(getTimeSorter(dateCol,list));
   }
 
   private float roundToHundredth(double totalHours) {
     return ((float) ((Math.round(totalHours * 100)))) / 100f;
   }
 
-  private void addUserIDColumns(CellTable<User> table) {
+  private void addUserIDColumns(CellTable<User> table, List<User> list) {
     TextColumn<User> userID = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
@@ -365,5 +390,262 @@ public class UserTable extends PagerTable {
     };
     userID.setSortable(true);
     table.addColumn(userID, USER_ID);
+    table.addColumnSortHandler(getUserIDSorter(userID, list));
+  }
+
+
+  private ColumnSortEvent.ListHandler<User> getAgeSorter(TextColumn<User> englishCol,
+                                                         List<User> dataList) {
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<User>() {
+          public int compare(User o1, User o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+
+            // Compare the name columns.
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return Integer.valueOf(o1.getAge()).compareTo(o2.getAge());
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
+  }
+
+  private ColumnSortEvent.ListHandler<User> getGenderSorter(TextColumn<User> englishCol,
+                                                            List<User> dataList) {
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<User>() {
+          public int compare(User o1, User o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return Integer.valueOf(o1.getGender()).compareTo(o2.getGender());
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
+  }
+
+
+  private ColumnSortEvent.ListHandler<User> getUserIDSorter(TextColumn<User> englishCol,
+                                                            List<User> dataList) {
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<User>() {
+          public int compare(User o1, User o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return o1.getUserID().compareTo(o2.getUserID());
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
+  }
+
+  private ColumnSortEvent.ListHandler<User> getDialectSorter(TextColumn<User> englishCol,
+                                                             List<User> dataList) {
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<User>() {
+          public int compare(User o1, User o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return o1.getDialect().compareTo(o2.getDialect());
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
+  }
+
+  private ColumnSortEvent.ListHandler<User> getDeviceSorter(TextColumn<User> englishCol,
+                                                             List<User> dataList) {
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<User>() {
+          public int compare(User o1, User o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return o1.getDevice().compareTo(o2.getDevice());
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
+  }
+
+  private ColumnSortEvent.ListHandler<User> getKindSorter(TextColumn<User> englishCol,
+                                                            List<User> dataList) {
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<User>() {
+          public int compare(User o1, User o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return o1.getUserKind().compareTo(o2.getUserKind());
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
+  }
+
+  private ColumnSortEvent.ListHandler<User> getIPSorter(TextColumn<User> englishCol,
+                                                            List<User> dataList) {
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<User>() {
+          public int compare(User o1, User o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return o1.getIpaddr().compareTo(o2.getIpaddr());
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
+  }
+
+  private ColumnSortEvent.ListHandler<User> getPermSorter(TextColumn<User> englishCol,
+                                                            List<User> dataList) {
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<User>() {
+          public int compare(User o1, User o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return o1.getPermissions().toString().compareTo(o2.getPermissions().toString());
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
+  }
+
+  private ColumnSortEvent.ListHandler<User> getTimeSorter(Column<User, SafeHtml> englishCol,
+                                                            List<User> dataList) {
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<User>() {
+          public int compare(User o1, User o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
+  }
+
+  private ColumnSortEvent.ListHandler<User> getNumRecordingsSorter(TextColumn<User> englishCol,
+                                                          List<User> dataList) {
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<User>() {
+          public int compare(User o1, User o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return Integer.valueOf(o1.getNumResults()).compareTo(o2.getNumResults());
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
+  }
+
+  private ColumnSortEvent.ListHandler<User> getRateSorter(TextColumn<User> englishCol,
+                                                                   List<User> dataList) {
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<User>() {
+          public int compare(User o1, User o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return Float.valueOf(o1.getRate()).compareTo(o2.getRate());
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
+  }
+
+  private ColumnSortEvent.ListHandler<User> getCompleteSorter(TextColumn<User> englishCol,
+                                                          List<User> dataList) {
+    ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        new Comparator<User>() {
+          public int compare(User o1, User o2) {
+            if (o1 == o2) {
+              return 0;
+            }
+            if (o1 != null) {
+              if (o2 == null) return 1;
+              else {
+                return Float.valueOf(o1.getCompletePercent()).compareTo(o2.getCompletePercent());
+              }
+            }
+            return -1;
+          }
+        });
+    return columnSortHandler;
   }
 }
