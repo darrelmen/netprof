@@ -1025,7 +1025,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.debug("Cache MISS : align exercise id = " + exerciseID + " file " + answer);
     }
 
-    db.getExercise(exerciseID); // TODO : why is this needed?
+    //db.getExercise(exerciseID); // TODO : why is this needed?
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
     PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,

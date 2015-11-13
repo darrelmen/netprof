@@ -26,18 +26,18 @@ public class Analysis extends DAO {
   public static final float MIN_SCORE_TO_SHOW = 0.20f;
   private final ParseResultJson parseResultJson;
   private final PhoneDAO phoneDAO;
-  private final Map<String,String> exToRef;
+  private Map<String, String> exToRef;
 
   /**
    * @param database
    * @param phoneDAO
    * @see DatabaseImpl#getAnalysis()
    */
-  public Analysis(Database database, PhoneDAO phoneDAO, Map<String,String> exToRef) {
+  public Analysis(Database database, PhoneDAO phoneDAO, Map<String, String> exToRef) {
     super(database);
     parseResultJson = new ParseResultJson(database.getServerProps());
     this.phoneDAO = phoneDAO;
-    this.exToRef = exToRef;
+    this.setExToRef(exToRef);
   }
 
   /**
@@ -130,6 +130,7 @@ public class Analysis extends DAO {
   private String getPerfSQL() {
     return getPerfSQL(0, false);
   }
+
   private String getPerfSQL(long id) {
     return getPerfSQL(id, true);
   }
@@ -228,7 +229,8 @@ public class Analysis extends DAO {
       Map<Long, UserInfo> best = getBest(sql, minRecordings);
       long now = System.currentTimeMillis();
 
-      if (DEBUG) logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - then) + " millis to get " + best.size());
+      if (DEBUG)
+        logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - then) + " millis to get " + best.size());
 
       if (best.isEmpty()) return new PhoneReport();
 
@@ -246,7 +248,8 @@ public class Analysis extends DAO {
 
       now = System.currentTimeMillis();
 
-      if (DEBUG) logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - then) + " millis to phone report");
+      if (DEBUG)
+        logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - then) + " millis to phone report");
 
       Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
 
@@ -273,7 +276,8 @@ public class Analysis extends DAO {
 
       now = System.currentTimeMillis();
 
-      if (DEBUG)  logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - start) + " millis to get " + phonesForUser.size() + " phones");
+      if (DEBUG)
+        logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - start) + " millis to get " + phonesForUser.size() + " phones");
 
       return phoneReport;
     } catch (Exception ee) {
@@ -390,6 +394,8 @@ public class Analysis extends DAO {
     int learn = 0;
     int count = 0;
     int missing = 0;
+    Set<String> missingAudio = new TreeSet<>();
+
     while (rs.next()) {
       count++;
       String exid = rs.getString(Database.EXID);
@@ -397,7 +403,7 @@ public class Analysis extends DAO {
       float pronScore = rs.getFloat(ResultDAO.PRON_SCORE);
       int id = rs.getInt(ResultDAO.ID);
       long userid = rs.getLong(ResultDAO.USERID);
-      String type =rs.getString(ResultDAO.AUDIO_TYPE);
+      String type = rs.getString(ResultDAO.AUDIO_TYPE);
 
       List<BestScore> results = userToBest.get(userid);
       if (results == null) userToBest.put(userid, results = new ArrayList<BestScore>());
@@ -420,13 +426,20 @@ public class Analysis extends DAO {
       long time = timestamp.getTime();
 
       String nativeAudio = exToRef.get(exid);
-      if (nativeAudio == null) missing++;
+      if (nativeAudio == null) {
+        if (exid.startsWith("Custom")) {
+//          logger.debug("missing audio for " + exid);
+          missingAudio.add(exid);
+        }
+        missing++;
+      }
       results.add(new BestScore(exid, pronScore, time, id, json, isiPad, isFlashcard, trimPathForWebPage(path), nativeAudio));
     }
 
     if (DEBUG || true) {
-      logger.info("total " + count + " missing audio " + missing+
+      logger.info("total " + count + " missing audio " + missing +
           " iPad = " + iPad + " flashcard " + flashcard + " learn " + learn);
+      logger.info("missing audio " +missingAudio);
     }
 
     finish(connection, statement, rs);
@@ -451,7 +464,7 @@ public class Analysis extends DAO {
     long then = System.currentTimeMillis();
 
     int c = 0;
-    int skipped=0;
+    int skipped = 0;
     for (BestScore bs : bestScores) {
       String json = bs.getJson();
       if (json == null) {
@@ -464,25 +477,28 @@ public class Analysis extends DAO {
         if (json.isEmpty()) logger.warn("no json for " + bs);
         Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(json);
         results.add(new WordScore(bs, netPronImageTypeListMap));
-      }
-      else {
+      } else {
         skipped++;
       }
     }
 
     long now = System.currentTimeMillis();
-    if (now-then > 50) {
+    if (now - then > 50) {
       logger.debug(getDatabase().getLanguage() + " took " + (now - then) + " millis to parse json for " + bestScores.size() + " best scores");
     }
 
     then = System.currentTimeMillis();
     Collections.sort(results);
     now = System.currentTimeMillis();
-    if (now-then > 50) {
+    if (now - then > 50) {
       logger.debug(getDatabase().getLanguage() + " took " + (now - then) + " millis to sort " + bestScores.size() + " best scores");
     }
-    logger.info("getWordScore out of " +bestScores.size() + " skipped " + skipped);
+    logger.info("getWordScore out of " + bestScores.size() + " skipped " + skipped);
 
     return results;
+  }
+
+  public void setExToRef(Map<String, String> exToRef) {
+    this.exToRef = exToRef;
   }
 }
