@@ -41,7 +41,7 @@ public class AudioCheck {
 
   public AudioCheck(ServerProperties props) {
     this.props = props;
-    this.MIN_DYNAMIC_RANGE = props.getMinDynamicRange();
+    this.MIN_DYNAMIC_RANGE = props == null ? 26: props.getMinDynamicRange();
   }
 
   private double dB(double power) {
