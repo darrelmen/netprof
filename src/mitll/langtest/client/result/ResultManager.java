@@ -671,7 +671,7 @@ public class ResultManager extends PagerTable {
     TextColumn<MonitorResult> dynamicRange = new TextColumn<MonitorResult>() {
       @Override
       public String getValue(MonitorResult answer) {
-        return "" + roundToHundredth(answer.getSnr());
+        return "" + roundToHundredth(answer.getSnr() < 0 ? 0 : answer.getSnr());
       }
     };
     dynamicRange.setSortable(true);
