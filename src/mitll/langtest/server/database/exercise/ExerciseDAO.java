@@ -6,6 +6,7 @@ import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonUserExercise;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -31,4 +32,6 @@ public interface ExerciseDAO {
   CommonExercise getExercise(String id);
 
   void setAudioDAO(AudioDAO audioDAO);
+
+  void attachAudio(Collection<CommonUserExercise> all);
 }
