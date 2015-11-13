@@ -28,6 +28,7 @@ public class MonitorResult implements IsSerializable {
   public static final String DEVICE = "device";
   public static final String TEXT = "text";
   public static final String DYNAMIC_RANGE = "Dynamic Range";
+  public static final String VALIDITY = "Validity";
 
   private int uniqueID;
   private long userid;
@@ -252,6 +253,11 @@ public class MonitorResult implements IsSerializable {
           }
           if (comp != 0) return getComp(asc, comp);
 
+          if (field.equals(VALIDITY)) {
+            comp = o1.getValidity().compareTo(o2.getValidity());
+          }
+          if (comp != 0) return getComp(asc, comp);
+
           if (field.equals(DYNAMIC_RANGE)) {
             float pronScore1 = o1.getSnr();
             float pronScore2 = o2.getSnr();
@@ -270,6 +276,8 @@ public class MonitorResult implements IsSerializable {
               comp = compareTwoMaybeInts(first, second);
             }
           }
+
+          if (comp == 0) comp = Integer.valueOf(o1.getUniqueID()).compareTo(o2.getUniqueID());
 
           return getComp(asc, comp);
         }
