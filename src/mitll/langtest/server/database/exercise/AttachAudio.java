@@ -1,5 +1,6 @@
 package mitll.langtest.server.database.exercise;
 
+import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.AudioAttribute;
 import mitll.langtest.shared.CommonExercise;
@@ -25,8 +26,16 @@ public class AttachAudio {
   private final int audioOffset;
   private final String mediaDir, mediaDir1;
   private final File installPath;
-  private final Map<String, List<AudioAttribute>> exToAudio;
+  private Map<String, List<AudioAttribute>> exToAudio;
 
+  /**
+   * @param mediaDir
+   * @param mediaDir1
+   * @param installPath
+   * @param audioOffset
+   * @param exToAudio
+   * @see ExcelImport#setAudioDAO(AudioDAO)
+   */
   public AttachAudio(String mediaDir,
                      String mediaDir1, File installPath,
                      int audioOffset,
@@ -34,19 +43,19 @@ public class AttachAudio {
     this.mediaDir = mediaDir;
     this.mediaDir1 = mediaDir1;
     this.installPath = installPath;
-    this.exToAudio = exToAudio;
+    this.setExToAudio(exToAudio);
     this.audioOffset = audioOffset;
   }
-  /**
-   * @param audioDAO
-   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
-   */
-//  @Override
-//  public void setAudioDAO(AudioDAO audioDAO) {
-//    exToAudio = audioDAO.getExToAudio();
-//  }
-//
-//
+
+ /* public AttachAudio(String mediaDir,
+                     String mediaDir1, File installPath,
+                     int audioOffset
+  ) {
+    this.mediaDir = mediaDir;
+    this.mediaDir1 = mediaDir1;
+    this.installPath = installPath;
+    this.audioOffset = audioOffset;
+  }*/
 
   /**
    * Go looking for audio in the media directory ("bestAudio") and if there's a file there
@@ -109,58 +118,64 @@ public class AttachAudio {
     int missing = 0;
     if (exToAudio.containsKey(id) || exToAudio.containsKey(id + "/1") || exToAudio.containsKey(id + "/2")) {
       List<AudioAttribute> audioAttributes = exToAudio.get(id);
-
-      if (audioAttributes == null) {
-        missingExerciseCount++;
-        if (missingExerciseCount < 10) logger.error("attachAudio can't find " + id);
-      } else if (!audioAttributes.isEmpty()) {
-        Set<String> audioPaths = new HashSet<String>();
-        for (AudioAttribute audioAttribute : imported.getAudioAttributes()) {
-          audioPaths.add(audioAttribute.getAudioRef());
-        }
-        for (AudioAttribute audio : audioAttributes) {
-          String child = mediaDir1 + File.separator + audio.getAudioRef();
-          /*  if (child.contains("bestAudio\bestAudio")) {
-              child = child.replaceAll("bestAudio\\bestAudio","bestAudio");
-            }*/
-          File test = new File(installPath, child);
-
-          boolean exists = test.exists();
-          if (!exists) {
-            //   logger.debug("child " + test.getAbsolutePath() + " doesn't exist");
-            test = new File(installPath, audio.getAudioRef());
-            exists = test.exists();
-            if (!exists) {
-              //     logger.debug("child " + test.getAbsolutePath() + " doesn't exist");
-            }
-            child = audio.getAudioRef();
-          }
-          if (exists) {
-            if (!audioPaths.contains(child)) {
-              audio.setAudioRef(child);   // remember to prefix the path
-              imported.addAudio(audio);
-              audioPaths.add(child);
-            }
-          } else {
-            missing++;
-            c++;
-            if (c < 5) {
-              logger.warn("file " + test.getAbsolutePath() + " does not exist - \t" + audio.getAudioRef());
-              if (c < 2) {
-                logger.warn("installPath " + installPath + "mediaDir " + mediaDir + " mediaDir1 " + mediaDir1);
-              }
-            }
-          }
-        }
-      }
+      missing = attachAudio(imported, missing, audioAttributes);
       //logger.debug("added " + c + " to " + id);
     }
-    if (!imported.hasRefAudio() && imported.getID().equals("166")) {
+    if (!imported.hasRefAudio() && imported.getID().startsWith("Custom")) {
       logger.warn("ex " + imported.getID() + " has no ref audio.");
     }
     //else {
     // logger.debug("can't find '" + id + "' in " + exToAudio.keySet().size() + " keys, e.g. '" + exToAudio.keySet().iterator().next() +"'");
     //}
+    return missing;
+  }
+
+  public <T extends CommonExercise> int attachAudio(T imported, int missing, List<AudioAttribute> audioAttributes) {
+    String id = imported.getID();
+
+    if (audioAttributes == null) {
+      missingExerciseCount++;
+      if (missingExerciseCount < 10) logger.error("attachAudio can't find " + id);
+    } else if (!audioAttributes.isEmpty()) {
+      Set<String> audioPaths = new HashSet<String>();
+      for (AudioAttribute audioAttribute : imported.getAudioAttributes()) {
+        audioPaths.add(audioAttribute.getAudioRef());
+      }
+      for (AudioAttribute audio : audioAttributes) {
+        String child = mediaDir1 + File.separator + audio.getAudioRef();
+        /*  if (child.contains("bestAudio\bestAudio")) {
+            child = child.replaceAll("bestAudio\\bestAudio","bestAudio");
+          }*/
+        File test = new File(installPath, child);
+
+        boolean exists = test.exists();
+        if (!exists) {
+          //   logger.debug("child " + test.getAbsolutePath() + " doesn't exist");
+          test = new File(installPath, audio.getAudioRef());
+          exists = test.exists();
+          if (!exists) {
+            //     logger.debug("child " + test.getAbsolutePath() + " doesn't exist");
+          }
+          child = audio.getAudioRef();
+        }
+        if (exists) {
+          if (!audioPaths.contains(child)) {
+            audio.setAudioRef(child);   // remember to prefix the path
+            imported.addAudio(audio);
+            audioPaths.add(child);
+          }
+        } else {
+          missing++;
+          c++;
+          if (c < 5) {
+            logger.warn("file " + test.getAbsolutePath() + " does not exist - \t" + audio.getAudioRef());
+            if (c < 2) {
+              logger.warn("installPath " + installPath + "mediaDir " + mediaDir + " mediaDir1 " + mediaDir1);
+            }
+          }
+        }
+      }
+    }
     return missing;
   }
 
@@ -179,4 +194,7 @@ public class AttachAudio {
     return wavPath.replaceAll("\\\\", "/");
   }
 
+  public void setExToAudio(Map<String, List<AudioAttribute>> exToAudio) {
+    this.exToAudio = exToAudio;
+  }
 }
