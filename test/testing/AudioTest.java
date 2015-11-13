@@ -38,7 +38,7 @@ public class AudioTest {
       for (File f : files) {
         if (f.getName().endsWith(".wav")) {
           System.out.println("Got " + f.getName());
-          String highPassFilterFile = new AudioConversion().getHighPassFilterFile(f.getAbsolutePath());
+          String highPassFilterFile = new AudioConversion(null).getHighPassFilterFile(f.getAbsolutePath());
           File file2 = new File(highPassFilterFile);
         // File file2=f;
           DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(file2);
