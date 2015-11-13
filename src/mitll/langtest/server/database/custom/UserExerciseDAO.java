@@ -1,30 +1,16 @@
 package mitll.langtest.server.database.custom;
 
-import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
-import mitll.langtest.shared.CommonUserExercise;
-import mitll.langtest.shared.Result;
+import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import org.apache.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.sql.*;
+import java.util.*;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class UserExerciseDAO extends DAO {
   private static final Logger logger = Logger.getLogger(UserExerciseDAO.class);
@@ -483,7 +469,7 @@ public class UserExerciseDAO extends DAO {
    * @param ref
    * @param sref
    */
-  private void addMissingAudio(UserExercise e, String ref, String sref) {
+/*  private void addMissingAudio(UserExercise e, String ref, String sref) {
     boolean hasRef = (ref != null && !ref.isEmpty());
     boolean hasSRef = (sref != null && !sref.isEmpty());
 
@@ -515,7 +501,7 @@ public class UserExerciseDAO extends DAO {
       logger.warn("adding missing slow audio ref -- only first time " + ref + " by " + e.getCreator());
 
     }
-  }
+  }*/
 
   private Map<String, List<AudioAttribute>> exToAudio;
   private AudioDAO audioDAO;
