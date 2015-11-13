@@ -86,6 +86,7 @@ public class DatabaseImpl implements Database {
 
   private final boolean addDefects = true;
   private UserManagement userManagement;
+  private  Analysis analysis;
 
   /**
    * @param configDir
@@ -99,12 +100,6 @@ public class DatabaseImpl implements Database {
    */
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
                       PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify) {
-//    long then = System.currentTimeMillis();
-//    connection = new H2Connection(configDir, dbName, mustAlreadyExist);
-//    long now = System.currentTimeMillis();
-//    if (now - then > 300)
-//      logger.info("took " + (now - then) + " millis to open database for " + serverProps.getLanguage());
-
     this(new H2Connection(configDir, dbName, mustAlreadyExist), configDir, relativeConfigDir, dbName, serverProps, pathHelper, logAndNotify);
   }
 
@@ -194,14 +189,21 @@ public class DatabaseImpl implements Database {
     }
 
     putBackWordAndPhone();
+
   }
 
   public ResultDAO getResultDAO() {
     return resultDAO;
   }
 
+
+  /**
+   * TODO: maybe just make this guy once?
+   * @return
+   */
   public Analysis getAnalysis() {
-    return new Analysis(this, phoneDAO, getExerciseIDToRefAudio());
+   // Analysis analysis = new Analysis(this, phoneDAO, getExerciseIDToRefAudio());
+    return analysis;
   }
 
   public RefResultDAO getRefResultDAO() {
@@ -387,6 +389,8 @@ public class DatabaseImpl implements Database {
       userExerciseDAO.setAudioDAO(audioDAO);
 
       userManagement = new UserManagement(userDAO, exerciseDAO, resultDAO, userListManager);
+
+      analysis = new Analysis(this, phoneDAO, getExerciseIDToRefAudio());
     }
   }
 
@@ -851,17 +855,37 @@ public class DatabaseImpl implements Database {
     return join;
   }
 
+  /**
+   * @see #getAnalysis()
+   * @return
+   */
   public Map<String, String> getExerciseIDToRefAudio() {
     Map<String, String> join = new HashMap<String, String>();
 
     for (CommonExercise exercise : getExercises()) {
       String id = exercise.getID();
-      join.put(id, exercise.getRefAudio());
+      String refAudio = exercise.getRefAudio();
+      if (refAudio == null) {
+      //  logger.warn("getExerciseIDToRefAudio huh? no ref audio for " +id);
+      }
+      else {
+        join.put(id, refAudio);
+      }
+      //if (id.equals("166")) logger.debug("getExerciseIDToRefAudio : found " + exercise + "\n and " + refAudio);
     }
 
-    for (CommonExercise exercise : userExerciseDAO.getAll()) {
+    Collection<CommonUserExercise> all = userExerciseDAO.getAll();
+    exerciseDAO.attachAudio(all);
+
+    for (CommonExercise exercise : all) {
       String id = exercise.getID();
-      join.put(id, exercise.getRefAudio());
+      String refAudio = exercise.getRefAudio();
+      if (refAudio == null) {
+     //   logger.warn("getExerciseIDToRefAudio huh? user exercise : no ref audio for " +id);
+      }
+      else {
+        join.put(id, refAudio);
+      }
     }
 
     return join;
