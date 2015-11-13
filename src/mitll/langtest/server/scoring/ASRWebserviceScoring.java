@@ -267,6 +267,11 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     //transcript = "<s> " + transcript + " </s>";
     int ctr = 0;
     for (String word : transcript.split(" ")) {
+      String trim = word.trim();
+      if (!trim.equals(word)) {
+        logger.warn("trim is different '" +trim + "' != '" + word +"'");
+        word = trim;
+      }
       if (!word.equals(" ") && !word.equals("")) {
         if (htkDictionary.contains(word)) {
           scala.collection.immutable.List<String[]> prons = htkDictionary.apply(word);
