@@ -13,10 +13,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
@@ -98,6 +95,7 @@ public class UserTable extends PagerTable {
 
         Widget table = getTable(result, service, getDownloadAnchor());
 
+        dialogVPanel.add(new HTML("Click on a column to sort."));
         dialogVPanel.add(table);
         dialogVPanel.add(closeButton);
 
