@@ -439,7 +439,7 @@ public class Analysis extends DAO {
     if (DEBUG || true) {
       logger.info("total " + count + " missing audio " + missing +
           " iPad = " + iPad + " flashcard " + flashcard + " learn " + learn);
-      logger.info("missing audio " +missingAudio);
+      if (!missingAudio.isEmpty()) logger.info("missing audio " +missingAudio);
     }
 
     finish(connection, statement, rs);
