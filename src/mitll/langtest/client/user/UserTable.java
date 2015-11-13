@@ -42,7 +42,7 @@ public class UserTable extends PagerTable {
   private static final String PERMISSIONS = "Perm.";//issions";
   private static final String QUALITY_CONTROL = "QUALITY_CONTROL";
   private static final String RECORD_AUDIO = "RECORD_AUDIO";
-  private static final String C_DEVELOPER = "CONTENT";//_DEVELOPER";
+  private static final String C_DEVELOPER = "CONTENT";
 
   private Widget lastTable = null;
   private Button closeButton;
@@ -288,8 +288,6 @@ public class UserTable extends PagerTable {
             if (o1 == o2) {
               return 0;
             }
-
-            // Compare the name columns.
             if (o1 != null) {
               return (o2 != null) ? (int) (o1.getId() - o2.getId()) : 0;
             }
@@ -300,6 +298,8 @@ public class UserTable extends PagerTable {
 
     // We know that the data is sorted alphabetically by default.
     table.getColumnSortList().push(id);
+
+  //  table.setWidth("100%", true);
 
     // Create a SimplePager.
     // return getPagerAndTable(table, table, 10, 10);
@@ -393,7 +393,6 @@ public class UserTable extends PagerTable {
     table.addColumnSortHandler(getUserIDSorter(userID, list));
   }
 
-
   private ColumnSortEvent.ListHandler<User> getAgeSorter(TextColumn<User> englishCol,
                                                          List<User> dataList) {
     ColumnSortEvent.ListHandler<User> columnSortHandler = new ColumnSortEvent.ListHandler<User>(dataList);
@@ -408,7 +407,9 @@ public class UserTable extends PagerTable {
             if (o1 != null) {
               if (o2 == null) return 1;
               else {
-                return Integer.valueOf(o1.getAge()).compareTo(o2.getAge());
+                int i = Integer.valueOf(o1.getAge()).compareTo(o2.getAge());
+                if (i == 0) i = Long.valueOf(o1.getId()).compareTo(o2.getId());
+                return i;
               }
             }
             return -1;
@@ -429,7 +430,9 @@ public class UserTable extends PagerTable {
             if (o1 != null) {
               if (o2 == null) return 1;
               else {
-                return Integer.valueOf(o1.getGender()).compareTo(o2.getGender());
+                int i = Integer.valueOf(o1.getGender()).compareTo(o2.getGender());
+                if (i == 0) i = Long.valueOf(o1.getId()).compareTo(o2.getId());
+                return i;
               }
             }
             return -1;
@@ -472,7 +475,9 @@ public class UserTable extends PagerTable {
             if (o1 != null) {
               if (o2 == null) return 1;
               else {
-                return o1.getDialect().compareTo(o2.getDialect());
+                int i = o1.getDialect().compareTo(o2.getDialect());
+                if (i == 0) i = Long.valueOf(o1.getId()).compareTo(o2.getId());
+                return i;
               }
             }
             return -1;
@@ -493,7 +498,9 @@ public class UserTable extends PagerTable {
             if (o1 != null) {
               if (o2 == null) return 1;
               else {
-                return o1.getDevice().compareTo(o2.getDevice());
+                int i = o1.getDevice().compareTo(o2.getDevice());
+                if (i == 0) i = Long.valueOf(o1.getId()).compareTo(o2.getId());
+                return i;
               }
             }
             return -1;
@@ -514,7 +521,9 @@ public class UserTable extends PagerTable {
             if (o1 != null) {
               if (o2 == null) return 1;
               else {
-                return o1.getUserKind().compareTo(o2.getUserKind());
+                int i = o1.getUserKind().compareTo(o2.getUserKind());
+                if (i == 0) i = Long.valueOf(o1.getId()).compareTo(o2.getId());
+                return i;
               }
             }
             return -1;
@@ -535,7 +544,9 @@ public class UserTable extends PagerTable {
             if (o1 != null) {
               if (o2 == null) return 1;
               else {
-                return o1.getIpaddr().compareTo(o2.getIpaddr());
+                int i = o1.getIpaddr().compareTo(o2.getIpaddr());
+                if (i == 0) i = Long.valueOf(o1.getId()).compareTo(o2.getId());
+                return i;
               }
             }
             return -1;
@@ -556,7 +567,9 @@ public class UserTable extends PagerTable {
             if (o1 != null) {
               if (o2 == null) return 1;
               else {
-                return o1.getPermissions().toString().compareTo(o2.getPermissions().toString());
+                int i = o1.getPermissions().toString().compareTo(o2.getPermissions().toString());
+                if (i == 0) i = Long.valueOf(o1.getId()).compareTo(o2.getId());
+                return i;
               }
             }
             return -1;
@@ -577,7 +590,9 @@ public class UserTable extends PagerTable {
             if (o1 != null) {
               if (o2 == null) return 1;
               else {
-                return Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
+                int i = Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
+                if (i == 0) i = Long.valueOf(o1.getId()).compareTo(o2.getId());
+                return i;
               }
             }
             return -1;
@@ -598,7 +613,9 @@ public class UserTable extends PagerTable {
             if (o1 != null) {
               if (o2 == null) return 1;
               else {
-                return Integer.valueOf(o1.getNumResults()).compareTo(o2.getNumResults());
+                int i = Integer.valueOf(o1.getNumResults()).compareTo(o2.getNumResults());
+                if (i == 0) i = Long.valueOf(o1.getId()).compareTo(o2.getId());
+                return i;
               }
             }
             return -1;
@@ -640,7 +657,9 @@ public class UserTable extends PagerTable {
             if (o1 != null) {
               if (o2 == null) return 1;
               else {
-                return Float.valueOf(o1.getCompletePercent()).compareTo(o2.getCompletePercent());
+                int i = Float.valueOf(o1.getCompletePercent()).compareTo(o2.getCompletePercent());
+                if (i == 0) i = Long.valueOf(o1.getId()).compareTo(o2.getId());
+                return i;
               }
             }
             return -1;
