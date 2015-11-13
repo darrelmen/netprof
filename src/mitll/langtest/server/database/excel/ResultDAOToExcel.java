@@ -57,6 +57,8 @@ public class ResultDAOToExcel {
         ResultDAO.AUDIO_TYPE,
         ResultDAO.DURATION,
         "Valid",
+        "Validity",
+        "Dynamic Range",
         ResultDAO.CORRECT,
         ResultDAO.PRON_SCORE,
         "Device",
@@ -103,6 +105,12 @@ public class ResultDAOToExcel {
 
       cell = row.createCell(j++);
       cell.setCellValue(result.isValid() ? YES : NO);
+
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getValidity());
+
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getSnr());
 
       cell = row.createCell(j++);
       cell.setCellValue(result.isCorrect() ? YES : NO);
