@@ -225,22 +225,27 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    * @param processDur
    * @param usePhoneToDisplay
    * @return
+   * @see #scoreRepeatExercise(String, String, String, Collection, String, int, int, boolean, boolean, String, boolean, String, Result, boolean)
    */
   private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
                                        boolean decode, String prefix, String noSuffix, Scores scores, String phoneLab,
                                        String wordLab, double duration, int processDur, boolean usePhoneToDisplay) {
     String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") + (usePhoneToDisplay ? "_phoneToDisplay" : "");
 
+    try {
+      EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
+          useScoreForBkgColor,
+          prefix1, "", decode, phoneLab, wordLab, true, usePhoneToDisplay);
+      Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
+      Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
+      String recoSentence = getRecoSentence(eventAndFileInfo);
 
-    EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
-        useScoreForBkgColor,
-        prefix1, "", decode, phoneLab, wordLab, true, usePhoneToDisplay);
-    Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
-    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
-    String recoSentence = getRecoSentence(eventAndFileInfo);
-
-    return new PretestScore(scores.hydraScore, getPhoneToScore(scores), getWordToScore(scores),
-        sTypeToImage, typeToEndTimes, recoSentence, (float) duration, processDur);
+      return new PretestScore(scores.hydraScore, getPhoneToScore(scores), getWordToScore(scores),
+          sTypeToImage, typeToEndTimes, recoSentence, (float) duration, processDur);
+    } catch (Exception e) {
+      logger.error("Got " + e, e);
+      return new PretestScore(-1);
+    }
   }
 
   ////////////////////////////////
@@ -248,6 +253,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 
   /**
    * TODO : Some phrases seem to break lts process?
+   *
    * @param transcript
    * @return
    * @see #runHydra(String, String, Collection, String, boolean, int)
@@ -285,9 +291,8 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
             String word1 = word.toLowerCase();
             String[][] process = letterToSoundClass.process(word1);
             if (process == null) {
-              logger.error("couldn't get letter to sound map from " +letterToSoundClass + " for " + word1);
-            }
-            else {
+              logger.error("couldn't get letter to sound map from " + letterToSoundClass + " for " + word1);
+            } else {
               for (String[] pron : process) {
                 if (ctr != 0) dict += ";";
                 ctr++;
