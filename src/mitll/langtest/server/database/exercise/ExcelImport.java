@@ -3,6 +3,7 @@ package mitll.langtest.server.database.exercise;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.AudioDAO;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListManager;
@@ -104,12 +105,15 @@ public class ExcelImport implements ExerciseDAO {
     return sectionHelper;
   }
 
+  AudioDAO audioDAO;
   /**
+   * TODO : what if they add a user exercise and add audio to it, or record new audio for other exercises???
    * @param audioDAO
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
    */
   @Override
   public void setAudioDAO(AudioDAO audioDAO) {
+    this.audioDAO = audioDAO;
     this.attachAudio = new AttachAudio(mediaDir, mediaDir1, installPath, serverProps.getAudioOffset(), audioDAO.getExToAudio());
   }
 
@@ -143,10 +147,66 @@ public class ExcelImport implements ExerciseDAO {
             logger.info("Ex " + ex.getID() + " ref " + ex.getRefAudio());
           }
         }
-        if (missing > 0) logger.warn("out of " + exercises.size() + " " + missing + " are missing ref audio.");
+
+/*        int user = 0;
+        int examined = 0;
+        for (CommonExercise ex : userExerciseDAO.getAll()) {
+          attachAudio.attachAudio(ex);
+          examined++;
+
+          if (!ex.hasRefAudio()) {
+            if (ex.getID().startsWith("Custom")) {
+              logger.warn("missing audio for " + ex.getID());
+            }
+            user++;
+            missing++;
+          }
+          else if (ex.getID().startsWith("Custom")) {
+            logger.warn("found audio for " + ex.getID());
+          }
+        }
+        if (missing > 0) {
+          logger.warn("out of " + exercises.size() + " " + missing + " are missing ref audio, out of " + examined + " user exercises missing = " + user);
+        }*/
       }
     }
     return exercises;
+  }
+
+  /**
+   * So the story is we get the user exercises out of the database on demand.
+   *
+   * We need to join with the audio table entries every time.
+   *
+   * TODO : also, this a lot of work just to get the one ref audio recording.
+   *
+   * @see DatabaseImpl#getExerciseIDToRefAudio()
+   * @param all
+   */
+  public void attachAudio(Collection<CommonUserExercise> all) {
+    attachAudio.setExToAudio(audioDAO.getExToAudio());
+    int user = 0;
+    int examined = 0;
+    for (CommonExercise ex : all) {
+      if (!ex.hasRefAudio()) {
+        attachAudio.attachAudio(ex);
+        examined++;
+
+        if (!ex.hasRefAudio()) {
+//          if (ex.getID().startsWith("Custom")) {
+//            logger.warn("missing audio for " + ex.getID());
+//          }
+          user++;
+          //     missing++;
+        } else if (ex.getID().startsWith("Custom")) {
+//          logger.warn("found audio for " + ex.getID());
+        }
+      }
+    }
+    if (user > 0) {
+      logger.info("out of " + exercises.size() + //" " + missing +
+          " are missing ref audio, out of " + examined + " user exercises missing = " + user);
+    }
   }
 
   private void addNewExercises() {
