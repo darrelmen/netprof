@@ -18,6 +18,8 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.Collator;
 import java.util.*;
 
@@ -607,6 +609,13 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
                                            int width, int height, boolean useScoreToColorBkg,
                                            boolean decode, String tmpDir, boolean useCache, String prefix, Result precalcResult,
                                            boolean usePhoneToDisplay, boolean useOldSchool) {
+/*    try {
+      String hostName = InetAddress.getLocalHost().getHostName();
+      logger.info("Got host " +hostName);
+    } catch (UnknownHostException e) {
+      e.printStackTrace();
+    }*/
+
     logger.debug("getASRScoreForAudio (" + serverProps.getLanguage() + ")" + (decode ? " Decoding " : " Aligning ") +
         "" + testAudioFile + " with sentence '" + sentence + "' req# " + reqid + (useCache ? " check cache" : " NO CACHE") + " prefix " + prefix);
 
