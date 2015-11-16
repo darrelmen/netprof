@@ -163,4 +163,6 @@ public interface LangTestDatabaseAsync {
   void getPhoneScores(long id, int minRecordings, AsyncCallback<PhoneReport> async);
 
   void getUsersWithRecordings(AsyncCallback<Collection<UserInfo>> async);
+
+  void getShells(List<String> ids, AsyncCallback<List<CommonShell>> async);
 }
