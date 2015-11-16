@@ -26,6 +26,7 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -71,6 +72,10 @@ public class NPFHelper implements RequiresResize {
     this.showQC = showQC;
   }
 
+  public void showNPF(UserList ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
+    showNPF(ul, tabAndContent, instanceName, loadExercises, null);
+  }
+
   /**
    * Add npf widget to content of a tab - here marked tabAndContent
    *
@@ -78,22 +83,24 @@ public class NPFHelper implements RequiresResize {
    * @param tabAndContent in this tab
    * @param instanceName  flex, review, etc.
    * @param loadExercises should we load exercises initially
-   * @see mitll.langtest.client.custom.Navigation#getListOperations
+   * @param toSelect
+   * @see mitll.langtest.client.custom.ListManager#getListOperations(UserList, String)
    */
-  public void showNPF(UserList ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
+  public void showNPF(UserList ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises,
+                      CommonExercise toSelect) {
     logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
     this.instanceName = instanceName;
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
       madeNPFContent = true;
-      // System.out.println("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
+      logger.info("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
       // System.out.println("\t: first is = " + instanceName + "  " + ul.getExercises().iterator().next().getID());
-      addNPFToContent(ul, content, instanceName, loadExercises);
+      addNPFToContent(ul, content, instanceName, loadExercises, toSelect);
     } else {
-      //  System.out.println("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
+      logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
       //   System.out.println("\t: first is = " + instanceName + "  " + ul.getExercises().iterator().next().getID());
-      rememberAndLoadFirst(ul);
+      rememberAndLoadFirst(ul, toSelect);
     }
   }
 
@@ -101,9 +108,9 @@ public class NPFHelper implements RequiresResize {
     return npfExerciseList;
   }
 
-  private void addNPFToContent(UserList ul, Panel listContent, String instanceName, boolean loadExercises) {
-    Panel npfContent = doNPF(ul, instanceName, loadExercises);
-    listContent.add(npfContent);
+  private void addNPFToContent(UserList ul, Panel listContent, String instanceName, boolean loadExercises,
+                               CommonExercise toSelect) {
+    listContent.add(doNPF(ul, instanceName, loadExercises, toSelect));
     listContent.addStyleName("userListBackground");
   }
 
@@ -113,14 +120,15 @@ public class NPFHelper implements RequiresResize {
    * @param ul
    * @param instanceName
    * @param loadExercises
+   * @param toSelect
    * @return
-   * @see #addNPFToContent(mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.Panel, String, boolean)
+   * @see #addNPFToContent(UserList, Panel, String, boolean, CommonExercise)
    */
-  private Panel doNPF(UserList ul, String instanceName, boolean loadExercises) {
+  private Panel doNPF(UserList ul, String instanceName, boolean loadExercises, CommonExercise toSelect) {
     // System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul);
     Panel hp = doInternalLayout(ul, instanceName);
     if (loadExercises) {
-      rememberAndLoadFirst(ul);
+      rememberAndLoadFirst(ul, toSelect);
     }
     return hp;
   }
@@ -131,7 +139,7 @@ public class NPFHelper implements RequiresResize {
    * @param ul
    * @param instanceName
    * @return
-   * @see #doNPF(mitll.langtest.shared.custom.UserList, String, boolean)
+   * @see #doNPF(UserList, String, boolean, String)
    */
   protected Panel doInternalLayout(UserList ul, String instanceName) {
     //System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
@@ -194,12 +202,15 @@ public class NPFHelper implements RequiresResize {
 
   /**
    * @param ul
-   * @see #doNPF(mitll.langtest.shared.custom.UserList, String, boolean)
-   * @see #showNPF(mitll.langtest.shared.custom.UserList, TabAndContent, String, boolean)
+   * @param toSelect
+   * @see #doNPF
+   * @see #showNPF(UserList, TabAndContent, String, boolean, String)
    */
-  private void rememberAndLoadFirst(final UserList ul) {
+  private void rememberAndLoadFirst(final UserList ul, CommonExercise toSelect) {
     npfExerciseList.setUserListID(ul.getUniqueID());
-    npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
+    List<CommonShell> copy = new ArrayList<CommonShell>(ul.getExercises());
+    //  npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
+    npfExerciseList.rememberAndLoadFirst(copy, toSelect, "");
     npfExerciseList.setWidth("270px");
     npfExerciseList.getElement().getStyle().setProperty("minWidth", "270px");
   }
@@ -260,6 +271,7 @@ public class NPFHelper implements RequiresResize {
   public void setContentPanel(DivWidget content) {
     this.contentPanel = content;
   }
+
   public String getInstanceName() {
     return instanceName;
   }
