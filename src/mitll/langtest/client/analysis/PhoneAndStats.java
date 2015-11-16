@@ -46,7 +46,13 @@ public class PhoneAndStats {
     return current;
   }
 
-  public int getDiff() { return current-getInitial();}
+  /**
+   * @return
+   * @see PhoneContainer#getDiffSorter(Column, List)
+   */
+  public int getDiff() {
+    return current - score;
+  }
 
   /**
    * @return
