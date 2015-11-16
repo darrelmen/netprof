@@ -77,6 +77,8 @@ public class Navigation implements RequiresResize, ShowTab {
   private static final String CONTENT1 = "content";
   private static final String MARK_DEFECTS1 = "markDefects";
 
+  private static final int STUDY_LISTS_INDEX = 2;
+
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final UserManager userManager;
@@ -148,7 +150,7 @@ public class Navigation implements RequiresResize, ShowTab {
       public void onFailure(Throwable caught) {
         logger.info("getContextPractice failed");
       }
-       //TODO: this is naughty
+      //TODO: this is naughty
     });
 
     defectHelper = new ChapterNPFHelper(service, feedback, userManager, controller, true);
@@ -272,7 +274,7 @@ public class Navigation implements RequiresResize, ShowTab {
     tabPanel = new TabPanel();
     tabPanel.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     tabPanel.getElement().setId("tabPanel");
-    this.listManager = new ListManager(service,userManager,controller,feedback,tabPanel);
+    this.listManager = new ListManager(service, userManager, controller, feedback, tabPanel);
 
     // so we can know when chapters is revealed and tell it to update it's lists
     tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
@@ -333,27 +335,7 @@ public class Navigation implements RequiresResize, ShowTab {
     }
 
     if (isQC()) {
-      markDefectsTab = makeFirstLevelTab(tabPanel, IconType.FLAG, MARK_DEFECTS);
-      markDefectsTab.getContent().getElement().setId("content_contentPanel");
-      markDefectsTab.getTab().addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          checkAndMaybeClearTab(MARK_DEFECTS);
-          markDefectsHelper.showNPF(markDefectsTab, MARK_DEFECTS1);
-          logEvent(recorderTab, MARK_DEFECTS);
-        }
-      });
-
-      review = makeFirstLevelTab(tabPanel, IconType.EDIT, FIX_DEFECTS);
-      review.getContent().getElement().setId("viewReview_contentPanel");
-      review.getTab().addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          checkAndMaybeClearTab(FIX_DEFECTS);
-          listManager.viewReview(review.getContent());
-          logEvent(review, FIX_DEFECTS);
-        }
-      });
+      addDefectsTabs();
     }
 
     if (controller.getPermissions().contains(User.Permission.RECORD_AUDIO)) {
@@ -379,6 +361,30 @@ public class Navigation implements RequiresResize, ShowTab {
         }
       });
     }
+  }
+
+  private void addDefectsTabs() {
+    markDefectsTab = makeFirstLevelTab(tabPanel, IconType.FLAG, MARK_DEFECTS);
+    markDefectsTab.getContent().getElement().setId("content_contentPanel");
+    markDefectsTab.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        checkAndMaybeClearTab(MARK_DEFECTS);
+        markDefectsHelper.showNPF(markDefectsTab, MARK_DEFECTS1);
+        logEvent(recorderTab, MARK_DEFECTS);
+      }
+    });
+
+    review = makeFirstLevelTab(tabPanel, IconType.EDIT, FIX_DEFECTS);
+    review.getContent().getElement().setId("viewReview_contentPanel");
+    review.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        checkAndMaybeClearTab(FIX_DEFECTS);
+        listManager.viewReview(review.getContent());
+        logEvent(review, FIX_DEFECTS);
+      }
+    });
   }
 
   /**
@@ -445,7 +451,7 @@ public class Navigation implements RequiresResize, ShowTab {
     chapters.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-      //  logger.info("got click on" + chapters);
+        //  logger.info("got click on" + chapters);
         checkAndMaybeClearTab(CHAPTERS);
         learnHelper.showNPF(chapters, LEARN);
         logEvent(chapters, CHAPTERS);
@@ -473,7 +479,7 @@ public class Navigation implements RequiresResize, ShowTab {
   private void showPracticeTab() {
     if (practiceTab != null) {
       checkAndMaybeClearTab(PRACTICE);
-  //    logger.info(" ------- showPracticeTab make practice tab  - ");
+      //    logger.info(" ------- showPracticeTab make practice tab  - ");
       practiceHelper.showNPF(practiceTab, PRACTICE);
       practiceHelper.setContentPanel(practiceTab.getContent());
       practiceHelper.hideList();
@@ -572,7 +578,7 @@ public class Navigation implements RequiresResize, ShowTab {
     TabAndContent tabAndContent = nameToTab.get(value);
     Integer tabIndex = nameToIndex.get(value);
 
-    logger.info("selectPreviousTab '" + value + "' index " + tabIndex + " tabAndContent " +tabAndContent);
+    logger.info("selectPreviousTab '" + value + "' index " + tabIndex + " tabAndContent " + tabAndContent);
 
     String orig = value;
     if (tabIndex == null) {
@@ -653,16 +659,26 @@ public class Navigation implements RequiresResize, ShowTab {
 
   @Override
   public void showLearnAndItem(String id) {
-    showDefaultInitialTab();
-    learnHelper.getExerciseList().loadByID(id);
+    if (id.startsWith("Custom")) {
+      tabPanel.selectTab(STUDY_LISTS_INDEX);
+      DivWidget content = studyLists.getContent();
+      Widget widget = content.getWidget(0);
+      ((TabPanel) widget).selectTab(3);
+
+      listManager.findListAndSelect(id);
+    } else {
+      showDefaultInitialTab();
+
+      boolean b = learnHelper.getExerciseList().loadByID(id);
+    }
   }
 
   /**
    * @param toUse
    * @seex #clickOnYourLists(long)
    * @seex #selectPreviouslyClickedSubTab(com.github.gwtbootstrap.client.ui.TabPanel, TabAndContent, TabAndContent, TabAndContent, mitll.langtest.shared.custom.UserList, String, boolean, boolean, boolean, boolean)
-   * @see #selectPreviousTab(String)
    * @seex #showMyLists
+   * @see #selectPreviousTab(String)
    */
   private void clickOnTab(final TabAndContent toUse) {
     if (toUse == null) {
@@ -670,7 +686,7 @@ public class Navigation implements RequiresResize, ShowTab {
     } else if (toUse.getTab() == null) {
       logger.warning("huh? toUse has a null tab? " + toUse);
     } else {
-     // logger.info("click on tab " + toUse);
+      // logger.info("click on tab " + toUse);
       toUse.clickOnTab();
     }
   }
@@ -703,6 +719,11 @@ public class Navigation implements RequiresResize, ShowTab {
     listManager.onResize();
   }
 
+  /**
+   * @see #showInitialState()
+   * @param ul
+   * @return
+   */
   private boolean createdByYou(UserList ul) {
     return ul.getCreator().getId() == userManager.getUser();
   }
