@@ -20,8 +20,8 @@ import java.util.logging.Logger;
  */
 public class AnalysisTab extends DivWidget {
   private final Logger logger = Logger.getLogger("AnalysisTab");
-  Panel bottom;
-  boolean isNarrow = false;
+  private final Panel bottom;
+  private boolean isNarrow = false;
 
   /**
    * @param service
@@ -33,9 +33,15 @@ public class AnalysisTab extends DivWidget {
    */
   public AnalysisTab(final LangTestDatabaseAsync service, final ExerciseController controller, final int userid,
                      final ShowTab showTab, String userChosenID, int minRecordings, DivWidget overallBottom) {
+    getElement().setId("AnalysisTab");
     final AnalysisPlot analysisPlot = new AnalysisPlot(service, userid, userChosenID, minRecordings,controller.getSoundManager());
     add(analysisPlot);
+   // bottom = new DivWidget();
     bottom = new HorizontalPanel();
+    bottom.getElement().setId("bottom");
+    bottom.addStyleName("floatLeft");
+
+//    bottom = new HorizontalPanel();
 
     if (overallBottom != null) {
       overallBottom.add(bottom);
@@ -60,7 +66,10 @@ public class AnalysisTab extends DivWidget {
       public void onSuccess(List<WordScore> wordScores) {
         final WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab);
         Panel tableWithPager = wordContainer.getTableWithPager(wordScores);
+
         DivWidget vert = new DivWidget();
+        vert.getElement().setId("WordsContainer");
+        vert.addStyleName("floatLeft");
         vert.add(new Heading(3, "Words"));
         vert.add(tableWithPager);
         lowerHalf.add(vert);
@@ -77,8 +86,8 @@ public class AnalysisTab extends DivWidget {
                               final ShowTab showTab,
                               final int minRecordings) {
     final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, analysisPlot, showTab);
-    final PhonePlot child = new PhonePlot();
-    final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, child, isNarrow);
+    final PhonePlot phonePlot = new PhonePlot();
+    final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, phonePlot, isNarrow);
 
     service.getPhoneScores(userid, minRecordings, new AsyncCallback<PhoneReport>() {
       @Override
@@ -91,22 +100,29 @@ public class AnalysisTab extends DivWidget {
         // logger.info("getPhoneScores " + phoneReport);
         Panel phones = phoneContainer.getTableWithPager(phoneReport);
 
-        DivWidget vert = new DivWidget();
-        vert.add(new Heading(3, "Sounds"));
-        vert.add(phones);
-        //  vert.addStyleName("leftTenMargin");
-        lowerHalf.add(vert);
+        DivWidget sounds = new DivWidget();
+        sounds.getElement().setId("SoundsContainer");
+        sounds.add(new Heading(3, "Sounds"));
+        sounds.addStyleName("floatLeft");
+
+        sounds.add(phones);
+        //  sounds.addStyleName("leftTenMargin");
+        lowerHalf.add(sounds);
 
         Panel examples = exampleContainer.getTableWithPager();
 
-        DivWidget vert2 = new DivWidget();
-        vert2.add(new Heading(3, "Words using Sound"));
-        vert2.add(examples);
-        vert2.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
-        lowerHalf.add(vert2);
+        DivWidget wordExamples = new DivWidget();
+        wordExamples.getElement().setId("WordExamples");
+        wordExamples.addStyleName("floatLeft");
 
-        child.addStyleName("topMargin");
-        lowerHalf.add(child);
+        wordExamples.add(new Heading(3, "Words using Sound"));
+        wordExamples.add(examples);
+        wordExamples.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
+        lowerHalf.add(wordExamples);
+
+        phonePlot.addStyleName("topMargin");
+        phonePlot.addStyleName("floatLeft");
+        lowerHalf.add(phonePlot);
 
         phoneContainer.showExamplesForSelectedSound();
       }
