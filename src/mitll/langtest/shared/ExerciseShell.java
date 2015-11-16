@@ -24,8 +24,8 @@ public class ExerciseShell implements IsSerializable, CommonShell {
   }
 
   /**
-   * @see AudioExercise#AudioExercise(String)
    * @param id
+   * @see AudioExercise#AudioExercise(String)
    */
   public ExerciseShell(String id) {
     this.id = id;
@@ -106,7 +106,7 @@ public class ExerciseShell implements IsSerializable, CommonShell {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShellsShort(java.util.Collection)
    */
   public CommonShell getShell() {
-    return new ExerciseShell(getID(), getTooltip(), englishSentence,meaning,foreignLanguage);
+    return new ExerciseShell(getID(), getTooltip(), englishSentence, meaning, foreignLanguage);
   }
 
   @Override
