@@ -439,7 +439,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return false;
   }
 
-  private void handleResetPass(final Container verticalContainer, final Panel firstRow, final EventRegistration eventRegistration, final String resetPassToken) {
+  private void handleResetPass(final Container verticalContainer, final Panel firstRow,
+                               final EventRegistration eventRegistration, final String resetPassToken) {
     logger.info("showLogin token '" + resetPassToken + "' for password reset");
 
     // staleToken = resetPassToken;
@@ -564,7 +565,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private Panel makeHeaderRow() {
     flashcard = new Flashcard(props);
-    Widget title = flashcard.makeNPFHeaderRow(props.getSplash(), true, getGreeting(), getReleaseStatus(), new LogoutClickHandler(),
+    Widget title = flashcard.makeNPFHeaderRow(props.getSplash(), true, getGreeting(), getReleaseStatus(),
+        new LogoutClickHandler(),
         new UsersClickHandler(),
         new ResultsClickHandler(),
         new MonitoringClickHandler(),
@@ -672,11 +674,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         hideFlash();
         checkLogin();
       }
-
-/*      public void gotDenial() {
-        showPopupOnDenial();
-      }*/
-
       /**
        * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#noMicrophoneFound()
        */
@@ -738,33 +735,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * Show a popup telling how unhappy we are with the user's choice not to allow mic recording.
-   *
-   * Remove the flash player that was there, put in a new one, again, and ask the user again for permission.
-   * @see #makeFlashContainer()
-   * @deprecated fall back to in browswer recording
-   */
-/*  private void showPopupOnDenial() {
-    new ModalInfoDialog(TRY_AGAIN, PLEASE_ALLOW_ACCESS_TO_THE_MICROPHONE,
-      new HiddenHandler() {
-        @Override
-        public void onHidden(HiddenEvent hiddenEvent) {
-          removeAndReloadFlash();
-        }
-      });
-  }*/
-
-/*  private void removeAndReloadFlash() {
-    logger.info(" : removeAndReloadFlash - reloading...");
-
-    firstRow.remove(flashRecordPanel);
-    flashRecordPanel.removeFlash();
-    makeFlashContainer();
-    firstRow.add(flashRecordPanel);
-    flashRecordPanel.initFlash();
-  }*/
-
-  /**
    * @see #gotUser
    * @see #makeHeaderRow()
    * @return
@@ -777,7 +747,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.LangTest.LogoutClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
    */
   private void resetState() {
-//    logger.info("resetState");
     History.newItem(""); // clear history!
     userManager.clearUser();
     lastUser = NO_USER_INITIAL;
@@ -804,7 +773,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       userID = user.getId();
     }
 
-    logger.info("gotUser : userID " + userID);
+  //  logger.info("gotUser : userID " + userID);
 
     flashcard.setUserName(getGreeting());
     if (userID != lastUser) {
@@ -1074,7 +1043,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           downloadFailedAlert();
         }
         public void onSuccess() {
-          ResultManager resultManager = new ResultManager(service, props.getNameForAnswer(), getStartupInfo().getTypeOrder(), outer, LangTest.this);
+          ResultManager resultManager = new ResultManager(service, props.getNameForAnswer(),
+              getStartupInfo().getTypeOrder(), outer, LangTest.this);
           resultManager.showResults();
         }
       });
