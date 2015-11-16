@@ -119,10 +119,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
   }
 
   private void addItems(List<PhoneAndStats> sortedHistory) {
-    // logger.info("PhoneContainer.addItems " + sortedHistory.size());
-    for (PhoneAndStats ps : sortedHistory) {
-      addItem(ps);
-    }
+    for (PhoneAndStats ps : sortedHistory) {  addItem(ps); }
     flush();
 
     try {
@@ -138,7 +135,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
    * @see AnalysisTab#getPhoneReport(LangTestDatabaseAsync, ExerciseController, int, Panel, AnalysisPlot, ShowTab, int)
    */
   public void showExamplesForSelectedSound() {
-   // logger.info("PhoneContainer.showExamplesForSelectedSound ---------- ");
     List<PhoneAndStats> list = getList();
     if (list.isEmpty()) {
       logger.info("list empty?");
@@ -198,8 +194,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
                 logger.warning("------- o2 is null?");
                 return -1;
               } else {
-                int a1 = o1.getCurrent();
-                int a2 = o2.getCurrent();
+                int a1 = o1.getInitial();
+                int a2 = o2.getInitial();
                 int i = Integer.valueOf(a1).compareTo(a2);
                 // logger.info("a1 " + a1 + " vs " + a2 + " i " + i);
                 if (i == 0) {
@@ -350,8 +346,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
     Column<PhoneAndStats, SafeHtml> scoreColumn = getScoreColumn();
     table.setColumnWidth(scoreColumn, SCORE_COL_WIDTH, Style.Unit.PX);
     table.addColumn(scoreColumn, SCORE);
-    //scoreColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     scoreColumn.setSortable(true);
+    table.addColumnSortHandler(getScoreSorter(scoreColumn, getList()));
 
     Column<PhoneAndStats, SafeHtml> currentCol = getCurrentCol();
     table.setColumnWidth(currentCol, SCORE_COL_WIDTH, Style.Unit.PX);
@@ -367,8 +363,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
 
     table.setWidth("100%", true);
 
-    ColumnSortEvent.ListHandler<PhoneAndStats> columnSortHandler2 = getScoreSorter(scoreColumn, getList());
-    table.addColumnSortHandler(columnSortHandler2);
 
     new TooltipHelper().createAddTooltip(table, "Click on an item to review.", Placement.RIGHT);
   }
@@ -436,7 +430,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
 
       @Override
       public SafeHtml getValue(PhoneAndStats shell) {
-        //float v = shell.getScore() * 100;
         int score = shell.getInitial();
         return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(score)).toSafeHtml();
       }
@@ -453,9 +446,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
 
       @Override
       public SafeHtml getValue(PhoneAndStats shell) {
-        //float v = shell.getScore() * 100;
-        int score = shell.getCurrent();
-        return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(score)).toSafeHtml();
+        return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(shell.getCurrent())).toSafeHtml();
       }
     };
   }
@@ -470,20 +461,13 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
 
       @Override
       public SafeHtml getValue(PhoneAndStats shell) {
-        //float v = shell.getScore() * 100;
-        int score = shell.getCurrent() - shell.getInitial();
-        return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(score)).toSafeHtml();
+        return new SafeHtmlBuilder().appendHtmlConstant(getScoreMarkup(shell.getDiff())).toSafeHtml();
       }
     };
   }
 
   public String getScoreMarkup(int score) {
-    return "<span " +
-        "style='" +
-        "margin-left:10px;" +
-        "'" +
-        ">" + score +
-        "</span>";
+    return "<span " +  "style='" +  "margin-left:10px;" + "'" + ">" + score + "</span>";
   }
 
   private Column<PhoneAndStats, SafeHtml> getCountColumn() {
@@ -506,8 +490,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
     /**
      * The styles applied to the table.
      */
-    interface TableStyle extends CellTable.Style {
-    }
+/*    interface TableStyle extends CellTable.Style {
+    }*/
 
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "PhoneScoresCellTableStyleSheet.css"})
