@@ -70,7 +70,6 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
           public void onSuccess(ExerciseListWrapper exerciseListWrapper) {
             for (CommonShell shell : exerciseListWrapper.getExercises()) {
               getIdToEx().put(shell.getID(), shell);
-
             }
           }
         });
@@ -208,6 +207,8 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
     return chart;
   }
 
+  com.google.gwt.user.client.Timer t;
+
   public void playLast(String id) {
     service.getExercise(id, userid, false, new AsyncCallback<CommonExercise>() {
       @Override
@@ -218,10 +219,36 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
       public void onSuccess(CommonExercise commonExercise) {
         List<CorrectAndScore> scores = commonExercise.getScores();
         CorrectAndScore correctAndScore = scores.get(scores.size() - 1);
-        soundFeedback.queueSong(getPath(correctAndScore.getPath()));
+        String refAudio = commonExercise.getRefAudio();
+
+        if (t != null) t.cancel();
+        if (refAudio != null) {
+          playLastThenRef(correctAndScore, refAudio);
+        }
       }
     });
-    //}
+  }
+
+  public void playLastThenRef(CorrectAndScore correctAndScore, String refAudio) {
+    final String path = getPath(refAudio);
+    soundFeedback.queueSong(getPath(correctAndScore.getPath()), new SoundFeedback.EndListener() {
+      @Override
+      public void songStarted() {
+
+      }
+
+      @Override
+      public void songEnded() {
+        t = new com.google.gwt.user.client.Timer() {
+          @Override
+          public void run() {
+            soundFeedback.queueSong(path);
+          }
+        };
+        t.schedule(100);
+      }
+
+    });
   }
 
   private String getPath(String path) {
@@ -238,31 +265,42 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
     return new ToolTip()
         .setFormatter(new ToolTipFormatter() {
           public String format(ToolTipData toolTipData) {
-            String s = timeToId.get(toolTipData.getXAsLong());
-            CommonShell commonShell = getIdToEx().get(s);
-            String foreignLanguage = commonShell == null ? "" : commonShell.getForeignLanguage();
-            String english = commonShell == null ? "" : commonShell.getEnglish();
-
-            String seriesName1 = toolTipData.getSeriesName();
-            boolean showEx = (!seriesName1.contains(CUMULATIVE_AVERAGE));
-            return "<b>" + seriesName1 + "</b><br/>" +
-                DateTimeFormat.getFormat("E MMM d yy h:mm a").format(
-                    new Date(toolTipData.getXAsLong())
-                ) +
-                (showEx ?
-                    "<br/>Ex " + s +
-                        "<br/>" + foreignLanguage +
-                        "<br/>" + english
-                    : "")
-                +
-                "<br/>Score = " + toolTipData.getYAsLong() + "%" +
-                (showEx ?
-                    "<br/>" + "<b>Click to hear</b>"
-                    : "")
-
-                ;
+            String exerciseID = timeToId.get(toolTipData.getXAsLong());
+            CommonShell commonShell = getIdToEx().get(exerciseID);
+            return getTooltip(toolTipData, exerciseID, commonShell);
           }
         });
+  }
+
+  private DateTimeFormat format = DateTimeFormat.getFormat("E MMM d yy h:mm a");
+
+  public String getTooltip(ToolTipData toolTipData, String s, CommonShell commonShell) {
+    String foreignLanguage = commonShell == null ? "" : commonShell.getForeignLanguage();
+    String english = commonShell == null ? "" : commonShell.getEnglish();
+
+    String seriesName1 = toolTipData.getSeriesName();
+    boolean showEx = (!seriesName1.contains(CUMULATIVE_AVERAGE));
+    String englishTool = "<br/>" + english;
+    if (english.equals("N/A")) englishTool = "";
+    return
+        "<b>" + seriesName1 + "</b>" +
+        "<br/>" +
+        format.format(
+            new Date(toolTipData.getXAsLong())
+        ) +
+        (showEx ?
+            "<br/>Exercise " + s +
+                "<br/>" +
+                "<span style='font-size:200%'>" + foreignLanguage + "</span>"+
+                englishTool
+            : "")
+        +
+        "<br/>Score <b>" + toolTipData.getYAsLong() + "</b>%" +
+        (showEx ?
+            "<br/>" + "<b>Click to hear</b>"
+            : "")
+
+        ;
   }
 
   /**
@@ -345,7 +383,6 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
     for (TimeAndScore ts : yValuesForUser) {
       data[i][0] = ts.getTimestamp();
       data[i++][1] = ts.getScore() * 100;
-      //  timeToId.put(ts.getTimestamp(),ts.getId());
     }
     return data;
   }
@@ -368,9 +405,25 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
   }
 
   private void setRawBestScores(List<TimeAndScore> rawBestScores) {
+    List<String> toGet = new ArrayList<>();
     for (TimeAndScore timeAndScore : rawBestScores) {
-      timeToId.put(timeAndScore.getTimestamp(), timeAndScore.getId());
+      String id = timeAndScore.getId();
+      timeToId.put(timeAndScore.getTimestamp(), id);
+      if (!getIdToEx().containsKey(id)) {
+        toGet.add(id);
+      }
     }
+    service.getShells(toGet, new AsyncCallback<List<CommonShell>>() {
+      @Override
+      public void onFailure(Throwable throwable) {
+
+      }
+
+      @Override
+      public void onSuccess(List<CommonShell> commonShells) {
+        for (CommonShell shell : commonShells) idToEx.put(shell.getID(), shell);
+      }
+    });
   }
 
   /**
