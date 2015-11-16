@@ -12,7 +12,7 @@ import mitll.langtest.shared.CommonShell;
 /**
 * Created by GO22670 on 1/9/14.
 */
-class PrevNextList extends HorizontalPanel {
+public class PrevNextList extends HorizontalPanel {
   private final ExerciseController controller;
   private Button prev, next;
   private final ListInterface container;
