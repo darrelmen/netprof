@@ -398,7 +398,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
     exampleContainer.addItems(phone, wordExamples);
     List<TimeAndScore> timeSeries = phoneReport.getPhoneToAvgSorted().get(phone).getTimeSeries();
 
-    getByTime(timeSeries);
+//    getByTime(timeSeries);
 //    DateTimeFormat format = DateTimeFormat.getFormat("E MMM d yy h:mm a");
  //   for (TimeAndScore ts : timeSeries) logger.info("gotClickOnItem " + format.format(new Date(ts.getTimestamp())) + " " +ts.getScore());
     phonePlot.showData(getByTime(timeSeries),phone, isNarrow);
