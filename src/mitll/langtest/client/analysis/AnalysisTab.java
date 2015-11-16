@@ -33,7 +33,7 @@ public class AnalysisTab extends DivWidget {
    */
   public AnalysisTab(final LangTestDatabaseAsync service, final ExerciseController controller, final int userid,
                      final ShowTab showTab, String userChosenID, int minRecordings, DivWidget overallBottom) {
-    final AnalysisPlot analysisPlot = new AnalysisPlot(service, userid, userChosenID, minRecordings);
+    final AnalysisPlot analysisPlot = new AnalysisPlot(service, userid, userChosenID, minRecordings,controller.getSoundManager());
     add(analysisPlot);
     bottom = new HorizontalPanel();
 
