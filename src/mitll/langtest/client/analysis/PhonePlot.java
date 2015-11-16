@@ -21,17 +21,18 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/19/15.
  */
 public class PhonePlot extends DivWidget implements IsWidget {
-  private final Logger logger = Logger.getLogger("AnalysisPlot");
-
-  public static final int NARROW_WIDTH = 330;
-
+ // private final Logger logger = Logger.getLogger("AnalysisPlot");
+  private static final int NARROW_WIDTH = 330;
   private static final int CHART_HEIGHT = 340;
-
 //  private static final int Y_OFFSET_FOR_LEGEND = 60;
   private static final String PRONUNCIATION_SCORE = "Pronunciation Score";
 
   private final Map<Long, String> timeToId = new TreeMap<>();
   private final Map<String, CommonShell> idToEx = new TreeMap<>();
+
+  public PhonePlot() {
+    getElement().setId("PhonePlot");
+  }
 
   /**
    * @see PhoneContainer#gotClickOnItem(PhoneAndStats)
@@ -42,7 +43,6 @@ public class PhonePlot extends DivWidget implements IsWidget {
   public void showData(List<TimeAndScore> rawBestScores, String userChosenID, boolean isNarrow) {
     clear();
     int rawTotal = rawBestScores.size();//userPerformance.getRawTotal();
-
     if (rawBestScores.isEmpty()) {
       add(new Label("No Recordings yet to analyze. Please record yourself."));
     } else {
@@ -64,7 +64,7 @@ public class PhonePlot extends DivWidget implements IsWidget {
    * @param subtitle
    * @param seriesName
    * @return
-   * @see PhonePlot#AnalysisPlot(LangTestDatabaseAsync, long, String, int)
+   * @see #showData(List, String, boolean)
    */
   private Chart getChart(String title, String subtitle, String seriesName, List<TimeAndScore> rawBestScores, boolean narrow) {
     Chart chart = new Chart()
@@ -145,10 +145,9 @@ public class PhonePlot extends DivWidget implements IsWidget {
   private void addCumulativeAverage(List<TimeAndScore> yValuesForUser, Chart chart, String seriesTitle) {
     Number[][] data = new Number[yValuesForUser.size()][2];
 
-    // logger.info("got " + yValuesForUser.size());
     int i = 0;
     for (TimeAndScore ts : yValuesForUser) {
-      data[i][0] = ts.getTimestamp();
+      data[i][0]   = ts.getTimestamp();
       data[i++][1] = ts.getCumulativeAverage() * 100;
     }
 
@@ -177,11 +176,9 @@ public class PhonePlot extends DivWidget implements IsWidget {
   }
 
   private Number[][] getDataForTimeAndScore(List<TimeAndScore> yValuesForUser) {
-    Number[][] data;
-    int i;
-    data = new Number[yValuesForUser.size()][2];
+    Number[][] data = new Number[yValuesForUser.size()][2];
 
-    i = 0;
+    int i = 0;
     for (TimeAndScore ts : yValuesForUser) {
       data[i][0] = ts.getTimestamp();
       data[i++][1] = ts.getScore() * 100;
@@ -201,8 +198,7 @@ public class PhonePlot extends DivWidget implements IsWidget {
     chart.getXAxis()
         .setType(Axis.Type.DATE_TIME);
 
-    chart.setHeight(CHART_HEIGHT +
-        "px");
+    chart.setHeight(CHART_HEIGHT + "px");
   }
 
   private void setRawBestScores(List<TimeAndScore> rawBestScores) {
@@ -215,7 +211,7 @@ public class PhonePlot extends DivWidget implements IsWidget {
    * @return
    * @see WordContainer#getShell(String)
    */
-  public Map<String, CommonShell> getIdToEx() {
+  private Map<String, CommonShell> getIdToEx() {
     return idToEx;
   }
 }
