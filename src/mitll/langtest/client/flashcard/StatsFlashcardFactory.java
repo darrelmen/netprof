@@ -707,13 +707,12 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
     public synchronized void queueSong(String song) {
       //logger.info("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
       destroySound(); // if there's something playing, stop it!
-      createSound(song, endListener);
+      createSound(song, null);
     }
 
     public synchronized void clear() {
       //  logger.info("\t stop playing current sound -------  "+ System.currentTimeMillis());
       destroySound(); // if there's something playing, stop it!
-
     }
 
     // TODO : remove this empty listener
