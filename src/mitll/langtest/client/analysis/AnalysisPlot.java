@@ -55,6 +55,8 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
    * @see AnalysisTab#AnalysisTab
    */
   public AnalysisPlot(LangTestDatabaseAsync service, long userid, final String userChosenID, final int minRecordings, SoundManagerAPI soundManagerAPI) {
+    getElement().setId("AnalysisPlot");
+ //   addStyleName("floatLeft");
     this.service = service;
     this.userid = userid;
     this.soundFeedback = new MySoundFeedback(soundManagerAPI);
@@ -93,8 +95,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
 //        logger.info("getPerformanceForUser raw total " + rawTotal + " num " + rawBestScores.size());
           String subtitle = "Score and average (" + rawTotal + " items : avg score " + (int) v + " %)";
           String title = "<b>" + userChosenID + "</b>" + " pronunciation score (Drag to zoom in, click to hear)";
-          add(getChart(title,
-              subtitle, CUMULATIVE_AVERAGE, userPerformance));
+          add(getChart(title, subtitle, CUMULATIVE_AVERAGE, userPerformance));
         }
         setRawBestScores(rawBestScores);
       }
@@ -142,7 +143,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
    * @param subtitle
    * @param seriesName
    * @return
-   * @see AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long, String, int)
+   * @see AnalysisPlot#AnalysisPlot
    */
   private Chart getChart(String title, String subtitle, String seriesName, UserPerformance userPerformance) {
     Chart chart = new Chart()
