@@ -37,6 +37,7 @@ import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
+import org.apache.commons.collections.ArrayStack;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
@@ -676,6 +677,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Map<String, Collection<String>> objectObjectMap = Collections.emptyMap();
     return getExerciseIds(0, objectObjectMap, "", -1, userID, "", false, false, false, false);
   }*/
+
+  @Override
+  public List<CommonShell> getShells(List<String> ids) {
+    List<CommonShell> shells = new ArrayList<>();
+    for (String id : ids) shells.add(db.getCustomOrPredefExercise(id).getShell());
+    return shells;
+  }
 
   /**
    * Joins with annotation data when doing QC.
