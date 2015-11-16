@@ -494,7 +494,6 @@ public class PhoneDAO extends DAO {
 
       List<TimeAndScore> phoneTimeSeries = getPhoneTimeSeries(value);
 
-
       int size = phoneTimeSeries.size();
       List<TimeAndScore> initialSample = phoneTimeSeries.subList(0, Math.min(INITIAL_SAMPLE_PHONES, size));
       float total = 0;
