@@ -118,21 +118,21 @@ public class UserList extends ExerciseShell {
   public boolean contains(CommonUserExercise userExercise) {
     return getExercises().contains(userExercise);
   }
-  public boolean contains(String id) {
+/*  public boolean contains(String id) {
     for (CommonUserExercise ue : exercises) {
       if (id.equals(ue.getID())) {
         return true;
       }
     }
     return false;
-  }
+  }*/
 
   public boolean isPrivate() {
     return isPrivate;
   }
 
   /**
-   * @see mitll.langtest.client.custom.Navigation#selectTabGivenHistory(TabPanel, TabAndContent, TabAndContent, TabAndContent, UserList, String, boolean, boolean, boolean, boolean)
+   * @see mitll.langtest.client.custom.ListManager#selectTabGivenHistory
    * @see Navigation#showInitialState()
    * @see mitll.langtest.client.custom.UserListCallback#addUserListsToDisplay(Collection, Panel, Map)
    * @return
