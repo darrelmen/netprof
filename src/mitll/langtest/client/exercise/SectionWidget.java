@@ -18,6 +18,7 @@ public interface SectionWidget {
 
   void selectItem(Collection<String> section, boolean doToggle);
 
+  void clearAll();
   void enableAll();
 
   void addButton(Button b);
