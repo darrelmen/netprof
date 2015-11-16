@@ -12,6 +12,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.*;
@@ -29,19 +30,19 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
   private static final String DELETE = "Delete";
   private static final String REVIEWERS = "Reviewers";
 
-  private final ListManager navigation;
+  private final ListManager listManager;
   private final Panel contentPanel;
   private final Panel child;
   private final ScrollPanel listScrollPanel;
   private final boolean allLists;
   private final String instanceName;
-  final boolean onlyMyLists;
-  final UserManager userManager;
-  final boolean showIsPublic;
+  private final boolean onlyMyLists;
+  private final UserManager userManager;
+  private final boolean showIsPublic;
+  private final String optionalExercise;
 
   /**
-   * @see ListManager#viewLessons(com.google.gwt.user.client.ui.Panel, boolean, boolean, boolean)
-   * @see ListManager#viewReview(com.google.gwt.user.client.ui.Panel)
+   * @see ListManager#viewLessons
    * @param contentPanel
    * @param child
    * @param listScrollPanel
@@ -50,11 +51,20 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
    * @param allLists
    * @param userManager
    * @param showIsPublic
+   * @param optionalExercise
    */
-  public UserListCallback(ListManager navigation, Panel contentPanel, Panel child, ScrollPanel listScrollPanel, String instanceName,
-                          boolean onlyMyLists, boolean allLists, UserManager userManager, boolean showIsPublic) {
-    this.navigation = navigation;
+  public UserListCallback(ListManager listManager,
+                          Panel contentPanel,
+                          Panel child,
+                          ScrollPanel listScrollPanel,
+                          String instanceName,
+                          boolean onlyMyLists, boolean allLists,
+                          UserManager userManager,
+                          boolean showIsPublic,
+                          String optionalExercise) {
     logger.info("UserListCallback instance '" +instanceName + "' only my lists " + onlyMyLists);
+
+    this.listManager = listManager;
     this.contentPanel = contentPanel;
     this.child = child;
     this.listScrollPanel = listScrollPanel;
@@ -63,6 +73,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
     this.allLists = allLists;
     this.userManager = userManager;
     this.showIsPublic = showIsPublic;
+    this.optionalExercise = optionalExercise;
   }
 
   @Override
@@ -91,7 +102,21 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
       }
       child.add(listScrollPanel);
 
-      selectPreviousList(result);
+      if (!optionalExercise.isEmpty()) {
+        logger.info("onSuccess find list for " + optionalExercise);
+        for (UserList ul : result) {
+          for (CommonExercise ex : ul.getExercises()) {
+            if (ex.getID().equals(optionalExercise)) {
+              logger.info("ex " +optionalExercise + " is on " + ul);
+              listManager.showList(ul, contentPanel, instanceName, ex);
+              break;
+            }
+          }
+        }
+      }
+      else {
+        selectPreviousList(result);
+      }
     }
   }
 
@@ -100,15 +125,19 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
    * @param result
    */
   private void selectPreviousList(Collection<UserList> result) {
-    String clickedUserList = navigation.getStorage().getValue(Navigation.CLICKED_USER_LIST);
+    String clickedUserList = listManager.getStorage().getValue(Navigation.CLICKED_USER_LIST);
     if (clickedUserList != null && !clickedUserList.isEmpty()) {
       long id = Long.parseLong(clickedUserList);
-      for (UserList ul : result) {
-         if (ul.getUniqueID() == id) {
-           navigation.showList(ul, contentPanel, instanceName);
-           break;
-         }
-      }
+      showList(result, id);
+    }
+  }
+
+  private void showList(Collection<UserList> result, long id) {
+    for (UserList ul : result) {
+       if (ul.getUniqueID() == id) {
+         listManager.showList(ul, contentPanel, instanceName, null);
+         break;
+       }
     }
   }
 
@@ -175,7 +204,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
     widgets.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        navigation.showList(ul, contentPanel, instanceName);
+        listManager.showList(ul, contentPanel, instanceName, null);
       }
     });
     widgets.addMouseOverHandler(new MouseOverHandler() {
@@ -280,7 +309,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
       public void onClick(ClickEvent event) {
         event.stopPropagation();
         logger.info("For " + uniqueID + " value " + isPublic.getValue());
-        navigation.setPublic(uniqueID, isPublic.getValue());
+        listManager.setPublic(uniqueID, isPublic.getValue());
       }
     });
     return isPublic;
@@ -329,7 +358,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
       @Override
       public void onClick(final ClickEvent event) {
         event.stopPropagation();
-        navigation.deleteList(delete, ul, onlyMyLists);
+        listManager.deleteList(delete, ul, onlyMyLists);
       }
     });
     return delete;
