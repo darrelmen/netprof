@@ -80,10 +80,8 @@ public class SimplePagingContainer<T> implements RequiresResize {
   protected CellTable.Resources chooseResources() {
     CellTable.Resources o;
 
-
     if (controller.isRightAlignContent()) {   // so when we truncate long entries, the ... appears on the correct end
-      logger.info("simplePaging : chooseResources RTL - content");
-
+     // logger.info("simplePaging : chooseResources RTL - content");
       o = GWT.create(RTLTableResources.class);
     } else {
       o = GWT.create(TableResources.class);
