@@ -458,13 +458,6 @@ public abstract class ExerciseList
     getParent().setVisible(false);
   }
 
-  //@Override
-/*
-  public void show() {
-    getParent().setVisible(true);
-  }
-*/
-
   /**
    * If we're not already showing this item, ask there server for the exercise.
    * Does this by pushing a history item and then noticing the history item change.
