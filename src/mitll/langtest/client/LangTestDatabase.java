@@ -34,6 +34,8 @@ public interface LangTestDatabase extends RemoteService {
                                      boolean onlyUnrecordedByMe, boolean onlyExamples, boolean incorrectFirstOrder,
                                      boolean onlyWithAudioAnno);
 
+  List<CommonShell> getShells(List<String> ids);
+
   CommonExercise getExercise(String id, long userID, boolean isFlashcardReq);
 
   void markAudioDefect(AudioAttribute audioAttribute, String exid);
