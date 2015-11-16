@@ -80,7 +80,8 @@ public class HistoryExerciseList extends PagingExerciseList {
     String instanceSuffix = ";" + SelectionState.INSTANCE + "=" + getInstance();
     boolean hasItemID = id != null && id.length() > 0;
 
-    String s = (hasItemID ? super.getHistoryToken(search, id) + ";" : "search=" + search + ";") + unitAndChapterSelection + instanceSuffix;
+    String s = (hasItemID ? super.getHistoryToken(search, id) + ";" : "search=" + search + ";") +
+        unitAndChapterSelection + instanceSuffix;
  //   logger.info("getHistoryToken '" + s + "'");
     return s;
   }
