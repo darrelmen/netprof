@@ -5,14 +5,22 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
+import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.sound.SoundFeedback;
+import mitll.langtest.client.sound.SoundManagerAPI;
+import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.analysis.TimeAndScore;
 import mitll.langtest.shared.analysis.UserPerformance;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.moxieapps.gwt.highcharts.client.*;
+import org.moxieapps.gwt.highcharts.client.events.SeriesClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -21,31 +29,38 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/19/15.
  */
 public class AnalysisPlot extends DivWidget implements IsWidget {
-  public static final String I_PAD_I_PHONE = "iPad/iPhone";
-  public static final String VOCAB_PRACTICE = "Vocab Practice";
-  public static final String LEARN = "Learn";
-  public static final String CUMULATIVE_AVERAGE = "Average";
+  private static final String WAV = ".wav";
+  private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
+  private static final String I_PAD_I_PHONE = "iPad/iPhone";
+  private static final String VOCAB_PRACTICE = "Vocab Practice";
+  private static final String LEARN = "Learn";
+  private static final String CUMULATIVE_AVERAGE = "Average";
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
   private static final int CHART_HEIGHT = 340;
 
   private static final int Y_OFFSET_FOR_LEGEND = 60;
-  // private static final String PRONUNCIATION_SCORE = "Pronunciation Score";
 
   private final Map<Long, String> timeToId = new TreeMap<>();
   private final Map<String, CommonShell> idToEx = new TreeMap<>();
+  private final long userid;
+  private final LangTestDatabaseAsync service;
+  private final MySoundFeedback soundFeedback;
 
   /**
    * @param service
-   * @param id
+   * @param userid
    * @param userChosenID
    * @param minRecordings
    * @see AnalysisTab#AnalysisTab
    */
-  public AnalysisPlot(LangTestDatabaseAsync service, long id, final String userChosenID, final int minRecordings) {
+  public AnalysisPlot(LangTestDatabaseAsync service, long userid, final String userChosenID, final int minRecordings, SoundManagerAPI soundManagerAPI) {
+    this.service = service;
+    this.userid = userid;
+    this.soundFeedback = new MySoundFeedback(soundManagerAPI);
     //setHeight("350px");
     service.getExerciseIds(1, new HashMap<String, Collection<String>>(), "", -1,
-        (int) id, "", false, false, false, false, new AsyncCallback<ExerciseListWrapper>() {
+        (int) userid, "", false, false, false, false, new AsyncCallback<ExerciseListWrapper>() {
           @Override
           public void onFailure(Throwable throwable) {
             logger.warning("\n\n\n-> getExerciseIds " + throwable);
@@ -53,11 +68,14 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
 
           @Override
           public void onSuccess(ExerciseListWrapper exerciseListWrapper) {
-            for (CommonShell shell : exerciseListWrapper.getExercises()) getIdToEx().put(shell.getID(), shell);
+            for (CommonShell shell : exerciseListWrapper.getExercises()) {
+              getIdToEx().put(shell.getID(), shell);
+
+            }
           }
         });
 
-    service.getPerformanceForUser(id, minRecordings, new AsyncCallback<UserPerformance>() {
+    service.getPerformanceForUser(userid, minRecordings, new AsyncCallback<UserPerformance>() {
       @Override
       public void onFailure(Throwable throwable) {
         logger.warning("\n\n\n-> getPerformanceForUser " + throwable);
@@ -75,13 +93,49 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
         } else {
 //        logger.info("getPerformanceForUser raw total " + rawTotal + " num " + rawBestScores.size());
           String subtitle = "Score and average (" + rawTotal + " items : avg score " + (int) v + " %)";
-          String title = "<b>" + userChosenID + "</b>" + " pronunciation score (Drag to zoom in)";
+          String title = "<b>" + userChosenID + "</b>" + " pronunciation score (Drag to zoom in, click to hear)";
           add(getChart(title,
               subtitle, CUMULATIVE_AVERAGE, userPerformance));
         }
         setRawBestScores(rawBestScores);
       }
     });
+  }
+
+  public class MySoundFeedback extends SoundFeedback {
+    public MySoundFeedback(SoundManagerAPI soundManager) {
+      super(soundManager);
+    }
+
+    public synchronized void queueSong(String song, SoundFeedback.EndListener endListener) {
+      //logger.info("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
+      destroySound(); // if there's something playing, stop it!
+      createSound(song, endListener);
+    }
+
+    public synchronized void queueSong(String song) {
+      //logger.info("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
+      destroySound(); // if there's something playing, stop it!
+      createSound(song, null);
+    }
+
+    public synchronized void clear() {
+      //  logger.info("\t stop playing current sound -------  "+ System.currentTimeMillis());
+      destroySound(); // if there's something playing, stop it!
+    }
+
+    // TODO : remove this empty listener
+/*    private final SoundFeedback.EndListener endListener = new SoundFeedback.EndListener() {
+      @Override
+      public void songStarted() {
+        //logger.info("song started --------- "+ System.currentTimeMillis());
+      }
+
+      @Override
+      public void songEnded() {
+        //logger.info("song ended   --------- " + System.currentTimeMillis());
+      }
+    };*/
   }
 
   /**
@@ -122,7 +176,21 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
             .setHoverStateMarker(new Marker()
                 .setEnabled(false)
             ))
-        .setToolTip(getToolTip());
+        .setToolTip(getToolTip())
+        .setSeriesPlotOptions(new SeriesPlotOptions()
+            .setSeriesClickEventHandler(new SeriesClickEventHandler() {
+                                          public boolean onClick(SeriesClickEvent clickEvent) {
+                                            long nearestXAsLong = clickEvent.getNearestXAsLong();
+                                            String s = timeToId.get(nearestXAsLong);
+                                            if (s != null) {
+                                              playLast(s);
+                                            }
+                                            return true;
+                                          }
+                                        }
+            )
+        );
+    ;
 
     Highcharts.setOptions(
         new Highcharts.Options().setGlobal(
@@ -138,6 +206,32 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
 
     configureChart(chart, subtitle);
     return chart;
+  }
+
+  public void playLast(String id) {
+    service.getExercise(id, userid, false, new AsyncCallback<CommonExercise>() {
+      @Override
+      public void onFailure(Throwable throwable) {
+      }
+
+      @Override
+      public void onSuccess(CommonExercise commonExercise) {
+        List<CorrectAndScore> scores = commonExercise.getScores();
+        CorrectAndScore correctAndScore = scores.get(scores.size() - 1);
+        soundFeedback.queueSong(getPath(correctAndScore.getPath()));
+      }
+    });
+    //}
+  }
+
+  private String getPath(String path) {
+    path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
+    path = ensureForwardSlashes(path);
+    return path;
+  }
+
+  private String ensureForwardSlashes(String wavPath) {
+    return wavPath.replaceAll("\\\\", "/");
   }
 
   private ToolTip getToolTip() {
@@ -161,7 +255,12 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
                         "<br/>" + english
                     : "")
                 +
-                "<br/>Score = " + toolTipData.getYAsLong() + "%";
+                "<br/>Score = " + toolTipData.getYAsLong() + "%" +
+                (showEx ?
+                    "<br/>" + "<b>Click to hear</b>"
+                    : "")
+
+                ;
           }
         });
   }
@@ -210,11 +309,10 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
 
     if (!iPadData.isEmpty()) {
       Number[][] data;
-      Series series;
       data = getDataForTimeAndScore(iPadData);
 
       String iPadName = I_PAD_I_PHONE;// + PRONUNCIATION_SCORE;
-      series = chart.createSeries()
+      Series series = chart.createSeries()
           .setName(iPadName)
           .setPoints(data)
           .setOption("color", "#00B800");
@@ -231,10 +329,8 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
       data = getDataForTimeAndScore(browserData);
 
       String prefix = isAVP ? VOCAB_PRACTICE : LEARN;
-      //String browserName = prefix + PRONUNCIATION_SCORE;
 
-      Series series;
-      series = chart.createSeries()
+      Series series = chart.createSeries()
           .setName(prefix)
           .setPoints(data);
 
@@ -243,14 +339,13 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
   }
 
   private Number[][] getDataForTimeAndScore(List<TimeAndScore> yValuesForUser) {
-    Number[][] data;
-    int i;
-    data = new Number[yValuesForUser.size()][2];
+    Number[][] data = new Number[yValuesForUser.size()][2];
 
-    i = 0;
+    int i = 0;
     for (TimeAndScore ts : yValuesForUser) {
       data[i][0] = ts.getTimestamp();
       data[i++][1] = ts.getScore() * 100;
+      //  timeToId.put(ts.getTimestamp(),ts.getId());
     }
     return data;
   }
@@ -261,14 +356,15 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
    * @see #getChart
    */
   private void configureChart(Chart chart, String title) {
-    chart.getYAxis().setAxisTitleText(title)
-        .setMin(0).setMax(100);
+    chart.getYAxis()
+        .setAxisTitleText(title)
+        .setMin(0)
+        .setMax(100);
 
     chart.getXAxis()
         .setType(Axis.Type.DATE_TIME);
 
-    chart.setHeight(CHART_HEIGHT +
-        "px");
+    chart.setHeight(CHART_HEIGHT + "px");
   }
 
   private void setRawBestScores(List<TimeAndScore> rawBestScores) {
