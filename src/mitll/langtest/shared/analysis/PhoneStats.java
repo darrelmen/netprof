@@ -22,23 +22,12 @@ public class PhoneStats implements /*Comparable<PhoneStats>,*/ Serializable {
    * @see mitll.langtest.server.database.PhoneDAO#getPhoneReport(Map, Map, float, float)
    */
   public PhoneStats(int count, int initial, int current,
-                    //long timestamp,
                     List<TimeAndScore> timeSeries) {
     this.count = count;
     this.initial = initial;
     this.current = current;
-    //this.timestamp = timestamp;
     this.timeSeries = timeSeries;
   }
-
-//  @Override
-//  public int compareTo(PhoneStats o) {
-//    return Long.valueOf(timestamp).compareTo(o.timestamp);
-//  }
-//
-//  public long getTimestamp() {
-//    return timestamp;
-//  }
 
   public int getInitial() {
     return initial;
@@ -47,6 +36,8 @@ public class PhoneStats implements /*Comparable<PhoneStats>,*/ Serializable {
   public int getCurrent() {
     return current;
   }
+
+  public int getDiff() { return current - initial; }
 
   public int getCount() {
     return count;
