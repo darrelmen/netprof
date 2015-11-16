@@ -212,6 +212,10 @@ class ButtonGroupSectionWidget implements SectionWidget {
     return enabledPath;
   }
 
+  /**
+   * @see #selectItem(Collection)
+   * @param sections
+   */
   private void clearExistingSelections(Collection<String> sections) {
     Collection<Button> toSelectSet = buttons.getButtonsByName(sections);
     for (Button unselectCandidate : buttons.getButtons()) {
@@ -286,9 +290,8 @@ class ButtonGroupSectionWidget implements SectionWidget {
    *
    * @see #selectItem(java.util.Collection)
    */
-  private void clearAll() {
+  public void clearAll() {
     //System.out.println("clearAll : ---------> disable clear button for type " + type + " checking " + buttons + " buttons <----------- ");
-
     // manager the selected set
     clearSelection();
     currentSelection = null;
