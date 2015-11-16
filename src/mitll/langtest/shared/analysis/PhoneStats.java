@@ -12,6 +12,7 @@ public class PhoneStats implements /*Comparable<PhoneStats>,*/ Serializable {
   private int current;
   private int count;
   private List<TimeAndScore> timeSeries;
+  private List<PhoneSession> sessions;
 
   public PhoneStats() {
   }
@@ -48,6 +49,14 @@ public class PhoneStats implements /*Comparable<PhoneStats>,*/ Serializable {
   }
 
   public String toString() {
-    return "count " + count + " initial " + initial + " current " +current;
+    return "count " + count + " initial " + initial + " current " +current + " num sessions " + getSessions().size();
+  }
+
+  public void setSessions(List<PhoneSession> sessions) {
+    this.sessions = sessions;
+  }
+
+  public List<PhoneSession> getSessions() {
+    return sessions;
   }
 }
