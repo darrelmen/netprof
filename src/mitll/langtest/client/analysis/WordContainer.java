@@ -297,8 +297,8 @@ class WordContainer extends SimplePagingContainer<WordScore> {
     /**
      * The styles applied to the table.
      */
-    interface TableStyle extends CellTable.Style {
-    }
+//    interface TableStyle extends CellTable.Style {
+//    }
 
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
