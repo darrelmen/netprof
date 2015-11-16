@@ -34,8 +34,9 @@ import java.util.logging.Logger;
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExerciseList extends VerticalPanel implements ListInterface, ProvidesResize,
-    ValueChangeHandler<String> {
+public abstract class ExerciseList
+    extends VerticalPanel
+    implements ListInterface, ProvidesResize, ValueChangeHandler<String> {
   private final Logger logger = Logger.getLogger("ExerciseList");
 
   private static final Map<String, Collection<String>> TYPE_TO_SELECTION = new HashMap<String, Collection<String>>();
@@ -93,8 +94,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     }
   }
 
-  @Override
-  public void removeHistoryListener() {
+ // @Override
+ private void removeHistoryListener() {
     if (handlerRegistration != null) {
       handlerRegistration.removeHandler();
       handlerRegistration = null;
@@ -267,9 +268,9 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     return instance;
   }
 
-  public void setInstance(String instance) {
+/*  public void setInstance(String instance) {
     this.instance = instance;
-  }
+  }*/
 
   @Override
   public boolean isPendingReq() {
@@ -369,11 +370,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see mitll.langtest.client.list.ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
   protected void gotEmptyExerciseList() {}
-
-  public void rememberAndLoadFirst(List<CommonShell> exercises) {
-//    logger.info(new Date() + " rememberAndLoadFirst : exercises " + exercises.size());
-    rememberAndLoadFirst(exercises, null, "All");
-  }
+  public void rememberAndLoadFirst(List<CommonShell> exercises) { rememberAndLoadFirst(exercises, null, "All");  }
 
   /**
    * Calls remember exercises -- interacts with flashcard mode and the shuffle option there.
@@ -391,9 +388,11 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    * @see #rememberAndLoadFirst(java.util.List)
    */
-  private void rememberAndLoadFirst(List<CommonShell> exercises, CommonExercise firstExercise, String selectionID) {
+  public void rememberAndLoadFirst(List<CommonShell> exercises, CommonExercise firstExercise,
+                                    String selectionID) {
     logger.info("ExerciseList : rememberAndLoadFirst instance '" + getInstance() +
-        "' remembering " + exercises.size() + " exercises, first = " + firstExercise);
+        "' remembering " + exercises.size() + " exercises, " + selectionID +
+        " first = " + firstExercise);
 
     exercises = rememberExercises(exercises);
     for (ListChangeListener<CommonShell> listener : listeners) {
@@ -409,18 +408,24 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
       }
     }
     if (firstExercise != null) {
-      CommonShell firstExerciseShell = findFirstExercise();
-      if (firstExerciseShell.getID().equals(firstExercise.getID())) {
+//      CommonShell firstExerciseShell = findFirstExercise();
+//      if (firstExerciseShell.getID().equals(firstExercise.getID())) {
         logger.info("ExerciseList : rememberAndLoadFirst using first = " + firstExercise);
-        useExercise(firstExercise);   // allows us to skip another round trip with the server to ask for the first exercise
-      } else {
-        logger.info("ExerciseList : rememberAndLoadFirst finding first...");
-        loadFirstExercise();
-      }
+
+      pushFirstSelection(firstExercise.getID());
+   //   useExercise(firstExercise);   // allows us to skip another round trip with the server to ask for the first exercise
+//      } else {
+//        logger.info("ExerciseList : rememberAndLoadFirst finding first - " +
+//            firstExerciseShell.getID() + " != " +firstExercise.getID());
+//        loadFirstExercise();
+//      }
     } else {
       loadFirstExercise();
     }
+    listLoaded();
   }
+
+  protected void listLoaded() {}
 
   boolean isStaleResponse(ExerciseListWrapper result) {
     return result.getReqID() < lastReqID;
@@ -453,10 +458,12 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     getParent().setVisible(false);
   }
 
-  @Override
+  //@Override
+/*
   public void show() {
     getParent().setVisible(true);
   }
+*/
 
   /**
    * If we're not already showing this item, ask there server for the exercise.
@@ -488,7 +495,7 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
 
   protected abstract CommonShell getFirst();
 
-  boolean hasExercise(String id) {
+  protected boolean hasExercise(String id) {
     return byID(id) != null;
   }
 
@@ -733,8 +740,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
   /**
    * @see #removeExercise
    */
-  @Override
-  public void removeCurrentExercise() {
+  //@Override
+  void removeCurrentExercise() {
     Widget current = innerContainer.getWidget();
     if (current != null) {
       if (!innerContainer.remove(current)) {
@@ -843,8 +850,8 @@ public abstract class ExerciseList extends VerticalPanel implements ListInterfac
     leftColumn.getElement().getStyle().setPaddingRight(10, Style.Unit.PX);
   }
 
-  @Override
-  public Widget getWidget() {
+ // @Override
+  private Widget getWidget() {
     return this;
   }
 
