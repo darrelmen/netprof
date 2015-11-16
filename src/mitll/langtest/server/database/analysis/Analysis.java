@@ -6,7 +6,9 @@ import mitll.langtest.server.database.*;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.apache.log4j.Logger;
 
@@ -27,6 +29,9 @@ public class Analysis extends DAO {
   private final ParseResultJson parseResultJson;
   private final PhoneDAO phoneDAO;
   private Map<String, String> exToRef;
+  private static final int MINUTE = 60 * 1000 * 1000;
+  private static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
+
 
   /**
    * @param database
@@ -153,7 +158,6 @@ public class Analysis extends DAO {
         " order by " + Database.EXID + ", " + Database.TIME;
   }
 
-
   /**
    * @param id
    * @param minRecordings
@@ -256,8 +260,8 @@ public class Analysis extends DAO {
       if (DEBUG) logger.info("getPhonesForUser report phonesForUser " + phonesForUser);
 
       for (Map.Entry<String, List<WordAndScore>> pair : phonesForUser.entrySet()) {
-        List<WordAndScore> value = pair.getValue();
         String phone = pair.getKey();
+        List<WordAndScore> value = pair.getValue();
         if (DEBUG) logger.info(phone + " = " + value.size() + " first " + value.get(0));
         List<WordAndScore> subset = new ArrayList<>();
 
@@ -278,6 +282,12 @@ public class Analysis extends DAO {
 
       if (DEBUG)
         logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - start) + " millis to get " + phonesForUser.size() + " phones");
+
+      Map<String, PhoneStats> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
+      for (PhoneStats phoneStat : phoneToAvgSorted.values()) {
+        List<PhoneSession> partition = partition(phoneStat.getTimeSeries());
+        phoneStat.setSessions(partition);
+      }
 
       return phoneReport;
     } catch (Exception ee) {
@@ -496,6 +506,33 @@ public class Analysis extends DAO {
     logger.info("getWordScore out of " + bestScores.size() + " skipped " + skipped);
 
     return results;
+  }
+
+  private List<PhoneSession> partition(List<TimeAndScore> answersForUser) {
+    PhoneSession s = null;
+    long lastTimestamp = 0;
+
+    List<PhoneSession> sessions = new ArrayList<PhoneSession>();
+
+    int id = 0;
+    for (TimeAndScore r : answersForUser) {
+      //logger.debug("got " + r);
+      String id1 = r.getId();
+      long timestamp = r.getTimestamp();
+      if (s == null || timestamp - lastTimestamp > SESSION_GAP) {
+        sessions.add(s = new PhoneSession());
+      }
+
+      s.addValue(r.getScore(),r.getTimestamp());
+
+    }
+    for (PhoneSession session : sessions) session.remember();
+    if (sessions.isEmpty() && !answersForUser.isEmpty()) {
+      logger.error("huh? no sessions from " + answersForUser.size());
+    }
+//    logger.debug("\tpartitionIntoSessions2 made " +sessions.size() + " from " + answersForUser.size() + " answers");
+
+    return sessions;
   }
 
   public void setExToRef(Map<String, String> exToRef) {
