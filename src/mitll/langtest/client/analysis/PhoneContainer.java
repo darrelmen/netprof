@@ -34,19 +34,20 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
-  public static final int TABLE_WIDTH = 295;
-  public static final int SCORE_COL_WIDTH = 60;
-  public static final String SOUND = "Sound";
-  public static final String SCORE = "Initial";
-  public static final String COUNT_COL_HEADER = "#";
-  public static final String CURR = "Curr.";
-  public static final String DIFF_COL_HEADER = "+/-";
-  public static final int COUNT_COL_WIDTH = 45;
+  private static final int TABLE_WIDTH = 295;
+  private static final int SCORE_COL_WIDTH = 60;
+  private static final String SOUND = "Sound";
+  private static final String SCORE = "Initial";
+  private static final String COUNT_COL_HEADER = "#";
+  private static final String CURR = "Curr.";
+  private static final String DIFF_COL_HEADER = "+/-";
+  private static final int COUNT_COL_WIDTH = 45;
+  private static final String TOOLTIP = "Click to see examples and scores over time";//"Click on an item to review.";
   private final Logger logger = Logger.getLogger("PhoneContainer");
   private static final int SOUND_WIDTH = 75;
-  private PhoneExampleContainer exampleContainer;
+  private final PhoneExampleContainer exampleContainer;
   private final PhonePlot phonePlot;
-  boolean isNarrow;
+  private final boolean isNarrow;
 
   /**
    * @see AnalysisTab#getPhoneReport(LangTestDatabaseAsync, ExerciseController, int, Panel, AnalysisPlot, ShowTab, int)
@@ -368,7 +369,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
     table.setWidth("100%", true);
 
 
-    new TooltipHelper().createAddTooltip(table, "Click on an item to review.", Placement.RIGHT);
+    new TooltipHelper().createAddTooltip(table, TOOLTIP, Placement.RIGHT);
   }
 
   private Column<PhoneAndStats, SafeHtml> getItemColumn() {
@@ -473,7 +474,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
     };
   }
 
-  public String getScoreMarkup(int score) {
+  private String getScoreMarkup(int score) {
     return "<span " +  "style='" +  "margin-left:10px;" + "'" + ">" + score + "</span>";
   }
 
@@ -493,6 +494,9 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
     };
   }
 
+  /**
+   * MUST BE PUBLIC
+   */
   public interface LocalTableResources extends CellTable.Resources {
     /**
      * The styles applied to the table.
