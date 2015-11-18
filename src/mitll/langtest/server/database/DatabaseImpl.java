@@ -3,6 +3,7 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.analysis.Analysis;
@@ -1257,10 +1258,15 @@ public class DatabaseImpl implements Database {
     recordWordAndPhoneInfo(resultID, asrScoreForAudio);
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerDecoding(String, CommonExercise, int, int, int, String, boolean, boolean, boolean, String, File, AudioCheck.ValidityAndDur, boolean, String, String, boolean, boolean)
+   * @param answer
+   * @param answerID
+   */
   public void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
     PretestScore pretestScore = answer.getPretestScore();
     if (pretestScore == null) {
-      logger.error("huh? pretest score is null for " + answer + " and " + answerID);
+      logger.debug("huh? pretest score is null for " + answer + " and " + answerID);
     }
     recordWordAndPhoneInfo(answerID, pretestScore);
   }
