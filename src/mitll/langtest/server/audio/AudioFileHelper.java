@@ -33,7 +33,7 @@ import java.util.*;
 public class AudioFileHelper implements CollationSort, AutoCRTScoring {
   private static final Logger logger = Logger.getLogger(AudioFileHelper.class);
   private static final String POSTED_AUDIO = "postedAudio";
-  //public static final String SIL = "sil";
+  private static final int MIN_WARN_DUR = 30;
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -172,7 +172,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
     AudioCheck.ValidityAndDur validity = new AudioConversion(serverProps).convertBase64ToAudioFiles(base64EncodedString, file, isRefRecording);
     long now = System.currentTimeMillis();
     long diff = now - then;
-    if (diff > 20) {
+    if (diff > MIN_WARN_DUR) {
       logger.debug("took " + diff + " millis to write wav file " + validity.durationInMillis + " millis long");
     }
     boolean isValid = validity.getValidity() == AudioAnswer.Validity.OK || (serverProps.isQuietAudioOK() && validity.getValidity() == AudioAnswer.Validity.TOO_QUIET);
