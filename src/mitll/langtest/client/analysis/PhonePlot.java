@@ -136,6 +136,11 @@ public class PhonePlot extends DivWidget implements IsWidget {
         });
   }
 
+  private DateTimeFormat format = DateTimeFormat.getFormat("E MMM d yy h:mm a");
+  private DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
+  DateTimeFormat shortFormat = DateTimeFormat.getFormat("MMM d, yy");
+  Date now = new Date();
+
   private ToolTip getToolTip2() {
     return new ToolTip()
         .setFormatter(new ToolTipFormatter() {
@@ -143,26 +148,32 @@ public class PhonePlot extends DivWidget implements IsWidget {
             try {
               PhoneSession session = timeToSession.get(toolTipData.getXAsLong());
               String seriesName1 = toolTipData.getSeriesName();
+
+              Date date = new Date(toolTipData.getXAsLong());
+
+              String nowFormat = shortFormat.format(now);
+              String shortForDate = shortFormat.format(date);
+
+              DateTimeFormat toUse = (nowFormat.substring(nowFormat.length() - 2).equals(shortForDate.substring(shortForDate.length() - 2))) ? noYearFormat : format;
+              String dateToShow = toUse.format(date);
+
+
               if (seriesName1.equals(AVERAGE)) {
                 return "<b>" + seriesName1 + "</b>" +
                     "<br/>" +
-                    DateTimeFormat.getFormat("E MMM d yy h:mm a").format(
-                        new Date(toolTipData.getXAsLong())
-                    )
+                    dateToShow
                     +
                     "<br/>Mean = " + toolTipData.getYAsLong() + "%";
               } else {
                 Point point = toolTipData.getPoint();
-
-                String s = session == null ? "" : (" n = " + session.getCount());
-                String range = point == null ? "" : (", range " + point.getLow() + "-" + point.getHigh());
+                String s = /*session == null ? "" : */(" n = " + session.getCount());
+                String range = /*point == null ? "" :*/ ("range " + point.getLow() + "-" + point.getHigh());
                 String s1 = "<b>" + seriesName1 + "</b>" +
                     "<br/>" +
-                    DateTimeFormat.getFormat("E MMM d yy h:mm a").format(
-                        new Date(toolTipData.getXAsLong())
-                    )
+                    dateToShow
                     +
-                    "<br/>Mean = " + toolTipData.getYAsLong() + "%" +
+                    "<br/>" +
+                    //"Mean = " + toolTipData.getYAsLong() + "%" +
                     range + s;
                 return s1;
               }
