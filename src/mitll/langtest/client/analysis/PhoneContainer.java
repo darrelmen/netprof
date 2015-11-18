@@ -144,8 +144,12 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
      // for (WordAndScore ws : wordExamples) logger.info("showExamplesForSelectedSound got " + ws.getScore() + " " + ws.getWord());
       //  logger.info("showExamplesForSelectedSound adding " + phone + " num examples " + wordExamples.size());
       exampleContainer.addItems(phone, wordExamples);
-      List<TimeAndScore> timeSeries = phoneReport.getPhoneToAvgSorted().get(phone).getTimeSeries();
-      phonePlot.showData(getByTime(timeSeries),phone, isNarrow);
+      PhoneStats stats = phoneReport.getPhoneToAvgSorted().get(phone);
+      List<TimeAndScore> timeSeries = stats.getTimeSeries();
+      List<TimeAndScore> byTime = getByTime(timeSeries);
+//      phonePlot.showData(byTime,phone, isNarrow);
+      phonePlot.showData2(stats.getSessions(),phone, isNarrow);
+
     }
   }
 
@@ -396,12 +400,15 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
     List<WordAndScore> wordExamples = phoneReport.getWordExamples(phone);
    // for (WordAndScore ws : wordExamples) logger.info("gotClickOnItem got " + ws.getScore() + " " + ws.getWord());
     exampleContainer.addItems(phone, wordExamples);
-    List<TimeAndScore> timeSeries = phoneReport.getPhoneToAvgSorted().get(phone).getTimeSeries();
+    PhoneStats stats = phoneReport.getPhoneToAvgSorted().get(phone);
+    List<TimeAndScore> timeSeries = stats.getTimeSeries();
 
 //    getByTime(timeSeries);
 //    DateTimeFormat format = DateTimeFormat.getFormat("E MMM d yy h:mm a");
  //   for (TimeAndScore ts : timeSeries) logger.info("gotClickOnItem " + format.format(new Date(ts.getTimestamp())) + " " +ts.getScore());
-    phonePlot.showData(getByTime(timeSeries),phone, isNarrow);
+    List<TimeAndScore> byTime = getByTime(timeSeries);
+  //  phonePlot.showData(byTime,phone, isNarrow);
+    phonePlot.showData2(stats.getSessions(),phone, isNarrow);
   }
 
   private List<TimeAndScore> getByTime(List<TimeAndScore> timeSeries) {
