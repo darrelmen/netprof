@@ -18,16 +18,17 @@ public class PathWriter {
 
   /**
    * Skips copying files called FILE_MISSING {@link mitll.langtest.server.audio.AudioConversion#FILE_MISSING}
-   * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
+   *
    * @param pathHelper
    * @param fileRef
    * @param destFileName
    * @param overwrite
    * @param id
-   * @param title mark the mp3 meta data with this title
+   * @param title            mark the mp3 meta data with this title
    * @param serverProperties
    * @return path of file under bestAudio directory
+   * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
    */
   public String getPermanentAudioPath(PathHelper pathHelper, File fileRef, String destFileName, boolean overwrite,
                                       String id, String title, ServerProperties serverProperties) {
@@ -45,16 +46,13 @@ public class PathWriter {
     //logger.debug("getPermanentAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +s);
     if (!fileRef.equals(destination) && !destFileName.equals(AudioConversion.FILE_MISSING)) {
       new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
-      logger.debug("getPermanentAudioPath : normalizing levels for " + destination.getAbsolutePath());
-
+      //logger.debug("getPermanentAudioPath : normalizing levels for " + destination.getAbsolutePath());
       new AudioConversion(serverProperties).normalizeLevels(destination);
     } else {
       if (FileUtils.size(destination.getAbsolutePath()) == 0) {
         logger.error("\ngetRefAudioPath : huh? " + destination + " is empty???");
       }
-
       logger.debug("getPermanentAudioPath : *not* normalizing levels for " + destination.getAbsolutePath());
-
     }
     ensureMP3(pathHelper, s, overwrite, title, serverProperties);
     return s;
@@ -68,12 +66,11 @@ public class PathWriter {
       if (!audioConversion.exists(wavFile, parent)) {
         parent = pathHelper.getConfigDir();
       }
-      if (!audioConversion.exists(wavFile,parent)) {
-        logger.error("can't find " + wavFile + " under "  +parent);
+      if (!audioConversion.exists(wavFile, parent)) {
+        logger.error("can't find " + wavFile + " under " + parent);
       }
       audioConversion.ensureWriteMP3(wavFile, parent, overwrite, title);
-    }
-    else {
+    } else {
       logger.warn("not converting wav to mp3???\n\n\n");
     }
   }
