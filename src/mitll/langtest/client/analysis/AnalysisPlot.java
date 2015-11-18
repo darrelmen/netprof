@@ -56,7 +56,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
    */
   public AnalysisPlot(LangTestDatabaseAsync service, long userid, final String userChosenID, final int minRecordings, SoundManagerAPI soundManagerAPI) {
     getElement().setId("AnalysisPlot");
- //   addStyleName("floatLeft");
+    //   addStyleName("floatLeft");
     this.service = service;
     this.userid = userid;
     this.soundFeedback = new MySoundFeedback(soundManagerAPI);
@@ -274,6 +274,9 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
   }
 
   private DateTimeFormat format = DateTimeFormat.getFormat("E MMM d yy h:mm a");
+  private DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
+  DateTimeFormat shortFormat = DateTimeFormat.getFormat("MMM d, yy");
+  Date now = new Date();
 
   public String getTooltip(ToolTipData toolTipData, String s, CommonShell commonShell) {
     String foreignLanguage = commonShell == null ? "" : commonShell.getForeignLanguage();
@@ -283,23 +286,31 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
     boolean showEx = (!seriesName1.contains(CUMULATIVE_AVERAGE));
     String englishTool = "<br/>" + english;
     if (english.equals("N/A")) englishTool = "";
+
+    Date date = new Date(toolTipData.getXAsLong());
+
+    // this year?
+    String nowFormat = shortFormat.format(now);
+    String shortForDate = shortFormat.format(date);
+
+    DateTimeFormat toUse = (nowFormat.substring(nowFormat.length() - 2).equals(shortForDate.substring(shortForDate.length() - 2))) ? noYearFormat : format;
+    String dateToShow = toUse.format(date);
+
     return
         "<b>" + seriesName1 + "</b>" +
-        "<br/>" +
-        format.format(
-            new Date(toolTipData.getXAsLong())
-        ) +
-        (showEx ?
-            "<br/>Exercise " + s +
-                "<br/>" +
-                "<span style='font-size:200%'>" + foreignLanguage + "</span>"+
-                englishTool
-            : "")
-        +
-        "<br/>Score <b>" + toolTipData.getYAsLong() + "</b>%" +
-        (showEx ?
-            "<br/>" + "<b>Click to hear</b>"
-            : "")
+            "<br/>" +
+            dateToShow +
+            (showEx ?
+                "<br/>Exercise " + s +
+                    "<br/>" +
+                    "<span style='font-size:200%'>" + foreignLanguage + "</span>" +
+                    englishTool
+                : "")
+            +
+            "<br/>Score <b>" + toolTipData.getYAsLong() + "</b>%" +
+            (showEx ?
+                "<br/>" + "<b>Click to hear</b>"
+                : "")
 
         ;
   }
