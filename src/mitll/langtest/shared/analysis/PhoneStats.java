@@ -7,7 +7,7 @@ import java.util.Map;
 /**
  * Created by go22670 on 10/26/15.
  */
-public class PhoneStats implements /*Comparable<PhoneStats>,*/ Serializable {
+public class PhoneStats implements Serializable {
   private int initial;
   private int current;
   private int count;
@@ -49,7 +49,7 @@ public class PhoneStats implements /*Comparable<PhoneStats>,*/ Serializable {
   }
 
   public String toString() {
-    return "count " + count + " initial " + initial + " current " +current + " num sessions " + getSessions().size();
+    return "count " + count + " initial " + initial + " current " +current + " num sessions " + getSessions().size() + " : " + getSessions();
   }
 
   public void setSessions(List<PhoneSession> sessions) {
