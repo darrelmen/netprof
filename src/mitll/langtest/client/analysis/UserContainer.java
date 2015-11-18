@@ -34,13 +34,15 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class UserContainer extends SimplePagingContainer<UserInfo> {
+  public static final String SIGNED_UP1 = "Started";//Signed Up";
+
   private final Logger logger = Logger.getLogger("UserContainer");
 
   private static final int MAX_LENGTH_ID = 13;
 
   private static final int ID_WIDTH = 130;
   public static final int TABLE_WIDTH = 420;
-  public static final int SIGNED_UP = 95;
+  public static final int SIGNED_UP = 90;
   public static final String CURRENT = "Curr.";
   public static final int CURRENT_WIDTH = 60;
   public static final int DIFF_WIDTH = 55;
@@ -282,7 +284,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
 
     Column<UserInfo, SafeHtml> dateCol = getDateColumn();
     dateCol.setSortable(true);
-    addColumn(dateCol, new TextHeader("Signed Up"));
+    addColumn(dateCol, new TextHeader(SIGNED_UP1));
     table.setColumnWidth(dateCol, SIGNED_UP + "px");
     table.addColumnSortHandler(getDateSorter(dateCol, getList()));
 
@@ -335,6 +337,9 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     };
   }
 
+  DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
+  Date now = new Date();
+
   private Column<UserInfo, SafeHtml> getDateColumn() {
     return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
@@ -352,10 +357,15 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
 
       @Override
       public SafeHtml getValue(UserInfo shell) {
-        String signedUp = DateTimeFormat.getFormat("MMM d, yy").format(
+        String signedUp = format.format(
             //     new Date(shell.getUser().getTimestampMillis())
             new Date(shell.getTimestampMillis())
         );
+
+        String format = UserContainer.this.format.format(now);
+        if (format.substring(format.length()-2).equals(signedUp.substring(signedUp.length()-2))) {
+          signedUp = signedUp.substring(0,signedUp.length()-4);
+        }
 
         return getSafeHtml(signedUp);
       }
