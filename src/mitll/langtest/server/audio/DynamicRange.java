@@ -225,7 +225,8 @@ public class DynamicRange {
 
       RMSInfo rmsInfo = new RMSInfo(range, maxSample, minSample, totalRMS, minRMS, maxRMS);
 
-      logger.info("got\n" + rmsInfo);
+//      logger.info("got\n" + rmsInfo);
+      logger.info("dymanic range : " + rmsInfo.getRange());
       return rmsInfo;
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -263,12 +264,16 @@ public class DynamicRange {
 
     public String toString() {
       return "Max-Min Range:\t" +
-          format(maxMin) +"dB" +    "\n" +
+          getRange() + "\n" +
           "Maximum Sample Value:\t" + max + "\n" +
           "Minimum Sample Value:\t" + min + "\n" +
           "Total RMS Value:\t" + format(totalRMS) + "dBFS\n" +
-          "Minimum RMS Value:\t" + format(minRMS) + "dBFS" +   "\n" +
+          "Minimum RMS Value:\t" + format(minRMS) + "dBFS" + "\n" +
           "Maximum RMS Value:\t" + format(maxRMS) + "dBFS";
+    }
+
+    public String getRange() {
+      return format(maxMin) + "dB";
     }
 
     private String format(double maxMin) {
