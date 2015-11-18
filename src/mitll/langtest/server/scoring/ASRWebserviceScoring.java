@@ -269,7 +269,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     for (String word : transcript.split(" ")) {
       String trim = word.trim();
       if (!trim.equals(word)) {
-        logger.warn("trim is different '" +trim + "' != '" + word +"'");
+        logger.warn("trim is different '" + trim + "' != '" + word + "'");
         word = trim;
       }
       if (!word.equals(" ") && !word.equals("")) {
@@ -351,22 +351,27 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     HTTPClient httpClient = new HTTPClient(ip, port, "dcodr");
 
     String resultsStr = runHydra(hydraInput, httpClient);
-    String[] results = resultsStr.split("\n"); // 0th entry-overall score and phone scores, 1st entry-word alignments, 2nd entry-phone alignments
-    long timeToRunHydra = System.currentTimeMillis() - then;
-
-    if (results[0].isEmpty()) {
-      String input = decode ? lmSentences == null ? "huh? no sentences to decode???" : lmSentences.toString() : transcript;
-      String which = decode ? " DECODING " : " ALIGNMENT ";
-      String message = "Failure during running of hydra on " + audioPath + which + " with " + input;
+    if (resultsStr.startsWith("ERROR")) {
+      String message = getFailureMessage(audioPath, transcript, lmSentences, decode);
+      message = "hydra said " + resultsStr + " : " + message;
       logger.error(message);
       langTestDatabase.logAndNotifyServerException(null, message);
       return null;
-    }
-    // TODO makes this a tuple3 type
-    String[] split = results[0].split(";");
-    Scores scores = new Scores(split);
-    // clean up tmp directory if above score threshold
-    logger.debug("Took " + timeToRunHydra + " millis to run hydra - overall score: " + split[0]);
+    } else {
+      String[] results = resultsStr.split("\n"); // 0th entry-overall score and phone scores, 1st entry-word alignments, 2nd entry-phone alignments
+      long timeToRunHydra = System.currentTimeMillis() - then;
+
+      if (results[0].isEmpty()) {
+        String message = getFailureMessage(audioPath, transcript, lmSentences, decode);
+        logger.error(message);
+        langTestDatabase.logAndNotifyServerException(null, message);
+        return null;
+      }
+      // TODO makes this a tuple3 type
+      String[] split = results[0].split(";");
+      Scores scores = new Scores(split);
+      // clean up tmp directory if above score threshold
+      logger.debug("Took " + timeToRunHydra + " millis to run hydra - overall score: " + split[0]);
     /*if (Float.parseFloat(split[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
       try {
 				logger.debug("deleting " + tmpDir + " since score is " + split[0]);
@@ -375,7 +380,14 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 				logger.error("Deleting dir " + tmpDir + " got " +e,e);
 			}
 		}*/
-    return new Object[]{scores, results[1].replaceAll("#", ""), results[2].replaceAll("#", "")}; // where are the # coming from?
+      return new Object[]{scores, results[1].replaceAll("#", ""), results[2].replaceAll("#", "")}; // where are the # coming from?
+    }
+  }
+
+  private String getFailureMessage(String audioPath, String transcript, Collection<String> lmSentences, boolean decode) {
+    String input = decode ? lmSentences == null ? "huh? no sentences to decode???" : lmSentences.toString() : transcript;
+    String which = decode ? " DECODING " : " ALIGNMENT ";
+    return "Failure during running of hydra on " + audioPath + which + " with " + input;
   }
 
   /**
