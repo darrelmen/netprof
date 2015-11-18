@@ -1,31 +1,29 @@
 package mitll.langtest.shared.analysis;
 
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Created by go22670 on 11/16/15.
  */
-public class PhoneSession implements Serializable {
-  transient SummaryStatistics summaryStatistics = new SummaryStatistics();
-  transient SummaryStatistics summaryStatistics2 = new SummaryStatistics();
+public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   private double mean;
   private double stdev;
-  private long timestamp;
   private double meanTime;
+  private long count;
+  long bin;
+  String phone;
 
-  public PhoneSession() {}
-
-  public void addValue(float value, long timestamp) {
-    summaryStatistics.addValue(value);
-    summaryStatistics2.addValue(timestamp);
+  public PhoneSession(String phone,long bin,long count, double mean, double stdev, double meanTime) {
+    this.phone = phone;
+    this.bin = bin;
+    this.count = count;
+    this.mean = mean;
+    this.stdev = stdev;
+    this.meanTime = meanTime;
   }
 
-  public void remember() {
-    this.mean = summaryStatistics.getMean();
-    this.stdev = summaryStatistics.getStandardDeviation();
-    this.meanTime = summaryStatistics2.getMean();
+  public PhoneSession() {
   }
 
   public double getMean() {
@@ -38,5 +36,23 @@ public class PhoneSession implements Serializable {
 
   public double getMeanTime() {
     return meanTime;
+  }
+
+  public String toString() {
+    return phone + " : " +new Date(bin) + " n " + count +
+        " mean " + mean + "  stdev " + stdev + " time " + meanTime;
+  }
+
+  @Override
+  public int compareTo(PhoneSession o) {
+    return Double.valueOf(meanTime).compareTo(o.getMeanTime());
+  }
+
+  public long getCount() {
+    return count;
+  }
+
+  public long getBin() {
+    return bin;
   }
 }
