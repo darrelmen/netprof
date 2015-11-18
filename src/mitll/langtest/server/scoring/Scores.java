@@ -4,12 +4,10 @@
 package mitll.langtest.server.scoring;
 
 import mitll.langtest.shared.Result;
+import org.apache.log4j.Logger;
 import pronz.speech.Audio;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Scores is a simple holder for the combination of scores returned when scoring an utterance.
@@ -20,52 +18,63 @@ import java.util.Map;
  * @author dhalbert
  */
 public class Scores {
-    public static final String PHONES = "phones";
-    public static final String WORDS = "words";
-    public float hydraScore;
-    public final Map<String, Map<String, Float>> eventScores;
-    private int processDur = 0;
+  private static final Logger logger = Logger.getLogger(Scores.class);
 
-    public Scores(int processDur) {
-        eventScores = Collections.emptyMap();
-        this.processDur = processDur;
-    }
+  public static final String PHONES = "phones";
+  public static final String WORDS = "words";
+  public float hydraScore = 0f;
+  public final Map<String, Map<String, Float>> eventScores;
+  private int processDur = 0;
 
-    /**
-     * @param hydecScore
-     * @param eventScores
-     * @param processDur
-     * @see ASRScoring#getEmptyScores()
-     * @see ASRScoring#getScoresFromHydec(Audio, String, String)
-     * @see ASRScoring#scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result)
-     */
-    public Scores(float hydecScore, Map<String, Map<String, Float>> eventScores, int processDur) {
-        this.hydraScore  = hydecScore;
-        this.eventScores = eventScores;
-        this.processDur  = processDur;
-    }
+  public Scores() {
+    eventScores = Collections.emptyMap();
+  }
 
-    /**
-     * TODO : do we need word scores?
-     *
-     * @see ASRWebserviceScoring#runHydra(String, String, Collection, String, boolean, int)
-     * @param scoreSplit
-     */
-    public Scores(String[] scoreSplit) {
-        float s = Float.parseFloat(scoreSplit[0]);
-        this.hydraScore = Float.isNaN(s) ? 0.0f : s;
-        this.eventScores = new HashMap<String, Map<String, Float>>();
-        eventScores.put(PHONES, new HashMap<String, Float>());
-        for (int i = 1; i < scoreSplit.length; i += 2) {
-            eventScores.get(PHONES).put(scoreSplit[i], Float.parseFloat(scoreSplit[i + 1]));
-        }
-    }
+  public Scores(int processDur) {
+    eventScores = Collections.emptyMap();
+    this.processDur = processDur;
+  }
 
-    public int getProcessDur() {
-        return processDur;
-    }
+  /**
+   * @param hydecScore
+   * @param eventScores
+   * @param processDur
+   * @see ASRScoring#getEmptyScores()
+   * @see ASRScoring#getScoresFromHydec(Audio, String, String)
+   * @see ASRScoring#scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result)
+   */
+  public Scores(float hydecScore, Map<String, Map<String, Float>> eventScores, int processDur) {
+    this.hydraScore = hydecScore;
+    this.eventScores = eventScores;
+    this.processDur = processDur;
+  }
 
-    public String toString() {
-        return "Scores score " + hydraScore + " events " + eventScores + " took " + processDur + " millis";
+  /**
+   * TODO : do we need word scores?
+   *
+   * @param scoreSplit
+   * @see ASRWebserviceScoring#runHydra(String, String, Collection, String, boolean, int)
+   */
+  public Scores(String[] scoreSplit) {
+    this.eventScores = new HashMap<String, Map<String, Float>>();
+    eventScores.put(PHONES, new HashMap<String, Float>());
+
+    try {
+      float s = Float.parseFloat(scoreSplit[0]);
+      this.hydraScore = Float.isNaN(s) ? 0.0f : s;
+      for (int i = 1; i < scoreSplit.length; i += 2) {
+        eventScores.get(PHONES).put(scoreSplit[i], Float.parseFloat(scoreSplit[i + 1]));
+      }
+    } catch (NumberFormatException e) {
+      logger.error("Parsing " + Arrays.asList(scoreSplit) + " Got " + e, e);
     }
+  }
+
+  public int getProcessDur() {
+    return processDur;
+  }
+
+  public String toString() {
+    return "Scores score " + hydraScore + " events " + eventScores + " took " + processDur + " millis";
+  }
 }
