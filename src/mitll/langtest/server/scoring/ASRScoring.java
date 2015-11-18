@@ -532,8 +532,5 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     return scores;
   }
 
-  private Scores getEmptyScores() {
-    Map<String, Map<String, Float>> eventScores = Collections.emptyMap();
-    return new Scores(0f, eventScores, 0);
-  }
+  private Scores getEmptyScores() { return new Scores(); }
 }
