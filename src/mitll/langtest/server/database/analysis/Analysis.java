@@ -13,7 +13,6 @@ import org.apache.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
-import java.util.Date;
 
 /**
  * Created by go22670 on 10/21/15.
@@ -25,7 +24,9 @@ public class Analysis extends DAO {
   private static final boolean DEBUG = false;
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
-  public static final float MIN_SCORE_TO_SHOW = 0.20f;
+  private static final float MIN_SCORE_TO_SHOW = 0.20f;
+  private static final int DESIRED_NUM_SESSIONS = 15;
+  public static final int MIN_SESSION_SIZE = 9;
   private final ParseResultJson parseResultJson;
   private final PhoneDAO phoneDAO;
   private Map<String, String> exToRef;
@@ -34,7 +35,8 @@ public class Analysis extends DAO {
   private static final long FIVEMIN = 5 * MINUTE;
   private static final long DAY = 24 * HOUR;
   private static final long WEEK = 7 * DAY;
-  private static final long SESSION_GAP = 10 * MINUTE;  // 5 minutes
+  private static final long MONTH = 4 * WEEK;
+//  private static final long SESSION_GAP = 10 * MINUTE;  // 5 minutes
 
   /**
    * @param database
@@ -511,46 +513,75 @@ public class Analysis extends DAO {
     return results;
   }
 
+  /**
+   * Adaptive granularity -- try to choose sessions separated by a time gap.
+   * Choose a time gap that is close to the desired sessions = 15 or ({@link #DESIRED_NUM_SESSIONS}
+   *
+   * The last session isn't guaranteed to have the required min size - potentially we'd want to combine the last two
+   * sessions if the last one is too small.
+   *
+   * @see #getPhonesForUser(long, int)
+   * @param key
+   * @param answersForUser
+   * @return
+   */
   private List<PhoneSession> partition(String key, List<TimeAndScore> answersForUser) {
     Collections.sort(answersForUser);
 
-    int c = 0;
-    Map<Long, PhoneSessionInternal> fiveToSession = new HashMap<>();
-    Map<Long, PhoneSessionInternal> hourToSession = new HashMap<>();
-    Map<Long, PhoneSessionInternal> dayToSession = new HashMap<>();
-    Map<Long, PhoneSessionInternal> weekToSession = new HashMap<>();
+    List<Long> times = Arrays.asList(FIVEMIN, HOUR, DAY, WEEK, MONTH);
+
+    Map<Long, List<PhoneSessionInternal>> granularityToSessions = new HashMap<>();
+    Map<Long, PhoneSessionInternal> granToCurrent = new HashMap<>();
+    for (Long time : times) {
+      granularityToSessions.put(time, new ArrayList<>());
+    }
+
+    long last = 0;
 
     for (TimeAndScore r : answersForUser) {
       long timestamp = r.getTimestamp();
-      long five = (timestamp / FIVE_MINUTES) * FIVE_MINUTES;
-      long hour = (timestamp / HOUR) * HOUR;
-      long day = (timestamp / DAY) * DAY;
-      long week = (timestamp / WEEK) * WEEK;
-      addSession(fiveToSession, r, five, key);
-      addSession(hourToSession, r, hour, key);
-      addSession(dayToSession, r, day, key);
-      addSession(weekToSession, r, week, key);
-      logger.info(key+","+r.getScore());
-    }
-//    logger.info("hours  " + hourToSession.size() + " days " + dayToSession.size());
 
-    Map<Long, PhoneSessionInternal> timeToSession = (fiveToSession.size() < 11) ? fiveToSession : (hourToSession.size() < 11) ? hourToSession : dayToSession.size() < 11 ? dayToSession : weekToSession;
+      for (Long time : times) {
+        List<PhoneSessionInternal> phoneSessionInternals = granularityToSessions.get(time);
+        PhoneSessionInternal phoneSessionInternal = granToCurrent.get(time);
+        long gran = (timestamp / time) * time;
+        long diff = timestamp - last;
+        if ((phoneSessionInternal == null) || (diff > time && phoneSessionInternal.getN() > MIN_SESSION_SIZE)) {
+          phoneSessionInternal = new PhoneSessionInternal(key, gran);
+          phoneSessionInternals.add(phoneSessionInternal);
+          granToCurrent.put(time, phoneSessionInternal);
+        } else {
+          //     logger.info("for " + r + " diff " + diff + " and " + phoneSessionInternal.getN());
+        }
+        phoneSessionInternal.addValue(r.getScore(), r.getTimestamp());
+      }
+      last = timestamp;
+    }
+    List<PhoneSessionInternal> toUse = null;
+    for (Long time : times) {
+      List<PhoneSessionInternal> phoneSessionInternals = granularityToSessions.get(time);
+      if (phoneSessionInternals.size() < DESIRED_NUM_SESSIONS) {
+      //  logger.warn("choosing " + time / 1000 + " with size " + phoneSessionInternals.size());
+        toUse = phoneSessionInternals;
+        break;
+      }
+    }
     List<PhoneSession> sessions2 = new ArrayList<PhoneSession>();
-    for (PhoneSessionInternal i : timeToSession.values()) {
-      i.remember();
-      double mean = i.getMean();
-      double stdev1 = i.getStdev();
-      double meanTime = i.getMeanTime();
-      sessions2.add(new PhoneSession(key, i.getBin(), i.getCount(), mean, stdev1, meanTime));
+    if (toUse == null) {
+      logger.error("huh? no sessions?");
+    } else {
+      for (PhoneSessionInternal i : toUse) {
+        i.remember();
+        double mean = i.getMean();
+        double stdev1 = i.getStdev();
+        double meanTime = i.getMeanTime();
+        sessions2.add(new PhoneSession(key, i.getBin(), i.getCount(), mean, stdev1, meanTime));
+      }
     }
 
-    Collections.sort(sessions2);
-
-    for (PhoneSession session : sessions2) {
-//      Date date = new Date((long) session.getMeanTime());
-  //    logger.info("date " + new Date(session.getBin()) + " : " + date + " n " + session.getCount() + " : " + session.getMean() + " stddev " + session.getStdev());
-  //    logger.info(session);
-    }
+//    for (PhoneSession session : sessions2) {
+//      logger.info(session);
+//    }
     return sessions2;
   }
 
@@ -562,15 +593,16 @@ public class Analysis extends DAO {
     phoneSessionInternal.addValue(r.getScore(), r.getTimestamp());
   }
 
-  public static class PhoneSessionInternal /*implements Serializable*/ {
-    transient SummaryStatistics summaryStatistics = new SummaryStatistics();
-    transient SummaryStatistics summaryStatistics2 = new SummaryStatistics();
-    private String phone;
+  public static class PhoneSessionInternal {
+    final transient SummaryStatistics summaryStatistics = new SummaryStatistics();
+    final transient SummaryStatistics summaryStatistics2 = new SummaryStatistics();
+    private final String phone;
     private double mean;
     private double stdev;
     private double meanTime;
     private long count;
-    private long bin;
+    private final long bin;
+    final List<TimeAndScore> values = new ArrayList<>();
 
     public PhoneSessionInternal(String phone, long bin) {
       this.phone = phone;
@@ -581,6 +613,7 @@ public class Analysis extends DAO {
       summaryStatistics.addValue(value);
 
       summaryStatistics2.addValue(timestamp);
+      values.add(new TimeAndScore("", timestamp, value, 0));
     }
 
     public void remember() {
@@ -609,17 +642,24 @@ public class Analysis extends DAO {
       return count;
     }
 
+    public long getN() {
+      return summaryStatistics.getN();
+    }
+
     public long getBin() {
       return bin;
     }
 
-    public String getPhone() {
+/*    public String getPhone() {
       return phone;
-    }
+    }*/
+
+/*    public void addToOther(PhoneSessionInternal other) {
+      for (TimeAndScore ts : values) other.addValue(ts.getScore(), ts.getTimestamp());
+    }*/
   }
 
-
-  public void setExToRef(Map<String, String> exToRef) {
+  private void setExToRef(Map<String, String> exToRef) {
     this.exToRef = exToRef;
   }
 }
