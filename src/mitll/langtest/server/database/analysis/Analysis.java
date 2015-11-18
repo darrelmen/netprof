@@ -6,14 +6,14 @@ import mitll.langtest.server.database.*;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.*;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
-import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.NetPronImageType;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * Created by go22670 on 10/21/15.
@@ -29,9 +29,12 @@ public class Analysis extends DAO {
   private final ParseResultJson parseResultJson;
   private final PhoneDAO phoneDAO;
   private Map<String, String> exToRef;
-  private static final int MINUTE = 60 * 1000 * 1000;
-  private static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
-
+  private static final long MINUTE = 60 * 1000;
+  private static final long HOUR = 60 * MINUTE;
+  private static final long FIVEMIN = 5 * MINUTE;
+  private static final long DAY = 24 * HOUR;
+  private static final long WEEK = 7 * DAY;
+  private static final long SESSION_GAP = 10 * MINUTE;  // 5 minutes
 
   /**
    * @param database
@@ -284,9 +287,9 @@ public class Analysis extends DAO {
         logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - start) + " millis to get " + phonesForUser.size() + " phones");
 
       Map<String, PhoneStats> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
-      for (PhoneStats phoneStat : phoneToAvgSorted.values()) {
-        List<PhoneSession> partition = partition(phoneStat.getTimeSeries());
-        phoneStat.setSessions(partition);
+      for (Map.Entry<String, PhoneStats> pair : phoneToAvgSorted.entrySet()) {
+        List<PhoneSession> partition = partition(pair.getKey(), pair.getValue().getTimeSeries());
+        pair.getValue().setSessions(partition);
       }
 
       return phoneReport;
@@ -449,7 +452,7 @@ public class Analysis extends DAO {
     if (DEBUG || true) {
       logger.info("total " + count + " missing audio " + missing +
           " iPad = " + iPad + " flashcard " + flashcard + " learn " + learn);
-      if (!missingAudio.isEmpty()) logger.info("missing audio " +missingAudio);
+      if (!missingAudio.isEmpty()) logger.info("missing audio " + missingAudio);
     }
 
     finish(connection, statement, rs);
@@ -508,32 +511,113 @@ public class Analysis extends DAO {
     return results;
   }
 
-  private List<PhoneSession> partition(List<TimeAndScore> answersForUser) {
-    PhoneSession s = null;
-    long lastTimestamp = 0;
+  private List<PhoneSession> partition(String key, List<TimeAndScore> answersForUser) {
+    Collections.sort(answersForUser);
 
-    List<PhoneSession> sessions = new ArrayList<PhoneSession>();
+    int c = 0;
+    Map<Long, PhoneSessionInternal> fiveToSession = new HashMap<>();
+    Map<Long, PhoneSessionInternal> hourToSession = new HashMap<>();
+    Map<Long, PhoneSessionInternal> dayToSession = new HashMap<>();
+    Map<Long, PhoneSessionInternal> weekToSession = new HashMap<>();
 
-    int id = 0;
     for (TimeAndScore r : answersForUser) {
-      //logger.debug("got " + r);
-      String id1 = r.getId();
       long timestamp = r.getTimestamp();
-      if (s == null || timestamp - lastTimestamp > SESSION_GAP) {
-        sessions.add(s = new PhoneSession());
-      }
-
-      s.addValue(r.getScore(),r.getTimestamp());
-
+      long five = (timestamp / FIVE_MINUTES) * FIVE_MINUTES;
+      long hour = (timestamp / HOUR) * HOUR;
+      long day = (timestamp / DAY) * DAY;
+      long week = (timestamp / WEEK) * WEEK;
+      addSession(fiveToSession, r, five, key);
+      addSession(hourToSession, r, hour, key);
+      addSession(dayToSession, r, day, key);
+      addSession(weekToSession, r, week, key);
+      logger.info(key+","+r.getScore());
     }
-    for (PhoneSession session : sessions) session.remember();
-    if (sessions.isEmpty() && !answersForUser.isEmpty()) {
-      logger.error("huh? no sessions from " + answersForUser.size());
-    }
-//    logger.debug("\tpartitionIntoSessions2 made " +sessions.size() + " from " + answersForUser.size() + " answers");
+//    logger.info("hours  " + hourToSession.size() + " days " + dayToSession.size());
 
-    return sessions;
+    Map<Long, PhoneSessionInternal> timeToSession = (fiveToSession.size() < 11) ? fiveToSession : (hourToSession.size() < 11) ? hourToSession : dayToSession.size() < 11 ? dayToSession : weekToSession;
+    List<PhoneSession> sessions2 = new ArrayList<PhoneSession>();
+    for (PhoneSessionInternal i : timeToSession.values()) {
+      i.remember();
+      double mean = i.getMean();
+      double stdev1 = i.getStdev();
+      double meanTime = i.getMeanTime();
+      sessions2.add(new PhoneSession(key, i.getBin(), i.getCount(), mean, stdev1, meanTime));
+    }
+
+    Collections.sort(sessions2);
+
+    for (PhoneSession session : sessions2) {
+//      Date date = new Date((long) session.getMeanTime());
+  //    logger.info("date " + new Date(session.getBin()) + " : " + date + " n " + session.getCount() + " : " + session.getMean() + " stddev " + session.getStdev());
+  //    logger.info(session);
+    }
+    return sessions2;
   }
+
+  private void addSession(Map<Long, PhoneSessionInternal> hourToSession, TimeAndScore r, long hour, String key) {
+    PhoneSessionInternal phoneSessionInternal = hourToSession.get(hour);
+    if (phoneSessionInternal == null) {
+      hourToSession.put(hour, phoneSessionInternal = new PhoneSessionInternal(key, hour));
+    }
+    phoneSessionInternal.addValue(r.getScore(), r.getTimestamp());
+  }
+
+  public static class PhoneSessionInternal /*implements Serializable*/ {
+    transient SummaryStatistics summaryStatistics = new SummaryStatistics();
+    transient SummaryStatistics summaryStatistics2 = new SummaryStatistics();
+    private String phone;
+    private double mean;
+    private double stdev;
+    private double meanTime;
+    private long count;
+    private long bin;
+
+    public PhoneSessionInternal(String phone, long bin) {
+      this.phone = phone;
+      this.bin = bin;
+    }
+
+    public void addValue(float value, long timestamp) {
+      summaryStatistics.addValue(value);
+
+      summaryStatistics2.addValue(timestamp);
+    }
+
+    public void remember() {
+      this.count = summaryStatistics.getN();
+
+      this.mean = summaryStatistics.getMean();
+
+      this.stdev = summaryStatistics.getStandardDeviation();
+
+      this.meanTime = summaryStatistics2.getMean();
+    }
+
+    public double getMean() {
+      return mean;
+    }
+
+    public double getStdev() {
+      return stdev;
+    }
+
+    public double getMeanTime() {
+      return meanTime;
+    }
+
+    public long getCount() {
+      return count;
+    }
+
+    public long getBin() {
+      return bin;
+    }
+
+    public String getPhone() {
+      return phone;
+    }
+  }
+
 
   public void setExToRef(Map<String, String> exToRef) {
     this.exToRef = exToRef;
