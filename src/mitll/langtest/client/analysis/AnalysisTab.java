@@ -19,6 +19,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/21/15.
  */
 public class AnalysisTab extends DivWidget {
+  public static final String WORDS = "Words";
   private final Logger logger = Logger.getLogger("AnalysisTab");
   private final Panel bottom;
   private boolean isNarrow = false;
@@ -70,7 +71,7 @@ public class AnalysisTab extends DivWidget {
         DivWidget vert = new DivWidget();
         vert.getElement().setId("WordsContainer");
         vert.addStyleName("floatLeft");
-        vert.add(new Heading(3, "Words"));
+        vert.add(new Heading(3, WORDS, "scores > 20"));
         vert.add(tableWithPager);
         lowerHalf.add(vert);
         getPhoneReport(service, controller, userid, lowerHalf, analysisPlot, showTab, minRecordings);
