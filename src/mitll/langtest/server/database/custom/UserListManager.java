@@ -457,7 +457,6 @@ public class UserListManager {
   private User getQCUser() {
     List<User.Permission> permissions = new ArrayList<User.Permission>();
     permissions.add(User.Permission.QUALITY_CONTROL);
-
     return new User(-1, 89, 0, 0, "", "", false, permissions);
   }
 
@@ -488,7 +487,7 @@ public class UserListManager {
           //logger.debug("getReviewedUserExercises : found " + e.getID() + " tooltip " + e.getTooltip());
         }
         else {
-          logger.warn("huh? can't find predef exercise " + id);
+          logger.warn("getReviewedUserExercises : huh? can't find predef exercise " + id);
         }
       }
     }
