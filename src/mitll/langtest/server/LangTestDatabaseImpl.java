@@ -70,6 +70,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final String ENGLISH = "English";
   private static final int MAX = 30;
   private static final int SLOW_MILLIS = 40;
+  public static final int WARN_DUR = 100;
   private RefResultDecoder refResultDecoder;
 
   private static final boolean warnMissingFile = true;
@@ -704,8 +705,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     long now = System.currentTimeMillis();
     String language = getLanguage();
-    if (now - then2 > 100) {
-      logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to find exercise " + id);
+    if (now - then2 > WARN_DUR) {
+      logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to find exercise " + id + " for " +userID);
     }
 
     if (byID == null) {
@@ -714,8 +715,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       then2 = System.currentTimeMillis();
       addAnnotationsAndAudio(userID, byID, isFlashcardReq);
       now = System.currentTimeMillis();
-      if (now - then2 > 100) {
-        logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to add annotations to exercise " + id);
+      if (now - then2 > WARN_DUR) {
+        logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to add annotations to exercise " + id + " for " +userID);
       }
       then2 = System.currentTimeMillis();
 
@@ -729,10 +730,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
 
       now = System.currentTimeMillis();
-      if (now - then2 > 100) {
+      if (now - then2 > WARN_DUR) {
         if (warnMissingFile) {
           logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis " +
-              "to ensure there are mp3s for exercise " + id);
+              "to ensure there are mp3s for exercise " + id + " for " +userID);
         }
       }
     }
