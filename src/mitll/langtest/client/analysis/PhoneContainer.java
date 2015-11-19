@@ -22,10 +22,7 @@ import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.client.scoring.WordTable;
-import mitll.langtest.shared.analysis.PhoneReport;
-import mitll.langtest.shared.analysis.PhoneStats;
-import mitll.langtest.shared.analysis.TimeAndScore;
-import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.analysis.*;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -34,6 +31,8 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
+  private final Logger logger = Logger.getLogger("PhoneContainer");
+
   private static final int TABLE_WIDTH = 295;
   private static final int SCORE_COL_WIDTH = 60;
   private static final String SOUND = "Sound";
@@ -43,7 +42,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
   private static final String DIFF_COL_HEADER = "+/-";
   private static final int COUNT_COL_WIDTH = 45;
   private static final String TOOLTIP = "Click to see examples and scores over time";//"Click on an item to review.";
-  private final Logger logger = Logger.getLogger("PhoneContainer");
   private static final int SOUND_WIDTH = 75;
   private final PhoneExampleContainer exampleContainer;
   private final PhonePlot phonePlot;
@@ -93,9 +91,11 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
     } else {
       for (Map.Entry<String, PhoneStats> ps : phoneToAvgSorted.entrySet()) {
         PhoneStats value = ps.getValue();
+        int initial = value.getInitial();
+        int current = value.getCurrent();
         phoneAndStatses.add(new PhoneAndStats(ps.getKey(),
-            value.getInitial(),
-            value.getCurrent(),
+            initial,
+            current,
             value.getCount()
         ));
       }
