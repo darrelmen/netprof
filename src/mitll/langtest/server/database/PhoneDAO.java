@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.database.analysis.PhoneAnalysis;
 import mitll.langtest.server.scoring.CollationSort;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.*;
@@ -518,6 +519,8 @@ public class PhoneDAO extends DAO {
 
     if (DEBUG) logger.debug("before sorted " + sorted);
 
+    setSessions(phoneToAvg);
+
     Collections.sort(sorted, new Comparator<String>() {
       @Override
       public int compare(String o1, String o2) {
@@ -552,6 +555,14 @@ public class PhoneDAO extends DAO {
     if (DEBUG) logger.debug("phone->words " + phoneToWordAndScore);
 
     return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted/*, phoneToCount*/);
+  }
+
+  public void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
+    PhoneAnalysis phoneAnalysis = new PhoneAnalysis();
+    for (Map.Entry<String, PhoneStats> pair : phoneToAvgSorted.entrySet()) {
+      List<PhoneSession> partition = phoneAnalysis.partition(pair.getKey(), pair.getValue().getTimeSeries());
+      pair.getValue().setSessions(partition);
+    }
   }
 
   /**
