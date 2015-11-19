@@ -60,7 +60,8 @@ public class Flashcard implements RequiresResize {
    * @return
    * @see mitll.langtest.client.LangTest#makeHeaderRow()
    */
-  public Panel makeNPFHeaderRow(String splashText, boolean isBeta, String userName, HTML browserInfo, ClickHandler logoutClickHandler,
+  public Panel makeNPFHeaderRow(String splashText, boolean isBeta, String userName, HTML browserInfo,
+                                ClickHandler logoutClickHandler,
                                 ClickHandler users,
                                 ClickHandler results,
                                 ClickHandler monitoring,
@@ -108,11 +109,7 @@ public class Flashcard implements RequiresResize {
     appName.addStyleName("bigFont");
 
     flashcard.add(appName);
-    subtitle = new Paragraph(splashText);
-    subtitle.addStyleName("subtitleForeground");
-    subtitle.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
-
-    flashcard.add(subtitle);
+    flashcard.add(getSubtitle(splashText));
 
     flashcardImage = new Image(LangTest.LANGTEST_IMAGES + Flashcard.NEW_PRO_F1_PNG);
     flashcardImage.addStyleName("floatLeft");
@@ -139,11 +136,7 @@ public class Flashcard implements RequiresResize {
     hp.add(recordAudio = new SimplePanel());
 
     // add log out/admin options cogMenu
-    cogMenu = makeMenu(users, results, monitoring, events);
-    cogMenu.addStyleName("cogStyle");
-    NavLink widget1 = new NavLink(LOG_OUT);
-    widget1.addClickHandler(logoutClickHandler);
-    cogMenu.add(widget1);
+    makeCogMenu(logoutClickHandler, users, results, monitoring, events);
 
     if (!isAnonymous) {
       hp.add(cogMenu);
@@ -165,6 +158,21 @@ public class Flashcard implements RequiresResize {
     });
 
     return headerRow;
+  }
+
+  private Paragraph getSubtitle(String splashText) {
+    subtitle = new Paragraph(splashText);
+    subtitle.addStyleName("subtitleForeground");
+    subtitle.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+    return subtitle;
+  }
+
+  private void makeCogMenu(ClickHandler logoutClickHandler, ClickHandler users, ClickHandler results, ClickHandler monitoring, ClickHandler events) {
+    cogMenu = makeMenu(users, results, monitoring, events);
+    cogMenu.addStyleName("cogStyle");
+    NavLink widget1 = new NavLink(LOG_OUT);
+    widget1.addClickHandler(logoutClickHandler);
+    cogMenu.add(widget1);
   }
 
   public void reflectPermissions(Collection<User.Permission> permissions) {
