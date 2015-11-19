@@ -8,7 +8,6 @@ import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -25,8 +24,8 @@ public class Analysis extends DAO {
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
   private static final float MIN_SCORE_TO_SHOW = 0.20f;
-  private static final int DESIRED_NUM_SESSIONS = 15;
-  public static final int MIN_SESSION_SIZE = 9;
+//  private static final int DESIRED_NUM_SESSIONS = 15;
+//  public static final int MIN_SESSION_SIZE = 9;
   private final ParseResultJson parseResultJson;
   private final PhoneDAO phoneDAO;
   private Map<String, String> exToRef;
@@ -49,25 +48,6 @@ public class Analysis extends DAO {
     this.phoneDAO = phoneDAO;
     this.setExToRef(exToRef);
   }
-
-  /**
-   * JUST FOR TESTING
-   *
-   * @param id
-   * @return
-   */
-/*  public List<BestScore> getResultForUser(long id) {
-    try {
-      String sql = getPerfSQL(id);
-      Map<Long, UserInfo> best = getBest(sql, minRecordings);
-
-      List<BestScore> resultsForQuery = best.values().iterator().next().getBestScores();
-      return resultsForQuery;
-    } catch (Exception ee) {
-      logException(ee);
-    }
-    return new ArrayList<BestScore>();
-  }*/
 
   private final Set<String> lincoln = new HashSet<>(Arrays.asList("gvidaver", "rbudd", "jmelot", "esalesky", "gatewood",
       "testing", "grading", "fullperm",
@@ -289,16 +269,21 @@ public class Analysis extends DAO {
         logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - start) + " millis to get " + phonesForUser.size() + " phones");
 
       Map<String, PhoneStats> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
-      for (Map.Entry<String, PhoneStats> pair : phoneToAvgSorted.entrySet()) {
-        List<PhoneSession> partition = partition(pair.getKey(), pair.getValue().getTimeSeries());
-        pair.getValue().setSessions(partition);
-      }
+      setSessions(phoneToAvgSorted);
 
       return phoneReport;
     } catch (Exception ee) {
       logException(ee);
     }
     return null;
+  }
+
+  public void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
+    PhoneAnalysis phoneAnalysis = new PhoneAnalysis();
+    for (Map.Entry<String, PhoneStats> pair : phoneToAvgSorted.entrySet()) {
+      List<PhoneSession> partition = phoneAnalysis.partition(pair.getKey(), pair.getValue().getTimeSeries());
+      pair.getValue().setSessions(partition);
+    }
   }
 
   private String getLanguage() {
@@ -469,6 +454,8 @@ public class Analysis extends DAO {
   /**
    * TODO : why do we parse json when we could just get it out of word and phone tables????
    *
+   * Only show unique items -- even if BestScore might contain the same item multiple times.
+   *
    * @param bestScores
    * @return
    * @see #getWordScoresForUser(long, int)
@@ -478,12 +465,14 @@ public class Analysis extends DAO {
 
     long then = System.currentTimeMillis();
 
-    int c = 0;
+//    int c = 0;
     int skipped = 0;
+    Map<String,WordScore> idToScore = new HashMap<>();
+
     for (BestScore bs : bestScores) {
       String json = bs.getJson();
       if (json == null) {
-        c++;
+        //c++;
         logger.error("huh? no json for " + bs);
       } else if (json.equals("{}")) {
         logger.warn("json is empty for " + bs);
@@ -491,11 +480,19 @@ public class Analysis extends DAO {
       } else if (bs.getScore() > MIN_SCORE_TO_SHOW) {
         if (json.isEmpty()) logger.warn("no json for " + bs);
         Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(json);
-        results.add(new WordScore(bs, netPronImageTypeListMap));
+      //  results.add(new WordScore(bs, netPronImageTypeListMap));
+        WordScore wordScore = new WordScore(bs, netPronImageTypeListMap);
+        WordScore current = idToScore.get(wordScore.getId());
+        if (current == null || current.getTimestamp() < wordScore.getTimestamp()) {
+          idToScore.put(wordScore.getId(), wordScore);
+        }
       } else {
         skipped++;
       }
     }
+
+    results.addAll(idToScore.values());
+    Collections.sort(results);
 
     long now = System.currentTimeMillis();
     if (now - then > 50) {
@@ -511,152 +508,6 @@ public class Analysis extends DAO {
     logger.info("getWordScore out of " + bestScores.size() + " skipped " + skipped);
 
     return results;
-  }
-
-  /**
-   * Adaptive granularity -- try to choose sessions separated by a time gap.
-   * Choose a time gap that is close to the desired sessions = 15 or ({@link #DESIRED_NUM_SESSIONS}
-   *
-   * The last session isn't guaranteed to have the required min size - potentially we'd want to combine the last two
-   * sessions if the last one is too small.
-   *
-   * @see #getPhonesForUser(long, int)
-   * @param key
-   * @param answersForUser
-   * @return
-   */
-  private List<PhoneSession> partition(String key, List<TimeAndScore> answersForUser) {
-    Collections.sort(answersForUser);
-
-    List<Long> times = Arrays.asList(FIVEMIN, HOUR, DAY, WEEK, MONTH);
-
-    Map<Long, List<PhoneSessionInternal>> granularityToSessions = new HashMap<>();
-    Map<Long, PhoneSessionInternal> granToCurrent = new HashMap<>();
-    for (Long time : times) {
-      granularityToSessions.put(time, new ArrayList<>());
-    }
-
-    long last = 0;
-
-    for (TimeAndScore r : answersForUser) {
-      long timestamp = r.getTimestamp();
-
-      for (Long time : times) {
-        List<PhoneSessionInternal> phoneSessionInternals = granularityToSessions.get(time);
-        PhoneSessionInternal phoneSessionInternal = granToCurrent.get(time);
-        long gran = (timestamp / time) * time;
-        long diff = timestamp - last;
-        if ((phoneSessionInternal == null) || (diff > time && phoneSessionInternal.getN() > MIN_SESSION_SIZE)) {
-          phoneSessionInternal = new PhoneSessionInternal(key, gran);
-          phoneSessionInternals.add(phoneSessionInternal);
-          granToCurrent.put(time, phoneSessionInternal);
-        } else {
-          //     logger.info("for " + r + " diff " + diff + " and " + phoneSessionInternal.getN());
-        }
-        phoneSessionInternal.addValue(r.getScore(), r.getTimestamp());
-      }
-      last = timestamp;
-    }
-    List<PhoneSessionInternal> toUse = null;
-    for (Long time : times) {
-      List<PhoneSessionInternal> phoneSessionInternals = granularityToSessions.get(time);
-      if (phoneSessionInternals.size() < DESIRED_NUM_SESSIONS) {
-      //  logger.warn("choosing " + time / 1000 + " with size " + phoneSessionInternals.size());
-        toUse = phoneSessionInternals;
-        break;
-      }
-    }
-    List<PhoneSession> sessions2 = new ArrayList<PhoneSession>();
-    if (toUse == null) {
-      logger.error("huh? no sessions?");
-    } else {
-      for (PhoneSessionInternal i : toUse) {
-        i.remember();
-        double mean = i.getMean();
-        double stdev1 = i.getStdev();
-        double meanTime = i.getMeanTime();
-        sessions2.add(new PhoneSession(key, i.getBin(), i.getCount(), mean, stdev1, meanTime));
-      }
-    }
-
-//    for (PhoneSession session : sessions2) {
-//      logger.info(session);
-//    }
-    return sessions2;
-  }
-
-  private void addSession(Map<Long, PhoneSessionInternal> hourToSession, TimeAndScore r, long hour, String key) {
-    PhoneSessionInternal phoneSessionInternal = hourToSession.get(hour);
-    if (phoneSessionInternal == null) {
-      hourToSession.put(hour, phoneSessionInternal = new PhoneSessionInternal(key, hour));
-    }
-    phoneSessionInternal.addValue(r.getScore(), r.getTimestamp());
-  }
-
-  public static class PhoneSessionInternal {
-    final transient SummaryStatistics summaryStatistics = new SummaryStatistics();
-    final transient SummaryStatistics summaryStatistics2 = new SummaryStatistics();
-    private final String phone;
-    private double mean;
-    private double stdev;
-    private double meanTime;
-    private long count;
-    private final long bin;
-    final List<TimeAndScore> values = new ArrayList<>();
-
-    public PhoneSessionInternal(String phone, long bin) {
-      this.phone = phone;
-      this.bin = bin;
-    }
-
-    public void addValue(float value, long timestamp) {
-      summaryStatistics.addValue(value);
-
-      summaryStatistics2.addValue(timestamp);
-      values.add(new TimeAndScore("", timestamp, value, 0));
-    }
-
-    public void remember() {
-      this.count = summaryStatistics.getN();
-
-      this.mean = summaryStatistics.getMean();
-
-      this.stdev = summaryStatistics.getStandardDeviation();
-
-      this.meanTime = summaryStatistics2.getMean();
-    }
-
-    public double getMean() {
-      return mean;
-    }
-
-    public double getStdev() {
-      return stdev;
-    }
-
-    public double getMeanTime() {
-      return meanTime;
-    }
-
-    public long getCount() {
-      return count;
-    }
-
-    public long getN() {
-      return summaryStatistics.getN();
-    }
-
-    public long getBin() {
-      return bin;
-    }
-
-/*    public String getPhone() {
-      return phone;
-    }*/
-
-/*    public void addToOther(PhoneSessionInternal other) {
-      for (TimeAndScore ts : values) other.addValue(ts.getScore(), ts.getTimestamp());
-    }*/
   }
 
   private void setExToRef(Map<String, String> exToRef) {
