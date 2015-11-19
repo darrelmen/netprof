@@ -21,8 +21,9 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/19/15.
  */
 public class PhonePlot extends DivWidget implements IsWidget {
-  public static final String AVERAGE = "Average";
   private final Logger logger = Logger.getLogger("PhonePlot");
+
+  public static final String AVERAGE = "Average";
   private static final int NARROW_WIDTH = 330;
   private static final int CHART_HEIGHT = 340;
   private static final String PRONUNCIATION_SCORE = "Pronunciation Score";
@@ -41,6 +42,7 @@ public class PhonePlot extends DivWidget implements IsWidget {
    * @param isNarrow
    * @see PhoneContainer#gotClickOnItem(PhoneAndStats)
    */
+/*
   public void showData(List<TimeAndScore> rawBestScores, String userChosenID, boolean isNarrow) {
     clear();
     int rawTotal = rawBestScores.size();
@@ -57,17 +59,17 @@ public class PhonePlot extends DivWidget implements IsWidget {
     }
     setRawBestScores(rawBestScores);
   }
-
+*/
   public void showData2(List<PhoneSession> rawBestScores, String userChosenID, boolean isNarrow) {
     clear();
-    int rawTotal = rawBestScores.size();//userPerformance.getRawTotal();
+ //   int rawTotal = rawBestScores.size();//userPerformance.getRawTotal();
     if (rawBestScores.isEmpty()) {
       add(new Label("No Recordings yet to analyze. Please record yourself."));
     } else {
       Chart chart = getChart2("<b>" + userChosenID + "</b>" + " pronunciation score",
-          "Score and average (" + rawTotal + " items " +
-              //": avg score " + (int) v +
-              " %)", "Range", rawBestScores, isNarrow);
+          "Average score and range" //+
+          //    " for " + rawTotal + " sessions"
+          , "Range", rawBestScores, isNarrow);
       add(chart);
     }
     setRawBestScores2(rawBestScores);
@@ -81,7 +83,7 @@ public class PhonePlot extends DivWidget implements IsWidget {
    * @return
    * @see #showData(List, String, boolean)
    */
-  private Chart getChart(String title, String subtitle, String seriesName, List<TimeAndScore> rawBestScores, boolean narrow) {
+/*  private Chart getChart(String title, String subtitle, String seriesName, List<TimeAndScore> rawBestScores, boolean narrow) {
     Chart chart = new Chart()
         .setZoomType(BaseChart.ZoomType.X)
         .setType(Series.Type.SCATTER)
@@ -108,7 +110,7 @@ public class PhonePlot extends DivWidget implements IsWidget {
 
     configureChart(chart, subtitle);
     return chart;
-  }
+  }*/
 
   private ToolTip getToolTip() {
     return new ToolTip()
@@ -191,7 +193,7 @@ public class PhonePlot extends DivWidget implements IsWidget {
    * @param subtitle
    * @param seriesName
    * @return
-   * @see #showData(List, String, boolean)
+   * @see #showData2
    */
   private Chart getChart2(String title, String subtitle, String seriesName, List<PhoneSession> rawBestScores, boolean narrow) {
     Chart chart = new Chart()
@@ -237,10 +239,6 @@ public class PhonePlot extends DivWidget implements IsWidget {
       data[i][0] = ts.getBin();
       double mean = ts.getMean();
       double stdev = ts.getStdev();
-      //    Date date = new Date((long) ts.getMeanTime());
-      logger.info("ts " + ts);
-//      logger.info("date " + date + " " + mean + " stddev " + stdev);
-
       double first = mean - stdev;
       if (first < 0) first = 0;
       data[i][1] = (int) (first * 100);
