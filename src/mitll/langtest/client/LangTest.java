@@ -58,6 +58,8 @@ import java.util.logging.Logger;
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private Logger logger = Logger.getLogger("LangTest");
+
+  private static final String VERSION = "v1.1&nbsp;";
   private static final List<String> SITE_LIST = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean","Iraqi",
       "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Russian", "Spanish", "Sudanese", "Tagalog", "Urdu");
 
@@ -177,10 +179,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     int user = userManager != null ? userManager.getUser() : -1;
     String exerciseID = "Unknown";
     String suffix = " browser " + browserCheck.getBrowserAndVersion() + " : " + message;
-    logMessageOnServer(prefix +
-      "user #" + user +
-      " exercise " + exerciseID +
-      suffix);
+    logMessageOnServer(prefix + "user #" + user + " exercise " + exerciseID + suffix);
 
     String toSend = prefix + suffix;
     if (toSend.length() > MAX_EXCEPTION_STRING) {
@@ -254,7 +253,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         public void onSuccess(ImageResponse result) {
           imageCache.put(key, result);
           //logger.info("getImage storing key " + key+ " now  " + imageCache.size() + " cached.");
-
           client.onSuccess(result);
         }
       });
@@ -297,7 +295,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void populateRootPanel() {
     Container verticalContainer = getRootContainer();
-
     // header/title line
     // first row ---------------
     Panel firstRow = makeFirstTwoRows(verticalContainer);
@@ -306,9 +303,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
      // logger.info("populate below header...");
       populateBelowHeader(verticalContainer, firstRow);
     }
-    //else {
-   //   logger.info("showing login...");
-   // }
   }
 
   private Container getRootContainer() {
@@ -565,7 +559,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private Panel makeHeaderRow() {
     flashcard = new Flashcard(props);
-    Widget title = flashcard.makeNPFHeaderRow(props.getSplash(), true, getGreeting(), getReleaseStatus(),
+    Widget title = flashcard.makeNPFHeaderRow(props.getSplash(), true, getGreeting(),
+        getReleaseStatus(),
         new LogoutClickHandler(),
         new UsersClickHandler(),
         new ResultsClickHandler(),
@@ -602,9 +597,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public String getBrowserInfo() { return browserCheck.getBrowserAndVersion();}
 
   private String getInfoLine() {
-    String releaseDate = props.getReleaseDate() != null ? " " + props.getReleaseDate() : "";
+    String releaseDate = //VERSION +
+        (props.getReleaseDate() != null ? " " + props.getReleaseDate() : "");
     return "<span><font size=-2>" +
-      browserCheck.ver +
+      browserCheck.ver + "&nbsp;"+
       releaseDate + (flashRecordPanel.usingWebRTC() ? " Flashless recording" : "")+
       "</font></span>";
   }
@@ -950,13 +946,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public LangTestDatabaseAsync getService() { return service; }
   public UserFeedback getFeedback() { return this; }
 
-  private long then;
+  //private long then;
   // recording methods...
   /**
    * Recording interface
    */
   public void startRecording() {
-    then = System.currentTimeMillis();
+    //then = System.currentTimeMillis();
     flashRecordPanel.recordOnClick();
   }
 
@@ -966,7 +962,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    */
   public void stopRecording(WavCallback wavCallback) {
-    long now = System.currentTimeMillis();
+//    long now = System.currentTimeMillis();
    // logger.info("stopRecording : time recording in UI " + (now - then) + " millis");
 
     flashRecordPanel.stopRecording(wavCallback);
