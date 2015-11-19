@@ -8,8 +8,8 @@ import java.util.Map;
  * Created by go22670 on 10/26/15.
  */
 public class PhoneStats implements Serializable {
-  private int initial;
-  private int current;
+//  private int initial;
+//  private int current;
   private int count;
   private List<TimeAndScore> timeSeries;
   private List<PhoneSession> sessions;
@@ -25,20 +25,41 @@ public class PhoneStats implements Serializable {
   public PhoneStats(int count, int initial, int current,
                     List<TimeAndScore> timeSeries) {
     this.count = count;
-    this.initial = initial;
-    this.current = current;
+//    this.initial = initial;
+//    this.current = current;
     this.timeSeries = timeSeries;
   }
 
+//  public int getInitial() {
+//    return initial;
+ // }
+
   public int getInitial() {
-    return initial;
+    List<PhoneSession> sessions = getSessions();
+    if (sessions == null) return 0;
+
+    PhoneSession next = sessions.iterator().next();
+    double mean = next.getMean();
+    return toHundred(mean);
   }
 
+  public int toHundred(double mean) {
+    return (int) Math.round(100 * mean);
+  }
+/*
   public int getCurrent() {
     return current;
   }
+*/
 
-  public int getDiff() { return current - initial; }
+
+  public int getCurrent() {
+    List<PhoneSession> sessions2 = getSessions();
+    if (sessions2 == null) return 0;
+    return toHundred(sessions2.get(sessions2.size()-1).getMean());
+  }
+
+  public int getDiff() { return getCurrent() - getInitial(); }
 
   public int getCount() {
     return count;
@@ -49,7 +70,7 @@ public class PhoneStats implements Serializable {
   }
 
   public String toString() {
-    return "count " + count + " initial " + initial + " current " +current + " num sessions " + getSessions().size() + " : " + getSessions();
+    return "count " + count + " initial " + getInitial() + " current " +getCurrent() + " num sessions " + getSessions().size() + " : " + getSessions();
   }
 
   public void setSessions(List<PhoneSession> sessions) {
