@@ -11,7 +11,7 @@ public class PhoneStats implements Serializable {
 //  private int initial;
 //  private int current;
   private int count;
-  private List<TimeAndScore> timeSeries;
+  private transient List<TimeAndScore> timeSeries;
   private List<PhoneSession> sessions;
 
   public PhoneStats() {
