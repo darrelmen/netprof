@@ -53,7 +53,7 @@ public class RefResultDecoder {
         }
       }).start();
     } else {
-      //logger.debug(getLanguage() + " not doing decode all");
+      logger.debug(getLanguage() + " not doing decode ref decode");
     }
   }
 
@@ -76,7 +76,7 @@ public class RefResultDecoder {
     }
 
     int size = resultsToDecode.size();
-    logger.info("found " + size + " with missing info");
+    logger.info("doMissingInfo found " + size + " with missing info");
 
     for (Result res : resultsToDecode) {
       if (count++ < 20) {
@@ -112,11 +112,10 @@ public class RefResultDecoder {
 
       int numResults = db.getRefResultDAO().getNumResults();
       String language = getLanguage();
-      logger.debug(language + "writeRefDecode : found " +
+      logger.debug(language + " writeRefDecode : found " +
           numResults + " in ref results table vs " + exToAudio.size() + " exercises with audio");
 
       Set<String> decodedFiles = getDecodedFiles();
-      //       List<CommonExercise> exercises = getExercises();
       logger.debug(language + " found " + decodedFiles.size() + " previous ref results, checking " +
           exercises.size() + " exercises ");
 
@@ -168,14 +167,12 @@ public class RefResultDecoder {
           defaultAudio + " default " + "decoded " + count);
 
 
-      if (serverProps.addMissingInfo() ||
-          language.equalsIgnoreCase("msa") ||
-          language.equalsIgnoreCase("egyptian") ||
-          language.equalsIgnoreCase("mandarin") ||
-          language.equalsIgnoreCase("levantine") ||
-          language.equalsIgnoreCase("spanish")
+      if (serverProps.addMissingInfo()
           ) {
         runMissingInfo(exercises);
+      }
+      else {
+        logger.debug("not looking for missing info");
       }
     }
   }
@@ -206,14 +203,14 @@ public class RefResultDecoder {
    */
   private Set<String> getDecodedFiles() {
     List<Result> results = db.getRefResultDAO().getResults();
-    logger.debug(getLanguage() + " found " + results.size() + " previous ref results");
+//    logger.debug(getLanguage() + " found " + results.size() + " previous ref results");
 
     Set<String> decodedFiles = new HashSet<String>();
-    int count = 0;
+//    int count = 0;
     for (Result res : results) {
-      if (count++ < 20) {
-        logger.debug("\t found " + res);
-      }
+//      if (count++ < 20) {
+//        logger.debug("\t found " + res);
+//      }
 
       String[] bestAudios = res.getAnswer().split(File.separator);
       if (bestAudios.length > 1) {
