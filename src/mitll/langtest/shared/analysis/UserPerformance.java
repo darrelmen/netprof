@@ -1,6 +1,5 @@
 package mitll.langtest.shared.analysis;
 
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.server.database.analysis.Analysis;
 
 import java.io.Serializable;
@@ -11,18 +10,17 @@ import java.util.*;
  */
 
 public class UserPerformance implements Serializable {
-  public static final int TOSHOW = 2;
   //  private transient final Logger logger = Logger.getLogger("UserPerformance");
+  private static final int TOSHOW = 2;
   private List<TimeAndScore> rawTimeAndScores = new ArrayList<>();
   private List<TimeAndScore> iPadTimeAndScores = new ArrayList<>();
- // private List<TimeAndScore> browserTimeAndScores = new ArrayList<>();
   private List<TimeAndScore> learnTimeAndScores = new ArrayList<>();
   private List<TimeAndScore> avpTimeAndScores   = new ArrayList<>();
+  private Map<Long, List<PhoneSession>> granularityToSessions;
 
   private long userID;
 
-  public UserPerformance() {
-  }
+  public UserPerformance() {}
 
   /**
    * @param userID
@@ -44,16 +42,16 @@ public class UserPerformance implements Serializable {
 
   /**
    * @return
-   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long, String, int)
+   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    * @see #getRawAverage()
    */
-  public int getRawTotal() {
+  private int getRawTotal() {
     return rawTimeAndScores.size();
   }
 
   /**
    * @return
-   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long, String, int)
+   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
   public float getRawAverage() {
     float total = getTotalScore(rawTimeAndScores);
@@ -119,25 +117,11 @@ public class UserPerformance implements Serializable {
    * @see mitll.langtest.client.analysis.AnalysisPlot#getChart(String, String, String, UserPerformance)
    * @return
    */
-  public List<TimeAndScore> getiPadTimeAndScores() {
-    return iPadTimeAndScores;
-  }
-
-  /**
-   * @see mitll.langtest.client.analysis.AnalysisPlot#getChart(String, String, String, UserPerformance)
-   * @return
-   */
-/*  public List<TimeAndScore> getBrowserTimeAndScores() {
-    return browserTimeAndScores;
-  }*/
-
+  public List<TimeAndScore> getiPadTimeAndScores()  { return iPadTimeAndScores;  }
   public List<TimeAndScore> getLearnTimeAndScores() {
     return learnTimeAndScores;
   }
-
-  public List<TimeAndScore> getAvpTimeAndScores() {
-    return avpTimeAndScores;
-  }
+  public List<TimeAndScore> getAvpTimeAndScores()   { return avpTimeAndScores;   }
 
   public String toString() {
     StringBuilder builder = new StringBuilder();
@@ -148,5 +132,13 @@ public class UserPerformance implements Serializable {
       if (count++ > TOSHOW) break;
     }
     return builder.toString();
+  }
+
+  public Map<Long, List<PhoneSession>> getGranularityToSessions() {
+    return granularityToSessions;
+  }
+
+  public void setGranularityToSessions(Map<Long, List<PhoneSession>> granularityToSessions) {
+    this.granularityToSessions = granularityToSessions;
   }
 }
