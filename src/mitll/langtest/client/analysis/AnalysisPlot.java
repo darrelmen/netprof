@@ -9,6 +9,7 @@ import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.sound.SoundManagerAPI;
+import mitll.langtest.client.sound.SoundPlayer;
 import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseListWrapper;
@@ -16,6 +17,8 @@ import mitll.langtest.shared.analysis.TimeAndScore;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.moxieapps.gwt.highcharts.client.*;
+import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
+import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.SeriesClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.SeriesClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
@@ -45,7 +48,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
   private final Map<String, CommonShell> idToEx = new TreeMap<>();
   private final long userid;
   private final LangTestDatabaseAsync service;
-  private final MySoundFeedback soundFeedback;
+  private final SoundPlayer soundFeedback;
 
   /**
    * @param service
@@ -59,7 +62,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
     //   addStyleName("floatLeft");
     this.service = service;
     this.userid = userid;
-    this.soundFeedback = new MySoundFeedback(soundManagerAPI);
+    this.soundFeedback = new SoundPlayer(soundManagerAPI);
     //setHeight("350px");
     service.getExerciseIds(1, new HashMap<String, Collection<String>>(), "", -1,
         (int) userid, "", false, false, false, false, new AsyncCallback<ExerciseListWrapper>() {
@@ -100,42 +103,6 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
         setRawBestScores(rawBestScores);
       }
     });
-  }
-
-  public class MySoundFeedback extends SoundFeedback {
-    public MySoundFeedback(SoundManagerAPI soundManager) {
-      super(soundManager);
-    }
-
-    public synchronized void queueSong(String song, SoundFeedback.EndListener endListener) {
-      //logger.info("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
-      destroySound(); // if there's something playing, stop it!
-      createSound(song, endListener);
-    }
-
-    public synchronized void queueSong(String song) {
-      //logger.info("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
-      destroySound(); // if there's something playing, stop it!
-      createSound(song, null);
-    }
-
-    public synchronized void clear() {
-      //  logger.info("\t stop playing current sound -------  "+ System.currentTimeMillis());
-      destroySound(); // if there's something playing, stop it!
-    }
-
-    // TODO : remove this empty listener
-/*    private final SoundFeedback.EndListener endListener = new SoundFeedback.EndListener() {
-      @Override
-      public void songStarted() {
-        //logger.info("song started --------- "+ System.currentTimeMillis());
-      }
-
-      @Override
-      public void songEnded() {
-        //logger.info("song ended   --------- " + System.currentTimeMillis());
-      }
-    };*/
   }
 
   /**
@@ -189,8 +156,14 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
                                           }
                                         }
             )
-        );
-    ;
+        ).setSelectionEventHandler(new ChartSelectionEventHandler() {
+          @Override
+          public boolean onSelection(ChartSelectionEvent selectionEvent) {
+            logger.info("User selected from " + selectionEvent.getXAxisMin() + " to " + selectionEvent.getXAxisMax());
+            return true;
+          }
+        });
+
 
     Highcharts.setOptions(
         new Highcharts.Options().setGlobal(
