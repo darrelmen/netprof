@@ -14,8 +14,8 @@ public class PhoneAnalysis {
   private static final Logger logger = Logger.getLogger(PhoneAnalysis.class);
 
   private static final int DESIRED_NUM_SESSIONS = 15;
-  public static final int MIN_SESSION_SIZE = 9;
-  public static final int REAL_MIN_SESSION_SIZE = MIN_SESSION_SIZE;
+  private static final int MIN_SESSION_SIZE = 9;
+  private static final int REAL_MIN_SESSION_SIZE = MIN_SESSION_SIZE;
 
   private static final long MINUTE = 60 * 1000;
   private static final long HOUR = 60 * MINUTE;
@@ -24,7 +24,7 @@ public class PhoneAnalysis {
   private static final long QUARTER = 6 * HOUR;
   private static final long WEEK = 7 * DAY;
   private static final long MONTH = 4 * WEEK;
-  public static final List<Long> GRANULARITIES = Arrays.asList(FIVEMIN, HOUR, QUARTER, DAY, WEEK, MONTH);
+  private static final List<Long> GRANULARITIES = Arrays.asList(FIVEMIN, HOUR, QUARTER, DAY, WEEK, MONTH);
 
   /**
    * Adaptive granularity -- try to choose sessions separated by a time gap.
@@ -70,14 +70,24 @@ public class PhoneAnalysis {
     return serial;
   }
 
-  public List<PhoneSession> getPhoneSessions(String key, List<TimeAndScore> answersForUser, List<Long> times) {
-    Map<Long, List<PhoneSessionInternal>> granularityToSessions = getGranularityToSessions(key, answersForUser, times);
+  /**
+   * @see #partition(String, List)
+   * @param key
+   * @param answersForUser
+   * @param times
+   * @return
+   */
+  private List<PhoneSession> getPhoneSessions(String key, List<TimeAndScore> answersForUser, List<Long> times) {
+    Map<Long, List<PhoneSessionInternal>> granularityToSessions =
+        getGranularityToSessions(key, answersForUser, times);
 
     List<PhoneSessionInternal> toUse = chooseSession(times, granularityToSessions);
-    return getPhoneSessions(key, toUse, false);
+    return getPhoneSessions(key, toUse, true);
   }
 
-  public Map<Long, List<PhoneSessionInternal>> getGranularityToSessions(String key, List<TimeAndScore> answersForUser, List<Long> times) {
+  private Map<Long, List<PhoneSessionInternal>> getGranularityToSessions(String key,
+                                                                         List<TimeAndScore> answersForUser,
+                                                                         List<Long> times) {
     Map<Long, List<PhoneSessionInternal>> granularityToSessions = new HashMap<>();
     Map<Long, PhoneSessionInternal> granToCurrent = new HashMap<>();
     for (Long time : times) {
@@ -88,7 +98,14 @@ public class PhoneAnalysis {
     return granularityToSessions;
   }
 
-  public List<PhoneSession> getPhoneSessions(String key, List<PhoneSessionInternal> toUse, boolean prune) {
+  /**
+   * @see #getGranularityToSessions(List)
+   * @param key
+   * @param toUse
+   * @param prune
+   * @return
+   */
+  private List<PhoneSession> getPhoneSessions(String key, List<PhoneSessionInternal> toUse, boolean prune) {
     List<PhoneSession> sessions2 = new ArrayList<PhoneSession>();
     if (toUse == null) {
       logger.error("huh? no sessions?");
@@ -107,10 +124,10 @@ public class PhoneAnalysis {
     return sessions2;
   }
 
-  public void partition(String key,
-                        List<TimeAndScore> answersForUser,
-                        List<Long> times, Map<Long, List<PhoneSessionInternal>> granularityToSessions,
-                        Map<Long, PhoneSessionInternal> granToCurrent) {
+  private void partition(String key,
+                         List<TimeAndScore> answersForUser,
+                         List<Long> times, Map<Long, List<PhoneSessionInternal>> granularityToSessions,
+                         Map<Long, PhoneSessionInternal> granToCurrent) {
     long last = 0;
 
     for (TimeAndScore r : answersForUser) {
@@ -134,7 +151,7 @@ public class PhoneAnalysis {
     }
   }
 
-  public List<PhoneSessionInternal> chooseSession(List<Long> times, Map<Long, List<PhoneSessionInternal>> granularityToSessions) {
+  private List<PhoneSessionInternal> chooseSession(List<Long> times, Map<Long, List<PhoneSessionInternal>> granularityToSessions) {
     List<PhoneSessionInternal> toUse = null;
     for (Long time : times) {
       List<PhoneSessionInternal> phoneSessionInternals = granularityToSessions.get(time);
@@ -152,7 +169,7 @@ public class PhoneAnalysis {
   public static class PhoneSessionInternal {
     final transient SummaryStatistics summaryStatistics = new SummaryStatistics();
     final transient SummaryStatistics summaryStatistics2 = new SummaryStatistics();
-    private final String phone;
+  //  private final String phone;
     private double mean;
     private double stdev;
     private double meanTime;
@@ -161,7 +178,7 @@ public class PhoneAnalysis {
     final List<TimeAndScore> values = new ArrayList<>();
 
     public PhoneSessionInternal(String phone, long bin) {
-      this.phone = phone;
+    //  this.phone = phone;
       this.bin = bin;
     }
 
@@ -210,5 +227,4 @@ public class PhoneAnalysis {
       return phone;
     }*/
   }
-
 }
