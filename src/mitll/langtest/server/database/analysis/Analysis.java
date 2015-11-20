@@ -24,7 +24,7 @@ public class Analysis extends DAO {
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
   private static final float MIN_SCORE_TO_SHOW = 0.20f;
-//  private static final int DESIRED_NUM_SESSIONS = 15;
+  //  private static final int DESIRED_NUM_SESSIONS = 15;
 //  public static final int MIN_SESSION_SIZE = 9;
   private final ParseResultJson parseResultJson;
   private final PhoneDAO phoneDAO;
@@ -164,7 +164,11 @@ public class Analysis extends DAO {
         List<BestScore> resultsForQuery = next.getBestScores();
         if (DEBUG) logger.debug(" resultsForQuery for " + resultsForQuery.size());
 
-        return new UserPerformance(id, resultsForQuery);
+        UserPerformance userPerformance = new UserPerformance(id, resultsForQuery);
+
+        PhoneAnalysis analysis = new PhoneAnalysis();
+        userPerformance.setGranularityToSessions(analysis.getGranularityToSessions(userPerformance.getRawBestScores()));
+        return userPerformance;
       }
     } catch (Exception ee) {
       logException(ee);
@@ -453,7 +457,7 @@ public class Analysis extends DAO {
 
   /**
    * TODO : why do we parse json when we could just get it out of word and phone tables????
-   *
+   * <p>
    * Only show unique items -- even if BestScore might contain the same item multiple times.
    *
    * @param bestScores
@@ -467,7 +471,7 @@ public class Analysis extends DAO {
 
 //    int c = 0;
     int skipped = 0;
-    Map<String,WordScore> idToScore = new HashMap<>();
+    Map<String, WordScore> idToScore = new HashMap<>();
 
     for (BestScore bs : bestScores) {
       String json = bs.getJson();
@@ -480,7 +484,7 @@ public class Analysis extends DAO {
       } else if (bs.getScore() > MIN_SCORE_TO_SHOW) {
         if (json.isEmpty()) logger.warn("no json for " + bs);
         Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(json);
-      //  results.add(new WordScore(bs, netPronImageTypeListMap));
+        //  results.add(new WordScore(bs, netPronImageTypeListMap));
         WordScore wordScore = new WordScore(bs, netPronImageTypeListMap);
         WordScore current = idToScore.get(wordScore.getId());
         if (current == null || current.getTimestamp() < wordScore.getTimestamp()) {
