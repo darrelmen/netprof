@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
-  public static final int PLAY_WIDTH = 42;
+  public static final int PLAY_WIDTH = WordContainer.PLAY_WIDTH;
   private final Logger logger = Logger.getLogger("PhoneExampleContainer");
   private static final int ITEM_WIDTH = 200;
   private ShowTab learnTab;
@@ -172,8 +172,6 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
       table.setColumnWidth(column, PLAY_WIDTH + "px");
 
       table.setWidth("100%", true);
-
-
     } catch (Exception e) {
       logger.warning("Got " + e);
     }
