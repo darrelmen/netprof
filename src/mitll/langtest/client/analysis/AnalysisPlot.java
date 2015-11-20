@@ -40,7 +40,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
   private static final String CUMULATIVE_AVERAGE = "Average";
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
-  private static final int CHART_HEIGHT = 340;
+  private static final int CHART_HEIGHT = 330;
 
   private static final int Y_OFFSET_FOR_LEGEND = 60;
 
@@ -64,8 +64,46 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
     this.userid = userid;
     this.soundFeedback = new SoundPlayer(soundManagerAPI);
     //setHeight("350px");
+    populateExerciseMap(service, (int) userid);
+
+    getPerformanceForUser(service, userid, userChosenID, minRecordings);
+  }
+
+  private void getPerformanceForUser(LangTestDatabaseAsync service, long userid,
+                                     final String userChosenID, int minRecordings) {
+    service.getPerformanceForUser(userid, minRecordings, new AsyncCallback<UserPerformance>() {
+      @Override
+      public void onFailure(Throwable throwable) {
+        logger.warning("\n\n\n-> getPerformanceForUser " + throwable);
+      }
+
+      @Override
+      public void onSuccess(UserPerformance userPerformance) {
+        addChart(userPerformance, userChosenID);
+      }
+    });
+  }
+
+  private void addChart(UserPerformance userPerformance, String userChosenID) {
+    clear();
+    List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
+    float v = userPerformance.getRawAverage() * 100;
+    int rawTotal = rawBestScores.size();//userPerformance.getRawTotal();
+
+    if (rawBestScores.isEmpty()) {
+      add(new Label("No Recordings yet to analyze. Please record yourself."));
+    } else {
+//        logger.info("getPerformanceForUser raw total " + rawTotal + " num " + rawBestScores.size());
+      String subtitle = "Score and average (" + rawTotal + " items, average " + (int) v + " %)";
+      String title = "<b>" + userChosenID + "</b>" + " pronunciation score (Drag to zoom in, click to hear)";
+      add(getChart(title, subtitle, CUMULATIVE_AVERAGE, userPerformance));
+    }
+    setRawBestScores(rawBestScores);
+  }
+
+  private void populateExerciseMap(LangTestDatabaseAsync service, int userid) {
     service.getExerciseIds(1, new HashMap<String, Collection<String>>(), "", -1,
-        (int) userid, "", false, false, false, false, new AsyncCallback<ExerciseListWrapper>() {
+        userid, "", false, false, false, false, new AsyncCallback<ExerciseListWrapper>() {
           @Override
           public void onFailure(Throwable throwable) {
             logger.warning("\n\n\n-> getExerciseIds " + throwable);
@@ -78,31 +116,6 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
             }
           }
         });
-
-    service.getPerformanceForUser(userid, minRecordings, new AsyncCallback<UserPerformance>() {
-      @Override
-      public void onFailure(Throwable throwable) {
-        logger.warning("\n\n\n-> getPerformanceForUser " + throwable);
-      }
-
-      @Override
-      public void onSuccess(UserPerformance userPerformance) {
-        clear();
-        List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
-        float v = userPerformance.getRawAverage() * 100;
-        int rawTotal = rawBestScores.size();//userPerformance.getRawTotal();
-
-        if (rawBestScores.isEmpty()) {
-          add(new Label("No Recordings yet to analyze. Please record yourself."));
-        } else {
-//        logger.info("getPerformanceForUser raw total " + rawTotal + " num " + rawBestScores.size());
-          String subtitle = "Score and average (" + rawTotal + " items : avg score " + (int) v + " %)";
-          String title = "<b>" + userChosenID + "</b>" + " pronunciation score (Drag to zoom in, click to hear)";
-          add(getChart(title, subtitle, CUMULATIVE_AVERAGE, userPerformance));
-        }
-        setRawBestScores(rawBestScores);
-      }
-    });
   }
 
   /**
@@ -322,7 +335,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
     Series series = chart.createSeries()
         .setName(seriesTitle)
         .setPoints(data)
-        .setType(Series.Type.LINE);
+        .setType(Series.Type.SPLINE);
 
     chart.addSeries(series);
   }
