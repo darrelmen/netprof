@@ -33,10 +33,11 @@ import java.util.logging.Logger;
 class WordContainer extends SimplePagingContainer<WordScore> {
   private final Logger logger = Logger.getLogger("WordContainer");
 
-  private static final int ITEM_COL_WIDTH = 260;
+  private static final int ITEM_COL_WIDTH = 250;
   private static final String SCORE = "Score";
-  private static final int PLAY_WIDTH = 42;
-  private static final int NATIVE_WIDTH = 50;
+  public static final int SCORE_WIDTH = 68;
+  public static final int PLAY_WIDTH = 42;
+  private static final int NATIVE_WIDTH = PLAY_WIDTH;
   private static final String NATIVE = "Ref";
   private static final String PLAY = "Play";
 
@@ -183,7 +184,7 @@ class WordContainer extends SimplePagingContainer<WordScore> {
 
     scoreColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     scoreColumn.setSortable(true);
-    table.setColumnWidth(scoreColumn, 70 + "px");
+    table.setColumnWidth(scoreColumn, SCORE_WIDTH + "px");
 
     Column<WordScore, SafeHtml> column = getPlayAudio();
 
