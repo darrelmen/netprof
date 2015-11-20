@@ -190,10 +190,10 @@ public abstract class ExerciseList
     logger.info("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
         "' vs new exercise " + exerciseID + " instance " + getInstance());
     if (token != null && idFromToken.equals(exerciseID)) {
-      logger.info("\tpushFirstSelection : (" + getInstance() + ") current token " + token + " same as new " + exerciseID);
+      //logger.info("\tpushFirstSelection : (" + getInstance() + ") current token " + token + " same as new " + exerciseID);
       checkAndAskServer(exerciseID);
     } else {
-      logger.info("\tpushFirstSelection : (" + getInstance() + ") pushNewItem " + exerciseID);
+      //logger.info("\tpushFirstSelection : (" + getInstance() + ") pushNewItem " + exerciseID);
 
       pushNewItem("", exerciseID);
     }
