@@ -149,8 +149,9 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see RefResultDAO#
-   * @return
+   * So when updating old data that is missing word and phone alignment information, we have to put it back.
+   * @see mitll.langtest.server.decoder.RefResultDecoder#doMissingInfo
+   * @return to re-process
    */
   public List<Result> getResultsToDecode() {
     try {
@@ -171,6 +172,7 @@ public class ResultDAO extends DAO {
           ">=0" + " AND " +AUDIO_TYPE +" != 'regular' "+
           " AND " +AUDIO_TYPE +" != 'slow' "+
           " AND " +VALID + "=true " +
+          " AND " +DURATION + ">0.7 " +
           scoreJsonClause;
 
       logger.info("sql\n" +sql);
