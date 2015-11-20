@@ -61,7 +61,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    */
   public ASRWebserviceScoring(String deployPath, ServerProperties properties, LogAndNotify langTestDatabase) {
     super(deployPath, properties, langTestDatabase);
-//    logger.debug("Creating ASRWebserviceScoring object");
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
     ip = properties.getWebserviceIP();
     port = properties.getWebservicePort();
@@ -371,7 +370,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
       String[] split = results[0].split(";");
       Scores scores = new Scores(split);
       // clean up tmp directory if above score threshold
-      logger.debug("Took " + timeToRunHydra + " millis to run hydra - overall score: " + split[0]);
+      logger.debug(languageProperty + " : Took " + timeToRunHydra + " millis to run hydra - overall score: " + split[0]);
     /*if (Float.parseFloat(split[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
       try {
 				logger.debug("deleting " + tmpDir + " since score is " + split[0]);
