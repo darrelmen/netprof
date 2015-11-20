@@ -143,9 +143,9 @@ public class ExcelImport implements ExerciseDAO {
         for (CommonExercise ex : exercises) {
           attachAudio.attachAudio(ex);
           if (!ex.hasRefAudio()) missing++;
-          if (ex.getID().equals("166")) {
-            logger.info("Ex " + ex.getID() + " ref " + ex.getRefAudio());
-          }
+//          if (ex.getID().equals("166")) {
+//            logger.info("Ex " + ex.getID() + " ref " + ex.getRefAudio());
+//          }
         }
 
 /*        int user = 0;
@@ -378,10 +378,10 @@ public class ExcelImport implements ExerciseDAO {
    */
   private List<CommonExercise> readExercises(File file) {
     try {
-      logger.debug("Excel reading " + language + " from " + file.getAbsolutePath());
+//      logger.debug("Excel reading " + language + " from " + file.getAbsolutePath());
       return readExercises(new FileInputStream(file));
     } catch (FileNotFoundException e) {
-      logger.error("looking for " + file.getAbsolutePath() + " got " + e, e);
+      logger.error(language +" : looking for " + file.getAbsolutePath() + " got " + e, e);
     }
     return new ArrayList<CommonExercise>();
   }
@@ -426,9 +426,11 @@ public class ExcelImport implements ExerciseDAO {
           Collection<CommonExercise> exercises1 = readFromSheet(sheet);
           exercises.addAll(exercises1);
           logger.info("sheet " + sheet.getSheetName() + " had " + exercises1.size() + " items.");
-          if (!exercises1.isEmpty()) {
-            CommonExercise first = exercises1.iterator().next();
-            logger.debug("e.g. " + first + " content  " + first.getContent());
+          if (DEBUG) {
+            if (!exercises1.isEmpty()) {
+              CommonExercise first = exercises1.iterator().next();
+              logger.debug("e.g. " + first + " content  " + first.getContent());
+            }
           }
         }
       }
@@ -832,7 +834,7 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   private void logStatistics(int id, int semis, int skipped, int englishSkipped, int deleted) {
-    logger.info("max exercise id = " + id);
+//    logger.info("max exercise id = " + id);
     // logger.info("missing audio files = " +c);
     if (skipped > 0) {
       logger.info("Skipped " + skipped + " entries with missing audio. " + getPercent(skipped, id));
