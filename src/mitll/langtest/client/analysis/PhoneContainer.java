@@ -146,8 +146,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
       //  logger.info("showExamplesForSelectedSound adding " + phone + " num examples " + wordExamples.size());
       exampleContainer.addItems(phone, wordExamples);
       PhoneStats stats = phoneReport.getPhoneToAvgSorted().get(phone);
-      List<TimeAndScore> timeSeries = stats.getTimeSeries();
-      List<TimeAndScore> byTime = getByTime(timeSeries);
+    //  List<TimeAndScore> timeSeries = stats.getTimeSeries();
+    //  List<TimeAndScore> byTime = getByTime(timeSeries);
 //      phonePlot.showData(byTime,phone, isNarrow);
       phonePlot.showData2(stats.getSessions(),phone, isNarrow);
 
@@ -402,17 +402,17 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
    // for (WordAndScore ws : wordExamples) logger.info("gotClickOnItem got " + ws.getScore() + " " + ws.getWord());
     exampleContainer.addItems(phone, wordExamples);
     PhoneStats stats = phoneReport.getPhoneToAvgSorted().get(phone);
-    List<TimeAndScore> timeSeries = stats.getTimeSeries();
+   // List<TimeAndScore> timeSeries = stats.getTimeSeries();
 
 //    getByTime(timeSeries);
 //    DateTimeFormat format = DateTimeFormat.getFormat("E MMM d yy h:mm a");
  //   for (TimeAndScore ts : timeSeries) logger.info("gotClickOnItem " + format.format(new Date(ts.getTimestamp())) + " " +ts.getScore());
-    List<TimeAndScore> byTime = getByTime(timeSeries);
+  //  List<TimeAndScore> byTime = getByTime(timeSeries);
   //  phonePlot.showData(byTime,phone, isNarrow);
     phonePlot.showData2(stats.getSessions(),phone, isNarrow);
   }
 
-  private List<TimeAndScore> getByTime(List<TimeAndScore> timeSeries) {
+/*  private List<TimeAndScore> getByTime(List<TimeAndScore> timeSeries) {
     List<TimeAndScore> copy = new ArrayList<>();
     for (TimeAndScore ts : timeSeries) copy.add(ts);
     Collections.sort(copy, new Comparator<TimeAndScore>() {
@@ -422,7 +422,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
       }
     });
     return copy;
-  }
+  }*/
 
   private SafeHtml getSafeHtml(String columnText) {
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
