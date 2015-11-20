@@ -22,11 +22,12 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/19/15.
  */
 public class PhonePlot extends DivWidget implements IsWidget {
-//  private final Logger logger = Logger.getLogger("PhonePlot");
+  //  private final Logger logger = Logger.getLogger("PhonePlot");
 
   private static final String AVERAGE = "Average";
   private static final int NARROW_WIDTH = 330;
   private static final int CHART_HEIGHT = 340;
+  public static final String PRONUNCIATION_SCORE = " score";
   //private static final String PRONUNCIATION_SCORE = "Pronunciation Score";
 
  // private final Map<Long, String> timeToId = new TreeMap<>();
@@ -48,7 +49,7 @@ public class PhonePlot extends DivWidget implements IsWidget {
     if (rawBestScores.isEmpty()) {
       add(new Label("No Recordings yet to analyze. Please record yourself."));
     } else {
-      Chart chart = getChart2("<b>" + userChosenID + "</b>" + " pronunciation score",
+      Chart chart = getChart2("<b>" + userChosenID + "</b>" + PRONUNCIATION_SCORE,
           "Average score and range" //+
           , "Range", rawBestScores, isNarrow);
       add(chart);
