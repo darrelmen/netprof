@@ -8,8 +8,19 @@ import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -212,15 +223,11 @@ public class ServerProperties {
     return getDefaultFalse(ENABLE_ALL_USERS);
   }
 
-
   public boolean shouldDoDecode() {
-    return getDefaultFalse(DO_DECODE);
+    return getDefaultTrue(DO_DECODE);
   }
 
-  public int getAudioOffset() {
-    String audioOffset = AUDIO_OFFSET;
-    return getIntProperty(audioOffset);
-  }
+  public int getAudioOffset() {  return getIntProperty(AUDIO_OFFSET); }
 
   public int getIntProperty(String audioOffset) {
     try {
