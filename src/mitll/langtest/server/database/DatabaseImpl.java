@@ -251,12 +251,14 @@ public class DatabaseImpl implements Database {
    * @seex mitll.langtest.server.database.custom.UserListManagerTest#tearDown
    */
   public void closeConnection() throws SQLException {
+/*
     logger.debug("   ------- testing only closeConnection : now " + connection.connectionsOpen() + " open.");
 
     Connection connection1 = connection.getConnection(this.getClass().toString());
     if (connection1 != null) {
       connection1.close();
     }
+*/
   }
 
   /**
@@ -267,12 +269,12 @@ public class DatabaseImpl implements Database {
   private void putBackWordAndPhone() {
     List<Result> results = resultDAO.getResultsForPractice();
     Map<Integer, Result> idToResult = new HashMap<>();
-    int skipped = 0;
+    //int skipped = 0;
     for (Result r : results) {
       if (r.getJsonScore() != null && r.getJsonScore().length() > 13) {
         idToResult.put(r.getUniqueID(), r);
       } else {
-        skipped++;
+      //  skipped++;
       }
     }
 
@@ -284,11 +286,11 @@ public class DatabaseImpl implements Database {
       long rid = word.rid;
       already.add((int) rid);
     }
-    logger.debug("putBackWordAndPhone current word results " + already.size());
+  //  logger.debug("putBackWordAndPhone current word results " + already.size());
     Set<Integer> allKeys = new HashSet<>(idToResult.keySet());
-    logger.debug("putBackWordAndPhone before " + allKeys.size());
+  //  logger.debug("putBackWordAndPhone before " + allKeys.size());
     allKeys.removeAll(already);
-    logger.debug("putBackWordAndPhone after " + allKeys.size());
+//    logger.debug("putBackWordAndPhone after " + allKeys.size());
     ParseResultJson parseResultJson = new ParseResultJson(getServerProps());
     int count = 0;
     for (Integer key : allKeys) {
@@ -303,7 +305,9 @@ public class DatabaseImpl implements Database {
         logger.warn("skipping empty json for " + key);
       }
     }
-    logger.debug("putBackWordAndPhone fixed " + count);
+    if (count > 0) {
+      logger.debug("putBackWordAndPhone fixed " + count);
+    }
   }
 
   private MonitoringSupport getMonitoringSupport() {
@@ -341,7 +345,7 @@ public class DatabaseImpl implements Database {
   /**
    * @param id
    * @return
-   * @see mitll.langtest.server.LoadTesting#getExercise
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultASRInfo(long, int, int)
    */
   public CommonExercise getExercise(String id) {
     return exerciseDAO.getExercise(id);
