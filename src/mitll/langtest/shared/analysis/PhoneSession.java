@@ -11,10 +11,10 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   private double stdev;
   private double meanTime;
   private long count;
-  long bin;
-  String phone;
+  private long bin;
+  private String phone;
 
-  public PhoneSession(String phone,long bin,long count, double mean, double stdev, double meanTime) {
+  public PhoneSession(String phone, long bin, long count, double mean, double stdev, double meanTime) {
     this.phone = phone;
     this.bin = bin;
     this.count = count;
@@ -23,24 +23,16 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
     this.meanTime = meanTime;
   }
 
-  public PhoneSession() {
-  }
+  public PhoneSession() {}
 
   public double getMean() {
     return mean;
   }
-
   public double getStdev() {
     return stdev;
   }
-
-  public double getMeanTime() {
+  private double getMeanTime() {
     return meanTime;
-  }
-
-  public String toString() {
-    return phone + " : " +new Date(bin) + " n " + count +
-        " mean " + mean + "  stdev " + stdev + " time " + meanTime;
   }
 
   @Override
@@ -54,5 +46,10 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
 
   public long getBin() {
     return bin;
+  }
+
+  public String toString() {
+    return phone + " : " + new Date(bin) + " n " + count +
+        " mean " + mean + "  stdev " + stdev + " time " + meanTime;
   }
 }
