@@ -20,6 +20,9 @@ import java.util.logging.Logger;
  */
 public class AnalysisTab extends DivWidget {
   public static final String WORDS = "Words";
+  public static final String WORDS_USING_SOUND = "Words using Sound";
+  public static final String SOUNDS = "Sounds";
+  public static final String SUBTITLE = "scores > 20";
   private final Logger logger = Logger.getLogger("AnalysisTab");
   private final Panel bottom;
   private boolean isNarrow = false;
@@ -35,9 +38,10 @@ public class AnalysisTab extends DivWidget {
   public AnalysisTab(final LangTestDatabaseAsync service, final ExerciseController controller, final int userid,
                      final ShowTab showTab, String userChosenID, int minRecordings, DivWidget overallBottom) {
     getElement().setId("AnalysisTab");
-    final AnalysisPlot analysisPlot = new AnalysisPlot(service, userid, userChosenID, minRecordings,controller.getSoundManager());
+    final AnalysisPlot analysisPlot = new AnalysisPlot(service, userid, userChosenID, minRecordings,
+        controller.getSoundManager());
     add(analysisPlot);
-   // bottom = new DivWidget();
+    // bottom = new DivWidget();
     bottom = new HorizontalPanel();
     bottom.getElement().setId("bottom");
     bottom.addStyleName("floatLeft");
@@ -68,15 +72,20 @@ public class AnalysisTab extends DivWidget {
         final WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab);
         Panel tableWithPager = wordContainer.getTableWithPager(wordScores);
 
-        DivWidget vert = new DivWidget();
-        vert.getElement().setId("WordsContainer");
-        vert.addStyleName("floatLeft");
-        vert.add(new Heading(3, WORDS, "scores > 20"));
-        vert.add(tableWithPager);
+        DivWidget vert = getWordContainerDiv(tableWithPager, "WordsContainer", new Heading(3, WORDS, SUBTITLE));
         lowerHalf.add(vert);
         getPhoneReport(service, controller, userid, lowerHalf, analysisPlot, showTab, minRecordings);
       }
     });
+  }
+
+  public DivWidget getWordContainerDiv(Panel tableWithPager, String containerID, Heading w) {
+    DivWidget vert = new DivWidget();
+    vert.getElement().setId(containerID);
+    vert.addStyleName("floatLeft");
+    vert.add(w);
+    vert.add(tableWithPager);
+    return vert;
   }
 
   private void getPhoneReport(LangTestDatabaseAsync service,
@@ -100,25 +109,13 @@ public class AnalysisTab extends DivWidget {
       public void onSuccess(PhoneReport phoneReport) {
         // logger.info("getPhoneScores " + phoneReport);
         Panel phones = phoneContainer.getTableWithPager(phoneReport);
-
-        DivWidget sounds = new DivWidget();
-        sounds.getElement().setId("SoundsContainer");
-        sounds.add(new Heading(3, "Sounds"));
-        sounds.addStyleName("floatLeft");
-
-        sounds.add(phones);
+        DivWidget sounds = getSoundsContainer(phones);
         //  sounds.addStyleName("leftTenMargin");
         lowerHalf.add(sounds);
 
         Panel examples = exampleContainer.getTableWithPager();
 
-        DivWidget wordExamples = new DivWidget();
-        wordExamples.getElement().setId("WordExamples");
-        wordExamples.addStyleName("floatLeft");
-
-        wordExamples.add(new Heading(3, "Words using Sound"));
-        wordExamples.add(examples);
-        wordExamples.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
+        DivWidget wordExamples = getWordExamples(examples);
         lowerHalf.add(wordExamples);
 
         phonePlot.addStyleName("topMargin");
@@ -128,5 +125,27 @@ public class AnalysisTab extends DivWidget {
         phoneContainer.showExamplesForSelectedSound();
       }
     });
+  }
+
+  public DivWidget getSoundsContainer(Panel phones) {
+    DivWidget sounds = new DivWidget();
+    sounds.getElement().setId("SoundsContainer");
+    sounds.add(new Heading(3, SOUNDS));
+    sounds.addStyleName("floatLeft");
+
+    sounds.add(phones);
+    return sounds;
+  }
+
+  public DivWidget getWordExamples(Panel examples) {
+/*    DivWidget wordExamples = new DivWidget();
+    wordExamples.getElement().setId("WordExamples");
+    wordExamples.addStyleName("floatLeft");
+    wordExamples.add(new Heading(3, WORDS_USING_SOUND));
+    wordExamples.add(examples);*/
+
+    DivWidget wordExamples = getWordContainerDiv(examples, "WordExamples", new Heading(3, WORDS_USING_SOUND));
+    wordExamples.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
+    return wordExamples;
   }
 }
