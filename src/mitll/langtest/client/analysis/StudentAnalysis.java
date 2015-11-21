@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/27/15.
  */
 public class StudentAnalysis extends DivWidget {
-  public static final int LEFT_MARGIN = UserContainer.TABLE_WIDTH+ 55;
+  public static final int LEFT_MARGIN = UserContainer.TABLE_WIDTH+ 53;
   public static final int TOP_MARGIN = -55;
   public static final String STUDENTS = "Students";
   public static final String OR_MORE_RECORDINGS = "5 or more recordings";
@@ -37,35 +37,57 @@ public class StudentAnalysis extends DivWidget {
       @Override
       public void onSuccess(Collection<UserInfo> users) {
         DivWidget rightSide = new DivWidget();
-        DivWidget top       = new DivWidget();
-        DivWidget bottom    = new DivWidget();
-        bottom.addStyleName("floatLeft");
-        UserContainer userContainer = new UserContainer(service, controller, rightSide, bottom, showTab);
-        List<UserInfo> filtered = new ArrayList<UserInfo>();
-        for (UserInfo userInfo : users) {
-          User user = userInfo.getUser();
-          if (user != null && user.getUserID() != null && !user.getUserID().equals("defectDetector")) {
-            filtered.add(userInfo);
-          }
-          else {
-            logger.warning("skip " + user);
-          }
-        }
-        Heading students = new Heading(3, STUDENTS, OR_MORE_RECORDINGS);
-        students.setWidth(STUDENT_WIDTH + "px");
-        //VerticalPanel leftSide = new VerticalPanel();
-        DivWidget leftSide = new DivWidget();
-        leftSide.add(students);
-        Panel tableWithPager = userContainer.getTableWithPager(filtered);
-        leftSide.add(tableWithPager);
+        rightSide.getElement().setId("rightSide");
+       // rightSide.addStyleName("floatNone");
+       // rightSide.addStyleName("floatLeftList");
+       // rightSide.getElement().getStyle().setOverflow(Style.Overflow.AUTO);
 
+        DivWidget bottom    = new DivWidget();
+        bottom.addStyleName("floatLeftList");
+
+        UserContainer userContainer = new UserContainer(service, controller, rightSide, bottom, showTab);
+
+        Panel tableWithPager = userContainer.getTableWithPager(getUserInfos(users));
+
+        DivWidget leftSide = getStudentContainer(tableWithPager);
+
+        DivWidget top       = new DivWidget();
+        top.getElement().setId("top");
+
+       //top.addStyleName("inlineBlockStyleOnly");
         top.add(leftSide);
         top.add(rightSide);
         add(top);
-        rightSide.getElement().getStyle().setMarginTop(TOP_MARGIN, Style.Unit.PX);
+       // rightSide.getElement().getStyle().setMarginTop(TOP_MARGIN, Style.Unit.PX);
         rightSide.getElement().getStyle().setMarginLeft(LEFT_MARGIN, Style.Unit.PX);
         add(bottom);
       }
     });
+  }
+
+  public DivWidget getStudentContainer(Panel tableWithPager) {
+    Heading students = new Heading(3, STUDENTS, OR_MORE_RECORDINGS);
+    students.setWidth(STUDENT_WIDTH + "px");
+    //VerticalPanel leftSide = new VerticalPanel();
+    DivWidget leftSide = new DivWidget();
+    leftSide.getElement().setId("studentDiv");
+    leftSide.addStyleName("floatLeftList");
+    leftSide.add(students);
+    leftSide.add(tableWithPager);
+    return leftSide;
+  }
+
+  public List<UserInfo> getUserInfos(Collection<UserInfo> users) {
+    List<UserInfo> filtered = new ArrayList<UserInfo>();
+    for (UserInfo userInfo : users) {
+      User user = userInfo.getUser();
+      if (user != null && user.getUserID() != null && !user.getUserID().equals("defectDetector")) {
+        filtered.add(userInfo);
+      }
+      else {
+        logger.warning("skip " + user);
+      }
+    }
+    return filtered;
   }
 }
