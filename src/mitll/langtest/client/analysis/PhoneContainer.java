@@ -149,7 +149,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
     //  List<TimeAndScore> timeSeries = stats.getTimeSeries();
     //  List<TimeAndScore> byTime = getByTime(timeSeries);
 //      phonePlot.showData(byTime,phone, isNarrow);
-      phonePlot.showData2(stats.getSessions(),phone, isNarrow);
+      phonePlot.showErrorBarData(stats.getSessions(),phone, isNarrow);
 
     }
   }
@@ -409,7 +409,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
  //   for (TimeAndScore ts : timeSeries) logger.info("gotClickOnItem " + format.format(new Date(ts.getTimestamp())) + " " +ts.getScore());
   //  List<TimeAndScore> byTime = getByTime(timeSeries);
   //  phonePlot.showData(byTime,phone, isNarrow);
-    phonePlot.showData2(stats.getSessions(),phone, isNarrow);
+    phonePlot.showErrorBarData(stats.getSessions(),phone, isNarrow);
   }
 
 /*  private List<TimeAndScore> getByTime(List<TimeAndScore> timeSeries) {
