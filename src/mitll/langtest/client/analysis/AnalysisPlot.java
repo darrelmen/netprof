@@ -1,21 +1,16 @@
 package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Label;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.IsWidget;
-import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundPlayer;
-import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.ExerciseListWrapper;
+import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.TimeAndScore;
 import mitll.langtest.shared.analysis.UserPerformance;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.moxieapps.gwt.highcharts.client.*;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEventHandler;
@@ -31,14 +26,24 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 10/19/15.
  */
-public class AnalysisPlot extends DivWidget implements IsWidget {
-  private static final String WAV = ".wav";
-  private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
+public class AnalysisPlot extends TimeSeriesPlot {
+  private final Logger logger = Logger.getLogger("AnalysisPlot");
+
+  private static final long MINUTE = 60 * 1000;
+  private static final long HOUR = 60 * MINUTE;
+  private static final long QUARTER = 6 * HOUR;
+
+  private static final long FIVEMIN = 5 * MINUTE;
+  private static final long DAY = 24 * HOUR;
+  private static final long WEEK = 7 * DAY;
+  private static final long MONTH = 4 * WEEK;
+
+//  private static final int NARROW_WIDTH = 330;
+
   private static final String I_PAD_I_PHONE = "iPad/iPhone";
   private static final String VOCAB_PRACTICE = "Vocab Practice";
   private static final String LEARN = "Learn";
   private static final String CUMULATIVE_AVERAGE = "Average";
-  private final Logger logger = Logger.getLogger("AnalysisPlot");
 
   private static final int CHART_HEIGHT = 330;
 
@@ -48,7 +53,8 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
   private final Map<String, CommonShell> idToEx = new TreeMap<>();
   private final long userid;
   private final LangTestDatabaseAsync service;
-  private final SoundPlayer soundFeedback;
+  private final PlayAudio playAudio;
+  private final HashMap<Long, String> granToLabel;
 
   /**
    * @param service
@@ -57,12 +63,22 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
    * @param minRecordings
    * @see AnalysisTab#AnalysisTab
    */
-  public AnalysisPlot(LangTestDatabaseAsync service, long userid, final String userChosenID, final int minRecordings, SoundManagerAPI soundManagerAPI) {
+  public AnalysisPlot(LangTestDatabaseAsync service, long userid, final String userChosenID, final int minRecordings,
+                      SoundManagerAPI soundManagerAPI) {
     getElement().setId("AnalysisPlot");
     //   addStyleName("floatLeft");
     this.service = service;
     this.userid = userid;
-    this.soundFeedback = new SoundPlayer(soundManagerAPI);
+    this.granToLabel = new HashMap<Long, String>();
+    granToLabel.put(HOUR, "Hour");
+    granToLabel.put(QUARTER, "6 Hours");
+    granToLabel.put(DAY, "Day");
+    granToLabel.put(WEEK, "Week");
+    granToLabel.put(MONTH, "Month");
+    granToLabel.put(FIVEMIN, "Minute");
+
+    SoundPlayer soundFeedback = new SoundPlayer(soundManagerAPI);
+    this.playAudio = new PlayAudio(service, soundFeedback);
     //setHeight("350px");
     populateExerciseMap(service, (int) userid);
 
@@ -126,9 +142,86 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
    * @see AnalysisPlot#AnalysisPlot
    */
   private Chart getChart(String title, String subtitle, String seriesName, UserPerformance userPerformance) {
-    Chart chart = new Chart()
+    final Chart chart = getChart(title);
+
+    Highcharts.setOptions(
+        new Highcharts.Options().setGlobal(
+            new Global()
+                .setUseUTC(false)
+        ));
+
+
+    List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
+
+
+    TimeAndScore first = rawBestScores.get(0);
+    TimeAndScore last = rawBestScores.get(rawBestScores.size() - 1);
+
+    long diff = last.getTimestamp() - first.getTimestamp();
+    boolean visible = true;//(diff < QUARTER);
+    addSeries(rawBestScores,
+        userPerformance.getiPadTimeAndScores(),
+        userPerformance.getLearnTimeAndScores(),
+        userPerformance.getAvpTimeAndScores(),
+        chart,
+        seriesName,
+        visible);
+
+
+    //addErrorBars(userPerformance, chart);
+    configureChart(chart, subtitle);
+
+ /*   Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        logger.info("redraw --- ");
+        chart.redraw();
+      }
+    });
+*/
+    return chart;
+  }
+
+  private void addErrorBars(UserPerformance userPerformance, Chart chart) {
+    Map<Long, List<PhoneSession>> granularityToSessions = userPerformance.getGranularityToSessions();
+    Map<Long, Series> granToError = new HashMap<>();
+    boolean oneSet = false;
+    long granChosen = 0;
+
+    List<Long> grans = new ArrayList<>(granularityToSessions.keySet());
+    Collections.sort(grans);
+    for (Long gran : grans) {
+      String s = granToLabel.get(gran);
+      logger.info("Adding for " + s);
+      List<PhoneSession> phoneSessions = granularityToSessions.get(gran);
+      Series series = addErrorBarSeries(phoneSessions, chart, s, true);
+      int size = phoneSessions.size();
+      if (!oneSet) {
+        if (size < 15) {
+          oneSet = true;
+          granChosen = gran;
+          series.setVisible(true);
+          logger.info("1 chose " + gran + " : " + size);
+        }
+        else {
+          logger.info("2 chose " + gran+ " : " + size);
+//          series.setVisible(false, false);
+        }
+      } else {
+        logger.info("3 chose " + gran+ " : " + size);
+        //    series.setVisible(false, false);
+      }
+      granToError.put(gran, series);
+    }
+
+    if (granChosen > 0) {
+      setRawBestScores2(granularityToSessions.get(granChosen));
+    }
+  }
+
+  private Chart getChart(String title) {
+    return new Chart()
         .setZoomType(BaseChart.ZoomType.X)
-        .setType(Series.Type.SCATTER)
+        //.setType(Series.Type.SCATTER)
         .setChartTitleText(title)
         //     .setChartSubtitleText(subtitle)
         .setMarginRight(10)
@@ -158,17 +251,7 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
             ))
         .setToolTip(getToolTip())
         .setSeriesPlotOptions(new SeriesPlotOptions()
-            .setSeriesClickEventHandler(new SeriesClickEventHandler() {
-                                          public boolean onClick(SeriesClickEvent clickEvent) {
-                                            long nearestXAsLong = clickEvent.getNearestXAsLong();
-                                            String s = timeToId.get(nearestXAsLong);
-                                            if (s != null) {
-                                              playLast(s);
-                                            }
-                                            return true;
-                                          }
-                                        }
-            )
+            .setSeriesClickEventHandler(getSeriesClickEventHandler())
         ).setSelectionEventHandler(new ChartSelectionEventHandler() {
           @Override
           public boolean onSelection(ChartSelectionEvent selectionEvent) {
@@ -176,111 +259,75 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
             return true;
           }
         });
-
-
-    Highcharts.setOptions(
-        new Highcharts.Options().setGlobal(
-            new Global()
-                .setUseUTC(false)
-        ));
-
-    addSeries(userPerformance.getRawBestScores(),
-        userPerformance.getiPadTimeAndScores(),
-        userPerformance.getLearnTimeAndScores(),
-        userPerformance.getAvpTimeAndScores(),
-        chart, seriesName);
-
-    configureChart(chart, subtitle);
-    return chart;
   }
 
-  com.google.gwt.user.client.Timer t;
-
-  public void playLast(String id) {
-    service.getExercise(id, userid, false, new AsyncCallback<CommonExercise>() {
-      @Override
-      public void onFailure(Throwable throwable) {
-      }
-
-      @Override
-      public void onSuccess(CommonExercise commonExercise) {
-        List<CorrectAndScore> scores = commonExercise.getScores();
-        CorrectAndScore correctAndScore = scores.get(scores.size() - 1);
-        String refAudio = commonExercise.getRefAudio();
-
-        if (t != null) t.cancel();
-        if (refAudio != null) {
-          playLastThenRef(correctAndScore, refAudio);
+  private SeriesClickEventHandler getSeriesClickEventHandler() {
+    return new SeriesClickEventHandler() {
+      public boolean onClick(SeriesClickEvent clickEvent) {
+        long nearestXAsLong = clickEvent.getNearestXAsLong();
+        String s = timeToId.get(nearestXAsLong);
+        if (s != null) {
+          playAudio.playLast(s, userid);
         }
+        return true;
       }
-    });
-  }
-
-  public void playLastThenRef(CorrectAndScore correctAndScore, String refAudio) {
-    final String path = getPath(refAudio);
-    soundFeedback.queueSong(getPath(correctAndScore.getPath()), new SoundFeedback.EndListener() {
-      @Override
-      public void songStarted() {
-
-      }
-
-      @Override
-      public void songEnded() {
-        t = new com.google.gwt.user.client.Timer() {
-          @Override
-          public void run() {
-            soundFeedback.queueSong(path);
-          }
-        };
-        t.schedule(100);
-      }
-
-    });
-  }
-
-  private String getPath(String path) {
-    path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
-    path = ensureForwardSlashes(path);
-    return path;
-  }
-
-  private String ensureForwardSlashes(String wavPath) {
-    return wavPath.replaceAll("\\\\", "/");
+    };
   }
 
   private ToolTip getToolTip() {
     return new ToolTip()
         .setFormatter(new ToolTipFormatter() {
           public String format(ToolTipData toolTipData) {
-            String exerciseID = timeToId.get(toolTipData.getXAsLong());
-            CommonShell commonShell = getIdToEx().get(exerciseID);
-            return getTooltip(toolTipData, exerciseID, commonShell);
+            try {
+
+              //    logger.info("timeToId " + (timeToId != null));
+              //   logger.info("getIdToEx " + (getIdToEx() != null));
+              // logger.info("toolTipData " + toolTipData);
+
+              String exerciseID = timeToId.get(toolTipData.getXAsLong());
+
+              ///  logger.info("exerciseID " + exerciseID);
+
+              CommonShell commonShell = exerciseID == null ? null : getIdToEx().get(exerciseID);
+              //    logger.info("getTooltip " + commonShell);
+
+              return getTooltip(toolTipData, exerciseID, commonShell);
+            } catch (Exception e) {
+              logger.warning(e.getMessage());
+              e.printStackTrace();
+              return "";
+            }
           }
         });
   }
 
-  private DateTimeFormat format = DateTimeFormat.getFormat("E MMM d yy h:mm a");
-  private DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
-  DateTimeFormat shortFormat = DateTimeFormat.getFormat("MMM d, yy");
-  Date now = new Date();
+//  private DateTimeFormat format = DateTimeFormat.getFormat("E MMM d yy h:mm a");
+//  private DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
+//  DateTimeFormat shortFormat = DateTimeFormat.getFormat("MMM d, yy");
+//  String nowFormat = shortFormat.format(new Date());
 
   public String getTooltip(ToolTipData toolTipData, String s, CommonShell commonShell) {
     String foreignLanguage = commonShell == null ? "" : commonShell.getForeignLanguage();
     String english = commonShell == null ? "" : commonShell.getEnglish();
 
     String seriesName1 = toolTipData.getSeriesName();
+
+    String dateToShow = getDateToShow(toolTipData);
+    if (granToLabel.values().contains(seriesName1)) {
+      //logger.info("get error bar tool tip");
+      return getErrorBarToolTip(toolTipData, seriesName1, dateToShow);
+    } else {
+//      logger.info("series is " + seriesName1);
+    }
     boolean showEx = (!seriesName1.contains(CUMULATIVE_AVERAGE));
-    String englishTool = "<br/>" + english;
-    if (english.equals("N/A")) englishTool = "";
-
-    Date date = new Date(toolTipData.getXAsLong());
-
-    // this year?
-    String nowFormat = shortFormat.format(now);
-    String shortForDate = shortFormat.format(date);
-
-    DateTimeFormat toUse = (nowFormat.substring(nowFormat.length() - 2).equals(shortForDate.substring(shortForDate.length() - 2))) ? noYearFormat : format;
-    String dateToShow = toUse.format(date);
+    String englishTool = (english == null || english.equals("N/A")) ? "" : "<br/>" + english;
+//
+//    logger.info("series " + seriesName1);
+//    logger.info("dateToShow " + dateToShow);
+//    logger.info("foreignLanguage " + foreignLanguage);
+//    logger.info("englishTool " + englishTool);
+//    logger.info("showEx " + showEx);
+//    logger.info("toolTipData " + toolTipData);
 
     return
         "<b>" + seriesName1 + "</b>" +
@@ -313,19 +360,17 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
                          List<TimeAndScore> learnData,
                          List<TimeAndScore> avpData,
                          Chart chart,
-                         String seriesTitle) {
-    addCumulativeAverage(yValuesForUser, chart, seriesTitle);
+                         String seriesTitle, boolean visible) {
+    addCumulativeAverage(yValuesForUser, chart, seriesTitle, visible);
 
-    addDeviceData(iPadData, chart);
-
-    addBrowserData(learnData, chart, false);
-    addBrowserData(avpData, chart, true);
+    addDeviceData(iPadData, chart, visible);
+    addBrowserData(learnData, chart, false, visible);
+    addBrowserData(avpData, chart, true, visible);
   }
 
-  private void addCumulativeAverage(List<TimeAndScore> yValuesForUser, Chart chart, String seriesTitle) {
+  private void addCumulativeAverage(List<TimeAndScore> yValuesForUser, Chart chart, String seriesTitle, boolean isVisible) {
     Number[][] data = new Number[yValuesForUser.size()][2];
 
-    // logger.info("got " + yValuesForUser.size());
     int i = 0;
     for (TimeAndScore ts : yValuesForUser) {
       data[i][0] = ts.getTimestamp();
@@ -335,40 +380,44 @@ public class AnalysisPlot extends DivWidget implements IsWidget {
     Series series = chart.createSeries()
         .setName(seriesTitle)
         .setPoints(data)
-        .setType(Series.Type.SPLINE);
+        .setType(Series.Type.SPLINE)
+        .setVisible(isVisible, false);
+//    series.setVisible(false,false);
 
     chart.addSeries(series);
   }
 
-  private void addDeviceData(List<TimeAndScore> iPadData, Chart chart) {
+  private void addDeviceData(List<TimeAndScore> iPadData, Chart chart, boolean isVisible) {
     // logger.info("iPadData " + iPadData.size());
 
     if (!iPadData.isEmpty()) {
-      Number[][] data;
-      data = getDataForTimeAndScore(iPadData);
+      Number[][] data = getDataForTimeAndScore(iPadData);
 
       String iPadName = I_PAD_I_PHONE;// + PRONUNCIATION_SCORE;
       Series series = chart.createSeries()
           .setName(iPadName)
           .setPoints(data)
-          .setOption("color", "#00B800");
+          .setOption("color", "#00B800")
+          .setType(Series.Type.SCATTER)
+          .setVisible(isVisible, false);
 
       chart.addSeries(series);
     }
   }
 
-  private void addBrowserData(List<TimeAndScore> browserData, Chart chart, boolean isAVP) {
+  private void addBrowserData(List<TimeAndScore> browserData, Chart chart, boolean isAVP, boolean isVisible) {
     //   logger.info("browserData " + browserData.size());
 
     if (!browserData.isEmpty()) {
-      Number[][] data;
-      data = getDataForTimeAndScore(browserData);
+      Number[][] data = getDataForTimeAndScore(browserData);
 
       String prefix = isAVP ? VOCAB_PRACTICE : LEARN;
 
       Series series = chart.createSeries()
           .setName(prefix)
-          .setPoints(data);
+          .setPoints(data)
+          .setType(Series.Type.SCATTER)
+          .setVisible(isVisible, false);
 
       chart.addSeries(series);
     }
