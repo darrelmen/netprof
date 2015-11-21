@@ -6,6 +6,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -40,13 +41,14 @@ public class AnalysisTab extends DivWidget {
     getElement().setId("AnalysisTab");
     final AnalysisPlot analysisPlot = new AnalysisPlot(service, userid, userChosenID, minRecordings,
         controller.getSoundManager());
+    analysisPlot.addStyleName("cardBorderShadow");
+    analysisPlot.getElement().getStyle().setMargin(10, Style.Unit.PX);
+
     add(analysisPlot);
-    // bottom = new DivWidget();
+ //   bottom = new DivWidget();
     bottom = new HorizontalPanel();
     bottom.getElement().setId("bottom");
     bottom.addStyleName("floatLeft");
-
-//    bottom = new HorizontalPanel();
 
     if (overallBottom != null) {
       overallBottom.add(bottom);
@@ -72,9 +74,22 @@ public class AnalysisTab extends DivWidget {
         final WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab);
         Panel tableWithPager = wordContainer.getTableWithPager(wordScores);
 
-        DivWidget vert = getWordContainerDiv(tableWithPager, "WordsContainer", new Heading(3, WORDS, SUBTITLE));
-        lowerHalf.add(vert);
-        getPhoneReport(service, controller, userid, lowerHalf, analysisPlot, showTab, minRecordings);
+        DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer", new Heading(3, WORDS, SUBTITLE));
+        wordsContainer.addStyleName("cardBorderShadow");
+        wordsContainer.getElement().getStyle().setMargin(10, Style.Unit.PX);
+
+        lowerHalf.add(wordsContainer);
+
+
+        DivWidget soundsDiv = new DivWidget();
+     //   Widget soundsDiv = new DivWidget();
+        soundsDiv.addStyleName("cardBorderShadow");
+        soundsDiv.addStyleName("floatRight");
+        soundsDiv.getElement().getStyle().setMargin(10, Style.Unit.PX);
+//        soundsDiv.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+
+        lowerHalf.add(soundsDiv);
+        getPhoneReport(service, controller, userid, soundsDiv, analysisPlot, showTab, minRecordings);
       }
     });
   }
@@ -108,16 +123,17 @@ public class AnalysisTab extends DivWidget {
       @Override
       public void onSuccess(PhoneReport phoneReport) {
         // logger.info("getPhoneScores " + phoneReport);
+        // #1 - phones
         Panel phones = phoneContainer.getTableWithPager(phoneReport);
         DivWidget sounds = getSoundsContainer(phones);
-        //  sounds.addStyleName("leftTenMargin");
         lowerHalf.add(sounds);
 
+        // #2 - word examples
         Panel examples = exampleContainer.getTableWithPager();
-
         DivWidget wordExamples = getWordExamples(examples);
         lowerHalf.add(wordExamples);
 
+        // #3 - phone plot
         phonePlot.addStyleName("topMargin");
         phonePlot.addStyleName("floatLeft");
         lowerHalf.add(phonePlot);
@@ -132,18 +148,11 @@ public class AnalysisTab extends DivWidget {
     sounds.getElement().setId("SoundsContainer");
     sounds.add(new Heading(3, SOUNDS));
     sounds.addStyleName("floatLeft");
-
     sounds.add(phones);
     return sounds;
   }
 
   public DivWidget getWordExamples(Panel examples) {
-/*    DivWidget wordExamples = new DivWidget();
-    wordExamples.getElement().setId("WordExamples");
-    wordExamples.addStyleName("floatLeft");
-    wordExamples.add(new Heading(3, WORDS_USING_SOUND));
-    wordExamples.add(examples);*/
-
     DivWidget wordExamples = getWordContainerDiv(examples, "WordExamples", new Heading(3, WORDS_USING_SOUND));
     wordExamples.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
     return wordExamples;
