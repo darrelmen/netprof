@@ -1,6 +1,8 @@
 package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Label;
+import com.google.gwt.dom.client.*;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import mitll.langtest.shared.analysis.PhoneSession;
 import org.moxieapps.gwt.highcharts.client.*;
@@ -16,7 +18,7 @@ public class PhonePlot extends TimeSeriesPlot/* implements IsWidget*/ {
   //  private final Logger logger = Logger.getLogger("PhonePlot");
 
   public static final String PRONUNCIATION_SCORE = " score";
-  private static final int CHART_HEIGHT = 340;
+  private static final int CHART_HEIGHT = 315;
   private static final int NARROW_WIDTH = 330;
 
   public PhonePlot() {
@@ -77,7 +79,7 @@ public class PhonePlot extends TimeSeriesPlot/* implements IsWidget*/ {
         .setZoomType(BaseChart.ZoomType.X)
             // .setType(Series.Type.ERRORBAR)
         .setChartTitleText(title)
-        .setMarginRight(10)
+      //  .setMarginRight(10)
         .setOption("/credits/enabled", false)
         .setOption("/plotOptions/series/pointStart", 1)
         .setOption("/legend/enabled", false)
@@ -112,9 +114,12 @@ public class PhonePlot extends TimeSeriesPlot/* implements IsWidget*/ {
   }
 
   protected void configureWidth(boolean narrow, Chart chart) {
-    int clientWidth = Window.getClientWidth();
-    if (clientWidth < 1450) narrow = true;
-    if (narrow) chart.setWidth(NARROW_WIDTH);
+//    int clientWidth = Window.getClientWidth();
+//    if (clientWidth < 1450) narrow = true;
+//    if (narrow) chart.setWidth(NARROW_WIDTH);
+    chart.setWidth(NARROW_WIDTH);
+//    chart.getElement().getStyle().setProperty("minWidth",NARROW_WIDTH, Style.Unit.PX);
+
   }
 
   /*  private void setRawBestScores(List<TimeAndScore> rawBestScores) {
