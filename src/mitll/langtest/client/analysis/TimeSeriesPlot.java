@@ -1,23 +1,26 @@
 /*
  * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
  */
-
 package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import mitll.langtest.shared.analysis.PhoneSession;
+import mitll.langtest.shared.analysis.UserPerformance;
 import org.moxieapps.gwt.highcharts.client.*;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 11/20/15.
  */
 public class TimeSeriesPlot extends DivWidget {
+  private final Logger logger = Logger.getLogger("TimeSeriesPlot");
+
   protected static final String AVERAGE = "Average";
   private final Map<Long, PhoneSession> timeToSession = new TreeMap<>();
 
@@ -96,6 +99,7 @@ public class TimeSeriesPlot extends DivWidget {
    * @param seriesTitle
    * @param hidden
    * @see PhonePlot#getErrorBarChart(String, String, String, List, boolean)
+   * @see AnalysisPlot#addErrorBars(UserPerformance, Chart)
    */
   protected Series addErrorBarSeries(List<PhoneSession> yValuesForUser, Chart chart, String seriesTitle, boolean hidden) {
     Number[][] data = new Number[yValuesForUser.size()][3];
@@ -117,10 +121,18 @@ public class TimeSeriesPlot extends DivWidget {
         .setName(seriesTitle)
         .setPoints(data)
         .setType(Series.Type.ERRORBAR)
-        .setVisible(false, false);
+        .setVisible(hidden, false);
 
+//    if (hidden) series.hide();
     // if (hidden) series.setVisible(false,false);
+
+    logger.info("before series " + seriesTitle + " is hidden = " + hidden + " " + series.isVisible());
     chart.addSeries(series);
+
+    if (hidden) series.setVisible(false,false);
+
+   // logger.info("after  series " + seriesTitle + " is hidden = " + hidden + " " + series.isVisible());
+
     return series;
   }
 
