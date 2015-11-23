@@ -1,9 +1,6 @@
 package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Label;
-import com.google.gwt.dom.client.*;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.Window;
 import mitll.langtest.shared.analysis.PhoneSession;
 import org.moxieapps.gwt.highcharts.client.*;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
@@ -16,7 +13,6 @@ import java.util.List;
  */
 public class PhonePlot extends TimeSeriesPlot/* implements IsWidget*/ {
   //  private final Logger logger = Logger.getLogger("PhonePlot");
-
   public static final String PRONUNCIATION_SCORE = " score";
   private static final int CHART_HEIGHT = 315;
   private static final int NARROW_WIDTH = 330;
@@ -64,7 +60,7 @@ public class PhonePlot extends TimeSeriesPlot/* implements IsWidget*/ {
         ));
 
     addErrorBarSeries(rawBestScores, chart, seriesName, false);
-    addMeans(rawBestScores, chart, AVERAGE);
+    addMeans(rawBestScores, chart, AVERAGE, false);
     return chart;
   }
 
@@ -119,22 +115,5 @@ public class PhonePlot extends TimeSeriesPlot/* implements IsWidget*/ {
 //    if (narrow) chart.setWidth(NARROW_WIDTH);
     chart.setWidth(NARROW_WIDTH);
 //    chart.getElement().getStyle().setProperty("minWidth",NARROW_WIDTH, Style.Unit.PX);
-
   }
-
-  /*  private void setRawBestScores(List<TimeAndScore> rawBestScores) {
-    for (TimeAndScore timeAndScore : rawBestScores) {
-      timeToId.put(timeAndScore.getTimestamp(), timeAndScore.getId());
-    }
-  }*/
-
-  /**
-   * @return
-   * @see WordContainer#getShell(String)
-   */
-/*
-  private Map<String, CommonShell> getIdToEx() {
-    return idToEx;
-  }
-*/
 }

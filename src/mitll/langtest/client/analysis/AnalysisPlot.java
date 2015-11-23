@@ -2,6 +2,7 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Label;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -16,17 +17,15 @@ import org.moxieapps.gwt.highcharts.client.events.*;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
-import scala.tools.nsc.backend.icode.Primitives;
 
 import java.util.*;
 import java.util.logging.Logger;
-
-//import org.moxieapps.gwt.highcharts.client.*;
 
 /**
  * Created by go22670 on 10/19/15.
  */
 public class AnalysisPlot extends TimeSeriesPlot {
+  public static final int X_OFFSET_LEGEND = 65;
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
   private static final long MINUTE = 60 * 1000;
@@ -37,6 +36,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private static final long DAY = 24 * HOUR;
   private static final long WEEK = 7 * DAY;
   private static final long MONTH = 4 * WEEK;
+  private static final long YEAR = 52 * WEEK;
 
 //  private static final int NARROW_WIDTH = 330;
 
@@ -44,7 +44,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private static final String VOCAB_PRACTICE = "Vocab Practice";
   private static final String LEARN = "Learn";
   private static final String CUMULATIVE_AVERAGE = "Average";
-  Set<String> toShowExercise = new HashSet<>(Arrays.asList(I_PAD_I_PHONE,VOCAB_PRACTICE, LEARN,CUMULATIVE_AVERAGE));
+  Set<String> toShowExercise = new HashSet<>(Arrays.asList(I_PAD_I_PHONE, VOCAB_PRACTICE, LEARN, CUMULATIVE_AVERAGE));
 
   private static final int CHART_HEIGHT = 330;
 
@@ -57,6 +57,15 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private final PlayAudio playAudio;
   private final HashMap<Long, String> granToLabel;
 
+
+  Map<Series, Boolean> seriesToVisible = new HashMap<>();
+  Map<Long, List<PhoneSession>> granularityToSessions;
+  Map<Long, Series> granToError = new HashMap<>();
+  Map<Long, Series> granToAverage = new HashMap<>();
+  List<Series> detailSeries = new ArrayList<>();
+
+  Chart chart = null;
+
   /**
    * @param service
    * @param userid
@@ -67,6 +76,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
   public AnalysisPlot(LangTestDatabaseAsync service, long userid, final String userChosenID, final int minRecordings,
                       SoundManagerAPI soundManagerAPI) {
     getElement().setId("AnalysisPlot");
+    getElement().getStyle().setProperty("minHeight", 350, Style.Unit.PX);
     //   addStyleName("floatLeft");
     this.service = service;
     this.userid = userid;
@@ -76,6 +86,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     granToLabel.put(DAY, "Day");
     granToLabel.put(WEEK, "Week");
     granToLabel.put(MONTH, "Month");
+    granToLabel.put(YEAR, "Year");
     granToLabel.put(FIVEMIN, "Minute");
 
     SoundPlayer soundFeedback = new SoundPlayer(soundManagerAPI);
@@ -107,7 +118,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
     float v = userPerformance.getRawAverage() * 100;
     int rawTotal = rawBestScores.size();//userPerformance.getRawTotal();
 
-    Chart chart = null;
     if (rawBestScores.isEmpty()) {
       add(new Label("No Recordings yet to analyze. Please record yourself."));
     } else {
@@ -125,48 +135,37 @@ public class AnalysisPlot extends TimeSeriesPlot {
       add(chart);
     }
     setRawBestScores(rawBestScores);
+    showSeriesByVisible();
+  }
 
-    final Chart outer = chart;
-/*    add(new Button("toggle", new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent clickEvent) {
-        if (outer != null) {
-          for (Series series : outer.getSeries()) {
-            String name = series.getName();
-            logger.info("series " + name + "/" + series + " : " + series.isVisible());
-            if (name.startsWith("Week")) {
-              series.setVisible(!series.isVisible());
-            }
-          }
-        }
-      }
-    }) {
-
-    });*/
-
+  private void showSeriesByVisible() {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        if (outer != null) {
-          logger.info("doing deferred ---------- ");
-//          outer.getXAxis().min();
-          for (Series series : outer.getSeries()) {
+        if (chart != null) {
+          // logger.info("doing deferred ---------- ");
+
+          for (Series series : seriesToVisible.keySet()) {
             String name = series.getName();
             Boolean expected = seriesToVisible.get(series);
-        //    logger.info("defer : series " + name + "/" + series + " : " + series.isVisible() + " : " + expected);
-            if (expected != null) {
-              series.setVisible(expected, false);
+            // if (expected != null) {
+            if (expected) {
+              logger.info("defer : series " + name + "/" + series + " : " + series.isVisible() + " : " + expected);
+              if (chart.getSeries(series.getId()) == null) {
+                logger.info("\tdefer : series " + name + "/" + series + " : " + series.isVisible() + " : " + expected);
+                chart.addSeries(series);
+              }
             } else {
-              logger.info("\t - skipping " + name);
+              chart.removeSeries(series);
             }
+            //  series.setVisible(expected, false);
           }
 
-          logger.info("doing redraw ---------- ");
+          //  logger.info("doing redraw ---------- ");
 
-          outer.redraw();
+          //   chart.redraw();
         }
       }
     });
-
   }
 
   private void populateExerciseMap(LangTestDatabaseAsync service, int userid) {
@@ -234,51 +233,127 @@ public class AnalysisPlot extends TimeSeriesPlot {
     return chart;
   }
 
-  Map<Series, Boolean> seriesToVisible = new HashMap<>();
-
   private void addErrorBars(UserPerformance userPerformance, Chart chart) {
-    Map<Long, List<PhoneSession>> granularityToSessions = userPerformance.getGranularityToSessions();
-    Map<Long, Series> granToError = new HashMap<>();
+    granToError.clear();
+    granularityToSessions = userPerformance.getGranularityToSessions();
+//    Map<Long, Series> granToError = new HashMap<>();
     boolean oneSet = false;
-    long granChosen = 0;
 
     List<Long> grans = new ArrayList<>(granularityToSessions.keySet());
     Collections.sort(grans);
+    long granChosen = grans.iterator().next();
     for (Long gran : grans) {
       String label = granToLabel.get(gran);
       //logger.info("Adding for " + label);
       List<PhoneSession> phoneSessions = granularityToSessions.get(gran);
       Series series = addErrorBarSeries(phoneSessions, chart, label, true);
-      seriesToVisible.put(series, false);
+      //    seriesToVisible.put(series, false);
+      granToError.put(gran, series);
 
-      Series avgSeries = addMeans(phoneSessions, chart, "Avg " + label);
+      Series avgSeries = addMeans(phoneSessions, chart, label, true);
+      //  seriesToVisible.put(avgSeries, false);
+      granToAverage.put(gran, avgSeries);
+
+//      int size = phoneSessions.size();
+//      String seriesInfo = gran + "/" + label;
+//      if (!oneSet) {
+//        int total = 0;
+//        boolean anyBigger = false;
+//        for (PhoneSession s : phoneSessions) {
+//          total += s.getCount();
+//          if (s.getCount() > 50) anyBigger=true;
+//          logger.info("\t" + series.getName() + " " + s.getCount());
+//        }
+//        if (chooseThisSize(size, total, anyBigger)) {
+//          oneSet = true;
+//          granChosen = gran;
+//
+//          logger.info("1 chose " + seriesInfo + " : " + size + " visible " + series.isVisible());
+//        }
+//      }
+    }
+
+//    if (granChosen > 0) {
+//      setRawBestScores2(granularityToSessions.get(granChosen));
+//    }
+    setVisibility(0, Long.MAX_VALUE);
+  }
+
+  private void setVisibility(long start, long end) {
+    logger.info("setVisibility from " + new Date(start) + " - " + new Date(end));
+
+    List<Long> grans = new ArrayList<>(granularityToSessions.keySet());
+
+    Collections.sort(grans);
+    boolean oneSet = false;
+
+    Series errorSeries = null;
+    Series averageSeries = null;
+    //  int total = 0;
+    for (Long gran : grans) {
+      Series series = granToError.get(gran);
+      seriesToVisible.put(series, false);
+      Series avgSeries = granToAverage.get(gran);
       seriesToVisible.put(avgSeries, false);
 
-
-      int size = phoneSessions.size();
-      String seriesInfo = gran + "/" + label;
       if (!oneSet) {
-        if (size < 15) {
+//      int size = avgSeries.getPoints().length;
+        List<PhoneSession> phoneSessions = granularityToSessions.get(gran);
+
+        int size = 0;
+        int total = 0;
+        boolean anyBigger = false;
+        for (PhoneSession session : phoneSessions) {
+          if (session.getStart() >= start && session.getEnd() < end) {
+            logger.info("\t " + gran + " session " + session);
+            size++;
+            total += session.getCount();
+            if (session.getCount() > 50) anyBigger=true;
+          }
+        }
+        String label = granToLabel.get(gran);
+        String seriesInfo = gran + "/" + label;
+
+        logger.info("setVisibility  " + seriesInfo + " : " + size + " sessions " + phoneSessions.size() + " any bigger " + anyBigger);
+
+        if (chooseThisSize(size, total, anyBigger)) {
           oneSet = true;
-          granChosen = gran;
-          series.setVisible(true);
-          seriesToVisible.put(series, true);
-          seriesToVisible.put(avgSeries, true);
-          logger.info("1 chose " + seriesInfo + " : " + size + " visible " + series.isVisible());
+          //      series.setVisible(true);
+//          seriesToVisible.put(series, true);
+//          seriesToVisible.put(avgSeries, true);
+          errorSeries = series;
+          averageSeries = avgSeries;
+          setRawBestScores2(granularityToSessions.get(gran));
+
+          logger.info("setVisibility 1 chose " + seriesInfo + " : " + size + " visible " + series.isVisible());
         } else {
-          logger.info("2 chose " + seriesInfo + " : " + size);
+          logger.info("setVisibility 2 too small " + seriesInfo + " : " + size);
 //          series.setVisible(false, false);
         }
-      } else {
-        logger.info("3 chose " + seriesInfo + " : " + size);
-        //    series.setVisible(false, false);
       }
-      granToError.put(gran, series);
+//      else {
+//        logger.info("setVisibility skip " + seriesInfo + " : " + size);
+//        //    series.setVisible(false, false);
+//      }
     }
 
-    if (granChosen > 0) {
-      setRawBestScores2(granularityToSessions.get(granChosen));
+    for (Series series : detailSeries) seriesToVisible.put(series, false);
+    if (!oneSet) {
+      logger.info("setVisibility show detail ");
+      for (Series series : detailSeries) seriesToVisible.put(series, true);
+    } else {
+      logger.info("setVisibility total --------- " + errorSeries.getName() + " " + averageSeries.getName());
+      seriesToVisible.put(errorSeries,   true);
+      seriesToVisible.put(averageSeries, true);
     }
+  }
+
+  private boolean chooseThisSize(int size, int total,boolean anyBigger) {
+    return
+        size < 15 &&
+            size > 1 &&
+            anyBigger &&
+            total > 200;
   }
 
   private Chart getChart(String title) {
@@ -288,6 +363,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
         .setChartTitleText(title)
         //     .setChartSubtitleText(subtitle)
         .setMarginRight(10)
+        //  .setMarginLeft(50)
         .setOption("/credits/enabled", false)
         .setOption("/plotOptions/series/pointStart", 1)
         .setOption("/legend/enabled", false)
@@ -295,7 +371,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
             .setLayout(Legend.Layout.VERTICAL)
             .setAlign(Legend.Align.LEFT)
             .setVerticalAlign(Legend.VerticalAlign.TOP)
-            .setX(100)
+            .setX(X_OFFSET_LEGEND)
             .setY(Y_OFFSET_FOR_LEGEND)
             .setBorderWidth(1)
             .setFloating(true)
@@ -319,7 +395,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
           @Override
           public boolean onSelection(ChartSelectionEvent selectionEvent) {
             if (selectionEvent != null) {
-              logger.info("User selected " + selectionEvent);
+            //  logger.info("User selected " + selectionEvent);
 //                  "from " + selectionEvent.getXAxisMin() + " to " + selectionEvent.getXAxisMax());
             } else logger.warning("got null selection event");
             return true;
@@ -347,18 +423,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
         .setFormatter(new ToolTipFormatter() {
           public String format(ToolTipData toolTipData) {
             try {
-
-              //    logger.info("timeToId " + (timeToId != null));
-              //   logger.info("getIdToEx " + (getIdToEx() != null));
-              // logger.info("toolTipData " + toolTipData);
-
               String exerciseID = timeToId.get(toolTipData.getXAsLong());
-
-              ///  logger.info("exerciseID " + exerciseID);
-
               CommonShell commonShell = exerciseID == null ? null : getIdToEx().get(exerciseID);
-              //    logger.info("getTooltip " + commonShell);
-
               return getTooltip(toolTipData, exerciseID, commonShell);
             } catch (Exception e) {
               logger.warning(e.getMessage());
@@ -381,13 +447,29 @@ public class AnalysisPlot extends TimeSeriesPlot {
     String seriesName1 = toolTipData.getSeriesName();
 
     String dateToShow = getDateToShow(toolTipData);
-    if (granToLabel.values().contains(seriesName1)) {
-      //logger.info("get error bar tool tip");
-      return getErrorBarToolTip(toolTipData, seriesName1, dateToShow);
+    Collection<String> values = granToLabel.values();
+
+//    logger.info("getTooltip series " + seriesName1);
+    //  logger.info("dateToShow " + dateToShow);
+//    logger.info("foreignLanguage " + foreignLanguage);
+//    logger.info("englishTool " + englishTool);
+//    logger.info("showEx " + showEx);
+   // logger.info("toolTipData " + toolTipData);
+
+    if (values.contains(seriesName1)) {
+      // logger.info("get error bar tool tip ");
+      String seriesId = toolTipData.getSeriesId();
+      Series series = chart.getSeries(seriesId);
+      if (granToAverage.values().contains(series)) {
+        return getAvgTooltip(toolTipData, seriesName1);
+      }
+      else {
+        return getErrorBarToolTip(toolTipData, seriesName1);
+      }
     } else {
-//      logger.info("series is " + seriesName1);
+      //logger.info("getTooltip series is " + seriesName1 + " not in " + values);
     }
- //   boolean showEx = (!seriesName1.contains(CUMULATIVE_AVERAGE));
+    //   boolean showEx = (!seriesName1.contains(CUMULATIVE_AVERAGE));
     boolean showEx = toShowExercise.contains(seriesName1);
 
     String englishTool = (english == null || english.equals("N/A")) ? "" : "<br/>" + english;
@@ -451,19 +533,18 @@ public class AnalysisPlot extends TimeSeriesPlot {
     Series series = chart.createSeries()
         .setName(seriesTitle)
         .setPoints(data)
-        .setType(Series.Type.SPLINE)
-        .setVisible(isVisible, false);
-//    series.setVisible(false,false);
+        .setType(Series.Type.SPLINE);
+//        .setVisible(isVisible, false); // necessary???????
 
-    chart.addSeries(series);
+    //  chart.addSeries(series);
 
     recordVisible(isVisible, series);
-
   }
 
   private void recordVisible(boolean isVisible, Series series) {
-    series.setVisible(isVisible, false);
+    // series.setVisible(isVisible, false);
     seriesToVisible.put(series, isVisible);
+    detailSeries.add(series);
   }
 
   private void addDeviceData(List<TimeAndScore> iPadData, Chart chart, boolean isVisible) {
@@ -477,10 +558,10 @@ public class AnalysisPlot extends TimeSeriesPlot {
           .setName(iPadName)
           .setPoints(data)
           .setOption("color", "#00B800")
-          .setType(Series.Type.SCATTER)
-          .setVisible(isVisible, false);
+          .setType(Series.Type.SCATTER);
+      //        .setVisible(isVisible, false);
 
-      chart.addSeries(series);
+//      if (isVisible) chart.addSeries(series);
       recordVisible(isVisible, series);
     }
   }
@@ -496,10 +577,10 @@ public class AnalysisPlot extends TimeSeriesPlot {
       Series series = chart.createSeries()
           .setName(prefix)
           .setPoints(data)
-          .setType(Series.Type.SCATTER)
-          .setVisible(isVisible, false);
+          .setType(Series.Type.SCATTER);
+      //         .setVisible(isVisible, false);
 
-      chart.addSeries(series);
+      //    chart.addSeries(series);
       recordVisible(isVisible, series);
     }
   }
@@ -516,6 +597,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
   }
 
   /**
+   * As we change zoom, show more or less info
+   *
    * @param chart
    * @param title
    * @see #getChart
@@ -532,11 +615,18 @@ public class AnalysisPlot extends TimeSeriesPlot {
       public boolean onSetExtremes(AxisSetExtremesEvent axisSetExtremesEvent) {
         if (axisSetExtremesEvent != null) {
           try {
-            if (axisSetExtremesEvent.getMin() != null) {
-              logger.info("onSetExtremes got " + axisSetExtremesEvent.getMin() + " : " + axisSetExtremesEvent.getMax());
+            Number min = axisSetExtremesEvent.getMin();
+            if (min != null && min.longValue() > 0) {
+              Number max = axisSetExtremesEvent.getMax();
+              long diff = (max.longValue() - min.longValue());
+              logger.info("onSetExtremes got " + min + " : " + max + " diff " + diff);
+              setVisibility(min.longValue(), max.longValue());
             } else {
               logger.info("no min for event");
+              setVisibility(0, Long.MAX_VALUE);
             }
+            showSeriesByVisible();
+
           } catch (Exception e) {
             e.printStackTrace();
           }
