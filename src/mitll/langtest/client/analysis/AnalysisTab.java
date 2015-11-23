@@ -20,10 +20,10 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/21/15.
  */
 public class AnalysisTab extends DivWidget {
-  public static final String WORDS = "Words";
-  public static final String WORDS_USING_SOUND = "Words using Sound";
-  public static final String SOUNDS = "Sounds";
-  public static final String SUBTITLE = "scores > 20";
+  private static final String WORDS = "Words";
+  private static final String WORDS_USING_SOUND = "Words using Sound";
+  private static final String SOUNDS = "Sounds";
+  private static final String SUBTITLE = "scores > 20";
   private final Logger logger = Logger.getLogger("AnalysisTab");
   private final Panel bottom;
   private boolean isNarrow = false;
@@ -45,7 +45,7 @@ public class AnalysisTab extends DivWidget {
     analysisPlot.getElement().getStyle().setMargin(10, Style.Unit.PX);
 
     add(analysisPlot);
- //   bottom = new DivWidget();
+
     bottom = new HorizontalPanel();
     bottom.getElement().setId("bottom");
     bottom.addStyleName("floatLeft");
@@ -80,13 +80,7 @@ public class AnalysisTab extends DivWidget {
 
         lowerHalf.add(wordsContainer);
 
-
-        DivWidget soundsDiv = new DivWidget();
-     //   Widget soundsDiv = new DivWidget();
-        soundsDiv.addStyleName("cardBorderShadow");
-        soundsDiv.addStyleName("floatRight");
-        soundsDiv.getElement().getStyle().setMargin(10, Style.Unit.PX);
-//        soundsDiv.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+        DivWidget soundsDiv = getSoundsDiv();
 
         lowerHalf.add(soundsDiv);
         getPhoneReport(service, controller, userid, soundsDiv, analysisPlot, showTab, minRecordings);
@@ -94,7 +88,17 @@ public class AnalysisTab extends DivWidget {
     });
   }
 
-  public DivWidget getWordContainerDiv(Panel tableWithPager, String containerID, Heading w) {
+  private DivWidget getSoundsDiv() {
+    DivWidget soundsDiv = new DivWidget();
+    soundsDiv.getElement().setId("soundsDiv");
+    soundsDiv.getElement().getStyle().setProperty("minHeight", 325, Style.Unit.PX);
+    soundsDiv.addStyleName("cardBorderShadow");
+    soundsDiv.addStyleName("floatRight");
+    soundsDiv.getElement().getStyle().setMargin(10, Style.Unit.PX);
+    return soundsDiv;
+  }
+
+  private DivWidget getWordContainerDiv(Panel tableWithPager, String containerID, Heading w) {
     DivWidget vert = new DivWidget();
     vert.getElement().setId(containerID);
     vert.addStyleName("floatLeft");
@@ -143,7 +147,7 @@ public class AnalysisTab extends DivWidget {
     });
   }
 
-  public DivWidget getSoundsContainer(Panel phones) {
+  private DivWidget getSoundsContainer(Panel phones) {
     DivWidget sounds = new DivWidget();
     sounds.getElement().setId("SoundsContainer");
     sounds.add(new Heading(3, SOUNDS));
@@ -152,7 +156,7 @@ public class AnalysisTab extends DivWidget {
     return sounds;
   }
 
-  public DivWidget getWordExamples(Panel examples) {
+  private DivWidget getWordExamples(Panel examples) {
     DivWidget wordExamples = getWordContainerDiv(examples, "WordExamples", new Heading(3, WORDS_USING_SOUND));
     wordExamples.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
     return wordExamples;
