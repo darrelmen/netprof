@@ -52,7 +52,7 @@ public interface ExerciseController extends EventRegistration {
 
   String getLanguage();
   boolean isRightAlignContent();
-  int getLeftColumnWidth();
+ // int getLeftColumnWidth();
   int getHeightOfTopRows();
 
   PropertyHandler getProps();
