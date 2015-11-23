@@ -24,9 +24,9 @@ import java.util.logging.Logger;
 /**
  * Does audio playback and fetches and shows various audio images (waveform, spectrogram, etc.) with a red line
  * indicating audio position during playback.<br></br>
- *
+ * <p>
  * Subclasses include the capability to record audio and post it to the server.<br></br>
- *
+ * <p>
  * On window resize, requests new images compatible with current window size.
  * User: GO22670
  * Date: 5/11/12
@@ -38,24 +38,24 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   public static final int LEFT_COLUMN_WIDTH = PagingContainer.MAX_WIDTH;
   private Logger logger = Logger.getLogger("AudioPanel");
 
-    static final int MIN_WIDTH = 256;
+  static final int MIN_WIDTH = 256;
   private static final float WAVEFORM_HEIGHT = 80f;//96;
   private static final float SPECTROGRAM_HEIGHT = 50f;//96;
   private static final String WAVEFORM = "Waveform";
   private static final String SPECTROGRAM = "Spectrogram";
   private static final String WAVEFORM_TOOLTIP = "The waveform should only be used to determine when periods of silence" +
-    " and speech occur, or whether the mic is working properly.";
+      " and speech occur, or whether the mic is working properly.";
   private static final String WAV = ".wav";
   private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
 
   private static final boolean WARN_ABOUT_MISSING_AUDIO = false;
   private static final int WINDOW_SIZE_CHANGE_THRESHOLD = 50;
-  private static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD/2;
+  private static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD / 2;
 
   private final ScoreListener gaugePanel;
   protected final String exerciseID;
   protected String audioPath;
-  protected final Map<String,Integer> reqs = new HashMap<String, Integer>();
+  protected final Map<String, Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
 
   private ImageAndCheck waveform;
@@ -81,7 +81,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private static final boolean DEBUG_GET_IMAGES = false;
 
   /**
-   * @see ScoringAudioPanel#ScoringAudioPanel(String, String, LangTestDatabaseAsync, ExerciseController, boolean, ScoreListener, int, String, String, CommonExercise, String)
    * @param service
    * @param showSpectrogram
    * @param gaugePanel
@@ -90,6 +89,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param exerciseID
    * @param exercise
    * @param instance
+   * @see ScoringAudioPanel#ScoringAudioPanel(String, String, LangTestDatabaseAsync, ExerciseController, boolean, ScoreListener, int, String, String, CommonExercise, String)
    */
   AudioPanel(String path, LangTestDatabaseAsync service,
              ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin,
@@ -103,20 +103,22 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
   }
 
-  public Button getPlayButton() {return hasAudio() ? playAudio.getPlayButton() : null;}
+  public Button getPlayButton() {
+    return hasAudio() ? playAudio.getPlayButton() : null;
+  }
 
-    /**
-     * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(CommonExercise, ExerciseController, Panel, LangTestDatabaseAsync, int, boolean, String, String)
-     * @param service
-     * @param controller
-     * @param showSpectrogram
-     * @param gaugePanel
-     * @param screenPortion
-     * @param rightMargin
-     * @param exerciseID
-     * @param exercise
-     * @param instance
-     */
+  /**
+   * @param service
+   * @param controller
+   * @param showSpectrogram
+   * @param gaugePanel
+   * @param screenPortion
+   * @param rightMargin
+   * @param exerciseID
+   * @param exercise
+   * @param instance
+   * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(CommonExercise, ExerciseController, Panel, LangTestDatabaseAsync, int, boolean, String, String)
+   */
   protected AudioPanel(LangTestDatabaseAsync service,
                        ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
                        float screenPortion, int rightMargin, String exerciseID, CommonExercise exercise, String instance) {
@@ -145,13 +147,14 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
-   * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(CommonExercise, ExerciseController, Panel, LangTestDatabaseAsync, int, boolean, String, String)
-   * @see mitll.langtest.client.scoring.AudioPanel#AudioPanel
-   * @return
+   *
    * @param exercise
    * @param instance
    * @param playButtonSuffix
    * @param recordButtonTitle
+   * @return
+   * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(CommonExercise, ExerciseController, Panel, LangTestDatabaseAsync, int, boolean, String, String)
+   * @see mitll.langtest.client.scoring.AudioPanel#AudioPanel
    */
   protected void addWidgets(String playButtonSuffix, String audioType, String recordButtonTitle) {
 //    logger.info("AudioPanel.addWidgets " + audioType + " title " + recordButtonTitle +
@@ -169,7 +172,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
     // add widgets to left of play button
     Widget toTheRightWidget = getAfterPlayWidget();
-   //   logger.info("got toTheRightWidget " + toTheRightWidget);
+    //   logger.info("got toTheRightWidget " + toTheRightWidget);
     audioPositionPopup = new AudioPositionPopup(imageContainer);
     imageContainer.add(audioPositionPopup);
 
@@ -177,8 +180,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       playAudio = getPlayButtons(toTheRightWidget, playButtonSuffix, audioType, recordButtonTitle);
       hp.add(playAudio);
       hp.setCellHorizontalAlignment(playAudio, HorizontalPanel.ALIGN_LEFT);
-    }
-    else {
+    } else {
       hp.add(toTheRightWidget);
       audioPositionPopup.setVisible(false);
     }
@@ -210,18 +212,30 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     add(divWithRelativePosition);
   }
 
-  boolean hasAudio() {  return hasAudio(exercise);  }
+  boolean hasAudio() {
+    return hasAudio(exercise);
+  }
 
-  boolean hasAudio(CommonExercise exercise) {  return true;  }
+  boolean hasAudio(CommonExercise exercise) {
+    return true;
+  }
 
-  public boolean isAudioPathSet() { return audioPath != null; }
-  public void doPause() { if (playAudio != null) playAudio.doPause(); }
+  public boolean isAudioPathSet() {
+    return audioPath != null;
+  }
+
+  public void doPause() {
+    if (playAudio != null) playAudio.doPause();
+  }
 
   /**
    * This is sort of a hack --
+   *
    * @return
    */
-  protected Widget getAfterPlayWidget() { return null;  }
+  protected Widget getAfterPlayWidget() {
+    return null;
+  }
 
   @Override
   public void onLoad() {
@@ -248,6 +262,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   public ImageAndCheck getWaveform() {
     return waveform;
   }
+
   public ImageAndCheck getSpectrogram() {
     return spectrogram;
   }
@@ -260,6 +275,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   public static class ImageAndCheck {
     final Image image;
+
     public ImageAndCheck() {
       image = new Image();
       image.setVisible(false);
@@ -269,16 +285,19 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       image.setVisible(visible);
     }
 
-    public void setUrl(String url) { image.setUrl(url); }
+    public void setUrl(String url) {
+      image.setUrl(url);
+    }
   }
 
   /**
    * Ask the server for the URLs to the mp3 for this audio
+   *
+   * @param path to audio on the server
    * @see #onLoad()
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.FastAndSlowASRScoringAudioPanel#showAudio(mitll.langtest.shared.AudioAttribute)
    * @see mitll.langtest.client.result.ResultManager#getAsyncTable(int, Widget)
-   * @param path to audio on the server
    */
   public String getImagesForPath(String path) {
     path = wavToMP3(path);
@@ -314,18 +333,17 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   /**
    * Note this is currently not very accurate with soundmanager2.
    *
-   * @see ScoringAudioPanel.TranscriptEventClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
    * @param start from here
-   * @param end to here
+   * @param end   to here
    * @paramx waveDurInSeconds
+   * @see ScoringAudioPanel.TranscriptEventClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
    */
   void playSegment(float start, float end) {
     if (start >= end) {
       System.err.println("bad segment " + start + "-" + end);
-    }
-    else {
+    } else {
       //logger.info("playSegment segment " + start + "-" + end);
-      playAudio.repeatSegment(start,end);
+      playAudio.repeatSegment(start, end);
     }
   }
 
@@ -348,9 +366,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   /**
    * Ask the server for images of the waveform, spectrogram, and transcripts.
-   * <p/>
+   * <p>
    * Complicated -- could be improved -- tries to ask for an image of that would fit horizontally.
-   * <p/>
+   * <p>
    * TODO uses the window width to determine the image width -- ideally we could find out what the width
    * of this component is and then use that.  getOffsetWidth doesn't work well, although perhaps using a parent
    * component's getOffsetWidth would.
@@ -359,13 +377,13 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @see #onResize()
    */
   private void getImages() {
-    int leftColumnWidth1 = controller.getLeftColumnWidth();
-    int leftColumnWidth =  Math.max(LEFT_COLUMN_WIDTH, leftColumnWidth1) + IMAGE_WIDTH_SLOP;
+    //int leftColumnWidth1 = controller.getLeftColumnWidth();
+    int leftColumnWidth = LEFT_COLUMN_WIDTH + IMAGE_WIDTH_SLOP;
     int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : rightMargin;
     if (gaugePanel != null && rightSide == 0 /*&& !controller.getProps().isNoModel()*/) {
       rightSide = 180; // TODO : hack!!!
     }
-      int width = getWidthForWaveform(leftColumnWidth1, leftColumnWidth, rightSide);
+    int width = getWidthForWaveform(LEFT_COLUMN_WIDTH, leftColumnWidth, rightSide);
 
     int diff = Math.abs(Window.getClientWidth() - lastWidth);
     if (lastWidth == 0 || diff > WINDOW_SIZE_CHANGE_THRESHOLD) {
@@ -373,32 +391,33 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
       if (DEBUG_GET_IMAGES) {
         logger.info("\t---> AudioPanel.getImages : offset width " + getOffsetWidth() +
-                " request width " + width + " path " + audioPath);
+            " request width " + width + " path " + audioPath);
       }
       getEachImage(width);
     } else {
       if (DEBUG_GET_IMAGES) logger.info("\tAudioPanel.getImages : not updating, offset width " +
-              getOffsetWidth() + " width " + width + " path " + audioPath + " diff " + diff + " last " + lastWidth);
+          getOffsetWidth() + " width " + width + " path " + audioPath + " diff " + diff + " last " + lastWidth);
     }
   }
 
-    protected int getWidthForWaveform(int leftColumnWidth1, int leftColumnWidth, int rightSide) {
-        int width = (int) ((screenPortion * ((float) Window.getClientWidth())) - leftColumnWidth) - rightSide;
-        int i = width / 5;
-        width = (i-1) *5;
-        width -= 4;
-        if (DEBUG_GET_IMAGES) {
-          logger.info("AudioPanel.getImages : leftColumnWidth " + leftColumnWidth + "(" + leftColumnWidth1 +
-                  ") width " + width + " (screen portion = " + screenPortion +
-                  ") vs window width " + Window.getClientWidth() + " right side " + rightSide);
-        }
-        return width;
+  protected int getWidthForWaveform(int leftColumnWidth1, int leftColumnWidth, int rightSide) {
+    int width = (int) ((screenPortion * ((float) Window.getClientWidth())) - leftColumnWidth) - rightSide;
+    int i = width / 5;
+    width = (i - 1) * 5;
+    width -= 4;
+    if (DEBUG_GET_IMAGES) {
+      logger.info("AudioPanel.getImages : leftColumnWidth " + leftColumnWidth + "(" + leftColumnWidth1 +
+          ") width " + width + " (screen portion = " + screenPortion +
+          ") vs window width " + Window.getClientWidth() + " right side " + rightSide);
     }
+    return width;
+  }
 
-    /**
+  /**
    * Get images of all types.
-   * @see #getImages()
+   *
    * @param width
+   * @see #getImages()
    */
   protected void getEachImage(int width) {
     //logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
@@ -411,14 +430,14 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   /**
    * Worries about responses returning out of order for the same type of image request (as the window is resized)
    * and ignores all but the most recent request.
-   *
+   * <p>
    * Call to controller getImage checks if the requested image is in the cache before requesting it.
    *
-   * @see mitll.langtest.client.LangTest#getImage(int, String, String, int, int, String, com.google.gwt.user.client.rpc.AsyncCallback)
    * @param path
    * @param type
    * @param width
    * @param imageAndCheck
+   * @see mitll.langtest.client.LangTest#getImage(int, String, String, int, int, String, com.google.gwt.user.client.rpc.AsyncCallback)
    */
   private void getImageURLForAudio(final String path, final String type, int width, final ImageAndCheck imageAndCheck) {
     final int toUse = Math.max(MIN_WIDTH, width);
@@ -465,7 +484,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   private void showResult(ImageResponse result, final ImageAndCheck imageAndCheck) {
-   // logger.info("\tgetImageURLForAudio : using new url " + result.imageURL);
+    // logger.info("\tgetImageURLForAudio : using new url " + result.imageURL);
     imageAndCheck.image.setUrl(result.imageURL);
     imageAndCheck.image.setVisible(true);
     audioPositionPopup.reinitialize(result.durationInSeconds);
@@ -473,8 +492,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   private void logMessage(ImageResponse result, long roundtrip) {
     String message = "getImageURLForAudio : (success) " + result + " took " + roundtrip + " millis, audio dur " +
-      (result.durationInSeconds * 1000f) + " millis, " +
-      " " + ((float) roundtrip / (float) (result.durationInSeconds * 1000f)) + " roundtrip/audio duration ratio.";
+        (result.durationInSeconds * 1000f) + " millis, " +
+        " " + ((float) roundtrip / (float) (result.durationInSeconds * 1000f)) + " roundtrip/audio duration ratio.";
     service.logMessage(message, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -498,10 +517,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     synchronized (this) {
       Integer mostRecentIDForType = reqs.get(type);
       if (mostRecentIDForType == null) {
-        System.err.println("huh? couldn't find req " + reqid + " in " +reqs);
+        System.err.println("huh? couldn't find req " + reqid + " in " + reqs);
         return false;
-      }
-      else {
+      } else {
         //logger.info("\tisMostRecentRequest: req for " + type + " = " + mostRecentIDForType + " compared to " + responseReqID);
         return mostRecentIDForType == responseReqID;
       }
