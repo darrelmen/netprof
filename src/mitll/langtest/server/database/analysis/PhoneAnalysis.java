@@ -24,13 +24,15 @@ public class PhoneAnalysis {
   private static final long QUARTER = 6 * HOUR;
   private static final long WEEK = 7 * DAY;
   private static final long MONTH = 4 * WEEK;
+  private static final long YEAR = 52 * WEEK;
   private static final List<Long> GRANULARITIES = Arrays.asList(
       //FIVEMIN,
-      //HOUR,
+      HOUR,
   //    QUARTER,
       DAY,
       WEEK,
-      MONTH
+      MONTH//,
+      //YEAR
   );
 
   /**
@@ -67,6 +69,11 @@ public class PhoneAnalysis {
     return getPhoneSessions(key, toUse, false);
   }*/
 
+  /**
+   * @see Analysis#getPerformanceForUser(long, int)
+   * @param answersForUser
+   * @return
+   */
   public Map<Long, List<PhoneSession>> getGranularityToSessions(List<TimeAndScore> answersForUser) {
     String overall1 = "overall";
     Map<Long, List<PhoneSessionInternal>> overall = getGranularityToSessions(overall1, answersForUser, GRANULARITIES);
@@ -118,19 +125,28 @@ public class PhoneAnalysis {
       logger.error("huh? no sessions?");
     } else {
       int size = toUse.size();
-      for (PhoneSessionInternal i : toUse) {
-        i.remember();
-        double mean = i.getMean();
-        double stdev1 = i.getStdev();
-        double meanTime = i.getMeanTime();
-        if (!prune || (i.getCount() > REAL_MIN_SESSION_SIZE || size == 1)) {
-          sessions2.add(new PhoneSession(key, i.getBin(), i.getCount(), mean, stdev1, meanTime));
+      for (PhoneSessionInternal internal : toUse) {
+        internal.remember();
+        double mean = internal.getMean();
+        double stdev1 = internal.getStdev();
+        double meanTime = internal.getMeanTime();
+        if (!prune || (internal.getCount() > REAL_MIN_SESSION_SIZE || size == 1)) {
+          if (internal.getEnd() == 0) logger.error("got 0 end time " + internal);
+          sessions2.add(new PhoneSession(key, internal.getBin(), internal.getCount(), mean, stdev1, meanTime, internal.getStart(), internal.getEnd()));
         }
       }
     }
     return sessions2;
   }
 
+  /**
+   * @see #getGranularityToSessions(String, List, List)
+   * @param key
+   * @param answersForUser
+   * @param times
+   * @param granularityToSessions
+   * @param granToCurrent
+   */
   private void partition(String key,
                          List<TimeAndScore> answersForUser,
                          List<Long> times, Map<Long, List<PhoneSessionInternal>> granularityToSessions,
@@ -146,7 +162,10 @@ public class PhoneAnalysis {
         long gran = (timestamp / time) * time;
         long diff = timestamp - last;
         if ((phoneSessionInternal == null) || (diff > time && phoneSessionInternal.getN() > MIN_SESSION_SIZE)) {
-          phoneSessionInternal = new PhoneSessionInternal(key, gran);
+//          if (phoneSessionInternal != null) {
+//            phoneSessionInternal.setEnd(last);
+//          }
+          phoneSessionInternal = new PhoneSessionInternal(key, gran/*, timestamp*/);
           phoneSessionInternals.add(phoneSessionInternal);
           granToCurrent.put(time, phoneSessionInternal);
         } else {
@@ -182,8 +201,15 @@ public class PhoneAnalysis {
     private double meanTime;
     private long count;
     private final long bin;
+    private  long start;
+    private long end = 0;
     final List<TimeAndScore> values = new ArrayList<>();
 
+    /**
+     * @see #partition(String, List, List, Map, Map)
+     * @param phone
+     * @param bin
+     */
     public PhoneSessionInternal(String phone, long bin) {
     //  this.phone = phone;
       this.bin = bin;
@@ -193,6 +219,10 @@ public class PhoneAnalysis {
       summaryStatistics.addValue(value);
 
       summaryStatistics2.addValue(timestamp);
+      if (values.isEmpty()) start = timestamp;
+      else {
+        if (timestamp > end) end = timestamp;
+      }
       values.add(new TimeAndScore("", timestamp, value, 0));
     }
 
@@ -228,6 +258,18 @@ public class PhoneAnalysis {
 
     public long getBin() {
       return bin;
+    }
+
+    public long getEnd() {
+      return end;
+    }
+
+/*    public void setEnd(long end) {
+      this.end = end;
+    }*/
+
+    public long getStart() {
+      return start;
     }
 
 /*    public String getPhone() {
