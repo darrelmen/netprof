@@ -206,7 +206,7 @@ public abstract class Scoring {
                                     String audioFileNoSuffix, boolean useScoreToColorBkg,
                                     String prefix, String suffix, boolean decode, boolean useWebservice,
                                     boolean usePhoneToDisplay) {
-    logger.debug("writeTranscripts - decode " + decode + " file " + audioFileNoSuffix + " width " + imageWidth + " prefix " + prefix);
+    //logger.debug("writeTranscripts - decode " + decode + " file " + audioFileNoSuffix + " width " + imageWidth + " prefix " + prefix);
 
     boolean foundATranscript = false;
     // These may not all exist. The speech file is created only by multisv right now.
