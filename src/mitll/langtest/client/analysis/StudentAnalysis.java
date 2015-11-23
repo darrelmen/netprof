@@ -3,10 +3,12 @@ package mitll.langtest.client.analysis;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.UserInfo;
 
@@ -19,15 +21,21 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/27/15.
  */
 public class StudentAnalysis extends DivWidget {
-  public static final int LEFT_MARGIN = UserContainer.TABLE_WIDTH+ 53;
-  public static final int TOP_MARGIN = -55;
-  public static final String STUDENTS = "Students";
-  public static final String OR_MORE_RECORDINGS = "5 or more recordings";
-  public static final int STUDENT_WIDTH = 300;
   private final Logger logger = Logger.getLogger("StudentAnalysis");
+
+  private static final int LEFT_MARGIN = UserContainer.TABLE_WIDTH+ 53;
+ // public static final int TOP_MARGIN = -55;
+  private static final String STUDENTS = "Students";
+  private static final String OR_MORE_RECORDINGS = "5 or more recordings";
+  private static final int STUDENT_WIDTH = 300;
+
+ // private Long selectedUser = null;
 
   public StudentAnalysis(final LangTestDatabaseAsync service, final ExerciseController controller,
                          final ShowTab showTab) {
+    String appTitle = controller.getProps().getAppTitle();
+    final String selectedUserKey = getSelectedUserKey(controller, appTitle);
+
     service.getUsersWithRecordings(new AsyncCallback<Collection<UserInfo>>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -45,7 +53,7 @@ public class StudentAnalysis extends DivWidget {
         DivWidget bottom    = new DivWidget();
         bottom.addStyleName("floatLeftList");
 
-        UserContainer userContainer = new UserContainer(service, controller, rightSide, bottom, showTab);
+        UserContainer userContainer = new UserContainer(service, controller, rightSide, bottom, showTab, selectedUserKey);
 
         Panel tableWithPager = userContainer.getTableWithPager(getUserInfos(users));
 
@@ -65,7 +73,15 @@ public class StudentAnalysis extends DivWidget {
     });
   }
 
-  public DivWidget getStudentContainer(Panel tableWithPager) {
+  private String getSelectedUserKey(ExerciseController controller, String appTitle) {
+    return getStoragePrefix(controller, appTitle) + "selectedUser";
+  }
+
+  private String getStoragePrefix(ExerciseController controller, String appTitle) {
+    return appTitle + ":" + controller.getUser() + ":";
+  }
+
+  private DivWidget getStudentContainer(Panel tableWithPager) {
     Heading students = new Heading(3, STUDENTS, OR_MORE_RECORDINGS);
     students.setWidth(STUDENT_WIDTH + "px");
     //VerticalPanel leftSide = new VerticalPanel();
@@ -77,7 +93,7 @@ public class StudentAnalysis extends DivWidget {
     return leftSide;
   }
 
-  public List<UserInfo> getUserInfos(Collection<UserInfo> users) {
+  private List<UserInfo> getUserInfos(Collection<UserInfo> users) {
     List<UserInfo> filtered = new ArrayList<UserInfo>();
     for (UserInfo userInfo : users) {
       User user = userInfo.getUser();
