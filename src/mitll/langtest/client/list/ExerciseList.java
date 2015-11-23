@@ -843,7 +843,6 @@ public abstract class ExerciseList
     leftColumn.getElement().getStyle().setPaddingRight(10, Style.Unit.PX);
   }
 
- // @Override
   private Widget getWidget() {
     return this;
   }
