@@ -506,7 +506,8 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
 
-      logger.debug("getScoresFromHydec  : scoring '" + sentence + "' (" + sentence.length() + ") got score " + hydec_score +
+      logger.debug("getScoresFromHydec : " +languageProperty +
+          " scoring '" + sentence + "' (" + sentence.length() + ") got score " + hydec_score +
           " and took " + timeToRunHydec + " millis");
 
       Map<String, Map<String, Float>> stringMapMap = jscoreOut._2;
