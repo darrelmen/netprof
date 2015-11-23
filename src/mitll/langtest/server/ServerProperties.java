@@ -223,7 +223,9 @@ public class ServerProperties {
     return getDefaultFalse(ENABLE_ALL_USERS);
   }
 
-  public boolean shouldDoDecode() {  return getDefaultFalse(DO_DECODE);  }
+  public boolean shouldDoDecode() {  return false;
+  //  getDefaultFalse(DO_DECODE);
+  }
 
   public int getAudioOffset() {  return getIntProperty(AUDIO_OFFSET); }
 
