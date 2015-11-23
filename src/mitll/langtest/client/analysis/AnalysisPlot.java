@@ -12,16 +12,16 @@ import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.TimeAndScore;
 import mitll.langtest.shared.analysis.UserPerformance;
 import org.moxieapps.gwt.highcharts.client.*;
-import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
-import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEventHandler;
-import org.moxieapps.gwt.highcharts.client.events.SeriesClickEvent;
-import org.moxieapps.gwt.highcharts.client.events.SeriesClickEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.*;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
+import scala.tools.nsc.backend.icode.Primitives;
 
 import java.util.*;
 import java.util.logging.Logger;
+
+//import org.moxieapps.gwt.highcharts.client.*;
 
 /**
  * Created by go22670 on 10/19/15.
@@ -44,6 +44,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private static final String VOCAB_PRACTICE = "Vocab Practice";
   private static final String LEARN = "Learn";
   private static final String CUMULATIVE_AVERAGE = "Average";
+  Set<String> toShowExercise = new HashSet<>(Arrays.asList(I_PAD_I_PHONE,VOCAB_PRACTICE, LEARN,CUMULATIVE_AVERAGE));
 
   private static final int CHART_HEIGHT = 330;
 
@@ -106,15 +107,66 @@ public class AnalysisPlot extends TimeSeriesPlot {
     float v = userPerformance.getRawAverage() * 100;
     int rawTotal = rawBestScores.size();//userPerformance.getRawTotal();
 
+    Chart chart = null;
     if (rawBestScores.isEmpty()) {
       add(new Label("No Recordings yet to analyze. Please record yourself."));
     } else {
 //        logger.info("getPerformanceForUser raw total " + rawTotal + " num " + rawBestScores.size());
       String subtitle = "Score and average (" + rawTotal + " items, average " + (int) v + " %)";
       String title = "<b>" + userChosenID + "</b>" + " pronunciation score (Drag to zoom in, click to hear)";
-      add(getChart(title, subtitle, CUMULATIVE_AVERAGE, userPerformance));
+      chart = getChart(title, subtitle, CUMULATIVE_AVERAGE, userPerformance);
+//
+//      for (Series series : chart.getSeries()) {
+//        String name = series.getName();
+//        logger.info("initial : series " + name + "/" + series + " : " + series.isVisible());
+//
+//      }
+
+      add(chart);
     }
     setRawBestScores(rawBestScores);
+
+    final Chart outer = chart;
+/*    add(new Button("toggle", new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent clickEvent) {
+        if (outer != null) {
+          for (Series series : outer.getSeries()) {
+            String name = series.getName();
+            logger.info("series " + name + "/" + series + " : " + series.isVisible());
+            if (name.startsWith("Week")) {
+              series.setVisible(!series.isVisible());
+            }
+          }
+        }
+      }
+    }) {
+
+    });*/
+
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        if (outer != null) {
+          logger.info("doing deferred ---------- ");
+//          outer.getXAxis().min();
+          for (Series series : outer.getSeries()) {
+            String name = series.getName();
+            Boolean expected = seriesToVisible.get(series);
+        //    logger.info("defer : series " + name + "/" + series + " : " + series.isVisible() + " : " + expected);
+            if (expected != null) {
+              series.setVisible(expected, false);
+            } else {
+              logger.info("\t - skipping " + name);
+            }
+          }
+
+          logger.info("doing redraw ---------- ");
+
+          outer.redraw();
+        }
+      }
+    });
+
   }
 
   private void populateExerciseMap(LangTestDatabaseAsync service, int userid) {
@@ -153,22 +205,23 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
     List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
 
-
     TimeAndScore first = rawBestScores.get(0);
     TimeAndScore last = rawBestScores.get(rawBestScores.size() - 1);
 
     long diff = last.getTimestamp() - first.getTimestamp();
-    boolean visible = true;//(diff < QUARTER);
+    boolean shortPeriod = diff < QUARTER;
     addSeries(rawBestScores,
         userPerformance.getiPadTimeAndScores(),
         userPerformance.getLearnTimeAndScores(),
         userPerformance.getAvpTimeAndScores(),
         chart,
         seriesName,
-        visible);
+        shortPeriod);
 
+    if (!shortPeriod) {
+      addErrorBars(userPerformance, chart);
+    }
 
-    //addErrorBars(userPerformance, chart);
     configureChart(chart, subtitle);
 
  /*   Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -181,6 +234,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
     return chart;
   }
 
+  Map<Series, Boolean> seriesToVisible = new HashMap<>();
+
   private void addErrorBars(UserPerformance userPerformance, Chart chart) {
     Map<Long, List<PhoneSession>> granularityToSessions = userPerformance.getGranularityToSessions();
     Map<Long, Series> granToError = new HashMap<>();
@@ -190,24 +245,32 @@ public class AnalysisPlot extends TimeSeriesPlot {
     List<Long> grans = new ArrayList<>(granularityToSessions.keySet());
     Collections.sort(grans);
     for (Long gran : grans) {
-      String s = granToLabel.get(gran);
-      logger.info("Adding for " + s);
+      String label = granToLabel.get(gran);
+      //logger.info("Adding for " + label);
       List<PhoneSession> phoneSessions = granularityToSessions.get(gran);
-      Series series = addErrorBarSeries(phoneSessions, chart, s, true);
+      Series series = addErrorBarSeries(phoneSessions, chart, label, true);
+      seriesToVisible.put(series, false);
+
+      Series avgSeries = addMeans(phoneSessions, chart, "Avg " + label);
+      seriesToVisible.put(avgSeries, false);
+
+
       int size = phoneSessions.size();
+      String seriesInfo = gran + "/" + label;
       if (!oneSet) {
         if (size < 15) {
           oneSet = true;
           granChosen = gran;
           series.setVisible(true);
-          logger.info("1 chose " + gran + " : " + size);
-        }
-        else {
-          logger.info("2 chose " + gran+ " : " + size);
+          seriesToVisible.put(series, true);
+          seriesToVisible.put(avgSeries, true);
+          logger.info("1 chose " + seriesInfo + " : " + size + " visible " + series.isVisible());
+        } else {
+          logger.info("2 chose " + seriesInfo + " : " + size);
 //          series.setVisible(false, false);
         }
       } else {
-        logger.info("3 chose " + gran+ " : " + size);
+        logger.info("3 chose " + seriesInfo + " : " + size);
         //    series.setVisible(false, false);
       }
       granToError.put(gran, series);
@@ -255,7 +318,10 @@ public class AnalysisPlot extends TimeSeriesPlot {
         ).setSelectionEventHandler(new ChartSelectionEventHandler() {
           @Override
           public boolean onSelection(ChartSelectionEvent selectionEvent) {
-            logger.info("User selected from " + selectionEvent.getXAxisMin() + " to " + selectionEvent.getXAxisMax());
+            if (selectionEvent != null) {
+              logger.info("User selected " + selectionEvent);
+//                  "from " + selectionEvent.getXAxisMin() + " to " + selectionEvent.getXAxisMax());
+            } else logger.warning("got null selection event");
             return true;
           }
         });
@@ -268,6 +334,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
         String s = timeToId.get(nearestXAsLong);
         if (s != null) {
           playAudio.playLast(s, userid);
+        } else {
+          logger.info("no point at " + nearestXAsLong);
         }
         return true;
       }
@@ -319,7 +387,9 @@ public class AnalysisPlot extends TimeSeriesPlot {
     } else {
 //      logger.info("series is " + seriesName1);
     }
-    boolean showEx = (!seriesName1.contains(CUMULATIVE_AVERAGE));
+ //   boolean showEx = (!seriesName1.contains(CUMULATIVE_AVERAGE));
+    boolean showEx = toShowExercise.contains(seriesName1);
+
     String englishTool = (english == null || english.equals("N/A")) ? "" : "<br/>" + english;
 //
 //    logger.info("series " + seriesName1);
@@ -334,8 +404,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
             "<br/>" +
             dateToShow +
             (showEx ?
-                "<br/>Exercise " + s +
-                    "<br/>" +
+                "<br/>Exercise " + s + "<br/>" +
                     "<span style='font-size:200%'>" + foreignLanguage + "</span>" +
                     englishTool
                 : "")
@@ -371,6 +440,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private void addCumulativeAverage(List<TimeAndScore> yValuesForUser, Chart chart, String seriesTitle, boolean isVisible) {
     Number[][] data = new Number[yValuesForUser.size()][2];
 
+    logger.info("addCumulativeAverage " + seriesTitle + " :  " + isVisible);
+
     int i = 0;
     for (TimeAndScore ts : yValuesForUser) {
       data[i][0] = ts.getTimestamp();
@@ -385,6 +456,14 @@ public class AnalysisPlot extends TimeSeriesPlot {
 //    series.setVisible(false,false);
 
     chart.addSeries(series);
+
+    recordVisible(isVisible, series);
+
+  }
+
+  private void recordVisible(boolean isVisible, Series series) {
+    series.setVisible(isVisible, false);
+    seriesToVisible.put(series, isVisible);
   }
 
   private void addDeviceData(List<TimeAndScore> iPadData, Chart chart, boolean isVisible) {
@@ -402,6 +481,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
           .setVisible(isVisible, false);
 
       chart.addSeries(series);
+      recordVisible(isVisible, series);
     }
   }
 
@@ -420,6 +500,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
           .setVisible(isVisible, false);
 
       chart.addSeries(series);
+      recordVisible(isVisible, series);
     }
   }
 
@@ -446,7 +527,25 @@ public class AnalysisPlot extends TimeSeriesPlot {
         .setMax(100);
 
     chart.getXAxis()
-        .setType(Axis.Type.DATE_TIME);
+        .setType(Axis.Type.DATE_TIME).setAxisSetExtremesEventHandler(new AxisSetExtremesEventHandler() {
+      @Override
+      public boolean onSetExtremes(AxisSetExtremesEvent axisSetExtremesEvent) {
+        if (axisSetExtremesEvent != null) {
+          try {
+            if (axisSetExtremesEvent.getMin() != null) {
+              logger.info("onSetExtremes got " + axisSetExtremesEvent.getMin() + " : " + axisSetExtremesEvent.getMax());
+            } else {
+              logger.info("no min for event");
+            }
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        } else {
+          logger.warning("got null event");
+        }
+        return true;
+      }
+    });
 
     chart.setHeight(CHART_HEIGHT + "px");
   }
@@ -463,7 +562,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
     service.getShells(toGet, new AsyncCallback<List<CommonShell>>() {
       @Override
       public void onFailure(Throwable throwable) {
-
       }
 
       @Override
