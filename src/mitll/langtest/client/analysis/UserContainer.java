@@ -10,6 +10,7 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -56,6 +57,8 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
   private final DivWidget rightSide;
   private final DivWidget overallBottom;
   private final LangTestDatabaseAsync service;
+  private Long selectedUser;
+  String selectedUserKey;
 
   /**
    * @param controller
@@ -65,13 +68,19 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
   public UserContainer(LangTestDatabaseAsync service, ExerciseController controller,
                        DivWidget rightSide,
                        DivWidget overallBottom,
-                       ShowTab learnTab
+                       ShowTab learnTab,
+                       //  Long selectedUser,
+                       String selectedUserKey
   ) {
     super(controller);
     this.rightSide = rightSide;
     this.learnTab = learnTab;
     this.service = service;
     this.overallBottom = overallBottom;
+    // this.selectedUser = selectedUser;
+    this.selectedUserKey = selectedUserKey;
+
+    this.selectedUser = getSelectedUser(selectedUserKey);
   }
 
   private String truncate(String columnText) {
@@ -101,17 +110,61 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         if (!users.isEmpty()) {
-          UserInfo next = users.iterator().next();
-          table.getSelectionModel().setSelected(next, true);
-          gotClickOnItem(next);
-        }
-        else {
+          if (selectedUser == null) {
+            UserInfo next = users.iterator().next();
+            table.getSelectionModel().setSelected(next, true);
+            gotClickOnItem(next);
+          } else {
+            int i = 0;
+            for (UserInfo userInfo : users) {
+              if (userInfo.getUser().getId() == selectedUser) {
+                logger.info("found previous selection - " + userInfo + " : " +i);
+                table.getSelectionModel().setSelected(userInfo, true);
+                gotClickOnItem(userInfo);
+
+                final int index = i;
+                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                  public void execute() {
+//                    table.getRowElement(index).scrollIntoView();
+                scrollIntoView(index);
+                  }});
+
+
+                break;
+              }
+              i++;
+            }
+          }
+        } else {
           logger.warning("huh? users is empty???");
         }
       }
     });
 
     return tableWithPager;
+  }
+
+  public void scrollIntoView(int i) {
+    int pageSize = table.getPageSize();
+    int pageNum = i / pageSize;
+    int newIndex = pageNum * pageSize;
+
+    if (i < table.getPageStart()) {
+                  int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());
+                  if (DEBUG|| true) logger.info("new start of " + i+ " " + pageNum + " size " + pageSize +
+                      " prev page " + newStart + " vs current " + table.getVisibleRange());
+                  table.setVisibleRange(newStart, pageSize);
+    } else {
+      int pageEnd = table.getPageStart() + pageSize;
+      if (i >= pageEnd) {
+        int newStart = Math.max(0, Math.min(table.getRowCount() - pageSize, newIndex));   // not sure how this happens, but need Math.max(0,...)
+        if (DEBUG || true) logger.info("new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
+            " vs current " + table.getVisibleRange());
+        table.setVisibleRange(newStart, pageSize);
+        table.redraw();
+      }
+    }
+    i++;
   }
 
   @Override
@@ -363,8 +416,8 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
         );
 
         String format = UserContainer.this.format.format(now);
-        if (format.substring(format.length()-2).equals(signedUp.substring(signedUp.length()-2))) {
-          signedUp = signedUp.substring(0,signedUp.length()-4);
+        if (format.substring(format.length() - 2).equals(signedUp.substring(signedUp.length() - 2))) {
+          signedUp = signedUp.substring(0, signedUp.length() - 4);
         }
 
         return getSafeHtml(signedUp);
@@ -447,10 +500,41 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     AnalysisTab widgets = new AnalysisTab(service, controller, id, learnTab, user1.getUserID(), MIN_RECORDINGS, overallBottom);
     rightSide.clear();
     rightSide.add(widgets);
+    storeSelectedUser(user.getUser().getId());
   }
 
   private SafeHtml getSafeHtml(String columnText) {
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
+  }
+
+
+  public Long getSelectedUser(String selectedUserKey) {
+    //  Long selectedUser;
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+      //      localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getId());
+      String item = localStorageIfSupported.getItem(selectedUserKey);
+      if (item != null) {
+        try {
+          return Long.parseLong(item);
+        } catch (NumberFormatException e) {
+          logger.warning("got " + e);
+          return null;
+
+        }
+      }
+    }
+    // else {
+    return null;
+    // }
+  }
+
+  public void storeSelectedUser(long selectedUser) {
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+      localStorageIfSupported.setItem(selectedUserKey, "" + selectedUser);
+
+    }
   }
 
   /**
