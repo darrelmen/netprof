@@ -44,6 +44,7 @@ import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
 import mitll.langtest.client.result.ResultManager;
+import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.user.*;
@@ -59,7 +60,8 @@ import java.util.logging.Logger;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private Logger logger = Logger.getLogger("LangTest");
 
-  private static final String VERSION = "v1.1&nbsp;";
+  private static final String VERSION = "v1.0&nbsp;";
+ // private static final String VERSION = "v1.1&nbsp;";
   private static final List<String> SITE_LIST = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean","Iraqi",
       "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Russian", "Spanish", "Sudanese", "Tagalog", "Urdu");
 
@@ -597,7 +599,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public String getBrowserInfo() { return browserCheck.getBrowserAndVersion();}
 
   private String getInfoLine() {
-    String releaseDate = //VERSION +
+    String releaseDate = VERSION +
         (props.getReleaseDate() != null ? " " + props.getReleaseDate() : "");
     return "<span><font size=-2>" +
       browserCheck.ver + "&nbsp;"+
@@ -624,10 +626,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public int getHeightOfTopRows() { return headerRow.getOffsetHeight();  }
 
-  @Override
+  /**
+   * @see AudioPanel#getImages()
+   * @return
+   */
+/*  @Override
   public int getLeftColumnWidth() {
     return 225;
-  }
+  }*/
 
   /**
    * @see #populateRootPanel()
@@ -933,6 +939,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public int getUser() { return userManager.getUser(); }
   public boolean isTeacher() { return userManager.isTeacher(); }
+  //public String getLocalStoragePrefix() { return userManager.getUserIDCookie(); }
   public PropertyHandler getProps() { return props; }
 
   public boolean useBkgColorForRef() {  return props.isBkgColorForRef(); }
