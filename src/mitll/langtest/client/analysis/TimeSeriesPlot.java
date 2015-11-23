@@ -5,6 +5,7 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.UserPerformance;
 import org.moxieapps.gwt.highcharts.client.*;
@@ -29,6 +30,10 @@ public class TimeSeriesPlot extends DivWidget {
   private final DateTimeFormat shortFormat = DateTimeFormat.getFormat("MMM d, yy");
   private final String nowFormat = shortFormat.format(new Date());
 
+  /**
+   * @return
+   * @see PhonePlot#getErrorBarChart(String)
+   */
   protected ToolTip getErrorBarToolTip() {
     return new ToolTip()
         .setFormatter(new ToolTipFormatter() {
@@ -41,14 +46,11 @@ public class TimeSeriesPlot extends DivWidget {
   private String getTooltipText(ToolTipData toolTipData) {
     try {
       String seriesName1 = toolTipData.getSeriesName();
-      String dateToShow = getDateToShow(toolTipData);
 
       if (seriesName1.equals(AVERAGE)) {
-        return "<b>" + seriesName1 + "</b>" +
-            "<br/>" + dateToShow +
-            "<br/>Mean = " + toolTipData.getYAsLong() + "%";
+        return getAvgTooltip(toolTipData, seriesName1);
       } else {
-        return getErrorBarToolTip(toolTipData, seriesName1, dateToShow);
+        return getErrorBarToolTip(toolTipData, seriesName1);
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -56,7 +58,22 @@ public class TimeSeriesPlot extends DivWidget {
     }
   }
 
-  protected String getErrorBarToolTip(ToolTipData toolTipData, String seriesName1, String dateToShow) {
+  protected String getAvgTooltip(ToolTipData toolTipData, String seriesName1) {
+    String dateToShow = getDateToShow(toolTipData);
+    return "<b>" + seriesName1 + "</b>" +
+        "<br/>" + dateToShow +
+        "<br/>Mean = " + toolTipData.getYAsLong() + "%";
+  }
+
+  /**
+   * @param toolTipData
+   * @param seriesName1
+   * @return
+   * @paramx dateToShow
+   * @see AnalysisPlot#getTooltip(ToolTipData, String, CommonShell)
+   */
+  protected String getErrorBarToolTip(ToolTipData toolTipData, String seriesName1) {
+    String dateToShow = getDateToShow(toolTipData);
     Point point = toolTipData.getPoint();
     PhoneSession session = timeToSession.get(toolTipData.getXAsLong());
 
@@ -88,8 +105,11 @@ public class TimeSeriesPlot extends DivWidget {
   }
 
   protected void setRawBestScores2(List<PhoneSession> rawBestScores) {
+    timeToSession.clear();
     for (PhoneSession timeAndScore : rawBestScores) {
-      timeToSession.put(timeAndScore.getBin(), timeAndScore);
+      //long bin = timeAndScore.getBin();
+      long bin = timeAndScore.getMiddle();
+      timeToSession.put(bin, timeAndScore);
     }
   }
 
@@ -106,7 +126,8 @@ public class TimeSeriesPlot extends DivWidget {
 
     int i = 0;
     for (PhoneSession ts : yValuesForUser) {
-      data[i][0] = ts.getBin();
+      //data[i][0] = ts.getBin();
+      data[i][0] = ts.getMiddle();
       double mean = ts.getMean();
       double stdev = ts.getStdev();
       double first = mean - stdev;
@@ -127,23 +148,25 @@ public class TimeSeriesPlot extends DivWidget {
     // if (hidden) series.setVisible(false,false);
 
     logger.info("before series " + seriesTitle + " is hidden = " + hidden + " " + series.isVisible());
-    chart.addSeries(series);
+    if (!hidden) {
+      chart.addSeries(series);
+    }
 
-    if (hidden) series.setVisible(false,false);
+    if (hidden) series.setVisible(false, false);
 
-   // logger.info("after  series " + seriesTitle + " is hidden = " + hidden + " " + series.isVisible());
+    // logger.info("after  series " + seriesTitle + " is hidden = " + hidden + " " + series.isVisible());
 
     return series;
   }
 
-  protected Series addMeans(List<PhoneSession> iPadData, Chart chart, String seriesName) {
+  protected Series addMeans(List<PhoneSession> iPadData, Chart chart, String seriesName, boolean hidden) {
     Series series = chart.createSeries()
         .setName(seriesName)
         .setPoints(getData(iPadData))
         .setOption("color", "#00B800")
         .setType(Series.Type.SPLINE);
 
-    chart.addSeries(series);
+    if (!hidden) chart.addSeries(series);
     return series;
   }
 
@@ -152,7 +175,8 @@ public class TimeSeriesPlot extends DivWidget {
 
     int i = 0;
     for (PhoneSession ts : yValuesForUser) {
-      data[i][0] = ts.getBin();
+//      data[i][0] = ts.getBin();
+      data[i][0] = ts.getMiddle();
       data[i++][1] = Math.round(ts.getMean() * 100);
     }
     return data;
