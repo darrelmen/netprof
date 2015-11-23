@@ -24,7 +24,14 @@ public class PhoneAnalysis {
   private static final long QUARTER = 6 * HOUR;
   private static final long WEEK = 7 * DAY;
   private static final long MONTH = 4 * WEEK;
-  private static final List<Long> GRANULARITIES = Arrays.asList(FIVEMIN, HOUR, QUARTER, DAY, WEEK, MONTH);
+  private static final List<Long> GRANULARITIES = Arrays.asList(
+      //FIVEMIN,
+      //HOUR,
+  //    QUARTER,
+      DAY,
+      WEEK,
+      MONTH
+  );
 
   /**
    * Adaptive granularity -- try to choose sessions separated by a time gap.
