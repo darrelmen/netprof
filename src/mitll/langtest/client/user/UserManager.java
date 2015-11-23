@@ -260,7 +260,7 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#getUser
    */
   public int getUser() {
-    if (USE_COOKIE) {
+    if (USE_COOKIE) {  // TODO : remove!
       String sid = Cookies.getCookie("sid");
       if (sid == null || sid.equals("" + NO_USER_SET)) {
         return NO_USER_SET;
@@ -311,7 +311,7 @@ public class UserManager {
    *
    * @return
    */
-  private String getUserIDCookie() {
+  public String getUserIDCookie() {
     return appTitle + ":" + USER_ID;
   }
 
