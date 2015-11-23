@@ -104,30 +104,31 @@ public class TimeSeriesPlot extends DivWidget {
         .equals(shortForDate.substring(shortForDate.length() - 2));
   }
 
-  protected void setRawBestScores2(List<PhoneSession> rawBestScores) {
+  protected void setRawBestScores2(List<PhoneSession> phoneSessions) {
     timeToSession.clear();
-    for (PhoneSession timeAndScore : rawBestScores) {
-      //long bin = timeAndScore.getBin();
-      long bin = timeAndScore.getMiddle();
-      timeToSession.put(bin, timeAndScore);
+    PhoneSession lastSession = getLastSession(phoneSessions);
+    for (PhoneSession session : phoneSessions) {
+      long bin = getSessionTime(lastSession, session);
+      timeToSession.put(bin, session);
     }
   }
 
   /**
-   * @param yValuesForUser
+   * @param phoneSessions
    * @param chart
    * @param seriesTitle
    * @param hidden
    * @see PhonePlot#getErrorBarChart(String, String, String, List, boolean)
    * @see AnalysisPlot#addErrorBars(UserPerformance, Chart)
    */
-  protected Series addErrorBarSeries(List<PhoneSession> yValuesForUser, Chart chart, String seriesTitle, boolean hidden) {
-    Number[][] data = new Number[yValuesForUser.size()][3];
+  protected Series addErrorBarSeries(List<PhoneSession> phoneSessions, Chart chart, String seriesTitle, boolean hidden) {
+    Number[][] data = new Number[phoneSessions.size()][3];
 
     int i = 0;
-    for (PhoneSession ts : yValuesForUser) {
-      //data[i][0] = ts.getBin();
-      data[i][0] = ts.getMiddle();
+    PhoneSession lastSession = getLastSession(phoneSessions);
+    for (PhoneSession ts : phoneSessions) {
+      long middle = getSessionTime(lastSession, ts);
+      data[i][0] = middle;
       double mean = ts.getMean();
       double stdev = ts.getStdev();
       double first = mean - stdev;
@@ -144,19 +145,23 @@ public class TimeSeriesPlot extends DivWidget {
         .setType(Series.Type.ERRORBAR)
         .setVisible(hidden, false);
 
-//    if (hidden) series.hide();
-    // if (hidden) series.setVisible(false,false);
-
-    logger.info("before series " + seriesTitle + " is hidden = " + hidden + " " + series.isVisible());
+//    logger.info("before series " + seriesTitle + " is hidden = " + hidden + " " + series.isVisible());
     if (!hidden) {
       chart.addSeries(series);
     }
 
     if (hidden) series.setVisible(false, false);
 
-    // logger.info("after  series " + seriesTitle + " is hidden = " + hidden + " " + series.isVisible());
-
     return series;
+  }
+
+  private long getSessionTime(PhoneSession lastSession, PhoneSession ts) {
+    long middle = ts.getMiddle();
+    if (ts == lastSession &&
+        ts.getEnd() - middle > AnalysisPlot.HOUR) {
+      middle = ts.getEnd();
+    }
+    return middle;
   }
 
   protected Series addMeans(List<PhoneSession> iPadData, Chart chart, String seriesName, boolean hidden) {
@@ -173,13 +178,17 @@ public class TimeSeriesPlot extends DivWidget {
   private Number[][] getData(List<PhoneSession> yValuesForUser) {
     Number[][] data = new Number[yValuesForUser.size()][2];
 
+    PhoneSession lastSession = getLastSession(yValuesForUser);
     int i = 0;
     for (PhoneSession ts : yValuesForUser) {
-//      data[i][0] = ts.getBin();
-      data[i][0] = ts.getMiddle();
+      data[i][0] = getSessionTime(lastSession, ts);
       data[i++][1] = Math.round(ts.getMean() * 100);
     }
     return data;
+  }
+
+  private PhoneSession getLastSession(List<PhoneSession> yValuesForUser) {
+    return yValuesForUser.get(yValuesForUser.size() - 1);
   }
 
 }
