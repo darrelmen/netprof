@@ -51,9 +51,11 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
     return count;
   }
 
+/*
   public long getBin() {
     return bin;
   }
+*/
 
   public String toString() {
     return phone + " : " + new Date(bin) +
