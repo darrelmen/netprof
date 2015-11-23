@@ -162,9 +162,6 @@ public class PhoneAnalysis {
         long gran = (timestamp / time) * time;
         long diff = timestamp - last;
         if ((phoneSessionInternal == null) || (diff > time && phoneSessionInternal.getN() > MIN_SESSION_SIZE)) {
-//          if (phoneSessionInternal != null) {
-//            phoneSessionInternal.setEnd(last);
-//          }
           phoneSessionInternal = new PhoneSessionInternal(key, gran/*, timestamp*/);
           phoneSessionInternals.add(phoneSessionInternal);
           granToCurrent.put(time, phoneSessionInternal);
@@ -193,9 +190,9 @@ public class PhoneAnalysis {
   }
 
   public static class PhoneSessionInternal {
-    final transient SummaryStatistics summaryStatistics = new SummaryStatistics();
+    final transient SummaryStatistics summaryStatistics  = new SummaryStatistics();
     final transient SummaryStatistics summaryStatistics2 = new SummaryStatistics();
-  //  private final String phone;
+
     private double mean;
     private double stdev;
     private double meanTime;
