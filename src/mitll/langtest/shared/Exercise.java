@@ -27,8 +27,8 @@ public class Exercise extends AudioExercise implements CommonExercise {
   private static final int MAX_TOOLTIP_LENGTH = 15;
   private String content;
 
-  protected String context;
-  protected String contextTranslation;
+  private String context;
+  private String contextTranslation;
   private transient Collection<String> refSentences = new ArrayList<String>();
   private List<String> translitSentences = new ArrayList<String>();
   private STATE state;
@@ -48,7 +48,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    */
   public Exercise(String id, String content, String tooltip, String context, String contextTranslation) {
-    super(id, tooltip);
+    super(id);
     this.setContent(content);
     this.context = context;
     this.contextTranslation = contextTranslation;
@@ -58,23 +58,17 @@ public class Exercise extends AudioExercise implements CommonExercise {
    * @param id
    * @param content
    * @param sentenceRef
-   * @param tooltip
    * @see UserExercise#toExercise()
    */
-  public Exercise(String id, String content, String sentenceRef, String tooltip) {
-    super(id, tooltip);
+  public Exercise(String id, String content, String sentenceRef) {
+    super(id);
 
     this.setContent(content);
     this.refSentences.add(sentenceRef);
   }
 
-  public void setTooltip() {
-    setTooltip(getCombinedTooltip());
-  }
-
   public CommonShell getShellCombinedTooltip() {
-    String combined = getCombinedTooltip();
-    return new ExerciseShell(getID(), combined, englishSentence, meaning, foreignLanguage);
+    return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage);
   }
 
   /**
@@ -170,9 +164,9 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.contextTranslation = contextTranslation;
   }
 
-  public Exercise toExercise() {
+/*  public Exercise toExercise() {
     return this;
-  }
+  }*/
 
   @Override
   public long getModifiedDateTimestamp() {
