@@ -54,7 +54,6 @@ public class ExcelImport implements ExerciseDAO {
   private final boolean usePredefinedTypeOrder;
   private final String language;
   private final boolean skipSemicolons;
-  //private int audioOffset = 0;
   private final int maxExercises;
   private final ServerProperties serverProps;
   private final UserListManager userListManager;
@@ -109,7 +108,7 @@ public class ExcelImport implements ExerciseDAO {
     return sectionHelper;
   }
 
-  AudioDAO audioDAO;
+  private AudioDAO audioDAO;
   /**
    * TODO : what if they add a user exercise and add audio to it, or record new audio for other exercises???
    * @param audioDAO
@@ -151,27 +150,6 @@ public class ExcelImport implements ExerciseDAO {
 //            logger.info("Ex " + ex.getID() + " ref " + ex.getRefAudio());
 //          }
         }
-
-/*        int user = 0;
-        int examined = 0;
-        for (CommonExercise ex : userExerciseDAO.getAll()) {
-          attachAudio.attachAudio(ex);
-          examined++;
-
-          if (!ex.hasRefAudio()) {
-            if (ex.getID().startsWith("Custom")) {
-              logger.warn("missing audio for " + ex.getID());
-            }
-            user++;
-            missing++;
-          }
-          else if (ex.getID().startsWith("Custom")) {
-            logger.warn("found audio for " + ex.getID());
-          }
-        }
-        if (missing > 0) {
-          logger.warn("out of " + exercises.size() + " " + missing + " are missing ref audio, out of " + examined + " user exercises missing = " + user);
-        }*/
       }
     }
     return exercises;
@@ -911,7 +889,6 @@ public class ExcelImport implements ExerciseDAO {
     exercises.add(imported);
   }
 
-
   private String cleanTics(String foreignLanguagePhrase) {
     if (foreignLanguagePhrase.startsWith("\'")) {
       foreignLanguagePhrase = foreignLanguagePhrase.substring(1);
@@ -1025,7 +1002,6 @@ public class ExcelImport implements ExerciseDAO {
       attachAudio.addOldSchoolAudio(refAudioIndex, imported);
     }
 
-    // int i = attachAudio(imported);
     return imported;
   }
 
