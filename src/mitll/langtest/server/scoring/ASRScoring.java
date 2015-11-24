@@ -187,7 +187,8 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
       logger.error("getScoreForAudio failed to generate scores.");
       return new PretestScore(0.01f);
     }
-    PretestScore pretestScore = getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix, wavFile,
+    PretestScore pretestScore = getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode,
+        prefix, noSuffix, wavFile,
         scores, jsonObject, usePhoneToDisplay);
    // logger.info("now we have pretest score " +pretestScore);
     return pretestScore;
@@ -361,26 +362,8 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    */
   private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(EventAndFileInfo eventAndFileInfo) {
     Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = eventAndFileInfo.typeToEvent;
-
     return new ParseResultJson(props).getNetPronImageTypeToEndTimes(typeToEvent);
   }
-
-/*  private Map<NetPronImageType, List<TranscriptSegment>> getNetPronImageTypeToEndTimes(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
-    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
-    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
-      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
-      if (endTimes == null) {
-        typeToEndTimes.put(key, endTimes = new ArrayList<TranscriptSegment>());
-      }
-      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
-        TranscriptEvent value = event.getValue();
-        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));
-      }
-    }
-
-    return typeToEndTimes;
-  }*/
 
   /**
    * Take the events (originally from a .lab file generated in pronz) for WORDS and string them together into a
