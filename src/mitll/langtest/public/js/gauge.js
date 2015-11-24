@@ -1,4 +1,8 @@
 /*
+ * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ */
+
+/*
  * Jsgauge 0.4.1
  * http://code.google.com/p/jsgauge/
  *
