@@ -32,7 +32,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   private float avgScore;
   private transient Collection<String> refSentences;
   private transient List<String> firstPron = new ArrayList<String>();
-  private static final int MAX_TOOLTIP_LENGTH = 15;
 
   public UserExercise() {
   }  // just for serialization
@@ -69,7 +68,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     this.foreignLanguage = foreignLanguage;
     this.transliteration = transliteration;
     isPredef = !exerciseID.startsWith(CUSTOM_PREFIX);
-    setTooltip();
   }
 
   /**
@@ -108,7 +106,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     this.englishSentence = exercise.getEnglish();
     this.foreignLanguage = exercise.getRefSentence();
     this.transliteration = exercise.getTransliteration();
-    setTooltip();
+    //setTooltip();
     setFieldToAnnotation(exercise.getFieldToAnnotation());
     setUnitToValue(exercise.getUnitToValue());
     setState(exercise.getState());
@@ -130,7 +128,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @deprecated ideally we shouldn't have to do this
    */
   public Exercise toExercise() {
-    Exercise exercise = new Exercise(getID(), getEnglish(), getForeignLanguage(), getTooltip());
+    Exercise exercise = new Exercise(getID(), getEnglish(), getForeignLanguage());
     copyFields(exercise);
     copyAudio(exercise);
 
@@ -189,25 +187,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShellsCombined(Collection)
    */
   public CommonShell getShellCombinedTooltip() {
-    String combined = getCombinedTooltip();
-
-    return new ExerciseShell(getID(), combined, englishSentence, meaning, foreignLanguage);
-  }
-
-  public String getCombinedTooltip() {
-    String refSentence = getForeignLanguage();
-    if (refSentence.length() > MAX_TOOLTIP_LENGTH) {
-      refSentence = refSentence.substring(0, MAX_TOOLTIP_LENGTH);
-    }
-    // boolean refSentenceEqualsTooltip = getTooltip().trim().equals(getForeignLanguage().trim());
-    boolean englishSameAsForeign = getEnglish().trim().equals(getForeignLanguage().trim());
-    String combined = englishSameAsForeign ? getEnglish() : getEnglish() + (refSentence.isEmpty() ? "" : " / " + refSentence);
-    if (combined.isEmpty()) combined = refSentence;
-    return combined;
-  }
-
-  public void setTooltip() {
-    setTooltip(getCombinedTooltip());
+    return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage);
   }
 
   @Override
