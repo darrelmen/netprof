@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ */
+
 // ==ClosureCompiler==
 // @compilation_level SIMPLE_OPTIMIZATIONS
 
