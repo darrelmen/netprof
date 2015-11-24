@@ -29,8 +29,6 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public interface ListInterface extends RequiresResize {
-//  void removeHistoryListener();
-
   /**
    * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList(Panel, String)
    * @param factory
@@ -49,12 +47,6 @@ public interface ListInterface extends RequiresResize {
    * @param id
    */
   void reloadWith(String id);
-
-  /**
-   * @see mitll.langtest.client.list.ExerciseList#getExerciseListOnLeftSide(PropertyHandler)
-   * @return
-   */
- // Widget getWidget();
 
   /**
    * @see mitll.langtest.client.custom.content.NPFHelper#doInternalLayout(UserList, String)
@@ -111,11 +103,6 @@ public interface ListInterface extends RequiresResize {
   int getComplete();
 
   /**
-   * @seex mitll.langtest.client.LangTest#resetState()
-   */
-  //void removeCurrentExercise();
-
-  /**
    * @see mitll.langtest.client.custom.content.NPFHelper#makeExerciseList(com.google.gwt.user.client.ui.Panel, String)
    */
   void reloadExercises();
@@ -132,7 +119,6 @@ public interface ListInterface extends RequiresResize {
   boolean isPendingReq();
 
   void hide();
- // void show();
 
   /**
    * @see Navigation#getNav()
@@ -147,7 +133,6 @@ public interface ListInterface extends RequiresResize {
 
   void addListChangedListener(ListChangeListener<CommonShell> listener);
 
-  //void setInstance(String instance);
   void setShuffle(boolean doShuffle);
   void simpleSetShuffle(boolean doShuffle);
 
