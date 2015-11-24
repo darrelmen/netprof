@@ -144,7 +144,7 @@ public abstract class Scoring {
    * @param suffix
    * @param decode             if true don't bother to write out images for word and phone
    * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
-   * @see ASRScoring#scoreRepeatExercise
+   * @see ASRWebserviceScoring#getPretestScore(String, int, int, boolean, boolean, String, String, Scores, String, String, double, int, boolean)
    */
   EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
                                     String audioFileNoSuffix, boolean useScoreToColorBkg,
