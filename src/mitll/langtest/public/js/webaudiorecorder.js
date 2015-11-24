@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ */
+
 function __log(e, data) {
 //    $('#status').append("<p>"+e + "  at " + new Date().getTime());
     console.log(e + "  at " + new Date().getTime());
