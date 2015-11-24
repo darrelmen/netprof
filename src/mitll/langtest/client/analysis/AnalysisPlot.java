@@ -17,7 +17,10 @@ import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.TimeAndScore;
 import mitll.langtest.shared.analysis.UserPerformance;
 import org.moxieapps.gwt.highcharts.client.*;
-import org.moxieapps.gwt.highcharts.client.events.*;
+import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEvent;
+import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.SeriesClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
@@ -69,6 +72,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private AnalysisTab.TIME_HORIZON timeHorizon;
   private long lastTime;
   private long firstTime;
+  List<Long> weeks = new ArrayList<>();
+  List<Long> months = new ArrayList<>();
 
   /**
    * @param service
@@ -93,9 +98,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     granToLabel.put(YEAR, "Year");
     granToLabel.put(FIVEMIN, "Minute");
 
-    SoundPlayer soundFeedback = new SoundPlayer(soundManagerAPI);
-    this.playAudio = new PlayAudio(service, soundFeedback);
-    //setHeight("350px");
+    this.playAudio = new PlayAudio(service, new SoundPlayer(soundManagerAPI));
     populateExerciseMap(service, (int) userid);
 
     getPerformanceForUser(service, userid, userChosenID, minRecordings);
@@ -111,9 +114,61 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
       @Override
       public void onSuccess(UserPerformance userPerformance) {
+        List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
+        long last = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
+        List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(WEEK);
+        weeks.addAll(getPeriods(phoneSessions, WEEK, last));
+        List<PhoneSession> phoneSessions1 = userPerformance.getGranularityToSessions().get(MONTH);
+        months.addAll(getPeriods(phoneSessions1, MONTH, last));
+
         addChart(userPerformance, userChosenID);
       }
     });
+  }
+
+  public SortedSet<Long> getPeriods(List<PhoneSession> phoneSessions, long granularity, final long lastTime) {
+    int i = phoneSessions.size() - 1;
+    SortedSet<Long> months2 = new TreeSet<Long>();
+ //   logger.info("Examine  " + granularity + " : " + phoneSessions.size() + " last " + new Date(lastTime));
+    long start = lastTime - granularity;
+    long last = lastTime;
+
+    while (i >= 0) {
+      PhoneSession session = phoneSessions.get(i);
+      String sessionWindow = getDateToShow2(session.getStart()) + " - " + getDateToShow2(session.getEnd());
+      String window = getDateToShow2(start) + " - " + getDateToShow2(last);
+      if (
+          (session.getEnd() > start && session.getEnd() <= last)
+              || (session.getStart() > start && session.getStart() <= last)
+              || (session.getStart() < start && session.getEnd() > last)
+          ) {
+  /*      logger.info("session " + sessionWindow + " vs" + window +
+            " at " + i);*/
+        months2.add(start);
+        start -= granularity;
+        last -= granularity;
+
+        // logger.info("\t last " +new Date(last));
+
+      } else {
+    /*    logger.info("not session " +
+            sessionWindow + " vs " +
+            window +
+            "  at " + i);*/
+        if (session.getStart() > last) {
+          i--;
+        }
+        else {
+          start -= granularity;
+          last -= granularity;
+        }
+      }
+    }
+    PhoneSession first = phoneSessions.get(0);
+    if (first.getStart() < start) {
+      months2.add(start);
+    }
+    return months2;
   }
 
   private void addChart(UserPerformance userPerformance, String userChosenID) {
@@ -150,7 +205,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
                 if (!series.isVisible()) {
                   series.setVisible(true);
                 }
-               // logger.info("\tshowSeriesByVisible defer : series " + name + "/" + series + " : " + series.isVisible());
+                // logger.info("\tshowSeriesByVisible defer : series " + name + "/" + series + " : " + series.isVisible());
               }
             } else {
               chart.removeSeries(series);
@@ -265,7 +320,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
         boolean anyBigger = false;
         for (PhoneSession session : phoneSessions) {
           if (session.getStart() >= start && session.getEnd() < end) {
-          //  logger.info("\t " + gran + " session " + session);
+            //  logger.info("\t " + gran + " session " + session);
             size++;
             total += session.getCount();
             if (session.getCount() > 50) anyBigger = true;
@@ -452,7 +507,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
   private void addCumulativeAverage(List<TimeAndScore> yValuesForUser, Chart chart, String seriesTitle, boolean isVisible) {
     Number[][] data = new Number[yValuesForUser.size()][2];
-
 //    logger.info("addCumulativeAverage " + seriesTitle + " :  " + isVisible);
 
     int i = 0;
@@ -478,15 +532,12 @@ public class AnalysisPlot extends TimeSeriesPlot {
     if (!iPadData.isEmpty()) {
       Number[][] data = getDataForTimeAndScore(iPadData);
 
-      String iPadName = I_PAD_I_PHONE;// + PRONUNCIATION_SCORE;
+      String iPadName = I_PAD_I_PHONE;
       Series series = chart.createSeries()
           .setName(iPadName)
           .setPoints(data)
           .setOption("color", "#00B800")
           .setType(Series.Type.SCATTER);
-      //        .setVisible(isVisible, false);
-
-//      if (isVisible) chart.addSeries(series);
       recordVisible(isVisible, series);
     }
   }
@@ -609,31 +660,80 @@ public class AnalysisPlot extends TimeSeriesPlot {
     return idToEx;
   }
 
-  public long setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon) {
+  public long setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon, AnalysisTab.TimeWidgets timeWidgets) {
     this.timeHorizon = timeHorizon;
-    Long x = goToLast(timeHorizon);
+    Long x = goToLast(timeHorizon, timeWidgets);
     if (x != null) return x;
     return 0;
   }
 
-  public Long goToLast(AnalysisTab.TIME_HORIZON timeHorizon) {
+  int index = 0;
+
+  public Long goToLast(AnalysisTab.TIME_HORIZON timeHorizon, AnalysisTab.TimeWidgets timeWidgets) {
+    this.timeHorizon = timeHorizon;
     switch (timeHorizon) {
       case WEEK:
         chart.getXAxis().setExtremes(lastTime - WEEK, lastTime);
-//        logger.warning("week ---- ");
+
+        Long aLong = weeks.get(weeks.size() - 1);
+        index = weeks.size() - 1;
+
+        timeWidgets.prevButton.setEnabled(weeks.size() > 1);
+        timeWidgets.nextButton.setEnabled(false);
+        timeWidgets.display.setText(getDateToShow2(aLong));
         return lastTime - WEEK;
       case MONTH:
         chart.getXAxis().setExtremes(lastTime - MONTH, lastTime);
-  //      logger.warning("MONTH ---- ");
+        logger.warning("MONTH ---- " + months.size());
+
+        Long aLong2 = months.get(months.size() - 1);
+
+        index = months.size() - 1;
+
+        timeWidgets.prevButton.setEnabled(months.size() > 1);
+        timeWidgets.nextButton.setEnabled(false);
+        timeWidgets.display.setText(getDateToShow2(aLong2));
 
         return lastTime - MONTH;
       case ALL:
         chart.getXAxis().setExtremes(firstTime, lastTime);
-
-    //    logger.warning("ALL ---- ");
-
+        timeWidgets.prevButton.setEnabled(false);
+        timeWidgets.nextButton.setEnabled(false);
+        timeWidgets.display.setText("");
+        //    logger.warning("ALL ---- ");
         return firstTime;
     }
     return null;
+  }
+
+  public void gotPrevClick(AnalysisTab.TimeWidgets timeWidgets) {
+    long offset = timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? WEEK : MONTH;
+    List<Long> periods = timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? weeks : months;
+
+    index--;
+    Long aLong = periods.get(index);
+
+    timeWidgets.prevButton.setEnabled(index > 0);
+    timeWidgets.nextButton.setEnabled(true);
+
+    timeWidgets.display.setText(getDateToShow2(aLong));
+
+    chart.getXAxis().setExtremes(aLong, aLong + offset);
+  }
+
+  public void gotNextClick(AnalysisTab.TimeWidgets timeWidgets) {
+    long offset = timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? WEEK : MONTH;
+    List<Long> periods = timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? weeks : months;
+
+    index++;
+    Long aLong = periods.get(index);
+
+    timeWidgets.prevButton.setEnabled(true);
+    timeWidgets.nextButton.setEnabled(index < periods.size() - 1);
+
+    timeWidgets.display.setText(getDateToShow2(aLong));
+
+
+    chart.getXAxis().setExtremes(aLong, aLong + offset);
   }
 }
