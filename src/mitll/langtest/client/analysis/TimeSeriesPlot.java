@@ -29,6 +29,7 @@ public class TimeSeriesPlot extends DivWidget {
   private final DateTimeFormat format = DateTimeFormat.getFormat("E MMM d yy h:mm a");
   private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
   private final DateTimeFormat shortFormat = DateTimeFormat.getFormat("MMM d, yy");
+  private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
   private final String nowFormat = shortFormat.format(new Date());
 
   /**
@@ -90,11 +91,24 @@ public class TimeSeriesPlot extends DivWidget {
   }
 
   protected String getDateToShow(ToolTipData toolTipData) {
-    Date date = new Date(toolTipData.getXAsLong());
+    long xAsLong = toolTipData.getXAsLong();
+    return getDateToShow(xAsLong);
+  }
+
+  protected String getDateToShow(long xAsLong) {
+    Date date = new Date(xAsLong);
     String shortForDate = shortFormat.format(date);
     DateTimeFormat toUse = sameYear(shortForDate) ? noYearFormat : format;
     return toUse.format(date);
   }
+
+  protected String getDateToShow2(long xAsLong) {
+    Date date = new Date(xAsLong);
+    String shortForDate = shortFormat.format(date);
+    DateTimeFormat toUse = sameYear(shortForDate) ? superShortFormat : shortFormat;
+    return toUse.format(date);
+  }
+
 
   private boolean sameYear(String shortForDate) {
     return sameYear(nowFormat, shortForDate);
