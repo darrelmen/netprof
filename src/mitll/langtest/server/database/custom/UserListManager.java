@@ -487,7 +487,7 @@ public class UserListManager {
           //logger.debug("getReviewedUserExercises : found " + byID + " tooltip " + byID.getTooltip());
           UserExercise e = new UserExercise(byID);
           onList.add(e); // all predefined references
-          e.setTooltip(byID.getCombinedTooltip());
+          //e.setTooltip(byID.getCombinedTooltip());
           //logger.debug("getReviewedUserExercises : found " + e.getID() + " tooltip " + e.getTooltip());
         }
         else {
@@ -593,7 +593,7 @@ public class UserListManager {
       addAnnotation(assignedID, pair.getKey(), value.getStatus(), value.getComment(), userExercise.getCreator());
     }
 
-    userExercise.setTooltip();
+//    userExercise.setTooltip();
 
     return userExercise;
   }
