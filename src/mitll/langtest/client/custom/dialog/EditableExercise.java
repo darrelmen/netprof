@@ -23,6 +23,7 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.logging.Logger;
@@ -375,13 +376,25 @@ class EditableExercise extends NewUserExercise {
     }
   }
 
+  /**
+   * @see #doAfterEditComplete(ListInterface, boolean)
+   * @param pagingContainer
+   */
   private void changeTooltip(ListInterface pagingContainer) {
     CommonShell byID = pagingContainer.byID(newUserExercise.getID());
     if (byID == null) {
       logger.warning("changeTooltip : huh? can't find exercise with id " + newUserExercise.getID());
     } else {
-      byID.setTooltip(newUserExercise.getCombinedTooltip());
-      logger.info("changeTooltip : for " + newUserExercise.getID() + " now " + byID.getTooltip());
+//      byID.setTooltip(newUserExercise.getCombinedTooltip());
+      if (byID instanceof UserExercise) {
+        UserExercise byID1 = (UserExercise) byID;
+        byID1.setEnglish(newUserExercise.getEnglish());
+        byID1.setForeignLanguage(newUserExercise.getForeignLanguage());
+
+//        logger.info("\tchangeTooltip : for " + newUserExercise.getID() + " now " + byID.getTooltip());
+
+      }
+  //    logger.info("changeTooltip : for " + newUserExercise.getID() + " now " + byID.getTooltip());
 
       pagingContainer.redraw();   // show change to tooltip!
     }
@@ -392,7 +405,7 @@ class EditableExercise extends NewUserExercise {
   private String originalTransliteration;
 
   /**
-   * @see EditItem#populatePanel
+   * @see EditItem#addEditOrAddPanel(CommonUserExercise, HasText, UserList, Panel, UserList, ListInterface, boolean, boolean)
    * @param newUserExercise
    */
   @Override
