@@ -417,9 +417,10 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.client.custom.dialog.EditableExercise#postEditItem
    */
   public void editItem(UserExercise userExercise) {
-    logger.debug("editItem ex #" + userExercise.getID() + " mediaDir : " + getServerProps().getMediaDir() + " initially audio was\n\t " + userExercise.getAudioAttributes());
+    logger.debug("editItem ex #" + userExercise.getID() + " mediaDir : " + getServerProps().getMediaDir() +
+        " initially audio was\n\t " + userExercise.getAudioAttributes());
 
-    userExercise.setTooltip();
+    //userExercise.setTooltip();
 
     logger.debug("tooltip now " + userExercise.getTooltip());
 
