@@ -21,7 +21,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.Navigation;
-import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordScore;
@@ -43,12 +42,10 @@ public class AnalysisTab extends DivWidget {
 
   enum TIME_HORIZON {WEEK, MONTH, ALL}
 
-  TIME_HORIZON timeHorizon = TIME_HORIZON.ALL;
-  AnalysisPlot analysisPlot;
-  ExerciseController controller;
-  HTML currentDate;
-  Button nextButton, prevButton;
-  TimeWidgets timeWidgets;
+//  TIME_HORIZON timeHorizon = TIME_HORIZON.ALL;
+  private final AnalysisPlot analysisPlot;
+  private final ExerciseController controller;
+  private final TimeWidgets timeWidgets;
 
   /**
    * @param service
@@ -83,22 +80,22 @@ public class AnalysisTab extends DivWidget {
     stepper.getElement().setId("stepper");
 //    stepper.addStyleName("floatLeft");
     stepper.addStyleName("leftTenMargin");
+    Button prevButton;
     stepper.add(prevButton = getPrevButton());
 
-    currentDate = new HTML();
+    HTML currentDate = new HTML();
     currentDate.setWidth("80px");
     currentDate.addStyleName("boxShadow");
     currentDate.addStyleName("leftFiveMargin");
     currentDate.addStyleName("topFiveMargin");
     currentDate.addStyleName("rightFiveMargin");
     stepper.add(currentDate);
-    nextButton = getNextButton();
+    Button nextButton = getNextButton();
     stepper.add(nextButton);
 
-    timeWidgets = new TimeWidgets(prevButton, nextButton, currentDate);
+    timeWidgets = new TimeWidgets(prevButton, nextButton, currentDate, allChoice, weekChoice, monthChoice);
 
     timeControls.add(stepper);
-//    timeControls.add(getWindowGroup());
 
     add(timeControls);
     add(analysisPlot);
@@ -121,12 +118,11 @@ public class AnalysisTab extends DivWidget {
     final Button left = new Button();
     controller.register(left, "prevTimeWindow");
     left.setIcon(IconType.CARET_LEFT);
-  //  new TooltipHelper().addTooltip(left, "Left Arrow Key");
+    //  new TooltipHelper().addTooltip(left, "Left Arrow Key");
     left.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        //left.setEnabled(false);
-        analysisPlot.gotPrevClick(new TimeWidgets(left, nextButton, currentDate));
+        analysisPlot.gotPrevClick(timeWidgets);
       }
     });
     left.setEnabled(false);
@@ -140,13 +136,16 @@ public class AnalysisTab extends DivWidget {
     right.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-//        right.setEnabled(false);
-        analysisPlot.gotNextClick(new TimeWidgets(prevButton, right, currentDate));
+        analysisPlot.gotNextClick(timeWidgets);
       }
     });
     right.setEnabled(false);
     return right;
   }
+
+  private Button allChoice;
+  private Button weekChoice;
+  private Button monthChoice;
 
   /**
    * @return
@@ -159,14 +158,15 @@ public class AnalysisTab extends DivWidget {
     buttonGroup.addStyleName("topMargin");
     buttonGroup.addStyleName("leftTenMargin");
     buttonGroup.setToggle(ToggleType.RADIO);
-    buttonGroup.add(getWeekChoice());
-    buttonGroup.add(getMonthChoice());
-    buttonGroup.add(getAllChoice());
+    buttonGroup.add(weekChoice = getWeekChoice());
+    buttonGroup.add(monthChoice = getMonthChoice());
+    allChoice = getAllChoice();
+    buttonGroup.add(allChoice);
 
     return buttonGroup;
   }
 
-  private Widget getWindowGroup() {
+/*  private Widget getWindowGroup() {
     ButtonToolbar w = new ButtonToolbar();
     ButtonGroup buttonGroup = new ButtonGroup();
     w.add(buttonGroup);
@@ -177,7 +177,7 @@ public class AnalysisTab extends DivWidget {
     buttonGroup.add(getNextButton());
 
     return w;
-  }
+  }*/
 
   private Button getWeekChoice() {
     return getButton(controller, getClickHandler(TIME_HORIZON.WEEK), "Week");
@@ -314,14 +314,26 @@ public class AnalysisTab extends DivWidget {
   }
 
   public static class TimeWidgets {
-    Button prevButton;
-    Button nextButton;
-    HTML display;
+    final Button prevButton;
+    final Button nextButton;
+    final Button all;
+    final Button week;
+    final Button month;
+    final HTML display;
 
-    public TimeWidgets(Button prevButton, Button nextButton, HTML display) {
+    public TimeWidgets(Button prevButton, Button nextButton, HTML display, Button all, Button week, Button month) {
       this.prevButton = prevButton;
       this.nextButton = nextButton;
       this.display = display;
+      this.all = all;
+      this.week = week;
+      this.month = month;
+    }
+
+    public void reset() {
+      all.setActive(true);
+      week.setActive(false);
+      month.setActive(false);
     }
   }
 }
