@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ */
+
 package mitll.langtest.server;
 
 import org.apache.log4j.Logger;
