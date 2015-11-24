@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ */
+
 /**
  * SoundManager 2 Demo: Play MP3 links via button
  * ----------------------------------------------
