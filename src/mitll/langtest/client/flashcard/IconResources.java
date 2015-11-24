@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ */
+
 package mitll.langtest.client.flashcard;
 
 import com.google.gwt.resources.client.ClientBundle;
