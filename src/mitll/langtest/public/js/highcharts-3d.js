@@ -1,4 +1,8 @@
 /*
+ * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ */
+
+/*
  Highcharts JS v4.1.9 (2015-10-07)
 
  (c) 2009-2013 Torstein H?nsi
