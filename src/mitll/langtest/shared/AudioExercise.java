@@ -25,15 +25,9 @@ public class AudioExercise extends ExerciseShell {
   private Map<String, String> unitToValue = new HashMap<String, String>();
   private Map<String, ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
 
-  public AudioExercise() {
-  }
-
+  public AudioExercise() {}
   public AudioExercise(String id) {
     super(id);
-  }
-
-  public AudioExercise(String id, String tooltip/*, String englishSentence, String meaning, String foreignLanguage*/) {
-    super(id, tooltip/*, englishSentence, meaning, foreignLanguage*/);
   }
 
   public String getRefAudio() {
@@ -387,15 +381,10 @@ public class AudioExercise extends ExerciseShell {
       if (value != null) {
         userToAudioSingle.put(toUse, value);
       }
-      else {
-//        System.out.println("\tgetMostRecentAudio no value for  " + toUse + " in " + userToAudio);
-      }
     }
 
     sortRegBeforeSlow(userToAudioSingle);
-
 //    System.out.println("\tgetMostRecentAudio userToAudioSingle " + userToAudioSingle);
-
     return userToAudioSingle;
   }
 
