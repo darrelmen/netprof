@@ -72,10 +72,8 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   @Override
   protected CellTable.Resources chooseResources() {
     CellTable.Resources o;
-//    o = GWT.create(LocalTableResources.class);
 
     if (controller.isRightAlignContent()) {   // so when we truncate long entries, the ... appears on the correct end
-      logger.info("chooseResources RTL - content");
       o = GWT.create(RTLLocalTableResources.class);
     } else {
       o = GWT.create(LocalTableResources.class);
@@ -321,9 +319,6 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
     /**
      * The styles applied to the table.
      */
-    interface TableStyle extends CellTable.Style {
-    }
-
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "RTLScoresCellTableStyleSheet.css"})
     PagingContainer.TableResources.TableStyle cellTableStyle();
