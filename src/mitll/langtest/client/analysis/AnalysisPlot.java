@@ -66,6 +66,9 @@ public class AnalysisPlot extends TimeSeriesPlot {
   List<Series> detailSeries = new ArrayList<>();
 
   Chart chart = null;
+  private AnalysisTab.TIME_HORIZON timeHorizon;
+  private long lastTime;
+  private long firstTime;
 
   /**
    * @param service
@@ -117,7 +120,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     clear();
     List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
     float v = userPerformance.getRawAverage() * 100;
-    int rawTotal = rawBestScores.size();//userPerformance.getRawTotal();
+    int rawTotal = rawBestScores.size();
 
     if (rawBestScores.isEmpty()) {
       add(new Label("No Recordings yet to analyze. Please record yourself."));
@@ -147,7 +150,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
                 if (!series.isVisible()) {
                   series.setVisible(true);
                 }
-                logger.info("\tshowSeriesByVisible defer : series " + name + "/" + series + " : " + series.isVisible());
+               // logger.info("\tshowSeriesByVisible defer : series " + name + "/" + series + " : " + series.isVisible());
               }
             } else {
               chart.removeSeries(series);
@@ -263,7 +266,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
         boolean anyBigger = false;
         for (PhoneSession session : phoneSessions) {
           if (session.getStart() >= start && session.getEnd() < end) {
-            logger.info("\t " + gran + " session " + session);
+          //  logger.info("\t " + gran + " session " + session);
             size++;
             total += session.getCount();
             if (session.getCount() > 50) anyBigger = true;
@@ -302,7 +305,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
         }
       });
     } else {
-  //    logger.info("setVisibility total --------- " + errorSeries.getName() + " " + averageSeries.getName());
+      //    logger.info("setVisibility total --------- " + errorSeries.getName() + " " + averageSeries.getName());
       seriesToVisible.put(errorSeries, true);
       seriesToVisible.put(averageSeries, true);
     }
@@ -404,8 +407,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
         return getErrorBarToolTip(toolTipData, seriesName1);
       }
     } //else {
-      //logger.info("getTooltip series is " + seriesName1 + " not in " + values);
-   // }
+    //logger.info("getTooltip series is " + seriesName1 + " not in " + values);
+    // }
     boolean showEx = toShowExercise.contains(seriesName1);
 
     String englishTool = (english == null || english.equals("N/A")) ? "" : "<br/>" + english;
@@ -535,26 +538,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
       @Override
       public boolean onSetExtremes(AxisSetExtremesEvent axisSetExtremesEvent) {
         if (axisSetExtremesEvent != null) {
-          for (Series series : detailSeries) {
-            series.setVisible(false, false);
-          }
-
-          try {
-            Number min = axisSetExtremesEvent.getMin();
-            Number max = axisSetExtremesEvent.getMax();
-            if (min != null && min.longValue() > 0) {
-          //    long diff = (max.longValue() - min.longValue());
-         //     logger.info("onSetExtremes got " + min + " : " + max + " diff " + diff);
-              setVisibility(min.longValue(), max.longValue());
-            } else {
-           //   logger.info("no min for event");
-              setVisibility(0, Long.MAX_VALUE);
-            }
-            showSeriesByVisible();
-
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
+          gotExtremes(axisSetExtremesEvent);
         } else {
           logger.warning("got null event");
         }
@@ -565,6 +549,35 @@ public class AnalysisPlot extends TimeSeriesPlot {
     chart.setHeight(CHART_HEIGHT + "px");
   }
 
+  public void gotExtremes(AxisSetExtremesEvent axisSetExtremesEvent) {
+    for (Series series : detailSeries) {
+      series.setVisible(false, false);
+    }
+
+    try {
+      Number min = axisSetExtremesEvent.getMin();
+      Number max = axisSetExtremesEvent.getMax();
+      if (min != null && min.longValue() > 0) {
+        //    long diff = (max.longValue() - min.longValue());
+        //     logger.info("onSetExtremes got " + min + " : " + max + " diff " + diff);
+        setVisibility(min.longValue(), max.longValue());
+      } else {
+
+        //   logger.info("no min for event");
+        setVisibility(0, Long.MAX_VALUE);
+//        goToLast(timeHorizon);
+      }
+      showSeriesByVisible();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * @param rawBestScores
+   * @see #addChart(UserPerformance, String)
+   */
   private void setRawBestScores(List<TimeAndScore> rawBestScores) {
     List<String> toGet = new ArrayList<>();
     for (TimeAndScore timeAndScore : rawBestScores) {
@@ -574,6 +587,9 @@ public class AnalysisPlot extends TimeSeriesPlot {
         toGet.add(id);
       }
     }
+    TimeAndScore timeAndScore = rawBestScores.get(rawBestScores.size() - 1);
+    this.firstTime = rawBestScores.get(0).getTimestamp();
+    this.lastTime = timeAndScore.getTimestamp();
     service.getShells(toGet, new AsyncCallback<List<CommonShell>>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -592,5 +608,33 @@ public class AnalysisPlot extends TimeSeriesPlot {
    */
   public Map<String, CommonShell> getIdToEx() {
     return idToEx;
+  }
+
+  public long setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon) {
+    this.timeHorizon = timeHorizon;
+    Long x = goToLast(timeHorizon);
+    if (x != null) return x;
+    return 0;
+  }
+
+  public Long goToLast(AnalysisTab.TIME_HORIZON timeHorizon) {
+    switch (timeHorizon) {
+      case WEEK:
+        chart.getXAxis().setExtremes(lastTime - WEEK, lastTime);
+        logger.warning("week ---- ");
+        return lastTime - WEEK;
+      case MONTH:
+        chart.getXAxis().setExtremes(lastTime - MONTH, lastTime);
+        logger.warning("MONTH ---- ");
+
+        return lastTime - MONTH;
+      case ALL:
+        chart.getXAxis().setExtremes(firstTime, lastTime);
+
+        logger.warning("ALL ---- ");
+
+        return firstTime;
+    }
+    return null;
   }
 }
