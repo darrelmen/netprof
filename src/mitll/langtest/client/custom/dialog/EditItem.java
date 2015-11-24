@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 /**
  * Coordinates editing an item -
  * makes a panel that has the list and content on the right
- *
+ * <p>
  * User: GO22670
  * Date: 12/9/13
  * Time: 4:58 PM
@@ -82,15 +82,15 @@ public class EditItem {
   }
 
   /**
-   * @see mitll.langtest.client.custom.Navigation#showEditItem
    * @param originalList
    * @param itemMarker
    * @param includeAddItem
    * @return
+   * @see mitll.langtest.client.custom.Navigation#showEditItem
    */
   public Panel editItem(UserList originalList, final HasText itemMarker, boolean includeAddItem) {
     Panel hp = new HorizontalPanel();
-    hp.getElement().setId("EditItem_for_"+originalList.getName());
+    hp.getElement().setId("EditItem_for_" + originalList.getName());
     Panel pagerOnLeft = new SimplePanel();
     hp.add(pagerOnLeft);
     pagerOnLeft.addStyleName("rightFiveMargin");
@@ -110,7 +110,9 @@ public class EditItem {
     return hp;
   }
 
-  public void onResize() { if (exerciseList != null) exerciseList.onResize(); }
+  public void onResize() {
+    if (exerciseList != null) exerciseList.onResize();
+  }
 
   private UserList makeListOfOnlyYourItems(UserList toCopy) {
     UserList copy2 = new UserList(toCopy);
@@ -121,16 +123,16 @@ public class EditItem {
   }
 
   /**
-   * @see #editItem
    * @param right
    * @param instanceName
    * @param ul
    * @param originalList
    * @param includeAddItem
    * @return
+   * @see #editItem
    */
   private PagingExerciseList makeExerciseList(Panel right, String instanceName, UserList ul, UserList originalList,
-                                                 final boolean includeAddItem) {
+                                              final boolean includeAddItem) {
     logger.info("EditItem.makeExerciseList - ul = " + ul.getName() + " " + includeAddItem);
 
     if (includeAddItem) {
@@ -140,52 +142,51 @@ public class EditItem {
     }
 
     final PagingExerciseList exerciseList =
-      new HistoryExerciseList(right, service, feedback, controller,
-        true, instanceName, false) {
-        @Override
-        protected void onLastItem() {
-          new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
-            @Override
-            public void onHidden(HiddenEvent hiddenEvent) {
-              reloadExercises();
-            }
-          });
-        }
-
-        @Override
-        protected void askServerForExercise(String itemID) {
-          if (itemID.equals(NEW_EXERCISE_ID)) {
-            useExercise(getNewItem());
+        new HistoryExerciseList(right, service, feedback, controller,
+            true, instanceName, false) {
+          @Override
+          protected void onLastItem() {
+            new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
+              @Override
+              public void onHidden(HiddenEvent hiddenEvent) {
+                reloadExercises();
+              }
+            });
           }
-          else {
-            logger.info("EditItem.makeExerciseList - askServerForExercise = "  + itemID);
 
-            super.askServerForExercise(itemID);
-          }
-        }
+          @Override
+          protected void askServerForExercise(String itemID) {
+            if (itemID.equals(NEW_EXERCISE_ID)) {
+              useExercise(getNewItem());
+            } else {
+              logger.info("EditItem.makeExerciseList - askServerForExercise = " + itemID);
 
-        @Override
-        public List<CommonShell> rememberExercises(List<CommonShell> result) {
-          clear();
-          boolean addNewItem = includeAddItem;
-
-          for (final CommonShell es : result) {
-            addExercise(es);
-            if (includeAddItem && es.getID().equals(NEW_EXERCISE_ID)) {
-              addNewItem = false;
+              super.askServerForExercise(itemID);
             }
           }
 
-          if (addNewItem) {
-            addExercise(getNewItem());  // TODO : fix this
+          @Override
+          public List<CommonShell> rememberExercises(List<CommonShell> result) {
+            clear();
+            boolean addNewItem = includeAddItem;
+
+            for (final CommonShell es : result) {
+              addExercise(es);
+              if (includeAddItem && es.getID().equals(NEW_EXERCISE_ID)) {
+                addNewItem = false;
+              }
+            }
+
+            if (addNewItem) {
+              addExercise(getNewItem());  // TODO : fix this
+            }
+            flush();
+            return result;
           }
-          flush();
-          return result;
-        }
-      };
+        };
     setFactory(exerciseList, ul, originalList);
     exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
-   // logger.info("setting vertical on " +exerciseList.getElement().getId());
+    // logger.info("setting vertical on " +exerciseList.getElement().getId());
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
       public void execute() {
@@ -197,6 +198,7 @@ public class EditItem {
 
   /**
    * TODO : consider filling in context and context translation?
+   *
    * @return
    */
   private UserExercise getNewItem() {
@@ -219,9 +221,9 @@ public class EditItem {
   }
 
   /**
-   * @see #editItem
    * @param ul
    * @param npfExerciseList
+   * @see #editItem
    */
   private void rememberAndLoadFirst(final UserList ul, PagingExerciseList npfExerciseList) {
     npfExerciseList.setUserListID(ul.getUniqueID());
@@ -235,13 +237,13 @@ public class EditItem {
   private UserExercise newExercise;
 
   /**
-   * @see #setFactory(mitll.langtest.client.list.PagingExerciseList, mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList)
    * @param exercise
    * @param right
    * @param ul
    * @param originalList
    * @param itemMarker
    * @param pagingContainer
+   * @see #setFactory(mitll.langtest.client.list.PagingExerciseList, mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList)
    */
   private void populatePanel(CommonUserExercise exercise, final Panel right, final UserList ul, final UserList originalList, final HasText itemMarker,
                              final ListInterface pagingContainer) {
@@ -260,6 +262,7 @@ public class EditItem {
 
   /**
    * TODO : consider filling in context and context translation?
+   *
    * @param userid
    * @return
    */
@@ -268,7 +271,6 @@ public class EditItem {
   }
 
   /**
-   * @see #populatePanel(mitll.langtest.shared.CommonUserExercise, com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HasText, mitll.langtest.client.list.ListInterface)
    * @param newExercise
    * @param itemMarker
    * @param originalList
@@ -277,29 +279,33 @@ public class EditItem {
    * @param pagingContainer
    * @param doNewExercise
    * @param setFields
+   * @see #populatePanel(mitll.langtest.shared.CommonUserExercise, com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HasText, mitll.langtest.client.list.ListInterface)
    */
   private void addEditOrAddPanel(CommonUserExercise newExercise, HasText itemMarker, UserList originalList,
-                                   Panel right, UserList ul, ListInterface pagingContainer, boolean doNewExercise, boolean setFields) {
+                                 Panel right, UserList ul, ListInterface pagingContainer,
+                                 boolean doNewExercise, boolean setFields) {
     NewUserExercise editableExercise = getAddOrEditPanel(newExercise, itemMarker, originalList, doNewExercise);
     right.add(editableExercise.addNew(ul, originalList, pagingContainer, right));
     if (setFields) editableExercise.setFields(newExercise);
   }
 
-  public void clearNewExercise() {  this.newExercise = null;  }
+  public void clearNewExercise() {
+    this.newExercise = null;
+  }
 
   /**
    * We can go three ways:
-   *
+   * <p>
    * 1) Make a new item
    * 2) Edit an item that I created
    * 3) Edit an item on the list made by someone else - all I can do then is remove it from my list.
    *
-   * @see #populatePanel
    * @param exercise
    * @param itemMarker
    * @param originalList
    * @param doNewExercise
    * @return
+   * @see #populatePanel
    */
   private NewUserExercise getAddOrEditPanel(CommonUserExercise exercise, HasText itemMarker, UserList originalList, boolean doNewExercise) {
     NewUserExercise editableExercise;
@@ -309,12 +315,11 @@ public class EditItem {
       boolean iCreatedThisItem = didICreateThisItem(exercise, originalList);
       if (iCreatedThisItem) {
         editableExercise = new EditableExercise(service, controller, this, itemMarker, exercise.toUserExercise(),
-          originalList,
-          exerciseList,
-          predefinedContentList,
-          npfHelper);
-      }
-      else {
+            originalList,
+            exerciseList,
+            predefinedContentList,
+            npfHelper);
+      } else {
         editableExercise = new NewUserExercise(service, controller, itemMarker, this, exercise, getInstance()) {
           @Override
           public Panel addNew(final UserList ul, final UserList originalList, ListInterface listInterface, Panel toAddTo) {
@@ -330,7 +335,7 @@ public class EditItem {
             return container;
           }
 
-          public Button makeDeleteButton(final UserList ul,  final long uniqueID) {
+          public Button makeDeleteButton(final UserList ul, final long uniqueID) {
             Button delete = makeDeleteButton(ul);
 
             delete.addClickHandler(new ClickHandler() {
@@ -347,7 +352,8 @@ public class EditItem {
           }
 
           @Override
-          public void setFields(CommonExercise newUserExercise) {}
+          public void setFields(CommonExercise newUserExercise) {
+          }
         };
       }
     }
