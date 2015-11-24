@@ -68,7 +68,7 @@ public class NewUserExercise extends BasicDialog {
   ListInterface listInterface;
   private Panel toAddTo;
   private boolean clickedCreate = false;
-  String instance;
+  final String instance;
 
   /**
    * @see EditItem#getAddOrEditPanel
@@ -177,9 +177,7 @@ public class NewUserExercise extends BasicDialog {
     return row;
   }
 
-  void addItemsAtTop(Panel container) {
-
-  }
+  void addItemsAtTop(Panel container) {}
 
   private void gotBlur() {
     gotBlur(english, foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo);
@@ -442,7 +440,6 @@ public class NewUserExercise extends BasicDialog {
     newUserExercise.setEnglish(english.getText());
     newUserExercise.setForeignLanguage(foreignLang.getText());
     newUserExercise.setTransliteration(translit.getText());
-    newUserExercise.setTooltip();
   }
 
   void checkIfNeedsRefAudio() {
@@ -491,7 +488,7 @@ public class NewUserExercise extends BasicDialog {
    * @param exerciseList
    * @param toAddTo
    */
-  void afterItemCreated(UserExercise newExercise, UserList ul, ListInterface exerciseList, Panel toAddTo) {
+  private void afterItemCreated(UserExercise newExercise, UserList ul, ListInterface exerciseList, Panel toAddTo) {
     //logger.info("afterItemCreated " + newExercise);
 
     editItem.clearNewExercise(); // success -- don't remember it
@@ -529,7 +526,7 @@ public class NewUserExercise extends BasicDialog {
     return new CreateFirstRecordAudioPanel(newUserExercise, row,  recordRegularSpeed, instance);
   }
 
-  protected class CreateFirstRecordAudioPanel extends RecordAudioPanel {
+  class CreateFirstRecordAudioPanel extends RecordAudioPanel {
     boolean recordRegularSpeed = true;
     private RecordAudioPanel otherRAP;
     private WaveformPostAudioRecordButton postAudioButton;
