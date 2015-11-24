@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ */
+
 package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Heading;
@@ -25,7 +29,6 @@ public class AnalysisTab extends DivWidget {
   private static final String SOUNDS = "Sounds";
   private static final String SUBTITLE = "scores > 20";
   private final Logger logger = Logger.getLogger("AnalysisTab");
-  private final Panel bottom;
   private boolean isNarrow = false;
 
   /**
@@ -46,7 +49,7 @@ public class AnalysisTab extends DivWidget {
 
     add(analysisPlot);
 
-    bottom = new HorizontalPanel();
+    Panel bottom = new HorizontalPanel();
     bottom.getElement().setId("bottom");
     bottom.addStyleName("floatLeft");
 
