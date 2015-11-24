@@ -129,7 +129,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
   public SortedSet<Long> getPeriods(List<PhoneSession> phoneSessions, long granularity, final long lastTime) {
     int i = phoneSessions.size() - 1;
     SortedSet<Long> months2 = new TreeSet<Long>();
- //   logger.info("Examine  " + granularity + " : " + phoneSessions.size() + " last " + new Date(lastTime));
+    //   logger.info("Examine  " + granularity + " : " + phoneSessions.size() + " last " + new Date(lastTime));
     long start = lastTime - granularity;
     long last = lastTime;
 
@@ -157,8 +157,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
             "  at " + i);*/
         if (session.getStart() > last) {
           i--;
-        }
-        else {
+        } else {
           start -= granularity;
           last -= granularity;
         }
@@ -345,7 +344,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
     for (Series series : detailSeries) seriesToVisible.put(series, false);
     if (!oneSet) {
-//      logger.info("setVisibility show detail ");
       for (Series series : detailSeries) {
         seriesToVisible.put(series, true);
       }
@@ -359,7 +357,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
         }
       });
     } else {
-      //    logger.info("setVisibility total --------- " + errorSeries.getName() + " " + averageSeries.getName());
       seriesToVisible.put(errorSeries, true);
       seriesToVisible.put(averageSeries, true);
     }
@@ -612,10 +609,9 @@ public class AnalysisPlot extends TimeSeriesPlot {
         //     logger.info("onSetExtremes got " + min + " : " + max + " diff " + diff);
         setVisibility(min.longValue(), max.longValue());
       } else {
-
         //   logger.info("no min for event");
         setVisibility(0, Long.MAX_VALUE);
-//        goToLast(timeHorizon);
+        setTimeWindowControlsToAll();
       }
       showSeriesByVisible();
 
@@ -669,8 +665,12 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
   int index = 0;
 
+  AnalysisTab.TimeWidgets timeWidgets;
+
   public Long goToLast(AnalysisTab.TIME_HORIZON timeHorizon, AnalysisTab.TimeWidgets timeWidgets) {
     this.timeHorizon = timeHorizon;
+    this.timeWidgets = timeWidgets;
+
     switch (timeHorizon) {
       case WEEK:
         chart.getXAxis().setExtremes(lastTime - WEEK, lastTime);
@@ -684,7 +684,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
         return lastTime - WEEK;
       case MONTH:
         chart.getXAxis().setExtremes(lastTime - MONTH, lastTime);
-        logger.warning("MONTH ---- " + months.size());
 
         Long aLong2 = months.get(months.size() - 1);
 
@@ -697,13 +696,17 @@ public class AnalysisPlot extends TimeSeriesPlot {
         return lastTime - MONTH;
       case ALL:
         chart.getXAxis().setExtremes(firstTime, lastTime);
-        timeWidgets.prevButton.setEnabled(false);
-        timeWidgets.nextButton.setEnabled(false);
-        timeWidgets.display.setText("");
-        //    logger.warning("ALL ---- ");
+        setTimeWindowControlsToAll();
         return firstTime;
     }
     return null;
+  }
+
+  public void setTimeWindowControlsToAll() {
+    timeWidgets.prevButton.setEnabled(false);
+    timeWidgets.nextButton.setEnabled(false);
+    timeWidgets.display.setText("");
+    timeWidgets.reset();
   }
 
   public void gotPrevClick(AnalysisTab.TimeWidgets timeWidgets) {
@@ -711,13 +714,16 @@ public class AnalysisPlot extends TimeSeriesPlot {
     List<Long> periods = timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? weeks : months;
 
     index--;
-    Long aLong = periods.get(index);
 
     timeWidgets.prevButton.setEnabled(index > 0);
     timeWidgets.nextButton.setEnabled(true);
 
-    timeWidgets.display.setText(getDateToShow2(aLong));
+    showTimePeriod(timeWidgets, offset, periods);
+  }
 
+  public void showTimePeriod(AnalysisTab.TimeWidgets timeWidgets, long offset, List<Long> periods) {
+    Long aLong = periods.get(index);
+    timeWidgets.display.setText(getDateToShow2(aLong));
     chart.getXAxis().setExtremes(aLong, aLong + offset);
   }
 
@@ -726,14 +732,10 @@ public class AnalysisPlot extends TimeSeriesPlot {
     List<Long> periods = timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? weeks : months;
 
     index++;
-    Long aLong = periods.get(index);
 
     timeWidgets.prevButton.setEnabled(true);
     timeWidgets.nextButton.setEnabled(index < periods.size() - 1);
 
-    timeWidgets.display.setText(getDateToShow2(aLong));
-
-
-    chart.getXAxis().setExtremes(aLong, aLong + offset);
+    showTimePeriod(timeWidgets, offset, periods);
   }
 }
