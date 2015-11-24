@@ -242,8 +242,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
   }
 
   private void setVisibility(long start, long end) {
-    logger.info("setVisibility from " + new Date(start) + " - " + new Date(end));
-
+//    logger.info("setVisibility from " + new Date(start) + " - " + new Date(end));
     List<Long> grans = new ArrayList<>(granularityToSessions.keySet());
 
     Collections.sort(grans);
@@ -621,17 +620,17 @@ public class AnalysisPlot extends TimeSeriesPlot {
     switch (timeHorizon) {
       case WEEK:
         chart.getXAxis().setExtremes(lastTime - WEEK, lastTime);
-        logger.warning("week ---- ");
+//        logger.warning("week ---- ");
         return lastTime - WEEK;
       case MONTH:
         chart.getXAxis().setExtremes(lastTime - MONTH, lastTime);
-        logger.warning("MONTH ---- ");
+  //      logger.warning("MONTH ---- ");
 
         return lastTime - MONTH;
       case ALL:
         chart.getXAxis().setExtremes(firstTime, lastTime);
 
-        logger.warning("ALL ---- ");
+    //    logger.warning("ALL ---- ");
 
         return firstTime;
     }
