@@ -74,7 +74,7 @@ public class ServerProperties {
   public static final String TRUE = "true";
   public static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
   public static final String ADD_MISSING_INFO = "addMissingInfo";
-  public static final int MIN_DYNAMIC_RANGE_DEFAULT = 26;
+  public static final int MIN_DYNAMIC_RANGE_DEFAULT = 20; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   public static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
 
   private Properties props = new Properties();
@@ -86,7 +86,6 @@ public class ServerProperties {
   private Set<Long> preferredVoices = new HashSet<Long>();
   private EmailList emailList;
   private int userInitialScores = 20;
-  //private int minDynamicRange;
 
   /**
    * @param servletContext
