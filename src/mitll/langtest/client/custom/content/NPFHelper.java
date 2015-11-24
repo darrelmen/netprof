@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ */
+
 package mitll.langtest.client.custom.content;
 
 import com.github.gwtbootstrap.client.ui.FluidRow;
