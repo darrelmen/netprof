@@ -14,7 +14,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * To change this template use File | Settings | File Templates.
  */
 public class ExerciseShell implements IsSerializable, CommonShell {
-  private String tooltip;
+ private static final int MAX_TOOLTIP_LENGTH = 15;
+
   protected String id;
 
   protected STATE state = STATE.UNSET;
@@ -38,17 +39,8 @@ public class ExerciseShell implements IsSerializable, CommonShell {
     this.foreignLanguage = "";
   }
 
-  public ExerciseShell(String id, String tooltip) {
+  public ExerciseShell(String id, String englishSentence, String meaning, String foreignLanguage) {
     this.id = id;
-    setTooltip(tooltip);
-    this.englishSentence = "";
-    this.meaning = "";
-    this.foreignLanguage = "";
-  }
-
-  public ExerciseShell(String id, String tooltip, String englishSentence, String meaning, String foreignLanguage) {
-    this.id = id;
-    setTooltip(tooltip);
     this.englishSentence = englishSentence;
     this.meaning = meaning;
     this.foreignLanguage = foreignLanguage;
@@ -63,12 +55,14 @@ public class ExerciseShell implements IsSerializable, CommonShell {
   }
 
   public String getTooltip() {
-    return tooltip;
-  }
-
-  public void setTooltip(String tooltip) {
-    this.tooltip = tooltip;
-    //if (tooltip.isEmpty() && !id.equals("-1")) throw new IllegalArgumentException("tooltip is empty for " + id);
+    String refSentence = getForeignLanguage();
+    if (refSentence.length() > MAX_TOOLTIP_LENGTH) {
+      refSentence = refSentence.substring(0, MAX_TOOLTIP_LENGTH);
+    }
+    boolean englishSameAsForeign = getEnglish().trim().equals(getForeignLanguage().trim());
+    String combined = englishSameAsForeign ? getEnglish() : getEnglish() + (refSentence.isEmpty() ? "" : " / " + refSentence);
+    if (combined.isEmpty()) combined = refSentence;
+    return combined;
   }
 
   public String getEnglish() {
@@ -110,7 +104,7 @@ public class ExerciseShell implements IsSerializable, CommonShell {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShellsShort(java.util.Collection)
    */
   public CommonShell getShell() {
-    return new ExerciseShell(getID(), getTooltip(), englishSentence, meaning, foreignLanguage);
+    return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage);
   }
 
   @Override
