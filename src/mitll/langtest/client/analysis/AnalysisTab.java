@@ -4,18 +4,24 @@
 
 package mitll.langtest.client.analysis;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.ButtonGroup;
+import com.github.gwtbootstrap.client.ui.ButtonToolbar;
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.Navigation;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordScore;
@@ -27,19 +33,22 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/21/15.
  */
 public class AnalysisTab extends DivWidget {
+  private final Logger logger = Logger.getLogger("AnalysisTab");
+
   private static final String WORDS = "Words";
   private static final String WORDS_USING_SOUND = "Words using Sound";
   private static final String SOUNDS = "Sounds";
   private static final String SUBTITLE = "scores > 20";
-  private final Logger logger = Logger.getLogger("AnalysisTab");
   private boolean isNarrow = false;
 
   enum TIME_HORIZON {WEEK, MONTH, ALL}
 
-  ;
-
   TIME_HORIZON timeHorizon = TIME_HORIZON.ALL;
   AnalysisPlot analysisPlot;
+  ExerciseController controller;
+  HTML currentDate;
+  Button nextButton, prevButton;
+  TimeWidgets timeWidgets;
 
   /**
    * @param service
@@ -51,13 +60,47 @@ public class AnalysisTab extends DivWidget {
    */
   public AnalysisTab(final LangTestDatabaseAsync service, final ExerciseController controller, final int userid,
                      final ShowTab showTab, String userChosenID, int minRecordings, DivWidget overallBottom) {
+    this.controller = controller;
     getElement().setId("AnalysisTab");
     analysisPlot = new AnalysisPlot(service, userid, userChosenID, minRecordings,
         controller.getSoundManager());
     analysisPlot.addStyleName("cardBorderShadow");
     analysisPlot.getElement().getStyle().setMargin(10, Style.Unit.PX);
 
-    add(getTimeGroup(controller));
+    // DivWidget timeControls = new DivWidget();
+    Panel timeControls = new HorizontalPanel();
+    // timeControls.addStyleName("floatLeft");
+    Widget timeGroup = getTimeGroup();
+    // timeGroup.addStyleName("floatLeft");
+
+    timeControls.add(timeGroup);
+
+    //   DivWidget stepper = new DivWidget();
+    Panel stepper = new HorizontalPanel();
+    stepper.addStyleName("inlineBlockStyleOnly");
+    stepper.addStyleName("topMargin");
+
+    stepper.getElement().setId("stepper");
+//    stepper.addStyleName("floatLeft");
+    stepper.addStyleName("leftTenMargin");
+    stepper.add(prevButton = getPrevButton());
+
+    currentDate = new HTML();
+    currentDate.setWidth("80px");
+    currentDate.addStyleName("boxShadow");
+    currentDate.addStyleName("leftFiveMargin");
+    currentDate.addStyleName("topFiveMargin");
+    currentDate.addStyleName("rightFiveMargin");
+    stepper.add(currentDate);
+    nextButton = getNextButton();
+    stepper.add(nextButton);
+
+    timeWidgets = new TimeWidgets(prevButton, nextButton, currentDate);
+
+    timeControls.add(stepper);
+//    timeControls.add(getWindowGroup());
+
+    add(timeControls);
     add(analysisPlot);
 
     Panel bottom = new HorizontalPanel();
@@ -74,82 +117,98 @@ public class AnalysisTab extends DivWidget {
     getWordScores(service, controller, userid, showTab, analysisPlot, bottom, minRecordings);
   }
 
+  private Button getPrevButton() {
+    final Button left = new Button();
+    controller.register(left, "prevTimeWindow");
+    left.setIcon(IconType.CARET_LEFT);
+  //  new TooltipHelper().addTooltip(left, "Left Arrow Key");
+    left.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        //left.setEnabled(false);
+        analysisPlot.gotPrevClick(new TimeWidgets(left, nextButton, currentDate));
+      }
+    });
+    left.setEnabled(false);
+    return left;
+  }
+
+  private Button getNextButton() {
+    final Button right = new Button();
+    right.setIcon(IconType.CARET_RIGHT);
+    controller.register(right, "timeWindowAdvance");
+    right.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+//        right.setEnabled(false);
+        analysisPlot.gotNextClick(new TimeWidgets(prevButton, right, currentDate));
+      }
+    });
+    right.setEnabled(false);
+    return right;
+  }
+
   /**
-   * @param controlState
    * @return
-   * @see #getRightColumn(mitll.langtest.client.flashcard.ControlState)
+   * @see
    */
-  private Widget getTimeGroup(ExerciseController controller) {
-    //  ControlGroup group = new ControlGroup("TIME");// + " " + controller.getLanguage().toUpperCase());
-
-//    Icon widget = new Icon(IconType.VOLUME_UP);
-//    widget.addStyleName("leftFiveMargin");
-//    group.add(widget);
-//
-
+  private Widget getTimeGroup() {
     ButtonToolbar w = new ButtonToolbar();
-    w.addStyleName("topFiveMargin");
-    //group.add(w);
     ButtonGroup buttonGroup = new ButtonGroup();
     w.add(buttonGroup);
-
+    buttonGroup.addStyleName("topMargin");
+    buttonGroup.addStyleName("leftTenMargin");
     buttonGroup.setToggle(ToggleType.RADIO);
-    buttonGroup.add(getWeekChoice(controller));
-    buttonGroup.add(getMonthChoice(controller));
-    buttonGroup.add(getAllChoice(controller));
+    buttonGroup.add(getWeekChoice());
+    buttonGroup.add(getMonthChoice());
+    buttonGroup.add(getAllChoice());
 
     return buttonGroup;
   }
 
-  private Button getWeekChoice(ExerciseController controller) {
-    Button onButton = new Button("Week");
-    onButton.getElement().setId("WeekChoice");
-    controller.register(onButton);
+  private Widget getWindowGroup() {
+    ButtonToolbar w = new ButtonToolbar();
+    ButtonGroup buttonGroup = new ButtonGroup();
+    w.add(buttonGroup);
+    buttonGroup.addStyleName("topMargin");
+    buttonGroup.addStyleName("leftTenMargin");
+    buttonGroup.add(getPrevButton());
+    //  buttonGroup.add(currentDate);
+    buttonGroup.add(getNextButton());
 
-    onButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        logger.warning("got WEEK click");
-        analysisPlot.setTimeHorizon(TIME_HORIZON.WEEK);
-      }
-    });
+    return w;
+  }
+
+  private Button getWeekChoice() {
+    return getButton(controller, getClickHandler(TIME_HORIZON.WEEK), "Week");
+  }
+
+  private Button getButton(ExerciseController controller, ClickHandler handler, String week) {
+    Button onButton = new Button(week);
+    onButton.getElement().setId(week + "Choice");
+    controller.register(onButton);
+    onButton.addClickHandler(handler);
 
     return onButton;
   }
 
-  private Button getMonthChoice(ExerciseController controller) {
-    Button onButton = new Button("Month");
-    onButton.getElement().setId("MonthChoice");
-    controller.register(onButton);
-
-    onButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        logger.warning("got MONTH click");
-
-        analysisPlot.setTimeHorizon(TIME_HORIZON.MONTH);
-
-      }
-    });
-
-    return onButton;
+  private Button getMonthChoice() {
+    return getButton(controller, getClickHandler(TIME_HORIZON.MONTH), "Month");
   }
 
-  private Button getAllChoice(ExerciseController controller) {
-    Button onButton = new Button("All");
-    onButton.getElement().setId("AllChoice");
-    controller.register(onButton);
-
-    onButton.setActive(true);
-
-    onButton.addClickHandler(new ClickHandler() {
+  private ClickHandler getClickHandler(final TIME_HORIZON month) {
+    return new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        analysisPlot.setTimeHorizon(TIME_HORIZON.ALL);
+        analysisPlot.setTimeHorizon(month, timeWidgets);
       }
-    });
+    };
+  }
 
-    return onButton;
+  private Button getAllChoice() {
+    Button all = getButton(controller, getClickHandler(TIME_HORIZON.ALL), "All");
+    all.setActive(true);
+    return all;
   }
 
   private void getWordScores(final LangTestDatabaseAsync service, final ExerciseController controller,
@@ -252,5 +311,17 @@ public class AnalysisTab extends DivWidget {
     DivWidget wordExamples = getWordContainerDiv(examples, "WordExamples", new Heading(3, WORDS_USING_SOUND));
     wordExamples.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
     return wordExamples;
+  }
+
+  public static class TimeWidgets {
+    Button prevButton;
+    Button nextButton;
+    HTML display;
+
+    public TimeWidgets(Button prevButton, Button nextButton, HTML display) {
+      this.prevButton = prevButton;
+      this.nextButton = nextButton;
+      this.display = display;
+    }
   }
 }
