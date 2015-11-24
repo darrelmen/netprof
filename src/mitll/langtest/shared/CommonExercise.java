@@ -74,14 +74,6 @@ public interface CommonExercise extends CommonShell {
 
   ExerciseAnnotation getAnnotation(String field);
 
-  /**
-   * @see mitll.langtest.server.database.Export#getExports
-   * @return
-   */
-  //Exercise toExercise();
-
-  // super nice to remove these... and make read only
-
   Map<String, String> getUnitToValue();
 
   /**
@@ -97,8 +89,6 @@ public interface CommonExercise extends CommonShell {
 
   Collection<String> getFields();
   boolean removeAudio(AudioAttribute audioAttribute);
-  String getCombinedTooltip();
-  void setTooltip();
 
   /**
    * @see mitll.langtest.server.database.ResultDAO#attachScoreHistory(long, CommonExercise, boolean)
