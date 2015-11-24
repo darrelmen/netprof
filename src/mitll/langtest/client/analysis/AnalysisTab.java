@@ -4,9 +4,12 @@
 
 package mitll.langtest.client.analysis;
 
-import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -31,6 +34,13 @@ public class AnalysisTab extends DivWidget {
   private final Logger logger = Logger.getLogger("AnalysisTab");
   private boolean isNarrow = false;
 
+  enum TIME_HORIZON {WEEK, MONTH, ALL}
+
+  ;
+
+  TIME_HORIZON timeHorizon = TIME_HORIZON.ALL;
+  AnalysisPlot analysisPlot;
+
   /**
    * @param service
    * @param controller
@@ -42,11 +52,12 @@ public class AnalysisTab extends DivWidget {
   public AnalysisTab(final LangTestDatabaseAsync service, final ExerciseController controller, final int userid,
                      final ShowTab showTab, String userChosenID, int minRecordings, DivWidget overallBottom) {
     getElement().setId("AnalysisTab");
-    final AnalysisPlot analysisPlot = new AnalysisPlot(service, userid, userChosenID, minRecordings,
+    analysisPlot = new AnalysisPlot(service, userid, userChosenID, minRecordings,
         controller.getSoundManager());
     analysisPlot.addStyleName("cardBorderShadow");
     analysisPlot.getElement().getStyle().setMargin(10, Style.Unit.PX);
 
+    add(getTimeGroup(controller));
     add(analysisPlot);
 
     Panel bottom = new HorizontalPanel();
@@ -61,6 +72,84 @@ public class AnalysisTab extends DivWidget {
     }
 
     getWordScores(service, controller, userid, showTab, analysisPlot, bottom, minRecordings);
+  }
+
+  /**
+   * @param controlState
+   * @return
+   * @see #getRightColumn(mitll.langtest.client.flashcard.ControlState)
+   */
+  private Widget getTimeGroup(ExerciseController controller) {
+    //  ControlGroup group = new ControlGroup("TIME");// + " " + controller.getLanguage().toUpperCase());
+
+//    Icon widget = new Icon(IconType.VOLUME_UP);
+//    widget.addStyleName("leftFiveMargin");
+//    group.add(widget);
+//
+
+    ButtonToolbar w = new ButtonToolbar();
+    w.addStyleName("topFiveMargin");
+    //group.add(w);
+    ButtonGroup buttonGroup = new ButtonGroup();
+    w.add(buttonGroup);
+
+    buttonGroup.setToggle(ToggleType.RADIO);
+    buttonGroup.add(getWeekChoice(controller));
+    buttonGroup.add(getMonthChoice(controller));
+    buttonGroup.add(getAllChoice(controller));
+
+    return buttonGroup;
+  }
+
+  private Button getWeekChoice(ExerciseController controller) {
+    Button onButton = new Button("Week");
+    onButton.getElement().setId("WeekChoice");
+    controller.register(onButton);
+
+    onButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        logger.warning("got WEEK click");
+        analysisPlot.setTimeHorizon(TIME_HORIZON.WEEK);
+      }
+    });
+
+    return onButton;
+  }
+
+  private Button getMonthChoice(ExerciseController controller) {
+    Button onButton = new Button("Month");
+    onButton.getElement().setId("MonthChoice");
+    controller.register(onButton);
+
+    onButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        logger.warning("got MONTH click");
+
+        analysisPlot.setTimeHorizon(TIME_HORIZON.MONTH);
+
+      }
+    });
+
+    return onButton;
+  }
+
+  private Button getAllChoice(ExerciseController controller) {
+    Button onButton = new Button("All");
+    onButton.getElement().setId("AllChoice");
+    controller.register(onButton);
+
+    onButton.setActive(true);
+
+    onButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        analysisPlot.setTimeHorizon(TIME_HORIZON.ALL);
+      }
+    });
+
+    return onButton;
   }
 
   private void getWordScores(final LangTestDatabaseAsync service, final ExerciseController controller,
