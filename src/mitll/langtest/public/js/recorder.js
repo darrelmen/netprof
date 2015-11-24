@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ */
+
 var recorderHasConsole = (window.console || console.log);
 var recordingStart;
 
