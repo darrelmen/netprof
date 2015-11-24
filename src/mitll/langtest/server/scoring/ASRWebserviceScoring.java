@@ -19,6 +19,7 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
@@ -52,7 +53,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
    * If the score was below a threshold, or the magic -1, we keep it around for future study.
    */
-//	private double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
   private final String ip;
   private final int port;
 
@@ -168,9 +168,10 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     if (testAudioFileNoSuffix.contains(AudioConversion.SIXTEEN_K_SUFFIX)) {
       noSuffix += AudioConversion.SIXTEEN_K_SUFFIX;
     }
+    String rawAudioPath = testAudioDir + File.separator + testAudioFileNoSuffix + ".raw";
+    AudioConversion.wav2raw(testAudioDir + File.separator + testAudioFileNoSuffix + ".wav", rawAudioPath);
 
     String key = testAudioDir + File.separator + testAudioFileNoSuffix;
-//		Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
     Object[] cached = useCache ? audioToScore.getIfPresent(key) : null;
     Scores scores = null;
     String phoneLab = "";
@@ -182,16 +183,24 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     }
 
     // actually run the scoring
-    String rawAudioPath = testAudioDir + File.separator + testAudioFileNoSuffix + ".raw";
-    AudioConversion.wav2raw(testAudioDir + File.separator + testAudioFileNoSuffix + ".wav", rawAudioPath);
-    //	logger.debug("Converting: " + (testAudioDir + File.separator + testAudioFileNoSuffix + ".wav to: " + rawAudioPath));
+
+    //logger.debug("Converting: " + (testAudioDir + File.separator + testAudioFileNoSuffix + ".wav to: " + rawAudioPath));
     // TODO remove the 16k hardcoding?
     double duration = new AudioCheck(props).getDurationInSeconds(wavFile);
-    //int end = (int)((duration * 16000.0) / 100.0);
-    int end = (int) (duration * 100.0);
+
+    JSONObject jsonObject = null;
+
+    PrecalcScores precalcScores = new PrecalcScores(props, precalcResult, usePhoneToDisplay);
+
+    if (precalcScores.isValid()) {
+      scores = precalcScores.getScores();
+      jsonObject = precalcScores.getJsonObject();
+    }
+
     int processDur = 0;
     if (scores == null) {
       long then = System.currentTimeMillis();
+      int end = (int) (duration * 100.0);
       Object[] result = runHydra(rawAudioPath, sentence, lmSentences, tmpDir, decode, end);
       if (result == null) {
         return new PretestScore(0);
@@ -208,7 +217,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
       return new PretestScore(0.01f);
     }
     return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix,
-        scores, phoneLab, wordLab, duration, processDur, usePhoneToDisplay);
+        scores, phoneLab, wordLab, duration, processDur, usePhoneToDisplay, jsonObject);
   }
 
   /**
@@ -232,13 +241,20 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    */
   private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
                                        boolean decode, String prefix, String noSuffix, Scores scores, String phoneLab,
-                                       String wordLab, double duration, int processDur, boolean usePhoneToDisplay) {
+                                       String wordLab, double duration, int processDur, boolean usePhoneToDisplay,
+                                       JSONObject jsonObject
+  ) {
     String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") + (usePhoneToDisplay ? "_phoneToDisplay" : "");
+    boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay();
 
     try {
-      EventAndFileInfo eventAndFileInfo = writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
-          useScoreForBkgColor,
-          prefix1, "", decode, phoneLab, wordLab, true, usePhoneToDisplay);
+      EventAndFileInfo eventAndFileInfo = jsonObject == null ?
+          writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
+              useScoreForBkgColor,
+              prefix1, "", decode, phoneLab, wordLab, true, usePhoneToDisplay) :
+          writeTranscriptsCached(imageOutDir, imageWidth, imageHeight, noSuffix,
+              useScoreForBkgColor,
+              prefix1, "", decode, false, jsonObject, reallyUsePhone);
       Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
       Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
       String recoSentence = getRecoSentence(eventAndFileInfo);
@@ -526,7 +542,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
   }
 
   private Map<String, Float> getPhoneToScore(Scores scores) {
-    Map<String, Float> phones = scores.eventScores.get("phones");
+    Map<String, Float> phones = scores.eventScores.get(Scores.PHONES);
     return getTokenToScore(scores, phones, true);
   }
 
