@@ -4,10 +4,8 @@
 
 package mitll.langtest.shared.custom;
 
-import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.Navigation;
-import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.User;
@@ -48,7 +46,7 @@ public class UserList extends ExerciseShell {
    * @param classMarker
    */
   public UserList(long uniqueID, User user, String name, String description, String classMarker, boolean isPrivate){
-    super(""+uniqueID,name);
+    super(""+uniqueID);
     this.uniqueID = uniqueID;
     this.creator = user;
     this.name = name;
