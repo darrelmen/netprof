@@ -4,6 +4,7 @@
 
 package mitll.langtest.client.analysis;
 
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -11,6 +12,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.*;
@@ -27,19 +29,23 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 10/20/15.
  */
-class WordContainer extends SimplePagingContainer<WordScore> {
+class WordContainer extends SimplePagingContainer<WordScore> implements AnalysisPlot.TimeChangeListener {
   private final Logger logger = Logger.getLogger("WordContainer");
+
+  private static final int ROWS_TO_SHOW = 8;
 
   private static final int ITEM_COL_WIDTH = 250;
   private static final String SCORE = "Score";
-  public static final int SCORE_WIDTH = 68;
+  private static final int SCORE_WIDTH = 68;
   public static final int PLAY_WIDTH = 42;
   private static final int NATIVE_WIDTH = PLAY_WIDTH;
   private static final String NATIVE = "Ref";
@@ -49,22 +55,30 @@ class WordContainer extends SimplePagingContainer<WordScore> {
   private final ExerciseComparator sorter;
   private final AnalysisPlot plot;
   private final ShowTab learnTab;
+  private final Heading heading;
 
   /**
    * @param controller
    * @param plot
    * @see AnalysisTab#getWordScores(LangTestDatabaseAsync, ExerciseController, int, ShowTab, AnalysisPlot, Panel, int)
    */
-  public WordContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab) {
+  public WordContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab, Heading w) {
     super(controller);
     sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
     this.plot = plot;
+    plot.addListener(this);
     this.learnTab = learnTab;
+    this.heading = w;
   }
 
+  private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
+
+
   protected int getPageSize() {
-    return 8;
+    return ROWS_TO_SHOW;
   }
+
+  private List<WordScore> sortedHistory;
 
   /**
    * @param sortedHistory
@@ -77,10 +91,8 @@ class WordContainer extends SimplePagingContainer<WordScore> {
     tableWithPager.setWidth(TABLE_HISTORY_WIDTH + "px");
     tableWithPager.addStyleName("floatLeft");
 
-    for (WordScore WordScore : sortedHistory) {
-      addItem(WordScore);
-    }
-    flush();
+    this.sortedHistory = sortedHistory;
+    addItems(sortedHistory);
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
@@ -89,6 +101,14 @@ class WordContainer extends SimplePagingContainer<WordScore> {
     });
 
     return tableWithPager;
+  }
+
+  private void addItems(List<WordScore> sortedHistory) {
+    clear();
+    for (WordScore WordScore : sortedHistory) {
+      addItem(WordScore);
+    }
+    flush();
   }
 
   @Override
@@ -195,7 +215,7 @@ class WordContainer extends SimplePagingContainer<WordScore> {
     SafeHtmlHeader header = new SafeHtmlHeader(new SafeHtml() {
       @Override
       public String asString() {
-        return "<span style=\"text-align:left;\">" +PLAY+
+        return "<span style=\"text-align:left;\">" + PLAY +
             "</span>";
       }
     });
@@ -232,13 +252,12 @@ class WordContainer extends SimplePagingContainer<WordScore> {
         String columnText = new WordTable().toHTML2(shell.getNetPronImageTypeListMap());
         if (columnText.isEmpty()) {
           CommonShell exercise = getShell(shell.getId());
-         // logger.info("getItemColumn : column text empty for id " + shell.getId() + " and found ex " + exercise);
+          // logger.info("getItemColumn : column text empty for id " + shell.getId() + " and found ex " + exercise);
 
           String foreignLanguage = exercise == null ? "" : exercise.getForeignLanguage();
           if (controller.getLanguage().equalsIgnoreCase("Spanish")) foreignLanguage = foreignLanguage.toUpperCase();
           columnText = new WordTable().getColoredSpan(foreignLanguage, shell.getPronScore());
-        }
-        else {
+        } else {
           //logger.info("getItemColumn : Got item id " + shell.getId() + " "+ columnText );
         }
         return getSafeHtml(columnText);
@@ -259,15 +278,15 @@ class WordContainer extends SimplePagingContainer<WordScore> {
       @Override
       public SafeHtml getValue(WordScore shell) {
         float v = shell.getPronScore() * 100;
-        String s = "<span " + "style='" +"margin-left:10px;" + "'" +">" + ((int) v) + "</span>";
+        String s = "<span " + "style='" + "margin-left:10px;" + "'" + ">" + ((int) v) + "</span>";
         return new SafeHtmlBuilder().appendHtmlConstant(s).toSafeHtml();
       }
     };
   }
 
   /**
-   * @see #addColumnsToTable()
    * @return
+   * @see #addColumnsToTable()
    */
   private Column<WordScore, SafeHtml> getPlayAudio() {
     return new Column<WordScore, SafeHtml>(new SafeHtmlCell()) {
@@ -290,12 +309,22 @@ class WordContainer extends SimplePagingContainer<WordScore> {
         String title = exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
         if (shell.getNativeAudio() != null) {
           return PlayAudioWidget.getAudioTagHTML(shell.getNativeAudio(), title);
-        }
-        else {
+        } else {
           return new SafeHtmlBuilder().toSafeHtml();
         }
       }
     };
+  }
+
+  @Override
+  public void timeChanged(long from, long to) {
+    List<WordScore> filtered = new ArrayList<>();
+    heading.setSubtext("Starting " + superShortFormat.format(new Date(from)));
+    for (WordScore wordScore : sortedHistory) {
+      if (wordScore.getTimestamp() > from && wordScore.getTimestamp() <= to) filtered.add(wordScore);
+
+    }
+    addItems(filtered);
   }
 
   public interface LocalTableResources extends CellTable.Resources {
@@ -304,7 +333,6 @@ class WordContainer extends SimplePagingContainer<WordScore> {
      */
 //    interface TableStyle extends CellTable.Style {
 //    }
-
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
     TableResources.TableStyle cellTableStyle();
