@@ -102,13 +102,12 @@ public class TimeSeriesPlot extends DivWidget {
     return toUse.format(date);
   }
 
-  protected String getDateToShow2(long xAsLong) {
+  protected String getShortDate(long xAsLong) {
     Date date = new Date(xAsLong);
     String shortForDate = shortFormat.format(date);
     DateTimeFormat toUse = sameYear(shortForDate) ? superShortFormat : shortFormat;
     return toUse.format(date);
   }
-
 
   private boolean sameYear(String shortForDate) {
     return sameYear(nowFormat, shortForDate);
