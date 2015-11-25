@@ -5,15 +5,17 @@
 package mitll.langtest.shared.analysis;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 10/26/15.
  */
 public class PhoneStats implements Serializable {
-//  private int initial;
-//  private int current;
+ // private final Logger logger = Logger.getLogger("PhoneStats");
+
   private int count;
   private transient List<TimeAndScore> timeSeries;
   private List<PhoneSession> sessions;
@@ -23,24 +25,21 @@ public class PhoneStats implements Serializable {
 
   /**
    * @param count
-   * @param initial
    * @see mitll.langtest.server.database.PhoneDAO#getPhoneReport(Map, Map, float, float)
    */
-  public PhoneStats(int count, int initial, int current,
+  public PhoneStats(int count,
                     List<TimeAndScore> timeSeries) {
     this.count = count;
-//    this.initial = initial;
-//    this.current = current;
     this.timeSeries = timeSeries;
   }
 
-//  public int getInitial() {
-//    return initial;
- // }
-
   public int getInitial() {
     List<PhoneSession> sessions = getSessions();
-    if (sessions == null) return 0;
+    return getInitial(sessions);
+  }
+
+  public int getInitial(List<PhoneSession> sessions) {
+    if (sessions == null || sessions.isEmpty()) return 0;
 
     PhoneSession next = sessions.iterator().next();
     double mean = next.getMean();
@@ -50,23 +49,31 @@ public class PhoneStats implements Serializable {
   public int toHundred(double mean) {
     return (int) Math.round(100 * mean);
   }
-/*
-  public int getCurrent() {
-    return current;
-  }
-*/
-
 
   public int getCurrent() {
     List<PhoneSession> sessions2 = getSessions();
-    if (sessions2 == null) return 0;
-    return toHundred(sessions2.get(sessions2.size()-1).getMean());
+    return getCurrent(sessions2);
   }
 
-  public int getDiff() { return getCurrent() - getInitial(); }
+  public int getCurrent(List<PhoneSession> sessions2) {
+    if (sessions2 == null || sessions2.isEmpty()) return 0;
+    return toHundred(sessions2.get(sessions2.size() - 1).getMean());
+  }
+
+  public int getDiff() {
+    return getCurrent() - getInitial();
+  }
 
   public int getCount() {
     return count;
+  }
+
+
+  public int getCount(List<PhoneSession> sessions2) {
+    if (sessions2 == null || sessions2.isEmpty()) return 0;
+    int total =0;
+    for (PhoneSession session:sessions2) total+= session.getCount();
+    return total;
   }
 
   public List<TimeAndScore> getTimeSeries() {
@@ -74,7 +81,7 @@ public class PhoneStats implements Serializable {
   }
 
   public String toString() {
-    return "count " + count + " initial " + getInitial() + " current " +getCurrent() + " num sessions " + getSessions().size() + " : " + getSessions();
+    return "count " + count + " initial " + getInitial() + " current " + getCurrent() + " num sessions " + getSessions().size() + " : " + getSessions();
   }
 
   public void setSessions(List<PhoneSession> sessions) {
@@ -84,4 +91,19 @@ public class PhoneStats implements Serializable {
   public List<PhoneSession> getSessions() {
     return sessions;
   }
+/*
+  public List<PhoneSession> getFiltered(long first, long last) {
+
+    List<PhoneSession> filtered = new ArrayList<>();
+    for (PhoneSession session : filtered) {
+      if (session.getStart() >= first && session.getEnd() <= last) {
+        filtered.add(session);
+        logger.info("included " +session);
+      }
+      else {
+        logger.info("Exclude " + session);
+      }
+    }
+    return filtered;
+  }*/
 }
