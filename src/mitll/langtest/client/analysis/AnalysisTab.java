@@ -42,7 +42,6 @@ public class AnalysisTab extends DivWidget {
 
   enum TIME_HORIZON {WEEK, MONTH, ALL}
 
-//  TIME_HORIZON timeHorizon = TIME_HORIZON.ALL;
   private final AnalysisPlot analysisPlot;
   private final ExerciseController controller;
   private final TimeWidgets timeWidgets;
@@ -166,19 +165,6 @@ public class AnalysisTab extends DivWidget {
     return buttonGroup;
   }
 
-/*  private Widget getWindowGroup() {
-    ButtonToolbar w = new ButtonToolbar();
-    ButtonGroup buttonGroup = new ButtonGroup();
-    w.add(buttonGroup);
-    buttonGroup.addStyleName("topMargin");
-    buttonGroup.addStyleName("leftTenMargin");
-    buttonGroup.add(getPrevButton());
-    //  buttonGroup.add(currentDate);
-    buttonGroup.add(getNextButton());
-
-    return w;
-  }*/
-
   private Button getWeekChoice() {
     return getButton(controller, getClickHandler(TIME_HORIZON.WEEK), "Week");
   }
@@ -222,10 +208,11 @@ public class AnalysisTab extends DivWidget {
 
       @Override
       public void onSuccess(List<WordScore> wordScores) {
-        final WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab);
+        Heading w = new Heading(3, WORDS, SUBTITLE);
+        final WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab,w);
         Panel tableWithPager = wordContainer.getTableWithPager(wordScores);
 
-        DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer", new Heading(3, WORDS, SUBTITLE));
+        DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer", w);
         wordsContainer.addStyleName("cardBorderShadow");
         wordsContainer.getElement().getStyle().setMargin(10, Style.Unit.PX);
 
@@ -268,6 +255,7 @@ public class AnalysisTab extends DivWidget {
     final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, analysisPlot, showTab);
     final PhonePlot phonePlot = new PhonePlot();
     final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, phonePlot, isNarrow);
+    analysisPlot.addListener(phoneContainer);
 
     service.getPhoneScores(userid, minRecordings, new AsyncCallback<PhoneReport>() {
       @Override
@@ -277,7 +265,6 @@ public class AnalysisTab extends DivWidget {
 
       @Override
       public void onSuccess(PhoneReport phoneReport) {
-        // logger.info("getPhoneScores " + phoneReport);
         // #1 - phones
         Panel phones = phoneContainer.getTableWithPager(phoneReport);
         DivWidget sounds = getSoundsContainer(phones);
