@@ -7,7 +7,6 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.analysis.PhoneAnalysis;
-import mitll.langtest.server.scoring.CollationSort;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -345,12 +344,12 @@ public class PhoneDAO extends DAO {
       float pronScore = rs.getFloat(i++);
       long resultTime = -1;
 
-      if (addTranscript) {
+      //if (addTranscript) {
         Timestamp timestamp = rs.getTimestamp(i++);
         if (timestamp != null) resultTime = timestamp.getTime();
-      } else {
-        i++;
-      }
+     // } else {
+     //   i++;
+     // }
       int wseq = rs.getInt(i++);
       String word = rs.getString(i++);
       float wscore = rs.getFloat(i++);
@@ -383,7 +382,7 @@ public class PhoneDAO extends DAO {
       }
 
       WordAndScore wordAndScore = new WordAndScore(exid, word, phoneScore, rid, wseq, seq, trimPathForWebPage(audioAnswer),
-          idToRef.get(exid), scoreJson);
+          idToRef.get(exid), scoreJson, resultTime);
       if (!ridsForPhone.contains(rid)) { // get rid of duplicates
         wordAndScores.add(wordAndScore);
       }
@@ -514,7 +513,7 @@ public class PhoneDAO extends DAO {
         total += bs.getScore();
       }
       int current = toPercent(total, size);
-      phoneToAvg.put(phone, new PhoneStats(size, start, current, phoneTimeSeries));
+      phoneToAvg.put(phone, new PhoneStats(size, phoneTimeSeries));
     }
 
     if (DEBUG) logger.debug("phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
