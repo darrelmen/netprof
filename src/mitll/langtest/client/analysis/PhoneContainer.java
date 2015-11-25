@@ -11,6 +11,7 @@ import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -24,9 +25,11 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
-import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.client.scoring.WordTable;
-import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.analysis.PhoneReport;
+import mitll.langtest.shared.analysis.PhoneSession;
+import mitll.langtest.shared.analysis.PhoneStats;
+import mitll.langtest.shared.analysis.WordAndScore;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -34,7 +37,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 10/20/15.
  */
-class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
+class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements AnalysisPlot.TimeChangeListener {
   private final Logger logger = Logger.getLogger("PhoneContainer");
 
   private static final int TABLE_WIDTH = 295;
@@ -50,15 +53,18 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
   private final PhoneExampleContainer exampleContainer;
   private final PhonePlot phonePlot;
   private final boolean isNarrow;
+  long from, to;
+  private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
 
   /**
-   * @see AnalysisTab#getPhoneReport(LangTestDatabaseAsync, ExerciseController, int, Panel, AnalysisPlot, ShowTab, int)
    * @param controller
    * @param exampleContainer
    * @param phonePlot
    * @param isNarrow
+   * @see AnalysisTab#getPhoneReport(LangTestDatabaseAsync, ExerciseController, int, Panel, AnalysisPlot, ShowTab, int)
    */
-  public PhoneContainer(ExerciseController controller, PhoneExampleContainer exampleContainer,  PhonePlot phonePlot, boolean isNarrow) {
+  public PhoneContainer(ExerciseController controller, PhoneExampleContainer exampleContainer,
+                        PhonePlot phonePlot, boolean isNarrow) {
     super(controller);
     this.exampleContainer = exampleContainer;
     this.phonePlot = phonePlot;
@@ -93,25 +99,88 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
     if (phoneToAvgSorted == null) {
       logger.warning("huh? phoneToAvgSorted is null ");
     } else {
-      for (Map.Entry<String, PhoneStats> ps : phoneToAvgSorted.entrySet()) {
-        PhoneStats value = ps.getValue();
-        int initial = value.getInitial();
-        int current = value.getCurrent();
-        phoneAndStatses.add(new PhoneAndStats(ps.getKey(),
-            initial,
-            current,
-            value.getCount()
-        ));
-      }
+      getPhoneStatuses(phoneAndStatses, phoneToAvgSorted, from = 0, to = Long.MAX_VALUE);
     }
     this.phoneReport = phoneReport;
     return getTableWithPager(phoneAndStatses);
   }
 
+  public void getPhoneStatuses(List<PhoneAndStats> phoneAndStatses, Map<String, PhoneStats> phoneToAvgSorted,
+                               long first, long last) {
+    //logger.info("From " + shortFormat(first) + " : " + shortFormat(last));
+    //logger.info("From " + first + " - " + last);
+
+    for (Map.Entry<String, PhoneStats> ps : phoneToAvgSorted.entrySet()) {
+      PhoneStats value = ps.getValue();
+      List<PhoneSession> filtered = getFiltered(first, last, value);
+
+      //    logger.info("key " + ps.getKey() + " value " + filtered.size());
+      //  logger.info("Filtered " + filtered.size());
+      int initial = value.getInitial(filtered);
+      int current = value.getCurrent(filtered);
+      int count = value.getCount(filtered);
+      if (!filtered.isEmpty()) {
+        phoneAndStatses.add(new PhoneAndStats(ps.getKey(),
+            initial,
+            current,
+            count
+        ));
+      }
+    }
+//    logger.info("getPhoneStatuses returned " + phoneAndStatses.size());
+  }
+
+  public List<PhoneSession> getFiltered(long first, long last, PhoneStats value) {
+    return first == 0 ? value.getSessions() : getFiltered(value.getSessions(), first, last);
+  }
+
+  public String shortFormat(long first) {
+    return superShortFormat.format(new Date(first));
+  }
+
+  /**
+   * TODO : this doesn't work properly - should do any sessions that overlap with the window
+   * @param orig
+   * @param first
+   * @param last
+   * @return
+   */
+  public List<PhoneSession> getFiltered(List<PhoneSession> orig, long first, long last) {
+     logger.info("From "+ shortFormat(first) + " - " + shortFormat(last));
+
+    List<PhoneSession> filtered = new ArrayList<>();
+    for (PhoneSession session : orig) {
+      //  String window = shortFormat(session.getStart()) + " - " + shortFormat(session.getEnd());
+      if (session.getStart() >= first && session.getEnd() <= last) {
+        filtered.add(session);
+        //  logger.info("included " + window);
+      } else {
+        //logger.info("Exclude " +window);
+      }
+    }
+    return filtered;
+  }
+
+  public List<WordAndScore> getFilteredWords(List<WordAndScore> orig, long first, long last) {
+    // logger.info("From "+ shortFormat(first) + " - " + shortFormat(last));
+
+    List<WordAndScore> filtered = new ArrayList<>();
+    for (WordAndScore session : orig) {
+      //  String window = shortFormat(session.getStart()) + " - " + shortFormat(session.getEnd());
+      if (session.getTimestamp() >= first && session.getTimestamp() <= last) {
+        filtered.add(session);
+        //  logger.info("included " + window);
+      } else {
+        // logger.info("Exclude " +window);
+      }
+    }
+    return filtered;
+  }
+
   /**
    * @param sortedHistory
    * @return
-   * @see SetCompleteDisplay#getScoreHistory(List, List, ExerciseController)
+   * @see #getTableWithPager(PhoneReport)
    */
   private Panel getTableWithPager(List<PhoneAndStats> sortedHistory) {
     Panel tableWithPager = getTableWithPager();
@@ -124,8 +193,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
   }
 
   private void addItems(List<PhoneAndStats> sortedHistory) {
-    for (PhoneAndStats ps : sortedHistory) {  addItem(ps); }
-    flush();
+    addPhones(sortedHistory);
 
     try {
       if (!sortedHistory.isEmpty()) {
@@ -136,25 +204,23 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
     }
   }
 
+  private void addPhones(List<PhoneAndStats> sortedHistory) {
+    clear();
+    for (PhoneAndStats ps : sortedHistory) {
+      addItem(ps);
+    }
+    flush();
+  }
+
   /**
    * @see AnalysisTab#getPhoneReport(LangTestDatabaseAsync, ExerciseController, int, Panel, AnalysisPlot, ShowTab, int)
    */
   public void showExamplesForSelectedSound() {
     List<PhoneAndStats> list = getList();
     if (list.isEmpty()) {
-      logger.info("list empty?");
+      logger.warning("showExamplesForSelectedSound : list empty?");
     } else {
-      String phone = list.get(0).getPhone();
-      List<WordAndScore> wordExamples = phoneReport.getWordExamples(phone);
-     // for (WordAndScore ws : wordExamples) logger.info("showExamplesForSelectedSound got " + ws.getScore() + " " + ws.getWord());
-      //  logger.info("showExamplesForSelectedSound adding " + phone + " num examples " + wordExamples.size());
-      exampleContainer.addItems(phone, wordExamples);
-      PhoneStats stats = phoneReport.getPhoneToAvgSorted().get(phone);
-    //  List<TimeAndScore> timeSeries = stats.getTimeSeries();
-    //  List<TimeAndScore> byTime = getByTime(timeSeries);
-//      phonePlot.showData(byTime,phone, isNarrow);
-      phonePlot.showErrorBarData(stats.getSessions(),phone, isNarrow);
-
+      clickOnPhone(list.get(0).getPhone());
     }
   }
 
@@ -387,7 +453,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
       @Override
       public SafeHtml getValue(PhoneAndStats shell) {
         int current = shell.getCurrent();
-        float percent = ((float) current)/100f;
+        float percent = ((float) current) / 100f;
         String columnText = new WordTable().getColoredSpan(shell.getPhone(), percent);
         return getSafeHtml(columnText);
       }
@@ -396,37 +462,27 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
 
   private void checkForClick(PhoneAndStats object, NativeEvent event) {
     if (BrowserEvents.CLICK.equals(event.getType())) {
-      gotClickOnItem(object);
+      clickOnPhone(object.getPhone());
     }
   }
 
-  private void gotClickOnItem(final PhoneAndStats e) {
-    String phone = e.getPhone();
-    List<WordAndScore> wordExamples = phoneReport.getWordExamples(phone);
-   // for (WordAndScore ws : wordExamples) logger.info("gotClickOnItem got " + ws.getScore() + " " + ws.getWord());
-    exampleContainer.addItems(phone, wordExamples);
+  /**
+   * TODO : why are the numbers different for word examples vs count???
+   * @param phone
+   */
+  private void clickOnPhone(String phone) {
     PhoneStats stats = phoneReport.getPhoneToAvgSorted().get(phone);
-   // List<TimeAndScore> timeSeries = stats.getTimeSeries();
+    List<PhoneSession> filtered = getFiltered(stats.getSessions(), from, to);
 
-//    getByTime(timeSeries);
-//    DateTimeFormat format = DateTimeFormat.getFormat("E MMM d yy h:mm a");
- //   for (TimeAndScore ts : timeSeries) logger.info("gotClickOnItem " + format.format(new Date(ts.getTimestamp())) + " " +ts.getScore());
-  //  List<TimeAndScore> byTime = getByTime(timeSeries);
-  //  phonePlot.showData(byTime,phone, isNarrow);
-    phonePlot.showErrorBarData(stats.getSessions(),phone, isNarrow);
+    PhoneSession first = filtered.get(0);
+    PhoneSession last = filtered.get(filtered.size()-1);
+    long s = first.getStart();
+    long e = last.getEnd();
+    List<WordAndScore> filteredWords = getFilteredWords(phoneReport.getWordExamples(phone), s, e);
+    exampleContainer.addItems(phone, filteredWords);
+
+    phonePlot.showErrorBarData(filtered, phone, isNarrow);
   }
-
-/*  private List<TimeAndScore> getByTime(List<TimeAndScore> timeSeries) {
-    List<TimeAndScore> copy = new ArrayList<>();
-    for (TimeAndScore ts : timeSeries) copy.add(ts);
-    Collections.sort(copy, new Comparator<TimeAndScore>() {
-      @Override
-      public int compare(TimeAndScore o1, TimeAndScore o2) {
-        return Long.valueOf(o1.getTimestamp()).compareTo(o2.getTimestamp());
-      }
-    });
-    return copy;
-  }*/
 
   private SafeHtml getSafeHtml(String columnText) {
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
@@ -479,7 +535,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
   }
 
   private String getScoreMarkup(int score) {
-    return "<span " +  "style='" +  "margin-left:10px;" + "'" + ">" + score + "</span>";
+    return "<span " + "style='" + "margin-left:10px;" + "'" + ">" + score + "</span>";
   }
 
   private Column<PhoneAndStats, SafeHtml> getCountColumn() {
@@ -498,6 +554,23 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
     };
   }
 
+  @Override
+  public void timeChanged(long from, long to) {
+    this.from = from;
+    this.to = to;
+    List<PhoneAndStats> phoneAndStatses = new ArrayList<>();
+    Map<String, PhoneStats> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
+    if (phoneToAvgSorted == null) {
+      logger.warning("huh? phoneToAvgSorted is null ");
+    } else {
+      getPhoneStatuses(phoneAndStatses, phoneToAvgSorted, from, to);
+    }
+    logger.info("got time changed " + shortFormat(from) + " " + shortFormat(to) + " got  "+phoneAndStatses.size());
+
+    addItems(phoneAndStatses);
+    showExamplesForSelectedSound();
+  }
+
   /**
    * MUST BE PUBLIC
    */
@@ -507,7 +580,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> {
      */
 /*    interface TableStyle extends CellTable.Style {
     }*/
-
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "PhoneScoresCellTableStyleSheet.css"})
     TableResources.TableStyle cellTableStyle();
