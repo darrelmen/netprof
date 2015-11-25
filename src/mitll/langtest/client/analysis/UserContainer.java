@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class UserContainer extends SimplePagingContainer<UserInfo> {
-  public static final String SIGNED_UP1 = "Started";//Signed Up";
+  private static final String SIGNED_UP1 = "Started";//Signed Up";
 
   private final Logger logger = Logger.getLogger("UserContainer");
 
@@ -47,22 +47,22 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
 
   private static final int ID_WIDTH = 130;
   public static final int TABLE_WIDTH = 420;
-  public static final int SIGNED_UP = 90;
-  public static final String CURRENT = "Curr.";
-  public static final int CURRENT_WIDTH = 60;
-  public static final int DIFF_WIDTH = 55;
-  public static final int INITIAL_SCORE_WIDTH = 75;
-  public static final String DIFF_COL_HEADER = "+/-";
-  public static final int MIN_RECORDINGS = 5;
+  private static final int SIGNED_UP = 90;
+  private static final String CURRENT = "Curr.";
+  private static final int CURRENT_WIDTH = 60;
+  private static final int DIFF_WIDTH = 55;
+  private static final int INITIAL_SCORE_WIDTH = 75;
+  private static final String DIFF_COL_HEADER = "+/-";
+  private static final int MIN_RECORDINGS = 5;
 
-  public static final int PAGE_SIZE = 7;
+  private static final int PAGE_SIZE = 7;
 
   private final ShowTab learnTab;
   private final DivWidget rightSide;
   private final DivWidget overallBottom;
   private final LangTestDatabaseAsync service;
-  private Long selectedUser;
-  String selectedUserKey;
+  private final Long selectedUser;
+  private final String selectedUserKey;
 
   /**
    * @param controller
@@ -122,7 +122,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
             int i = 0;
             for (UserInfo userInfo : users) {
               if (userInfo.getUser().getId() == selectedUser) {
-                logger.info("found previous selection - " + userInfo + " : " +i);
+                logger.info("found previous selection - " + userInfo + " : " + i);
                 table.getSelectionModel().setSelected(userInfo, true);
                 gotClickOnItem(userInfo);
 
@@ -130,8 +130,9 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
                 Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                   public void execute() {
 //                    table.getRowElement(index).scrollIntoView();
-                scrollIntoView(index);
-                  }});
+                    scrollIntoView(index);
+                  }
+                });
 
 
                 break;
@@ -148,22 +149,22 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     return tableWithPager;
   }
 
-  public void scrollIntoView(int i) {
+  private void scrollIntoView(int i) {
     int pageSize = table.getPageSize();
     int pageNum = i / pageSize;
     int newIndex = pageNum * pageSize;
 
     if (i < table.getPageStart()) {
-                  int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());
-                  if (DEBUG|| true) logger.info("new start of " + i+ " " + pageNum + " size " + pageSize +
-                      " prev page " + newStart + " vs current " + table.getVisibleRange());
-                  table.setVisibleRange(newStart, pageSize);
+      int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());
+//                  if (DEBUG) logger.info("new start of " + i+ " " + pageNum + " size " + pageSize +
+//                      " prev page " + newStart + " vs current " + table.getVisibleRange());
+      table.setVisibleRange(newStart, pageSize);
     } else {
       int pageEnd = table.getPageStart() + pageSize;
       if (i >= pageEnd) {
         int newStart = Math.max(0, Math.min(table.getRowCount() - pageSize, newIndex));   // not sure how this happens, but need Math.max(0,...)
-        if (DEBUG || true) logger.info("new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
-            " vs current " + table.getVisibleRange());
+//        if (DEBUG) logger.info("new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
+//            " vs current " + table.getVisibleRange());
         table.setVisibleRange(newStart, pageSize);
         table.redraw();
       }
@@ -394,8 +395,8 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     };
   }
 
-  DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
-  Date now = new Date();
+  private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
+  private final Date now = new Date();
 
   private Column<UserInfo, SafeHtml> getDateColumn() {
     return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
@@ -512,11 +513,9 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
   }
 
 
-  public Long getSelectedUser(String selectedUserKey) {
-    //  Long selectedUser;
+  private Long getSelectedUser(String selectedUserKey) {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      //      localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getId());
       String item = localStorageIfSupported.getItem(selectedUserKey);
       if (item != null) {
         try {
@@ -533,7 +532,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     // }
   }
 
-  public void storeSelectedUser(long selectedUser) {
+  private void storeSelectedUser(long selectedUser) {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       localStorageIfSupported.setItem(selectedUserKey, "" + selectedUser);
@@ -548,8 +547,10 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     /**
      * The styles applied to the table.
      */
+/*
     interface TableStyle extends CellTable.Style {
     }
+*/
 
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
