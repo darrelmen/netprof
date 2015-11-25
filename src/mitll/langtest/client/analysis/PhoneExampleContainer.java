@@ -26,7 +26,9 @@ import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.analysis.WordScore;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
@@ -40,6 +42,7 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
   private static final int ITEM_WIDTH = 200;
   private ShowTab learnTab;
   private String phone;
+  private final boolean isSpanish;
 
   /**
    * @param controller
@@ -48,6 +51,7 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
   public PhoneExampleContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab) {
     super(controller);
     this.learnTab = learnTab;
+    isSpanish = controller.getLanguage().equalsIgnoreCase("Spanish");
   }
 
   /**
@@ -78,6 +82,7 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
    * @see PhoneContainer#gotClickOnItem(PhoneAndStats)
    */
   public void addItems(String phone, List<WordAndScore> sortedHistory) {
+  //  this.sortedHistory = sortedHistory;
     this.phone = phone;
     clear();
     if (sortedHistory != null) {
@@ -199,7 +204,7 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
         if (columnText.isEmpty()) {
           //CommonShell exercise = plot.getIdToEx().get(shell.getId());
           String foreignLanguage = shell.getWord();//exercise == null ? "" : exercise.getForeignLanguage();
-          if (controller.getLanguage().equalsIgnoreCase("Spanish")) foreignLanguage = foreignLanguage.toUpperCase();
+          if (isSpanish) foreignLanguage = foreignLanguage.toUpperCase();
           columnText = new WordTable().getColoredSpan(foreignLanguage, shell.getScore());
         }
         return getSafeHtml(columnText);
@@ -219,12 +224,6 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
    * Must be public
    */
   public interface LocalTableResources extends CellTable.Resources {
-    /**
-     * The styles applied to the table.
-     */
-    interface TableStyle extends CellTable.Style {
-    }
-
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "PhoneScoresCellTableStyleSheet.css"})
     TableResources.TableStyle cellTableStyle();
