@@ -34,6 +34,12 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   public PhoneSession() {
   }
 
+  public boolean doesOverlap(long start, long last) {
+    return (getEnd() > start && getEnd() <= last)
+        || (getStart() > start && getStart() <= last)
+        || (getStart() < start && getEnd() > last);
+  }
+
   public double getMean() {
     return mean;
   }
@@ -62,9 +68,8 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
 
   public String toString() {
     return phone + " : " + new Date(bin) +
-
-        " start " + new Date(start)+
-        " end "  + new Date(end)+
+        " start " + new Date(start) +
+        " end " + new Date(end) +
         " n " + count +
         " mean " + mean + "  stdev " + stdev + " time " + meanTime;
   }
@@ -78,6 +83,6 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   }
 
   public long getMiddle() {
-    return (start +end) / 2;
+    return (start + end) / 2;
   }
 }
