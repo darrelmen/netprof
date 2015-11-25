@@ -23,6 +23,7 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
   private String word;
   private float score;
   private long resultID;
+  private long timestamp;
   private String answerAudio;
   private String refAudio;
   private String scoreJson;
@@ -37,10 +38,11 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
    * @param answerAudio
    * @param refAudio
    * @param scoreJson
+   * @param timestamp
    * @see PhoneDAO#getPhoneReport(String, Map, boolean)
    */
   public WordAndScore(String exid, String word, float score, long resultID, int wseq, int seq, String answerAudio,
-                      String refAudio,  String scoreJson) {
+                      String refAudio, String scoreJson, long timestamp) {
     this.exid = exid;
     this.word = word;
     this.score = score;
@@ -50,6 +52,7 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
     this.answerAudio = answerAudio;
     this.refAudio = refAudio;
     this.scoreJson = scoreJson;
+    this.timestamp = timestamp;
   }
 
   public WordAndScore() {}
@@ -120,6 +123,10 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
 
   public String getExid() {
     return exid;
+  }
+
+  public long getTimestamp() {
+    return timestamp;
   }
 
 //  public String getNativeAudio() {
