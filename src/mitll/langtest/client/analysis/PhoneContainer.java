@@ -528,6 +528,9 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     if (BrowserEvents.CLICK.equals(event.getType())) {
       clickOnPhone(object.getPhone());
     }
+    else {
+      logger.info("got other event " + event.getType());
+    }
   }
 
   /**
