@@ -36,7 +36,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
-    private Logger logger = Logger.getLogger("PlayAudioPanel");
+  private Logger logger = Logger.getLogger("PlayAudioPanel");
 
     /**
    * @see #setPlayButtonText
