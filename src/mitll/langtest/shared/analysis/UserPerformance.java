@@ -84,6 +84,7 @@ public class UserPerformance implements Serializable {
    * @see #UserPerformance()
    */
   private void setRawBestScores(List<BestScore> rawBestScores) {
+    // TODO : necessary to sort????
     Collections.sort(rawBestScores, new Comparator<BestScore>() {
       @Override
       public int compare(BestScore o1, BestScore o2) {
