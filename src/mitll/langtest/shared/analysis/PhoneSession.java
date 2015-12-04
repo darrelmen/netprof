@@ -6,6 +6,7 @@ package mitll.langtest.shared.analysis;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by go22670 on 11/16/15.
@@ -20,6 +21,17 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   private long end;
   private String phone;
 
+  /**
+   * @see mitll.langtest.server.database.analysis.PhoneAnalysis#getPhoneSessions(String, List, boolean)
+   * @param phone
+   * @param bin
+   * @param count
+   * @param mean
+   * @param stdev
+   * @param meanTime
+   * @param start
+   * @param end
+   */
   public PhoneSession(String phone, long bin, long count, double mean, double stdev, double meanTime, long start, long end) {
     this.phone = phone;
     this.bin = bin;
