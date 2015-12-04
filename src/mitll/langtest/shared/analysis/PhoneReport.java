@@ -44,10 +44,12 @@ public class PhoneReport implements Serializable {
   /**
    * @see mitll.langtest.client.analysis.PhoneContainer#clickOnPhone(String)
    * @see PhoneContainer#showExamplesForSelectedSound()
-   * @param phone
+   * @paramx phone
    * @return
    */
+/*
   public List<WordAndScore> getWordExamples(String phone) { return phoneToWordAndScoreSorted.get(phone);}
+*/
   public String toString() { return getPhoneToAvgSorted().toString(); }
 
   public int getOverallPercent() {
