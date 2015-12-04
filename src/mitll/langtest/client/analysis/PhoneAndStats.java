@@ -5,13 +5,14 @@
 package mitll.langtest.client.analysis;
 
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.client.Command;
 
 import java.util.List;
 
 /**
  * Created by go22670 on 10/22/15.
  */
-public class PhoneAndStats {
+public class PhoneAndStats implements Comparable<PhoneAndStats>{
   private final String phone;
 
   private final int score, current;
@@ -64,5 +65,11 @@ public class PhoneAndStats {
    */
   public int getCount() {
     return count;
+  }
+
+  @Override
+  public int compareTo(PhoneAndStats o) {
+    int i = Integer.valueOf(current).compareTo(o.getCurrent());
+    return i == 0 ? phone.compareTo(o.getPhone()) : i;
   }
 }
