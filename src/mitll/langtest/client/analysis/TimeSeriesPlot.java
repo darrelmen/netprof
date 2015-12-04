@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 11/20/15.
  */
 public class TimeSeriesPlot extends DivWidget {
-  private final Logger logger = Logger.getLogger("TimeSeriesPlot");
+//  private final Logger logger = Logger.getLogger("TimeSeriesPlot");
 
   protected static final String AVERAGE = "Average";
   private final Map<Long, PhoneSession> timeToSession = new TreeMap<>();
@@ -145,9 +145,11 @@ public class TimeSeriesPlot extends DivWidget {
       data[i][0] = middle;
       double mean = ts.getMean();
       double stdev = ts.getStdev();
+
       double first = mean - stdev;
       if (first < 0) first = 0;
       data[i][1] = (int) (first * 100);
+
       double second = mean + stdev;
       if (second > 1) second = 1;
       data[i++][2] = (int) (second * 100);
