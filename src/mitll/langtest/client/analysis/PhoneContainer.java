@@ -100,12 +100,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     from = 0;
     to = System.currentTimeMillis();
     this.phoneReport = phoneReport;
-
-//    logger.info("getTableWithPager From " + debugFormat(from) + " : " + debugFormat(to));
-
-    List<PhoneAndStats> phoneAndStatsList = getPhoneAndStatsList(from, to);
-
-    return getTableWithPager(phoneAndStatsList);
+    return getTableWithPager(getPhoneAndStatsList(from, to));
   }
 
   /**
@@ -120,8 +115,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     this.from = from;
     this.to = to;
 
-    List<PhoneAndStats> phoneAndStatsList = getPhoneAndStatsList(from, to);
-    addItems(phoneAndStatsList);
+    addItems(getPhoneAndStatsList(from, to));
     showExamplesForSelectedSound();
   }
 
@@ -172,6 +166,9 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
         ));
       }
     }
+
+    Collections.sort(phoneAndStatses);
+
 //    logger.info("getPhoneStatuses returned " + phoneAndStatses.size());
   }
 
@@ -354,7 +351,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
               }
             } else {
               logger.warning("------- o1 is null?");
-
               return -1;
             }
           }
@@ -503,7 +499,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
     table.setWidth("100%", true);
 
-
     new TooltipHelper().createAddTooltip(table, TOOLTIP, Placement.RIGHT);
   }
 
@@ -545,16 +540,10 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
     SortedSet<WordAndScore> examples = new TreeSet<>();
     for (PhoneSession session : filtered) examples.addAll(session.getExamples());
-   // PhoneSession first = filtered.get(0);
-   // PhoneSession last = filtered.get(filtered.size() - 1);
-    //long s = first.getStart();
-   // long e = last.getEnd();
-    // List<WordAndScore> wordExamples = phoneReport.getWordExamples(phone);
     List<WordAndScore> filteredWords = new ArrayList<>(examples);
 
     // TODO: better ways of doing this.
     filteredWords = filteredWords.subList(0, Math.min(filteredWords.size(), MAX_EXAMPLES));
-    //List<WordAndScore> filteredWords = getFilteredWords(wordExamples, s, e);
     exampleContainer.addItems(phone, filteredWords);
 
     phonePlot.showErrorBarData(filtered, phone, isNarrow);
