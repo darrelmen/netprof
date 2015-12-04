@@ -16,18 +16,30 @@ import java.util.List;
 public class SimpleTimeAndScore implements Serializable {
   private long timestamp;
   private float score;
+  private transient WordAndScore wordAndScore;
 
   /**
    * @param timestamp
    * @param score
    * @see mitll.langtest.server.database.PhoneDAO#getPhoneTimeSeries(List)
    */
+  public SimpleTimeAndScore( long timestamp, float score, WordAndScore wordAndScore) {
+    this.timestamp = timestamp;
+    this.score = score;
+    this.wordAndScore = wordAndScore;
+  }
+
   public SimpleTimeAndScore( long timestamp, float score) {
     this.timestamp = timestamp;
     this.score = score;
+    this.wordAndScore = null;
   }
 
   public SimpleTimeAndScore() {
+  }
+
+  public WordAndScore getWordAndScore() {
+    return wordAndScore;
   }
 
   public long getTimestamp() {
