@@ -35,6 +35,7 @@ public class AnalysisTab extends DivWidget {
   private final Logger logger = Logger.getLogger("AnalysisTab");
 
   private static final String WORDS = "Words";
+  private static final String WORDS_USING_SOUND_PREFIX = "Words using ";
   private static final String WORDS_USING_SOUND = "Words using Sound";
   private static final String SOUNDS = "Sounds";
   private static final String SUBTITLE = "scores > 20";
@@ -45,6 +46,7 @@ public class AnalysisTab extends DivWidget {
   private final AnalysisPlot analysisPlot;
   private final ExerciseController controller;
   private TimeWidgets timeWidgets;
+  Heading exampleHeader = new Heading(3, WORDS_USING_SOUND);
 
   /**
    * @param service
@@ -58,10 +60,7 @@ public class AnalysisTab extends DivWidget {
                      final ShowTab showTab, String userChosenID, int minRecordings, DivWidget overallBottom) {
     this.controller = controller;
     getElement().setId("AnalysisTab");
-    analysisPlot = new AnalysisPlot(service, userid, userChosenID, minRecordings,
-        controller.getSoundManager());
-//    analysisPlot.addStyleName("cardBorderShadow");
-//    analysisPlot.getElement().getStyle().setMargin(10, Style.Unit.PX);
+    analysisPlot = new AnalysisPlot(service, userid, userChosenID, minRecordings, controller.getSoundManager());
 
     Panel timeControls = new HorizontalPanel();
     timeControls.add(getTimeGroup());
@@ -84,7 +83,7 @@ public class AnalysisTab extends DivWidget {
     getWordScores(service, controller, userid, showTab, analysisPlot, bottom, minRecordings);
   }
 
-  public Panel getTimeWindowStepper() {
+  private Panel getTimeWindowStepper() {
     Panel stepper = getStepperContainer();
 
     Button prevButton = getPrevButton();
@@ -100,7 +99,7 @@ public class AnalysisTab extends DivWidget {
     return stepper;
   }
 
-  public Panel getStepperContainer() {
+  private Panel getStepperContainer() {
     Panel stepper = new HorizontalPanel();
     stepper.getElement().setId("stepper");
     stepper.addStyleName("inlineBlockStyleOnly");
@@ -202,6 +201,15 @@ public class AnalysisTab extends DivWidget {
     return all;
   }
 
+  /**
+   * @param service
+   * @param controller
+   * @param userid
+   * @param showTab
+   * @param analysisPlot
+   * @param lowerHalf
+   * @param minRecordings
+   */
   private void getWordScores(final LangTestDatabaseAsync service, final ExerciseController controller,
                              final int userid, final ShowTab showTab, final AnalysisPlot analysisPlot,
                              final Panel lowerHalf, final int minRecordings) {
@@ -218,6 +226,9 @@ public class AnalysisTab extends DivWidget {
         Panel tableWithPager = wordContainer.getTableWithPager(wordScores);
 
         DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer", wordsTitle);
+        wordsContainer.addStyleName("cardBorderShadow");
+        wordsContainer.getElement().getStyle().setMargin(10, Style.Unit.PX);
+
         lowerHalf.add(wordsContainer);
 
         DivWidget soundsDiv = getSoundsDiv();
@@ -241,11 +252,9 @@ public class AnalysisTab extends DivWidget {
   private DivWidget getWordContainerDiv(Panel tableWithPager, String containerID, Heading w) {
     DivWidget wordsContainer = new DivWidget();
     wordsContainer.getElement().setId(containerID);
-    wordsContainer.getElement().getStyle().setMargin(10, Style.Unit.PX);
     wordsContainer.addStyleName("floatLeft");
     wordsContainer.add(w);
     wordsContainer.add(tableWithPager);
-    wordsContainer.addStyleName("cardBorderShadow");
     return wordsContainer;
   }
 
@@ -256,7 +265,7 @@ public class AnalysisTab extends DivWidget {
                               AnalysisPlot analysisPlot,
                               final ShowTab showTab,
                               final int minRecordings) {
-    final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, analysisPlot, showTab);
+    final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, showTab, exampleHeader);
     final PhonePlot phonePlot = new PhonePlot();
     final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, phonePlot, isNarrow);
     analysisPlot.addListener(phoneContainer);
@@ -271,13 +280,11 @@ public class AnalysisTab extends DivWidget {
       public void onSuccess(PhoneReport phoneReport) {
         // #1 - phones
         Panel phones = phoneContainer.getTableWithPager(phoneReport);
-        DivWidget sounds = getSoundsContainer(phones);
-        lowerHalf.add(sounds);
+        lowerHalf.add(getSoundsContainer(phones));
 
         // #2 - word examples
         Panel examples = exampleContainer.getTableWithPager();
-        DivWidget wordExamples = getWordExamples(examples);
-        lowerHalf.add(wordExamples);
+        lowerHalf.add(getWordExamples(examples));
 
         // #3 - phone plot
         phonePlot.addStyleName("topMargin");
@@ -298,8 +305,9 @@ public class AnalysisTab extends DivWidget {
     return sounds;
   }
 
+
   private DivWidget getWordExamples(Panel examples) {
-    DivWidget wordExamples = getWordContainerDiv(examples, "WordExamples", new Heading(3, WORDS_USING_SOUND));
+    DivWidget wordExamples = getWordContainerDiv(examples, "WordExamples", exampleHeader);
     wordExamples.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
     return wordExamples;
   }
