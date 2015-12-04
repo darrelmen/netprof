@@ -35,7 +35,7 @@ public class Analysis extends DAO {
   private Map<String, String> exToRef;
   private static final long MINUTE = 60 * 1000;
   private static final long HOUR = 60 * MINUTE;
-//  private static final long FIVEMIN = 5 * MINUTE;
+  //  private static final long FIVEMIN = 5 * MINUTE;
   private static final long DAY = 24 * HOUR;
   private static final long WEEK = 7 * DAY;
 //  private static final long MONTH = 4 * WEEK;
@@ -95,18 +95,74 @@ public class Analysis extends DAO {
       });
 
       // TODO : choose the initial granularity and set initial and current to those values
-/*
+
       for (UserInfo userInfo : userInfos) {
         Map<Long, List<PhoneSession>> granularityToSessions =
             new PhoneAnalysis().getGranularityToSessions(userInfo.getBestScores());
         //userPerformance.setGranularityToSessions();
+        List<PhoneSession> phoneSessions = chooseGran(granularityToSessions);
+
+        PhoneSession first = phoneSessions.get(0);
+        PhoneSession last = phoneSessions.get(phoneSessions.size() - 1);
+        if (phoneSessions.size() > 2 && last.getCount() < 10) {
+          last = phoneSessions.get(phoneSessions.size()-2);
+        }
+
+        userInfo.setStart((int) Math.round(first.getMean() * 100d));
+        userInfo.setCurrent((int) Math.round(last.getMean() * 100d));
       }
-*/
+
       return userInfos;
     } catch (SQLException e) {
       logger.error("Got " + e, e);
     }
     return Collections.emptyList();
+  }
+
+  private List<PhoneSession> chooseGran(Map<Long, List<PhoneSession>> granularityToSessions) {
+    List<Long> grans = new ArrayList<>(granularityToSessions.keySet());
+
+    Collections.sort(grans);
+    boolean oneSet = false;
+    List<PhoneSession> phoneSessions1 = Collections.emptyList();
+    for (Long gran : grans) {
+      if (!oneSet) {
+        List<PhoneSession> phoneSessions = granularityToSessions.get(gran);
+
+        int size = 0;
+        int total = 0;
+        boolean anyBigger = false;
+        for (PhoneSession session : phoneSessions) {
+          //  logger.info("\t " + gran + " session " + session);
+          size++;
+          total += session.getCount();
+          if (session.getCount() > 50) anyBigger = true;
+        }
+        //       String label = granToLabel.get(gran);
+//        String seriesInfo = gran + "/" + label;
+        // logger.info("setVisibility  " + seriesInfo + " : " + size + " sessions " + phoneSessions.size() + " any bigger " + anyBigger);
+
+        if (PhoneSession.chooseThisSize(size, total, anyBigger)) {
+          oneSet = true;
+          phoneSessions1 = granularityToSessions.get(gran);
+          //logger.info("setVisibility 1 chose " + seriesInfo + " : " + size + " visible " + series.isVisible());
+          break;
+        }
+        //else {
+        //logger.info("setVisibility 2 too small " + seriesInfo + " : " + size);
+        //}
+      }
+    }
+
+    if (!oneSet) {
+      if (grans.isEmpty()) {
+        logger.error("huh? empty map for " + granularityToSessions);
+      } else {
+        Long first = grans.iterator().next();
+        phoneSessions1 = granularityToSessions.get(first);
+      }
+    }
+    return phoneSessions1;
   }
 
   /**
@@ -179,7 +235,8 @@ public class Analysis extends DAO {
         if (DEBUG) logger.debug(" resultsForQuery for " + resultsForQuery.size());
 
         UserPerformance userPerformance = new UserPerformance(id, resultsForQuery);
-        userPerformance.setGranularityToSessions(new PhoneAnalysis().getGranularityToSessions(userPerformance.getRawBestScores()));
+        userPerformance.setGranularityToSessions(
+            new PhoneAnalysis().getGranularityToSessions(userPerformance.getRawBestScores()));
         return userPerformance;
       }
     } catch (Exception ee) {
@@ -293,11 +350,13 @@ public class Analysis extends DAO {
   }
 
   private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
-    PhoneAnalysis phoneAnalysis = new PhoneAnalysis();
-    for (Map.Entry<String, PhoneStats> pair : phoneToAvgSorted.entrySet()) {
-      List<PhoneSession> partition = phoneAnalysis.partition(pair.getKey(), pair.getValue().getTimeSeries());
-      pair.getValue().setSessions(partition);
-    }
+    new PhoneAnalysis().setSessions(phoneToAvgSorted);
+
+//    PhoneAnalysis phoneAnalysis = new PhoneAnalysis();
+//    for (Map.Entry<String, PhoneStats> pair : phoneToAvgSorted.entrySet()) {
+//      List<PhoneSession> partition = phoneAnalysis.partitionForUser(pair.getKey(), pair.getValue().getTimeSeries());
+//      pair.getValue().setSessions(partition);
+//    }
   }
 
   private String getLanguage() {
@@ -401,11 +460,11 @@ public class Analysis extends DAO {
   }
 
   /**
-   * @see #getBestForQuery(Connection, PreparedStatement, int)
    * @param connection
    * @param statement
    * @return
    * @throws SQLException
+   * @see #getBestForQuery(Connection, PreparedStatement, int)
    */
   private Map<Long, List<BestScore>> getUserToResults(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
