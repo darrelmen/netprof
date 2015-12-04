@@ -346,11 +346,11 @@ public class PhoneDAO extends DAO {
       long resultTime = -1;
 
       //if (addTranscript) {
-        Timestamp timestamp = rs.getTimestamp(i++);
-        if (timestamp != null) resultTime = timestamp.getTime();
-     // } else {
-     //   i++;
-     // }
+      Timestamp timestamp = rs.getTimestamp(i++);
+      if (timestamp != null) resultTime = timestamp.getTime();
+      // } else {
+      //   i++;
+      // }
       int wseq = rs.getInt(i++);
       String word = rs.getString(i++);
       float wscore = rs.getFloat(i++);
@@ -373,7 +373,8 @@ public class PhoneDAO extends DAO {
       List<PhoneAndScore> scores = phoneToScores.get(phone);
       if (scores == null) phoneToScores.put(phone, scores = new ArrayList<PhoneAndScore>());
       float phoneScore = rs.getFloat(SCORE);
-      scores.add(new PhoneAndScore(phoneScore, resultTime));
+      PhoneAndScore phoneAndScore = new PhoneAndScore(phoneScore, resultTime);
+      scores.add(phoneAndScore);
 
       List<WordAndScore> wordAndScores = phoneToWordAndScore.get(phone);
       Set<Long> ridsForPhone = phoneToRID.get(phone);
@@ -386,6 +387,7 @@ public class PhoneDAO extends DAO {
           idToRef.get(exid), scoreJson, resultTime);
       if (!ridsForPhone.contains(rid)) { // get rid of duplicates
         wordAndScores.add(wordAndScore);
+        phoneAndScore.setWordAndScore(wordAndScore);
       }
       ridsForPhone.add(rid);
 
@@ -399,7 +401,7 @@ public class PhoneDAO extends DAO {
         }
 
         setTranscript(wordAndScore, netPronImageTypeListMap);
-     //   addResultTime(phoneToTimeStamp, resultTime, phone, phoneScore);
+        //   addResultTime(phoneToTimeStamp, resultTime, phone, phoneScore);
       }
       //    } else {
      /*   logger.debug("------> current " + currentRID +
@@ -407,12 +409,6 @@ public class PhoneDAO extends DAO {
       //  }
     }
     finish(connection, statement, rs);
-
-    // TODO : add this info to phone report
-//    for (Map.Entry<String, List<PhoneAndScore>> pair : phoneToTimeStamp.entrySet()) {
-//      Collections.sort(pair.getValue());
-//    }
-    // TODO : use phone time&score info
 
     return getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems);
   }
@@ -434,7 +430,6 @@ public class PhoneDAO extends DAO {
 //    if (times == null) phoneToTimeStamp.put(phone, times = new ArrayList<PhoneAndScore>());
 //    times.add(new PhoneAndScore(phoneScore, resultTime));
 //  }
-
   private String getResultIDJoinSQL(long userid, List<Integer> ids) {
     String filterClause = ResultDAO.RESULTS + "." + ResultDAO.ID + " in (" + getInList(ids) + ")";
     return getJoinSQL(userid, filterClause);
@@ -500,7 +495,7 @@ public class PhoneDAO extends DAO {
       List<TimeAndScore> phoneTimeSeries = getPhoneTimeSeries(value);
 
       int size = phoneTimeSeries.size();
-      List<TimeAndScore> initialSample = phoneTimeSeries.subList(0, Math.min(INITIAL_SAMPLE_PHONES, size));
+/*       List<TimeAndScore> initialSample = phoneTimeSeries.subList(0, Math.min(INITIAL_SAMPLE_PHONES, size));
       float total = 0;
 
       for (TimeAndScore bs : initialSample) {
@@ -513,7 +508,7 @@ public class PhoneDAO extends DAO {
       for (TimeAndScore bs : phoneTimeSeries) {
         total += bs.getScore();
       }
-      int current = toPercent(total, size);
+      int current = toPercent(total, size);*/
       phoneToAvg.put(phone, new PhoneStats(size, phoneTimeSeries));
     }
 
@@ -549,23 +544,23 @@ public class PhoneDAO extends DAO {
 
     Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = new LinkedHashMap<String, List<WordAndScore>>();
 
-//    Map<String, Integer> phoneToCount = new HashMap<>();
     for (String phone : sorted) {
       List<WordAndScore> value = phoneToWordAndScore.get(phone);
       phoneToWordAndScoreSorted.put(phone, value);
-      //phoneToCount.put(phone, value.size());
     }
 
     if (DEBUG) logger.debug("phone->words " + phoneToWordAndScore);
 
-    return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted/*, phoneToCount*/);
+    return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted);
   }
 
   /**
-   * @see #getPhoneReport(Map, Map, float, float)
    * @param phoneToAvgSorted
+   * @see #getPhoneReport(Map, Map, float, float)
    */
-  private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) { new PhoneAnalysis().setSessions(phoneToAvgSorted); }
+  private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
+    new PhoneAnalysis().setSessions(phoneToAvgSorted);
+  }
 
   /**
    * @param rawBestScores
@@ -582,15 +577,19 @@ public class PhoneDAO extends DAO {
       count++;
       float moving = total / count;
 
-      TimeAndScore timeAndScore = new TimeAndScore(bs.getTimestamp(), pronScore, moving);
+      WordAndScore wordAndScore = bs.getWordAndScore();
+    //  if (wordAndScore == null) logger.error("huh? word and score is null for " + bs);
+      TimeAndScore timeAndScore = new TimeAndScore("", bs.getTimestamp(), pronScore, moving, wordAndScore);
       phoneTimeSeries.add(timeAndScore);
     }
     return phoneTimeSeries;
   }
 
+/*
   private static int toPercent(float total, float size) {
     return (int) Math.ceil(100 * total / size);
   }
+*/
 
   private String trimPathForWebPage(String path) {
     int answer = path.indexOf(PathHelper.ANSWERS);
