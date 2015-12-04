@@ -23,6 +23,7 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   private long start;
   private long end;
   private String phone;
+  private List<WordAndScore> examples;
 
   /**
    * @see mitll.langtest.server.database.analysis.PhoneAnalysis#getPhoneSessions(String, List, boolean)
@@ -35,7 +36,8 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
    * @param start
    * @param end
    */
-  public PhoneSession(String phone, long bin, long count, double mean, double stdev, double meanTime, long start, long end) {
+  public PhoneSession(String phone, long bin, long count, double mean, double stdev, double meanTime, long start, long end,
+                      List<WordAndScore> examples) {
     this.phone = phone;
     this.bin = bin;
     this.count = count;
@@ -44,6 +46,7 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
     this.meanTime = meanTime;
     this.start = start;
     this.end = end;
+    this.examples = examples;
   }
 
   public PhoneSession() {
@@ -118,5 +121,9 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
 
   public long getMiddle() {
     return (start + end) / 2;
+  }
+
+  public List<WordAndScore> getExamples() {
+    return examples;
   }
 }
