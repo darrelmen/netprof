@@ -10,7 +10,6 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 10/29/15.
@@ -23,12 +22,13 @@ public class UserInfo implements Serializable {
   private transient List<BestScore> bestScores;
   private long startTime;
 
-  public UserInfo() {}
+  public UserInfo() {
+  }
 
   /**
-   * @see mitll.langtest.server.database.analysis.Analysis#getBestForQuery
    * @param bestScores
    * @param initialSamples
+   * @see mitll.langtest.server.database.analysis.Analysis#getBestForQuery
    */
   public UserInfo(List<BestScore> bestScores, long startTime, int initialSamples) {
     this.bestScores = bestScores;
@@ -49,25 +49,18 @@ public class UserInfo implements Serializable {
       total += bs.getScore();
     }
 
-    start = toPercent(total,  bestScores1.size());
-  //  logger.info("start " + total + " " + start);
+    setStart(toPercent(total, bestScores1.size()));
+    //  logger.info("start " + total + " " + start);
     total = 0;
     for (BestScore bs : bestScores) {
       total += bs.getScore();
     }
-    current = toPercent(total, bestScores.size());
-  //  logger.info("current " + total + " " + current);
+    setCurrent(toPercent(total, bestScores.size()));
+    //  logger.info("current " + total + " " + current);
   }
 
   private static int toPercent(float total, float size) {
     return (int) Math.ceil(100 * total / size);
-  }
-
-  public String toString() {
-    User user = getUser();
-
-    String id = user == null ? "UNK" :""+user.getId();
-    return id + "/"+getUserID() + " : "+ getNum() + " : " +getStart() + " " + getCurrent() + " " + getDiff();
   }
 
   public String getUserID() {
@@ -96,7 +89,7 @@ public class UserInfo implements Serializable {
   }
 
   public int getDiff() {
-    return getCurrent()-getStart();
+    return getCurrent() - getStart();
   }
 
   public int getNum() {
@@ -105,5 +98,19 @@ public class UserInfo implements Serializable {
 
   public List<BestScore> getBestScores() {
     return bestScores;
+  }
+
+  public void setStart(int start) {
+    this.start = start;
+  }
+
+  public void setCurrent(int current) {
+    this.current = current;
+  }
+
+  public String toString() {
+    User user = getUser();
+    String id = user == null ? "UNK" : "" + user.getId();
+    return id + "/" + getUserID() + " : " + getNum() + " : " + getStart() + " " + getCurrent() + " " + getDiff();
   }
 }
