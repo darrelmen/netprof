@@ -95,21 +95,21 @@ public class Analysis extends DAO {
       });
 
       // TODO : choose the initial granularity and set initial and current to those values
-
       for (UserInfo userInfo : userInfos) {
         Map<Long, List<PhoneSession>> granularityToSessions =
             new PhoneAnalysis().getGranularityToSessions(userInfo.getBestScores());
         //userPerformance.setGranularityToSessions();
         List<PhoneSession> phoneSessions = chooseGran(granularityToSessions);
+        if (!phoneSessions.isEmpty()) {
+          PhoneSession first = phoneSessions.get(0);
+          PhoneSession last  = phoneSessions.get(phoneSessions.size() - 1);
+          if (phoneSessions.size() > 2 && last.getCount() < 10) {
+            last = phoneSessions.get(phoneSessions.size() - 2);
+          }
 
-        PhoneSession first = phoneSessions.get(0);
-        PhoneSession last = phoneSessions.get(phoneSessions.size() - 1);
-        if (phoneSessions.size() > 2 && last.getCount() < 10) {
-          last = phoneSessions.get(phoneSessions.size()-2);
+          userInfo.setStart(  (int) Math.round(first.getMean() * 100d));
+          userInfo.setCurrent((int) Math.round( last.getMean() * 100d));
         }
-
-        userInfo.setStart((int) Math.round(first.getMean() * 100d));
-        userInfo.setCurrent((int) Math.round(last.getMean() * 100d));
       }
 
       return userInfos;
@@ -154,14 +154,14 @@ public class Analysis extends DAO {
       }
     }
 
-    if (!oneSet) {
+/*    if (!oneSet) {
       if (grans.isEmpty()) {
         logger.error("huh? empty map for " + granularityToSessions);
       } else {
         Long first = grans.iterator().next();
         phoneSessions1 = granularityToSessions.get(first);
       }
-    }
+    }*/
     return phoneSessions1;
   }
 
@@ -338,7 +338,8 @@ public class Analysis extends DAO {
 
       if (DEBUG) {
         now = System.currentTimeMillis();
-        logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - start) + " millis to get " + phonesForUser.size() + " phones");
+        logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - start) + " millis to get " +
+            phonesForUser.size() + " phones");
       }
       setSessions(phoneReport.getPhoneToAvgSorted());
 
@@ -349,15 +350,7 @@ public class Analysis extends DAO {
     return null;
   }
 
-  private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
-    new PhoneAnalysis().setSessions(phoneToAvgSorted);
-
-//    PhoneAnalysis phoneAnalysis = new PhoneAnalysis();
-//    for (Map.Entry<String, PhoneStats> pair : phoneToAvgSorted.entrySet()) {
-//      List<PhoneSession> partition = phoneAnalysis.partitionForUser(pair.getKey(), pair.getValue().getTimeSeries());
-//      pair.getValue().setSessions(partition);
-//    }
-  }
+  private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) { new PhoneAnalysis().setSessions(phoneToAvgSorted);  }
 
   private String getLanguage() {
     return database.getLanguage();
