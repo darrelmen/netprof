@@ -38,6 +38,7 @@ public class PhoneDAO extends DAO {
 
   private static final boolean DEBUG = false;
   private static final int INITIAL_SAMPLE_PHONES = 30;
+  public static final String RID1 = "RID";
   private ParseResultJson parseResultJson;
 
   /**
@@ -354,7 +355,7 @@ public class PhoneDAO extends DAO {
       String word = rs.getString(i++);
       float wscore = rs.getFloat(i++);
 
-      long rid = rs.getLong("RID");
+      long rid = rs.getLong(RID1);
 //      logger.info("Got " + exid + " rid " + rid + " word " + word);
 
       if (!exid.equals(currentExercise)) {
@@ -398,7 +399,7 @@ public class PhoneDAO extends DAO {
         }
 
         setTranscript(wordAndScore, netPronImageTypeListMap);
-        addResultTime(phoneToTimeStamp, resultTime, phone, phoneScore);
+     //   addResultTime(phoneToTimeStamp, resultTime, phone, phoneScore);
       }
       //    } else {
      /*   logger.debug("------> current " + currentRID +
@@ -408,9 +409,9 @@ public class PhoneDAO extends DAO {
     finish(connection, statement, rs);
 
     // TODO : add this info to phone report
-    for (Map.Entry<String, List<PhoneAndScore>> pair : phoneToTimeStamp.entrySet()) {
-      Collections.sort(pair.getValue());
-    }
+//    for (Map.Entry<String, List<PhoneAndScore>> pair : phoneToTimeStamp.entrySet()) {
+//      Collections.sort(pair.getValue());
+//    }
     // TODO : use phone time&score info
 
     return getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems);
@@ -428,11 +429,11 @@ public class PhoneDAO extends DAO {
    * @param phoneScore
    * @see #getPhoneReport(String, Map, boolean)
    */
-  private void addResultTime(Map<String, List<PhoneAndScore>> phoneToTimeStamp, long resultTime, String phone, float phoneScore) {
-    List<PhoneAndScore> times = phoneToTimeStamp.get(phone);
-    if (times == null) phoneToTimeStamp.put(phone, times = new ArrayList<PhoneAndScore>());
-    times.add(new PhoneAndScore(phoneScore, resultTime));
-  }
+//  private void addResultTime(Map<String, List<PhoneAndScore>> phoneToTimeStamp, long resultTime, String phone, float phoneScore) {
+//    List<PhoneAndScore> times = phoneToTimeStamp.get(phone);
+//    if (times == null) phoneToTimeStamp.put(phone, times = new ArrayList<PhoneAndScore>());
+//    times.add(new PhoneAndScore(phoneScore, resultTime));
+//  }
 
   private String getResultIDJoinSQL(long userid, List<Integer> ids) {
     String filterClause = ResultDAO.RESULTS + "." + ResultDAO.ID + " in (" + getInList(ids) + ")";
@@ -560,7 +561,11 @@ public class PhoneDAO extends DAO {
     return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted/*, phoneToCount*/);
   }
 
-  public void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
+  /**
+   * @see #getPhoneReport(Map, Map, float, float)
+   * @param phoneToAvgSorted
+   */
+  private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
     PhoneAnalysis phoneAnalysis = new PhoneAnalysis();
     for (Map.Entry<String, PhoneStats> pair : phoneToAvgSorted.entrySet()) {
       List<PhoneSession> partition = phoneAnalysis.partition(pair.getKey(), pair.getValue().getTimeSeries());
@@ -583,7 +588,7 @@ public class PhoneDAO extends DAO {
       count++;
       float moving = total / count;
 
-      TimeAndScore timeAndScore = new TimeAndScore("", bs.getTimestamp(), pronScore, moving);
+      TimeAndScore timeAndScore = new TimeAndScore(bs.getTimestamp(), pronScore, moving);
       phoneTimeSeries.add(timeAndScore);
     }
     return phoneTimeSeries;

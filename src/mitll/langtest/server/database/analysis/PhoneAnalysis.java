@@ -32,7 +32,7 @@ public class PhoneAnalysis {
   private static final List<Long> GRANULARITIES = Arrays.asList(
       //FIVEMIN,
       HOUR,
-  //    QUARTER,
+      //    QUARTER,
       DAY,
       WEEK,
       MONTH//,
@@ -74,9 +74,9 @@ public class PhoneAnalysis {
   }*/
 
   /**
-   * @see Analysis#getPerformanceForUser(long, int)
    * @param answersForUser
    * @return
+   * @see Analysis#getPerformanceForUser(long, int)
    */
   public Map<Long, List<PhoneSession>> getGranularityToSessions(List<TimeAndScore> answersForUser) {
     String overall1 = "overall";
@@ -89,11 +89,11 @@ public class PhoneAnalysis {
   }
 
   /**
-   * @see #partition(String, List)
    * @param key
    * @param answersForUser
    * @param times
    * @return
+   * @see #partition(String, List)
    */
   private List<PhoneSession> getPhoneSessions(String key, List<TimeAndScore> answersForUser, List<Long> times) {
     Map<Long, List<PhoneSessionInternal>> granularityToSessions =
@@ -117,11 +117,11 @@ public class PhoneAnalysis {
   }
 
   /**
-   * @see #getGranularityToSessions(List)
    * @param key
    * @param toUse
    * @param prune
    * @return
+   * @see #getGranularityToSessions(List)
    */
   private List<PhoneSession> getPhoneSessions(String key, List<PhoneSessionInternal> toUse, boolean prune) {
     List<PhoneSession> sessions2 = new ArrayList<PhoneSession>();
@@ -135,8 +135,11 @@ public class PhoneAnalysis {
         double stdev1 = internal.getStdev();
         double meanTime = internal.getMeanTime();
         if (!prune || (internal.getCount() > REAL_MIN_SESSION_SIZE || size == 1)) {
-          if (internal.getEnd() == 0) logger.error("got 0 end time " + internal);
-          sessions2.add(new PhoneSession(key, internal.getBin(), internal.getCount(), mean, stdev1, meanTime, internal.getStart(), internal.getEnd()));
+          if (internal.getEnd() == 0) {
+            logger.error("got 0 end time " + internal);
+          }
+          sessions2.add(new PhoneSession(key, internal.getBin(), internal.getCount(), mean, stdev1, meanTime,
+              internal.getStart(), internal.getEnd()));
         }
       }
     }
@@ -144,12 +147,12 @@ public class PhoneAnalysis {
   }
 
   /**
-   * @see #getGranularityToSessions(String, List, List)
    * @param key
    * @param answersForUser
    * @param times
    * @param granularityToSessions
    * @param granToCurrent
+   * @see #getGranularityToSessions(String, List, List)
    */
   private void partition(String key,
                          List<TimeAndScore> answersForUser,
@@ -166,7 +169,7 @@ public class PhoneAnalysis {
         long gran = (timestamp / time) * time;
         long diff = timestamp - last;
         if ((phoneSessionInternal == null) || (diff > time && phoneSessionInternal.getN() > MIN_SESSION_SIZE)) {
-          phoneSessionInternal = new PhoneSessionInternal(key, gran/*, timestamp*/);
+          phoneSessionInternal = new PhoneSessionInternal(gran/*, timestamp*/);
           phoneSessionInternals.add(phoneSessionInternal);
           granToCurrent.put(time, phoneSessionInternal);
         } else {
@@ -194,7 +197,7 @@ public class PhoneAnalysis {
   }
 
   public static class PhoneSessionInternal {
-    final transient SummaryStatistics summaryStatistics  = new SummaryStatistics();
+    final transient SummaryStatistics summaryStatistics = new SummaryStatistics();
     final transient SummaryStatistics summaryStatistics2 = new SummaryStatistics();
 
     private double mean;
@@ -202,17 +205,15 @@ public class PhoneAnalysis {
     private double meanTime;
     private long count;
     private final long bin;
-    private  long start;
+    private long start;
     private long end = 0;
     final List<TimeAndScore> values = new ArrayList<>();
 
     /**
-     * @see #partition(String, List, List, Map, Map)
-     * @param phone
      * @param bin
+     * @see #partition(String, List, List, Map, Map)
      */
-    public PhoneSessionInternal(String phone, long bin) {
-    //  this.phone = phone;
+    public PhoneSessionInternal(long bin) {
       this.bin = bin;
     }
 
@@ -221,10 +222,9 @@ public class PhoneAnalysis {
 
       summaryStatistics2.addValue(timestamp);
       if (values.isEmpty()) start = timestamp;
-      else {
-        if (timestamp > end) end = timestamp;
-      }
-      values.add(new TimeAndScore("", timestamp, value, 0));
+      if (timestamp > end)  end   = timestamp;
+
+      values.add(new TimeAndScore(timestamp, value, 0));
     }
 
     public void remember() {
@@ -276,5 +276,10 @@ public class PhoneAnalysis {
 /*    public String getPhone() {
       return phone;
     }*/
+
+    @Override
+    public String toString() {
+      return getCount() + " s " + getStart() + " - " + getEnd() + " mean " + getMean();
+    }
   }
 }
