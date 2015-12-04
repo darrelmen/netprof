@@ -39,9 +39,9 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class UserContainer extends SimplePagingContainer<UserInfo> {
-  private static final String SIGNED_UP1 = "Started";//Signed Up";
-
   private final Logger logger = Logger.getLogger("UserContainer");
+
+  private static final String SIGNED_UP1 = "Started";//Signed Up";
 
   private static final int MAX_LENGTH_ID = 13;
 
@@ -73,7 +73,6 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
                        DivWidget rightSide,
                        DivWidget overallBottom,
                        ShowTab learnTab,
-                       //  Long selectedUser,
                        String selectedUserKey
   ) {
     super(controller);
@@ -81,9 +80,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     this.learnTab = learnTab;
     this.service = service;
     this.overallBottom = overallBottom;
-    // this.selectedUser = selectedUser;
     this.selectedUserKey = selectedUserKey;
-
     this.selectedUser = getSelectedUser(selectedUserKey);
   }
 
@@ -129,11 +126,9 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
                 final int index = i;
                 Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                   public void execute() {
-//                    table.getRowElement(index).scrollIntoView();
                     scrollIntoView(index);
                   }
                 });
-
 
                 break;
               }
@@ -512,7 +507,6 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
   }
 
-
   private Long getSelectedUser(String selectedUserKey) {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
@@ -547,11 +541,6 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     /**
      * The styles applied to the table.
      */
-/*
-    interface TableStyle extends CellTable.Style {
-    }
-*/
-
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
     TableResources.TableStyle cellTableStyle();
