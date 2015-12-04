@@ -35,10 +35,10 @@ public class Analysis extends DAO {
   private Map<String, String> exToRef;
   private static final long MINUTE = 60 * 1000;
   private static final long HOUR = 60 * MINUTE;
-  private static final long FIVEMIN = 5 * MINUTE;
+//  private static final long FIVEMIN = 5 * MINUTE;
   private static final long DAY = 24 * HOUR;
   private static final long WEEK = 7 * DAY;
-  private static final long MONTH = 4 * WEEK;
+//  private static final long MONTH = 4 * WEEK;
 //  private static final long SESSION_GAP = 10 * MINUTE;  // 5 minutes
 
   /**
@@ -271,13 +271,11 @@ public class Analysis extends DAO {
 
       if (DEBUG) logger.info("getPhonesForUser report phoneReport " + phoneReport);
 
-      now = System.currentTimeMillis();
-
-      if (DEBUG)
+      if (DEBUG) {
+        now = System.currentTimeMillis();
         logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - start) + " millis to get " + phonesForUser.size() + " phones");
-
-      Map<String, PhoneStats> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
-      setSessions(phoneToAvgSorted);
+      }
+      setSessions(phoneReport.getPhoneToAvgSorted());
 
       return phoneReport;
     } catch (Exception ee) {
@@ -286,7 +284,7 @@ public class Analysis extends DAO {
     return null;
   }
 
-  public void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
+  private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
     PhoneAnalysis phoneAnalysis = new PhoneAnalysis();
     for (Map.Entry<String, PhoneStats> pair : phoneToAvgSorted.entrySet()) {
       List<PhoneSession> partition = phoneAnalysis.partition(pair.getKey(), pair.getValue().getTimeSeries());
@@ -329,7 +327,7 @@ public class Analysis extends DAO {
 
       for (BestScore bs : pair.getValue()) {
         int id = bs.getResultID();
-        String exid = bs.getId();
+        String exid = bs.getExId();
         long time = bs.getTimestamp();
 
         Long aLong = userToEarliest.get(userID);
