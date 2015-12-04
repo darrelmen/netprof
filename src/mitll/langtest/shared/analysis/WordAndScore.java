@@ -84,6 +84,10 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
     return word;
   }
 
+  /**
+   * @see PhoneExampleContainer#getItemColumn()
+   * @return
+   */
   public float getScore() {
     return score;
   }
