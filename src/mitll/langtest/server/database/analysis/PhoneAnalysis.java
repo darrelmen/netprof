@@ -118,7 +118,7 @@ public class PhoneAnalysis {
   private List<PhoneSession> getPhoneSessions(String key, List<PhoneSessionInternal> toUse, boolean prune) {
     List<PhoneSession> sessions2 = new ArrayList<PhoneSession>();
     if (toUse == null) {
-      logger.error("huh? no sessions?");
+      logger.error("getPhoneSessions huh? no sessions?");
     } else {
       int size = toUse.size();
       for (PhoneSessionInternal internal : toUse) {
@@ -128,7 +128,7 @@ public class PhoneAnalysis {
         double meanTime = internal.getMeanTime();
         if (!prune || (internal.getCount() > REAL_MIN_SESSION_SIZE || size == 1)) {
           if (internal.getEnd() == 0) {
-            logger.error("got 0 end time " + internal);
+            logger.error("getPhoneSessions got 0 end time " + internal);
           }
           sessions2.add(new PhoneSession(key, internal.getBin(), internal.getCount(), mean, stdev1, meanTime,
               internal.getStart(), internal.getEnd()));
