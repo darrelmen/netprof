@@ -26,9 +26,7 @@ import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.analysis.WordAndScore;
-import mitll.langtest.shared.analysis.WordScore;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
@@ -37,12 +35,14 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
-  public static final int PLAY_WIDTH = WordContainer.PLAY_WIDTH;
   private final Logger logger = Logger.getLogger("PhoneExampleContainer");
+
+  public static final int PLAY_WIDTH = WordContainer.PLAY_WIDTH;
   private static final int ITEM_WIDTH = 200;
   private ShowTab learnTab;
   private String phone;
   private final boolean isSpanish;
+  private final TextHeader header = new TextHeader("Examples of sound");
 
   /**
    * @param controller
@@ -78,11 +78,9 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
   /**
    * @param phone
    * @param sortedHistory
-   * @see PhoneContainer#showExamplesForSelectedSound()
-   * @see PhoneContainer#gotClickOnItem(PhoneAndStats)
+   * @see PhoneContainer#clickOnPhone(String)
    */
   public void addItems(String phone, List<WordAndScore> sortedHistory) {
-  //  this.sortedHistory = sortedHistory;
     this.phone = phone;
     clear();
     if (sortedHistory != null) {
@@ -108,8 +106,6 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
     o = GWT.create(LocalTableResources.class);
     return o;
   }
-
-  private TextHeader header = new TextHeader("Examples of sound");
 
   private Column<WordAndScore, SafeHtml> getPlayAudio() {
     return new Column<WordAndScore, SafeHtml>(new SafeHtmlCell()) {
