@@ -41,7 +41,7 @@ public class PhonePlot extends TimeSeriesPlot/* implements IsWidget*/ {
           , "Range", rawBestScores, isNarrow);
       add(chart);
     }
-    setRawBestScores2(rawBestScores);
+    setPhoneSessions(rawBestScores);
   }
 
   /**
