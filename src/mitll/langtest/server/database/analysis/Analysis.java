@@ -93,6 +93,15 @@ public class Analysis extends DAO {
           return -1 * Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
         }
       });
+
+      // TODO : choose the initial granularity and set initial and current to those values
+/*
+      for (UserInfo userInfo : userInfos) {
+        Map<Long, List<PhoneSession>> granularityToSessions =
+            new PhoneAnalysis().getGranularityToSessions(userInfo.getBestScores());
+        //userPerformance.setGranularityToSessions();
+      }
+*/
       return userInfos;
     } catch (SQLException e) {
       logger.error("Got " + e, e);
@@ -163,15 +172,14 @@ public class Analysis extends DAO {
         if (DEBUG) logger.debug("no results for " + id);
         return new UserPerformance();
       } else {
+        if (values.size() > 1) logger.error("only expecting one user for " + id);
         UserInfo next = values.iterator().next();
         if (DEBUG) logger.debug(" results for " + values.size() + "  first  " + next);
         List<BestScore> resultsForQuery = next.getBestScores();
         if (DEBUG) logger.debug(" resultsForQuery for " + resultsForQuery.size());
 
         UserPerformance userPerformance = new UserPerformance(id, resultsForQuery);
-
-        PhoneAnalysis analysis = new PhoneAnalysis();
-        userPerformance.setGranularityToSessions(analysis.getGranularityToSessions(userPerformance.getRawBestScores()));
+        userPerformance.setGranularityToSessions(new PhoneAnalysis().getGranularityToSessions(userPerformance.getRawBestScores()));
         return userPerformance;
       }
     } catch (Exception ee) {
