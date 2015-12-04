@@ -4,6 +4,7 @@
 
 package mitll.langtest.client.analysis;
 
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -35,6 +36,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
+  public static final String WORDS_USING = "Words with ";
   private final Logger logger = Logger.getLogger("PhoneExampleContainer");
 
   public static final int PLAY_WIDTH = WordContainer.PLAY_WIDTH;
@@ -43,15 +45,17 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
   private String phone;
   private final boolean isSpanish;
   private final TextHeader header = new TextHeader("Examples of sound");
+  private Heading heading;
 
   /**
    * @param controller
    * @see AnalysisTab#getPhoneReport
    */
-  public PhoneExampleContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab) {
+  public PhoneExampleContainer(ExerciseController controller, ShowTab learnTab, Heading heading) {
     super(controller);
     this.learnTab = learnTab;
     isSpanish = controller.getLanguage().equalsIgnoreCase("Spanish");
+    this.heading = heading;
   }
 
   /**
@@ -82,6 +86,7 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
    */
   public void addItems(String phone, List<WordAndScore> sortedHistory) {
     this.phone = phone;
+    heading.setText(WORDS_USING + phone);
     clear();
     if (sortedHistory != null) {
      // logger.info("PhoneExampleContainer.addItems " + sortedHistory.size() + " items");
