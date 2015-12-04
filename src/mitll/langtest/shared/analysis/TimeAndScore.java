@@ -14,10 +14,8 @@ import java.util.List;
 
 public class TimeAndScore extends SimpleTimeAndScore implements Comparable<SimpleTimeAndScore> {
   private String id;
-
-//  private long timestamp;
-//  private float score;
   private float cumulativeAverage;
+  //private transient WordAndScore wordAndScore;
 
   /**
    * @param bs
@@ -25,11 +23,15 @@ public class TimeAndScore extends SimpleTimeAndScore implements Comparable<Simpl
    * @see UserPerformance#setRawBestScores(List)
    */
   public TimeAndScore(BestScore bs, float cumulativeAverage) {
-    this(bs.getExId(), bs.getTimestamp(), bs.getScore(), cumulativeAverage);
+    this(bs.getExId(), bs.getTimestamp(), bs.getScore(), cumulativeAverage, null);
+  }
+
+  public TimeAndScore(long timestamp, float score) {
+    this("", timestamp, score, 0, null);
   }
 
   public TimeAndScore(long timestamp, float score, float cumulativeAverage) {
-    this("", timestamp, score, cumulativeAverage);
+    this("", timestamp, score, cumulativeAverage, null);
   }
 
   /**
@@ -39,48 +41,14 @@ public class TimeAndScore extends SimpleTimeAndScore implements Comparable<Simpl
    * @param cumulativeAverage
    * @see mitll.langtest.server.database.PhoneDAO#getPhoneTimeSeries(List)
    */
-  private TimeAndScore(String id, long timestamp, float score, float cumulativeAverage) {
-    super(timestamp,score);
+  public TimeAndScore(String id, long timestamp, float score, float cumulativeAverage, WordAndScore wordAndScore) {
+    super(timestamp, score,wordAndScore);
     this.id = id;
-//    this.timestamp = timestamp;
-//    this.score = score;
     this.cumulativeAverage = cumulativeAverage;
   }
 
-  /**
-   * @seex UserPerformance#addBestScores
-   * @paramx bestScoreList
-   * @paramx binSize
-   */
-/*  public TimeAndScore(List<BestScore> bestScoreList, long binSize) {
-    float total = 0;
-    for (BestScore bs : bestScoreList) total += bs.getScore();
-    score = total / (float) bestScoreList.size();
-    count = bestScoreList.size();
-    this.timestamp = (bestScoreList.get(0).getTimestamp()/binSize)*binSize;
-  }*/
   public TimeAndScore() {
   }
-/*
-  public long getTimestamp() {
-    return timestamp;
-  }
-
-  *//**
-   * TODO : make this an int
-   *
-   * @return
-   *//*
-  public float getScore() {
-    return score;
-  }*/
-
-/*
-  public int getCount() {
-    return count;
-  }
-*/
-
 
   @Override
   public int compareTo(SimpleTimeAndScore o) {
@@ -115,4 +83,5 @@ public class TimeAndScore extends SimpleTimeAndScore implements Comparable<Simpl
   public String getId() {
     return id;
   }
+
 }
