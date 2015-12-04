@@ -23,7 +23,7 @@ import java.util.*;
 public class Analysis extends DAO {
   private static final Logger logger = Logger.getLogger(Analysis.class);
 
-  private static final int MAX_EXAMPLES = 50;
+ // private static final int MAX_EXAMPLES = 50;
   private static final boolean DEBUG = false;
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
@@ -98,7 +98,7 @@ public class Analysis extends DAO {
       for (UserInfo userInfo : userInfos) {
         Map<Long, List<PhoneSession>> granularityToSessions =
             new PhoneAnalysis().getGranularityToSessions(userInfo.getBestScores());
-        //userPerformance.setGranularityToSessions();
+
         List<PhoneSession> phoneSessions = chooseGran(granularityToSessions);
         if (!phoneSessions.isEmpty()) {
           PhoneSession first = phoneSessions.get(0);
@@ -123,10 +123,10 @@ public class Analysis extends DAO {
     List<Long> grans = new ArrayList<>(granularityToSessions.keySet());
 
     Collections.sort(grans);
-    boolean oneSet = false;
+   // boolean oneSet = false;
     List<PhoneSession> phoneSessions1 = Collections.emptyList();
     for (Long gran : grans) {
-      if (!oneSet) {
+      //if (!oneSet) {
         List<PhoneSession> phoneSessions = granularityToSessions.get(gran);
 
         int size = 0;
@@ -143,7 +143,7 @@ public class Analysis extends DAO {
         // logger.info("setVisibility  " + seriesInfo + " : " + size + " sessions " + phoneSessions.size() + " any bigger " + anyBigger);
 
         if (PhoneSession.chooseThisSize(size, total, anyBigger)) {
-          oneSet = true;
+        //  oneSet = true;
           phoneSessions1 = granularityToSessions.get(gran);
           //logger.info("setVisibility 1 chose " + seriesInfo + " : " + size + " visible " + series.isVisible());
           break;
@@ -151,7 +151,7 @@ public class Analysis extends DAO {
         //else {
         //logger.info("setVisibility 2 too small " + seriesInfo + " : " + size);
         //}
-      }
+      //}
     }
 
 /*    if (!oneSet) {
@@ -313,9 +313,9 @@ public class Analysis extends DAO {
       if (DEBUG)
         logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - then) + " millis to phone report");
 
-      Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
+      //Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
 
-      if (DEBUG) logger.info("getPhonesForUser report phonesForUser " + phonesForUser);
+/*      if (DEBUG) logger.info("getPhonesForUser report phonesForUser " + phonesForUser);
 
       for (Map.Entry<String, List<WordAndScore>> pair : phonesForUser.entrySet()) {
         String phone = pair.getKey();
@@ -332,14 +332,14 @@ public class Analysis extends DAO {
           }
         }
         phonesForUser.put(phone, subset);
-      }
+      }*/
 
       if (DEBUG) logger.info("getPhonesForUser report phoneReport " + phoneReport);
 
       if (DEBUG) {
         now = System.currentTimeMillis();
         logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - start) + " millis to get " +
-            phonesForUser.size() + " phones");
+            /*phonesForUser.size() +*/ " phones");
       }
       setSessions(phoneReport.getPhoneToAvgSorted());
 
