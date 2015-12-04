@@ -26,17 +26,21 @@ public class TimeAndScore implements Serializable, Comparable<TimeAndScore> {
    * @see UserPerformance#setRawBestScores(List)
    */
   public TimeAndScore(BestScore bs, float cumulativeAverage) {
-    this(bs.getId(), bs.getTimestamp(), bs.getScore(), cumulativeAverage);
+    this(bs.getExId(), bs.getTimestamp(), bs.getScore(), cumulativeAverage);
+  }
+
+  public TimeAndScore(long timestamp, float score, float cumulativeAverage) {
+    this("",timestamp,score,cumulativeAverage);
   }
 
   /**
-   * @see
+   * @see mitll.langtest.server.database.PhoneDAO#getPhoneTimeSeries(List)
    * @param id
    * @param timestamp
    * @param score
    * @param cumulativeAverage
    */
-  public TimeAndScore(String id, long timestamp, float score, float cumulativeAverage) {
+  private TimeAndScore(String id, long timestamp, float score, float cumulativeAverage) {
     this.id = id;
     this.timestamp = timestamp;
     this.score = score;
@@ -102,6 +106,10 @@ public class TimeAndScore implements Serializable, Comparable<TimeAndScore> {
     return cumulativeAverage;
   }
 
+  /**
+   * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores(List)
+   * @return
+   */
   public String getId() {
     return id;
   }
