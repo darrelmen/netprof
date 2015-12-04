@@ -73,13 +73,13 @@ public interface LangTestDatabase extends RemoteService {
                                    int width, int height, boolean useScoreToColorBkg, String exerciseID);
 
   void addRoundTrip(long resultid, int roundTrip);
-  // monitoring support
 
   AudioAnswer getAlignment(String base64EncodedString,
                            String textToAlign,
                            String identifier,
                            int reqid, String device);
 
+  // monitoring support
   Map<User, Integer> getUserToResultCount();
 
   Collection<UserInfo> getUsersWithRecordings();
@@ -119,7 +119,7 @@ public interface LangTestDatabase extends RemoteService {
 
   void logMessage(String message);
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device);
-  void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID);
+  //void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID);
 
   AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
                                        Map<String, Collection<String>> typeToSection, long userListID);
