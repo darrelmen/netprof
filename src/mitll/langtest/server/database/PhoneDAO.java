@@ -566,11 +566,15 @@ public class PhoneDAO extends DAO {
    * @param phoneToAvgSorted
    */
   private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
-    PhoneAnalysis phoneAnalysis = new PhoneAnalysis();
+    new PhoneAnalysis().setSessions(phoneToAvgSorted);
+/*
     for (Map.Entry<String, PhoneStats> pair : phoneToAvgSorted.entrySet()) {
-      List<PhoneSession> partition = phoneAnalysis.partition(pair.getKey(), pair.getValue().getTimeSeries());
-      pair.getValue().setSessions(partition);
+      String phone = pair.getKey();
+      PhoneStats stats = pair.getValue();
+      List<PhoneSession> partition = phoneAnalysis.partitionForUser(phone, stats.getTimeSeries());
+      stats.setSessions(partition);
     }
+*/
   }
 
   /**
