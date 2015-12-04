@@ -6,6 +6,7 @@ package mitll.langtest.server;
 
 import audio.image.ImageType;
 import audio.imagewriter.SimpleImageWriter;
+import com.github.gwtbootstrap.client.ui.Button;
 import com.google.common.io.Files;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
@@ -13,6 +14,8 @@ import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
@@ -849,11 +852,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       AudioConversion audioConversion = new AudioConversion(serverProps);
       if (!audioConversion.exists(wavFile, parent)) {
-        if (warnMissingFile) logger.warn("can't find " + wavFile + " under " + parent + " trying config... ");
+        if (warnMissingFile) logger.warn("ensureMP3 : can't find " + wavFile + " under " + parent + " trying config... ");
         parent = configDir;
       }
       if (!audioConversion.exists(wavFile, parent)) {
-        if (warnMissingFile) logger.error("huh? can't find " + wavFile + " under " + parent);
+        if (warnMissingFile) logger.error("ensureMP3 : can't find " + wavFile + " under " + parent);
       }
       String s = audioConversion.ensureWriteMP3(wavFile, parent, false, title);
       return !(s.equals(AudioConversion.FILE_MISSING));
@@ -884,7 +887,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String wavAudioFile = getWavAudioFile(audioFile);
     File testFile = new File(wavAudioFile);
     if (!testFile.exists() || testFile.length() == 0) {
-      if (testFile.length() == 0) logger.error("huh? " + wavAudioFile + " is empty???");
+      if (testFile.length() == 0) logger.error("getImageForAudioFile : huh? " + wavAudioFile + " is empty???");
       return new ImageResponse();
     }
     ImageType imageType1 =
@@ -914,7 +917,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (absolutePathToImage.startsWith(installPath)) {
       relativeImagePath = absolutePathToImage.substring(installPath.length());
     } else {
-      logger.error("huh? file path " + absolutePathToImage + " doesn't start with " + installPath + "?");
+      logger.error("getImageForAudioFile huh? file path " + absolutePathToImage + " doesn't start with " + installPath + "?");
     }
 
     relativeImagePath = pathHelper.ensureForwardSlashes(relativeImagePath);
@@ -1121,11 +1124,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param visited
    * @return
    * @see mitll.langtest.client.custom.Navigation#showInitialState()
-   * @see mitll.langtest.client.custom.Navigation#viewLessons
+   * @see mitll.langtest.client.custom.ListManager#viewLessons
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   public Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean visited) {
-    if (!onlyCreated && !visited) logger.error("huh? asking for neither your lists nor  your visited lists.");
+    if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
     return db.getUserListManager().getListsForUser(userid, onlyCreated, visited);
   }
 
@@ -1133,8 +1136,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param search
    * @param userid
    * @return
-   * @see mitll.langtest.client.custom.Navigation#showInitialState()
-   * @see mitll.langtest.client.custom.Navigation#viewLessons
+   * @see mitll.langtest.client.custom.ListManager#viewLessons
    */
   @Override
   public Collection<UserList> getUserListsForText(String search, long userid) {
@@ -1174,6 +1176,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.getUserListManager().markCorrectness(id, isCorrect, creatorID);
   }
 
+  /**
+   * @see mitll.langtest.client.qc.QCNPFExercise#markAttentionLL(ListInterface, CommonShell)
+   * @param id
+   * @param state
+   * @param creatorID
+   */
   public void markState(String id, STATE state, long creatorID) {
     db.getUserListManager().markState(id, state, creatorID);
   }
@@ -1191,7 +1199,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @return
-   * @see mitll.langtest.client.custom.Navigation#viewReview
+   * @see mitll.langtest.client.custom.ListManager#viewReview
    */
   @Override
   public List<UserList> getReviewLists() {
@@ -1207,11 +1215,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return lists;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.ListManager#deleteList(Button, UserList, boolean)
+   * @param id
+   * @return
+   */
   @Override
   public boolean deleteList(long id) {
     return db.getUserListManager().deleteList(id);
   }
 
+  /**
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#deleteItem(String, long, UserList, PagingExerciseList, PagingExerciseList)
+   * @param listid
+   * @param exid
+   * @return
+   */
   @Override
   public boolean deleteItemFromList(long listid, String exid) {
     return db.getUserListManager().deleteItemFromList(listid, exid, getTypeOrder());
@@ -1225,12 +1244,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
    */
   @Override
-  public boolean isValidForeignPhrase(String foreign) {
-    boolean b = audioFileHelper.checkLTS(foreign);
-    /*    logger.debug("'" +foreign +
-      "' is valid phrase = "+b);*/
-    return b;
-  }
+  public boolean isValidForeignPhrase(String foreign) { return audioFileHelper.checkLTS(foreign);  }
 
   /**
    * Put the new item in the database,
@@ -1276,14 +1290,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return b;
   }
 
-  @Override
+/*  @Override
   public void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID) {
     try {
       db.logEvent(id, widgetType, exid, context, userid, hitID, "unknown browser");
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
-  }
+  }*/
 
   /**
    * @param id
