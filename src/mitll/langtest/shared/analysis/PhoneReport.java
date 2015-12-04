@@ -29,12 +29,11 @@ public class PhoneReport implements Serializable {
    */
   public PhoneReport(int overallPercent,
                      Map<String, List<WordAndScore>> phoneToWordAndScoreSorted,
-                     Map<String, PhoneStats> phoneToAvgSorted/*,
-                     Map<String, Integer> phoneToCount*/) {
+                     Map<String, PhoneStats> phoneToAvgSorted
+  ) {
     this.overallPercent = overallPercent;
     this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
     this.phoneToAvgSorted = phoneToAvgSorted;
-  //  this.phoneToCount = phoneToCount;
     valid = true;
   }
 
@@ -43,7 +42,7 @@ public class PhoneReport implements Serializable {
   }
 
   /**
-   * @see mitll.langtest.client.analysis.PhoneContainer#gotClickOnItem(PhoneAndStats)
+   * @see mitll.langtest.client.analysis.PhoneContainer#clickOnPhone(String)
    * @see PhoneContainer#showExamplesForSelectedSound()
    * @param phone
    * @return
@@ -59,19 +58,7 @@ public class PhoneReport implements Serializable {
    * @see mitll.langtest.client.analysis.PhoneContainer#getTableWithPager(PhoneReport)
    * @return
    */
-  public Map<String, PhoneStats> getPhoneToAvgSorted() {
-    return phoneToAvgSorted;
-  }
-
-/*
-  public Map<String, Integer> getPhoneToCount() {
-    Map<String,Integer> phoneToCount = new LinkedHashMap<>();
-    for (Map.Entry<String, PhoneStats> pair : phoneToAvgSorted.entrySet()) {
-      phoneToCount.put(pair.getKey(),pair.getValue().getCount());
-    }
-    return phoneToCount;
-  }
-*/
+  public Map<String, PhoneStats> getPhoneToAvgSorted() { return phoneToAvgSorted;  }
 
   public boolean isValid() {
     return valid;
