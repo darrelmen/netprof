@@ -75,6 +75,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final int MAX = 30;
   private static final int SLOW_MILLIS = 40;
   public static final int WARN_DUR = 100;
+  private static final int MIN_RECORDINGS = 5;
   private RefResultDecoder refResultDecoder;
 
   private static final boolean warnMissingFile = true;
@@ -1956,7 +1957,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public Collection<UserInfo> getUsersWithRecordings() {
-    return db.getAnalysis().getUserInfo(db.getUserDAO(), 5);
+    return db.getAnalysis().getUserInfo(db.getUserDAO(), MIN_RECORDINGS);
   }
 
   public Map<Integer, Integer> getResultCountToCount() {
