@@ -15,9 +15,9 @@ import java.util.List;
 /**
  * Created by go22670 on 10/19/15.
  */
-public class PhonePlot extends TimeSeriesPlot/* implements IsWidget*/ {
+public class PhonePlot extends TimeSeriesPlot {
   //  private final Logger logger = Logger.getLogger("PhonePlot");
-  public static final String PRONUNCIATION_SCORE = " score";
+  public static final String PRONUNCIATION_SCORE = " trend";
   private static final int CHART_HEIGHT = 315;
   private static final int NARROW_WIDTH = 330;
 
