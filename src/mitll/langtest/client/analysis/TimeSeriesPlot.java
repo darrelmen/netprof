@@ -22,7 +22,6 @@ import java.util.logging.Logger;
  */
 public class TimeSeriesPlot extends DivWidget {
 //  private final Logger logger = Logger.getLogger("TimeSeriesPlot");
-
   protected static final String AVERAGE = "Average";
   private final Map<Long, PhoneSession> timeToSession = new TreeMap<>();
 
@@ -113,12 +112,23 @@ public class TimeSeriesPlot extends DivWidget {
     return sameYear(nowFormat, shortForDate);
   }
 
+  /**
+   * Could also use Calendar...
+   * @param nowFormat
+   * @param shortForDate
+   * @return
+   */
   private boolean sameYear(String nowFormat, String shortForDate) {
     return nowFormat.substring(nowFormat.length() - 2)
         .equals(shortForDate.substring(shortForDate.length() - 2));
   }
 
-  protected void setRawBestScores2(List<PhoneSession> phoneSessions) {
+  /**
+   * @see AnalysisPlot#setVisibility(long, long)
+   * @see PhonePlot#showErrorBarData(List, String, boolean)
+   * @param phoneSessions
+   */
+  protected void setPhoneSessions(List<PhoneSession> phoneSessions) {
     timeToSession.clear();
     PhoneSession lastSession = getLastSession(phoneSessions);
     for (PhoneSession session : phoneSessions) {
@@ -206,5 +216,4 @@ public class TimeSeriesPlot extends DivWidget {
   private PhoneSession getLastSession(List<PhoneSession> yValuesForUser) {
     return yValuesForUser.get(yValuesForUser.size() - 1);
   }
-
 }
