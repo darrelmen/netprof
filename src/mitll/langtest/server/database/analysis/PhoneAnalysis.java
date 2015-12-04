@@ -5,6 +5,7 @@
 package mitll.langtest.server.database.analysis;
 
 import mitll.langtest.shared.analysis.PhoneSession;
+import mitll.langtest.shared.analysis.PhoneStats;
 import mitll.langtest.shared.analysis.SimpleTimeAndScore;
 import mitll.langtest.shared.analysis.TimeAndScore;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
@@ -24,12 +25,12 @@ public class PhoneAnalysis {
 
   private static final long MINUTE = 60 * 1000;
   private static final long HOUR = 60 * MINUTE;
-  private static final long FIVEMIN = 5 * MINUTE;
+//  private static final long FIVEMIN = 5 * MINUTE;
   private static final long DAY = 24 * HOUR;
-  private static final long QUARTER = 6 * HOUR;
+//  private static final long QUARTER = 6 * HOUR;
   private static final long WEEK = 7 * DAY;
   private static final long MONTH = 4 * WEEK;
-  private static final long YEAR = 52 * WEEK;
+//  private static final long YEAR = 52 * WEEK;
   private static final List<Long> GRANULARITIES = Arrays.asList(
       //FIVEMIN,
       HOUR,
@@ -39,7 +40,15 @@ public class PhoneAnalysis {
       MONTH//,
       //YEAR
   );
-  public static final String OVERALL = "overall";
+  private static final String OVERALL = "overall";
+
+  public void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
+    for (Map.Entry<String, PhoneStats> pair : phoneToAvgSorted.entrySet()) {
+      String phone = pair.getKey();
+      PhoneStats stats = pair.getValue();
+      stats.setSessions(partitionDontPrune(phone, stats.getTimeSeries()));
+    }
+  }
 
   /**
    * Adaptive granularity -- try to choose sessions separated by a time gap.
@@ -53,27 +62,9 @@ public class PhoneAnalysis {
    * @return
    * @see Analysis#getPhonesForUser(long, int)
    */
-  public List<PhoneSession> partition(String key, List<TimeAndScore> answersForUser) {
-    // Collections.sort(answersForUser);
-    List<PhoneSession> sessions2 = getPhoneSessions(key, answersForUser, GRANULARITIES);
-//    for (PhoneSession session : sessions2) {
-//      logger.info(session);
-//    }
-    return sessions2;
+  private List<PhoneSession> partitionDontPrune(String key, List<TimeAndScore> answersForUser) {
+    return getPhoneSessionsDontPrune(key, answersForUser, GRANULARITIES);
   }
-
-/*  public List<PhoneSession> getOverallSessions(List<TimeAndScore> answersForUser) {
-    Map<Long, List<PhoneSessionInternal>> granularityToSessions = new HashMap<>();
-    Map<Long, PhoneSessionInternal> granToCurrent = new HashMap<>();
-    for (Long time : times) {
-      granularityToSessions.put(time, new ArrayList<>());
-    }
-
-    partition(key, answersForUser, times, granularityToSessions, granToCurrent);
-
-    List<PhoneSessionInternal> toUse = chooseSession(times, granularityToSessions);
-    return getPhoneSessions(key, toUse, false);
-  }*/
 
   /**
    * @param answersForUser
@@ -95,11 +86,10 @@ public class PhoneAnalysis {
    * @param answersForUser
    * @param times
    * @return
-   * @see #partition(String, List)
+   * @see #partitionDontPrune(String, List)
    */
-  private List<PhoneSession> getPhoneSessions(String key, List<TimeAndScore> answersForUser, List<Long> times) {
+  private List<PhoneSession> getPhoneSessionsDontPrune(String key, List<TimeAndScore> answersForUser, List<Long> times) {
     Map<Long, List<PhoneSessionInternal>> granularityToSessions = getGranularityToSessions(answersForUser, times);
-
     List<PhoneSessionInternal> toUse = chooseSession(times, granularityToSessions);
     return getPhoneSessions(key, toUse, true);
   }
@@ -119,10 +109,11 @@ public class PhoneAnalysis {
 
   /**
    * @param key
-   * @param toUse
-   * @param prune
+   * @param toUse raw sessions to filter
+   * @param prune true if we want to not make sessions that are smaller than MIN_SESSION_SIZE (9)
    * @return
    * @see #getGranularityToSessions(List)
+   * @see #getPhoneSessions(String, List, boolean)
    */
   private List<PhoneSession> getPhoneSessions(String key, List<PhoneSessionInternal> toUse, boolean prune) {
     List<PhoneSession> sessions2 = new ArrayList<PhoneSession>();
@@ -181,6 +172,12 @@ public class PhoneAnalysis {
     }
   }
 
+  /**
+   * Choose first granularity that has fewer than desired sessions (15)
+   * @param times
+   * @param granularityToSessions
+   * @return choosen session list
+   */
   private List<PhoneSessionInternal> chooseSession(List<Long> times,
                                                    Map<Long, List<PhoneSessionInternal>> granularityToSessions) {
     List<PhoneSessionInternal> toUse = null;
