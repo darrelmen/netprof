@@ -10,17 +10,16 @@ import java.util.Date;
  * Created by go22670 on 10/19/15.
  */
 public class BestScore extends SimpleTimeAndScore implements Comparable<BestScore> {
-  private  String exid;
-//  private final long timestamp;
-//  private final float pronScore;
-  private  String fileRef;
-  private  String nativeAudio;
-  private  int resultID;
+  private String exid;
+  private String fileRef;
+  private String nativeAudio;
+  private int resultID;
   private String json;
   private boolean isiPad;
   private boolean isFlashcard;
 
-  public BestScore() {}
+  public BestScore() {
+  }
 
   /**
    * @param id
@@ -34,8 +33,6 @@ public class BestScore extends SimpleTimeAndScore implements Comparable<BestScor
                    boolean isFlashcard, String fileRef, String nativeAudio) {
     super(timestamp, (pronScore < 0) ? 0 : pronScore);
     this.exid = id;
-   // this.pronScore = (pronScore < 0) ? 0 : pronScore;
-   // this.timestamp = timestamp;
     this.resultID = resultID;
     this.json = json;
     this.isiPad = isiPad;
@@ -57,14 +54,6 @@ public class BestScore extends SimpleTimeAndScore implements Comparable<BestScor
         //count +
         " : " + getScore();
   }
-
-/*  public float getScore() {
-    return pronScore;
-  }
-
-  public long getTimestamp() {
-    return timestamp;
-  }*/
 
   public String getExId() {
     return exid;
