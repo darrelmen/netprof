@@ -4,13 +4,15 @@
 
 package mitll.langtest.shared.analysis;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.Date;
 
 /**
  * Created by go22670 on 10/19/15.
  */
 public class BestScore implements Comparable<BestScore> {
-  private final String id;
+  private final String exid;
   private final long timestamp;
   private final float pronScore;
   private final String fileRef;
@@ -26,11 +28,11 @@ public class BestScore implements Comparable<BestScore> {
    * @param timestamp
    * @param isFlashcard
    * @param nativeAudio
-   * @see mitll.langtest.server.database.analysis.Analysis#getBestForQuery
+   * @see mitll.langtest.server.database.analysis.Analysis#getUserToResults(Connection, PreparedStatement)
    */
   public BestScore(String id, float pronScore, long timestamp, int resultID, String json, boolean isiPad,
                    boolean isFlashcard, String fileRef, String nativeAudio) {
-    this.id = id;
+    this.exid = id;
     this.pronScore = (pronScore < 0) ? 0 : pronScore;
     this.timestamp = timestamp;
     this.resultID = resultID;
@@ -43,13 +45,13 @@ public class BestScore implements Comparable<BestScore> {
 
   @Override
   public int compareTo(BestScore o) {
-    int c = getId().compareTo(o.getId());
+    int c = getExId().compareTo(o.getExId());
     if (c == 0) return -1 * Long.valueOf(getTimestamp()).compareTo(o.getTimestamp());
     else return c;
   }
 
   public String toString() {
-    return "ex " + getId() + "/ res " + getResultID() +
+    return "ex " + getExId() + "/ res " + getResultID() +
         " : " + new Date(getTimestamp()) + " # " +
         //count +
         " : " + pronScore;
@@ -63,28 +65,8 @@ public class BestScore implements Comparable<BestScore> {
     return timestamp;
   }
 
-/*
-  public void setCount(int count) {
-    this.count = count;
-  }
-
-  public int getCount() {
-    return count;
-  }
-*/
-
-/*  public String toCSV() {
-//    SimpleDateFormat df = new SimpleDateFormat("MM-dd-yy HH:mm:ss");
-//    String s = df.format(timestamp) + ",";
-    //String s = "";
-    return getId() + "," + //s +
-        timestamp + "," +
-        //count + "," +
-        pronScore;
-  }*/
-
-  public String getId() {
-    return id;
+  public String getExId() {
+    return exid;
   }
 
   public int getResultID() {
