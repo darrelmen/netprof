@@ -64,8 +64,9 @@ import java.util.logging.Logger;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private Logger logger = Logger.getLogger("LangTest");
 
-  private static final String VERSION = "v1.0&nbsp;";
- // private static final String VERSION = "v1.1&nbsp;";
+//  private static final String VERSION = "v1.0&nbsp;";
+  private static final String VERSION = "v1.1&nbsp;";
+
   private static final List<String> SITE_LIST = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean","Iraqi",
       "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Russian", "Spanish", "Sudanese", "Tagalog", "Urdu");
 
@@ -294,7 +295,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
   }
 
-
   /**
    * @see #onModuleLoad2()
    * @return
@@ -443,7 +443,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
                                final EventRegistration eventRegistration, final String resetPassToken) {
     logger.info("showLogin token '" + resetPassToken + "' for password reset");
 
-    // staleToken = resetPassToken;
     service.getUserIDForToken(resetPassToken, new AsyncCallback<Long>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -629,15 +628,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public int getHeightOfTopRows() { return headerRow.getOffsetHeight();  }
-
-  /**
-   * @see AudioPanel#getImages()
-   * @return
-   */
-/*  @Override
-  public int getLeftColumnWidth() {
-    return 225;
-  }*/
 
   /**
    * @see #populateRootPanel()
@@ -887,21 +877,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       checkLogin();
     }
   }
-/*
-  private void console(String message) {
-    int ieVersion = BrowserCheck.getIEVersion();
-    if (ieVersion == -1 || ieVersion > 9) {
-      consoleLog(message);
-    }
-  }*/
-/*
-
-  private native static void consoleLog( String message) */
-/*-{
-      console.log( "LangTest:" + message );
-  }-*//*
-;
-*/
 
   @Override
   public void rememberAudioType(String audioType) {  this.audioType = audioType;  }
@@ -943,7 +918,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public int getUser() { return userManager.getUser(); }
   public boolean isTeacher() { return userManager.isTeacher(); }
-  //public String getLocalStoragePrefix() { return userManager.getUserIDCookie(); }
   public PropertyHandler getProps() { return props; }
 
   public boolean useBkgColorForRef() {  return props.isBkgColorForRef(); }
@@ -957,13 +931,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public LangTestDatabaseAsync getService() { return service; }
   public UserFeedback getFeedback() { return this; }
 
-  //private long then;
   // recording methods...
   /**
    * Recording interface
    */
   public void startRecording() {
-    //then = System.currentTimeMillis();
     flashRecordPanel.recordOnClick();
   }
 
