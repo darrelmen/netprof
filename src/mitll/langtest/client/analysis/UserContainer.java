@@ -55,7 +55,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
   private static final String DIFF_COL_HEADER = "+/-";
   private static final int MIN_RECORDINGS = 5;
 
-  private static final int PAGE_SIZE = 7;
+  private static final int PAGE_SIZE = 11;
 
   private final ShowTab learnTab;
   private final DivWidget rightSide;
@@ -119,7 +119,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
             int i = 0;
             for (UserInfo userInfo : users) {
               if (userInfo.getUser().getId() == selectedUser) {
-                logger.info("found previous selection - " + userInfo + " : " + i);
+            //    logger.info("found previous selection - " + userInfo + " : " + i);
                 table.getSelectionModel().setSelected(userInfo, true);
                 gotClickOnItem(userInfo);
 
