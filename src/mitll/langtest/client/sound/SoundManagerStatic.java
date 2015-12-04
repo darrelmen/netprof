@@ -4,6 +4,8 @@
 
 package mitll.langtest.client.sound;
 
+import java.util.logging.Logger;
+
 /**
  * Created by IntelliJ IDEA.
  * User: GO22670
@@ -12,6 +14,8 @@ package mitll.langtest.client.sound;
  * To change this template use File | Settings | File Templates.
  */
 public class SoundManagerStatic implements SoundManagerAPI {
+  private final Logger logger = Logger.getLogger("SoundManagerStatic");
+
   private final boolean debug = false;
 
   public SoundManagerStatic() {
@@ -27,8 +31,6 @@ public class SoundManagerStatic implements SoundManagerAPI {
    */
   public boolean isReady() {
     boolean ready = SoundManager.isReady();
-    if (debug) System.out.println("SoundManagerStatic.isReady " +ready);
-
     return ready;
   }
 
@@ -38,8 +40,6 @@ public class SoundManagerStatic implements SoundManagerAPI {
    */
   public boolean isOK() {
     boolean ok = SoundManager.isOK();
-    if (debug) System.out.println("SoundManagerStatic.isOK " +ok);
-
     return ok;
   }
 
@@ -53,7 +53,7 @@ public class SoundManagerStatic implements SoundManagerAPI {
    * @see SoundFeedback#createSound(String, mitll.langtest.client.sound.SoundFeedback.EndListener, boolean)
    */
   public void createSound(Sound sound, String title, String file) {
-    if (debug) System.out.println("SoundManagerStatic.createSound " + sound);
+//    if (debug) System.out.println("SoundManagerStatic.createSound " + sound);
     if (SoundManager.isReady() && SoundManager.isOK()) {
       SoundManager.createSound(sound, title, file);
     }
@@ -70,7 +70,7 @@ public class SoundManagerStatic implements SoundManagerAPI {
      * @see mitll.langtest.client.sound.SoundFeedback#destroySound()
      */
   public void destroySound(Sound sound) {
-    if (debug) System.out.println("SoundManagerStatic.destroy " + sound);
+  //  if (debug) System.out.println("SoundManagerStatic.destroy " + sound);
     if (SoundManager.isReady() && SoundManager.isOK()) {
       try {
         SoundManager.destroySound(sound);
@@ -85,16 +85,16 @@ public class SoundManagerStatic implements SoundManagerAPI {
   }
 
   public void play(Sound sound) {
-    if (debug) System.out.println("SoundManagerStatic.play " + sound);
+    //if (debug) System.out.println("SoundManagerStatic.play " + sound);
     try {
       SoundManager.play(sound);
     } catch (Exception e) {
-      if (debug) System.out.println("SoundManagerStatic.play got exception playing sound.");
+      logger.warning("SoundManagerStatic.play got exception playing sound.");
     }
   }
 
   public void setPosition(Sound sound, double position) {
-    if (debug) System.out.println("SoundManagerStatic.setPosition " +sound);
+   // if (debug) System.out.println("SoundManagerStatic.setPosition " +sound);
 
     SoundManager.setPosition(sound, position);
   }
@@ -117,28 +117,30 @@ public class SoundManagerStatic implements SoundManagerAPI {
   }
 
   public void loaded() {
-    if (debug) System.out.println("SoundManagerStatic.loaded ");
+    if (debug) logger.info("SoundManagerStatic.loaded ");
 
     SoundManager.loaded();
   }
 
+/*
   public void songFinished(Sound sound) {
-    if (debug) System.out.println("SoundManagerStatic.songFinished ");
+    if (debug) logger.info("SoundManagerStatic.songFinished ");
 
     SoundManager.songFinished(sound);
   }
 
   public void songFirstLoaded(Sound sound, double durationEstimate) {
-    if (debug) System.out.println("SoundManagerStatic.songFirstLoaded " +sound);
+    if (debug) logger.info("SoundManagerStatic.songFirstLoaded " +sound);
 
     SoundManager.songFirstLoaded(sound, durationEstimate);
   }
 
   public void songLoaded(Sound sound, double duration) {
-    if (debug) System.out.println("SoundManagerStatic.songLoaded " +sound);
+    if (debug) logger.info("SoundManagerStatic.songLoaded " +sound);
 
     SoundManager.songLoaded(sound,duration);
   }
+*/
 
   public void update(Sound sound, double position) {
     SoundManager.update(sound, position);
