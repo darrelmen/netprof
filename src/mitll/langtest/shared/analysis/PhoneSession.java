@@ -12,6 +12,9 @@ import java.util.List;
  * Created by go22670 on 11/16/15.
  */
 public class PhoneSession implements Serializable, Comparable<PhoneSession> {
+  private static final int TOTAL_THRESHOLD = 200;
+  private static final int TOO_MANY_SESSIONS = 15;
+
   private double mean;
   private double stdev;
   private double meanTime;
@@ -64,6 +67,24 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
     return meanTime;
   }
 
+  /**
+   * Choose this series if there are more than one sessions and less than 15.
+   * And if any of the sessions are bigger than 50 (necessary?)
+   * And the total recordings is > 200.
+   *
+   * @param size
+   * @param total
+   * @param anyBigger
+   * @return
+   */
+  public static boolean chooseThisSize(int size, int total, boolean anyBigger) {
+    return
+        size > 1 &&
+            size < TOO_MANY_SESSIONS &&
+            anyBigger &&
+            total > TOTAL_THRESHOLD;
+  }
+
   @Override
   public int compareTo(PhoneSession o) {
     return Double.valueOf(meanTime).compareTo(o.getMeanTime());
@@ -73,10 +94,11 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
     return count;
   }
 
+/*
   public long getBin() {
     return bin;
   }
-
+*/
 
   public String toString() {
     return phone + " : " + new Date(bin) +
