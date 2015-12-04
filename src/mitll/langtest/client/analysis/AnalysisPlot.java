@@ -32,10 +32,12 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/19/15.
  */
 public class AnalysisPlot extends TimeSeriesPlot {
-  private static final int X_OFFSET_LEGEND = 65;
-  public static final int TOTAL_THRESHOLD = 200;
-  public static final int TOO_MANY_SESSIONS = 15;
   private final Logger logger = Logger.getLogger("AnalysisPlot");
+
+  private static final int X_OFFSET_LEGEND = 65;
+//  public static final int TOTAL_THRESHOLD = 200;
+//  public static final int TOO_MANY_SESSIONS = 15;
+  public static final int MIN_HEIGHT = 350;
 
   private static final long MINUTE = 60 * 1000;
   public static final long HOUR = 60 * MINUTE;
@@ -62,7 +64,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private final long userid;
   private final LangTestDatabaseAsync service;
   private final PlayAudio playAudio;
-  private final HashMap<Long, String> granToLabel;
+  private Map<Long, String> granToLabel;
 
   private final Map<Series, Boolean> seriesToVisible = new HashMap<>();
   private Map<Long, List<PhoneSession>> granularityToSessions;
@@ -87,10 +89,21 @@ public class AnalysisPlot extends TimeSeriesPlot {
   public AnalysisPlot(LangTestDatabaseAsync service, long userid, final String userChosenID, final int minRecordings,
                       SoundManagerAPI soundManagerAPI) {
     getElement().setId("AnalysisPlot");
-    getElement().getStyle().setProperty("minHeight", 350, Style.Unit.PX);
+    getElement().getStyle().setProperty("minHeight", MIN_HEIGHT, Style.Unit.PX);
+    getElement().getStyle().setMargin(10, Style.Unit.PX);
+    addStyleName("cardBorderShadow");
 
     this.service = service;
     this.userid = userid;
+    populateGranToLabel();
+
+    this.playAudio = new PlayAudio(service, new SoundPlayer(soundManagerAPI));
+    populateExerciseMap(service, (int) userid);
+
+    getPerformanceForUser(service, userid, userChosenID, minRecordings);
+  }
+
+  private void populateGranToLabel() {
     this.granToLabel = new HashMap<Long, String>();
     granToLabel.put(HOUR, "Hour");
     granToLabel.put(QUARTER, "6 Hours");
@@ -99,11 +112,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
     granToLabel.put(MONTH, "Month");
     granToLabel.put(YEAR, "Year");
     granToLabel.put(FIVEMIN, "Minute");
-
-    this.playAudio = new PlayAudio(service, new SoundPlayer(soundManagerAPI));
-    populateExerciseMap(service, (int) userid);
-
-    getPerformanceForUser(service, userid, userChosenID, minRecordings);
   }
 
   private void getPerformanceForUser(LangTestDatabaseAsync service, long userid,
@@ -330,12 +338,11 @@ public class AnalysisPlot extends TimeSeriesPlot {
 //        String seriesInfo = gran + "/" + label;
         // logger.info("setVisibility  " + seriesInfo + " : " + size + " sessions " + phoneSessions.size() + " any bigger " + anyBigger);
 
-        if (chooseThisSize(size, total, anyBigger)) {
+        if (PhoneSession.chooseThisSize(size, total, anyBigger)) {
           oneSet = true;
           errorSeries = series;
           averageSeries = avgSeries;
-          setRawBestScores2(granularityToSessions.get(gran));
-
+          setPhoneSessions(granularityToSessions.get(gran));
           //logger.info("setVisibility 1 chose " + seriesInfo + " : " + size + " visible " + series.isVisible());
         }
         //else {
@@ -344,7 +351,10 @@ public class AnalysisPlot extends TimeSeriesPlot {
       }
     }
 
+    showErrorBarsOrDetail(oneSet, errorSeries, averageSeries);
+  }
 
+  private void showErrorBarsOrDetail(boolean oneSet, Series errorSeries, Series averageSeries) {
     for (Series series : detailSeries) seriesToVisible.put(series, false);
     if (!oneSet) {
       for (Series series : detailSeries) {
@@ -375,13 +385,13 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * @param anyBigger
    * @return
    */
-  private boolean chooseThisSize(int size, int total, boolean anyBigger) {
+/*  private boolean chooseThisSize(int size, int total, boolean anyBigger) {
     return
         size > 1 &&
         size < TOO_MANY_SESSIONS &&
             anyBigger &&
             total > TOTAL_THRESHOLD;
-  }
+  }*/
 
   private Chart getChart(String title) {
     return new Chart()
@@ -672,7 +682,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     return idToEx;
   }
 
-  public long setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon, AnalysisTab.TimeWidgets timeWidgets) {
+  public long setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon, TimeWidgets timeWidgets) {
     this.timeHorizon = timeHorizon;
     Long x = goToLast(timeHorizon, timeWidgets);
     if (x != null) return x;
@@ -681,9 +691,9 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
   private int index = 0;
 
-  private AnalysisTab.TimeWidgets timeWidgets;
+  private TimeWidgets timeWidgets;
 
-  private Long goToLast(AnalysisTab.TIME_HORIZON timeHorizon, AnalysisTab.TimeWidgets timeWidgets) {
+  private Long goToLast(AnalysisTab.TIME_HORIZON timeHorizon, TimeWidgets timeWidgets) {
     this.timeHorizon = timeHorizon;
     this.timeWidgets = timeWidgets;
 
@@ -733,7 +743,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     changed(firstTime, lastTime);
   }
 
-  public void gotPrevClick(AnalysisTab.TimeWidgets timeWidgets) {
+  public void gotPrevClick(TimeWidgets timeWidgets) {
     long offset = timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? WEEK : MONTH;
     List<Long> periods = timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? weeks : months;
 
@@ -745,7 +755,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     showTimePeriod(timeWidgets, offset, periods);
   }
 
-  private void showTimePeriod(AnalysisTab.TimeWidgets timeWidgets, long offset, List<Long> periods) {
+  private void showTimePeriod(TimeWidgets timeWidgets, long offset, List<Long> periods) {
     Long aLong = periods.get(index);
     timeWidgets.display.setText(getShortDate(aLong));
     long end = aLong + offset;
@@ -754,7 +764,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     changed(aLong, end);
   }
 
-  public void gotNextClick(AnalysisTab.TimeWidgets timeWidgets) {
+  public void gotNextClick(TimeWidgets timeWidgets) {
     long offset = timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? WEEK : MONTH;
     List<Long> periods = timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? weeks : months;
 
