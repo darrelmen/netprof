@@ -4,10 +4,7 @@
 
 package mitll.langtest.client.analysis;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.ButtonGroup;
-import com.github.gwtbootstrap.client.ui.ButtonToolbar;
-import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
@@ -35,7 +32,6 @@ public class AnalysisTab extends DivWidget {
   private final Logger logger = Logger.getLogger("AnalysisTab");
 
   private static final String WORDS = "Words";
-  private static final String WORDS_USING_SOUND_PREFIX = "Words using ";
   private static final String WORDS_USING_SOUND = "Words using Sound";
   private static final String SOUNDS = "Sounds";
   private static final String SUBTITLE = "scores > 20";
@@ -46,7 +42,7 @@ public class AnalysisTab extends DivWidget {
   private final AnalysisPlot analysisPlot;
   private final ExerciseController controller;
   private TimeWidgets timeWidgets;
-  Heading exampleHeader = new Heading(3, WORDS_USING_SOUND);
+  private Heading exampleHeader = new Heading(3, WORDS_USING_SOUND);
 
   /**
    * @param service
@@ -60,11 +56,16 @@ public class AnalysisTab extends DivWidget {
                      final ShowTab showTab, String userChosenID, int minRecordings, DivWidget overallBottom) {
     this.controller = controller;
     getElement().setId("AnalysisTab");
-    analysisPlot = new AnalysisPlot(service, userid, userChosenID, minRecordings, controller.getSoundManager());
+    Icon playFeedback = new Icon(IconType.PLAY);
+    analysisPlot = new AnalysisPlot(service, userid, userChosenID, minRecordings, controller.getSoundManager(), playFeedback);
 
     Panel timeControls = new HorizontalPanel();
     timeControls.add(getTimeGroup());
     timeControls.add(getTimeWindowStepper());
+
+    playFeedback.addStyleName("leftFiveMargin");
+    // timeControls.add(playFeedback);
+    playFeedback.setVisible(false);
 
     add(timeControls);
     add(analysisPlot);
