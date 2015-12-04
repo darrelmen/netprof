@@ -4,7 +4,6 @@
 
 package mitll.langtest.shared.analysis;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -13,11 +12,11 @@ import java.util.List;
  * @see mitll.langtest.client.analysis.AnalysisPlot#addSeries
  */
 
-public class TimeAndScore implements Serializable, Comparable<TimeAndScore> {
+public class TimeAndScore extends SimpleTimeAndScore implements Comparable<SimpleTimeAndScore> {
   private String id;
 
-  private long timestamp;
-  private float score;
+//  private long timestamp;
+//  private float score;
   private float cumulativeAverage;
 
   /**
@@ -30,20 +29,21 @@ public class TimeAndScore implements Serializable, Comparable<TimeAndScore> {
   }
 
   public TimeAndScore(long timestamp, float score, float cumulativeAverage) {
-    this("",timestamp,score,cumulativeAverage);
+    this("", timestamp, score, cumulativeAverage);
   }
 
   /**
-   * @see mitll.langtest.server.database.PhoneDAO#getPhoneTimeSeries(List)
    * @param id
    * @param timestamp
    * @param score
    * @param cumulativeAverage
+   * @see mitll.langtest.server.database.PhoneDAO#getPhoneTimeSeries(List)
    */
   private TimeAndScore(String id, long timestamp, float score, float cumulativeAverage) {
+    super(timestamp,score);
     this.id = id;
-    this.timestamp = timestamp;
-    this.score = score;
+//    this.timestamp = timestamp;
+//    this.score = score;
     this.cumulativeAverage = cumulativeAverage;
   }
 
@@ -61,18 +61,19 @@ public class TimeAndScore implements Serializable, Comparable<TimeAndScore> {
   }*/
   public TimeAndScore() {
   }
-
+/*
   public long getTimestamp() {
     return timestamp;
   }
 
-  /**
+  *//**
    * TODO : make this an int
+   *
    * @return
-   */
+   *//*
   public float getScore() {
     return score;
-  }
+  }*/
 
 /*
   public int getCount() {
@@ -80,11 +81,17 @@ public class TimeAndScore implements Serializable, Comparable<TimeAndScore> {
   }
 */
 
+
+  @Override
+  public int compareTo(SimpleTimeAndScore o) {
+    return Long.valueOf(getTimestamp()).compareTo(o.getTimestamp());
+  }
+
   public String toString() {
     String format = getTimeString();
     return id + "\tat\t" + format + " avg score for " +
         //count + "\t" +
-        "=\t" + score + "\t" + getCumulativeAverage();
+        "=\t" + getScore() + "\t" + getCumulativeAverage();
   }
 
   private String getTimeString() {
@@ -94,12 +101,7 @@ public class TimeAndScore implements Serializable, Comparable<TimeAndScore> {
   public String toCSV() {
     return getTimeString() +
         //"," + count +
-        "," + score + "," + getCumulativeAverage();
-  }
-
-  @Override
-  public int compareTo(TimeAndScore o) {
-    return new Long(timestamp).compareTo(o.getTimestamp());
+        "," + getScore() + "," + getCumulativeAverage();
   }
 
   public float getCumulativeAverage() {
@@ -107,8 +109,8 @@ public class TimeAndScore implements Serializable, Comparable<TimeAndScore> {
   }
 
   /**
-   * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores(List)
    * @return
+   * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores(List)
    */
   public String getId() {
     return id;
