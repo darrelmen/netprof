@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 10/26/15.
+ * @see mitll.langtest.client.analysis.PhoneContainer#clickOnPhone(String)
  */
 public class PhoneStats implements Serializable {
  // private final Logger logger = Logger.getLogger("PhoneStats");
@@ -27,8 +28,7 @@ public class PhoneStats implements Serializable {
    * @param count
    * @see mitll.langtest.server.database.PhoneDAO#getPhoneReport(Map, Map, float, float)
    */
-  public PhoneStats(int count,
-                    List<TimeAndScore> timeSeries) {
+  public PhoneStats(int count, List<TimeAndScore> timeSeries) {
     this.count = count;
     this.timeSeries = timeSeries;
   }
@@ -91,19 +91,4 @@ public class PhoneStats implements Serializable {
   public List<PhoneSession> getSessions() {
     return sessions;
   }
-/*
-  public List<PhoneSession> getFiltered(long first, long last) {
-
-    List<PhoneSession> filtered = new ArrayList<>();
-    for (PhoneSession session : filtered) {
-      if (session.getStart() >= first && session.getEnd() <= last) {
-        filtered.add(session);
-        logger.info("included " +session);
-      }
-      else {
-        logger.info("Exclude " + session);
-      }
-    }
-    return filtered;
-  }*/
 }
