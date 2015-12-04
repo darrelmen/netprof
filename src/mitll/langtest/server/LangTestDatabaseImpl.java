@@ -750,7 +750,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (byID != null) {
       //logger.debug("returning (" + language + ") exercise " + byID.getID());
     } else {
-      logger.info("couldn't find exercise with id '" + id + "'");
+      logger.info(getLanguage() + " : couldn't find exercise with id '" + id + "'");
     }
     return byID;
   }
@@ -1371,7 +1371,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String exid = attr.getExid();
     CommonExercise byID = db.getCustomOrPredefExercise(exid);
     if (byID == null) {
-      logger.error("couldn't find exercise " + exid);
+      logger.error(getLanguage() + " : couldn't find exercise " + exid);
       logAndNotifyServerException(new Exception("couldn't find exercise " + exid));
     } else {
       byID.getAudioAttributes().clear();
@@ -1860,7 +1860,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exercise);  // allow custom items to mask out non-custom items
 
     if (exercise1 == null) {
-      logger.warn("couldn't find exercise with id '" + exercise + "'");
+      logger.warn(getLanguage() + " : couldn't find exercise with id '" + exercise + "'");
     }
 //		else {
 //			logger.info("allow alternates " + allowAlternates + " " +exercise +
