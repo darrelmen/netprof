@@ -28,6 +28,7 @@ import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.analysis.WordAndScore;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
@@ -68,7 +69,6 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
   }
 
   /**
-   * @param
    * @return
    * @see SetCompleteDisplay#getScoreHistory(List, List, ExerciseController)
    */
@@ -84,9 +84,10 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
    * @param sortedHistory
    * @see PhoneContainer#clickOnPhone(String)
    */
-  public void addItems(String phone, List<WordAndScore> sortedHistory) {
+  public void addItems(String phone, Collection<WordAndScore> sortedHistory) {
     this.phone = phone;
     heading.setText(WORDS_USING + phone);
+    heading.setSubtext("first ten");
     clear();
     if (sortedHistory != null) {
      // logger.info("PhoneExampleContainer.addItems " + sortedHistory.size() + " items");

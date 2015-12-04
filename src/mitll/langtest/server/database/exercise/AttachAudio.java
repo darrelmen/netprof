@@ -126,7 +126,7 @@ public class AttachAudio {
       //logger.debug("added " + c + " to " + id);
     }
     if (!imported.hasRefAudio() && imported.getID().startsWith("Custom")) {
-      logger.warn("ex " + imported.getID() + " has no ref audio.");
+     // logger.warn("ex " + imported.getID() + " has no ref audio.");
     }
     //else {
     // logger.debug("can't find '" + id + "' in " + exToAudio.keySet().size() + " keys, e.g. '" + exToAudio.keySet().iterator().next() +"'");
