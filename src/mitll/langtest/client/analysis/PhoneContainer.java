@@ -38,6 +38,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements AnalysisPlot.TimeChangeListener {
+  public static final int MAX_EXAMPLES = 10;
   private final Logger logger = Logger.getLogger("PhoneContainer");
 
   private static final int TABLE_WIDTH = 295;
@@ -55,7 +56,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   private final boolean isNarrow;
   private long from;
   private long to;
-//  private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
+  //  private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
   private final DateTimeFormat debugShortFormat = DateTimeFormat.getFormat("MMM d yyyy");
 
   /**
@@ -182,7 +183,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * @see #getPhoneStatuses(List, Map, long, long)
    */
   private List<PhoneSession> getFiltered(long first, long last, PhoneStats value) {
-   // logger.info("getFiltered " + first + "/" + debugFormat(first) + " - " + debugFormat(last));
+    // logger.info("getFiltered " + first + "/" + debugFormat(first) + " - " + debugFormat(last));
     return first == 0 ? value.getSessions() : getFiltered(value.getSessions(), first, last);
   }
 
@@ -205,7 +206,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * @see #getFiltered(long, long, PhoneStats)
    */
   private List<PhoneSession> getFiltered(List<PhoneSession> orig, long first, long last) {
-   // logger.info("getFiltered : From " + first + "/" + debugFormat(first) + " - " + debugFormat(last) + " window dur " + (last - first));
+    // logger.info("getFiltered : From " + first + "/" + debugFormat(first) + " - " + debugFormat(last) + " window dur " + (last - first));
 
     List<PhoneSession> filtered = new ArrayList<>();
     for (PhoneSession session : orig) {
@@ -223,8 +224,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
   private boolean doesSessionOverlap(long first, long last, PhoneSession session) {
     return (session.getStart() >= first && session.getStart() <= last) || // start inside window
-        (session.getEnd()   >= first && session.getEnd()   <= last) ||    // end inside window
-        (session.getStart()  < first && session.getEnd()   >  last);      // session starts before and ends after window
+        (session.getEnd() >= first && session.getEnd() <= last) ||    // end inside window
+        (session.getStart() < first && session.getEnd() > last);      // session starts before and ends after window
   }
 
   /**
@@ -234,12 +235,12 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * @return
    * @see #clickOnPhone(String)
    */
-  private List<WordAndScore> getFilteredWords(List<WordAndScore> orig, long first, long last) {
+  private List<WordAndScore> getFilteredWords(Collection<WordAndScore> orig, long first, long last) {
     if (first > last) {
       // throw new IllegalArgumentException("getFilteredWords " + orig.size() + " first after last?");
       logger.warning("getFilteredWords " + orig.size() + " first after last?");
     }
-  //  logger.info("getFilteredWords From " + debugFormat(first) + " - " + debugFormat(last) + " window dur " + (last - first));
+    //  logger.info("getFilteredWords From " + debugFormat(first) + " - " + debugFormat(last) + " window dur " + (last - first));
 
     List<WordAndScore> filtered = new ArrayList<>();
     for (WordAndScore session : orig) {
@@ -249,8 +250,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
         //  logger.info("included " + window);
       }
       //else {
-        // logger.info("Exclude " +window);
-     // }
+      // logger.info("Exclude " +window);
+      // }
     }
     return filtered;
   }
@@ -527,8 +528,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   private void checkForClick(PhoneAndStats object, NativeEvent event) {
     if (BrowserEvents.CLICK.equals(event.getType())) {
       clickOnPhone(object.getPhone());
-    }
-    else {
+    } else {
       logger.info("got other event " + event.getType());
     }
   }
@@ -540,21 +540,21 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    */
   private void clickOnPhone(String phone) {
     PhoneStats stats = phoneReport.getPhoneToAvgSorted().get(phone);
-  //  logger.info("clickOnPhone " + debugFormat(from) + " - " + debugFormat(to));
+    //  logger.info("clickOnPhone " + debugFormat(from) + " - " + debugFormat(to));
     List<PhoneSession> filtered = getFiltered(stats.getSessions(), from, to);
 
-    PhoneSession first = filtered.get(0);
-    PhoneSession last = filtered.get(filtered.size() - 1);
-    long s = first.getStart();
-//    if (first.getCount() == 0) {
-//      logger.warning("clickOnPhone huh? first " + first + " is empty ");
-//    }
-    long e = last.getEnd();
+    SortedSet<WordAndScore> examples = new TreeSet<>();
+    for (PhoneSession session : filtered) examples.addAll(session.getExamples());
+   // PhoneSession first = filtered.get(0);
+   // PhoneSession last = filtered.get(filtered.size() - 1);
+    //long s = first.getStart();
+   // long e = last.getEnd();
+    // List<WordAndScore> wordExamples = phoneReport.getWordExamples(phone);
+    List<WordAndScore> filteredWords = new ArrayList<>(examples);
 
-//    if (last.getCount() == 0) {
-//      logger.warning("clickOnPhone huh? last " + last + " is empty ");
-//    }
-    List<WordAndScore> filteredWords = getFilteredWords(phoneReport.getWordExamples(phone), s, e);
+    // TODO: better ways of doing this.
+    filteredWords = filteredWords.subList(0, Math.min(filteredWords.size(), MAX_EXAMPLES));
+    //List<WordAndScore> filteredWords = getFilteredWords(wordExamples, s, e);
     exampleContainer.addItems(phone, filteredWords);
 
     phonePlot.showErrorBarData(filtered, phone, isNarrow);
