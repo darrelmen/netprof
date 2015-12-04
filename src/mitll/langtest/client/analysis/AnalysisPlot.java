@@ -33,6 +33,8 @@ import java.util.logging.Logger;
  */
 public class AnalysisPlot extends TimeSeriesPlot {
   private static final int X_OFFSET_LEGEND = 65;
+  public static final int TOTAL_THRESHOLD = 200;
+  public static final int TOO_MANY_SESSIONS = 15;
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
   private static final long MINUTE = 60 * 1000;
@@ -335,11 +337,13 @@ public class AnalysisPlot extends TimeSeriesPlot {
           setRawBestScores2(granularityToSessions.get(gran));
 
           //logger.info("setVisibility 1 chose " + seriesInfo + " : " + size + " visible " + series.isVisible());
-        } else {
-          //logger.info("setVisibility 2 too small " + seriesInfo + " : " + size);
         }
+        //else {
+          //logger.info("setVisibility 2 too small " + seriesInfo + " : " + size);
+        //}
       }
     }
+
 
     for (Series series : detailSeries) seriesToVisible.put(series, false);
     if (!oneSet) {
@@ -361,12 +365,22 @@ public class AnalysisPlot extends TimeSeriesPlot {
     }
   }
 
+  /**
+   * Choose this series if there are more than one sessions and less than 15.
+   * And if any of the sessions are bigger than 50 (necessary?)
+   * And the total recordings is > 200.
+   *
+   * @param size
+   * @param total
+   * @param anyBigger
+   * @return
+   */
   private boolean chooseThisSize(int size, int total, boolean anyBigger) {
     return
-        size < 15 &&
-            size > 1 &&
+        size > 1 &&
+        size < TOO_MANY_SESSIONS &&
             anyBigger &&
-            total > 200;
+            total > TOTAL_THRESHOLD;
   }
 
   private Chart getChart(String title) {

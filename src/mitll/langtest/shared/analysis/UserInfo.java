@@ -16,18 +16,14 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/29/15.
  */
 public class UserInfo implements Serializable {
- // private static final int INITIAL_SAMPLE = 20;
- // private transient final Logger logger = Logger.getLogger("UserInfo");
-
   private User user;
   private int start;
   private int current;
   private int num;
   private transient List<BestScore> bestScores;
-  long startTime;
+  private long startTime;
 
-  public UserInfo() {
-  }
+  public UserInfo() {}
 
   /**
    * @see mitll.langtest.server.database.analysis.Analysis#getBestForQuery
@@ -61,7 +57,6 @@ public class UserInfo implements Serializable {
     }
     current = toPercent(total, bestScores.size());
   //  logger.info("current " + total + " " + current);
-
   }
 
   private static int toPercent(float total, float size) {
