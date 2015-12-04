@@ -304,7 +304,8 @@ public class Analysis extends DAO {
    * @throws SQLException
    * @see #getBest(String, int)
    */
-  private Map<Long, UserInfo> getBestForQuery(Connection connection, PreparedStatement statement, int minRecordings) throws SQLException {
+  private Map<Long, UserInfo> getBestForQuery(Connection connection, PreparedStatement statement, int minRecordings)
+      throws SQLException {
     Map<Long, List<BestScore>> userToBest = getUserToResults(connection, statement);
 
     if (DEBUG) logger.info("getBestForQuery got " + userToBest.values().iterator().next().size());
@@ -391,6 +392,13 @@ public class Analysis extends DAO {
     return userToUserInfo;
   }
 
+  /**
+   * @see #getBestForQuery(Connection, PreparedStatement, int)
+   * @param connection
+   * @param statement
+   * @return
+   * @throws SQLException
+   */
   private Map<Long, List<BestScore>> getUserToResults(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
     Map<Long, List<BestScore>> userToBest = new HashMap<>();
