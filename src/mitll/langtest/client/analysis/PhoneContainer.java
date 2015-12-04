@@ -53,8 +53,10 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   private final PhoneExampleContainer exampleContainer;
   private final PhonePlot phonePlot;
   private final boolean isNarrow;
-  long from, to;
+  private long from;
+  private long to;
   private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
+  private final DateTimeFormat debugShortFormat = DateTimeFormat.getFormat("MMM d yyyy");
 
   /**
    * @param controller
@@ -94,26 +96,78 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * @see AnalysisTab#getPhoneReport
    */
   public Panel getTableWithPager(PhoneReport phoneReport) {
-    List<PhoneAndStats> phoneAndStatses = new ArrayList<>();
-    Map<String, PhoneStats> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
-    if (phoneToAvgSorted == null) {
-      logger.warning("huh? phoneToAvgSorted is null ");
-    } else {
-      getPhoneStatuses(phoneAndStatses, phoneToAvgSorted, from = 0, to = Long.MAX_VALUE);
-    }
+    //  Map<String, PhoneStats> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
+    from = 0;
+    to = System.currentTimeMillis();
     this.phoneReport = phoneReport;
-    return getTableWithPager(phoneAndStatses);
+
+    logger.info("getTableWithPager From " + debugFormat(from) + " : " + debugFormat(to));
+
+//    List<PhoneAndStats> phoneAndStatsList = getPhoneAndStatsListForPeriod(phoneToAvgSorted, from, to);
+    List<PhoneAndStats> phoneAndStatsList = getPhoneAndStatsList(from, to);
+
+    return getTableWithPager(phoneAndStatsList);
   }
 
-  public void getPhoneStatuses(List<PhoneAndStats> phoneAndStatses, Map<String, PhoneStats> phoneToAvgSorted,
-                               long first, long last) {
-    //logger.info("From " + shortFormat(first) + " : " + shortFormat(last));
+  /**
+   * @param from
+   * @param to
+   * @see AnalysisPlot#changed(long, long)
+   */
+  @Override
+  public void timeChanged(long from, long to) {
+    logger.info("timeChanged From " + debugFormat(from) + " : " + debugFormat(to));
+
+    this.from = from;
+    this.to = to;
+
+    List<PhoneAndStats> phoneAndStatsList = getPhoneAndStatsList(from, to);
+//    if (phoneToAvgSorted == null) {
+//      logger.warning("timeChanged huh? phoneToAvgSorted is null ");
+//    } else {
+//      getPhoneStatuses(phoneAndStatsList, phoneToAvgSorted, from, to);
+//    }
+//    logger.info("timeChanged " + shortFormat(from) + " " + shortFormat(to) + " got  " + phoneAndStatsList.size());
+
+    addItems(phoneAndStatsList);
+    showExamplesForSelectedSound();
+  }
+
+  private List<PhoneAndStats> getPhoneAndStatsList(long from, long to) {
+    Map<String, PhoneStats> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
+    return getPhoneAndStatsListForPeriod(phoneToAvgSorted, from, to);
+  }
+
+  private List<PhoneAndStats> getPhoneAndStatsListForPeriod(Map<String, PhoneStats> phoneToAvgSorted, long first, long last) {
+    logger.info("timeChanged From " + first+"/"+debugFormat(first) + " : " + last +"/"+debugFormat(last));
+
+    List<PhoneAndStats> phoneAndStatsList = new ArrayList<>();
+    if (phoneToAvgSorted == null) {
+      logger.warning("getPhoneAndStatsListForPeriod huh? phoneToAvgSorted is null ");
+    } else {
+      getPhoneStatuses(phoneAndStatsList, phoneToAvgSorted, first, last);
+      if (phoneAndStatsList.isEmpty()) {
+        logger.warning("getPhoneAndStatsListForPeriod phoneAndStatsList is empty? ");
+      }
+    }
+    return phoneAndStatsList;
+  }
+
+  /**
+   * @param phoneAndStatses
+   * @param phoneToAvgSorted
+   * @param first
+   * @param last
+   * @see #timeChanged(long, long)
+   */
+  private void getPhoneStatuses(List<PhoneAndStats> phoneAndStatses, Map<String, PhoneStats> phoneToAvgSorted,
+                                long first, long last) {
+    logger.info("getPhoneStatuses From " + first+"/"+debugFormat(first) + " : " + last+"/"+debugFormat(last));
     //logger.info("From " + first + " - " + last);
 
     for (Map.Entry<String, PhoneStats> ps : phoneToAvgSorted.entrySet()) {
       PhoneStats value = ps.getValue();
       List<PhoneSession> filtered = getFiltered(first, last, value);
-
       //    logger.info("key " + ps.getKey() + " value " + filtered.size());
       //  logger.info("Filtered " + filtered.size());
       int initial = value.getInitial(filtered);
@@ -130,28 +184,45 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 //    logger.info("getPhoneStatuses returned " + phoneAndStatses.size());
   }
 
-  public List<PhoneSession> getFiltered(long first, long last, PhoneStats value) {
+  /**
+   * @param first
+   * @param last
+   * @param value
+   * @return
+   * @see #getPhoneStatuses(List, Map, long, long)
+   */
+  private List<PhoneSession> getFiltered(long first, long last, PhoneStats value) {
+   // logger.info("getFiltered " + first + "/" + debugFormat(first) + " - " + debugFormat(last));
+
     return first == 0 ? value.getSessions() : getFiltered(value.getSessions(), first, last);
   }
 
-  public String shortFormat(long first) {
+  private String shortFormat(long first) {
     return superShortFormat.format(new Date(first));
+  }
+
+  private String debugFormat(long first) {
+    return debugShortFormat.format(new Date(first));
   }
 
   /**
    * TODO : this doesn't work properly - should do any sessions that overlap with the window
+   *
    * @param orig
    * @param first
    * @param last
    * @return
+   * @see #clickOnPhone(String)
+   * @see #getFiltered(long, long, PhoneStats)
    */
-  public List<PhoneSession> getFiltered(List<PhoneSession> orig, long first, long last) {
-     logger.info("From "+ shortFormat(first) + " - " + shortFormat(last));
+  private List<PhoneSession> getFiltered(List<PhoneSession> orig, long first, long last) {
+    logger.info("getFiltered : From " + first + "/" + debugFormat(first) + " - " + debugFormat(last) + " window dur " + (last - first));
 
     List<PhoneSession> filtered = new ArrayList<>();
     for (PhoneSession session : orig) {
       //  String window = shortFormat(session.getStart()) + " - " + shortFormat(session.getEnd());
-      if (session.getStart() >= first && session.getEnd() <= last) {
+      if (doesSessionOverlap(first, last, session)
+          ) {
         filtered.add(session);
         //  logger.info("included " + window);
       } else {
@@ -161,18 +232,36 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     return filtered;
   }
 
-  public List<WordAndScore> getFilteredWords(List<WordAndScore> orig, long first, long last) {
-    // logger.info("From "+ shortFormat(first) + " - " + shortFormat(last));
+  private boolean doesSessionOverlap(long first, long last, PhoneSession session) {
+    return (session.getStart() >= first && session.getStart() <= last) || // start inside window
+        (session.getEnd()   >= first && session.getEnd()   <= last) ||    // end inside window
+        (session.getStart()  < first && session.getEnd()   >  last);      // session starts before and ends after window
+  }
+
+  /**
+   * @param orig
+   * @param first
+   * @param last
+   * @return
+   * @see #clickOnPhone(String)
+   */
+  private List<WordAndScore> getFilteredWords(List<WordAndScore> orig, long first, long last) {
+    if (first > last) {
+      // throw new IllegalArgumentException("getFilteredWords " + orig.size() + " first after last?");
+      logger.warning("getFilteredWords " + orig.size() + " first after last?");
+    }
+    logger.info("getFilteredWords From " + debugFormat(first) + " - " + debugFormat(last) + " window dur " + (last - first));
 
     List<WordAndScore> filtered = new ArrayList<>();
     for (WordAndScore session : orig) {
       //  String window = shortFormat(session.getStart()) + " - " + shortFormat(session.getEnd());
-      if (session.getTimestamp() >= first && session.getTimestamp() <= last) {
+      if (session.getTimestamp() > first && session.getTimestamp() <= last) {
         filtered.add(session);
         //  logger.info("included " + window);
-      } else {
-        // logger.info("Exclude " +window);
       }
+      //else {
+        // logger.info("Exclude " +window);
+     // }
     }
     return filtered;
   }
@@ -468,16 +557,25 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
   /**
    * TODO : why are the numbers different for word examples vs count???
+   *
    * @param phone
    */
   private void clickOnPhone(String phone) {
     PhoneStats stats = phoneReport.getPhoneToAvgSorted().get(phone);
+    logger.info("clickOnPhone " + debugFormat(from) + " - " + debugFormat(to));
     List<PhoneSession> filtered = getFiltered(stats.getSessions(), from, to);
 
     PhoneSession first = filtered.get(0);
-    PhoneSession last = filtered.get(filtered.size()-1);
+    PhoneSession last = filtered.get(filtered.size() - 1);
     long s = first.getStart();
+    if (first.getCount() == 0) {
+      logger.warning("clickOnPhone huh? first " + first + " is empty ");
+    }
     long e = last.getEnd();
+
+    if (last.getCount() == 0) {
+      logger.warning("clickOnPhone huh? last " + last + " is empty ");
+    }
     List<WordAndScore> filteredWords = getFilteredWords(phoneReport.getWordExamples(phone), s, e);
     exampleContainer.addItems(phone, filteredWords);
 
@@ -554,22 +652,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     };
   }
 
-  @Override
-  public void timeChanged(long from, long to) {
-    this.from = from;
-    this.to = to;
-    List<PhoneAndStats> phoneAndStatses = new ArrayList<>();
-    Map<String, PhoneStats> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
-    if (phoneToAvgSorted == null) {
-      logger.warning("huh? phoneToAvgSorted is null ");
-    } else {
-      getPhoneStatuses(phoneAndStatses, phoneToAvgSorted, from, to);
-    }
-    logger.info("got time changed " + shortFormat(from) + " " + shortFormat(to) + " got  "+phoneAndStatses.size());
-
-    addItems(phoneAndStatses);
-    showExamplesForSelectedSound();
-  }
 
   /**
    * MUST BE PUBLIC
@@ -578,8 +660,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     /**
      * The styles applied to the table.
      */
-/*    interface TableStyle extends CellTable.Style {
-    }*/
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "PhoneScoresCellTableStyleSheet.css"})
     TableResources.TableStyle cellTableStyle();
