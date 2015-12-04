@@ -4,6 +4,7 @@
 
 package mitll.langtest.client.analysis;
 
+import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
@@ -35,8 +36,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
   private static final int X_OFFSET_LEGEND = 65;
-//  public static final int TOTAL_THRESHOLD = 200;
-//  public static final int TOO_MANY_SESSIONS = 15;
   public static final int MIN_HEIGHT = 350;
 
   private static final long MINUTE = 60 * 1000;
@@ -78,6 +77,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private long firstTime;
   private final List<Long> weeks = new ArrayList<>();
   private final List<Long> months = new ArrayList<>();
+  Icon playFeedback;
 
   /**
    * @param service
@@ -87,7 +87,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * @see AnalysisTab#AnalysisTab
    */
   public AnalysisPlot(LangTestDatabaseAsync service, long userid, final String userChosenID, final int minRecordings,
-                      SoundManagerAPI soundManagerAPI) {
+                      SoundManagerAPI soundManagerAPI, Icon playFeedback) {
     getElement().setId("AnalysisPlot");
     getElement().getStyle().setProperty("minHeight", MIN_HEIGHT, Style.Unit.PX);
     getElement().getStyle().setMargin(10, Style.Unit.PX);
@@ -95,9 +95,10 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
     this.service = service;
     this.userid = userid;
+    this.playFeedback = playFeedback;
     populateGranToLabel();
 
-    this.playAudio = new PlayAudio(service, new SoundPlayer(soundManagerAPI));
+    this.playAudio = new PlayAudio(service, new SoundPlayer(soundManagerAPI), playFeedback);
     populateExerciseMap(service, (int) userid);
 
     getPerformanceForUser(service, userid, userChosenID, minRecordings);
@@ -346,7 +347,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
           //logger.info("setVisibility 1 chose " + seriesInfo + " : " + size + " visible " + series.isVisible());
         }
         //else {
-          //logger.info("setVisibility 2 too small " + seriesInfo + " : " + size);
+        //logger.info("setVisibility 2 too small " + seriesInfo + " : " + size);
         //}
       }
     }
@@ -375,32 +376,11 @@ public class AnalysisPlot extends TimeSeriesPlot {
     }
   }
 
-  /**
-   * Choose this series if there are more than one sessions and less than 15.
-   * And if any of the sessions are bigger than 50 (necessary?)
-   * And the total recordings is > 200.
-   *
-   * @param size
-   * @param total
-   * @param anyBigger
-   * @return
-   */
-/*  private boolean chooseThisSize(int size, int total, boolean anyBigger) {
-    return
-        size > 1 &&
-        size < TOO_MANY_SESSIONS &&
-            anyBigger &&
-            total > TOTAL_THRESHOLD;
-  }*/
-
   private Chart getChart(String title) {
     return new Chart()
         .setZoomType(BaseChart.ZoomType.X)
-        //.setType(Series.Type.SCATTER)
         .setChartTitleText(title)
-        //     .setChartSubtitleText(subtitle)
         .setMarginRight(10)
-        //  .setMarginLeft(50)
         .setOption("/credits/enabled", false)
         .setOption("/plotOptions/series/pointStart", 1)
         .setOption("/legend/enabled", false)
