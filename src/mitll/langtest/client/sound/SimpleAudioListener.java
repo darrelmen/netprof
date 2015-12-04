@@ -9,6 +9,5 @@ package mitll.langtest.client.sound;
  */
 public interface SimpleAudioListener {
   void songLoaded(double duration);
-
   void songFinished();
 }
