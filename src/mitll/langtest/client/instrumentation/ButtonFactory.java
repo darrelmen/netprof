@@ -6,6 +6,7 @@ package mitll.langtest.client.instrumentation;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Tab;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
@@ -22,7 +23,7 @@ import java.util.logging.Logger;
  * Created by GO22670 on 3/24/2014.
  */
 public class ButtonFactory implements EventLogger {
-  private Logger logger = Logger.getLogger("ButtonFactory");
+  //private Logger logger = Logger.getLogger("ButtonFactory");
 
   private final LangTestDatabaseAsync service;
   private final PropertyHandler props;
@@ -96,11 +97,10 @@ public class ButtonFactory implements EventLogger {
   public void logEvent(final String widgetID, final String widgetType, final String exid, final String context,
                        final long userid) {
     // System.out.println("logEvent event for " + widgetID + " " + widgetType + " exid " + exid + " context " + context + " user " + userid);
-
     try {
-      com.google.gwt.core.client.Scheduler.get().scheduleDeferred(new com.google.gwt.core.client.Scheduler.ScheduledCommand() {
+      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
         public void execute() {
-          if (props != null && controller != null) {
+          if (props != null && controller != null && service != null) {
             service.logEvent(widgetID, widgetType, exid, context, userid, props.getTurkID(), controller.getBrowserInfo(),
                 new AsyncCallback<Void>() {
                   @Override
@@ -120,7 +120,7 @@ public class ButtonFactory implements EventLogger {
         }
       });
     } catch (Exception e) {
-      logger.warning("Got " +e);
+//      logger.warning("Got " +e);
     }
   }
 }
