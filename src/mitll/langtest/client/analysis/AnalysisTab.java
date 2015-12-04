@@ -44,7 +44,7 @@ public class AnalysisTab extends DivWidget {
 
   private final AnalysisPlot analysisPlot;
   private final ExerciseController controller;
-  private final TimeWidgets timeWidgets;
+  private TimeWidgets timeWidgets;
 
   /**
    * @param service
@@ -60,41 +60,12 @@ public class AnalysisTab extends DivWidget {
     getElement().setId("AnalysisTab");
     analysisPlot = new AnalysisPlot(service, userid, userChosenID, minRecordings,
         controller.getSoundManager());
-    analysisPlot.addStyleName("cardBorderShadow");
-    analysisPlot.getElement().getStyle().setMargin(10, Style.Unit.PX);
+//    analysisPlot.addStyleName("cardBorderShadow");
+//    analysisPlot.getElement().getStyle().setMargin(10, Style.Unit.PX);
 
-    // DivWidget timeControls = new DivWidget();
     Panel timeControls = new HorizontalPanel();
-    // timeControls.addStyleName("floatLeft");
-    Widget timeGroup = getTimeGroup();
-    // timeGroup.addStyleName("floatLeft");
-
-    timeControls.add(timeGroup);
-
-    //   DivWidget stepper = new DivWidget();
-    Panel stepper = new HorizontalPanel();
-    stepper.addStyleName("inlineBlockStyleOnly");
-    stepper.addStyleName("topMargin");
-
-    stepper.getElement().setId("stepper");
-//    stepper.addStyleName("floatLeft");
-    stepper.addStyleName("leftTenMargin");
-    Button prevButton;
-    stepper.add(prevButton = getPrevButton());
-
-    HTML currentDate = new HTML();
-    currentDate.setWidth("80px");
-    currentDate.addStyleName("boxShadow");
-    currentDate.addStyleName("leftFiveMargin");
-    currentDate.addStyleName("topFiveMargin");
-    currentDate.addStyleName("rightFiveMargin");
-    stepper.add(currentDate);
-    Button nextButton = getNextButton();
-    stepper.add(nextButton);
-
-    timeWidgets = new TimeWidgets(prevButton, nextButton, currentDate, allChoice, weekChoice, monthChoice);
-
-    timeControls.add(stepper);
+    timeControls.add(getTimeGroup());
+    timeControls.add(getTimeWindowStepper());
 
     add(timeControls);
     add(analysisPlot);
@@ -103,21 +74,55 @@ public class AnalysisTab extends DivWidget {
     bottom.getElement().setId("bottom");
     bottom.addStyleName("floatLeft");
 
-    if (overallBottom != null) {
-      overallBottom.add(bottom);
+    if (overallBottom != null) { // are we in student or teacher view
+      overallBottom.add(bottom); // teacher
       isNarrow = true;
     } else {
-      add(bottom);
+      add(bottom); // student
     }
 
     getWordScores(service, controller, userid, showTab, analysisPlot, bottom, minRecordings);
+  }
+
+  public Panel getTimeWindowStepper() {
+    Panel stepper = getStepperContainer();
+
+    Button prevButton = getPrevButton();
+    stepper.add(prevButton);
+
+    HTML currentDate = getCurrentTimeWindow();
+    stepper.add(currentDate);
+
+    Button nextButton = getNextButton();
+    stepper.add(nextButton);
+
+    timeWidgets = new TimeWidgets(prevButton, nextButton, currentDate, allChoice, weekChoice, monthChoice);
+    return stepper;
+  }
+
+  public Panel getStepperContainer() {
+    Panel stepper = new HorizontalPanel();
+    stepper.getElement().setId("stepper");
+    stepper.addStyleName("inlineBlockStyleOnly");
+    stepper.addStyleName("topMargin");
+    stepper.addStyleName("leftTenMargin");
+    return stepper;
+  }
+
+  private HTML getCurrentTimeWindow() {
+    HTML currentDate = new HTML();
+    currentDate.setWidth("80px");
+    currentDate.addStyleName("boxShadow");
+    currentDate.addStyleName("leftFiveMargin");
+    currentDate.addStyleName("topFiveMargin");
+    currentDate.addStyleName("rightFiveMargin");
+    return currentDate;
   }
 
   private Button getPrevButton() {
     final Button left = new Button();
     controller.register(left, "prevTimeWindow");
     left.setIcon(IconType.CARET_LEFT);
-    //  new TooltipHelper().addTooltip(left, "Left Arrow Key");
     left.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -208,14 +213,11 @@ public class AnalysisTab extends DivWidget {
 
       @Override
       public void onSuccess(List<WordScore> wordScores) {
-        Heading w = new Heading(3, WORDS, SUBTITLE);
-        final WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab,w);
+        Heading wordsTitle = new Heading(3, WORDS, SUBTITLE);
+        final WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab, wordsTitle);
         Panel tableWithPager = wordContainer.getTableWithPager(wordScores);
 
-        DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer", w);
-        wordsContainer.addStyleName("cardBorderShadow");
-        wordsContainer.getElement().getStyle().setMargin(10, Style.Unit.PX);
-
+        DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer", wordsTitle);
         lowerHalf.add(wordsContainer);
 
         DivWidget soundsDiv = getSoundsDiv();
@@ -237,12 +239,14 @@ public class AnalysisTab extends DivWidget {
   }
 
   private DivWidget getWordContainerDiv(Panel tableWithPager, String containerID, Heading w) {
-    DivWidget vert = new DivWidget();
-    vert.getElement().setId(containerID);
-    vert.addStyleName("floatLeft");
-    vert.add(w);
-    vert.add(tableWithPager);
-    return vert;
+    DivWidget wordsContainer = new DivWidget();
+    wordsContainer.getElement().setId(containerID);
+    wordsContainer.getElement().getStyle().setMargin(10, Style.Unit.PX);
+    wordsContainer.addStyleName("floatLeft");
+    wordsContainer.add(w);
+    wordsContainer.add(tableWithPager);
+    wordsContainer.addStyleName("cardBorderShadow");
+    return wordsContainer;
   }
 
   private void getPhoneReport(LangTestDatabaseAsync service,
@@ -298,29 +302,5 @@ public class AnalysisTab extends DivWidget {
     DivWidget wordExamples = getWordContainerDiv(examples, "WordExamples", new Heading(3, WORDS_USING_SOUND));
     wordExamples.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
     return wordExamples;
-  }
-
-  public static class TimeWidgets {
-    final Button prevButton;
-    final Button nextButton;
-    final Button all;
-    final Button week;
-    final Button month;
-    final HTML display;
-
-    public TimeWidgets(Button prevButton, Button nextButton, HTML display, Button all, Button week, Button month) {
-      this.prevButton = prevButton;
-      this.nextButton = nextButton;
-      this.display = display;
-      this.all = all;
-      this.week = week;
-      this.month = month;
-    }
-
-    public void reset() {
-      all.setActive(true);
-      week.setActive(false);
-      month.setActive(false);
-    }
   }
 }
