@@ -14,15 +14,15 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * To change this template use File | Settings | File Templates.
  */
 public class ExerciseShell implements IsSerializable, CommonShell {
- private static final int MAX_TOOLTIP_LENGTH = 15;
+  private static final int MAX_TOOLTIP_LENGTH = 15;
 
   protected String id;
 
-  protected STATE state = STATE.UNSET;
-  protected STATE secondState = STATE.UNSET;
+  private STATE state = STATE.UNSET;
+  private STATE secondState = STATE.UNSET;
 
   protected String englishSentence;
-  protected String meaning;
+  protected String meaning = "";
   protected String foreignLanguage;
 
   public ExerciseShell() {
@@ -39,7 +39,7 @@ public class ExerciseShell implements IsSerializable, CommonShell {
     this.foreignLanguage = "";
   }
 
-  public ExerciseShell(String id, String englishSentence, String meaning, String foreignLanguage) {
+  private ExerciseShell(String id, String englishSentence, String meaning, String foreignLanguage) {
     this.id = id;
     this.englishSentence = englishSentence;
     this.meaning = meaning;
