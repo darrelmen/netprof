@@ -61,7 +61,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   public ASRScorePanel(String parent, ExerciseController controller, String exerciseID) {
     this.controller = controller;
     this.exerciseID = exerciseID;
-    addStyleName("leftFiveMargin");
+    addStyleName("leftTenMargin");
     addStyleName("floatRight");
     getElement().setId("ASRScorePanel");
     CaptionPanel chartCaptionPanel = new CaptionPanel(SCORE_HISTORY);
