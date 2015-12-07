@@ -66,8 +66,8 @@ public class RefResultDecoder {
   }
 
   /**
-   * @see #runMissingInfo(List)
    * @param exercises
+   * @see #runMissingInfo(List)
    */
   private void doMissingInfo(final List<CommonExercise> exercises) {
     List<Result> resultsToDecode = db.getResultDAO().getResultsToDecode();
@@ -88,19 +88,18 @@ public class RefResultDecoder {
       }
 
 //      String[] bestAudios = res.getAnswer().split(File.separator);
-  //    if (bestAudios.length > 1) {
-        CommonExercise exercise = idToEx.get(res.getExerciseID());
-        if (exercise != null) {
-          logger.info("doMissingInfo #" +count + " of " + size + " align " + exercise.getID() + " and result " + res.getUniqueID());
-          PretestScore alignmentScore = audioFileHelper.getAlignmentScore(exercise, res.getAnswer(), serverProps.usePhoneToDisplay(), false);
-          db.rememberScore(res.getUniqueID(),alignmentScore);
-        }
-        else {
-          logger.warn("no exercise for " + res.getExerciseID()+ " from result?");
-        }
-        if (stopDecode) break;
-        //	logger.debug("previously found " + res);
-    //  }
+      //    if (bestAudios.length > 1) {
+      CommonExercise exercise = idToEx.get(res.getExerciseID());
+      if (exercise != null) {
+        logger.info("doMissingInfo #" + count + " of " + size + " align " + exercise.getID() + " and result " + res.getUniqueID());
+        PretestScore alignmentScore = audioFileHelper.getAlignmentScore(exercise, res.getAnswer(), serverProps.usePhoneToDisplay(), false);
+        db.rememberScore(res.getUniqueID(), alignmentScore);
+      } else {
+        logger.warn("no exercise for " + res.getExerciseID() + " from result?");
+      }
+      if (stopDecode) break;
+      //	logger.debug("previously found " + res);
+      //  }
     }
   }
 
@@ -174,8 +173,7 @@ public class RefResultDecoder {
       if (serverProps.addMissingInfo()
           ) {
         runMissingInfo(exercises);
-      }
-      else {
+      } else {
         logger.debug("not looking for missing info");
       }
     }
