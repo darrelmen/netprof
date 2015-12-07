@@ -163,16 +163,16 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
   protected void scoreAudio(String path, long resultID, String refSentence, final ImageAndCheck wordTranscript,
                             final ImageAndCheck phoneTranscript, int width, int height, int reqid) {
     // logger.info("ReviewScoringPanel.scoreAudio : path " + path + " width " + width + " height " + height);
-    boolean wasVisible = wordTranscript.image.isVisible();
+    boolean wasVisible = wordTranscript.getImage().isVisible();
     belowContainer.setWidth(width + "px");
 
     // only show the spinning icon if it's going to take awhile
     final Timer t = new Timer() {
       @Override
       public void run() {
-        wordTranscript.image.setUrl(LangTest.LANGTEST_IMAGES + "animated_progress44.gif");
-        wordTranscript.image.setVisible(true);
-        phoneTranscript.image.setVisible(false);
+        wordTranscript.getImage().setUrl(LangTest.LANGTEST_IMAGES + "animated_progress44.gif");
+        wordTranscript.getImage().setVisible(true);
+        phoneTranscript.getImage().setVisible(false);
       }
     };
 
@@ -181,8 +181,8 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
 
     service.getResultASRInfo(resultID, width, height, new AsyncCallback<PretestScore>() {
       public void onFailure(Throwable caught) {
-        wordTranscript.image.setVisible(false);
-        phoneTranscript.image.setVisible(false);
+        wordTranscript.getImage().setVisible(false);
+        phoneTranscript.getImage().setVisible(false);
       }
 
       public void onSuccess(PretestScore result) {
