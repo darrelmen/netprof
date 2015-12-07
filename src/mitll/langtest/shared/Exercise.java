@@ -24,7 +24,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class Exercise extends AudioExercise implements CommonExercise {
-  private static final int MAX_TOOLTIP_LENGTH = 15;
+ // private static final int MAX_TOOLTIP_LENGTH = 15;
   private String content;
 
   private String context;
@@ -67,16 +67,18 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.refSentences.add(sentenceRef);
   }
 
+/*
   public CommonShell getShellCombinedTooltip() {
     return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage);
   }
+*/
 
   /**
    * Hack - if we have "N/A" for english, don't show it in the list.
    *
    * @return
    */
-  public String getCombinedTooltip() {
+/*  public String getCombinedTooltip() {
     String refSentence = getRefSentence();
     if (refSentence.length() > MAX_TOOLTIP_LENGTH) {
       refSentence = refSentence.substring(0, MAX_TOOLTIP_LENGTH);
@@ -85,7 +87,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
     String combined = refSentenceEqualsTooltip ? getTooltip() : getTooltip() + (refSentence.isEmpty() ? "" : " / " + refSentence);
     if (getTooltip().isEmpty() || getTooltip().equals("N/A")) combined = refSentence;
     return combined;
-  }
+  }*/
 
   public String getContent() {
     return content;
@@ -102,7 +104,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
 
   /**
    * @param sentenceRefs
-   * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise(String, int, org.apache.poi.ss.usermodel.Row, String, String, String, String, String, boolean, String, boolean)
+   * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    */
   @Override
   public void setRefSentences(Collection<String> sentenceRefs) {
@@ -163,10 +165,6 @@ public class Exercise extends AudioExercise implements CommonExercise {
   public void setContextTranslation(String contextTranslation) {
     this.contextTranslation = contextTranslation;
   }
-
-/*  public Exercise toExercise() {
-    return this;
-  }*/
 
   @Override
   public long getModifiedDateTimestamp() {
@@ -229,8 +227,12 @@ public class Exercise extends AudioExercise implements CommonExercise {
       }
     }
 
-    return "Exercise " + id + " content bytes = " + content.length() + " english '" + getEnglish() +
-        "'/'" + getRefSentence() + "' context " + getContext() + "/" + getContextTranslation() +
+    return "Exercise " + id + " content bytes = " + content.length() +
+        " english '" + getEnglish() +
+        "'/'" + getRefSentence() + "' " +
+        "meaning '" +getMeaning()+
+        "' transliteration '" +getTransliteration()+
+        "' context " + getContext() + "/" + getContextTranslation() +
         " audio count = " + audioAttributes1.size() +
         (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
         " unit->lesson " + getUnitToValue();
