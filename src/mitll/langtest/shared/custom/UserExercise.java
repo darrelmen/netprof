@@ -307,7 +307,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
         "meaning '" + getMeaning() + "' " +
         "context '" + getContext() + "' " +
         "contextTranslation '" + getContextTranslation() + "' " +
-        "tooltip '" + getTooltip() +
         "' audio attr (" + getAudioAttributes().size() +
         ")" +
         // " :" + getAudioAttributes() +
