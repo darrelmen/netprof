@@ -420,10 +420,6 @@ public class DatabaseImpl implements Database {
     logger.debug("editItem ex #" + userExercise.getID() + " mediaDir : " + getServerProps().getMediaDir() +
         " initially audio was\n\t " + userExercise.getAudioAttributes());
 
-    //userExercise.setTooltip();
-
-    logger.debug("tooltip now " + userExercise.getTooltip());
-
     getUserListManager().editItem(userExercise, true, getServerProps().getMediaDir());
 
     Set<AudioAttribute> original = new HashSet<AudioAttribute>(userExercise.getAudioAttributes());
