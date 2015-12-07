@@ -277,7 +277,7 @@ public class PagingExerciseList extends ExerciseList {
       tellUserPanelIsBusy();
       markCurrentExercise(pagingContainer.getCurrentSelection().getID());
     } else {
-      controller.logEvent(this, "ExerciseList", e.getID(), "Clicked on item '" + e.getTooltip() + "'");
+      controller.logEvent(this, "ExerciseList", e.getID(), "Clicked on item '" + e.getEnglish() + "'");
 
       pushNewItem(getTypeAheadText(), e.getID());
     }
