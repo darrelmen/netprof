@@ -208,11 +208,12 @@ public class NPFHelper implements RequiresResize {
    * @param ul
    * @param toSelect
    * @see #doNPF
-   * @see #showNPF(UserList, TabAndContent, String, boolean, String)
+   * @see #showNPF
    */
   private void rememberAndLoadFirst(final UserList ul, CommonExercise toSelect) {
     npfExerciseList.setUserListID(ul.getUniqueID());
     List<CommonShell> copy = new ArrayList<CommonShell>(ul.getExercises());
+    logger.info("rememberAndLoadFirst " + copy.size() + " exercises from  " +ul.getName());
     //  npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
     npfExerciseList.rememberAndLoadFirst(copy, toSelect, "");
     npfExerciseList.setWidth("270px");
