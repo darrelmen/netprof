@@ -290,7 +290,7 @@ public class ListManager implements RequiresResize {
           new UserListCallback(this, contentPanel, child, listScrollPanel, LESSONS + "_All", false, true, userManager,
               onlyMine, optionalExercise));
     } else {
-      logger.info("viewLessons for " + userManager.getUser());
+ //     logger.info("viewLessons for user #" + userManager.getUser());
       service.getListsForUser(userManager.getUser(), onlyMine,
           onlyVisited,
           new UserListCallback(this, contentPanel, child, listScrollPanel,
@@ -380,7 +380,6 @@ public class ListManager implements RequiresResize {
    */
   void showList(final UserList ul, Panel contentPanel, final String instanceName, CommonExercise toSelect) {
     logger.info("showList " + ul + " instance '" + instanceName + "'");
-    //  if (!ul.isEmpty()) logger.info("\tfirst" + ul.getExercises().iterator().next());
     controller.logEvent(contentPanel, "Tab", "UserList_" + ul.getID(), "Show List");
 
     String previousList = storage.getValue(CLICKED_USER_LIST);
@@ -550,7 +549,7 @@ public class ListManager implements RequiresResize {
 
             reviewItem.showNPF(ul, editTab, getInstanceName(isReview), false, toSelect);
           } else {
-            //   logger.info("getListOperations : showEditItem ");
+            logger.info("getListOperations : showEditItem ");
             showEditItem(ul, editTab, editItem, !ul.isFavorite());
           }
         }
@@ -701,7 +700,7 @@ public class ListManager implements RequiresResize {
                                                 boolean isReview, boolean isComment,
                                                 boolean isNormalList) {
     String subTab = storage.getValue(SUB_TAB);
-    logger.info("selectPreviouslyClickedSubTab : subtab '" + subTab + "'");
+   // logger.info("selectPreviouslyClickedSubTab : subtab '" + subTab + "'");
 
     boolean chosePrev = false;
     if (subTab != null) {
@@ -733,8 +732,7 @@ public class ListManager implements RequiresResize {
 
           break;
         default:
-          logger.info("selectPreviouslyClickedSubTab : no subtab?");
-
+        //  logger.info("selectPreviouslyClickedSubTab : no subtab?");
           chosePrev = false;
           break;
       }
