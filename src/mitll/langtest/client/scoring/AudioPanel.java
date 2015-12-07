@@ -15,6 +15,7 @@ import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -169,6 +170,9 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     Panel imageContainer = new VerticalPanel();
     divWithRelativePosition.add(imageContainer);
     imageContainer.getElement().setId("AudioPanel_imageContainer");
+    float totalHeight = getWaveformHeight() + (2 * 20);
+    imageContainer.setHeight(totalHeight +"px");
+  //  imageContainer.setWidth(getImageWidth()+"px");
 
     HorizontalPanel hp = new HorizontalPanel();
     hp.setVerticalAlignment(ALIGN_MIDDLE);
@@ -176,7 +180,6 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
     // add widgets to left of play button
     Widget toTheRightWidget = getAfterPlayWidget();
-    //   logger.info("got toTheRightWidget " + toTheRightWidget);
     audioPositionPopup = new AudioPositionPopup(imageContainer);
     imageContainer.add(audioPositionPopup);
 
@@ -190,30 +193,40 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     }
 
     waveform = new ImageAndCheck();
-    imageContainer.add(getWaveform().image);
-
-    getWaveform().image.setAltText(WAVEFORM_TOOLTIP);
-    getWaveform().image.setTitle(WAVEFORM_TOOLTIP);
+    imageContainer.add(getWaveformImage());
 
     spectrogram = new ImageAndCheck();
     if (showSpectrogram) {
-      imageContainer.add(getSpectrogram().image);
+      imageContainer.add(getSpectrogram().getImage());
     }
 
     words = new ImageAndCheck();
-    imageContainer.add(words.image);
-    words.image.getElement().setId("Transcript_Words");
+    Image wordsImage = words.getImage();
+    imageContainer.add(wordsImage);
+    wordsImage.getElement().setId("Transcript_Words");
+    wordsImage.setHeight(20+"px");
 
     phones = new ImageAndCheck();
-    imageContainer.add(phones.image);
-    phones.image.getElement().setId("Transcript_Phones");
+    Image phonesImage = phones.getImage();
+    imageContainer.add(phonesImage);
+    phonesImage.setHeight(20+"px");
+    phonesImage.getElement().setId("Transcript_Phones");
 
-    hp.setWidth("100%");
+   // hp.setWidth("100%");
 
     add(hp);
     hp.addStyleName("bottomFiveMargin");
 
     add(divWithRelativePosition);
+  }
+
+  private Image getWaveformImage() {
+    Image waveformImage = getWaveform().getImage();
+    waveformImage.getElement().setId("waveformImage");
+    // waveformImage.setHeight(getWaveformHeight()+"px");
+    waveformImage.setAltText(WAVEFORM_TOOLTIP);
+    waveformImage.setTitle(WAVEFORM_TOOLTIP);
+    return waveformImage;
   }
 
   boolean hasAudio() {
@@ -278,19 +291,40 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   }
 
   public static class ImageAndCheck {
-    final Image image;
+    private final Image image;
 
     public ImageAndCheck() {
       image = new Image();
-      image.setVisible(false);
+      getImage().setVisible(false);
     }
 
+    /**
+     * @see WaveformPostAudioRecordButton#stopRecording()
+     * @param visible
+     */
     public void setVisible(boolean visible) {
-      image.setVisible(visible);
+      getImage().setVisible(visible);
     }
 
+    public boolean isVisible() {
+      return getImage().isVisible();
+    }
+
+    /**
+     * @see WaveformPostAudioRecordButton#stopRecording()
+     * @param url
+     */
     public void setUrl(String url) {
-      image.setUrl(url);
+      getImage().setUrl(url);
+      setVisible(true);
+    }
+
+    /**
+     * @see ASRScoringAudioPanel#scoreAudio(String, long, String, ImageAndCheck, ImageAndCheck, int, int, int)
+     * @return
+     */
+    public Image getImage() {
+      return image;
     }
   }
 
@@ -344,7 +378,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   void playSegment(float start, float end) {
     if (start >= end) {
-      System.err.println("bad segment " + start + "-" + end);
+      logger.warning("bad segment " + start + "-" + end);
     } else {
       //logger.info("playSegment segment " + start + "-" + end);
       playAudio.repeatSegment(start, end);
@@ -382,12 +416,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   private void getImages() {
     //int leftColumnWidth1 = controller.getLeftColumnWidth();
-    int leftColumnWidth = LEFT_COLUMN_WIDTH + IMAGE_WIDTH_SLOP;
-    int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : rightMargin;
-    if (gaugePanel != null && rightSide == 0 /*&& !controller.getProps().isNoModel()*/) {
-      rightSide = 180; // TODO : hack!!!
-    }
-    int width = getWidthForWaveform(LEFT_COLUMN_WIDTH, leftColumnWidth, rightSide);
+    int width = getImageWidth();
 
     int diff = Math.abs(Window.getClientWidth() - lastWidth);
     if (lastWidth == 0 || diff > WINDOW_SIZE_CHANGE_THRESHOLD) {
@@ -402,6 +431,15 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
       if (DEBUG_GET_IMAGES) logger.info("\tAudioPanel.getImages : not updating, offset width " +
           getOffsetWidth() + " width " + width + " path " + audioPath + " diff " + diff + " last " + lastWidth);
     }
+  }
+
+  private int getImageWidth() {
+    int leftColumnWidth = LEFT_COLUMN_WIDTH + IMAGE_WIDTH_SLOP;
+    int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : rightMargin;
+    if (gaugePanel != null && rightSide == 0 /*&& !controller.getProps().isNoModel()*/) {
+      rightSide = 180; // TODO : hack!!!
+    }
+    return getWidthForWaveform(LEFT_COLUMN_WIDTH, leftColumnWidth, rightSide);
   }
 
   protected int getWidthForWaveform(int leftColumnWidth1, int leftColumnWidth, int rightSide) {
@@ -468,7 +506,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
           long roundtrip = now - then;
 
           if (!result.successful) {
-            System.err.println("got error for request for type " + type);
+            logger.warning("got error for request for type " + type);
             if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);
           } else if (result.req == -1 || isMostRecentRequest(type, result.req)) { // could be cached
             showResult(result, imageAndCheck);
@@ -489,8 +527,8 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
 
   private void showResult(ImageResponse result, final ImageAndCheck imageAndCheck) {
     // logger.info("\tgetImageURLForAudio : using new url " + result.imageURL);
-    imageAndCheck.image.setUrl(result.imageURL);
-    imageAndCheck.image.setVisible(true);
+    imageAndCheck.getImage().setUrl(result.imageURL);
+    imageAndCheck.getImage().setVisible(true);
     audioPositionPopup.reinitialize(result.durationInSeconds);
   }
 
@@ -521,7 +559,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     synchronized (this) {
       Integer mostRecentIDForType = reqs.get(type);
       if (mostRecentIDForType == null) {
-        System.err.println("huh? couldn't find req " + reqid + " in " + reqs);
+        logger.warning("huh? couldn't find req " + reqid + " in " + reqs);
         return false;
       } else {
         //logger.info("\tisMostRecentRequest: req for " + type + " = " + mostRecentIDForType + " compared to " + responseReqID);
