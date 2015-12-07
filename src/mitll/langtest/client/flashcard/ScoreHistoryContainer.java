@@ -32,6 +32,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScore> {
+  public static final int HISTORY_COL_WIDTH = 105;
   private final Logger logger = Logger.getLogger("ScoreHistoryContainer");
 
   private static final int MAX_LENGTH_ID = 15;
@@ -59,7 +60,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   public Panel getTableWithPager(List<ExerciseCorrectAndScore> sortedHistory) {
     Panel tableWithPager = getTableWithPager();
     tableWithPager.getElement().setId("TableScoreHistory");
-    tableWithPager.setWidth(TABLE_HISTORY_WIDTH + "px");
+  //  tableWithPager.setWidth(TABLE_HISTORY_WIDTH + "px");
    // tableWithPager.addStyleName("floatLeft");
 
     for (ExerciseCorrectAndScore exerciseCorrectAndScore : sortedHistory) {
@@ -86,12 +87,11 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
     englishCol.setSortable(true);
     table.setColumnWidth(englishCol, COL_WIDTH + "px");
 
-    String language = controller.getLanguage();
-
     Column<ExerciseCorrectAndScore, SafeHtml> flColumn = getFLColumn();
     flColumn.setSortable(true);
     table.setColumnWidth(flColumn,COL_WIDTH + "px");
 
+    String language = controller.getLanguage();
     String headerForFL = language.equals("English") ? "Meaning" : language;
     addColumn(flColumn,   new TextHeader(headerForFL));
     addColumn(englishCol, new TextHeader("English"));
@@ -131,8 +131,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
               else {
                 CommonShell shell1 = idToExercise.get(o1.getId());
                 CommonShell shell2 = idToExercise.get(o2.getId());
-
-                return sorter.compareStrings(shell1.getEnglish(), shell2.getEnglish());
+                return sorter.compareStrings(getEnglishText(shell1), getEnglishText(shell2));
               }
             }
             return -1;
@@ -159,8 +158,8 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
                 CommonShell shell1 = idToExercise.get(o1.getId());
                 CommonShell shell2 = idToExercise.get(o2.getId());
 
-                String id1 = shell1.getForeignLanguage();
-                String id2 = shell2.getForeignLanguage();
+                String id1 = getFLText(shell1);
+                String id2 = getFLText(shell2);
                 return id1.toLowerCase().compareTo(id2.toLowerCase());
               }
             }
@@ -217,14 +216,14 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
 
     Column<ExerciseCorrectAndScore, SafeHtml> column2 = getHistoryColumn();
     table.addColumn(column2, "History");
-    table.setColumnWidth(column2, "88px");
+    table.setColumnWidth(column2, HISTORY_COL_WIDTH + "px");
 
     Column<ExerciseCorrectAndScore, SafeHtml> scoreColumn = getScoreColumn();
     table.addColumn(scoreColumn, "Score");
 
     scoreColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     scoreColumn.setSortable(true);
-    table.setColumnWidth(scoreColumn, "70" + "px");
+    table.setColumnWidth(scoreColumn, 70 + "px");
     table.setWidth("100%", true);
 
     ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> columnSortHandler2 = getScoreSorter(scoreColumn,  getList());
@@ -238,7 +237,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
       @Override
       public SafeHtml getValue(ExerciseCorrectAndScore shell) {
         CommonShell shell1 = idToExercise.get(shell.getId());
-        String columnText = shell1.getEnglish();
+        String columnText = getEnglishText(shell1);
         return getSafeHtml(shell, truncate(columnText));
       }
     };
@@ -249,13 +248,8 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
       @Override
       public SafeHtml getValue(ExerciseCorrectAndScore shell) {
         CommonShell shell1 = idToExercise.get(shell.getId());
-        String toShow = shell1.getForeignLanguage();
-
-        if (controller.getLanguage().equalsIgnoreCase("english")) {
-          toShow = shell1.getMeaning();
-        }
+        String toShow = getFLText(shell1);
         String columnText = truncate(toShow);
-
         return getSafeHtml(shell, columnText);
       }
     };
