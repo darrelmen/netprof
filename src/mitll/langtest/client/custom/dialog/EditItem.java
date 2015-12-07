@@ -137,7 +137,7 @@ public class EditItem {
 
     if (includeAddItem) {
       UserExercise newItem = getNewItem();
-      logger.info("makeExerciseList : Adding " + newItem + " with " + newItem.getTooltip());
+      logger.info("makeExerciseList : Adding " + newItem);// + " with " + newItem.getTooltip());
       ul.addExercise(newItem);
     }
 
