@@ -140,25 +140,32 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     getMailSupport().email(serverProps.getEmailAddress(), subject, prefixedMessage);
   }
 
+  /**
+   * @see #makeExerciseListWrapper(int, Collection, long, String, boolean, boolean)
+   * @param exercises
+   * @return
+   */
   private List<CommonShell> getExerciseShells(Collection<? extends CommonExercise> exercises) {
-    return getLanguage().equals(ENGLISH) ? getExerciseShellsShort(exercises) : getExerciseShellsCombined(exercises);
+    //return getLanguage().equals(ENGLISH) ? getExerciseShellsShort(exercises) : getExerciseShellsCombined(exercises);
+    return getExerciseShellsShort(exercises);
   }
 
   private List<CommonShell> getExerciseShellsShort(Collection<? extends CommonExercise> exercises) {
     List<CommonShell> ids = new ArrayList<CommonShell>();
     for (CommonExercise e : exercises) {
+//      logger.info("got " +e.getID() + " mean " + e.getMeaning() + " eng " + e.getEnglish() + " fl " + e.getForeignLanguage());
       ids.add(e.getShell());
     }
     return ids;
   }
 
-  private List<CommonShell> getExerciseShellsCombined(Collection<? extends CommonExercise> exercises) {
+/*  private List<CommonShell> getExerciseShellsCombined(Collection<? extends CommonExercise> exercises) {
     List<CommonShell> ids = new ArrayList<CommonShell>();
     for (CommonExercise e : exercises) {
       ids.add(e.getShellCombinedTooltip());
     }
     return ids;
-  }
+  }*/
 
   /**
    * Complicated.
@@ -1128,7 +1135,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   public Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean visited) {
-    if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
+  //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
     return db.getUserListManager().getListsForUser(userid, onlyCreated, visited);
   }
 
