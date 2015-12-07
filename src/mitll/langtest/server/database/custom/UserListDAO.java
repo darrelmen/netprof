@@ -396,9 +396,6 @@ public class UserListDAO extends DAO {
   private void populateList(UserList where) {
     List<CommonUserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
     where.setExercises(onList);
-    //if (!onList.isEmpty()) {
-      //logger.debug("populateList : got " + onList.size() + " for list " + where.getUniqueID() + " = " + where);
-    // }
   }
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
