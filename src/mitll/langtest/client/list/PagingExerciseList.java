@@ -114,7 +114,7 @@ public class PagingExerciseList extends ExerciseList {
 
   /**
    * @return
-   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises(java.util.Map, String)
+   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises
    */
   protected String getPrefix() {
     return typeAhead.getText();
