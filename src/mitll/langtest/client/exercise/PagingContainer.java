@@ -16,6 +16,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.view.client.SingleSelectionModel;
+import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.STATE;
 import mitll.langtest.shared.sorter.ExerciseComparator;
@@ -31,15 +32,13 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PagingContainer extends SimplePagingContainer<CommonShell> {
-  public static final String ENGLISH = "English";
   private final Logger logger = Logger.getLogger("PagingContainer");
 
   private static final int MAX_LENGTH_ID = 17;
   private static final boolean DEBUG = false;
   private final Map<String, CommonShell> idToExercise = new HashMap<String, CommonShell>();
   private final boolean isRecorder;
-  private ExerciseComparator sorter;
-  private boolean english;
+  private final ExerciseComparator sorter;
 
   /**
    * @param controller
@@ -52,7 +51,6 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
     this.verticalUnaccountedFor = verticalUnaccountedFor;
     this.isRecorder = isRecorder;
-    english = controller.getLanguage().equals(ENGLISH);
   }
 
   public void redraw() {
@@ -97,8 +95,8 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
   }
 
   /**
-   * @see mitll.langtest.client.list.PagingExerciseList#setUnaccountedForVertical(int)
    * @param v
+   * @see mitll.langtest.client.list.PagingExerciseList#setUnaccountedForVertical(int)
    */
   public void setUnaccountedForVertical(int v) {
     verticalUnaccountedFor = v;
@@ -136,12 +134,12 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     Column<CommonShell, SafeHtml> englishCol = getEnglishColumn();
     englishCol.setSortable(true);
 
-    String language = controller.getLanguage();
     addColumn(englishCol, new TextHeader(ENGLISH));
 
     Column<CommonShell, SafeHtml> flColumn = getFLColumn();
     flColumn.setSortable(true);
 
+    String language = controller.getLanguage();
     String headerForFL = language.equals(ENGLISH) ? "Meaning" : language;
     addColumn(flColumn, new TextHeader(headerForFL));
 
@@ -160,7 +158,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
 
     // Set the width of each column.
     table.setColumnWidth(englishCol, 50.0, Style.Unit.PCT);
-    table.setColumnWidth(flColumn, 50.0, Style.Unit.PCT);
+    table.setColumnWidth(flColumn,   50.0, Style.Unit.PCT);
   }
 
   private ColumnSortEvent.ListHandler<CommonShell> getFLSorter(Column<CommonShell, SafeHtml> flColumn, List<CommonShell> dataList) {
@@ -233,7 +231,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
 
       @Override
       public SafeHtml getValue(CommonShell shell) {
-        String columnText = shell.getEnglish();
+        String columnText = getEnglishText(shell);
         if (!controller.showCompleted()) {
           return getColumnToolTip(columnText);
         } else {
@@ -291,6 +289,10 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     return columnText;
   }
 
+  /**
+   * @return
+   * @see #addColumnsToTable()
+   */
   private Column<CommonShell, SafeHtml> getFLColumn() {
     return new Column<CommonShell, SafeHtml>(new ClickableCell()) {
       @Override
@@ -303,17 +305,14 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
 
       @Override
       public SafeHtml getValue(CommonShell shell) {
-        String toShow = shell.getForeignLanguage();
-        if (english) {
-          toShow = shell.getMeaning();
-        }
-        String columnText = truncate(toShow);
+        String columnText = truncate(getFLText(shell));
         return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
       }
     };
   }
 
-  protected void gotClickOnItem(final CommonShell e) {}
+  protected void gotClickOnItem(final CommonShell e) {
+  }
 
   @Override
   public void clear() {
