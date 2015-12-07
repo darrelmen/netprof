@@ -13,6 +13,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
+import mitll.langtest.client.custom.dialog.EditItem;
+import mitll.langtest.shared.CommonShell;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -21,8 +23,12 @@ import java.util.logging.Logger;
  * Created by go22670 on 9/16/14.
  */
 public class SimplePagingContainer<T> implements RequiresResize {
-  public static final boolean DEBUG = false;
   private final Logger logger = Logger.getLogger("SimplePagingContainer");
+
+  protected static final String ENGLISH = "English";
+  private final boolean english;
+
+  private static final boolean DEBUG = false;
   public static final int MAX_WIDTH = 320;
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
   private static final int VERTICAL_SLOP = 35;
@@ -40,6 +46,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
 
   public SimplePagingContainer(ExerciseController controller) {
     this.controller = controller;
+    english = controller.getLanguage().equals(ENGLISH);
   }
 
   /**
@@ -73,7 +80,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
     table.getElement().getStyle().setProperty("maxWidth", MAX_WIDTH + "px");
   }
 
-  protected void makeCellTable() {
+  private void makeCellTable() {
     CellTable.Resources o = chooseResources();
 
     this.table = makeCellTable(o);
@@ -85,7 +92,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
     CellTable.Resources o;
 
     if (controller.isRightAlignContent()) {   // so when we truncate long entries, the ... appears on the correct end
-     // logger.info("simplePaging : chooseResources RTL - content");
+      // logger.info("simplePaging : chooseResources RTL - content");
       o = GWT.create(RTLTableResources.class);
     } else {
       o = GWT.create(TableResources.class);
@@ -131,6 +138,30 @@ public class SimplePagingContainer<T> implements RequiresResize {
    */
   protected void addColumn(Column<T, SafeHtml> id2, Header<?> header) {
     table.addColumn(id2, header);
+  }
+
+  /**
+   * Confusing for english - english col should be foreign language for english,
+   * @param shell
+   * @return
+   */
+  protected String getEnglishText(CommonShell shell) {
+//    logger.info("getEnglishText " + shell.getID() + " en " + shell.getEnglish() + " fl " + shell.getForeignLanguage() + " mn " + shell.getMeaning());
+    return english && !shell.getEnglish().equals(EditItem.NEW_ITEM) ? shell.getForeignLanguage() : shell.getEnglish();
+  }
+
+  /**
+   * Confusing for english - fl text should be english or meaning if there is meaning
+   * @param shell
+   * @return
+   */
+  protected String getFLText(CommonShell shell) {
+    String toShow = shell.getForeignLanguage();
+    if (english && !shell.getEnglish().equals(EditItem.NEW_ITEM)) {
+      String meaning = shell.getMeaning();
+      toShow = meaning.isEmpty() ? shell.getEnglish() : meaning;
+    }
+    return toShow;
   }
 
   public void clear() {
