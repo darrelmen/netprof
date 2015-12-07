@@ -54,7 +54,7 @@ public class ExerciseShell implements IsSerializable, CommonShell {
     this.id = id;
   }
 
-  public String getTooltip() {
+/*  public String getTooltip() {
     String refSentence = getForeignLanguage();
     if (refSentence.length() > MAX_TOOLTIP_LENGTH) {
       refSentence = refSentence.substring(0, MAX_TOOLTIP_LENGTH);
@@ -63,7 +63,7 @@ public class ExerciseShell implements IsSerializable, CommonShell {
     String combined = englishSameAsForeign ? getEnglish() : getEnglish() + (refSentence.isEmpty() ? "" : " / " + refSentence);
     if (combined.isEmpty()) combined = refSentence;
     return combined;
-  }
+  }*/
 
   public String getEnglish() {
     return englishSentence;
@@ -113,6 +113,6 @@ public class ExerciseShell implements IsSerializable, CommonShell {
   }
 
   public String toString() {
-    return "Exercise id = " + getID() + "/" + getTooltip() + " states " + getState() + "/" + getSecondState();
+    return "Exercise id = " + getID() + "/" + getEnglish() + " states " + getState() + "/" + getSecondState();
   }
 }
