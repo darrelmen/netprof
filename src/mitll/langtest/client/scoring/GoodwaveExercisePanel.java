@@ -691,7 +691,6 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      */
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
       public MyPostAudioRecordButton(ExerciseController controller) {
-       // CommonExercise outerEx = outer.exercise;
         super(getLocalExercise(), controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index, true,
             RECORD_YOURSELF, controller.getProps().doClickAndHold() ? RELEASE_TO_STOP : "Stop");
       }
