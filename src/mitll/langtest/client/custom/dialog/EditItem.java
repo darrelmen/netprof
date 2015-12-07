@@ -47,7 +47,7 @@ import java.util.logging.Logger;
 public class EditItem {
   private final Logger logger = Logger.getLogger("EditItem");
 
-  private static final String NEW_ITEM = "*New Item*";
+  public static final String NEW_ITEM = "*New Item*";
   public static final String NEW_EXERCISE_ID = "NewExerciseID";
   private static final String EDIT_ITEM = "editItem";
 
