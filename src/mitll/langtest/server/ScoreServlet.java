@@ -159,10 +159,10 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #doGet(HttpServletRequest, HttpServletResponse)
    * @param toReturn
    * @param split1
    * @return
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private JSONObject getPhoneReport(JSONObject toReturn, String[] split1) {
     String user = "";
@@ -585,7 +585,8 @@ public class ScoreServlet extends DatabaseServlet {
         if (doFlashcard) {
           jsonForScore.put(IS_CORRECT, answer.isCorrect());
           jsonForScore.put(SAID_WORD, answer.isSaidAnswer());
-          jsonForScore.put("resultID", answer.getResultID());
+          long decodeResultID = answer.getResultID();
+          jsonForScore.put("resultID", decodeResultID);
 
           // attempt to get more feedback when we're too sensitive and match the unknown model
           if (!answer.isCorrect() && !answer.isSaidAnswer()) {
@@ -597,9 +598,14 @@ public class ScoreServlet extends DatabaseServlet {
             jsonForScore = getJsonForScore(pretestScore1, usePhoneToDisplay);
 
             // so we mark it correct if the score is above 50% on alignment
-            jsonForScore.put(IS_CORRECT, pretestScore1.getHydecScore() > ALIGNMENT_SCORE_CORRECT);
+            boolean isCorrect = pretestScore1.getHydecScore() > ALIGNMENT_SCORE_CORRECT;
+            jsonForScore.put(IS_CORRECT, isCorrect);
             jsonForScore.put(SCORE, pretestScore1.getHydecScore());
             jsonForScore.put(SAID_WORD, false);   // don't say they said the word - decode says they didn't
+
+            if (isCorrect) {
+              db.rememberScore(decodeResultID, pretestScore1);
+            }
           }
         }
       }
