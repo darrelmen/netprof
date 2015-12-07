@@ -84,15 +84,15 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
                             int toUse, int height, final int reqid) {
     if (path == null) return;
     //System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
-    boolean wasVisible = wordTranscript.image.isVisible();
+    boolean wasVisible = wordTranscript.isVisible();
 
     // only show the spinning icon if it's going to take awhile
     final Timer t = new Timer() {
       @Override
       public void run() {
-        wordTranscript.image.setUrl(LangTest.LANGTEST_IMAGES + "animated_progress44.gif");
-        wordTranscript.image.setVisible(true);
-        phoneTranscript.image.setVisible(false);
+        wordTranscript.setUrl(LangTest.LANGTEST_IMAGES + "animated_progress44.gif");
+       // wordTranscript.getImage().setVisible(true);
+        phoneTranscript.setVisible(false);
       }
     };
 
@@ -107,8 +107,8 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
         //  Window.alert("Server error -- couldn't contact server.");
         //}
         //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " failure? "+ caught.getMessage());
-        wordTranscript.image.setVisible(false);
-        phoneTranscript.image.setVisible(false);
+        wordTranscript.setVisible(false);
+        phoneTranscript.setVisible(false);
       }
 
       public void onSuccess(PretestScore result) {
