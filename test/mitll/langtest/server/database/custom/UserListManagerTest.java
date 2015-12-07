@@ -544,12 +544,9 @@ public class UserListManagerTest {
     String englishSentence = exercise.getEnglish();
     assertNotNull("huh? exercise " + exercise + " has no english?", englishSentence);
     assertTrue("english is " + englishSentence, englishSentence.equals(ENGLISH));
-    assertTrue(exercise.getTooltip().equals(ENGLISH));
 
     next.toUserExercise().setEnglish(CHANGED);
     assertTrue(next.getEnglish().equals(CHANGED));
-    assertTrue(!next.getTooltip().isEmpty());
-    assertTrue(next.getTooltip().equals(CHANGED));
 
     userListManager.editItem(next.toUserExercise(), false, "");
 
@@ -568,7 +565,6 @@ public class UserListManagerTest {
 
   private UserExercise addExercise(User owner, UserListManager userListManager, long listid, UserList testList) {
     UserExercise english = createNewItem(owner.getId());
-    assertTrue(!english.getTooltip().isEmpty());
     userListManager.reallyCreateNewItem(listid, english, "");
 
     // have to go back to database to get user list
@@ -578,11 +574,7 @@ public class UserListManagerTest {
     testList = userListManager.getUserListByID(listid, new ArrayList<String>());
     Collection<CommonUserExercise> exercises = testList.getExercises();
     assertTrue(exercises.contains(english));
-    // tooltip should never be empty
-    for (CommonUserExercise ue : exercises) {
-      //logger.debug("\t" + ue.getTooltip());
-      assertTrue(!ue.getTooltip().isEmpty());
-    }
+
     return english;
   }
 
