@@ -648,7 +648,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
       sentence = sentence.toUpperCase();  // hack for English
     }
 
-    ASR asrScoring = useOldSchool || isEnglishSite() ? oldschoolScoring : getASRScoring();
+    ASR asrScoring = useOldSchool ? oldschoolScoring : getASRScoring();
 
     logger.info("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
 
@@ -740,6 +740,10 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
     }
   }
 
+  /**
+   * @see #getASRScoreForAudio(int, String, String, Collection, int, int, boolean, boolean, String, boolean, String, Result, boolean, boolean)
+   * @return
+   */
   private ASR getASRScoring() {
     return webserviceScoring;
   }
