@@ -82,9 +82,9 @@ public abstract class ScoringAudioPanel extends AudioPanel {
 
   //PopupPanel popupPanel;
   private void addClickHandlers() {
-    this.phones.image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-    this.phones.image.addClickHandler(new TranscriptEventClickHandler(this.phones.image, NetPronImageType.PHONE_TRANSCRIPT));
-    final Image image = this.words.image;
+    this.phones.getImage().getElement().getStyle().setCursor(Style.Cursor.POINTER);
+    this.phones.getImage().addClickHandler(new TranscriptEventClickHandler(this.phones.getImage(), NetPronImageType.PHONE_TRANSCRIPT));
+    final Image image = this.words.getImage();
     image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
     image.addClickHandler(new TranscriptEventClickHandler(image,NetPronImageType.WORD_TRANSCRIPT));
 
@@ -182,14 +182,14 @@ public abstract class ScoringAudioPanel extends AudioPanel {
       showImageAndCheck(words, wordTranscript);
     }
     else {
-      wordTranscript.image.setUrl(IMAGES_REDX_PNG);
+      wordTranscript.getImage().setUrl(IMAGES_REDX_PNG);
     }
     String phones = netPronImageTypeStringMap.get(NetPronImageType.PHONE_TRANSCRIPT);
     if (phones != null) {
       showImageAndCheck(phones, phoneTranscript);
     }
     else {
-      phoneTranscript.image.setUrl(IMAGES_REDX_PNG);
+      phoneTranscript.getImage().setUrl(IMAGES_REDX_PNG);
     }
     if (!scoredBefore && scoreListener != null) {
       scoreListener.gotScore(result, showOnlyOneExercise, path);
@@ -198,8 +198,8 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   }
 
   private void showImageAndCheck(String imageURL, ImageAndCheck wordTranscript) {
-    wordTranscript.image.setUrl(imageURL);
-    wordTranscript.image.setVisible(true);
+    wordTranscript.getImage().setUrl(imageURL);
+    wordTranscript.getImage().setVisible(true);
     //if (ADD_CHECKBOX) wordTranscript.getCheck().setVisible(true);
   }
 
@@ -207,7 +207,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
     //int index = 0;
     List<TranscriptSegment> transcriptSegments = result.getsTypeToEndTimes().get(type);
     float wavFileLengthInSeconds = result.getWavFileLengthInSeconds();//transcriptSegments.get(transcriptSegments.size() - 1);
-    float horizOffset = (float) eventXPos / (float) phones.image.getWidth();
+    float horizOffset = (float) eventXPos / (float) phones.getImage().getWidth();
     float mouseClickTime = wavFileLengthInSeconds * horizOffset;
     if (debug) System.out.println("got client at " + eventXPos + " or " + horizOffset + " or time " + mouseClickTime +
       " duration " + wavFileLengthInSeconds + " secs or " + wavFileLengthInSeconds * 1000 + " millis");
