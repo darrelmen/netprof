@@ -172,8 +172,6 @@ class EditableExercise extends NewUserExercise {
     return row;
   }
 
-  protected String getEnglishLabel() {  return ENGLISH_LABEL;  }
-
   /**
    * @param container
    */
