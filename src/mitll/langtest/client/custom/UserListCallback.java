@@ -111,7 +111,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
         for (UserList ul : result) {
           for (CommonExercise ex : ul.getExercises()) {
             if (ex.getID().equals(optionalExercise)) {
-              logger.info("ex " +optionalExercise + " is on " + ul);
+              logger.info("onSuccess ex " +optionalExercise + " is on " + ul);
               listManager.showList(ul, contentPanel, instanceName, ex);
               break;
             }
@@ -131,8 +131,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
   private void selectPreviousList(Collection<UserList> result) {
     String clickedUserList = listManager.getStorage().getValue(Navigation.CLICKED_USER_LIST);
     if (clickedUserList != null && !clickedUserList.isEmpty()) {
-      long id = Long.parseLong(clickedUserList);
-      showList(result, id);
+      showList(result, Long.parseLong(clickedUserList));
     }
   }
 
