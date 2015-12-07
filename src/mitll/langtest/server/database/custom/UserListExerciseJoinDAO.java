@@ -30,8 +30,8 @@ public class UserListExerciseJoinDAO extends DAO {
   public static final String USER_EXERCISE_LIST_EXERCISE = "userexerciselist_exercise";
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
    * @param database
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
    */
   public UserListExerciseJoinDAO(Database database) {
     super(database);
@@ -42,35 +42,35 @@ public class UserListExerciseJoinDAO extends DAO {
     }
   }
 
-  void createUserListTable(Database database) throws SQLException {
+  private void createUserListTable(Database database) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
-      USER_EXERCISE_LIST_EXERCISE +
-      " (" +
-      UNIQUEID +
-      " IDENTITY, " +
-      USERLISTID +
-      " LONG, " +
-      EXERCISEID +
-      " VARCHAR , " +
-      "FOREIGN KEY(" +
-      USERLISTID +
-      ") REFERENCES " +
-      UserListDAO.USER_EXERCISE_LIST +
-      "(" +
-      UNIQUEID +
-      ")" +    // user lists can be combinations of predefined and user defined exercises
+        USER_EXERCISE_LIST_EXERCISE +
+        " (" +
+        UNIQUEID +
+        " IDENTITY, " +
+        USERLISTID +
+        " LONG, " +
+        EXERCISEID +
+        " VARCHAR , " +
+        "FOREIGN KEY(" +
+        USERLISTID +
+        ") REFERENCES " +
+        UserListDAO.USER_EXERCISE_LIST +
+        "(" +
+        UNIQUEID +
+        ")" +    // user lists can be combinations of predefined and user defined exercises
  /*       "," +
       "FOREIGN KEY(exerciseid) REFERENCES " +
       UserExerciseDAO.USEREXERCISE +
       "(uniqueid)" +*/
-      ")");
+        ")");
     finish(database, connection, statement);
   }
 
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
-   * <p/>
+   * <p>
    * Uses return generated keys to get the user id
    *
    * @see UserListManager#addItemToList(long, mitll.langtest.shared.custom.UserExercise)
@@ -82,13 +82,13 @@ public class UserListExerciseJoinDAO extends DAO {
 
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
-        "INSERT INTO " + USER_EXERCISE_LIST_EXERCISE +
-          "(" +
-          USERLISTID +
-          "," +
-          EXERCISEID +
-          ") " +
-          "VALUES(?,?);");
+          "INSERT INTO " + USER_EXERCISE_LIST_EXERCISE +
+              "(" +
+              USERLISTID +
+              "," +
+              EXERCISEID +
+              ") " +
+              "VALUES(?,?);");
       int i = 1;
       statement.setLong(i++, userList.getUniqueID());
       statement.setString(i++, uniqueID);
@@ -111,23 +111,23 @@ public class UserListExerciseJoinDAO extends DAO {
   }
 
   /**
-   * @see UserListManager#deleteItemFromList(long, String, java.util.Collection)
    * @param listid
    * @param exid
    * @return
+   * @see UserListManager#deleteItemFromList(long, String, java.util.Collection)
    */
   public boolean remove(long listid, String exid) {
     String sql = getRemoveSQL(listid, exid);
-    return doSqlOn(sql,USER_EXERCISE_LIST_EXERCISE);
+    return doSqlOn(sql, USER_EXERCISE_LIST_EXERCISE);
   }
 
   private String getRemoveSQL(long listid, String exid) {
-    return "DELETE FROM " + USER_EXERCISE_LIST_EXERCISE +" WHERE " +
-      USERLISTID +
-      "=" + listid +
-      " AND " +
-      EXERCISEID +
-      "='" + exid +
-      "'; ";
+    return "DELETE FROM " + USER_EXERCISE_LIST_EXERCISE + " WHERE " +
+        USERLISTID +
+        "=" + listid +
+        " AND " +
+        EXERCISEID +
+        "='" + exid +
+        "'; ";
   }
 }

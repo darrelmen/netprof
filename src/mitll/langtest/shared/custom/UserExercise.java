@@ -106,7 +106,8 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     this.englishSentence = exercise.getEnglish();
     this.foreignLanguage = exercise.getRefSentence();
     this.transliteration = exercise.getTransliteration();
-    //setTooltip();
+    this.meaning = exercise.getMeaning();
+
     setFieldToAnnotation(exercise.getFieldToAnnotation());
     setUnitToValue(exercise.getUnitToValue());
     setState(exercise.getState());
@@ -127,15 +128,15 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#addNew
    * @deprecated ideally we shouldn't have to do this
    */
-  public Exercise toExercise() {
+/*  public Exercise toExercise() {
     Exercise exercise = new Exercise(getID(), getEnglish(), getForeignLanguage());
     copyFields(exercise);
     copyAudio(exercise);
 
     return exercise;
-  }
+  }*/
 
-  private void copyFields(Exercise imported) {
+/*  private void copyFields(Exercise imported) {
     AudioAttribute slowSpeed = getSlowSpeed();
     if (slowSpeed != null) {
       imported.addAudio(slowSpeed);
@@ -146,7 +147,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     imported.setFieldToAnnotation(getFieldToAnnotation());
     imported.setContext(getContext());
     imported.setContextTranslation(getContextTranslation());
-  }
+  }*/
 
   @Override
   public String getRefSentence() {
@@ -164,14 +165,14 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   }
 
   /**
-   * Consider how to do this better -- not consistent with Exercise meaning...
+   * TODO : Consider how to do this better -- not consistent with Exercise meaning...
    *
    * @return
    */
-  @Override
+/*  @Override
   public String getMeaning() {
-    return "";
-  }
+    return meaning;
+  }*/
 
   /**
    * @return
@@ -180,14 +181,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   @Override
   public String getContent() {
     return "";
-  }
-
-  /**
-   * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShellsCombined(Collection)
-   */
-  public CommonShell getShellCombinedTooltip() {
-    return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage);
   }
 
   @Override
@@ -311,7 +304,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
         " creator " + getCreator() +
         " : English '" + getEnglish() + "', " +
         "foreign language '" + getForeignLanguage() + "'" + " (" + getTransliteration() + ") " +
-        "meaning " + getMeaning() +
+        "meaning '" + getMeaning() + "' " +
         "context '" + getContext() + "' " +
         "contextTranslation '" + getContextTranslation() + "' " +
         "tooltip '" + getTooltip() +
