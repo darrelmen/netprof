@@ -11,7 +11,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public interface CommonShell extends IsSerializable {
   String getID();
-  String getTooltip();
+  String getTooltip(); // TODO REmove
   STATE getState();
   void setState(STATE state);
 
