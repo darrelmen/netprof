@@ -6,6 +6,7 @@ package mitll.langtest.shared.custom;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.Navigation;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.CommonUserExercise;
 import mitll.langtest.shared.ExerciseShell;
 import mitll.langtest.shared.User;
@@ -63,6 +64,11 @@ public class UserList extends ExerciseShell {
     this(ul.uniqueID, ul.getCreator(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate());
   }
 
+  /**
+   * @see mitll.langtest.client.custom.dialog.EditItem#makeExerciseList(Panel, String, UserList, UserList, boolean)
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterItemCreated(UserExercise, UserList, ListInterface, Panel)
+   * @param toAdd
+   */
   public void addExercise(CommonUserExercise toAdd) { exercises.add(toAdd);  }
   public void addExerciseAfter(CommonUserExercise after, CommonUserExercise toAdd) {
     int index = exercises.indexOf(after);
@@ -120,15 +126,6 @@ public class UserList extends ExerciseShell {
   public boolean contains(CommonUserExercise userExercise) {
     return getExercises().contains(userExercise);
   }
-/*  public boolean contains(String id) {
-    for (CommonUserExercise ue : exercises) {
-      if (id.equals(ue.getID())) {
-        return true;
-      }
-    }
-    return false;
-  }*/
-
   public boolean isPrivate() {
     return isPrivate;
   }
@@ -153,5 +150,4 @@ public class UserList extends ExerciseShell {
       " :"+
       " with " + getExercises().size() + " exercises.";
   }
-
 }
