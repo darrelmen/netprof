@@ -25,7 +25,7 @@ import java.util.*;
 public class RefResultDecoder {
   private static final Logger logger = Logger.getLogger(RefResultDecoder.class);
   public static final boolean DO_REF_DECODE = true;
-  private static final boolean RUN_MISSING_INFO = false;
+//  private static final boolean RUN_MISSING_INFO = false;
 
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
@@ -235,6 +235,7 @@ public class RefResultDecoder {
    */
   private int doDecode(Set<String> decodedFiles, CommonExercise exercise, Collection<AudioAttribute> audioAttributes) {
     int count = 0;
+    boolean doHydec = serverProps.shouldDoDecodeWithHydec();
     List<AudioAttribute> toDecode = new ArrayList<AudioAttribute>();
     for (AudioAttribute attribute : audioAttributes) {
       if (!attribute.isExampleSentence()) {
@@ -248,7 +249,7 @@ public class RefResultDecoder {
       if (stopDecode) return 0;
 
       try {
-        audioFileHelper.decodeOneAttribute(exercise, attribute);
+        audioFileHelper.decodeOneAttribute(exercise, attribute, doHydec);
         sleep(2000);
         count++;
       } catch (Exception e) {
