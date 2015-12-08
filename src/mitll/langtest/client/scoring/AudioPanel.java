@@ -39,9 +39,9 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioPanel extends VerticalPanel implements RequiresResize {
+  private Logger logger = Logger.getLogger("AudioPanel");
 
   public static final int LEFT_COLUMN_WIDTH = PagingContainer.MAX_WIDTH;
-  private Logger logger = Logger.getLogger("AudioPanel");
 
   static final int MIN_WIDTH = 256;
   private static final float WAVEFORM_HEIGHT = 80f;//96;
