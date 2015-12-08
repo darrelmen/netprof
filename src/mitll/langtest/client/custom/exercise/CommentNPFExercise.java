@@ -45,8 +45,9 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class CommentNPFExercise extends NPFExercise {
-  public static final String CONTEXT = "context";
-  private Logger logger = Logger.getLogger("CommentNPFExercise");
+  private final Logger logger = Logger.getLogger("CommentNPFExercise");
+
+  private static final String CONTEXT = "context";
   private static final String CONTEXT_SENTENCE = "Context Sentence";
   private static final String DEFAULT = "Default";
 
@@ -55,7 +56,7 @@ public class CommentNPFExercise extends NPFExercise {
   private static final String F = "F";
   public static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";//"\\p{P}";
   public static final String SPACE_REGEX = " ";
-  public static final String REF_AUDIO = "refAudio";
+  private static final String REF_AUDIO = "refAudio";
 
   private AudioAttribute defaultAudio, maleAudio, femaleAudio;
   private PlayAudioPanel contextPlay;
@@ -161,6 +162,8 @@ public class CommentNPFExercise extends NPFExercise {
    * <p>
    * TODO : don't do this - make spans with different colors
    *
+   * Worries about lower case/upper case mismatch.
+   *
    * @param e
    * @param context
    * @return
@@ -168,11 +171,14 @@ public class CommentNPFExercise extends NPFExercise {
    */
   private String highlightVocabItemInContext(CommonExercise e, String context) {
     String trim = e.getRefSentence().trim();
-    // String trim = ref;
     String toFind = removePunct(trim);
 
     // todone split on spaces, find matching words if no contigious overlap
     int i = context.indexOf(toFind);
+    if (i == -1) { // maybe mixed case - 'where' in Where is the desk?
+      String str = toFind.toLowerCase();
+      i = context.toLowerCase().indexOf(str);
+    }
     int end = i + toFind.length();
     if (i > -1) {
       //log("marking underline from " + i + " to " + end + " for '" + toFind +  "' in '" + trim + "'");
@@ -193,9 +199,10 @@ public class CommentNPFExercise extends NPFExercise {
           builder.append("<u>");
           builder.append(context.substring(startToken, endToken = startToken + token.length()));
           builder.append("</u>");
-        } else {
-          //log("from " + endToken + " couldn't find token '" + token + "' len " + token.length() + " in '" + context + "'");
         }
+        //else {
+          //log("from " + endToken + " couldn't find token '" + token + "' len " + token.length() + " in '" + context + "'");
+        //}
       }
       builder.append(context.substring(endToken));
       // System.out.println("before " + context + " after " + builder.toString());
@@ -203,26 +210,6 @@ public class CommentNPFExercise extends NPFExercise {
     }
     return context;
   }
-
-  /*
-  private void log(String message) {
-    System.out.println(message);
-    console(message);
-  }
-
-  private void console(String message) {
-    int ieVersion = BrowserCheck.getIEVersion();
-    if (ieVersion == -1 || ieVersion > 9) {
-      consoleLog(message);
-    }
-  }
-
-  private native static void consoleLog(String message) */
-/*-{
-      console.log("LangTest:" + message);
-  }-*//*
-;
-*/
 
   /**
    * For context audio!
@@ -314,10 +301,8 @@ public class CommentNPFExercise extends NPFExercise {
         @Override
         public void onClick(ClickEvent event) {
           if (choice.equals(M)) {
-            //System.out.println("playing male audio! " + maleAudio.getAudioRef());
             contextPlay.playAudio(maleAudio.getAudioRef());
           } else if (choice.equals(F)) {
-            //System.out.println("playing female audio! " + femaleAudio.getAudioRef());
             contextPlay.playAudio(femaleAudio.getAudioRef());
           } else {
             contextPlay.playAudio(defaultAudio.getAudioRef());
