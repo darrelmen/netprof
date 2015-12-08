@@ -170,9 +170,8 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
     final Timer t = new Timer() {
       @Override
       public void run() {
-        wordTranscript.getImage().setUrl(LangTest.LANGTEST_IMAGES + "animated_progress44.gif");
-        wordTranscript.getImage().setVisible(true);
-        phoneTranscript.getImage().setVisible(false);
+        wordTranscript.setUrl(LangTest.LANGTEST_IMAGES + "animated_progress44.gif");
+        phoneTranscript.setVisible(false);
       }
     };
 
