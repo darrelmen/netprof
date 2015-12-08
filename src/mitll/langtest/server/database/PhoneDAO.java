@@ -37,8 +37,7 @@ public class PhoneDAO extends DAO {
   private static final String SCORE = "score";
 
   private static final boolean DEBUG = false;
-  private static final int INITIAL_SAMPLE_PHONES = 30;
-  public static final String RID1 = "RID";
+  private static final String RID1 = "RID";
   private ParseResultJson parseResultJson;
 
   /**
@@ -60,7 +59,7 @@ public class PhoneDAO extends DAO {
   }
 
   public static class Phone {
-    long id;
+    //long id;
     final long wid;
     final long rid;
     final String phone;
@@ -76,7 +75,8 @@ public class PhoneDAO extends DAO {
     }
 
     public String toString() {
-      return "# " + id + " rid " + rid + " wid " + wid + " : " + phone + " at " + seq + " score " + score;
+      return // "# " + id +
+          " rid " + rid + " wid " + wid + " : " + phone + " at " + seq + " score " + score;
     }
   }
 
@@ -193,6 +193,11 @@ public class PhoneDAO extends DAO {
     return worstPhonesAndScore;
   }
 
+  /**
+   * @param worstPhonesAndScore
+   * @return
+   * @see #getWorstPhonesJson(long, List, Map)
+   */
   private JSONObject getWorstPhonesJson(PhoneReport worstPhonesAndScore) {
     JSONObject jsonObject = new JSONObject();
 
@@ -318,6 +323,7 @@ public class PhoneDAO extends DAO {
    * @return
    * @throws SQLException
    * @see #getWorstPhonesForResults(long, List, Map)
+   * @see #getWorstPhones(long, List, Map)
    */
   private PhoneReport getPhoneReport(String sql, Map<String, String> idToRef, boolean addTranscript) throws SQLException {
     // logger.debug("getPhoneReport query is " + sql);
@@ -331,7 +337,7 @@ public class PhoneDAO extends DAO {
     String currentExercise = "";
     Map<String, List<WordAndScore>> phoneToWordAndScore = new HashMap<String, List<WordAndScore>>();
     Map<String, Set<Long>> phoneToRID = new HashMap<String, Set<Long>>();
-    Map<String, List<PhoneAndScore>> phoneToTimeStamp = new HashMap<String, List<PhoneAndScore>>();
+    //  Map<String, List<PhoneAndScore>> phoneToTimeStamp = new HashMap<String, List<PhoneAndScore>>();
 
     float totalScore = 0;
     float totalItems = 0;
@@ -377,19 +383,24 @@ public class PhoneDAO extends DAO {
       scores.add(phoneAndScore);
 
       List<WordAndScore> wordAndScores = phoneToWordAndScore.get(phone);
-      Set<Long> ridsForPhone = phoneToRID.get(phone);
+      //Set<Long> ridsForPhone = phoneToRID.get(phone);
       if (wordAndScores == null) {
         phoneToWordAndScore.put(phone, wordAndScores = new ArrayList<WordAndScore>());
-        phoneToRID.put(phone, ridsForPhone = new HashSet<Long>());
+        // phoneToRID.put(phone, ridsForPhone = new HashSet<Long>());
       }
 
       WordAndScore wordAndScore = new WordAndScore(exid, word, phoneScore, rid, wseq, seq, trimPathForWebPage(audioAnswer),
           idToRef.get(exid), scoreJson, resultTime);
-      if (!ridsForPhone.contains(rid)) { // get rid of duplicates
-        wordAndScores.add(wordAndScore);
-        phoneAndScore.setWordAndScore(wordAndScore);
-      }
-      ridsForPhone.add(rid);
+
+      //if (!ridsForPhone.contains(rid)) { // get rid of duplicates
+      wordAndScores.add(wordAndScore);
+      phoneAndScore.setWordAndScore(wordAndScore);
+      // }
+      // else {
+      //   if (phone.equals("aa")) logger.info("skip " + wordAndScore);
+      // }
+
+      //ridsForPhone.add(rid);
 
       if (addTranscript) {
         Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = stringToMap.get(scoreJson);
@@ -512,7 +523,7 @@ public class PhoneDAO extends DAO {
       phoneToAvg.put(phone, new PhoneStats(size, phoneTimeSeries));
     }
 
-    if (DEBUG) logger.debug("phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
+    //if (DEBUG || true) logger.debug("phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
 
     List<String> sorted = new ArrayList<String>(phoneToAvg.keySet());
 
@@ -520,12 +531,22 @@ public class PhoneDAO extends DAO {
 
     setSessions(phoneToAvg);
 
+    if (DEBUG) logger.debug("phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
+
     Collections.sort(sorted, new Comparator<String>() {
       @Override
       public int compare(String o1, String o2) {
         PhoneStats first = phoneToAvg.get(o1);
         PhoneStats second = phoneToAvg.get(o2);
-        return Integer.valueOf(first.getCurrent()).compareTo(second.getCurrent());
+        int current = first.getCurrent();
+        int current1 = second.getCurrent();
+        //if (current == current1) {
+        //  logger.info("got same " + current + " for " + o1 + " and " + o2);
+        //} else {
+          // logger.info("\tgot " + current + " for " + o1 + " and " + current1 + " for "+ o2);
+        //}
+        int i = Integer.valueOf(current).compareTo(current1);
+        return i == 0 ? o1.compareTo(o2) : i;
       }
     });
 
@@ -578,7 +599,7 @@ public class PhoneDAO extends DAO {
       float moving = total / count;
 
       WordAndScore wordAndScore = bs.getWordAndScore();
-    //  if (wordAndScore == null) logger.error("huh? word and score is null for " + bs);
+      //  if (wordAndScore == null) logger.error("huh? word and score is null for " + bs);
       TimeAndScore timeAndScore = new TimeAndScore("", bs.getTimestamp(), pronScore, moving, wordAndScore);
       phoneTimeSeries.add(timeAndScore);
     }
