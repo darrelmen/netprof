@@ -263,6 +263,7 @@ public class JsonSupport {
    Sort word by score asc
    * @return
    * @see mitll.langtest.server.ScoreServlet#getPhoneReport
+   * @see DatabaseImpl#getJsonPhoneReport(long, Map)
    */
   public JSONObject getJsonPhoneReport(long userid, Map<String, Collection<String>> typeToValues) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToValues);
