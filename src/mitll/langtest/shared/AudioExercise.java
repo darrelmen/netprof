@@ -306,11 +306,13 @@ public class AudioExercise extends ExerciseShell {
   public List<AudioAttribute> getDefaultUserAudio() {
     List<AudioAttribute> males = new ArrayList<AudioAttribute>();
     for (AudioAttribute audioAttribute : audioAttributes.values()) {
-      MiniUser user = audioAttribute.getUser();
-      if (user == null) {
-        System.err.println("getByGender : huh? there's no user attached to " + audioAttribute);
-      } else if (user.isUnknownDefault()) {
-        males.add(audioAttribute);
+      if (audioAttribute.isValid()) {
+        MiniUser user = audioAttribute.getUser();
+        if (user == null) {
+          //System.err.println("getByGender : huh? there's no user attached to " + audioAttribute);
+        } else if (user.isUnknownDefault()) {
+          males.add(audioAttribute);
+        }
       }
     }
     return males;
@@ -332,10 +334,12 @@ public class AudioExercise extends ExerciseShell {
     long timestamp = 0;
     MiniUser bothLatest = null;
     MiniUser latest = null;
-    MiniUser defaultUser = null;
+    //MiniUser defaultUser = null;
     for (Map.Entry<MiniUser, List<AudioAttribute>> pair : userToAudio.entrySet()) {
       boolean reg = false, slow = false;
       for (AudioAttribute audioAttribute : pair.getValue()) {
+        if (!audioAttribute.isValid()) continue;
+
         MiniUser user = pair.getKey();
         //System.out.println("\t\tgetMostRecentAudio user " + user + "" + (user.isDefault() ? " DEFAULT " : ""));
 
@@ -360,7 +364,7 @@ public class AudioExercise extends ExerciseShell {
           }
         } else {
           //System.out.println("\t\tgetMostRecentAudio found default user " + user);
-          defaultUser = user;
+          //defaultUser = user;
         }
       }
     }
@@ -371,10 +375,12 @@ public class AudioExercise extends ExerciseShell {
 
     Map<MiniUser, List<AudioAttribute>> userToAudioSingle = new HashMap<MiniUser, List<AudioAttribute>>();
     if (toUse == null && !userToAudio.isEmpty()) {
+/*
       if (userToAudio.size() > 1 || defaultUser == null) {
         System.err.println("AudioExercise.getMostRecentAudio : huh? user->audio map size=" + userToAudio.size() +
             " was " + userToAudio + " but couldn't find latest user?");
       }
+*/
     }
     else {
       List<AudioAttribute> value = userToAudio.get(toUse);
