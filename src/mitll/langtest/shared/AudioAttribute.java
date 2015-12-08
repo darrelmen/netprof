@@ -22,6 +22,8 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioAttribute implements IsSerializable, UserAndTime {
+  private static final String FILE_MISSING = "FILE_MISSING";
+
   private static final String SPEED = "speed";
   public static final String SLOW = "slow";
   public static final String REGULAR = "regular";
@@ -91,6 +93,10 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     this(audioRef);
     this.setUser(miniUser);
     this.userid = miniUser.getId();
+  }
+
+  public boolean isValid() {
+    return audioRef != null && !audioRef.contains(FILE_MISSING);
   }
 
   public String getExid() {
