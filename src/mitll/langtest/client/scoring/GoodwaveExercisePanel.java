@@ -51,6 +51,9 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
+  public static final String MANDARIN = "Mandarin";
+  public static final String KOREAN = "Korean";
+  public static final String JAPANESE = "Japanese";
   private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 //  private static final String DEFAULT = "Default";
 
@@ -407,7 +410,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   private void getClickableWords(String label, String value, Panel nameValueRow) {
     String language = controller.getLanguage();
-    boolean isMandarinOrKorean = language.equalsIgnoreCase("Mandarin") || language.equals("Korean");
+    boolean isMandarinOrKorean = hasClickableCharacters(language);
 
     DivWidget horizontal = new DivWidget();
     horizontal.setWidth("80%");
@@ -436,6 +439,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     nameValueRow.add(horizontal);
     horizontal.addStyleName("leftFiveMargin");
+  }
+
+  private boolean hasClickableCharacters(String language) {
+    return language.equalsIgnoreCase(MANDARIN) || language.equals(KOREAN) || language.equalsIgnoreCase(JAPANESE);
   }
 
   private InlineHTML makeClickableText(String label, String value, final String html, boolean chineseCharacter) {
