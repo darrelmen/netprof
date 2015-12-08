@@ -28,6 +28,8 @@ public class ExerciseTrie extends Trie<CommonExercise> {
   private static final int TOOLONG_TO_WAIT = 150;
   private static final String MANDARIN = "Mandarin";
   private static final String ENGLISH = "English";
+  private static final String KOREAN = "Korean";
+  private static final String JAPANESE = "Japanese";
 
   /**
    * Tokens are normalized to lower case.
@@ -47,9 +49,11 @@ public class ExerciseTrie extends Trie<CommonExercise> {
 
     long then = System.currentTimeMillis();
     boolean isMandarin = language.equalsIgnoreCase(MANDARIN);
-    boolean isKorean   = language.equalsIgnoreCase("Korean");
+    boolean isKorean   = language.equalsIgnoreCase(KOREAN);
+    boolean isJapanese = language.equalsIgnoreCase(JAPANESE);
+    boolean hasClickableCharacters = isMandarin || isKorean || isJapanese;
 
-    logger.warn("lang " + language + " looking at " + exercisesForState.size());
+    //logger.debug("lang " + language + " looking at " + exercisesForState.size());
 
     for (CommonExercise exercise : exercisesForState) {
       String english = exercise.getEnglish();
@@ -74,7 +78,7 @@ public class ExerciseTrie extends Trie<CommonExercise> {
             addEntry(exercise, removeDiacritics(token));
           }
 
-          if (isMandarin || isKorean) {
+          if (hasClickableCharacters) {
             final CharacterIterator it = new StringCharacterIterator(fl);
 
             for(char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
