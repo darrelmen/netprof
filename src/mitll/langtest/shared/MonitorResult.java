@@ -116,9 +116,7 @@ public class MonitorResult implements IsSerializable {
     return answer;
   }
 
-  public boolean isValid() {
-    return valid;
-  }
+  public boolean isValid() { return valid; }
 
   public long getTimestamp() {
     return timestamp;
