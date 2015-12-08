@@ -16,7 +16,6 @@ import java.util.logging.Logger;
  */
 public class PhoneStats implements Serializable {
  // private final Logger logger = Logger.getLogger("PhoneStats");
-
   private int count;
   private transient List<TimeAndScore> timeSeries;
   private List<PhoneSession> sessions;
@@ -68,7 +67,6 @@ public class PhoneStats implements Serializable {
     return count;
   }
 
-
   public int getCount(List<PhoneSession> sessions2) {
     if (sessions2 == null || sessions2.isEmpty()) return 0;
     int total =0;
@@ -81,7 +79,8 @@ public class PhoneStats implements Serializable {
   }
 
   public String toString() {
-    return "count " + count + " initial " + getInitial() + " current " + getCurrent() + " num sessions " + getSessions().size() + " : " + getSessions();
+    return "count " + count + " initial " + getInitial() + " current " + getCurrent() +
+        (getSessions() != null ? " num sessions " + getSessions().size() + " : " + getSessions() : "");
   }
 
   public void setSessions(List<PhoneSession> sessions) {
