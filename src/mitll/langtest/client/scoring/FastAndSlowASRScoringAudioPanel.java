@@ -22,11 +22,14 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.MiniUser;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 10/16/15.
  */
 public class FastAndSlowASRScoringAudioPanel extends ASRScoringAudioPanel {
+  private Logger logger = null;
+
   private static final String DEFAULT = "Default";
 
   private static final String GROUP = "group";
@@ -67,6 +70,8 @@ public class FastAndSlowASRScoringAudioPanel extends ASRScoringAudioPanel {
    */
   @Override
   protected Widget getAfterPlayWidget() {
+    logger = Logger.getLogger("FastAndSlowASRScoringAudioPanel");
+
     final Panel rightSide = new VerticalPanel();
 
     rightSide.getElement().setId("beforePlayWidget_verticalPanel");
@@ -78,9 +83,9 @@ public class FastAndSlowASRScoringAudioPanel extends ASRScoringAudioPanel {
     } else {
       // add gender choices
       Set<Long> preferredVoices = controller.getProps().getPreferredVoices();
-      Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
+      Map<MiniUser, List<AudioAttribute>> malesMap   = exercise.getMostRecentAudio(true, preferredVoices);
       Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
-      Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
+      Collection<AudioAttribute> defaultUserAudio    = exercise.getDefaultUserAudio();
 
       List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
       boolean maleEmpty = maleUsers.isEmpty();
@@ -97,7 +102,6 @@ public class FastAndSlowASRScoringAudioPanel extends ASRScoringAudioPanel {
       // first choice here is for default audio (where we don't know the gender)
       final Collection<AudioAttribute> initialAudioChoices = maleEmpty ?
           femaleEmpty ? audioAttributes : femalesMap.get(femaleUsers.get(0)) : malesMap.get(maleUsers.get(0));
-      //System.out.println("getAfterPlayWidget.initialAudioChoices  " + initialAudioChoices);
 
       addRegularAndSlow(rightSide, initialAudioChoices, instance);
 
@@ -203,7 +207,10 @@ public class FastAndSlowASRScoringAudioPanel extends ASRScoringAudioPanel {
     RadioButton slow = null;
     AudioAttribute slowAttr = null;
     for (final AudioAttribute audioAttribute : audioAttributes) {
+      if (!audioAttribute.isValid()) continue;
+
       String display = audioAttribute.getDisplay();
+
       // System.out.println("attri " + audioAttribute + " display " +display);
       final RadioButton radio = new RadioButton(GROUP + "_" + exerciseID + "_" + instance, display);
       radio.getElement().setId("Radio_" + display);
@@ -248,7 +255,7 @@ public class FastAndSlowASRScoringAudioPanel extends ASRScoringAudioPanel {
     }
     AudioAttribute firstAttr = (regular != null) ? regAttr : slowAttr;
     if ((regular == null) && (slow == null))
-      System.err.println("no radio choice got selected??? ");
+      logger.warning("no radio choice got selected??? ");
 
     else {
       //System.out.println("GoodwaveExercisePanel.addRegularAndSlow showing " +firstAttr);
@@ -261,7 +268,7 @@ public class FastAndSlowASRScoringAudioPanel extends ASRScoringAudioPanel {
       });
     }
     if (firstAttr == null)
-      System.err.println("huh? no attribute ");
+      logger.warning("huh? no attribute ");
   }
 
   /**
