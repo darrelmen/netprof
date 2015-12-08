@@ -28,31 +28,27 @@ public class DecodeAlignOutput {
    */
   public DecodeAlignOutput(PretestScore alignmentScore, boolean isDecode) {
     this(alignmentScore.getHydecScore(), new ScoreToJSON().getJsonObject(alignmentScore).toString(),
-        //numPhones(alignmentScore),
         alignmentScore.getProcessDur(), false,
-        //isDecode,
         alignmentScore);
   }
 
   public DecodeAlignOutput(AudioAnswer decodeAnswer, boolean isDecode) {
-    this((float) decodeAnswer.getScore(),
-        new ScoreToJSON().getJsonFromAnswer(decodeAnswer).toString(),
-        //     numPhones(decodeAnswer.getPretestScore()),
-        decodeAnswer.getPretestScore().getProcessDur(), decodeAnswer.isCorrect(),
-        //isDecode,
-        decodeAnswer.getPretestScore());
+    PretestScore pretestScore = decodeAnswer.getPretestScore();
+    this.score = (float) decodeAnswer.getScore();
+    this.json = new ScoreToJSON().getJsonFromAnswer(decodeAnswer).toString();
+    this.numPhones = pretestScore == null ? 0 : numPhones(pretestScore);
+    this.processDurInMillis = pretestScore == null ? 0 : decodeAnswer.getPretestScore().getProcessDur();
+    this.isCorrect = decodeAnswer.isCorrect();
   }
 
   public DecodeAlignOutput(float score, String json,
-                           //int numPhones,
-                           long processDurInMillis, boolean isCorrect,// boolean isDecode,
+                           long processDurInMillis, boolean isCorrect,
                            PretestScore pretestScore) {
     this.score = score;
     this.json = json;
     this.numPhones = numPhones(pretestScore);
     this.processDurInMillis = processDurInMillis;
     this.isCorrect = isCorrect;
-    //    this.isDecode = isDecode;
   }
 
   private int numPhones(PretestScore pretestScore) {
