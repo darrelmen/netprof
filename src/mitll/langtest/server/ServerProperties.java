@@ -12,19 +12,8 @@ import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -70,12 +59,13 @@ public class ServerProperties {
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
   private static final String ENABLE_ALL_USERS = "enableAllUsers";
   private static final String DO_DECODE = "dodecode";
-  public static final String FALSE = "false";
-  public static final String TRUE = "true";
-  public static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
-  public static final String ADD_MISSING_INFO = "addMissingInfo";
-  public static final int MIN_DYNAMIC_RANGE_DEFAULT = 20; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
-  public static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
+  private static final String FALSE = "false";
+  private static final String TRUE = "true";
+  private static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
+  private static final String ADD_MISSING_INFO = "addMissingInfo";
+  private static final int MIN_DYNAMIC_RANGE_DEFAULT = 20; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
+  private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
+  private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
 
   private Properties props = new Properties();
 
@@ -83,9 +73,9 @@ public class ServerProperties {
 
   // just for automated testing
   private boolean quietAudioOK;
-  private Set<Long> preferredVoices = new HashSet<Long>();
+  private final Set<Long> preferredVoices = new HashSet<Long>();
   private EmailList emailList;
-  private int userInitialScores = 20;
+  private final int userInitialScores = 20;
 
   /**
    * @param servletContext
@@ -226,13 +216,15 @@ public class ServerProperties {
     return getDefaultFalse(ENABLE_ALL_USERS);
   }
 
-  public boolean shouldDoDecode() {  return false;
-  //  getDefaultFalse(DO_DECODE);
+  public boolean shouldDoDecode() {
+    return getDefaultFalse(DO_DECODE);
   }
 
-  public int getAudioOffset() {  return getIntProperty(AUDIO_OFFSET); }
+  public int getAudioOffset() {
+    return getIntProperty(AUDIO_OFFSET);
+  }
 
-  public int getIntProperty(String audioOffset) {
+  private int getIntProperty(String audioOffset) {
     try {
       return Integer.parseInt(props.getProperty(audioOffset));
     } catch (NumberFormatException e) {
@@ -240,7 +232,7 @@ public class ServerProperties {
     }
   }
 
-  public int getIntPropertyDef(String audioOffset, String defaultValue) {
+  private int getIntPropertyDef(String audioOffset, String defaultValue) {
     try {
       return Integer.parseInt(props.getProperty(audioOffset, defaultValue));
     } catch (NumberFormatException e) {
@@ -364,7 +356,7 @@ public class ServerProperties {
     return getDefaultFalse("dropRefResultTable");
   }
 
-  private Map<String, String> phoneToDisplay = new HashMap<>();
+  private final Map<String, String> phoneToDisplay = new HashMap<>();
 
   public Map<String, String> getPhoneToDisplay() {
     return phoneToDisplay;
@@ -435,7 +427,7 @@ public class ServerProperties {
 
   // EMAIL ------------------------
 
-  public EmailList getEmailList() {
+  private EmailList getEmailList() {
     return emailList;
   }
 
@@ -486,5 +478,13 @@ public class ServerProperties {
 
   public int getMinDynamicRange() {
     return getIntPropertyDef(MIN_DYNAMIC_RANGE, "" + MIN_DYNAMIC_RANGE_DEFAULT);
+  }
+
+  /**
+   * true if you want to compare hydec scores with hydra scores for reference audio
+   * @return
+   */
+  public boolean shouldDoDecodeWithHydec() {
+    return getDefaultFalse(RUN_REF_DECODE_WITH_HYDEC);
   }
 }
