@@ -45,7 +45,6 @@ public class AudioConversion {
   private File tempDir;
 
   /**
-   *
    * @param props
    */
   public AudioConversion(ServerProperties props) {
@@ -137,11 +136,14 @@ public class AudioConversion {
    */
   public String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix) throws UnsupportedAudioFileException {
     String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + ".wav";
-    File wavFile = new File(pathname);
+    File wavFile = convertTo16Khz(new File(pathname));
+    return removeSuffix(wavFile.getName());
+  }
 
-    wavFile = convertTo16Khz(wavFile);
-    String name1 = wavFile.getName();
-    return removeSuffix(name1);
+  public String trimSilence(String testAudioDir, String testAudioFileNoSuffix) throws UnsupportedAudioFileException {
+    String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + ".wav";
+    File wavFile = trimSilence(new File(pathname));
+    return removeSuffix(wavFile.getName());
   }
 
   public String getHighPassFilterFile(String wavFile) {
@@ -172,24 +174,57 @@ public class AudioConversion {
         long then = System.currentTimeMillis();
         //     String convertTo16KHZ = new AudioConverter().convertTo16KHZ(binPath, wavFile.getAbsolutePath());
         String convertTo16KHZ = convertTo16KHZ(getBinPath(), wavFile.getAbsolutePath());
-        String name1 = wavFile.getName();
-        String sampled = wavFile.getParent() + File.separator + removeSuffix(name1) + SIXTEEN_K_SUFFIX + ".wav";
-        if (new FileCopier().copy(convertTo16KHZ, sampled)) {
-          wavFile = new File(sampled);
+        String suffix = SIXTEEN_K_SUFFIX;
+        wavFile = replaceOriginal(wavFile, convertTo16KHZ, suffix);
 
-          // cleanup
-          String parent = new File(convertTo16KHZ).getParent();
-          File file = new File(parent);
-          FileUtils.deleteDirectory(file);
-        }
         long now = System.currentTimeMillis();
         logger.info("convertTo16Khz : took " + (now - then) + " millis to convert original " + orig.getName() + " at " + sampleRate +
             " to 16K wav file : " + wavFile.getName());
+
       }
     } catch (IOException e) {
       logger.error("Got " + e, e);
     }
     return wavFile;
+  }
+
+  private File trimSilence(final File wavFile) throws UnsupportedAudioFileException {
+    File replacement = wavFile;
+    if (!wavFile.exists()) {
+      logger.error("trimSilence " + wavFile + " doesn't exist");
+      return wavFile;
+    }
+    try {
+     // File orig = wavFile;
+      long then = System.currentTimeMillis();
+      //     String convertTo16KHZ = new AudioConverter().convertTo16KHZ(binPath, wavFile.getAbsolutePath());
+      String convertTo16KHZ = trimSilence(getBinPath(), wavFile.getAbsolutePath());
+      String suffix = "_trim";
+      replacement = replaceOriginal(wavFile, convertTo16KHZ, suffix);
+
+      long now = System.currentTimeMillis();
+      logger.info("trimSilence : took " + (now - then) + " millis to convert original " + wavFile.getName() +
+          " to trim wav file : " + replacement.getName());
+
+    } catch (IOException e) {
+      logger.error("Got " + e, e);
+    }
+    return replacement;
+  }
+
+  private File replaceOriginal(final File wavFile, final String convertTo16KHZ, final String suffix) throws IOException {
+    String name1 = wavFile.getName();
+    String sampled = wavFile.getParent() + File.separator + removeSuffix(name1) + suffix + ".wav";
+    File replacement = wavFile;
+    if (new FileCopier().copy(convertTo16KHZ, sampled)) {
+      replacement = new File(sampled);
+
+      // cleanup
+      String parent = new File(convertTo16KHZ).getParent();
+      File file = new File(parent);
+      FileUtils.deleteDirectory(file);
+    }
+    return replacement;
   }
 
   /**
@@ -259,6 +294,41 @@ public class AudioConversion {
     if (!b) {
       logger.info("Exists " + exists);
       logger.error("couldn't do high pass filter on " + pathToAudioFile);
+      logger.info("path " + asRunnable);
+    }
+//    logger.info("path " + asRunnable);
+
+    return tempForWavz;
+  }
+
+  /**
+   * sox $sourcewav $outputwav vad -t 6 -p 0.25 reverse vad -t 6 -p 0.25 reverse
+   *
+   * @param soxPath
+   * @param pathToAudioFile
+   * @return
+   * @throws IOException
+   */
+  private String doTrimSilence(String soxPath, String pathToAudioFile) throws IOException {
+    final String tempForWavz = tempDir + File.separator + "tempTrim.wav";
+
+    if (tempDir == null || !tempDir.exists()) {
+      tempDir = createTempDirectory();
+    }
+    boolean exists = tempDir.exists();
+    //log.info("running sox on " + tempForWavz);
+
+    ProcessBuilder soxFirst = new ProcessBuilder(
+        soxPath,
+        pathToAudioFile,
+        tempForWavz,
+        "vad", "-t", "6", "-p", "0.25", "reverse", "vad", "-t", "6", "-p", "0.25", "reverse");
+    List<String> command = soxFirst.command();
+    String asRunnable = command.toString().replaceAll(",", " ");
+    boolean b = new ProcessRunner().runProcess(soxFirst);
+    if (!b) {
+      logger.info("Exists " + exists);
+      logger.error("couldn't do trim silence on " + pathToAudioFile);
       logger.info("path " + asRunnable);
     }
 //    logger.info("path " + asRunnable);
