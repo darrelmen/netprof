@@ -183,9 +183,8 @@ public class ScoreServlet extends DatabaseServlet {
 
     logger.debug("getPhoneReport (" + serverProps.getLanguage() + ") : user " + user + " selection " + selection);
     try {
-      long l = Long.parseLong(user);
       long then = System.currentTimeMillis();
-      toReturn = db.getJsonPhoneReport(l, selection);
+      toReturn = db.getJsonPhoneReport(Long.parseLong(user), selection);
       long now = System.currentTimeMillis();
       if (now - then > 250) {
         logger.debug("getPhoneReport (" + serverProps.getLanguage() + ") : user " + user + " selection " + selection + " took " + (now - then) + " millis");
@@ -593,7 +592,7 @@ public class ScoreServlet extends DatabaseServlet {
             answer = getAudioAnswerAlign(reqid, exerciseID, user, false, wavPath, saveFile, deviceType, device,
                 exercise1, usePhoneToDisplay);
             PretestScore pretestScore1 = answer.getPretestScore();
-            logger.debug("Alignment on an unknown model gets " + pretestScore1);
+            logger.debug("Alignment on an unknown model answer gets " + pretestScore1);
             //   logger.debug("score info " + answer.getPretestScore().getsTypeToEndTimes());
             jsonForScore = getJsonForScore(pretestScore1, usePhoneToDisplay);
 
@@ -603,8 +602,12 @@ public class ScoreServlet extends DatabaseServlet {
             jsonForScore.put(SCORE, pretestScore1.getHydecScore());
             jsonForScore.put(SAID_WORD, false);   // don't say they said the word - decode says they didn't
 
-            if (isCorrect) {
+            if (pretestScore1.getHydecScore() > 0.25) {
+              logger.info("remember score for result " + decodeResultID);
               db.rememberScore(decodeResultID, pretestScore1);
+            }
+            else {
+              logger.debug("skipping remembering alignment since score was too low " + pretestScore1.getHydecScore());
             }
           }
         }
