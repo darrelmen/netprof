@@ -526,7 +526,8 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    * @see AutoCRT#getFlashcardAnswer
    * @see AutoCRTScoring#getASRScoreForAudio(File, Collection, boolean, boolean)
    */
-  private PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache, boolean usePhoneToDisplay, boolean useOldSchool) {
+  private PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache,
+                                           boolean usePhoneToDisplay, boolean useOldSchool) {
     String tmpDir = Files.createTempDir().getAbsolutePath();
     makeASRScoring();
     List<String> unk = new ArrayList<String>();
@@ -646,13 +647,13 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
 
     DirAndName testDirAndName = new DirAndName(testAudioFile, installPath).invoke();
     String testAudioName = testDirAndName.getName();
-    String testAudioDir = testDirAndName.getDir();
+    String testAudioDir  = testDirAndName.getDir();
 
     if (isEnglishSite()) {
       sentence = sentence.toUpperCase();  // hack for English
     }
 
-    ASR asrScoring = useOldSchool ? oldschoolScoring : getASRScoring();
+    ASR asrScoring = useOldSchool || serverProps.getOldSchoolService() ? oldschoolScoring : getASRScoring();
 
     logger.info("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
 
