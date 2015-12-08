@@ -49,4 +49,8 @@ public class PhoneAndScore implements Comparable<PhoneAndScore> {
   public WordAndScore getWordAndScore() {
     return wordAndScore;
   }
+  
+  public String toString() {
+    return ""+pronScore;
+  }
 }
