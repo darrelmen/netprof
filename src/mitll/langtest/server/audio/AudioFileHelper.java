@@ -22,8 +22,6 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.text.Collator;
 import java.util.*;
 
@@ -38,6 +36,8 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
   private static final Logger logger = Logger.getLogger(AudioFileHelper.class);
   private static final String POSTED_AUDIO = "postedAudio";
   private static final int MIN_WARN_DUR = 30;
+  public static final String REG = "reg";
+  public static final String SLOW = "slow";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -289,36 +289,40 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    *
    * @param exercise
    * @param attribute
+   * @param doHydec
    * @see mitll.langtest.server.decoder.RefResultDecoder#doDecode
    */
-  public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute) {
+  public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute, boolean doHydec) {
     if (isInDictOrLTS(exercise)) {
       String audioRef = attribute.getAudioRef();
       if (!audioRef.contains("context=")) {
         //logger.debug("doing alignment -- ");
         // Do alignment...
-        PretestScore alignmentScore = getAlignmentScore(exercise, pathHelper.getAbsoluteFile(audioRef).getAbsolutePath(),
-            serverProps.usePhoneToDisplay(), false);
+        File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
+        String absolutePath = absoluteFile.getAbsolutePath();
+
+        PretestScore alignmentScore = getAlignmentScore(exercise, absolutePath, serverProps.usePhoneToDisplay(), false);
         DecodeAlignOutput alignOutput = new DecodeAlignOutput(alignmentScore, false);
 
         // Do decoding, and record alignment info we just got in the database ...
-        AudioAnswer decodeAnswer = getRefDecodeAnswer(exercise, audioRef, pathHelper.getAbsoluteFile(audioRef), attribute.getDurationInMillis(), false);
+        long durationInMillis = attribute.getDurationInMillis();
+        AudioAnswer decodeAnswer = getRefDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, false);
         DecodeAlignOutput decodeOutput = new DecodeAlignOutput(decodeAnswer, true);
 
-        PretestScore alignmentScoreOld = getAlignmentScore(exercise, pathHelper.getAbsoluteFile(audioRef).getAbsolutePath(),
-            serverProps.usePhoneToDisplay(), true);
+        PretestScore alignmentScoreOld = doHydec ? getAlignmentScore(exercise, absolutePath,
+            serverProps.usePhoneToDisplay(), true) : new PretestScore();
         DecodeAlignOutput alignOutputOld = new DecodeAlignOutput(alignmentScoreOld, false);
 
         // Do decoding, and record alignment info we just got in the database ...
-        AudioAnswer decodeAnswerOld = getRefDecodeAnswer(exercise, audioRef, pathHelper.getAbsoluteFile(audioRef), attribute.getDurationInMillis(), true);
+        AudioAnswer decodeAnswerOld = doHydec ? getRefDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, true) : new AudioAnswer();
         DecodeAlignOutput decodeOutputOld = new DecodeAlignOutput(decodeAnswerOld, true);
 
         //logger.debug("attr dur " + attribute.getDurationInMillis());
 
         getRefAudioAnswerDecoding(exercise, (int) attribute.getUserid(),
             //audioRef,
-            pathHelper.getAbsoluteFile(audioRef),
-            attribute.getDurationInMillis(),
+            absoluteFile,
+            durationInMillis,
 
             alignOutput,
             decodeOutput,
@@ -327,7 +331,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
             decodeOutputOld,
 
             attribute.isMale(),
-            attribute.isRegularSpeed() ? "reg" : "slow");
+            attribute.isRegularSpeed() ? REG : SLOW);
       }
     } else {
       logger.warn("skipping " + exercise.getID() + " since can't do decode/align b/c of LTS errors ");
@@ -348,7 +352,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    * @return
    * @paramx wavPath
    * @paramx numAlignPhones
-   * @see #decodeOneAttribute(CommonExercise, AudioAttribute)
+   * @see #decodeOneAttribute(CommonExercise, AudioAttribute, boolean)
    */
   private void getRefAudioAnswerDecoding(CommonExercise exercise1,
                                          int user,
@@ -553,7 +557,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
 
   /**
    * @return
-   * @see #decodeOneAttribute(CommonExercise, AudioAttribute)
+   * @see #decodeOneAttribute(CommonExercise, AudioAttribute, boolean)
    */
   public PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, boolean usePhoneToDisplay, boolean useOldSchool) {
     return getASRScoreForAudio(0, testAudioPath, exercise.getRefSentence(), 128, 128, false,
@@ -741,8 +745,8 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
   }
 
   /**
-   * @see #getASRScoreForAudio(int, String, String, Collection, int, int, boolean, boolean, String, boolean, String, Result, boolean, boolean)
    * @return
+   * @see #getASRScoreForAudio(int, String, String, Collection, int, int, boolean, boolean, String, boolean, String, Result, boolean, boolean)
    */
   private ASR getASRScoring() {
     return webserviceScoring;
