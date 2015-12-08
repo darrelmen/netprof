@@ -68,8 +68,6 @@ public interface CommonExercise extends CommonShell {
 
   CommonShell getShell();
 
-//  CommonShell getShellCombinedTooltip();
-
   Map<String, ExerciseAnnotation> getFieldToAnnotation();
 
   ExerciseAnnotation getAnnotation(String field);

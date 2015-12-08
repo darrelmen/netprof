@@ -222,7 +222,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
 
   private void setPlayLabel() {
     playing = false;
-    if (DEBUG) System.out.println(new Date() + " setPlayLabel playing " +playing);
+    if (DEBUG) logger.info(new Date() + " setPlayLabel playing " +playing);
     playButton.setText(playLabel);
     playButton.setIcon(IconType.PLAY);
 
@@ -255,7 +255,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
       int s = (int) start1;
       int e = (int) end1;
 
-      //System.out.println("playing from " + s + " to " + e);
+      //logger.info("playing from " + s + " to " + e);
       soundManager.playInterval(currentSound, s, e);
     }
   }
@@ -264,7 +264,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @see #reinitialize()
    */
   private void pause() {
-    if (DEBUG) System.out.println("PlayAudioPanel :pause");
+    if (DEBUG) logger.info("PlayAudioPanel :pause");
 
     setPlayLabel();
     soundManager.pause(currentSound);
@@ -275,7 +275,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
       listener.update(position);
     }
     //else {
-      //System.out.println("PlayAudioPanel :update - no listener");
+      //logger.info("PlayAudioPanel :update - no listener");
     //}
   }
 
@@ -296,7 +296,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
       doClick();
     }
     else {
-      System.out.println("playAudio - "  + path);
+      logger.info("playAudio - "  + path);
 
       loadAudio(path);
       this.currentPath = path;
@@ -337,18 +337,18 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    */
   public void startSong(String path) {
     if (!path.equals(FILE_MISSING)) {
-      //System.out.println("PlayAudioPanel.loadAudio - skipping " + path);
-      if (DEBUG) System.out.println("PlayAudioPanel : start song : " + path);
+      //logger.info("PlayAudioPanel.loadAudio - skipping " + path);
+      if (DEBUG) logger.info("PlayAudioPanel : start song : " + path);
       if (soundManager.isReady()) {
-        //if (DEBUG) System.out.println(new Date() + " Sound manager is ready.");
+        //if (DEBUG) logger.info(new Date() + " Sound manager is ready.");
         if (soundManager.isOK()) {
           if (DEBUG)
-            System.out.println("PlayAudioPanel : startSong : " + path + " destroy current sound " + currentSound);
+            logger.info("PlayAudioPanel : startSong : " + path + " destroy current sound " + currentSound);
 
           destroySound();
           createSound(path);
         } else {
-          System.out.println(new Date() + " Sound manager is not OK!.");
+          logger.info(new Date() + " Sound manager is not OK!.");
           warnNoFlash.setVisible(true);
         }
       }
@@ -362,7 +362,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private void createSound(String song){
     currentSound = new Sound(this);
     if (DEBUG) {
-      System.out.println("PlayAudioPanel.createSound  : (" + getElement().getId()+ ") for " +song +" : "+ this + " created sound " + currentSound);
+      logger.info("PlayAudioPanel.createSound  : (" + getElement().getId()+ ") for " +song +" : "+ this + " created sound " + currentSound);
     }
 
     String uniqueID = song + "_" + getElement().getId(); // fix bug where multiple npf panels might load the same audio file and not load the second one seemingly
@@ -375,7 +375,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    */
   private void destroySound() {
     if (currentSound != null) {
-      if (DEBUG) System.out.println("PlayAudioPanel.destroySound : (" + getElement().getId()+ ") destroy sound " + currentSound);
+      if (DEBUG) logger.info("PlayAudioPanel.destroySound : (" + getElement().getId()+ ") destroy sound " + currentSound);
 
       this.soundManager.destroySound(currentSound);
     }
@@ -386,7 +386,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    */
   public void reinitialize(){
     if (DEBUG) {
-      System.out.println("PlayAudioPanel :reinitialize " + getElement().getId());
+      logger.info("PlayAudioPanel :reinitialize " + getElement().getId());
     }
 
     setPlayLabel();
@@ -394,12 +394,12 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     soundManager.setPosition(currentSound, 0);
 
     if (listener != null) {
-      if (DEBUG) System.out.println("PlayAudioPanel :reinitialize - telling listener to reinitialize ");
+      if (DEBUG) logger.info("PlayAudioPanel :reinitialize - telling listener to reinitialize ");
 
       listener.reinitialize();
     }
 //    else {
-//      System.out.println("PlayAudioPanel :reinitialize - no listener");
+//      logger.info("PlayAudioPanel :reinitialize - no listener");
 //    }
   }
 
@@ -409,7 +409,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    */
   public void songFirstLoaded(double durationEstimate){
     if (DEBUG) {
-      System.out.println("PlayAudioPanel.songFirstLoaded : " + this);
+      logger.info("PlayAudioPanel.songFirstLoaded : " + this);
     //  new Exception().printStackTrace();
     }
 
@@ -417,7 +417,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
       listener.songFirstLoaded(durationEstimate);
     }
     else if (listener != null) {
-      System.out.println("PlayAudioPanel :songFirstLoaded - listener is me??? ");
+      logger.info("PlayAudioPanel :songFirstLoaded - listener is me??? ");
     }
     setEnabled(true);
   }
@@ -427,7 +427,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param duration
    */
   public void songLoaded(double duration) {
-    if (DEBUG) System.out.println("PlayAudioPanel.songLoaded : " + this);
+    if (DEBUG) logger.info("PlayAudioPanel.songLoaded : " + this);
 
     if (listener != null) {
       listener.songLoaded(duration);
@@ -436,7 +436,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
       simpleAudioListener.songLoaded(duration);
     }
 //    else {
-//      System.out.println("no listener for song loaded " + duration);
+//      logger.info("no listener for song loaded " + duration);
 //    }
     setEnabled(true);
     reinitialize();
@@ -446,7 +446,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * Called when the audio stops playing, also relays the message to the listener if there is one.
    */
   public void songFinished() {
-    if (DEBUG) System.out.println("PlayAudioPanel :songFinished "+ getElement().getId());
+    if (DEBUG) logger.info("PlayAudioPanel :songFinished "+ getElement().getId());
 
     setPlayLabel();
 
@@ -467,7 +467,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   public Button getPlayButton() { return playButton;  }
   
   public void playCurrent(){
-	  if (DEBUG) System.out.println("PlayAudioPanel :play " + playing);
+	  if (DEBUG) logger.info("PlayAudioPanel :play " + playing);
 	  playing = true;
 	  setPlayButtonText();
 	  soundManager.play(currentSound);
