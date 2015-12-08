@@ -14,6 +14,5 @@ package mitll.langtest.client.sound;
 public interface AudioControl extends SimpleAudioListener {
   void reinitialize();
   void songFirstLoaded(double durationEstimate);
-
   void update(double position);
 }
