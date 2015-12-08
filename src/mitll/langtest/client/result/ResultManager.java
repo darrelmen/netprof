@@ -395,23 +395,7 @@ public class ResultManager extends PagerTable {
     cellTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
       @Override
       public void onSelectionChange(SelectionChangeEvent event) {
-        final MonitorResult selectedObject = selectionModel.getSelectedObject();
-       // String audioType = selectedObject.getAudioType();
-
-       // logger.info("audio type " + audioType);
-        String foreignText =  selectedObject.getForeignText();
-
-        ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(), foreignText, service, controller, selectedObject.getId(), null, "instance");
-
-        w.setResultID(selectedObject.getUniqueID());
-
-        Panel vert = new VerticalPanel();
-        vert.add(w);
-        vert.add(w.getBelow());
-
-        reviewContainer.clear();
-        reviewContainer.add(vert);
-        reviewContainer.add(w.getTables());
+        respondToClick(selectionModel.getSelectedObject());
       }
     });
     addColumnsToTable(cellTable);
@@ -428,6 +412,25 @@ public class ResultManager extends PagerTable {
     cellTable.setWidth("100%", false);
 
     return getPagerAndTable(cellTable, rightOfPager);
+  }
+
+  public void respondToClick(MonitorResult selectedObject) {
+    reviewContainer.clear();
+    if (selectedObject.getDurationInMillis() > 100 && selectedObject.isValid()) {
+      // logger.info("audio type " + audioType);
+      String foreignText = selectedObject.getForeignText();
+
+      ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(), foreignText, service, controller, selectedObject.getId(), null, "instance");
+
+      w.setResultID(selectedObject.getUniqueID());
+
+      Panel vert = new VerticalPanel();
+      vert.add(w);
+      vert.add(w.getBelow());
+
+      reviewContainer.add(vert);
+      reviewContainer.add(w.getTables());
+    }
   }
 
   private Column<?, ?> getColumn(String name) {
@@ -470,7 +473,7 @@ public class ResultManager extends PagerTable {
           @Override
           public void onFailure(Throwable caught) {
             Window.alert("Can't contact server.");
-            logger.warning("Got  " +caught);
+            logger.warning("Got  " + caught);
           }
 
           @Override
