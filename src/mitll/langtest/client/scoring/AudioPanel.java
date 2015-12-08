@@ -96,7 +96,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param instance
    * @see ScoringAudioPanel#ScoringAudioPanel(String, String, LangTestDatabaseAsync, ExerciseController, boolean, ScoreListener, int, String, String, CommonExercise, String)
    */
-  AudioPanel(String path, LangTestDatabaseAsync service,
+  public AudioPanel(String path, LangTestDatabaseAsync service,
              ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin,
              String playButtonSuffix, String audioType, String exerciseID, CommonExercise exercise, String instance) {
     this(service, controller, showSpectrogram, gaugePanel, 1.0f, rightMargin, exerciseID, exercise, instance);
