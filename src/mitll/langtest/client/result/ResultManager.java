@@ -28,6 +28,7 @@ import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.list.TypeAhead;
+import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.ReviewScoringPanel;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.shared.MonitorResult;
@@ -414,6 +415,11 @@ public class ResultManager extends PagerTable {
     return getPagerAndTable(cellTable, rightOfPager);
   }
 
+  /**
+   * Don't do alignment with invalid audio.
+   *
+   * @param selectedObject
+   */
   public void respondToClick(MonitorResult selectedObject) {
     reviewContainer.clear();
     if (selectedObject.getDurationInMillis() > 100 && selectedObject.isValid()) {
@@ -430,6 +436,9 @@ public class ResultManager extends PagerTable {
 
       reviewContainer.add(vert);
       reviewContainer.add(w.getTables());
+    } else {
+      AudioPanel w = new AudioPanel(selectedObject.getAnswer(), service, controller, false, null, 10, "", controller.getAudioType(), selectedObject.getId(), null, "instance");
+      reviewContainer.add(w);
     }
   }
 
