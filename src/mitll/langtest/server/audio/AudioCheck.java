@@ -237,7 +237,7 @@ public class AudioCheck {
 
   public static class ValidityAndDur {
     private AudioAnswer.Validity validity;
-    public final int durationInMillis;
+    public int durationInMillis;
     private double maxMinRange;
 
     public ValidityAndDur(AudioAnswer.Validity validity) {
@@ -248,8 +248,6 @@ public class AudioCheck {
       this.validity = validity;
       this.durationInMillis = (int) (1000d * dur);
     }
-
-    //public void setValidity(AudioAnswer.Validity validity) { this.validity = validity;}
 
     public AudioAnswer.Validity getValidity() {
       return validity;
@@ -264,5 +262,9 @@ public class AudioCheck {
     }
 
     public String toString() { return "valid " + getValidity() + " dur " + durationInMillis + " max min " + maxMinRange; }
+
+    public void setDuration(double duration) {
+      this.durationInMillis = (int) (1000d * duration);
+    }
   }
 }
