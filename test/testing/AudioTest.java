@@ -1,7 +1,9 @@
 package testing;
 
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.DynamicRange;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import java.io.File;
@@ -42,6 +44,41 @@ public class AudioTest {
           File file2 = new File(highPassFilterFile);
         // File file2=f;
           DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(file2);
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void testTrim() {
+    String file = "/Users/go22670/netPron2/snrs-no-hp";
+    try {
+      File file1 = new File(file);
+      File[] files = file1.listFiles();
+      for (File f : files) {
+        if (f.getName().endsWith(".wav")) {
+          double durationInSeconds = new AudioCheck(null).getDurationInSeconds(f);
+        //  System.out.println("before " + durationInSeconds);
+          File replacement = File.createTempFile("dude",".wav");
+          FileUtils.copyFile(f, replacement);
+          System.out.println("2 before " + new AudioCheck(null).getDurationInSeconds(replacement));
+
+          //System.out.println("Got " + replacement.getName());
+         // String trimmed = new AudioConversion(null).doTrimSilence(replacement.getAbsolutePath());
+          /*File trimmedFile =*/
+          double v = new AudioConversion(null).trimSilence(replacement);
+       //   File file2 = new File(trimmed);
+       //   System.out.println("after " + trimmed + " exists " + file2.exists()+
+       //       ": "+new AudioCheck(null).getDurationInSeconds(file2) + " : " +v);
+
+          System.out.println("after " + replacement + " exists " + replacement.exists()+
+              ": "+new AudioCheck(null).getDurationInSeconds(replacement)+ " : " + v);
+
+
+          // File file2=f;
+         // DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(file2);
         }
       }
     } catch (Exception e) {
