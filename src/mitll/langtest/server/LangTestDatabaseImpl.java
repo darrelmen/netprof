@@ -74,15 +74,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public static final String DATABASE_REFERENCE = "databaseReference";
   public static final String AUDIO_FILE_HELPER_REFERENCE = "audioFileHelperReference";
   private static final int SLOW_EXERCISE_EMAIL = 2000;
-  private static final String ENGLISH = "English";
+//  private static final String ENGLISH = "English";
   private static final int MAX = 30;
   private static final int SLOW_MILLIS = 40;
   public static final int WARN_DUR = 100;
   private static final int MIN_RECORDINGS = 5;
+  private static final String WAV1 = "wav";
   private RefResultDecoder refResultDecoder;
 
   private static final boolean warnMissingFile = true;
-
 
   private DatabaseImpl db;
   private AudioFileHelper audioFileHelper;
@@ -933,6 +933,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     String imageURL = relativeImagePath;
     double duration = new AudioCheck(serverProps).getDurationInSeconds(wavAudioFile);
+    if (duration == 0) {
+      logger.error("huh? " +wavAudioFile + " has zero duration???");
+    }
     /*    logger.debug("for " + wavAudioFile + " type " + imageType + " rel path is " + relativeImagePath +
         " url " + imageURL + " duration " + duration);*/
 
@@ -955,7 +958,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private String ensureWAV(String audioFile) {
-    if (!audioFile.endsWith("wav")) {
+    if (!audioFile.endsWith(WAV1)) {
       return audioFile.substring(0, audioFile.length() - MP3.length()) + WAV;
     } else {
       return audioFile;
@@ -1914,7 +1917,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                   String textToAlign,
                                   String identifier,
                                   int reqid, String device) {
-    AudioAnswer audioAnswer = audioFileHelper.getAlignment(base64EncodedString, textToAlign, identifier, reqid, serverProps.usePhoneToDisplay());
+    AudioAnswer audioAnswer = audioFileHelper.getAlignment(base64EncodedString, textToAlign, identifier, reqid,
+        serverProps.usePhoneToDisplay());
 
     if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
       logger.warn("huh? got zero length recording " + identifier);
@@ -1939,7 +1943,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     File fileRef = pathHelper.getAbsoluteFile(audioAnswer.getPath());
     String destFileName = audioType + "_" + System.currentTimeMillis() + "_by_" + user + ".wav";
     String foreignLanguage = exercise1 == null ? "" : exercise1.getForeignLanguage();
-    String permanentAudioPath = new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise, foreignLanguage, serverProps);
+    String permanentAudioPath = new PathWriter().
+        getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise, foreignLanguage, serverProps);
     AudioAttribute audioAttribute =
         db.getAudioDAO().addOrUpdate(user, exercise, audioType, permanentAudioPath, System.currentTimeMillis(), audioAnswer.getDurationInMillis());
     audioAnswer.setPath(audioAttribute.getAudioRef());
