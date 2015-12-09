@@ -57,7 +57,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String EVENT = "event";
   private static final String CONTENT = "content";
   private static final String HAS_MODEL = "hasModel";
-  private static final long REFRESH_CONTENT_INTERVAL = 12 * 60 * 60 * 1000l;
+  private static final long REFRESH_CONTENT_INTERVAL = 12 * 60 * 60 * 1000L;
 
   private static final String IS_CORRECT = "isCorrect";
   private static final String SAID_WORD = "saidWord";
