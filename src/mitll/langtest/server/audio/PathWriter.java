@@ -4,13 +4,13 @@
 
 package mitll.langtest.server.audio;
 
-import audio.tools.FileCopier;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.h2.store.fs.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by GO22670 on 4/15/2014.
@@ -49,11 +49,16 @@ public class PathWriter {
     String s = BEST_AUDIO + File.separator + id + File.separator + destFileName;
     //logger.debug("getPermanentAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +s);
     if (!fileRef.equals(destination) && !destFileName.equals(AudioConversion.FILE_MISSING)) {
-      new FileCopier().copy(fileRef.getAbsolutePath(), destination.getAbsolutePath());
+      try {
+        FileUtils.copyFile(fileRef, destination);
+      } catch (IOException e) {
+        logger.error("couldn't copy " +fileRef.getAbsolutePath() + " to " + destination.getAbsolutePath());
+      }
+
       //logger.debug("getPermanentAudioPath : normalizing levels for " + destination.getAbsolutePath());
       new AudioConversion(serverProperties).normalizeLevels(destination);
     } else {
-      if (FileUtils.size(destination.getAbsolutePath()) == 0) {
+      if (FileUtils.sizeOf(destination) == 0) {
         logger.error("\ngetRefAudioPath : huh? " + destination + " is empty???");
       }
       logger.debug("getPermanentAudioPath : *not* normalizing levels for " + destination.getAbsolutePath());
