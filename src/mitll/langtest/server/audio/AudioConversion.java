@@ -226,8 +226,8 @@ public class AudioConversion {
 
         long now = System.currentTimeMillis();
         if (now - then > 30) {
-          logger.info("trimSilence : took " + (now - then) + " millis to convert original " + wavFile.getName()/* +
-          " to trim wav file : " + replacement.getName()*/);
+          logger.info("trimSilence : took " + (now - then) + " millis to convert original " + wavFile.getName()  +
+          " to trim wav file : " + durationInSeconds + " before, " +durationInSecondsTrimmed + " after.");
         }
         return durationInSecondsTrimmed;
       }
