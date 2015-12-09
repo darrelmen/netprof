@@ -51,6 +51,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
   private boolean checkedLTS = false;
   private Map<String, Integer> phoneToCount;
   private boolean useOldSchoolServiceOnly = false;
+  private final AudioConversion audioConversion;
 
   /**
    * @param pathHelper
@@ -67,6 +68,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
     this.logAndNotify = langTestDatabase;
     this.useOldSchoolServiceOnly = serverProperties.getOldSchoolService();
     this.mp3Support = new MP3Support(pathHelper, serverProperties);
+    audioConversion = new AudioConversion(serverProps);
     makeAutoCRT();
   }
 
@@ -173,7 +175,10 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
     File file = pathHelper.getAbsoluteFile(wavPath);
 
     long then = System.currentTimeMillis();
-    AudioCheck.ValidityAndDur validity = new AudioConversion(serverProps).convertBase64ToAudioFiles(base64EncodedString, file, isRefRecording);
+    AudioCheck.ValidityAndDur validity = audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, isRefRecording);
+
+   // logger.debug("writeAudioFile writing to " + file.getAbsolutePath() + " validity " + validity);
+
     long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > MIN_WARN_DUR) {
@@ -206,7 +211,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
   public AudioAnswer getAnswer(String exerciseID, CommonExercise exercise1, int user, boolean doFlashcard, String wavPath,
                                File file, String deviceType, String device, float score, int reqid, boolean allowAlternates) {
     String audioType = doFlashcard ? "flashcard" : "learn";
-    AudioCheck.ValidityAndDur validity = new AudioConversion(serverProps).isValid(file, false);
+    AudioCheck.ValidityAndDur validity = audioConversion.isValid(file, false);
     boolean isValid =
         validity.getValidity() == AudioAnswer.Validity.OK ||
             (serverProps.isQuietAudioOK() && validity.getValidity() == AudioAnswer.Validity.TOO_QUIET);
@@ -501,8 +506,8 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
   }
 
   private AudioAnswer getAudioAnswer(String base64EncodedString, int reqid, File file) {
-    AudioCheck.ValidityAndDur validity = new AudioConversion(serverProps).convertBase64ToAudioFiles(base64EncodedString, file, false);
-    //logger.debug("writing to " + file.getAbsolutePath() + " answer " + audioAnswer);
+    AudioCheck.ValidityAndDur validity = audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, false);
+  //  logger.debug("getAudioAnswer writing to " + file.getAbsolutePath() + " validity " + validity);
     return new AudioAnswer(pathHelper.ensureForwardSlashes(pathHelper.getWavPathUnder(POSTED_AUDIO)),
         validity.getValidity(), reqid, validity.durationInMillis);
   }
