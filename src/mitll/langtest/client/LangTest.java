@@ -61,20 +61,24 @@ import java.util.logging.Logger;
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  *
+ * Release Versions:
+ *
  * 1.1
  *  - final state of analysis feature - off by default, on with ?analysis
  * 1.1.1
  *  - fix for custom english entries
  * 1.1.2
- * - Fix for highlight of mixed case context
- * - Added code for trimming silence
+ *  - Fix for highlight of mixed case context
+ *  - Added code for trimming silence
+ * 1.1.3
+ *  - Trims silence from beginning and end of recordings with sox
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private Logger logger = Logger.getLogger("LangTest");
 
 //  private static final String VERSION = "v1.0&nbsp;";
   private static final String VERSION = "v" +
-    "1.1.2" +
+    "1.1.3" +
     "&nbsp;";
 
   private static final List<String> SITE_LIST = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean","Iraqi",
