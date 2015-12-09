@@ -242,9 +242,6 @@ public class CommentNPFExercise extends NPFExercise {
         } else if (audioAttribute.getTimestamp() > femaleTime) {
           if (femaleAudio == null || !preferredUsers.contains(femaleAudio.getUser().getId())) {
             femaleAudio = audioAttribute;
-//            if (preferredUsers.contains(femaleAudio.getUser().getId()))
-//              logger.info("found " + femaleAudio.getUser());
-
             femaleTime = audioAttribute.getTimestamp();
           }
         }
