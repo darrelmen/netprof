@@ -5,14 +5,14 @@ import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.analysis.*;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by GO22670 on 1/30/14.
@@ -142,6 +142,23 @@ public class PerformanceTest extends BaseTest {
 //      for (WordAndScore wordAndScore : pair.getValue()) builder.append(wordAndScore.getScore() +", ");
 //      logger.info(pair.getKey() + " " + builder);
 //    }
+  }
+
+  @Test
+  public void testSudanese() {
+    String path = "../dbs/"+"sudaneseToday";//.replaceAll(".h2.db", "");
+
+    H2Connection connection = getH2Connection(path);
+    DatabaseImpl database = getDatabase(connection, "sudanese", path);
+    int id = 71;
+    //int id = 535;   // tiffany
+   // UserPerformance performanceForUser = database.getAnalysis().getPerformanceForUser(id, 1);
+    HashMap<String, Collection<String>> stringCollectionHashMap = new HashMap<>();
+    stringCollectionHashMap.put("Chapter", Collections.singletonList("7"));
+    stringCollectionHashMap.put("Lesson", Collections.singletonList("1"));
+    JSONObject jsonPhoneReport = database.getJsonPhoneReport(1, stringCollectionHashMap);
+
+    logger.info("jsonPhoneReport " +jsonPhoneReport);
   }
 
   @Test
