@@ -5,6 +5,7 @@
 package mitll.langtest.server;
 
 import com.google.common.io.Files;
+import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.rest.RestUserManagement;
@@ -494,6 +495,8 @@ public class ScoreServlet extends DatabaseServlet {
    * <p>
    * Allow alternate decode possibilities if header is set.
    *
+   * DON'T trim silence after it gets the file from the iPad/iPhone
+   *
    * @param request
    * @param requestType - decode or align or record
    * @param deviceType
@@ -520,7 +523,10 @@ public class ScoreServlet extends DatabaseServlet {
     String use_phone_to_display = request.getHeader("USE_PHONE_TO_DISPLAY");
     boolean usePhoneToDisplay = use_phone_to_display != null && !use_phone_to_display.equals("false");
 
-    writeToOutputStream(request.getInputStream(), saveFile);
+    writeToFile(request.getInputStream(), saveFile);
+
+//    new AudioConversion(null).trimSilence(saveFile);
+
     return getJsonForAudioForUser(reqid, exerciseID, i, Request.valueOf(requestType.toUpperCase()), wavPath, saveFile,
         deviceType, device, allowAlternates, usePhoneToDisplay);
   }
@@ -724,9 +730,9 @@ public class ScoreServlet extends DatabaseServlet {
    * @throws IOException
    * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
    */
-  private void writeToOutputStream(ServletInputStream inputStream, File saveFile) throws IOException {
-    writeToFile(inputStream, saveFile);
-  }
+//  private void writeToOutputStream(ServletInputStream inputStream, File saveFile) throws IOException {
+//    writeToFile(inputStream, saveFile);
+//  }
 
   /**
    * For both words and phones, return event text, start, end times, and score for event.
