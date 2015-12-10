@@ -7,6 +7,7 @@ package mitll.langtest.server.decoder;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.AudioAttribute;
@@ -14,9 +15,11 @@ import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.scoring.PretestScore;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -25,6 +28,7 @@ import java.util.*;
 public class RefResultDecoder {
   private static final Logger logger = Logger.getLogger(RefResultDecoder.class);
   public static final boolean DO_REF_DECODE = true;
+  public static final boolean DO_TRIM = true;
 //  private static final boolean RUN_MISSING_INFO = false;
 
   private final DatabaseImpl db;
@@ -33,13 +37,22 @@ public class RefResultDecoder {
   private final AudioFileHelper audioFileHelper;
   private boolean stopDecode = false;
   private PathHelper pathHelper;
+  LangTestDatabaseImpl langTestDatabase;
 
+  /**
+   * @param db
+   * @param serverProperties
+   * @param pathHelper
+   * @param audioFileHelper
+   * @see LangTestDatabaseImpl#init()
+   */
   public RefResultDecoder(DatabaseImpl db, ServerProperties serverProperties, PathHelper pathHelper,
-                          AudioFileHelper audioFileHelper) {
+                          AudioFileHelper audioFileHelper, LangTestDatabaseImpl langTestDatabase) {
     this.db = db;
     this.serverProps = serverProperties;
     this.pathHelper = pathHelper;
     this.audioFileHelper = audioFileHelper;
+    this.langTestDatabase = langTestDatabase;
   }
 
   /**
@@ -52,6 +65,10 @@ public class RefResultDecoder {
       new Thread(new Runnable() {
         @Override
         public void run() {
+
+          sleep(5000);
+          trimRef(exercises, relativeConfigDir);
+
           sleep(5000);
           writeRefDecode(exercises, relativeConfigDir);
         }
@@ -103,6 +120,76 @@ public class RefResultDecoder {
     }
   }
 
+  private void trimRef(List<CommonExercise> exercises, String relativeConfigDir) {
+    if (DO_TRIM) {
+      Map<String, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
+      String installPath = pathHelper.getInstallPath();
+
+      int numResults = db.getRefResultDAO().getNumResults();
+      String language = getLanguage();
+      logger.debug(language + " writeRefDecode : found " +
+          numResults + " in ref results table vs " + exToAudio.size() + " exercises with audio");
+
+      Set<String> decodedFiles = getDecodedFiles();
+      logger.debug(language + " found " + decodedFiles.size() + " previous ref results, checking " +
+          exercises.size() + " exercises ");
+
+      if (stopDecode) logger.debug("Stop decode true");
+
+      int count = 0;
+      int trimmed = 0;
+      int attrc = 0;
+      int maleAudio = 0;
+      int femaleAudio = 0;
+      int defaultAudio = 0;
+      for (CommonExercise exercise : exercises) {
+        if (stopDecode) return;
+
+        List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
+        if (audioAttributes != null) {
+//					logger.warn("hmm - audio recorded for " + )
+          db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
+          attrc += audioAttributes.size();
+        }
+
+        Set<Long> preferredVoices = serverProps.getPreferredVoices();
+        Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
+        Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
+
+        List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
+        boolean maleEmpty = maleUsers.isEmpty();
+
+        List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
+        boolean femaleEmpty = femaleUsers.isEmpty();
+        String title = exercise.getForeignLanguage();
+        if (!maleEmpty) {
+          List<AudioAttribute> audioAttributes1 = malesMap.get(maleUsers.get(0));
+          maleAudio += audioAttributes1.size();
+          Info info = doTrim(decodedFiles, audioAttributes1, title, exercise.getID());
+          trimmed += info.trimmed;
+          count += info.count;
+        }
+        if (!femaleEmpty) {
+          List<AudioAttribute> audioAttributes1 = femalesMap.get(femaleUsers.get(0));
+          femaleAudio += audioAttributes1.size();
+
+          Info info = doTrim(decodedFiles, audioAttributes1, title, exercise.getID());
+          trimmed += info.trimmed;
+          count += info.count;
+        } else if (maleEmpty) {
+          Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
+          defaultAudio += defaultUserAudio.size();
+          Info info = doTrim(decodedFiles, defaultUserAudio, title, exercise.getID());
+          trimmed += info.trimmed;
+          count += info.count;
+        }
+      }
+      logger.debug("trimRef : Out of " + attrc + " best audio files, " + maleAudio + " male, " + femaleAudio + " female, " +
+          defaultAudio + " default " + "examined " + count +
+          " trimmed " + trimmed);
+    }
+  }
+
   /**
    * Do alignment and decoding on all the reference audio and store the results in the RefResult table.
    *
@@ -142,7 +229,6 @@ public class RefResultDecoder {
         Set<Long> preferredVoices = serverProps.getPreferredVoices();
         Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
         Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
-        Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
 
         List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
         boolean maleEmpty = maleUsers.isEmpty();
@@ -161,8 +247,8 @@ public class RefResultDecoder {
 
           count += doDecode(decodedFiles, exercise, audioAttributes1);
         } else if (maleEmpty) {
+          Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
           defaultAudio += defaultUserAudio.size();
-
           count += doDecode(decodedFiles, exercise, defaultUserAudio);
         }
       }
@@ -258,6 +344,57 @@ public class RefResultDecoder {
     }
 
     return count;
+  }
+
+  AudioConversion audioConversion = new AudioConversion(null);
+
+  private Info doTrim(Set<String> decodedFiles, Collection<AudioAttribute> audioAttributes, String title, String exid) {
+    int count = 0;
+    int trimmed = 0;
+    for (AudioAttribute attribute : audioAttributes) {
+      String bestAudio = getFile(attribute);
+      if (!decodedFiles.contains(bestAudio)) {
+        String audioRef = attribute.getAudioRef();
+        File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
+
+        File replacement = new File(absoluteFile.getParent(), "orig_" + absoluteFile.getName());
+        if (!replacement.exists()) {
+          try {
+            FileUtils.copyFile(absoluteFile, replacement);
+          } catch (IOException e) {
+            logger.error("got " + e, e);
+          }
+        }
+
+        AudioConversion.TrimInfo trimInfo = audioConversion.trimSilence(absoluteFile, true);
+        if (trimInfo.didTrim()) {
+          // drop ref result info
+          logger.debug("trimmed " + exid + " audio " + bestAudio);
+          boolean b = db.getRefResultDAO().removeForAudioFile(absoluteFile.getAbsolutePath());
+          if (!b) {
+            logger.warn("for " + exid + " couldn't remove " + absoluteFile.getAbsolutePath() + " for " + attribute);
+          }
+          trimmed++;
+        }
+
+        count++;
+
+        String author = attribute.getUser().getUserID();
+        audioConversion.ensureWriteMP3(audioRef, pathHelper.getInstallPath(), true, title, author);
+      }
+    }
+
+    return new Info(trimmed, count);
+  }
+
+  private static class Info {
+    int trimmed;
+    int count;
+
+    public Info(int trimmed, int count) {
+      this.trimmed = trimmed;
+      this.count = count;
+    }
   }
 
   private String getFile(AudioAttribute attribute) {
