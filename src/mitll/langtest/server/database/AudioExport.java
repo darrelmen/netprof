@@ -687,7 +687,10 @@ public class AudioExport {
     for (CommonExercise ex : toWrite) {
       if (ex.getRefAudio() != null) {
         try {
-          copyAudioSimple(zOut, installPath, audioConversion, ex.getRefAudio(), ex.getForeignLanguage());
+          AudioAttribute audio = ex.getRegularSpeed();
+          String artist = audio.getUser().getUserID();
+
+          copyAudioSimple(zOut, installPath, audioConversion, ex.getRefAudio(), ex.getForeignLanguage(),artist);
         } catch (IOException e) {
           //logger.debug("skipping duplicate " +e);
           d++;
@@ -788,8 +791,8 @@ public class AudioExport {
     String audioRef = attribute.getAudioRef();
 /*    logger.debug("\tfor ex id " +exid +
       " writing audio under context path " + realContextPath + " at " + audioRef);*/
-
-    String s = audioConversion.ensureWriteMP3(audioRef, realContextPath, false, title);
+    String author = attribute.getUser().getUserID();
+    String s = audioConversion.ensureWriteMP3(audioRef, realContextPath, false, title, author);
     File mp3 = new File(s);
     if (mp3.exists()) {
       //  logger.debug("---> Did write " + mp3.getAbsolutePath());
@@ -824,8 +827,8 @@ public class AudioExport {
    */
   private void copyAudioSimple(ZipOutputStream zOut,
                                String realContextPath,
-                               AudioConversion audioConversion, String audioRef, String title) throws IOException {
-    String filePath = audioConversion.ensureWriteMP3(audioRef, realContextPath, false, title);
+                               AudioConversion audioConversion, String audioRef, String title, String author) throws IOException {
+    String filePath = audioConversion.ensureWriteMP3(audioRef, realContextPath, false, title, author);
     File mp3 = new File(filePath);
     if (mp3.exists()) {
       String name = audioRef.replaceAll(".wav", ".mp3");
