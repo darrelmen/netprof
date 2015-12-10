@@ -6,6 +6,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.DecodeAlignOutput;
+import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.shared.Result;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -169,7 +170,8 @@ public class RefResultDAO extends DAO {
 
             MALE + "," +
             SPEED +
-            ") VALUES(?,?,?,?,?,?," +
+            ") " +
+            "VALUES(?,?,?,?,?,?," +
             "?,?,?,?," +
             "?,?,?,?," +
             "?,?,?," +
@@ -218,6 +220,10 @@ public class RefResultDAO extends DAO {
     return newID;
   }
 
+  public boolean removeForAudioFile(String audioFile) {
+    return remove(REFRESULT, ANSWER, audioFile);
+  }
+
   private String copyStringChar(String plan) {
     return new String(plan.toCharArray());
   }
@@ -226,7 +232,7 @@ public class RefResultDAO extends DAO {
    * Pulls the list of results out of the database.
    *
    * @return
-   * @see DatabaseImpl#populateUserToNumAnswers
+   * @see RefResultDecoder#getDecodedFiles()
    */
   public List<Result> getResults() {
     try {
@@ -248,6 +254,12 @@ public class RefResultDAO extends DAO {
     return new ArrayList<Result>();
   }
 
+  /**
+   * @param exid
+   * @param answer
+   * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
+   */
   public Result getResult(String exid, String answer) {
     String sql = "SELECT * FROM " + REFRESULT + " WHERE " + Database.EXID + "='" + exid + "' AND " + ANSWER + " like '%" + answer + "'";
     try {
