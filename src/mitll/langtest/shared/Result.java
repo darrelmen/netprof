@@ -126,12 +126,6 @@ public class Result implements IsSerializable, UserAndTime {
     return durationInMillis;
   }
 
-/*
-  public String getDevice() {
-    return device;
-  }
-*/
-
   @Override
   public String toString() {
     return "Result #" + getUniqueID() + "\t\tby user " + getUserid() + "\texid " + getExerciseID() + " " +
