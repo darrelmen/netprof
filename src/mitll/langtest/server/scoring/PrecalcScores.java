@@ -41,7 +41,9 @@ class PrecalcScores {
 
     if (valid) {
       jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
-      scores = getCachedScores(precalcResult, jsonObject, usePhoneToDisplay);
+      float pronScore = precalcResult.getPronScore();
+
+      scores = getCachedScores(pronScore, jsonObject, usePhoneToDisplay);
 
       isValid = isPrecalcValidCheck();
 //      logger.debug("for cached result " + precalcResult + " is valid " + isValid + " : " + precalcResult.getJsonScore());
@@ -51,16 +53,15 @@ class PrecalcScores {
   }
 
   /**
-   * @param precalcResult
+   * @param pronScore
    * @param jsonObject
    * @return
+   * @see #PrecalcScores(ServerProperties, Result, boolean)
    */
-  private Scores getCachedScores(Result precalcResult, JSONObject jsonObject, boolean usePhones) {
+  private Scores getCachedScores(float pronScore, JSONObject jsonObject, boolean usePhones) {
     Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseResultJson.parseJson(jsonObject, "words", "w", usePhones);
     Map<String, Map<String, Float>> eventScores = getEventAverages(imageTypeMapMap);
-
-    Scores scores = new Scores(precalcResult.getPronScore(), eventScores, 0);
-    return scores;
+    return new Scores(pronScore, eventScores, 0);
   }
 
   /**
