@@ -7,11 +7,11 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
- *
- *    String highPassFilterFile = conversion.getHighPassFilterFile(file.getAbsolutePath());
- DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(new File(highPassFilterFile));
+ * String highPassFilterFile = conversion.getHighPassFilterFile(file.getAbsolutePath());
+ * DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(new File(highPassFilterFile));
  * Created by go22670 on 10/30/15.
  */
 public class AudioTest {
@@ -42,7 +42,7 @@ public class AudioTest {
           System.out.println("Got " + f.getName());
           String highPassFilterFile = new AudioConversion(null).getHighPassFilterFile(f.getAbsolutePath());
           File file2 = new File(highPassFilterFile);
-        // File file2=f;
+          // File file2=f;
           DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(file2);
         }
       }
@@ -59,30 +59,48 @@ public class AudioTest {
       File[] files = file1.listFiles();
       for (File f : files) {
         if (f.getName().endsWith(".wav")) {
-          double durationInSeconds = new AudioCheck(null).getDurationInSeconds(f);
-        //  System.out.println("before " + durationInSeconds);
-          File replacement = File.createTempFile("dude",".wav");
+          AudioCheck audioCheck = new AudioCheck(null);
+          double durationInSeconds = audioCheck.getDurationInSeconds(f);
+          //  System.out.println("before " + durationInSeconds);
+       //   File replacement = File.createTempFile("dude", ".wav");
+          File replacement = new File(f.getParent(),"trim_"+f.getName());
           FileUtils.copyFile(f, replacement);
-          System.out.println("2 before " + new AudioCheck(null).getDurationInSeconds(replacement));
+          System.out.println("2 before " + audioCheck.getDurationInSeconds(replacement));
 
           //System.out.println("Got " + replacement.getName());
-         // String trimmed = new AudioConversion(null).doTrimSilence(replacement.getAbsolutePath());
+          // String trimmed = new AudioConversion(null).doTrimSilence(replacement.getAbsolutePath());
           /*File trimmedFile =*/
-          double v = new AudioConversion(null).trimSilence(replacement);
-       //   File file2 = new File(trimmed);
-       //   System.out.println("after " + trimmed + " exists " + file2.exists()+
-       //       ": "+new AudioCheck(null).getDurationInSeconds(file2) + " : " +v);
+          double v = new AudioConversion(null).trimSilence(replacement, false).getDuration();
+          //   File file2 = new File(trimmed);
+          //   System.out.println("after " + trimmed + " exists " + file2.exists()+
+          //       ": "+new AudioCheck(null).getDurationInSeconds(file2) + " : " +v);
 
-          System.out.println("after " + replacement + " exists " + replacement.exists()+
-              ": "+new AudioCheck(null).getDurationInSeconds(replacement)+ " : " + v);
+          System.out.println("after " + replacement + " exists " + replacement.exists() +
+              ": " + audioCheck.getDurationInSeconds(replacement) + " : " + v);
 
-
-          // File file2=f;
-         // DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(file2);
+          //File destFile = new File(replacement + "copy");
+          for (int i = 0; i < 10; i++) {
+            replacement = copyAndTrim(audioCheck, replacement);
+          }
+//          File file3 = copyAndTrim(audioCheck, file2);
         }
       }
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  public File copyAndTrim(AudioCheck audioCheck, File replacement) throws IOException {
+    File destFile = new File(replacement.getParent(),"trim_"+replacement.getName());
+
+    FileUtils.copyFile(replacement, destFile);
+
+    double v2 = new AudioConversion(null).trimSilence(destFile, false).getDuration();
+
+    double v3 = audioCheck.getDurationInSeconds(destFile);
+
+    System.out.println("got " + v2 + " : " + v3);
+
+    return destFile;
   }
 }
