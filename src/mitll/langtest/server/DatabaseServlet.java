@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServlet;
 import java.io.*;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -38,17 +39,18 @@ public class DatabaseServlet extends HttpServlet {
    * @return
    */
   private boolean ensureMP3(CommonExercise byID, PathHelper pathHelper, String configDir) {
-    return ensureMP3(byID.getRefAudio(), pathHelper, configDir, byID.getForeignLanguage());
+    return ensureMP3(byID.getRefAudio(), pathHelper, configDir, byID.getForeignLanguage(), "");
   }
 
   /**
    * @see mitll.langtest.server.ScoreServlet#getAnswer
    * @param wavFile
    * @param title
+   * @param author
    */
-  protected void ensureMP3(String wavFile, String title) { ensureMP3(wavFile, pathHelper, configDir, title);  }
+  protected void ensureMP3(String wavFile, String title, String author) { ensureMP3(wavFile, pathHelper, configDir, title, author);  }
 
-  private boolean ensureMP3(String wavFile, PathHelper pathHelper, String configDir, String title) {
+  private boolean ensureMP3(String wavFile, PathHelper pathHelper, String configDir, String title, String author) {
     if (wavFile != null) {
       String parent = pathHelper.getInstallPath();
       //logger.debug("ensureMP3 : wav " + wavFile + " under " + parent);
@@ -61,7 +63,7 @@ public class DatabaseServlet extends HttpServlet {
       if (!audioConversion.exists(wavFile, parent)) {
         logger.error("huh? can't find " + wavFile + " under " + parent);
       }
-      String filePath = audioConversion.ensureWriteMP3(wavFile, parent, false, title);
+      String filePath = audioConversion.ensureWriteMP3(wavFile, parent, false, title, author);
       return new File(filePath).exists();
     } else {
       return false;
@@ -90,7 +92,7 @@ public class DatabaseServlet extends HttpServlet {
   }
 
   /**
-   * @see mitll.langtest.server.ScoreServlet#getJsonArray
+   * @see mitll.langtest.server.load.LoadTestServlet#getJsonArray(List)
    * @param byID
    */
   protected void ensureMP3s(CommonExercise byID) {
@@ -132,12 +134,14 @@ public class DatabaseServlet extends HttpServlet {
     ex.put("ctr", exercise.getContextTranslation());
     AudioAttribute latestContext = exercise.getLatestContext(true);
     if (latestContext != null) {
-      if (CHECK_FOR_MP3) ensureMP3(latestContext.getAudioRef(), exercise.getContext());
+      String author = latestContext.getUser().getUserID();
+      if (CHECK_FOR_MP3) ensureMP3(latestContext.getAudioRef(), exercise.getContext(), author);
     }
     ex.put("ctmref", latestContext == null ? NO : latestContext.getAudioRef());
     latestContext = exercise.getLatestContext(false);
     if (latestContext != null) {
-      if (CHECK_FOR_MP3) ensureMP3(latestContext.getAudioRef(), exercise.getContext());
+      String author = latestContext.getUser().getUserID();
+      if (CHECK_FOR_MP3) ensureMP3(latestContext.getAudioRef(), exercise.getContext(), author);
     }
     ex.put("ctfref", latestContext == null ? NO : latestContext.getAudioRef());
     ex.put("ref", exercise.hasRefAudio() ? exercise.getRefAudioWithPrefs(serverProps.getPreferredVoices()) : NO);
@@ -207,24 +211,24 @@ public class DatabaseServlet extends HttpServlet {
     // we want the item text so we can label the mp3 with a title
     String foreignLanguage = exercise.getForeignLanguage();
 
-    if (mr != null) {
-      if (CHECK_FOR_MP3) ensureMP3(mr, foreignLanguage);
-    }
+//    if (mr != null) {
+//      if (CHECK_FOR_MP3) ensureMP3(mr, foreignLanguage, author);
+//    }
     ex.put("mrr", mr == null ? NO : mr);
 
-    if (ms != null) {
-      if (CHECK_FOR_MP3) ensureMP3(ms, foreignLanguage);
-    }
+//    if (ms != null) {
+//      if (CHECK_FOR_MP3) ensureMP3(ms, foreignLanguage, author);
+//    }
     ex.put("msr", ms == null ? NO : ms);
 
-    if (fr != null) {
-      if (CHECK_FOR_MP3) ensureMP3(fr, foreignLanguage);
-    }
+//    if (fr != null) {
+//      if (CHECK_FOR_MP3) ensureMP3(fr, foreignLanguage, author);
+//    }
     ex.put("frr", fr == null ? NO : fr);
 
-    if (fs != null) {
-      if (CHECK_FOR_MP3) ensureMP3(fs, foreignLanguage);
-    }
+//    if (fs != null) {
+//      if (CHECK_FOR_MP3) ensureMP3(fs, foreignLanguage, author);
+//    }
     ex.put("fsr", fs == null ? NO : fs);
   }
 }

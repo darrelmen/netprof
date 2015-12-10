@@ -106,7 +106,7 @@ public class AudioCheck {
     return validityAndDur;
   }
 
-  private void addDynamicRange(File file, /*boolean isBrowser,*/ ValidityAndDur validityAndDur) {
+  private void addDynamicRange(File file, ValidityAndDur validityAndDur) {
     String highPassFilterFile = new AudioConversion(props).getHighPassFilterFile(file.getAbsolutePath());
     DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(new File(highPassFilterFile));
     if (dynamicRange.maxMin < MIN_DYNAMIC_RANGE) {
