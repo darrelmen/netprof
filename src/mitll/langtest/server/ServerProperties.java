@@ -423,7 +423,7 @@ public class ServerProperties {
   }
 
   public boolean addMissingInfo() {
-    return getDefaultTrue(ADD_MISSING_INFO);
+    return getDefaultFalse(ADD_MISSING_INFO);
   }
 
   // EMAIL ------------------------
