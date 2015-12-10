@@ -69,5 +69,4 @@ public interface ASR {
 			return phoneSet;
 		}
 	}
-	
 }
