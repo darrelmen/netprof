@@ -49,8 +49,7 @@ public class PathHelper {
    * @return
    */
   public File getAbsoluteFile(String filePath) {
-    String realContextPath = getInstallPath();
-    return getAbsolute(realContextPath, filePath);
+    return getAbsolute(getInstallPath(), filePath);
   }
 
   public File getAbsolute(String realContextPath, String filePath) {
