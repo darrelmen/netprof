@@ -29,13 +29,14 @@ public class PathWriter {
    * @param overwrite
    * @param id
    * @param title            mark the mp3 meta data with this title
+   * @param artist
    * @param serverProperties
    * @return path of file under bestAudio directory
    * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath
    * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
    */
   public String getPermanentAudioPath(PathHelper pathHelper, File fileRef, String destFileName, boolean overwrite,
-                                      String id, String title, ServerProperties serverProperties) {
+                                      String id, String title, String artist, ServerProperties serverProperties) {
     final File bestDir = pathHelper.getAbsoluteFile(BEST_AUDIO);
     if (!bestDir.exists() && !bestDir.mkdir()) {
       if (!bestDir.exists()) logger.warn("huh? couldn't make " + bestDir.getAbsolutePath());
@@ -63,11 +64,12 @@ public class PathWriter {
       }
       logger.debug("getPermanentAudioPath : *not* normalizing levels for " + destination.getAbsolutePath());
     }
-    ensureMP3(pathHelper, s, overwrite, title, serverProperties);
+    ensureMP3(pathHelper, s, overwrite, title, artist, serverProperties);
     return s;
   }
 
-  private void ensureMP3(PathHelper pathHelper, String wavFile, boolean overwrite, String title, ServerProperties serverProperties) {
+  private void ensureMP3(PathHelper pathHelper, String wavFile, boolean overwrite, String title, String artist,
+                         ServerProperties serverProperties) {
     if (wavFile != null) {
       String parent = pathHelper.getInstallPath();
 
@@ -78,7 +80,7 @@ public class PathWriter {
       if (!audioConversion.exists(wavFile, parent)) {
         logger.error("can't find " + wavFile + " under " + parent);
       }
-      audioConversion.ensureWriteMP3(wavFile, parent, overwrite, title);
+      audioConversion.ensureWriteMP3(wavFile, parent, overwrite, title, artist);
     } else {
       logger.warn("not converting wav to mp3???\n\n\n");
     }
