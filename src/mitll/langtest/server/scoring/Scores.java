@@ -8,6 +8,7 @@
 package mitll.langtest.server.scoring;
 
 import mitll.langtest.shared.Result;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import pronz.speech.Audio;
 
@@ -43,14 +44,13 @@ public class Scores {
    * @param hydecScore
    * @param eventScores
    * @param processDur
-   * @see ASRScoring#getEmptyScores()
+   * @see PrecalcScores#getCachedScores(float, JSONObject, boolean)
    * @see ASRScoring#getScoresFromHydec(Audio, String, String)
-   * @see ASRScoring#scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result)
    */
   public Scores(float hydecScore, Map<String, Map<String, Float>> eventScores, int processDur) {
-    this.hydraScore = hydecScore;
+    this.hydraScore  = hydecScore;
     this.eventScores = eventScores;
-    this.processDur = processDur;
+    this.processDur  = processDur;
   }
 
   /**
