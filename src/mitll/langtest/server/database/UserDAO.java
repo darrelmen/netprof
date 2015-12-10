@@ -8,7 +8,9 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
+import org.apache.commons.math3.analysis.integration.gauss.SymmetricGaussIntegrator;
 import org.apache.log4j.Logger;
+import org.apache.log4j.net.SyslogAppender;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
@@ -545,11 +547,6 @@ public class UserDAO extends DAO {
     return getUserWhere(-1, sql);
   }
 
-/*  public boolean isMale(long userid) {
-    User userWhere = getUserWhere(userid);
-    return userWhere == null || userWhere.isMale();
-  }*/
-
   /**
    * @param userid
    * @return null if no user with that id else the user object
@@ -557,7 +554,11 @@ public class UserDAO extends DAO {
    */
   public User getUserWhere(long userid) {
     String sql = "SELECT * from users where " + ID + "=" + userid + ";";
+    long then = System.currentTimeMillis();
     List<User> users = getUsers(sql);
+    long now = System.currentTimeMillis();
+    //logger.debug("getUserWhere took " +(now-then) + " millis.");
+
     if (users.isEmpty()) {
       if (userid > 0) {
         logger.warn(language + " : no user with id " + userid);

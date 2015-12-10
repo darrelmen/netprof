@@ -5,15 +5,11 @@
 package mitll.langtest.server;
 
 import com.google.common.io.Files;
-import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -22,7 +18,6 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -342,7 +337,7 @@ public class ScoreServlet extends DatabaseServlet {
     String user = request.getHeader(USER);
 
     long userid = userManagement.getUserFromParam2(user);
-    if (db.getUserDAO().getUserWhere(userid) == null) {
+    if (getUser(userid) == null) {
       jsonObject.put(ERROR, "unknown user " + userid);
     } else {
       String context = request.getHeader(CONTEXT);
@@ -358,6 +353,15 @@ public class ScoreServlet extends DatabaseServlet {
         db.logEvent(widgetid, widgetType, exid == null ? "N/A" : exid, context, userid, device);
       }
     }
+  }
+
+  private User getUser(long userid) {
+    return db.getUserDAO().getUserWhere(userid);
+  }
+
+  private String getUserID(long userid) {
+    User userWhere = db.getUserDAO().getUserWhere(userid);
+    return userWhere == null ? "" + userid : userWhere.getUserID();
   }
 
   /**
@@ -494,7 +498,7 @@ public class ScoreServlet extends DatabaseServlet {
    * If request type is decode, decode the file and return score info in json.
    * <p>
    * Allow alternate decode possibilities if header is set.
-   *
+   * <p>
    * DON'T trim silence after it gets the file from the iPad/iPhone
    *
    * @param request
@@ -611,8 +615,7 @@ public class ScoreServlet extends DatabaseServlet {
             if (pretestScore1.getHydecScore() > 0.25) {
               logger.info("remember score for result " + decodeResultID);
               db.rememberScore(decodeResultID, pretestScore1);
-            }
-            else {
+            } else {
               logger.debug("skipping remembering alignment since score was too low " + pretestScore1.getHydecScore());
             }
           }
@@ -715,7 +718,7 @@ public class ScoreServlet extends DatabaseServlet {
       @Override
       public void run() {
         //long then = System.currentTimeMillis();
-        ensureMP3(path, foreignLanguage);
+        ensureMP3(path, foreignLanguage, getUserID(user));
         // long now = System.currentTimeMillis();
         //       logger.debug("Took " + (now-then) + " millis to write mp3 version");
       }
@@ -723,16 +726,6 @@ public class ScoreServlet extends DatabaseServlet {
 
     return answer;
   }
-
-  /**
-   * @param inputStream
-   * @param saveFile
-   * @throws IOException
-   * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
-   */
-//  private void writeToOutputStream(ServletInputStream inputStream, File saveFile) throws IOException {
-//    writeToFile(inputStream, saveFile);
-//  }
 
   /**
    * For both words and phones, return event text, start, end times, and score for event.
