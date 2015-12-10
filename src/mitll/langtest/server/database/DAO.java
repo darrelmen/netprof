@@ -90,14 +90,10 @@ public class DAO {
   }
 
   protected boolean remove(String table, String idField, long itemId) {
-    String sql = "DELETE FROM " + table +" WHERE " +
-      idField +
-      "=" + itemId +
-      "";
+    String sql = "DELETE FROM " + table +" WHERE " + idField + "=" + itemId;
 
     return doSqlOn(sql, table);
   }
-
 
   protected boolean remove(String table, String idField, String itemId) {
     String sql = "DELETE FROM " + table +" WHERE " +
