@@ -27,8 +27,9 @@ import java.util.*;
  */
 public class RefResultDecoder {
   private static final Logger logger = Logger.getLogger(RefResultDecoder.class);
-  public static final boolean DO_REF_DECODE = true;
-  public static final boolean DO_TRIM = false;
+  private static final boolean DO_REF_DECODE = true;
+  private static final boolean DO_TRIM = true;
+  public static final int SLEEP_BETWEEN_DECODES = 100;
 //  private static final boolean RUN_MISSING_INFO = false;
 
   private final DatabaseImpl db;
@@ -36,8 +37,8 @@ public class RefResultDecoder {
 
   private final AudioFileHelper audioFileHelper;
   private boolean stopDecode = false;
-  private PathHelper pathHelper;
-  LangTestDatabaseImpl langTestDatabase;
+  private final PathHelper pathHelper;
+  //private final LangTestDatabaseImpl langTestDatabase;
 
   /**
    * @param db
@@ -52,7 +53,7 @@ public class RefResultDecoder {
     this.serverProps = serverProperties;
     this.pathHelper = pathHelper;
     this.audioFileHelper = audioFileHelper;
-    this.langTestDatabase = langTestDatabase;
+  //  this.langTestDatabase = langTestDatabase;
   }
 
   /**
@@ -65,12 +66,11 @@ public class RefResultDecoder {
       new Thread(new Runnable() {
         @Override
         public void run() {
-
           sleep(5000);
           trimRef(exercises, relativeConfigDir);
 
           sleep(5000);
-          writeRefDecode(exercises, relativeConfigDir);
+          if (!serverProps.isNoModel()) writeRefDecode(exercises, relativeConfigDir);
         }
       }).start();
     } else {
@@ -183,7 +183,9 @@ public class RefResultDecoder {
           count += info.count;
           changed += info.changed;
         }
+        if (count > 0 && count % 2000 == 0) logger.debug("examined " +count+ " files.");
       }
+
       logger.debug("trimRef : Out of " + attrc + " best audio files, " + maleAudio + " male, " + femaleAudio + " female, " +
           defaultAudio + " default " + "examined " + count +
           " trimmed " + trimmed + " dropped ref result rows = " + changed);
@@ -216,12 +218,12 @@ public class RefResultDecoder {
       int maleAudio = 0;
       int femaleAudio = 0;
       int defaultAudio = 0;
+
       for (CommonExercise exercise : exercises) {
         if (stopDecode) return;
 
         List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
         if (audioAttributes != null) {
-//					logger.warn("hmm - audio recorded for " + )
           db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
           attrc += audioAttributes.size();
         }
@@ -251,8 +253,9 @@ public class RefResultDecoder {
           defaultAudio += defaultUserAudio.size();
           count += doDecode(decodedFiles, exercise, defaultUserAudio);
         }
+        if (count > 0 && count % 100 == 0) logger.debug("ref decode - did " + count + " decodes");
       }
-      logger.debug("Out of " + attrc + " best audio files, " + maleAudio + " male, " + femaleAudio + " female, " +
+      logger.debug("writeRefDecode : Out of " + attrc + " best audio files, " + maleAudio + " male, " + femaleAudio + " female, " +
           defaultAudio + " default " + "decoded " + count);
 
 
@@ -275,7 +278,7 @@ public class RefResultDecoder {
     }).start();
   }
 
-  public void sleep(int millis) {
+  private void sleep(int millis) {
     try {
       Thread.sleep(millis); // ???
     } catch (InterruptedException e) {
@@ -336,7 +339,7 @@ public class RefResultDecoder {
 
       try {
         audioFileHelper.decodeOneAttribute(exercise, attribute, doHydec);
-        sleep(2000);
+        sleep(SLEEP_BETWEEN_DECODES);
         count++;
       } catch (Exception e) {
         logger.error("Got " + e, e);
@@ -346,10 +349,9 @@ public class RefResultDecoder {
     return count;
   }
 
-  AudioConversion audioConversion = new AudioConversion(null);
+  private final AudioConversion audioConversion = new AudioConversion(null);
 
   /**
-   * @param decodedFiles
    * @param audioAttributes
    * @param title
    * @param exid
@@ -373,25 +375,27 @@ public class RefResultDecoder {
           } catch (IOException e) {
             logger.error("got " + e, e);
           }
-        }
+          AudioConversion.TrimInfo trimInfo = audioConversion.trimSilence(absoluteFile, true);
+          if (trimInfo.didTrim()) {
+            // drop ref result info
+            logger.debug("trimmed " + exid + " " + attribute + " audio " + bestAudio);
+            if (!serverProps.isNoModel()) {
+              boolean b = db.getRefResultDAO().removeForAudioFile(absoluteFile.getAbsolutePath());
+              if (!b) {
+                logger.warn("for " + exid + " couldn't remove " + absoluteFile.getAbsolutePath() + " for " + attribute);
+              } else {
+                changed++;
+              }
+            }
 
-        AudioConversion.TrimInfo trimInfo = audioConversion.trimSilence(absoluteFile, true);
-        if (trimInfo.didTrim()) {
-          // drop ref result info
-          logger.debug("trimmed " + exid + " " + attribute + " audio " + bestAudio);
-          boolean b = db.getRefResultDAO().removeForAudioFile(absoluteFile.getAbsolutePath());
-          if (!b) {
-            logger.warn("for " + exid + " couldn't remove " + absoluteFile.getAbsolutePath() + " for " + attribute);
-          } else {
-            changed++;
+            trimmed++;
           }
-          trimmed++;
+
+          count++;
+
+          String author = attribute.getUser().getUserID();
+          audioConversion.ensureWriteMP3(audioRef, pathHelper.getInstallPath(), trimInfo.didTrim(), title, author);
         }
-
-        count++;
-
-        String author = attribute.getUser().getUserID();
-        audioConversion.ensureWriteMP3(audioRef, pathHelper.getInstallPath(), true, title, author);
       }
       else {
         logger.warn("no file for " + exid + " " + attribute + " at audio file " + bestAudio);
@@ -402,9 +406,9 @@ public class RefResultDecoder {
   }
 
   private static class Info {
-    int trimmed;
-    int count;
-    int changed;
+    final int trimmed;
+    final int count;
+    final int changed;
 
     public Info(int trimmed, int count, int changed) {
       this.trimmed = trimmed;
