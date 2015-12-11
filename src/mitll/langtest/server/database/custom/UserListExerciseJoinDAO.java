@@ -118,7 +118,7 @@ public class UserListExerciseJoinDAO extends DAO {
    */
   public boolean remove(long listid, String exid) {
     String sql = getRemoveSQL(listid, exid);
-    return doSqlOn(sql, USER_EXERCISE_LIST_EXERCISE);
+    return doSqlOn(sql, USER_EXERCISE_LIST_EXERCISE, true);
   }
 
   private String getRemoveSQL(long listid, String exid) {
