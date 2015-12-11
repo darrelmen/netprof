@@ -7,6 +7,7 @@ package mitll.langtest.server.scoring;
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.shared.Result;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -50,6 +51,21 @@ class PrecalcScores {
     } else {
       isValid = false;
     }
+  }
+
+  /**
+   * Sometimes we write the unknown model alignment into the ref result table - really shouldn't do that.
+   * @return
+   */
+  private boolean isPrecalcValidCheck() {
+    Map<String, Float> stringFloatMap = scores.eventScores.get(Scores.WORDS);
+    boolean avp = scores.eventScores.isEmpty() ||
+        (stringFloatMap.isEmpty() &&
+            (!precalcResult.getAudioType().equals("avp") || precalcResult.isCorrect())
+        );
+
+//    boolean onlyUnknown = stringFloatMap != null && stringFloatMap.size() == 1 && stringFloatMap.containsKey(SLFFile.UNKNOWN_MODEL);
+    return !avp && !stringFloatMap.containsKey(SLFFile.UNKNOWN_MODEL);
   }
 
   /**
@@ -121,14 +137,6 @@ class PrecalcScores {
         (precalcResult.isValid() &&
             (precalcResult.getPronScore() < 0 || precalcResult.getJsonScore() == null || precalcResult.getJsonScore().isEmpty()));
     return !isInvalid;
-  }
-
-  private boolean isPrecalcValidCheck() {
-    boolean avp = scores.eventScores.isEmpty() ||
-        (scores.eventScores.get(Scores.WORDS).isEmpty() &&
-            (!precalcResult.getAudioType().equals("avp") || precalcResult.isCorrect())
-        );
-    return !avp;
   }
 
   public Scores getScores() {

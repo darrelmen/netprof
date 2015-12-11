@@ -9,7 +9,6 @@ import corpus.LTS;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.log4j.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,7 +18,7 @@ import org.apache.log4j.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class ConfigFileCreator {
-  private static Logger logger = Logger.getLogger(ConfigFileCreator.class);
+//  private static Logger logger = Logger.getLogger(ConfigFileCreator.class);
 
   private final String platform = Utils.package$.MODULE$.platform();
   private final Map<String, String> properties;
@@ -90,7 +89,6 @@ public class ConfigFileCreator {
       //  logger.info("setting lts to " + value);
         kv.put(LTS_CLASS, value);
       }
-
       // new FileCopier().copy(modelsDir+File.separator+"phones.dict",tmpDir+File.separator +"dict");   // Audio.hscore in pron sets dictionary=this value
     }
     //logger.info("using config from template " + cfgTemplate);
