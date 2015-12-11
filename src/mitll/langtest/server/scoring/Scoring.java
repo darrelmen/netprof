@@ -210,14 +210,15 @@ public abstract class Scoring {
                                     String audioFileNoSuffix, boolean useScoreToColorBkg,
                                     String prefix, String suffix, boolean decode, boolean useWebservice,
                                     boolean usePhoneToDisplay) {
-/*    logger.debug("writeTranscripts - decode " + decode + " file " + audioFileNoSuffix + " width " + imageWidth + " height " + imageHeight+
-        " prefix " + prefix);*/
+   logger.debug("writeTranscripts - decode " + decode + " file " + audioFileNoSuffix + " width " + imageWidth + " height " + imageHeight+
+        " prefix " + prefix);
 
     boolean foundATranscript = false;
     // These may not all exist. The speech file is created only by multisv right now.
     String phoneLabFile = prependDeploy(audioFileNoSuffix + ".phones.lab");
     Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
     if (new File(phoneLabFile).exists()) {
+      logger.info("using " + phoneLabFile);
       typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
       foundATranscript = true;
     } else {
@@ -226,6 +227,8 @@ public abstract class Scoring {
 
     String wordLabFile = prependDeploy(audioFileNoSuffix + ".words.lab");
     if (new File(wordLabFile).exists()) {
+      logger.info("using " + wordLabFile);
+
       typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
       foundATranscript = true;
     } else {
