@@ -1271,7 +1271,10 @@ public class DatabaseImpl implements Database {
   public void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
     PretestScore pretestScore = answer.getPretestScore();
     if (pretestScore == null) {
-      logger.debug("huh? pretest score is null for " + answer + " and " + answerID);
+      logger.debug("recordWordAndPhoneInfo pretest score is null for " + answer + " and " + answerID);
+    }
+    else {
+      logger.debug("recordWordAndPhoneInfo pretest score is " + pretestScore+ " for " + answer + " and " + answerID);
     }
     recordWordAndPhoneInfo(answerID, pretestScore);
   }
