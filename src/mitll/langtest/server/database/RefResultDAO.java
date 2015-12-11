@@ -220,8 +220,18 @@ public class RefResultDAO extends DAO {
     return newID;
   }
 
-  public boolean removeForAudioFile(String audioFile) {
-    return remove(REFRESULT, ANSWER, audioFile);
+  public boolean removeForAudioFile(String audioFile/*, int duration*/) {
+
+/*
+    String sql = "DELETE FROM " + REFRESULT +" WHERE " +
+        ANSWER +
+        "='" + audioFile +
+        "'";
+
+    return doSqlOn(sql, table);*/
+
+
+    return remove(REFRESULT, ANSWER, audioFile, false);
   }
 
   private String copyStringChar(String plan) {
