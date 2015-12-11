@@ -230,7 +230,7 @@ public class DynamicRange {
       RMSInfo rmsInfo = new RMSInfo(range, maxSample, minSample, totalRMS, minRMS, maxRMS);
 
 //      logger.info("got\n" + rmsInfo);
-      logger.info("dymanic range : " + rmsInfo.getRange());
+//      logger.info("dymanic range : " + rmsInfo.getRange());
       return rmsInfo;
     } catch (Exception e) {
       logger.error("Got " + e, e);
