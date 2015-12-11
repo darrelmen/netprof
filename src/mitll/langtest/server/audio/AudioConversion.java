@@ -40,7 +40,7 @@ public class AudioConversion {
   public static final String SIXTEEN_K_SUFFIX = "_16K";
   public static final String FILE_MISSING = "FILE_MISSING";
   private static final float SIXTEEN_K = 16000f;
-  private static final float TRIM_SILENCE_BEFORE_AND_AFTER = 0.25f;
+  private static final float TRIM_SILENCE_BEFORE_AND_AFTER = 0.30f;
   private static final String T_VALUE = "" + 7;
   public static final String LAME = "lame";
   private AudioCheck audioCheck;
@@ -214,12 +214,6 @@ public class AudioConversion {
       double durationInSecondsTrimmed = audioCheck.getDurationInSeconds(trimmed);
       double diff = durationInSeconds - durationInSecondsTrimmed;
       if (durationInSecondsTrimmed > 0.1 && diff > 0.1) {
-
-/*        if (makeCopyOfOriginal) {
-          File replacement = new File(wavFile.getParent(), "orig_" + wavFile.getName());
-          FileUtils.copyFile(wavFile, replacement);
-        }*/
-
         FileUtils.copyFile(new File(trimmed), wavFile);
 
         long now = System.currentTimeMillis();
@@ -269,13 +263,13 @@ public class AudioConversion {
   }
 
   private File copyFile(final File wavFile, final String sourceFile, final String suffix) throws IOException {
-    logger.info("orig " + wavFile.getName() + " source " + sourceFile + " suffix " + suffix);
+//    logger.info("orig " + wavFile.getName() + " source " + sourceFile + " suffix " + suffix);
     String name1 = wavFile.getName();
     String dest = wavFile.getParent() + File.separator + removeSuffix(name1) + suffix + ".wav";
 
     File replacement = new File(dest);
     File srcFile = new File(sourceFile);
-    logger.info("srcFile " + srcFile + " exists " + srcFile.exists());
+//    logger.info("srcFile " + srcFile + " exists " + srcFile.exists());
     FileUtils.copyFile(srcFile, replacement);
 
     // cleanup
