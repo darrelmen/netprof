@@ -158,12 +158,12 @@ public abstract class Scoring {
     Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
 
     if (phoneLab != null) {
-      logger.debug("phoneLab: " + phoneLab);
+//      logger.debug("phoneLab: " + phoneLab);
       typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLab);
       foundATranscript = true;
     }
     if (wordLab != null) {
-      logger.debug("wordLab: " + wordLab);
+ //     logger.debug("wordLab: " + wordLab);
       typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLab);
       foundATranscript = true;
     }
