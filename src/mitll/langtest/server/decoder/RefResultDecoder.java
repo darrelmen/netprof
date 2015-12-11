@@ -28,7 +28,7 @@ import java.util.*;
 public class RefResultDecoder {
   private static final Logger logger = Logger.getLogger(RefResultDecoder.class);
   public static final boolean DO_REF_DECODE = true;
-  public static final boolean DO_TRIM = true;
+  public static final boolean DO_TRIM = false;
 //  private static final boolean RUN_MISSING_INFO = false;
 
   private final DatabaseImpl db;
@@ -130,14 +130,11 @@ public class RefResultDecoder {
       logger.debug(language + " writeRefDecode : found " +
           numResults + " in ref results table vs " + exToAudio.size() + " exercises with audio");
 
-      Set<String> decodedFiles = getDecodedFiles();
-      logger.debug(language + " found " + decodedFiles.size() + " previous ref results, checking " +
-          exercises.size() + " exercises ");
-
       if (stopDecode) logger.debug("Stop decode true");
 
       int count = 0;
       int trimmed = 0;
+      int changed = 0;
       int attrc = 0;
       int maleAudio = 0;
       int femaleAudio = 0;
@@ -165,28 +162,31 @@ public class RefResultDecoder {
         if (!maleEmpty) {
           List<AudioAttribute> audioAttributes1 = malesMap.get(maleUsers.get(0));
           maleAudio += audioAttributes1.size();
-          Info info = doTrim(decodedFiles, audioAttributes1, title, exercise.getID());
+          Info info = doTrim(audioAttributes1, title, exercise.getID());
           trimmed += info.trimmed;
           count += info.count;
+          changed += info.changed;
         }
         if (!femaleEmpty) {
           List<AudioAttribute> audioAttributes1 = femalesMap.get(femaleUsers.get(0));
           femaleAudio += audioAttributes1.size();
 
-          Info info = doTrim(decodedFiles, audioAttributes1, title, exercise.getID());
+          Info info = doTrim(audioAttributes1, title, exercise.getID());
           trimmed += info.trimmed;
           count += info.count;
+          changed += info.changed;
         } else if (maleEmpty) {
           Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
           defaultAudio += defaultUserAudio.size();
-          Info info = doTrim(decodedFiles, defaultUserAudio, title, exercise.getID());
+          Info info = doTrim(defaultUserAudio, title, exercise.getID());
           trimmed += info.trimmed;
           count += info.count;
+          changed += info.changed;
         }
       }
       logger.debug("trimRef : Out of " + attrc + " best audio files, " + maleAudio + " male, " + femaleAudio + " female, " +
           defaultAudio + " default " + "examined " + count +
-          " trimmed " + trimmed);
+          " trimmed " + trimmed + " dropped ref result rows = " + changed);
     }
   }
 
@@ -348,15 +348,24 @@ public class RefResultDecoder {
 
   AudioConversion audioConversion = new AudioConversion(null);
 
-  private Info doTrim(Set<String> decodedFiles, Collection<AudioAttribute> audioAttributes, String title, String exid) {
+  /**
+   * @param decodedFiles
+   * @param audioAttributes
+   * @param title
+   * @param exid
+   * @return
+   * @see #trimRef(List, String)
+   */
+  private Info doTrim(Collection<AudioAttribute> audioAttributes, String title, String exid) {
     int count = 0;
     int trimmed = 0;
+    int changed = 0;
     for (AudioAttribute attribute : audioAttributes) {
       String bestAudio = getFile(attribute);
-      if (!decodedFiles.contains(bestAudio)) {
-        String audioRef = attribute.getAudioRef();
-        File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
+      String audioRef = attribute.getAudioRef();
+      File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
 
+      if (absoluteFile.exists()) {
         File replacement = new File(absoluteFile.getParent(), "orig_" + absoluteFile.getName());
         if (!replacement.exists()) {
           try {
@@ -369,10 +378,12 @@ public class RefResultDecoder {
         AudioConversion.TrimInfo trimInfo = audioConversion.trimSilence(absoluteFile, true);
         if (trimInfo.didTrim()) {
           // drop ref result info
-          logger.debug("trimmed " + exid + " audio " + bestAudio);
+          logger.debug("trimmed " + exid + " " + attribute + " audio " + bestAudio);
           boolean b = db.getRefResultDAO().removeForAudioFile(absoluteFile.getAbsolutePath());
           if (!b) {
             logger.warn("for " + exid + " couldn't remove " + absoluteFile.getAbsolutePath() + " for " + attribute);
+          } else {
+            changed++;
           }
           trimmed++;
         }
@@ -382,18 +393,23 @@ public class RefResultDecoder {
         String author = attribute.getUser().getUserID();
         audioConversion.ensureWriteMP3(audioRef, pathHelper.getInstallPath(), true, title, author);
       }
+      else {
+        logger.warn("no file for " + exid + " " + attribute + " at audio file " + bestAudio);
+      }
     }
 
-    return new Info(trimmed, count);
+    return new Info(trimmed, count, changed);
   }
 
   private static class Info {
     int trimmed;
     int count;
+    int changed;
 
-    public Info(int trimmed, int count) {
+    public Info(int trimmed, int count, int changed) {
       this.trimmed = trimmed;
       this.count = count;
+      this.changed = changed;
     }
   }
 
