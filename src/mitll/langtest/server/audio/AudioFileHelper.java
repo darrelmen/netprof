@@ -325,7 +325,6 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
         //logger.debug("attr dur " + attribute.getDurationInMillis());
 
         getRefAudioAnswerDecoding(exercise, (int) attribute.getUserid(),
-            //audioRef,
             absoluteFile,
             durationInMillis,
 
@@ -590,7 +589,6 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    * @see mitll.langtest.server.scoring.AutoCRTScoring#getASRScoreForAudio
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    **/
-
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg,
                                           boolean decode, String tmpDir, boolean useCache, String prefix, Result precalcResult,
@@ -623,17 +621,9 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
                                            int width, int height, boolean useScoreToColorBkg,
                                            boolean decode, String tmpDir, boolean useCache, String prefix, Result precalcResult,
                                            boolean usePhoneToDisplay, boolean useOldSchool) {
-/*    try {
-      String hostName = InetAddress.getLocalHost().getHostName();
-      logger.info("Got host " +hostName);
-    } catch (UnknownHostException e) {
-      e.printStackTrace();
-    }*/
-
     logger.debug("getASRScoreForAudio (" + serverProps.getLanguage() + ")" + (decode ? " Decoding " : " Aligning ") +
         "" + testAudioFile + " with sentence '" + sentence + "' req# " + reqid + (useCache ? " check cache" : " NO CACHE") + " prefix " + prefix);
 
-    // audio stuff
     makeASRScoring();
     if (testAudioFile == null) {
       logger.error("huh? no test audio file for " + sentence);
@@ -660,7 +650,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
 
     ASR asrScoring = useOldSchool || serverProps.getOldSchoolService() ? oldschoolScoring : getASRScoring();
 
-    logger.info("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
+    logger.debug("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
 
     PretestScore pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
@@ -677,6 +667,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
     pretestScore.setReqid(reqid);
 
     JSONObject json = new ScoreToJSON().getJsonObject(pretestScore);
+   // logger.info("json for preset score " +pretestScore + " " + json);
     pretestScore.setJson(json.toString());
 
     return pretestScore;
