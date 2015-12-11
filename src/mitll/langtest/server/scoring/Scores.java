@@ -7,7 +7,6 @@
  */
 package mitll.langtest.server.scoring;
 
-import mitll.langtest.shared.Result;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import pronz.speech.Audio;
@@ -26,7 +25,7 @@ public class Scores {
   private static final Logger logger = Logger.getLogger(Scores.class);
 
   public static final String PHONES = "phones";
-  public static final String WORDS = "words";
+  public static final String WORDS  = "words";
   public float hydraScore = 0f;
   public final Map<String, Map<String, Float>> eventScores;
   private int processDur = 0;
@@ -52,6 +51,8 @@ public class Scores {
     this.eventScores = eventScores;
     this.processDur  = processDur;
   }
+
+  public boolean isValid() { return hydraScore > -0.01; }
 
   /**
    * TODO : do we need word scores?
