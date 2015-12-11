@@ -92,19 +92,19 @@ public class DAO {
   protected boolean remove(String table, String idField, long itemId) {
     String sql = "DELETE FROM " + table +" WHERE " + idField + "=" + itemId;
 
-    return doSqlOn(sql, table);
+    return doSqlOn(sql, table, true);
   }
 
-  protected boolean remove(String table, String idField, String itemId) {
+  protected boolean remove(String table, String idField, String itemId, boolean warnIfDidntAlter) {
     String sql = "DELETE FROM " + table +" WHERE " +
       idField +
       "='" + itemId +
       "'";
 
-    return doSqlOn(sql, table);
+    return doSqlOn(sql, table, warnIfDidntAlter);
   }
 
-  protected boolean doSqlOn(String sql, String table) {
+  protected boolean doSqlOn(String sql, String table, boolean warnIfDidntAlter) {
     try {
       int before = getCount(table);
 
@@ -112,7 +112,7 @@ public class DAO {
       PreparedStatement statement = connection.prepareStatement(sql);
       boolean changed = statement.executeUpdate() == 1;
 
-      if (!changed) {
+      if (!changed && warnIfDidntAlter) {
         logger.warn("doSqlOn : didn't alter row for " + table + " sql " + sql);
       }
 
@@ -120,9 +120,10 @@ public class DAO {
       database.closeConnection(connection);
 
       int count = getCount(table);
-      logger.debug("now " + count + " in " + table);
-      if (before - count != 1) {
-        logger.warn("DAO.doSqlOn : there were " + before + " before for " + table);
+    //  logger.debug("now " + count + " in " + table);
+      if (before - count != 1 && warnIfDidntAlter) {
+        logger.warn("DAO.doSqlOn : now " + count +
+            " there were " + before + " before for " + table);
       }
 
       return changed;
