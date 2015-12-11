@@ -72,14 +72,15 @@ import java.util.logging.Logger;
  *  - Added code for trimming silence
  * 1.1.3
  *  - Trims silence from beginning and end of recordings with sox
+ * 1.1.4
+ *  - Trims silence from all ref audio
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private Logger logger = Logger.getLogger("LangTest");
 
-//  private static final String VERSION = "v1.0&nbsp;";
-  private static final String VERSION = "v" +
-    "1.1.3" +
-    "&nbsp;";
+  private static final String VERSION_INFO = "1.1.4";
+
+  private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
   private static final List<String> SITE_LIST = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean","Iraqi",
       "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Russian", "Spanish", "Sudanese", "Tagalog", "Urdu");
