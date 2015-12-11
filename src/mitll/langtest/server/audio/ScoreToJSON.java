@@ -82,7 +82,7 @@ public class ScoreToJSON {
 
         jsonObject.put("words", jsonWords);
       }
-      else {
+      else if (pretestScore.getHydecScore() > -0.1f) {
         logger.warn("no word transcript for " + pretestScore);
       }
     }
@@ -107,8 +107,8 @@ public class ScoreToJSON {
   }
 
   private static float round(float d, int decimalPlace) {
-    BigDecimal bd = new BigDecimal(Float.toString(d));
-    bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+    BigDecimal bd = new BigDecimal(Float.toString(d)).
+        setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
     return bd.floatValue();
   }
 }
