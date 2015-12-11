@@ -112,7 +112,7 @@ public class ParseResultJson {
     typeToEvent.put(ImageType.WORD_TRANSCRIPT,  wordEvents);
     typeToEvent.put(ImageType.PHONE_TRANSCRIPT, phoneEvents);
 
-    boolean valid = true;
+   // boolean valid = true;
     if (jsonObject.containsKey(words1)) {
       try {
         JSONArray words = jsonObject.getJSONArray(words1);
