@@ -47,6 +47,7 @@ public class RefResultDAO extends DAO {
   public static final String HYDEC_ALIGN_PRON_SCORE = "hydecAlignPronScore";
   public static final String HYDEC_ALIGN_PROCESS_DUR = "hydecAlignProcessDur";
   public static final String HYDEC_ALIGN_NUM_PHONES = "hydecAlignNumPhones";
+  public static final String WORDS = "{\"words\":[]}";
   private final boolean dropTable;
 //  private final boolean debug = false;
 
@@ -220,17 +221,7 @@ public class RefResultDAO extends DAO {
     return newID;
   }
 
-  public boolean removeForAudioFile(String audioFile/*, int duration*/) {
-
-/*
-    String sql = "DELETE FROM " + REFRESULT +" WHERE " +
-        ANSWER +
-        "='" + audioFile +
-        "'";
-
-    return doSqlOn(sql, table);*/
-
-
+  public boolean removeForAudioFile(String audioFile) {
     return remove(REFRESULT, ANSWER, audioFile, false);
   }
 
@@ -384,6 +375,9 @@ public class RefResultDAO extends DAO {
   /**
    * Get a list of Results for this Query.
    *
+   * Use decode score for result score
+   * use decode alignment (if valid) for alignment json
+   *
    * @param connection
    * @param statement
    * @return
@@ -396,28 +390,40 @@ public class RefResultDAO extends DAO {
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
       long userID = rs.getLong(USERID);
-      String plan = "";
       String exid = rs.getString(Database.EXID);
-      int qid = 0;
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       String answer = rs.getString(ANSWER);
-      boolean valid = true;
-      String type = "";
       int dur = rs.getInt(DURATION);
 
       boolean correct = rs.getBoolean(CORRECT);
-      float pronScore = rs.getFloat(PRON_SCORE);
 
-      Result result = new Result(uniqueID, userID, //id
-          plan, // plan
-          exid, // id
-          qid, // qid
-          trimPathForWebPage2(answer), // answer
-          valid, // valid
-          timestamp.getTime(),
-          type, dur, correct, pronScore, "browser");
-      result.setJsonScore(rs.getString(SCORE_JSON));
-      results.add(result);
+      float pronScore = rs.getFloat(PRON_SCORE);
+      String scoreJson = rs.getString(SCORE_JSON);
+      boolean validDecodeJSON = pronScore > 0 && !scoreJson.equals(WORDS);
+
+      if (!validDecodeJSON) {
+        logger.info("getResultsForQuery got " + scoreJson + " for " + exid);
+      }
+      float alignScore = rs.getFloat(ALIGNSCORE);
+      String alignJSON = rs.getString(ALIGNJSON);
+      boolean validAlignJSON = alignScore > 0 && !alignJSON.contains(WORDS);
+
+      if (validAlignJSON || validDecodeJSON) {
+        float pronScore1  = validDecodeJSON ? pronScore : alignScore;
+        String scoreJson1 = validDecodeJSON ? scoreJson : alignJSON;
+        Result result = new Result(uniqueID, userID, //id
+            "", // plan
+            exid, // id
+            0, // qid
+            trimPathForWebPage2(answer), // answer
+            true, // valid
+            timestamp.getTime(),
+            "", dur, correct, pronScore1, "browser");
+        result.setJsonScore(scoreJson1);
+        results.add(result);
+      } else {
+        logger.info("getResultsForQuery skipping invalid ref result " + exid + " : " + answer);
+      }
     }
     finish(connection, statement, rs);
 
