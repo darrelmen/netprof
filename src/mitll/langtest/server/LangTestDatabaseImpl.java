@@ -1036,16 +1036,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     String[] split = testAudioFile.split(File.separator);
     String answer = split[split.length - 1];
-    Result result = db.getRefResultDAO().getResult(exerciseID, answer.replaceAll(".mp3", ".wav"));
-    if (result != null) {
-      logger.debug("Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + result.getUniqueID());
+    Result cachedResult = db.getRefResultDAO().getResult(exerciseID, answer.replaceAll(".mp3", ".wav"));
+    if (cachedResult != null) {
+      logger.debug("Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID());
     } else {
       logger.debug("Cache MISS : align exercise id = " + exerciseID + " file " + answer);
     }
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
     PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-        false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, result, usePhoneToDisplay1, false);
+        false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, cachedResult, usePhoneToDisplay1, false);
     long timeToRunHydec = System.currentTimeMillis() - then;
 
     logger.debug("getASRScoreForAudio : scoring file " + testAudioFile + " for " +
@@ -1054,7 +1054,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         " score " + asrScoreForAudio.getHydecScore() +
         " took " + timeToRunHydec + " millis " + " usePhoneToDisplay " + usePhoneToDisplay1);
 
-    if (resultID > -1 && result == null) { // alignment has two steps : 1) post the audio, then 2) do alignment
+    if (resultID > -1 && cachedResult == null) { // alignment has two steps : 1) post the audio, then 2) do alignment
       db.rememberScore(resultID, asrScoreForAudio);
     }
     return asrScoreForAudio;
