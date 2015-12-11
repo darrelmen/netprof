@@ -174,13 +174,15 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     PrecalcScores precalcScores = new PrecalcScores(props, precalcResult, usePhoneToDisplay);
 
     if (precalcScores.isValid()) {
+    //  logger.info("got valid precalc  " + precalcScores);
       scores = precalcScores.getScores();
       jsonObject = precalcScores.getJsonObject();
     } else {
       if (precalcResult != null) {
         logger.debug("unusable precalc result, so recalculating : " + precalcResult);
       }
-      //logger.debug("recalculating : " + precalcResult);
+
+  //    logger.debug("recalculating : " + precalcResult);
       scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
     }
     if (scores == null) {
@@ -190,7 +192,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     PretestScore pretestScore = getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode,
         prefix, noSuffix, wavFile,
         scores, jsonObject, usePhoneToDisplay);
-   // logger.info("now we have pretest score " +pretestScore);
+//    logger.info("now we have pretest score " +pretestScore + " json " + jsonObject);
     return pretestScore;
   }
 
@@ -224,6 +226,11 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 
     //logger.debug("getPretestScore prefix " + prefix1);
     if (jsonObject != null) logger.debug("generating images from " + jsonObject);
+
+    if (!scores.isValid()) {
+      // skip image generation!
+      jsonObject = new JSONObject();
+    }
 
     EventAndFileInfo eventAndFileInfo = jsonObject == null ?
         writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
@@ -292,7 +299,6 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @param scoringDir
    * @return Scores which is the overall score and the event scores
    * @see #getScoreForAudio(String, String, String, String, boolean, String, boolean)
-   * @see #scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result)
    */
   private Scores calcScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
                                    String sentence,
