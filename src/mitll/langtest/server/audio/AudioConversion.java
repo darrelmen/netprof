@@ -43,6 +43,7 @@ public class AudioConversion {
   private static final float TRIM_SILENCE_BEFORE_AND_AFTER = 0.30f;
   private static final String T_VALUE = "" + 7;
   public static final String LAME = "lame";
+  private static final double DIFF_THRESHOLD = 0.2;
   private AudioCheck audioCheck;
   private static final boolean DEBUG = false;
 
@@ -213,12 +214,12 @@ public class AudioConversion {
       double durationInSeconds = audioCheck.getDurationInSeconds(wavFile);
       double durationInSecondsTrimmed = audioCheck.getDurationInSeconds(trimmed);
       double diff = durationInSeconds - durationInSecondsTrimmed;
-      if (durationInSecondsTrimmed > 0.1 && diff > 0.1) {
+      if (durationInSecondsTrimmed > 0.1 && diff > DIFF_THRESHOLD) {
         FileUtils.copyFile(new File(trimmed), wavFile);
 
         long now = System.currentTimeMillis();
         if (now - then > 0) {
-          logger.info("trimSilence : took " + (now - then) + " millis to convert original " + wavFile.getName() +
+          logger.debug("trimSilence : took " + (now - then) + " millis to convert original " + wavFile.getName() +
               " to trim wav file : " + durationInSeconds + " before, " + durationInSecondsTrimmed + " after.");
         }
         return new TrimInfo(durationInSecondsTrimmed, true);
