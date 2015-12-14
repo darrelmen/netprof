@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * Created by go22670 on 10/21/15.
@@ -266,7 +267,7 @@ public class Analysis extends DAO {
         if (DEBUG) logger.warn("resultsForQuery " + resultsForQuery.size());
 
         List<WordScore> wordScore = getWordScore(resultsForQuery);
-        if (DEBUG) logger.warn("wordScore " + wordScore.size());
+        if (DEBUG || true) logger.warn("getWordScoresForUser for # " +id +" min " +minRecordings + " wordScore " + wordScore.size());
 
         return wordScore;
       }
@@ -486,7 +487,7 @@ public class Analysis extends DAO {
 
       String json = rs.getString(ResultDAO.SCORE_JSON);
       if (json != null && json.equals("{}")) {
-        logger.warn("Got empty json " + json + " for " + exid + " : " + id);
+        logger.warn("getUserToResults : Got empty json " + json + " for " + exid + " : " + id);
       }
       String device = rs.getString(ResultDAO.DEVICE_TYPE);
       String path = rs.getString(ResultDAO.ANSWER);
@@ -541,7 +542,8 @@ public class Analysis extends DAO {
 
 //    int c = 0;
     int skipped = 0;
-    Map<String, WordScore> idToScore = new HashMap<>();
+   // Map<String, WordScore> idToScore = new HashMap<>();
+  //  List<WordScore> wordScores = new ArrayList<>();
 
     for (BestScore bs : bestScores) {
       String json = bs.getJson();
@@ -556,17 +558,25 @@ public class Analysis extends DAO {
         Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(json);
         //  results.add(new WordScore(bs, netPronImageTypeListMap));
         WordScore wordScore = new WordScore(bs, netPronImageTypeListMap);
-        WordScore current = idToScore.get(wordScore.getId());
-        if (current == null || current.getTimestamp() < wordScore.getTimestamp()) {
-          idToScore.put(wordScore.getId(), wordScore);
-        }
+     //   WordScore current = idToScore.get(wordScore.getId());
+//        if (current == null || current.getTimestamp() < wordScore.getTimestamp()) {
+//          if (idToScore.containsKey(wordScore.getId())) {
+//            WordScore wordScore1 = idToScore.get(wordScore.getId());
+//            logger.warn("getWordScore stepping on " + new Date(wordScore1.getTimestamp()));
+//          }
+//          idToScore.put(wordScore.getId(), wordScore);
+//        }
+//        else {
+//          logger.warn("skip " +current + " and " + wordScore);
+//        }
+        results.add(wordScore);
       } else {
         skipped++;
       }
     }
 
-    results.addAll(idToScore.values());
-    Collections.sort(results);
+    //results.addAll(wordScores.values());
+   // Collections.sort(results);
 
     long now = System.currentTimeMillis();
     if (now - then > 50) {
