@@ -132,6 +132,10 @@ public class PretestScore implements IsSerializable {
     this.json = json;
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#getASRScoreForAudio(int, String, String, Collection, int, int, boolean, boolean, String, boolean, String, Result, boolean, boolean)
+   * @return
+   */
   public boolean isRanNormally() {
     return ranNormally;
   }
