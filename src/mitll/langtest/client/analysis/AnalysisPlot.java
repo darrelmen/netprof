@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -36,7 +37,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
   private static final int X_OFFSET_LEGEND = 65;
-  public static final int MIN_HEIGHT = 350;
 
   private static final long MINUTE = 60 * 1000;
   public static final long HOUR = 60 * MINUTE;
@@ -54,9 +54,11 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private static final String CUMULATIVE_AVERAGE = "Average";
   private final Set<String> toShowExercise = new HashSet<>(Arrays.asList(I_PAD_I_PHONE, VOCAB_PRACTICE, LEARN, CUMULATIVE_AVERAGE));
 
+  private static final int SHORT_THRESHOLD = 822;
+  public static final int CHART_HEIGHT_SHORT = 260;
   private static final int CHART_HEIGHT = 330;
 
-  private static final int Y_OFFSET_FOR_LEGEND = 60;
+  private static final int Y_OFFSET_FOR_LEGEND = 20;
 
   private final Map<Long, String> timeToId = new TreeMap<>();
   private final Map<String, CommonShell> idToEx = new TreeMap<>();
@@ -89,7 +91,9 @@ public class AnalysisPlot extends TimeSeriesPlot {
   public AnalysisPlot(LangTestDatabaseAsync service, long userid, final String userChosenID, final int minRecordings,
                       SoundManagerAPI soundManagerAPI, Icon playFeedback) {
     getElement().setId("AnalysisPlot");
-    getElement().getStyle().setProperty("minHeight", MIN_HEIGHT, Style.Unit.PX);
+    int minHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
+
+    getElement().getStyle().setProperty("minHeight", minHeight, Style.Unit.PX);
     getElement().getStyle().setMargin(10, Style.Unit.PX);
     addStyleName("cardBorderShadow");
 
@@ -543,8 +547,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
   }
 
   private void addBrowserData(List<TimeAndScore> browserData, Chart chart, boolean isAVP, boolean isVisible) {
-    //   logger.info("browserData " + browserData.size());
-
     if (!browserData.isEmpty()) {
       Number[][] data = getDataForTimeAndScore(browserData);
 
@@ -596,7 +598,13 @@ public class AnalysisPlot extends TimeSeriesPlot {
       }
     });
 
-    chart.setHeight(CHART_HEIGHT + "px");
+    int clientHeight = Window.getClientHeight();
+    int chartHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
+    chart.setHeight(chartHeight + "px");
+  }
+
+  private boolean isShort() {
+    return Window.getClientHeight() < SHORT_THRESHOLD;
   }
 
   /**
