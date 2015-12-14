@@ -7,10 +7,14 @@ package mitll.langtest.client.analysis;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.user.client.ui.HTML;
 
+import java.util.logging.Logger;
+
 /**
  * Created by go22670 on 12/4/15.
  */
 public class TimeWidgets {
+  private final Logger logger = Logger.getLogger("TimeWidgets");
+
   final Button prevButton;
   final Button nextButton;
   final Button all;
