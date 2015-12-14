@@ -66,7 +66,7 @@ public class Scores {
 
     try {
       float s = Float.parseFloat(scoreSplit[0]);
-      this.hydraScore = Float.isNaN(s) ? 0.0f : s;
+      this.hydraScore = Float.isNaN(s) ? -1f : s;
       for (int i = 1; i < scoreSplit.length; i += 2) {
         eventScores.get(PHONES).put(scoreSplit[i], Float.parseFloat(scoreSplit[i + 1]));
       }
