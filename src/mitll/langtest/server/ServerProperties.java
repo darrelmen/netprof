@@ -59,6 +59,7 @@ public class ServerProperties {
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
   private static final String ENABLE_ALL_USERS = "enableAllUsers";
   private static final String DO_DECODE = "dodecode";
+  private static final String DO_TRIM = "dotrim";
   private static final String FALSE = "false";
   private static final String TRUE = "true";
   private static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
@@ -219,6 +220,10 @@ public class ServerProperties {
 
   public boolean shouldDoDecode() {
     return getDefaultFalse(DO_DECODE);
+  }
+
+  public boolean shouldTrimAudio() {
+    return getDefaultTrue(DO_TRIM);
   }
 
   public int getAudioOffset() {
@@ -483,6 +488,7 @@ public class ServerProperties {
 
   /**
    * true if you want to compare hydec scores with hydra scores for reference audio
+   *
    * @return
    */
   public boolean shouldDoDecodeWithHydec() {
