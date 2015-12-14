@@ -29,7 +29,7 @@ public class RefResultDecoder {
   private static final Logger logger = Logger.getLogger(RefResultDecoder.class);
   private static final boolean DO_REF_DECODE = true;
   private static final boolean DO_TRIM = true;
-  public static final int SLEEP_BETWEEN_DECODES = 100;
+  public static final int SLEEP_BETWEEN_DECODES = 2000;
 //  private static final boolean RUN_MISSING_INFO = false;
 
   private final DatabaseImpl db;
@@ -48,12 +48,12 @@ public class RefResultDecoder {
    * @see LangTestDatabaseImpl#init()
    */
   public RefResultDecoder(DatabaseImpl db, ServerProperties serverProperties, PathHelper pathHelper,
-                          AudioFileHelper audioFileHelper, LangTestDatabaseImpl langTestDatabase) {
+                          AudioFileHelper audioFileHelper) {
     this.db = db;
     this.serverProps = serverProperties;
     this.pathHelper = pathHelper;
     this.audioFileHelper = audioFileHelper;
-  //  this.langTestDatabase = langTestDatabase;
+    //  this.langTestDatabase = langTestDatabase;
   }
 
   /**
@@ -62,20 +62,21 @@ public class RefResultDecoder {
    * @see LangTestDatabaseImpl#init()
    */
   public void doRefDecode(final List<CommonExercise> exercises, final String relativeConfigDir) {
-    if (serverProps.shouldDoDecode()) {
-      new Thread(new Runnable() {
-        @Override
-        public void run() {
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        if (serverProps.shouldTrimAudio()) {
           sleep(5000);
           trimRef(exercises, relativeConfigDir);
-
+        }
+        if (serverProps.shouldDoDecode()) {
           sleep(5000);
           if (!serverProps.isNoModel()) writeRefDecode(exercises, relativeConfigDir);
+        } else {
+          logger.debug(getLanguage() + " not doing decode ref decode");
         }
-      }).start();
-    } else {
-      logger.debug(getLanguage() + " not doing decode ref decode");
-    }
+      }
+    }).start();
   }
 
   private String getLanguage() {
@@ -183,7 +184,7 @@ public class RefResultDecoder {
           count += info.count;
           changed += info.changed;
         }
-        if (count > 0 && count % 2000 == 0) logger.debug("examined " +count+ " files.");
+        if (count > 0 && count % 2000 == 0) logger.debug("examined " + count + " files.");
       }
 
       logger.debug("trimRef : Out of " + attrc + " best audio files, " + maleAudio + " male, " + femaleAudio + " female, " +
@@ -396,8 +397,7 @@ public class RefResultDecoder {
           String author = attribute.getUser().getUserID();
           audioConversion.ensureWriteMP3(audioRef, pathHelper.getInstallPath(), trimInfo.didTrim(), title, author);
         }
-      }
-      else {
+      } else {
         logger.warn("no file for " + exid + " " + attribute + " at audio file " + bestAudio);
       }
     }
@@ -415,6 +415,7 @@ public class RefResultDecoder {
       this.count = count;
       this.changed = changed;
     }
+
   }
 
   private String getFile(AudioAttribute attribute) {
