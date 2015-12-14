@@ -25,13 +25,10 @@ import java.util.logging.Logger;
 public class StudentAnalysis extends DivWidget {
   private final Logger logger = Logger.getLogger("StudentAnalysis");
 
-  private static final int LEFT_MARGIN = UserContainer.TABLE_WIDTH+ 53;
- // public static final int TOP_MARGIN = -55;
+  private static final int LEFT_MARGIN = UserContainer.TABLE_WIDTH + 53;
   private static final String STUDENTS = "Students";
   private static final String OR_MORE_RECORDINGS = "5 or more recordings";
   private static final int STUDENT_WIDTH = 300;
-
- // private Long selectedUser = null;
 
   public StudentAnalysis(final LangTestDatabaseAsync service, final ExerciseController controller,
                          final ShowTab showTab) {
@@ -48,11 +45,11 @@ public class StudentAnalysis extends DivWidget {
       public void onSuccess(Collection<UserInfo> users) {
         DivWidget rightSide = new DivWidget();
         rightSide.getElement().setId("rightSide");
-       // rightSide.addStyleName("floatNone");
-       // rightSide.addStyleName("floatLeftList");
-       // rightSide.getElement().getStyle().setOverflow(Style.Overflow.AUTO);
+        // rightSide.addStyleName("floatNone");
+        // rightSide.addStyleName("floatLeftList");
+        // rightSide.getElement().getStyle().setOverflow(Style.Overflow.AUTO);
 
-        DivWidget bottom    = new DivWidget();
+        DivWidget bottom = new DivWidget();
         bottom.addStyleName("floatLeftList");
 
         UserContainer userContainer = new UserContainer(service, controller, rightSide, bottom, showTab, selectedUserKey);
@@ -61,14 +58,14 @@ public class StudentAnalysis extends DivWidget {
 
         DivWidget leftSide = getStudentContainer(tableWithPager);
 
-        DivWidget top       = new DivWidget();
+        DivWidget top = new DivWidget();
         top.getElement().setId("top");
 
-       //top.addStyleName("inlineBlockStyleOnly");
+        //top.addStyleName("inlineBlockStyleOnly");
         top.add(leftSide);
         top.add(rightSide);
         add(top);
-       // rightSide.getElement().getStyle().setMarginTop(TOP_MARGIN, Style.Unit.PX);
+        // rightSide.getElement().getStyle().setMarginTop(TOP_MARGIN, Style.Unit.PX);
         rightSide.getElement().getStyle().setMarginLeft(LEFT_MARGIN, Style.Unit.PX);
         add(bottom);
       }
@@ -86,7 +83,7 @@ public class StudentAnalysis extends DivWidget {
   private DivWidget getStudentContainer(Panel tableWithPager) {
     Heading students = new Heading(3, STUDENTS, OR_MORE_RECORDINGS);
     students.setWidth(STUDENT_WIDTH + "px");
-    //VerticalPanel leftSide = new VerticalPanel();
+    students.getElement().getStyle().setMarginBottom(2, Style.Unit.PX);
     DivWidget leftSide = new DivWidget();
     leftSide.getElement().setId("studentDiv");
     leftSide.addStyleName("floatLeftList");
@@ -101,8 +98,7 @@ public class StudentAnalysis extends DivWidget {
       User user = userInfo.getUser();
       if (user != null && user.getUserID() != null && !user.getUserID().equals("defectDetector")) {
         filtered.add(userInfo);
-      }
-      else {
+      } else {
         logger.warning("skip " + user);
       }
     }
