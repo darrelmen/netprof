@@ -16,6 +16,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.*;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -39,11 +40,13 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class WordContainer extends SimplePagingContainer<WordScore> implements AnalysisPlot.TimeChangeListener {
+  public static final int NARROW_THRESHOLD = 1450;
   private final Logger logger = Logger.getLogger("WordContainer");
 
   private static final int ROWS_TO_SHOW = 8;
 
   private static final int ITEM_COL_WIDTH = 250;
+  private static final int ITEM_COL_WIDTH_NARROW = 190;
   private static final String SCORE = "Score";
   private static final int SCORE_WIDTH = 68;
   public static final int PLAY_WIDTH = 42;
@@ -52,6 +55,7 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
   private static final String PLAY = "Play";
 
   private static final int TABLE_HISTORY_WIDTH = 430; //380
+  private static final int TABLE_HISTORY_WIDTH_NARROW = 360; //380
   private final ExerciseComparator sorter;
   private final AnalysisPlot plot;
   private final ShowTab learnTab;
@@ -73,7 +77,6 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
 
   private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
 
-
   protected int getPageSize() {
     return ROWS_TO_SHOW;
   }
@@ -88,7 +91,9 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
   public Panel getTableWithPager(List<WordScore> sortedHistory) {
     Panel tableWithPager = getTableWithPager();
     tableWithPager.getElement().setId("TableScoreHistory");
-    tableWithPager.setWidth(TABLE_HISTORY_WIDTH + "px");
+    int tableHistoryWidth = isNarrow() ? TABLE_HISTORY_WIDTH_NARROW : TABLE_HISTORY_WIDTH;
+
+    tableWithPager.setWidth(tableHistoryWidth + "px");
     tableWithPager.addStyleName("floatLeft");
 
     this.sortedHistory = sortedHistory;
@@ -121,7 +126,8 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
   private void addReview() {
     Column<WordScore, SafeHtml> itemCol = getItemColumn();
     itemCol.setSortable(true);
-    table.setColumnWidth(itemCol, ITEM_COL_WIDTH + "px");
+    int itemColWidth = isNarrow() ? ITEM_COL_WIDTH_NARROW : ITEM_COL_WIDTH;
+    table.setColumnWidth(itemCol, itemColWidth + "px");
 
     String language = controller.getLanguage();
 
@@ -132,6 +138,10 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
 
     ColumnSortEvent.ListHandler<WordScore> columnSortHandler = getEnglishSorter(itemCol, dataList);
     table.addColumnSortHandler(columnSortHandler);
+  }
+
+  private boolean isNarrow() {
+    return Window.getClientWidth() < NARROW_THRESHOLD;
   }
 
   private ColumnSortEvent.ListHandler<WordScore> getEnglishSorter(Column<WordScore, SafeHtml> englishCol,
