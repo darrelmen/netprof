@@ -146,9 +146,6 @@ public interface LangTestDatabaseAsync {
 
   void getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which, AsyncCallback<Collection<String>> async);
 
-  // just for backwards compatibility
-//  void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, AsyncCallback<Void> async);
-
   void addRoundTrip(long resultid, int roundTrip, AsyncCallback<Void> async);
 
   void getResultASRInfo(long resultID, int width, int height, AsyncCallback<PretestScore> async);
