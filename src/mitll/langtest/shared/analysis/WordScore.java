@@ -85,4 +85,8 @@ public class WordScore implements Serializable, Comparable<WordScore> {
   public String toString() {
     return "exid " + id + "/" + resultID + " score " + pronScore + "  : " + netPronImageTypeListMap;
   }
+
+  public void setTimestamp(long timestamp) {
+    this.timestamp = timestamp;
+  }
 }
