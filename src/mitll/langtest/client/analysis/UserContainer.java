@@ -19,6 +19,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -89,10 +90,17 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     return columnText;
   }
 
+  /**
+   * @see SimplePagingContainer#makeCellTable()
+   * @return
+   */
   protected int getPageSize() {
-    return PAGE_SIZE;
+    return isShort() ? 8:PAGE_SIZE;
   }
 
+  private boolean isShort() {
+    return Window.getClientHeight() < 822;
+  }
   /**
    * @param users
    * @return
