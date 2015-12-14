@@ -4,6 +4,7 @@
 
 package mitll.langtest.client.analysis;
 
+import com.github.gwtbootstrap.client.ui.Collapse;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -30,10 +31,7 @@ import mitll.langtest.shared.CommonShell;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -60,6 +58,7 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
   private final AnalysisPlot plot;
   private final ShowTab learnTab;
   private final Heading heading;
+  private final boolean spanish;
 
   /**
    * @param controller
@@ -68,6 +67,7 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
    */
   public WordContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab, Heading w) {
     super(controller);
+    spanish = controller.getLanguage().equalsIgnoreCase("Spanish");
     sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
     this.plot = plot;
     plot.addListener(this);
@@ -76,12 +76,14 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
   }
 
   private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
+  private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
 
   protected int getPageSize() {
     return ROWS_TO_SHOW;
   }
 
   private List<WordScore> sortedHistory;
+  private SortedSet<WordScore> byTime;
 
   /**
    * @param sortedHistory
@@ -97,6 +99,18 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
     tableWithPager.addStyleName("floatLeft");
 
     this.sortedHistory = sortedHistory;
+
+    byTime = new TreeSet<WordScore>(new Comparator<WordScore>() {
+      @Override
+      public int compare(WordScore o1, WordScore o2) {
+        int i = new Long(o1.getTimestamp()).compareTo(o2.getTimestamp());
+        return i == 0 ? o1.getId().compareTo(o2.getId()) : i;
+      }
+    });
+
+    byTime.addAll(sortedHistory);
+
+//    logger.info("getTableWithPager got " + sortedHistory.size() + " items");
     addItems(sortedHistory);
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -108,7 +122,7 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
     return tableWithPager;
   }
 
-  private void addItems(List<WordScore> sortedHistory) {
+  private void addItems(Collection<WordScore> sortedHistory) {
     clear();
     for (WordScore WordScore : sortedHistory) {
       addItem(WordScore);
@@ -134,9 +148,7 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
     String headerForFL = language.equals("English") ? "Meaning" : language;
     addColumn(itemCol, new TextHeader(headerForFL));
 
-    List<WordScore> dataList = getList();
-
-    ColumnSortEvent.ListHandler<WordScore> columnSortHandler = getEnglishSorter(itemCol, dataList);
+    ColumnSortEvent.ListHandler<WordScore> columnSortHandler = getEnglishSorter(itemCol, getList());
     table.addColumnSortHandler(columnSortHandler);
   }
 
@@ -265,7 +277,7 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
           // logger.info("getItemColumn : column text empty for id " + shell.getId() + " and found ex " + exercise);
 
           String foreignLanguage = exercise == null ? "" : exercise.getForeignLanguage();
-          if (controller.getLanguage().equalsIgnoreCase("Spanish")) foreignLanguage = foreignLanguage.toUpperCase();
+          if (spanish) foreignLanguage = foreignLanguage.toUpperCase();
           columnText = new WordTable().getColoredSpan(foreignLanguage, shell.getPronScore());
         } else {
           //logger.info("getItemColumn : Got item id " + shell.getId() + " "+ columnText );
@@ -326,23 +338,41 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
     };
   }
 
+  /**
+   * @param from
+   * @param to
+   * @see AnalysisPlot#timeChanged(long, long)
+   */
   @Override
   public void timeChanged(long from, long to) {
-    List<WordScore> filtered = new ArrayList<>();
-    heading.setSubtext("Starting " + superShortFormat.format(new Date(from)));
-    for (WordScore wordScore : sortedHistory) {
-      if (wordScore.getTimestamp() > from && wordScore.getTimestamp() <= to) filtered.add(wordScore);
-
+ //   List<WordScore> filtered = new ArrayList<>();
+    if (from == 0) {
+      heading.setSubtext("");
+      addItems(sortedHistory);
+   //   logger.info("Starting from 0");
     }
-    addItems(filtered);
+    else {
+     // logger.info("Starting from " +from + " : " +to);
+     // logger.info("Starting from " + noYearFormat.format(new Date(from)) + " to " + noYearFormat.format(new Date(to)));
+      heading.setSubtext("Starting " + superShortFormat.format(new Date(from)));
+
+      WordScore fromElement = new WordScore();
+      fromElement.setTimestamp(from);
+      WordScore toElement = new WordScore();
+      toElement.setTimestamp(to);
+
+      SortedSet<WordScore> wordScores = byTime.subSet(fromElement, toElement);
+      List<WordScore> filtered = new ArrayList<>(wordScores);
+
+      Collections.sort(filtered); // put sort back to by score first
+      addItems(filtered);
+    }
   }
 
   public interface LocalTableResources extends CellTable.Resources {
     /**
      * The styles applied to the table.
      */
-//    interface TableStyle extends CellTable.Style {
-//    }
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
     TableResources.TableStyle cellTableStyle();
