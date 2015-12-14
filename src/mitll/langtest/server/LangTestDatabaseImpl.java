@@ -2174,7 +2174,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     List<CommonExercise> exercises = getExercises();
 
-    this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, audioFileHelper, this);
+    this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, audioFileHelper);
     refResultDecoder.doRefDecode(exercises, relativeConfigDir);
   }
 
