@@ -47,7 +47,8 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
   private final SLFFile slfFile = new SLFFile();
 
   // TODO make Scores + phoneLab + wordLab an object so have something more descriptive than Object[]
-  private final Cache<String, Object[]> audioToScore; // key => (Scores, wordLab, phoneLab)
+  private final Cache<String, Object[]> decodeAudioToScore; // key => (Scores, wordLab, phoneLab)
+  private final Cache<String, Object[]> alignAudioToScore; // key => (Scores, wordLab, phoneLab)
 
   /**
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
@@ -65,7 +66,8 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    */
   public ASRWebserviceScoring(String deployPath, ServerProperties properties, LogAndNotify langTestDatabase) {
     super(deployPath, properties, langTestDatabase);
-    audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
+    decodeAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
+    alignAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
     ip = properties.getWebserviceIP();
     port = properties.getWebservicePort();
   }
@@ -172,7 +174,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     AudioConversion.wav2raw(testAudioDir + File.separator + testAudioFileNoSuffix + ".wav", rawAudioPath);
 
     String key = testAudioDir + File.separator + testAudioFileNoSuffix;
-    Object[] cached = useCache ? audioToScore.getIfPresent(key) : null;
+    Object[] cached = useCache ? (decode ? decodeAudioToScore.getIfPresent(key) : alignAudioToScore.getIfPresent(key)) : null;
     Scores scores = null;
     String phoneLab = "";
     String wordLab = "";
@@ -209,12 +211,20 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
         scores = (Scores) result[0];
         wordLab = (String) result[1];
         phoneLab = (String) result[2];
-        audioToScore.put(key, new Object[]{scores, wordLab, phoneLab});
+        if (scores.isValid()) {
+          if (wordLab.contains("UNKNOWN")) {
+            logger.warn("huh? hydra result returns " + wordLab);
+          }
+          Cache<String, Object[]> stringCache = decode ? decodeAudioToScore : alignAudioToScore;
+          stringCache.put(key, new Object[]{scores, wordLab, phoneLab});
+        } else {
+          logger.warn("scoreRepeatExercise skipping invalid response from hydra.");
+        }
       }
     }
     if (scores == null) {
-      logger.error("getScoreForAudio failed to generate scores.");
-      return new PretestScore(0.01f);
+      logger.error("scoreRepeatExercise hydra failed to generate scores.");
+      return new PretestScore(-1f);
     }
     return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix,
         scores, phoneLab, wordLab, duration, processDur, usePhoneToDisplay, jsonObject);
@@ -351,8 +361,9 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
   private Object[] runHydra(String audioPath, String transcript, Collection<String> lmSentences, String tmpDir, boolean decode, int end) {
     // reference trans
     String cleaned = slfFile.cleanToken(transcript);
-    if (isMandarin)
+    if (isMandarin) {
       cleaned = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") + getSegmented(transcript.trim()); // segmentation method will filter out the UNK model
+    }
 
     // generate dictionary
     String hydraDict = createHydraDict(cleaned);
