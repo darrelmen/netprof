@@ -62,6 +62,7 @@ public class AnalysisTab extends DivWidget {
     Panel timeControls = new HorizontalPanel();
     timeControls.add(getTimeGroup());
     timeControls.add(getTimeWindowStepper());
+    analysisPlot.setTimeWidgets(timeWidgets);
 
     playFeedback.addStyleName("leftFiveMargin");
     // timeControls.add(playFeedback);
@@ -84,6 +85,10 @@ public class AnalysisTab extends DivWidget {
     getWordScores(service, controller, userid, showTab, analysisPlot, bottom, minRecordings);
   }
 
+  /**
+   * @see #AnalysisTab(LangTestDatabaseAsync, ExerciseController, int, ShowTab, String, int, DivWidget)
+   * @return
+   */
   private Panel getTimeWindowStepper() {
     Panel stepper = getStepperContainer();
 
@@ -126,7 +131,7 @@ public class AnalysisTab extends DivWidget {
     left.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        analysisPlot.gotPrevClick(timeWidgets);
+        analysisPlot.gotPrevClick();
       }
     });
     left.setEnabled(false);
@@ -140,7 +145,7 @@ public class AnalysisTab extends DivWidget {
     right.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        analysisPlot.gotNextClick(timeWidgets);
+        analysisPlot.gotNextClick();
       }
     });
     right.setEnabled(false);
@@ -191,7 +196,7 @@ public class AnalysisTab extends DivWidget {
     return new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        analysisPlot.setTimeHorizon(month, timeWidgets);
+        analysisPlot.setTimeHorizon(month);
       }
     };
   }
@@ -222,6 +227,7 @@ public class AnalysisTab extends DivWidget {
 
       @Override
       public void onSuccess(List<WordScore> wordScores) {
+        logger.info("got " + wordScores.size() + " for user #" + userid);
         Heading wordsTitle = new Heading(3, WORDS, SUBTITLE);
         final WordContainer wordContainer = new WordContainer(controller, analysisPlot, showTab, wordsTitle);
         Panel tableWithPager = wordContainer.getTableWithPager(wordScores);
