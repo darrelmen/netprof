@@ -5,6 +5,7 @@
 package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Label;
+import com.google.gwt.user.client.Window;
 import mitll.langtest.shared.analysis.PhoneSession;
 import org.moxieapps.gwt.highcharts.client.*;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
@@ -17,9 +18,10 @@ import java.util.List;
  */
 public class PhonePlot extends TimeSeriesPlot {
   //  private final Logger logger = Logger.getLogger("PhonePlot");
-  public static final String PRONUNCIATION_SCORE = " trend";
+  private static final String PRONUNCIATION_SCORE = " trend";
   private static final int CHART_HEIGHT = 315;
   private static final int NARROW_WIDTH = 330;
+  private static final int NARROW_WIDTH_REALLY = 320;
 
   public PhonePlot() {
     getElement().setId("PhonePlot");
@@ -37,8 +39,7 @@ public class PhonePlot extends TimeSeriesPlot {
       add(new Label("No Recordings yet to analyze. Please record yourself."));
     } else {
       Chart chart = getErrorBarChart("<b>" + userChosenID + "</b>" + PRONUNCIATION_SCORE,
-          "Average score and range" //+
-          , "Range", rawBestScores, isNarrow);
+          "Average score and range", "Range", rawBestScores);
       add(chart);
     }
     setPhoneSessions(rawBestScores);
@@ -51,11 +52,11 @@ public class PhonePlot extends TimeSeriesPlot {
    * @return
    * @see #showErrorBarData
    */
-  protected Chart getErrorBarChart(String title, String subtitle, String seriesName,
-                                   List<PhoneSession> rawBestScores, boolean narrow) {
+  private Chart getErrorBarChart(String title, String subtitle, String seriesName,
+                                 List<PhoneSession> rawBestScores) {
     Chart chart = getErrorBarChart(title, subtitle);
 
-    configureWidth(narrow, chart);
+    configureWidth(chart);
 
     Highcharts.setOptions(
         new Highcharts.Options().setGlobal(
@@ -79,7 +80,6 @@ public class PhonePlot extends TimeSeriesPlot {
         .setZoomType(BaseChart.ZoomType.X)
             // .setType(Series.Type.ERRORBAR)
         .setChartTitleText(title)
-      //  .setMarginRight(10)
         .setOption("/credits/enabled", false)
         .setOption("/plotOptions/series/pointStart", 1)
         .setOption("/legend/enabled", false)
@@ -113,11 +113,12 @@ public class PhonePlot extends TimeSeriesPlot {
     chart.setHeight(CHART_HEIGHT + "px");
   }
 
-  protected void configureWidth(boolean narrow, Chart chart) {
-//    int clientWidth = Window.getClientWidth();
-//    if (clientWidth < 1450) narrow = true;
-//    if (narrow) chart.setWidth(NARROW_WIDTH);
-    chart.setWidth(NARROW_WIDTH);
-//    chart.getElement().getStyle().setProperty("minWidth",NARROW_WIDTH, Style.Unit.PX);
+  /**
+   * @see #getErrorBarChart(String, String, String, List)
+   * @param chart
+   */
+  private void configureWidth(Chart chart) {
+    int narrowWidth =(Window.getClientWidth() < WordContainer.NARROW_THRESHOLD) ? NARROW_WIDTH_REALLY : NARROW_WIDTH;
+    chart.setWidth(narrowWidth);
   }
 }
