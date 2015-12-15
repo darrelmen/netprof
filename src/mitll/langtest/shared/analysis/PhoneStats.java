@@ -5,17 +5,16 @@
 package mitll.langtest.shared.analysis;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 10/26/15.
+ *
  * @see mitll.langtest.client.analysis.PhoneContainer#clickOnPhone(String)
  */
 public class PhoneStats implements Serializable {
- // private final Logger logger = Logger.getLogger("PhoneStats");
+  // private final Logger logger = Logger.getLogger("PhoneStats");
   private int count;
   private transient List<TimeAndScore> timeSeries;
   private List<PhoneSession> sessions;
@@ -50,8 +49,7 @@ public class PhoneStats implements Serializable {
   }
 
   public int getCurrent() {
-    List<PhoneSession> sessions2 = getSessions();
-    return getCurrent(sessions2);
+    return getCurrent(getSessions());
   }
 
   public int getCurrent(List<PhoneSession> sessions2) {
@@ -69,8 +67,8 @@ public class PhoneStats implements Serializable {
 
   public int getCount(List<PhoneSession> sessions2) {
     if (sessions2 == null || sessions2.isEmpty()) return 0;
-    int total =0;
-    for (PhoneSession session:sessions2) total+= session.getCount();
+    int total = 0;
+    for (PhoneSession session : sessions2) total += session.getCount();
     return total;
   }
 
