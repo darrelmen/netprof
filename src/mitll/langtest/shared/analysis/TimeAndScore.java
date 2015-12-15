@@ -15,7 +15,6 @@ import java.util.List;
 public class TimeAndScore extends SimpleTimeAndScore implements Comparable<SimpleTimeAndScore> {
   private String id;
   private float cumulativeAverage;
-  //private transient WordAndScore wordAndScore;
 
   /**
    * @param bs
@@ -26,14 +25,6 @@ public class TimeAndScore extends SimpleTimeAndScore implements Comparable<Simpl
     this(bs.getExId(), bs.getTimestamp(), bs.getScore(), cumulativeAverage, null);
   }
 
-  public TimeAndScore(long timestamp, float score) {
-    this("", timestamp, score, 0, null);
-  }
-
-  public TimeAndScore(long timestamp, float score, float cumulativeAverage) {
-    this("", timestamp, score, cumulativeAverage, null);
-  }
-
   /**
    * @param id
    * @param timestamp
@@ -42,7 +33,7 @@ public class TimeAndScore extends SimpleTimeAndScore implements Comparable<Simpl
    * @see mitll.langtest.server.database.PhoneDAO#getPhoneTimeSeries(List)
    */
   public TimeAndScore(String id, long timestamp, float score, float cumulativeAverage, WordAndScore wordAndScore) {
-    super(timestamp, score,wordAndScore);
+    super(timestamp, score, wordAndScore);
     this.id = id;
     this.cumulativeAverage = cumulativeAverage;
   }
@@ -55,20 +46,12 @@ public class TimeAndScore extends SimpleTimeAndScore implements Comparable<Simpl
     return Long.valueOf(getTimestamp()).compareTo(o.getTimestamp());
   }
 
-  public String toString() {
-    String format = getTimeString();
-    return id + "\tat\t" + format + " avg score for " +
-        //count + "\t" +
-        "=\t" + getScore() + "\t" + getCumulativeAverage();
-  }
-
   private String getTimeString() {
     return "" + getTimestamp();
   }
 
   public String toCSV() {
     return getTimeString() +
-        //"," + count +
         "," + getScore() + "," + getCumulativeAverage();
   }
 
@@ -84,4 +67,10 @@ public class TimeAndScore extends SimpleTimeAndScore implements Comparable<Simpl
     return id;
   }
 
+  public String toString() {
+    String format = getTimeString();
+    return id + "\tat\t" + format + " avg score for " + //getWordAndScore().getWord() +
+        //count + "\t" +
+        " =\t" + getScore() + "\t" + getCumulativeAverage();
+  }
 }
