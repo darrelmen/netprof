@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -194,6 +195,9 @@ public class PhoneDAO extends DAO {
   }
 
   /**
+   * TODO: sort phones by average score of the latest unique item - if you say pijama 10 times, don't return it as
+   * an example 10 times, and only have the last one contribute to the average score for the phone.
+   *
    * @param worstPhonesAndScore
    * @return
    * @see #getWorstPhonesJson(long, List, Map)
@@ -301,43 +305,42 @@ public class PhoneDAO extends DAO {
    */
   public PhoneReport getWorstPhonesForResults(long userid, List<Integer> ids, Map<String, String> idToRef) throws SQLException {
     String sql = getResultIDJoinSQL(userid, ids);
-    return getPhoneReport(sql, idToRef, true);
+    return getPhoneReport(sql, idToRef, true, false);
   }
 
   /**
    * @param userid
    * @param exids
+   * @param sortByLatestExample
    * @return
    * @throws SQLException
    * @see #getPhoneReport(long, List, Map)
    */
   private PhoneReport getWorstPhones(long userid, List<String> exids, Map<String, String> idToRef) throws SQLException {
     String sql = getJoinSQL(userid, exids);
-    return getPhoneReport(sql, idToRef, false);
+    return getPhoneReport(sql, idToRef, false, true);
   }
 
   /**
    * @param sql
    * @param idToRef
-   * @param addTranscript true if going to analysis tab
+   * @param addTranscript       true if going to analysis tab
+   * @param sortByLatestExample
    * @return
    * @throws SQLException
    * @see #getWorstPhonesForResults(long, List, Map)
-   * @see #getWorstPhones(long, List, Map)
+   * @see #getWorstPhones(long, List, Map, boolean)
    */
-  private PhoneReport getPhoneReport(String sql, Map<String, String> idToRef, boolean addTranscript) throws SQLException {
+  private PhoneReport getPhoneReport(String sql, Map<String, String> idToRef, boolean addTranscript, boolean sortByLatestExample) throws SQLException {
     // logger.debug("getPhoneReport query is " + sql);
     Connection connection = getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
 
-    // long currentRID = -1;
     Map<String, List<PhoneAndScore>> phoneToScores = new HashMap<String, List<PhoneAndScore>>();
 
     String currentExercise = "";
     Map<String, List<WordAndScore>> phoneToWordAndScore = new HashMap<String, List<WordAndScore>>();
-    Map<String, Set<Long>> phoneToRID = new HashMap<String, Set<Long>>();
-    //  Map<String, List<PhoneAndScore>> phoneToTimeStamp = new HashMap<String, List<PhoneAndScore>>();
 
     float totalScore = 0;
     float totalItems = 0;
@@ -351,12 +354,9 @@ public class PhoneDAO extends DAO {
       float pronScore = rs.getFloat(i++);
       long resultTime = -1;
 
-      //if (addTranscript) {
       Timestamp timestamp = rs.getTimestamp(i++);
       if (timestamp != null) resultTime = timestamp.getTime();
-      // } else {
-      //   i++;
-      // }
+
       int wseq = rs.getInt(i++);
       String word = rs.getString(i++);
       float wscore = rs.getFloat(i++);
@@ -365,14 +365,12 @@ public class PhoneDAO extends DAO {
 //      logger.info("Got " + exid + " rid " + rid + " word " + word);
 
       if (!exid.equals(currentExercise)) {
-        //   currentRID = rid;
         currentExercise = exid;
         //logger.debug("adding " + exid + " score " + pronScore);
         totalScore += pronScore;
         totalItems++;
       }
 
-//      if (currentRID == rid) {   // TODO : ? WHY ?
       String phone = rs.getString(PHONE);
       int seq = rs.getInt(SEQ);
 
@@ -383,24 +381,15 @@ public class PhoneDAO extends DAO {
       scores.add(phoneAndScore);
 
       List<WordAndScore> wordAndScores = phoneToWordAndScore.get(phone);
-      //Set<Long> ridsForPhone = phoneToRID.get(phone);
       if (wordAndScores == null) {
         phoneToWordAndScore.put(phone, wordAndScores = new ArrayList<WordAndScore>());
-        // phoneToRID.put(phone, ridsForPhone = new HashSet<Long>());
       }
 
       WordAndScore wordAndScore = new WordAndScore(exid, word, phoneScore, rid, wseq, seq, trimPathForWebPage(audioAnswer),
           idToRef.get(exid), scoreJson, resultTime);
 
-      //if (!ridsForPhone.contains(rid)) { // get rid of duplicates
       wordAndScores.add(wordAndScore);
       phoneAndScore.setWordAndScore(wordAndScore);
-      // }
-      // else {
-      //   if (phone.equals("aa")) logger.info("skip " + wordAndScore);
-      // }
-
-      //ridsForPhone.add(rid);
 
       if (addTranscript) {
         Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = stringToMap.get(scoreJson);
@@ -412,7 +401,6 @@ public class PhoneDAO extends DAO {
         }
 
         setTranscript(wordAndScore, netPronImageTypeListMap);
-        //   addResultTime(phoneToTimeStamp, resultTime, phone, phoneScore);
       }
       //    } else {
      /*   logger.debug("------> current " + currentRID +
@@ -421,7 +409,7 @@ public class PhoneDAO extends DAO {
     }
     finish(connection, statement, rs);
 
-    return getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems);
+    return getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems, sortByLatestExample);
   }
 
   private void setTranscript(WordAndScore wordAndScore, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
@@ -429,18 +417,6 @@ public class PhoneDAO extends DAO {
     wordAndScore.clearJSON();
   }
 
-  /**
-   * @param phoneToTimeStamp
-   * @param resultTime
-   * @param phone
-   * @param phoneScore
-   * @see #getPhoneReport(String, Map, boolean)
-   */
-//  private void addResultTime(Map<String, List<PhoneAndScore>> phoneToTimeStamp, long resultTime, String phone, float phoneScore) {
-//    List<PhoneAndScore> times = phoneToTimeStamp.get(phone);
-//    if (times == null) phoneToTimeStamp.put(phone, times = new ArrayList<PhoneAndScore>());
-//    times.add(new PhoneAndScore(phoneScore, resultTime));
-//  }
   private String getResultIDJoinSQL(long userid, List<Integer> ids) {
     String filterClause = ResultDAO.RESULTS + "." + ResultDAO.ID + " in (" + getInList(ids) + ")";
     return getJoinSQL(userid, filterClause);
@@ -478,12 +454,13 @@ public class PhoneDAO extends DAO {
    * @param phoneToWordAndScore
    * @param totalScore
    * @param totalItems
+   * @param sortByLatestExample
    * @return
-   * @see #getPhoneReport(String, Map, boolean)
+   * @see #getPhoneReport(String, Map, boolean, boolean)
    */
   private PhoneReport getPhoneReport(Map<String, List<PhoneAndScore>> phoneToScores,
                                      Map<String, List<WordAndScore>> phoneToWordAndScore,
-                                     float totalScore, float totalItems) {
+                                     float totalScore, float totalItems, boolean sortByLatestExample) {
     float overallScore = totalItems > 0 ? totalScore / totalItems : 0;
     int percentOverall = (int) (100f * round(overallScore, 2));
     if (DEBUG) {
@@ -491,6 +468,117 @@ public class PhoneDAO extends DAO {
           " phoneToScores " + phoneToScores.size() + " : " + phoneToScores);
     }
 
+    final Map<String, PhoneStats> phoneToAvg = getPhoneToPhoneStats(phoneToScores);
+    //if (DEBUG || true) logger.debug("phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
+
+    List<String> sorted = new ArrayList<String>(phoneToAvg.keySet());
+
+    if (DEBUG) logger.debug("before sorted " + sorted);
+
+    setSessions(phoneToAvg);
+
+    if (DEBUG) logger.debug("phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
+
+    if (sortByLatestExample) {
+      Map<String, List<WordAndScore>> stringCollectionMap = sortPhonesByLatest(phoneToAvg, sorted);
+      phoneToWordAndScore = stringCollectionMap;
+    } else {
+      sortPhonesByCurrentScore(phoneToAvg, sorted);
+    }
+
+    if (DEBUG) logger.debug("sorted " + sorted.size() + " " + sorted);
+
+    Map<String, PhoneStats> phoneToAvgSorted = new LinkedHashMap<String, PhoneStats>();
+    for (String phone : sorted) {
+      phoneToAvgSorted.put(phone, phoneToAvg.get(phone));
+    }
+
+    if (DEBUG) logger.debug("phoneToAvgSorted " + phoneToAvgSorted.size() + " " + phoneToAvgSorted);
+
+    Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = new LinkedHashMap<String, List<WordAndScore>>();
+
+    for (String phone : sorted) {
+      List<WordAndScore> value = phoneToWordAndScore.get(phone);
+      Collections.sort(value);
+      phoneToWordAndScoreSorted.put(phone, value);
+    }
+
+    if (DEBUG) logger.debug("phone->words " + phoneToWordAndScore);
+
+    return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted);
+  }
+
+  private void sortPhonesByCurrentScore(final Map<String, PhoneStats> phoneToAvg, List<String> sorted) {
+    Collections.sort(sorted, new Comparator<String>() {
+      @Override
+      public int compare(String o1, String o2) {
+        PhoneStats first = phoneToAvg.get(o1);
+        PhoneStats second = phoneToAvg.get(o2);
+        int current = first.getCurrent();
+        int current1 = second.getCurrent();
+        //if (current == current1) {
+        //  logger.info("got same " + current + " for " + o1 + " and " + o2);
+        //} else {
+        // logger.info("\tgot " + current + " for " + o1 + " and " + current1 + " for "+ o2);
+        //}
+        int i = Integer.valueOf(current).compareTo(current1);
+        return i == 0 ? o1.compareTo(o2) : i;
+      }
+    });
+/*
+    for (String phone : sorted) {
+      logger.info("phone " + phone + " : " + phoneToAvg.get(phone).getCurrent());
+    }
+*/
+  }
+
+  /**
+   * For the iPad, we don't want to return every single example, just the latest one, and the summary score
+   * for the phone is just for the latest ones, or else they can seem inconsistent, since the iPad only shows
+   * distinct words.
+   * @param phoneToAvg
+   * @param sorted
+   * @return
+   */
+  private Map<String, List<WordAndScore>> sortPhonesByLatest(final Map<String, PhoneStats> phoneToAvg, List<String> sorted) {
+    Map<String, List<WordAndScore>> phoneToMinimal = new HashMap<>();
+    for (Map.Entry<String, PhoneStats> pair : phoneToAvg.entrySet()) {
+      PhoneStats value = pair.getValue();
+      Map<String, WordAndScore> wordToExample = new HashMap<>();
+      for (TimeAndScore item : value.getTimeSeries()) {
+//        logger.info("got " + item + " at " + new Date(item.getTimestamp()));
+        wordToExample.put(item.getWordAndScore().getWord(), item.getWordAndScore());
+      }
+      phoneToMinimal.put(pair.getKey(), new ArrayList<>(wordToExample.values()));
+    }
+
+    Map<String, Float> phoneToScore = new HashMap<>();
+    for (Map.Entry<String, List<WordAndScore>> pair : phoneToMinimal.entrySet()) {
+      float total = 0;
+      for (WordAndScore example : pair.getValue()) total += example.getScore();
+      total /= pair.getValue().size();
+      phoneToScore.put(pair.getKey(), total);
+    }
+
+    Collections.sort(sorted, new Comparator<String>() {
+      @Override
+      public int compare(String o1, String o2) {
+        Float current = phoneToScore.get(o1);
+        Float current1 = phoneToScore.get(o2);
+        int i = current.compareTo(current1);
+        return i == 0 ? o1.compareTo(o2) : i;
+      }
+    });
+
+    if (DEBUG) {
+      for (String phone : sorted) {
+        logger.info("phone " + phone + " : " + phoneToScore.get(phone) + " " + phoneToMinimal.get(phone));
+      }
+    }
+    return phoneToMinimal;
+  }
+
+  private Map<String, PhoneStats> getPhoneToPhoneStats(Map<String, List<PhoneAndScore>> phoneToScores) {
     final Map<String, PhoneStats> phoneToAvg = new HashMap<String, PhoneStats>();
 
     for (Map.Entry<String, List<PhoneAndScore>> pair : phoneToScores.entrySet()) {
@@ -504,80 +592,14 @@ public class PhoneDAO extends DAO {
       });
 
       List<TimeAndScore> phoneTimeSeries = getPhoneTimeSeries(value);
-
-      int size = phoneTimeSeries.size();
-/*       List<TimeAndScore> initialSample = phoneTimeSeries.subList(0, Math.min(INITIAL_SAMPLE_PHONES, size));
-      float total = 0;
-
-      for (TimeAndScore bs : initialSample) {
-        total += bs.getScore();
-      }
-
-      int start = toPercent(total, initialSample.size());
-      //  logger.info("start " + total + " " + start);
-      total = 0;
-      for (TimeAndScore bs : phoneTimeSeries) {
-        total += bs.getScore();
-      }
-      int current = toPercent(total, size);*/
-      phoneToAvg.put(phone, new PhoneStats(size, phoneTimeSeries));
+      phoneToAvg.put(phone, new PhoneStats(phoneTimeSeries.size(), phoneTimeSeries));
     }
-
-    //if (DEBUG || true) logger.debug("phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
-
-    List<String> sorted = new ArrayList<String>(phoneToAvg.keySet());
-
-    if (DEBUG) logger.debug("before sorted " + sorted);
-
-    setSessions(phoneToAvg);
-
-    if (DEBUG) logger.debug("phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
-
-    Collections.sort(sorted, new Comparator<String>() {
-      @Override
-      public int compare(String o1, String o2) {
-        PhoneStats first = phoneToAvg.get(o1);
-        PhoneStats second = phoneToAvg.get(o2);
-        int current = first.getCurrent();
-        int current1 = second.getCurrent();
-        //if (current == current1) {
-        //  logger.info("got same " + current + " for " + o1 + " and " + o2);
-        //} else {
-          // logger.info("\tgot " + current + " for " + o1 + " and " + current1 + " for "+ o2);
-        //}
-        int i = Integer.valueOf(current).compareTo(current1);
-        return i == 0 ? o1.compareTo(o2) : i;
-      }
-    });
-
-    if (DEBUG) logger.debug("sorted " + sorted.size() + " " + sorted);
-
-    Map<String, PhoneStats> phoneToAvgSorted = new LinkedHashMap<String, PhoneStats>();
-    for (String phone : sorted) {
-      phoneToAvgSorted.put(phone, phoneToAvg.get(phone));
-    }
-
-    if (DEBUG) logger.debug("phoneToAvgSorted " + phoneToAvgSorted.size() + " " + phoneToAvgSorted);
-
-    for (List<WordAndScore> words : phoneToWordAndScore.values()) {
-      Collections.sort(words);
-    }
-
-    Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = new LinkedHashMap<String, List<WordAndScore>>();
-
-    for (String phone : sorted) {
-      List<WordAndScore> value = phoneToWordAndScore.get(phone);
-      phoneToWordAndScoreSorted.put(phone, value);
-    }
-
-    if (DEBUG) logger.debug("phone->words " + phoneToWordAndScore);
-
-    return new PhoneReport(percentOverall, phoneToWordAndScoreSorted, phoneToAvgSorted);
+    return phoneToAvg;
   }
 
   /**
    * @param phoneToAvgSorted
-   * @see #getPhoneReport(Map, Map, float, float)
+   * @see #getPhoneReport(Map, Map, float, float, boolean)
    */
   private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
     new PhoneAnalysis().setSessions(phoneToAvgSorted);
@@ -586,7 +608,7 @@ public class PhoneDAO extends DAO {
   /**
    * @param rawBestScores
    * @return
-   * @see #getPhoneReport(Map, Map, float, float)
+   * @see #getPhoneReport(Map, Map, float, float, boolean)
    */
   private List<TimeAndScore> getPhoneTimeSeries(List<PhoneAndScore> rawBestScores) {
     float total = 0;
@@ -599,18 +621,11 @@ public class PhoneDAO extends DAO {
       float moving = total / count;
 
       WordAndScore wordAndScore = bs.getWordAndScore();
-      //  if (wordAndScore == null) logger.error("huh? word and score is null for " + bs);
       TimeAndScore timeAndScore = new TimeAndScore("", bs.getTimestamp(), pronScore, moving, wordAndScore);
       phoneTimeSeries.add(timeAndScore);
     }
     return phoneTimeSeries;
   }
-
-/*
-  private static int toPercent(float total, float size) {
-    return (int) Math.ceil(100 * total / size);
-  }
-*/
 
   private String trimPathForWebPage(String path) {
     int answer = path.indexOf(PathHelper.ANSWERS);
