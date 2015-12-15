@@ -183,7 +183,8 @@ public class ScoreServlet extends DatabaseServlet {
       toReturn = db.getJsonPhoneReport(Long.parseLong(user), selection);
       long now = System.currentTimeMillis();
       if (now - then > 250) {
-        logger.debug("getPhoneReport (" + serverProps.getLanguage() + ") : user " + user + " selection " + selection + " took " + (now - then) + " millis");
+        logger.debug("getPhoneReport (" + serverProps.getLanguage() + ") : user " + user + " selection " + selection +
+            " took " + (now - then) + " millis");
       }
     } catch (NumberFormatException e) {
       toReturn.put(ERROR, "User id should be a number");
