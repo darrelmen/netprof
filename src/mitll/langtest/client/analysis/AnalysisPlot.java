@@ -679,7 +679,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
   /**
    * @see AnalysisTab#getClickHandler(AnalysisTab.TIME_HORIZON)
    * @param timeHorizon
-   * @param timeWidgets
    * @return
    */
   public long setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon) {
@@ -695,7 +694,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
   private Long goToLast(AnalysisTab.TIME_HORIZON timeHorizon) {
     this.timeHorizon = timeHorizon;
-//    this.timeWidgets = timeWidgets;
 
     switch (timeHorizon) {
       case WEEK:
