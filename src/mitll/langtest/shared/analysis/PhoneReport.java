@@ -4,8 +4,6 @@
 
 package mitll.langtest.shared.analysis;
 
-import mitll.langtest.client.analysis.*;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +18,9 @@ public class PhoneReport implements Serializable {
 
   private boolean valid = false;
 
-  public PhoneReport() { valid = false; }
+  public PhoneReport() {
+    valid = false;
+  }
 
   /**
    * @param overallPercent
@@ -41,28 +41,23 @@ public class PhoneReport implements Serializable {
     return phoneToWordAndScoreSorted;
   }
 
-  /**
-   * @see mitll.langtest.client.analysis.PhoneContainer#clickOnPhone(String)
-   * @see PhoneContainer#showExamplesForSelectedSound()
-   * @paramx phone
-   * @return
-   */
-/*
-  public List<WordAndScore> getWordExamples(String phone) { return phoneToWordAndScoreSorted.get(phone);}
-*/
-  public String toString() { return getPhoneToAvgSorted().toString(); }
-
   public int getOverallPercent() {
     return overallPercent;
   }
 
   /**
-   * @see mitll.langtest.client.analysis.PhoneContainer#getTableWithPager(PhoneReport)
    * @return
+   * @see mitll.langtest.client.analysis.PhoneContainer#getTableWithPager(PhoneReport)
    */
-  public Map<String, PhoneStats> getPhoneToAvgSorted() { return phoneToAvgSorted;  }
+  public Map<String, PhoneStats> getPhoneToAvgSorted() {
+    return phoneToAvgSorted;
+  }
 
   public boolean isValid() {
     return valid;
+  }
+
+  public String toString() {
+    return "valid " + valid + " : " + getPhoneToAvgSorted().toString();
   }
 }
