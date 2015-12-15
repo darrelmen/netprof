@@ -57,6 +57,11 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
 
   public WordAndScore() {}
 
+  /**
+   * Sort first by score
+   * @param o
+   * @return
+   */
   @Override
   public int compareTo(WordAndScore o) {
     int i = getScore() < o.getScore() ? -1 : getScore() > o.getScore() ? +1 : 0;
