@@ -62,6 +62,8 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
     return mean;
   }
 
+
+
   public double getStdev() {
     return stdev;
   }
@@ -96,12 +98,6 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
   public long getCount() {
     return count;
   }
-
-/*
-  public long getBin() {
-    return bin;
-  }
-*/
 
   public String toString() {
     return phone + " : " + new Date(bin) +
