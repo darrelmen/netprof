@@ -10,10 +10,10 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.STATE;
+import mitll.langtest.shared.exercise.STATE;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -176,7 +176,7 @@ public class WaveformExercisePanel extends ExercisePanel {
    *
    * @param controller
    * @param completedExercise
-   * @see mitll.langtest.client.exercise.NavigationHelper#clickNext(ExerciseController, mitll.langtest.shared.CommonExercise)
+   * @see mitll.langtest.client.exercise.NavigationHelper#clickNext(ExerciseController, mitll.langtest.shared.exercise.CommonExercise)
    */
   @Override
   public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
