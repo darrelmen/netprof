@@ -25,8 +25,8 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
@@ -131,7 +131,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   /**
    * @param e
    * @return
-   * @see mitll.langtest.client.list.ExerciseList#makeExercisePanel(mitll.langtest.shared.CommonExercise)
+   * @see mitll.langtest.client.list.ExerciseList#makeExercisePanel(mitll.langtest.shared.exercise.CommonExercise)
    */
   @Override
   public Panel getExercisePanel(CommonExercise e) {
@@ -229,7 +229,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   }
 
   /**
-   * @see #getExercisePanel(mitll.langtest.shared.CommonExercise)
+   * @see #getExercisePanel(mitll.langtest.shared.exercise.CommonExercise)
    */
   private class StatsPracticePanel extends BootstrapExercisePanel {
     private Widget container;
