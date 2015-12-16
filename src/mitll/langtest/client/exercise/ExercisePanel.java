@@ -13,20 +13,23 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Note that for text input answers, the user is prevented from cut-copy-paste.<br></br>
- *
+ * <p>
  * Subclassed to provide for audio recording and playback {@linkxx mitll.langtest.client.recorder.SimpleRecordExercisePanel} and
  * grading of answers {@linkx mitll.langtest.client.grading.GradingExercisePanel}
- *
+ * <p>
  * User: GO22670
  * Date: 5/8/12
  * Time: 1:39 PM
  * To change this template use File | Settings | File Templates.
  */
 public abstract class ExercisePanel extends VerticalPanel implements
-  BusyPanel, PostAnswerProvider, ProvidesResize, RequiresResize {
+    BusyPanel, PostAnswerProvider, ProvidesResize, RequiresResize {
+  private Logger logger = Logger.getLogger("ExercisePanel");
+
   private static final int CONTENT_SCROLL_HEIGHT = 220;
   private static final String PROMPT = "Read the following text and answer the question or questions below.";
   private final List<Widget> answers = new ArrayList<Widget>();
@@ -35,25 +38,24 @@ public abstract class ExercisePanel extends VerticalPanel implements
   protected final ExerciseController controller;
   private final NavigationHelper navigationHelper;
   protected final ListInterface exerciseList;
-  private final Map<Integer,Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
+  private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
   protected final String message;
   protected final String instance;
 
   /**
-   * @see ExercisePanelFactory#getExercisePanel
-   * @see mitll.langtest.client.list.ListInterface#loadExercise
    * @param e
    * @param service
    * @param controller
    * @param exerciseList
    * @param instructionMessage
    * @param instance
+   * @see ExercisePanelFactory#getExercisePanel
+   * @see mitll.langtest.client.list.ListInterface#loadExercise
    */
   public ExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service,
                        final ExerciseController controller, ListInterface exerciseList, String instructionMessage, String instance) {
     this.exercise = e;
     this.controller = controller;
-  //  this.service = service;
     this.exerciseList = exerciseList;
     this.message = instructionMessage;
     this.instance = instance;
@@ -84,15 +86,17 @@ public abstract class ExercisePanel extends VerticalPanel implements
   }
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller) {
-    return new NavigationHelper(exercise,controller, this, exerciseList, true, true, true);
+    return new NavigationHelper(exercise, controller, this, exerciseList, true, true, true);
   }
 
-  protected void addInstructions() {  add(new Heading(4, PROMPT));  }
+  protected void addInstructions() {
+    add(new Heading(4, PROMPT));
+  }
 
   /**
-   * @see #ExercisePanel(CommonExercise, LangTestDatabaseAsync, ExerciseController, ListInterface, String, String)
    * @param e
    * @return
+   * @see #ExercisePanel(CommonExercise, LangTestDatabaseAsync, ExerciseController, ListInterface, String, String)
    */
   private Widget getQuestionContent(CommonExercise e) {
     String content = getExerciseContent(e);
@@ -107,7 +111,11 @@ public abstract class ExercisePanel extends VerticalPanel implements
     }
   }
 
-  protected String getExerciseContent(CommonExercise e) { return e.getContent();  }
+  protected abstract String getExerciseContent(CommonExercise e);
+/*  {
+    logger.warning("getExerciseContent got " + e.getContent());
+    return e.getContent();
+  }*/
 
   Widget getContentScroller(HTML maybeRTLContent) {
     ScrollPanel scroller = new ScrollPanel(maybeRTLContent);
@@ -117,26 +125,25 @@ public abstract class ExercisePanel extends VerticalPanel implements
   }
 
   /**
-   * @see #getQuestionContent(mitll.langtest.shared.exercise.CommonExercise)
    * @param content
    * @return
+   * @see #getQuestionContent(mitll.langtest.shared.exercise.CommonExercise)
    */
   protected HTML getMaybeRTLContent(String content) {
     boolean rightAlignContent = controller.isRightAlignContent();
     HasDirection.Direction direction =
-      true && rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
+        rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
 
     HTML html = new HTML(content, direction);
     html.setWidth("100%");
-    if (true && rightAlignContent) {
+    if (rightAlignContent) {
       html.addStyleName("rightAlign");
     }
 
     html.addStyleName("wrapword");
     if (isPashto()) {
       html.addStyleName("pashtofont");
-    }
-    else {
+    } else {
       html.addStyleName("xlargeFont");
     }
     return html;
@@ -146,27 +153,33 @@ public abstract class ExercisePanel extends VerticalPanel implements
     return controller.getLanguage().equalsIgnoreCase("Pashto");
   }
 
-  public void onResize() {}
-  public boolean isBusy() { return false; }
+  public void onResize() {
+  }
+
+  public boolean isBusy() {
+    return false;
+  }
 
   @Override
-  public void setBusy(boolean v) {}
+  public void setBusy(boolean v) {
+  }
 
   /**
    * For every question,
    * <ul>
-   *  <li>show the text of the question,  </li>
-   *  <li>the prompt to the test taker (e.g "Speak your response in English")  </li>
-   *  <li>an answer widget (either a simple text box, an flash audio record and playback widget, or a list of the answers, when grading </li>
+   * <li>show the text of the question,  </li>
+   * <li>the prompt to the test taker (e.g "Speak your response in English")  </li>
+   * <li>an answer widget (either a simple text box, an flash audio record and playback widget, or a list of the answers, when grading </li>
    * </ul>     <br></br>
    * Remember the answer widgets so we can notice which have been answered, and then know when to enable the next button.
+   *
    * @param e
    * @param service
    * @param controller used in subclasses for audio control
    */
   private void addQuestions(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller) {
-      add(getQuestionPanel(e, service, controller, 1
-      ));
+    add(getQuestionPanel(e, service, controller, 1
+    ));
   }
 
   private Panel getQuestionPanel(CommonExercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
@@ -182,9 +195,9 @@ public abstract class ExercisePanel extends VerticalPanel implements
   }
 
   /**
-   * @see #getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
    * @param index
    * @param answerWidget
+   * @see #getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
    */
   protected void addAnswerWidget(int index, Widget answerWidget) {
     answers.add(answerWidget);
@@ -205,7 +218,9 @@ public abstract class ExercisePanel extends VerticalPanel implements
     vp.add(prompt);
   }
 
-  protected String getQuestionPrompt() { return "";  }
+  protected String getQuestionPrompt() {
+    return "";
+  }
 
 /*  protected String getWrittenPrompt(boolean promptInEnglish) {
     return THREE_SPACES +
@@ -230,9 +245,9 @@ public abstract class ExercisePanel extends VerticalPanel implements
    * <br></br>
    * Loads next exercise after the post.
    *
-   * @see NavigationHelper#getNextAndPreviousButtons
    * @param controller
    * @param completedExercise
+   * @see NavigationHelper#getNextAndPreviousButtons
    */
   @Override
   public abstract void postAnswers(final ExerciseController controller, final CommonExercise completedExercise); /*{
@@ -288,7 +303,10 @@ public abstract class ExercisePanel extends VerticalPanel implements
   }*/
 
   protected Widget getAnswerWidget(final CommonExercise exercise, final LangTestDatabaseAsync service,
-                                   ExerciseController controller, final int index) { return null; }
+                                   ExerciseController controller, final int index) {
+    return null;
+  }
+
   @Override
   protected void onLoad() {
     super.onLoad();
@@ -307,31 +325,31 @@ public abstract class ExercisePanel extends VerticalPanel implements
   public void recordIncomplete(Widget answer) {
     if (!completed.remove(answer) && !completed.isEmpty()) {
       System.err.println("recordIncomplete : huh? answer " + answer.getElement().getId() +
-        " is not on list of size " + completed.size());
+          " is not on list of size " + completed.size());
       for (Widget widget : completed) {
         System.err.println("recordIncomplete : known : " + widget.getElement().getId());
       }
     }
-   // System.out.println("recordIncomplete : completed " + completed.size() + " vs total " + answers.size());
+    // System.out.println("recordIncomplete : completed " + completed.size() + " vs total " + answers.size());
 
     enableNext();
   }
 
   /**
-   * @see mitll.langtest.client.exercise.WaveformPostAudioRecordButton#useResult(mitll.langtest.shared.AudioAnswer)
    * @param answer
+   * @see mitll.langtest.client.exercise.WaveformPostAudioRecordButton#useResult(mitll.langtest.shared.AudioAnswer)
    */
   public void recordCompleted(Widget answer) {
     completed.add(answer);
 
-    System.out.println("recordCompleted : id " + answer.getElement().getId()+
-      " completed " + completed.size() + " vs total " + answers.size());
+    System.out.println("recordCompleted : id " + answer.getElement().getId() +
+        " completed " + completed.size() + " vs total " + answers.size());
 
     if (completed.size() > answers.size()) {
       System.err.println("recordCompleted huh? more complete " + completed.size() + " than answers " + answers.size());
     }
 
-   // markTabsComplete();
+    // markTabsComplete();
     enableNext();
   }
 
@@ -364,7 +382,6 @@ public abstract class ExercisePanel extends VerticalPanel implements
       }
     }
   }*/
-
   protected void enableNext() {
     //System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
     boolean isComplete = isCompleted();
