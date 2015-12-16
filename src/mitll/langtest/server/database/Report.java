@@ -8,7 +8,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.shared.AudioAttribute;
+import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.UserAndTime;
