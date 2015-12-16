@@ -142,10 +142,10 @@ public class ExcelImport implements ExerciseDAO {
         // add new items
         addNewExercises();
 
-        int missing = 0;
+       // int missing = 0;
         for (CommonExercise ex : exercises) {
           attachAudio.attachAudio(ex);
-          if (!ex.hasRefAudio()) missing++;
+         // if (!ex.hasRefAudio()) missing++;
 //          if (ex.getID().equals("166")) {
 //            logger.info("Ex " + ex.getID() + " ref " + ex.getRefAudio());
 //          }
