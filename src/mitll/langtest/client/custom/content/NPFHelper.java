@@ -22,12 +22,11 @@ import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
-import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,18 +91,16 @@ public class NPFHelper implements RequiresResize {
    */
   public void showNPF(UserList ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises,
                       CommonExercise toSelect) {
-    logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
+   // logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
     this.instanceName = instanceName;
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
       madeNPFContent = true;
-      logger.info("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
-      // System.out.println("\t: first is = " + instanceName + "  " + ul.getExercises().iterator().next().getID());
+     // logger.info("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
       addNPFToContent(ul, content, instanceName, loadExercises, toSelect);
     } else {
-      logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
-      //   System.out.println("\t: first is = " + instanceName + "  " + ul.getExercises().iterator().next().getID());
+    //  logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
       rememberAndLoadFirst(ul, toSelect);
     }
   }
@@ -146,8 +143,7 @@ public class NPFHelper implements RequiresResize {
    * @see #doNPF(UserList, String, boolean, String)
    */
   protected Panel doInternalLayout(UserList ul, String instanceName) {
-    //System.out.println(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
-    logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
+//    logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
 
     // row 1
     Panel hp = new HorizontalPanel();
@@ -213,7 +209,7 @@ public class NPFHelper implements RequiresResize {
   private void rememberAndLoadFirst(final UserList ul, CommonExercise toSelect) {
     npfExerciseList.setUserListID(ul.getUniqueID());
     List<CommonShell> copy = new ArrayList<CommonShell>(ul.getExercises());
-    logger.info("rememberAndLoadFirst " + copy.size() + " exercises from  " +ul.getName());
+  //  logger.info("rememberAndLoadFirst " + copy.size() + " exercises from  " +ul.getName());
     //  npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
     npfExerciseList.rememberAndLoadFirst(copy, toSelect, "");
     npfExerciseList.setWidth("270px");
@@ -252,7 +248,7 @@ public class NPFHelper implements RequiresResize {
   }
 
   protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList, final String instanceName, final boolean showQC) {
-    return new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
+    return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
         if (showQC) {
@@ -409,7 +405,6 @@ public class NPFHelper implements RequiresResize {
        * @param currentExercisePanel
        * @param instanceName
        * @param incorrectFirst
-       * @seex mitll.langtest.client.custom.Navigation.RecorderNPFHelper#getMyListLayout(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.custom.SimpleChapterNPFHelper)
        * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
        * @see mitll.langtest.client.custom.content.NPFHelper.FlexListLayout#makeExerciseList(com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel, String, boolean)
        */
