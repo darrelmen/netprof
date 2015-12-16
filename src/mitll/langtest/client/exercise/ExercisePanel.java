@@ -10,7 +10,7 @@ import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.util.*;
 
@@ -117,7 +117,7 @@ public abstract class ExercisePanel extends VerticalPanel implements
   }
 
   /**
-   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
+   * @see #getQuestionContent(mitll.langtest.shared.exercise.CommonExercise)
    * @param content
    * @return
    */
@@ -182,7 +182,7 @@ public abstract class ExercisePanel extends VerticalPanel implements
   }
 
   /**
-   * @see #getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
+   * @see #getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
    * @param index
    * @param answerWidget
    */
