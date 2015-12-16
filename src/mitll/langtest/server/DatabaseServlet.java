@@ -5,8 +5,8 @@
 package mitll.langtest.server;
 
 import mitll.langtest.server.audio.AudioConversion;
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
