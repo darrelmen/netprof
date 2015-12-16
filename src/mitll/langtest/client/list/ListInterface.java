@@ -13,9 +13,9 @@ import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.dialog.PrevNextList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
-import mitll.langtest.shared.STATE;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.Collection;

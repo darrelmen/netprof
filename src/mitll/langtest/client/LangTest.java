@@ -48,11 +48,14 @@ import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
 import mitll.langtest.client.result.ResultManager;
-import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.user.*;
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.ImageResponse;
+import mitll.langtest.shared.Result;
+import mitll.langtest.shared.StartupInfo;
+import mitll.langtest.shared.User;
+import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;

@@ -7,8 +7,8 @@ package mitll.langtest.server.database.exercise;
 import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonUserExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonUserExercise;
 
 import java.util.Collection;
 import java.util.List;
