@@ -291,13 +291,13 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
     column.add(row);
 
-    if (e.getModifiedDateTimestamp() != 0) {
-      Heading widgets = new Heading(5, "Changed", new Date(e.getModifiedDateTimestamp()).toString());
-    //  if (!e.getAudioAttributes().isEmpty()) {
-    //    widgets.addStyleName("floatRight");
-    //  }
-      row.add(widgets);
-    }
+//    if (e.getModifiedDateTimestamp() != 0) {
+//      Heading widgets = new Heading(5, "Changed", new Date(e.getModifiedDateTimestamp()).toString());
+//    //  if (!e.getAudioAttributes().isEmpty()) {
+//    //    widgets.addStyleName("floatRight");
+//    //  }
+//      row.add(widgets);
+//    }
 
     column.add(getEntry(e, FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
     column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTransliteration()));
