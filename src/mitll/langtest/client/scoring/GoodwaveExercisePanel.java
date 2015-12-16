@@ -51,11 +51,11 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
+  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
+
   public static final String MANDARIN = "Mandarin";
   public static final String KOREAN = "Korean";
   public static final String JAPANESE = "Japanese";
-  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
-//  private static final String DEFAULT = "Default";
 
   private static final String REFERENCE = "";
   private static final String RECORD_YOURSELF = "Record";
@@ -133,8 +133,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
   }
 
-  private void addBelowPlaybackWidget(CommonExercise e, Panel toAddTo) {
-  }
+//  private void addBelowPlaybackWidget(CommonExercise e, Panel toAddTo) {
+//  }
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller,
                                                  final ListInterface listContainer, boolean addKeyHandler) {
@@ -201,7 +201,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
     addGroupingStyle(div);
 
-    addBelowPlaybackWidget(exercise, toAddTo);
+ //   addBelowPlaybackWidget(exercise, toAddTo);
     toAddTo.add(div);
   }
 
@@ -258,7 +258,8 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @see #GoodwaveExercisePanel
    */
   private Widget getQuestionContent(CommonExercise e) {
-    String content = e.getContent();
+  //  String content = e.getContent();
+  //  logger.info("getQuestionContent got content " + content);
     final VerticalPanel vp = new VerticalPanel();
     vp.getElement().setId("getQuestionContent_verticalContainer");
 
@@ -269,7 +270,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     }
     vp.addStyleName("blockStyle");
 
-    Widget questionContent = getQuestionContent(e, content);
+    Widget questionContent = getQuestionContent(e, "");//e.getContent());
 
     vp.add(questionContent);
 
