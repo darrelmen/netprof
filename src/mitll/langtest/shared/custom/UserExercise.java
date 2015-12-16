@@ -4,7 +4,7 @@
 
 package mitll.langtest.shared.custom;
 
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.*;
@@ -123,32 +123,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     }
   }
 
-  /**
-   * @return
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#addNew
-   * @deprecated ideally we shouldn't have to do this
-   */
-/*  public Exercise toExercise() {
-    Exercise exercise = new Exercise(getID(), getEnglish(), getForeignLanguage());
-    copyFields(exercise);
-    copyAudio(exercise);
-
-    return exercise;
-  }*/
-
-/*  private void copyFields(Exercise imported) {
-    AudioAttribute slowSpeed = getSlowSpeed();
-    if (slowSpeed != null) {
-      imported.addAudio(slowSpeed);
-    }
-    imported.setEnglishSentence(getEnglish());
-    imported.setTranslitSentence(getTransliteration());
-    imported.setUnitToValue(getUnitToValue());
-    imported.setFieldToAnnotation(getFieldToAnnotation());
-    imported.setContext(getContext());
-    imported.setContextTranslation(getContextTranslation());
-  }*/
-
   @Override
   public String getRefSentence() {
     return foreignLanguage;
@@ -163,16 +137,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   public String getTransliteration() {
     return transliteration;
   }
-
-  /**
-   * TODO : Consider how to do this better -- not consistent with Exercise meaning...
-   *
-   * @return
-   */
-/*  @Override
-  public String getMeaning() {
-    return meaning;
-  }*/
 
   /**
    * @return
