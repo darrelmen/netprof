@@ -4,7 +4,7 @@
 
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.monitoring.Session;
