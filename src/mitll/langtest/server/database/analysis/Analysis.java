@@ -38,7 +38,7 @@ public class Analysis extends DAO {
   private static final long HOUR = 60 * MINUTE;
   //  private static final long FIVEMIN = 5 * MINUTE;
   private static final long DAY = 24 * HOUR;
-  private static final long WEEK = 7 * DAY;
+//  private static final long WEEK = 7 * DAY;
 //  private static final long MONTH = 4 * WEEK;
 //  private static final long SESSION_GAP = 10 * MINUTE;  // 5 minutes
 
