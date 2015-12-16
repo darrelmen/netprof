@@ -4,7 +4,7 @@
 
 package mitll.langtest.server.database.exercise;
 
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.util.ArrayList;
 import java.util.Collection;
