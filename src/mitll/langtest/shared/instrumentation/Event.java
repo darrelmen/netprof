@@ -5,9 +5,7 @@
 package mitll.langtest.shared.instrumentation;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.client.instrumentation.EventRegistration;
 
-import java.util.Comparator;
 import java.util.Date;
 
 /**
