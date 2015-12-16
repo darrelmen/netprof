@@ -40,6 +40,10 @@ import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
@@ -595,7 +599,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userID
    * @param firstExercise
    * @param isFlashcardReq
-   * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.CommonExercise, boolean)
+   * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.exercise.CommonExercise, boolean)
    */
   private void attachScoreHistory(long userID, CommonExercise firstExercise, boolean isFlashcardReq) {
     db.getResultDAO().attachScoreHistory(userID, firstExercise, isFlashcardReq);
@@ -603,7 +607,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @param firstExercise
-   * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.CommonExercise, boolean)
+   * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.exercise.CommonExercise, boolean)
    */
   private void attachAudio(CommonExercise firstExercise) {
     db.getAudioDAO().attachAudio(firstExercise, pathHelper.getInstallPath(), relativeConfigDir);
@@ -616,7 +620,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @param userID
    * @param firstExercise
-   * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.CommonExercise, boolean)
+   * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.exercise.CommonExercise, boolean)
    */
   private void addPlayedMarkings(long userID, CommonExercise firstExercise) {
     db.getEventDAO().addPlayedMarkings(userID, firstExercise);
@@ -784,7 +788,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @param byID
-   * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.CommonExercise, boolean)
+   * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.exercise.CommonExercise, boolean)
    */
   private void addAnnotations(CommonExercise byID) {
     db.getUserListManager().addAnnotations(byID);
@@ -841,7 +845,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param title
    * @param artist
    * @return true if mp3 file exists
-   * @see #ensureMP3s(mitll.langtest.shared.CommonExercise)
+   * @see #ensureMP3s(mitll.langtest.shared.exercise.CommonExercise)
    * @see #writeAudioFile
    */
   public boolean ensureMP3(String wavFile, String title, String artist) {
@@ -1348,7 +1352,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @param audioAttribute
    * @param exid
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio(mitll.langtest.shared.CommonExercise, mitll.langtest.shared.AudioAttribute, mitll.langtest.client.custom.tabs.RememberTabAndContent)
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.shared.exercise.AudioAttribute, mitll.langtest.client.custom.tabs.RememberTabAndContent)
    */
   @Override
   public void markAudioDefect(AudioAttribute audioAttribute, String exid) {
