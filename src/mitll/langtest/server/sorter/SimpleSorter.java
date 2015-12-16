@@ -7,8 +7,8 @@ package mitll.langtest.server.sorter;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
 import java.io.OutputStream;
