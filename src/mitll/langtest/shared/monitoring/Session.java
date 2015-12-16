@@ -7,11 +7,7 @@ package mitll.langtest.shared.monitoring;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.flashcard.SetScore;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
 * Created with IntelliJ IDEA.
