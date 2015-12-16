@@ -4,7 +4,7 @@
 
 package mitll.langtest.server.database.exercise;
 
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.SectionNode;
 import org.apache.log4j.Logger;
 

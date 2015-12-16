@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundPlayer;
-import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.TimeAndScore;
@@ -132,12 +132,13 @@ public class AnalysisPlot extends TimeSeriesPlot {
       @Override
       public void onSuccess(UserPerformance userPerformance) {
         List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
-        long last = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
-        List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(WEEK);
-        weeks.addAll(getPeriods(phoneSessions, WEEK, last));
-        List<PhoneSession> phoneSessions1 = userPerformance.getGranularityToSessions().get(MONTH);
-        months.addAll(getPeriods(phoneSessions1, MONTH, last));
-
+        if (!rawBestScores.isEmpty()) {
+          long last = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
+          List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(WEEK);
+          weeks.addAll(getPeriods(phoneSessions, WEEK, last));
+          List<PhoneSession> phoneSessions1 = userPerformance.getGranularityToSessions().get(MONTH);
+          months.addAll(getPeriods(phoneSessions1, MONTH, last));
+        }
         addChart(userPerformance, userChosenID);
       }
     });
@@ -653,19 +654,22 @@ public class AnalysisPlot extends TimeSeriesPlot {
         toGet.add(id);
       }
     }
-    TimeAndScore timeAndScore = rawBestScores.get(rawBestScores.size() - 1);
-    this.firstTime = rawBestScores.get(0).getTimestamp();
-    this.lastTime = timeAndScore.getTimestamp();
-    service.getShells(toGet, new AsyncCallback<List<CommonShell>>() {
-      @Override
-      public void onFailure(Throwable throwable) {
-      }
 
-      @Override
-      public void onSuccess(List<CommonShell> commonShells) {
-        for (CommonShell shell : commonShells) idToEx.put(shell.getID(), shell);
-      }
-    });
+    if (!rawBestScores.isEmpty()) {
+      TimeAndScore timeAndScore = rawBestScores.get(rawBestScores.size() - 1);
+      this.firstTime = rawBestScores.get(0).getTimestamp();
+      this.lastTime = timeAndScore.getTimestamp();
+      service.getShells(toGet, new AsyncCallback<List<CommonShell>>() {
+        @Override
+        public void onFailure(Throwable throwable) {
+        }
+
+        @Override
+        public void onSuccess(List<CommonShell> commonShells) {
+          for (CommonShell shell : commonShells) idToEx.put(shell.getID(), shell);
+        }
+      });
+    }
   }
 
   /**
