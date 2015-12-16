@@ -5,7 +5,7 @@
 package mitll.langtest.server;
 
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.User;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
