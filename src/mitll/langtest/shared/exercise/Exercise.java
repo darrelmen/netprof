@@ -4,7 +4,7 @@
 
 package mitll.langtest.shared.exercise;
 
-import mitll.langtest.shared.custom.UserExercise;
+import mitll.langtest.server.database.ResultDAO;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.ArrayList;
@@ -24,7 +24,6 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class Exercise extends AudioExercise implements CommonExercise {
- // private static final int MAX_TOOLTIP_LENGTH = 15;
   private String content;
 
   private String context;
@@ -37,57 +36,20 @@ public class Exercise extends AudioExercise implements CommonExercise {
 
   private transient List<String> firstPron = new ArrayList<String>();
 
-  public Exercise() {
-  }     // required for serialization
+  public Exercise() {}
 
   /**
    * @param id
    * @param content
-   * @param tooltip
    * @param context
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    */
-  public Exercise(String id, String content, String tooltip, String context, String contextTranslation) {
+  public Exercise(String id, String content, String context, String contextTranslation) {
     super(id);
-    this.setContent(content);
+    this.content = content;
     this.context = context;
     this.contextTranslation = contextTranslation;
   }
-
-  /**
-   * @param id
-   * @param content
-   * @param sentenceRef
-   * @see UserExercise#toExercise()
-   */
-  public Exercise(String id, String content, String sentenceRef) {
-    super(id);
-
-    this.setContent(content);
-    this.refSentences.add(sentenceRef);
-  }
-
-/*
-  public CommonShell getShellCombinedTooltip() {
-    return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage);
-  }
-*/
-
-  /**
-   * Hack - if we have "N/A" for english, don't show it in the list.
-   *
-   * @return
-   */
-/*  public String getCombinedTooltip() {
-    String refSentence = getRefSentence();
-    if (refSentence.length() > MAX_TOOLTIP_LENGTH) {
-      refSentence = refSentence.substring(0, MAX_TOOLTIP_LENGTH);
-    }
-    boolean refSentenceEqualsTooltip = getTooltip().trim().equals(getRefSentence().trim());
-    String combined = refSentenceEqualsTooltip ? getTooltip() : getTooltip() + (refSentence.isEmpty() ? "" : " / " + refSentence);
-    if (getTooltip().isEmpty() || getTooltip().equals("N/A")) combined = refSentence;
-    return combined;
-  }*/
 
   public String getContent() {
     return content;
@@ -124,10 +86,6 @@ public class Exercise extends AudioExercise implements CommonExercise {
     translitSentences.add(translitSentence);
   }
 
-  private void setContent(String content) {
-    this.content = content;
-  }
-
   /**
    * @param englishSentence
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
@@ -150,26 +108,10 @@ public class Exercise extends AudioExercise implements CommonExercise {
     return contextTranslation;
   }
 
-  /**
-   * @param context
-   * @see mitll.langtest.shared.custom.UserExercise#copyFields(Exercise)  - only
-   */
-  public void setContext(String context) {
-    this.context = context;
-  }
-
-  /**
-   * @param contextTranslation
-   * @see mitll.langtest.shared.custom.UserExercise#copyFields
-   */
-  public void setContextTranslation(String contextTranslation) {
-    this.contextTranslation = contextTranslation;
-  }
-
-  @Override
-  public long getModifiedDateTimestamp() {
-    return 0;
-  }
+//  @Override
+//  public long getModifiedDateTimestamp() {
+//    return 0;
+//  }
 
   @Override
   public STATE getState() {
@@ -194,6 +136,10 @@ public class Exercise extends AudioExercise implements CommonExercise {
     return avgScore;
   }
 
+  /**
+   * @see ResultDAO#attachScoreHistory
+   * @param avgScore
+   */
   public void setAvgScore(float avgScore) {
     this.avgScore = avgScore;
   }
