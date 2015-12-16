@@ -2,7 +2,7 @@
  * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
  */
 
-package mitll.langtest.shared;
+package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -11,7 +11,6 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public interface CommonShell extends IsSerializable {
   String getID();
- // String getTooltip(); // TODO REmove
   STATE getState();
   void setState(STATE state);
 
