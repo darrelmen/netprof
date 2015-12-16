@@ -6,7 +6,6 @@ package mitll.langtest.shared;
 
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.rpc.IsSerializable;
-import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
