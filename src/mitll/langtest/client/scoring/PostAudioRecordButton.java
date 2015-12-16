@@ -13,7 +13,7 @@ import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.util.logging.Logger;
 
