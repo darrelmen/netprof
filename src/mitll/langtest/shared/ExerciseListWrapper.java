@@ -5,13 +5,15 @@
 package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.List;
 
 /**
  * Includes a reqID so if the client gets responses out of order it can ignore responses to old requests.
  * Also includes the first exercise.
- * The list of exercises here is just a list of {@link mitll.langtest.shared.CommonShell} objects to
+ * The list of exercises here is just a list of {@link mitll.langtest.shared.exercise.CommonShell} objects to
  * reduce the bytes sent to get the exercise list. Perhaps in the future we could move to an async list.
  * <p/>
  * User: GO22670

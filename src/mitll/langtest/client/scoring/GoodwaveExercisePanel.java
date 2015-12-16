@@ -34,8 +34,8 @@ import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.ArrayList;
@@ -185,7 +185,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @param controller    used in subclasses for audio control
    * @param screenPortion
    * @param exercise
-   * @see #GoodwaveExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
+   * @see #GoodwaveExercisePanel(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
    */
   protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo,
                                  float screenPortion, CommonExercise exercise) {
@@ -220,7 +220,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   /**
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
+   * @see #getQuestionContent(mitll.langtest.shared.exercise.CommonExercise)
    */
   private Panel getUnitLessonForExercise() {
     Panel flow = new HorizontalPanel();
@@ -287,7 +287,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   /**
    * @param e
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
+   * @see #getQuestionContent(mitll.langtest.shared.exercise.CommonExercise)
    */
   private Widget getItemHeader(CommonExercise e) {
     Heading w = new Heading(HEADING_FOR_UNIT_LESSON, "Item", e.getID());
@@ -510,7 +510,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @param controller
    * @param screenPortion
    * @return
-   * @see #addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.CommonExercise)
+   * @see #addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.CommonExercise)
    */
   private ScoringAudioPanel getAnswerWidget(LangTestDatabaseAsync service, final ExerciseController controller, float screenPortion) {
     ScoringAudioPanel widgets = new ASRRecordAudioPanel(service, controller, getLocalExercise(), instance);
