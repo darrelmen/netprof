@@ -490,7 +490,7 @@ public class UserDAO extends DAO {
         }
       }
  // drop old default current timestamp
-      statement = connection.prepareStatement("ALTER TABLE " +USERS+ " CHANGE " + TIMESTAMP + " TIMESTAMP NOT NULL");
+      statement = connection.prepareStatement("ALTER TABLE " +USERS+ " ALTER " + TIMESTAMP + " TIMESTAMP NOT NULL");
       statement.execute();
       statement.close();
     } finally {
