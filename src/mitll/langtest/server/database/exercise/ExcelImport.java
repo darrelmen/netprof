@@ -14,7 +14,6 @@ import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonUserExercise;
 import mitll.langtest.shared.exercise.Exercise;
-import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.custom.UserExercise;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
@@ -95,7 +94,6 @@ public class ExcelImport implements ExerciseDAO {
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
     this.language = serverProps.getLanguage();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
-  //  this.audioOffset = serverProps.getAudioOffset();
     this.userListManager = userListManager;
     this.unitIndex = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
@@ -129,7 +127,9 @@ public class ExcelImport implements ExerciseDAO {
       if (exercises == null) {
         exercises = readExercises(new File(file));
 
-        addAlternates();
+        for (CommonExercise e : exercises) idToExercise.put(e.getID(), e);
+
+        addAlternatives(exercises);
 
         addDefects(idToDefectMap);
 
@@ -175,14 +175,11 @@ public class ExcelImport implements ExerciseDAO {
         examined++;
 
         if (!ex.hasRefAudio()) {
-//          if (ex.getID().startsWith("Custom")) {
-//            logger.warn("missing audio for " + ex.getID());
-//          }
           user++;
-          //     missing++;
-        } else if (ex.getID().startsWith("Custom")) {
-//          logger.warn("found audio for " + ex.getID());
         }
+       // else if (ex.getID().startsWith("Custom")) {
+//          logger.warn("found audio for " + ex.getID());
+       // }
       }
     }
     if (user > 0) {
@@ -250,11 +247,14 @@ public class ExcelImport implements ExerciseDAO {
   /**
    * Keep track of possible alternatives for each english word - e.g. Good Bye = Ciao OR Adios
    */
-  private void addAlternates() {
+/*  private void addAlternates() {
+    List<CommonExercise> exercises = this.exercises;
+    addAlternatives(exercises);
+  }*/
+
+  private void addAlternatives(List<CommonExercise> exercises) {
     Map<String, Set<String>> englishToFL = new HashMap<>();
     for (CommonExercise e : exercises) {
-      idToExercise.put(e.getID(), e);
-
       Set<String> refs = englishToFL.getOrDefault(e.getEnglish(), new HashSet<>());
       if (refs.isEmpty()) englishToFL.put(e.getEnglish(), refs);
       refs.add(e.getForeignLanguage());
@@ -411,7 +411,7 @@ public class ExcelImport implements ExerciseDAO {
           if (DEBUG) {
             if (!exercises1.isEmpty()) {
               CommonExercise first = exercises1.iterator().next();
-              logger.debug("e.g. " + first + " content  " + first.getContent());
+              logger.debug("e.g. " + first);// + " content  " + first.getContent());
             }
           }
         }
@@ -607,7 +607,7 @@ public class ExcelImport implements ExerciseDAO {
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
 
               CommonExercise imported = isDelete ? null : getExercise(idToUse, english, foreignLanguagePhrase, translit,
-                  meaning, context, contextTranslation, false, hasAudioIndex ? getCell(next, audioIndex) : "", true);
+                  meaning, context, contextTranslation, hasAudioIndex ? getCell(next, audioIndex) : "", true);
 
               if (!isDelete &&
                   (imported.hasRefAudio() || !shouldHaveRefAudio)) {  // skip items without ref audio, for now.
@@ -775,7 +775,7 @@ public class ExcelImport implements ExerciseDAO {
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
               CommonExercise imported = getExercise(idToUse, english, foreignLanguagePhrase, translit,
-                  meaning, context, contextTranslation, false, (audioIndex != -1) ? getCell(next, audioIndex) : "", false);
+                  meaning, context, contextTranslation, (audioIndex != -1) ? getCell(next, audioIndex) : "", false);
               if (isDelete) {
                 deleted++;
               } else if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
@@ -912,12 +912,9 @@ public class ExcelImport implements ExerciseDAO {
    */
   private CommonExercise getExercise(String id,
                                      String english, String foreignLanguagePhrase, String translit, String meaning,
-                                     String context, String contextTranslation, boolean promptInEnglish,
+                                     String context, String contextTranslation,
                                      String audioIndex, boolean lookForOldAudio) {
-    Exercise imported;
-
-//    logger.debug("id " + id + " context " + context);
-    imported = getExercise(id, english, foreignLanguagePhrase, translit, meaning, context, contextTranslation,
+    Exercise imported = getExercise(id, meaning, context, contextTranslation,
         audioIndex, lookForOldAudio);
     //   logger.debug("id " + id + " context " + imported.getContext());
 
@@ -977,23 +974,20 @@ public class ExcelImport implements ExerciseDAO {
 
   /**
    * @param id
-   * @param english
-   * @param foreignLanguagePhrase
-   * @param translit
    * @param meaning
    * @param context
    * @param contextTranslation
    * @param refAudioIndex
    * @param lookForOldAudio
    * @return
-   * @see #getExercise(String, String, String, String, String, String, String, boolean, String, boolean)
+   * @see #getExercise(String, String, String, String, String, String, String, String, boolean)
    */
   private Exercise getExercise(String id,
-                               String english, String foreignLanguagePhrase, String translit, String meaning,
+                               String meaning,
                                String context, String contextTranslation, String refAudioIndex, boolean lookForOldAudio) {
-    String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context,
-        contextTranslation, language);
-    Exercise imported = new Exercise(id, content, context, contextTranslation);
+//    String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context,
+//        contextTranslation, language);
+    Exercise imported = new Exercise(id, /*content,*/ context, contextTranslation);
 
     //logger.debug("id  " + id+  " context " + imported.getContext());
     imported.setMeaning(meaning);
