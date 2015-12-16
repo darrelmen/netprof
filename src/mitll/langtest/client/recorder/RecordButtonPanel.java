@@ -14,7 +14,7 @@ import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 
 /**
  * Just a single record button for the UI component.
@@ -45,7 +45,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
    *
-   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#FlashcardRecordButtonPanel(mitll.langtest.client.flashcard.AudioAnswerListener, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.CommonExercise, int, String)
+   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#FlashcardRecordButtonPanel(mitll.langtest.client.flashcard.AudioAnswerListener, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.exercise.CommonExercise, int, String)
    */
   protected RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
                               final CommonExercise exercise, final int index,

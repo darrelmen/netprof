@@ -5,9 +5,9 @@
 package mitll.langtest.shared.sorter;
 
 import mitll.langtest.client.custom.exercise.CommentNPFExercise;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
-import mitll.langtest.shared.STATE;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.STATE;
 
 import java.util.Collection;
 
