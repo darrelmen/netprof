@@ -243,9 +243,9 @@ public class AudioExercise extends ExerciseShell {
       if (attr.getUser() != null) {
         if (attr.getUser().getId() == userID) mine.add(attr);
       }
-      else {
-        System.err.println("getRecordingsBy : Can't find user for " + attr);
-      }
+//      else {
+//        System.err.println("getRecordingsBy : Can't find user for " + attr);
+//      }
     }
     return mine;
   }
@@ -374,8 +374,6 @@ public class AudioExercise extends ExerciseShell {
 
     MiniUser toUse = bothLatest != null ? bothLatest : latest;
 
-  //  System.out.println("\tgetMostRecentAudio toUse " + toUse);
-
     Map<MiniUser, List<AudioAttribute>> userToAudioSingle = new HashMap<MiniUser, List<AudioAttribute>>();
     if (toUse == null && !userToAudio.isEmpty()) {
 /*
@@ -393,7 +391,6 @@ public class AudioExercise extends ExerciseShell {
     }
 
     sortRegBeforeSlow(userToAudioSingle);
-//    System.out.println("\tgetMostRecentAudio userToAudioSingle " + userToAudioSingle);
     return userToAudioSingle;
   }
 
@@ -460,18 +457,18 @@ public class AudioExercise extends ExerciseShell {
    */
   public void addUnitToValue(String unit, String value) {
     if (value == null) return;
-    if (value.isEmpty()) {
-      System.out.println("addUnitToValue " + unit + " value " + value);
-    }
+//    if (value.isEmpty()) {
+//      System.out.println("addUnitToValue " + unit + " value " + value);
+//    }
     this.getUnitToValue().put(unit, value);
   }
   public void setUnitToValue(Map<String, String> unitToValue) {
     this.unitToValue = unitToValue;
   }
 
-  public int getNumAudio() {
+/*  public int getNumAudio() {
     return getAudioAttributes().size();
-  }
+  }*/
 
   public boolean removeAudio(AudioAttribute audioAttribute) {
     return audioAttributes.remove(audioAttribute.getKey()) != null;
