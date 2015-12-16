@@ -7,8 +7,8 @@ package mitll.langtest.server.database.exercise;
 import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.AudioExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.Exercise;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -63,7 +63,7 @@ public class AttachAudio {
    * @param imported      to attach audio to
    * @see ExcelImport#getExercise(String, String, String, String, String, String, String, String, boolean)
    */
-  public void addOldSchoolAudio(String refAudioIndex, Exercise imported) {
+  public <T extends AudioExercise> void addOldSchoolAudio(String refAudioIndex, T imported) {
     String id = imported.getID();
     String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : id;
     if (audioOffset != 0) {
