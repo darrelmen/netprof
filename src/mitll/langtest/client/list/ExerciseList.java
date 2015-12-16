@@ -22,8 +22,8 @@ import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.Result;
 
@@ -466,7 +466,7 @@ public abstract class ExerciseList
    * If we're not already showing this item, ask there server for the exercise.
    * Does this by pushing a history item and then noticing the history item change.
    *
-   * @see #rememberAndLoadFirst(java.util.List, mitll.langtest.shared.CommonExercise, String)
+   * @see #rememberAndLoadFirst(java.util.List, mitll.langtest.shared.exercise.CommonExercise, String)
    */
   private void loadFirstExercise() {
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
@@ -652,8 +652,8 @@ public abstract class ExerciseList
 
   /**
    * @param commonExercise
-   * @see #rememberAndLoadFirst(java.util.List, mitll.langtest.shared.CommonExercise, String)
-   * @see ExerciseAsyncCallback#onSuccess(mitll.langtest.shared.CommonExercise)
+   * @see #rememberAndLoadFirst(java.util.List, mitll.langtest.shared.exercise.CommonExercise, String)
+   * @see ExerciseAsyncCallback#onSuccess(mitll.langtest.shared.exercise.CommonExercise)
    */
   protected void useExercise(final CommonExercise commonExercise) {
     //  logger.info("ExerciseList.useExercise : commonExercise " + commonExercise.getID());
@@ -677,7 +677,7 @@ public abstract class ExerciseList
 
   /**
    * @param exercise
-   * @see #useExercise(mitll.langtest.shared.CommonExercise)
+   * @see #useExercise(mitll.langtest.shared.exercise.CommonExercise)
    */
   private Panel makeExercisePanel(CommonExercise exercise) {
     logger.info("ExerciseList.makeExercisePanel : " + exercise + " instance " + instance);
@@ -716,7 +716,7 @@ public abstract class ExerciseList
   /**
    * @param currentID
    * @return
-   * @see #useExercise(mitll.langtest.shared.CommonExercise)
+   * @see #useExercise(mitll.langtest.shared.exercise.CommonExercise)
    */
   private int getIndex(String currentID) {
     CommonShell shell = byID(currentID);
