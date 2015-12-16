@@ -25,8 +25,8 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
