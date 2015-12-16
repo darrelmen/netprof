@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface ListChangeListener<T> {
   /**
-   * @see mitll.langtest.client.list.ExerciseList#rememberAndLoadFirst(java.util.List, mitll.langtest.shared.CommonExercise, String)
+   * @see mitll.langtest.client.list.ExerciseList#rememberAndLoadFirst(java.util.List, mitll.langtest.shared.exercise.CommonExercise, String)
    * @param items
    * @param selectionID
    */
