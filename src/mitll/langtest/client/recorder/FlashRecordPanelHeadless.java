@@ -62,9 +62,13 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     }
   }*/
 
-  private native static void consoleLog( String message) /*-{
+/*
+  private native static void consoleLog( String message) */
+/*-{
       console.log( "FlashRecordPanelHeadless:" + message );
-  }-*/;
+  }-*//*
+;
+*/
 
   /**
    * Show this widget (make it big enough to accommodate the permission dialog) and install the flash player.
@@ -72,8 +76,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * @seex mitll.langtest.client.LangTest#showPopupOnDenial()
    */
   public boolean initFlash() {
-    logger.info("initFlash");
-
+  //  logger.info("initFlash");
     if (!didPopup) {
       show();
       installFlash();
@@ -163,9 +166,9 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
       micPermission.gotPermission();
     } else {
-      logger.info("installFlash : didn't get Flash Player permission!");
+    //  logger.info("installFlash : didn't get Flash Player permission!");
       if (checkIfFlashInstalled()) {
-        logger.info("installFlash : looking for " + id);
+      //  logger.info("installFlash : looking for " + id);
         installFlash(GWT.getModuleBaseURL(), id);
       }
       else {
@@ -275,7 +278,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * Event from flash when user clicks Accept
    */
   public static void micConnected() {
-    consoleLog("micConnected!");
+   // consoleLog("micConnected!");
     permissionReceived = true;
     micPermission.gotPermission();
   }
@@ -284,7 +287,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * Event from flash when user clicks Deny
    */
   public static void micNotConnected() {
-    consoleLog("---> mic *NOT* Connected! <--- ");
+  //  consoleLog("---> mic *NOT* Connected! <--- ");
     permissionReceived = false;
 
     selfPointer.hide();
@@ -294,7 +297,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   public static void noMicrophoneFound() {
-    consoleLog("no mic available");
+//    consoleLog("no mic available");
     permissionReceived = false;
 
     micPermission.noMicAvailable();
@@ -303,8 +306,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   public boolean gotPermission()  {
     boolean b = permissionReceived || usingWebRTC();
     if (!b) {
-      logger.info("gotPermission permission received " + permissionReceived);
-      logger.info("gotPermission usingWebRTC " + usingWebRTC());
+      logger.info("gotPermission permission received " + permissionReceived + " usingWebRTC " + usingWebRTC());
     }
     return b;
   }
@@ -321,14 +323,13 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   public void stopRecording(final WavCallback wavCallback) {
     if (permissionReceived) {
       final long then = System.currentTimeMillis();
-      logger.info("stopRecording - initial ");
+//      logger.info("stopRecording - initial ");
 
       Timer t = new Timer() {
         @Override
         public void run() {
-
-          long now = System.currentTimeMillis();
-          logger.info("stopRecording timer at " + now + " diff " + (now - then));
+//          long now = System.currentTimeMillis();
+//          logger.info("stopRecording timer at " + now + " diff " + (now - then));
 
           flashStopRecording();
           wavCallback.getBase64EncodedWavFile(flashGetWav());
