@@ -24,7 +24,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
@@ -232,7 +232,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param e
    * @param controller
    * @param w1
-   * @see #makeAddToList(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController)
+   * @see #makeAddToList(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.exercise.ExerciseController)
    * @see #wasRevealed()
    */
   private void populateListChoices(final CommonExercise e, final ExerciseController controller, final DropdownBase w1) {

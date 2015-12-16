@@ -11,7 +11,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 
 /**
  * A row with prev/next buttons.  Key bindings for keys too.
