@@ -10,8 +10,7 @@ package mitll.langtest.shared.exercise;
 public class ExObject extends BaseObject implements CommonShell {
   public enum FIELDS {ENGLISH, MEANING, FOREIGN_LANGUAGE, EX_STATE, SECOND_STATE}
 
-  public ExObject() {
-  }
+  public ExObject() {}
 
   public ExObject(long id, String exid) {
     super(id, exid);
@@ -66,7 +65,6 @@ public class ExObject extends BaseObject implements CommonShell {
   public String getForeignLanguage() {
     return nameToField.get(FIELDS.FOREIGN_LANGUAGE.name()).getValue();
   }
-
 
   public void setForeignLanguage(CommonShell shell) {
     addField(FIELDS.FOREIGN_LANGUAGE.name(), shell.getForeignLanguage());
