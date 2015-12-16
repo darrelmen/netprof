@@ -16,9 +16,8 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.view.client.SingleSelectionModel;
-import mitll.langtest.client.custom.dialog.EditItem;
-import mitll.langtest.shared.CommonShell;
-import mitll.langtest.shared.STATE;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
 import java.util.*;
