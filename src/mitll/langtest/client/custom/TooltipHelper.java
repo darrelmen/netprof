@@ -21,7 +21,7 @@ public class TooltipHelper {
   public Tooltip addTooltip(Widget w, String tip) { return createAddTooltip(w, tip, Placement.RIGHT);  }
 
   /**
-   * @see mitll.langtest.client.custom.exercise.NPFExercise#makeAddToList(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController)
+   * @see mitll.langtest.client.custom.exercise.NPFExercise#makeAddToList(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.exercise.ExerciseController)
    * @param widget
    * @param tip
    * @param placement
