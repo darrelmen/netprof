@@ -213,7 +213,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
         phoneLab = (String) result[2];
         if (scores.isValid()) {
           if (wordLab.contains("UNKNOWN")) {
-            logger.warn("huh? hydra result returns " + wordLab);
+            logger.info("note : hydra result includes UNKNOWNMODEL : " + wordLab);
           }
           Cache<String, Object[]> stringCache = decode ? decodeAudioToScore : alignAudioToScore;
           stringCache.put(key, new Object[]{scores, wordLab, phoneLab});
