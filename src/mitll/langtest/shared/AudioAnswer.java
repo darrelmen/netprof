@@ -6,6 +6,7 @@ package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.audio.AudioCheck;
+import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.io.File;
