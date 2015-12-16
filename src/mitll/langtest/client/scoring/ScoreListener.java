@@ -22,7 +22,7 @@ public interface ScoreListener {
 
   /**
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#setClassAvg(float)
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.CommonExercise)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.CommonExercise)
    * @param classAvg
    */
   void setClassAvg(float classAvg);
