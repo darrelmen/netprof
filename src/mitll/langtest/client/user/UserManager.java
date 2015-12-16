@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class UserManager {
-  private Logger logger = Logger.getLogger("UserManager");
+  private final Logger logger = Logger.getLogger("UserManager");
 
   private static final long HOUR_IN_MILLIS = 1000 * 60 * 60;
 
@@ -45,6 +45,7 @@ public class UserManager {
 //  private static final int FOREVER_HOURS = ONE_YEAR;
 
   private static final int NO_USER_SET = -1;
+  private static final String NO_USER_SET_STRING = "" + NO_USER_SET;
 
   private static final String USER_ID = "userID";
   private static final String USER_CHOSEN_ID = "userChosenID";
@@ -98,8 +99,8 @@ public class UserManager {
   private void login() {
     final int user = getUser();
     if (user != NO_USER_SET) {
-      //logger.info("UserManager.login : current user : " + user);
-      console("UserManager.login : current user : " + user);
+     // logger.info("UserManager.login : current user : " + user);
+      //console("UserManager.login : current user : " + user);
       rememberAudioType();
       getPermissionsAndSetUser(user);
     } else {
@@ -107,16 +108,21 @@ public class UserManager {
     }
   }
 
-  private void console(String message) {
+/*  private void console(String message) {
     int ieVersion = BrowserCheck.getIEVersion();
     if (ieVersion == -1 || ieVersion > 9) {
-      consoleLog(message);
+     // consoleLog(message);
+      logger.info(message);
     }
-  }
+  }*/
+/*
 
-  private native static void consoleLog(String message) /*-{
+  private native static void consoleLog(String message) */
+/*-{
       console.log("UserManager:" + message);
-  }-*/;
+  }-*//*
+;
+*/
 
 
   /**
@@ -127,7 +133,7 @@ public class UserManager {
    * @see #storeUser
    */
   private void getPermissionsAndSetUser(final int user) {
-    console("getPermissionsAndSetUser : " + user);
+    //console("getPermissionsAndSetUser : " + user);
     // logger.info("UserManager.getPermissionsAndSetUser " + user + " asking server for info...");
 
     service.getUserBy(user, new AsyncCallback<User>() {
@@ -284,16 +290,14 @@ public class UserManager {
    */
   public boolean isUserExpired() {
     String sid = getUserFromStorage();
-    //String shownHello = Storage.getLocalStorageIfSupported().getItem(UserPassLogin.SHOWN_HELLO);
-    // logger.info("user id cookie for " + getUserIDCookie() + " is " + sid + " shown hello " + shownHello);
-    return (sid == null || sid.equals("" + NO_USER_SET)) ||
-        //shownHello == null ||
+    return (sid == null || sid.equals(NO_USER_SET_STRING)) ||
         checkUserExpired(sid);
   }
 
   private String getUserFromStorage() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-    return localStorageIfSupported.getItem(getUserIDCookie());
+    String userIDCookie = getUserIDCookie();
+    return localStorageIfSupported != null ? localStorageIfSupported.getItem(userIDCookie) : NO_USER_SET_STRING;
   }
 
   /**
@@ -315,7 +319,7 @@ public class UserManager {
    *
    * @return
    */
-  public String getUserIDCookie() {
+  private String getUserIDCookie() {
     return appTitle + ":" + USER_ID;
   }
 
@@ -409,7 +413,8 @@ public class UserManager {
       rememberUserSessionEnd(localStorageIfSupported, futureMoment);
       localStorageIfSupported.setItem(getAudioType(), "" + audioType);
       // localStorageIfSupported.setItem(getLoginType(), "" + userType);
-      logger.info("storeUser : user now " + user.getId() + " / " + getUser() + " audio '" + audioType + "' expires in " + (DURATION / 1000) + " seconds");
+      logger.info("storeUser : user now " + user.getId() + " / " + getUser() + " audio '" + audioType +
+          "' expires in " + (DURATION / 1000) + " seconds");
       userNotification.rememberAudioType(audioType);
 
       gotNewUser(user);
@@ -439,9 +444,6 @@ public class UserManager {
    */
   private void rememberUserSessionEnd(Storage localStorageIfSupported, long futureMoment) {
     localStorageIfSupported.setItem(getExpires(), "" + futureMoment);
-    //  String expires = getExpiresCookie();
-    // long expirationDate = Long.parseLong(expires);
-//    logger.info("rememberUserSessionEnd : user will expire on " + new Date(expirationDate));
   }
 
   private long getUserSessionEnd() {
