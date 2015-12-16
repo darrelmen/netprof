@@ -18,6 +18,7 @@ import mitll.langtest.server.database.custom.*;
 import mitll.langtest.server.database.exercise.ExcelImport;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.exercise.UploadDAO;
 import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.ParseResultJson;
@@ -25,6 +26,9 @@ import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonUserExercise;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
@@ -77,6 +81,8 @@ public class DatabaseImpl implements Database {
   private UserExerciseDAO userExerciseDAO;
   private AddRemoveDAO addRemoveDAO;
   private EventDAO eventDAO;
+  private UploadDAO uploadDAO;
+
   private ContextPractice contextPractice;
 
   private DatabaseConnection connection = null;
@@ -155,6 +161,7 @@ public class DatabaseImpl implements Database {
    * Create or alter tables as needed.
    */
   private void initializeDAOs(PathHelper pathHelper) {
+    uploadDAO = new UploadDAO(this, getServerProps());
     userDAO = new UserDAO(this, getServerProps());
     UserListDAO userListDAO = new UserListDAO(this, userDAO);
     addRemoveDAO = new AddRemoveDAO(this);
@@ -257,7 +264,6 @@ public class DatabaseImpl implements Database {
   public void closeConnection() throws SQLException {
 /*
     logger.debug("   ------- testing only closeConnection : now " + connection.connectionsOpen() + " open.");
-
     Connection connection1 = connection.getConnection(this.getClass().toString());
     if (connection1 != null) {
       connection1.close();
@@ -497,8 +503,8 @@ public class DatabaseImpl implements Database {
 
   /**
    * @param audioAttribute
-   * @see mitll.langtest.server.LangTestDatabaseImpl#markAudioDefect(mitll.langtest.shared.AudioAttribute, String)
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio(mitll.langtest.shared.CommonExercise, mitll.langtest.shared.AudioAttribute, mitll.langtest.client.custom.tabs.RememberTabAndContent)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#markAudioDefect(mitll.langtest.shared.exercise.AudioAttribute, String)
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.shared.exercise.AudioAttribute, mitll.langtest.client.custom.tabs.RememberTabAndContent)
    */
   public void markAudioDefect(AudioAttribute audioAttribute) {
     if (audioDAO.markDefect(audioAttribute) < 1) {
