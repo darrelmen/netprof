@@ -374,7 +374,7 @@ public class RefResultDAO extends DAO {
 
   /**
    * Get a list of Results for this Query.
-   *
+   * <p>
    * Use decode score for result score
    * use decode alignment (if valid) for alignment json
    *
@@ -387,6 +387,10 @@ public class RefResultDAO extends DAO {
   private List<Result> getResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
     List<Result> results = new ArrayList<Result>();
+
+    int count = 0;
+    int skipped = 0;
+    long then = System.currentTimeMillis();
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
       long userID = rs.getLong(USERID);
@@ -402,14 +406,18 @@ public class RefResultDAO extends DAO {
       boolean validDecodeJSON = pronScore > 0 && !scoreJson.equals(WORDS);
 
       if (!validDecodeJSON) {
-        logger.info("getResultsForQuery got " + scoreJson + " for " + exid);
+        if (count++ < 10) {
+          logger.info("getResultsForQuery got invalid decode result, score " + pronScore +
+              " json " + scoreJson + " for " + exid);
+        }
       }
+
       float alignScore = rs.getFloat(ALIGNSCORE);
       String alignJSON = rs.getString(ALIGNJSON);
       boolean validAlignJSON = alignScore > 0 && !alignJSON.contains(WORDS);
 
       if (validAlignJSON || validDecodeJSON) {
-        float pronScore1  = validDecodeJSON ? pronScore : alignScore;
+        float pronScore1 = validDecodeJSON ? pronScore : alignScore;
         String scoreJson1 = validDecodeJSON ? scoreJson : alignJSON;
         Result result = new Result(uniqueID, userID, //id
             "", // plan
@@ -422,9 +430,15 @@ public class RefResultDAO extends DAO {
         result.setJsonScore(scoreJson1);
         results.add(result);
       } else {
-        logger.info("getResultsForQuery skipping invalid ref result " + exid + " : " + answer);
+        logger.info("getResultsForQuery skipping invalid ref (decode score " +pronScore + " align score " + alignScore +
+            "  result " + exid + " : " + answer);
+        skipped++;
       }
     }
+
+    long now = System.currentTimeMillis();
+
+    logger.info("getResultsForQuery took " + (now-then) + " millis, found " + count + " invalid decode results, skipped " + skipped);
     finish(connection, statement, rs);
 
     return results;
