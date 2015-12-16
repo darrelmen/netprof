@@ -6,6 +6,7 @@ package mitll.langtest.shared.exercise;
 
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.custom.UserExercise;
 
 import java.util.*;
 
@@ -420,7 +421,14 @@ public class AudioExercise extends ExerciseShell {
   }
 
   public Map<String, ExerciseAnnotation> getFieldToAnnotation() {  return fieldToAnnotation;  }
-  public void setFieldToAnnotation(Map<String, ExerciseAnnotation> fieldToAnnotation) { this.fieldToAnnotation = fieldToAnnotation; }
+
+  /**
+   * @see UserExercise#UserExercise(CommonExercise)
+   * @param fieldToAnnotation
+   */
+  public void setFieldToAnnotation(Map<String, ExerciseAnnotation> fieldToAnnotation) {
+    this.fieldToAnnotation = fieldToAnnotation;
+  }
 
   public ExerciseAnnotation getAnnotation(String field) {
     if (!fieldToAnnotation.containsKey(field)) {
@@ -462,13 +470,14 @@ public class AudioExercise extends ExerciseShell {
 //    }
     this.getUnitToValue().put(unit, value);
   }
+
+  /**
+   * @see UserExercise#UserExercise(CommonExercise)
+   * @param unitToValue
+   */
   public void setUnitToValue(Map<String, String> unitToValue) {
     this.unitToValue = unitToValue;
   }
-
-/*  public int getNumAudio() {
-    return getAudioAttributes().size();
-  }*/
 
   public boolean removeAudio(AudioAttribute audioAttribute) {
     return audioAttributes.remove(audioAttribute.getKey()) != null;
