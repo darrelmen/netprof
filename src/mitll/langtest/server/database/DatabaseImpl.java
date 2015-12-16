@@ -903,10 +903,11 @@ public class DatabaseImpl implements Database {
     return join;
   }
 
-
   public AnswerDAO getAnswerDAO() {
     return answerDAO;
   }
+
+  public UploadDAO getUploadDAO() { return uploadDAO; }
 
   /**
    * @param userID
