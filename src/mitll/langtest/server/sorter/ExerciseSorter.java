@@ -6,7 +6,7 @@ package mitll.langtest.server.sorter;
 
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.ScoreServlet;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
 
 import java.util.*;

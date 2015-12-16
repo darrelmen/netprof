@@ -7,7 +7,7 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.UserDAO;
-import mitll.langtest.shared.CommonUserExercise;
+import mitll.langtest.shared.exercise.CommonUserExercise;
 import mitll.langtest.shared.custom.UserList;
 import org.apache.log4j.Logger;
 
