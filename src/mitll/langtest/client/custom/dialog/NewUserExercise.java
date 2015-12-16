@@ -24,9 +24,13 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.BasicDialog;
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.CommonUserExercise;
 
 import java.util.logging.Logger;
 
