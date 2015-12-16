@@ -2,7 +2,7 @@
  * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
  */
 
-package mitll.langtest.shared;
+package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -14,7 +14,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * To change this template use File | Settings | File Templates.
  */
 public class ExerciseShell implements IsSerializable, CommonShell {
-  private static final int MAX_TOOLTIP_LENGTH = 15;
+ // private static final int MAX_TOOLTIP_LENGTH = 15;
 
   protected String id;
 
@@ -53,17 +53,6 @@ public class ExerciseShell implements IsSerializable, CommonShell {
   public void setID(String id) {
     this.id = id;
   }
-
-/*  public String getTooltip() {
-    String refSentence = getForeignLanguage();
-    if (refSentence.length() > MAX_TOOLTIP_LENGTH) {
-      refSentence = refSentence.substring(0, MAX_TOOLTIP_LENGTH);
-    }
-    boolean englishSameAsForeign = getEnglish().trim().equals(getForeignLanguage().trim());
-    String combined = englishSameAsForeign ? getEnglish() : getEnglish() + (refSentence.isEmpty() ? "" : " / " + refSentence);
-    if (combined.isEmpty()) combined = refSentence;
-    return combined;
-  }*/
 
   public String getEnglish() {
     return englishSentence;

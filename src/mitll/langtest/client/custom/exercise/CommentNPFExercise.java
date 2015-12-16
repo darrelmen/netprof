@@ -26,8 +26,8 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 
@@ -70,7 +70,7 @@ public class CommentNPFExercise extends NPFExercise {
   /**
    * @param content
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
+   * @see #getQuestionContent(mitll.langtest.shared.exercise.CommonExercise)
    */
   @Override
   protected Widget getQuestionContent(final CommonExercise e, String content) {
@@ -336,8 +336,8 @@ public class CommentNPFExercise extends NPFExercise {
    * @param label
    * @param value
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise, String)
-   * @see #getContext(mitll.langtest.shared.CommonExercise)
+   * @see #getQuestionContent(mitll.langtest.shared.exercise.CommonExercise, String)
+   * @see #getContext(mitll.langtest.shared.exercise.CommonExercise)
    */
   private Widget getEntry(CommonExercise e, final String field, final String label, String value) {
     return getEntry(field, label, value, e.getAnnotation(field));
@@ -349,7 +349,7 @@ public class CommentNPFExercise extends NPFExercise {
    * @param value
    * @param annotation
    * @return
-   * @see #getEntry(mitll.langtest.shared.CommonExercise, String, String, String)
+   * @see #getEntry(mitll.langtest.shared.exercise.CommonExercise, String, String, String)
    * @see #makeFastAndSlowAudio(String)
    */
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
