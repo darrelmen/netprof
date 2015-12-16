@@ -4,7 +4,7 @@
 
 package mitll.langtest.server.scoring;
 
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.scoring.PretestScore;
 
