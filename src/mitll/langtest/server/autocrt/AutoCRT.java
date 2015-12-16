@@ -9,7 +9,7 @@ import mitll.langtest.server.scoring.AutoCRTScoring;
 import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
@@ -43,7 +43,7 @@ public class AutoCRT {
   }
 
   /**
-   * Decode the phrase from the exercise in {@link mitll.langtest.shared.CommonExercise#getForeignLanguage}
+   * Decode the phrase from the exercise in {@link mitll.langtest.shared.exercise.CommonExercise#getForeignLanguage}
    *
    * @param commonExercise
    * @param audioFile
