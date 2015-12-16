@@ -33,7 +33,7 @@ public class PathWriter {
    * @param serverProperties
    * @return path of file under bestAudio directory
    * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.exercise.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
    */
   public String getPermanentAudioPath(PathHelper pathHelper, File fileRef, String destFileName, boolean overwrite,
                                       String id, String title, String artist, ServerProperties serverProperties) {
