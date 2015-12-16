@@ -30,7 +30,7 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.SoundFeedback;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.util.logging.Logger;
 
@@ -83,7 +83,7 @@ class FlashcardPanel extends HorizontalPanel {
    * @param endListener
    * @param instance
    * @param exerciseList
-   * @see StatsFlashcardFactory#getExercisePanel(mitll.langtest.shared.CommonExercise)
+   * @see StatsFlashcardFactory#getExercisePanel(mitll.langtest.shared.exercise.CommonExercise)
    */
   public FlashcardPanel(final CommonExercise e, final LangTestDatabaseAsync service,
                         final ExerciseController controller, boolean addKeyBinding,
@@ -244,7 +244,7 @@ class FlashcardPanel extends HorizontalPanel {
    * @param contentMiddle
    * @param belowDiv
    * @return
-   * @see #FlashcardPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ControlState, StatsFlashcardFactory.MySoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener, String, mitll.langtest.client.list.ListInterface)
+   * @see #FlashcardPanel(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ControlState, StatsFlashcardFactory.MySoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener, String, mitll.langtest.client.list.ListInterface)
    */
   private Panel getThreePartContent(ControlState controlState,
                                     Panel contentMiddle,
@@ -386,7 +386,7 @@ class FlashcardPanel extends HorizontalPanel {
    * Widgets below the card are a left button, a progress bar, and a right button.
    *
    * @param toAddTo
-   * @see #FlashcardPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ControlState, StatsFlashcardFactory.MySoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener, String, mitll.langtest.client.list.ListInterface)
+   * @see #FlashcardPanel(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ControlState, StatsFlashcardFactory.MySoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener, String, mitll.langtest.client.list.ListInterface)
    */
   private void addPrevNextWidgets(Panel toAddTo) {
     toAddTo.add(getPrevButton());
@@ -625,7 +625,7 @@ class FlashcardPanel extends HorizontalPanel {
    *
    * @param e
    * @return
-   * @see #getCardPrompt(mitll.langtest.shared.CommonExercise)
+   * @see #getCardPrompt(mitll.langtest.shared.exercise.CommonExercise)
    */
   private DivWidget getQuestionContent(CommonExercise e) {
     String foreignSentence = e.getForeignLanguage();
@@ -679,7 +679,7 @@ class FlashcardPanel extends HorizontalPanel {
    * @param foreignSentence
    * @param hasRefAudio
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
+   * @see #getQuestionContent(mitll.langtest.shared.exercise.CommonExercise)
    */
   private Widget getForeignLanguageContent(String foreignSentence, boolean hasRefAudio) {
     Heading foreignLanguageContent = new Heading(1, foreignSentence);
@@ -727,7 +727,7 @@ class FlashcardPanel extends HorizontalPanel {
   /**
    * @param focusPanel
    * @see #getForeignLanguageContent(String, boolean)
-   * @see #getQuestionContent(mitll.langtest.shared.CommonExercise)
+   * @see #getQuestionContent(mitll.langtest.shared.exercise.CommonExercise)
    */
   private void addAudioBindings(final FocusPanel focusPanel) {
     focusPanel.addClickHandler(new ClickHandler() {
@@ -811,7 +811,7 @@ class FlashcardPanel extends HorizontalPanel {
   /**
    * @see #playRefLater()
    * @see #getCardContent()
-   * @see #FlashcardPanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ControlState, StatsFlashcardFactory.MySoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener, String, mitll.langtest.client.list.ListInterface)
+   * @see #FlashcardPanel(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ControlState, StatsFlashcardFactory.MySoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener, String, mitll.langtest.client.list.ListInterface)
    */
   private void playRef() {
     String refAudioToPlay = getRefAudioToPlay();
@@ -873,7 +873,7 @@ class FlashcardPanel extends HorizontalPanel {
 
   /**
    * @return
-   * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, String)
+   * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, String)
    */
   boolean otherReasonToIgnoreKeyPress() {  return commentBox.isPopupShowing();  }
 
