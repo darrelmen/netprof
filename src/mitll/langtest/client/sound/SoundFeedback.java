@@ -21,7 +21,7 @@ public class SoundFeedback {
 
   /**
    * @param soundManager
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#BootstrapExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, mitll.langtest.client.flashcard.ControlState, SoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener)
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#BootstrapExercisePanel(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, mitll.langtest.client.flashcard.ControlState, SoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener)
    */
   public SoundFeedback(SoundManagerAPI soundManager) {
     this.soundManager = soundManager;
