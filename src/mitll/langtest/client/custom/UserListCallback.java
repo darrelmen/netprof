@@ -16,7 +16,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.server.database.custom.UserListManager;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.*;
