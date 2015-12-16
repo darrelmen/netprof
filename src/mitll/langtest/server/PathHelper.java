@@ -43,7 +43,7 @@ public class PathHelper {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.exercise.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
    * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int, String)
    * @param filePath
    * @return
