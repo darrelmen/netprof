@@ -24,6 +24,10 @@ public class Upload implements IsSerializable {
   public Upload() {
   }
 
+  public Upload(long user, String note, String fileRef, String project, String sourceURL) {
+    this(-1, user, note, fileRef, System.currentTimeMillis(), true, project, sourceURL);
+  }
+
   public Upload(long id, long user, String note, String fileRef, long timestamp, boolean enabled,
                 String project, String sourceURL) {
     this.id = id;
@@ -38,7 +42,8 @@ public class Upload implements IsSerializable {
 
   @Override
   public String toString() {
-    return "Upload by " + getUser() + " on " + new Date(getTimestamp()) + " note " + getNote() + " file " + getFileRef();
+    return "Upload #" +id+
+        "by " + getUser() + " on " + new Date(getTimestamp()) + " note " + getNote() + " file " + getFileRef();
   }
 
   public long getUser() {
