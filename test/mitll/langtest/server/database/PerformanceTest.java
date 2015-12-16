@@ -152,10 +152,27 @@ public class PerformanceTest extends BaseTest {
     DatabaseImpl database = getDatabase(connection, "sudanese", path);
     int id = 71;
     //int id = 535;   // tiffany
-   // UserPerformance performanceForUser = database.getAnalysis().getPerformanceForUser(id, 1);
+    // UserPerformance performanceForUser = database.getAnalysis().getPerformanceForUser(id, 1);
     HashMap<String, Collection<String>> stringCollectionHashMap = new HashMap<>();
     stringCollectionHashMap.put("Chapter", Collections.singletonList("7"));
     stringCollectionHashMap.put("Lesson", Collections.singletonList("1"));
+    JSONObject jsonPhoneReport = database.getJsonPhoneReport(1, stringCollectionHashMap);
+
+    logger.info("jsonPhoneReport " +jsonPhoneReport);
+  }
+
+  @Test
+  public void testSpanishPhone() {
+    String path = "../dbs/"+"npfSpanish";//.replaceAll(".h2.db", "");
+
+    H2Connection connection = getH2Connection(path);
+    DatabaseImpl database = getDatabase(connection, "spanish", path);
+    int id = 1;
+    //int id = 535;   // tiffany
+    // UserPerformance performanceForUser = database.getAnalysis().getPerformanceForUser(id, 1);
+    Map<String, Collection<String>> stringCollectionHashMap = new HashMap<>();
+    stringCollectionHashMap.put("Unit", Collections.singletonList("1"));
+    stringCollectionHashMap.put("Chapter", Collections.singletonList("6"));
     JSONObject jsonPhoneReport = database.getJsonPhoneReport(1, stringCollectionHashMap);
 
     logger.info("jsonPhoneReport " +jsonPhoneReport);
@@ -261,6 +278,29 @@ public class PerformanceTest extends BaseTest {
   }
 
   @Test
+  public void testRussian() {
+    String path = "../dbs/"+"npfRussian";//.replaceAll(".h2.db", "");
+    String urdu = "russian";
+
+    H2Connection connection = getH2Connection(path);
+    DatabaseImpl database = getDatabase(connection, urdu, path);
+    Analysis analysis = database.getAnalysis();
+    // int id = 117;
+    int id = 155;
+    UserPerformance performanceForUser = analysis.getPerformanceForUser(id, 1);
+    logger.info("perf " + performanceForUser);
+
+    List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(id, 1);
+
+    int i = 0;
+    logger.debug("got " +wordScoresForUser.size());
+    for (WordScore ws : wordScoresForUser) {
+      logger.debug("#"+(i++)+ " Got WordScore at " + new Date(ws.getTimestamp()) + " : " +ws);
+    }
+  }
+
+
+  @Test
   public void testLizzy() {
     String path = "npfUrdu";//.replaceAll(".h2.db", "");
     String urdu = "urdu";
@@ -309,7 +349,7 @@ public class PerformanceTest extends BaseTest {
     long then = System.currentTimeMillis();
     //   int id = 71; // psanish
     //int id = 41; // big mandarin classroom user
-    int id = 71;
+    int id = 1;
     DatabaseImpl database = getSpanishDatabase();
     PhoneReport phoneReport = database.getAnalysis().getPhonesForUser(id, 1);
 
