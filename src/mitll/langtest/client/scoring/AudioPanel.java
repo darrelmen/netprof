@@ -19,7 +19,7 @@ import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.ImageResponse;
 
 import java.util.HashMap;
@@ -334,7 +334,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param path to audio on the server
    * @see #onLoad()
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.FastAndSlowASRScoringAudioPanel#showAudio(mitll.langtest.shared.AudioAttribute)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.FastAndSlowASRScoringAudioPanel#showAudio(mitll.langtest.shared.exercise.AudioAttribute)
    * @see mitll.langtest.client.result.ResultManager#getAsyncTable(int, Widget)
    */
   public String getImagesForPath(String path) {
