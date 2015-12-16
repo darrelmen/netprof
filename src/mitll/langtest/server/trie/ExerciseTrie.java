@@ -7,7 +7,7 @@ package mitll.langtest.server.trie;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
 
 import java.text.CharacterIterator;

@@ -5,7 +5,7 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
