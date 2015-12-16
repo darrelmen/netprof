@@ -4,7 +4,7 @@
 
 package mitll.langtest.server.scoring;
 
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.text.Collator;
 import java.util.List;
