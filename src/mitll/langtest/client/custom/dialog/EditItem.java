@@ -25,11 +25,11 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.custom.UserExercise;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.CommonUserExercise;
-import mitll.langtest.shared.custom.UserExercise;
-import mitll.langtest.shared.custom.UserList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +78,7 @@ public class EditItem {
     this.predefinedContentList = listInterface;
     this.feedback = feedback;
     this.npfHelper = npfHelper;
-    logger.info(getClass() + " : npfHelper " + npfHelper);
+    //logger.info(getClass() + " : npfHelper " + npfHelper);
   }
 
   /**
