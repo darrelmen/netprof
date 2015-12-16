@@ -5,7 +5,7 @@
 package mitll.langtest.server.load;
 
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.custom.UserList;
