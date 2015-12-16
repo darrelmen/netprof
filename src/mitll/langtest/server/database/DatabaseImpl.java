@@ -95,9 +95,9 @@ public class DatabaseImpl implements Database {
 
   private JsonSupport jsonSupport;
 
-  private final boolean addDefects = true;
+  private static final boolean ADD_DEFECTS = true;
   private UserManagement userManagement;
-  private  Analysis analysis;
+  private Analysis analysis;
 
   /**
    * @param configDir
@@ -211,10 +211,11 @@ public class DatabaseImpl implements Database {
 
   /**
    * TODO: maybe just make this guy once?
+   *
    * @return
    */
   public Analysis getAnalysis() {
-   // Analysis analysis = new Analysis(this, phoneDAO, getExerciseIDToRefAudio());
+    // Analysis analysis = new Analysis(this, phoneDAO, getExerciseIDToRefAudio());
     return analysis;
   }
 
@@ -284,7 +285,7 @@ public class DatabaseImpl implements Database {
       if (r.getJsonScore() != null && r.getJsonScore().length() > 13) {
         idToResult.put(r.getUniqueID(), r);
       } else {
-      //  skipped++;
+        //  skipped++;
       }
     }
 
@@ -296,9 +297,9 @@ public class DatabaseImpl implements Database {
       long rid = word.rid;
       already.add((int) rid);
     }
-  //  logger.debug("putBackWordAndPhone current word results " + already.size());
+    //  logger.debug("putBackWordAndPhone current word results " + already.size());
     Set<Integer> allKeys = new HashSet<>(idToResult.keySet());
-  //  logger.debug("putBackWordAndPhone before " + allKeys.size());
+    //  logger.debug("putBackWordAndPhone before " + allKeys.size());
     allKeys.removeAll(already);
 //    logger.debug("putBackWordAndPhone after " + allKeys.size());
     ParseResultJson parseResultJson = new ParseResultJson(getServerProps());
@@ -389,9 +390,10 @@ public class DatabaseImpl implements Database {
    */
   private void makeDAO(String lessonPlanFile, String mediaDir, String installPath) {
     if (exerciseDAO == null) {
-      logger.debug(lessonPlanFile);
+      //  logger.debug(lessonPlanFile);
       synchronized (this) {
-        this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, getServerProps(), userListManager, installPath, addDefects);
+        this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, getServerProps(), userListManager, installPath,
+            ADD_DEFECTS);
       }
       userExerciseDAO.setExerciseDAO(exerciseDAO);
       exerciseDAO.setUserExerciseDAO(userExerciseDAO);
@@ -868,46 +870,42 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see #getAnalysis()
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getPerformanceForUser(long, int)
+   * @see DatabaseImpl#makeDAO(String, String, String)
    */
   public Map<String, String> getExerciseIDToRefAudio() {
     Map<String, String> join = new HashMap<String, String>();
 
-    for (CommonExercise exercise : getExercises()) {
-      String id = exercise.getID();
-      String refAudio = exercise.getRefAudio();
-      if (refAudio == null) {
-      //  logger.warn("getExerciseIDToRefAudio huh? no ref audio for " +id);
-      }
-      else {
-        join.put(id, refAudio);
-      }
-      //if (id.equals("166")) logger.debug("getExerciseIDToRefAudio : found " + exercise + "\n and " + refAudio);
-    }
+    populateIDToRefAudio(join, getExercises());
 
     Collection<CommonUserExercise> all = userExerciseDAO.getAll();
     exerciseDAO.attachAudio(all);
 
+    populateIDToRefAudio(join, all);
+
+    return join;
+  }
+
+  public <T extends CommonExercise> void populateIDToRefAudio(Map<String, String> join, Collection<T> all) {
     for (CommonExercise exercise : all) {
-      String id = exercise.getID();
       String refAudio = exercise.getRefAudio();
       if (refAudio == null) {
-     //   logger.warn("getExerciseIDToRefAudio huh? user exercise : no ref audio for " +id);
-      }
-      else {
+        //   logger.warn("getExerciseIDToRefAudio huh? user exercise : no ref audio for " +id);
+      } else {
+        String id = exercise.getID();
         join.put(id, refAudio);
       }
     }
-
-    return join;
   }
 
   public AnswerDAO getAnswerDAO() {
     return answerDAO;
   }
 
-  public UploadDAO getUploadDAO() { return uploadDAO; }
+  public UploadDAO getUploadDAO() {
+    return uploadDAO;
+  }
 
   /**
    * @param userID
@@ -1271,17 +1269,16 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerDecoding(String, CommonExercise, int, int, int, String, boolean, boolean, boolean, String, File, AudioCheck.ValidityAndDur, boolean, String, String, boolean, boolean)
    * @param answer
    * @param answerID
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerDecoding(String, CommonExercise, int, int, int, String, boolean, boolean, boolean, String, File, AudioCheck.ValidityAndDur, boolean, String, String, boolean, boolean)
    */
   public void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
     PretestScore pretestScore = answer.getPretestScore();
     if (pretestScore == null) {
       logger.debug("recordWordAndPhoneInfo pretest score is null for " + answer + " and " + answerID);
-    }
-    else {
-      logger.debug("recordWordAndPhoneInfo pretest score is " + pretestScore+ " for " + answer + " and " + answerID);
+    } else {
+      logger.debug("recordWordAndPhoneInfo pretest score is " + pretestScore + " for " + answer + " and " + answerID);
     }
     recordWordAndPhoneInfo(answerID, pretestScore);
   }
