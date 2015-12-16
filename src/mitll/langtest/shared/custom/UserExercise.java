@@ -219,10 +219,10 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     return !getID().startsWith(CUSTOM_PREFIX);
   }
 
-  @Override
+/*  @Override
   public long getModifiedDateTimestamp() {
     return modifiedTimestamp;
-  }
+  }*/
 
   public List<CorrectAndScore> getScores() {
     return scores;
