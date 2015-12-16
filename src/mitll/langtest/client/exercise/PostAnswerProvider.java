@@ -4,7 +4,7 @@
 
 package mitll.langtest.client.exercise;
 
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 
 /**
  * Created with IntelliJ IDEA.
