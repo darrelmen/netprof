@@ -6,9 +6,9 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.UserDAO;
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.Exercise;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Exercise;
 import org.apache.log4j.Logger;
 
 import java.io.File;
