@@ -175,7 +175,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
     practiceHelper = makePracticeHelper(service, userManager, controller, feedback);
     ListInterface exerciseList = npfHelper.getExerciseList();
-    logger.info("Navigation : npfHelper exercise list is " + exerciseList);
+  //  logger.info("Navigation : npfHelper exercise list is " + exerciseList);
     reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, exerciseList, npfHelper);
     // logger.info("Navigation : made review item helper " + reviewItem);
 
