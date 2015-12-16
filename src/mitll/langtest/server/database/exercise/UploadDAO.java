@@ -2,13 +2,24 @@
  * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
  */
 
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.database.DAO;
+import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.JsonSupport;
+import mitll.langtest.server.database.ResultDAO;
+import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.server.database.WordDAO;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.analysis.PhoneAnalysis;
 import mitll.langtest.server.scoring.ParseResultJson;
-import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.analysis.PhoneAndScore;
+import mitll.langtest.shared.analysis.PhoneReport;
+import mitll.langtest.shared.analysis.PhoneStats;
+import mitll.langtest.shared.analysis.TimeAndScore;
+import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import net.sf.json.JSONArray;
@@ -16,9 +27,18 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.math.BigDecimal;
-import java.sql.*;
-import java.util.*;
-import java.util.Date;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,11 +47,11 @@ import java.util.Date;
  * Time: 2:23 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PhoneDAO extends DAO {
+public class UploadDAO extends DAO {
   private static final int MAX_EXAMPLES = 30;
-  private static final Logger logger = Logger.getLogger(PhoneDAO.class);
+  private static final Logger logger = Logger.getLogger(UploadDAO.class);
 
-  private static final String PHONE = "phone";
+  private static final String UPLOAD = "upload";
   private static final String RID = "rid";
   private static final String WID = "wid";
   private static final String SEQ = "seq";
@@ -39,27 +59,29 @@ public class PhoneDAO extends DAO {
 
   private static final boolean DEBUG = false;
   private static final String RID1 = "RID";
-  private ParseResultJson parseResultJson;
+  public static final String USER = "user";
+//  private ParseResultJson parseResultJson;
 
   /**
    * @param database
-   * @see DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
+   * @see DatabaseImpl#initializeDAOs(PathHelper)
    */
-  public PhoneDAO(Database database) {
+  public UploadDAO(Database database) {
     super(database);
     try {
       createTable(database);
-      createIndex(database, RID, PHONE);
-      createIndex(database, WID, PHONE);
+    //  createIndex(database, RID, UPLOAD);
+    //  createIndex(database, WID, UPLOAD);
       Connection connection = database.getConnection(this.getClass().toString());
       database.closeConnection(connection);
-      parseResultJson = new ParseResultJson(database.getServerProps());
+   //   parseResultJson = new ParseResultJson(database.getServerProps());
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
   }
 
   public static class Phone {
+    //long id;
     final long wid;
     final long rid;
     final String phone;
@@ -85,54 +107,46 @@ public class PhoneDAO extends DAO {
    * Do we care about start and end offsets into audio???
    *
    * @param database
-   * @throws java.sql.SQLException
+   * @throws SQLException
    */
   private void createTable(Database database) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " +
-        PHONE +
+        UPLOAD +
         " (" +
         "ID IDENTITY, " +
-        RID + " BIGINT, " +
-        WID + " BIGINT, " +
-        PHONE + " VARCHAR, " +
-        SEQ + " INT, " +
-        SCORE + " FLOAT, " +
+        USER + " BIGINT, " +
+        "source" + " VARCHAR, " +
+        "project" + " VARCHAR, " +
+        "time" + " TIMESTAMP, " +
+        "enabled" + " BOOLEAN, " +
 
         "FOREIGN KEY(" +
-        RID +
+        USER +
         ") REFERENCES " +
-        ResultDAO.RESULTS +
-        "(ID)," +
-
-        "FOREIGN KEY(" +
-        WID +
-        ") REFERENCES " +
-        WordDAO.WORD +
+        UserDAO.ID +
         "(ID)" +
-
-        ")");
+       ")");
 
     finish(database, connection, statement);
   }
-
 
   /**
    * <p>
    *
    * @param phone
    */
-  public boolean addPhone(Phone phone) {
+  public boolean addUpload(Upload upload) {
     Connection connection = getConnection();
     boolean val = true;
     try {
       // there are much better ways of doing this...
       PreparedStatement statement = connection.prepareStatement(
-          "INSERT INTO " + PHONE +
+          "INSERT INTO " + UPLOAD +
               "(" +
               RID + "," +
               WID + "," +
-              PHONE + "," +
+              UPLOAD + "," +
               SEQ + "," +
               SCORE +
               //"," +
@@ -169,7 +183,7 @@ public class PhoneDAO extends DAO {
    * @param exids
    * @param idToRef
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#getJsonPhoneReport
+   * @see DatabaseImpl#getJsonPhoneReport
    * @see JsonSupport#getJsonPhoneReport(long, Map)
    */
   public JSONObject getWorstPhonesJson(long userid, List<String> exids, Map<String, String> idToRef) {
@@ -370,7 +384,7 @@ public class PhoneDAO extends DAO {
         totalItems++;
       }
 
-      String phone = rs.getString(PHONE);
+      String phone = rs.getString(UPLOAD);
       int seq = rs.getInt(SEQ);
 
       List<PhoneAndScore> scores = phoneToScores.get(phone);
