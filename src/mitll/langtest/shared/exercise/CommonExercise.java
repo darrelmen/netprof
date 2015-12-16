@@ -85,7 +85,7 @@ public interface CommonExercise extends CommonShell {
 
   void addAnnotation(String field, String status, String comment);
 
-  long getModifiedDateTimestamp();
+//  long getModifiedDateTimestamp();
 
   Collection<String> getFields();
   boolean removeAudio(AudioAttribute audioAttribute);
