@@ -8,9 +8,11 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.*;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -784,7 +786,7 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#setExerciseState(String, int, mitll.langtest.shared.CommonExercise)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#setExerciseState(String, int, mitll.langtest.shared.exercise.CommonExercise)
    * @see mitll.langtest.server.database.DatabaseImpl#duplicateExercise(mitll.langtest.shared.custom.UserExercise)
    * @see mitll.langtest.server.database.custom.UserListManager#markState(java.util.Collection)
    * @param shell
@@ -797,8 +799,8 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#setExerciseState(String, int, mitll.langtest.shared.CommonExercise)
-   * @see mitll.langtest.server.database.custom.UserListManager#markState(String, mitll.langtest.shared.STATE, long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#setExerciseState(String, int, mitll.langtest.shared.exercise.CommonExercise)
+   * @see mitll.langtest.server.database.custom.UserListManager#markState(String, mitll.langtest.shared.exercise.STATE, long)
    * @param shell
    * @param state
    * @param creatorID
@@ -809,7 +811,7 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#setExerciseState(String, int, mitll.langtest.shared.CommonExercise)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#setExerciseState(String, int, mitll.langtest.shared.exercise.CommonExercise)
    * @param exerciseID
    * @return
    */

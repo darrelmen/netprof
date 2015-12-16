@@ -34,6 +34,10 @@ import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.*;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.STATE;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -98,7 +102,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   /**
-   * @see GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.CommonExercise)
+   * @see GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.CommonExercise)
    * @see #getQuestionContent
    * @param div
    */
@@ -114,7 +118,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel(mitll.langtest.shared.CommonExercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
    * @param controller
    * @param listContainer
    * @param addKeyHandler
@@ -198,7 +202,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   /**
    * @see #addApprovedButton(mitll.langtest.client.list.ListInterface, mitll.langtest.client.exercise.NavigationHelper)
-   * @see #nextWasPressed(mitll.langtest.client.list.ListInterface, mitll.langtest.shared.CommonShell)
+   * @see #nextWasPressed(mitll.langtest.client.list.ListInterface, mitll.langtest.shared.exercise.CommonShell)
    * @param listContainer
    * @param completedExercise
    */
@@ -239,7 +243,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   /**
    * @see #checkBoxWasClicked(boolean, String, com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.FocusWidget)
-   * @see #markReviewed(mitll.langtest.client.list.ListInterface, mitll.langtest.shared.CommonShell)
+   * @see #markReviewed(mitll.langtest.client.list.ListInterface, mitll.langtest.shared.exercise.CommonShell)
    * @param completedExercise
    */
   private void markReviewed(final CommonShell completedExercise) {
@@ -437,7 +441,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @param next
    * @param allByUser
    * @return
-   * @see #addTabsForUsers(mitll.langtest.shared.CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
+   * @see #addTabsForUsers(mitll.langtest.shared.exercise.CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
    */
   private DivWidget getGenderGroup(final RememberTabAndContent tabAndContent, final AudioAttribute audio, final Button next, final List<AudioAttribute> allByUser) {
     ButtonToolbar w = new ButtonToolbar();
@@ -535,7 +539,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @param e
    * @param audio
    * @return both the comment widget and the audio panel
-   * @see #addTabsForUsers(mitll.langtest.shared.CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
+   * @see #addTabsForUsers(mitll.langtest.shared.exercise.CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
    */
   private Pair getPanelForAudio(final CommonExercise e, final AudioAttribute audio) {
     String audioRef = audio.getAudioRef();
