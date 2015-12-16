@@ -11,7 +11,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.*;
 import java.util.logging.Logger;
