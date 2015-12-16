@@ -9,7 +9,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
 
 import java.io.File;
