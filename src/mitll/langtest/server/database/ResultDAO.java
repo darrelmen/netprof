@@ -9,7 +9,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
@@ -525,7 +525,7 @@ public class ResultDAO extends DAO {
    * @param userID
    * @param firstExercise
    * @param isFlashcardRequest
-   * @see mitll.langtest.server.LangTestDatabaseImpl#attachScoreHistory(long, mitll.langtest.shared.CommonExercise, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#attachScoreHistory(long, mitll.langtest.shared.exercise.CommonExercise, boolean)
    */
   public void attachScoreHistory(long userID, CommonExercise firstExercise, boolean isFlashcardRequest) {
     List<CorrectAndScore> resultsForExercise = getCorrectAndScores(userID, firstExercise, isFlashcardRequest);
@@ -637,7 +637,7 @@ public class ResultDAO extends DAO {
    * @param userid
    * @return
    * @see #getSessionsForUserIn2
-   * @see #attachScoreHistory(long, mitll.langtest.shared.CommonExercise, boolean)
+   * @see #attachScoreHistory(long, mitll.langtest.shared.exercise.CommonExercise, boolean)
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory
    */
   private List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, long userid) {
