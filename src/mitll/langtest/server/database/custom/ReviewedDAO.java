@@ -6,7 +6,7 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.shared.STATE;
+import mitll.langtest.shared.exercise.STATE;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -170,8 +170,8 @@ public class ReviewedDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#setState(mitll.langtest.shared.CommonShell, mitll.langtest.shared.STATE, long)
-   * @see mitll.langtest.server.database.custom.UserListManager#setSecondState(mitll.langtest.shared.CommonShell, mitll.langtest.shared.STATE, long)
+   * @see mitll.langtest.server.database.custom.UserListManager#setState(mitll.langtest.shared.exercise.CommonShell, mitll.langtest.shared.exercise.STATE, long)
+   * @see mitll.langtest.server.database.custom.UserListManager#setSecondState(mitll.langtest.shared.exercise.CommonShell, mitll.langtest.shared.exercise.STATE, long)
    * @param exerciseID
    * @param state
    * @param creatorID
