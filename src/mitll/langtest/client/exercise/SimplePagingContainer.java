@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.custom.dialog.EditItem;
-import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.List;
 import java.util.logging.Logger;
