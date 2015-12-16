@@ -14,7 +14,7 @@ import corpus.LTS;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.SLFFile;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;

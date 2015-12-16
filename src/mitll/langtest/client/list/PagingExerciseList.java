@@ -20,9 +20,9 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.CommonShell;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.STATE;
+import mitll.langtest.shared.exercise.STATE;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -298,7 +298,7 @@ public class PagingExerciseList extends ExerciseList {
    * A little complicated -- if {@link #doShuffle} is true, shuffles the exercises
    *
    * @param result
-   * @see ExerciseList#rememberAndLoadFirst(java.util.List, mitll.langtest.shared.CommonExercise, String)
+   * @see ExerciseList#rememberAndLoadFirst(java.util.List, mitll.langtest.shared.exercise.CommonExercise, String)
    * @see #simpleSetShuffle(boolean)
    */
   @Override
@@ -412,7 +412,7 @@ public class PagingExerciseList extends ExerciseList {
 
   /**
    * @param itemID
-   * @see #useExercise(mitll.langtest.shared.CommonExercise)
+   * @see #useExercise(mitll.langtest.shared.exercise.CommonExercise)
    */
   protected void markCurrentExercise(String itemID) {
     pagingContainer.markCurrentExercise(itemID);
