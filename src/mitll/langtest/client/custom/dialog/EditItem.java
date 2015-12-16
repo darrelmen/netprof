@@ -25,9 +25,9 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.CommonExercise;
-import mitll.langtest.shared.CommonShell;
-import mitll.langtest.shared.CommonUserExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.CommonUserExercise;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
@@ -279,7 +279,7 @@ public class EditItem {
    * @param pagingContainer
    * @param doNewExercise
    * @param setFields
-   * @see #populatePanel(mitll.langtest.shared.CommonUserExercise, com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HasText, mitll.langtest.client.list.ListInterface)
+   * @see #populatePanel(mitll.langtest.shared.exercise.CommonUserExercise, com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HasText, mitll.langtest.client.list.ListInterface)
    */
   private void addEditOrAddPanel(CommonUserExercise newExercise, HasText itemMarker, UserList originalList,
                                  Panel right, UserList ul, ListInterface pagingContainer,
