@@ -6,8 +6,8 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import net.sf.json.JSONArray;
