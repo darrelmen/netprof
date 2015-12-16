@@ -10,6 +10,8 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.*;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -469,6 +471,8 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
+   * TODO : move to JSONSupport
+   *
    * This is the json that describes an individual entry.
    * <p>
    * Makes sure to attach audio to exercises (this is especially important for userexercises that mask out
@@ -476,6 +480,7 @@ public class ScoreServlet extends DatabaseServlet {
    *
    * @param copy
    * @return
+   * @see #getJsonForSelection(Map)
    */
   private JSONArray getJsonArray(List<CommonExercise> copy) {
     JSONArray exercises = new JSONArray();
