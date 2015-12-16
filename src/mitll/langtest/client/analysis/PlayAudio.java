@@ -13,7 +13,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundPlayer;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.List;
