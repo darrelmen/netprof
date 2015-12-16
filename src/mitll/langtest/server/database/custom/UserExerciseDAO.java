@@ -34,12 +34,10 @@ public class UserExerciseDAO extends DAO {
   private static final String CONTEXT_TRANSLATION = "contextTranslation";
 
   private ExerciseDAO exerciseDAO;
-  //  private final LogAndNotify logAndNotify;
   private static final boolean DEBUG = false;
 
   public UserExerciseDAO(Database database) {
     super(database);
-    // this.logAndNotify = logAndNotify;
     try {
       createUserTable(database);
       Collection<String> columns = getColumns(USEREXERCISE);
@@ -178,13 +176,6 @@ public class UserExerciseDAO extends DAO {
     }
   }
 
-/*
-  private void logException(Exception ee) {
-    logger.error("got " + ee, ee);
-    logAndNotify.logAndNotifyServerException(ee);
-  }
-*/
-
   private String fixSingleQuote(String s) {
     return s == null ? "" : s.replaceAll("'", "''");
   }
@@ -200,8 +191,6 @@ public class UserExerciseDAO extends DAO {
         "foreignLanguage VARCHAR, " +
         TRANSLITERATION + " VARCHAR, " +
         "creatorid INT, " +
-        //    REF_AUDIO + " VARCHAR, " +
-        //    SLOW_AUDIO_REF + " VARCHAR, " +
         CONTEXT + " VARCHAR, " +
         CONTEXT_TRANSLATION + " VARCHAR, " +
         "override" +
@@ -513,14 +502,13 @@ public class UserExerciseDAO extends DAO {
   public void setAudioDAO(AudioDAO audioDAO) {
     //  exToAudio = audioDAO.getExToAudio();
     //  this.audioDAO = audioDAO;
-
 /*    if (ADD_MISSING_AUDIO) {
       getOverrides(true);
     }*/
   }
 
   private Map<String, String> getUnitToValue(ResultSet rs, List<String> typeOrder) throws SQLException {
-    String first = rs.getString(UNIT);
+    String first  = rs.getString(UNIT);
     String second = rs.getString(LESSON);
     Map<String, String> unitToValue = new HashMap<String, String>();
 
