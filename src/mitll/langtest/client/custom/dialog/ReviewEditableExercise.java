@@ -35,6 +35,7 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -302,7 +303,7 @@ public class ReviewEditableExercise extends EditableExercise {
   }
 
   /**
-   * @see #getPanelForAudio(mitll.langtest.shared.CommonExercise, mitll.langtest.shared.AudioAttribute, RememberTabAndContent)
+   * @see #getPanelForAudio(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.shared.exercise.AudioAttribute, RememberTabAndContent)
    * @param id
    * @param audio
    * @param audioPanel
@@ -324,7 +325,7 @@ public class ReviewEditableExercise extends EditableExercise {
   }
 
   /**
-   * @see #getPanelForAudio(mitll.langtest.shared.CommonExercise, mitll.langtest.shared.AudioAttribute, RememberTabAndContent)
+   * @see #getPanelForAudio(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.shared.exercise.AudioAttribute, RememberTabAndContent)
    * @param e
    * @param audio
    * @return
