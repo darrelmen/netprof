@@ -6,7 +6,7 @@ package mitll.langtest.server.scoring;
 
 import corpus.*;
 import mitll.langtest.server.database.AudioExport;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
 
 import java.text.CollationKey;
