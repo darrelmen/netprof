@@ -24,8 +24,6 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class Exercise extends AudioExercise implements CommonExercise {
-  private String content;
-
   private String context;
   private String contextTranslation;
   private transient Collection<String> refSentences = new ArrayList<String>();
@@ -40,22 +38,16 @@ public class Exercise extends AudioExercise implements CommonExercise {
 
   /**
    * @param id
-   * @param content
+   * @paramx content
    * @param context
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    */
-  public Exercise(String id, String content, String context, String contextTranslation) {
+  public Exercise(String id, String context, String contextTranslation) {
     super(id);
-    this.content = content;
     this.context = context;
     this.contextTranslation = contextTranslation;
   }
-
-  public String getContent() {
-    return content;
-  }
-
-  public String getRefSentence() {
+   public String getRefSentence() {
     return getForeignLanguage();
   }
 
@@ -173,7 +165,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
       }
     }
 
-    return "Exercise " + id + " content bytes = " + content.length() +
+    return "Exercise " + id + //" content bytes = " + content.length() +
         " english '" + getEnglish() +
         "'/'" + getRefSentence() + "' " +
         "meaning '" +getMeaning()+

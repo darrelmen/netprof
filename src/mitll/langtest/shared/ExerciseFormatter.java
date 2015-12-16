@@ -4,6 +4,8 @@
 
 package mitll.langtest.shared;
 
+import mitll.langtest.shared.exercise.CommonExercise;
+
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -15,7 +17,7 @@ public class ExerciseFormatter {
   public static final String FOREIGN_LANGUAGE_PROMPT = "Say:";
   public static final String ENGLISH_PROMPT = "Meaning:";
   public static final String TRANSLITERATION = "Transliteration:";
-  public static final String TRANSLATION = "Translation:";
+ // private static final String TRANSLATION = "Translation:";
   public static final String CONTEXT = "Context:";
   public static final String CONTEXT_TRANSLATION = "Context Translation: ";
 
@@ -29,17 +31,20 @@ public class ExerciseFormatter {
    * @param language
    * @return
    */
-  public static String getContent(String foreignPhrase, String translit, String english, String meaning, String context, String contextTranslation, String language) {
+/*  public static String getContent(String foreignPhrase, String translit, String english, String meaning, String context,
+                                  String contextTranslation, String language) {
     return getContent(foreignPhrase, translit, english, meaning, context, contextTranslation,
       language.equalsIgnoreCase("english"),
       language.equalsIgnoreCase("urdu"),
       language.equalsIgnoreCase("pashto"));
-  }
+  }*/
 
+/*
   public static String getContent(String foreignPhrase, String translit, String english, String meaning,
                                   boolean isEnglish, boolean isUrdu, boolean isPashto) {
     return getContent(foreignPhrase, translit, english, meaning, "", "", isEnglish, isUrdu, isPashto);
   }
+*/
 
   /**
    * TODO : This is a bad idea -- the client side should do formatting, etc.
@@ -54,6 +59,7 @@ public class ExerciseFormatter {
    * @param isPashto
    * @return
    */
+/*
   private static String getContent(String foreignPhrase, String translit, String english, String meaning, String context,
                                   String contextTranslation, boolean isEnglish, boolean isUrdu, boolean isPashto) {
     String arabicHTML = getArabic(foreignPhrase, isUrdu, isPashto, false);
@@ -75,8 +81,9 @@ public class ExerciseFormatter {
       contextHTML +
       contextTranslationHTML;
   }
+*/
 
-  private static String getSpanWrapper(String rowTitle, String english, boolean includePrompt) {
+/*  private static String getSpanWrapper(String rowTitle, String english, boolean includePrompt) {
     String prompt = includePrompt ? "<span class=\"Instruction-title\">" +
       rowTitle +
       "</span>\n" : "";
@@ -86,13 +93,18 @@ public class ExerciseFormatter {
       "<span class=" + textClasses + "> " + english +
       "</span>\n" +
       "</div>";
-  }
+  }*/
 
+  /**
+   * @see mitll.langtest.client.exercise.WaveformExercisePanel#getExerciseContent(CommonExercise)
+   * @param arabic
+   * @return
+   */
   public static String getArabic(String arabic) {
     return getArabic(arabic, false, false, false);
   }
 
-  public static String getArabic(String arabic, boolean isUrdu, boolean isPashto, boolean includePrompt) {
+  private static String getArabic(String arabic, boolean isUrdu, boolean isPashto, boolean includePrompt) {
     String prompt = includePrompt ? "<span class=\"Instruction-title\">" +
       FOREIGN_LANGUAGE_PROMPT +
       "</span>\n" : "";
