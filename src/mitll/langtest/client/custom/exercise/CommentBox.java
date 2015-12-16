@@ -18,7 +18,7 @@ import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.scoring.CommentAnnotator;
-import mitll.langtest.shared.CommonExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 
 import java.util.HashMap;
@@ -35,7 +35,7 @@ public class CommentBox extends PopupContainer {
   private MyPopup commentPopup;
 
   /**
-   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getQuestionContent(mitll.langtest.shared.CommonExercise, String)
+   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getQuestionContent(mitll.langtest.shared.exercise.CommonExercise, String)
    * @see mitll.langtest.client.flashcard.FlashcardPanel#getFirstRow(mitll.langtest.client.exercise.ExerciseController)
    * @param exercise
    * @param registration
