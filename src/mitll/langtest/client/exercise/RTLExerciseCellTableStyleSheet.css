@@ -20,7 +20,7 @@
 }*/
 
 .cellTableFirstColumn {
-    padding: 2px 15px;
+    padding: 2px 5px;
     overflow: hidden;
     cursor:pointer;
     font-size: larger;
@@ -28,7 +28,7 @@
 }
 
 .cellTableLastColumn {
-    padding: 2px 15px;
+    padding: 2px 5px;
     /*
     overflow: hidden;
     */

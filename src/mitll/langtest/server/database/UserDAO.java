@@ -8,10 +8,12 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
-import org.apache.commons.math3.analysis.integration.gauss.SymmetricGaussIntegrator;
 import org.apache.log4j.Logger;
-import org.apache.log4j.net.SyslogAppender;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import java.io.IOException;
@@ -20,8 +22,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class UserDAO extends DAO {
   private static final String DEFECT_DETECTOR = "defectDetector";
@@ -46,7 +57,7 @@ public class UserDAO extends DAO {
   private long defectDetector;
   private boolean enableAllUsers;
 
-  private static final String ID = "id";
+  public static final String ID = "id";
   private static final String AGE = "age";
   private static final String GENDER = "gender";
   private static final String EXPERIENCE = "experience";
@@ -209,10 +220,10 @@ public class UserDAO extends DAO {
               KIND + "," +
               PASS + "," +
               EMAIL + "," +
-              DEVICE +
+              DEVICE + "," + TIMESTAMP +
 
               ") " +
-              "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
+              "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
       int i = 1;
       long newID = max + 1;
       statement.setLong(i++, newID);
@@ -232,6 +243,7 @@ public class UserDAO extends DAO {
       statement.setString(i++, passwordH);
       statement.setString(i++, emailH);
       statement.setString(i++, device);
+      statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
 
       statement.executeUpdate();
 
@@ -380,7 +392,7 @@ public class UserDAO extends DAO {
   }
 
   public User getUserWithPass(String id, String passwordHash) {
-    logger.debug(language + " : getUser getting user with id '" + id + "' and pass '" + passwordHash +"'");
+    logger.debug(language + " : getUser getting user with id '" + id + "' and pass '" + passwordHash + "'");
     String sql = "SELECT * from " +
         USERS +
         " where " +
@@ -402,7 +414,7 @@ public class UserDAO extends DAO {
    * @return
    */
   public User getUserByID(String id) {
-    return getUserWhere(-1, "SELECT * from users where UPPER(" +USER_ID +")='" + id.toUpperCase() + "'");
+    return getUserWhere(-1, "SELECT * from users where UPPER(" + USER_ID + ")='" + id.toUpperCase() + "'");
   }
 
   private int userExistsSQL(String id, String sql) {
@@ -440,7 +452,7 @@ public class UserDAO extends DAO {
           "nativeLang VARCHAR, " +
           "dialect VARCHAR, " +
           USER_ID + " VARCHAR, " +
-          TIMESTAMP +" TIMESTAMP, "+//" AS CURRENT_TIMESTAMP, " +
+          TIMESTAMP + " TIMESTAMP, " +//" AS CURRENT_TIMESTAMP, " +
           "enabled BOOLEAN, " +
           RESET_PASSWORD_KEY + " VARCHAR, " +
           ENABLED_REQ_KEY + " VARCHAR, " +
@@ -474,17 +486,21 @@ public class UserDAO extends DAO {
       for (String col : new HashSet<String>(Arrays.asList(NATIVE_LANG, DIALECT, USER_ID, PERMISSIONS, KIND, PASS, EMAIL,
           DEVICE, ENABLED_REQ_KEY, RESET_PASSWORD_KEY))) {
         if (!columns.contains(col.toLowerCase())) {
-          addVarcharColumn(connection, col);
+          addVarchar(connection, USERS, col);
         }
       }
+ // drop old default current timestamp
+      statement = connection.prepareStatement("ALTER TABLE " +USERS+ " CHANGE " + TIMESTAMP + " TIMESTAMP NOT NULL");
+      statement.execute();
+      statement.close();
     } finally {
       database.closeConnection(connection);
     }
   }
 
-  private void addVarcharColumn(Connection connection, String column) throws SQLException {
+/*  private void addVarcharColumn(Connection connection, String column) throws SQLException {
     addColumn(connection, column, "VARCHAR");
-  }
+  }*/
 
   private void addColumn(Connection connection, String column, String type) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE users ADD " + column + " " + type);
@@ -503,10 +519,11 @@ public class UserDAO extends DAO {
 
   public List<User> getUsersDevices() {
     return getUsers("SELECT * from users" +
-            " where device like 'i%'"+
-        " order by " + ID + " ASC"
+            " where device like 'i%'" +
+            " order by " + ID + " ASC"
     );
   }
+
   /**
    * @return
    * @see AudioDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
@@ -536,9 +553,9 @@ public class UserDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String)
    * @param resetKey
    * @return
+   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String)
    */
   public User getUserWhereEnabledReq(String resetKey) {
     String sql = "SELECT * from users where " +
@@ -575,13 +592,13 @@ public class UserDAO extends DAO {
     List<User> users = getUsers(sql);
     if (users.isEmpty()) {
       if (userid > 0) {
-        logger.warn(language + " : for " + sql + " no user with id '" + userid +"'");
+        logger.warn(language + " : for " + sql + " no user with id '" + userid + "'");
       }
       return null;
     }
 
     User next = users.iterator().next();
-    logger.debug("For " + userid + " found " +next);
+    logger.debug("For " + userid + " found " + next);
     return next;
   }
 
@@ -704,7 +721,9 @@ public class UserDAO extends DAO {
     return idToUser;
   }
 
-  public void toXLSX(OutputStream out, List<User> users) {  writeToStream(out, getSpreadsheet(users));  }
+  public void toXLSX(OutputStream out, List<User> users) {
+    writeToStream(out, getSpreadsheet(users));
+  }
 
   private SXSSFWorkbook getSpreadsheet(List<User> users) {
     long then = System.currentTimeMillis();
@@ -782,7 +801,7 @@ public class UserDAO extends DAO {
       wb.dispose();
     } catch (IOException e) {
       logger.error("got " + e, e);
-      database.logEvent("unk", "(" +language+ ") toXLSX: " + e.toString(), 0, UNKNOWN);
+      database.logEvent("unk", "(" + language + ") toXLSX: " + e.toString(), 0, UNKNOWN);
     }
   }
 
@@ -810,7 +829,7 @@ public class UserDAO extends DAO {
       database.closeConnection(connection);
 
       User userByID = getUserWhere(remove);
-      logger.debug("after password set to " + passwordH+      " user now " +userByID);
+      logger.debug("after password set to " + passwordH + " user now " + userByID);
       return i1 != 0;
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
@@ -820,7 +839,6 @@ public class UserDAO extends DAO {
   }
 
   /**
-   *
    * @param userid
    * @param resetKey
    * @param key
@@ -843,7 +861,7 @@ public class UserDAO extends DAO {
 
       statement.close();
       database.closeConnection(connection);
-      logger.debug("for " + language + " update " + key + "/" +s+ " for " + userid);
+      logger.debug("for " + language + " update " + key + "/" + s + " for " + userid);
       return i1 != 0;
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
@@ -862,28 +880,28 @@ public class UserDAO extends DAO {
     return updateKey(remove, resetKey, "");
   }
 
-    public boolean changeEnabled(int userid, boolean enabled) {
-        try {
-            Connection connection = getConnection();
+  public boolean changeEnabled(int userid, boolean enabled) {
+    try {
+      Connection connection = getConnection();
 
-            PreparedStatement statement = connection.prepareStatement(
-                    "UPDATE " + USERS + " SET " +
-                            ENABLED + "=?" +
-                            " WHERE " +
-                            ID + "=?");
-            int i = 1;
-            statement.setBoolean(i++, enabled);
-            statement.setLong(i++, userid);
-            int i1 = statement.executeUpdate();
+      PreparedStatement statement = connection.prepareStatement(
+          "UPDATE " + USERS + " SET " +
+              ENABLED + "=?" +
+              " WHERE " +
+              ID + "=?");
+      int i = 1;
+      statement.setBoolean(i++, enabled);
+      statement.setLong(i++, userid);
+      int i1 = statement.executeUpdate();
 
-            statement.close();
-            database.closeConnection(connection);
-            logger.debug("for " + language + " update " + ENABLED + "/" + enabled + " for " + userid +  "  " + i1);
-            return i1 != 0;
-        } catch (Exception ee) {
-            logger.error("Got " + ee, ee);
-            database.logEvent("unk", "changeEnabled user: " + userid + " " + ee.toString(), 0, UNKNOWN);
-        }
-        return false;
+      statement.close();
+      database.closeConnection(connection);
+      logger.debug("for " + language + " update " + ENABLED + "/" + enabled + " for " + userid + "  " + i1);
+      return i1 != 0;
+    } catch (Exception ee) {
+      logger.error("Got " + ee, ee);
+      database.logEvent("unk", "changeEnabled user: " + userid + " " + ee.toString(), 0, UNKNOWN);
     }
+    return false;
+  }
 }
