@@ -7,8 +7,8 @@ package mitll.langtest.shared.custom;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.shared.CommonUserExercise;
-import mitll.langtest.shared.ExerciseShell;
+import mitll.langtest.shared.exercise.CommonUserExercise;
+import mitll.langtest.shared.exercise.ExerciseShell;
 import mitll.langtest.shared.User;
 
 import java.util.ArrayList;
