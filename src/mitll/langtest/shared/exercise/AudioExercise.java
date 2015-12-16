@@ -2,7 +2,10 @@
  * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
  */
 
-package mitll.langtest.shared;
+package mitll.langtest.shared.exercise;
+
+import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.MiniUser;
 
 import java.util.*;
 
