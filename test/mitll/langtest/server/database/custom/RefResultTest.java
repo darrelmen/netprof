@@ -3,23 +3,16 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.shared.AudioAttribute;
-import mitll.langtest.shared.CommonExercise;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Created by GO22670 on 1/30/14.
