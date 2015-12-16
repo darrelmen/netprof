@@ -35,14 +35,13 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.client.scoring.GoodwaveExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -133,7 +132,7 @@ public class Navigation implements RequiresResize, ShowTab {
     learnHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller, null
     ) {
       protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
-        return new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
+        return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
             return new CommentNPFExercise(e, controller, exerciseList, false, "classroom");
@@ -163,7 +162,7 @@ public class Navigation implements RequiresResize, ShowTab {
         learnHelper.getExerciseList()
     ) {
       protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
-        return new GoodwaveExercisePanelFactory(service, feedback, controller, exerciseList, 1.0f) {
+        return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
             return new QCNPFExercise(e, controller, exerciseList, MARK_DEFECTS1);
