@@ -51,16 +51,6 @@ public class AttachAudio {
     this.audioOffset = audioOffset;
   }
 
- /* public AttachAudio(String mediaDir,
-                     String mediaDir1, File installPath,
-                     int audioOffset
-  ) {
-    this.mediaDir = mediaDir;
-    this.mediaDir1 = mediaDir1;
-    this.installPath = installPath;
-    this.audioOffset = audioOffset;
-  }*/
-
   /**
    * Go looking for audio in the media directory ("bestAudio") and if there's a file there
    * under a matching exercise id, attach Fast and/or slow versions to this exercise.
@@ -71,7 +61,7 @@ public class AttachAudio {
    *
    * @param refAudioIndex override place to look for audio
    * @param imported      to attach audio to
-   * @see #getExercise(String, String, String, String, String, String, String, String, boolean)
+   * @see ExcelImport#getExercise(String, String, String, String, String, String, String, String, boolean)
    */
   public void addOldSchoolAudio(String refAudioIndex, Exercise imported) {
     String id = imported.getID();
