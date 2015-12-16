@@ -7,7 +7,11 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioConversion;
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.Result;
+import mitll.langtest.shared.User;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -117,7 +121,7 @@ public class AudioDAO extends DAO {
    * @param firstExercise
    * @param installPath
    * @param relativeConfigDir
-   * @see mitll.langtest.server.LangTestDatabaseImpl#attachAudio(mitll.langtest.shared.CommonExercise)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#attachAudio(mitll.langtest.shared.exercise.CommonExercise)
    * @see DatabaseImpl#attachAudio(CommonExercise)
    * @see DatabaseImpl#writeZip(OutputStream, long, PathHelper)
    */
@@ -656,7 +660,7 @@ public class AudioDAO extends DAO {
    * @param userid
    * @param attr
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#markGender(mitll.langtest.shared.AudioAttribute, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#markGender(mitll.langtest.shared.exercise.AudioAttribute, boolean)
    */
   public void addOrUpdateUser(int userid, AudioAttribute attr) {
     long timestamp = attr.getTimestamp();
@@ -730,7 +734,7 @@ public class AudioDAO extends DAO {
    * @param audioType        part of unique id
    * @param durationInMillis
    * @return AudioAttribute that represents the audio that has been added to the exercise
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.exercise.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
    * @see #addOrUpdateUser(int, AudioAttribute)
    */
   private void addOrUpdateUser(int userid, String audioRef, String exerciseID, long timestamp, String audioType, int durationInMillis) {
@@ -788,7 +792,7 @@ public class AudioDAO extends DAO {
    * @param timestamp
    * @param durationInMillis
    * @return AudioAttribute that represents the audio that has been added to the exercise
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.exercise.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
    */
   public AudioAttribute addOrUpdate(int userid, String exerciseID, String audioType, String audioRef, long timestamp, long durationInMillis) {
     if (isBadUser(userid)) {
