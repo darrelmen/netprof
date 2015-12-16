@@ -2,9 +2,12 @@
  * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
  */
 
-package mitll.langtest.shared;
+package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.Result;
+import mitll.langtest.shared.UserAndTime;
 
 import java.util.HashMap;
 import java.util.Map;
