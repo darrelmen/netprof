@@ -1,8 +1,10 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.connection.H2Connection;
+import mitll.langtest.server.database.exercise.ExcelImport;
 import mitll.langtest.server.database.exercise.UploadDAO;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.analysis.*;
@@ -22,6 +24,7 @@ import java.util.*;
 public class PerformanceTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(PerformanceTest.class);
   public static final int CHINESE_DUDE = 71;
+  public static final String UNIT_TO_VALUE = "unitToValue";
 
   @Test
   public void testBest() {
@@ -96,22 +99,51 @@ public class PerformanceTest extends BaseTest {
     String path = "../dbs/" + "npfSpanishTest";
 
     H2Connection connection = getH2Connection(path);
-    DatabaseImpl database = getDatabase(connection, "spanish", path);
+    String spanish = "spanish";
+    DatabaseImpl database = getDatabase(connection, spanish, path);
 
     UploadDAO uploadDAO = database.getUploadDAO();
 
     dumpUploads(uploadDAO.getUploads());
 
-    uploadDAO.addUpload(new Upload(database.getUsers().get(0).getId(), "note", "file", "spanish", "spanishURL"));
+    uploadDAO.addUpload(new Upload(database.getUsers().get(0).getId(), "note", "file", spanish, "spanishURL"));
 
     dumpUploads(uploadDAO.getUploads());
 
     List<ExObject> objects = new ArrayList<>();
-    List<CommonExercise> exercises = database.getExercises();
-    exercises = exercises.subList(0, 200);
+  //  List<CommonExercise> exercises = database.getExercises();
+
+    File file = getPropertiesFile(spanish);
+    String parent = file.getParent();
+    String lessonPlanFile = parent + File.separator + "testFirst.xlsx";
+    String lessonPlanFile2 = parent + File.separator + "testSecond.xlsx";
+
+    ExcelImport excelImport = new ExcelImport(lessonPlanFile, database.getServerProps());
+    List<CommonExercise> exercises = excelImport.readExercises();
+
+    ExcelImport excelImport2 = new ExcelImport(lessonPlanFile2, database.getServerProps());
+    List<CommonExercise> exercises2 = excelImport2.readExercises();
+
+//    List<CommonExercise> exercises = (List<CommonExercise>) excelImport;
+    //exercises = exercises.subList(0, 200);
     int id = 0;
 
     Map<CommonExercise, ExObject> oldToNew = new HashMap<>();
+    convertToNewEx(objects, exercises, id, oldToNew);
+    convertToNewEx(objects, exercises2, id, oldToNew);
+
+    for (Map.Entry<CommonExercise, ExObject> pair : oldToNew.entrySet()) {
+      logger.info(//pair.getKey() + " " +
+          pair.getValue());
+    }
+//    for (CommonShell exObject : objects) {
+//      logger.info("got " + exObject + " e " + exObject.getEnglish() + " " + exObject.getForeignLanguage());
+//
+//    }
+  }
+
+  public void convertToNewEx(List<ExObject> objects, List<CommonExercise> exercises, int id,
+                             Map<CommonExercise, ExObject> oldToNew) {
     for (CommonExercise ex : exercises) {
       ExObject exObject = new ExObject(id++, ex.getID());
       exObject.setEnglish(ex);
@@ -128,8 +160,8 @@ public class PerformanceTest extends BaseTest {
       }
 
       MapContainer mapContainer = new MapContainer();
-      Field unitToValue = new Field("unitToValue", mapContainer);
-      exObject.addField("unitToValue", unitToValue);
+      Field unitToValue = new Field(UNIT_TO_VALUE, mapContainer); // TODO add easy method on exobject
+      exObject.addField(UNIT_TO_VALUE, unitToValue);
       for (Map.Entry<String, String> pair : ex.getUnitToValue().entrySet()) {
         mapContainer.put(pair.getKey(), pair.getValue());
       }
@@ -137,15 +169,6 @@ public class PerformanceTest extends BaseTest {
       objects.add(exObject);
       oldToNew.put(ex, exObject);
     }
-
-    for (Map.Entry<CommonExercise, ExObject> pair : oldToNew.entrySet()) {
-      logger.info(//pair.getKey() + " " +
-          pair.getValue());
-    }
-//    for (CommonShell exObject : objects) {
-//      logger.info("got " + exObject + " e " + exObject.getEnglish() + " " + exObject.getForeignLanguage());
-//
-//    }
   }
 
   public void dumpUploads(Collection<Upload> uploads) {
