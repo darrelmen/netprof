@@ -110,4 +110,6 @@ public interface CommonExercise extends CommonShell {
   void setFirstPron(List<String> phones);
 
   void setRefSentences(Collection<String> orDefault);
+
+  String getRefAudioIndex();
 }
