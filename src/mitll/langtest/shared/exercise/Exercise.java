@@ -26,9 +26,9 @@ import java.util.Set;
 public class Exercise extends AudioExercise implements CommonExercise {
   private String context;
   private String contextTranslation;
+  private transient String refAudioIndex;
   private transient Collection<String> refSentences = new ArrayList<String>();
   private List<String> translitSentences = new ArrayList<String>();
-  private STATE state;
   private List<CorrectAndScore> scores;
   private float avgScore;
 
@@ -42,12 +42,15 @@ public class Exercise extends AudioExercise implements CommonExercise {
    * @param context
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    */
-  public Exercise(String id, String context, String contextTranslation) {
+  public Exercise(String id, String context, String contextTranslation, String meaning, String refAudioIndex) {
     super(id);
     this.context = context;
     this.contextTranslation = contextTranslation;
+    this.meaning = meaning;
+    this.refAudioIndex = refAudioIndex;
   }
-   public String getRefSentence() {
+
+  public String getRefSentence() {
     return getForeignLanguage();
   }
 
@@ -65,6 +68,11 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.refSentences = sentenceRefs;
   }
 
+  @Override
+  public String getRefAudioIndex() {
+    return refAudioIndex;
+  }
+
   public void setForeignLanguage(String foreignLanguage) {
     this.foreignLanguage = foreignLanguage;
   }
@@ -73,6 +81,10 @@ public class Exercise extends AudioExercise implements CommonExercise {
     return translitSentences.isEmpty() ? "" : translitSentences.get(0);
   }
 
+  /**
+   * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise(String, String, String, String, String, boolean)
+   * @param translitSentence
+   */
   public void setTranslitSentence(String translitSentence) {
     translitSentences.clear();
     translitSentences.add(translitSentence);
@@ -86,9 +98,9 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.englishSentence = englishSentence;
   }
 
-  public void setMeaning(String meaning) {
+/*  public void setMeaning(String meaning) {
     this.meaning = meaning;
-  }
+  }*/
 
   @Override
   public String getContext() {
@@ -104,6 +116,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
 //  public long getModifiedDateTimestamp() {
 //    return 0;
 //  }
+/*
 
   @Override
   public STATE getState() {
@@ -114,6 +127,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
   public void setState(STATE state) {
     this.state = state;
   }
+*/
 
   public List<CorrectAndScore> getScores() {
     return scores;
