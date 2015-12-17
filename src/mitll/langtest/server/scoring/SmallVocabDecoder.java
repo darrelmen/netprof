@@ -5,6 +5,7 @@
 package mitll.langtest.server.scoring;
 
 import corpus.HTKDictionary;
+import corpus.LTS;
 import org.apache.log4j.Logger;
 import pronz.speech.Audio;
 
@@ -14,7 +15,7 @@ import java.util.*;
 
 /**
  * Creates the LM for a small vocab decoder from foreground and background sentences.
- *
+ * <p>
  * User: GO22670
  * Date: 2/7/13
  * Time: 12:24 PM
@@ -24,10 +25,10 @@ public class SmallVocabDecoder {
   private static final Logger logger = Logger.getLogger(SmallVocabDecoder.class);
   private HTKDictionary htkDictionary;
 
-  public SmallVocabDecoder() {}
+  public SmallVocabDecoder() {
+  }
 
   /**
-   *
    * @param htkDictionary
    * @see ASRScoring#makeDecoder()
    */
@@ -40,18 +41,19 @@ public class SmallVocabDecoder {
    * Very important to limit the vocabulary (less than 300 words) or else the small vocab dcodr will run out of
    * memory and segfault! <br></br>
    * Remember to add special tokens like silence, pause, and unk
-   * @see ASRScoring#getUsedTokens
+   *
    * @param background sentences
    * @return most frequent vocabulary words
+   * @see ASRScoring#getUsedTokens
    */
   public List<String> getVocab(Collection<String> background, int vocabSizeLimit) {
     return getSimpleVocab(background, vocabSizeLimit);
   }
 
   /**
-   * @see ASRScoring#getValidSentences(Collection)
    * @param s
    * @return
+   * @see #getTokens(String)
    */
   private String toFull(String s) {
     StringBuilder builder = new StringBuilder();
@@ -59,14 +61,13 @@ public class SmallVocabDecoder {
     char fullWidthZero = '\uFF10';
 
     final CharacterIterator it = new StringCharacterIterator(s);
-    for(char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
+    for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
       if (c >= '0' && c <= '9') {
-        int offset = c-'0';
+        int offset = c - '0';
         int full = fullWidthZero + offset;
-        Character character = Character.valueOf((char)full);
+        Character character = Character.valueOf((char) full);
         builder.append(character.toString());
-      }
-      else {
+      } else {
         builder.append(c);
       }
     }
@@ -74,19 +75,19 @@ public class SmallVocabDecoder {
   }
 
   /**
-   * @see ASRScoring#getUniqueTokensInLM
    * @param sentences
    * @param vocabSizeLimit
    * @return
+   * @see ASRScoring#getUniqueTokensInLM
    */
   public List<String> getSimpleVocab(Collection<String> sentences, int vocabSizeLimit) {
     // count the tokens
     final Map<String, Integer> sc = new HashMap<String, Integer>();
     for (String sentence : sentences) {
       for (String token : getTokens(sentence)) {
-      //  if (isValid(scoring, token)) {
-          Integer c = sc.get(token);
-          sc.put(token, (c == null) ? 1 : c + 1);
+        //  if (isValid(scoring, token)) {
+        Integer c = sc.get(token);
+        sc.put(token, (c == null) ? 1 : c + 1);
      /*   } else {
           logger.warn("getSimpleVocab : skipping '" + token + "' which is not in dictionary.");
         }*/
@@ -105,17 +106,23 @@ public class SmallVocabDecoder {
 
     // take top n most frequent
     List<String> all = new ArrayList<String>(); // copy list b/c sublist not serializable ???
-    if (vocab.size() > vocabSizeLimit) logger.warn("truncating vocab size from " + vocab.size() + " to " + vocabSizeLimit);
+    if (vocab.size() > vocabSizeLimit)
+      logger.warn("truncating vocab size from " + vocab.size() + " to " + vocabSizeLimit);
     all.addAll(vocab.subList(0, Math.min(vocab.size(), vocabSizeLimit)));
     return all;
   }
 
+  /**
+   * @param sentence
+   * @return
+   * @see Scoring#getSegmented(String)
+   * @see mitll.langtest.server.audio.SLFFile#createSimpleSLFFile(Collection)
+   */
   public List<String> getTokens(String sentence) {
     List<String> all = new ArrayList<String>();
-   // logger.debug("initial " + sentence);
+    // logger.debug("initial " + sentence);
     String trimmedSent = getTrimmed(sentence);
-
-   // logger.debug("after  trim " + trimmedSent);
+    // logger.debug("after  trim " + trimmedSent);
 
     for (String untrimedToken : trimmedSent.split("\\p{Z}+")) { // split on spaces
       //String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
@@ -131,23 +138,24 @@ public class SmallVocabDecoder {
     return all;
   }
 
-  public Collection<String> getMandarinTokens( String foreignLanguage) {
-  //  String foreignLanguage = e.getForeignLanguage();
+  public Collection<String> getMandarinTokens(String foreignLanguage) {
     return getTokens(segmentation(foreignLanguage));
   }
 
   /**
    * Tries to remove junky characters from the sentence so hydec won't choke on them.
+   * <p>
+   * Also removes the chinese unicode bullet character, like in Bill Gates.
    *
    * @param sentence
    * @return
    * @see #getTokens(String)
-   * @see mitll.langtest.server.ExerciseTrie#getExercises(String, SmallVocabDecoder)
+   * @see mitll.langtest.server.trie.ExerciseTrie#getExercises(String, SmallVocabDecoder)
    * @see ASRScoring#getScoresFromHydec(Audio, String, String)
    */
   public String getTrimmed(String sentence) {
     //String orig = sentence;
-    sentence = sentence.replaceAll("\\u2022", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("/", " ");
+    sentence = sentence.replaceAll("\\u2022", " ").replaceAll("\\u2219", " ").replaceAll("\\p{Z}+", " ").replaceAll(";", " ").replaceAll("~", " ").replaceAll("\\u2191", " ").replaceAll("\\u2193", " ").replaceAll("/", " ");
     // logger.debug("after  convert " + sentence);
 
     String trim = sentence.replaceAll("'", "").replaceAll("\\p{P}", " ").replaceAll("\\s+", " ").trim();
@@ -163,8 +171,7 @@ public class SmallVocabDecoder {
   /**
    * @param phrase
    * @return
-   * @see mitll.langtest.server.scoring.ASRScoring#checkLTS(corpus.LTS, String)
-   * @see mitll.langtest.server.ExerciseTrie#getFLTokens(SmallVocabDecoder, CommonExercise)
+   * @see mitll.langtest.server.scoring.CheckLTS#checkLTS(LTS, String)
    */
   //warning -- this will filter out UNKNOWNMODEL - where this matters, add it 
   //back in
@@ -202,6 +209,6 @@ public class SmallVocabDecoder {
     } catch (Exception e) {
       logger.error("isDict - " + token + " got " + e);
       return false;
-  }
+    }
   }
 }
