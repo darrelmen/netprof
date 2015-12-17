@@ -257,6 +257,11 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     this.refSentences = orDefault;
   }
 
+  @Override
+  public String getRefAudioIndex() {
+    return "";
+  }
+
   public void setAvgScore(float avgScore) {
     this.avgScore = avgScore;
   }
