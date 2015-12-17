@@ -57,14 +57,7 @@ public class BaseTest {
    * @return
    */
   protected DatabaseImpl getDatabase(DatabaseConnection connection, String config, String dbName) {
-    String quizlet = "quizlet";
-    if (config.equals("msa")) quizlet = "classroom";
-    else if (config.equals("pashto1")) quizlet = "pashtoQuizlet1";
-    else if (config.equals("pashto2")) quizlet = "pashtoQuizlet2";
-    else if (config.equals("pashto3")) quizlet = "pashtoQuizlet3";
-    String config1 = config.startsWith("pashto") ? "pashto" : config;
-    File file = new File("war" + File.separator + "config" + File.separator + config1 + File.separator + quizlet +
-        ".properties");
+    File file = getPropertiesFile(config);
     String parent = file.getParent();
     DatabaseImpl database =
         new DatabaseImpl(connection, parent, file.getName(), dbName, new ServerProperties(parent, file.getName()), new PathHelper("war"), null);
@@ -73,6 +66,17 @@ public class BaseTest {
     database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(), "media");
     database.getExercises();
     return database;
+  }
+
+  protected File getPropertiesFile(String config) {
+    String quizlet = "quizlet";
+    if (config.equals("msa")) quizlet = "classroom";
+    else if (config.equals("pashto1")) quizlet = "pashtoQuizlet1";
+    else if (config.equals("pashto2")) quizlet = "pashtoQuizlet2";
+    else if (config.equals("pashto3")) quizlet = "pashtoQuizlet3";
+    String config1 = config.startsWith("pashto") ? "pashto" : config;
+    return new File("war" + File.separator + "config" + File.separator + config1 + File.separator + quizlet +
+        ".properties");
   }
 
   protected H2Connection getH2Connection(String path) {
