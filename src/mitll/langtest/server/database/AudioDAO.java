@@ -7,6 +7,7 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
@@ -75,7 +76,7 @@ public class AudioDAO extends DAO {
 
   /**
    * @return
-   * @see mitll.langtest.server.database.exercise.ExcelImport#setAudioDAO(AudioDAO)
+   * @see ExerciseDAO#setAudioDAO(AudioDAO, String, String)
    */
   public Map<String, List<AudioAttribute>> getExToAudio() {
     Map<String, List<AudioAttribute>> exToAudio = new HashMap<String, List<AudioAttribute>>();
