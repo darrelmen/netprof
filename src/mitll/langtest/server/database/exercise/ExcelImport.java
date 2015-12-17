@@ -11,6 +11,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.shared.exercise.AudioExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonUserExercise;
 import mitll.langtest.shared.exercise.Exercise;
@@ -145,7 +146,10 @@ public class ExcelImport implements ExerciseDAO {
        // int missing = 0;
         for (CommonExercise ex : exercises) {
           attachAudio.attachAudio(ex);
-         // if (!ex.hasRefAudio()) missing++;
+          AudioExercise audioExercise = (AudioExercise) ex;
+          attachAudio.addOldSchoolAudio(ex.getRefAudioIndex(), audioExercise);
+
+          // if (!ex.hasRefAudio()) missing++;
 //          if (ex.getID().equals("166")) {
 //            logger.info("Ex " + ex.getID() + " ref " + ex.getRefAudio());
 //          }
@@ -451,7 +455,7 @@ public class ExcelImport implements ExerciseDAO {
     int colIndexOffset = -1;
 
     int transliterationIndex = -1;
-    int weightIndex = -1;
+    //int weightIndex = -1;
     int meaningIndex = -1;
     int idIndex = -1;
     int contextIndex = -1;
@@ -987,14 +991,14 @@ public class ExcelImport implements ExerciseDAO {
                                String context, String contextTranslation, String refAudioIndex, boolean lookForOldAudio) {
 //    String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context,
 //        contextTranslation, language);
-    Exercise imported = new Exercise(id, /*content,*/ context, contextTranslation);
+    Exercise imported = new Exercise(id, /*content,*/ context, contextTranslation, meaning, refAudioIndex);
 
     //logger.debug("id  " + id+  " context " + imported.getContext());
-    imported.setMeaning(meaning);
+    //imported.setMeaning(meaning);
 
-    if (lookForOldAudio) {
-      attachAudio.addOldSchoolAudio(refAudioIndex, imported);
-    }
+//    if (lookForOldAudio) {
+//      attachAudio.addOldSchoolAudio(refAudioIndex, imported);
+//    }
 
     return imported;
   }
