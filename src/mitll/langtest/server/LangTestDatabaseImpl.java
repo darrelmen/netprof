@@ -821,6 +821,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public List<CommonExercise> getExercises() {
     long then = System.currentTimeMillis();
     List<CommonExercise> exercises = db.getExercises();
+    long now = System.currentTimeMillis();
+    if (now - then > 200) {
+      logger.info("getExercises took " + (now - then) + " millis to get the raw exercise list for " + getLanguage());
+    }
     if (fullTrie == null) {
       fullTrie = new ExerciseTrie(exercises, getLanguage(), audioFileHelper.getSmallVocabDecoder());
     }
@@ -829,7 +833,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (getServletContext().getAttribute(AUDIO_FILE_HELPER_REFERENCE) == null) {
       shareAudioFileHelper(getServletContext());
     }
-    long now = System.currentTimeMillis();
+    now = System.currentTimeMillis();
     if (now - then > 200) {
       logger.info("took " + (now - then) + " millis to get the predef exercise list for " + getLanguage());
     }
