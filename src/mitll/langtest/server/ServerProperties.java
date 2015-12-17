@@ -174,7 +174,7 @@ public class ServerProperties {
 
   /**
    * @return
-   * @see mitll.langtest.server.database.exercise.ExcelImport#ExcelImport(String, String, ServerProperties, UserListManager, String, boolean)
+   * @see mitll.langtest.server.database.exercise.ExcelImport#ExcelImport(String, ServerProperties, UserListManager, boolean)
    */
   public int[] getUnitChapterWeek() {
     int[] parsedUCW = new int[]{-1, -1, -1};
