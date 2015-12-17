@@ -95,6 +95,7 @@ public class AudioExercise extends ExerciseShell {
   public void addAudioForUser(String ref, MiniUser user) {
     addAudio(new AudioAttribute(ref, user));
   }
+
   public void clearRefAudio() {
     AudioAttribute audio = getRegularSpeed();
     if (audio != null) audioAttributes.remove(audio.getKey());
