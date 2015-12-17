@@ -225,8 +225,14 @@ public class UserExerciseDAO extends DAO {
     try {
       if (DEBUG) logger.debug("\tusing for user exercise = " + sql);
 
+      long then = System.currentTimeMillis();
       List<CommonUserExercise> userExercises = getUserExercises(sql);
-      if (DEBUG) logger.debug("\tfound " + userExercises.size() + " exercises userExercises on list " + listID);
+      long now = System.currentTimeMillis();
+
+      if (DEBUG || (now-then) > 30) {
+        logger.debug("getOnList : took " + (now-then) +
+            " found " + userExercises.size() + " exercises userExercises on list " + listID);
+      }
 
 
       for (CommonUserExercise ue : userExercises) {
