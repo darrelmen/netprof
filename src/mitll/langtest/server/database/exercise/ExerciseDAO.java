@@ -35,7 +35,7 @@ public interface ExerciseDAO {
 
   CommonExercise getExercise(String id);
 
-  void setAudioDAO(AudioDAO audioDAO);
+  void setAudioDAO(AudioDAO audioDAO, String mediaDir, String installPath);
 
   void attachAudio(Collection<CommonUserExercise> all);
 }
