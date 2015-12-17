@@ -116,7 +116,7 @@ public class UserDAO extends DAO {
 
   /**
    * @param manager
-   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO(boolean, String, boolean, String, String)
+   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
    */
   public void checkForFavorites(UserListManager manager) {
     for (User u : getUsers()) {
