@@ -38,7 +38,7 @@ public class AttachAudio {
    * @param installPath
    * @param audioOffset
    * @param exToAudio
-   * @see ExcelImport#setAudioDAO(AudioDAO)
+   * @see ExerciseDAO#setAudioDAO(AudioDAO, String, String)
    */
   public AttachAudio(String mediaDir,
                      String mediaDir1, File installPath,
