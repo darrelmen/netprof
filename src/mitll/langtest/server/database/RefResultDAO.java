@@ -262,7 +262,8 @@ public class RefResultDAO extends DAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
    */
   public Result getResult(String exid, String answer) {
-    String sql = "SELECT * FROM " + REFRESULT + " WHERE " + Database.EXID + "='" + exid + "' AND " + ANSWER + " like '%" + answer + "'";
+    String sql = "SELECT * FROM " + REFRESULT +
+        " WHERE " + Database.EXID + "='" + exid + "' AND " + ANSWER + " like '%" + answer + "'";
     try {
       List<Result> resultsSQL = getResultsSQL(sql);
       if (resultsSQL.size() > 1) {
@@ -352,8 +353,9 @@ public class RefResultDAO extends DAO {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
 
-    //  logger.debug("running " + sql + " -> " +resultsForQuery.size() + " results");
-    return getResultsForQuery(connection, statement);
+    List<Result> resultsForQuery = getResultsForQuery(connection, statement);
+ //   logger.debug("getResultsSQL running " + sql + " -> " +resultsForQuery.size() + " results");
+    return resultsForQuery;
   }
 
   public int getNumResults() {
