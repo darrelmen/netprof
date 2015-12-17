@@ -622,7 +622,8 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
                                            boolean decode, String tmpDir, boolean useCache, String prefix, Result precalcResult,
                                            boolean usePhoneToDisplay, boolean useOldSchool) {
     logger.debug("getASRScoreForAudio (" + serverProps.getLanguage() + ")" + (decode ? " Decoding " : " Aligning ") +
-        "" + testAudioFile + " with sentence '" + sentence + "' req# " + reqid + (useCache ? " check cache" : " NO CACHE") + " prefix " + prefix);
+        "" + testAudioFile + " with sentence '" + sentence + "' req# " + reqid +
+        (useCache ? " check cache" : " NO CACHE") + " prefix " + prefix);
 
     makeASRScoring();
     if (testAudioFile == null) {
@@ -650,19 +651,21 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
 
     ASR asrScoring = useOldSchool || serverProps.getOldSchoolService() ? oldschoolScoring : getASRScoring();
 
-    logger.debug("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
+//    logger.debug("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
 
     PretestScore pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
         sentence, lmSentences,
-        pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix, precalcResult, usePhoneToDisplay);
+        pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix, precalcResult,
+        usePhoneToDisplay);
 
     if (!pretestScore.isRanNormally() && isWebservice(asrScoring)) {
       logger.warn("Using hydec as fallback for " + (decode ? " decoding " : " aligning ") + testAudioFile);
       pretestScore = oldschoolScoring.scoreRepeat(
           testAudioDir, removeSuffix(testAudioName),
           sentence, lmSentences,
-          pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix, precalcResult, usePhoneToDisplay);
+          pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix, precalcResult,
+          usePhoneToDisplay);
     }
     pretestScore.setReqid(reqid);
 
