@@ -392,13 +392,13 @@ public class DatabaseImpl implements Database {
     if (exerciseDAO == null) {
       //  logger.debug(lessonPlanFile);
       synchronized (this) {
-        this.exerciseDAO = new ExcelImport(lessonPlanFile, mediaDir, getServerProps(), userListManager, installPath,
+        this.exerciseDAO = new ExcelImport(lessonPlanFile, getServerProps(), userListManager,
             ADD_DEFECTS);
       }
       userExerciseDAO.setExerciseDAO(exerciseDAO);
       exerciseDAO.setUserExerciseDAO(userExerciseDAO);
       exerciseDAO.setAddRemoveDAO(addRemoveDAO);
-      exerciseDAO.setAudioDAO(audioDAO);
+      exerciseDAO.setAudioDAO(audioDAO, mediaDir, installPath);
 
       exerciseDAO.getRawExercises();
 
