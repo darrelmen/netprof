@@ -8,7 +8,7 @@ package mitll.langtest.shared.exercise;
  * Created by go22670 on 12/16/15.
  */
 public class ExObject extends BaseObject implements CommonShell {
-  public enum FIELDS {ENGLISH, MEANING, FOREIGN_LANGUAGE, EX_STATE, SECOND_STATE}
+  public enum FIELDS {ENGLISH, MEANING, FL, EX_STATE, SECOND_STATE}
 
   public ExObject() {}
 
@@ -63,10 +63,10 @@ public class ExObject extends BaseObject implements CommonShell {
 
   @Override
   public String getForeignLanguage() {
-    return nameToField.get(FIELDS.FOREIGN_LANGUAGE.name()).getValue();
+    return nameToField.get(FIELDS.FL.name()).getValue();
   }
 
   public void setForeignLanguage(CommonShell shell) {
-    addField(FIELDS.FOREIGN_LANGUAGE.name(), shell.getForeignLanguage());
+    addField(FIELDS.FL.name(), shell.getForeignLanguage());
   }
 }
