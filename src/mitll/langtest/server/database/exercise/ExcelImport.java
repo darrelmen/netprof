@@ -11,11 +11,11 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.AudioExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonUserExercise;
 import mitll.langtest.shared.exercise.Exercise;
-import mitll.langtest.shared.custom.UserExercise;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -48,8 +48,8 @@ public class ExcelImport implements ExerciseDAO {
   private final List<String> errors = new ArrayList<String>();
   private final String file;
   private final SectionHelper sectionHelper = new SectionHelper();
-  private final String mediaDir;
-  private final String mediaDir1;
+  // private final String mediaDir;
+  // private final String mediaDir1;
   private boolean shouldHaveRefAudio = false;
   private final boolean usePredefinedTypeOrder;
   private final String language;
@@ -61,7 +61,7 @@ public class ExcelImport implements ExerciseDAO {
   private AddRemoveDAO addRemoveDAO;
   private UserExerciseDAO userExerciseDAO;
 
-  private final File installPath;
+  //  private final File installPath;
   private final boolean addDefects;
   private int unitIndex;
   private int chapterIndex;
@@ -71,25 +71,29 @@ public class ExcelImport implements ExerciseDAO {
 
   private final boolean DEBUG = false;
 
+  public ExcelImport(String file, ServerProperties serverProperties) {
+    this(file, serverProperties, null, false);
+  }
+
   /**
    * @param file
    * @param userListManager
    * @param addDefects
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
    */
-  public ExcelImport(String file, String mediaDir, ServerProperties serverProps,
+  public ExcelImport(String file, ServerProperties serverProps,
                      UserListManager userListManager,
-                     String installPath, boolean addDefects) {
+                     boolean addDefects) {
     this.file = file;
     this.serverProps = serverProps;
     maxExercises = serverProps.getMaxNumExercises();
-    this.mediaDir = mediaDir;
-    mediaDir1 = mediaDir.replaceAll("bestAudio", "");
+    // this.mediaDir = mediaDir;
+//    mediaDir1 = mediaDir.replaceAll("bestAudio", "");
     this.addDefects = addDefects;
-    this.installPath = new File(installPath);
-    if (!this.installPath.exists()) {
-      logger.warn("\n\n\nhuh? install path " + this.installPath.getAbsolutePath() + " doesn't exist???");
-    }
+//    this.installPath = new File(installPath);
+//    if (!this.installPath.exists()) {
+//      logger.warn("\n\n\nhuh? install path " + this.installPath.getAbsolutePath() + " doesn't exist???");
+//    }
     // turn off missing fast/slow for classroom
     shouldHaveRefAudio = false;
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
@@ -108,15 +112,26 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   private AudioDAO audioDAO;
+
   /**
    * TODO : what if they add a user exercise and add audio to it, or record new audio for other exercises???
+   *
    * @param audioDAO
+   * @param mediaDir
+   * @param installPath
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
    */
   @Override
-  public void setAudioDAO(AudioDAO audioDAO) {
+  public void setAudioDAO(AudioDAO audioDAO, String mediaDir, String installPath) {
     this.audioDAO = audioDAO;
-    this.attachAudio = new AttachAudio(mediaDir, mediaDir1, installPath, serverProps.getAudioOffset(), audioDAO.getExToAudio());
+
+    File fileInstallPath = new File(installPath);
+    if (!fileInstallPath.exists()) {
+      logger.warn("\n\n\nhuh? install path " + fileInstallPath.getAbsolutePath() + " doesn't exist???");
+    }
+
+    this.attachAudio = new AttachAudio(mediaDir, mediaDir.replaceAll("bestAudio", ""), fileInstallPath,
+        serverProps.getAudioOffset(), audioDAO.getExToAudio());
   }
 
   /**
@@ -126,11 +141,10 @@ public class ExcelImport implements ExerciseDAO {
   public List<CommonExercise> getRawExercises() {
     synchronized (this) {
       if (exercises == null) {
-        exercises = readExercises(new File(file));
+        List<CommonExercise> commonExercises = readExercises();
+        exercises = commonExercises;
 
         for (CommonExercise e : exercises) idToExercise.put(e.getID(), e);
-
-        addAlternatives(exercises);
 
         addDefects(idToDefectMap);
 
@@ -143,7 +157,7 @@ public class ExcelImport implements ExerciseDAO {
         // add new items
         addNewExercises();
 
-       // int missing = 0;
+        // int missing = 0;
         for (CommonExercise ex : exercises) {
           attachAudio.attachAudio(ex);
           AudioExercise audioExercise = (AudioExercise) ex;
@@ -159,15 +173,21 @@ public class ExcelImport implements ExerciseDAO {
     return exercises;
   }
 
+  public List<CommonExercise> readExercises() {
+    List<CommonExercise> commonExercises = readExercises(new File(file));
+    addAlternatives(commonExercises);
+    return commonExercises;
+  }
+
   /**
    * So the story is we get the user exercises out of the database on demand.
-   *
+   * <p>
    * We need to join with the audio table entries every time.
-   *
+   * <p>
    * TODO : also, this a lot of work just to get the one ref audio recording.
    *
-   * @see DatabaseImpl#getExerciseIDToRefAudio()
    * @param all
+   * @see DatabaseImpl#getExerciseIDToRefAudio()
    */
   public void attachAudio(Collection<CommonUserExercise> all) {
     attachAudio.setExToAudio(audioDAO.getExToAudio());
@@ -181,9 +201,9 @@ public class ExcelImport implements ExerciseDAO {
         if (!ex.hasRefAudio()) {
           user++;
         }
-       // else if (ex.getID().startsWith("Custom")) {
+        // else if (ex.getID().startsWith("Custom")) {
 //          logger.warn("found audio for " + ex.getID());
-       // }
+        // }
       }
     }
     if (user > 0) {
@@ -255,7 +275,6 @@ public class ExcelImport implements ExerciseDAO {
     List<CommonExercise> exercises = this.exercises;
     addAlternatives(exercises);
   }*/
-
   private void addAlternatives(List<CommonExercise> exercises) {
     Map<String, Set<String>> englishToFL = new HashMap<>();
     for (CommonExercise e : exercises) {
@@ -367,7 +386,7 @@ public class ExcelImport implements ExerciseDAO {
 //      logger.debug("Excel reading " + language + " from " + file.getAbsolutePath());
       return readExercises(new FileInputStream(file));
     } catch (FileNotFoundException e) {
-      logger.error(language +" : looking for " + file.getAbsolutePath() + " got " + e, e);
+      logger.error(language + " : looking for " + file.getAbsolutePath() + " got " + e, e);
     }
     return new ArrayList<CommonExercise>();
   }
@@ -799,7 +818,7 @@ public class ExcelImport implements ExerciseDAO {
     }
 
     logStatistics(id, semis, skipped, englishSkipped, deleted);
-  //  if (missingExerciseCount > 0) logger.debug("missing ex count " + missingExerciseCount);
+    //  if (missingExerciseCount > 0) logger.debug("missing ex count " + missingExerciseCount);
     return exercises;
   }
 
