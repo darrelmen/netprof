@@ -49,22 +49,16 @@ public class Field implements IsSerializable {
    */
   public Field(String name, String value) {
     this(-1, name,
-        //true,
-        // false, false,
         FIELD_TYPE.STRING, value, -1);
   }
 
   public Field(String name, String value, long objectRef) {
     this(-1, name,
-        //true,
-        // false, false,
         FIELD_TYPE.STRING, value, objectRef);
   }
 
   public Field(String name, BaseObject baseObject) {
     this(-1, name,
-        //true,
-        //isCollection, isMap,
         FIELD_TYPE.OBJECT, "", baseObject.getObjectRef());
     this.fieldObject = baseObject;
   }
@@ -79,10 +73,23 @@ public class Field implements IsSerializable {
 
   public Field(String name, MapContainer baseObject) {
     this(-1, name,
-        //true,
-        //isCollection, isMap,
         FIELD_TYPE.MAP, "", baseObject.getObjectRef());
     this.fieldObject = baseObject;
+  }
+
+  public Field(String name, FIELD_TYPE type) {
+    this.name = name;
+    this.type = type;
+    switch (type) {
+      case LIST:
+        fieldObject = new ListContainer();
+        break;
+      case MAP:
+        fieldObject = new MapContainer();
+        break;
+      default:
+        throw new IllegalArgumentException("unknown field " +type);
+    }
   }
 
   public boolean isPrimitive() {
@@ -92,10 +99,6 @@ public class Field implements IsSerializable {
   public FIELD_TYPE getType() {
     return type;
   }
-
-/*  public boolean isCollection() {
-    return isCollection;
-  }*/
 
   public String getValue() {
     return value;
@@ -114,6 +117,11 @@ public class Field implements IsSerializable {
   public void put(String name, FieldObject object) {
     MapContainer fieldObject = (MapContainer) this.fieldObject;
     fieldObject.put(name, object);
+  }
+
+  public void put(String name, String value) {
+    MapContainer fieldObject = (MapContainer) this.fieldObject;
+    fieldObject.put(name, new StringObject(value));
   }
 
   public long getObjectRef() {
