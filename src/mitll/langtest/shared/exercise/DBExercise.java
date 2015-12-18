@@ -7,12 +7,13 @@ package mitll.langtest.shared.exercise;
 /**
  * Created by go22670 on 12/16/15.
  */
-public class ExObject extends BaseObject implements CommonShell {
-  public enum FIELDS {ENGLISH, MEANING, FL, EX_STATE, SECOND_STATE}
+public class DBExercise extends BaseObject implements CommonShell {
+  public enum FIELDS {ENGLISH, MEANING, FL, EX_STATE, SECOND_STATE, UNIT_TO_VALUE}
 
-  public ExObject() {}
+  public DBExercise() {
+  }
 
-  public ExObject(long id, String exid) {
+  public DBExercise(long id, String exid) {
     super(id, exid);
   }
 
@@ -48,7 +49,7 @@ public class ExObject extends BaseObject implements CommonShell {
   }
 
   public void setEnglish(CommonShell shell) {
-    addField(ExObject.FIELDS.ENGLISH.name(), shell.getEnglish());
+    addField(DBExercise.FIELDS.ENGLISH.name(), shell.getEnglish());
   }
 
   @Override
@@ -58,7 +59,17 @@ public class ExObject extends BaseObject implements CommonShell {
 
   public void setMeaning(CommonShell shell) {
     if (!shell.getMeaning().isEmpty())
-      addField(ExObject.FIELDS.MEANING.name(), shell.getMeaning());
+      addField(DBExercise.FIELDS.MEANING.name(), shell.getMeaning());
+  }
+
+  public void addUnitToValue(String key, String value) {
+    String name = FIELDS.UNIT_TO_VALUE.name();
+    Field unitToValue = nameToField.get(name);
+    if (unitToValue == null) {
+      unitToValue = new Field(name, Field.FIELD_TYPE.MAP);
+      addField(name, unitToValue);
+    }
+    unitToValue.put(key, value);
   }
 
   @Override
