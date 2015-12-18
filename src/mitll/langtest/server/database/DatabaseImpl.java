@@ -4,6 +4,7 @@
 
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -40,6 +41,7 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -340,6 +342,11 @@ public class DatabaseImpl implements Database {
         getPhoneDAO(), configDir, installPath);
   }
 
+  /**
+   * @see mitll.langtest.server.DownloadServlet#returnSpreadsheet(HttpServletResponse, DatabaseImpl, String)
+   * @see LangTestDatabaseImpl#getTypeOrder()
+   * @return
+   */
   public SectionHelper getSectionHelper() {
     getExercises();
     return exerciseDAO.getSectionHelper();
@@ -357,6 +364,9 @@ public class DatabaseImpl implements Database {
    * @param id
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultASRInfo(long, int, int)
+   * @see mitll.langtest.server.DownloadServlet#getFilenameForDownload(DatabaseImpl, String, String)
+   * @see #deleteItem(String)
+   * @see #getCustomOrPredefExercise(String)
    */
   public CommonExercise getExercise(String id) {
     return exerciseDAO.getExercise(id);
@@ -1132,10 +1142,7 @@ public class DatabaseImpl implements Database {
    * @return
    * @see mitll.langtest.server.LoadTesting#getExercise
    */
-  private CommonExercise getUserExerciseWhere(String id) {
-    CommonUserExercise where = userExerciseDAO.getWhere(id);
-    return where != null ? where : null;
-  }
+  private CommonExercise getUserExerciseWhere(String id) { return userExerciseDAO.getWhere(id);  }
 
   @Override
   public ServerProperties getServerProps() {
