@@ -145,15 +145,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * Save transmission bandwidth - don't send a list of fully populated items - just send enough to populate a list
+   *
    * @param exercises
    * @return
    * @see #makeExerciseListWrapper(int, Collection, long, String, boolean, boolean)
    */
   private List<CommonShell> getExerciseShells(Collection<? extends CommonExercise> exercises) {
-    return getExerciseShellsShort(exercises);
-  }
-
-  private List<CommonShell> getExerciseShellsShort(Collection<? extends CommonExercise> exercises) {
     List<CommonShell> ids = new ArrayList<CommonShell>();
     for (CommonExercise e : exercises) {
 //      logger.info("got " +e.getID() + " mean " + e.getMeaning() + " eng " + e.getEnglish() + " fl " + e.getForeignLanguage());
@@ -688,6 +686,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Map<String, Collection<String>> objectObjectMap = Collections.emptyMap();
     return getExerciseIds(0, objectObjectMap, "", -1, userID, "", false, false, false, false);
   }*/
+
+  /**
+   * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores(List)
+   * @param ids
+   * @return
+   */
   @Override
   public List<CommonShell> getShells(List<String> ids) {
     List<CommonShell> shells = new ArrayList<>();
