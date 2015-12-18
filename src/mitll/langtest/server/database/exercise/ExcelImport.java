@@ -48,8 +48,7 @@ public class ExcelImport implements ExerciseDAO {
   private final List<String> errors = new ArrayList<String>();
   private final String file;
   private final SectionHelper sectionHelper = new SectionHelper();
-  // private final String mediaDir;
-  // private final String mediaDir1;
+
   private boolean shouldHaveRefAudio = false;
   private final boolean usePredefinedTypeOrder;
   private final String language;
@@ -61,7 +60,6 @@ public class ExcelImport implements ExerciseDAO {
   private AddRemoveDAO addRemoveDAO;
   private UserExerciseDAO userExerciseDAO;
 
-  //  private final File installPath;
   private final boolean addDefects;
   private int unitIndex;
   private int chapterIndex;
@@ -106,6 +104,10 @@ public class ExcelImport implements ExerciseDAO {
     if (DEBUG) logger.debug("unit " + unitIndex + " chapter " + chapterIndex + " week " + weekIndex);
   }
 
+  /**
+   * @see DatabaseImpl#getSectionHelper()
+   * @return
+   */
   @Override
   public SectionHelper getSectionHelper() {
     return sectionHelper;
@@ -141,8 +143,7 @@ public class ExcelImport implements ExerciseDAO {
   public List<CommonExercise> getRawExercises() {
     synchronized (this) {
       if (exercises == null) {
-        List<CommonExercise> commonExercises = readExercises();
-        exercises = commonExercises;
+        exercises = readExercises();
 
         for (CommonExercise e : exercises) idToExercise.put(e.getID(), e);
 
@@ -353,6 +354,11 @@ public class ExcelImport implements ExerciseDAO {
     this.userExerciseDAO = userExerciseDAO;
   }
 
+  /**
+   * @see #addNewExercises()
+   * @see #removeExercises()
+   * @param addRemoveDAO
+   */
   @Override
   public void setAddRemoveDAO(AddRemoveDAO addRemoveDAO) {
     this.addRemoveDAO = addRemoveDAO;
