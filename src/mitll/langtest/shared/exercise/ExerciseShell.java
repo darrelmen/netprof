@@ -5,6 +5,7 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.custom.UserList;
 
 /**
  * Created with IntelliJ IDEA.
@@ -23,19 +24,39 @@ public class ExerciseShell implements IsSerializable, CommonShell {
   protected String meaning;
   protected String foreignLanguage;
 
-  public ExerciseShell() {}
+  public ExerciseShell() {
+  }
 
   /**
    * @param id
    * @see AudioExercise#AudioExercise(String)
+   * @see UserList#UserList()
    */
-  public ExerciseShell(String id) { this(id,"","","");  }
+  public ExerciseShell(String id) {
+    this(id, "", "", "");
+  }
 
+  /**
+   * @param id
+   * @param englishSentence
+   * @param meaning
+   * @param foreignLanguage
+   * @see #getShell()
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShells
+   */
   private ExerciseShell(String id, String englishSentence, String meaning, String foreignLanguage) {
     this.id = id;
     this.englishSentence = englishSentence;
     this.meaning = meaning;
     this.foreignLanguage = foreignLanguage;
+  }
+
+  /**
+   * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShells(java.util.Collection)
+   */
+  public CommonShell getShell() {
+    return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage);
   }
 
   public String getID() {
@@ -78,14 +99,6 @@ public class ExerciseShell implements IsSerializable, CommonShell {
   @Override
   public void setSecondState(STATE state) {
     this.secondState = state;
-  }
-
-  /**
-   * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShellsShort(java.util.Collection)
-   */
-  public CommonShell getShell() {
-    return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage);
   }
 
   @Override
