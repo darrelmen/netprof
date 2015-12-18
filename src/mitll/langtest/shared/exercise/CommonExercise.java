@@ -27,8 +27,6 @@ public interface CommonExercise extends CommonShell {
 
   String getTransliteration();
 
-//  String getContent();
-
   boolean hasRefAudio();
 
   String getRefAudio();
