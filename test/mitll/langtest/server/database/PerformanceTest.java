@@ -1,7 +1,6 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.exercise.ExcelImport;
@@ -110,29 +109,29 @@ public class PerformanceTest extends BaseTest {
 
     dumpUploads(uploadDAO.getUploads());
 
-    List<ExObject> objects = new ArrayList<>();
-  //  List<CommonExercise> exercises = database.getExercises();
+    List<DBExercise> objects = new ArrayList<>();
+    //  List<CommonExercise> exercises = database.getExercises();
 
     File file = getPropertiesFile(spanish);
     String parent = file.getParent();
     String lessonPlanFile = parent + File.separator + "testFirst.xlsx";
-    String lessonPlanFile2 = parent + File.separator + "testSecond.xlsx";
+    //  String lessonPlanFile2 = parent + File.separator + "testSecond.xlsx";
 
     ExcelImport excelImport = new ExcelImport(lessonPlanFile, database.getServerProps());
     List<CommonExercise> exercises = excelImport.readExercises();
 
-    ExcelImport excelImport2 = new ExcelImport(lessonPlanFile2, database.getServerProps());
-    List<CommonExercise> exercises2 = excelImport2.readExercises();
+    //   ExcelImport excelImport2 = new ExcelImport(lessonPlanFile2, database.getServerProps());
+    //   List<CommonExercise> exercises2 = excelImport2.readExercises();
 
 //    List<CommonExercise> exercises = (List<CommonExercise>) excelImport;
     //exercises = exercises.subList(0, 200);
     int id = 0;
 
-    Map<CommonExercise, ExObject> oldToNew = new HashMap<>();
+    Map<CommonExercise, DBExercise> oldToNew = new HashMap<>();
     convertToNewEx(objects, exercises, id, oldToNew);
-    convertToNewEx(objects, exercises2, id, oldToNew);
+    // convertToNewEx(objects, exercises2, id, oldToNew);
 
-    for (Map.Entry<CommonExercise, ExObject> pair : oldToNew.entrySet()) {
+    for (Map.Entry<CommonExercise, DBExercise> pair : oldToNew.entrySet()) {
       logger.info(//pair.getKey() + " " +
           pair.getValue());
     }
@@ -142,32 +141,46 @@ public class PerformanceTest extends BaseTest {
 //    }
   }
 
-  public void convertToNewEx(List<ExObject> objects, List<CommonExercise> exercises, int id,
-                             Map<CommonExercise, ExObject> oldToNew) {
-    for (CommonExercise ex : exercises) {
-      ExObject exObject = new ExObject(id++, ex.getID());
-      exObject.setEnglish(ex);
-      exObject.setMeaning(ex);
-      exObject.setForeignLanguage(ex);
+  public void convertToNewEx(List<DBExercise> objects, List<CommonExercise> exercises, int id,
+                             Map<CommonExercise, DBExercise> oldToNew) {
+    List<CommonExercise> exercises1 = exercises;
+    exercises1 = exercises.subList(0, 2);
+    for (CommonExercise ex : exercises1) {
+      DBExercise dbExercise = new DBExercise(id++, ex.getID());
+      dbExercise.setEnglish(ex);
+      dbExercise.setMeaning(ex);
+      dbExercise.setForeignLanguage(ex);
 
       if (false) {
         ListContainer baseObject = new ListContainer();
         Field list = new Field("list", baseObject);
-        exObject.addField("list", list);
+        dbExercise.addField("list", list);
         list.add(new StringObject("first"));
         list.add(new StringObject("second"));
         list.add(new StringObject("third"));
       }
 
-      MapContainer mapContainer = new MapContainer();
-      Field unitToValue = new Field(UNIT_TO_VALUE, mapContainer); // TODO add easy method on exobject
-      exObject.addField(UNIT_TO_VALUE, unitToValue);
+      ListContainer baseObject = new ListContainer();
+      Field list = new Field("list", baseObject);
+      dbExercise.addField("questions", list);
+      BaseObject question = new BaseObject(1, dbExercise.getID());
+      list.add(question);
+      question.addField("Question", "Test Question");
+      ListContainer answerKey = new ListContainer(2);
+      question.addField("Answer Key", new Field("Answer Key", answerKey));
+      answerKey.add(new StringObject("First"));
+      answerKey.add(new StringObject("Second"));
+      answerKey.add(new StringObject("Third"));
+
+//      MapContainer mapContainer = new MapContainer();
+//      Field unitToValue = new Field(UNIT_TO_VALUE, mapContainer); // TODO add easy method on exobject
+//      dbExercise.addField(UNIT_TO_VALUE, unitToValue);
       for (Map.Entry<String, String> pair : ex.getUnitToValue().entrySet()) {
-        mapContainer.put(pair.getKey(), pair.getValue());
+        dbExercise.addUnitToValue(pair.getKey(), pair.getValue());
       }
 
-      objects.add(exObject);
-      oldToNew.put(ex, exObject);
+      objects.add(dbExercise);
+      oldToNew.put(ex, dbExercise);
     }
   }
 
