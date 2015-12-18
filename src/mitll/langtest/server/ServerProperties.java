@@ -30,6 +30,9 @@ import java.util.jar.Manifest;
 public class ServerProperties {
   private static final Logger logger = Logger.getLogger(ServerProperties.class);
 
+  private static final String FALSE = "false";
+  private static final String TRUE = "true";
+
   /**
    * I.e. the hydra web service for ASR
    */
@@ -45,7 +48,7 @@ public class ServerProperties {
   private static final String RECO_TEST = "recoTest";
   private static final String RECO_TEST2 = "recoTest2";
   private static final String MIN_PRON_SCORE = "minPronScore";
-  private static final String MIN_PRON_SCORE_DEFAULT = "0.20";
+  private static final String MIN_PRON_SCORE_DEFAULT = ""+0.31f;//"0.20";
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
   private static final String AUDIO_OFFSET = "audioOffset";
@@ -60,14 +63,14 @@ public class ServerProperties {
   private static final String ENABLE_ALL_USERS = "enableAllUsers";
   private static final String DO_DECODE = "dodecode";
   private static final String DO_TRIM = "dotrim";
-  private static final String FALSE = "false";
-  private static final String TRUE = "true";
+
   private static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
   private static final String ADD_MISSING_INFO = "addMissingInfo";
   private static final int MIN_DYNAMIC_RANGE_DEFAULT = 20; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
   private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
   private static final String BEST_AUDIO = "bestAudio";
+  private static final String READ_EXERCISES_FROM_DB = "readExercisesFromDB";
 
   private Properties props = new Properties();
 
@@ -321,7 +324,7 @@ public class ServerProperties {
     return props.getProperty(param, FALSE).equals(TRUE);
   }
 
-  private boolean getDefaultTrue(String param) {
+  private boolean getDefaultTrue(String param)  {
     return props.getProperty(param, TRUE).equals(TRUE);
   }
 
@@ -493,5 +496,9 @@ public class ServerProperties {
    */
   public boolean shouldDoDecodeWithHydec() {
     return getDefaultFalse(RUN_REF_DECODE_WITH_HYDEC);
+  }
+
+  public boolean readExercisesFromDB() {
+    return getDefaultFalse(READ_EXERCISES_FROM_DB);
   }
 }
