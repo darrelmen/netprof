@@ -121,6 +121,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private Navigation navigation;
   private EventLogger buttonFactory;
   private final KeyPressHelper keyPressHelper = new KeyPressHelper(false,true);
+  private boolean isMicConnected = true;
 
   /**
    * This gets called first.
@@ -663,7 +664,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #onModuleLoad2()
    * @see #resetState()
    */
-  private void modeSelect() {
+  public void modeSelect() {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         checkInitFlash();
@@ -704,6 +705,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
                   checkLogin();
 
                   flashcard.setSplash();
+                  isMicConnected = false;
                 }
               }
           );
@@ -721,6 +723,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         });
 
         flashcard.setSplash();
+        isMicConnected = false;
       }
     });
   }
@@ -1062,4 +1065,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void downloadFailedAlert() {  Window.alert("Code download failed");  }
+
+  public boolean isMicAvailable() {
+    return isMicConnected;
+  }
 }
