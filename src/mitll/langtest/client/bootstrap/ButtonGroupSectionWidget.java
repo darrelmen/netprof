@@ -38,6 +38,16 @@ class ButtonGroupSectionWidget implements SectionWidget {
     return type;
   }
 
+  @Override
+  public boolean hasOnlyOne() {
+    return false;
+  }
+
+  @Override
+  public List<String> getCurrentSelections() {
+    return null;
+  }
+
   /**
    * @param row
    * @see FlexSectionExerciseList#addButtonGroup(com.google.gwt.user.client.ui.HorizontalPanel, java.util.List, String, java.util.List, ButtonGroupSectionWidget)
