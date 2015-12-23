@@ -1,0 +1,291 @@
+package mitll.langtest.client.amas;
+
+import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.i18n.client.HasDirection;
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.PopupHelper;
+import mitll.langtest.client.dialog.KeyPressHelper;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.NoPasteTextBox;
+import mitll.langtest.shared.Answer;
+import mitll.langtest.shared.exercise.CommonExercise;
+
+import java.util.Collection;
+import java.util.Map;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: GO22670
+ * Date: 11/8/13
+ * Time: 1:45 PM
+ * To change this template use File | Settings | File Templates.
+ */
+public class TextResponse {
+//  private Logger logger = Logger.getLogger("TextResponse");
+  private static final int TEXT_BOX_WIDTH = 400;
+  private static final int FEEDBACK_HEIGHT = 40;
+
+  private KeyPressHelper enterKeyButtonHelper;
+  private ScoreFeedback textScoreFeedback;
+  private final int user;
+  private AnswerPosted answerPosted;
+  private Widget textResponseWidget;
+
+  private long timeShown = System.currentTimeMillis();
+  private Map<String, Collection<String>> typeToSelection;
+
+  /**
+   * @see mitll.langtest.client.recorder.FeedbackRecordPanel.AnswerPanel#doText
+   * @param user
+   * @param typeToSelection
+   */
+  public TextResponse(int user, Map<String, Collection<String>> typeToSelection) {
+    this.user = user;
+    this.typeToSelection = typeToSelection;
+  }
+
+  public interface AnswerPosted {
+    void answerPosted();
+  }
+
+  public void setAnswerPostedCallback(AnswerPosted answerPosted) { this.answerPosted = answerPosted; }
+
+  /**
+   * Has two rows -- the text input box and the score feedback
+   * @see mitll.langtest.client.recorder.FeedbackRecordPanel.AnswerPanel#doText
+   * @param toAddTo
+   * @param exercise
+   * @param service
+   * @param controller
+   * @param centered
+   * @param useWhite
+   * @param addKeyBinding
+   * @param questionID
+   * @param buttonTitle
+   * @param getFocus
+   * @return
+   */
+  public Widget addWidgets(Panel toAddTo, CommonExercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
+                           boolean centered, boolean useWhite, boolean addKeyBinding, int questionID,
+                           String buttonTitle, boolean getFocus) {
+    textScoreFeedback = new ScoreFeedback(useWhite);
+
+    textResponseWidget = getTextResponseWidget(exercise, service, controller, getTextScoreFeedback(), centered,
+      addKeyBinding, questionID, buttonTitle, getFocus);
+
+    if (controller.isRightAlignContent()) {
+      textResponseWidget.addStyleName("floatRight");
+    }
+    else {
+      textResponseWidget.addStyleName("floatLeft");
+    }
+    textResponseWidget.addStyleName("topFiveMargin");
+
+    Panel scoreFeedbackRow = getTextScoreFeedback().getScoreFeedbackRow(FEEDBACK_HEIGHT, controller);
+
+    Panel hp = new HorizontalPanel();
+    hp.add(getTextScoreFeedback().getFeedbackImage());
+    hp.add(scoreFeedbackRow);
+    hp.add(textResponseWidget);
+    toAddTo.add(hp);
+
+    return textResponseWidget;
+  }
+
+  /**
+   * Three parts - text input, check button, and feedback icon
+   *
+   *
+   * @param exercise
+   * @param service
+   * @param controller
+   * @param scoreFeedback
+   * @param centered
+   * @param addEnterKeyBinding
+   * @param questionID
+   * @param buttonTitle
+   * @param getFocus
+   * @return
+   * @see #addWidgets
+   */
+  private Widget getTextResponseWidget(CommonExercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
+                                       ScoreFeedback scoreFeedback, boolean centered, boolean addEnterKeyBinding,
+                                       int questionID, String buttonTitle, boolean getFocus) {
+    final Button answerButton = getAnswerButton(buttonTitle);
+
+    boolean allowPaste = controller.getProps().isDemoMode();
+    final TextBox noPasteAnswer = getAnswerBox(controller, allowPaste, answerButton, getFocus);
+    noPasteAnswer.setWidth(TEXT_BOX_WIDTH + "px");
+    String answerType = controller.getAudioType();
+    setupSubmitButton(exercise, service, answerButton, noPasteAnswer, scoreFeedback, answerType, addEnterKeyBinding, questionID);
+
+    // button then text box
+    Panel row = new HorizontalPanel();
+    row.getElement().setId("textResponseRow");
+    row.add(answerButton);
+    row.add(noPasteAnswer);
+
+    return centered ? getRecordButtonRow(row) : row;
+  }
+
+  private Button getAnswerButton(String buttonTitle) {
+    final Button answerButton = new Button(buttonTitle);
+    answerButton.getElement().setId("check_"+buttonTitle);
+    answerButton.addStyleName("rightFiveMargin");
+    return answerButton;
+  }
+
+  private Widget getRecordButtonRow(Widget recordButton) {
+    FluidRow recordButtonRow = new FluidRow();
+    Paragraph recordButtonContainer = new Paragraph();
+    recordButtonContainer.addStyleName("alignCenter");
+    recordButtonContainer.add(recordButton);
+    recordButton.addStyleName("alignCenter");
+    recordButtonRow.add(new Column(12, recordButtonContainer));
+    recordButtonRow.getElement().setId("recordButtonRow");
+    return recordButtonRow;
+  }
+
+  /**
+   * @see #getTextResponseWidget
+   * @param exercise
+   * @param service
+   * @param check
+   * @param noPasteAnswer
+   * @param scoreFeedback
+   * @param answerType
+   * @param addEnterKeyBinding
+   * @param questionID
+   */
+  private void setupSubmitButton(final CommonExercise exercise, final LangTestDatabaseAsync service, final Button check,
+                                 final TextBox noPasteAnswer, final ScoreFeedback scoreFeedback, final String answerType,
+                                 boolean addEnterKeyBinding, final int questionID) {
+    check.setType(ButtonType.PRIMARY);
+    check.setEnabled(false);
+    check.addStyleName("leftFiveMargin");
+
+    if (addEnterKeyBinding) {
+      enterKeyButtonHelper = new KeyPressHelper(false);
+      enterKeyButtonHelper.addKeyHandler(check);
+      check.setTitle("Hit Enter to submit answer.");
+    }
+
+    check.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        String guess = noPasteAnswer.getText();
+        getScoreForGuess(guess, service, exercise, check, scoreFeedback, answerType, questionID);
+      }
+    });
+  }
+
+  /**
+   * Text box goes RTL.
+   *
+   * @see #getTextResponseWidget
+   * @param controller
+   * @param allowPaste
+   * @param check
+   * @param getFocus
+   * @return
+   */
+  private TextBox getAnswerBox(ExerciseController controller, boolean allowPaste, final Button check, boolean getFocus) {
+    final TextBox noPasteAnswer = allowPaste ? new TextBox() : new NoPasteTextBox();
+    noPasteAnswer.setPlaceholder("Answer in " + controller.getLanguage());
+    if (controller.isRightAlignContent()) {
+      noPasteAnswer.addStyleName("rightAlign");
+    }
+
+    if (controller.isRightAlignContent()) {
+      noPasteAnswer.addStyleName(controller.getLanguage().toLowerCase());
+      noPasteAnswer.setDirection(HasDirection.Direction.RTL);
+    }
+
+    noPasteAnswer.addKeyUpHandler(new KeyUpHandler() {
+      public void onKeyUp(KeyUpEvent event) {
+        check.setEnabled(noPasteAnswer.getText().length() > 0);
+      }
+    });
+
+    if (getFocus) {
+      Scheduler.get().scheduleDeferred(new Command() {
+        public void execute() {
+          noPasteAnswer.setFocus(true);
+        }
+      });
+    }
+    return noPasteAnswer;
+  }
+
+  /**
+   * @see #setupSubmitButton
+   * @param guess
+   * @param service
+   * @param exercise
+   * @param check
+   * @param scoreFeedback
+   * @param answerType probably should be removed
+   * @param questionID
+   */
+  private void getScoreForGuess(final String guess, LangTestDatabaseAsync service, CommonExercise exercise, final Button check,
+                                final ScoreFeedback scoreFeedback, String answerType, int questionID) {
+    if (guess.isEmpty() || removePunct(guess.trim()).isEmpty()) {
+      new PopupHelper().showPopup
+          ("Try again.", "Please type a non-empty response.", textResponseWidget);
+    } else {
+      scoreFeedback.setWaiting();
+      check.setEnabled(false);
+
+      long timeSpent = System.currentTimeMillis()-timeShown;
+      timeShown = System.currentTimeMillis();
+
+      service.getScoreForAnswer(user, exercise, questionID, guess, answerType, timeSpent, typeToSelection, new AsyncCallback<Answer>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          check.setEnabled(true);
+        }
+
+        @Override
+        public void onSuccess(Answer result) {
+          check.setEnabled(true);
+          gotScoreForGuess(result);
+        }
+      });
+    }
+  }
+
+  private static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";//"\\p{P}";
+  private String removePunct(String t) {
+    return t.replaceAll(PUNCT_REGEX, "");
+  }
+
+  /**
+   * @see #getScoreForGuess(String, LangTestDatabaseAsync, CommonExercise, Button, ScoreFeedback, String, int)
+   * @param result
+   */
+  protected void gotScoreForGuess(Answer result) {
+    getTextScoreFeedback().showCRTFeedback();
+    if (answerPosted != null) {
+      answerPosted.answerPosted();
+    }
+  }
+
+  public void onUnload() {
+    if (enterKeyButtonHelper != null) {
+      enterKeyButtonHelper.removeKeyHandler();
+    }
+  }
+
+  private ScoreFeedback getTextScoreFeedback() { return textScoreFeedback;  }
+}

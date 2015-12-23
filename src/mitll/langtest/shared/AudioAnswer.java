@@ -6,6 +6,7 @@ package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.audio.AudioCheck;
+import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -78,7 +79,7 @@ public class AudioAnswer implements IsSerializable {
   public void setDecodeOutput(String decodeOutput) { this.decodeOutput = decodeOutput; }
 
   /**
-   * @see mitll.langtest.server.autocrt.AutoCRT#getFlashcardAnswer
+   * @see DecodeCorrectnessChecker#getFlashcardAnswer
    * @param score
    */
   public void setScore(double score) { this.score = score; }
@@ -96,7 +97,7 @@ public class AudioAnswer implements IsSerializable {
   public boolean isCorrect() { return correct; }
 
   /**
-   * @see mitll.langtest.server.autocrt.AutoCRT#getFlashcardAnswer
+   * @see DecodeCorrectnessChecker#getFlashcardAnswer
    * @param correct
    */
   public void setCorrect(boolean correct) {
