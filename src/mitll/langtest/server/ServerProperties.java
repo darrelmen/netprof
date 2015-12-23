@@ -33,6 +33,13 @@ public class ServerProperties {
   private static final String FALSE = "false";
   private static final String TRUE = "true";
 
+  public static final String MIRA_DEVEL_HOST = "mira-devel.llan.ll.mit.edu/scorer/item"; //"mira-devel.llan.ll.mit.edu/msa/item";
+  private static final String MIRA_DEVEL = "https://" +MIRA_DEVEL_HOST;
+  private static final String MIRA_LEN   = "https://mira.ll.mit.edu/scorer/item";
+  private static final String MIRA_DEFAULT = MIRA_LEN;
+  private static final String MIRA_CLASSIFIER_URL = "miraClassifierURL";
+  private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
+
   /**
    * I.e. the hydra web service for ASR
    */
@@ -318,6 +325,7 @@ public class ServerProperties {
         }
       }
     }
+    miraClassifierURL = props.getProperty(MIRA_CLASSIFIER_URL, MIRA_DEFAULT);
   }
 
   private boolean getDefaultFalse(String param) {
@@ -500,5 +508,18 @@ public class ServerProperties {
 
   public boolean readExercisesFromDB() {
     return getDefaultFalse(READ_EXERCISES_FROM_DB);
+  }
+
+
+  public String getMiraClassifierURL() {
+    return miraClassifierURL;
+  }
+
+  public boolean useMiraClassifier() {
+    return getDefaultTrue("useMiraClassifier");
+  }
+
+  public String getMiraFlavor() {
+    return props.getProperty("miraFlavor",getLanguage().toLowerCase()+"-amas3");
   }
 }
