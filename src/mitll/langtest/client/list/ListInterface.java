@@ -143,4 +143,6 @@ public interface ListInterface extends RequiresResize {
    * @param text
    */
   void searchBoxEntry(String text);
+
+  int getIndex(String currentID);
 }
