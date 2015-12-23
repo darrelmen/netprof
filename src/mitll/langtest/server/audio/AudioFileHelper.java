@@ -11,6 +11,7 @@ import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.autocrt.AutoCRT;
+import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.scoring.*;
 import mitll.langtest.shared.AudioAnswer;
@@ -32,7 +33,7 @@ import java.util.*;
  * Time: 5:08 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AudioFileHelper implements CollationSort, AutoCRTScoring {
+public class AudioFileHelper implements CollationSort, AlignDecode {
   private static final Logger logger = Logger.getLogger(AudioFileHelper.class);
   private static final String POSTED_AUDIO = "postedAudio";
   private static final int MIN_WARN_DUR = 30;
@@ -45,7 +46,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
   private ASR asrScoring;
   private ASRScoring oldschoolScoring;
   private ASRWebserviceScoring webserviceScoring;
-  private AutoCRT autoCRT;
+  private DecodeCorrectnessChecker decodeCorrectnessChecker;
   private final DatabaseImpl db;
   private final LogAndNotify logAndNotify;
   private boolean checkedLTS = false;
@@ -69,7 +70,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
     this.useOldSchoolServiceOnly = serverProperties.getOldSchoolService();
     this.mp3Support = new MP3Support(pathHelper, serverProperties);
     audioConversion = new AudioConversion(serverProps);
-    makeAutoCRT();
+    makeDecodeCorrectnessChecker();
   }
 
   /**
@@ -527,8 +528,8 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    * @param usePhoneToDisplay
    * @param useOldSchool
    * @return PretestScore for audio
-   * @see AutoCRT#getFlashcardAnswer
-   * @see AutoCRTScoring#getASRScoreForAudio(File, Collection, boolean, boolean)
+   * @see DecodeCorrectnessChecker#getFlashcardAnswer
+   * @see AlignDecode#getASRScoreForAudio(File, Collection, boolean, boolean)
    */
   private PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache,
                                            boolean usePhoneToDisplay, boolean useOldSchool) {
@@ -586,7 +587,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    * @param useOldSchool
    * @return PretestScore
    * @seex #getASRScoreForAudio(int, String, String, int, int, boolean)
-   * @see mitll.langtest.server.scoring.AutoCRTScoring#getASRScoreForAudio
+   * @see AlignDecode#getASRScoreForAudio
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    **/
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
@@ -689,7 +690,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    * @see mitll.langtest.server.test.RecoTest#isMatch
    */
   public PretestScore getFlashcardAnswer(CommonExercise e, File audioFile, AudioAnswer answer) {
-    return this.autoCRT.getFlashcardAnswer(e, audioFile, answer, this.serverProps.getLanguage(), true, false, false);
+    return this.decodeCorrectnessChecker.getFlashcardAnswer(e, audioFile, answer, this.serverProps.getLanguage(), true, false, false);
   }
 
   private String removeSuffix(String audioFile) {
@@ -722,7 +723,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
     if (doFlashcard) {
       makeASRScoring();
-      PretestScore flashcardAnswer = autoCRT.getFlashcardAnswer(exercise, file, audioAnswer, serverProps.getLanguage(),
+      PretestScore flashcardAnswer = decodeCorrectnessChecker.getFlashcardAnswer(exercise, file, audioAnswer, serverProps.getLanguage(),
           canUseCache, allowAlternates, useOldSchool);
       audioAnswer.setPretestScore(flashcardAnswer);
       return audioAnswer;
@@ -773,8 +774,19 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
   /**
    * @see #AudioFileHelper(PathHelper, ServerProperties, DatabaseImpl, LogAndNotify)
    */
-  private void makeAutoCRT() {
-    autoCRT = new AutoCRT(this, serverProps.getMinPronScore());
+  private void makeDecodeCorrectnessChecker() {
+    decodeCorrectnessChecker = new DecodeCorrectnessChecker(this, serverProps.getMinPronScore());
+  }
+
+  /**
+   * @param phrases
+   * @return
+   * @see AutoCRT#getScoreForAudio(String, int, File)
+   */
+  public Collection<String> getValidPhrases(Collection<String> phrases) {
+    makeASRScoring(); // TODO : evil
+    return new InDictFilter(this).getValidPhrases(phrases);
+    //return asrScoring.getValidPhrases(phrases);
   }
 
   /**
