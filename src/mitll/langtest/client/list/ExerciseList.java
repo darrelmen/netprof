@@ -47,7 +47,7 @@ public abstract class ExerciseList
   private static final int MAX_MSG_LEN = 200;
   protected boolean incorrectFirstOrder = false;
 
-  private SimplePanel innerContainer;
+  protected SimplePanel innerContainer;
   protected final LangTestDatabaseAsync service;
   private final UserFeedback feedback;
   private ExercisePanelFactory factory;
@@ -468,7 +468,7 @@ public abstract class ExerciseList
    *
    * @see #rememberAndLoadFirst(java.util.List, mitll.langtest.shared.exercise.CommonExercise, String)
    */
-  private void loadFirstExercise() {
+  protected void loadFirstExercise() {
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
       logger.info("loadFirstExercise : current exercises is empty?");
       removeCurrentExercise();
@@ -718,7 +718,7 @@ public abstract class ExerciseList
    * @return
    * @see #useExercise(mitll.langtest.shared.exercise.CommonExercise)
    */
-  private int getIndex(String currentID) {
+  public int getIndex(String currentID) {
     CommonShell shell = byID(currentID);
     int i = shell != null ? getRealIndex(shell) : -1;
     // logger.info("getIndex " + currentID + " = " +i);
