@@ -55,7 +55,7 @@ public class SmallVocabDecoder {
    * @return
    * @see #getTokens(String)
    */
-  private String toFull(String s) {
+  public   String toFull(String s) {
     StringBuilder builder = new StringBuilder();
 
     char fullWidthZero = '\uFF10';
