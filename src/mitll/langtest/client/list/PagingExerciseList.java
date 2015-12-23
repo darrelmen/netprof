@@ -272,7 +272,7 @@ public class PagingExerciseList extends ExerciseList {
     return "search="+search +";item=" + id;
   }
 
-  void gotClickOnItem(final CommonShell e) {
+  protected void gotClickOnItem(final CommonShell e) {
     if (isExercisePanelBusy()) {
       tellUserPanelIsBusy();
       markCurrentExercise(pagingContainer.getCurrentSelection().getID());

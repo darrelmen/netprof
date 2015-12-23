@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,4 +28,13 @@ public interface SectionWidget {
 
   void addButton(Button b);
   void addLabel(Widget label, String color);
+
+  String getType();
+
+  boolean hasOnlyOne();
+//  boolean selectItem(String item);
+//
+  List<String> getCurrentSelections();
+//
+//  boolean selectItems(Collection<String> section);
 }
