@@ -14,8 +14,11 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
   private long userid;
 
   private String id;
+  private int qid;
   private boolean correct;
   private float score;
+  private float classifierScore;
+  private float userScore;
   private long timestamp;
   private String path;
   private transient String scoreJson;
@@ -96,6 +99,20 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
   }
 
   public String getScoreJson() { return scoreJson;  }
+
+  public int getQid() {
+    return qid;
+  }
+
+  public boolean hasUserScore() { return userScore > -1; }
+
+  public float getUserScore() {
+    return userScore;
+  }
+  public float getClassifierScore() {
+    return classifierScore;
+  }
+
 
   public String toString() {
     return "id " + getId() + " " + (isCorrect() ? "C" : "I") + " score " + getPercentScore();
