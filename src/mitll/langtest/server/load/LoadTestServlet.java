@@ -582,7 +582,7 @@ public class LoadTestServlet extends DatabaseServlet {
     }
 
     try {
-      AutoCRTScoring crtScoring = new AutoCRTScoring() {
+      AlignDecode crtScoring = new AlignDecode() {
         @Override
         public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, int firstPhoneLength) {
           return audioFileHelper.getASRScoreForAudio(testAudioFile, lmSentences, 10);

@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  * Time: 3:27 PM
  * To change this template use File | Settings | File Templates.
  */
-class SimpleChapterNPFHelper implements RequiresResize {
+public class SimpleChapterNPFHelper implements RequiresResize {
   private Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
 
   private boolean madeNPFContent = false;
@@ -87,7 +87,7 @@ class SimpleChapterNPFHelper implements RequiresResize {
     }
   }
 
-  private void addNPFToContent(Panel listContent, String instanceName) {
+  protected void addNPFToContent(Panel listContent, String instanceName) {
     listContent.add(doNPF(instanceName));
     listContent.addStyleName("userListBackground");
   }
