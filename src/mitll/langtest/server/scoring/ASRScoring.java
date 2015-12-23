@@ -320,7 +320,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @param lmSentences
    * @param background
    * @return
-   * @see AutoCRTScoring#getASRScoreForAudio(File, Collection, boolean, boolean)
+   * @see AlignDecode#getASRScoreForAudio(File, Collection, boolean, boolean)
    */
   public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
     return getUniqueTokensInLM(lmSentences, getSmallVocabDecoder().getVocab(background, VOCAB_SIZE_LIMIT));
