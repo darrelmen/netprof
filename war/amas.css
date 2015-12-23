@@ -1,0 +1,285 @@
+.msa {
+    font-family: "Geeza Pro", "Simplified Arabic",Arial,sans-serif;
+    font-size: 14pt;
+    font-weight: normal;
+    line-height: 125%;
+    direction: rtl;
+}
+
+.msa td h4 {
+    font-family: "Geeza Pro", "Simplified Arabic",Arial,sans-serif;
+    font-size: 14pt;
+    font-weight: normal;
+    line-height: 125%;
+    direction: rtl;
+}
+
+.msa td > h4 {
+    font-family: "Geeza Pro", "Simplified Arabic",Arial,sans-serif;
+    font-size: 14pt;
+    font-weight: normal;
+    line-height: 125%;
+    direction: rtl;
+}
+
+.msa table td {
+    font-family: "Geeza Pro", "Simplified Arabic",Arial,sans-serif;
+    font-size: 14pt;
+    font-weight: normal;
+    line-height: 125%;
+    direction: rtl;
+}
+
+/*
+Where should this font live? under src?
+*/
+@font-face {
+    font-family: 'MyWebFont';
+    src:  url('./Jameel Noori Nastaleeq.ttf') format('truetype')
+}
+
+.urdu {
+    font-family: 'MyWebFont', Arial,sans-serif;
+    font-size: 14pt;
+    font-weight: normal;
+    line-height: 125%;
+    direction: rtl;
+}
+
+.urdu h4 td {
+    font-family: 'MyWebFont', Arial,sans-serif;
+    font-size: 14pt;
+    font-weight: normal;
+    line-height: 125%;
+    direction: rtl;
+}
+
+.urdu td > table {
+    font-family: 'MyWebFont', Arial,sans-serif;
+    font-size: 14pt;
+    font-weight: normal;
+    line-height: 125%;
+    direction: rtl;
+}
+
+.urdu table td {
+    font-family: 'MyWebFont', Arial,sans-serif;
+    font-size: 14pt;
+    font-weight: normal;
+    line-height: 125%;
+    direction: rtl;
+}
+
+.farsi {
+    font-family: "Times New Roman", Arial,sans-serif;
+    font-size: 20pt;
+    font-weight: normal;
+    line-height: 150%;
+    direction: rtl;
+}
+
+.farsi h4 td {
+    font-family: "Times New Roman", Arial,sans-serif;
+    font-size: 20pt;
+    font-weight: normal;
+    line-height: 150%;
+    direction: rtl;
+}
+
+.farsi td > h4 {
+    font-family: "Times New Roman", Arial,sans-serif;
+    font-size: 20pt;
+    font-weight: normal;
+    line-height: 150%;
+    direction: rtl;
+}
+
+.farsi table td {
+    font-family: "Times New Roman", Arial,sans-serif;
+    font-size: 20pt;
+    font-weight: normal;
+    line-height: 150%;
+    direction: rtl;
+}
+
+
+.dari {
+    font-family: "Times New Roman", Arial,sans-serif;
+    font-size: 20pt;
+    font-weight: normal;
+    line-height: 150%;
+    direction: rtl;
+}
+
+.dari h4 td {
+    font-family: "Times New Roman", Arial,sans-serif;
+    font-size: 20pt;
+    font-weight: normal;
+    line-height: 150%;
+    direction: rtl;
+}
+
+.dari td > h4 {
+    font-family: "Times New Roman", Arial,sans-serif;
+    font-size: 20pt;
+    font-weight: normal;
+    line-height: 150%;
+    direction: rtl;
+}
+
+.dari table td {
+    font-family: "Times New Roman", Arial,sans-serif;
+    font-size: 20pt;
+    font-weight: normal;
+    line-height: 150%;
+    direction: rtl;
+}
+
+.pashto {
+    font-family: Arial,Helvetica,sans-serif;
+    font-size: 18pt;
+    font-weight: normal;
+    line-height: 125%;
+    direction: rtl;
+}
+
+.pashto h4 td {
+    font-family: Arial,Helvetica,sans-serif;
+    font-size: 18pt;
+    font-weight: normal;
+    line-height: 125%;
+    direction: rtl;
+}
+
+.pashto td > h4 {
+    font-family: Arial,Helvetica,sans-serif;
+    font-size: 18pt;
+    font-weight: normal;
+    line-height: 125%;
+    direction: rtl;
+}
+
+.pashto tr > td {
+    font-family: Arial,Helvetica,sans-serif;
+    font-size: 18pt;
+    font-weight: normal;
+    line-height: 125%;
+    direction: rtl;
+}
+
+.mandarin {
+    font-family: MingLiU,Arial,sans-serif;
+    font-size: 16pt;
+    font-weight: normal;
+    line-height: 150%;
+}
+
+.mandarin h4 > td {
+    font-family: MingLiU,Arial,sans-serif;
+    font-size: 16pt;
+    font-weight: normal;
+    line-height: 150%;
+}
+
+.mandarin table td {
+    font-family: MingLiU,Arial,sans-serif;
+    font-size: 16pt;
+    font-weight: normal;
+    line-height: 150%;
+}
+
+.russian {
+    font-family: Arial,sans-serif;
+    font-size: 14pt;
+    font-weight: normal;
+    line-height: 125%;
+}
+
+.russian h4 td {
+    font-family: Arial,sans-serif;
+    font-size: 14pt;
+    font-weight: normal;
+    line-height: 125%;
+}
+
+.russian td > h4 {
+    font-family: Arial,sans-serif;
+    font-size: 14pt;
+    font-weight: normal;
+    line-height: 125%;
+}
+
+.russian table td {
+    font-family: Arial,sans-serif;
+    font-size: 14pt;
+    font-weight: normal;
+    line-height: 125%;
+}
+
+.korean {
+    font-family: Gulim,sans-serif;
+    font-size: 12pt;
+    font-weight: normal;
+    line-height: 125%;
+}
+
+.korean h4 td {
+    font-family: Gulim,sans-serif;
+    font-size: 12pt;
+    font-weight: normal;
+    line-height: 125%;
+}
+
+.korean td > h4 {
+    font-family: Gulim,sans-serif;
+    font-size: 12pt;
+    font-weight: normal;
+    line-height: 125%;
+}
+
+.korean table td {
+    font-family: Gulim,sans-serif;
+    font-size: 12pt;
+    font-weight: normal;
+    line-height: 125%;
+}
+
+.spanish {
+    font-family: Arial,sans-serif;
+    font-size: 11pt;
+    font-weight: normal;
+    line-height: 125%;
+}
+
+.spanish h4 td {
+    font-family: Arial,sans-serif;
+    font-size: 11pt;
+    font-weight: normal;
+    line-height: 125%;
+}
+
+.spanish td > h4 {
+    font-family: Arial,sans-serif;
+    font-size: 11pt;
+    font-weight: normal;
+    line-height: 125%;
+}
+
+.spanish table td {
+    font-family: Arial,sans-serif;
+    font-size: 11pt;
+    font-weight: normal;
+    line-height: 125%;
+}
+
+.tableCell-even {
+    padding: 5px;
+    background: rgba(0, 138, 184, 0.16);
+    border: 1px solid #ffffff;
+}
+
+.tableCell-odd {
+    padding: 5px;
+    background: #FFCC33;
+    border: 1px solid #ffffff;
+}
