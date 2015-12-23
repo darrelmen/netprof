@@ -79,6 +79,8 @@ public class PropertyHandler {
   private boolean enableAllUsers;
   private boolean usePhoneToDisplay;
 
+  private  String amasWelcome = "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)";
+
   /**
    * @return
    * @see mitll.langtest.client.recorder.RecordButton#showTooLoud
@@ -146,6 +148,12 @@ public class PropertyHandler {
   private boolean showFlashcardAnswer = true;
   private boolean allowPlusInURL;
   private boolean noModel = false;
+
+  private static final String RESPONSE_TYPE = "responseType";
+  private static final String SPEECH = "Speech";
+  public static final String TEXT = "Text";
+  private static final String AUDIO = "Audio";
+  private String responseType = AUDIO;
 
   /**
    * @param props
@@ -329,6 +337,12 @@ public class PropertyHandler {
         System.err.println("couldn't parse " + loginType);
       }
     }
+
+    if (Window.Location.getParameter(RESPONSE_TYPE) != null) {
+      responseType = Window.Location.getParameter(RESPONSE_TYPE);
+    }
+
+    setResponseType();
   }
 
   /**
@@ -475,6 +489,34 @@ public class PropertyHandler {
     return showWelcome;
   }
 
+  private static boolean knownChoice(String choice) {
+    return TEXT.equals(choice) || AUDIO.equals(choice) || SPEECH.equals(choice);
+  }
+
+  /**
+   * Parse URL to extract the responseType values
+   */
+  private void setResponseType() {
+    String href = Window.Location.getHref();
+    if (href.contains("responseType=")) {
+      //     logger.info("found response type " + href);
+      String s = href.split("responseType=")[1];
+      String candidate = s.split("\\*\\*\\*")[0];
+      if (knownChoice(candidate)) {
+        responseType = candidate;
+      }
+      else {
+        logger.warning("responseType unknown " + candidate);
+      }
+    }
+  }
+
+  public String getResponseType() {
+    return responseType;
+  }
+  public void setResponseType(String responseType) {
+    this.responseType = responseType;
+  }
   /**
    * TODO : Consider rewording for other customers...
    *
