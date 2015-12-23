@@ -668,6 +668,9 @@ fieldset > legend {
     min-width: 190px;
 }
 
+.scrollBackground {
+    background-color: #F8FEFF;
+}
 .userNPFContent2 {
     margin-top: 5px;
     float: left;
