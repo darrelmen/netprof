@@ -402,4 +402,23 @@ public class HistoryExerciseList extends PagingExerciseList {
   protected void noSectionsGetExercises(long userID) {
     super.getExercises(userID);
   }
+
+  /**
+   * Make sure all sections have a selection - quiz, test type, ilr level
+   * @return
+   * @see SingleSelectExerciseList#gotSelection()
+   * @see HistoryExerciseList#restoreListFromHistory(String)
+   */
+  protected int getNumSelections() {
+    int count = 0;
+    // logger.info("type now " + typeToSelection);
+    for (SectionWidget widget : typeToBox.values()) {
+      boolean hasSelection = !widget.getCurrentSelections().isEmpty();
+      //logger.info("getNumSelections : widget " + widget.getType() + " value now " + currentSelection);
+      if (hasSelection) {
+        count++;
+      }
+    }
+    return count;
+  }
 }
