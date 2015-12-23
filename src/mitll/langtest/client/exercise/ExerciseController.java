@@ -73,4 +73,6 @@ public interface ExerciseController extends EventRegistration {
   boolean usingFlashRecorder();
 
   void checkUser();
+
+  boolean isMicAvailable();
 }
