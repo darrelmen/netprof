@@ -14,6 +14,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.STATE;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,7 +26,7 @@ import java.util.Collection;
  * Time: 6:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class WaveformExercisePanel extends ExercisePanel {
+public class WaveformExercisePanel<T extends Shell> extends ExercisePanel<T> {
   private static final String RECORD_PROMPT = "Record the word or phrase, first at normal speed, then again at slow speed.";
   private static final String RECORD_PROMPT2 = "Record the in-context sentence.";
   private static final String EXAMPLE_RECORD = "EXAMPLE_RECORD";
@@ -40,7 +41,7 @@ public class WaveformExercisePanel extends ExercisePanel {
    * @param instance
    * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#getFactory(mitll.langtest.client.list.PagingExerciseList)
    */
-  public WaveformExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service,
+  public WaveformExercisePanel(final T e, final LangTestDatabaseAsync service,
                                final ExerciseController controller, ListInterface exerciseList, boolean doNormalRecording, String instance) {
     super(e, service, controller, exerciseList, doNormalRecording ? "" : EXAMPLE_RECORD, instance);
     getElement().setId("WaveformExercisePanel");
@@ -62,7 +63,7 @@ public class WaveformExercisePanel extends ExercisePanel {
   }
 
   /**
-   * @see ExercisePanel#ExercisePanel(CommonExercise, LangTestDatabaseAsync, ExerciseController, ListInterface, String, String)
+   * @see ExercisePanel#ExercisePanel(T, LangTestDatabaseAsync, ExerciseController, ListInterface, String, String)
    *
    */
   protected void addInstructions() {
@@ -81,7 +82,7 @@ public class WaveformExercisePanel extends ExercisePanel {
   private boolean isNormalRecord() { return !isExampleRecord(); }
 
   @Override
-  protected String getExerciseContent(CommonExercise e) {
+  protected String getExerciseContent(T e) {
     //System.out.println("normal recording for " +e.getID());
     String context = isNormalRecord() ? e.getForeignLanguage() : hasContext(exercise) ? exercise.getContext() : "No in-context audio for this exercise.";
     return ExerciseFormatter.getArabic(context);
@@ -97,7 +98,7 @@ public class WaveformExercisePanel extends ExercisePanel {
    * @return
    * @seex ExercisePanel#ExercisePanel(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, ExerciseController, ListInterface)
    */
-  protected Widget getAnswerWidget(CommonExercise exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
+  protected Widget getAnswerWidget(T exercise, LangTestDatabaseAsync service, ExerciseController controller, final int index) {
     audioPanels = new ArrayList<RecordAudioPanel>();
     Panel vp = new VerticalPanel();
 
@@ -114,11 +115,11 @@ public class WaveformExercisePanel extends ExercisePanel {
     return vp;
   }
 
-  private boolean hasContext(CommonExercise exercise) {
+  private boolean hasContext(T exercise) {
     return exercise.getContext() != null && !exercise.getContext().isEmpty();
   }
 
-  private void addExampleSentenceRecorder(CommonExercise exercise, LangTestDatabaseAsync service, ExerciseController controller, int index, Panel vp) {
+  private void addExampleSentenceRecorder(T exercise, LangTestDatabaseAsync service, ExerciseController controller, int index, Panel vp) {
     RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, false, "context=" + Result.AUDIO_TYPE_REGULAR, instance);
     audioPanels.add(fast);
     vp.add(fast);
@@ -127,7 +128,7 @@ public class WaveformExercisePanel extends ExercisePanel {
     addAnswerWidget(index, fast);
   }
 
-  private VerticalPanel addRecordAudioPanelNoCaption(CommonExercise exercise, LangTestDatabaseAsync service,
+  private VerticalPanel addRecordAudioPanelNoCaption(T exercise, LangTestDatabaseAsync service,
                                             ExerciseController controller, int index, Panel vp, String audioType) {
 //    System.out.println("addRecordAudioPanel " + exercise + " audioType " +audioType);
     RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, false, audioType, instance);
@@ -154,7 +155,7 @@ public class WaveformExercisePanel extends ExercisePanel {
     return flow;
   }
 
-  Widget getItemHeader(CommonExercise e) {
+  Widget getItemHeader(T e) {
     Heading w = new Heading(GoodwaveExercisePanel.HEADING_FOR_UNIT_LESSON, "Item", e.getID());
     w.getElement().setId("ItemHeading");
     return w;
@@ -176,10 +177,10 @@ public class WaveformExercisePanel extends ExercisePanel {
    *
    * @param controller
    * @param completedExercise
-   * @see mitll.langtest.client.exercise.NavigationHelper#clickNext(ExerciseController, mitll.langtest.shared.exercise.CommonExercise)
+   * @see mitll.langtest.client.exercise.NavigationHelper#clickNext(ExerciseController, mitll.langtest.shared.exercise.T)
    */
   @Override
-  public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
+  public void postAnswers(ExerciseController controller, Shell completedExercise) {
     completedExercise.setState(STATE.RECORDED);
     exerciseList.setState(completedExercise.getID(), STATE.RECORDED);
     exerciseList.redraw();

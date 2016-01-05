@@ -15,8 +15,10 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.STATE;
+import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 
@@ -55,7 +57,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
    * @param controller
    * @see mitll.langtest.client.exercise.AutoCRTChapterNPFHelper#getFactory
    */
-  public FeedbackRecordPanel(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller,
+  public FeedbackRecordPanel(AmasExerciseImpl e, LangTestDatabaseAsync service, ExerciseController controller,
                              ListInterface exerciseList,
                              QuizScorePanel quizScorePanel) {
     super(e, service, controller, exerciseList);
@@ -93,7 +95,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
    * @see mitll.langtest.client.exercise.NavigationHelper#clickNext
    */
   @Override
-  public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
+  public void postAnswers(ExerciseController controller, Shell completedExercise) {
     if (isCompleted()) {
       exerciseList.loadNextExercise(completedExercise);
     } else {
@@ -108,7 +110,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
    * @return
    * @see #AmasExercisePanel
    */
-  protected Widget getQuestionContent(CommonExercise e) {
+  protected Widget getQuestionContent(AmasExerciseImpl e) {
     String content = e.getContent();
 
     if (logger == null) {
@@ -135,7 +137,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
    * @see #getQuestionPanel
    */
   @Override
-  protected Widget getAnswerWidget(CommonExercise exercise, final LangTestDatabaseAsync service, ExerciseController controller,
+  protected Widget getAnswerWidget(AmasExerciseImpl exercise, final LangTestDatabaseAsync service, ExerciseController controller,
                                    final int index) {
     if (logger == null) {
       logger = Logger.getLogger("FeedbackRecordPanel");
@@ -167,7 +169,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
   }
 
   /**
-   * @see #FeedbackRecordPanel(CommonExercise, LangTestDatabaseAsync, ExerciseController, ListInterface, QuizScorePanel)
+   * @see #FeedbackRecordPanel(AmasExerciseImpl, LangTestDatabaseAsync, ExerciseController, ListInterface, QuizScorePanel)
    * @see mitll.langtest.client.recorder.FeedbackRecordPanel.AnswerPanel
    */
   private void getScores(final boolean firstTime) {
@@ -250,7 +252,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
      * @return
      * @see #getAnswerWidget
      */
-    private Widget addComboAnswer(final CommonExercise exercise, final LangTestDatabaseAsync service,
+    private Widget addComboAnswer(final AmasExerciseImpl exercise, final LangTestDatabaseAsync service,
                                   final ExerciseController controller, final int index, String responseType,
                                   String buttonTitle, boolean getFocus) {
       if (responseType.equalsIgnoreCase(AUDIO)) {
@@ -404,7 +406,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
      * @return
      * @see #addComboAnswer
      */
-    private Panel doText(CommonExercise exercise, final LangTestDatabaseAsync service, final ExerciseController controller,
+    private Panel doText(AmasExerciseImpl exercise, final LangTestDatabaseAsync service, final ExerciseController controller,
                          int index,
                          String buttonTitle, boolean getFocus) {
       final TextResponse textResponse = getTextResponse(controller);
@@ -435,7 +437,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
     /**
      * @param controller
      * @return
-     * @see #doText(CommonExercise, LangTestDatabaseAsync, ExerciseController, int, String, boolean)
+     * @see #doText(AmasExerciseImpl, LangTestDatabaseAsync, ExerciseController, int, String, boolean)
      */
     private TextResponse getTextResponse(final ExerciseController controller) {
       final TextResponse textResponse = new TextResponse(controller.getUser(), exerciseList.getTypeToSelection()) {
