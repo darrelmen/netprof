@@ -5,7 +5,6 @@
 package mitll.langtest.client.exercise;
 
 import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -15,10 +14,9 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
-import com.google.gwt.view.client.SingleSelectionModel;
-import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.custom.dialog.EditItem;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
-import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
 import java.util.*;
@@ -31,14 +29,14 @@ import java.util.logging.Logger;
  * Time: 7:49 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingContainer<T extends Shell> extends SimplePagingContainer<T> {
+public class PagingContainer<T extends CommonShell> extends ClickablePagingContainer<T> {
   private final Logger logger = Logger.getLogger("PagingContainer");
 
   private static final int MAX_LENGTH_ID = 17;
-  private static final boolean DEBUG = false;
-  private final Map<String, T> idToExercise = new HashMap<>();
   private final boolean isRecorder;
   private final ExerciseComparator sorter;
+  protected static final String ENGLISH = "English";
+  private final boolean english;
 
   /**
    * @param controller
@@ -51,83 +49,7 @@ public class PagingContainer<T extends Shell> extends SimplePagingContainer<T> {
     sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
     this.verticalUnaccountedFor = verticalUnaccountedFor;
     this.isRecorder = isRecorder;
-  }
-
-  public void redraw() {
-    table.redraw();
-  }
-
-  private T getByID(String id) {
-    for (T t : getList()) {
-      if (t.getID().equals(id)) {
-        return t;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * @param es
-   * @see mitll.langtest.client.list.PagingExerciseList#simpleRemove(String)
-   */
-  public void forgetExercise(T es) {
-    List<T> list = getList();
-    int before = getList().size();
-
-    if (!list.remove(es)) {
-      if (!list.remove(getByID(es.getID()))) {
-        logger.warning("forgetExercise couldn't remove " + es);
-//        for (T t : list) {
-//          logger.info("\tnow has " + t.getID());
-//        }
-      } else {
-        idToExercise.remove(es.getID());
-      }
-    } else {
-      if (list.size() == before - 1) {
-        //logger.info("\tPagingContainer : now has " + list.size()+ " items");
-      } else {
-        logger.warning("\tPagingContainer.forgetExercise : now has " + list.size() + " items vs " + before);
-      }
-      idToExercise.remove(es.getID());
-    }
-    redraw();
-  }
-
-  /**
-   * @param v
-   * @see mitll.langtest.client.list.PagingExerciseList#setUnaccountedForVertical(int)
-   */
-  public void setUnaccountedForVertical(int v) {
-    verticalUnaccountedFor = v;
-  }
-
-  public List<T> getExercises() {
-    return getList();
-  }
-
-  public int getSize() {
-    return getList().size();
-  }
-
-  public boolean isEmpty() {
-    return getList().isEmpty();
-  }
-
-  public T getFirst() {
-    return getAt(0);
-  }
-
-  public int getIndex(T t) {
-    return getList().indexOf(t);
-  }
-
-  public T getAt(int i) {
-    return getList().get(i);
-  }
-
-  public T getCurrentSelection() {
-    return selectionModel.getSelectedObject();
+    english = controller.getLanguage().equals(ENGLISH);
   }
 
   protected void addColumnsToTable() {
@@ -208,12 +130,6 @@ public class PagingContainer<T extends Shell> extends SimplePagingContainer<T> {
     return columnSortHandler;
   }
 
-
-  @Override
-  protected void addSelectionModel() {
-    selectionModel = new SingleSelectionModel<T>();
-    table.setSelectionModel(selectionModel);
-  }
 
   /**
    * @return
@@ -311,121 +227,29 @@ public class PagingContainer<T extends Shell> extends SimplePagingContainer<T> {
     };
   }
 
-  protected void gotClickOnItem(final T e) {
-  }
 
-  @Override
-  public void clear() {
-    super.clear();
-    idToExercise.clear();
-  }
-
-  public T byID(String id) {
-    return idToExercise.get(id);
+  /**
+   * Confusing for english - english col should be foreign language for english,
+   * @param shell
+   * @return
+   */
+  protected String getEnglishText(CommonShell shell) {
+//    logger.info("getEnglishText " + shell.getID() + " en " + shell.getEnglish() + " fl " + shell.getForeignLanguage() + " mn " + shell.getMeaning());
+    return english && !shell.getEnglish().equals(EditItem.NEW_ITEM) ? shell.getForeignLanguage() : shell.getEnglish();
   }
 
   /**
-   * @param exercise
-   * @see ListInterface#addExercise(mitll.langtest.shared.exercise.Shell)
+   * Confusing for english - fl text should be english or meaning if there is meaning
+   * @param shell
+   * @return
    */
-  public void addExercise(T exercise) {
-    idToExercise.put(exercise.getID(), exercise);
-    getList().add(exercise);
-  }
-
-  /**
-   * @param afterThisOne
-   * @param exercise
-   * @see mitll.langtest.client.list.PagingExerciseList#addExerciseAfter(T, T)
-   */
-  public void addExerciseAfter(T afterThisOne, T exercise) {
-    //logger.info("addExercise adding " + exercise);
-    List<T> list = getList();
-    int before = list.size();
-    String id = exercise.getID();
-    idToExercise.put(id, exercise);
-    int i = list.indexOf(afterThisOne);
-    list.add(i + 1, exercise);
-    int after = list.size();
-    // logger.info("data now has "+ after + " after adding " + exercise.getID());
-    if (before + 1 != after) logger.warning("didn't add " + exercise.getID());
-  }
-
-  public Set<String> getKeys() {
-    return idToExercise.keySet();
-  }
-
-  private void markCurrent(T currentExercise) {
-    if (currentExercise != null) {
-      markCurrentExercise(currentExercise.getID());
+  protected String getFLText(CommonShell shell) {
+    String toShow = shell.getForeignLanguage();
+    if (english && !shell.getEnglish().equals(EditItem.NEW_ITEM)) {
+      String meaning = shell.getMeaning();
+      toShow = meaning.isEmpty() ? shell.getEnglish() : meaning;
     }
+    return toShow;
   }
 
-  protected float adjustVerticalRatio(float ratio) {
-    if (dataProvider != null && getList() != null && !getList().isEmpty()) {
-      T toLoad = getList().get(0);
-
-      if (toLoad.getID().length() > ID_LINE_WRAP_LENGTH) {
-        ratio /= 2; // hack for long ids
-      }
-    }
-
-    return ratio;
-  }
-
-  public void markCurrentExercise(String itemID) {
-    if (getList() == null || getList().isEmpty()) return;
-
-    T t = idToExercise.get(itemID);
-    markCurrent(getList().indexOf(t), t);
-  }
-
-  private void markCurrent(int i, T itemToSelect) {
-    if (DEBUG) logger.info(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect.getID());
-    table.getSelectionModel().setSelected(itemToSelect, true);
-    if (DEBUG) {
-      int pageEnd = table.getPageStart() + table.getPageSize();
-      logger.info("marking " + i + " out of " + table.getRowCount() + " page start " + table.getPageStart() +
-          " end " + pageEnd);
-    }
-
-    int pageNum = i / table.getPageSize();
-    int newIndex = pageNum * table.getPageSize();
-    if (i < table.getPageStart()) {
-      int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());
-      if (DEBUG) logger.info("new start of prev page " + newStart + " vs current " + table.getVisibleRange());
-      table.setVisibleRange(newStart, table.getPageSize());
-    } else {
-      int pageEnd = table.getPageStart() + table.getPageSize();
-      if (i >= pageEnd) {
-        int newStart = Math.max(0, Math.min(table.getRowCount() - table.getPageSize(), newIndex));   // not sure how this happens, but need Math.max(0,...)
-        if (DEBUG) logger.info("new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
-            " vs current " + table.getVisibleRange());
-        table.setVisibleRange(newStart, table.getPageSize());
-      }
-    }
-    table.redraw();
-  }
-
-  /**
-   * @param currentExercise
-   * @see mitll.langtest.client.list.PagingExerciseList#onResize()
-   */
-  public void onResize(T currentExercise) {
-    int numRows = getNumTableRowsGivenScreenHeight();
-    if (table.getPageSize() != numRows) {
-      table.setPageSize(numRows);
-      table.redraw();
-      markCurrent(currentExercise);
-    }
-  }
-
-  public static class ClickableCell extends SafeHtmlCell {
-    @Override
-    public Set<String> getConsumedEvents() {
-      Set<String> events = new HashSet<String>();
-      events.add(BrowserEvents.CLICK);
-      return events;
-    }
-  }
 }
