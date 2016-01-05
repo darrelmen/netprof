@@ -19,8 +19,8 @@ import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.ImageResponse;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public class AudioPanel extends VerticalPanel implements RequiresResize {
+public class AudioPanel<T extends Shell> extends VerticalPanel implements RequiresResize {
   private Logger logger = Logger.getLogger("AudioPanel");
 
   public static final int LEFT_COLUMN_WIDTH = PagingContainer.MAX_WIDTH;
@@ -79,7 +79,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
   private boolean showSpectrogram = false;
   private final int rightMargin;
 
-  protected CommonExercise exercise;
+  protected T exercise;
   protected String instance;
 
   private static final boolean debug = false;
@@ -98,7 +98,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   public AudioPanel(String path, LangTestDatabaseAsync service,
              ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin,
-             String playButtonSuffix, String audioType, String exerciseID, CommonExercise exercise, String instance) {
+             String playButtonSuffix, String audioType, String exerciseID, T exercise, String instance) {
     this(service, controller, showSpectrogram, gaugePanel, 1.0f, rightMargin, exerciseID, exercise, instance);
     this.audioPath = path;
 
@@ -126,7 +126,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    */
   protected AudioPanel(LangTestDatabaseAsync service,
                        ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
-                       float screenPortion, int rightMargin, String exerciseID, CommonExercise exercise, String instance) {
+                       float screenPortion, int rightMargin, String exerciseID, T exercise, String instance) {
     this.screenPortion = screenPortion;
     this.soundManager = controller.getSoundManager();
     this.service = service;
@@ -158,7 +158,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
    * @param playButtonSuffix
    * @param recordButtonTitle
    * @return
-   * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(CommonExercise, ExerciseController, Panel, LangTestDatabaseAsync, int, boolean, String, String)
+   * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(T, ExerciseController, Panel, LangTestDatabaseAsync, int, boolean, String, String)
    * @see mitll.langtest.client.scoring.AudioPanel#AudioPanel
    */
   protected void addWidgets(String playButtonSuffix, String audioType, String recordButtonTitle) {
@@ -233,7 +233,7 @@ public class AudioPanel extends VerticalPanel implements RequiresResize {
     return hasAudio(exercise);
   }
 
-  boolean hasAudio(CommonExercise exercise) {
+  boolean hasAudio(T exercise) {
     return true;
   }
 
