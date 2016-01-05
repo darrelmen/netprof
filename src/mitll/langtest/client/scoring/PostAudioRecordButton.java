@@ -13,7 +13,7 @@ import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.logging.Logger;
 
@@ -25,14 +25,14 @@ import java.util.logging.Logger;
  * Time: 6:51 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class PostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
+public abstract class PostAudioRecordButton<T extends Shell> extends RecordButton implements RecordButton.RecordingListener {
   private Logger logger = Logger.getLogger("PostAudioRecordButton");
 
   private boolean validAudio = false;
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
   private final int index;
   private int reqid = 0;
-  private CommonExercise exercise;
+  private T exercise;
   protected final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final boolean recordInResults;
@@ -47,7 +47,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @param recordButtonTitle
    * @param stopButtonTitle
    */
-  public PostAudioRecordButton(CommonExercise exercise, final ExerciseController controller, LangTestDatabaseAsync service,
+  public PostAudioRecordButton(T exercise, final ExerciseController controller, LangTestDatabaseAsync service,
                                int index, boolean recordInResults, String recordButtonTitle, String stopButtonTitle) {
     super(controller.getRecordTimeout(), controller.getProps().doClickAndHold(), recordButtonTitle, stopButtonTitle, controller.getProps());
     setRecordingListener(this);
@@ -62,8 +62,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     getElement().getStyle().setMarginBottom(1, Style.Unit.PX);
   }
 
-  public void setExercise(CommonExercise exercise) { this.exercise = exercise; }
-  public CommonExercise getExercise() { return exercise; }
+  public void setExercise(T exercise) { this.exercise = exercise; }
+  public T getExercise() { return exercise; }
 
   /**
    * @see mitll.langtest.client.recorder.RecordButton#stop()
