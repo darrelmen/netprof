@@ -5,8 +5,7 @@
 package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.List;
 
@@ -21,12 +20,12 @@ import java.util.List;
  * Time: 4:19 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExerciseListWrapper implements IsSerializable {
+public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
   public ExerciseListWrapper() {} // req for serialization
 
   private int reqID;
-  private List<CommonShell> exercises;
-  private CommonExercise firstExercise;
+  private List<T> exercises;
+  private T firstExercise;
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#makeExerciseListWrapper
@@ -34,7 +33,7 @@ public class ExerciseListWrapper implements IsSerializable {
    * @param ids
    * @param firstExercise
    */
-  public ExerciseListWrapper(int reqID, List<CommonShell> ids, CommonExercise firstExercise) {
+  public ExerciseListWrapper(int reqID, List<T> ids, T firstExercise) {
     this.reqID = reqID;
     this.exercises = ids;
     this.firstExercise = firstExercise;
@@ -43,10 +42,8 @@ public class ExerciseListWrapper implements IsSerializable {
   public int getReqID() {
     return reqID;
   }
-  public List<CommonShell> getExercises() {
-    return exercises;
-  }
-  public CommonExercise getFirstExercise() { return firstExercise;  }
+  public List<T> getExercises() { return exercises;  }
+  public T getFirstExercise() { return firstExercise;  }
 
   public String toString() {
     return "req " + reqID + " has " + exercises.size() + " exercises" +
