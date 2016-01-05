@@ -16,8 +16,8 @@
     </facet>
     <facet type="gwt" name="GWT">
       <configuration>
-        <setting name="compilerMaxHeapSize" value="1024" />
-        <setting name="gwtScriptOutputStyle" value="PRETTY" />
+        <setting name="compilerMaxHeapSize" value="1524" />
+        <setting name="gwtScriptOutputStyle" value="OBF" />
         <setting name="gwtSdkUrl" value="file://$MODULE_DIR$/gwt" />
         <setting name="webFacet" value="Web" />
       </configuration>
@@ -64,17 +64,12 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="gwt" level="project" />
     <orderEntry type="library" name="lib" level="project" />
-    <orderEntry type="library" name="lib1" level="project" />
-    <orderEntry type="module" module-name="imagewriter" />
-    <orderEntry type="library" name="org.moxieapps.gwt.highcharts-1.5.0" level="project" />
-    <orderEntry type="library" name="gwt-dev" level="project" />
-    <orderEntry type="library" name="commons-beanutils-1.8.0 (2)" level="project" />
-    <orderEntry type="library" name="servlet-api (2)" level="project" />
-    <orderEntry type="library" name="servlet-api (2)" level="project" />
-    <orderEntry type="library" name="commons-beanutils-1.8.0" level="project" />
-    <orderEntry type="library" name="xmlbeans-2.3.0" level="project" />
-    <orderEntry type="library" name="org.moxieapps.gwt.highcharts-1.7.0" level="project" />
+    <orderEntry type="library" name="servlet-api" level="project" />
     <orderEntry type="module" module-name="Audioimage" />
+    <orderEntry type="module" module-name="imagewriter" />
+    <orderEntry type="library" name="org.moxieapps.gwt.highcharts-1.7.0" level="project" />
+    <orderEntry type="library" name="commons-math3-3.5" level="project" />
   </component>
 </module>
