@@ -16,9 +16,9 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PopupHelper;
+import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -41,7 +41,7 @@ public class PagingExerciseList<T extends Shell> extends ExerciseList<T> {
   private Logger logger = Logger.getLogger("PagingExerciseList");
 
   protected final ExerciseController controller;
-  protected PagingContainer<T> pagingContainer;
+  protected ClickablePagingContainer<T> pagingContainer;
   private final boolean showTypeAhead;
 
   private TypeAhead typeAhead;
@@ -126,10 +126,10 @@ public class PagingExerciseList<T extends Shell> extends ExerciseList<T> {
    * @return
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
    */
-  protected PagingContainer makePagingContainer() {
+  protected ClickablePagingContainer<T> makePagingContainer() {
     final PagingExerciseList<T> outer = this;
     pagingContainer =
-        new PagingContainer<T>(controller, getVerticalUnaccountedFor(),getRole().equals(Result.AUDIO_TYPE_RECORDER)) {
+        new ClickablePagingContainer<T>(controller) {
           @Override
           protected void gotClickOnItem(T e) {
             outer.gotClickOnItem(e);
@@ -177,7 +177,7 @@ public class PagingExerciseList<T extends Shell> extends ExerciseList<T> {
    *
    * @param pagingContainer
    */
-  protected void addTableWithPager(PagingContainer pagingContainer) {
+  protected void addTableWithPager(ClickablePagingContainer<T> pagingContainer) {
     // row 1
     Panel column = new FlowPanel();
     add(column);
