@@ -10,7 +10,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
 
 /**
 * Tells playAudioPanel to be enabled/disabled in response to recording states
@@ -19,7 +19,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 * Time: 11:46 PM
 * To change this template use File | Settings | File Templates.
 */
-public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
+public class WaveformPostAudioRecordButton<T extends Shell> extends PostAudioRecordButton<T> {
   private static final String RECORD_BUTTON = "RecordButton";
   private final RecordAudioPanel recordAudioPanel;
   private PlayAudioPanel playAudioPanel;
@@ -39,7 +39,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
    * @param playButtonSuffix
    * @param stopButtonText
    */
-  public WaveformPostAudioRecordButton(CommonExercise exercise,
+  public WaveformPostAudioRecordButton(T exercise,
                                        ExerciseController controller,
                                        Panel widgets,
                                        RecordAudioPanel recordAudioPanel, LangTestDatabaseAsync service, int index,
