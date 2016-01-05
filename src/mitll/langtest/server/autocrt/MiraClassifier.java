@@ -2,6 +2,7 @@ package mitll.langtest.server.autocrt;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.HTTPClient;
+import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
 import mitll.langtest.shared.exercise.CommonExercise;
 import net.sf.json.JSONObject;
@@ -36,7 +37,7 @@ public class MiraClassifier {
    * @return
    * @see AutoCRT#getScoreForExercise(CommonExercise, int, String, float)
    */
-  public Info getMiraScore(CommonExercise exercise, int questionID, String answer, String miraFlavor, String url,
+  public Info getMiraScore(AmasExerciseImpl exercise, int questionID, String answer, String miraFlavor, String url,
                            Collection<String> additionalCorrect) {
     String id = exercise.getID();
     List<QAPair> foreignLanguageQuestions = exercise.getForeignLanguageQuestions();
