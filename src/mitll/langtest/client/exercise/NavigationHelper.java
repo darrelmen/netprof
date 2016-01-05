@@ -11,7 +11,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
 
 /**
  * A row with prev/next buttons.  Key bindings for keys too.
@@ -22,7 +22,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
  * Time: 6:36 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NavigationHelper extends HorizontalPanel {
+public class NavigationHelper<T extends Shell> extends HorizontalPanel {
   private static final String LEFT_ARROW_TOOLTIP = "Press the left arrow key to go to the previous item.";
 
   private Button prev;
@@ -30,7 +30,7 @@ public class NavigationHelper extends HorizontalPanel {
 //  private final boolean debug = false;
   private boolean enableNextOnlyWhenAllCompleted = true;
   private final PostAnswerProvider provider;
-  private final ListInterface listContainer;
+  private final ListInterface<T> listContainer;
 
   /**
    * @see ExercisePanel#getNavigationHelper(ExerciseController)
@@ -40,14 +40,14 @@ public class NavigationHelper extends HorizontalPanel {
    * @param listContainer
    * @param addKeyHandler
    */
-  public NavigationHelper(CommonExercise exercise, ExerciseController controller, PostAnswerProvider provider,
-                          ListInterface listContainer, boolean addKeyHandler) {
+  public NavigationHelper(T exercise, ExerciseController controller, PostAnswerProvider provider,
+                          ListInterface<T> listContainer, boolean addKeyHandler) {
     this(exercise, controller, provider, listContainer, true, addKeyHandler,
       false);
   }
 
-  public NavigationHelper(CommonExercise exercise, ExerciseController controller, PostAnswerProvider provider,
-                          ListInterface listContainer, boolean addButtons, boolean addKeyHandler,
+  public NavigationHelper(T exercise, ExerciseController controller, PostAnswerProvider provider,
+                          ListInterface<T> listContainer, boolean addButtons, boolean addKeyHandler,
                           boolean enableNextOnlyWhenAllCompleted) {
     this.provider = provider;
     this.listContainer = listContainer;
@@ -66,13 +66,13 @@ public class NavigationHelper extends HorizontalPanel {
    * @param addButtons
    * @param addKeyHandler
    */
-  private void getNextAndPreviousButtons(final CommonExercise e,
+  private void getNextAndPreviousButtons(final T e,
                                          final ExerciseController controller, boolean addButtons, boolean addKeyHandler) {
     makePrevButton(e, controller, addButtons, addKeyHandler);
     makeNextButton(e, controller, addButtons);
   }
 
-  private void makePrevButton(final CommonExercise exercise, ExerciseController controller, boolean addButtons, boolean useKeyHandler) {
+  private void makePrevButton(final T exercise, ExerciseController controller, boolean addButtons, boolean useKeyHandler) {
     this.prev = new Button("Previous");
     prev.getElement().setId("NavigationHelper_Previous");
     getPrev().addClickHandler(new ClickHandler() {
@@ -89,7 +89,7 @@ public class NavigationHelper extends HorizontalPanel {
     //getPrev().setVisible(!controller.isMinimalUI() || !controller.isPromptBeforeNextItem());
   }
 
-  private void makeNextButton(final CommonExercise exercise, final ExerciseController controller, boolean addButtons) {
+  private void makeNextButton(final T exercise, final ExerciseController controller, boolean addButtons) {
     this.next = new Button(getNextButtonText());
     next.getElement().setId("NavigationHelper_"+getNextButtonText());
 
@@ -108,7 +108,7 @@ public class NavigationHelper extends HorizontalPanel {
     });
   }
 
-  protected void enableNext(CommonExercise exercise) {
+  protected void enableNext(T exercise) {
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
       next.setEnabled(false);
     }
@@ -117,7 +117,7 @@ public class NavigationHelper extends HorizontalPanel {
     }
   }
 
-  void clickPrev(CommonExercise e) {
+  void clickPrev(T e) {
     if (getPrev().isEnabled() && getPrev().isVisible()) {
       getPrev().setEnabled(false);
       listContainer.loadPreviousExercise(e);
@@ -131,7 +131,7 @@ public class NavigationHelper extends HorizontalPanel {
    * @param controller
    * @param exercise
    */
-  void clickNext(final ExerciseController controller, final CommonExercise exercise) {
+  void clickNext(final ExerciseController controller, final T exercise) {
     if (next.isEnabled() && next.isVisible()) {
       if (provider != null) {
         provider.postAnswers(controller, exercise);
