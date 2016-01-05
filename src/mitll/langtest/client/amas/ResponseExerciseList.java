@@ -18,8 +18,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
@@ -89,9 +89,9 @@ public class ResponseExerciseList<T extends Shell> extends SingleSelectExerciseL
    * @seex mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
    * @see #addComponents()
    */
-  protected PagingContainer makePagingContainer() {
+  protected ClickablePagingContainer<T> makePagingContainer() {
     final PagingExerciseList<T> outer = this;
-    pagingContainer = new PagingContainer<T>(controller, getVerticalUnaccountedFor(),false) {
+    pagingContainer = new ClickablePagingContainer<T>(controller, getVerticalUnaccountedFor(),false) {
       @Override
       protected void gotClickOnItem(T e) {
         outer.gotClickOnItem(e);
