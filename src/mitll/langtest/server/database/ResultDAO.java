@@ -64,6 +64,11 @@ public class ResultDAO extends DAO {
   public static final String DEVICETYPE = "devicetype";
   public static final String VALIDITY = "validity";
   public static final String SNR = "SNR";
+  static final String SESSION = "session"; // from ODA
+
+
+  public static final String USER_SCORE = "userscore";
+  public static final String CLASSIFIER_SCORE = "classifierscore";
 
   private final boolean debug = false;
 
@@ -627,6 +632,46 @@ public class ResultDAO extends DAO {
     return new ArrayList<CorrectAndScore>();
   }
 
+
+  /**
+   * @param ids
+   * @param userid
+   * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoresForUser
+   */
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, long userid, String session) {
+    try {
+      String list = getInList(ids);
+
+      String sessionClause = session != null && !session.isEmpty() ? SESSION + "='" + session + "' AND " : "";
+      String sql = getCSSelect() + " FROM " + RESULTS + " WHERE " +
+          USERID + "=? AND " +
+          sessionClause +
+
+          VALID + "=true" +
+          " AND " +
+          Database.EXID + " in (" + list + ")";
+
+      return getCorrectAndScoresForUser(userid, sql);
+    } catch (Exception ee) {
+      logger.error("exception getting results for user " + userid + " and ids " + ids);
+      logException(ee);
+    }
+    return new ArrayList<CorrectAndScore>();
+  }
+
+  private List<CorrectAndScore> getCorrectAndScoresForUser(long userid, String sql) throws SQLException {
+    Connection connection = database.getConnection(this.getClass().toString());
+    PreparedStatement statement = connection.prepareStatement(sql);
+    statement.setLong(1, userid);
+
+    List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement);
+
+    //  if (sql.contains("session")) {
+    //    logger.debug("getCorrectAndScoresForUser for  " + sql + " got " + scores.size() + " scores");
+    //  }
+    return scores;
+  }
 
   /**
    * TODOx : inefficient - better ways to do this in h2???
