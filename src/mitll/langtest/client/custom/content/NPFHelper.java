@@ -27,6 +27,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -250,7 +251,7 @@ public class NPFHelper implements RequiresResize {
   protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList, final String instanceName, final boolean showQC) {
     return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(CommonExercise e) {
+      public Panel getExercisePanel(Shell e) {
         if (showQC) {
           return new QCNPFExercise(e, controller, exerciseList, instanceName);
         } else {
@@ -408,8 +409,10 @@ public class NPFHelper implements RequiresResize {
        * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
        * @see mitll.langtest.client.custom.content.NPFHelper.FlexListLayout#makeExerciseList(com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel, String, boolean)
        */
-      public MyFlexSectionExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
-        super(topRow, currentExercisePanel, FlexListLayout.this.service, FlexListLayout.this.feedback, FlexListLayout.this.controller, instanceName, incorrectFirst);
+      public MyFlexSectionExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
+                                       boolean incorrectFirst) {
+        super(topRow, currentExercisePanel, FlexListLayout.this.service, FlexListLayout.this.feedback,
+            FlexListLayout.this.controller, instanceName, incorrectFirst);
       }
 
       @Override
