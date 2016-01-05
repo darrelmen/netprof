@@ -6,6 +6,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.exercise.Shell;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ import java.util.Set;
  * Time: 4:34 PM
  * To change this template use File | Settings | File Templates.
  */
-public class SectionHelper {
+public class SectionHelper<T extends Shell>  {
   private static final Logger logger = Logger.getLogger(SectionHelper.class);
   private static final String unitType = "unit";
   private static final String chapterType = "chapter";
@@ -33,7 +34,7 @@ public class SectionHelper {
 
   private List<String> predefinedTypeOrder = new ArrayList<String>();
 
-  private final Map<String,Map<String,Lesson>> typeToUnitToLesson = new HashMap<String,Map<String,Lesson>>();
+  private final Map<String,Map<String,Lesson<T>>> typeToUnitToLesson = new HashMap<>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
   private final Map<String, Map<String, Map<String, Collection<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String, Map<String, Collection<String>>>>();
 
@@ -102,12 +103,12 @@ public class SectionHelper {
         }
       }
     } else {
-      Map<String, Lesson> stringLessonMap = typeToUnitToLesson.get(root);
+      Map<String, Lesson<T>> stringLessonMap = typeToUnitToLesson.get(root);
       if (stringLessonMap == null) {
         logger.error("no entry for " + root + " in " + typeToUnitToLesson.keySet());
       } else {
         //logger.debug("for " + root + " got " + stringLessonMap);
-        for (Map.Entry<String, Lesson> rootSection : stringLessonMap.entrySet()) {
+        for (Map.Entry<String, Lesson<T>> rootSection : stringLessonMap.entrySet()) {
           SectionNode parent = new SectionNode(root, rootSection.getKey());
           firstSet.add(parent);
         }
@@ -153,13 +154,13 @@ public class SectionHelper {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesForSelectionState
    */
-  public Collection<CommonExercise> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection) {
-    Collection<CommonExercise> currentList = null;
+  public Collection<T> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection) {
+    Collection<T> currentList = null;
 
     for (Map.Entry<String, Collection<String>> pair : typeToSection.entrySet()) {
       String type = pair.getKey();
       if (isKnownType(type)) {
-        Collection<CommonExercise> exercisesForSection = new HashSet<CommonExercise>(getExercisesForSection(type, pair.getValue()));
+        Collection<T> exercisesForSection = new HashSet<T>(getExercisesForSection(type, pair.getValue()));
 
         if (currentList == null) {
           currentList = exercisesForSection;
@@ -190,19 +191,19 @@ public class SectionHelper {
    * @param sections
    * @return
    */
-  private Collection<CommonExercise> getExercisesForSection(String type, Collection<String> sections) {
-    Map<String, Lesson> sectionToLesson = typeToUnitToLesson.get(type);
+  private Collection<T> getExercisesForSection(String type, Collection<String> sections) {
+    Map<String, Lesson<T>> sectionToLesson = typeToUnitToLesson.get(type);
     if (sectionToLesson == null) {
       return Collections.emptyList();
     } else {
-      List<CommonExercise> exercises = new ArrayList<CommonExercise>();
+      List<T> exercises = new ArrayList<T>();
       for (String section : sections) {
-        Lesson lesson = sectionToLesson.get(section);
+        Lesson<T> lesson = sectionToLesson.get(section);
         if (lesson == null) {
           logger.error("Couldn't find section " + section);
           return Collections.emptyList();
         } else {
-          Collection<CommonExercise> exercises1 = lesson.getExercises();
+          Collection<T> exercises1 = lesson.getExercises();
           if (exercises1.isEmpty()) {
             logger.warn("getExercisesForSection : huh? section " + section + " has no exercises : " + lesson);
           }
@@ -213,17 +214,19 @@ public class SectionHelper {
     }
   }
 
+/*
   @Deprecated
-  public Pair addUnitToLesson(CommonExercise exercise, String unitName) { return addExerciseToLesson(exercise, unitType, unitName);}
-  public Pair addChapterToLesson(CommonExercise exercise, String unitName) { return addExerciseToLesson(exercise, chapterType, unitName);}
-  public Pair addWeekToLesson(CommonExercise exercise, String unitName) { return addExerciseToLesson(exercise, weekType, unitName);}
+  public Pair addUnitToLesson(T exercise, String unitName) { return addExerciseToLesson(exercise, unitType, unitName);}
+  public Pair addChapterToLesson(T exercise, String unitName) { return addExerciseToLesson(exercise, chapterType, unitName);}
+  public Pair addWeekToLesson(T exercise, String unitName) { return addExerciseToLesson(exercise, weekType, unitName);}
+*/
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesFromFiltered(java.util.Map, mitll.langtest.shared.custom.UserList)
    * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
    * @param where
    */
-  public void addExercise(CommonExercise where) {
+  public void addExercise(T where) {
     List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
     for (Map.Entry<String, String> pair : where.getUnitToValue().entrySet()) {
       Pair pair1 = addExerciseToLesson(where, pair.getKey(), pair.getValue());
@@ -240,8 +243,8 @@ public class SectionHelper {
    * @param unitName
    * @return
    */
-  public Pair addExerciseToLesson(CommonExercise exercise, String type, String unitName) {
-    Map<String, Lesson> unit = getSectionToLesson(type);
+  public Pair addExerciseToLesson(T exercise, String type, String unitName) {
+    Map<String, Lesson<T>> unit = getSectionToLesson(type);
 
     addUnitNameEntry(exercise, unitName, unit);
 
@@ -250,15 +253,15 @@ public class SectionHelper {
     return new Pair(type, unitName);
   }
 
-  private void addUnitNameEntry(CommonExercise exercise, String unitName, Map<String, Lesson> unit) {
-    Lesson unitForName = unit.get(unitName);
+  private void addUnitNameEntry(T exercise, String unitName, Map<String, Lesson<T>> unit) {
+    Lesson<T> unitForName = unit.get(unitName);
     if (unitForName == null) {
-      unit.put(unitName, unitForName = new Lesson(unitName));
+      unit.put(unitName, unitForName = new Lesson<T>(unitName));
     }
     unitForName.addExercise(exercise);
   }
 
-  public void removeExercise(CommonExercise exercise) {
+  public void removeExercise(T exercise) {
     Map<String, String> unitToValue = exercise.getUnitToValue();
   //  logger.debug("Removing " + exercise.getID() + " with " +unitToValue);
     if (unitToValue != null) {
@@ -270,7 +273,7 @@ public class SectionHelper {
     }
   }
 
-  public void refreshExercise(CommonExercise exercise) {
+  public void refreshExercise(T exercise) {
     removeExercise(exercise);
     addExercise(exercise);
   }
@@ -282,16 +285,16 @@ public class SectionHelper {
    * @param unitName
    * @return
    */
-  private boolean removeExerciseToLesson(CommonExercise exercise, String type, String unitName) {
-    Map<String, Lesson> unit = getSectionToLesson(type);
+  private boolean removeExerciseToLesson(T exercise, String type, String unitName) {
+    Map<String, Lesson<T>> unit = getSectionToLesson(type);
     return unit.get(unitName).remove(exercise);
   }
 
 
-  private Map<String, Lesson> getSectionToLesson(String section) {
-    Map<String, Lesson> unit = typeToUnitToLesson.get(section);
+  private Map<String, Lesson<T>> getSectionToLesson(String section) {
+    Map<String, Lesson<T>> unit = typeToUnitToLesson.get(section);
     if (unit == null) {
-      typeToUnitToLesson.put(section, unit = new HashMap<String, Lesson>());
+      typeToUnitToLesson.put(section, unit = new HashMap<>());
     }
     return unit;
   }
@@ -352,7 +355,7 @@ public class SectionHelper {
   public void report() {
     logger.debug("type order " + getTypeOrder());
     for (String key : typeToUnitToLesson.keySet()) {
-      Map<String, Lesson> categoryToLesson = typeToUnitToLesson.get(key);
+      Map<String, Lesson<T>> categoryToLesson = typeToUnitToLesson.get(key);
       Set<String> sections = categoryToLesson.keySet();
       if (!sections.isEmpty()) {
         logger.debug("report : Section type : " + key + " : sections " + sections);
