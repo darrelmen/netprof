@@ -20,9 +20,10 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 
 import java.util.Arrays;
@@ -37,7 +38,7 @@ import java.util.logging.Logger;
  * Time: 4:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ResponseExerciseList extends SingleSelectExerciseList {
+public class ResponseExerciseList<T extends Shell> extends SingleSelectExerciseList<T> {
   private Logger logger = Logger.getLogger("ResponseExerciseList");
 
   private static final String SPEECH = "Speech";
@@ -89,10 +90,10 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
    * @see #addComponents()
    */
   protected PagingContainer makePagingContainer() {
-    final PagingExerciseList outer = this;
-    pagingContainer = new PagingContainer(controller, getVerticalUnaccountedFor(),false) {
+    final PagingExerciseList<T> outer = this;
+    pagingContainer = new PagingContainer<T>(controller, getVerticalUnaccountedFor(),false) {
       @Override
-      protected void gotClickOnItem(CommonShell e) {
+      protected void gotClickOnItem(T e) {
         outer.gotClickOnItem(e);
       }
     };
@@ -214,7 +215,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
 //  }
 
   /**
-   * @see #loadNextExercise(CommonShell)
+   * @see ListInterface#loadNextExercise(Shell)
    */
   @Override
   protected void onLastItem() {
@@ -280,7 +281,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
   }
 
   @Override
-  public boolean loadNextExercise(CommonShell current) {
+  public boolean loadNextExercise(T current) {
     //logger.info("loadNextExercise " + current.getID() );
     boolean b = super.loadNextExercise(current);
    // controller.showAdvance(this);
