@@ -17,8 +17,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.MiniUser;
 
 import java.util.*;
@@ -27,7 +26,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 10/16/15.
  */
-public class FastAndSlowASRScoringAudioPanel<T extends CommonExercise> extends ASRScoringAudioPanel<T> {
+public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttributeExercise> extends ASRScoringAudioPanel<T> {
   private Logger logger = null;
 
   private static final String DEFAULT = "Default";
