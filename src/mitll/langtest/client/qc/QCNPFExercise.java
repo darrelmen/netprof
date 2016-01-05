@@ -34,10 +34,7 @@ import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.*;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.STATE;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -128,7 +125,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
                                                  final ListInterface listContainer, boolean addKeyHandler) {
     NavigationHelper navHelper = new NavigationHelper(exercise, controller, new PostAnswerProvider() {
       @Override
-      public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
+      public void postAnswers(ExerciseController controller, T completedExercise) {
         nextWasPressed(listContainer, completedExercise);
       }
     }, listContainer, addKeyHandler) {
