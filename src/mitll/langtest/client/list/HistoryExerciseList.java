@@ -190,7 +190,7 @@ public class HistoryExerciseList<T extends Shell> extends PagingExerciseList<T> 
    * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer()
    */
   @Override
-  protected void gotClickOnItem(T e) {
+  public void gotClickOnItem(T e) {
     loadByID(e.getID());
   }
 
