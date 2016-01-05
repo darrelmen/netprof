@@ -13,6 +13,7 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.exercise.Shell;
 
@@ -42,7 +43,7 @@ public class WaveformExercisePanel<T extends CommonExercise> extends ExercisePan
    * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#getFactory(mitll.langtest.client.list.PagingExerciseList)
    */
   public WaveformExercisePanel(final T e, final LangTestDatabaseAsync service,
-                               final ExerciseController controller, ListInterface exerciseList, boolean doNormalRecording, String instance) {
+                               final ExerciseController controller, ListInterface<T> exerciseList, boolean doNormalRecording, String instance) {
     super(e, service, controller, exerciseList, doNormalRecording ? "" : EXAMPLE_RECORD, instance);
     getElement().setId("WaveformExercisePanel");
   }
@@ -120,7 +121,7 @@ public class WaveformExercisePanel<T extends CommonExercise> extends ExercisePan
   }
 
   private void addExampleSentenceRecorder(T exercise, LangTestDatabaseAsync service, ExerciseController controller, int index, Panel vp) {
-    RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, false, "context=" + Result.AUDIO_TYPE_REGULAR, instance);
+    RecordAudioPanel fast = new RecordAudioPanel<T>(exercise, controller, this, service, index, false, "context=" + Result.AUDIO_TYPE_REGULAR, instance);
     audioPanels.add(fast);
     vp.add(fast);
 
@@ -131,7 +132,7 @@ public class WaveformExercisePanel<T extends CommonExercise> extends ExercisePan
   private VerticalPanel addRecordAudioPanelNoCaption(T exercise, LangTestDatabaseAsync service,
                                             ExerciseController controller, int index, Panel vp, String audioType) {
 //    System.out.println("addRecordAudioPanel " + exercise + " audioType " +audioType);
-    RecordAudioPanel fast = new RecordAudioPanel(exercise, controller, this, service, index, false, audioType, instance);
+    RecordAudioPanel fast = new RecordAudioPanel<T>(exercise, controller, this, service, index, false, audioType, instance);
     audioPanels.add(fast);
     vp.add(fast);
 
@@ -180,7 +181,7 @@ public class WaveformExercisePanel<T extends CommonExercise> extends ExercisePan
    * @see mitll.langtest.client.exercise.NavigationHelper#clickNext(ExerciseController, mitll.langtest.shared.exercise.T)
    */
   @Override
-  public void postAnswers(ExerciseController controller, Shell completedExercise) {
+  public void postAnswers(ExerciseController controller, T completedExercise) {
     completedExercise.setState(STATE.RECORDED);
     exerciseList.setState(completedExercise.getID(), STATE.RECORDED);
     exerciseList.redraw();
