@@ -8,8 +8,10 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.exercise.BaseExercise;
 import mitll.langtest.shared.exercise.CommonUserExercise;
 import mitll.langtest.shared.exercise.ExerciseShell;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,7 +25,7 @@ import java.util.Map;
  * Time: 8:18 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UserList extends ExerciseShell {
+public class UserList<T extends Shell> extends BaseExercise {
   public static final String MY_LIST = "Favorites";
 
   private long uniqueID;
@@ -34,7 +36,7 @@ public class UserList extends ExerciseShell {
   private String classMarker;
   private boolean isPrivate;
   private boolean isReview;
-  private List<CommonUserExercise> exercises = new ArrayList<CommonUserExercise>();
+  private List<T> exercises = new ArrayList<>();
 
   public UserList(){}
 
@@ -69,8 +71,8 @@ public class UserList extends ExerciseShell {
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterItemCreated(UserExercise, UserList, ListInterface, Panel)
    * @param toAdd
    */
-  public void addExercise(CommonUserExercise toAdd) { exercises.add(toAdd);  }
-  public void addExerciseAfter(CommonUserExercise after, CommonUserExercise toAdd) {
+  public void addExercise(T toAdd) { exercises.add(toAdd);  }
+  public void addExerciseAfter(T after, T toAdd) {
     int index = exercises.indexOf(after);
     if (index == -1) {
       exercises.add(toAdd);
@@ -91,7 +93,7 @@ public class UserList extends ExerciseShell {
     return classMarker;
   }
 
-  public Collection<CommonUserExercise> getExercises() {
+  public Collection<T> getExercises() {
     return exercises;
   }
 
@@ -99,15 +101,15 @@ public class UserList extends ExerciseShell {
    * @see mitll.langtest.server.database.custom.UserListDAO#populateList(UserList)
    * @param exercises
    */
-  public void setExercises(List<CommonUserExercise> exercises) {
+  public void setExercises(List<T> exercises) {
     this.exercises = exercises;
   }
 
-  public boolean remove(CommonUserExercise newUserExercise) {  return exercises.remove(newUserExercise); }
+  public boolean remove(T newUserExercise) {  return exercises.remove(newUserExercise); }
 
-  public CommonUserExercise remove(String id) {
-    CommonUserExercise toRemove = null;
-    for (CommonUserExercise ue : exercises) {
+  public T remove(String id) {
+    T toRemove = null;
+    for (T ue : exercises) {
       if (id.equals(ue.getID())) {
         toRemove = ue;
       }
@@ -123,7 +125,7 @@ public class UserList extends ExerciseShell {
     this.uniqueID = uniqueID;
   }
 
-  public boolean contains(CommonUserExercise userExercise) {
+  public boolean contains(T userExercise) {
     return getExercises().contains(userExercise);
   }
   public boolean isPrivate() {
