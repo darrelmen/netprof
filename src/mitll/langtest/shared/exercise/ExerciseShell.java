@@ -4,7 +4,6 @@
 
 package mitll.langtest.shared.exercise;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.custom.UserList;
 
 /**
@@ -13,19 +12,15 @@ import mitll.langtest.shared.custom.UserList;
  * Date: 11/29/12
  * Time: 3:00 PM
  * To change this template use File | Settings | File Templates.
+ *
+ * TODO : UserList should not extend this
  */
-public class ExerciseShell implements IsSerializable, CommonShell {
-  protected String id;
-
-  private STATE state = STATE.UNSET;
-  private STATE secondState = STATE.UNSET;
-
+public class ExerciseShell extends BaseExercise implements CommonShell {
   protected String englishSentence;
   protected String meaning;
   protected String foreignLanguage;
 
-  public ExerciseShell() {
-  }
+  public ExerciseShell() {}
 
   /**
    * @param id
@@ -45,7 +40,7 @@ public class ExerciseShell implements IsSerializable, CommonShell {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShells
    */
   private ExerciseShell(String id, String englishSentence, String meaning, String foreignLanguage) {
-    this.id = id;
+    super(id);
     this.englishSentence = englishSentence;
     this.meaning = meaning;
     this.foreignLanguage = foreignLanguage;
@@ -57,14 +52,6 @@ public class ExerciseShell implements IsSerializable, CommonShell {
    */
   public CommonShell getShell() {
     return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage);
-  }
-
-  public String getID() {
-    return id;
-  }
-
-  public void setID(String id) {
-    this.id = id;
   }
 
   public String getEnglish() {
@@ -79,26 +66,6 @@ public class ExerciseShell implements IsSerializable, CommonShell {
   @Override
   public String getForeignLanguage() {
     return foreignLanguage;
-  }
-
-  @Override
-  public STATE getState() {
-    return state;
-  }
-
-  @Override
-  public void setState(STATE state) {
-    this.state = state;
-  }
-
-  @Override
-  public STATE getSecondState() {
-    return secondState;
-  }
-
-  @Override
-  public void setSecondState(STATE state) {
-    this.secondState = state;
   }
 
   @Override
