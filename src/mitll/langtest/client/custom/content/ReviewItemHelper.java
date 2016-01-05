@@ -13,9 +13,9 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
+import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
@@ -91,7 +91,7 @@ public class ReviewItemHelper extends NPFHelper {
         return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst) {
           com.github.gwtbootstrap.client.ui.CheckBox onlyAudio;
           @Override
-          protected void addTableWithPager(PagingContainer pagingContainer) {
+          protected void addTableWithPager(ClickablePagingContainer pagingContainer) {
             // row 1
             Panel column = new FlowPanel();
             add(column);
