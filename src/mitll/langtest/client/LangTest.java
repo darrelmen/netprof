@@ -418,7 +418,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param firstRow
    * @return false if we didn't do either of the special pages and should do the normal navigation view
    */
-  private boolean showLogin(final Container verticalContainer, final Panel firstRow) {
+  public boolean showLogin(final Container verticalContainer, final Panel firstRow) {
     final EventRegistration eventRegistration = this;
 
     // check if we're here as a result of resetting a password
