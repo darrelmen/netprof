@@ -128,12 +128,12 @@ public class SimpleChapterNPFHelper<T extends Shell> implements RequiresResize {
    * @return
    * @see mitll.langtest.client.exercise.WaveformExercisePanel
    */
-  protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
+  protected ExercisePanelFactory getFactory(final PagingExerciseList<T> exerciseList) {
     final String instance = exerciseList.getInstance();
     return new ExercisePanelFactory<T>(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(final T e) {
-        return new WaveformExercisePanel(e, service, controller, exerciseList, true, instance) {
+        return new WaveformExercisePanel<T>(e, service, controller, exerciseList, true, instance) {
           @Override
           public void postAnswers(ExerciseController controller, T completedExercise) {
             super.postAnswers(controller, completedExercise);
