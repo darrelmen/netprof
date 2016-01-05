@@ -35,7 +35,6 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.ArrayList;
@@ -50,7 +49,9 @@ import java.util.logging.Logger;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
+public class GoodwaveExercisePanel<T extends CommonExercise> extends HorizontalPanel implements BusyPanel, RequiresResize,
+    ProvidesResize,
+    CommentAnnotator {
   private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
   public static final String MANDARIN = "Mandarin";
@@ -73,7 +74,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   private Image recordImage1;
   private Image recordImage2;
 
-  protected final CommonExercise exercise;
+  protected final T exercise;
   protected final ExerciseController controller;
   protected final LangTestDatabaseAsync service;
   protected ScoreListener scorePanel;
@@ -86,17 +87,17 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
    * and a right side -- the charts and gauges {@link ASRScorePanel}
    *
-   * @param e             for this exercise
+   * @param commonExercise             for this exercise
    * @param controller
    * @param listContainer
    * @param screenPortion
    * @param instance
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    */
-  public GoodwaveExercisePanel(final CommonExercise e, final ExerciseController controller,
-                               final ListInterface listContainer,
+  public GoodwaveExercisePanel(final T commonExercise, final ExerciseController controller,
+                               final ListInterface<T> listContainer,
                                float screenPortion, boolean addKeyHandler, String instance) {
-    this.exercise = e;
+    this.exercise = commonExercise;
     this.controller = controller;
     this.service = controller.getService();
     this.screenPortion = screenPortion;
@@ -109,9 +110,9 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     center.addStyleName("floatLeft");
     // attempt to left justify
 
-    ASRScorePanel widgets = makeScorePanel(e, instance);
+    ASRScorePanel widgets = makeScorePanel(commonExercise, instance);
 
-    addQuestionContentRow(e, controller, center);
+    addQuestionContentRow(commonExercise, controller, center);
 
     // content is on the left side
     add(center);
@@ -121,7 +122,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
       add(widgets);
     }
     if (controller.isRecordingEnabled()) {
-      addUserRecorder(service, controller, center, screenPortion, e); // todo : revisit screen portion...
+      addUserRecorder(service, controller, center, screenPortion, commonExercise); // todo : revisit screen portion...
     }
 
     this.navigationHelper = getNavigationHelper(controller, listContainer, addKeyHandler);
@@ -137,10 +138,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 //  }
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller,
-                                                 final ListInterface listContainer, boolean addKeyHandler) {
-    return new NavigationHelper(getLocalExercise(), controller, new PostAnswerProvider() {
+                                                 final ListInterface<T> listContainer, boolean addKeyHandler) {
+    return new NavigationHelper<T>(getLocalExercise(), controller, new PostAnswerProvider<T>() {
       @Override
-      public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
+      public void postAnswers(ExerciseController controller, T completedExercise) {
         nextWasPressed(listContainer, completedExercise);
       }
     }, listContainer, true, addKeyHandler, false);
@@ -149,7 +150,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   public void wasRevealed() {
   }
 
-  protected ASRScorePanel makeScorePanel(CommonExercise e, String instance) {
+  protected ASRScorePanel makeScorePanel(T e, String instance) {
     ASRScorePanel widgets = new ASRScorePanel("GoodwaveExercisePanel_" + instance, controller, e.getID());
     scorePanel = widgets;
     return widgets;
@@ -159,12 +160,12 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     listContainer.loadNextExercise(exercise.getID());
   }
 
-  protected void nextWasPressed(ListInterface listContainer, CommonShell completedExercise) {
+  protected void nextWasPressed(ListInterface listContainer, T completedExercise) {
     navigationHelper.enableNextButton(false);
     listContainer.loadNextExercise(completedExercise.getID());
   }
 
-  protected void addQuestionContentRow(CommonExercise e, ExerciseController controller, Panel hp) {
+  protected void addQuestionContentRow(T e, ExerciseController controller, Panel hp) {
     hp.add(getQuestionContent(e));
   }
 
@@ -185,10 +186,10 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @param controller    used in subclasses for audio control
    * @param screenPortion
    * @param exercise
-   * @see #GoodwaveExercisePanel(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
+   * @see #GoodwaveExercisePanel(mitll.langtest.shared.exercise.T, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
    */
   protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo,
-                                 float screenPortion, CommonExercise exercise) {
+                                 float screenPortion, T exercise) {
     DivWidget div = new DivWidget();
     ScoringAudioPanel answerWidget = getAnswerWidget(service, controller, screenPortion);
     String refAudio = exercise.getRefAudio();
@@ -205,7 +206,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     toAddTo.add(div);
   }
 
-  private void showRecordingHistory(CommonExercise exercise, ScoringAudioPanel answerWidget, String refAudio) {
+  private void showRecordingHistory(T exercise, ScoringAudioPanel answerWidget, String refAudio) {
     answerWidget.setRefAudio(refAudio);
     for (CorrectAndScore score : exercise.getScores()) {
       answerWidget.addScore(score);
@@ -220,7 +221,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
 
   /**
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.exercise.CommonExercise)
+   * @see #getQuestionContent(mitll.langtest.shared.exercise.T)
    */
   private Panel getUnitLessonForExercise() {
     Panel flow = new HorizontalPanel();
@@ -257,7 +258,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @return the panel that has the instructions and the audio panel
    * @see #GoodwaveExercisePanel
    */
-  private Widget getQuestionContent(CommonExercise e) {
+  private Widget getQuestionContent(T e) {
   //  String content = e.getContent();
   //  logger.info("getQuestionContent got content " + content);
     final VerticalPanel vp = new VerticalPanel();
@@ -288,15 +289,15 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
   /**
    * @param e
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.exercise.CommonExercise)
+   * @see #getQuestionContent(mitll.langtest.shared.exercise.T)
    */
-  private Widget getItemHeader(CommonExercise e) {
+  private Widget getItemHeader(T e) {
     Heading w = new Heading(HEADING_FOR_UNIT_LESSON, "Item", e.getID());
     w.getElement().setId("ItemHeading");
     return w;
   }
 
-  protected Widget getQuestionContent(CommonExercise e, String content) {
+  protected Widget getQuestionContent(T e, String content) {
     Widget questionContent = new HTML(content);
     questionContent.getElement().setId("QuestionContent");
     questionContent.addStyleName("floatLeft");
@@ -308,7 +309,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @return
    * @see #getQuestionContent
    */
-  protected Widget getScoringAudioPanel(final CommonExercise e) {
+  protected Widget getScoringAudioPanel(final T e) {
     String path = e.getRefAudio() != null ? e.getRefAudio() : e.getSlowAudioRef();
 
     if (path != null) {
@@ -511,7 +512,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
    * @param controller
    * @param screenPortion
    * @return
-   * @see #addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.CommonExercise)
+   * @see #addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.T)
    */
   private ScoringAudioPanel getAnswerWidget(LangTestDatabaseAsync service, final ExerciseController controller, float screenPortion) {
     ScoringAudioPanel widgets = new ASRRecordAudioPanel(service, controller, getLocalExercise(), instance);
@@ -540,14 +541,14 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
     return t.replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
   }
 
-  public CommonExercise getLocalExercise() {
+  public T getLocalExercise() {
     return exercise;
   }
 
   /**
    * An ASR scoring panel with a record button.
    */
-  private class ASRRecordAudioPanel extends ASRScoringAudioPanel {
+  private class ASRRecordAudioPanel extends ASRScoringAudioPanel<T> {
     private final int index;
     private PostAudioRecordButton postAudioRecordButton;
     private PlayAudioPanel playAudioPanel;
@@ -561,7 +562,7 @@ public class GoodwaveExercisePanel extends HorizontalPanel implements BusyPanel,
      * @param exercise
      *@param instance @see GoodwaveExercisePanel#getAnswerWidget
      */
-    public ASRRecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, CommonExercise exercise, String instance) {
+    public ASRRecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, T exercise, String instance) {
       super(exercise.getForeignLanguage(), service, controller, scorePanel, REFERENCE, exercise.getID(), exercise, instance);
       this.index = 1;
       getElement().setId("ASRRecordAudioPanel");
