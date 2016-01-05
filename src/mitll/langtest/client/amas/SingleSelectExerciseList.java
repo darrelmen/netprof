@@ -7,7 +7,6 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -20,8 +19,8 @@ import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -33,7 +32,7 @@ import java.util.logging.Logger;
  * Time: 5:32 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class SingleSelectExerciseList extends HistoryExerciseList {
+public abstract class SingleSelectExerciseList<T extends Shell> extends HistoryExerciseList<T> {
   public static final int NUM_CHOICES = 3;
   private final Logger logger = Logger.getLogger("SingleSelectExerciseList");
 
@@ -353,9 +352,9 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList {
 
 
   /**
-   * @see #rememberAndLoadFirst(List, CommonExercise, String)
+   * @seex #rememberAndLoadFirst(List, CommonExercise, String)
    */
-  //@Override
+  @Override
   protected void loadFirstExercise() {
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
       logger.info("loadFirstExercise : current exercises is empty?");
