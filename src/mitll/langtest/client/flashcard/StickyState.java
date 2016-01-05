@@ -5,6 +5,7 @@
 package mitll.langtest.client.flashcard;
 
 import mitll.langtest.client.custom.KeyStorage;
+import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.shared.exercise.CommonExercise;
 
 /**
@@ -28,7 +29,7 @@ public class StickyState {
   /**
    *
    * @param e
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory#getExercisePanel(mitll.langtest.shared.exercise.CommonExercise)
+   * @see ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.exercise.Shell)
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
    */
   protected void storeCurrent(CommonExercise e) {

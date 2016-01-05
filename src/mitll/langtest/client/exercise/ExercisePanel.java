@@ -10,7 +10,7 @@ import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  * Time: 1:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExercisePanel extends VerticalPanel implements
+public abstract class ExercisePanel<T extends Shell> extends VerticalPanel implements
     BusyPanel, PostAnswerProvider, ProvidesResize, RequiresResize {
   private Logger logger = Logger.getLogger("ExercisePanel");
 
@@ -34,10 +34,10 @@ public abstract class ExercisePanel extends VerticalPanel implements
   private static final String PROMPT = "Read the following text and answer the question or questions below.";
   private final List<Widget> answers = new ArrayList<Widget>();
   private final Set<Widget> completed = new HashSet<Widget>();
-  protected CommonExercise exercise = null;
+  protected T exercise = null;
   protected final ExerciseController controller;
   private final NavigationHelper navigationHelper;
-  protected final ListInterface exerciseList;
+  protected final ListInterface<T> exerciseList;
   private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
   protected final String message;
   protected final String instance;
@@ -52,8 +52,8 @@ public abstract class ExercisePanel extends VerticalPanel implements
    * @see ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.list.ListInterface#loadExercise
    */
-  public ExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service,
-                       final ExerciseController controller, ListInterface exerciseList, String instructionMessage, String instance) {
+  public ExercisePanel(final T e, final LangTestDatabaseAsync service,
+                       final ExerciseController controller, ListInterface<T> exerciseList, String instructionMessage, String instance) {
     this.exercise = e;
     this.controller = controller;
     this.exerciseList = exerciseList;
@@ -86,7 +86,7 @@ public abstract class ExercisePanel extends VerticalPanel implements
   }
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller) {
-    return new NavigationHelper(exercise, controller, this, exerciseList, true, true, true);
+    return new NavigationHelper<T>(exercise, controller, this, exerciseList, true, true, true);
   }
 
   protected void addInstructions() {
@@ -96,9 +96,9 @@ public abstract class ExercisePanel extends VerticalPanel implements
   /**
    * @param e
    * @return
-   * @see #ExercisePanel(CommonExercise, LangTestDatabaseAsync, ExerciseController, ListInterface, String, String)
+   * @see #ExercisePanel(T, LangTestDatabaseAsync, ExerciseController, ListInterface, String, String)
    */
-  private Widget getQuestionContent(CommonExercise e) {
+  private Widget getQuestionContent(T e) {
     String content = getExerciseContent(e);
 
     HTML maybeRTLContent = getMaybeRTLContent(content);
@@ -111,7 +111,7 @@ public abstract class ExercisePanel extends VerticalPanel implements
     }
   }
 
-  protected abstract String getExerciseContent(CommonExercise e);
+  protected abstract String getExerciseContent(T e);
 /*  {
     logger.warning("getExerciseContent got " + e.getContent());
     return e.getContent();
@@ -127,7 +127,7 @@ public abstract class ExercisePanel extends VerticalPanel implements
   /**
    * @param content
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.exercise.CommonExercise)
+   * @see #getQuestionContent(mitll.langtest.shared.exercise.T)
    */
   protected HTML getMaybeRTLContent(String content) {
     boolean rightAlignContent = controller.isRightAlignContent();
@@ -177,12 +177,12 @@ public abstract class ExercisePanel extends VerticalPanel implements
    * @param service
    * @param controller used in subclasses for audio control
    */
-  private void addQuestions(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller) {
+  private void addQuestions(T e, LangTestDatabaseAsync service, ExerciseController controller) {
     add(getQuestionPanel(e, service, controller, 1
     ));
   }
 
-  private Panel getQuestionPanel(CommonExercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
+  private Panel getQuestionPanel(T exercise, LangTestDatabaseAsync service, ExerciseController controller,
                                  int questionNumber) {
     // add question prompt
     Panel vp = new VerticalPanel();
@@ -197,7 +197,7 @@ public abstract class ExercisePanel extends VerticalPanel implements
   /**
    * @param index
    * @param answerWidget
-   * @see #getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
+   * @see #getAnswerWidget(mitll.langtest.shared.exercise.T, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
    */
   protected void addAnswerWidget(int index, Widget answerWidget) {
     answers.add(answerWidget);
@@ -250,7 +250,7 @@ public abstract class ExercisePanel extends VerticalPanel implements
    * @see NavigationHelper#getNextAndPreviousButtons
    */
   @Override
-  public abstract void postAnswers(final ExerciseController controller, final CommonExercise completedExercise); /*{
+  public abstract void postAnswers(final ExerciseController controller, final Shell completedExercise); /*{
     int i = 1;
     int user = controller.getUser();
     final Set<Widget> incomplete = new HashSet<Widget>();
@@ -302,7 +302,7 @@ public abstract class ExercisePanel extends VerticalPanel implements
     t.schedule(3000);
   }*/
 
-  protected Widget getAnswerWidget(final CommonExercise exercise, final LangTestDatabaseAsync service,
+  protected Widget getAnswerWidget(final T exercise, final LangTestDatabaseAsync service,
                                    ExerciseController controller, final int index) {
     return null;
   }
@@ -324,10 +324,10 @@ public abstract class ExercisePanel extends VerticalPanel implements
    */
   public void recordIncomplete(Widget answer) {
     if (!completed.remove(answer) && !completed.isEmpty()) {
-      System.err.println("recordIncomplete : huh? answer " + answer.getElement().getId() +
+      logger.warning("recordIncomplete : huh? answer " + answer.getElement().getId() +
           " is not on list of size " + completed.size());
       for (Widget widget : completed) {
-        System.err.println("recordIncomplete : known : " + widget.getElement().getId());
+        logger.warning("recordIncomplete : known : " + widget.getElement().getId());
       }
     }
     // System.out.println("recordIncomplete : completed " + completed.size() + " vs total " + answers.size());
@@ -346,7 +346,7 @@ public abstract class ExercisePanel extends VerticalPanel implements
         " completed " + completed.size() + " vs total " + answers.size());
 
     if (completed.size() > answers.size()) {
-      System.err.println("recordCompleted huh? more complete " + completed.size() + " than answers " + answers.size());
+      logger.warning("recordCompleted huh? more complete " + completed.size() + " than answers " + answers.size());
     }
 
     // markTabsComplete();
