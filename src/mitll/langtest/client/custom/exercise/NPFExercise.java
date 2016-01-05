@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  * Time: 4:58 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NPFExercise extends GoodwaveExercisePanel {
+public class NPFExercise<T extends CommonExercise> extends GoodwaveExercisePanel<T> {
   private final Logger logger = Logger.getLogger("NPFExercise");
 
   private static final String ADD_ITEM = "Add Item to List";
@@ -63,14 +63,14 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param instance
    * @see mitll.langtest.client.custom.content.NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, boolean)
    */
-  NPFExercise(CommonExercise e, ExerciseController controller, ListInterface listContainer, float screenPortion,
+  NPFExercise(T e, ExerciseController controller, ListInterface<T> listContainer, float screenPortion,
               boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
   }
 
   @Override
   protected NavigationHelper getNavigationHelper(ExerciseController controller,
-                                                           ListInterface listContainer, boolean addKeyHandler) {
+                                                           ListInterface<T> listContainer, boolean addKeyHandler) {
     NavigationHelper navigationHelper = super.getNavigationHelper(controller, listContainer, addKeyHandler);
     navigationHelper.add(makeAddToList(getLocalExercise(), controller));
     navigationHelper.add(getNextListButton());
@@ -83,7 +83,7 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param controller
    * @return
    */
-  private Panel makeAddToList(CommonExercise e, ExerciseController controller) {
+  private Panel makeAddToList(T e, ExerciseController controller) {
     addToList = new DropdownButton(ADD_TO_LIST);
     addToList.getElement().setId("NPFExercise_AddToList");
     addToList.setDropup(true);
@@ -232,10 +232,10 @@ public class NPFExercise extends GoodwaveExercisePanel {
    * @param e
    * @param controller
    * @param w1
-   * @see #makeAddToList(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.exercise.ExerciseController)
+   * @see #makeAddToList(mitll.langtest.shared.exercise.T, mitll.langtest.client.exercise.ExerciseController)
    * @see #wasRevealed()
    */
-  private void populateListChoices(final CommonExercise e, final ExerciseController controller, final DropdownBase w1) {
+  private void populateListChoices(final T e, final ExerciseController controller, final DropdownBase w1) {
     service.getListsForUser(controller.getUser(), true, false, new AsyncCallback<Collection<UserList>>() {
       @Override
       public void onFailure(Throwable caught) {}
