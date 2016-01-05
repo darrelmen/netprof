@@ -517,6 +517,11 @@ public class PropertyHandler {
   public void setResponseType(String responseType) {
     this.responseType = responseType;
   }
+
+  public boolean isOdaMode() {
+    return false;
+  }
+
   /**
    * TODO : Consider rewording for other customers...
    *
