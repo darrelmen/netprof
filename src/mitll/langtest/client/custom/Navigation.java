@@ -41,7 +41,7 @@ import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -132,7 +132,7 @@ public class Navigation implements RequiresResize, ShowTab {
     learnHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller, null
     ) {
       protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
-        return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
+        return new ExercisePanelFactory<CommonExercise>(service, feedback, controller, exerciseList) {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
             return new CommentNPFExercise(e, controller, exerciseList, false, "classroom");
@@ -162,7 +162,7 @@ public class Navigation implements RequiresResize, ShowTab {
         learnHelper.getExerciseList()
     ) {
       protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
-        return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
+        return new ExercisePanelFactory<CommonExercise>(service, feedback, controller, exerciseList) {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
             return new QCNPFExercise(e, controller, exerciseList, MARK_DEFECTS1);
@@ -225,12 +225,12 @@ public class Navigation implements RequiresResize, ShowTab {
                                                              boolean incorrectFirst) {
             return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName, true) {
               @Override
-              protected CommonShell findFirstExercise() {
+              protected Shell findFirstExercise() {
                 String currentExerciseID = statsFlashcardFactory.getCurrentExerciseID();
                 if (currentExerciseID != null && !currentExerciseID.trim().isEmpty()) {
                   logger.info("findFirstExercise ---> found previous state current ex = " + currentExerciseID);
 
-                  CommonShell shell = byID(currentExerciseID);
+                  Shell shell = byID(currentExerciseID);
 
                   if (shell == null) {
                     logger.warning("huh? can't find " + currentExerciseID);
