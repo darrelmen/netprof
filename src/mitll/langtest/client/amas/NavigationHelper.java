@@ -9,6 +9,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
 
 /**
  * A row with prev/next buttons.  Key bindings for keys too.
@@ -27,7 +28,7 @@ public class NavigationHelper extends HorizontalPanel {
   private final PostAnswerProvider provider;
   private final ListInterface listContainer;
 
-  public NavigationHelper(CommonExercise exercise, ExerciseController controller, PostAnswerProvider provider,
+  public NavigationHelper(Shell exercise, ExerciseController controller, PostAnswerProvider provider,
                           ListInterface listContainer, boolean addButtons,
                           boolean enableNextOnlyWhenAllCompleted) {
     this.provider = provider;
@@ -47,12 +48,12 @@ public class NavigationHelper extends HorizontalPanel {
    * @param addButtons
    * @see NavigationHelper#NavigationHelper
    */
-  private void getNextAndPreviousButtons(final CommonExercise e,
+  private void getNextAndPreviousButtons(final Shell e,
                                          final ExerciseController controller, boolean addButtons) {
     makeNextButton(e, controller, addButtons);
   }
 
-  private void makeNextButton(final CommonExercise exercise, final ExerciseController controller, boolean addButtons) {
+  private void makeNextButton(final Shell exercise, final ExerciseController controller, boolean addButtons) {
     this.next = new Button(getNextButtonText());
     next.getElement().setId("NavigationHelper_" + getNextButtonText());
 
@@ -71,7 +72,7 @@ public class NavigationHelper extends HorizontalPanel {
     });
   }
 
-  private void enableNext(CommonExercise exercise) {
+  private void enableNext(Shell exercise) {
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
       next.setEnabled(false);
     } else {
@@ -86,7 +87,7 @@ public class NavigationHelper extends HorizontalPanel {
    * @param exercise
    * @see #getNextAndPreviousButtons
    */
-  private void clickNext(final ExerciseController controller, final CommonExercise exercise) {
+  private void clickNext(final ExerciseController controller, final Shell exercise) {
     if (next.isEnabled() && next.isVisible()) {
       if (provider != null) {
         provider.postAnswers(controller, exercise);
