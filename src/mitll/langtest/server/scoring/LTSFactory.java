@@ -27,7 +27,8 @@ public class LTSFactory implements CollationSort {
 
   // known languages
   public enum Language {
-    ARABIC, DARI, EGYPTIAN, ENGLISH, FARSI, JAPANESE, IRAQI, LEVANTINE, KOREAN, MANDARIN, MSA, PASHTO, RUSSIAN, SPANISH, SUDANESE, TAGALOG, URDU
+    ARABIC, DARI, EGYPTIAN, ENGLISH, FARSI, FRENCH, GERMAN, JAPANESE, IRAQI, LEVANTINE, KOREAN, MANDARIN, MSA,
+    PASHTO, PORTUGUESE, RUSSIAN, SPANISH, SUDANESE, TAGALOG, URDU
   }
   // TODO : what about Japanese, Korean, ... for LTS?
 
@@ -50,32 +51,13 @@ public class LTSFactory implements CollationSort {
     languageToLTS.put(Language.MANDARIN.name().toLowerCase(), unknown);
     languageToLTS.put(Language.MSA.name().toLowerCase(), new ModernStandardArabicLTS());
     languageToLTS.put(Language.IRAQI.name().toLowerCase(), new ModernStandardArabicLTS());
+
     try {
       languageToLTS.put(Language.PASHTO.name().toLowerCase(), new PashtoLTS());
-    } catch (Exception e) {
-      logger.warn("got " + e);
-    }
-    try {
       languageToLTS.put(Language.RUSSIAN.name().toLowerCase(), new RussianLTS());
-    } catch (Exception e) {
-      logger.warn("got " + e);
-    }
-    try {
       languageToLTS.put(Language.SPANISH.name().toLowerCase(), new SpanishLTS());
-    } catch (Exception e) {
-      logger.warn("got " + e);
-    }
-    try {
       languageToLTS.put(Language.SUDANESE.name().toLowerCase(), new SudaneseLTS());
-    } catch (Exception e) {
-      logger.warn("got " + e);
-    }
-    try {
       languageToLTS.put(Language.TAGALOG.name().toLowerCase(), unknown);
-    } catch (Exception e) {
-      logger.warn("got " + e);
-    }
-    try {
       languageToLTS.put(Language.URDU.name().toLowerCase(), new UrduLTS());
     } catch (Exception e) {
       logger.warn("got " + e);
