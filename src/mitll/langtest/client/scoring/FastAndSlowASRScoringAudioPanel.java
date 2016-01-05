@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 10/16/15.
  */
-public class FastAndSlowASRScoringAudioPanel extends ASRScoringAudioPanel {
+public class FastAndSlowASRScoringAudioPanel<T extends CommonExercise> extends ASRScoringAudioPanel<T> {
   private Logger logger = null;
 
   private static final String DEFAULT = "Default";
@@ -47,7 +47,7 @@ public class FastAndSlowASRScoringAudioPanel extends ASRScoringAudioPanel {
    * @param service
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getAudioPanel
    */
-  public FastAndSlowASRScoringAudioPanel(CommonExercise exercise,
+  public FastAndSlowASRScoringAudioPanel(T exercise,
                                          String path, LangTestDatabaseAsync service, ExerciseController controller1,
                                          ScoreListener scoreListener,
                                          String instance
@@ -280,7 +280,7 @@ public class FastAndSlowASRScoringAudioPanel extends ASRScoringAudioPanel {
   }
 
   @Override
-  protected boolean hasAudio(CommonExercise exercise) {
+  protected boolean hasAudio(T exercise) {
     return !exercise.getAudioAttributes().isEmpty();
   }
 
