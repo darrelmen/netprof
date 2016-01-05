@@ -22,10 +22,9 @@ import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -38,9 +37,9 @@ import java.util.logging.Logger;
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExerciseList
+public abstract class ExerciseList<T extends Shell>
     extends VerticalPanel
-    implements ListInterface, ProvidesResize, ValueChangeHandler<String> {
+    implements ListInterface<T>, ProvidesResize, ValueChangeHandler<String> {
   private final Logger logger = Logger.getLogger("ExerciseList");
 
   private static final Map<String, Collection<String>> TYPE_TO_SELECTION = new HashMap<String, Collection<String>>();
@@ -50,14 +49,14 @@ public abstract class ExerciseList
   protected SimplePanel innerContainer;
   protected final LangTestDatabaseAsync service;
   private final UserFeedback feedback;
-  private ExercisePanelFactory factory;
+  private ExercisePanelFactory<T> factory;
   private final ExerciseController controller;
 
   protected Panel createdPanel;
   int lastReqID = 0;
   final boolean allowPlusInURL;
   private String instance;
-  private final List<ListChangeListener<CommonShell>> listeners = new ArrayList<ListChangeListener<CommonShell>>();
+  private final List<ListChangeListener<T>> listeners = new ArrayList<>();
   protected boolean doShuffle;
 
   /**
@@ -70,7 +69,7 @@ public abstract class ExerciseList
    * @seex mitll.langtest.client.LangTest#makeExerciseList
    */
   protected ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                         ExercisePanelFactory factory,
+                         ExercisePanelFactory<T> factory,
                          ExerciseController controller,
                          String instance, boolean incorrectFirst) {
     this.instance = instance;
@@ -284,7 +283,7 @@ public abstract class ExerciseList
   /**
    * @see ListInterface#getExercises(long)
    */
-  class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper> {
+  class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper<T>> {
     private final String selectionID;
 
     public SetExercisesCallback(String selectionID) {
@@ -300,7 +299,7 @@ public abstract class ExerciseList
       dealWithRPCError(caught);
     }
 
-    public void onSuccess(ExerciseListWrapper result) {
+    public void onSuccess(ExerciseListWrapper<T> result) {
       //logger.info("\tExerciseList.SetExercisesCallback Got " + result.getExercises().size() + " results");
       if (isStaleResponse(result)) {
         // logger.info("----> SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
@@ -320,7 +319,7 @@ public abstract class ExerciseList
   /**
    * @see #reloadWith(String)
    */
-  private class SetExercisesCallbackWithID implements AsyncCallback<ExerciseListWrapper> {
+  private class SetExercisesCallbackWithID implements AsyncCallback<ExerciseListWrapper<T>> {
     private final String id;
 
     public SetExercisesCallbackWithID(String id) {
@@ -333,18 +332,20 @@ public abstract class ExerciseList
       dealWithRPCError(caught);
     }
 
-    public void onSuccess(ExerciseListWrapper result) {
-      logger.info("\tExerciseList.SetExercisesCallbackWithID Got " + result.getExercises().size() + " results, id = " + id);
+    public void onSuccess(ExerciseListWrapper<T> result) {
+      logger.info("\tExerciseList.SetExercisesCallbackWithID Got " + result.getExercises().size() + " results, id = " +
+          id);
       if (isStaleResponse(result)) {
-        logger.info("----> SetExercisesCallbackWithID.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
+        logger.info("----> SetExercisesCallbackWithID.onSuccess ignoring result " + result.getReqID() +
+            " b/c before latest " + lastReqID);
       } else {
         gotExercises(true);
         if (result.getExercises().isEmpty()) {
           gotEmptyExerciseList();
         }
-        List<CommonShell> exercises = result.getExercises();
+        List<T> exercises = result.getExercises();
         exercises = rememberExercises(exercises);
-        for (ListChangeListener<CommonShell> listener : listeners) {
+        for (ListChangeListener<T> listener : listeners) {
           listener.listChanged(exercises, "");
         }
         pushFirstSelection(id);
@@ -374,7 +375,7 @@ public abstract class ExerciseList
    * @see mitll.langtest.client.list.ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
   protected void gotEmptyExerciseList() {}
-  public void rememberAndLoadFirst(List<CommonShell> exercises) { rememberAndLoadFirst(exercises, null, "All");  }
+  public void rememberAndLoadFirst(List<T> exercises) { rememberAndLoadFirst(exercises, null, "All");  }
 
   /**
    * Calls remember exercises -- interacts with flashcard mode and the shuffle option there.
@@ -384,7 +385,8 @@ public abstract class ExerciseList
    * Previously we would first ask the server for the exercise list and then ask for the first exercise on
    * the list, making the user/client wait for both calls to finish before displaying the first item.
    * <p>
-   * Now the first exercise is in the {@link mitll.langtest.shared.ExerciseListWrapper#getFirstExercise()} returned with the exercise list on the first call.
+   * Now the first exercise is in the {@link mitll.langtest.shared.ExerciseListWrapper#getFirstExercise()} returned
+   * with the exercise list on the first call.
    *
    * @param exercises     - exercise list
    * @param firstExercise - the initial exercise returned from getExercises
@@ -392,20 +394,20 @@ public abstract class ExerciseList
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    * @see #rememberAndLoadFirst(java.util.List)
    */
-  public void rememberAndLoadFirst(List<CommonShell> exercises, CommonExercise firstExercise,
-                                    String selectionID) {
+  public void rememberAndLoadFirst(List<T> exercises, T firstExercise,
+                                   String selectionID) {
     logger.info("ExerciseList : rememberAndLoadFirst instance '" + getInstance() +
         "' remembering " + exercises.size() + " exercises, " + selectionID +
         " first = " + firstExercise);
 
     exercises = rememberExercises(exercises);
-    for (ListChangeListener<CommonShell> listener : listeners) {
+    for (ListChangeListener<T> listener : listeners) {
       listener.listChanged(exercises, selectionID);
     }
 
     String exercise_title1 = controller.getProps().getExercise_title();
     if (exercise_title1 != null) {
-      CommonShell headstartExercise = byID(exercise_title1);
+      Shell headstartExercise = byID(exercise_title1);
       if (headstartExercise != null) {
         loadExercise(exercise_title1);
         return;
@@ -435,7 +437,7 @@ public abstract class ExerciseList
     return result.getReqID() < lastReqID;
   }
 
-  public abstract List<CommonShell> rememberExercises(List<CommonShell> result);
+  public abstract List<T> rememberExercises(List<T> result);
 
   /**
    * Worry about deleting the currently visible item.
@@ -443,9 +445,9 @@ public abstract class ExerciseList
    * @param es
    * @see mitll.langtest.client.list.PagingExerciseList#forgetExercise(String)
    */
-  public CommonShell removeExercise(CommonShell es) {
+  public T removeExercise(T es) {
     String id = es.getID();
-    CommonShell current = getCurrentExercise();
+    T current = getCurrentExercise();
     if (current.getID().equals(id)) {
       if (!onLast(current)) {
         loadNextExercise(current);
@@ -473,7 +475,7 @@ public abstract class ExerciseList
       logger.info("loadFirstExercise : current exercises is empty?");
       removeCurrentExercise();
     } else {
-      CommonShell toLoad = findFirstExercise();
+      T toLoad = findFirstExercise();
 //      logger.info("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
       pushFirstSelection(toLoad.getID());
     }
@@ -486,23 +488,23 @@ public abstract class ExerciseList
    *
    * @return
    */
-  protected CommonShell findFirstExercise() {
+  protected T findFirstExercise() {
     return getFirst();
   }
 
-  protected abstract CommonShell getFirst();
+  protected abstract T getFirst();
 
   protected boolean hasExercise(String id) {
     return byID(id) != null;
   }
 
-  public abstract CommonShell byID(String name);
+  public abstract T byID(String name);
 
   /**
    * @param itemID
    * @see #loadFirstExercise()
-   * @see #loadNextExercise
-   * @see #loadPreviousExercise
+   * @see ListInterface ListInterface#loadNextExercise
+   * @see ListInterface ListInterface#loadPreviousExercise
    */
   public void loadExercise(String itemID) {
 //    logger.info("ExerciseList.loadExercise itemID " + itemID);
@@ -579,7 +581,7 @@ public abstract class ExerciseList
     }
   }
 
-  private CommonExercise cachedNext = null;
+  private T cachedNext = null;
   private boolean pendingReq = false;
 
   /**
@@ -607,14 +609,14 @@ public abstract class ExerciseList
   private void goGetNextAndCacheIt(String itemID) {
     int i = getIndex(itemID);
     if (!isOnLastItem(i)) {
-      CommonShell next = getAt(i + 1);
-      service.getExercise(next.getID(), controller.getUser(), incorrectFirstOrder, new AsyncCallback<CommonExercise>() {
+      T next = getAt(i + 1);
+      service.getExercise(next.getID(), controller.getUser(), incorrectFirstOrder, new AsyncCallback<T>() {
         @Override
         public void onFailure(Throwable caught) {
         }
 
         @Override
-        public void onSuccess(CommonExercise result) {
+        public void onSuccess(T result) {
           cachedNext = result;
           //logger.info("\tExerciseList.askServerForExercise got cached id = " + cachedNext.getID() + " instance " + instance);
         }
@@ -622,7 +624,7 @@ public abstract class ExerciseList
     }
   }
 
-  private class ExerciseAsyncCallback implements AsyncCallback<CommonExercise> {
+  private class ExerciseAsyncCallback implements AsyncCallback<T> {
     @Override
     public void onFailure(Throwable caught) {
       pendingReq = false;
@@ -639,7 +641,7 @@ public abstract class ExerciseList
     }
 
     @Override
-    public void onSuccess(CommonExercise result) {
+    public void onSuccess(T result) {
       pendingReq = false;
 
       if (result == null) {
@@ -655,7 +657,7 @@ public abstract class ExerciseList
    * @see #rememberAndLoadFirst(java.util.List, mitll.langtest.shared.exercise.CommonExercise, String)
    * @see ExerciseAsyncCallback#onSuccess(mitll.langtest.shared.exercise.CommonExercise)
    */
-  protected void useExercise(final CommonExercise commonExercise) {
+  protected void useExercise(final T commonExercise) {
     //  logger.info("ExerciseList.useExercise : commonExercise " + commonExercise.getID());
     String itemID = commonExercise.getID();
     markCurrentExercise(itemID);
@@ -673,13 +675,13 @@ public abstract class ExerciseList
     return getCurrentExercise() != null ? getCurrentExercise().getID() : "Unknown";
   }
 
-  public abstract CommonShell getCurrentExercise();
+  public abstract T getCurrentExercise();
 
   /**
    * @param exercise
    * @see #useExercise(mitll.langtest.shared.exercise.CommonExercise)
    */
-  private Panel makeExercisePanel(CommonExercise exercise) {
+  private Panel makeExercisePanel(T exercise) {
     logger.info("ExerciseList.makeExercisePanel : " + exercise + " instance " + instance);
     Panel exercisePanel = factory.getExercisePanel(exercise);
     innerContainer.setWidget(exercisePanel);
@@ -700,14 +702,14 @@ public abstract class ExerciseList
    * @param current
    * @see ListInterface#loadNextExercise
    */
-  private void getNextExercise(CommonShell current) {
+  private void getNextExercise(T current) {
     // logger.info("ExerciseList.getNextExercise " + current);
     int i = getIndex(current.getID());
     if (i == -1) {
       logger.warning("ExerciseList.getNextExercise : huh? couldn't find " + current +
           " in " + getSize() + " exercises : " + getKeys());
     } else {
-      CommonShell next = getAt(i + 1);
+      Shell next = getAt(i + 1);
       logger.info("ExerciseList.getNextExercise " + next);
       loadExercise(next.getID());
     }
@@ -719,15 +721,15 @@ public abstract class ExerciseList
    * @see #useExercise(mitll.langtest.shared.exercise.CommonExercise)
    */
   public int getIndex(String currentID) {
-    CommonShell shell = byID(currentID);
+    T shell = byID(currentID);
     int i = shell != null ? getRealIndex(shell) : -1;
     // logger.info("getIndex " + currentID + " = " +i);
     return i;
   }
 
-  protected abstract int getRealIndex(CommonShell t);
+  protected abstract int getRealIndex(T t);
 
-  protected abstract CommonShell getAt(int i);
+  protected abstract T getAt(int i);
 
   @Override
   public int getComplete() {
@@ -775,7 +777,7 @@ public abstract class ExerciseList
    * @seex NavigationHelper#loadNextExercise
    */
   @Override
-  public boolean loadNextExercise(CommonShell current) {
+  public boolean loadNextExercise(T current) {
     logger.info("ExerciseList.loadNextExercise current is : " + current + " instance " + instance);
     String id = current.getID();
     int i = getIndex(id);
@@ -794,7 +796,7 @@ public abstract class ExerciseList
 
   public boolean loadNextExercise(String id) {
     logger.info("ExerciseList.loadNextExercise id = " + id + " instance " + instance);
-    CommonShell exerciseByID = byID(id);
+    T exerciseByID = byID(id);
     if (exerciseByID == null) logger.warning("huh? couldn't find exercise with id " + exerciseByID);
     return exerciseByID != null && loadNextExercise(exerciseByID);
   }
@@ -817,7 +819,7 @@ public abstract class ExerciseList
    * @seex NavigationHelper#loadPreviousExercise
    */
   @Override
-  public boolean loadPreviousExercise(CommonShell current) {
+  public boolean loadPreviousExercise(T current) {
     int i = getIndex(current.getID());
     boolean onFirst = i == 0;
     if (!onFirst) {
@@ -861,7 +863,7 @@ public abstract class ExerciseList
    * @return
    * @see mitll.langtest.client.exercise.NavigationHelper#makePrevButton
    */
-  public boolean onFirst(CommonShell current) {
+  public boolean onFirst(T current) {
     boolean b = current == null || getSize() == 1 || getIndex(current.getID()) == 0;
     //logger.info("onFirst : of " +getSize() +", on checking " + current + " = " + b);
     return b;
@@ -872,7 +874,7 @@ public abstract class ExerciseList
   }
 
   @Override
-  public boolean onLast(CommonShell current) {
+  public boolean onLast(T current) {
     boolean b = current == null || getSize() == 1 || isOnLastItem(getIndex(current.getID()));
     return b;
   }
@@ -895,11 +897,11 @@ public abstract class ExerciseList
    * @see #rememberAndLoadFirst
    */
   @Override
-  public void addListChangedListener(ListChangeListener<CommonShell> listener) {
+  public void addListChangedListener(ListChangeListener<T> listener) {
     listeners.add(listener);
   }
 
-  protected abstract List<CommonShell> getInOrder();
+  protected abstract List<T> getInOrder();
 
   /**
    * @param doShuffle

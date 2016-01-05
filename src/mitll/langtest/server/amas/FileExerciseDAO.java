@@ -1,13 +1,7 @@
 package mitll.langtest.server.amas;
 
-import mitll.langtest.server.database.AudioDAO;
-import mitll.langtest.server.database.custom.AddRemoveDAO;
-import mitll.langtest.server.database.custom.UserExerciseDAO;
-import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
-import mitll.langtest.shared.exercise.CommonUserExercise;
 import org.apache.log4j.Logger;
 
 import java.io.*;
@@ -24,7 +18,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  * hasn't been used in a long time
  */
-public class FileExerciseDAO implements ExerciseDAO {
+public class FileExerciseDAO {
   private static final Logger logger = Logger.getLogger(FileExerciseDAO.class);
 
   private static final String FILE_PREFIX = "file://";
@@ -36,8 +30,8 @@ public class FileExerciseDAO implements ExerciseDAO {
   private static final boolean WRITE_ANSWER_KEY = false;
   private final String mediaDir;
 
-  private List<CommonExercise> exercises;
-  private final Map<String, CommonExercise> idToExercise = new HashMap<String, CommonExercise>();
+  private List<AmasExerciseImpl> exercises;
+  private final Map<String, AmasExerciseImpl> idToExercise = new HashMap<String, AmasExerciseImpl>();
   private final SectionHelper sectionHelper = new SectionHelper();
   private final List<String> errors = new ArrayList<String>();
   private final ILRMapping ilrMapping;
@@ -58,21 +52,12 @@ public class FileExerciseDAO implements ExerciseDAO {
     this.configDir = configDir;
   }
 
-  @Override
+//  @Override
   public SectionHelper getSectionHelper() {
     return sectionHelper;
   }
 
-  @Override
-  public CommonExercise addOverlay(CommonUserExercise userExercise) {
-    return null;
-  }
-
-  @Override
-  public void add(CommonUserExercise userExercise) {
-
-  }
-
+/*
   @Override
   public boolean remove(String id) {
     return false;
@@ -87,8 +72,9 @@ public class FileExerciseDAO implements ExerciseDAO {
   public void setAddRemoveDAO(AddRemoveDAO addRemoveDAO) {
 
   }
+*/
 
-  public CommonExercise getExercise(String id) {
+  public AmasExerciseImpl getExercise(String id) {
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
     if (!idToExercise.containsKey(id)) {
       logger.warn("couldn't find " + id + " in " + idToExercise.size() + " exercises...");
@@ -96,7 +82,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     return idToExercise.get(id);
   }
 
-  @Override
+/*  @Override
   public void setAudioDAO(AudioDAO audioDAO, String mediaDir, String installPath) {
 
   }
@@ -104,10 +90,10 @@ public class FileExerciseDAO implements ExerciseDAO {
   @Override
   public void attachAudio(Collection<CommonUserExercise> all) {
 
-  }
+  }*/
 
-  private void populateIDToExercise(List<CommonExercise> exercises) {
-    for (CommonExercise e : exercises) idToExercise.put(e.getID(), e);
+  private void populateIDToExercise(List<AmasExerciseImpl> exercises) {
+    for (AmasExerciseImpl e : exercises) idToExercise.put(e.getID(), e);
   }
 
   /**
@@ -142,7 +128,7 @@ public class FileExerciseDAO implements ExerciseDAO {
    * @return
    * @see #readFastAndSlowExercises(String, String, String)
    */
-  private List<CommonExercise> readExercises(String installPath, String configDir, String lessonPlanFile,
+  private List<AmasExerciseImpl> readExercises(String installPath, String configDir, String lessonPlanFile,
                                              InputStream resourceAsStream) {
     List<AmasExerciseImpl> exercises = new ArrayList<>();
 
@@ -221,11 +207,11 @@ public class FileExerciseDAO implements ExerciseDAO {
     return exercises;
   }
 
-/*  private void confirmAudioRefs(List<CommonExercise> exercises) {
+/*  private void confirmAudioRefs(List<AmasExerciseImpl> exercises) {
     int c = 0;
     try {
       FileWriter writer = new FileWriter("missingAudio.txt");
-      for (CommonExercise e : exercises) {
+      for (AmasExerciseImpl e : exercises) {
         String refAudio = e.getRefAudio();
         File file = new File(refAudio);
         if (!file.exists()) {
@@ -579,7 +565,7 @@ public class FileExerciseDAO implements ExerciseDAO {
     return wavPath.replaceAll("\\\\", "/");
   }
 
-  public List<CommonExercise> getRawExercises() {
+  public List<AmasExerciseImpl> getRawExercises() {
     return exercises;
   }
 }
