@@ -11,7 +11,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  * Time: 3:21 PM
  * To change this template use File | Settings | File Templates.
  */
-public class HistoryExerciseList extends PagingExerciseList {
+public class HistoryExerciseList<T extends Shell> extends PagingExerciseList<T> {
   private Logger logger = Logger.getLogger("HistoryExerciseList");
 
   public static final String ANY = "Clear";
@@ -190,7 +190,7 @@ public class HistoryExerciseList extends PagingExerciseList {
    * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer()
    */
   @Override
-  protected void gotClickOnItem(CommonShell e) {
+  protected void gotClickOnItem(T e) {
     loadByID(e.getID());
   }
 
