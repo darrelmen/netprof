@@ -33,8 +33,13 @@ import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.PlayListener;
-import mitll.langtest.shared.*;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.ExerciseFormatter;
+import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.STATE;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -46,7 +51,7 @@ import java.util.logging.Logger;
  * Time: 5:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class QCNPFExercise extends GoodwaveExercisePanel {
+public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePanel<T> {
   private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
   private static final String DEFECT = "Defect?";
@@ -82,7 +87,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   private Tooltip approvedTooltip;
   private Tooltip nextTooltip;
 
-  public QCNPFExercise(CommonExercise e, ExerciseController controller, ListInterface listContainer,
+  public QCNPFExercise(T e, ExerciseController controller, ListInterface<T> listContainer,
                        String instance) {
     super(e, controller, listContainer, 1.0f, false, instance);
 
@@ -90,7 +95,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   @Override
-  protected ASRScorePanel makeScorePanel(CommonExercise e, String instance) {
+  protected ASRScorePanel makeScorePanel(T e, String instance) {
     audioWasPlayed = new HashSet<Widget>();
     toResize = new ArrayList<RequiresResize>();
 
@@ -99,7 +104,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   /**
-   * @see GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.CommonExercise)
+   * @see GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.T)
    * @see #getQuestionContent
    * @param div
    */
@@ -109,21 +114,21 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   @Override
-  protected void addQuestionContentRow(CommonExercise e, ExerciseController controller, Panel hp) {
+  protected void addQuestionContentRow(T e, ExerciseController controller, Panel hp) {
     super.addQuestionContentRow(e, controller, hp);
     hp.addStyleName("questionContentPadding");
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel(mitll.langtest.shared.exercise.T, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
    * @param controller
    * @param listContainer
    * @param addKeyHandler
    * @return
    */
   protected NavigationHelper getNavigationHelper(ExerciseController controller,
-                                                 final ListInterface listContainer, boolean addKeyHandler) {
-    NavigationHelper navHelper = new NavigationHelper(exercise, controller, new PostAnswerProvider() {
+                                                 final ListInterface<T> listContainer, boolean addKeyHandler) {
+    NavigationHelper navHelper = new NavigationHelper<T>(exercise, controller, new PostAnswerProvider<T>() {
       @Override
       public void postAnswers(ExerciseController controller, T completedExercise) {
         nextWasPressed(listContainer, completedExercise);
@@ -134,7 +139,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
        * @param exercise
        */
       @Override
-      protected void enableNext(CommonExercise exercise) {
+      protected void enableNext(T exercise) {
         boolean allPlayed = audioWasPlayed.size() == toResize.size();
         next.setEnabled(allPlayed);
       }
@@ -191,7 +196,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
   }
 
   @Override
-  protected void nextWasPressed(ListInterface listContainer, CommonShell completedExercise) {
+  protected void nextWasPressed(ListInterface listContainer, T completedExercise) {
     //System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
     super.nextWasPressed(listContainer, completedExercise);
     markReviewed(listContainer, completedExercise);
@@ -203,7 +208,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @param listContainer
    * @param completedExercise
    */
-  private void markReviewed(ListInterface listContainer, CommonShell completedExercise) {
+  private <S extends Shell> void markReviewed(ListInterface listContainer, S completedExercise) {
     if (isCourseContent()) {
       markReviewed(completedExercise);
       boolean allCorrect = incorrectFields.isEmpty();
@@ -218,7 +223,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @param listContainer
    * @param completedExercise
    */
-  private void markAttentionLL(ListInterface listContainer, CommonShell completedExercise) {
+  private  <S extends Shell> void markAttentionLL(ListInterface listContainer, S completedExercise) {
     if (isCourseContent()) {
       service.markState(completedExercise.getID(), STATE.ATTN_LL, controller.getUser(),
         new AsyncCallback<Void>() {
@@ -243,7 +248,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @see #markReviewed(mitll.langtest.client.list.ListInterface, mitll.langtest.shared.exercise.CommonShell)
    * @param completedExercise
    */
-  private void markReviewed(final CommonShell completedExercise) {
+  private <S extends Shell> void markReviewed(final S completedExercise) {
     boolean allCorrect = incorrectFields.isEmpty();
     //System.out.println("markReviewed : exercise " + completedExercise.getID() + " instance " + instance + " allCorrect " + allCorrect);
 
@@ -270,14 +275,14 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    */
   @Override
   protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo,
-                                 float screenPortion, CommonExercise exercise) {}
+                                 float screenPortion, T exercise) {}
 
   /**
    * @param content
    * @return
    */
   @Override
-  protected Widget getQuestionContent(CommonExercise e, String content) {
+  protected Widget getQuestionContent(T e, String content) {
     Panel column = new FlowPanel();
     column.getElement().setId("QCNPFExercise_QuestionContent");
     column.addStyleName("floatLeft");
@@ -319,7 +324,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
 
   private List<RememberTabAndContent> tabs;
 
-  protected Widget getScoringAudioPanel(final CommonExercise e) {
+  protected Widget getScoringAudioPanel(final T e) {
     if (!e.hasRefAudio()) {
       return addNoRefAudio(e);
     } else {
@@ -342,7 +347,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
     }
   }
 
-  private Widget addNoRefAudio(CommonExercise e) {
+  private Widget addNoRefAudio(T e) {
     ExerciseAnnotation refAudio = e.getAnnotation(REF_AUDIO);
     Panel column = new FlowPanel();
     column.addStyleName("blockStyle");
@@ -359,7 +364,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @param maleUsers
    * @see #getScoringAudioPanel
    */
-  private void addTabsForUsers(CommonExercise e, TabPanel tabPanel, Map<MiniUser, List<AudioAttribute>> malesMap, List<MiniUser> maleUsers) {
+  private void addTabsForUsers(T e, TabPanel tabPanel, Map<MiniUser, List<AudioAttribute>> malesMap, List<MiniUser> maleUsers) {
     int me = controller.getUser();
     for (MiniUser user : maleUsers) {
       String tabTitle = getUserTitle(me, user);
@@ -438,7 +443,7 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @param next
    * @param allByUser
    * @return
-   * @see #addTabsForUsers(mitll.langtest.shared.exercise.CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
+   * @see #addTabsForUsers(mitll.langtest.shared.exercise.T, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
    */
   private DivWidget getGenderGroup(final RememberTabAndContent tabAndContent, final AudioAttribute audio, final Button next, final List<AudioAttribute> allByUser) {
     ButtonToolbar w = new ButtonToolbar();
@@ -536,14 +541,14 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
    * @param e
    * @param audio
    * @return both the comment widget and the audio panel
-   * @see #addTabsForUsers(mitll.langtest.shared.exercise.CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
+   * @see #addTabsForUsers(mitll.langtest.shared.exercise.T, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
    */
-  private Pair getPanelForAudio(final CommonExercise e, final AudioAttribute audio) {
+  private Pair getPanelForAudio(final T e, final AudioAttribute audio) {
     String audioRef = audio.getAudioRef();
     if (audioRef != null) {
       audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
     }
-    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, e.getRefSentence(), service, controller,
+    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<T>(audioRef, e.getRefSentence(), service, controller,
       controller.getProps().showSpectrogram(), scorePanel, 70, audio.isRegularSpeed()?" Regular speed":" Slow speed", e.getID(), e, instance);
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
@@ -579,10 +584,9 @@ public class QCNPFExercise extends GoodwaveExercisePanel {
       this.entry = entry;
       this.audioPanel = audioPanel;
     }
-
   }
 
-  private Widget getEntry(CommonExercise e, final String field, final String label, String value) {
+  private Widget getEntry(T e, final String field, final String label, String value) {
     return getEntry(field, label, value, e.getAnnotation(field));
   }
 
