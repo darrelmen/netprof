@@ -17,10 +17,12 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.AudioPanel;
+import mitll.langtest.server.amas.QuizCorrect;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.PathWriter;
+import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.database.custom.UserListManager;
@@ -40,11 +42,9 @@ import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.STATE;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
+import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -192,9 +192,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.list.PagingExerciseList#loadExercises
    */
   @Override
-  public ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix,
-                                            long userListID, int userID, String role, boolean onlyRecorderByMatchingGender,
-                                            boolean onlyExamples, boolean incorrectFirstOrder, boolean onlyWithAudioAnno) {
+  public <T extends Shell> ExerciseListWrapper<T> getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix,
+                                                                 long userListID, int userID, String role, boolean onlyRecorderByMatchingGender,
+                                                                 boolean onlyExamples, boolean incorrectFirstOrder, boolean onlyWithAudioAnno) {
     Collection<CommonExercise> exercises;
 
     logger.debug("getExerciseIds : (" + getLanguage() + ") " +
@@ -223,11 +223,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         //logger.debug("marked " +i + " as recorded");
 
         // now sort : everything gets sorted the same way
-        List<CommonExercise> commonExercises;
+        List<T> commonExercises;
         if (incorrectFirstOrder) {
           commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, userID, audioFileHelper.getCollator());
         } else {
-          commonExercises = new ArrayList<CommonExercise>(exercises);
+          commonExercises = new ArrayList<>(exercises);
           //  logger.warn("before " + commonExercises);
           sortExercises(role, commonExercises);
           //  logger.warn("after " + commonExercises);
@@ -249,7 +249,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     } catch (Exception e) {
       logger.warn("got " + e, e);
       logAndNotifyServerException(e);
-      return new ExerciseListWrapper();
+      return new ExerciseListWrapper<T>();
     }
   }
 
@@ -387,6 +387,46 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     // logger.debug("\tafter found " + exercisesForState.size() + " matches to " + typeToSelection);
     return exercisesForState;
   }
+
+  public QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<String> exids) {
+    return new QuizCorrect(db).getScoresForUser(typeToSection, userID, exids);
+  }
+
+  @Override
+  public void addStudentAnswer(long resultID, boolean correct) {
+    db.getAnswerDAO().addUserScore(resultID, correct ? 1.0f : 0.0f);
+  }
+
+  /**
+   * TODO : put this back
+   *
+   * @param userID
+   * @param exercise
+   * @param questionID
+   * @param answer
+   * @param answerType
+   * @param timeSpent
+   * @param typeToSection
+   * @return
+   * @see mitll.langtest.client.flashcard.TextResponse#getScoreForGuess
+   */
+  public Answer getScoreForAnswer(long userID, CommonExercise exercise, int questionID, String answer, String answerType, long timeSpent, Map<String, Collection<String>> typeToSection) {
+   // AutoCRT.CRTScores scoreForAnswer1 = audioFileHelper.getScoreForAnswer(exercise, questionID, answer);
+    AutoCRT.CRTScores scoreForAnswer1 = new AutoCRT.CRTScores();
+    double scoreForAnswer = serverProps.useMiraClassifier() ? scoreForAnswer1.getNewScore() : scoreForAnswer1.getOldScore();
+
+    String session = "";// getLatestSession(typeToSection, userID);
+    //  logger.warn("getScoreForAnswer user " + userID + " ex " + exercise.getID() + " qid " +questionID + " type " +typeToSection + " session " + session);
+    boolean correct = scoreForAnswer > 0.5;
+    long resultID = db.getAnswerDAO().addTextAnswer((int) userID,
+        exercise.getID(),
+        questionID, answer, answerType, correct,
+        (float) scoreForAnswer, (float) scoreForAnswer, session, timeSpent);
+
+    Answer answer1 = new Answer(scoreForAnswer, correct, resultID);
+    return answer1;
+  }
+
 
   /**
    * Marks each exercise - first state - with whether this user has recorded audio for this item
@@ -688,9 +728,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }*/
 
   /**
-   * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores(List)
    * @param ids
    * @return
+   * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores(List)
    */
   @Override
   public List<CommonShell> getShells(List<String> ids) {
@@ -708,7 +748,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise
    */
-  public CommonExercise getExercise(String id, long userID, boolean isFlashcardReq) {
+  public <T extends Shell> T getExercise(String id, long userID, boolean isFlashcardReq) {
     long then = System.currentTimeMillis();
     List<CommonExercise> exercises = getExercises();
 
@@ -1073,7 +1113,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, long, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param resultID
    * @param testAudioFile
@@ -1083,6 +1122,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param useScoreToColorBkg
    * @param exerciseID
    * @return
+   * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, long, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    */
   @Override
   public PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
