@@ -12,11 +12,9 @@ import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.STATE;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
+import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -37,11 +35,20 @@ public interface LangTestDatabaseAsync {
                       boolean addToAudioTable, boolean recordedWithFlash, String deviceType, String device,
                       boolean allowAlternates, AsyncCallback<AudioAnswer> async);
 
-  void getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height, boolean useScoreToColorBkg, String exerciseID, AsyncCallback<PretestScore> async);
 
-  void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID, AsyncCallback<ImageResponse> async);
+  void getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height,
+                           boolean useScoreToColorBkg, String exerciseID, AsyncCallback<PretestScore> async);
 
-  void getExercise(String id, long userID, boolean isFlashcardReq, AsyncCallback<CommonExercise> async);
+  void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID,
+                            AsyncCallback<ImageResponse> async);
+
+  void getScoreForAnswer(long userID, CommonExercise e, int questionID, String answer, String answerType, long timeSpent, Map<String, Collection<String>> typeToSection, AsyncCallback<Answer> async);
+
+  void addStudentAnswer(long resultID, boolean correct, AsyncCallback<Void> async);
+
+  void getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<String> exids, AsyncCallback<QuizCorrectAndScore> async);
+
+  <T extends Shell> void getExercise(String id, long userID, boolean isFlashcardReq, AsyncCallback<T> async);
 
   void getUserToResultCount(AsyncCallback<Map<User, Integer>> async);
 
@@ -55,7 +62,8 @@ public interface LangTestDatabaseAsync {
 
   void getSessions(AsyncCallback<List<Session>> async);
 
-  void getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, long userid, String flText, int req, AsyncCallback<ResultAndTotal> async);
+  void getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, long userid, String flText,
+                  int req, AsyncCallback<ResultAndTotal> async);
 
   void getResultStats(AsyncCallback<Map<String, Number>> async);
 
@@ -65,8 +73,9 @@ public interface LangTestDatabaseAsync {
 
   void logMessage(String message, AsyncCallback<Void> async);
 
-  void getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID,
-                      int userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples, boolean incorrectFirstOrder, boolean onlyWithAudioAnno, AsyncCallback<ExerciseListWrapper> async);
+  <T extends Shell> void getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID,
+                      int userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples,
+                      boolean incorrectFirstOrder, boolean onlyWithAudioAnno, AsyncCallback<ExerciseListWrapper<T>> async);
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
@@ -100,9 +109,11 @@ public interface LangTestDatabaseAsync {
 
   void deleteItem(String exid, AsyncCallback<Boolean> async);
 
-  void getUserHistoryForList(long userid, Collection<String> ids, long latestResultID, Map<String, Collection<String>> typeToSection, long userListID, AsyncCallback<AVPScoreReport> async);
+  void getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
+                             Map<String, Collection<String>> typeToSection, long userListID, AsyncCallback<AVPScoreReport> async);
 
-  void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device, AsyncCallback<Void> async);
+  void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device,
+                AsyncCallback<Void> async);
 
   void getEvents(AsyncCallback<List<Event>> async);
 
@@ -134,7 +145,8 @@ public interface LangTestDatabaseAsync {
 
   void userExists(String login, String passwordH, AsyncCallback<User> async);
 
-  void addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale, int age, String dialect, boolean isCD, String device, AsyncCallback<User> async);
+  void addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale,
+               int age, String dialect, boolean isCD, String device, AsyncCallback<User> async);
 
   void resetPassword(String userid, String text, String url, AsyncCallback<Boolean> asyncCallback);
 
@@ -148,7 +160,8 @@ public interface LangTestDatabaseAsync {
 
   void getNumResults(AsyncCallback<Integer> async);
 
-  void getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which, AsyncCallback<Collection<String>> async);
+  void getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which,
+                             AsyncCallback<Collection<String>> async);
 
   void addRoundTrip(long resultid, int roundTrip, AsyncCallback<Void> async);
 
@@ -157,7 +170,8 @@ public interface LangTestDatabaseAsync {
   void changeEnabledFor(int userid, boolean enabled, AsyncCallback<Void> async);
 
   void getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
-                                   int width, int height, boolean useScoreToColorBkg, String exerciseID, AsyncCallback<PretestScore> async);
+                                   int width, int height, boolean useScoreToColorBkg, String exerciseID,
+                                   AsyncCallback<PretestScore> async);
 
   void getContextPractice(AsyncCallback<ContextPractice> async);
 

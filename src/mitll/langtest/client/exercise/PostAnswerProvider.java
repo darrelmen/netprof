@@ -4,7 +4,7 @@
 
 package mitll.langtest.client.exercise;
 
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,6 +13,6 @@ import mitll.langtest.shared.exercise.CommonExercise;
  * Time: 11:39 AM
  * To change this template use File | Settings | File Templates.
  */
-public interface PostAnswerProvider {
-  void postAnswers(ExerciseController controller, CommonExercise completedExercise);
+public interface PostAnswerProvider<T extends Shell> {
+  void postAnswers(ExerciseController controller, T completedExercise);
 }

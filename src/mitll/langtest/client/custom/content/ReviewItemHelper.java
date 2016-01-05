@@ -20,9 +20,9 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.Shell;
 
 /**
  * Created by GO22670 on 3/26/2014.
@@ -70,7 +70,7 @@ public class ReviewItemHelper extends NPFHelper {
       protected ExercisePanelFactory getFactory(final PagingExerciseList pagingExerciseList, String instanceName) {
         return new ExercisePanelFactory(service,feedback,controller,predefinedContent) {
           @Override
-          public Panel getExercisePanel(CommonExercise exercise) {
+          public Panel getExercisePanel(Shell exercise) {
             ReviewEditableExercise reviewEditableExercise =
               new ReviewEditableExercise(service, controller, itemMarker, new UserExercise(exercise), ul,
                 pagingExerciseList, predefinedContent, npfHelper);
