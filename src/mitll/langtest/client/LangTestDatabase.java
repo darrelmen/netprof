@@ -4,6 +4,7 @@
 
 package mitll.langtest.client;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.*;
@@ -13,11 +14,9 @@ import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.STATE;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
+import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -37,14 +36,15 @@ import java.util.Map;
 public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
-  ExerciseListWrapper getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection,
+  <T extends Shell> ExerciseListWrapper<T> getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection,
                                      String prefix, long userListID, int userID, String role,
                                      boolean onlyUnrecordedByMe, boolean onlyExamples, boolean incorrectFirstOrder,
                                      boolean onlyWithAudioAnno);
 
   List<CommonShell> getShells(List<String> ids);
 
-  CommonExercise getExercise(String id, long userID, boolean isFlashcardReq);
+  <T extends Shell> T getExercise(String id, long userID, boolean isFlashcardReq);
+
 
   void markAudioDefect(AudioAttribute audioAttribute, String exid);
   void markGender(AudioAttribute attr, boolean isMale);
@@ -62,6 +62,24 @@ public interface LangTestDatabase extends RemoteService {
                              int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults,
                              boolean addToAudioTable, boolean recordedWithFlash, String deviceType, String device,
                              boolean allowAlternates);
+
+
+  /**
+   * TODO : return result id
+   * @see mitll.langtest.client.flashcard.TextResponse#getScoreForGuess
+   * @param userID
+   * @param e
+   * @param questionID
+   * @param answer
+   * @param answerType
+   * @param timeSpent
+   * @param typeToSection
+   * @return
+   */
+  Answer getScoreForAnswer(long userID, CommonExercise e, int questionID, String answer, String answerType, long timeSpent, Map<String, Collection<String>> typeToSection);
+
+  void addStudentAnswer(long resultID, boolean correct);
+  QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<String> exids);
 
   Collection<String> getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which);
 
