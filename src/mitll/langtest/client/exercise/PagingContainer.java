@@ -16,8 +16,9 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.view.client.SingleSelectionModel;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.STATE;
+import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
 import java.util.*;
@@ -30,12 +31,12 @@ import java.util.logging.Logger;
  * Time: 7:49 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingContainer extends SimplePagingContainer<CommonShell> {
+public class PagingContainer<T extends Shell> extends SimplePagingContainer<T> {
   private final Logger logger = Logger.getLogger("PagingContainer");
 
   private static final int MAX_LENGTH_ID = 17;
   private static final boolean DEBUG = false;
-  private final Map<String, CommonShell> idToExercise = new HashMap<String, CommonShell>();
+  private final Map<String, T> idToExercise = new HashMap<>();
   private final boolean isRecorder;
   private final ExerciseComparator sorter;
 
@@ -56,8 +57,8 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     table.redraw();
   }
 
-  private CommonShell getByID(String id) {
-    for (CommonShell t : getList()) {
+  private T getByID(String id) {
+    for (T t : getList()) {
       if (t.getID().equals(id)) {
         return t;
       }
@@ -69,14 +70,14 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
    * @param es
    * @see mitll.langtest.client.list.PagingExerciseList#simpleRemove(String)
    */
-  public void forgetExercise(CommonShell es) {
-    List<CommonShell> list = getList();
+  public void forgetExercise(T es) {
+    List<T> list = getList();
     int before = getList().size();
 
     if (!list.remove(es)) {
       if (!list.remove(getByID(es.getID()))) {
         logger.warning("forgetExercise couldn't remove " + es);
-//        for (CommonShell t : list) {
+//        for (T t : list) {
 //          logger.info("\tnow has " + t.getID());
 //        }
       } else {
@@ -101,7 +102,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     verticalUnaccountedFor = v;
   }
 
-  public List<CommonShell> getExercises() {
+  public List<T> getExercises() {
     return getList();
   }
 
@@ -113,41 +114,41 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     return getList().isEmpty();
   }
 
-  public CommonShell getFirst() {
+  public T getFirst() {
     return getAt(0);
   }
 
-  public int getIndex(CommonShell t) {
+  public int getIndex(T t) {
     return getList().indexOf(t);
   }
 
-  public CommonShell getAt(int i) {
+  public T getAt(int i) {
     return getList().get(i);
   }
 
-  public CommonShell getCurrentSelection() {
+  public T getCurrentSelection() {
     return selectionModel.getSelectedObject();
   }
 
   protected void addColumnsToTable() {
-    Column<CommonShell, SafeHtml> englishCol = getEnglishColumn();
+    Column<T, SafeHtml> englishCol = getEnglishColumn();
     englishCol.setSortable(true);
 
     addColumn(englishCol, new TextHeader(ENGLISH));
 
-    Column<CommonShell, SafeHtml> flColumn = getFLColumn();
+    Column<T, SafeHtml> flColumn = getFLColumn();
     flColumn.setSortable(true);
 
     String language = controller.getLanguage();
     String headerForFL = language.equals(ENGLISH) ? "Meaning" : language;
     addColumn(flColumn, new TextHeader(headerForFL));
 
-    List<CommonShell> dataList = getList();
+    List<T> dataList = getList();
 
-    ColumnSortEvent.ListHandler<CommonShell> columnSortHandler = getEnglishSorter(englishCol, dataList);
+    ColumnSortEvent.ListHandler<T> columnSortHandler = getEnglishSorter(englishCol, dataList);
     table.addColumnSortHandler(columnSortHandler);
 
-    ColumnSortEvent.ListHandler<CommonShell> columnSortHandler2 = getFLSorter(flColumn, dataList);
+    ColumnSortEvent.ListHandler<T> columnSortHandler2 = getFLSorter(flColumn, dataList);
     table.addColumnSortHandler(columnSortHandler2);
 
     // We know that the data is sorted alphabetically by default.
@@ -160,12 +161,12 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     table.setColumnWidth(flColumn,   50.0, Style.Unit.PCT);
   }
 
-  private ColumnSortEvent.ListHandler<CommonShell> getFLSorter(Column<CommonShell, SafeHtml> flColumn, List<CommonShell> dataList) {
-    ColumnSortEvent.ListHandler<CommonShell> columnSortHandler2 = new ColumnSortEvent.ListHandler<CommonShell>(dataList);
+  private ColumnSortEvent.ListHandler<T> getFLSorter(Column<T, SafeHtml> flColumn, List<T> dataList) {
+    ColumnSortEvent.ListHandler<T> columnSortHandler2 = new ColumnSortEvent.ListHandler<T>(dataList);
 
     columnSortHandler2.setComparator(flColumn,
-        new Comparator<CommonShell>() {
-          public int compare(CommonShell o1, CommonShell o2) {
+        new Comparator<T>() {
+          public int compare(T o1, T o2) {
             if (o1 == o2) {
               return 0;
             }
@@ -185,11 +186,11 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     return columnSortHandler2;
   }
 
-  private ColumnSortEvent.ListHandler<CommonShell> getEnglishSorter(Column<CommonShell, SafeHtml> englishCol, List<CommonShell> dataList) {
-    ColumnSortEvent.ListHandler<CommonShell> columnSortHandler = new ColumnSortEvent.ListHandler<CommonShell>(dataList);
+  private ColumnSortEvent.ListHandler<T> getEnglishSorter(Column<T, SafeHtml> englishCol, List<T> dataList) {
+    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<T>(dataList);
     columnSortHandler.setComparator(englishCol,
-        new Comparator<CommonShell>() {
-          public int compare(CommonShell o1, CommonShell o2) {
+        new Comparator<T>() {
+          public int compare(T o1, T o2) {
             if (o1 == o2) {
               return 0;
             }
@@ -210,7 +211,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
 
   @Override
   protected void addSelectionModel() {
-    selectionModel = new SingleSelectionModel<CommonShell>();
+    selectionModel = new SingleSelectionModel<T>();
     table.setSelectionModel(selectionModel);
   }
 
@@ -218,10 +219,10 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
    * @return
    * @see #addColumnsToTable()
    */
-  private Column<CommonShell, SafeHtml> getEnglishColumn() {
-    return new Column<CommonShell, SafeHtml>(new ClickableCell()) {
+  private Column<T, SafeHtml> getEnglishColumn() {
+    return new Column<T, SafeHtml>(new ClickableCell()) {
       @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, CommonShell object, NativeEvent event) {
+      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
         if (BrowserEvents.CLICK.equals(event.getType())) {
           gotClickOnItem(object);
@@ -229,7 +230,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
       }
 
       @Override
-      public SafeHtml getValue(CommonShell shell) {
+      public SafeHtml getValue(T shell) {
         String columnText = getEnglishText(shell);
         if (!controller.showCompleted()) {
           return getColumnToolTip(columnText);
@@ -292,10 +293,10 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
    * @return
    * @see #addColumnsToTable()
    */
-  private Column<CommonShell, SafeHtml> getFLColumn() {
-    return new Column<CommonShell, SafeHtml>(new ClickableCell()) {
+  private Column<T, SafeHtml> getFLColumn() {
+    return new Column<T, SafeHtml>(new ClickableCell()) {
       @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, CommonShell object, NativeEvent event) {
+      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
         if (BrowserEvents.CLICK.equals(event.getType())) {
           gotClickOnItem(object);
@@ -303,14 +304,14 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
       }
 
       @Override
-      public SafeHtml getValue(CommonShell shell) {
+      public SafeHtml getValue(T shell) {
         String columnText = truncate(getFLText(shell));
         return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
       }
     };
   }
 
-  protected void gotClickOnItem(final CommonShell e) {
+  protected void gotClickOnItem(final T e) {
   }
 
   @Override
@@ -319,15 +320,15 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     idToExercise.clear();
   }
 
-  public CommonShell byID(String id) {
+  public T byID(String id) {
     return idToExercise.get(id);
   }
 
   /**
    * @param exercise
-   * @see mitll.langtest.client.list.PagingExerciseList#addExercise(CommonShell)
+   * @see ListInterface#addExercise(mitll.langtest.shared.exercise.Shell)
    */
-  public void addExercise(CommonShell exercise) {
+  public void addExercise(T exercise) {
     idToExercise.put(exercise.getID(), exercise);
     getList().add(exercise);
   }
@@ -335,11 +336,11 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
   /**
    * @param afterThisOne
    * @param exercise
-   * @see mitll.langtest.client.list.PagingExerciseList#addExerciseAfter(CommonShell, CommonShell)
+   * @see mitll.langtest.client.list.PagingExerciseList#addExerciseAfter(T, T)
    */
-  public void addExerciseAfter(CommonShell afterThisOne, CommonShell exercise) {
+  public void addExerciseAfter(T afterThisOne, T exercise) {
     //logger.info("addExercise adding " + exercise);
-    List<CommonShell> list = getList();
+    List<T> list = getList();
     int before = list.size();
     String id = exercise.getID();
     idToExercise.put(id, exercise);
@@ -354,7 +355,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     return idToExercise.keySet();
   }
 
-  private void markCurrent(CommonShell currentExercise) {
+  private void markCurrent(T currentExercise) {
     if (currentExercise != null) {
       markCurrentExercise(currentExercise.getID());
     }
@@ -362,7 +363,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
 
   protected float adjustVerticalRatio(float ratio) {
     if (dataProvider != null && getList() != null && !getList().isEmpty()) {
-      CommonShell toLoad = getList().get(0);
+      T toLoad = getList().get(0);
 
       if (toLoad.getID().length() > ID_LINE_WRAP_LENGTH) {
         ratio /= 2; // hack for long ids
@@ -372,15 +373,14 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
     return ratio;
   }
 
-
   public void markCurrentExercise(String itemID) {
     if (getList() == null || getList().isEmpty()) return;
 
-    CommonShell t = idToExercise.get(itemID);
+    T t = idToExercise.get(itemID);
     markCurrent(getList().indexOf(t), t);
   }
 
-  private void markCurrent(int i, CommonShell itemToSelect) {
+  private void markCurrent(int i, T itemToSelect) {
     if (DEBUG) logger.info(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect.getID());
     table.getSelectionModel().setSelected(itemToSelect, true);
     if (DEBUG) {
@@ -411,7 +411,7 @@ public class PagingContainer extends SimplePagingContainer<CommonShell> {
    * @param currentExercise
    * @see mitll.langtest.client.list.PagingExerciseList#onResize()
    */
-  public void onResize(CommonShell currentExercise) {
+  public void onResize(T currentExercise) {
     int numRows = getNumTableRowsGivenScreenHeight();
     if (table.getPageSize() != numRows) {
       table.setPageSize(numRows);
