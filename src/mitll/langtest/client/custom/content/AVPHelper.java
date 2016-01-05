@@ -8,11 +8,12 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.list.HistoryExerciseList;
+import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -62,14 +63,14 @@ public class AVPHelper extends NPFHelper {
    */
   @Override
   protected PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
-    HistoryExerciseList widgets = new HistoryExerciseList(right, service, feedback, controller,
+    HistoryExerciseList widgets = new NPExerciseList(right, service, feedback, controller,
         true, instanceName, true) {
       @Override
       protected void onLastItem() {
       } // TODO : necessary?
 
       @Override
-      protected void addTableWithPager(PagingContainer pagingContainer) {
+      protected void addTableWithPager(ClickablePagingContainer pagingContainer) {
         pagingContainer.getTableWithPager();
       }
 
