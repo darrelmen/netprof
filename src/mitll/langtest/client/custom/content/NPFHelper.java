@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  * Time: 3:27 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NPFHelper implements RequiresResize {
+public class NPFHelper<T extends Shell> implements RequiresResize {
   Logger logger = Logger.getLogger("NPFHelper");
 
   protected static final String LIST_COMPLETE = "List complete!";
@@ -53,7 +53,7 @@ public class NPFHelper implements RequiresResize {
   protected final UserManager userManager;
 
   protected final UserFeedback feedback;
-  public PagingExerciseList npfExerciseList;
+  public PagingExerciseList<T> npfExerciseList;
   private final boolean showQC;
   DivWidget contentPanel;
   protected String instanceName;
@@ -209,7 +209,7 @@ public class NPFHelper implements RequiresResize {
    */
   private void rememberAndLoadFirst(final UserList ul, CommonExercise toSelect) {
     npfExerciseList.setUserListID(ul.getUniqueID());
-    List<CommonShell> copy = new ArrayList<CommonShell>(ul.getExercises());
+    List<T> copy = new ArrayList<>(ul.getExercises());
   //  logger.info("rememberAndLoadFirst " + copy.size() + " exercises from  " +ul.getName());
     //  npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
     npfExerciseList.rememberAndLoadFirst(copy, toSelect, "");
