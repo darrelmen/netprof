@@ -16,10 +16,10 @@ import java.util.*;
  * Time: 1:03 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AmasExerciseImpl extends ExerciseShell /*implements CommonExercise*/ {
+public class AmasExerciseImpl implements Shell /*implements CommonExercise*/ {
   public static final String EN = "en";
   public static final String FL = "fl";
-  private static final int MAX_TOOLTIP_LENGTH = 15;
+ // private static final int MAX_TOOLTIP_LENGTH = 15;
   private String content;
   private Map<String, String> unitToValue = new HashMap<String, String>();
 
@@ -27,7 +27,10 @@ public class AmasExerciseImpl extends ExerciseShell /*implements CommonExercise*
   private List<String> refSentences = new ArrayList<String>();
 
   private transient List<String> firstPron = new ArrayList<String>();
+  protected String id;
+  private STATE state = STATE.UNSET;
   private String altID;
+
   //  private String imageURL;
   //  private String audioURL;
 
@@ -36,10 +39,10 @@ public class AmasExerciseImpl extends ExerciseShell /*implements CommonExercise*
   /**
    * @param id
    * Exercise exercise = new Exercise(id, "", id, "", "", "");
-   * @see mitll.langtest.server.database.exercise.FileExerciseDAO#readODAFormat(String, String, String)
+   * @see mitll.langtest.server.amas.FileExerciseDAO#readTSVLine(String, String, String, int)
    */
   public AmasExerciseImpl(String id, String content, String altID) {
-    super(id);
+    this.id = id;
     this.content = content;
     this.altID = altID;
   }
@@ -50,11 +53,10 @@ public class AmasExerciseImpl extends ExerciseShell /*implements CommonExercise*
    * @param content
    * @param sentenceRef
    * @param tooltip
-   * @see mitll.langtest.server.database.exercise.FileExerciseDAO#getSimpleExerciseForLine(String, int)
+   * @see mitll.langtest.server.amas.FileExerciseDAO#getSimpleExerciseForLine(String, int)
    */
   public AmasExerciseImpl(String id, String content, String sentenceRef, String tooltip) {
-    super(id);
-
+    this.id = id;
     this.setContent(content);
     this.refSentences.add(sentenceRef);
   }
@@ -64,12 +66,11 @@ public class AmasExerciseImpl extends ExerciseShell /*implements CommonExercise*
    * @param content
    * @param sentenceRefs
    * @param tooltip
-   * @see mitll.langtest.server.database.exercise.FileExerciseDAO#getFlashcardExercise(int, String, String, String, String)
+   * @see mitll.langtest.server.amas.FileExerciseDAO#getFlashcardExercise(int, String, String, String, String)
    */
 
   public AmasExerciseImpl(String id, String content, List<String> sentenceRefs, String tooltip) {
-    super(id);
-
+    this.id = id;
     this.setContent(content);
     this.refSentences = sentenceRefs;
   }
@@ -169,18 +170,22 @@ public class AmasExerciseImpl extends ExerciseShell /*implements CommonExercise*
     return qaPairs == null ? new ArrayList<QAPair>() : qaPairs;
   }
 
+/*
   public String getEnglish() {
     return "";
   }
+*/
 
   public String getContent() {  return content; }
 
   private void setContent(String content) {  this.content = content; }
 
+/*
   @Override
   public String getForeignLanguage() {
     return getRefSentence();
   }
+*/
 
 //  public Exercise toExercise() {
 //    return this;
@@ -257,6 +262,24 @@ public class AmasExerciseImpl extends ExerciseShell /*implements CommonExercise*
 
   public void setUnitToValue(Map<String, String> unitToValue) {
     this.unitToValue = unitToValue;
+  }
+
+  public String getID() {
+    return id;
+  }
+
+  public void setID(String id) {
+    this.id = id;
+  }
+
+  @Override
+  public STATE getState() {
+    return state;
+  }
+
+  @Override
+  public void setState(STATE state) {
+    this.state = state;
   }
 
   public String toString() {
