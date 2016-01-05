@@ -13,10 +13,9 @@ import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.dialog.PrevNextList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.STATE;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.Collection;
 import java.util.Map;
@@ -28,7 +27,7 @@ import java.util.Map;
  * Time: 5:25 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface ListInterface extends RequiresResize {
+public interface ListInterface<T extends Shell> extends RequiresResize {
   /**
    * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList(Panel, String)
    * @param factory
@@ -55,7 +54,7 @@ public interface ListInterface extends RequiresResize {
    */
   Widget getExerciseListOnLeftSide(PropertyHandler props);
 
-  CommonShell byID(String name);
+  T byID(String name);
 
   void loadExercise(String itemID);
 
@@ -67,13 +66,13 @@ public interface ListInterface extends RequiresResize {
    * @return
    * @see ListInterface#loadNextExercise
    */
- boolean loadNextExercise(CommonShell current);
+  boolean loadNextExercise(T current);
 
   boolean loadNextExercise(String id);
 
   boolean loadPrev();
 
-  boolean loadPreviousExercise(CommonShell current);
+  boolean loadPreviousExercise(T current);
 
   void checkAndAskServer(String id);
 
@@ -91,10 +90,10 @@ public interface ListInterface extends RequiresResize {
    * @return
    */
   boolean onFirst();
-  boolean onFirst(CommonShell current);
+  boolean onFirst(T current);
 
   boolean onLast();
-  boolean onLast(CommonShell current);
+  boolean onLast(T current);
   /**
    * @see mitll.langtest.client.LangTest#resetState()
    */
@@ -106,14 +105,14 @@ public interface ListInterface extends RequiresResize {
    * @see mitll.langtest.client.custom.content.NPFHelper#makeExerciseList(com.google.gwt.user.client.ui.Panel, String)
    */
   void reloadExercises();
-  void addExercise(CommonShell es);
+  void addExercise(T es);
 
-  CommonShell simpleRemove(String id);
+  T simpleRemove(String id);
 
   int getSize();
 
   /**
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getAnswerWidget(CommonExercise, LangTestDatabaseAsync, ExerciseController, boolean, String)
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, LangTestDatabaseAsync, ExerciseController, boolean, String)
    * @return
    */
   boolean isPendingReq();
@@ -131,7 +130,7 @@ public interface ListInterface extends RequiresResize {
   void setState(String id, STATE state);
   void setSecondState(String id, STATE state);
 
-  void addListChangedListener(ListChangeListener<CommonShell> listener);
+  void addListChangedListener(ListChangeListener<T> listener);
 
   void setShuffle(boolean doShuffle);
   void simpleSetShuffle(boolean doShuffle);
