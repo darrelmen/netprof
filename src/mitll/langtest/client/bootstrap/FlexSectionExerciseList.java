@@ -23,6 +23,7 @@ import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -34,7 +35,7 @@ import java.util.logging.Logger;
  * Time: 5:32 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FlexSectionExerciseList extends HistoryExerciseList {
+public class FlexSectionExerciseList<T extends Shell> extends HistoryExerciseList<T> {
   private Logger logger = Logger.getLogger("FlexSectionExerciseList");
   private static final int LABEL_MARGIN_BOTTOM = 10;
 
