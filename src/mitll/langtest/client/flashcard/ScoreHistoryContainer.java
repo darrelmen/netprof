@@ -40,7 +40,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   public static final int COL_WIDTH = 130;
   public static final String CORRECT_INCORRECT_HISTORY_AND_AVERAGE_PRONUNCIATION_SCORE = "Correct/Incorrect history and average pronunciation score";
 
-  private final Map<String, CommonShell> idToExercise = new HashMap<String, CommonShell>();
+  private final Map<String, CommonShell> idToExercise = new HashMap<>();
   private ExerciseComparator sorter;
 
   public ScoreHistoryContainer(ExerciseController controller, List<CommonShell> allExercises) {
