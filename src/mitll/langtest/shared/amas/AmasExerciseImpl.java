@@ -284,6 +284,20 @@ public class AmasExerciseImpl implements Shell /*implements CommonExercise*/ {
     this.state = state;
   }
 
+  /**
+   * TODO : refactor so this isn't needed.
+   * @return
+   */
+  @Override
+  public STATE getSecondState() {
+    return null;
+  }
+
+  @Override
+  public void setSecondState(STATE state) {
+
+  }
+
   public String toString() {
   //  Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
 
