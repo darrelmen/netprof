@@ -26,7 +26,7 @@ import java.util.Collection;
  * Time: 6:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class WaveformExercisePanel<T extends Shell> extends ExercisePanel<T> {
+public class WaveformExercisePanel<T extends CommonExercise> extends ExercisePanel<T> {
   private static final String RECORD_PROMPT = "Record the word or phrase, first at normal speed, then again at slow speed.";
   private static final String RECORD_PROMPT2 = "Record the in-context sentence.";
   private static final String EXAMPLE_RECORD = "EXAMPLE_RECORD";
