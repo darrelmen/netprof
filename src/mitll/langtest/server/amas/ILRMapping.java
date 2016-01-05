@@ -1,7 +1,7 @@
 package mitll.langtest.server.amas;
 
 import mitll.langtest.server.database.exercise.SectionHelper;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.amas.AmasExerciseImpl;
 import org.apache.log4j.Logger;
 
 import java.io.*;
@@ -28,7 +28,7 @@ public class ILRMapping {
   private static final String ENCODING = "UTF8";
   private final boolean usePredefOrder;
   /**
-   * @see mitll.langtest.server.database.exercise.FileExerciseDAO#FileExerciseDAO
+   * @see mitll.langtest.server.amas.FileExerciseDAO#FileExerciseDAO
    * @param configDir
    * @param sectionHelper
    * @param mappingFile
@@ -50,7 +50,7 @@ public class ILRMapping {
 
   /**
    * For now we only have listening at level 0+
-   * @see mitll.langtest.server.database.exercise.FileExerciseDAO#readExercises
+   * @see mitll.langtest.server.amas.FileExerciseDAO#readExercises
    */
   public void finalStep() {
     if (useMapping()) {
@@ -101,11 +101,11 @@ public class ILRMapping {
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.FileExerciseDAO#readExercises(String, String, String, InputStream)
+   * @see mitll.langtest.server.amas.FileExerciseDAO#readExercises(String, String, String, InputStream)
    * @param exid
    * @param e
    */
-  public void addMappingAssoc(String exid, CommonExercise e) {
+  public void addMappingAssoc(String exid, AmasExerciseImpl e) {
     List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
 
     SectionHelper.Pair ilrAssoc = sectionHelper.addExerciseToLesson(e, ILR_LEVEL, exerciseToLevel.get(exid));
@@ -132,7 +132,7 @@ public class ILRMapping {
     return new BufferedReader(new InputStreamReader(resourceAsStream, ENCODING));
   }
 
-  public void report(Map<String, CommonExercise> idToExercise) {
+  public void report(Map<String, AmasExerciseImpl> idToExercise) {
     int size = idToExercise.keySet().size();
     Set<String> mappedExercises = getMappedExercises();
     int size1 = mappedExercises.size();
