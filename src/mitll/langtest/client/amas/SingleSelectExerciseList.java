@@ -80,8 +80,7 @@ public abstract class SingleSelectExerciseList<T extends Shell> extends HistoryE
    */
   @Override
   protected void addComponents() {
-    PagingContainer exerciseShellPagingContainer = makePagingContainer();
-    addTableWithPager(exerciseShellPagingContainer);
+    addTableWithPager(makePagingContainer());
   }
 
   /**
