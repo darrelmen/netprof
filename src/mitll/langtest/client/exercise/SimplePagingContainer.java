@@ -15,6 +15,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -22,7 +23,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 9/16/14.
  */
-public class SimplePagingContainer<T> implements RequiresResize {
+public class SimplePagingContainer<T extends Shell> implements RequiresResize {
   private final Logger logger = Logger.getLogger("SimplePagingContainer");
 
   protected static final String ENGLISH = "English";
@@ -155,7 +156,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
    * @param shell
    * @return
    */
-  protected String getFLText(CommonShell shell) {
+  protected String getFLText(T shell) {
     String toShow = shell.getForeignLanguage();
     if (english && !shell.getEnglish().equals(EditItem.NEW_ITEM)) {
       String meaning = shell.getMeaning();

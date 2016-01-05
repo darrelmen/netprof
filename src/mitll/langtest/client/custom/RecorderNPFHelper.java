@@ -25,6 +25,7 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.Collection;
 import java.util.Map;
@@ -57,7 +58,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
     final String oinstance = exerciseList.getInstance();
     return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(final CommonExercise e) {
+      public Panel getExercisePanel(final Shell e) {
         return new MyWaveformExercisePanel(e, controller, exerciseList, oinstance);
       }
     };
@@ -210,7 +211,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
     }
 
     @Override
-    public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
+    public void postAnswers(ExerciseController controller, Shell completedExercise) {
       super.postAnswers(controller, completedExercise);
       tellOtherListExerciseDirty(e);
     }
