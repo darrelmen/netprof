@@ -25,6 +25,7 @@ import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.custom.exercise.CommentBox;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
@@ -83,7 +84,7 @@ class FlashcardPanel extends HorizontalPanel {
    * @param endListener
    * @param instance
    * @param exerciseList
-   * @see StatsFlashcardFactory#getExercisePanel(mitll.langtest.shared.exercise.CommonExercise)
+   * @see ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.exercise.Shell)
    */
   public FlashcardPanel(final CommonExercise e, final LangTestDatabaseAsync service,
                         final ExerciseController controller, boolean addKeyBinding,
