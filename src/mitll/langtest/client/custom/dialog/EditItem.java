@@ -30,6 +30,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.CommonUserExercise;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -166,7 +167,7 @@ public class EditItem {
           }
 
           @Override
-          public List<CommonShell> rememberExercises(List<CommonShell> result) {
+          public List<Shell> rememberExercises(List<Shell> result) {
             clear();
             boolean addNewItem = includeAddItem;
 
@@ -210,7 +211,7 @@ public class EditItem {
 
     exerciseList.setFactory(new ExercisePanelFactory(service, feedback, controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(CommonExercise e) {
+      public Panel getExercisePanel(Shell e) {
         Panel panel = new SimplePanel();
         panel.getElement().setId("EditItemPanel");
         // TODO : do something better here than toCommonUserExercise
