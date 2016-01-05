@@ -44,7 +44,7 @@ import java.util.logging.Logger;
  * Time: 5:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class CommentNPFExercise extends NPFExercise {
+public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T> {
   private final Logger logger = Logger.getLogger("CommentNPFExercise");
 
   private static final String CONTEXT = "context";
@@ -62,7 +62,7 @@ public class CommentNPFExercise extends NPFExercise {
   private PlayAudioPanel contextPlay;
   private CommentBox commentBox;
 
-  public CommentNPFExercise(CommonExercise e, ExerciseController controller, ListInterface listContainer,
+  public CommentNPFExercise(T e, ExerciseController controller, ListInterface<T> listContainer,
                             boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, 1.0f, addKeyHandler, instance);
   }
@@ -70,10 +70,10 @@ public class CommentNPFExercise extends NPFExercise {
   /**
    * @param content
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.exercise.CommonExercise)
+   * @see #getQuestionContent(mitll.langtest.shared.exercise.T)
    */
   @Override
-  protected Widget getQuestionContent(final CommonExercise e, String content) {
+  protected Widget getQuestionContent(final T e, String content) {
     if (commentBox == null) // defensive...
       this.commentBox = new CommentBox(e, controller, this);
 
@@ -105,7 +105,7 @@ public class CommentNPFExercise extends NPFExercise {
     return column;
   }
 
-  private void addContextButton(final CommonExercise e, DivWidget row) {
+  private void addContextButton(final T e, DivWidget row) {
     String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
 
     if (!context.isEmpty() && controller.getProps().showContextButton()) {
@@ -115,7 +115,7 @@ public class CommentNPFExercise extends NPFExercise {
       show.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          new ModalInfoDialog(CONTEXT_SENTENCE, Collections.EMPTY_LIST, getContext(e), null);
+          new ModalInfoDialog(CONTEXT_SENTENCE, Collections.emptyList(), getContext(e), null);
         }
       });
 
@@ -133,7 +133,7 @@ public class CommentNPFExercise extends NPFExercise {
    * @return
    * @see #addContextButton
    */
-  private Panel getContext(CommonExercise e) {
+  private Panel getContext(T e) {
     String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
     String contextTranslation = e.getContextTranslation() != null && !e.getContextTranslation().trim().isEmpty() ? e.getContextTranslation() : "";
     boolean same = context.equals(contextTranslation);
@@ -167,9 +167,9 @@ public class CommentNPFExercise extends NPFExercise {
    * @param e
    * @param context
    * @return
-   * @see #getContext(CommonExercise)
+   * @see #getContext(T)
    */
-  private String highlightVocabItemInContext(CommonExercise e, String context) {
+  private String highlightVocabItemInContext(T e, String context) {
     String trim = e.getRefSentence().trim();
     String toFind = removePunct(trim);
 
@@ -222,7 +222,7 @@ public class CommentNPFExercise extends NPFExercise {
    * @param hp
    * @see #getContext
    */
-  private void addGenderChoices(CommonExercise e, Panel hp) {
+  private void addGenderChoices(T e, Panel hp) {
     // first, choose male and female voices
 
     long maleTime = 0, femaleTime = 0;
@@ -336,10 +336,10 @@ public class CommentNPFExercise extends NPFExercise {
    * @param label
    * @param value
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.exercise.CommonExercise, String)
-   * @see #getContext(mitll.langtest.shared.exercise.CommonExercise)
+   * @see #getQuestionContent(mitll.langtest.shared.exercise.T, String)
+   * @see #getContext(mitll.langtest.shared.exercise.T)
    */
-  private Widget getEntry(CommonExercise e, final String field, final String label, String value) {
+  private Widget getEntry(T e, final String field, final String label, String value) {
     return getEntry(field, label, value, e.getAnnotation(field));
   }
 
@@ -349,7 +349,7 @@ public class CommentNPFExercise extends NPFExercise {
    * @param value
    * @param annotation
    * @return
-   * @see #getEntry(mitll.langtest.shared.exercise.CommonExercise, String, String, String)
+   * @see #getEntry(mitll.langtest.shared.exercise.T, String, String, String)
    * @see #makeFastAndSlowAudio(String)
    */
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
@@ -363,7 +363,7 @@ public class CommentNPFExercise extends NPFExercise {
    */
   @Override
   protected ASRScoringAudioPanel makeFastAndSlowAudio(final String path) {
-    return new FastAndSlowASRScoringAudioPanel(getLocalExercise(), path, service, controller, scorePanel, instance) {
+    return new FastAndSlowASRScoringAudioPanel<T>(getLocalExercise(), path, service, controller, scorePanel, instance) {
       @Override
       protected void addAudioRadioButton(Panel vp, RadioButton fast) {
         vp.add(commentBox.getEntry(audioPath, fast, exercise.getAnnotation(path)));

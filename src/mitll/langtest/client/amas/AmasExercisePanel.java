@@ -255,7 +255,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
    * @param n
    * @param englishQuestions
    * @param pair
-   * @param toAddTo
+   * @paramx toAddTo
    * @return
    */
   private Panel getQuestionPanel(AmasExerciseImpl exercise, LangTestDatabaseAsync service, ExerciseController controller,
@@ -282,7 +282,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
    * @param total
    * @param qaPair
    * @param showAnswer
-   * @see #getQuestionPanel(mitll.langtest.shared.AmasExerciseImpl, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int, int, List, QAPair, com.google.gwt.user.client.ui.HasWidgets)
+   * @see #getQuestionPanel
    */
   private void getQuestionHeader(int total, QAPair qaPair, boolean showAnswer, HasWidgets toAddTo) {
     String question = qaPair.getQuestion();
