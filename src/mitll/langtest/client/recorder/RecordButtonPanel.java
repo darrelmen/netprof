@@ -15,6 +15,7 @@ import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
 
 /**
  * Just a single record button for the UI component.
@@ -32,7 +33,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   protected final RecordButton recordButton;
   private final LangTestDatabaseAsync service;
   private final ExerciseController controller;
-  private final CommonExercise exercise;
+  private final Shell exercise;
   private final int index;
   private int reqid = 0;
   private Panel panel;
@@ -48,7 +49,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#FlashcardRecordButtonPanel(mitll.langtest.client.flashcard.AudioAnswerListener, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.exercise.CommonExercise, int, String)
    */
   protected RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
-                              final CommonExercise exercise, final int index,
+                              final Shell exercise, final int index,
                               boolean doFlashcardAudio, String audioType, String recordButtonTitle){
     this.service = service;
     this.controller = controller;
