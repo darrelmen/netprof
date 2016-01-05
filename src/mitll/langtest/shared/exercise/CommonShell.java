@@ -4,16 +4,10 @@
 
 package mitll.langtest.shared.exercise;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
 /**
  * Created by GO22670 on 3/21/2014.
  */
-public interface CommonShell extends IsSerializable {
-  String getID();
-  STATE getState();
-  void setState(STATE state);
-
+public interface CommonShell extends Shell {
   STATE getSecondState();
   void setSecondState(STATE state);
 
