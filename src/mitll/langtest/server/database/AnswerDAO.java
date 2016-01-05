@@ -24,6 +24,34 @@ public class AnswerDAO extends DAO {
   }
 
   /**
+   * TODO : consider moving device type through...
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
+   * @see mitll.langtest.client.flashcard.TextResponse#getScoreForGuess
+   *@param userID
+   * @param exerciseID
+   * @param questionID
+   * @param answer
+   * @param answerType
+   * @param correct
+   * @param pronScore
+   * @param classifierScore
+   * @param session
+   * @param timeSpent                */
+  public long addTextAnswer(int userID,
+                            String exerciseID, int questionID,
+                            String answer,
+                            String answerType,
+                            boolean correct,
+                            float pronScore, float classifierScore, String session, long timeSpent) {
+/*    return addAnswer(database,userID,
+        exerciseID, questionID, answer, "",
+        true, answerType,
+        0,
+        correct, pronScore, classifierScore, "", "", "", false, false, session, timeSpent, 0, 0);*/
+    return 0;
+  }
+
+  /**
    * @param database
    * @param userID
    * @param id
@@ -226,6 +254,35 @@ public class AnswerDAO extends DAO {
       statement.close();
     } catch (Exception e) {
       logger.error("got " + e, e);
+    } finally {
+      database.closeConnection(connection);
+    }
+  }
+
+  public void addUserScore(long id, float score) {
+    changeScore(id, score, ResultDAO.USER_SCORE);
+  }
+
+  private void changeScore(long id, float score, String scoreColumn) {
+    Connection connection = getConnection();
+    // logger.debug("changing " +scoreColumn + " for " +id + " to " + score);
+    try {
+      String sql = "UPDATE results " +
+          "SET " +
+          scoreColumn +"='" + score + "' " +
+          "WHERE id=" + id;
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      int i = statement.executeUpdate();
+
+      if (i == 0) {
+        logger.error("huh? didn't change the answer for " + id + " sql " + sql);
+      }
+
+      statement.close();
+      resultDAO.invalidateCachedResults();
+    } catch (Exception e) {
+      logger.error("got " +e,e);
     } finally {
       database.closeConnection(connection);
     }
