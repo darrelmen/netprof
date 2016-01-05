@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,7 +17,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
  * Time: 6:18 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExercisePanelFactory {
+public abstract class ExercisePanelFactory <T extends Shell> {
   protected final LangTestDatabaseAsync service;
   protected final UserFeedback userFeedback;
   protected final ExerciseController controller;
@@ -47,5 +47,5 @@ public abstract class ExercisePanelFactory {
    * @param e
    * @return
    */
-  public abstract Panel getExercisePanel(CommonExercise e);
+  public abstract Panel getExercisePanel(T e);
 }
