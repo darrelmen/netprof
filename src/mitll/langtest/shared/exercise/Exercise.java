@@ -179,7 +179,7 @@ public class Exercise extends AudioExercise implements CommonExercise {
       }
     }
 
-    return "Exercise " + id + //" content bytes = " + content.length() +
+    return "Exercise " + getID() + //" content bytes = " + content.length() +
         " english '" + getEnglish() +
         "'/'" + getRefSentence() + "' " +
         "meaning '" +getMeaning()+
