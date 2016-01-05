@@ -20,9 +20,10 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -36,11 +37,11 @@ import java.util.logging.Logger;
  * Time: 5:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingExerciseList extends ExerciseList {
+public class PagingExerciseList<T extends Shell> extends ExerciseList<T> {
   private Logger logger = Logger.getLogger("PagingExerciseList");
 
   protected final ExerciseController controller;
-  protected PagingContainer pagingContainer;
+  protected PagingContainer<T> pagingContainer;
   private final boolean showTypeAhead;
 
   private TypeAhead typeAhead;
@@ -62,7 +63,7 @@ public class PagingExerciseList extends ExerciseList {
    * @see mitll.langtest.client.custom.content.NPFHelper#makeExerciseList(Panel, String)
    */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            ExercisePanelFactory factory, ExerciseController controller,
+                            ExercisePanelFactory<T> factory, ExerciseController controller,
                             boolean showTypeAhead, String instance, boolean incorrectFirst) {
     super(currentExerciseVPanel, service, feedback, factory, controller, instance, incorrectFirst);
     this.controller = controller;
@@ -109,7 +110,8 @@ public class PagingExerciseList extends ExerciseList {
     logger.info("PagingExerciseList.loadExercises : looking for " +
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
     service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID,
-        controller.getUser(), getRole(), getUnrecorded(), isOnlyExamples(), incorrectFirstOrder, false, new SetExercisesCallback(""));
+        controller.getUser(), getRole(), getUnrecorded(), isOnlyExamples(), incorrectFirstOrder, false,
+        new SetExercisesCallback(""));
   }
 
   /**
@@ -125,11 +127,11 @@ public class PagingExerciseList extends ExerciseList {
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
    */
   protected PagingContainer makePagingContainer() {
-    final PagingExerciseList outer = this;
+    final PagingExerciseList<T> outer = this;
     pagingContainer =
-        new PagingContainer(controller, getVerticalUnaccountedFor(),getRole().equals(Result.AUDIO_TYPE_RECORDER)) {
+        new PagingContainer<T>(controller, getVerticalUnaccountedFor(),getRole().equals(Result.AUDIO_TYPE_RECORDER)) {
           @Override
-          protected void gotClickOnItem(CommonShell e) {
+          protected void gotClickOnItem(T e) {
             outer.gotClickOnItem(e);
           }
         };
@@ -137,12 +139,12 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   @Override
-  protected CommonShell findFirstExercise() {
+  protected T findFirstExercise() {
     return controller.showCompleted() ? getFirstNotCompleted() : super.findFirstExercise();
   }
 
-  private CommonShell getFirstNotCompleted() {
-    for (CommonShell es : pagingContainer.getExercises()) {
+  private T getFirstNotCompleted() {
+    for (T es : pagingContainer.getExercises()) {
       STATE state = es.getState();
       if (state != null && state.equals(STATE.UNSET)) {
         return es;
@@ -272,12 +274,12 @@ public class PagingExerciseList extends ExerciseList {
     return "search="+search +";item=" + id;
   }
 
-  protected void gotClickOnItem(final CommonShell e) {
+  public void gotClickOnItem(final T e) {
     if (isExercisePanelBusy()) {
       tellUserPanelIsBusy();
       markCurrentExercise(pagingContainer.getCurrentSelection().getID());
     } else {
-      controller.logEvent(this, "ExerciseList", e.getID(), "Clicked on item '" + e.getEnglish() + "'");
+      controller.logEvent(this, "ExerciseList", e.getID(), "Clicked on item '" + e.toString() + "'");
 
       pushNewItem(getTypeAheadText(), e.getID());
     }
@@ -292,7 +294,7 @@ public class PagingExerciseList extends ExerciseList {
     onResize();
   }
 
-  private List<CommonShell> inOrderResult;
+  private List<T> inOrderResult;
 
   /**
    * A little complicated -- if {@link #doShuffle} is true, shuffles the exercises
@@ -302,17 +304,17 @@ public class PagingExerciseList extends ExerciseList {
    * @see #simpleSetShuffle(boolean)
    */
   @Override
-  public List<CommonShell> rememberExercises(List<CommonShell> result) {
+  public List<T> rememberExercises(List<T> result) {
     inOrderResult = result;
     if (doShuffle) {
       logger.info(getInstance() + " : rememberExercises - shuffling " + result.size() + " items");
 
-      result = new ArrayList<CommonShell>(result);
+      result = new ArrayList<T>(result);
       Shuffler.shuffle(result);
     }
     clear();
     int c = 0;
-    for (CommonShell es : result) {
+    for (T es : result) {
       addExercise(es);
     }
     flush();
@@ -320,7 +322,7 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   @Override
-  protected List<CommonShell> getInOrder() {
+  protected List<T> getInOrder() {
     return inOrderResult;
   }
 
@@ -335,36 +337,36 @@ public class PagingExerciseList extends ExerciseList {
   }
 
   @Override
-  protected CommonShell getFirst() {
+  protected T getFirst() {
     return pagingContainer.getFirst();
   }
 
   @Override
-  public CommonShell byID(String name) {
+  public T byID(String name) {
     return pagingContainer.byID(name);
   }
 
   @Override
-  public CommonShell getCurrentExercise() {
+  public T getCurrentExercise() {
     return pagingContainer.getCurrentSelection();
   }
 
   @Override
-  protected int getRealIndex(CommonShell t) {
+  protected int getRealIndex(T t) {
     return pagingContainer.getIndex(t);
   }
 
   @Override
-  protected CommonShell getAt(int i) {
+  protected T getAt(int i) {
     return pagingContainer.getAt(i);
   }
 
   /**
-   * @see PagingExerciseList#rememberExercises(List)
+   * @see ExerciseList#rememberExercises(List)
    * @param es
    */
   @Override
-  public void addExercise(CommonShell es) {
+  public void addExercise(T es) {
     pagingContainer.addExercise(es);
   }
 
@@ -373,12 +375,12 @@ public class PagingExerciseList extends ExerciseList {
    * @param after
    * @param es
    */
-  public void addExerciseAfter(CommonShell after, CommonShell es) {
+  public void addExerciseAfter(T after, T es) {
     pagingContainer.addExerciseAfter(after, es);
   }
 
-  public CommonShell forgetExercise(String id) {
-    CommonShell es = byID(id);
+  public T forgetExercise(String id) {
+    T es = byID(id);
     if (es != null) {
       return removeExercise(es);
     } else {
@@ -393,8 +395,8 @@ public class PagingExerciseList extends ExerciseList {
    * @see mitll.langtest.client.list.ExerciseList#removeExercise
    */
   @Override
-  public CommonShell simpleRemove(String id) {
-    CommonShell es = byID(id);
+  public T simpleRemove(String id) {
+    T es = byID(id);
     pagingContainer.forgetExercise(es);
 
     if (isEmpty()) {
