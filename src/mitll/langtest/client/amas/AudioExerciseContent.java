@@ -10,8 +10,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
-import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class AudioExerciseContent {
    * @return
    * @see mitll.langtest.client.recorder.FeedbackRecordPanel#getQuestionContent
    */
-  public Widget getQuestionContent(CommonExercise e, ExerciseController controller, boolean includeExerciseID,
+  public Widget getQuestionContent(AmasExerciseImpl e, ExerciseController controller, boolean includeExerciseID,
                                    boolean showQuestion, String content, int index, int totalInQuiz) {
     rightAlignContent = controller.isRightAlignContent();
     language = controller.getLanguage().toLowerCase();
@@ -62,7 +62,7 @@ public class AudioExerciseContent {
    * @param totalInQuiz
    * @return
    */
-  private Panel makeFlashcardForCRT(CommonExercise e, String content, boolean includeExerciseID, boolean showQuestion, int index, int totalInQuiz) {
+  private Panel makeFlashcardForCRT(AmasExerciseImpl e, String content, boolean includeExerciseID, boolean showQuestion, int index, int totalInQuiz) {
     Panel container = new FlowPanel();
     container.getElement().setId("makeFlashcardForCRT_container");
     addAudioRow(e, content, includeExerciseID, container, index, totalInQuiz);
@@ -78,7 +78,7 @@ public class AudioExerciseContent {
     return container;
   }
 
-  private QAPair getQaPair(CommonExercise e) {
+  private QAPair getQaPair(AmasExerciseImpl e) {
     List<QAPair> foreignLanguageQuestions = e.getForeignLanguageQuestions();
     QAPair qaPair = foreignLanguageQuestions.isEmpty() ? null : foreignLanguageQuestions.get(0);
     if (foreignLanguageQuestions.isEmpty()) {
@@ -98,7 +98,7 @@ public class AudioExerciseContent {
    * @seex #getAudioDiv
    * @see #makeFlashcardForCRT
    */
-  private void addAudioRow(CommonExercise e, String content, boolean includeExerciseID, Panel container, int index, int totalInQuiz) {
+  private void addAudioRow(AmasExerciseImpl e, String content, boolean includeExerciseID, Panel container, int index, int totalInQuiz) {
     Panel horiz = new FlowPanel();
     horiz.getElement().setId("item_and_content");
     container.add(horiz);
