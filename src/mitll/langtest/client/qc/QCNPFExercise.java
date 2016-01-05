@@ -51,7 +51,7 @@ import java.util.logging.Logger;
  * Time: 5:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePanel<T> {
+public class QCNPFExercise<T extends Shell> extends GoodwaveExercisePanel<T> {
   private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
   private static final String DEFECT = "Defect?";
