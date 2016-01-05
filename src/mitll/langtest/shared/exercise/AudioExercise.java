@@ -26,7 +26,6 @@ public class AudioExercise extends ExerciseShell {
   private static final String CONTEXT = "context";
 
   private Map<String, AudioAttribute> audioAttributes = new HashMap<String, AudioAttribute>();
-  private Map<String, String> unitToValue = new HashMap<String, String>();
   private Map<String, ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
 
   public AudioExercise() {}
@@ -457,35 +456,12 @@ public class AudioExercise extends ExerciseShell {
 
   public Collection<String> getFields() { return fieldToAnnotation.keySet(); }
 
-  public Map<String, String> getUnitToValue() { return unitToValue; }
-
-  /**
-   * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
-   * @param unit
-   * @param value
-   */
-  public void addUnitToValue(String unit, String value) {
-    if (value == null) return;
-//    if (value.isEmpty()) {
-//      System.out.println("addUnitToValue " + unit + " value " + value);
-//    }
-    this.getUnitToValue().put(unit, value);
-  }
-
-  /**
-   * @see UserExercise#UserExercise(CommonExercise)
-   * @param unitToValue
-   */
-  public void setUnitToValue(Map<String, String> unitToValue) {
-    this.unitToValue = unitToValue;
-  }
-
   public boolean removeAudio(AudioAttribute audioAttribute) {
     return audioAttributes.remove(audioAttribute.getKey()) != null;
   }
 
   public String toString() {
     return super.toString() +" audio attr (" +getAudioAttributes().size()+
-      ") :" + getAudioAttributes() + " and " +fieldToAnnotation + " annotations, unit/lesson " + unitToValue;
+      ") :" + getAudioAttributes() + " and " +fieldToAnnotation + " annotations, unit/lesson " + getUnitToValue();
   }
 }
