@@ -18,6 +18,7 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.logging.Logger;
 
@@ -28,7 +29,7 @@ import java.util.logging.Logger;
  * Time: 3:27 PM
  * To change this template use File | Settings | File Templates.
  */
-public class SimpleChapterNPFHelper implements RequiresResize {
+public class SimpleChapterNPFHelper<T extends Shell> implements RequiresResize {
   private Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
 
   private boolean madeNPFContent = false;
@@ -63,7 +64,8 @@ public class SimpleChapterNPFHelper implements RequiresResize {
   }
 
   protected NPFHelper.FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                                                     UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
+                                                     UserManager userManager, ExerciseController controller,
+                                                     SimpleChapterNPFHelper outer) {
     return new MyFlexListLayout(service, feedback, userManager, controller, outer);
   }
 
@@ -128,12 +130,12 @@ public class SimpleChapterNPFHelper implements RequiresResize {
    */
   protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
     final String instance = exerciseList.getInstance();
-    return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
+    return new ExercisePanelFactory<T>(service, feedback, controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(final CommonExercise e) {
+      public Panel getExercisePanel(final T e) {
         return new WaveformExercisePanel(e, service, controller, exerciseList, true, instance) {
           @Override
-          public void postAnswers(ExerciseController controller, CommonExercise completedExercise) {
+          public void postAnswers(ExerciseController controller, T completedExercise) {
             super.postAnswers(controller, completedExercise);
             tellOtherListExerciseDirty(e);
           }
@@ -142,7 +144,7 @@ public class SimpleChapterNPFHelper implements RequiresResize {
     };
   }
 
-  protected void tellOtherListExerciseDirty(CommonExercise e) {
+  protected void tellOtherListExerciseDirty(T e) {
     if (predefinedContentList != null && e.getID().equals(predefinedContentList.getCurrentExerciseID())) {
       logger.info("WaveformExercisePanel.reloading " + e.getID());
 
