@@ -9,7 +9,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.HashSet;
@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  * Time: 11:31 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ASRScoringAudioPanel extends ScoringAudioPanel {
+public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> {
   private Logger logger = Logger.getLogger("ASRScoringAudioPanel");
   public static final String SCORE = "score";
   private final Set<String> tested = new HashSet<String>();
@@ -40,7 +40,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    * @param instance
    */
   public ASRScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel,
-                              String playButtonSuffix, String exerciseID, CommonExercise exercise, String instance) {
+                              String playButtonSuffix, String exerciseID, T exercise, String instance) {
     super(refSentence, service, controller, gaugePanel, playButtonSuffix, exerciseID, exercise, instance);
   }
 
@@ -60,7 +60,7 @@ public class ASRScoringAudioPanel extends ScoringAudioPanel {
    */
   public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                               ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
-                              int rightMargin, String playButtonSuffix, String exerciseID, CommonExercise exercise, String instance) {
+                              int rightMargin, String playButtonSuffix, String exerciseID, T exercise, String instance) {
     super(path, refSentence, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, exerciseID, exercise, instance);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
