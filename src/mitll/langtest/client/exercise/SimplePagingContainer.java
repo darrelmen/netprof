@@ -13,9 +13,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
-import mitll.langtest.client.custom.dialog.EditItem;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Shell;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -23,11 +20,8 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 9/16/14.
  */
-public class SimplePagingContainer<T extends Shell> implements RequiresResize {
+public class SimplePagingContainer<T> implements RequiresResize {
   private final Logger logger = Logger.getLogger("SimplePagingContainer");
-
-  protected static final String ENGLISH = "English";
-  private final boolean english;
 
   private static final boolean DEBUG = false;
   public static final int MAX_WIDTH = 320;
@@ -47,12 +41,11 @@ public class SimplePagingContainer<T extends Shell> implements RequiresResize {
 
   public SimplePagingContainer(ExerciseController controller) {
     this.controller = controller;
-    english = controller.getLanguage().equals(ENGLISH);
   }
 
   /**
    * @return
-   * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager(mitll.langtest.client.exercise.PagingContainer)
+   * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager(ClickablePagingContainer)
    */
   public Panel getTableWithPager() {
     this.dataProvider = new ListDataProvider<T>();
@@ -141,29 +134,6 @@ public class SimplePagingContainer<T extends Shell> implements RequiresResize {
     table.addColumn(id2, header);
   }
 
-  /**
-   * Confusing for english - english col should be foreign language for english,
-   * @param shell
-   * @return
-   */
-  protected String getEnglishText(CommonShell shell) {
-//    logger.info("getEnglishText " + shell.getID() + " en " + shell.getEnglish() + " fl " + shell.getForeignLanguage() + " mn " + shell.getMeaning());
-    return english && !shell.getEnglish().equals(EditItem.NEW_ITEM) ? shell.getForeignLanguage() : shell.getEnglish();
-  }
-
-  /**
-   * Confusing for english - fl text should be english or meaning if there is meaning
-   * @param shell
-   * @return
-   */
-  protected String getFLText(T shell) {
-    String toShow = shell.getForeignLanguage();
-    if (english && !shell.getEnglish().equals(EditItem.NEW_ITEM)) {
-      String meaning = shell.getMeaning();
-      toShow = meaning.isEmpty() ? shell.getEnglish() : meaning;
-    }
-    return toShow;
-  }
 
   public void clear() {
     List<T> list = getList();
