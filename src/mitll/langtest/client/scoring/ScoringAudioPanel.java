@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -29,7 +29,7 @@ import java.util.Map;
  * Time: 11:17 AM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ScoringAudioPanel extends AudioPanel {
+public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    // private Logger logger = Logger.getLogger("ScoringAudioPanel");
 
   private static final int ANNOTATION_HEIGHT = 20;
@@ -44,7 +44,7 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   public static final float MP3_HEADER_OFFSET = 0f;//0.048f;
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, LangTestDatabaseAsync, ExerciseController, ScoreListener, String, String, CommonExercise, String)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, LangTestDatabaseAsync, ExerciseController, ScoreListener, String, String, T, String)
    * @param refSentence
    * @param service
    * @param gaugePanel
@@ -54,12 +54,12 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    * @param instance
    */
   ScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller,
-                    ScoreListener gaugePanel, String playButtonSuffix, String exerciseID, CommonExercise exercise, String instance) {
+                    ScoreListener gaugePanel, String playButtonSuffix, String exerciseID, T exercise, String instance) {
     this(null, refSentence, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix, exerciseID, exercise, instance);
   }
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, LangTestDatabaseAsync, ExerciseController, boolean, ScoreListener, int, String, String, CommonExercise, String)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, LangTestDatabaseAsync, ExerciseController, boolean, ScoreListener, int, String, String, T, String)
    * @param path
    * @param refSentence
    * @param service
@@ -73,8 +73,10 @@ public abstract class ScoringAudioPanel extends AudioPanel {
    */
   ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                     ExerciseController controller,
-                    boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix, String exerciseID, CommonExercise exercise, String instance) {
-    super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, controller.getAudioType(), exerciseID, exercise, instance);
+                    boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix,
+                    String exerciseID, T exercise, String instance) {
+    super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix,
+        controller.getAudioType(), exerciseID, exercise, instance);
     this.refSentence = refSentence;
     showOnlyOneExercise = controller.showOnlyOneExercise();
     addClickHandlers();
@@ -225,20 +227,20 @@ public abstract class ScoringAudioPanel extends AudioPanel {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.CommonExercise)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.T)
    * @param score
    */
   public void addScore(CorrectAndScore score) {  scoreListener.addScore(score); }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.CommonExercise)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.T)
    */
   public void showChart() {
     scoreListener.showChart(showOnlyOneExercise);
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.CommonExercise)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.T)
    * @param avgScore
    */
   public void setClassAvg(float avgScore) { scoreListener.setClassAvg(avgScore);  }
