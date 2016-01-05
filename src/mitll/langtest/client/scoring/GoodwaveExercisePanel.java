@@ -35,6 +35,8 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.ArrayList;
@@ -49,7 +51,7 @@ import java.util.logging.Logger;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public class GoodwaveExercisePanel<T extends CommonExercise> extends HorizontalPanel implements BusyPanel, RequiresResize,
+public class GoodwaveExercisePanel<T extends CommonShell> extends HorizontalPanel implements BusyPanel, RequiresResize,
     ProvidesResize,
     CommentAnnotator {
   private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
