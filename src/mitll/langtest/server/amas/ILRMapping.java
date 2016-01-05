@@ -1,7 +1,7 @@
 package mitll.langtest.server.amas;
 
 import mitll.langtest.server.database.exercise.SectionHelper;
-import mitll.langtest.shared.amas.AmasExerciseImpl;
+import mitll.langtest.shared.exercise.Shell;
 import org.apache.log4j.Logger;
 
 import java.io.*;
@@ -10,7 +10,7 @@ import java.util.*;
 /**
  * Created by GO22670 on 3/7/14.
  */
-public class ILRMapping {
+public class ILRMapping<T extends Shell> {
   private static final Logger logger = Logger.getLogger(ILRMapping.class);
   public static final String ILR_LEVEL = "ILR Level";
   private static final String TEST_TYPE = "Test type";
@@ -24,7 +24,7 @@ public class ILRMapping {
   private final Collection<String> listeningExercises = new ArrayList<String>();
   private final Map<String,String> exerciseToQuiz = new HashMap<String,String>();
 
-  private final SectionHelper sectionHelper;
+  private final SectionHelper<T> sectionHelper;
   private static final String ENCODING = "UTF8";
   private final boolean usePredefOrder;
   /**
@@ -34,7 +34,7 @@ public class ILRMapping {
    * @param mappingFile
    * @param usePredefOrder
    */
-  public ILRMapping(String configDir, SectionHelper sectionHelper, String mappingFile, boolean usePredefOrder) {
+  public ILRMapping(String configDir, SectionHelper<T> sectionHelper, String mappingFile, boolean usePredefOrder) {
     this.sectionHelper = sectionHelper;
     this.usePredefOrder = usePredefOrder;
     File ilrMapping = new File(configDir, mappingFile);
@@ -105,7 +105,7 @@ public class ILRMapping {
    * @param exid
    * @param e
    */
-  public void addMappingAssoc(String exid, AmasExerciseImpl e) {
+  public void addMappingAssoc(String exid, T e) {
     List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
 
     SectionHelper.Pair ilrAssoc = sectionHelper.addExerciseToLesson(e, ILR_LEVEL, exerciseToLevel.get(exid));
@@ -132,7 +132,7 @@ public class ILRMapping {
     return new BufferedReader(new InputStreamReader(resourceAsStream, ENCODING));
   }
 
-  public void report(Map<String, AmasExerciseImpl> idToExercise) {
+  public void report(Map<String, T> idToExercise) {
     int size = idToExercise.keySet().size();
     Set<String> mappedExercises = getMappedExercises();
     int size1 = mappedExercises.size();
