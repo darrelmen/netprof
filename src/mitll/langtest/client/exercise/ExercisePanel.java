@@ -27,7 +27,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class ExercisePanel<T extends Shell> extends VerticalPanel implements
-    BusyPanel, PostAnswerProvider, ProvidesResize, RequiresResize {
+    BusyPanel, PostAnswerProvider<T>, ProvidesResize, RequiresResize {
   private Logger logger = Logger.getLogger("ExercisePanel");
 
   private static final int CONTENT_SCROLL_HEIGHT = 220;
@@ -36,7 +36,7 @@ public abstract class ExercisePanel<T extends Shell> extends VerticalPanel imple
   private final Set<Widget> completed = new HashSet<Widget>();
   protected T exercise = null;
   protected final ExerciseController controller;
-  private final NavigationHelper navigationHelper;
+  private final NavigationHelper<T> navigationHelper;
   protected final ListInterface<T> exerciseList;
   private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
   protected final String message;
@@ -85,7 +85,7 @@ public abstract class ExercisePanel<T extends Shell> extends VerticalPanel imple
     getElement().setId("ExercisePanel");
   }
 
-  protected NavigationHelper getNavigationHelper(ExerciseController controller) {
+  protected NavigationHelper<T> getNavigationHelper(ExerciseController controller) {
     return new NavigationHelper<T>(exercise, controller, this, exerciseList, true, true, true);
   }
 
@@ -250,7 +250,7 @@ public abstract class ExercisePanel<T extends Shell> extends VerticalPanel imple
    * @see NavigationHelper#getNextAndPreviousButtons
    */
   @Override
-  public abstract void postAnswers(final ExerciseController controller, final Shell completedExercise); /*{
+  public abstract void postAnswers(final ExerciseController controller, final T completedExercise); /*{
     int i = 1;
     int user = controller.getUser();
     final Set<Widget> incomplete = new HashSet<Widget>();
