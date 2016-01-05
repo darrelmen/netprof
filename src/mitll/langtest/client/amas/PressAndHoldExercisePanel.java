@@ -17,6 +17,7 @@ import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.Collection;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
   private Heading recoOutput;
   public static final int HIDE_DELAY = 2500;
 
-  private final CommonExercise exercise;
+  private final Shell exercise;
 
   private final MySoundFeedback soundFeedback;
   private final ExerciseController controller;
@@ -61,7 +62,7 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
    * @param typeToSelection
    * @see mitll.langtest.client.recorder.FeedbackRecordPanel.AnswerPanel#addComboAnswer
    */
-  public PressAndHoldExercisePanel(final CommonExercise e,
+  public PressAndHoldExercisePanel(final Shell e,
                                    final LangTestDatabaseAsync service,
                                    final ExerciseController controller,
                                    MySoundFeedback soundFeedback,

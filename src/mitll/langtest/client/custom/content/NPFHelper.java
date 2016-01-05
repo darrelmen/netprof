@@ -18,16 +18,14 @@ import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Shell;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +39,7 @@ import java.util.logging.Logger;
  * Time: 3:27 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NPFHelper<T extends Shell> implements RequiresResize {
+public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> implements RequiresResize {
   Logger logger = Logger.getLogger("NPFHelper");
 
   protected static final String LIST_COMPLETE = "List complete!";
@@ -76,7 +74,7 @@ public class NPFHelper<T extends Shell> implements RequiresResize {
     this.showQC = showQC;
   }
 
-  public void showNPF(UserList ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
+  public void showNPF(UL ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
     showNPF(ul, tabAndContent, instanceName, loadExercises, null);
   }
 
@@ -88,10 +86,10 @@ public class NPFHelper<T extends Shell> implements RequiresResize {
    * @param instanceName  flex, review, etc.
    * @param loadExercises should we load exercises initially
    * @param toSelect
-   * @see mitll.langtest.client.custom.ListManager#getListOperations(UserList, String)
+   * @see mitll.langtest.client.custom.ListManager#getListOperations(UL, String)
    */
-  public void showNPF(UserList ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises,
-                      CommonExercise toSelect) {
+  public void showNPF(UL ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises,
+                      T toSelect) {
    // logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
     this.instanceName = instanceName;
     DivWidget content = tabAndContent.getContent();
@@ -110,8 +108,8 @@ public class NPFHelper<T extends Shell> implements RequiresResize {
     return npfExerciseList;
   }
 
-  private void addNPFToContent(UserList ul, Panel listContent, String instanceName, boolean loadExercises,
-                               CommonExercise toSelect) {
+  private void addNPFToContent(UL ul, Panel listContent, String instanceName, boolean loadExercises,
+                               T toSelect) {
     listContent.add(doNPF(ul, instanceName, loadExercises, toSelect));
     listContent.addStyleName("userListBackground");
   }
@@ -126,7 +124,7 @@ public class NPFHelper<T extends Shell> implements RequiresResize {
    * @return
    * @see #addNPFToContent(UserList, Panel, String, boolean, CommonExercise)
    */
-  private Panel doNPF(UserList ul, String instanceName, boolean loadExercises, CommonExercise toSelect) {
+  private Panel doNPF(UL ul, String instanceName, boolean loadExercises, T toSelect) {
     // System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul);
     Panel hp = doInternalLayout(ul, instanceName);
     if (loadExercises) {
@@ -141,9 +139,9 @@ public class NPFHelper<T extends Shell> implements RequiresResize {
    * @param ul
    * @param instanceName
    * @return
-   * @see #doNPF(UserList, String, boolean, String)
+   * @see #doNPF(UL, String, boolean, String)
    */
-  protected Panel doInternalLayout(UserList ul, String instanceName) {
+  protected Panel doInternalLayout(UL ul, String instanceName) {
 //    logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
 
     // row 1
@@ -174,7 +172,7 @@ public class NPFHelper<T extends Shell> implements RequiresResize {
     left.add(exerciseListOnLeftSide);
   }
 
-  protected Panel getRightSideContent(UserList ul, String instanceName) {
+  protected Panel getRightSideContent(UL ul, String instanceName) {
     Panel npfContentPanel = new SimplePanel();
     npfContentPanel.addStyleName("floatRight");
     npfContentPanel.getElement().setId("internalLayout_RightContent");
@@ -202,12 +200,14 @@ public class NPFHelper<T extends Shell> implements RequiresResize {
   }
 
   /**
+   * TODO : avoid unparameterized list here.
+   *
    * @param ul
    * @param toSelect
    * @see #doNPF
    * @see #showNPF
    */
-  private void rememberAndLoadFirst(final UserList ul, CommonExercise toSelect) {
+  private void rememberAndLoadFirst(final UL ul, T toSelect) {
     npfExerciseList.setUserListID(ul.getUniqueID());
     List<T> copy = new ArrayList<>(ul.getExercises());
   //  logger.info("rememberAndLoadFirst " + copy.size() + " exercises from  " +ul.getName());
@@ -224,7 +224,7 @@ public class NPFHelper<T extends Shell> implements RequiresResize {
    * @see #makeNPFExerciseList
    */
   PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
-    return new HistoryExerciseList(right, service, feedback, controller,
+    return new NPExerciseList(right, service, feedback, controller,
         true, instanceName, false) {
       @Override
       protected void onLastItem() {
@@ -244,14 +244,14 @@ public class NPFHelper<T extends Shell> implements RequiresResize {
    * @param showQC
    * @see #makeNPFExerciseList(com.google.gwt.user.client.ui.Panel, String)
    */
-  void setFactory(final PagingExerciseList exerciseList, final String instanceName, boolean showQC) {
+  void setFactory(final PagingExerciseList<T> exerciseList, final String instanceName, boolean showQC) {
     exerciseList.setFactory(getFactory(exerciseList, instanceName, showQC));
   }
 
-  protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList, final String instanceName, final boolean showQC) {
-    return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
+  protected ExercisePanelFactory getFactory(final PagingExerciseList<T> exerciseList, final String instanceName, final boolean showQC) {
+    return new ExercisePanelFactory<T>(service, feedback, controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(Shell e) {
+      public Panel getExercisePanel(T e) {
         if (showQC) {
           return new QCNPFExercise(e, controller, exerciseList, instanceName);
         } else {
@@ -315,7 +315,7 @@ public class NPFHelper<T extends Shell> implements RequiresResize {
      * @see ChapterNPFHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
      * @see ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
      */
-    public Panel doInternalLayout(UserList ul, String instanceName) {
+    public Panel doInternalLayout(UL ul, String instanceName) {
       Panel twoRows = new FlowPanel();
       twoRows.getElement().setId("NPFHelper_twoRows");
 
