@@ -127,18 +127,20 @@ public class AmasExerciseImpl implements Shell /*implements CommonExercise*/ {
 
     qaPairs.add(pair);
   }
-
+/*
   public String getRefSentence() {
     StringBuilder builder = new StringBuilder();
     for (String s : refSentences) {
       builder.append(s).append(" ");
     }
     return builder.toString();
-  }
+  }*/
 
+/*
   public String getTransliteration() {
     return "";//    translitSentences.isEmpty() ? "" : translitSentences.get(0);
   }
+*/
 
   /**
    * @return
@@ -294,8 +296,9 @@ public class AmasExerciseImpl implements Shell /*implements CommonExercise*/ {
     }*/
 
     return "Exercise " + getID() +  (getAltID().isEmpty() ? "" : "/"+getAltID())+
-        " english '" + getEnglish() +
-        "'/'" + getRefSentence() +
+     //   " english '" + getEnglish() +
+     //   "'" +
+      //  "/'" + getRefSentence() +
   //      " audio count = " + audioAttributes1.size()+
     //    (builder.toString().isEmpty() ? "":" \n\tmissing user audio " + builder.toString()) +
         " unit->lesson " + getUnitToValue();
