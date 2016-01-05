@@ -28,6 +28,7 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
@@ -134,7 +135,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
    * @see mitll.langtest.client.list.ExerciseList#makeExercisePanel(mitll.langtest.shared.exercise.CommonExercise)
    */
   @Override
-  public Panel getExercisePanel(CommonExercise e) {
+  public Panel getExercisePanel(Shell e) {
     currentExercise = e;
     sticky.storeCurrent(e);
     boolean recordingEnabled = controller.isRecordingEnabled();
@@ -229,7 +230,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   }
 
   /**
-   * @see #getExercisePanel(mitll.langtest.shared.exercise.CommonExercise)
+   * @see ExercisePanelFactory#getExercisePanel(Shell)
    */
   private class StatsPracticePanel extends BootstrapExercisePanel {
     private Widget container;
