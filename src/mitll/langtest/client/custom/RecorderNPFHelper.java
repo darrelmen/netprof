@@ -16,10 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.custom.content.NPFHelper;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.exercise.PagingContainer;
-import mitll.langtest.client.exercise.WaveformExercisePanel;
+import mitll.langtest.client.exercise.*;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
@@ -76,7 +73,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
           private CheckBox filterOnly;
 
           @Override
-          protected void addTableWithPager(PagingContainer pagingContainer) {
+          protected void addTableWithPager(ClickablePagingContainer pagingContainer) {
             // row 1
             Panel column = new FlowPanel();
             add(column);
@@ -186,9 +183,9 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
   }
 
   private class MyWaveformExercisePanel extends WaveformExercisePanel {
-    private final CommonExercise e; // TODO REMOVE!
+    private final Shell e; // TODO REMOVE!
 
-    public MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface exerciseList1, String instance) {
+    public MyWaveformExercisePanel(Shell e, ExerciseController controller1, ListInterface exerciseList1, String instance) {
       super(e, service, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
       this.e = e;
     }
