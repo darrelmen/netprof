@@ -21,7 +21,7 @@ public abstract class ExercisePanelFactory <T extends Shell> {
   protected final LangTestDatabaseAsync service;
   protected final UserFeedback userFeedback;
   protected final ExerciseController controller;
-  protected ListInterface exerciseList;
+  protected ListInterface<T> exerciseList;
 
   /**
    * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
@@ -31,14 +31,14 @@ public abstract class ExercisePanelFactory <T extends Shell> {
    * @param exerciseList
    */
   public ExercisePanelFactory(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                              final ExerciseController controller, ListInterface exerciseList) {
+                              final ExerciseController controller, ListInterface<T> exerciseList) {
     this.service = service;
     this.userFeedback = userFeedback;
     this.controller = controller;
     this.exerciseList = exerciseList;
   }
 
-  public void setExerciseList(ListInterface exerciseList) {
+  public void setExerciseList(ListInterface<T> exerciseList) {
      this.exerciseList = exerciseList;
   }
 
