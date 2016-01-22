@@ -89,7 +89,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private static final List<String> SITE_LIST = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "German",
       "Korean", "Iraqi",
-      "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Russian", "Spanish", "Sudanese", "Tagalog", "Urdu");
+      "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Russian", "Spanish", "Sudanese", "Tagalog", "Urdu", "Tagalog");
 
   /**
    * How far to the right to shift the list of sites...
