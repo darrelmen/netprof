@@ -55,9 +55,9 @@ public class LTSFactory implements CollationSort {
     try {
       languageToLTS.put(Language.PASHTO.name().toLowerCase(), new PashtoLTS());
       languageToLTS.put(Language.RUSSIAN.name().toLowerCase(), new RussianLTS());
+      languageToLTS.put(Language.TAGALOG.name().toLowerCase(), new TagalogLTS());
       languageToLTS.put(Language.SPANISH.name().toLowerCase(), new SpanishLTS());
       languageToLTS.put(Language.SUDANESE.name().toLowerCase(), new SudaneseLTS());
-      languageToLTS.put(Language.TAGALOG.name().toLowerCase(), unknown);
       languageToLTS.put(Language.URDU.name().toLowerCase(), new UrduLTS());
     } catch (Exception e) {
       logger.warn("got " + e);
