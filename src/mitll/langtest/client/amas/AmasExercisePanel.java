@@ -48,7 +48,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
 
   protected final LangTestDatabaseAsync service;
   protected final NavigationHelper navigationHelper;
-  protected final ListInterface exerciseList;
+  protected final ResponseExerciseList exerciseList;
   protected final Map<Integer, Widget> indexToWidget = new HashMap<Integer, Widget>();
 
   protected Map<Integer, Tab> indexToTab = new TreeMap<Integer, Tab>();
@@ -60,10 +60,10 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
    * @param service
    * @param controller
    * @param exerciseList
-   * @see ExercisePanelFactory#getExercisePanel
+   * @see FeedbackRecordPanel#FeedbackRecordPanel
    */
   protected AmasExercisePanel(final AmasExerciseImpl e, final LangTestDatabaseAsync service,
-                              final ExerciseController controller, ListInterface exerciseList) {
+                              final ExerciseController controller, ResponseExerciseList exerciseList) {
     this.exercise = e;
     this.controller = controller;
     this.service = service;
