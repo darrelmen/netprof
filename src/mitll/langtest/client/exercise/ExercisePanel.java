@@ -53,7 +53,8 @@ public abstract class ExercisePanel<T extends Shell> extends VerticalPanel imple
    * @see mitll.langtest.client.list.ListInterface#loadExercise
    */
   public ExercisePanel(final T e, final LangTestDatabaseAsync service,
-                       final ExerciseController controller, ListInterface<T> exerciseList, String instructionMessage, String instance) {
+                       final ExerciseController controller, ListInterface<T> exerciseList, String instructionMessage,
+                       String instance) {
     this.exercise = e;
     this.controller = controller;
     this.exerciseList = exerciseList;
