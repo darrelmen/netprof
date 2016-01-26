@@ -91,7 +91,7 @@ public class ResponseExerciseList<T extends Shell> extends SingleSelectExerciseL
    */
   protected ClickablePagingContainer<T> makePagingContainer() {
     final PagingExerciseList<T> outer = this;
-    pagingContainer = new ClickablePagingContainer<T>(controller, getVerticalUnaccountedFor(),false) {
+    pagingContainer = new ClickablePagingContainer<T>(controller) {
       @Override
       protected void gotClickOnItem(T e) {
         outer.gotClickOnItem(e);
