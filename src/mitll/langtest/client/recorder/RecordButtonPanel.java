@@ -14,8 +14,6 @@ import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.Shell;
 
 /**
  * Just a single record button for the UI component.
@@ -33,7 +31,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   protected final RecordButton recordButton;
   private final LangTestDatabaseAsync service;
   private final ExerciseController controller;
-  private final Shell exercise;
+  private final String exerciseID;
   private final int index;
   private int reqid = 0;
   private Panel panel;
@@ -46,14 +44,14 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
    *
-   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#FlashcardRecordButtonPanel(mitll.langtest.client.flashcard.AudioAnswerListener, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.shared.exercise.CommonExercise, int, String)
+   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#FlashcardRecordButtonPanel(mitll.langtest.client.flashcard.AudioAnswerListener, LangTestDatabaseAsync, ExerciseController, String, int, String)
    */
   protected RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
-                              final Shell exercise, final int index,
+                              final String exerciseID, final int index,
                               boolean doFlashcardAudio, String audioType, String recordButtonTitle){
     this.service = service;
     this.controller = controller;
-    this.exercise = exercise;
+    this.exerciseID = exerciseID;
     this.index = index;
     this.doFlashcardAudio = doFlashcardAudio;
     layoutRecordButton(recordButton = makeRecordButton(controller,recordButtonTitle));
@@ -140,7 +138,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     String device = controller.getBrowserInfo();
     final int len = base64EncodedWavFile.length();
     service.writeAudioFile(base64EncodedWavFile,
-        exercise.getID(),
+        exerciseID,
       index,
       controller.getUser(),
       reqid,
@@ -191,7 +189,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
         private String getLog(long then) {
           long now = System.currentTimeMillis();
           long diff = now - then;
-          return "audio for user " + controller.getUser() + " for exercise " + exercise.getID() + " took " + diff + " millis to post " +
+          return "audio for user " + controller.getUser() + " for exercise " + exerciseID + " took " + diff + " millis to post " +
             len + " characters or " + (len / diff) + " char/milli";
         }
       });
