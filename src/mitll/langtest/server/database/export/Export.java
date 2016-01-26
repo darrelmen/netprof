@@ -1,13 +1,15 @@
 package mitll.langtest.server.database.export;
 
+import mitll.langtest.server.amas.FileExerciseDAO;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.GradeDAO;
 import mitll.langtest.server.database.ResultDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.export.ExerciseExport;
+import mitll.langtest.server.export.ResponseAndGrade;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.grade.Grade;
 import org.apache.log4j.Logger;
 
@@ -32,11 +34,11 @@ public class Export {
   private static final Logger logger = Logger.getLogger(Export.class);
   public static final int MIN_LENGTH = 2;
 
-  private ExerciseDAO exerciseDAO = null;
+  private FileExerciseDAO exerciseDAO = null;
   private ResultDAO resultDAO = null;
   private GradeDAO gradeDAO = null;
 
-  public Export(ExerciseDAO exerciseDAO, ResultDAO resultDAO, GradeDAO gradeDAO) {
+  public Export(FileExerciseDAO exerciseDAO, ResultDAO resultDAO, GradeDAO gradeDAO) {
     this.exerciseDAO = exerciseDAO;
     this.resultDAO = resultDAO;
     this.gradeDAO = gradeDAO;
@@ -57,13 +59,13 @@ public class Export {
     Map<String, List<Result>> exerciseToResult = populateMapOfExerciseIdToResults();
     logger.debug("getExport : got " + exerciseToResult.size() + " exercise with results");
 
-    List<CommonExercise> exercises = getExercises();
+    List<AmasExerciseImpl> exercises = getExercises();
     logger.debug("getExport : got " + exercises.size() + " exercises");
 
     List<ExerciseExport> allExports = new ArrayList<ExerciseExport>();
     List<ExerciseExport> predefExports = new ArrayList<ExerciseExport>();
     // int c = 0;
-    for (CommonExercise e : exercises) {
+    for (AmasExerciseImpl e : exercises) {
       ExportPair exports = getExports(idToGrade, getResultsForExercise(exerciseToResult, e), e, true, max);
 
       allExports.addAll(exports.allExports);
@@ -80,7 +82,7 @@ public class Export {
    * @return
    * @see #getExport()
    */
-  private List<Result> getResultsForExercise(Map<String, List<Result>> exerciseToResult, CommonExercise e) {
+  private List<Result> getResultsForExercise(Map<String, List<Result>> exerciseToResult, AmasExerciseImpl e) {
     List<Result> results1 = exerciseToResult.get(e.getID());
     Set<String> strings = exerciseToResult.keySet();
     if (results1 == null) {
@@ -140,7 +142,7 @@ public class Export {
    * @return
    * @see #getExport
    */
-  private List<CommonExercise> getExercises() {
+  private List<AmasExerciseImpl> getExercises() {
     return exerciseDAO.getRawExercises();
   }
 
@@ -160,7 +162,7 @@ public class Export {
    */
   private ExportPair getExports(Map<Integer, List<Grade>> idToGrade,
                                 List<Result> resultsForExercise,
-                                CommonExercise exercise, boolean useFLQ,
+                                AmasExerciseImpl exercise, boolean useFLQ,
                                 int correctGrade) {
     //  boolean debug = false;
     Map<Integer, ExerciseExport> qidToExport = populateIdToExportMap(exercise);
@@ -253,7 +255,7 @@ public class Export {
      * @param allExports
      * @param predefOnly
      * @see Export#getExport()
-     * @see Export#getExports(Map, List, CommonExercise, boolean, int)
+     * @see Export#getExports(Map, List, AmasExerciseImpl, boolean, int)
      */
     public ExportPair(List<ExerciseExport> allExports, List<ExerciseExport> predefOnly) {
       this.allExports = allExports;
@@ -308,7 +310,7 @@ public class Export {
    * @return
    * @see #getExports
    */
-  private Map<Integer, ExerciseExport> populateIdToExportMap(CommonExercise exercise) {
+  private Map<Integer, ExerciseExport> populateIdToExportMap(AmasExerciseImpl exercise) {
     Map<Integer, ExerciseExport> qidToExport = new HashMap<Integer, ExerciseExport>();
     int qid = 0;
     for (QAPair qaPair : exercise.getQuestions()) {
@@ -366,7 +368,7 @@ public class Export {
    * @param correctGrade
    * @see #getExports
    */
-  private Set<String> addPredefinedAnswers(CommonExercise exercise, boolean useFLQ,
+  private Set<String> addPredefinedAnswers(AmasExerciseImpl exercise, boolean useFLQ,
                                            Map<Integer, ExerciseExport> qidToExport,
                                            Map<Integer, ExerciseExport> preDefqidToExport,
                                            int correctGrade) {
