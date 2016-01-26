@@ -16,8 +16,6 @@ import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.Shell;
 
 import java.util.Collection;
 import java.util.Map;
@@ -37,7 +35,7 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
   private Heading recoOutput;
   public static final int HIDE_DELAY = 2500;
 
-  private final Shell exercise;
+  private final String exerciseID;
 
   private final MySoundFeedback soundFeedback;
   private final ExerciseController controller;
@@ -54,7 +52,7 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
   private Panel recoOutputContainer;
 
   /**
-   * @param e
+   * @param exerciseID
    * @param service
    * @param controller
    * @param instance
@@ -62,16 +60,16 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
    * @param typeToSelection
    * @see mitll.langtest.client.recorder.FeedbackRecordPanel.AnswerPanel#addComboAnswer
    */
-  public PressAndHoldExercisePanel(final Shell e,
+  public PressAndHoldExercisePanel(final String exerciseID,
                                    final LangTestDatabaseAsync service,
                                    final ExerciseController controller,
                                    MySoundFeedback soundFeedback,
                                    String instance, int qid, Map<String, Collection<String>> typeToSelection) {
-    this.exercise = e;
+    this.exerciseID = exerciseID;
     this.controller = controller;
     this.instance = instance;
     this.soundFeedback = soundFeedback;
-    addRecordingAndFeedbackWidgets(e, service, controller, this, qid,typeToSelection);
+    addRecordingAndFeedbackWidgets(exerciseID, service, controller, this, qid,typeToSelection);
   }
 
   /**
@@ -87,7 +85,7 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
    * @param qid
    * @seex #FlashcardPanel
    */
-  private void addRecordingAndFeedbackWidgets(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller,
+  private void addRecordingAndFeedbackWidgets(String e, LangTestDatabaseAsync service, ExerciseController controller,
                                               Panel toAddTo, int qid, Map<String, Collection<String>> typeToSelection) {
     Widget answerAndRecordButtonRow = getAnswerAndRecordButtonRow(e, service, controller, qid,typeToSelection);
     answerAndRecordButtonRow.addStyleName("topFiveMargin");
@@ -98,15 +96,16 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
   }
 
   /**
-   * @param e
+   * @param exerciseID
    * @param service
    * @param controller
    * @param qid
    * @return
    * @see #addRecordingAndFeedbackWidgets(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, int)
    */
-  private Widget getAnswerAndRecordButtonRow(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller, int qid, Map<String, Collection<String>> typeToSelection) {
-    RecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, false // = DO NOT add key binding! - bad for now for multi-question responses
+  private Widget getAnswerAndRecordButtonRow(String exerciseID, LangTestDatabaseAsync service,
+                                             ExerciseController controller, int qid, Map<String, Collection<String>> typeToSelection) {
+    RecordButtonPanel answerWidget = getAnswerWidget(exerciseID, service, controller, false // = DO NOT add key binding! - bad for now for multi-question responses
         , instance, qid,typeToSelection);
     this.answerWidget = answerWidget;
     button = answerWidget.getRecordButton();
@@ -196,8 +195,10 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
    * @return
    * @see #getAnswerAndRecordButtonRow(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
-  private RecordButtonPanel getAnswerWidget(final CommonExercise exercise, LangTestDatabaseAsync service,
-                                            ExerciseController controller, final boolean addKeyBinding, String instance, int qid, Map<String, Collection<String>> typeToSelection) {
+  private RecordButtonPanel getAnswerWidget(final String exercise, LangTestDatabaseAsync service,
+                                            ExerciseController controller, final boolean addKeyBinding, String instance,
+                                            int qid,
+                                            Map<String, Collection<String>> typeToSelection) {
     return new FlashcardRecordButtonPanel(this, service, controller, exercise, qid, instance, typeToSelection) {
       @Override
       public Widget getRecordButton() {
@@ -323,7 +324,7 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
 
     iconContainer.clear();
     if (badAudioRecording) {
-      controller.logEvent(button, "Button", exercise.getID(), "bad recording");
+      controller.logEvent(button, "Button", exerciseID, "bad recording");
       if (!realRecordButton.checkAndShowTooLoud(result.getValidity())) {
         showPopup(result.getValidity().getPrompt(), realRecordButton.getParent());
       }
@@ -356,10 +357,10 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
       prevRecording = true;
 
       if (correct) {
-        controller.logEvent(button, "Button", exercise.getID(), "correct response - score " + Math.round(score * 100f));
+        controller.logEvent(button, "Button", exerciseID, "correct response - score " + Math.round(score * 100f));
         showCorrectFeedback(result, score);
       } else {   // incorrect!!
-        controller.logEvent(button, "Button", exercise.getID(), "incorrect response - score " + Math.round(score * 100f));
+        controller.logEvent(button, "Button", exerciseID, "incorrect response - score " + Math.round(score * 100f));
         showIncorrectFeedback(result, score);
       }
     }
