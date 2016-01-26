@@ -45,7 +45,7 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
       @Override
       public Panel getExercisePanel(AmasExerciseImpl e) {
         if (child != null) {child.setVisible(true);}
-        return new FeedbackRecordPanel(e, service, controller, exerciseList, child);
+        return new FeedbackRecordPanel(e, service, controller, (ResponseExerciseList)exerciseList, child);
       }
     };
   }
