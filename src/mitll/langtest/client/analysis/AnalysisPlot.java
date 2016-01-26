@@ -19,6 +19,7 @@ import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.TimeAndScore;
 import mitll.langtest.shared.analysis.UserPerformance;
+import mitll.langtest.shared.exercise.Shell;
 import org.moxieapps.gwt.highcharts.client.*;
 import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEvent;
 import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEventHandler;
@@ -233,14 +234,14 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
   private void populateExerciseMap(LangTestDatabaseAsync service, int userid) {
     service.getExerciseIds(1, new HashMap<String, Collection<String>>(), "", -1,
-        userid, "", false, false, false, false, new AsyncCallback<ExerciseListWrapper>() {
+        userid, "", false, false, false, false, new AsyncCallback<ExerciseListWrapper<CommonShell>>() {
           @Override
           public void onFailure(Throwable throwable) {
             logger.warning("\n\n\n-> getExerciseIds " + throwable);
           }
 
           @Override
-          public void onSuccess(ExerciseListWrapper exerciseListWrapper) {
+          public void onSuccess(ExerciseListWrapper<CommonShell> exerciseListWrapper) {
             for (CommonShell shell : exerciseListWrapper.getExercises()) {
               getIdToEx().put(shell.getID(), shell);
             }
