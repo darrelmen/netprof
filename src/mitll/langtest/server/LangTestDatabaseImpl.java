@@ -253,7 +253,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  private void sortExercises(String role, List<CommonExercise> commonExercises) {
+  private <T extends Shell> void sortExercises(String role, List<T> commonExercises) {
     new ExerciseSorter(getTypeOrder()).getSortedByUnitThenAlpha(commonExercises, role.equals(Result.AUDIO_TYPE_RECORDER));
     //new ExerciseSorter(getTypeOrder()).getSortedByUnitThenPhone(commonExercises, false, audioFileHelper.getPhoneToCount(), false);
   }
@@ -410,7 +410,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @see mitll.langtest.client.flashcard.TextResponse#getScoreForGuess
    */
-  public Answer getScoreForAnswer(long userID, CommonExercise exercise, int questionID, String answer, String answerType, long timeSpent, Map<String, Collection<String>> typeToSection) {
+  public Answer getScoreForAnswer(long userID, String exerciseID, int questionID, String answer,
+                                  String answerType, long timeSpent, Map<String, Collection<String>> typeToSection) {
    // AutoCRT.CRTScores scoreForAnswer1 = audioFileHelper.getScoreForAnswer(exercise, questionID, answer);
     AutoCRT.CRTScores scoreForAnswer1 = new AutoCRT.CRTScores();
     double scoreForAnswer = serverProps.useMiraClassifier() ? scoreForAnswer1.getNewScore() : scoreForAnswer1.getOldScore();
@@ -418,8 +419,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String session = "";// getLatestSession(typeToSection, userID);
     //  logger.warn("getScoreForAnswer user " + userID + " ex " + exercise.getID() + " qid " +questionID + " type " +typeToSection + " session " + session);
     boolean correct = scoreForAnswer > 0.5;
+   // String exerciseID = exercise.getID();
     long resultID = db.getAnswerDAO().addTextAnswer((int) userID,
-        exercise.getID(),
+        exerciseID,
         questionID, answer, answerType, correct,
         (float) scoreForAnswer, (float) scoreForAnswer, session, timeSpent);
 

@@ -24,7 +24,6 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class Exercise extends AudioExercise implements CommonExercise {
-  private String context;
   private String contextTranslation;
   private transient String refAudioIndex;
   private transient Collection<String> refSentences = new ArrayList<String>();
@@ -101,11 +100,6 @@ public class Exercise extends AudioExercise implements CommonExercise {
 /*  public void setMeaning(String meaning) {
     this.meaning = meaning;
   }*/
-
-  @Override
-  public String getContext() {
-    return context;
-  }
 
   @Override
   public String getContextTranslation() {
