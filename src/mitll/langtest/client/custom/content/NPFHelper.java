@@ -26,6 +26,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -281,7 +282,7 @@ public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> impleme
   /**
    * Created by GO22670 on 3/28/2014.
    */
-  public abstract static class FlexListLayout implements RequiresResize {
+  public abstract static class FlexListLayout<T extends Shell> implements RequiresResize {
     Logger logger = Logger.getLogger("FlexListLayout");
 
     public PagingExerciseList npfExerciseList;
@@ -315,7 +316,7 @@ public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> impleme
      * @see ChapterNPFHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
      * @see ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
      */
-    public Panel doInternalLayout(UL ul, String instanceName) {
+    public Panel doInternalLayout(UserList<T> ul, String instanceName) {
       Panel twoRows = new FlowPanel();
       twoRows.getElement().setId("NPFHelper_twoRows");
 

@@ -13,7 +13,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonExercise;
 
 /**
  * Created with IntelliJ IDEA.
@@ -36,14 +35,14 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    * @param exercisePanel
    * @param service
    * @param controller
-   * @param exercise
+   * @param exerciseID
    * @param index
    * @param instance
    * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, String)
    */
   public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel, LangTestDatabaseAsync service,
-                                    ExerciseController controller, CommonExercise exercise, int index, String instance) {
-    super(service, controller, exercise, index, true, "avp", "Record");
+                                    ExerciseController controller, String exerciseID, int index, String instance) {
+    super(service, controller, exerciseID, index, true, "avp", "Record");
     this.instance = instance;
     this.exercisePanel = exercisePanel;
   }
