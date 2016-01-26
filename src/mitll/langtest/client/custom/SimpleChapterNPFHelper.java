@@ -17,7 +17,9 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.exercise.AudioAttributeExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.logging.Logger;
@@ -29,7 +31,7 @@ import java.util.logging.Logger;
  * Time: 3:27 PM
  * To change this template use File | Settings | File Templates.
  */
-public class SimpleChapterNPFHelper<T extends Shell> implements RequiresResize {
+public class SimpleChapterNPFHelper<T extends CommonShell & AudioAttributeExercise> implements RequiresResize {
   private Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
 
   private boolean madeNPFContent = false;
@@ -94,7 +96,7 @@ public class SimpleChapterNPFHelper<T extends Shell> implements RequiresResize {
     listContent.addStyleName("userListBackground");
   }
 
-  private final NPFHelper.FlexListLayout flexListLayout;
+  private final NPFHelper.FlexListLayout<T> flexListLayout;
 
   /**
    * Make the instance name uses the unique id for the list.
