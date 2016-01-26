@@ -19,6 +19,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell {
   protected String englishSentence;
   protected String meaning;
   protected String foreignLanguage;
+  protected String context;
 
   public ExerciseShell() {}
 
@@ -71,6 +72,11 @@ public class ExerciseShell extends BaseExercise implements CommonShell {
   @Override
   public boolean equals(Object other) {
     return other instanceof ExerciseShell && getID().equals(((ExerciseShell) other).getID());
+  }
+
+  @Override
+  public String getContext() {
+    return context;
   }
 
   public String toString() {
