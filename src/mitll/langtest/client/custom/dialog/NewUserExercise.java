@@ -346,7 +346,7 @@ public class NewUserExercise<T extends CommonUserExercise, UL extends UserList<T
    * @return
    * @see #addNew
    */
-  Panel getCreateButton(UserList ul, ListInterface<T> pagingContainer, Panel toAddTo,
+  Panel getCreateButton(UL ul, ListInterface<T> pagingContainer, Panel toAddTo,
                         ControlGroup normalSpeedRecording
   ) {
     Button submit = makeCreateButton(ul, pagingContainer, toAddTo, foreignLang, rap, normalSpeedRecording);
