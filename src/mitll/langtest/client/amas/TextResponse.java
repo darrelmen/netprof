@@ -76,12 +76,12 @@ public class TextResponse {
    * @param getFocus
    * @return
    */
-  public Widget addWidgets(Panel toAddTo, CommonExercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
+  public Widget addWidgets(Panel toAddTo, String exerciseID, LangTestDatabaseAsync service, ExerciseController controller,
                            boolean centered, boolean useWhite, boolean addKeyBinding, int questionID,
                            String buttonTitle, boolean getFocus) {
     textScoreFeedback = new ScoreFeedback(useWhite);
 
-    textResponseWidget = getTextResponseWidget(exercise, service, controller, getTextScoreFeedback(), centered,
+    textResponseWidget = getTextResponseWidget(exerciseID, service, controller, getTextScoreFeedback(), centered,
       addKeyBinding, questionID, buttonTitle, getFocus);
 
     if (controller.isRightAlignContent()) {
@@ -119,7 +119,7 @@ public class TextResponse {
    * @return
    * @see #addWidgets
    */
-  private Widget getTextResponseWidget(CommonExercise exercise, LangTestDatabaseAsync service, ExerciseController controller,
+  private Widget getTextResponseWidget(String exerciseID, LangTestDatabaseAsync service, ExerciseController controller,
                                        ScoreFeedback scoreFeedback, boolean centered, boolean addEnterKeyBinding,
                                        int questionID, String buttonTitle, boolean getFocus) {
     final Button answerButton = getAnswerButton(buttonTitle);
@@ -128,7 +128,7 @@ public class TextResponse {
     final TextBox noPasteAnswer = getAnswerBox(controller, allowPaste, answerButton, getFocus);
     noPasteAnswer.setWidth(TEXT_BOX_WIDTH + "px");
     String answerType = controller.getAudioType();
-    setupSubmitButton(exercise, service, answerButton, noPasteAnswer, scoreFeedback, answerType, addEnterKeyBinding, questionID);
+    setupSubmitButton(exerciseID, service, answerButton, noPasteAnswer, scoreFeedback, answerType, addEnterKeyBinding, questionID);
 
     // button then text box
     Panel row = new HorizontalPanel();
@@ -168,7 +168,7 @@ public class TextResponse {
    * @param addEnterKeyBinding
    * @param questionID
    */
-  private void setupSubmitButton(final CommonExercise exercise, final LangTestDatabaseAsync service, final Button check,
+  private void setupSubmitButton(final String exerciseID, final LangTestDatabaseAsync service, final Button check,
                                  final TextBox noPasteAnswer, final ScoreFeedback scoreFeedback, final String answerType,
                                  boolean addEnterKeyBinding, final int questionID) {
     check.setType(ButtonType.PRIMARY);
@@ -185,7 +185,7 @@ public class TextResponse {
       @Override
       public void onClick(ClickEvent event) {
         String guess = noPasteAnswer.getText();
-        getScoreForGuess(guess, service, exercise, check, scoreFeedback, answerType, questionID);
+        getScoreForGuess(guess, service, exerciseID, check, scoreFeedback, answerType, questionID);
       }
     });
   }
@@ -238,7 +238,7 @@ public class TextResponse {
    * @param answerType probably should be removed
    * @param questionID
    */
-  private void getScoreForGuess(final String guess, LangTestDatabaseAsync service, CommonExercise exercise, final Button check,
+  private void getScoreForGuess(final String guess, LangTestDatabaseAsync service, String exerciseID, final Button check,
                                 final ScoreFeedback scoreFeedback, String answerType, int questionID) {
     if (guess.isEmpty() || removePunct(guess.trim()).isEmpty()) {
       new PopupHelper().showPopup
@@ -250,7 +250,7 @@ public class TextResponse {
       long timeSpent = System.currentTimeMillis()-timeShown;
       timeShown = System.currentTimeMillis();
 
-      service.getScoreForAnswer(user, exercise, questionID, guess, answerType, timeSpent, typeToSelection, new AsyncCallback<Answer>() {
+      service.getScoreForAnswer(user, exerciseID, questionID, guess, answerType, timeSpent, typeToSelection, new AsyncCallback<Answer>() {
         @Override
         public void onFailure(Throwable caught) {
           check.setEnabled(true);
