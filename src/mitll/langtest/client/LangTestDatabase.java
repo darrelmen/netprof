@@ -76,7 +76,7 @@ public interface LangTestDatabase extends RemoteService {
    * @param typeToSection
    * @return
    */
-  Answer getScoreForAnswer(long userID, CommonExercise e, int questionID, String answer, String answerType, long timeSpent, Map<String, Collection<String>> typeToSection);
+  Answer getScoreForAnswer(long userID, String exerciseID, int questionID, String answer, String answerType, long timeSpent, Map<String, Collection<String>> typeToSection);
 
   void addStudentAnswer(long resultID, boolean correct);
   QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<String> exids);
