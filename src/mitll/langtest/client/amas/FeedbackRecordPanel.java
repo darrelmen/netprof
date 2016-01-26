@@ -55,10 +55,10 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
    * @param e
    * @param service
    * @param controller
-   * @see mitll.langtest.client.exercise.AutoCRTChapterNPFHelper#getFactory
+   * @see mitll.langtest.client.amas.AutoCRTChapterNPFHelper#getFactory
    */
   public FeedbackRecordPanel(AmasExerciseImpl e, LangTestDatabaseAsync service, ExerciseController controller,
-                             ListInterface exerciseList,
+                             ResponseExerciseList exerciseList,
                              QuizScorePanel quizScorePanel) {
     super(e, service, controller, exerciseList);
     getElement().setId("FeedbackRecordPanel");
@@ -406,7 +406,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
      * @return
      * @see #addComboAnswer
      */
-    private Panel doText(AmasExerciseImpl exercise, final LangTestDatabaseAsync service, final ExerciseController controller,
+    private Panel doText(Shell exercise, final LangTestDatabaseAsync service, final ExerciseController controller,
                          int index,
                          String buttonTitle, boolean getFocus) {
       final TextResponse textResponse = getTextResponse(controller);
@@ -421,7 +421,8 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
       Panel row1 = new VerticalPanel();
       row1.getElement().setId("text_row1");
       outerContainer.add(row1);
-      Widget widget = textResponse.addWidgets(row1, exercise, service, controller, false, true, false, index, buttonTitle, getFocus);
+      Widget widget = textResponse.addWidgets(row1, exercise.getID(), service, controller, false, true, false, index,
+          buttonTitle, getFocus);
       widget.getElement().setId("textResponse_" + index);
 
       Panel row2 = new FluidRow();
