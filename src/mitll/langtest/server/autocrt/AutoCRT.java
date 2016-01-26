@@ -12,6 +12,7 @@ import mitll.langtest.server.scoring.AlignDecode;
 import mitll.langtest.server.scoring.InDictFilter;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
@@ -155,7 +156,8 @@ public class AutoCRT {
    * @param useCache
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
-  public void getAutoCRTDecodeOutput(CommonExercise exercise, int questionID, File audioFile, AudioAnswer answer, boolean useCache) {
+  public void getAutoCRTDecodeOutput(AmasExerciseImpl exercise, int questionID, File audioFile, AudioAnswer answer,
+                                     boolean useCache) {
     String exerciseID = exercise.getID();
     PretestScore asrScoreForAudio = getScoreForAudio(exerciseID, questionID, audioFile, useCache);
     if (asrScoreForAudio == null) {
@@ -174,7 +176,8 @@ public class AutoCRT {
    * @param asrScoreForAudio
    * @param answer
    */
-  private void markCorrectnessOnAnswer(CommonExercise exercise, int questionID, PretestScore asrScoreForAudio, AudioAnswer answer) {
+  private void markCorrectnessOnAnswer(AmasExerciseImpl exercise, int questionID, PretestScore asrScoreForAudio,
+                                       AudioAnswer answer) {
     String exerciseID = exercise.getID();
     String recoSentence = asrScoreForAudio.getRecoSentence();
     boolean lowPronScore = asrScoreForAudio.getHydecScore() < minPronScore;
@@ -198,7 +201,8 @@ public class AutoCRT {
     } else {
       String annotatedResponse = getAnnotatedResponse(exerciseID, questionID, recoSentence);
 
-      CRTScores scoreForAnswer = recoSentence.isEmpty() ? new CRTScores() : getScoreForExercise(exercise, questionID, recoSentence);
+      CRTScores scoreForAnswer = recoSentence.isEmpty() ? new CRTScores() :
+          getScoreForExercise(exercise, questionID, recoSentence);
 
       answer.setDecodeOutput(annotatedResponse);
       answer.setScore(scoreForAnswer.oldScore);
@@ -439,7 +443,7 @@ public class AutoCRT {
    * @param answer
    * @return
    */
-  public CRTScores getScoreForExercise(CommonExercise exercise, int questionID, String answer) {
+  public CRTScores getScoreForExercise(AmasExerciseImpl exercise, int questionID, String answer) {
     return getScoreForExercise(exercise, questionID, answer, -1);
   }
 
@@ -457,7 +461,7 @@ public class AutoCRT {
    * @return 0-1
    * @see #getScoreForExercise(CommonExercise, int, String)
    */
-  public CRTScores getScoreForExercise(CommonExercise exercise, int questionID, String answer, float expectedGrade) {
+  public CRTScores getScoreForExercise(AmasExerciseImpl exercise, int questionID, String answer, float expectedGrade) {
     getClassifier();
     String id = exercise.getID();
     String key = id + "_" + questionID;
@@ -512,7 +516,8 @@ public class AutoCRT {
 //      }
 
       MiraClassifier.Info info = useMiraClassifier ?
-          new MiraClassifier().getMiraScore(exercise, questionID, answer, miraFlavor, miraURL, completelyCorrect) : new MiraClassifier.Info(0, 0, 0);
+          new MiraClassifier().getMiraScore(exercise, questionID, answer, miraFlavor, miraURL, completelyCorrect) :
+          new MiraClassifier.Info(0, 0, 0);
       Double miraClassScore = info.getGrade();
       CRTScores crtScores;
       boolean present = first != null;
