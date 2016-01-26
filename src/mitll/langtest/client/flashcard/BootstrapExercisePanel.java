@@ -162,15 +162,15 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
 
   /**
    *
-   * @param e
+   * @param exerciseID
    * @param service
    * @param controller
    * @return
    * @see #addRecordingAndFeedbackWidgets(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel)
    */
-  private Widget getAnswerAndRecordButtonRow(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller) {
+  private Widget getAnswerAndRecordButtonRow(String exerciseID, LangTestDatabaseAsync service, ExerciseController controller) {
    // logger.info("BootstrapExercisePanel.getAnswerAndRecordButtonRow = " + instance);
-    RecordButtonPanel answerWidget = getAnswerWidget(e, service, controller, addKeyBinding, instance);
+    RecordButtonPanel answerWidget = getAnswerWidget(exerciseID, service, controller, addKeyBinding, instance);
     this.answerWidget = answerWidget;
     button = answerWidget.getRecordButton();
     realRecordButton = answerWidget.getRealRecordButton();
@@ -191,7 +191,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    *
    * @param recordButton
    * @return
-   * @see #getAnswerAndRecordButtonRow(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
+   * @see #getAnswerAndRecordButtonRow(String, LangTestDatabaseAsync, ExerciseController)
    * @see BootstrapExercisePanel#addRecordingAndFeedbackWidgets(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel)
    */
   private Panel getRecordButtonRow(Widget recordButton) {
@@ -239,17 +239,17 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
   }
 
   /**
-   * @param exercise
+   * @param exerciseID
    * @param service
    * @param controller
    * @param addKeyBinding
    * @param instance
    * @return
-   * @see #getAnswerAndRecordButtonRow(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
+   * @see #getAnswerAndRecordButtonRow(String, LangTestDatabaseAsync, ExerciseController)
    */
-  private RecordButtonPanel getAnswerWidget(final CommonExercise exercise, LangTestDatabaseAsync service,
+  private RecordButtonPanel getAnswerWidget(final String exerciseID, LangTestDatabaseAsync service,
                                             ExerciseController controller, final boolean addKeyBinding, String instance) {
-    return new FlashcardRecordButtonPanel(this, service, controller, exercise, 1, instance) {
+    return new FlashcardRecordButtonPanel(this, service, controller, exerciseID, 1, instance) {
       final FlashcardRecordButtonPanel outer = this;
       @Override
       protected RecordButton makeRecordButton(final ExerciseController controller, String buttonTitle) {
@@ -259,14 +259,14 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
             BootstrapExercisePanel.this.instance) {
           @Override
           protected void start() {
-            controller.logEvent(this, AVP_RECORD_BUTTON, exercise, "Start_Recording");
+            controller.logEvent(this, AVP_RECORD_BUTTON, exerciseID, "Start_Recording");
             super.start();
             recordingStarted();
           }
 
           @Override
           public void stop() {
-            controller.logEvent(this, AVP_RECORD_BUTTON, exercise, "Stop_Recording");
+            controller.logEvent(this, AVP_RECORD_BUTTON, exerciseID, "Stop_Recording");
             outer.setAllowAlternates(showOnlyEnglish);
             super.stop();
           }
