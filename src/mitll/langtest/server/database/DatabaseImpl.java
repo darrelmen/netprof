@@ -37,6 +37,7 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
@@ -765,11 +766,13 @@ public class DatabaseImpl implements Database {
 
   /**
    * @param out
-   * @see mitll.langtest.server.DownloadServlet
+   * @see mitll.langtest.server.DownloadServlet#returnSpreadsheet(HttpServletResponse, DatabaseImpl, String)
    */
   public void usersToXLSX(OutputStream out) {
     userManagement.usersToXLSX(out);
   }
+
+  public JSON usersToJSON() { return userManagement.usersToJSON(); }
 
   /**
    * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
