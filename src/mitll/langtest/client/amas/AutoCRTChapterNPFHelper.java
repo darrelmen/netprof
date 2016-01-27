@@ -5,47 +5,47 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
-import mitll.langtest.client.custom.content.NPFHelper;
+import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
-import mitll.langtest.shared.exercise.Shell;
 
 /**
-* Created by go22670 on 1/22/15.
-*/
+ * Created by go22670 on 1/22/15.
+ */
 public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
   //private Logger logger = Logger.getLogger("AutoCRTChapterNPFHelper");
   private QuizScorePanel child;
   private ResponseExerciseList exerciseList;
 
   /**
-   *
-   * @see LangTest#populateBelowHeader
    * @param service
    * @param feedback
    * @param userManager
    * @param controller
+   * @see LangTest#populateBelowHeader
    */
   public AutoCRTChapterNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
                                  ExerciseController controller) {
-    super(service, feedback, userManager, controller,null);
+    super(service, feedback, userManager, controller, null);
   }
 
   /**
-   * @see mitll.langtest.client.custom.SimpleChapterNPFHelper.MyFlexListLayout#getFactory
    * @param exerciseList
    * @return
+   * @see mitll.langtest.client.custom.SimpleChapterNPFHelper.MyFlexListLayout#getFactory
    */
   protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
     return new ExercisePanelFactory<AmasExerciseImpl>(service, controller.getFeedback(), controller, exerciseList) {
       @Override
       public Panel getExercisePanel(AmasExerciseImpl e) {
-        if (child != null) {child.setVisible(true);}
-        return new FeedbackRecordPanel(e, service, controller, (ResponseExerciseList)exerciseList, child);
+        if (child != null) {
+          child.setVisible(true);
+        }
+        return new FeedbackRecordPanel(e, service, controller, (ResponseExerciseList) exerciseList, child);
       }
     };
   }
@@ -59,19 +59,19 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
   }
 
   /**
-   * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#SimpleChapterNPFHelper
    * @param service
    * @param feedback
    * @param userManager
    * @param controller
    * @param outer
    * @return
+   * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#SimpleChapterNPFHelper
    */
   @Override
-  protected NPFHelper.FlexListLayout getMyListLayout(final LangTestDatabaseAsync service, final UserFeedback feedback,
-                                                     UserManager userManager, final ExerciseController controller,
-                                                     SimpleChapterNPFHelper outer) {
-    return new MyFlexListLayout(outer) {
+  protected FlexListLayout getMyListLayout(final LangTestDatabaseAsync service, final UserFeedback feedback,
+                                           UserManager userManager, final ExerciseController controller,
+                                           SimpleChapterNPFHelper outer) {
+    return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
       @Override
       protected PagingExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
                                                     boolean incorrectFirst) {
@@ -91,7 +91,7 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
       }
 
       /**
-       * @see #doInternalLayout(String)
+       * @see #doInternalLayout
        * @param bottomRow
        */
       @Override
