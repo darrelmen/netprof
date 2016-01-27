@@ -10,13 +10,9 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.shared.exercise.AudioAttributeExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.STATE;
-import mitll.langtest.shared.exercise.Shell;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +24,7 @@ import java.util.Collection;
  * Time: 6:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class WaveformExercisePanel<T extends CommonShell & AudioAttributeExercise> extends ExercisePanel<T> {
+public class WaveformExercisePanel<T extends CommonShell & AudioRefExercise> extends ExercisePanel<T> {
   private static final String RECORD_PROMPT  = "Record the word or phrase, first at normal speed, then again at slow speed.";
   private static final String RECORD_PROMPT2 = "Record the in-context sentence.";
   private static final String EXAMPLE_RECORD = "EXAMPLE_RECORD";
@@ -66,7 +62,7 @@ public class WaveformExercisePanel<T extends CommonShell & AudioAttributeExercis
   }
 
   /**
-   * @see ExercisePanel#ExercisePanel(T, LangTestDatabaseAsync, ExerciseController, ListInterface, String, String)
+   * @see ExercisePanel#ExercisePanel
    *
    */
   protected void addInstructions() {

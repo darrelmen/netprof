@@ -28,8 +28,10 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.AudioAttributeExercise;
+import mitll.langtest.shared.exercise.AudioRefExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.CommonUserExercise;
-import mitll.langtest.shared.exercise.Shell;
 
 import java.util.logging.Logger;
 
@@ -91,7 +93,7 @@ public class NewUserExercise<T extends CommonUserExercise, UL extends UserList<T
     this.itemMarker = itemMarker;
     this.editItem = editItem;
     this.newUserExercise = newExercise.toUserExercise();
-  //  this.newUserExercise = newExercise;//.toUserExercise();
+    //  this.newUserExercise = newExercise;//.toUserExercise();
     this.instance = instance;
   }
 
@@ -190,7 +192,7 @@ public class NewUserExercise<T extends CommonUserExercise, UL extends UserList<T
   }
 
   void gotBlur(FormField english, FormField foreignLang, RecordAudioPanel rap,
-               ControlGroup normalSpeedRecording, UserList ul, ListInterface pagingContainer,
+               ControlGroup normalSpeedRecording, UL ul, ListInterface pagingContainer,
                Panel toAddTo) {
     grabInfoFromFormAndStuffInfoExercise();
   }
@@ -303,14 +305,15 @@ public class NewUserExercise<T extends CommonUserExercise, UL extends UserList<T
   }
 */
 
-  public void setFields(T newUserExercise) {
+  public <S extends CommonShell & AudioRefExercise> void setFields(S newUserExercise) {
     logger.info("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
 
     // english
-    english.box.setText(newUserExercise.getEnglish());
-    ((TextBox) english.box).setVisibleLength(newUserExercise.getEnglish().length() + 4);
-    if (newUserExercise.getEnglish().length() > 20) {
-      english.box.setWidth("400px");
+    String english = newUserExercise.getEnglish();
+    this.english.box.setText(english);
+    ((TextBox) this.english.box).setVisibleLength(english.length() + 4);
+    if (english.length() > 20) {
+      this.english.box.setWidth("400px");
     }
 
     // foreign lang
@@ -322,7 +325,7 @@ public class NewUserExercise<T extends CommonUserExercise, UL extends UserList<T
     translit.box.setText(newUserExercise.getTransliteration());
 
     // regular speed audio
-    rap.getPostAudioButton().setExercise(newUserExercise);
+    rap.getPostAudioButton().setExercise(newUserExercise.getID());
     String refAudio = newUserExercise.getRefAudio();
 
     if (refAudio != null) {
@@ -330,7 +333,7 @@ public class NewUserExercise<T extends CommonUserExercise, UL extends UserList<T
     }
 
     // slow speed audio
-    rapSlow.getPostAudioButton().setExercise(newUserExercise);
+    rapSlow.getPostAudioButton().setExercise(newUserExercise.getID());
     String slowAudioRef = newUserExercise.getSlowAudioRef();
 
     if (slowAudioRef != null) {
@@ -543,10 +546,10 @@ public class NewUserExercise<T extends CommonUserExercise, UL extends UserList<T
   class CreateFirstRecordAudioPanel extends RecordAudioPanel<T> {
     boolean recordRegularSpeed = true;
     private RecordAudioPanel otherRAP;
-    private WaveformPostAudioRecordButton<T> postAudioButton;
+    private WaveformPostAudioRecordButton postAudioButton;
 
-    public <S extends Shell> CreateFirstRecordAudioPanel(S newExercise, Panel row,
-                                                         boolean recordRegularSpeed, String instance) {
+    public CreateFirstRecordAudioPanel(T newExercise, Panel row,
+                                       boolean recordRegularSpeed, String instance) {
       super(newExercise, NewUserExercise.this.controller, row, NewUserExercise.this.service, 0, false,
           NewUserExercise.this.controller.getAudioType(), instance);
       this.recordRegularSpeed = recordRegularSpeed;
@@ -588,7 +591,7 @@ public class NewUserExercise<T extends CommonUserExercise, UL extends UserList<T
     @Override
     protected WaveformPostAudioRecordButton makePostAudioRecordButton(String audioType, String recordButtonTitle) {
       postAudioButton =
-          new WaveformPostAudioRecordButton(exercise, controller, exercisePanel, this, service, recordRegularSpeed ? 0 : 1,
+          new WaveformPostAudioRecordButton(exercise.getID(), controller, exercisePanel, this, service, recordRegularSpeed ? 0 : 1,
               false // don't record in results table
               ,
               RecordButton.RECORD1,
@@ -663,7 +666,7 @@ public class NewUserExercise<T extends CommonUserExercise, UL extends UserList<T
       this.otherRAP = otherRAP;
     }
 
-    public WaveformPostAudioRecordButton<T> getPostAudioButton() {
+    public WaveformPostAudioRecordButton getPostAudioButton() {
       return postAudioButton;
     }
   }
