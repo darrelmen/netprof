@@ -18,7 +18,7 @@ import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.scoring.CommentAnnotator;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.ExerciseAnnotation;
 
 import java.util.HashMap;
@@ -27,9 +27,9 @@ import java.util.Map;
 /**
  * Created by go22670 on 9/8/14.
  */
-public class CommentBox extends PopupContainer {
+public class CommentBox<T extends Shell & AnnotationExercise> extends PopupContainer {
   private static final String COMMENT_BUTTON_GROUP_NEW = "comment-button-group-new";
-  private final CommonExercise exercise;
+  private final T exercise;
   private final CommentAnnotator commentAnnotator;
   private final EventRegistration registration;
   private MyPopup commentPopup;
@@ -41,7 +41,7 @@ public class CommentBox extends PopupContainer {
    * @param registration
    * @param commentAnnotator
    */
-  public CommentBox(CommonExercise exercise, EventRegistration registration, CommentAnnotator commentAnnotator) {
+  public CommentBox(T exercise, EventRegistration registration, CommentAnnotator commentAnnotator) {
     this.exercise = exercise;
     this.registration = registration;
     this.commentAnnotator = commentAnnotator;
