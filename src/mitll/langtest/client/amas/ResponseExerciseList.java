@@ -23,6 +23,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 
@@ -38,7 +39,7 @@ import java.util.logging.Logger;
  * Time: 4:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ResponseExerciseList<T extends Shell> extends SingleSelectExerciseList<T> {
+public class ResponseExerciseList<T extends AmasExerciseImpl> extends SingleSelectExerciseList<T> {
   private Logger logger = Logger.getLogger("ResponseExerciseList");
 
   private static final String SPEECH = "Speech";
@@ -55,7 +56,7 @@ public class ResponseExerciseList<T extends Shell> extends SingleSelectExerciseL
    * @param service
    * @param feedback
    * @param controller
-   * @see mitll.langtest.client.exercise.AutoCRTChapterNPFHelper#getMyListLayout
+   * @see mitll.langtest.client.amas.AutoCRTChapterNPFHelper#getMyListLayout
    */
   public ResponseExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                               UserFeedback feedback,
@@ -118,7 +119,7 @@ public class ResponseExerciseList<T extends Shell> extends SingleSelectExerciseL
    *
    * @param container
    * @return
-   * @see mitll.langtest.client.bootstrap.SingleSelectExerciseList#addButtonRow
+   * @see mitll.langtest.client.amas.SingleSelectExerciseList#addButtonRow
    */
   @Override
   protected void addBottomText(Panel container) {

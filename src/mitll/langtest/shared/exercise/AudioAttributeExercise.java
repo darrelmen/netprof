@@ -8,18 +8,13 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * TODO : divide this into read only base class
+ *
  * Created by go22670 on 1/5/16.
  */
-public interface AudioAttributeExercise {
-  boolean hasRefAudio();
-
-  String getRefAudio();
+public interface AudioAttributeExercise extends AudioRefExercise {
 
   String getRefAudioWithPrefs(Set<Long> prefs);
-
-  String getSlowAudioRef();
-
-  Collection<AudioAttribute> getAudioAttributes();
 
   AudioAttribute getRegularSpeed();
 
@@ -32,7 +27,6 @@ public interface AudioAttributeExercise {
    */
   AudioAttribute getLatestContext(boolean isMale);
 
-  AudioAttribute getRecordingsBy(long userID, boolean regularSpeed);
 
   AudioAttribute getRecordingsBy(long userID, String speed);
 
