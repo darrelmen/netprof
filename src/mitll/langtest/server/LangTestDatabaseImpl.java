@@ -371,7 +371,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private Collection<CommonExercise> getExercisesFromFiltered(Map<String, Collection<String>> typeToSelection, UserList userListByID) {
-    SectionHelper helper = new SectionHelper();
+    SectionHelper helper = new SectionHelper<CommonExercise>();
     List<CommonExercise> exercises2 = getCommonExercises(userListByID);
     long then = System.currentTimeMillis();
     for (CommonExercise commonExercise : exercises2) {
