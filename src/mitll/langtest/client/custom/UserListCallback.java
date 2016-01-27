@@ -16,16 +16,16 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.server.database.custom.UserListManager;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
 import java.util.logging.Logger;
 
 /**
-* Created by GO22670 on 6/5/2014.
-*/
-class UserListCallback implements AsyncCallback<Collection<UserList>> {
+ * Created by GO22670 on 6/5/2014.
+ */
+class UserListCallback<T extends Shell, UL extends UserList<T>> implements AsyncCallback<Collection<UL>> {
   private final Logger logger = Logger.getLogger("UserListCallback");
 
   private static final String NO_LISTS_CREATED_YET = "No lists created yet.";
@@ -46,7 +46,6 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
   private final String optionalExercise;
 
   /**
-   * @see ListManager#viewLessons
    * @param contentPanel
    * @param child
    * @param listScrollPanel
@@ -56,6 +55,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
    * @param userManager
    * @param showIsPublic
    * @param optionalExercise
+   * @see ListManager#viewLessons
    */
   public UserListCallback(ListManager listManager,
                           Panel contentPanel,
@@ -66,7 +66,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
                           UserManager userManager,
                           boolean showIsPublic,
                           String optionalExercise) {
-    logger.info("UserListCallback instance '" +instanceName + "' only my lists " + onlyMyLists);
+    logger.info("UserListCallback instance '" + instanceName + "' only my lists " + onlyMyLists);
 
     this.listManager = listManager;
     this.contentPanel = contentPanel;
@@ -81,10 +81,11 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
   }
 
   @Override
-  public void onFailure(Throwable caught) {}
+  public void onFailure(Throwable caught) {
+  }
 
   @Override
-  public void onSuccess(final Collection<UserList> result) {
+  public void onSuccess(final Collection<UL> result) {
     logger.info("\tUserListCallback : Displaying " + result.size() + " user lists for " + instanceName);
     if (result.isEmpty()) {
       child.add(new Heading(3, allLists ? NO_LISTS_YET : NO_LISTS_CREATED_YET));
@@ -98,83 +99,81 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
       insideScroll.addStyleName("userListContainer");
       listScrollPanel.add(insideScroll);
 
-      Map<String, List<UserList>> nameToLists = populateNameToList(result);
+      Map<String, List<UL>> nameToLists = populateNameToList(result);
 
       boolean anyAdded = addUserListsToDisplay(result, insideScroll, nameToLists);
       if (!anyAdded) {
-        insideScroll.add(new Heading(3, allLists ? NO_LISTS_CREATED_OR_VISITED_YET: NO_LISTS_CREATED_YET));
+        insideScroll.add(new Heading(3, allLists ? NO_LISTS_CREATED_OR_VISITED_YET : NO_LISTS_CREATED_YET));
       }
       child.add(listScrollPanel);
 
       if (!optionalExercise.isEmpty()) {
         logger.info("onSuccess find list for " + optionalExercise);
-        for (UserList ul : result) {
-          for (CommonExercise ex : ul.getExercises()) {
+        for (UL ul : result) {
+          for (T ex : ul.getExercises()) {
             if (ex.getID().equals(optionalExercise)) {
-              logger.info("onSuccess ex " +optionalExercise + " is on " + ul);
+              logger.info("onSuccess ex " + optionalExercise + " is on " + ul);
               listManager.showList(ul, contentPanel, instanceName, ex);
               break;
             }
           }
         }
-      }
-      else {
+      } else {
         selectPreviousList(result);
       }
     }
   }
 
   /**
-   * @see #onSuccess(java.util.Collection)
    * @param result
+   * @see #onSuccess(java.util.Collection)
    */
-  private void selectPreviousList(Collection<UserList> result) {
+  private void selectPreviousList(Collection<UL> result) {
     String clickedUserList = listManager.getStorage().getValue(Navigation.CLICKED_USER_LIST);
     if (clickedUserList != null && !clickedUserList.isEmpty()) {
       showList(result, Long.parseLong(clickedUserList));
     }
   }
 
-  private void showList(Collection<UserList> result, long id) {
+  private void showList(Collection<UL> result, long id) {
     for (UserList ul : result) {
-       if (ul.getUniqueID() == id) {
-         listManager.showList(ul, contentPanel, instanceName, null);
-         break;
-       }
+      if (ul.getUniqueID() == id) {
+        listManager.showList(ul, contentPanel, instanceName, null);
+        break;
+      }
     }
   }
 
-  private Map<String, List<UserList>> populateNameToList(Collection<UserList> result) {
-    Map<String,List<UserList>> nameToLists = new HashMap<String, List<UserList>>();
+  private Map<String, List<UL>> populateNameToList(Collection<UL> result) {
+    Map<String, List<UL>> nameToLists = new HashMap<>();
 
-    for (final UserList ul : result) {
-      List<UserList> userLists = nameToLists.get(ul.getName());
-      if (userLists == null) nameToLists.put(ul.getName(), userLists = new ArrayList<UserList>());
+    for (final UL ul : result) {
+      List<UL> userLists = nameToLists.get(ul.getName());
+      if (userLists == null) nameToLists.put(ul.getName(), userLists = new ArrayList<>());
       userLists.add(ul);
     }
     return nameToLists;
   }
 
   /**
-   * @see #onSuccess(java.util.Collection)
    * @param result
    * @param insideScroll
    * @param nameToLists
    * @return
+   * @see #onSuccess(java.util.Collection)
    */
-  private boolean addUserListsToDisplay(Collection<UserList> result, Panel insideScroll, Map<String, List<UserList>> nameToLists) {
+  private boolean addUserListsToDisplay(Collection<UL> result, Panel insideScroll, Map<String, List<UL>> nameToLists) {
     boolean anyAdded = false;
-    for (final UserList ul : result) {
-      List<UserList> collisions = nameToLists.get(ul.getName());
+    for (final UL ul : result) {
+      List<UL> collisions = nameToLists.get(ul.getName());
       boolean showMore = false;
       if (collisions.size() > 1) {
         if (collisions.indexOf(ul) > 0) showMore = true;
       }
-      if (!ul.isEmpty() || createdByYou(ul) || (!ul.isPrivate()) ) {
+      if (!ul.isEmpty() || createdByYou(ul) || (!ul.isPrivate())) {
         anyAdded = true;
         insideScroll.add(getDisplayRowPerList(ul, showMore, onlyMyLists));
-      }
-      else {
+      } else {
         logger.info("skipping " + ul.getName() + " empty " + ul.isEmpty());
       }
     }
@@ -187,15 +186,15 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
     }
   }
 
- /**
-  * When you click on the panel, show the list.
-  *
-  * @see UserListCallback#addUserListsToDisplay
-  * @param ul
-  * @param showMore
-  * @param onlyMyLists
-  * @return
-  */
+  /**
+   * When you click on the panel, show the list.
+   *
+   * @param ul
+   * @param showMore
+   * @param onlyMyLists
+   * @return
+   * @see UserListCallback#addUserListsToDisplay
+   */
   private Panel getDisplayRowPerList(final UserList ul, boolean showMore, boolean onlyMyLists) {
     final FocusPanel widgets = new FocusPanel();
 
@@ -235,11 +234,11 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
   }
 
   /**
-   * @see UserListCallback#getDisplayRowPerList
    * @param ul
    * @param showMore
    * @param container
    * @param onlyMyLists
+   * @see UserListCallback#getDisplayRowPerList
    */
   private void addWidgetsForList(final UserList ul, boolean showMore, final Panel container, boolean onlyMyLists) {
     Panel r1 = new FlowPanel();
@@ -248,13 +247,13 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
 /*    Widget child = makeItemMarker2(ul);
     child.addStyleName("leftFiveMargin");*/
 
-    Heading h4 = new Heading(4,name,ul.getExercises().size() + " items");
+    Heading h4 = new Heading(4, name, ul.getExercises().size() + " items");
     h4.addStyleName("floatLeft");
     r1.add(h4);
 
     boolean empty = ul.getDescription().trim().isEmpty();
     boolean cmempty = ul.getClassMarker().trim().isEmpty();
-    String subtext = empty ? "" : ul.getDescription() + (cmempty ? "":",");
+    String subtext = empty ? "" : ul.getDescription() + (cmempty ? "" : ",");
 
     if (!empty) {
       h4 = getDescription(subtext);
@@ -280,12 +279,12 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
       if (showIsPublic) {
         r1.add(getIsPublic(ul, uniqueID));
       }
-    //  String prefix = showIsPublic ? "" :
+      //  String prefix = showIsPublic ? "" :
       String html1 = //(ul.isPrivate() ? "" : "Public ") +
-        " by " +
-          (uniqueID == UserListManager.COMMENT_MAGIC_ID ? "Students" :
-            uniqueID == UserListManager.REVIEW_MAGIC_ID ? REVIEWERS :
-              ul.getCreator().getUserID());
+          " by " +
+              (uniqueID == UserListManager.COMMENT_MAGIC_ID ? "Students" :
+                  uniqueID == UserListManager.REVIEW_MAGIC_ID ? REVIEWERS :
+                      ul.getCreator().getUserID());
       Heading h4Again = yourList ? new Heading(5, html1) : new Heading(4, "", html1);
 
       h4Again.addStyleName("floatRight");
@@ -345,10 +344,10 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
   }
 
   /**
-   * @see #addWidgetsForList
    * @param ul
    * @param onlyMyLists
    * @return
+   * @see #addWidgetsForList
    */
   private Button makeDeleteButton(final UserList ul, final boolean onlyMyLists) {
     final Button delete = new Button(DELETE);
@@ -373,9 +372,10 @@ class UserListCallback implements AsyncCallback<Collection<UserList>> {
    * @param ul
    * @return
    */
-  private boolean isYourList(UserList ul)   {
+  private boolean isYourList(UserList ul) {
     return createdByYou(ul) && !ul.getName().equals(UserList.MY_LIST);
   }
+
   private boolean createdByYou(UserList ul) {
     return ul.getCreator().getId() == userManager.getUser();
   }
