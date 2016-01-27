@@ -89,10 +89,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
-  private static final List<String> SITE_LIST = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "German",
+  public static final List<String> SITE_LIST = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "German",
       "Korean", "Iraqi",
       "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Russian", "Spanish", "Sudanese", "Tagalog",
-      "Urdu", "Tagalog");
+      "Urdu");
 
   /**
    * How far to the right to shift the list of sites...
