@@ -695,7 +695,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public List<CommonShell> getShells(List<String> ids) {
     List<CommonShell> shells = new ArrayList<>();
-    for (String id : ids) shells.add(db.getCustomOrPredefExercise(id).getShell());
+    for (String id : ids) {
+      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(id);
+      if (customOrPredefExercise == null) {
+        logger.warn("Couldn't find exercise for " +id);
+      }
+      else {
+        shells.add(customOrPredefExercise.getShell());
+      }
+    }
     return shells;
   }
 
