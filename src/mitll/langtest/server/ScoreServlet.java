@@ -9,7 +9,9 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -408,7 +410,8 @@ public class ScoreServlet extends DatabaseServlet {
     JSONArray jsonArray = new JSONArray();
     Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
 
-    for (SectionNode node : db.getSectionHelper().getSectionNodes()) {
+    List<SectionNode> sectionNodes = db.getSectionHelper().getSectionNodes();
+    for (SectionNode node : sectionNodes) {
       String type = node.getType();
       typeToValues.put(type, Collections.singletonList(node.getName()));
       JSONObject jsonForNode = getJsonForNode(node, typeToValues);
