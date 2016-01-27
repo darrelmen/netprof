@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -22,6 +21,9 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.AnnotationExercise;
+import mitll.langtest.shared.exercise.AudioRefExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Shell;
 
 /**
@@ -64,59 +66,7 @@ public class ReviewItemHelper extends NPFHelper {
    */
   protected Panel doInternalLayout(final UserList ul, String instanceName) {
 //    logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
-
-    this.flexListLayout = new FlexListLayout(service,feedback,userManager,controller) {
-      @Override
-      protected ExercisePanelFactory getFactory(final PagingExerciseList pagingExerciseList, String instanceName) {
-        return new ExercisePanelFactory(service,feedback,controller,predefinedContent) {
-          @Override
-          public Panel getExercisePanel(Shell exercise) {
-            ReviewEditableExercise reviewEditableExercise =
-              new ReviewEditableExercise(service, controller, itemMarker, new UserExercise(exercise), ul,
-                pagingExerciseList, predefinedContent, npfHelper);
-            SimplePanel ignoredContainer = new SimplePanel();
-
-            Panel widgets = reviewEditableExercise.addNew(ul, ul,
-              npfExerciseList,
-              ignoredContainer);
-            reviewEditableExercise.setFields(exercise);
-
-            return widgets;
-          }
-        };
-      }
-
-      @Override
-      protected FlexSectionExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
-        return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst) {
-          com.github.gwtbootstrap.client.ui.CheckBox onlyAudio;
-          @Override
-          protected void addTableWithPager(ClickablePagingContainer pagingContainer) {
-            // row 1
-            Panel column = new FlowPanel();
-            add(column);
-            addTypeAhead(column);
-
-            // row 2
-            final com.github.gwtbootstrap.client.ui.CheckBox w = new com.github.gwtbootstrap.client.ui.CheckBox("Only with audio defects");
-            onlyAudio = w;
-            w.addClickHandler(new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                  loadExercises(getHistoryToken(""), getTypeAheadText(),w.getValue());
-              }
-            });
-            w.addStyleName("leftFiveMargin");
-            add(w);
-
-            // row 3
-            add(pagingContainer.getTableWithPager());
-          }
-        };
-
-      }
-    };
-
+    this.flexListLayout = new ReviewFlexListLayout(ul);
     Panel widgets = flexListLayout.doInternalLayout(ul, instanceName);
     npfExerciseList = flexListLayout.npfExerciseList;
     return widgets;
@@ -130,6 +80,66 @@ public class ReviewItemHelper extends NPFHelper {
       npfExerciseList.onResize();
     } else {
       //System.out.println("ReviewItemHelper.onResize : not sending resize event - flexListLayout is null?");
+    }
+  }
+
+  private class ReviewFlexListLayout<T extends CommonShell & AnnotationExercise & AudioRefExercise> extends FlexListLayout<T> {
+    private final UserList ul;
+
+    public ReviewFlexListLayout(UserList ul) {
+      super(ReviewItemHelper.this.service, ReviewItemHelper.this.feedback, ReviewItemHelper.this.userManager, ReviewItemHelper.this.controller);
+      this.ul = ul;
+    }
+
+    @Override
+    protected ExercisePanelFactory getFactory(final PagingExerciseList pagingExerciseList, String instanceName) {
+      return new ExercisePanelFactory<T>(service,feedback,controller,predefinedContent) {
+        @Override
+        public Panel getExercisePanel(T exercise) {
+          ReviewEditableExercise reviewEditableExercise =
+            new ReviewEditableExercise(service, controller, itemMarker, new UserExercise(exercise), ul,
+              pagingExerciseList, predefinedContent, npfHelper);
+          SimplePanel ignoredContainer = new SimplePanel();
+
+          Panel widgets = reviewEditableExercise.addNew(ul, ul,
+            npfExerciseList,
+            ignoredContainer);
+          reviewEditableExercise.setFields(exercise);
+
+          return widgets;
+        }
+      };
+    }
+
+    @Override
+    protected PagingExerciseList<T> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
+      FlexListLayout outer = this;
+      return new NPFlexSectionExerciseList<T>(outer, topRow, currentExercisePanel, instanceName, incorrectFirst) {
+        com.github.gwtbootstrap.client.ui.CheckBox onlyAudio;
+        @Override
+        protected void addTableWithPager(ClickablePagingContainer pagingContainer) {
+          // row 1
+          Panel column = new FlowPanel();
+          add(column);
+          addTypeAhead(column);
+
+          // row 2
+          final com.github.gwtbootstrap.client.ui.CheckBox w = new com.github.gwtbootstrap.client.ui.CheckBox("Only with audio defects");
+          onlyAudio = w;
+          w.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                loadExercises(getHistoryToken(""), getTypeAheadText(),w.getValue());
+            }
+          });
+          w.addStyleName("leftFiveMargin");
+          add(w);
+
+          // row 3
+          add(pagingContainer.getTableWithPager());
+        }
+      };
+
     }
   }
 }
