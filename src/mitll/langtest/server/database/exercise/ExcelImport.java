@@ -42,6 +42,7 @@ public class ExcelImport implements ExerciseDAO {
   private static final String CONTEXT = "context";
   private static final String MEANING = "meaning";
   private static final String ID = "id";
+  public static final String WORD = "word";
 
   private List<CommonExercise> exercises = null;
   private final Map<String, CommonExercise> idToExercise = new HashMap<String, CommonExercise>();
@@ -521,7 +522,7 @@ public class ExcelImport implements ExerciseDAO {
           List<String> predefinedTypeOrder = new ArrayList<String>();
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
-            if (colNormalized.startsWith("word")) {
+            if (colNormalized.startsWith(WORD)) {
               gotHeader = true;
               colIndexOffset = columns.indexOf(col);
             } else if (colNormalized.contains("transliteration")) {
@@ -728,7 +729,7 @@ public class ExcelImport implements ExerciseDAO {
         if (!gotHeader) {
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
-            if (colNormalized.startsWith("word")) {
+            if (colNormalized.startsWith(WORD)) {
               gotHeader = true;
               colIndexOffset = columns.indexOf(col);
             } else if (colNormalized.contains("transliteration")) {
