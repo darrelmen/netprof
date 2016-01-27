@@ -100,11 +100,11 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @param exercise
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
-  public UserExercise(CommonExercise exercise) {
+  public <T extends CommonShell & AnnotationExercise & AudioRefExercise> UserExercise(T exercise) {
     super(exercise.getID());
     this.isPredef = true;
     this.englishSentence = exercise.getEnglish();
-    this.foreignLanguage = exercise.getRefSentence();
+    this.foreignLanguage = exercise.getForeignLanguage();
     this.transliteration = exercise.getTransliteration();
     this.meaning = exercise.getMeaning();
 
@@ -117,7 +117,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     copyAudio(exercise);
   }
 
-  private void copyAudio(CommonExercise exercise) {
+  private void copyAudio(AudioRefExercise exercise) {
     for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
       addAudio(audioAttribute);
     }
