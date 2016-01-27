@@ -31,6 +31,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -38,7 +39,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 10/20/15.
  */
-public class ListManager implements RequiresResize {
+public class ListManager<T extends Shell> implements RequiresResize {
   private final Logger logger = Logger.getLogger("ListManager");
 
   private final KeyStorage storage;
