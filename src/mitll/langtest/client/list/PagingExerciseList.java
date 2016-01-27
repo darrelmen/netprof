@@ -300,7 +300,7 @@ public class PagingExerciseList<T extends Shell> extends ExerciseList<T> {
    * A little complicated -- if {@link #doShuffle} is true, shuffles the exercises
    *
    * @param result
-   * @see ExerciseList#rememberAndLoadFirst(java.util.List, mitll.langtest.shared.exercise.CommonExercise, String)
+   * @see ExerciseList#rememberAndLoadFirst
    * @see #simpleSetShuffle(boolean)
    */
   @Override
@@ -414,11 +414,12 @@ public class PagingExerciseList<T extends Shell> extends ExerciseList<T> {
 
   /**
    * @param itemID
-   * @see #useExercise(mitll.langtest.shared.exercise.CommonExercise)
+   * @see #useExercise
    */
   protected void markCurrentExercise(String itemID) {
     pagingContainer.markCurrentExercise(itemID);
   }
+
 
   public void setUserListID(long userListID) {
     this.userListID = userListID;

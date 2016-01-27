@@ -110,6 +110,12 @@ public class Result implements IsSerializable, UserAndTime {
 
   public String getExerciseID() { return id;  }
 
+  /**
+   * TODO : make sure this is set
+   * @return
+   */
+  public int getQid() {   return qid;  }
+
   public String getAnswer() {
     return answer;
   }
