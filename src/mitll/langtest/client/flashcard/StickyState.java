@@ -7,6 +7,7 @@ package mitll.langtest.client.flashcard;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
 
 /**
  * Remember the state of the flashcards in the localStorage browser cache.
@@ -32,7 +33,7 @@ public class StickyState {
    * @see ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.exercise.Shell)
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
    */
-  protected void storeCurrent(CommonExercise e) {
+  protected void storeCurrent(Shell e) {
  //   System.out.println("StickyState.storeCurrent store current " + e.getID());
     storage.storeValue(CURRENT_EXERCISE, e.getID());
   }
