@@ -32,7 +32,8 @@ import java.util.zip.ZipOutputStream;
 public class AudioExport {
   private static final Logger logger = Logger.getLogger(AudioExport.class);
   private static final List<Boolean> GENDERS = Arrays.asList(Boolean.TRUE, Boolean.FALSE);
-  private static final List<String> SPEEDS = Arrays.asList(AudioAttribute.REGULAR, AudioAttribute.SLOW, AudioAttribute.REGULAR_AND_SLOW);
+  private static final List<String> SPEEDS = Arrays.asList(AudioAttribute.REGULAR, AudioAttribute.SLOW,
+      AudioAttribute.REGULAR_AND_SLOW);
   private static final String ID = "ID";
   private static final String WORD_EXPRESSION = "Word/Expression";
   private static final String TRANSLITERATION = "Transliteration";
