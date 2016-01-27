@@ -12,14 +12,15 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Shell;
 
 /**
 * Created by GO22670 on 1/9/14.
 */
-public class PrevNextList extends HorizontalPanel {
+public class PrevNextList<T extends Shell> extends HorizontalPanel {
   private final ExerciseController controller;
   private Button prev, next;
-  private final ListInterface container;
+  private final ListInterface<T> container;
   private boolean disableNext = true;
 
   /**
@@ -29,7 +30,7 @@ public class PrevNextList extends HorizontalPanel {
    * @param disableNext
    * @param controller
    */
-  public PrevNextList(final CommonShell exerciseShell, ListInterface listContainer, boolean disableNext, ExerciseController controller) {
+  public PrevNextList(final T exerciseShell, ListInterface<T> listContainer, boolean disableNext, ExerciseController controller) {
     this.container = listContainer;
     this.disableNext = disableNext;
     this.controller = controller;
@@ -39,7 +40,7 @@ public class PrevNextList extends HorizontalPanel {
     getElement().setId("PrevNextList");
   }
 
-  private void makePrevButton(final CommonShell exercise) {
+  private void makePrevButton(final T exercise) {
     this.prev = new Button("Previous");
     prev.getElement().setId("PrevNextList_Previous");
 
@@ -55,7 +56,7 @@ public class PrevNextList extends HorizontalPanel {
     add(prev);
   }
 
-  private void makeNextButton(final CommonShell exercise) {
+  private void makeNextButton(final T exercise) {
     this.next = new Button("Next");
     next.getElement().setId("nextButton");
     controller.register(next,exercise.getID());
