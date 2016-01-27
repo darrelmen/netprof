@@ -10,6 +10,7 @@ import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
+import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
@@ -195,10 +196,11 @@ public class UserManagement {
   }
 
   /**
-   * @see mitll.langtest.server.DownloadServlet
+   * @see mitll.langtest.server.database.DatabaseImpl#usersToXLSX(OutputStream)
    * @param out
    */
   public void usersToXLSX(OutputStream out) {  userDAO.toXLSX(out, getUsers());  }
+  public JSON usersToJSON() { return userDAO.toJSON(getUsers());  }
 
   /**
    * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
