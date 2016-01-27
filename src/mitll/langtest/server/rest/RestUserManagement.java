@@ -151,6 +151,9 @@ public class RestUserManagement {
         toReturn.put(VALID, changePFor(token, passwordH));
       }
       return true;
+    } else if (queryString.equals("users")) {
+      toReturn.put("users",db.usersToJSON());
+      return true;
     }
     return false;
   }
