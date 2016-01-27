@@ -354,7 +354,7 @@ public class RefResultDAO extends DAO {
     PreparedStatement statement = connection.prepareStatement(sql);
 
     List<Result> resultsForQuery = getResultsForQuery(connection, statement);
- //   logger.debug("getResultsSQL running " + sql + " -> " +resultsForQuery.size() + " results");
+    //   logger.debug("getResultsSQL running " + sql + " -> " +resultsForQuery.size() + " results");
     return resultsForQuery;
   }
 
@@ -432,15 +432,17 @@ public class RefResultDAO extends DAO {
         result.setJsonScore(scoreJson1);
         results.add(result);
       } else {
-        logger.info("getResultsForQuery skipping invalid ref (decode score " +pronScore + " align score " + alignScore +
-            "  result " + exid + " : " + answer);
+        if (skipped < 20) {
+          logger.info("getResultsForQuery skipping invalid ref (decode score " + pronScore + " align score " + alignScore +
+              "  result " + exid + " : " + answer);
+        }
         skipped++;
       }
     }
 
     long now = System.currentTimeMillis();
 
-    logger.info("getResultsForQuery took " + (now-then) + " millis, found " + count + " invalid decode results, skipped " + skipped);
+    logger.info("getResultsForQuery took " + (now - then) + " millis, found " + count + " invalid decode results, skipped " + skipped);
     finish(connection, statement, rs);
 
     return results;
