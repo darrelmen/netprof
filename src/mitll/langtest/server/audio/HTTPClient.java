@@ -25,14 +25,37 @@ public class HTTPClient {
 	/* Constructor */
   public HTTPClient() {}
 
-/*	public HTTPClient(String url) {
-		logger.debug("connect to " + url);
+	public HTTPClient(String url) {  connect(url);  }
+
+	public HTTPClient(String webserviceIP, boolean secure) {
+		String protocol = "http" + (secure ? "s" : "");
+		String url = protocol + "://" + webserviceIP;
+		connect(url);
+	}
+
+  public HTTPClient(String webserviceIP, int webservicePort, boolean secure) {
+		String protocol = "http" + (secure ? "s" : "");
+		String url = protocol + "://" + webserviceIP + ":" + webservicePort;
+		connect(url);
+	}
+
+	/**
+	 * @param webserviceIP
+	 * @param webservicePort
+	 * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra
+	 */
+	public HTTPClient(String webserviceIP, int webservicePort, String service) {
+		String url = "http://" + webserviceIP + ":" + webservicePort + "/" + service;
+		connect(url);
+	}
+
+	private void connect(String url) {
 		try {
 			httpConn = setupHttpConn(url);
 		} catch (IOException e) {
 			logger.error("Error constructing HTTPClient:\n" + e, e);
 		}
-	}*/
+	}
 
 	/**
 	 * @see mitll.langtest.server.database.UserManagement#userExists(HttpServletRequest, String, String)
@@ -43,22 +66,6 @@ public class HTTPClient {
 		String url = "http://" + webserviceIP + ":" + webservicePort;
 
 		logger.debug("connect to " + url);
-		try {
-			httpConn = setupHttpConn(url);
-		} catch (IOException e) {
-			logger.error("Error constructing HTTPClient:\n" + e, e);
-		}
-	}
-
-	/**
-	 * @param webserviceIP
-	 * @param webservicePort
-	 * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra
-	 */
-	public HTTPClient(String webserviceIP, int webservicePort, String service) {
-		String url = "http://" + webserviceIP + ":" + webservicePort + "/" + service;
-
-		//  logger.debug("connect to " + url);
 		try {
 			httpConn = setupHttpConn(url);
 		} catch (IOException e) {
