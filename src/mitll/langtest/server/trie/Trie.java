@@ -12,16 +12,19 @@ package mitll.langtest.server.trie;
  * To change this template use File | Settings | File Templates.
  */
 
+import mitll.langtest.server.scoring.SmallVocabDecoder;
+import org.apache.log4j.Logger;
+
 import java.util.*;
 
 /**
  * A tree-like data structure that enables quick lookup due to sharing common prefixes (using Aho Corasick algorithm).
  */
 public class Trie<T> {
-  private static final boolean USE_SINGLE_TOKEN_MAP = false;
+  private static final Logger logger = Logger.getLogger(Trie.class);
+
   private static final boolean SPLIT_ON_CHARACTERS = true;
   private final TrieNode<T> root;
-  private final Map<String, TextEntityValue<T>> singleTokenMap;
   private Map<String, String> tempCache;
   private boolean convertToUpper = true;
 
@@ -31,30 +34,16 @@ public class Trie<T> {
 
   private Trie(boolean convertToUpper) {
     this.convertToUpper = convertToUpper;
-    this.root = new TrieNode<T>();
-    this.singleTokenMap = new HashMap<String, TextEntityValue<T>>();
-  }
-
-  /**
-   * Just for testing.
-   *
-   * @paramx entryList
-   */
-/*  public Trie(List<TextEntityValue> entryList) {
-    this();
-    build(entryList);
-  }*/
-  private TrieNode<T> getRoot() {
-    return root;
+    this.root = new TrieNode<>();
   }
 
   /**
    * @param toMatch
    * @return
-   * @see mitll.langtest.server.ExerciseTrie#getExercises(String, mitll.langtest.server.scoring.SmallVocabDecoder)
+   * @see #getMatches(String)
    */
-  protected List<EmitValue<T>> getEmits(String toMatch) {
-    TrieNode<T> start = getRoot();
+  private List<EmitValue<T>> getEmits(String toMatch) {
+    TrieNode<T> start = root;
     for (String c : getChars(toMatch)) {
       start = start.getNextState(c);
       if (start == null) break;
@@ -67,57 +56,11 @@ public class Trie<T> {
   }
 
   /**
-   * Builds trie from scratch. This method adds each entry and then computes failure function.
-   *
-   * @param entryList
-   */
-/*  private void build(List<TextEntityValue> entryList) {
-    makeNodes(entryList);
-    computeFailureFunction();
-  }*/
-
-/*  private void build2(List<String> entryList) {
-    makeNodes2(entryList);
-    computeFailureFunction();
-  }*/
-
-  /**
-   * Check in HashMap for single tokens (less memory than putting everything in the trie).
-   *
-   * @param transitionLabel
-   * @return entity found with this label
-   */
-  public TextEntityValue<T> getSingleTokenValue(String transitionLabel) {
-    return singleTokenMap.get(transitionLabel);
-  }
-
-  /**
-   * Creates a temp string cache so we can avoid making multiple copies of identical strings.
-   * Depending on the dictionary this can be a memory savings of 10% - 15%.
-   *
-   * @param entryList to store in trie
-   */
-/*  private void makeNodes(List<TextEntityValue> entryList) {
-    startMakingNodes();
-    for (TextEntityValue entry : entryList) {
-      addEntryToTrie(entry, tempCache);
-    }
-    endMakingNodes();
-  }*/
-
-/*  private void makeNodes2(List<String> entryList) {
-    startMakingNodes();
-    for (String entry : entryList) {
-      addEntryToTrie(entry);
-    }
-    endMakingNodes();
-  }*/
-
-  /**
    * Start building
+   * @see ExerciseTrie#ExerciseTrie(Collection, String, SmallVocabDecoder)
    */
   public void startMakingNodes() {
-    this.tempCache = new HashMap<String, String>();
+    this.tempCache = new HashMap<>();
   }
 
   /**
@@ -131,10 +74,6 @@ public class Trie<T> {
   public boolean addEntryToTrie(TextEntityValue<T> textEntityDescription) {
     return addEntryToTrie(textEntityDescription, tempCache);
   }
-
-/*  public boolean addEntryToTrie(final String entry) {
-    return addEntryToTrie(new MyTextEntityValue(entry), tempCache);
-  }*/
 
   /**
    * addEntryToTrie is a method to implement algorithm 2 in the AC paper
@@ -153,11 +92,11 @@ public class Trie<T> {
     List<String> split = SPLIT_ON_CHARACTERS ? getChars(normalizedValue) : getSpaceSeparatedTokens(normalizedValue);
 
     int n = split.size();
-    if (n == 1 && USE_SINGLE_TOKEN_MAP) {
+/*    if (n == 1 && USE_SINGLE_TOKEN_MAP) {
       String upperCase = convertToUpper ? normalizedValue.toUpperCase() : normalizedValue;
       singleTokenMap.put(upperCase, textEntityDescription);
       return false;
-    }
+    }*/
 
     TrieNode<T> currentState = root;
     for (String aSplit : split) {
@@ -169,13 +108,13 @@ public class Trie<T> {
       TrieNode<T> nextState = currentState.getNextState(uniqueCopy);
 
       if (nextState == null) {
-        nextState = new TrieNode<T>();
+        nextState = new TrieNode<>();
         currentState.addTransition(uniqueCopy, nextState);
       }
       currentState = nextState;
     }
 
-    currentState.getAndCreateEmitList().add(new EmitValue<T>(textEntityDescription, n));
+    currentState.getAndCreateEmitList().add(new EmitValue<>(textEntityDescription, n));
     return true;
   }
 
@@ -189,7 +128,7 @@ public class Trie<T> {
   }
 
   private List<String> getChars(String entry) {
-    List<String> toAdd = new ArrayList<String>();
+    List<String> toAdd = new ArrayList<>();
     StringBuilder builder = new StringBuilder();
     for (int i = 0; i < entry.length(); i++) {
       builder.append(entry.charAt(i));
@@ -207,7 +146,7 @@ public class Trie<T> {
   private List<String> getSpaceSeparatedTokens(String normalizedValue) {
     int findex = 0;
     int nindex = 0;
-    List<String> split = new ArrayList<String>();
+    List<String> split = new ArrayList<>();
     while ((nindex = normalizedValue.indexOf(' ', findex)) != -1) {
       if (nindex > findex) {
         String token = normalizedValue.substring(findex, nindex);
@@ -226,7 +165,7 @@ public class Trie<T> {
   private void computeFailureFunction() {
     // computeFailureFunction is a method to implement algorithm 3 here from
     // AC paper after the tree is built
-    Queue<TrieNode<T>> queue = new LinkedList<TrieNode<T>>();
+    Queue<TrieNode<T>> queue = new LinkedList<>();
     for (TrieNode<T> child : root.getTransitionValues()) {
       queue.add(child);
       child.setFailureNode(root);
@@ -264,14 +203,25 @@ public class Trie<T> {
     }
   }
 
-  public Collection<T> getMatchesLC(String toMatch) {
-    return getMatches(toMatch.toLowerCase());
-  }
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultAlternatives(Map, long, String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(Map, long, String)
+   * @param toMatch
+   * @return
+   */
+  public Collection<T> getMatchesLC(String toMatch) { return getMatches(toMatch.toLowerCase());  }
 
+  /**
+   *
+   * @param lc
+   * @return
+   * @see ExerciseTrie#getExercises(String, SmallVocabDecoder)
+   * @see Trie#getMatchesLC(String)
+   */
   public Collection<T> getMatches(String lc) {
     List<EmitValue<T>> emits = getEmits(lc);
-    Set<T> unique = new HashSet<T>();
-    List<T> ids = new ArrayList<T>();
+    Set<T> unique = new HashSet<>();
+    List<T> ids = new ArrayList<>();
     for (EmitValue<T> ev : emits) {
       T exercise = ev.getValue();
       if (!unique.contains(exercise)) {
@@ -279,60 +229,8 @@ public class Trie<T> {
         unique.add(exercise);
       }
     }
-    //logger.debug("getExercises : for '" +prefix + "' (" +lc+ ") got " + ids.size() + " matches");
+
+  //  logger.debug("getExercises : for '" +lc + "' (" +lc+ ") got " + ids.size() + " matches");
     return ids;
   }
-
-/*  private static class MyTextEntityValue implements TextEntityValue<String> {
-    private final String entry;
-    public MyTextEntityValue(String entry) {
-      this.entry = entry;
-    }
-
-    @Override
-    public String getValue() {
-      return null;
-    }
-
-    @Override
-    public String getNormalizedValue() {
-      return entry;
-    }
-    public String toString() { return entry; }
-  }*/
-
-/*  public static void main(String [] arg) {
-    Trie trie = new Trie(false);
-
-    String [] str =  {"he went","he goes","he goes home","he goes to work","he returns","hello!","hi","hi there"};
-    List<String> entryList = Arrays.asList(str);
-    trie.build2(entryList);
-    TrieNode root1 = trie.getRoot();
-    System.out.println("got 1 " + root1);
-
-    if (false) {
-    TrieNode he = root1.getNextState("he");
-    System.out.println("got 2 " + he + " emits " + (he != null ? he.getEmitList() : "null"));
-    TrieNode e = he != null ?he.getNextState("goes") : null;
-    System.out.println("got 3 " + e + " emits " + (e != null ? e.getEmitList() : "null"));
-
-    TrieNode ee = e != null ?e.getNextState("home") : null;
-    System.out.println("got 4 " + ee + " emits " + (ee != null ? ee.getEmitList() : "null"));
-    }
-    else {
-      TrieNode he = root1.getNextState("h");
-      System.out.println("got 2 " + he + " emits " + (he != null ? he.getEmitList() : "null"));
-      System.out.println("got 2 " + he + " emits " + (he != null ? he.getEmitsBelow() : "null"));
-      TrieNode e = he != null ?he.getNextState("he") : null;
-      System.out.println("got 3 " + e + " emits " + (e != null ? e.getEmitsBelow() : "null"));
-
-      System.out.println("h = " +trie.getEmits("h"));
-      System.out.println("he = " +trie.getEmits("he"));
-      System.out.println("hel = " +trie.getEmits("hel"));
-      System.out.println("hi = " +trie.getEmits("hi"));
-      System.out.println("xx = " +trie.getEmits("xx"));
-    }
- //   System.out.println("got 4 " + e.getNextState("l"));
-  //  System.out.println("got " + trie.getSingleTokenValue("hel"));
-  }*/
 }

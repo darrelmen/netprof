@@ -52,6 +52,7 @@ class CheckLTS {
     return checkLTS2(letterToSoundClass, foreignLanguagePhrase);
   }
 
+  int shown = 0;
   /**
    * So chinese is special -- it doesn't do lts -- it just uses a dictionary
    *
@@ -87,11 +88,13 @@ class CheckLTS {
               process[0][0].length() == 0 || (process.length == 1 && process[0].length == 1 && process[0][0].equals("aa"))) {
             boolean htkEntry = htkDictionary.contains(token);
             if (!htkEntry && !htkDictionary.isEmpty()) {
-              logger.warn("checkLTS with " + lts + "/" + languageProperty + " token #" + i +
-                      " : '" + token + "' hash " + token.hashCode() +
-                      " is invalid in '" + foreignLanguagePhrase +
-                      "' and not in dictionary of size " + htkDictionary.size()
-              );
+              if (!(lts instanceof corpus.EmptyLTS)) {
+                logger.warn("checkLTS with " + lts + "/" + languageProperty + " token #" + i +
+                    " : '" + token + "' hash " + token.hashCode() +
+                    " is invalid in '" + foreignLanguagePhrase +
+                    "' and not in dictionary of size " + htkDictionary.size()
+                );
+              }
               oov.add(trim);
             } else {
               indict.add(trim);
