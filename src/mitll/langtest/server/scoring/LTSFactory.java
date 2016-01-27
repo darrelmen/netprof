@@ -32,13 +32,13 @@ public class LTSFactory implements CollationSort {
     ARABIC, DARI, EGYPTIAN, ENGLISH, FARSI, FRENCH, GERMAN, JAPANESE, IRAQI, LEVANTINE, KOREAN, MANDARIN, MSA,
     PASHTO, PORTUGUESE, RUSSIAN, SPANISH, SUDANESE, TAGALOG, URDU
   }
-  // TODO : what about Japanese, Korean, ... for LTS?
 
-  private final Map<String, LTS> languageToLTS = new HashMap<String, LTS>();
   private final LTS unknown = new EmptyLTS();
+  private LTS ltsForLanguage = unknown; /// attempt to deal with undefined LTS...
 
   /**
-   * Does reflection to make an appropriate LTS
+   * TODO : what about Japanese, Korean, ... for LTS?
+   * Does reflection to make an appropriate LTS - expecting something like corpus.EnglishLTS
    * <p>
    * ARABIC, MSA, and IRAQI all map to MSA LTS
    *
@@ -49,7 +49,6 @@ public class LTSFactory implements CollationSort {
     this.thisLanguage = thisLanguage;
     String name = thisLanguage.name();
     String classPrefix = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
-    languageToLTS.put(name.toLowerCase(), unknown); /// attempt to deal with undefined LTS...
     String className = "corpus." + classPrefix + "LTS";
 
     try {
@@ -57,14 +56,14 @@ public class LTSFactory implements CollationSort {
         case ARABIC:
         case MSA:
         case IRAQI:
-          languageToLTS.put(name.toLowerCase(), new ModernStandardArabicLTS());
+          ltsForLanguage = new ModernStandardArabicLTS();
           break;
         case MANDARIN:
-          languageToLTS.put(name.toLowerCase(), unknown);
+          ltsForLanguage = unknown;
           break;
         default:
           Class<?> aClass = Class.forName(className);
-          languageToLTS.put(name.toLowerCase(), (LTS) aClass.newInstance());
+          ltsForLanguage = (LTS) aClass.newInstance();
           break;
       }
     } catch (ClassNotFoundException e) {
@@ -75,28 +74,14 @@ public class LTSFactory implements CollationSort {
       logger.error("Not allowed to make instance of LTS class " + className, e);
     }
 
-    logger.info("lts map now " + languageToLTS);
-
-/*    languageToLTS.put(Language.EGYPTIAN.name().toLowerCase(), new EgyptianLTS());
-    languageToLTS.put(Language.ENGLISH.name().toLowerCase(), new EnglishLTS());
-    languageToLTS.put(Language.FARSI.name().toLowerCase(), new FarsiLTS());
-    // languageToLTS.put(Language.JAPANESE.name().toLowerCase(), new LevantineLTS());
-    languageToLTS.put(Language.LEVANTINE.name().toLowerCase(), new LevantineLTS());
-    languageToLTS.put(Language.MANDARIN.name().toLowerCase(), unknown);
-    languageToLTS.put(Language.MSA.name().toLowerCase(), new ModernStandardArabicLTS());
-    languageToLTS.put(Language.IRAQI.name().toLowerCase(), new ModernStandardArabicLTS());
-
-    try {
-      languageToLTS.put(Language.PASHTO.name().toLowerCase(), new PashtoLTS());
-      languageToLTS.put(Language.RUSSIAN.name().toLowerCase(), new RussianLTS());
-      languageToLTS.put(Language.TAGALOG.name().toLowerCase(), new TagalogLTS());
-      languageToLTS.put(Language.SPANISH.name().toLowerCase(), new SpanishLTS());
-      languageToLTS.put(Language.SUDANESE.name().toLowerCase(), new SudaneseLTS());
-      languageToLTS.put(Language.URDU.name().toLowerCase(), new UrduLTS());
-    } catch (Exception e) {
-      logger.warn("got " + e);
-    }*/
+    logger.debug("lts for " + name + " found at " + className + " is " + ltsForLanguage);
   }
+
+  /**
+   * @return
+   * @see mitll.langtest.server.scoring.ASRScoring#ASRScoring
+   */
+  public LTS getLTSClass() { return ltsForLanguage; }
 
   /**
    * @param thisLanguage
@@ -109,12 +94,17 @@ public class LTSFactory implements CollationSort {
   /**
    * @return
    * @see mitll.langtest.server.scoring.ASRScoring#getCollator
+   * @see #sort(List)
    */
-  //@Override
   public Collator getCollator() {
     return Collator.getInstance(getLocale(thisLanguage));
   }
 
+  /**
+   * @see Scoring#sort(List)
+   * @param toSort
+   * @param <T>
+   */
   public <T extends CommonExercise> void sort(List<T> toSort) {
     Collator collator = getCollator();
     final Map<T, CollationKey> exToKey = new HashMap<T, CollationKey>();
@@ -254,21 +244,5 @@ public class LTSFactory implements CollationSort {
 //    logger.debug("Language Code: " + locale.getLanguage() + ", Language Display Name: " + locale.getDisplayLanguage());
 //    logger.debug("Country Code: " + locale.getCountry() + ", Country Display Name: " + locale.getDisplayCountry());
     return locale;
-  }
-
-  /**
-   * @param language
-   * @return
-   * @see mitll.langtest.server.scoring.ASRScoring#ASRScoring
-   */
-  public LTS getLTSClass(String language) {
-    LTS letterToSoundClass = languageToLTS.get(language.toLowerCase());
-
-    if (letterToSoundClass == null) {
-      logger.warn("NOTE: we have no LTS for '" + language + "' in " + new TreeSet<String>(languageToLTS.keySet()) +
-          " , using the empty LTS class : " + unknown.getClass());
-      letterToSoundClass = unknown;
-    }
-    return letterToSoundClass;
   }
 }
