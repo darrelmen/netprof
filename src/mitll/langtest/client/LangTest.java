@@ -56,6 +56,7 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -861,7 +862,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
-  public void logEvent(UIObject button, String widgetType, CommonShell ex, String context) {
+  public void logEvent(UIObject button, String widgetType, Shell ex, String context) {
     buttonFactory.logEvent(button, widgetType, ex.getID(), context, getUser());
   }
 
