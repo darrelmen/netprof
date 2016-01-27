@@ -1270,9 +1270,9 @@ public class DatabaseImpl implements Database {
    * @param pathHelper
    * @param prefix
    */
-  public void doReport(PathHelper pathHelper, String prefix) {
+  public void doReport(PathHelper pathHelper, String prefix, int year) {
     try {
-      getReport(prefix).writeReportToFile(pathHelper, serverProps.getLanguage());
+      getReport(prefix).writeReportToFile(pathHelper, serverProps.getLanguage(), year);
     } catch (IOException e) {
       logger.error("got " + e);
     }
