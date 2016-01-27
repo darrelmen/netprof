@@ -31,14 +31,14 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.SoundFeedback;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.logging.Logger;
 
 /**
  * Created by GO22670 on 6/26/2014.
  */
-class FlashcardPanel extends HorizontalPanel {
+class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExercise> extends HorizontalPanel {
   private final Logger logger = Logger.getLogger("FlashcardPanel");
 
   protected static final String PLAYING_AUDIO_HIGHLIGHT = "playingAudioHighlight";
@@ -58,7 +58,7 @@ class FlashcardPanel extends HorizontalPanel {
   private static final String CLICK_TO_FLIP = "Click to flip";
   private static final String SHUFFLE = "Shuffle";
 
-  final CommonExercise exercise;
+  final T exercise;
   Widget english;
   Widget foreign;
 
@@ -86,7 +86,7 @@ class FlashcardPanel extends HorizontalPanel {
    * @param exerciseList
    * @see ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.exercise.Shell)
    */
-  public FlashcardPanel(final CommonExercise e, final LangTestDatabaseAsync service,
+  public FlashcardPanel(final T e, final LangTestDatabaseAsync service,
                         final ExerciseController controller, boolean addKeyBinding,
                         final ControlState controlState,
                         StatsFlashcardFactory.MySoundFeedback soundFeedback,
@@ -130,7 +130,7 @@ class FlashcardPanel extends HorizontalPanel {
   //  logger.info("Adding recording widgets to " + inner2.getElement().getId());
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
-        addRecordingAndFeedbackWidgets(exercise, service, controller, inner2);
+        addRecordingAndFeedbackWidgets(exercise.getID(), service, controller, inner2);
       }
     });
 
@@ -161,7 +161,7 @@ class FlashcardPanel extends HorizontalPanel {
    */
   DivWidget getFirstRow(ExerciseController controller) {
     DivWidget firstRow = new DivWidget();
-    commentBox = new CommentBox(exercise, controller, new CommentAnnotator() {
+    commentBox = new CommentBox<T>(exercise, controller, new CommentAnnotator() {
       @Override
       public void addIncorrectComment(String commentToPost, String field) {
         addAnnotation(field, GoodwaveExercisePanel.INCORRECT, commentToPost);
@@ -234,7 +234,7 @@ class FlashcardPanel extends HorizontalPanel {
     clickToFlipContainer.setHeight("100px");
   }
 
-  void addRecordingAndFeedbackWidgets(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller, Panel contentMiddle) {
+  void addRecordingAndFeedbackWidgets(String exerciseID, LangTestDatabaseAsync service, ExerciseController controller, Panel contentMiddle) {
      logger.warning("adding empty recording and feedback widgets " + this.getClass());
   }
 
@@ -614,7 +614,7 @@ class FlashcardPanel extends HorizontalPanel {
    * @return
    * @see #FlashcardPanel
    */
-  private DivWidget getCardPrompt(CommonExercise e) {
+  private DivWidget getCardPrompt(T e) {
     DivWidget questionContent = getQuestionContent(e);
     questionContent.getElement().setId("cardPrompt");
     questionContent.addStyleName("cardContent");
@@ -628,7 +628,7 @@ class FlashcardPanel extends HorizontalPanel {
    * @return
    * @see #getCardPrompt(mitll.langtest.shared.exercise.CommonExercise)
    */
-  private DivWidget getQuestionContent(CommonExercise e) {
+  private DivWidget getQuestionContent(T e) {
     String foreignSentence = e.getForeignLanguage();
 
     String englishSentence = e.getEnglish();

@@ -24,10 +24,9 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class Exercise extends AudioExercise implements CommonExercise {
-  private String contextTranslation;
   private transient String refAudioIndex;
   private transient Collection<String> refSentences = new ArrayList<String>();
-  private List<String> translitSentences = new ArrayList<String>();
+  //private List<String> translitSentences = new ArrayList<String>();
   private List<CorrectAndScore> scores;
   private float avgScore;
 
@@ -72,12 +71,13 @@ public class Exercise extends AudioExercise implements CommonExercise {
     return refAudioIndex;
   }
 
-  public void setForeignLanguage(String foreignLanguage) {
-    this.foreignLanguage = foreignLanguage;
+  @Override
+  public boolean isPredefined() {
+    return true;
   }
 
-  public String getTransliteration() {
-    return translitSentences.isEmpty() ? "" : translitSentences.get(0);
+  public void setForeignLanguage(String foreignLanguage) {
+    this.foreignLanguage = foreignLanguage;
   }
 
   /**
@@ -85,8 +85,9 @@ public class Exercise extends AudioExercise implements CommonExercise {
    * @param translitSentence
    */
   public void setTranslitSentence(String translitSentence) {
-    translitSentences.clear();
-    translitSentences.add(translitSentence);
+//    translitSentences.clear();
+//    translitSentences.add(translitSentence);
+    this.transliteration = translitSentence;
   }
 
   /**
@@ -101,10 +102,6 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.meaning = meaning;
   }*/
 
-  @Override
-  public String getContextTranslation() {
-    return contextTranslation;
-  }
 
 //  @Override
 //  public long getModifiedDateTimestamp() {
