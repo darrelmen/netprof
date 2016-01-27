@@ -27,7 +27,8 @@ public class LTSFactory implements CollationSort {
 
   // known languages
   public enum Language {
-    ARABIC, DARI, EGYPTIAN, ENGLISH, FARSI, JAPANESE, IRAQI, LEVANTINE, KOREAN, MANDARIN, MSA, PASHTO, RUSSIAN, SPANISH, SUDANESE, TAGALOG, URDU
+    ARABIC, DARI, EGYPTIAN, ENGLISH, FARSI, FRENCH, GERMAN, JAPANESE, IRAQI, LEVANTINE, KOREAN, MANDARIN, MSA,
+    PASHTO, PORTUGUESE, RUSSIAN, SPANISH, SUDANESE, TAGALOG, URDU
   }
   // TODO : what about Japanese, Korean, ... for LTS?
 
@@ -35,14 +36,45 @@ public class LTSFactory implements CollationSort {
   private final LTS unknown = new EmptyLTS();
 
   /**
+   * Does reflection to make an appropriate LTS
+   *
+   * ARABIC, MSA, and IRAQI all map to MSA LTS
+   *
    * @param thisLanguage
    * @see ASRScoring#ASRScoring
    */
   private LTSFactory(Language thisLanguage) {
     this.thisLanguage = thisLanguage;
-    languageToLTS.put(Language.ARABIC.name().toLowerCase(), new ModernStandardArabicLTS());
-    languageToLTS.put(Language.DARI.name().toLowerCase(), new DariLTS());
-    languageToLTS.put(Language.EGYPTIAN.name().toLowerCase(), new EgyptianLTS());
+    String name = thisLanguage.name();
+    String classPrefix = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+    languageToLTS.put(name.toLowerCase(), unknown); /// attempt to deal with undefined LTS...
+
+    try {
+      switch(thisLanguage) {
+        case ARABIC:
+        case MSA:
+        case IRAQI:
+          languageToLTS.put(name.toLowerCase(), new ModernStandardArabicLTS());
+          break;
+        case MANDARIN:
+          languageToLTS.put(name.toLowerCase(), unknown);
+          break;
+        default :
+          Class<?> aClass = Class.forName(classPrefix + "LTS");
+          languageToLTS.put(name.toLowerCase(), (LTS)aClass.newInstance());
+          break;
+      }
+    } catch (ClassNotFoundException e) {
+      logger.error("Couldn't find LTS class " + classPrefix);
+    } catch (InstantiationException e) {
+      logger.error("Couldn't make instance of LTS class " + classPrefix,e);
+    } catch (IllegalAccessException e) {
+      logger.error("Not allowed to make instance of LTS class " + classPrefix,e);
+    }
+
+    logger.info("lts map now " + languageToLTS);
+
+/*    languageToLTS.put(Language.EGYPTIAN.name().toLowerCase(), new EgyptianLTS());
     languageToLTS.put(Language.ENGLISH.name().toLowerCase(), new EnglishLTS());
     languageToLTS.put(Language.FARSI.name().toLowerCase(), new FarsiLTS());
     // languageToLTS.put(Language.JAPANESE.name().toLowerCase(), new LevantineLTS());
@@ -50,36 +82,17 @@ public class LTSFactory implements CollationSort {
     languageToLTS.put(Language.MANDARIN.name().toLowerCase(), unknown);
     languageToLTS.put(Language.MSA.name().toLowerCase(), new ModernStandardArabicLTS());
     languageToLTS.put(Language.IRAQI.name().toLowerCase(), new ModernStandardArabicLTS());
+
     try {
       languageToLTS.put(Language.PASHTO.name().toLowerCase(), new PashtoLTS());
-    } catch (Exception e) {
-      logger.warn("got " + e);
-    }
-    try {
       languageToLTS.put(Language.RUSSIAN.name().toLowerCase(), new RussianLTS());
-    } catch (Exception e) {
-      logger.warn("got " + e);
-    }
-    try {
+      languageToLTS.put(Language.TAGALOG.name().toLowerCase(), new TagalogLTS());
       languageToLTS.put(Language.SPANISH.name().toLowerCase(), new SpanishLTS());
-    } catch (Exception e) {
-      logger.warn("got " + e);
-    }
-    try {
       languageToLTS.put(Language.SUDANESE.name().toLowerCase(), new SudaneseLTS());
-    } catch (Exception e) {
-      logger.warn("got " + e);
-    }
-    try {
-      languageToLTS.put(Language.TAGALOG.name().toLowerCase(), unknown);
-    } catch (Exception e) {
-      logger.warn("got " + e);
-    }
-    try {
       languageToLTS.put(Language.URDU.name().toLowerCase(), new UrduLTS());
     } catch (Exception e) {
       logger.warn("got " + e);
-    }
+    }*/
   }
 
   /**
