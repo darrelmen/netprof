@@ -441,7 +441,7 @@ public class DatabaseImpl implements Database {
 
     getUserListManager().editItem(userExercise, true, getServerProps().getMediaDir());
 
-    Set<AudioAttribute> original = new HashSet<AudioAttribute>(userExercise.getAudioAttributes());
+    Set<AudioAttribute> original = new HashSet<>(userExercise.getAudioAttributes());
     Set<AudioAttribute> defects = getAndMarkDefects(userExercise, userExercise.getFieldToAnnotation());
 
     logger.debug("originally had " + original.size() + " attribute, and " + defects.size() + " defects");
@@ -495,7 +495,7 @@ public class DatabaseImpl implements Database {
    * @see #editItem(mitll.langtest.shared.custom.UserExercise)
    */
   private Set<AudioAttribute> getAndMarkDefects(UserExercise userExercise, Map<String, ExerciseAnnotation> fieldToAnnotation) {
-    Set<AudioAttribute> defects = new HashSet<AudioAttribute>();
+    Set<AudioAttribute> defects = new HashSet<>();
 
     for (Map.Entry<String, ExerciseAnnotation> fieldAnno : fieldToAnnotation.entrySet()) {
       if (!fieldAnno.getValue().isCorrect()) {
@@ -596,7 +596,7 @@ public class DatabaseImpl implements Database {
     });
 
     int count = 0;
-    List<AVPHistoryForList.UserScore> scores = new ArrayList<AVPHistoryForList.UserScore>();
+    List<AVPHistoryForList.UserScore> scores = new ArrayList<>();
 
     for (Session session : sessionsForUserIn2) {
       if (count++ < 10 || session.isLatest()) {
@@ -619,7 +619,7 @@ public class DatabaseImpl implements Database {
     });
 
     count = 0;
-    scores = new ArrayList<AVPHistoryForList.UserScore>();
+    scores = new ArrayList<>();
 
     for (Session session : sessionsForUserIn2) {
       if (count++ < 10 || session.isLatest()) {
@@ -634,7 +634,7 @@ public class DatabaseImpl implements Database {
 
     sessionAVPHistoryForList2.setScores(scores);
 
-    List<AVPHistoryForList> historyForLists = new ArrayList<AVPHistoryForList>();
+    List<AVPHistoryForList> historyForLists = new ArrayList<>();
     historyForLists.add(sessionAVPHistoryForList);
     historyForLists.add(sessionAVPHistoryForList2);
 
@@ -868,7 +868,7 @@ public class DatabaseImpl implements Database {
   }
 
   private Map<String, CommonExercise> getIdToExerciseMap() {
-    Map<String, CommonExercise> join = new HashMap<String, CommonExercise>();
+    Map<String, CommonExercise> join = new HashMap<>();
 
     for (CommonExercise exercise : getExercises()) {
       String id = exercise.getID();
@@ -888,7 +888,7 @@ public class DatabaseImpl implements Database {
    * @see DatabaseImpl#makeDAO(String, String, String)
    */
   public Map<String, String> getExerciseIDToRefAudio() {
-    Map<String, String> join = new HashMap<String, String>();
+    Map<String, String> join = new HashMap<>();
 
     populateIDToRefAudio(join, getExercises());
 
@@ -900,7 +900,7 @@ public class DatabaseImpl implements Database {
     return join;
   }
 
-  public <T extends CommonExercise> void populateIDToRefAudio(Map<String, String> join, Collection<T> all) {
+  private <T extends CommonExercise> void populateIDToRefAudio(Map<String, String> join, Collection<T> all) {
     for (CommonExercise exercise : all) {
       String refAudio = exercise.getRefAudio();
       if (refAudio == null) {
@@ -1096,7 +1096,7 @@ public class DatabaseImpl implements Database {
 
     SectionHelper sectionHelper = getSectionHelper();
 
-    List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
+    List<SectionHelper.Pair> pairs = new ArrayList<>();
     for (Map.Entry<String, String> pair : exercise.getUnitToValue().entrySet()) {
       pairs.add(sectionHelper.addExerciseToLesson(duplicate, pair.getKey(), pair.getValue()));
     }
@@ -1261,13 +1261,18 @@ public class DatabaseImpl implements Database {
     getReport("").doReport(serverProps, site, mailSupport, pathHelper);
   }
 
-  public Report getReport(String prefix) {
+  private Report getReport(String prefix) {
     return new Report(userDAO, resultDAO, eventDAO, audioDAO, serverProps.getLanguage(), prefix);
   }
 
+  /**
+   * JUST FOR TESTING
+   * @param pathHelper
+   * @param prefix
+   */
   public void doReport(PathHelper pathHelper, String prefix) {
     try {
-      getReport(prefix).writeReport(pathHelper, serverProps.getLanguage());
+      getReport(prefix).writeReportToFile(pathHelper, serverProps.getLanguage());
     } catch (IOException e) {
       logger.error("got " + e);
     }
