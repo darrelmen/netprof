@@ -25,10 +25,8 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
@@ -43,7 +41,9 @@ import java.util.logging.Logger;
  * TODOx : concept of rounds explicit?
  * TODO : review table...?
  */
-public class StatsFlashcardFactory extends ExercisePanelFactory implements RequiresResize {
+public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & AnnotationExercise & ScoredExercise>
+    extends ExercisePanelFactory<T>
+    implements RequiresResize {
   private Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
   private static final String REMAINING = "Remaining";
@@ -57,7 +57,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   private static final String GO_BACK = "Go back";
   public static final String N_A = "N/A";
 
-  private CommonExercise currentExercise;
+  private T currentExercise;
   private final ControlState controlState;
   private List<CommonShell> allExercises;//, originalExercises;
 
@@ -132,10 +132,10 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   /**
    * @param e
    * @return
-   * @see mitll.langtest.client.list.ExerciseList#makeExercisePanel(mitll.langtest.shared.exercise.CommonExercise)
+   * @see mitll.langtest.client.list.ExerciseList#makeExercisePanel
    */
   @Override
-  public Panel getExercisePanel(Shell e) {
+  public Panel getExercisePanel(T e) {
     currentExercise = e;
     sticky.storeCurrent(e);
     boolean recordingEnabled = controller.isRecordingEnabled();
@@ -153,8 +153,8 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
         new StatsPracticePanel(e, exerciseList);
   }
 
-  private FlashcardPanel getNoRecordFlashcardPanel(final CommonExercise e) {
-    return new FlashcardPanel(e,
+  private FlashcardPanel<T> getNoRecordFlashcardPanel(final T e) {
+    return new FlashcardPanel<T>(e,
         StatsFlashcardFactory.this.service,
         StatsFlashcardFactory.this.controller,
         ADD_KEY_BINDING,
@@ -232,11 +232,11 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
   /**
    * @see ExercisePanelFactory#getExercisePanel(Shell)
    */
-  private class StatsPracticePanel extends BootstrapExercisePanel {
+  private class StatsPracticePanel extends BootstrapExercisePanel<T> {
     private Widget container;
     final SetCompleteDisplay completeDisplay = new SetCompleteDisplay();
 
-    public StatsPracticePanel(CommonExercise e, ListInterface exerciseListToUse) {
+    public StatsPracticePanel(T e, ListInterface exerciseListToUse) {
       super(e,
           StatsFlashcardFactory.this.service,
           StatsFlashcardFactory.this.controller,
@@ -520,7 +520,7 @@ public class StatsFlashcardFactory extends ExercisePanelFactory implements Requi
      * @param correct
      * @param feedback
      * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
-     * @see #showIncorrectFeedback(mitll.langtest.shared.AudioAnswer, double, boolean)
+     * @see #showIncorrectFeedback
      */
     protected void nextAfterDelay(boolean correct, String feedback) {
       if (exerciseList.onLast()) {
