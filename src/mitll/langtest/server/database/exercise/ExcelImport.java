@@ -12,10 +12,7 @@ import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.custom.UserExercise;
-import mitll.langtest.shared.exercise.AudioExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonUserExercise;
-import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.shared.exercise.*;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -44,10 +41,10 @@ public class ExcelImport implements ExerciseDAO {
   private static final String ID = "id";
 
   private List<CommonExercise> exercises = null;
-  private final Map<String, CommonExercise> idToExercise = new HashMap<String, CommonExercise>();
+  private final Map<String, CommonExercise> idToExercise = new HashMap<>();
   private final List<String> errors = new ArrayList<String>();
   private final String file;
-  private final SectionHelper sectionHelper = new SectionHelper();
+  private final SectionHelper<CommonExercise> sectionHelper = new SectionHelper<CommonExercise>();
 
   private boolean shouldHaveRefAudio = false;
   private final boolean usePredefinedTypeOrder;
@@ -109,7 +106,7 @@ public class ExcelImport implements ExerciseDAO {
    * @return
    */
   @Override
-  public SectionHelper getSectionHelper() {
+  public SectionHelper<CommonExercise> getSectionHelper() {
     return sectionHelper;
   }
 
@@ -175,10 +172,12 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   public List<CommonExercise> readExercises() {
-    List<CommonExercise> commonExercises = readExercises(new File(file));
-    addAlternatives(commonExercises);
-    return commonExercises;
+    List<CommonExercise> Ts = readExercises(new File(file));
+    addAlternatives(Ts);
+    return Ts;
   }
+
+  //public AttachAudio getAttachAudio() { return attachAudio; }
 
   /**
    * So the story is we get the user exercises out of the database on demand.
@@ -190,7 +189,7 @@ public class ExcelImport implements ExerciseDAO {
    * @param all
    * @see DatabaseImpl#getExerciseIDToRefAudio()
    */
-  public void attachAudio(Collection<CommonUserExercise> all) {
+  public void attachAudio(Collection<CommonExercise> all) {
     attachAudio.setExToAudio(audioDAO.getExToAudio());
     int user = 0;
     int examined = 0;
@@ -215,7 +214,7 @@ public class ExcelImport implements ExerciseDAO {
 
   private void addNewExercises() {
     for (String id : addRemoveDAO.getAdds()) {
-      CommonUserExercise where = userExerciseDAO.getWhere(id);
+      CommonExercise where = userExerciseDAO.getWhere(id);
       if (where == null) {
         logger.error("getRawExercises huh? couldn't find user exercise from add exercise table in user exercise table : " + id);
       } else {
@@ -227,14 +226,14 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   private void addOverlays(Set<String> removes) {
-    Collection<CommonUserExercise> overrides = userExerciseDAO.getOverrides();
+    Collection<CommonExercise> overrides = userExerciseDAO.getOverrides();
 
     if (overrides.size() > 0) {
       logger.debug("found " + overrides.size() + " overrides...");
     }
 
     int override = 0;
-    for (CommonUserExercise userExercise : overrides) {
+    for (CommonExercise userExercise : overrides) {
       if (!removes.contains(userExercise.getID())) {
         CommonExercise exercise = getExercise(userExercise.getID());
         if (exercise != null) {
@@ -298,11 +297,11 @@ public class ExcelImport implements ExerciseDAO {
   /**
    * @param userExercise
    * @return old exercises
-   * @see mitll.langtest.server.database.DatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
+   * @see mitll.langtest.server.database.DatabaseImpl#editItem
    * @see #getRawExercises()
    */
   @Override
-  public CommonExercise addOverlay(CommonUserExercise userExercise) {
+  public CommonExercise addOverlay(CommonExercise userExercise) {
     CommonExercise exercise = getExercise(userExercise.getID());
 
     if (exercise == null) {
@@ -329,7 +328,7 @@ public class ExcelImport implements ExerciseDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#duplicateExercise(UserExercise)
    * @see #addNewExercises()
    */
-  public void add(CommonUserExercise ue) {
+  public void add(CommonExercise ue) {
     synchronized (this) {
       exercises.add(ue);
       idToExercise.put(ue.getID(), ue);
@@ -595,7 +594,7 @@ public class ExcelImport implements ExerciseDAO {
           }
           if (english.length() == 0) {
             //if (serverProps.isClassroomMode()) {
-            //english = "NO ENGLISH";    // DON'T DO THIS - it messes up the indexing.
+            //english = "NO ENGLISH";    // DON'CommonExercise DO THIS - it messes up the indexing.
             fieldToDefect.put("english", "missing english");
             // }
             //logger.info("-------- > for row " + next.getRowNum() + " english is blank ");
@@ -682,8 +681,8 @@ public class ExcelImport implements ExerciseDAO {
     logStatistics(id, semis, skipped, englishSkipped, deleted);
 
     // put the skips at the end
-    Collection<CommonExercise> commonExercises = readFromSheetSkips(sheet, id);
-    exercises.addAll(commonExercises);
+    Collection<CommonExercise> Ts = readFromSheetSkips(sheet, id);
+    exercises.addAll(Ts);
     return exercises;
   }
 
@@ -912,7 +911,7 @@ public class ExcelImport implements ExerciseDAO {
     String englishSentence = imported.getEnglish();
     List<CommonExercise> exercisesForSentence = englishToExercises.get(englishSentence);
     if (exercisesForSentence == null)
-      englishToExercises.put(englishSentence, exercisesForSentence = new ArrayList<CommonExercise>());
+      englishToExercises.put(englishSentence, exercisesForSentence = new ArrayList<>());
     exercisesForSentence.add(imported);
 
     exercises.add(imported);
