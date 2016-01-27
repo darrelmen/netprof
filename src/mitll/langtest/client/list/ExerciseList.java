@@ -124,10 +124,12 @@ public abstract class ExerciseList<T extends Shell>
     currentExerciseVPanel.addStyleName("floatLeft");
   }
 
-  /**
-   * @param factory
-   * @see mitll.langtest.client.LangTest#reallySetFactory()
-   */
+  public void addWidgets() {}
+
+    /**
+     * @param factory
+     * @see mitll.langtest.client.LangTest#reallySetFactory()
+     */
   public void setFactory(ExercisePanelFactory factory) {
     this.factory = factory;
     addHistoryListener();
@@ -919,5 +921,11 @@ public abstract class ExerciseList<T extends Shell>
    */
   public void simpleSetShuffle(boolean doShuffle) {
     this.doShuffle = doShuffle;
+  }
+
+  public Collection<String> getIDs() {
+    Set<String> ids = new HashSet<>();
+    for (T cs : getInOrder()) ids.add(cs.getID());
+    return ids;
   }
 }
