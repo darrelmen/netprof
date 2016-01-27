@@ -128,7 +128,7 @@ public class UserListManager {
   private void setStateOnUserExercises(Map<String, ReviewedDAO.StateCreator> exerciseToState,
                                          Set<String> userExercisesRemaining, boolean firstState) {
     int count = 0;
-    List<CommonUserExercise> userExercises = userExerciseDAO.getWhere(userExercisesRemaining);
+    List<CommonExercise> userExercises = userExerciseDAO.getWhere(userExercisesRemaining);
 
     for (CommonShell commonUserExercise : userExercises) {
       ReviewedDAO.StateCreator state = exerciseToState.get(commonUserExercise.getID());
@@ -375,7 +375,7 @@ public class UserListManager {
     }
     //logger.debug("getCommentedList After there are " + idToCreator.size() + " idToCreator items ");
 
-    List<CommonUserExercise> include = userExerciseDAO.getWhere(idToCreator.keySet());
+    List<CommonExercise> include = userExerciseDAO.getWhere(idToCreator.keySet());
     //logger.debug("getCommentedList include " + include.size() + " included ");
 
     UserList reviewList = getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, idToCreator.keySet(),COMMENT_MAGIC_ID, typeOrder);
@@ -395,7 +395,7 @@ public class UserListManager {
       }
     }
 
-    List<CommonUserExercise> allKnown = userExerciseDAO.getWhere(defectIds);
+    List<CommonExercise> allKnown = userExerciseDAO.getWhere(defectIds);
     logger.debug("\tgetAttentionList ids #=" + allKnown.size());
 
     return getReviewList(allKnown, ATTENTION, "Items for LL review", defectIds,ATTN_LL_MAGIC_ID, typeOrder);
@@ -405,7 +405,6 @@ public class UserListManager {
    * TODO : probably a bad idea to do a massive where in ... ids.
    *
    * @see mitll.langtest.server.LangTestDatabaseImpl#getReviewLists()
-   * @see mitll.langtest.client.custom.Navigation#viewReview
    * @see #markCorrectness(String, boolean, long)
    * @return
    * @param typeOrder used by sorter to sort first in unit & chapter order
@@ -421,7 +420,7 @@ public class UserListManager {
       }
     }
 
-    List<CommonUserExercise> allKnown = userExerciseDAO.getWhere(defectIds);
+    List<CommonExercise> allKnown = userExerciseDAO.getWhere(defectIds);
     //logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
 
     return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID, typeOrder);
@@ -439,12 +438,12 @@ public class UserListManager {
    * @param typeOrder used by sorter to sort first in unit & chapter order
    * @return
    */
-  private UserList getReviewList(List<CommonUserExercise> allKnown, String name, String description,
+  private UserList getReviewList(List<CommonExercise> allKnown, String name, String description,
                                  Collection<String> ids, long userListMaginID, Collection<String> typeOrder) {
-    Map<String, CommonUserExercise> idToUser = new HashMap<String, CommonUserExercise>();
-    for (CommonUserExercise ue : allKnown) idToUser.put(ue.getID(), ue);
+    Map<String, CommonExercise> idToUser = new HashMap<>();
+    for (CommonExercise ue : allKnown) idToUser.put(ue.getID(), ue);
 
-    List<CommonUserExercise> onList = getReviewedUserExercises(idToUser, ids);
+    List<CommonExercise> onList = getReviewedUserExercises(idToUser, ids);
 
    // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
     User user = getQCUser();
@@ -472,8 +471,8 @@ public class UserListManager {
    * @param ids
    * @return
    */
-  private List<CommonUserExercise> getReviewedUserExercises(Map<String, CommonUserExercise> idToUserExercise, Collection<String> ids) {
-    List<CommonUserExercise> onList = new ArrayList<CommonUserExercise>();
+  private List<CommonExercise> getReviewedUserExercises(Map<String, CommonExercise> idToUserExercise, Collection<String> ids) {
+    List<CommonExercise> onList = new ArrayList<>();
 
     for (String id : ids) {
       if (id.startsWith(UserExercise.CUSTOM_PREFIX)) {   // add user defined exercises
@@ -497,9 +496,9 @@ public class UserListManager {
         }
       }
     }
-    Collections.sort(onList, new Comparator<CommonUserExercise>() {
+    Collections.sort(onList, new Comparator<CommonExercise>() {
       @Override
-      public int compare(CommonUserExercise o1, CommonUserExercise o2) {
+      public int compare(CommonExercise o1, CommonExercise o2) {
         return o1.getID().compareTo(o2.getID());
       }
     });

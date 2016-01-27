@@ -20,6 +20,8 @@ public class ExerciseShell extends BaseExercise implements CommonShell {
   protected String meaning;
   protected String foreignLanguage;
   protected String context;
+  protected String transliteration;
+  protected String contextTranslation;
 
   public ExerciseShell() {}
 
@@ -29,7 +31,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell {
    * @see UserList#UserList()
    */
   public ExerciseShell(String id) {
-    this(id, "", "", "");
+    this(id, "", "", "", "", "", "");
   }
 
   /**
@@ -37,14 +39,20 @@ public class ExerciseShell extends BaseExercise implements CommonShell {
    * @param englishSentence
    * @param meaning
    * @param foreignLanguage
-   * @see #getShell()
+   * @param transliteration
+   * @param context
+   *@param contextTranslation @see #getShell()
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShells
    */
-  private ExerciseShell(String id, String englishSentence, String meaning, String foreignLanguage) {
+  private ExerciseShell(String id, String englishSentence, String meaning, String foreignLanguage,
+                        String transliteration, String context, String contextTranslation) {
     super(id);
     this.englishSentence = englishSentence;
     this.meaning = meaning;
     this.foreignLanguage = foreignLanguage;
+    this.transliteration = transliteration;
+    this.context = context;
+    this.contextTranslation = contextTranslation;
   }
 
   /**
@@ -52,7 +60,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShells(java.util.Collection)
    */
   public CommonShell getShell() {
-    return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage);
+    return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage, transliteration, context, contextTranslation);
   }
 
   public String getEnglish() {
@@ -77,6 +85,16 @@ public class ExerciseShell extends BaseExercise implements CommonShell {
   @Override
   public String getContext() {
     return context;
+  }
+
+  @Override
+  public String getContextTranslation() {
+    return contextTranslation;
+  }
+
+  @Override
+  public String getTransliteration() {
+    return transliteration;
   }
 
   public String toString() {
