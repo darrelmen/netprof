@@ -10,14 +10,23 @@ import java.util.*;
  * Created by go22670 on 10/26/15.
  */
 public class EmailList {
-  private static final String DEBUG_EMAIL = "debugEmail";
-  private static final String TEST_EMAIL = "testEmail";
-  private static final String EMAIL_ADDRESS = "emailAddress";
-
-  private static final String APPROVAL_EMAIL = "approvalEmail";
+  // MIT LL
   private static final String GORDON_VIDAVER = "gordon.vidaver@ll.mit.edu";
   private static final String DOUG_JONES = "daj@ll.mit.edu";
   public static final String RAY_BUDD = "Raymond.Budd@ll.mit.edu";
+
+  // DLI -
+  private static final String GRIMMER = "michael.grimmer1@dliflc.edu";
+  private static final String TAMAS_1 = "tamas.g.marius.civ@mail.mil";
+  private static final String TAMAS_2 = "tamas.marius@dliflc.edu";
+  private static final String SANDY   = "sandra.wagner@dliflc.edu";
+
+
+  private static final String DEBUG_EMAIL = "debugEmail";
+  private static final String TEST_EMAIL = "testEmail";
+  private static final String EMAIL_ADDRESS = "emailAddress";
+  private static final String APPROVAL_EMAIL = "approvalEmail";
+
   private static final String DEFAULT_EMAIL = GORDON_VIDAVER;
   private static final String APPROVERS = "approvers";
   private static final String APPROVER_EMAILS = "approverEmails";
@@ -30,17 +39,16 @@ public class EmailList {
       "Sandy",
       "Gordon");
 
-  private static final String TAMAS_1 = "tamas.g.marius.civ@mail.mil";
-  private static final String TAMAS_2 = "tamas.marius@dliflc.edu";
+
   private static final List<String> DLI_EMAILS = Arrays.asList(
       TAMAS_1,
       TAMAS_2,
-      "michael.grimmer1@dliflc.edu",
-      "sandra.wagner@dliflc.edu",
+      GRIMMER,
+      SANDY,
       GORDON_VIDAVER);
 
 
-  private static final Set<String> ADMINLIST = new HashSet<String>(Arrays.asList("gvidaver", "tmarius",
+  private static final Set<String> ADMINLIST = new HashSet<>(Arrays.asList("gvidaver", "tmarius",
       "mgrimmer",
       "swagner", "gmarkovic", "djones", "jmelot", "rbudd", "pgatewood"));
 
@@ -49,12 +57,15 @@ public class EmailList {
    */
   private static final String REPORT_EMAILS = "reportEmails";
 
-  private List<String> reportEmails = Arrays.asList(TAMAS_1, TAMAS_2, GORDON_VIDAVER, DOUG_JONES, RAY_BUDD);
+  /**
+   * Fix for https://gh.ll.mit.edu/DLI-LTEA/Development/issues/500
+   */
+  private List<String> reportEmails = Arrays.asList(TAMAS_1, TAMAS_2, GORDON_VIDAVER, DOUG_JONES, RAY_BUDD, GRIMMER);
   private List<String> approvers = DLI_APPROVERS;
   private List<String> approverEmails = DLI_EMAILS;
   private Set<String> admins = ADMINLIST;
 
-  private Properties props;
+  private final Properties props;
 
   public EmailList(Properties props) {
     this.props = props;
@@ -66,7 +77,7 @@ public class EmailList {
     if (property != null) approverEmails = Arrays.asList(property.split(","));
 
     property = props.getProperty(ADMINS);
-    if (property != null) admins = new HashSet<String>(Arrays.asList(property.split(",")));
+    if (property != null) admins = new HashSet<>(Arrays.asList(property.split(",")));
 
     property = props.getProperty(REPORT_EMAILS);
     if (property != null) {
