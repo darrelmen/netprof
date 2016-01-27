@@ -8,11 +8,13 @@ import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Shell;
 
 /**
  * Created by go22670 on 1/5/16.
  */
-public class NPExerciseList<T extends CommonExercise> extends HistoryExerciseList<T> {
+public class NPExerciseList<T extends CommonShell> extends HistoryExerciseList<T> {
   protected NPExerciseList(Panel currentExerciseVPanel,
                            LangTestDatabaseAsync service,
                            UserFeedback feedback,
