@@ -18,6 +18,7 @@ import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -87,7 +88,7 @@ public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> impleme
    * @param instanceName  flex, review, etc.
    * @param loadExercises should we load exercises initially
    * @param toSelect
-   * @see mitll.langtest.client.custom.ListManager#getListOperations(UL, String)
+   * @see mitll.langtest.client.custom.ListManager#getListOperations
    */
   public void showNPF(UL ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises,
                       T toSelect) {
@@ -140,7 +141,7 @@ public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> impleme
    * @param ul
    * @param instanceName
    * @return
-   * @see #doNPF(UL, String, boolean, String)
+   * @see #doNPF
    */
   protected Panel doInternalLayout(UL ul, String instanceName) {
 //    logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
@@ -249,14 +250,15 @@ public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> impleme
     exerciseList.setFactory(getFactory(exerciseList, instanceName, showQC));
   }
 
-  protected ExercisePanelFactory getFactory(final PagingExerciseList<T> exerciseList, final String instanceName, final boolean showQC) {
+  protected ExercisePanelFactory<T> getFactory(final PagingExerciseList<T> exerciseList, final String instanceName,
+                                            final boolean showQC) {
     return new ExercisePanelFactory<T>(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(T e) {
         if (showQC) {
-          return new QCNPFExercise(e, controller, exerciseList, instanceName);
+          return new QCNPFExercise<T>(e, controller, exerciseList, instanceName);
         } else {
-          return new CommentNPFExercise(e, controller, exerciseList, false, instanceName);
+          return new CommentNPFExercise<T>(e, controller, exerciseList, false, instanceName);
         }
       }
     };
@@ -279,157 +281,4 @@ public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> impleme
     return instanceName;
   }
 
-  /**
-   * Created by GO22670 on 3/28/2014.
-   */
-  public abstract static class FlexListLayout<T extends Shell> implements RequiresResize {
-    Logger logger = Logger.getLogger("FlexListLayout");
-
-    public PagingExerciseList npfExerciseList;
-    private final ExerciseController controller;
-    private final LangTestDatabaseAsync service;
-    private final UserFeedback feedback;
-    private final UserManager userManager;
-    final boolean incorrectFirst;
-
-    /**
-     * @param service
-     * @param feedback
-     * @param userManager
-     * @param controller
-     * @see ChapterNPFHelper#ChapterNPFHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, boolean)
-     * @see ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
-     */
-    public FlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                          UserManager userManager, ExerciseController controller) {
-      this.controller = controller;
-      this.service = service;
-      this.feedback = feedback;
-      this.userManager = userManager;
-      this.incorrectFirst = false;
-    }
-
-    /**
-     * @param ul
-     * @param instanceName
-     * @return
-     * @see ChapterNPFHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
-     * @see ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
-     */
-    public Panel doInternalLayout(UserList<T> ul, String instanceName) {
-      Panel twoRows = new FlowPanel();
-      twoRows.getElement().setId("NPFHelper_twoRows");
-
-      Panel exerciseListContainer = new SimplePanel();
-      exerciseListContainer.addStyleName("floatLeft");
-      exerciseListContainer.getElement().setId("NPFHelper_exerciseListContainer");
-
-      // second row ---------------
-      FluidRow topRow = new FluidRow();
-      topRow.getElement().setId("NPFHelper_topRow");
-
-      twoRows.add(topRow);
-
-      Panel bottomRow = new HorizontalPanel();
-      bottomRow.add(exerciseListContainer);
-      bottomRow.getElement().setId("NPFHelper_bottomRow");
-      styleBottomRow(bottomRow);
-
-      twoRows.add(bottomRow);
-
-      FlowPanel currentExerciseVPanel = new FlowPanel();
-      currentExerciseVPanel.getElement().setId("NPFHelper_defect_currentExercisePanel");
-
-      currentExerciseVPanel.addStyleName("floatLeftList");
-      bottomRow.add(currentExerciseVPanel);
-
-      long uniqueID = ul == null ? -1 : ul.getUniqueID();
-      FlexSectionExerciseList widgets = makeNPFExerciseList(topRow, currentExerciseVPanel, instanceName, uniqueID, incorrectFirst);
-      npfExerciseList = widgets;
-
-      if (npfExerciseList == null) {
-        logger.warning("huh? exercise list is null for " + instanceName + " and " + ul);
-      } else {
-        Widget exerciseListOnLeftSide = npfExerciseList.getExerciseListOnLeftSide(controller.getProps());
-        exerciseListContainer.add(exerciseListOnLeftSide);
-      }
-
-      widgets.addWidgets();
-      return twoRows;
-    }
-
-    protected void styleBottomRow(Panel bottomRow) {
-      bottomRow.setWidth("100%");
-      bottomRow.addStyleName("trueInlineStyle");
-    }
-
-    /**
-     * @param topRow
-     * @param currentExercisePanel
-     * @param instanceName
-     * @param userListID
-     * @param incorrectFirst
-     * @return
-     * @see #doInternalLayout(mitll.langtest.shared.custom.UserList, String)
-     */
-    private FlexSectionExerciseList makeNPFExerciseList(final Panel topRow, Panel currentExercisePanel, String instanceName,
-                                                        long userListID, boolean incorrectFirst) {
-      final FlexSectionExerciseList exerciseList = makeExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst);
-      exerciseList.setUserListID(userListID);
-
-      exerciseList.setFactory(getFactory(exerciseList, instanceName));
-      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-        @Override
-        public void execute() {
-          exerciseList.onResize();
-        }
-      });
-      return exerciseList;
-    }
-
-    protected abstract ExercisePanelFactory getFactory(final PagingExerciseList exerciseList, final String instanceName);
-
-    protected FlexSectionExerciseList makeExerciseList(final Panel topRow, Panel currentExercisePanel,
-                                                       final String instanceName, boolean incorrectFirst) {
-      return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst);
-    }
-
-    @Override
-    public void onResize() {
-      if (npfExerciseList != null) {
-        npfExerciseList.onResize();
-      }
-    }
-
-    protected class MyFlexSectionExerciseList extends FlexSectionExerciseList {
-      /**
-       * @param topRow
-       * @param currentExercisePanel
-       * @param instanceName
-       * @param incorrectFirst
-       * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
-       * @see mitll.langtest.client.custom.content.NPFHelper.FlexListLayout#makeExerciseList(com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel, String, boolean)
-       */
-      public MyFlexSectionExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
-                                       boolean incorrectFirst) {
-        super(topRow, currentExercisePanel, FlexListLayout.this.service, FlexListLayout.this.feedback,
-            FlexListLayout.this.controller, instanceName, incorrectFirst);
-      }
-
-      @Override
-      protected void onLastItem() {
-        new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
-          @Override
-          public void onHidden(HiddenEvent hiddenEvent) {
-            reloadExercises();
-          }
-        });
-      }
-
-      @Override
-      protected void noSectionsGetExercises(long userID) {
-        loadExercises(getHistoryToken("", ""), getPrefix(), false);
-      }
-    }
-  }
 }

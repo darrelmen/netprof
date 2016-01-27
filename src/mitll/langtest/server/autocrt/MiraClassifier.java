@@ -103,10 +103,10 @@ public class MiraClassifier {
               (after - before > 0 ?
                   " (with " + (after - before) + " additional graded)" : ""));
         }
-        scoreInfo = new HTTPClient(url).sendAndReceive(object.toString());
+        scoreInfo = new HTTPClient(url).sendAndReceiveAndClose(object.toString());
       } catch (IOException e) {
         logger.info("Got " + e + " so trying dev host " + ServerProperties.MIRA_DEVEL_HOST);
-        scoreInfo = new HTTPClient(ServerProperties.MIRA_DEVEL_HOST, true).sendAndReceive(object.toString());
+        scoreInfo = new HTTPClient(ServerProperties.MIRA_DEVEL_HOST, true).sendAndReceiveAndClose(object.toString());
       }
 
       JSONObject scoreJSON = JSONObject.fromObject(scoreInfo);
