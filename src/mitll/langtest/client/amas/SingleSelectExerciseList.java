@@ -96,6 +96,7 @@ public abstract class SingleSelectExerciseList<T extends Shell> extends HistoryE
    * @see #getExercises(long)
    * @see mitll.langtest.client.custom.content.FlexListLayout#doInternalLayout(String)
    */
+  @Override
   public void addWidgets() {
     sectionPanel.clear();
     sectionPanel.add(getWidgetsForTypes());
