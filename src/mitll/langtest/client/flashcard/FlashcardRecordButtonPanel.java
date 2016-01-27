@@ -14,6 +14,9 @@ import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.AudioAnswer;
 
+import java.util.Collection;
+import java.util.Map;
+
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -30,8 +33,6 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   protected final String instance;
 
   /**
-   *
-   *
    * @param exercisePanel
    * @param service
    * @param controller
@@ -41,8 +42,9 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, String)
    */
   public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel, LangTestDatabaseAsync service,
-                                    ExerciseController controller, String exerciseID, int index, String instance) {
-    super(service, controller, exerciseID, index, true, "avp", "Record");
+                                    ExerciseController controller, String exerciseID, int index, String instance,
+                                    Map<String, Collection<String>> typeToSelection) {
+    super(service, controller, exerciseID, index, true, "avp", "Record", typeToSelection);
     this.instance = instance;
     this.exercisePanel = exercisePanel;
   }
@@ -67,8 +69,8 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getAnswerAndRecordButtonRow(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
    * @return
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getAnswerAndRecordButtonRow(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
    */
   @Override
   public Widget getRecordButton() {
@@ -97,16 +99,16 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    * * the audio was invalid in some way : too short, too quiet, too loud<br></br>
    * * the audio was the correct response<br></br>
    * * the audio was incorrect<br></br><p></p>
-   * <p/>
+   * <p>
    * And then move on to the next item.
    *
-   * @param result        response from server
-   * @param outer         ignored here
+   * @param result response from server
+   * @param outer  ignored here
    * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile
    */
   @Override
   protected void receivedAudioAnswer(final AudioAnswer result, Panel outer) {
-   // System.out.println("FlashcardRecordButtonPanel.receivedAudioAnswer " + result);
+    // System.out.println("FlashcardRecordButtonPanel.receivedAudioAnswer " + result);
     recordButton.setVisible(false);
     waiting.setVisible(false);
     if (result.isCorrect()) {
@@ -119,7 +121,8 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   }
 
   @Override
-  public void flip(boolean first) {}
+  public void flip(boolean first) {
+  }
 
   @Override
   public void stopRecording() {
