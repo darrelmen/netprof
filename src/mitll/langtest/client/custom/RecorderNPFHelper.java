@@ -14,14 +14,15 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
-import mitll.langtest.client.custom.content.NPFHelper;
+import mitll.langtest.client.custom.content.FlexListLayout;
+import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.exercise.*;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.AudioRefExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.Collection;
@@ -30,7 +31,7 @@ import java.util.Map;
 /**
  * Created by go22670 on 2/10/15.
  */
-class RecorderNPFHelper extends SimpleChapterNPFHelper {
+class RecorderNPFHelper<T extends CommonShell & AudioRefExercise> extends SimpleChapterNPFHelper<T> {
   private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
 
   final boolean doNormalRecording;
@@ -51,25 +52,27 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
   }
 
   @Override
-  protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
+  protected ExercisePanelFactory<T> getFactory(final PagingExerciseList<T> exerciseList) {
     final String oinstance = exerciseList.getInstance();
-    return new ExercisePanelFactory(service, feedback, controller, exerciseList) {
+    return new ExercisePanelFactory<T>(service, feedback, controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(final Shell e) {
+      public Panel getExercisePanel(final T e) {
         return new MyWaveformExercisePanel(e, controller, exerciseList, oinstance);
       }
     };
   }
 
   @Override
-  protected NPFHelper.FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                                                     final UserManager userManager, ExerciseController controller,
-                                                     SimpleChapterNPFHelper outer) {
+  protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
+                                           final UserManager userManager, ExerciseController controller,
+                                           SimpleChapterNPFHelper outer) {
     return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
+
+      FlexListLayout outerLayout = this;
       @Override
-      protected FlexSectionExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
-                                                         boolean incorrectFirst) {
-        return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst) {
+      protected PagingExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
+                                                    boolean incorrectFirst) {
+        return new NPFlexSectionExerciseList<T>(outerLayout, topRow, currentExercisePanel, instanceName, incorrectFirst) {
           private CheckBox filterOnly;
 
           @Override
@@ -182,10 +185,10 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
     return (int) (ratio * 100f);
   }
 
-  private class MyWaveformExercisePanel extends WaveformExercisePanel {
-    private final Shell e; // TODO REMOVE!
+  private class MyWaveformExercisePanel extends WaveformExercisePanel<T> {
+    private final T e; // TODO REMOVE!
 
-    public MyWaveformExercisePanel(Shell e, ExerciseController controller1, ListInterface exerciseList1, String instance) {
+    public MyWaveformExercisePanel(T e, ExerciseController controller1, ListInterface exerciseList1, String instance) {
       super(e, service, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
       this.e = e;
     }
@@ -208,7 +211,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper {
     }
 
     @Override
-    public void postAnswers(ExerciseController controller, Shell completedExercise) {
+    public void postAnswers(ExerciseController controller, T completedExercise) {
       super.postAnswers(controller, completedExercise);
       tellOtherListExerciseDirty(e);
     }
