@@ -27,9 +27,10 @@ import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -40,7 +41,9 @@ import java.util.logging.Logger;
  * Time: 3:07 PM
  * To change this template use File | Settings | File Templates.
  */
-public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswerListener {
+public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & AnnotationExercise & ScoredExercise>
+    extends FlashcardPanel<T>
+    implements AudioAnswerListener {
   private Logger logger;
 
   private Heading recoOutput;
@@ -66,7 +69,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @see StatsFlashcardFactory.StatsPracticePanel#StatsPracticePanel
    *
    */
-  public BootstrapExercisePanel(final CommonExercise e, final LangTestDatabaseAsync service,
+  public BootstrapExercisePanel(final T e, final LangTestDatabaseAsync service,
                                 final ExerciseController controller, boolean addKeyBinding,
                                 final ControlState controlState,
                                 StatsFlashcardFactory.MySoundFeedback soundFeedback,
@@ -130,21 +133,23 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * reco feedback - whether the recorded audio was correct/incorrect, etc.  <br></br>
    * score feedback - pron score
    *
-   * @param e
+   * @param exerciseID
    * @param service
    * @param controller used in subclasses for audio control
    * @param toAddTo
    * @see #BootstrapExercisePanel
    */
   @Override
-  protected void addRecordingAndFeedbackWidgets(CommonExercise e, LangTestDatabaseAsync service, ExerciseController controller,
-                                      Panel toAddTo) {
+  protected void addRecordingAndFeedbackWidgets(String exerciseID, LangTestDatabaseAsync service,
+                                                ExerciseController controller,
+                                                Panel toAddTo) {
     if (logger == null) {
       logger = Logger.getLogger("BootstrapExercisePanel");
     }
   //  logger.info("called  addRecordingAndFeedbackWidgets ");
     // add answer widget to do the recording
-    Widget answerAndRecordButtonRow = getAnswerAndRecordButtonRow(e, service, controller);
+  //  String exerciseID = exerciseID.getID();
+    Widget answerAndRecordButtonRow = getAnswerAndRecordButtonRow(exerciseID, service, controller);
     toAddTo.add(answerAndRecordButtonRow);
 
     if (controller.getProps().showFlashcardAnswer()) {
@@ -166,7 +171,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @param service
    * @param controller
    * @return
-   * @see #addRecordingAndFeedbackWidgets(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel)
+   * @see FlashcardPanel#addRecordingAndFeedbackWidgets(String, LangTestDatabaseAsync, ExerciseController, Panel)
    */
   private Widget getAnswerAndRecordButtonRow(String exerciseID, LangTestDatabaseAsync service, ExerciseController controller) {
    // logger.info("BootstrapExercisePanel.getAnswerAndRecordButtonRow = " + instance);
@@ -192,7 +197,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    * @param recordButton
    * @return
    * @see #getAnswerAndRecordButtonRow(String, LangTestDatabaseAsync, ExerciseController)
-   * @see BootstrapExercisePanel#addRecordingAndFeedbackWidgets(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel)
+   * @see FlashcardPanel#addRecordingAndFeedbackWidgets(String, LangTestDatabaseAsync, ExerciseController, Panel)
    */
   private Panel getRecordButtonRow(Widget recordButton) {
     Panel recordButtonRow = getCenteredWrapper(recordButton);
@@ -249,7 +254,7 @@ public class BootstrapExercisePanel extends FlashcardPanel implements AudioAnswe
    */
   private RecordButtonPanel getAnswerWidget(final String exerciseID, LangTestDatabaseAsync service,
                                             ExerciseController controller, final boolean addKeyBinding, String instance) {
-    return new FlashcardRecordButtonPanel(this, service, controller, exerciseID, 1, instance) {
+    return new FlashcardRecordButtonPanel(this, service, controller, exerciseID, 1, instance, Collections.emptyMap()) {
       final FlashcardRecordButtonPanel outer = this;
       @Override
       protected RecordButton makeRecordButton(final ExerciseController controller, String buttonTitle) {
