@@ -33,7 +33,7 @@ import java.util.logging.Logger;
  *
 * Created by GO22670 on 3/28/2014.
 */
-class EditableExercise extends NewUserExercise {
+class EditableExercise<T extends CommonUserExercise, UL extends UserList<T>> extends NewUserExercise<T,UL> {
   private Logger logger = Logger.getLogger("EditableExercise");
 
   public static final int LABEL_WIDTH = 105;
@@ -44,7 +44,7 @@ class EditableExercise extends NewUserExercise {
   private final HTML slowAnno = new HTML();
   private String originalForeign = "";
   private String originalEnglish = "";
-  final UserList originalList;
+  final UL originalList;
 
   protected final PagingExerciseList exerciseList;
   protected final ListInterface predefinedContentList;
@@ -61,9 +61,9 @@ class EditableExercise extends NewUserExercise {
   public EditableExercise(LangTestDatabaseAsync service,
                           ExerciseController controller,
                           EditItem editItem,
-                          HasText itemMarker, CommonUserExercise changedUserExercise, UserList originalList,
+                          HasText itemMarker, T changedUserExercise, UL originalList,
 
-                          PagingExerciseList exerciseList,
+                          PagingExerciseList<T> exerciseList,
                           ListInterface predefinedContent,
                           NPFHelper npfHelper) {
     super(service, controller, itemMarker, editItem, changedUserExercise, npfHelper.getInstanceName());
@@ -79,7 +79,7 @@ class EditableExercise extends NewUserExercise {
 
   @Override
   protected void gotBlur(FormField english, FormField foreignLang, RecordAudioPanel rap,
-                         ControlGroup normalSpeedRecording, UserList ul, ListInterface pagingContainer,
+                         ControlGroup normalSpeedRecording, UL ul, ListInterface pagingContainer,
                          Panel toAddTo) {
     boolean changed = foreignChanged();
     validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, false, changed);
