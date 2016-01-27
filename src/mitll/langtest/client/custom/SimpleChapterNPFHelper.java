@@ -8,19 +8,19 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.custom.content.NPFHelper;
+import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.WaveformExercisePanel;
+import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.exercise.AudioAttributeExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Shell;
 
 import java.util.logging.Logger;
 
@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  * Time: 3:27 PM
  * To change this template use File | Settings | File Templates.
  */
-public class SimpleChapterNPFHelper<T extends CommonShell & AudioAttributeExercise> implements RequiresResize {
+public abstract class SimpleChapterNPFHelper<T extends CommonShell & AudioRefExercise> implements RequiresResize {
   private Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
 
   private boolean madeNPFContent = false;
@@ -41,7 +41,7 @@ public class SimpleChapterNPFHelper<T extends CommonShell & AudioAttributeExerci
   protected final UserManager userManager;
 
   protected final UserFeedback feedback;
-  protected PagingExerciseList npfExerciseList;
+  protected ExerciseList npfExerciseList;
   private final ListInterface predefinedContentList;
 
   /**
@@ -65,11 +65,12 @@ public class SimpleChapterNPFHelper<T extends CommonShell & AudioAttributeExerci
     this.flexListLayout = getMyListLayout(service, feedback, userManager, controller, outer);
   }
 
-  protected NPFHelper.FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                                                     UserManager userManager, ExerciseController controller,
-                                                     SimpleChapterNPFHelper outer) {
-    return new MyFlexListLayout(service, feedback, userManager, controller, outer);
-  }
+  protected abstract FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
+                                           UserManager userManager, ExerciseController controller,
+                                           SimpleChapterNPFHelper outer);
+//  {
+//    return new MyFlexListLayout(service, feedback, userManager, controller, outer);
+//  }
 
   /**
    * Add npf widget to content of a tab - here marked tabAndContent
@@ -96,7 +97,7 @@ public class SimpleChapterNPFHelper<T extends CommonShell & AudioAttributeExerci
     listContent.addStyleName("userListBackground");
   }
 
-  private final NPFHelper.FlexListLayout<T> flexListLayout;
+  private final FlexListLayout<T> flexListLayout;
 
   /**
    * Make the instance name uses the unique id for the list.
@@ -178,7 +179,7 @@ public class SimpleChapterNPFHelper<T extends CommonShell & AudioAttributeExerci
   }
 */
 
-  protected static class MyFlexListLayout extends NPFHelper.FlexListLayout {
+  protected abstract static class MyFlexListLayout extends FlexListLayout {
     private final SimpleChapterNPFHelper outer;
 
     public MyFlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
