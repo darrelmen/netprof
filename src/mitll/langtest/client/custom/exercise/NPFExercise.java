@@ -20,11 +20,12 @@ import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 
@@ -39,7 +40,7 @@ import java.util.logging.Logger;
  * Time: 4:58 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NPFExercise<T extends CommonExercise> extends GoodwaveExercisePanel<T> {
+public class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExercise> extends GoodwaveExercisePanel<T> {
   private final Logger logger = Logger.getLogger("NPFExercise");
 
   private static final String ADD_ITEM = "Add Item to List";
@@ -218,7 +219,7 @@ public class NPFExercise<T extends CommonExercise> extends GoodwaveExercisePanel
   /**
    * Every time this panel becomes visible again, we need to check the lists for this user.
    *
-   * @see mitll.langtest.client.custom.Navigation#getTabPanel(com.google.gwt.user.client.ui.Panel)
+   * @see Navigation#getNav()
    */
   @Override
   public void wasRevealed() { populateListChoices(exercise, controller, addToList);  }
@@ -232,7 +233,7 @@ public class NPFExercise<T extends CommonExercise> extends GoodwaveExercisePanel
    * @param e
    * @param controller
    * @param w1
-   * @see #makeAddToList(mitll.langtest.shared.exercise.T, mitll.langtest.client.exercise.ExerciseController)
+   * @see #makeAddToList
    * @see #wasRevealed()
    */
   private void populateListChoices(final T e, final ExerciseController controller, final DropdownBase w1) {
@@ -248,7 +249,7 @@ public class NPFExercise<T extends CommonExercise> extends GoodwaveExercisePanel
         boolean anyAdded = false;
     //    logger.info("\tpopulateListChoices : found list " + result.size() + " choices");
         for (final UserList ul : result) {
-          if (!ul.contains(new UserExercise(e))) {
+          if (!ul.containsByID(e)) {
             activeCount++;
             anyAdded = true;
             final NavLink widget = new NavLink(ul.getName());
