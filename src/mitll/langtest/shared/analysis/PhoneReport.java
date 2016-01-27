@@ -58,6 +58,7 @@ public class PhoneReport implements Serializable {
   }
 
   public String toString() {
-    return "valid " + valid + " : " + getPhoneToAvgSorted().toString();
+    Map<String, PhoneStats> phoneToAvgSorted = getPhoneToAvgSorted();
+    return "valid " + valid + " : " + (phoneToAvgSorted == null ? "null phoneToAvgSorted?" :phoneToAvgSorted.toString());
   }
 }
