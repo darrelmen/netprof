@@ -17,11 +17,8 @@ import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.AudioAttributeExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.exercise.Shell;
 
 import java.util.Map;
 
@@ -31,10 +28,10 @@ import java.util.Map;
  * The record audio and play buttons are tied to each other in that when playing audio, you can't record, and vice-versa.
  *
  */
-public class RecordAudioPanel<T extends Shell & AudioAttributeExercise> extends AudioPanel<T> {
+public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioPanel<T> {
   private final int index;
 
-  private PostAudioRecordButton<T> postAudioRecordButton;
+  private PostAudioRecordButton postAudioRecordButton;
   private PlayAudioPanel playAudioPanel;
   protected final Panel exercisePanel;
 
@@ -117,7 +114,7 @@ public class RecordAudioPanel<T extends Shell & AudioAttributeExercise> extends 
    */
   @Override
   protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, String audioType, String recordButtonTitle) {
-    WaveformPostAudioRecordButton<T> myPostAudioRecordButton = makePostAudioRecordButton(audioType, recordButtonTitle);
+    WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton(audioType, recordButtonTitle);
     postAudioRecordButton = myPostAudioRecordButton;
 
    // System.out.println("makePlayAudioPanel : audio type " + audioType + " suffix '" +playButtonSuffix +"'");
@@ -141,7 +138,7 @@ public class RecordAudioPanel<T extends Shell & AudioAttributeExercise> extends 
    * @param recordButtonTitle
    * @return
    */
-  protected WaveformPostAudioRecordButton<T> makePostAudioRecordButton(String audioType, String recordButtonTitle) {
+  protected WaveformPostAudioRecordButton makePostAudioRecordButton(String audioType, String recordButtonTitle) {
     return new MyWaveformPostAudioRecordButton(audioType, recordButtonTitle);
   }
 
@@ -169,7 +166,7 @@ public class RecordAudioPanel<T extends Shell & AudioAttributeExercise> extends 
 
   public void setExercise(T exercise) {
     this.exercise = exercise;
-    postAudioRecordButton.setExercise(exercise);
+    postAudioRecordButton.setExercise(exercise.getID());
   }
 
   /**
@@ -211,7 +208,7 @@ public class RecordAudioPanel<T extends Shell & AudioAttributeExercise> extends 
     }
   }
 
-  protected class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton<T> {
+  protected class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton {
     private long then,now;
 
     /**
@@ -220,7 +217,7 @@ public class RecordAudioPanel<T extends Shell & AudioAttributeExercise> extends 
      * @param recordButtonTitle
      */
     public MyWaveformPostAudioRecordButton(String audioType, String recordButtonTitle) {
-      super(RecordAudioPanel.this.exercise,
+      super(RecordAudioPanel.this.exercise.getID(),
         RecordAudioPanel.this.controller,
         RecordAudioPanel.this.exercisePanel,
         RecordAudioPanel.this, RecordAudioPanel.this.service, RecordAudioPanel.this.index, true, recordButtonTitle, RecordButton.STOP1, audioType);
