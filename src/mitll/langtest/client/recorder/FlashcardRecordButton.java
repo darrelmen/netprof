@@ -218,9 +218,11 @@ public class FlashcardRecordButton extends RecordButton {
 
   public void initRecordButton() {
     super.initRecordButton();
-    setText(addKeyBinding ? SPACE_BAR : PROMPT);
+    setText(addKeyBinding ? SPACE_BAR : getPrompt());
     setType(ButtonType.PRIMARY);
   }
+
+  protected String getPrompt() { return PROMPT;  }
 
   public void removeTooltip() {
     if (tooltip != null) {
