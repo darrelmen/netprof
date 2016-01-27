@@ -128,6 +128,14 @@ public class UserList<T extends Shell> extends BaseExercise {
   public boolean contains(T userExercise) {
     return getExercises().contains(userExercise);
   }
+
+  public boolean containsByID(T userExercise) {
+    for (T ex : getExercises()) {
+      if (ex.getID().equals(userExercise.getID())) return true;
+    }
+    return false;
+  }
+
   public boolean isPrivate() {
     return isPrivate;
   }
