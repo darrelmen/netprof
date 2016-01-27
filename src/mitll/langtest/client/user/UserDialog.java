@@ -24,7 +24,7 @@ public abstract class UserDialog extends BasicDialog {
 
   public static final int MIN_AGE = 12;
   public static final int MAX_AGE = 90;
-  static final int TEST_AGE = 100;
+ // static final int TEST_AGE = 100;
   final PropertyHandler props;
   final LangTestDatabaseAsync service;
 
