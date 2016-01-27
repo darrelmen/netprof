@@ -34,10 +34,7 @@ import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.exercise.AudioAttributeExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.ArrayList;
@@ -52,10 +49,8 @@ import java.util.logging.Logger;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public class GoodwaveExercisePanel<T extends CommonShell & AudioAttributeExercise> extends HorizontalPanel
-    implements BusyPanel, RequiresResize,
-    ProvidesResize,
-    CommentAnnotator {
+public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & ScoredExercise> extends HorizontalPanel
+    implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
   private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
   public static final String MANDARIN = "Mandarin";
@@ -190,7 +185,7 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioAttributeExercis
    * @param controller    used in subclasses for audio control
    * @param screenPortion
    * @param exercise
-   * @see #GoodwaveExercisePanel(mitll.langtest.shared.exercise.T, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
+   * @see #GoodwaveExercisePanel
    */
   protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo,
                                  float screenPortion, T exercise) {
@@ -225,7 +220,7 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioAttributeExercis
 
   /**
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.exercise.T)
+   * @see #getQuestionContent
    */
   private Panel getUnitLessonForExercise() {
     Panel flow = new HorizontalPanel();
@@ -293,7 +288,7 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioAttributeExercis
   /**
    * @param e
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.exercise.T)
+   * @see #getQuestionContent
    */
   private Widget getItemHeader(T e) {
     Heading w = new Heading(HEADING_FOR_UNIT_LESSON, "Item", e.getID());
@@ -516,7 +511,7 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioAttributeExercis
    * @param controller
    * @param screenPortion
    * @return
-   * @see #addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.T)
+   * @see #addUserRecorder
    */
   private ScoringAudioPanel getAnswerWidget(LangTestDatabaseAsync service, final ExerciseController controller, float screenPortion) {
     ScoringAudioPanel widgets = new ASRRecordAudioPanel(service, controller, getLocalExercise(), instance);
@@ -704,7 +699,7 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioAttributeExercis
      */
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
       public MyPostAudioRecordButton(ExerciseController controller) {
-        super(getLocalExercise(), controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index, true,
+        super(getLocalExercise().getID(), controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index, true,
             RECORD_YOURSELF, controller.getProps().doClickAndHold() ? RELEASE_TO_STOP : "Stop");
       }
 
@@ -719,7 +714,7 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioAttributeExercis
       public void startRecording() {
         playAudioPanel.setEnabled(false);
         isBusy = true;
-        controller.logEvent(this, "RecordButton", getExercise().getID(), "startRecording");
+        controller.logEvent(this, "RecordButton", getExerciseID(), "startRecording");
 
         super.startRecording();
         recordImage1.setVisible(true);
@@ -728,7 +723,7 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioAttributeExercis
 
       @Override
       public void stopRecording() {
-        controller.logEvent(this, "RecordButton", getExercise().getID(), "stopRecording");
+        controller.logEvent(this, "RecordButton", getExerciseID(), "stopRecording");
 
         playAudioPanel.setEnabled(true);
         isBusy = false;
