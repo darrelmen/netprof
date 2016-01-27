@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.flashcard.AudioAnswerListener;
 import mitll.langtest.client.flashcard.FlashcardRecordButtonPanel;
 import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
@@ -199,7 +200,8 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
                                             ExerciseController controller, final boolean addKeyBinding, String instance,
                                             int qid,
                                             Map<String, Collection<String>> typeToSelection) {
-    return new FlashcardRecordButtonPanel(this, service, controller, exercise, qid, instance, typeToSelection) {
+    PressAndHoldExercisePanel widgets = this;
+    return new FlashcardRecordButtonPanel(widgets, service, controller, exercise, qid, instance, typeToSelection) {
       @Override
       public Widget getRecordButton() {
         return super.getRealRecordButton();
