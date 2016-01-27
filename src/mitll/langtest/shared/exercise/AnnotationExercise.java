@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by go22670 on 1/5/16.
  */
-public interface AnnoationExercise {
+public interface AnnotationExercise {
   Map<String, ExerciseAnnotation> getFieldToAnnotation();
 
   ExerciseAnnotation getAnnotation(String field);
