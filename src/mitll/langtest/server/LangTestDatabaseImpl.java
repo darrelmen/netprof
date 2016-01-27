@@ -869,8 +869,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       String parent = pathHelper.getInstallPath();
 
       if (!audioConversion.exists(wavFile, parent)) {
-        if (warnMissingFile)
+        if (warnMissingFile) {
           logger.warn("ensureMP3 : can't find " + wavFile + " under " + parent + " trying config... ");
+        }
         parent = configDir;
       }
       if (!audioConversion.exists(wavFile, parent)) {
@@ -1052,15 +1053,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private PretestScore getPretestScore(int reqid, long resultID, String testAudioFile, String sentence,
                                        int width, int height, boolean useScoreToColorBkg, String exerciseID, boolean usePhoneToDisplay) {
+    if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
     long then = System.currentTimeMillis();
 
     String[] split = testAudioFile.split(File.separator);
     String answer = split[split.length - 1];
     Result cachedResult = db.getRefResultDAO().getResult(exerciseID, answer.replaceAll(".mp3", ".wav"));
     if (cachedResult != null) {
-      logger.debug("Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID());
+      logger.debug("getASRScoreForAudio Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID());
     } else {
-      logger.debug("Cache MISS : align exercise id = " + exerciseID + " file " + answer);
+      logger.debug("getASRScoreForAudio Cache MISS : align exercise id = " + exerciseID + " file " + answer);
     }
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
