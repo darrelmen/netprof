@@ -24,7 +24,6 @@ import java.util.logging.Logger;
  */
 public class ButtonFactory implements EventLogger {
   //private Logger logger = Logger.getLogger("ButtonFactory");
-
   private final LangTestDatabaseAsync service;
   private final PropertyHandler props;
   private ExerciseController controller;
@@ -101,21 +100,26 @@ public class ButtonFactory implements EventLogger {
       Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
         public void execute() {
           if (props != null && controller != null && service != null) {
-            service.logEvent(widgetID, widgetType, exid, context, userid, props.getTurkID(), controller.getBrowserInfo(),
-                new AsyncCallback<Void>() {
-                  @Override
-                  public void onFailure(Throwable caught) {
-                    if (!caught.getMessage().trim().equals("0")) {
-                      // System.err.println("FAILED to send event for " + widgetID + " message '" + caught.getMessage() +"'");
-                      caught.printStackTrace();
-                    }
-                  }
+            String turkID = props.getTurkID();
+            String browserInfo = controller.getBrowserInfo();
 
-                  @Override
-                  public void onSuccess(Void result) {
-                    //System.out.println("sent event for " + widgetID);
-                  }
-                });
+            if (turkID != null && browserInfo != null) {
+              service.logEvent(widgetID, widgetType, exid, context, userid, turkID, browserInfo,
+                  new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                      if (!caught.getMessage().trim().equals("0")) {
+                        // System.err.println("FAILED to send event for " + widgetID + " message '" + caught.getMessage() +"'");
+                        caught.printStackTrace();
+                      }
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                      //System.out.println("sent event for " + widgetID);
+                    }
+                  });
+            }
           }
         }
       });
