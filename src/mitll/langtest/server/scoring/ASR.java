@@ -15,7 +15,7 @@ import java.util.Set;
 
 // TODO make this actually have method signatures...
 public interface ASR {
-	<T extends CommonExercise> void sort(List<T> toSort);
+	//<T extends CommonExercise> void sort(List<T> toSort);
 	Collator getCollator();
 	boolean validLTS(String foreignLanguagePhrase);
 	PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
