@@ -43,8 +43,7 @@ import java.util.logging.Logger;
 /**
  * Created by GO22670 on 3/28/2014.
  */
-public class ReviewEditableExercise extends EditableExercise {
-
+public class ReviewEditableExercise<T extends CommonUserExercise, UL extends UserList<T>> extends EditableExercise<T,UL> {
   private final Logger logger = Logger.getLogger("ReviewEditableExercise");
 
   private static final String FIXED = "Mark Fixed";
@@ -62,7 +61,7 @@ public class ReviewEditableExercise extends EditableExercise {
   private static final String MALE = "Male";
   private static final String FEMALE = "Female";
 
-  private final PagingExerciseList exerciseList;
+  private final PagingExerciseList<T> exerciseList;
   private final ListInterface predefinedContentList;
   private static final String WAV = ".wav";
   private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
@@ -78,10 +77,10 @@ public class ReviewEditableExercise extends EditableExercise {
   public ReviewEditableExercise(LangTestDatabaseAsync service,
                                 ExerciseController controller,
                                 HasText itemMarker,
-                                CommonUserExercise changedUserExercise,
+                                T changedUserExercise,
 
-                                UserList originalList,
-                                PagingExerciseList exerciseList,
+                                UL originalList,
+                                PagingExerciseList<T> exerciseList,
                                 ListInterface predefinedContent,
                                 NPFHelper npfHelper) {
     super(service, controller,
@@ -231,12 +230,12 @@ public class ReviewEditableExercise extends EditableExercise {
   private final Set<Widget> audioWasPlayed = new HashSet<Widget>();
   private final Set<Widget> toResize = new HashSet<Widget>();
 
-  private Widget getPanelForAudio(final CommonExercise exercise, final AudioAttribute audio, RememberTabAndContent tabAndContent) {
+  private Widget getPanelForAudio(final T exercise, final AudioAttribute audio, RememberTabAndContent tabAndContent) {
     String audioRef = audio.getAudioRef();
     if (audioRef != null) {
       audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
     }
-    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel(audioRef, exercise.getRefSentence(), service, controller,
+    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<T>(audioRef, exercise.getRefSentence(), service, controller,
       controller.getProps().showSpectrogram(), new EmptyScoreListener(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED, exercise.getID(),
         exercise, npfHelper.getInstanceName()) {
 
