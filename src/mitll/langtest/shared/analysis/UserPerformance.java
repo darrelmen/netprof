@@ -19,12 +19,13 @@ public class UserPerformance implements Serializable {
   private List<TimeAndScore> rawTimeAndScores = new ArrayList<>();
   private List<TimeAndScore> iPadTimeAndScores = new ArrayList<>();
   private List<TimeAndScore> learnTimeAndScores = new ArrayList<>();
-  private List<TimeAndScore> avpTimeAndScores   = new ArrayList<>();
+  private List<TimeAndScore> avpTimeAndScores = new ArrayList<>();
   private Map<Long, List<PhoneSession>> granularityToSessions;
 
   private long userID;
 
-  public UserPerformance() {}
+  public UserPerformance() {
+  }
 
   /**
    * @param userID
@@ -59,7 +60,8 @@ public class UserPerformance implements Serializable {
    */
   public float getRawAverage() {
     float total = getTotalScore(rawTimeAndScores);
-    return total / (float) getRawTotal();
+    int rawTotal = getRawTotal();
+    return rawTotal == 0 ? 0 : (total / (float) rawTotal);
   }
 
   private float getTotalScore(Collection<TimeAndScore> timeAndScores) {
@@ -106,8 +108,7 @@ public class UserPerformance implements Serializable {
       } else {
         if (bs.isFlashcard()) {
           avpTimeAndScores.add(timeAndScore);
-        }
-        else {
+        } else {
           learnTimeAndScores.add(timeAndScore);
         }
       }
@@ -119,18 +120,24 @@ public class UserPerformance implements Serializable {
   }
 
   /**
-   * @see mitll.langtest.client.analysis.AnalysisPlot#getChart(String, String, String, UserPerformance)
    * @return
+   * @see mitll.langtest.client.analysis.AnalysisPlot#getChart(String, String, String, UserPerformance)
    */
-  public List<TimeAndScore> getiPadTimeAndScores()  { return iPadTimeAndScores;  }
+  public List<TimeAndScore> getiPadTimeAndScores() {
+    return iPadTimeAndScores;
+  }
+
   public List<TimeAndScore> getLearnTimeAndScores() {
     return learnTimeAndScores;
   }
-  public List<TimeAndScore> getAvpTimeAndScores()   { return avpTimeAndScores;   }
+
+  public List<TimeAndScore> getAvpTimeAndScores() {
+    return avpTimeAndScores;
+  }
 
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    builder.append("User " + getUserID() + " " + getRawTotal() + " items, avg score " + getRawAverage() );
+    builder.append("User " + getUserID() + " " + getRawTotal() + " items, avg score " + getRawAverage());
     int count = 0;
     for (TimeAndScore ts : getRawBestScores()) {
       builder.append("\n").append(ts);
@@ -144,8 +151,8 @@ public class UserPerformance implements Serializable {
   }
 
   /**
-   * @see Analysis#getPerformanceForUser(long, int)
    * @param granularityToSessions
+   * @see Analysis#getPerformanceForUser(long, int)
    */
   public void setGranularityToSessions(Map<Long, List<PhoneSession>> granularityToSessions) {
     this.granularityToSessions = granularityToSessions;
