@@ -36,10 +36,7 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.MiniUser;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.STATE;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -51,7 +48,7 @@ import java.util.logging.Logger;
  * Time: 5:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class QCNPFExercise<T extends Shell> extends GoodwaveExercisePanel<T> {
+public class QCNPFExercise<T extends CommonShell & AudioAttributeExercise & AnnotationExercise & ScoredExercise> extends GoodwaveExercisePanel<T> {
   private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
   private static final String DEFECT = "Defect?";
@@ -104,7 +101,7 @@ public class QCNPFExercise<T extends Shell> extends GoodwaveExercisePanel<T> {
   }
 
   /**
-   * @see GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.T)
+   * @see GoodwaveExercisePanel#addUserRecorder
    * @see #getQuestionContent
    * @param div
    */
@@ -120,7 +117,7 @@ public class QCNPFExercise<T extends Shell> extends GoodwaveExercisePanel<T> {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel(mitll.langtest.shared.exercise.T, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, float, boolean, String)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    * @param controller
    * @param listContainer
    * @param addKeyHandler
@@ -301,7 +298,7 @@ public class QCNPFExercise<T extends Shell> extends GoodwaveExercisePanel<T> {
 //      row.add(widgets);
 //    }
 
-    column.add(getEntry(e, FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence()));
+    column.add(getEntry(e, FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getForeignLanguage()));
     column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTransliteration()));
     column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglish()));
 
@@ -548,7 +545,7 @@ public class QCNPFExercise<T extends Shell> extends GoodwaveExercisePanel<T> {
     if (audioRef != null) {
       audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
     }
-    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<T>(audioRef, e.getRefSentence(), service, controller,
+    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<T>(audioRef, e.getForeignLanguage(), service, controller,
       controller.getProps().showSpectrogram(), scorePanel, 70, audio.isRegularSpeed()?" Regular speed":" Slow speed", e.getID(), e, instance);
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
