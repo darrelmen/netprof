@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.shared.Answer;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
@@ -256,7 +257,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
                                   final ExerciseController controller, final int index, String responseType,
                                   String buttonTitle, boolean getFocus) {
       if (responseType.equalsIgnoreCase(AUDIO)) {
-        PressAndHoldExercisePanel autoCRTRecordPanel = new PressAndHoldExercisePanel(exercise,
+        PressAndHoldExercisePanel autoCRTRecordPanel = new PressAndHoldExercisePanel(exercise.getID(),
             service,
             controller,
             new MySoundFeedback(controller), "Feedback", index, exerciseList.getTypeToSelection()) {
@@ -438,13 +439,13 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
     /**
      * @param controller
      * @return
-     * @see #doText(AmasExerciseImpl, LangTestDatabaseAsync, ExerciseController, int, String, boolean)
+     * @see #doText
      */
     private TextResponse getTextResponse(final ExerciseController controller) {
       final TextResponse textResponse = new TextResponse(controller.getUser(), exerciseList.getTypeToSelection()) {
         /**
          * @see #getScoreForGuess
-         * @param answerGiven
+         * @paramx answerGiven
          * @param result
          */
         @Override
