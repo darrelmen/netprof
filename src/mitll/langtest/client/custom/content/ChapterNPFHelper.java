@@ -12,37 +12,48 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonExercise;
 
 /**
  * Created by GO22670 on 3/26/2014.
  */
-public class ChapterNPFHelper extends NPFHelper {
+public class ChapterNPFHelper<T extends CommonExercise, UL extends UserList<T>> extends NPFHelper<T,UL> {
   private final FlexListLayout flexListLayout;
 
   /**
    * Makes defect helper.
    *
-   * @see mitll.langtest.client.custom.Navigation#Navigation(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback)
    * @param service
    * @param feedback
    * @param userManager
    * @param controller
    * @param showQC
+   * @see mitll.langtest.client.custom.Navigation#Navigation(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback)
    */
   public ChapterNPFHelper(final LangTestDatabaseAsync service, final UserFeedback feedback,
                           final UserManager userManager, final ExerciseController controller, final boolean showQC) {
     super(service, feedback, userManager, controller, showQC);
-    final NPFHelper outer = this;
-    this.flexListLayout = new FlexListLayout(service,feedback,userManager,controller) {
+    final NPFHelper<T,UL> outer = this;
+    this.flexListLayout = new FlexListLayout(service, feedback, userManager, controller) {
       @Override
-      protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList, String instanceName) {
+      protected ExercisePanelFactory<T> getFactory(PagingExerciseList exerciseList, String instanceName) {
         return outer.getFactory(exerciseList, instanceName, showQC);
+      }
+
+      @Override
+      protected PagingExerciseList<T> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
+        return new NPFlexSectionExerciseList<T>(this, topRow, currentExercisePanel, instanceName, incorrectFirst);
       }
     };
   }
 
+  //  {
+//    return new NPFlexSectionExerciseList<T>(this, topRow, currentExercisePanel, instanceName, incorrectFirst);
+//  }
+
   /**
    * Left and right components
+   *
    * @param ul
    * @param instanceName
    * @return
