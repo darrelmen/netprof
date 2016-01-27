@@ -13,15 +13,11 @@ import java.util.Set;
 /**
  * Created by GO22670 on 3/20/2014.
  */
-public interface CommonExercise extends CommonShell, AudioAttributeExercise, AnnoationExercise {
-
-  String getContextTranslation();
+public interface CommonExercise extends CommonShell, AudioAttributeExercise, AnnotationExercise, ScoredExercise {
 
   String getRefSentence();
 
   Collection<String> getRefSentences();
-
-  String getTransliteration();
 
   CommonShell getShell();
 
@@ -32,14 +28,12 @@ public interface CommonExercise extends CommonShell, AudioAttributeExercise, Ann
    * @param scoreTotal
    */
   void setScores(List<CorrectAndScore> scoreTotal);
-  List<CorrectAndScore> getScores();
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotationsAndAudio
    * @param v
    */
   void setAvgScore(float v);
-  float getAvgScore();
 
   List<String> getFirstPron();
 
@@ -49,4 +43,6 @@ public interface CommonExercise extends CommonShell, AudioAttributeExercise, Ann
   void setRefSentences(Collection<String> orDefault);
 
   String getRefAudioIndex();
+
+  boolean isPredefined();
 }
