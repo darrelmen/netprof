@@ -288,8 +288,8 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    * @see #runHydra(String, String, Collection, String, boolean, int)
    */
   private String createHydraDict(String transcript) {
-    if (letterToSoundClass == null) {
-      logger.warn(this + " :  LTS is null???");
+    if (getLTS() == null) {
+      logger.warn(this + " : createHydraDict : LTS is null???");
     }
 
     String dict = "[";
@@ -318,14 +318,14 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
             dict += " sp";
           }
         } else {
-          if (letterToSoundClass == null) {
+          if (getLTS() == null) {
             logger.warn(this + " " + languageProperty + " : LTS is null???");
           } else {
 
             String word1 = word.toLowerCase();
-            String[][] process = letterToSoundClass.process(word1);
+            String[][] process = getLTS().process(word1);
             if (process == null) {
-              logger.error("couldn't get letter to sound map from " + letterToSoundClass + " for " + word1);
+              logger.error("couldn't get letter to sound map from " + getLTS() + " for " + word1);
             } else {
               for (String[] pron : process) {
                 if (ctr != 0) dict += ";";
@@ -471,8 +471,8 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    */
   private String getUniqueTokensInLM(Collection<String> lmSentences, List<String> backgroundVocab) {
     String sentence;
-    Set<String> backSet = new HashSet<String>(backgroundVocab);
-    List<String> mergedVocab = new ArrayList<String>(backgroundVocab);
+    Set<String> backSet = new HashSet<>(backgroundVocab);
+    List<String> mergedVocab = new ArrayList<>(backgroundVocab);
     List<String> foregroundVocab = svDecoderHelper.getSimpleVocab(lmSentences, FOREGROUND_VOCAB_LIMIT);
     for (String foregroundToken : foregroundVocab) {
       if (!backSet.contains(foregroundToken)) {
@@ -498,12 +498,12 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    * @see #scoreRepeatExercise
    */
   private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(EventAndFileInfo eventAndFileInfo) {
-    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
+    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<>();
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
       List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
       if (endTimes == null) {
-        typeToEndTimes.put(key, endTimes = new ArrayList<TranscriptSegment>());
+        typeToEndTimes.put(key, endTimes = new ArrayList<>());
       }
       for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
         TranscriptEvent value = event.getValue();
@@ -569,7 +569,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
       }
       return Collections.emptyMap();
     } else {
-      Map<String, Float> phoneToScore = new HashMap<String, Float>();
+      Map<String, Float> phoneToScore = new HashMap<>();
       for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
         String key = phoneScorePair.getKey();
         if (!key.equals("sil")) {
