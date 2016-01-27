@@ -4,7 +4,9 @@
 
 package mitll.langtest.server.scoring;
 
-import corpus.*;
+import corpus.EmptyLTS;
+import corpus.LTS;
+import corpus.ModernStandardArabicLTS;
 import mitll.langtest.server.database.AudioExport;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
@@ -37,7 +39,7 @@ public class LTSFactory implements CollationSort {
 
   /**
    * Does reflection to make an appropriate LTS
-   *
+   * <p>
    * ARABIC, MSA, and IRAQI all map to MSA LTS
    *
    * @param thisLanguage
@@ -48,9 +50,10 @@ public class LTSFactory implements CollationSort {
     String name = thisLanguage.name();
     String classPrefix = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
     languageToLTS.put(name.toLowerCase(), unknown); /// attempt to deal with undefined LTS...
+    String className = "corpus." + classPrefix + "LTS";
 
     try {
-      switch(thisLanguage) {
+      switch (thisLanguage) {
         case ARABIC:
         case MSA:
         case IRAQI:
@@ -59,17 +62,17 @@ public class LTSFactory implements CollationSort {
         case MANDARIN:
           languageToLTS.put(name.toLowerCase(), unknown);
           break;
-        default :
-          Class<?> aClass = Class.forName(classPrefix + "LTS");
-          languageToLTS.put(name.toLowerCase(), (LTS)aClass.newInstance());
+        default:
+          Class<?> aClass = Class.forName(className);
+          languageToLTS.put(name.toLowerCase(), (LTS) aClass.newInstance());
           break;
       }
     } catch (ClassNotFoundException e) {
-      logger.error("Couldn't find LTS class " + classPrefix);
+      logger.error("Couldn't find LTS class '" + className + "'");
     } catch (InstantiationException e) {
-      logger.error("Couldn't make instance of LTS class " + classPrefix,e);
+      logger.error("Couldn't make instance of LTS class " + className, e);
     } catch (IllegalAccessException e) {
-      logger.error("Not allowed to make instance of LTS class " + classPrefix,e);
+      logger.error("Not allowed to make instance of LTS class " + className, e);
     }
 
     logger.info("lts map now " + languageToLTS);
