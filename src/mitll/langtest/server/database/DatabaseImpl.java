@@ -27,9 +27,7 @@ import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonUserExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
@@ -210,16 +208,10 @@ public class DatabaseImpl implements Database {
     return resultDAO;
   }
 
-
   /**
-   * TODO: maybe just make this guy once?
-   *
    * @return
    */
-  public Analysis getAnalysis() {
-    // Analysis analysis = new Analysis(this, phoneDAO, getExerciseIDToRefAudio());
-    return analysis;
-  }
+  public Analysis getAnalysis() { return analysis; }
 
   public RefResultDAO getRefResultDAO() {
     return refresultDAO;
@@ -347,9 +339,10 @@ public class DatabaseImpl implements Database {
    * @see LangTestDatabaseImpl#getTypeOrder()
    * @return
    */
-  public SectionHelper getSectionHelper() {
+  public SectionHelper<CommonExercise> getSectionHelper() {
     getExercises();
-    return exerciseDAO.getSectionHelper();
+    SectionHelper<CommonExercise> sectionHelper = exerciseDAO.getSectionHelper();
+    return sectionHelper;
   }
 
   /**
@@ -402,8 +395,7 @@ public class DatabaseImpl implements Database {
     if (exerciseDAO == null) {
       //  logger.debug(lessonPlanFile);
       synchronized (this) {
-        this.exerciseDAO = new ExcelImport(lessonPlanFile, getServerProps(), userListManager,
-            ADD_DEFECTS);
+        this.exerciseDAO = new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
       }
       userExerciseDAO.setExerciseDAO(exerciseDAO);
       exerciseDAO.setUserExerciseDAO(userExerciseDAO);
@@ -889,7 +881,7 @@ public class DatabaseImpl implements Database {
 
     populateIDToRefAudio(join, getExercises());
 
-    Collection<CommonUserExercise> all = userExerciseDAO.getAll();
+    Collection<CommonExercise> all = userExerciseDAO.getAll();
     exerciseDAO.attachAudio(all);
 
     populateIDToRefAudio(join, all);
@@ -897,7 +889,7 @@ public class DatabaseImpl implements Database {
     return join;
   }
 
-  public <T extends CommonExercise> void populateIDToRefAudio(Map<String, String> join, Collection<T> all) {
+  public <T extends Shell & AudioAttributeExercise> void populateIDToRefAudio(Map<String, String> join, Collection<CommonExercise> all) {
     for (CommonExercise exercise : all) {
       String refAudio = exercise.getRefAudio();
       if (refAudio == null) {
@@ -909,6 +901,39 @@ public class DatabaseImpl implements Database {
     }
   }
 
+
+  /**
+   * So the story is we get the user exercises out of the database on demand.
+   * <p>
+   * We need to join with the audio table entries every time.
+   * <p>
+   * TODO : also, this a lot of work just to get the one ref audio recording.
+   *
+   * @param all
+   * @see DatabaseImpl#getExerciseIDToRefAudio()
+   */
+/*  public <A extends AudioAttributeExercise> void attachAudio(Collection<A> all) {
+    attachAudio.setExToAudio(audioDAO.getExToAudio());
+    int user = 0;
+    int examined = 0;
+    for (A ex : all) {
+      if (!ex.hasRefAudio()) {
+        attachAudio.attachAudio(ex);
+        examined++;
+
+        if (!ex.hasRefAudio()) {
+          user++;
+        }
+        // else if (ex.getID().startsWith("Custom")) {
+//          logger.warn("found audio for " + ex.getID());
+        // }
+      }
+    }
+    if (user > 0) {
+      logger.info(//"out of " + exercises.size() + //" " + missing +
+          " are missing ref audio, out of " + examined + " user exercises missing = " + user);
+    }
+  }*/
   public AnswerDAO getAnswerDAO() {
     return answerDAO;
   }
