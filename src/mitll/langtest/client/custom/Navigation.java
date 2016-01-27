@@ -19,12 +19,8 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.analysis.StudentAnalysis;
-import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.contextPractice.DialogWindow;
-import mitll.langtest.client.custom.content.AVPHelper;
-import mitll.langtest.client.custom.content.ChapterNPFHelper;
-import mitll.langtest.client.custom.content.NPFHelper;
-import mitll.langtest.client.custom.content.ReviewItemHelper;
+import mitll.langtest.client.custom.content.*;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.custom.tabs.TabAndContent;
@@ -41,6 +37,7 @@ import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
@@ -131,11 +128,22 @@ public class Navigation implements RequiresResize, ShowTab {
     storage = new KeyStorage(controller);
     learnHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller, null
     ) {
+      @Override
+      protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
+                                               UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
+        return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
+          @Override
+          protected PagingExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
+            return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst);
+          }
+        };
+      }
+
       protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
         return new ExercisePanelFactory<CommonExercise>(service, feedback, controller, exerciseList) {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
-            return new CommentNPFExercise(e, controller, exerciseList, false, "classroom");
+            return new CommentNPFExercise<CommonExercise>(e, controller, exerciseList, false, "classroom");
           }
         };
       }
@@ -161,11 +169,21 @@ public class Navigation implements RequiresResize, ShowTab {
     markDefectsHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller,
         learnHelper.getExerciseList()
     ) {
+      @Override
+      protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
+        return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
+          @Override
+          protected PagingExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
+            return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst);
+          }
+        };
+      }
+
       protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
         return new ExercisePanelFactory<CommonExercise>(service, feedback, controller, exerciseList) {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
-            return new QCNPFExercise(e, controller, exerciseList, MARK_DEFECTS1);
+            return new QCNPFExercise<CommonExercise>(e, controller, exerciseList, MARK_DEFECTS1);
 
           }
         };
@@ -174,7 +192,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
     practiceHelper = makePracticeHelper(service, userManager, controller, feedback);
     ListInterface exerciseList = npfHelper.getExerciseList();
-  //  logger.info("Navigation : npfHelper exercise list is " + exerciseList);
+    //  logger.info("Navigation : npfHelper exercise list is " + exerciseList);
     reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, exerciseList, npfHelper);
     // logger.info("Navigation : made review item helper " + reviewItem);
 
@@ -192,8 +210,8 @@ public class Navigation implements RequiresResize, ShowTab {
    * @return
    * @see #Navigation(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
    */
-  private SimpleChapterNPFHelper makePracticeHelper(final LangTestDatabaseAsync service, final UserManager userManager,
-                                                    final ExerciseController controller, final UserFeedback feedback) {
+  private <T extends CommonShell>SimpleChapterNPFHelper makePracticeHelper(final LangTestDatabaseAsync service, final UserManager userManager,
+                                                                           final ExerciseController controller, final UserFeedback feedback) {
     return new SimpleChapterNPFHelper(service, feedback, userManager, controller,
         null
     ) {
@@ -216,21 +234,22 @@ public class Navigation implements RequiresResize, ShowTab {
       }
 
       @Override
-      protected NPFHelper.FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                                                         UserManager userManager, ExerciseController controller,
-                                                         SimpleChapterNPFHelper outer) {
+      protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
+                                               UserManager userManager, ExerciseController controller,
+                                               SimpleChapterNPFHelper outer) {
         return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
+          FlexListLayout outer = this;
           @Override
-          protected FlexSectionExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
-                                                             boolean incorrectFirst) {
-            return new MyFlexSectionExerciseList(topRow, currentExercisePanel, instanceName, true) {
+          protected PagingExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
+                                                        boolean incorrectFirst) {
+            return new NPFlexSectionExerciseList<T>(outer, topRow, currentExercisePanel, instanceName, true) {
               @Override
-              protected Shell findFirstExercise() {
+              protected T findFirstExercise() {
                 String currentExerciseID = statsFlashcardFactory.getCurrentExerciseID();
                 if (currentExerciseID != null && !currentExerciseID.trim().isEmpty()) {
                   logger.info("findFirstExercise ---> found previous state current ex = " + currentExerciseID);
 
-                  Shell shell = byID(currentExerciseID);
+                  T shell = byID(currentExerciseID);
 
                   if (shell == null) {
                     logger.warning("huh? can't find " + currentExerciseID);
@@ -250,7 +269,8 @@ public class Navigation implements RequiresResize, ShowTab {
               }
 
               @Override
-              protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno) {
+              protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix,
+                                                      boolean onlyWithAudioAnno) {
                 super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno);
                 statsFlashcardFactory.setSelection(typeToSection);
               }
@@ -700,7 +720,7 @@ public class Navigation implements RequiresResize, ShowTab {
    * @param label
    * @return
    * @see mitll.langtest.client.custom.Navigation#getNav()
-   * @see Navigation#getListOperations(mitll.langtest.shared.custom.UserList, String)
+   * @see Navigation#getListOperations
    */
   private TabAndContent makeTab(TabPanel tabPanel, IconType iconType, String label) {
     return new TabAndContent(tabPanel, iconType, label);
@@ -723,9 +743,9 @@ public class Navigation implements RequiresResize, ShowTab {
   }
 
   /**
-   * @see #showInitialState()
    * @param ul
    * @return
+   * @see #showInitialState()
    */
   private boolean createdByYou(UserList ul) {
     return ul.getCreator().getId() == userManager.getUser();
