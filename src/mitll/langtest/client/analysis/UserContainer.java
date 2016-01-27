@@ -169,7 +169,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
 //        if (DEBUG) logger.info("new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
 //            " vs current " + table.getVisibleRange());
         table.setVisibleRange(newStart, pageSize);
-        redraw();
+        table.redraw();
       }
     }
     i++;
