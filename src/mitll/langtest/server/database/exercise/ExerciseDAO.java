@@ -12,6 +12,7 @@ import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonUserExercise;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.Collection;
 import java.util.List;
@@ -33,26 +34,33 @@ public interface ExerciseDAO {
   List<CommonExercise> getRawExercises();
 
   /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getExercise(String)
+   * @param id
+   * @return
+   */
+  CommonExercise getExercise(String id);
+
+  /**
    * @see DatabaseImpl#getSectionHelper()
    * @see UserExerciseDAO#add(UserExercise, boolean)
    * @see UserExerciseDAO#getUserExercises(String)
    * @see ExcelImport#removeExercises()
    * @return
    */
-  SectionHelper getSectionHelper();
+  SectionHelper<CommonExercise> getSectionHelper();
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#editItem(UserExercise)
    * @param userExercise
    * @return
    */
-  CommonExercise addOverlay(CommonUserExercise userExercise);
+  CommonExercise addOverlay(CommonExercise userExercise);
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#duplicateExercise(UserExercise)
    * @param userExercise
    */
-  void add(CommonUserExercise userExercise);
+  void add(CommonExercise userExercise);
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
@@ -74,13 +82,6 @@ public interface ExerciseDAO {
   void setAddRemoveDAO(AddRemoveDAO addRemoveDAO);
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getExercise(String)
-   * @param id
-   * @return
-   */
-  CommonExercise getExercise(String id);
-
-  /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO(String, String, String)
    * @param audioDAO
    * @param mediaDir
@@ -92,5 +93,5 @@ public interface ExerciseDAO {
    * @see DatabaseImpl#getExerciseIDToRefAudio()
    * @param all
    */
-  void attachAudio(Collection<CommonUserExercise> all);
+  void attachAudio(Collection<CommonExercise> all);
 }
