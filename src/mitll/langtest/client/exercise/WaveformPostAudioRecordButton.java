@@ -19,7 +19,7 @@ import mitll.langtest.shared.exercise.Shell;
 * Time: 11:46 PM
 * To change this template use File | Settings | File Templates.
 */
-public class WaveformPostAudioRecordButton<T extends Shell> extends PostAudioRecordButton<T> {
+public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   private static final String RECORD_BUTTON = "RecordButton";
   private final RecordAudioPanel recordAudioPanel;
   private PlayAudioPanel playAudioPanel;
@@ -29,7 +29,7 @@ public class WaveformPostAudioRecordButton<T extends Shell> extends PostAudioRec
   /**
    * @see RecordAudioPanel#makePostAudioRecordButton(String, String)
    * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton(String, String)
-   * @param exercise
+   * @param exerciseID
    * @param controller
    * @param widgets
    * @param recordAudioPanel
@@ -39,12 +39,12 @@ public class WaveformPostAudioRecordButton<T extends Shell> extends PostAudioRec
    * @param playButtonSuffix
    * @param stopButtonText
    */
-  public WaveformPostAudioRecordButton(T exercise,
+  public WaveformPostAudioRecordButton(String exerciseID,
                                        ExerciseController controller,
                                        Panel widgets,
                                        RecordAudioPanel recordAudioPanel, LangTestDatabaseAsync service, int index,
                                        boolean recordInResults, String playButtonSuffix, String stopButtonText, String audioType) {
-    super(exercise, controller, service, index, recordInResults, playButtonSuffix, stopButtonText);
+    super(exerciseID, controller, service, index, recordInResults, playButtonSuffix, stopButtonText);
     this.recordAudioPanel = recordAudioPanel;
     this.parentPanel = widgets;
     getElement().setId("WaveformPostAudioRecordButton_" + index);
@@ -70,7 +70,7 @@ public class WaveformPostAudioRecordButton<T extends Shell> extends PostAudioRec
     if (parentPanel instanceof BusyPanel) {
       ((BusyPanel) parentPanel).setBusy(true);
     }
-    controller.logEvent(this, RECORD_BUTTON, getExercise().getID(), "startRecording");
+    controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "startRecording");
     then = System.currentTimeMillis();
     super.startRecording();
     setPlayEnabled(false);
@@ -89,7 +89,7 @@ public class WaveformPostAudioRecordButton<T extends Shell> extends PostAudioRec
     }
     long now = System.currentTimeMillis();
 
-    controller.logEvent(this, RECORD_BUTTON, getExercise().getID(), "stopRecording, duration " + (now - then) + " millis");
+    controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "stopRecording, duration " + (now - then) + " millis");
 
   //  recordAudioPanel.getWaveform().setVisible(true);
     recordAudioPanel.getWaveform().setUrl(LangTest.LANGTEST_IMAGES + "animated_progress.gif");
