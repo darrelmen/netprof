@@ -4,6 +4,8 @@
 
 package mitll.langtest.shared.exercise;
 
+import java.util.Map;
+
 /**
  * Created by go22670 on 12/16/15.
  */
@@ -44,6 +46,11 @@ public class DBExercise extends BaseObject implements CommonShell {
   }
 
   @Override
+  public Map<String, String> getUnitToValue() {
+    return null;
+  }
+
+  @Override
   public String getEnglish() {
     return nameToField.get(FIELDS.ENGLISH.name()).getValue();
   }
@@ -75,6 +82,21 @@ public class DBExercise extends BaseObject implements CommonShell {
   @Override
   public String getForeignLanguage() {
     return nameToField.get(FIELDS.FL.name()).getValue();
+  }
+
+  @Override
+  public String getTransliteration() {
+    return null;
+  }
+
+  @Override
+  public String getContext() {
+    return null;
+  }
+
+  @Override
+  public String getContextTranslation() {
+    return null;
   }
 
   public void setForeignLanguage(CommonShell shell) {
