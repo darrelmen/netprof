@@ -33,7 +33,7 @@ public class Report {
 
   private static final int MIN_MILLIS = (1000 * 60);
   private static final int TEN_SECONDS = 1000 * 10;
-  public static final boolean CLEAR_DAY_HOUR_MINUTE = true;
+  private static final boolean CLEAR_DAY_HOUR_MINUTE = true;
   private static final boolean WRITE_RESULTS_TO_FILE = false;
   private static final String ACTIVE_USERS = "Active Users";
   private static final String TIME_ON_TASK_MINUTES = "Time on Task Minutes ";
@@ -41,21 +41,21 @@ public class Report {
   private static final String MONTH = "By Month";
   private static final String WEEK = "By Week";
   private static final String top = "<td style='vertical-align: top;'>";
-  public static final String DEVICE_RECORDINGS = "Device Recordings";
-  public static final String ALL_RECORDINGS = "All Recordings";
-  public static final String MM_DD_YY = "MM_dd_yy";
+  private static final String DEVICE_RECORDINGS = "Device Recordings";
+  private static final String ALL_RECORDINGS = "All Recordings";
+  private static final String MM_DD_YY = "MM_dd_yy";
 //  public static final String MM_DD_YY_HH_MM_SS = "MM_dd_yy_hh_mm_ss";
-  public static final boolean SHOW_TEACHER_SKIPS = false;
-  public static final boolean DO_2014 = false;
+  private static final boolean SHOW_TEACHER_SKIPS = false;
+  private static final boolean DO_2014 = false;
 
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
   private final EventDAO eventDAO;
   private final AudioDAO audioDAO;
-  String prefix;
-  String language;
-  BufferedWriter csv;
-  private Map<Long, Long> userToStart = new HashMap<>();
+  private final String prefix;
+  private final String language;
+  private BufferedWriter csv;
+  private final Map<Long, Long> userToStart = new HashMap<>();
   private static final boolean DEBUG = false;
 
   public Report(UserDAO userDAO, ResultDAO resultDAO, EventDAO eventDAO, AudioDAO audioDAO, String language,
@@ -466,18 +466,19 @@ public class Report {
    * @param language
    * @see #doReport
    */
-  private Map<Long, Map<String, Integer>> getResults(StringBuilder builder, Set<Long> students, PathHelper pathHelper, String language) {
+  private void getResults(StringBuilder builder, Set<Long> students, PathHelper pathHelper, String language) {
     List<Result> results = resultDAO.getResults();
-    return getResultsForSet(builder, students, pathHelper, results, ALL_RECORDINGS, language);
+    getResultsForSet(builder, students, pathHelper, results, ALL_RECORDINGS, language);
   }
 
-  private Map<Long, Map<String, Integer>> getResultsDevices(StringBuilder builder, Set<Long> students, PathHelper pathHelper, String language) {
+  private void getResultsDevices(StringBuilder builder, Set<Long> students, PathHelper pathHelper, String language) {
     List<Result> results = resultDAO.getResultsDevices();
-    return getResultsForSet(builder, students, pathHelper, results, DEVICE_RECORDINGS, language);
+    getResultsForSet(builder, students, pathHelper, results, DEVICE_RECORDINGS, language);
   }
 
   private Map<Long, Map<String, Integer>> getResultsForSet(StringBuilder builder, Set<Long> students,
-                                                           PathHelper pathHelper, List<Result> results, String recordings, String language) {
+                                                           PathHelper pathHelper, Collection<Result> results,
+                                                           String recordings, String language) {
     Calendar calendar;
     Date january1st = getJanuaryFirst(getCal());
     Date january1stNextYear = getJanuaryFirstNextYear();
