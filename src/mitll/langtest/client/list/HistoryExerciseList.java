@@ -8,6 +8,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.user.UserFeedback;
@@ -362,7 +363,7 @@ public class HistoryExerciseList<T extends Shell> extends PagingExerciseList<T> 
    * @param onlyWithAudioAnno
    * @see #loadExercises(java.util.Map, String)
    * @see PagingExerciseList#loadExercises(String, String, boolean)
-   * @see mitll.langtest.client.custom.content.NPFHelper.FlexListLayout.MyFlexSectionExerciseList#loadExercises(java.util.Map, String)
+   * @see NPFlexSectionExerciseList#loadExercises(java.util.Map, String)
    */
   protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix,
                                           boolean onlyWithAudioAnno) {
