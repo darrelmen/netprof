@@ -115,7 +115,8 @@ public class EditItem<T extends CommonUserExercise, UL extends UserList<T>> {
   }
 
   private UserList<T> makeListOfOnlyYourItems(UL toCopy) {
-    UserList<T> copy2 = new UserList<T>(toCopy);
+    UserList<T> copy2 = new UserList<>(toCopy);
+    //UL copy2 = (UL) tUserList;
     for (T ue : toCopy.getExercises()) {
       copy2.addExercise(ue);
     }
@@ -136,7 +137,7 @@ public class EditItem<T extends CommonUserExercise, UL extends UserList<T>> {
     logger.info("EditItem.makeExerciseList - ul = " + ul.getName() + " " + includeAddItem);
 
     if (includeAddItem) {
-      UserExercise newItem = getNewItem();
+      T newItem = getNewItem();
       logger.info("makeExerciseList : Adding " + newItem);// + " with " + newItem.getTooltip());
       ul.addExercise(newItem);
     }
@@ -316,17 +317,17 @@ public class EditItem<T extends CommonUserExercise, UL extends UserList<T>> {
   private NewUserExercise getAddOrEditPanel(T exercise, HasText itemMarker, UL originalList, boolean doNewExercise) {
     NewUserExercise editableExercise;
     if (doNewExercise) {
-      editableExercise = new NewUserExercise<T>(service, controller, itemMarker, this, exercise, getInstance());
+      editableExercise = new NewUserExercise<T,UL>(service, controller, itemMarker, this, exercise, getInstance());
     } else {
       boolean iCreatedThisItem = didICreateThisItem(exercise, originalList);
       if (iCreatedThisItem) {
-        editableExercise = new EditableExercise(service, controller, this, itemMarker, exercise.toUserExercise(),
+        editableExercise = new EditableExercise<UserExercise,UserList<UserExercise>>(service, controller, this, itemMarker, exercise.toUserExercise(),
             originalList,
             exerciseList,
             predefinedContentList,
             npfHelper);
       } else {
-        editableExercise = new NewUserExercise<T>(service, controller, itemMarker, this, exercise, getInstance()) {
+        editableExercise = new NewUserExercise<T,UL>(service, controller, itemMarker, this, exercise, getInstance()) {
           @Override
           public Panel addNew(final UL ul, final UL originalList, ListInterface<T> listInterface, Panel toAddTo) {
             final FluidContainer container = new FluidContainer();
