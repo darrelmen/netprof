@@ -7,6 +7,7 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonUserExercise;
 import mitll.langtest.shared.custom.UserList;
 import org.apache.log4j.Logger;
@@ -393,8 +394,8 @@ public class UserListDAO extends DAO {
    * @see #getAllByUser(long)
    * @param where
    */
-  private void populateList(UserList where) {
-    List<CommonUserExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
+  private void populateList(UserList<CommonExercise> where) {
+    List<CommonExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
     where.setExercises(onList);
   }
 
