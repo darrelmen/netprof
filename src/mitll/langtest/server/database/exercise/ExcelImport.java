@@ -106,8 +106,8 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   /**
-   * @see DatabaseImpl#getSectionHelper()
    * @return
+   * @see DatabaseImpl#getSectionHelper()
    */
   @Override
   public SectionHelper getSectionHelper() {
@@ -148,13 +148,12 @@ public class ExcelImport implements ExerciseDAO {
 
         for (CommonExercise e : exercises) idToExercise.put(e.getID(), e);
 
+        if (exercises.size() != idToExercise.size()) logger.warn(exercises.size() + " but id->ex " + idToExercise.size());
         addDefects(idToDefectMap);
 
         // remove exercises to remove
-        Set<String> removes = removeExercises();
-
         // mask over old items that have been overridden
-        addOverlays(removes);
+        addOverlays(removeExercises());
 
         // add new items
         addNewExercises();
@@ -176,6 +175,7 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   public List<CommonExercise> readExercises() {
+    logger.info("readExercises from " + file);
     List<CommonExercise> commonExercises = readExercises(new File(file));
     addAlternatives(commonExercises);
     return commonExercises;
@@ -214,24 +214,41 @@ public class ExcelImport implements ExerciseDAO {
     }
   }
 
+  /**
+   * @see #getRawExercises()
+   */
   private void addNewExercises() {
     for (String id : addRemoveDAO.getAdds()) {
       CommonUserExercise where = userExerciseDAO.getWhere(id);
       if (where == null) {
         logger.error("getRawExercises huh? couldn't find user exercise from add exercise table in user exercise table : " + id);
       } else {
-        // logger.debug("adding new user exercise " + where.getID());
-        add(where);
-        sectionHelper.addExercise(where);
+        if (idToExercise.containsKey(id)) {
+          logger.debug("addNewExercises SKIPPING new user exercise " + where.getID() + " since already added from spreadsheet : " + where);
+        }
+        else {
+          logger.debug("addNewExercises adding new user exercise " + where.getID() + " : " + where);
+          add(where);
+          sectionHelper.addExercise(where);
+        }
       }
     }
   }
 
-  private void addOverlays(Set<String> removes) {
+  /**
+   * Don't add overlays for exercises that have been removed.
+   *
+   * @param removes
+   */
+  private void addOverlays(Collection<String> removes) {
     Collection<CommonUserExercise> overrides = userExerciseDAO.getOverrides();
 
     if (overrides.size() > 0) {
-      logger.debug("found " + overrides.size() + " overrides...");
+      logger.debug("addOverlays found " + overrides.size() + " overrides : ");
+     // for (CommonUserExercise exercise : overrides) logger.info("\t" + exercise);
+    }
+    if (removes.size() > 0) {
+      logger.debug("addOverlays found " + removes.size() + " to remove " + removes);
     }
 
     int override = 0;
@@ -239,31 +256,30 @@ public class ExcelImport implements ExerciseDAO {
       if (!removes.contains(userExercise.getID())) {
         CommonExercise exercise = getExercise(userExercise.getID());
         if (exercise != null) {
-          //logger.debug("refresh exercise for " + userExercise.getID());
-          sectionHelper.removeExercise(exercise);
-          sectionHelper.addExercise(userExercise);
+         // logger.debug("addOverlays refresh exercise for " + userExercise.getID());
+          sectionHelper.refreshExercise(exercise);
           addOverlay(userExercise);
           override++;
+        } else {
+          logger.warn("----> addOverlays not adding as overlay " + userExercise.getID());
         }
-        //else {
-        //logger.debug("not adding as overlay " + userExercise.getID());
-        //}
       }
     }
     if (override > 0) {
-      logger.debug("overlay count was " + override);
+      logger.debug("addOverlays overlay count was " + override);
     }
   }
 
-  private Set<String> removeExercises() {
-    Set<String> removes = addRemoveDAO.getRemoves();
+  private Collection<String> removeExercises() {
+    Collection<String> removes = addRemoveDAO.getRemoves();
 
-    if (!removes.isEmpty()) logger.debug("Removing " + removes.size());
+    if (!removes.isEmpty()) logger.debug("removeExercises : Removing " + removes.size() + " exercises marked as deleted.");
+
     for (String id : removes) {
       CommonExercise remove = idToExercise.remove(id);
       if (remove != null) {
-//            logger.debug("\tremove " + id);
-        exercises.remove(remove);
+        boolean remove1 = exercises.remove(remove);
+        if (!remove1) logger.error("huh? remove inconsistency??");
         getSectionHelper().removeExercise(remove);
       }
     }
@@ -273,10 +289,6 @@ public class ExcelImport implements ExerciseDAO {
   /**
    * Keep track of possible alternatives for each english word - e.g. Good Bye = Ciao OR Adios
    */
-/*  private void addAlternates() {
-    List<CommonExercise> exercises = this.exercises;
-    addAlternatives(exercises);
-  }*/
   private void addAlternatives(List<CommonExercise> exercises) {
     Map<String, Set<String>> englishToFL = new HashMap<>();
     for (CommonExercise e : exercises) {
@@ -334,19 +346,22 @@ public class ExcelImport implements ExerciseDAO {
     synchronized (this) {
       exercises.add(ue);
       idToExercise.put(ue.getID(), ue);
+
+      if (exercises.size() != idToExercise.size()) logger.warn("add " + exercises.size() + " exercises but id->ex " + idToExercise.size());
+
     }
   }
 
-  @Override
   /**
    * @return true if exercise with this id was removed
+   * @see DatabaseImpl#deleteItem(String)
    */
+  @Override
   public boolean remove(String id) {
     synchronized (this) {
       if (!idToExercise.containsKey(id)) return false;
       CommonExercise remove = idToExercise.remove(id);
-      exercises.remove(remove);
-      return true;
+      return exercises.remove(remove);
     }
   }
 
@@ -356,9 +371,9 @@ public class ExcelImport implements ExerciseDAO {
   }
 
   /**
+   * @param addRemoveDAO
    * @see #addNewExercises()
    * @see #removeExercises()
-   * @param addRemoveDAO
    */
   @Override
   public void setAddRemoveDAO(AddRemoveDAO addRemoveDAO) {
@@ -390,12 +405,11 @@ public class ExcelImport implements ExerciseDAO {
    */
   private List<CommonExercise> readExercises(File file) {
     try {
-//      logger.debug("Excel reading " + language + " from " + file.getAbsolutePath());
       return readExercises(new FileInputStream(file));
     } catch (FileNotFoundException e) {
       logger.error(language + " : looking for " + file.getAbsolutePath() + " got " + e, e);
     }
-    return new ArrayList<CommonExercise>();
+    return new ArrayList<>();
   }
 
   private void log() {
@@ -418,17 +432,17 @@ public class ExcelImport implements ExerciseDAO {
   private List<CommonExercise> readExercises(InputStream inp) {
     log();
     List<CommonExercise> exercises = new ArrayList<CommonExercise>();
-    String language1 = serverProps.getLanguage();
+    String language = serverProps.getLanguage();
     try {
       long then = System.currentTimeMillis();
-      // logger.debug("starting to read spreadsheet for " + language1 + " on " + Thread.currentThread() + " at " + System.currentTimeMillis());
+      // logger.debug("starting to read spreadsheet for " + language + " on " + Thread.currentThread() + " at " + System.currentTimeMillis());
 
       XSSFWorkbook wb = new XSSFWorkbook(inp);
-//      logger.debug("finished reading spreadsheet for " + language1 + " on " + Thread.currentThread() + " at " + System.currentTimeMillis());
+//      logger.debug("finished reading spreadsheet for " + language + " on " + Thread.currentThread() + " at " + System.currentTimeMillis());
 
       long now = System.currentTimeMillis();
       if (now - then > 1000) {
-        logger.info("took " + (now - then) + " millis to open spreadsheet for " + language1 + " on " + Thread.currentThread());
+        logger.info("readExercises took " + (now - then) + " millis to open spreadsheet for " + language + " on " + Thread.currentThread());
       }
       then = now;
 
@@ -437,7 +451,7 @@ public class ExcelImport implements ExerciseDAO {
         if (sheet.getPhysicalNumberOfRows() > 0) {
           Collection<CommonExercise> exercises1 = readFromSheet(sheet);
           exercises.addAll(exercises1);
-          logger.info("sheet " + sheet.getSheetName() + " had " + exercises1.size() + " items.");
+          logger.info("readExercises sheet " + sheet.getSheetName() + " had " + exercises1.size() + " items.");
           if (DEBUG) {
             if (!exercises1.isEmpty()) {
               CommonExercise first = exercises1.iterator().next();
@@ -448,7 +462,7 @@ public class ExcelImport implements ExerciseDAO {
       }
 
       if (!errors.isEmpty()) {
-        logger.warn("there were " + errors.size() + " errors");
+        logger.warn("readExercises there were " + errors.size() + " errors");
         int count = 0;
         for (String error : errors) {
           if (count++ < 10) logger.warn(error);
@@ -458,8 +472,9 @@ public class ExcelImport implements ExerciseDAO {
       sectionHelper.allKeysValid();
       inp.close();
       now = System.currentTimeMillis();
-      if (now - then > 1000) {
-        logger.info("took " + (now - then) + " millis to make " + exercises.size() + " exercises for " + language1);
+
+      if (now - then > 20) {
+        logger.info("readExercises took " + (now - then) + " millis to make " + exercises.size() + " exercises for " + language);
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -644,7 +659,7 @@ public class ExcelImport implements ExerciseDAO {
                 recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
 
                 if (knownIds.contains(imported.getID())) {
-                  logger.warn("found duplicate entry under " + imported.getID() + " " + imported);
+                  logger.warn("readFromSheet : found duplicate entry under " + imported.getID() + " " + imported);
                 } else {
                   knownIds.add(imported.getID());
                   rememberExercise(exercises, englishToExercises, imported);
@@ -909,6 +924,12 @@ public class ExcelImport implements ExerciseDAO {
     return rowToRange;
   }
 
+  /**
+   * @see #readFromSheet(Sheet)
+   * @param exercises
+   * @param englishToExercises
+   * @param imported
+   */
   private void rememberExercise(List<CommonExercise> exercises, Map<String, List<CommonExercise>> englishToExercises, CommonExercise imported) {
     String englishSentence = imported.getEnglish();
     List<CommonExercise> exercisesForSentence = englishToExercises.get(englishSentence);
