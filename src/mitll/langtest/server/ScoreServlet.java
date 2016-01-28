@@ -77,6 +77,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO_TRUE = REMOVE_EXERCISES_WITH_MISSING_AUDIO +
       "=true";
+  public static final String YEAR = "year";
   private boolean removeExercisesWithMissingAudioDefault = true;
 
   private RestUserManagement userManagement;
@@ -126,7 +127,7 @@ public class ScoreServlet extends DatabaseServlet {
     try {
       if (queryString != null) {
         queryString = URLDecoder.decode(queryString, "UTF-8");
-        if (matchesRequest(queryString,NESTED_CHAPTERS)) {
+        if (matchesRequest(queryString, NESTED_CHAPTERS)) {
           String[] split1 = queryString.split("&");
           if (split1.length == 2) {
             String removeExercisesWithMissingAudio = getRemoveExercisesParam(queryString);
@@ -147,13 +148,23 @@ public class ScoreServlet extends DatabaseServlet {
         } else if (userManagement.doGet(request, response, queryString, toReturn)) {
           logger.info("doGet handled user command for " + queryString);
         } else if (matchesRequest(queryString, CHAPTER_HISTORY)) {
-          queryString = queryString.substring(queryString.indexOf(CHAPTER_HISTORY) + CHAPTER_HISTORY.length());
+          queryString = removePrefix(queryString, CHAPTER_HISTORY);
           toReturn = getChapterHistory(queryString, toReturn);
         } else if (matchesRequest(queryString, REF_INFO)) {
-          queryString = queryString.substring(queryString.indexOf(REF_INFO) + REF_INFO.length());
+          queryString = removePrefix(queryString, REF_INFO);
           toReturn = getRefInfo(queryString, toReturn);
+        } else if (matchesRequest(queryString, "jsonReport")) {
+          queryString = removePrefix(queryString, "jsonReport");
+          int year = getYear(queryString);
+          getReport(toReturn, year);
+        } else if (matchesRequest(queryString, "report")) {
+          queryString = removePrefix(queryString, "report");
+          int year = getYear(queryString);
+          configureResponseHTML(response, year);
+          reply(response, getReport(toReturn, year));
+          return;
         } else if (matchesRequest(queryString, PHONE_REPORT)) {
-          queryString = queryString.substring(queryString.indexOf(PHONE_REPORT) + PHONE_REPORT.length());
+          queryString = removePrefix(queryString, PHONE_REPORT);
           String[] split1 = queryString.split("&");
           if (split1.length < 2) {
             toReturn.put(ERROR, "expecting at least two query parameters");
@@ -171,6 +182,35 @@ public class ScoreServlet extends DatabaseServlet {
     reply(response, toReturn.toString());
   }
 
+  private String getReport(JSONObject jsonObject, int year) {
+    return db.getReport(year, jsonObject);
+  }
+
+  /**
+   * Defaults to this year.
+   * @param queryString
+   * @return
+   */
+  private int getYear(String queryString) {
+    String[] split1 = queryString.split("&");
+    int year;
+    if (split1.length == 2) {
+      String param = split1[1];
+//      logger.info("Got param " + param);
+      year = getParamIntValue(param, YEAR);
+      if (year == -1) {
+        year = Calendar.getInstance().get(Calendar.YEAR);
+      }
+    } else {
+      year = Calendar.getInstance().get(Calendar.YEAR);
+    }
+    return year;
+  }
+
+  private String removePrefix(String queryString, String prefix) {
+    return queryString.substring(queryString.indexOf(prefix) + prefix.length());
+  }
+
   private boolean matchesRequest(String queryString, String expected) {
     return queryString.startsWith(expected) || queryString.startsWith(REQUEST1 + expected);
   }
@@ -184,12 +224,37 @@ public class ScoreServlet extends DatabaseServlet {
   private String getRemoveExercisesParam(String queryString) {
     String[] split1 = queryString.split("&");
     if (split1.length == 2) {
-      boolean hasParam = split1[1].startsWith(REMOVE_EXERCISES_WITH_MISSING_AUDIO);
-      if (!hasParam) return "expecting param " + REMOVE_EXERCISES_WITH_MISSING_AUDIO;
-      return split1[1].equals(REMOVE_EXERCISES_WITH_MISSING_AUDIO_TRUE) ? "true" : "false";
+      return getParamValue(split1[1], REMOVE_EXERCISES_WITH_MISSING_AUDIO);
     }
     return removeExercisesWithMissingAudioDefault ? "true" : "false";
   }
+
+  private String getParamValue(String s, String param) {
+    boolean hasParam = s.startsWith(param);
+    if (!hasParam) {
+      return "expecting param " + param;
+    }
+    return s.equals(param + "=true") ? "true" : "false";
+  }
+
+  private int getParamIntValue(String arg, String param) {
+    boolean hasParam = arg.startsWith(param);
+    if (!hasParam) {
+      return -1;
+    }
+    String[] split = arg.split("=");
+    try {
+      if (split.length == 2) {
+        return Integer.parseInt(split[1]);
+      } else {
+        return Integer.parseInt(arg);
+      }
+    } catch (NumberFormatException e) {
+      logger.warn("got " + e + " on " + arg);
+      return -1;
+    }
+  }
+
 
   /**
    * @param toReturn
@@ -416,6 +481,14 @@ public class ScoreServlet extends DatabaseServlet {
   private void configureResponse(HttpServletResponse response) {
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
+  }
+
+  private void configureResponseHTML(HttpServletResponse response, int year) {
+    response.setContentType("test/html; charset=UTF-8");
+    response.setCharacterEncoding("UTF-8");
+
+    response.setHeader("Content-disposition", "attachment; filename=reportForYear" + year + ".html");
+
   }
 
   /**
