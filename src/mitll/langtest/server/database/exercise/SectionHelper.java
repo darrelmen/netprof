@@ -264,7 +264,7 @@ public class SectionHelper {
     if (unitToValue != null) {
       for (Map.Entry<String, String> pair : unitToValue.entrySet()) {
         if (!removeExerciseToLesson(exercise, pair.getKey(), pair.getValue())) {
-          logger.warn("didn't remove " + exercise.getID() + " for " + pair);
+          logger.warn("removeExercise didn't remove " + exercise.getID() + " for " + pair);
         }
       }
     }

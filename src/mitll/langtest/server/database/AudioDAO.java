@@ -368,7 +368,7 @@ public class AudioDAO extends DAO {
   }
 
   /**
-   * @see LangTestDatabaseImpl#getMaleFemaleProgress()
+   * @see DatabaseImpl#getMaleFemaleProgress()
    * @param userMapMales
    * @param userMapFemales
    * @param total
@@ -379,7 +379,7 @@ public class AudioDAO extends DAO {
                                               Set<String> uniqueIDs) {
     float maleFast = getCountForGender(userMapMales.keySet(), REGULAR, uniqueIDs);
     float maleSlow = getCountForGender(userMapMales.keySet(), SLOW, uniqueIDs);
-    float male = getCountBothSpeeds(userMapMales.keySet(), uniqueIDs);
+    float male     = getCountBothSpeeds(userMapMales.keySet(), uniqueIDs);
 
     float femaleFast = getCountForGender(userMapFemales.keySet(), REGULAR, uniqueIDs);
     float femaleSlow = getCountForGender(userMapFemales.keySet(), SLOW, uniqueIDs);
@@ -407,45 +407,41 @@ public class AudioDAO extends DAO {
    * @param userIds
    * @param audioSpeed
    * @return
+   * @see #getRecordedReport(Map, Map, float, Set)
    */
   private int getCountForGender(Set<Long> userIds, String audioSpeed,
                                 Set<String> uniqueIDs) {
-    //  int count = -1;
-    Set<String> results = new HashSet<String>();
+    Set<String> idsOfRecordedExercises = new HashSet<String>();
+    Set<String> idsOfStaleExercises = new HashSet<String>();
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String s = getInClause(userIds);
       if (!s.isEmpty()) s = s.substring(0, s.length() - 1);
       String sql = "select " +
-          // "count(distinct " + Database.EXID + ") " +
-          "distinct " + Database.EXID + " " +
-          "from " +
-          AUDIO +
+          "distinct " + Database.EXID +
+          " from " + AUDIO +
           " WHERE " +
           (s.isEmpty() ? "" : USERID + " IN (" + s + ") AND ") +
           DEFECT + "<>true " +
-          " AND " + AUDIO_TYPE + "='" +
-          audioSpeed +
-          "' ";
+          " AND " + AUDIO_TYPE + "='" + audioSpeed + "' ";
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
-        //String exid = rs.getString(Database.EXID);
-        String string = rs.getString(1);
-        if (uniqueIDs.contains(string)) {
-          results.add(string);
+        String exid = rs.getString(1);
+        if (uniqueIDs.contains(exid)) {
+          idsOfRecordedExercises.add(exid);
         } else {
-          //logger.debug("skipping stale exid " + string);
+          idsOfStaleExercises.add(exid);
+          //logger.debug("skipping stale exid " + exid);
         }
-        //break;
-        //  results.add(exid);
       }
       finish(connection, statement, rs);
-//      logger.debug("for " + audioSpeed + "\t" + sql + " got " + results.size());
+ /*     logger.debug("getCountForGender : for " + audioSpeed + "\n\t" + sql + "\n\tgot " + idsOfRecordedExercises.size() +
+          " and stale " +idsOfStaleExercises);*/
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
-    return results.size();
+    return idsOfRecordedExercises.size();
   }
 
   private int getCountBothSpeeds(Set<Long> userIds,
