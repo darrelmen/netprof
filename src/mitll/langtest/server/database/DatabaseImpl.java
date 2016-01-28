@@ -29,6 +29,7 @@ import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.CommonUserExercise;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
@@ -344,9 +345,9 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * @return
    * @see mitll.langtest.server.DownloadServlet#returnSpreadsheet(HttpServletResponse, DatabaseImpl, String)
    * @see LangTestDatabaseImpl#getTypeOrder()
-   * @return
    */
   public SectionHelper getSectionHelper() {
     getExercises();
@@ -772,7 +773,9 @@ public class DatabaseImpl implements Database {
     userManagement.usersToXLSX(out);
   }
 
-  public JSON usersToJSON() { return userManagement.usersToJSON(); }
+  public JSON usersToJSON() {
+    return userManagement.usersToJSON();
+  }
 
   /**
    * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
@@ -1130,7 +1133,7 @@ public class DatabaseImpl implements Database {
   /**
    * @param id
    * @return
-   * @see mitll.langtest.server.LoadTesting#getExercise
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String, long, boolean)
    */
   public CommonExercise getCustomOrPredefExercise(String id) {
     CommonExercise byID = getUserExerciseWhere(id);  // allow custom items to mask out non-custom items
@@ -1143,9 +1146,12 @@ public class DatabaseImpl implements Database {
   /**
    * @param id
    * @return
-   * @see mitll.langtest.server.LoadTesting#getExercise
+   * @see #editItem(UserExercise)
+   * @see #getCustomOrPredefExercise(String)
    */
-  private CommonExercise getUserExerciseWhere(String id) { return userExerciseDAO.getWhere(id);  }
+  private CommonExercise getUserExerciseWhere(String id) {
+    return userExerciseDAO.getWhere(id);
+  }
 
   @Override
   public ServerProperties getServerProps() {
@@ -1261,7 +1267,7 @@ public class DatabaseImpl implements Database {
     getReport("").doReport(serverProps, site, mailSupport, pathHelper);
   }
 
-  public String getReport(int year,JSONObject jsonObject) {
+  public String getReport(int year, JSONObject jsonObject) {
     return getReport("").getReport(jsonObject, year);
   }
 
@@ -1271,6 +1277,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * JUST FOR TESTING
+   *
    * @param pathHelper
    * @param prefix
    */
@@ -1336,6 +1343,28 @@ public class DatabaseImpl implements Database {
         }
       }
     }
+  }
+
+  public Map<String, Float> getMaleFemaleProgress() {
+    UserDAO userDAO = getUserDAO();
+    Map<Long, User> userMapMales   = userDAO.getUserMap(true);
+    Map<Long, User> userMapFemales = userDAO.getUserMap(false);
+
+    Collection<? extends CommonShell> exercises = getExercises();
+    float total = exercises.size();
+    Set<String> uniqueIDs = new HashSet<String>();
+
+    logger.debug("before " + exercises.size());
+    for (CommonShell shell : exercises) {
+      String id = shell.getID();
+      boolean add = uniqueIDs.add(id);
+      if (!add) {
+        logger.warn("getMaleFemaleProgress found duplicate id " + id + " : " + shell);
+      }
+    }
+    logger.debug("after " + uniqueIDs.size());
+
+    return getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs);
   }
 
   public String toString() {
