@@ -35,6 +35,8 @@ public class UserDAOToExcel {
   private static final String IPADDR = "ipaddr";
   private static final String DIALECT = "dialect";
   private static final String TIMESTAMP = "timestamp";
+  private static final String SEC = "(sec)";
+
   /**
    * For spreadsheet download
    */
@@ -47,7 +49,8 @@ public class UserDAOToExcel {
       "permissions",
       "items complete?",
       "num recordings",
-      "rate(sec)",
+      "rate" +
+          SEC,
       IPADDR,
       TIMESTAMP,
       KIND,
@@ -72,7 +75,7 @@ public class UserDAOToExcel {
       jsonObject.put(COLUMNS2.get(j++), user.getPermissions().toString().replaceAll("\\[", "").replaceAll("\\]", ""));
       jsonObject.put(COLUMNS2.get(j++), user.isComplete() ? "Yes" : ("No (" + Math.round(100 * user.getCompletePercent()) + "%)"));
       jsonObject.put(COLUMNS2.get(j++), "" + user.getNumResults());
-      jsonObject.put(COLUMNS2.get(j++), "" + roundToHundredth(user.getRate()));
+      jsonObject.put(COLUMNS2.get(j++).replaceAll(SEC,""), "" + roundToHundredth(user.getRate()));
 
       jsonObject.put(COLUMNS2.get(j++), user.getIpaddr());
       try {
