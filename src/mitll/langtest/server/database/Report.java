@@ -118,7 +118,6 @@ public class Report {
         String message = writeReportToFile(file, pathHelper, language, jsonObject, year);
         sendEmails(language, site, mailSupport, reportEmails, message);
 
-
       } catch (IOException e) {
         logger.error("got " + e, e);
       }
@@ -131,13 +130,15 @@ public class Report {
    * @throws IOException
    * @see DatabaseImpl#doReport
    */
-  public void writeReportToFile(PathHelper pathHelper, String language, int year) throws IOException {
+  public JSONObject writeReportToFile(PathHelper pathHelper, String language, int year) throws IOException {
     File file = getReportPath(pathHelper, language);
     JSONObject jsonObject = new JSONObject();
     writeReportToFile(file, pathHelper, language, jsonObject, year);
     logger.debug("wrote to " + file.getAbsolutePath());
 
-    logger.debug("\n" + jsonObject.toString());
+    //logger.debug("\n" + jsonObject.toString());
+
+    return jsonObject;
   }
 
   private File getReportPath(PathHelper pathHelper, String language) {
@@ -195,9 +196,13 @@ public class Report {
    * @see #writeReportToFile
    */
   private String doReport(PathHelper pathHelper, String language, JSONObject jsonObject, int year) {
-    logger.info("doing year " + year);
-    setUserStart();
     openCSVWriter(pathHelper, language);
+    return getReport(jsonObject, year);
+  }
+
+  public String getReport(JSONObject jsonObject, int year) {
+  //  logger.info("doing year " + year);
+    setUserStart();
 
     StringBuilder builder = new StringBuilder();
     builder.append("<html><head><body>");
@@ -212,12 +217,9 @@ public class Report {
     getUsers(builder, userDAO.getUsersDevices(), NEW_I_PAD_I_PHONE_USERS, iPadUsers, year);
     jsonObject.put("iPadUsers", iPadUsers);
 
-    logger.debug("json " + jsonObject.toString());
-
     JSONObject timeOnTaskJSON = new JSONObject();
     Set<Long> events = getEvents(builder, users, timeOnTaskJSON, year);
     jsonObject.put("overallTimeOnTask", timeOnTaskJSON);
-
 
     JSONObject deviceTimeOnTaskJSON = new JSONObject();
     Set<Long> eventsDevices = getEventsDevices(builder, users, deviceTimeOnTaskJSON, year);
@@ -232,11 +234,11 @@ public class Report {
     jsonObject.put("uniqueUsersYTD", uniqueUsersYTD);
 
     JSONObject allRecordings = new JSONObject();
-    getResults(builder, users, pathHelper, language, allRecordings, year);
+    getResults(builder, users, /*pathHelper, language,*/ allRecordings, year);
     jsonObject.put("allRecordings", allRecordings);
 
     JSONObject deviceRecordings = new JSONObject();
-    getResultsDevices(builder, users, pathHelper, language, deviceRecordings, year);
+    getResultsDevices(builder, users, /*pathHelper, language,*/ deviceRecordings, year);
     jsonObject.put("deviceRecordings", deviceRecordings);
 
     Calendar calendar = getCalendarForYear(year);
@@ -247,7 +249,9 @@ public class Report {
       logger.info("doReport : between " + january1st + " and " + january1stNextYear);
     }
 
-    addRefAudio(builder, calendar, january1st, january1stNextYear, audioDAO.getAudioAttributes(), jsonObject, year);
+    JSONObject referenceRecordings = new JSONObject();
+    addRefAudio(builder, calendar, january1st, january1stNextYear, audioDAO.getAudioAttributes(), referenceRecordings, year);
+    jsonObject.put("referenceRecordings", referenceRecordings);
 
     builder.append("</body></head></html>");
     return builder.toString();
@@ -320,8 +324,6 @@ public class Report {
    * @see #getUsers
    */
   private Set<Long> getUsers(StringBuilder builder, Collection<User> users, String users1, JSONObject jsonObject, int year) {
-    // int year2 = getThisYear();
-
     Calendar calendar = getCalendarForYear(year);
     Date january1st = getJanuaryFirst(calendar, year);
     Date january1stNextYear = getNextYear(year);
@@ -435,7 +437,7 @@ public class Report {
     jsonObject.put("month", monthArray);
     jsonObject.put("week", weekArray);
 
-    logger.debug("getSectionReport json " + jsonObject);
+//    logger.debug("getSectionReport json " + jsonObject);
 
     return getYearMonthWeekTable(users1, yearCol, monthCol, weekCol);
   }
@@ -461,7 +463,7 @@ public class Report {
     if (DEBUG) logger.info(builder.toString());
 
     try {
-      csv.write(builder.toString());
+      if (csv != null) csv.write(builder.toString());
     } catch (IOException e) {
       logger.error("Got " + e, e);
     }
@@ -588,25 +590,26 @@ public class Report {
 
   /**
    * @param builder
-   * @param language
+   * @paramx language
    * @param year
    * @see #doReport
    */
-  private void getResults(StringBuilder builder, Set<Long> students, PathHelper pathHelper, String language,
+  private void getResults(StringBuilder builder, Set<Long> students, /*PathHelper pathHelper, String language,*/
                           JSONObject jsonObject, int year) {
     List<Result> results = resultDAO.getResults();
-    getResultsForSet(builder, students, pathHelper, results, ALL_RECORDINGS, language, jsonObject, year);
+    getResultsForSet(builder, students, /*pathHelper,*/ results, ALL_RECORDINGS, /*language,*/ jsonObject, year);
   }
 
-  private void getResultsDevices(StringBuilder builder, Set<Long> students, PathHelper pathHelper, String language,
+  private void getResultsDevices(StringBuilder builder, Set<Long> students,/* PathHelper pathHelper, String language,*/
                                  JSONObject jsonObject, int year) {
     List<Result> results = resultDAO.getResultsDevices();
-    getResultsForSet(builder, students, pathHelper, results, DEVICE_RECORDINGS, language, jsonObject, year);
+    getResultsForSet(builder, students, /*pathHelper, */results, DEVICE_RECORDINGS, /*language,*/ jsonObject, year);
   }
 
   private void getResultsForSet(StringBuilder builder, Set<Long> students,
-                                PathHelper pathHelper, Collection<Result> results,
-                                String recordings, String language,
+                                //PathHelper pathHelper,
+                                Collection<Result> results,
+                                String recordings,// String language,
                                 JSONObject jsonObject, int year) {
     Date january1st = getJanuaryFirst(getCalendarForYear(year), year);
     Date january1stNextYear = getNextYear(year);
@@ -634,10 +637,10 @@ public class Report {
 
       BufferedWriter writer = null;
 
-      if (WRITE_RESULTS_TO_FILE) {
+/*      if (WRITE_RESULTS_TO_FILE) {
         File file = getReportFile(pathHelper, today + "_all", language);
         writer = new BufferedWriter(new FileWriter(file));
-      }
+      }*/
 
       teacherAudio = 0;
       invalid = 0;
@@ -952,7 +955,7 @@ public class Report {
     builder.append(getSectionReport(-1, monthToCount, weekToCount, activeUsers, activeJSON, year));
     jsonObject.put("activeUsers", activeJSON);
 
-    logger.debug("active users " + activeJSON);
+//    logger.debug("active users " + activeJSON);
 
     Map<Integer, Long> monthToDur = getMonthToDur(monthToCount2);
     long total = 0;
@@ -970,7 +973,7 @@ public class Report {
 
     int ytdHours = Math.round(total / 60);
 
-    logger.info("ytd hours " + ytdHours);
+//    logger.info("ytd hours " + ytdHours);
 
     String yearMonthWeekTable = getYearMonthWeekTable(tableLabel,
         getYTD(ytdHours, TOTAL_TIME_ON_TASK_HOURS, yearJSON, year),
@@ -992,7 +995,7 @@ public class Report {
   private void dumpActiveUsers(String activeUsers, Set<Long> teachers, int skipped, Set<Long> users) {
     List<Long> longs = new ArrayList<>(users);
     Collections.sort(longs);
-    logger.debug(activeUsers + " getEvents skipped " + skipped + " events from teachers " + teachers + "\nusers " + longs);
+//    logger.debug(activeUsers + " getEvents skipped " + skipped + " events from teachers " + teachers + "\nusers " + longs);
   }
 
   private boolean isValidUser(long creatorID) {
