@@ -1261,6 +1261,10 @@ public class DatabaseImpl implements Database {
     getReport("").doReport(serverProps, site, mailSupport, pathHelper);
   }
 
+  public String getReport(int year,JSONObject jsonObject) {
+    return getReport("").getReport(jsonObject, year);
+  }
+
   private Report getReport(String prefix) {
     return new Report(userDAO, resultDAO, eventDAO, audioDAO, serverProps.getLanguage(), prefix);
   }
