@@ -839,12 +839,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     if (fullTrie == null) {
       fullTrie = new ExerciseTrie(exercises, getLanguage(), audioFileHelper.getSmallVocabDecoder());
-    }
-
-    audioFileHelper.checkLTS(exercises);
-    if (getServletContext().getAttribute(AUDIO_FILE_HELPER_REFERENCE) == null) {
+      audioFileHelper.checkLTS(exercises);
       shareAudioFileHelper(getServletContext());
     }
+
+//    if (getServletContext().getAttribute(AUDIO_FILE_HELPER_REFERENCE) == null) {
+//    }
     now = System.currentTimeMillis();
     if (now - then > 200) {
       logger.info("took " + (now - then) + " millis to get the predef exercise list for " + getLanguage());
@@ -2036,15 +2036,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.monitoring.MonitoringManager#doMaleFemale
    */
   @Override
-  public Map<String, Float> getMaleFemaleProgress() {
-    Map<Long, User> userMapMales = db.getUserDAO().getUserMap(true);
-    Map<Long, User> userMapFemales = db.getUserDAO().getUserMap(false);
-
-    float total = getExercises().size();
-    Set<String> uniqueIDs = new HashSet<String>();
-    for (CommonShell shell : getExercises()) uniqueIDs.add(shell.getID());
-    return db.getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs);
-  }
+  public Map<String, Float> getMaleFemaleProgress() {  return db.getMaleFemaleProgress();  }
 
   /**
    * Map of overall, male, female to list of counts (ex 0 had 7, ex 1, had 5, etc.)
