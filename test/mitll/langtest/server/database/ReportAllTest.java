@@ -15,6 +15,54 @@ public class ReportAllTest extends BaseTest {
   public static final boolean DO_ONE = false;
 
 
+
+  @Test
+  public void testMaleFemaleRefCoverageSudanese() {
+    int i = 0;
+    List<String> configs = Collections.singletonList("sudanese");
+    for (String db : Arrays.asList("newSudanese2")) {
+      String config = configs.get(i++);
+
+      H2Connection connection = getH2Connection("war/config/sudanese/"+db);
+      DatabaseImpl database = getDatabase(connection, config, db);
+      Map<String, Float> maleFemaleProgress = database.getMaleFemaleProgress();
+
+      logger.info(maleFemaleProgress.toString());
+
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      //  break;
+    }
+  }
+
+
+
+  @Test
+  public void testMaleFemaleRefCoverage() {
+    int i = 0;
+    List<String> configs = Collections.singletonList("russian");
+    for (String db : Arrays.asList("npfRussian")) {
+      String config = configs.get(i++);
+
+      H2Connection connection = getH2Connection("war/config/russian/"+db);
+      DatabaseImpl database = getDatabase(connection, config, db);
+      Map<String, Float> maleFemaleProgress = database.getMaleFemaleProgress();
+
+      logger.info(maleFemaleProgress.toString());
+
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      //  break;
+    }
+  }
+
+
   @Test
   public void testReport() {
     List<String> strings = getDBs();
