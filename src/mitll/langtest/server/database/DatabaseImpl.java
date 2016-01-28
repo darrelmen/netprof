@@ -1345,6 +1345,10 @@ public class DatabaseImpl implements Database {
     }
   }
 
+  /**
+   *
+   * @return
+   */
   public Map<String, Float> getMaleFemaleProgress() {
     UserDAO userDAO = getUserDAO();
     Map<Long, User> userMapMales   = userDAO.getUserMap(true);
@@ -1354,7 +1358,6 @@ public class DatabaseImpl implements Database {
     float total = exercises.size();
     Set<String> uniqueIDs = new HashSet<String>();
 
-    logger.debug("before " + exercises.size());
     for (CommonShell shell : exercises) {
       String id = shell.getID();
       boolean add = uniqueIDs.add(id);
@@ -1362,7 +1365,6 @@ public class DatabaseImpl implements Database {
         logger.warn("getMaleFemaleProgress found duplicate id " + id + " : " + shell);
       }
     }
-    logger.debug("after " + uniqueIDs.size());
 
     return getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs);
   }
