@@ -14,6 +14,38 @@ public class ReportAllTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(ReportAllTest.class);
   public static final boolean DO_ONE = false;
 
+
+  @Test
+  public void testReport() {
+    List<String> strings = getDBs();
+    logger.debug("Got " + strings);
+
+    List<String> configs = Arrays.asList();
+    int i = 0;
+    PathHelper war = new PathHelper("war");
+
+    configs = Collections.singletonList("english");
+    for (String db : Arrays.asList("npfEnglish")) {
+      //String path = "/Users/go22670/Development/asr/performance-reports/dbs/" + db;
+      String config = configs.get(i++);
+
+      logger.info("doing " + config + " ------- ");
+
+      H2Connection connection = getH2Connection("war/config/english/"+db);
+
+      DatabaseImpl database = getDatabase(connection, config, db);
+      database.doReport(war, config, 2015);
+
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      //  break;
+    }
+  }
+
+
   @Test
   public void testReports() {
     List<String> strings = getDBs();
@@ -50,7 +82,7 @@ public class ReportAllTest extends BaseTest {
       H2Connection connection = getH2(db);
 
       DatabaseImpl database = getDatabase(connection, config, db);
-      database.doReport(war, config);
+      database.doReport(war, config, 2016);
 
       try {
         Thread.sleep(1000);
@@ -96,7 +128,7 @@ public class ReportAllTest extends BaseTest {
       H2Connection connection = getH2(db);
 
       DatabaseImpl database = getDatabase(connection, config, db);
-      int activeUsersYTD = database.getReport(config).getActiveUsersYTD();
+      int activeUsersYTD = 0;//database.getReport(config).getActiveUsersYTD();
       logger.info(config + "," + activeUsersYTD);
       configToUsers.put(config, activeUsersYTD);
     }
@@ -123,7 +155,7 @@ public class ReportAllTest extends BaseTest {
             "pashtoCE.h2.db\n" +
             "pashto2.h2.db\n" +
             "pashto3.h2.db\n" +
-            "npfRussian.h2.db\n"  +
+            "npfRussian.h2.db\n" +
             "npfSpanish.h2.db\n" +
             "sudaneseToday.h2.db\n" +
             "npfTagalog.h2.db\n" +
