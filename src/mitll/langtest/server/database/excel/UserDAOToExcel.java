@@ -59,39 +59,67 @@ public class UserDAOToExcel {
       DEVICE
   );
 
+  /**
+   * For spreadsheet download
+   */
+  private static final List<String> COLUMNSJSON = Arrays.asList(ID,
+      "userid",
+      DIALECT,
+      AGE,
+      GENDER,
+      EXPERIENCE,
+      "permissions",
+      "itemsComplete",
+      "numRecordings",
+      "rate",
+      IPADDR,
+      TIMESTAMP,
+      KIND,
+      PASS,
+      EMAIL,
+      DEVICE
+  );
+
+  /**
+   * @see mitll.langtest.server.database.UserDAO#toJSON(List)
+   * @param users
+   * @return
+   */
   public JSON toJSON(List<User> users) {
     JSONArray json = new JSONArray();
 
     for (User user : users) {
       int j = 0;
       JSONObject jsonObject = new JSONObject();
-      jsonObject.put(COLUMNS2.get(j++), user.getId());
-      jsonObject.put(COLUMNS2.get(j++), user.getUserID());
-      jsonObject.put(COLUMNS2.get(j++), user.getDialect());
-      jsonObject.put(COLUMNS2.get(j++), user.getAge());
-      jsonObject.put(COLUMNS2.get(j++), user.getGender() == 0 ? MALE : FEMALE);
-      jsonObject.put(COLUMNS2.get(j++), user.getExperience());
+      jsonObject.put(COLUMNSJSON.get(j++), user.getId());
+      jsonObject.put(COLUMNSJSON.get(j++), user.getUserID());
+      jsonObject.put(COLUMNSJSON.get(j++), user.getDialect());
+      jsonObject.put(COLUMNSJSON.get(j++), user.getAge());
+      jsonObject.put(COLUMNSJSON.get(j++), user.getGender() == 0 ? MALE : FEMALE);
+      jsonObject.put(COLUMNSJSON.get(j++), user.getExperience());
 
-      jsonObject.put(COLUMNS2.get(j++), user.getPermissions().toString().replaceAll("\\[", "").replaceAll("\\]", ""));
-      jsonObject.put(COLUMNS2.get(j++), user.isComplete() ? "Yes" : ("No (" + Math.round(100 * user.getCompletePercent()) + "%)"));
-      jsonObject.put(COLUMNS2.get(j++), "" + user.getNumResults());
-      jsonObject.put("rate", "" + roundToHundredth(user.getRate()));
+      jsonObject.put(COLUMNSJSON.get(j++), user.getPermissions().toString().replaceAll("\\[", "").replaceAll("\\]", ""));
+      jsonObject.put(COLUMNSJSON.get(j++), user.isComplete() ? "Yes" : ("No (" + Math.round(100 * user.getCompletePercent()) + "%)"));
+      jsonObject.put(COLUMNSJSON.get(j++), "" + user.getNumResults());
+      jsonObject.put(COLUMNSJSON.get(j++), "" + roundToHundredth(user.getRate()));
 
-      jsonObject.put(COLUMNS2.get(j++), user.getIpaddr());
+      jsonObject.put(COLUMNSJSON.get(j++), user.getIpaddr());
       try {
         SimpleDateFormat sdf = new SimpleDateFormat();
         String format = sdf.format(new Date(user.getTimestampMillis()));
-        jsonObject.put(COLUMNS2.get(j++), format);
+        jsonObject.put(COLUMNSJSON.get(j++), format);
       } catch (Exception e) {
         logger.error("got " + e, e);
       }
-      User.Kind userKind = user.getUserKind();
-      jsonObject.put(COLUMNS2.get(j++), userKind.toString());
+
+      jsonObject.put(COLUMNSJSON.get(j++), user.getUserKind().toString());
+
       String passwordHash = user.getPasswordHash();
-      jsonObject.put(COLUMNS2.get(j++), passwordHash == null || passwordHash.isEmpty() ? "NO_PASSWORD" : "HAS_PASSWORD");
+      jsonObject.put(COLUMNSJSON.get(j++), passwordHash == null || passwordHash.isEmpty() ? "NO_PASSWORD" : "HAS_PASSWORD");
+
       String emailHash = user.getEmailHash();
-      jsonObject.put(COLUMNS2.get(j++), emailHash == null || emailHash.isEmpty() ? "NO_EMAIL" : "HAS_EMAIL");
-      jsonObject.put(COLUMNS2.get(j++), user.getDevice());
+      jsonObject.put(COLUMNSJSON.get(j++), emailHash == null || emailHash.isEmpty() ? "NO_EMAIL" : "HAS_EMAIL");
+      jsonObject.put(COLUMNSJSON.get(j++), user.getDevice());
 
       json.add(jsonObject);
     }
