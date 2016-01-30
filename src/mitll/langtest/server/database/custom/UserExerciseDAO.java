@@ -463,9 +463,9 @@ public class UserExerciseDAO extends DAO {
   }
 
   /**
-   * @param e
-   * @param ref
-   * @param sref
+   * @paramx e
+   * @paramx ref
+   * @paramx sref
    * @see #getUserExercises(String)
    */
 /*  private void addMissingAudio(UserExercise e, String ref, String sref) {
