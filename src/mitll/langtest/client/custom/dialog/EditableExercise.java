@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.thirdparty.javascript.jscomp.graph.Annotation;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasText;
@@ -19,9 +20,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.CommonUserExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -33,7 +32,7 @@ import java.util.logging.Logger;
  *
 * Created by GO22670 on 3/28/2014.
 */
-class EditableExercise<T extends CommonUserExercise, UL extends UserList<T>> extends NewUserExercise<T,UL> {
+class EditableExercise<T extends CommonUserExercise, UL extends UserList<T>> extends NewUserExercise {
   private Logger logger = Logger.getLogger("EditableExercise");
 
   public static final int LABEL_WIDTH = 105;
@@ -61,7 +60,9 @@ class EditableExercise<T extends CommonUserExercise, UL extends UserList<T>> ext
   public EditableExercise(LangTestDatabaseAsync service,
                           ExerciseController controller,
                           EditItem editItem,
-                          HasText itemMarker, T changedUserExercise, UL originalList,
+                          HasText itemMarker,
+                          T changedUserExercise,
+                          UL originalList,
 
                           PagingExerciseList<T> exerciseList,
                           ListInterface predefinedContent,
@@ -79,7 +80,9 @@ class EditableExercise<T extends CommonUserExercise, UL extends UserList<T>> ext
 
   @Override
   protected void gotBlur(FormField english, FormField foreignLang, RecordAudioPanel rap,
-                         ControlGroup normalSpeedRecording, UL ul, ListInterface pagingContainer,
+                         ControlGroup normalSpeedRecording,
+                         UserList<Shell> ul,
+                         ListInterface<Shell> pagingContainer,
                          Panel toAddTo) {
     boolean changed = foreignChanged();
     validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, false, changed);
@@ -379,7 +382,7 @@ class EditableExercise<T extends CommonUserExercise, UL extends UserList<T>> ext
    * @param pagingContainer
    */
   private void changeTooltip(ListInterface pagingContainer) {
-    CommonShell byID = pagingContainer.byID(newUserExercise.getID());
+    Shell byID = pagingContainer.byID(newUserExercise.getID());
     if (byID == null) {
       logger.warning("changeTooltip : huh? can't find exercise with id " + newUserExercise.getID());
     } else {
@@ -407,7 +410,7 @@ class EditableExercise<T extends CommonUserExercise, UL extends UserList<T>> ext
    * @param newUserExercise
    */
   @Override
-  public void setFields(CommonExercise newUserExercise) {
+  public <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
     //logger.info("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
 
     // english
@@ -430,7 +433,7 @@ class EditableExercise<T extends CommonUserExercise, UL extends UserList<T>> ext
 
     if (rap != null) {
       // regular speed audio
-      rap.getPostAudioButton().setExercise(newUserExercise);
+      rap.getPostAudioButton().setExercise(newUserExercise.getID());
       String refAudio = newUserExercise.getRefAudio();
 
       if (refAudio != null) {
@@ -445,7 +448,7 @@ class EditableExercise<T extends CommonUserExercise, UL extends UserList<T>> ext
       }
 
       // slow speed audio
-      rapSlow.getPostAudioButton().setExercise(newUserExercise);
+      rapSlow.getPostAudioButton().setExercise(newUserExercise.getID());
       String slowAudioRef = newUserExercise.getSlowAudioRef();
 
       if (slowAudioRef != null) {
@@ -459,7 +462,7 @@ class EditableExercise<T extends CommonUserExercise, UL extends UserList<T>> ext
     }
   }
 
-  private void useAnnotation(CommonExercise userExercise, String field, HTML annoField) {
+  private void useAnnotation(AnnotationExercise userExercise, String field, HTML annoField) {
     useAnnotation(userExercise.getAnnotation(field), annoField);
   }
 
