@@ -66,6 +66,14 @@ public class UserList<T extends Shell> extends BaseExercise {
     this(ul.uniqueID, ul.getCreator(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate());
   }
 
+  public UserList<T> getCopy() {
+    UserList<T> copy  = new UserList<>();
+    for (T ue : getExercises()) {
+      copy.addExercise(ue);
+    }
+    return copy;
+  }
+
   /**
    * @see mitll.langtest.client.custom.dialog.EditItem#makeExerciseList(Panel, String, UserList, UserList, boolean)
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterItemCreated(UserExercise, UserList, ListInterface, Panel)
