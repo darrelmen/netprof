@@ -4,6 +4,7 @@
 
 package mitll.langtest.client.custom.content;
 
+import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -21,9 +22,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.AnnotationExercise;
-import mitll.langtest.shared.exercise.AudioRefExercise;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Shell;
 
 /**
@@ -31,19 +30,19 @@ import mitll.langtest.shared.exercise.Shell;
  */
 public class ReviewItemHelper extends NPFHelper {
   //private Logger logger = Logger.getLogger("ReviewItemHelper");
-
   private FlexListLayout flexListLayout;
   private final HasText itemMarker;
   private final ListInterface predefinedContent;
   private final NPFHelper npfHelper;
 
   /**
-   * @see mitll.langtest.client.custom.Navigation#Navigation
    * @param service
    * @param feedback
    * @param userManager
    * @param controller
    * @param predefinedContent
+   * @see mitll.langtest.client.custom.Navigation#Navigation
+   * @see mitll.langtest.client.custom.ListManager#ListManager(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback, TabPanel)
    */
   public ReviewItemHelper(final LangTestDatabaseAsync service, final UserFeedback feedback,
                           final UserManager userManager, final ExerciseController controller,
@@ -58,11 +57,10 @@ public class ReviewItemHelper extends NPFHelper {
   /**
    * Left and right components
    *
-   *
    * @param ul
    * @param instanceName
    * @return
-   * @see #doNPF(mitll.langtest.shared.custom.UserList, String, boolean)
+   * @see #doNPF
    */
   protected Panel doInternalLayout(final UserList ul, String instanceName) {
 //    logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
@@ -83,27 +81,31 @@ public class ReviewItemHelper extends NPFHelper {
     }
   }
 
-  private class ReviewFlexListLayout<T extends CommonShell & AnnotationExercise & AudioRefExercise> extends FlexListLayout<T> {
-    private final UserList ul;
+  // private class ReviewFlexListLayout<T extends CommonShell & AnnotationExercise & AudioRefExercise> extends FlexListLayout<T> {
+  private class ReviewFlexListLayout extends FlexListLayout<CommonExercise> {
+    private final UserList<Shell> ul;
 
-    public ReviewFlexListLayout(UserList ul) {
+    public ReviewFlexListLayout(UserList<Shell> ul) {
       super(ReviewItemHelper.this.service, ReviewItemHelper.this.feedback, ReviewItemHelper.this.userManager, ReviewItemHelper.this.controller);
       this.ul = ul;
     }
 
     @Override
     protected ExercisePanelFactory getFactory(final PagingExerciseList pagingExerciseList, String instanceName) {
-      return new ExercisePanelFactory<T>(service,feedback,controller,predefinedContent) {
+      return new ExercisePanelFactory<CommonExercise>(service, feedback, controller, predefinedContent) {
         @Override
-        public Panel getExercisePanel(T exercise) {
+        public Panel getExercisePanel(CommonExercise exercise) {
           ReviewEditableExercise reviewEditableExercise =
-            new ReviewEditableExercise(service, controller, itemMarker, new UserExercise(exercise), ul,
-              pagingExerciseList, predefinedContent, npfHelper);
+              new ReviewEditableExercise<CommonExercise, UserList<CommonExercise>>(service, controller, itemMarker,
+                  new UserExercise(exercise), ul,
+                  pagingExerciseList, predefinedContent, npfHelper);
           SimplePanel ignoredContainer = new SimplePanel();
 
-          Panel widgets = reviewEditableExercise.addNew(ul, ul,
-            npfExerciseList,
-            ignoredContainer);
+          Panel widgets = reviewEditableExercise.addNew(
+              ul,
+              ul,
+              npfExerciseList,
+              ignoredContainer);
           reviewEditableExercise.setFields(exercise);
 
           return widgets;
@@ -112,10 +114,12 @@ public class ReviewItemHelper extends NPFHelper {
     }
 
     @Override
-    protected PagingExerciseList<T> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
+    protected PagingExerciseList<CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
+                                                                  String instanceName, boolean incorrectFirst) {
       FlexListLayout outer = this;
-      return new NPFlexSectionExerciseList<T>(outer, topRow, currentExercisePanel, instanceName, incorrectFirst) {
+      return new NPFlexSectionExerciseList<CommonExercise>(outer, topRow, currentExercisePanel, instanceName, incorrectFirst) {
         com.github.gwtbootstrap.client.ui.CheckBox onlyAudio;
+
         @Override
         protected void addTableWithPager(ClickablePagingContainer pagingContainer) {
           // row 1
@@ -129,7 +133,7 @@ public class ReviewItemHelper extends NPFHelper {
           w.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                loadExercises(getHistoryToken(""), getTypeAheadText(),w.getValue());
+              loadExercises(getHistoryToken(""), getTypeAheadText(), w.getValue());
             }
           });
           w.addStyleName("leftFiveMargin");
