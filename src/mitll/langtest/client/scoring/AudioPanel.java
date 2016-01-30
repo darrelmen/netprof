@@ -94,7 +94,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @param exerciseID
    * @param exercise
    * @param instance
-   * @see ScoringAudioPanel#ScoringAudioPanel(String, String, LangTestDatabaseAsync, ExerciseController, boolean, ScoreListener, int, String, String, CommonExercise, String)
+   * @see ScoringAudioPanel#ScoringAudioPanel
    */
   public AudioPanel(String path, LangTestDatabaseAsync service,
              ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin,
@@ -122,7 +122,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @param exerciseID
    * @param exercise
    * @param instance
-   * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(CommonExercise, ExerciseController, Panel, LangTestDatabaseAsync, int, boolean, String, String)
+   * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel
    */
   protected AudioPanel(LangTestDatabaseAsync service,
                        ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
@@ -153,8 +153,6 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
    *
-   * @param exercise
-   * @param instance
    * @param playButtonSuffix
    * @param recordButtonTitle
    * @return
