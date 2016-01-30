@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 /**
  * Created by GO22670 on 3/28/2014.
  */
-public class ReviewEditableExercise<T extends CommonUserExercise, UL extends UserList<T>> extends EditableExercise<T,UL> {
+public class ReviewEditableExercise<T extends CommonExercise, UL extends UserList<T>> extends EditableExercise<T,UL> {
   private final Logger logger = Logger.getLogger("ReviewEditableExercise");
 
   private static final String FIXED = "Mark Fixed";
@@ -57,7 +57,6 @@ public class ReviewEditableExercise<T extends CommonUserExercise, UL extends Use
   private static final String SLOW_SPEED = " Slow speed";
   private static final int DELAY_MILLIS = 5000;
   private static final String ADD_AUDIO = "Add audio";
-  //public static final String DEFAULT_SPEAKER = "Default Speaker";
   private static final String MALE = "Male";
   private static final String FEMALE = "Female";
 

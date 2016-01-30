@@ -28,7 +28,7 @@ import java.util.Map;
  * The record audio and play buttons are tied to each other in that when playing audio, you can't record, and vice-versa.
  *
  */
-public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioPanel<T> {
+public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioPanel<Shell> {
   private final int index;
 
   private PostAudioRecordButton postAudioRecordButton;
@@ -79,6 +79,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   /**
    * Worries about context type audio too.
    * @return
+   * @see #RecordAudioPanel(Shell, ExerciseController, Panel, LangTestDatabaseAsync, int, boolean, String, String)
    */
   public AudioAttribute getAudioAttribute() {
     AudioAttribute audioAttribute = audioType.equals(Result.AUDIO_TYPE_REGULAR) ? exercise.getRecordingsBy(controller.getUser(), true) :
