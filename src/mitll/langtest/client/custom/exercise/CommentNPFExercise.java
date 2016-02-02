@@ -60,7 +60,7 @@ public class CommentNPFExercise<T extends CommonShell & AudioAttributeExercise &
 
   private AudioAttribute defaultAudio, maleAudio, femaleAudio;
   private PlayAudioPanel contextPlay;
-  private CommentBox commentBox;
+  //private CommentBox commentBox;
 
   /**
    *
@@ -84,8 +84,7 @@ public class CommentNPFExercise<T extends CommonShell & AudioAttributeExercise &
    */
   @Override
   protected Widget getQuestionContent(final T e, String content) {
-    if (commentBox == null) // defensive...
-      this.commentBox = new CommentBox<T>(e, controller, this, mutableAnnotation);
+     // gettCommentBox(e);
 
     Panel column = new VerticalPanel();
     column.getElement().setId("QuestionContent");
@@ -113,6 +112,12 @@ public class CommentNPFExercise<T extends CommonShell & AudioAttributeExercise &
     }
 
     return column;
+  }
+
+  private CommentBox<T> getCommentBox() {
+    logger.info("exercise " + exercise);
+    logger.info("mutableAnnotation " + mutableAnnotation);
+    return new CommentBox<T>(exercise, controller, this, mutableAnnotation);
   }
 
   private void addContextButton(final T e, DivWidget row) {
@@ -364,6 +369,8 @@ public class CommentNPFExercise<T extends CommonShell & AudioAttributeExercise &
    * @see #makeFastAndSlowAudio(String)
    */
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
+    CommentBox<T> commentBox = getCommentBox();
+    logger.info("getEntry commentBox ");
     return commentBox.getEntry(field, getContentWidget(label, value, false), annotation);
   }
 
@@ -377,7 +384,7 @@ public class CommentNPFExercise<T extends CommonShell & AudioAttributeExercise &
     return new FastAndSlowASRScoringAudioPanel<T>(getLocalExercise(), path, service, controller, scorePanel, instance) {
       @Override
       protected void addAudioRadioButton(Panel vp, RadioButton fast) {
-        vp.add(commentBox.getEntry(audioPath, fast, exercise.getAnnotation(path)));
+        vp.add(getCommentBox().getEntry(audioPath, fast, exercise.getAnnotation(path)));
       }
 
       @Override
