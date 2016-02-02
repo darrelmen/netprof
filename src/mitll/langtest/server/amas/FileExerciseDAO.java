@@ -82,16 +82,6 @@ public class FileExerciseDAO {
     return idToExercise.get(id);
   }
 
-/*  @Override
-  public void setAudioDAO(AudioDAO audioDAO, String mediaDir, String installPath) {
-
-  }
-
-  @Override
-  public void attachAudio(Collection<CommonUserExercise> all) {
-
-  }*/
-
   private void populateIDToExercise(List<AmasExerciseImpl> exercises) {
     for (AmasExerciseImpl e : exercises) idToExercise.put(e.getID(), e);
   }

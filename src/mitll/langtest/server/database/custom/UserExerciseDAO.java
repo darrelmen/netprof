@@ -269,7 +269,7 @@ public class UserExerciseDAO extends DAO {
       }
 /*      if (userExercises2.isEmpty()) {
         if (DEBUG) logger.debug("\tgetOnList : no exercises on list id " + listID);
-        return new ArrayList<CommonUserExercise>();
+        return new ArrayList<?>();
       } else {
         if (DEBUG) logger.debug("\tgetOnList for " + listID+ "  got " + userExercises2.size());
         return userExercises2;
