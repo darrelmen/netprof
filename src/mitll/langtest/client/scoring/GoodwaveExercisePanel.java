@@ -34,7 +34,9 @@ import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.AudioRefExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.ArrayList;
@@ -86,7 +88,7 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
    * and a right side -- the charts and gauges {@link ASRScorePanel}
    *
-   * @param commonExercise             for this exercise
+   * @param commonExercise for this exercise
    * @param controller
    * @param listContainer
    * @param screenPortion
@@ -102,7 +104,7 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
     this.screenPortion = screenPortion;
     this.instance = instance;
     setWidth("100%");
- //   addStyleName("inlineBlockStyle");
+    //   addStyleName("inlineBlockStyle");
     getElement().setId("GoodwaveExercisePanel");
 
     this.navigationHelper = getNavigationHelper(controller, listContainer, addKeyHandler);
@@ -112,7 +114,9 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
     addContent();
   }
 
-  public void addContent() {
+  private void addContent() {
+    logger.info("doing addContent on " + this);
+
     final Panel center = new VerticalPanel();
     center.getElement().setId("GoodwaveVerticalCenter");
     center.addStyleName("floatLeft");
@@ -204,7 +208,7 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
 
     addGroupingStyle(div);
 
- //   addBelowPlaybackWidget(exercise, toAddTo);
+    //   addBelowPlaybackWidget(exercise, toAddTo);
     toAddTo.add(div);
   }
 
@@ -261,8 +265,8 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
    * @see #GoodwaveExercisePanel
    */
   private Widget getQuestionContent(T e) {
-  //  String content = e.getContent();
-  //  logger.info("getQuestionContent got content " + content);
+    //  String content = e.getContent();
+    //  logger.info("getQuestionContent got content " + content);
     final VerticalPanel vp = new VerticalPanel();
     vp.getElement().setId("getQuestionContent_verticalContainer");
 
@@ -460,10 +464,10 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
         public void onClick(ClickEvent clickEvent) {
           Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             public void execute() {
-             // String test = "{man’s}";
-              String s1 = html.replaceAll(CommentNPFExercise.PUNCT_REGEX, " ").replaceAll("’"," ");
+              // String test = "{man’s}";
+              String s1 = html.replaceAll(CommentNPFExercise.PUNCT_REGEX, " ").replaceAll("’", " ");
               String s2 = s1.split(CommentNPFExercise.SPACE_REGEX)[0].toLowerCase();
-           //   logger.warning("search on {" +s2 +"}");
+              //   logger.warning("search on {" +s2 +"}");
               listContainer.searchBoxEntry(s2);
             }
           });
@@ -562,7 +566,7 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
      * @param service
      * @param controller
      * @param exercise
-     *@param instance @see GoodwaveExercisePanel#getAnswerWidget
+     * @param instance   @see GoodwaveExercisePanel#getAnswerWidget
      */
     public ASRRecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, T exercise, String instance) {
       super(exercise.getForeignLanguage(), service, controller, scorePanel, REFERENCE, exercise.getID(), exercise, instance);

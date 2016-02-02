@@ -44,6 +44,7 @@ public class UserListManager {
   public static final long COMMENT_MAGIC_ID = -200;
   private static final long ATTN_LL_MAGIC_ID = -300;
   private static final boolean DEBUG = false;
+  public static final String DUP = "_dup_";
 
   private final UserDAO userDAO;
   private final ReviewedDAO reviewedDAO, secondStateDAO;
@@ -519,7 +520,7 @@ public class UserListManager {
    * @param userExercise
    * @return
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addItemToUserList(long, mitll.langtest.shared.custom.UserExercise)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addItemToUserList
    */
   public void addItemToUserList(long userListID, String userExercise) {
     addItemToList(userListID, userExercise);
@@ -579,9 +580,10 @@ public class UserListManager {
     String id = userExercise.getID();
     String newid;
     if (id.contains("dup")) {
-      newid = id.split("dup")[0] + "_dup_" + System.currentTimeMillis();
-    } else {
-      newid = id + "_dup_" + System.currentTimeMillis();
+       newid = id.split("dup")[0] + DUP +System.currentTimeMillis();
+    }
+    else {
+       newid = id + DUP +System.currentTimeMillis();
     }
 
     logger.debug("duplicating " + userExercise + " with id " + newid);
@@ -594,8 +596,6 @@ public class UserListManager {
       ExerciseAnnotation value = pair.getValue();
       addAnnotation(assignedID, pair.getKey(), value.getStatus(), value.getComment(), userExercise.getCombinedMutableUserExercise().getCreator());
     }
-
-//    userExercise.setTooltip();
 
     return userExercise;
   }
@@ -655,7 +655,7 @@ public class UserListManager {
    * @param title
    * @param artist
    * @return new, permanent audio path
-   * @see #fixAudioPaths(mitll.langtest.shared.custom.UserExercise, boolean, String)
+   * @see #fixAudioPaths
    */
   private String getRefAudioPath(String id, File fileRef, String destFileName, boolean overwrite, String title, String artist) {
     return new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, id, title, artist,
@@ -690,7 +690,7 @@ public class UserListManager {
    * @param userListID
    * @param user
    * @see mitll.langtest.server.LangTestDatabaseImpl#addVisitor
-   * @see mitll.langtest.client.custom.Navigation#addVisitor(mitll.langtest.shared.custom.UserList)
+   * @see mitll.langtest.client.custom.Navigation#addVisitor
    */
   public void addVisitor(long userListID, long user) {
     //logger.debug("addVisitor - user " + user + " visits " + userList.getUniqueID());
@@ -788,7 +788,7 @@ public class UserListManager {
    * @param state
    * @param creatorID
    * @see mitll.langtest.server.LangTestDatabaseImpl#setExerciseState(String, int, mitll.langtest.shared.exercise.CommonExercise)
-   * @see mitll.langtest.server.database.DatabaseImpl#duplicateExercise(mitll.langtest.shared.custom.UserExercise)
+   * @see mitll.langtest.server.database.DatabaseImpl#duplicateExercise
    * @see mitll.langtest.server.database.custom.UserListManager#markState(java.util.Collection)
    */
   public void setState(CommonShell shell, STATE state, long creatorID) {
