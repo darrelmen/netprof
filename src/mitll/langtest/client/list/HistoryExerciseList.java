@@ -12,6 +12,7 @@ import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
@@ -24,7 +25,7 @@ import java.util.logging.Logger;
  * Time: 3:21 PM
  * To change this template use File | Settings | File Templates.
  */
-public class HistoryExerciseList<T extends Shell> extends PagingExerciseList<T> {
+public class HistoryExerciseList<T extends CommonShell> extends PagingExerciseList<T> {
   private Logger logger = Logger.getLogger("HistoryExerciseList");
 
   public static final String ANY = "Clear";

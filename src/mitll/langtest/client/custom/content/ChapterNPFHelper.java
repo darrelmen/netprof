@@ -17,8 +17,8 @@ import mitll.langtest.shared.exercise.CommonExercise;
 /**
  * Created by GO22670 on 3/26/2014.
  */
-public class ChapterNPFHelper<T extends CommonExercise, UL extends UserList<T>> extends NPFHelper<T,UL> {
-  private final FlexListLayout flexListLayout;
+public class ChapterNPFHelper extends NPFHelper {
+  private final FlexListLayout<CommonExercise> flexListLayout;
 
   /**
    * Makes defect helper.
@@ -33,16 +33,16 @@ public class ChapterNPFHelper<T extends CommonExercise, UL extends UserList<T>> 
   public ChapterNPFHelper(final LangTestDatabaseAsync service, final UserFeedback feedback,
                           final UserManager userManager, final ExerciseController controller, final boolean showQC) {
     super(service, feedback, userManager, controller, showQC);
-    final NPFHelper<T,UL> outer = this;
-    this.flexListLayout = new FlexListLayout(service, feedback, userManager, controller) {
+    final NPFHelper outer = this;
+    this.flexListLayout = new FlexListLayout<CommonExercise>(service, feedback, userManager, controller) {
       @Override
-      protected ExercisePanelFactory<T> getFactory(PagingExerciseList exerciseList, String instanceName) {
+      protected ExercisePanelFactory<CommonExercise> getFactory(PagingExerciseList exerciseList, String instanceName) {
         return outer.getFactory(exerciseList, instanceName, showQC);
       }
 
       @Override
-      protected PagingExerciseList<T> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
-        return new NPFlexSectionExerciseList<T>(this, topRow, currentExercisePanel, instanceName, incorrectFirst);
+      protected PagingExerciseList<CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
+        return new NPFlexSectionExerciseList<CommonExercise>(this, topRow, currentExercisePanel, instanceName, incorrectFirst);
       }
     };
   }
