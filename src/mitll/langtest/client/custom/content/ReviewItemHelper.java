@@ -22,17 +22,16 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.*;
 
 /**
  * Created by GO22670 on 3/26/2014.
  */
-public class ReviewItemHelper extends NPFHelper {
+public class ReviewItemHelper extends NPFHelper{
   //private Logger logger = Logger.getLogger("ReviewItemHelper");
-  private FlexListLayout flexListLayout;
+  private FlexListLayout<CommonExercise> flexListLayout;
   private final HasText itemMarker;
-  private final ListInterface predefinedContent;
+  private final ListInterface<CommonExercise> predefinedContent;
   private final NPFHelper npfHelper;
 
   /**
@@ -46,7 +45,7 @@ public class ReviewItemHelper extends NPFHelper {
    */
   public ReviewItemHelper(final LangTestDatabaseAsync service, final UserFeedback feedback,
                           final UserManager userManager, final ExerciseController controller,
-                          final ListInterface predefinedContent,
+                          final ListInterface<CommonExercise> predefinedContent,
                           NPFHelper npfHelper) {
     super(service, feedback, userManager, controller, true);
     this.itemMarker = null;
@@ -62,7 +61,8 @@ public class ReviewItemHelper extends NPFHelper {
    * @return
    * @see #doNPF
    */
-  protected Panel doInternalLayout(final UserList ul, String instanceName) {
+  @Override
+  protected Panel doInternalLayout(final UserList<CommonExercise> ul, String instanceName) {
 //    logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
     this.flexListLayout = new ReviewFlexListLayout(ul);
     Panel widgets = flexListLayout.doInternalLayout(ul, instanceName);
@@ -81,23 +81,24 @@ public class ReviewItemHelper extends NPFHelper {
     }
   }
 
-  // private class ReviewFlexListLayout<T extends CommonShell & AnnotationExercise & AudioRefExercise> extends FlexListLayout<T> {
-  private class ReviewFlexListLayout extends FlexListLayout<CommonExercise> {
-    private final UserList<Shell> ul;
+  // private class ReviewFlexListLayout<CommonExercise extends CommonShell & AnnotationExercise & AudioRefExercise> extends FlexListLayout<CommonExercise> {
+  private class ReviewFlexListLayout/*<CommonExercise extends CommonShell & AudioRefExercise & CombinedMutableUserExercise & AnnotationExercise>*/ extends FlexListLayout<CommonExercise> {
+    private final UserList<CommonExercise> ul;
 
-    public ReviewFlexListLayout(UserList<Shell> ul) {
+    public ReviewFlexListLayout(UserList<CommonExercise> ul) {
       super(ReviewItemHelper.this.service, ReviewItemHelper.this.feedback, ReviewItemHelper.this.userManager, ReviewItemHelper.this.controller);
       this.ul = ul;
     }
 
     @Override
-    protected ExercisePanelFactory getFactory(final PagingExerciseList pagingExerciseList, String instanceName) {
+    protected ExercisePanelFactory<CommonExercise> getFactory(final PagingExerciseList<CommonExercise> pagingExerciseList, String instanceName) {
       return new ExercisePanelFactory<CommonExercise>(service, feedback, controller, predefinedContent) {
         @Override
         public Panel getExercisePanel(CommonExercise exercise) {
+          CommonExercise userExercise = new UserExercise(exercise);
           ReviewEditableExercise reviewEditableExercise =
-              new ReviewEditableExercise<CommonExercise, UserList<CommonExercise>>(service, controller, itemMarker,
-                  new UserExercise(exercise), ul,
+              new ReviewEditableExercise(service, controller, itemMarker,
+                  userExercise, ul,
                   pagingExerciseList, predefinedContent, npfHelper);
           SimplePanel ignoredContainer = new SimplePanel();
 
