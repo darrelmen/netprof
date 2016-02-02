@@ -397,7 +397,7 @@ public abstract class Scoring {
   /**
    * @param foreignLanguagePhrase
    * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTS
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
    */
   public ASR.PhoneInfo getBagOfPhones(String foreignLanguagePhrase) {
     return checkLTSHelper.getBagOfPhones(foreignLanguagePhrase);
