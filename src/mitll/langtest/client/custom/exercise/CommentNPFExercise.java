@@ -62,6 +62,15 @@ public class CommentNPFExercise<T extends CommonShell & AudioAttributeExercise &
   private PlayAudioPanel contextPlay;
   private CommentBox commentBox;
 
+  /**
+   *
+   * @param e
+   * @param controller
+   * @param listContainer
+   * @param addKeyHandler
+   * @param instance
+   * @param mutableAnnotation
+   */
   public CommentNPFExercise(T e, ExerciseController controller, ListInterface<T> listContainer,
                             boolean addKeyHandler, String instance, MutableAnnotationExercise mutableAnnotation) {
     super(e, controller, listContainer, 1.0f, addKeyHandler, instance);
@@ -116,7 +125,8 @@ public class CommentNPFExercise<T extends CommonShell & AudioAttributeExercise &
       show.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          new ModalInfoDialog(CONTEXT_SENTENCE, Collections.emptyList(), getContext(e), null);
+          List<String> messages = Collections.emptyList();
+          new ModalInfoDialog(CONTEXT_SENTENCE, messages, getContext(e), null);
         }
       });
 
