@@ -41,8 +41,12 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    * @param instance
    * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, String)
    */
-  public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel, LangTestDatabaseAsync service,
-                                    ExerciseController controller, String exerciseID, int index, String instance,
+  public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel,
+                                    LangTestDatabaseAsync service,
+                                    ExerciseController controller,
+                                    String exerciseID,
+                                    int index,
+                                    String instance,
                                     Map<String, Collection<String>> typeToSelection) {
     super(service, controller, exerciseID, index, true, "avp", "Record", typeToSelection);
     this.instance = instance;
