@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 /**
  * Created by GO22670 on 6/26/2014.
  */
-class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExercise> extends HorizontalPanel {
+class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExercise & MutableAnnotationExercise> extends HorizontalPanel {
   private final Logger logger = Logger.getLogger("FlashcardPanel");
 
   protected static final String PLAYING_AUDIO_HIGHLIGHT = "playingAudioHighlight";
@@ -171,7 +171,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
       public void addCorrectComment(String field) {
         addAnnotation(field, GoodwaveExercisePanel.CORRECT, "");
       }
-    });
+    },exercise);
     DivWidget left = new DivWidget();
     left.add(commentBox.getEntry(QCNPFExercise.FOREIGN_LANGUAGE, null, exercise.getAnnotation(QCNPFExercise.FOREIGN_LANGUAGE)));
     left.addStyleName("floatLeft");
