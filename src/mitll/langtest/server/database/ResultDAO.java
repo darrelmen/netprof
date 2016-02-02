@@ -14,6 +14,8 @@ import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.UserPerformance;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.monitoring.Session;
@@ -335,11 +337,11 @@ public class ResultDAO extends DAO {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
    */
-  public List<CommonExercise> getExercisesSortedIncorrectFirst(Collection<CommonExercise> exercises, long userid, Collator collator) {
+  public <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises, long userid, Collator collator) {
     List<String> allIds = new ArrayList<String>();
-    Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
+    Map<String, T> idToEx = new HashMap<>();
     Map<String, CollationKey> idToKey = new HashMap<String, CollationKey>();
-    for (CommonExercise exercise : exercises) {
+    for (T exercise : exercises) {
       String id = exercise.getID();
       allIds.add(id);
       idToEx.put(id, exercise);
@@ -350,7 +352,7 @@ public class ResultDAO extends DAO {
 
     List<ExerciseCorrectAndScore> sortedResults = getExerciseCorrectAndScores(userid, allIds, idToKey);
 
-    List<CommonExercise> commonExercises = new ArrayList<CommonExercise>(exercises.size());
+    List<T> commonExercises = new ArrayList<>(exercises.size());
     for (ExerciseCorrectAndScore score : sortedResults) {
       commonExercises.add(idToEx.get(score.getId()));
     }
@@ -545,8 +547,9 @@ public class ResultDAO extends DAO {
         scoreTotal += pronScore;
       }
     }
-    firstExercise.setScores(resultsForExercise);
-    firstExercise.setAvgScore(total == 0 ? 0f : scoreTotal / total);
+    MutableExercise mutable = firstExercise.getMutable();
+    mutable.setScores(resultsForExercise);
+    mutable.setAvgScore(total == 0 ? 0f : scoreTotal / total);
   }
 
   /**
