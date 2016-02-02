@@ -8,6 +8,7 @@ import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.log4j.Logger;
 
 import java.text.CharacterIterator;
@@ -22,7 +23,7 @@ import java.util.Collection;
  * Time: 4:42 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExerciseTrie extends Trie<CommonExercise> {
+public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
   private static final Logger logger = Logger.getLogger(ExerciseTrie.class);
 
   private static final int TOOLONG_TO_WAIT = 150;
@@ -43,7 +44,8 @@ public class ExerciseTrie extends Trie<CommonExercise> {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseListWrapperForPrefix
    */
-  public ExerciseTrie(Collection<CommonExercise> exercisesForState, String language, SmallVocabDecoder smallVocabDecoder) {
+  public ExerciseTrie(Collection<T> exercisesForState, String language,
+                                              SmallVocabDecoder smallVocabDecoder) {
     boolean includeForeign = !language.equals(ENGLISH);
     startMakingNodes();
 
@@ -55,10 +57,10 @@ public class ExerciseTrie extends Trie<CommonExercise> {
 
     //logger.debug("lang " + language + " looking at " + exercisesForState.size());
 
-    for (CommonExercise exercise : exercisesForState) {
+    for (T exercise : exercisesForState) {
       String english = exercise.getEnglish();
       if (english != null && !english.isEmpty()) {
-        addEntryToTrie(new ExerciseWrapper(exercise, true));
+        addEntryToTrie(new ExerciseWrapper<T>(exercise, true));
         Collection<String> tokens = smallVocabDecoder.getTokens(english.toLowerCase());
         if (tokens.size() > 1) {
           for (String token : tokens) {
@@ -69,7 +71,7 @@ public class ExerciseTrie extends Trie<CommonExercise> {
       if (includeForeign) {
         String fl = exercise.getForeignLanguage();
         if (fl != null && !fl.isEmpty()) {
-          addEntryToTrie(new ExerciseWrapper(exercise, false));
+          addEntryToTrie(new ExerciseWrapper<T>(exercise, false));
 
           Collection<String> tokens = isMandarin ?
               getMandarinTokens(smallVocabDecoder, exercise) : smallVocabDecoder.getTokens(fl);
@@ -111,11 +113,11 @@ public class ExerciseTrie extends Trie<CommonExercise> {
     }
   }
 
-  private boolean addEntry(CommonExercise exercise, String token) {
-    return addEntryToTrie(new ExerciseWrapper(token, exercise));
+  private boolean addEntry(T exercise, String token) {
+    return addEntryToTrie(new ExerciseWrapper<T>(token, exercise));
   }
 
-  private Collection<String> getMandarinTokens(SmallVocabDecoder smallVocabDecoder, CommonExercise e) {
+  private Collection<String> getMandarinTokens(SmallVocabDecoder smallVocabDecoder, T e) {
     return smallVocabDecoder.getMandarinTokens(e.getForeignLanguage());
   }
 
@@ -126,30 +128,30 @@ public class ExerciseTrie extends Trie<CommonExercise> {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseListWrapperForPrefix
    */
-  public Collection<CommonExercise> getExercises(String prefix, SmallVocabDecoder smallVocabDecoder) {
+  public Collection<T> getExercises(String prefix, SmallVocabDecoder smallVocabDecoder) {
     return getMatches(smallVocabDecoder.getTrimmed(prefix.toLowerCase()));
   }
 
-  private static class ExerciseWrapper implements TextEntityValue<CommonExercise> {
+  private static class ExerciseWrapper<T extends CommonShell> implements TextEntityValue<T> {
     private final String value;
-    private final CommonExercise e;
+    private final T e;
 
     /**
      * @param e
      * @param useEnglish
      * @see ExerciseTrie#ExerciseTrie
      */
-    public ExerciseWrapper(CommonExercise e, boolean useEnglish) {
+    public ExerciseWrapper(T e, boolean useEnglish) {
       this((useEnglish ? e.getEnglish().toLowerCase() : e.getForeignLanguage()), e);
     }
 
-    public ExerciseWrapper(String value, CommonExercise e) {
+    public ExerciseWrapper(String value, T e) {
       this.value = value;
       this.e = e;
     }
 
     @Override
-    public CommonExercise getValue() {
+    public T getValue() {
       return e;
     }
 
