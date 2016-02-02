@@ -104,14 +104,23 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
     setWidth("100%");
  //   addStyleName("inlineBlockStyle");
     getElement().setId("GoodwaveExercisePanel");
+
+    this.navigationHelper = getNavigationHelper(controller, listContainer, addKeyHandler);
+    this.listContainer = listContainer;
+    navigationHelper.addStyleName("topBarMargin");
+
+    addContent();
+  }
+
+  public void addContent() {
     final Panel center = new VerticalPanel();
     center.getElement().setId("GoodwaveVerticalCenter");
     center.addStyleName("floatLeft");
     // attempt to left justify
 
-    ASRScorePanel widgets = makeScorePanel(commonExercise, instance);
+    ASRScorePanel widgets = makeScorePanel(exercise, instance);
 
-    addQuestionContentRow(commonExercise, controller, center);
+    addQuestionContentRow(exercise, controller, center);
 
     // content is on the left side
     add(center);
@@ -121,20 +130,14 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
       add(widgets);
     }
     if (controller.isRecordingEnabled()) {
-      addUserRecorder(service, controller, center, screenPortion, commonExercise); // todo : revisit screen portion...
+      addUserRecorder(service, controller, center, screenPortion, exercise); // todo : revisit screen portion...
     }
-
-    this.navigationHelper = getNavigationHelper(controller, listContainer, addKeyHandler);
-    this.listContainer = listContainer;
-    navigationHelper.addStyleName("topBarMargin");
 
     if (!controller.showOnlyOneExercise()) { // headstart doesn't need navigation, lists, etc.
       center.add(navigationHelper);
     }
   }
 
-//  private void addBelowPlaybackWidget(CommonExercise e, Panel toAddTo) {
-//  }
 
   protected NavigationHelper getNavigationHelper(ExerciseController controller,
                                                  final ListInterface<T> listContainer, boolean addKeyHandler) {
