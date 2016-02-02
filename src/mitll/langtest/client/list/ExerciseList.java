@@ -168,7 +168,7 @@ public abstract class ExerciseList<T extends CommonShell>
    * After re-fetching the ids, select this one.
    *
    * @param id
-   * @see mitll.langtest.client.custom.dialog.EditableExercise#doAfterEditComplete(ListInterface, boolean)
+   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#doAfterEditComplete
    */
   @Override
   public void reloadWith(String id) {
@@ -226,7 +226,7 @@ public abstract class ExerciseList<T extends CommonShell>
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   void pushNewItem(String search, String exerciseID) {
-    logger.info("------------ ExerciseList.pushNewItem : (" + getInstance() + ") push history " + exerciseID + " - ");
+    //logger.info("------------ ExerciseList.pushNewItem : (" + getInstance() + ") push history " + exerciseID + " - ");
     History.newItem("#" + "search=" + search + ";" +
         "item=" + exerciseID + ";instance=" + getInstance());
   }
@@ -400,9 +400,11 @@ public abstract class ExerciseList<T extends CommonShell>
    */
   public void rememberAndLoadFirst(List<T> exercises, CommonExercise firstExercise,
                                    String selectionID) {
+/*
     logger.info("ExerciseList : rememberAndLoadFirst instance '" + getInstance() +
         "' remembering " + exercises.size() + " exercises, " + selectionID +
         " first = " + firstExercise);
+*/
 
     exercises = rememberExercises(exercises);
     for (ListChangeListener<T> listener : listeners) {
@@ -420,7 +422,7 @@ public abstract class ExerciseList<T extends CommonShell>
     if (firstExercise != null) {
 //      CommonShell firstExerciseShell = findFirstExercise();
 //      if (firstExerciseShell.getID().equals(firstExercise.getID())) {
-        logger.info("ExerciseList : rememberAndLoadFirst using first = " + firstExercise);
+      //  logger.info("ExerciseList : rememberAndLoadFirst using first = " + firstExercise);
 
       pushFirstSelection(firstExercise.getID());
    //   useExercise(firstExercise);   // allows us to skip another round trip with the server to ask for the first exercise
@@ -659,7 +661,7 @@ public abstract class ExerciseList<T extends CommonShell>
   /**
    * @param commonExercise
    * @see #rememberAndLoadFirst(java.util.List, mitll.langtest.shared.exercise.CommonExercise, String)
-   * @see ExerciseAsyncCallback#onSuccess(mitll.langtest.shared.exercise.CommonExercise)
+   * @see ExerciseAsyncCallback#onSuccess
    */
   protected void useExercise(final T commonExercise) {
     //  logger.info("ExerciseList.useExercise : commonExercise " + commonExercise.getID());
@@ -683,7 +685,7 @@ public abstract class ExerciseList<T extends CommonShell>
 
   /**
    * @param exercise
-   * @see #useExercise(mitll.langtest.shared.exercise.CommonExercise)
+   * @see #useExercise
    */
   private Panel makeExercisePanel(T exercise) {
     logger.info("ExerciseList.makeExercisePanel : " + exercise + " instance " + instance);
@@ -722,7 +724,7 @@ public abstract class ExerciseList<T extends CommonShell>
   /**
    * @param currentID
    * @return
-   * @see #useExercise(mitll.langtest.shared.exercise.CommonExercise)
+   * @see #useExercise
    */
   public int getIndex(String currentID) {
     T shell = byID(currentID);
