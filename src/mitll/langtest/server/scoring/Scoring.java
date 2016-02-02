@@ -65,7 +65,6 @@ public abstract class Scoring {
    * By keeping these here, we ensure that we only ever read the dictionary once
    */
   HTKDictionary htkDictionary;
-  final LTS letterToSoundClass;
   final ConfigFileCreator configFileCreator;
   final boolean isMandarin;
 
@@ -97,13 +96,15 @@ public abstract class Scoring {
     isMandarin = language.equalsIgnoreCase("mandarin");
     if (isMandarin) logger.warn("using mandarin segmentation.");
     ltsFactory = new LTSFactory(languageProperty);
-    this.letterToSoundClass = ltsFactory.getLTSClass(language);
-
-    this.configFileCreator = new ConfigFileCreator(properties, letterToSoundClass, scoringDir);
+    this.configFileCreator = new ConfigFileCreator(properties, getLTS(), scoringDir);
 
     readDictionary();
     makeDecoder();
-    checkLTSHelper = new CheckLTS(letterToSoundClass, htkDictionary, language);
+    checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language);
+  }
+
+  protected LTS getLTS() {
+    return ltsFactory.getLTSClass();
   }
 
   private static String getScoringDir(String deployPath) {
@@ -384,7 +385,7 @@ public abstract class Scoring {
   /**
    * @param foreignLanguagePhrase
    * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#inDictOrLTS(String)
+   * @see mitll.langtest.server.audio.AudioFileHelper#inDictOrLTS
    */
   Set<String> checkLTS(String foreignLanguagePhrase) {
     return checkLTSHelper.checkLTS(foreignLanguagePhrase);
@@ -439,11 +440,11 @@ public abstract class Scoring {
   /**
    * @param toSort
    * @param <T>
-   * @see ASR#sort(List)
+   * @seex ASR#sort(List)
    */
-  public <T extends CommonExercise> void sort(List<T> toSort) {
+/*  public <T extends CommonExercise> void sort(List<T> toSort) {
     ltsFactory.sort(toSort);
-  }
+  }*/
 
   public Collator getCollator() {
     return ltsFactory.getCollator();
