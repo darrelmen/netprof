@@ -7,7 +7,6 @@ package mitll.langtest.server.sorter;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
@@ -33,7 +32,7 @@ public class SimpleSorter extends ExerciseComparator {
    * @return
    * @see LangTestDatabaseImpl#sortExercises(String, List)
    */
-  public void getSortedByUnitThenAlpha(List<? extends CommonExercise> toSort, final boolean recordedLast) {
+  public void getSortedByUnitThenAlpha(List<? extends CommonShell> toSort, final boolean recordedLast) {
     if (typeOrder.isEmpty()) {
       sortByTooltip(toSort);
     } else {
@@ -46,9 +45,9 @@ public class SimpleSorter extends ExerciseComparator {
         }
       }
       if (allPredef) {*/
-        Collections.sort(toSort, new Comparator<CommonExercise>() {
+        Collections.sort(toSort, new Comparator<CommonShell>() {
           @Override
-          public int compare(CommonExercise o1, CommonExercise o2) {
+          public int compare(CommonShell o1, CommonShell o2) {
            // return SimpleSorter.this.compare(o1, o2, recordedLast);
             return SimpleSorter.this.simpleCompare(o1, o2, recordedLast);
           }
