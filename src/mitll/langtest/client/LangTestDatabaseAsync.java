@@ -87,7 +87,7 @@ public interface LangTestDatabaseAsync {
 
   void getListsForUser(long userid, boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList>> async);
 
-  void addItemToUserList(long userListID, UserExercise userExercise, AsyncCallback<Void> async);
+  void addItemToUserList(long userListID, String exID, AsyncCallback<Void> async);
 
   void reallyCreateNewItem(long userListID, CombinedMutableUserExercise userExercise, AsyncCallback<CommonExercise> async);
 
