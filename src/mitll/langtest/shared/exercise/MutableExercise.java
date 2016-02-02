@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * Created by go22670 on 2/1/16.
  */
-public interface MutableExercise {
+public interface MutableExercise extends CommonShell {
   void setBagOfPhones(Set<String> bagOfPhones);
 
   void setFirstPron(List<String> phones);
