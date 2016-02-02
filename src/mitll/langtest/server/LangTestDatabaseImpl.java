@@ -1217,8 +1217,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
-  public void addItemToUserList(long userListID, UserExercise userExercise) {
-    db.getUserListManager().addItemToUserList(userListID, userExercise);
+  public void addItemToUserList(long userListID,String exID) {
+    db.getUserListManager().addItemToUserList(userListID, exID);
   }
 
   /**
@@ -1248,7 +1248,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param id
    * @param state
    * @param creatorID
-   * @see mitll.langtest.client.qc.QCNPFExercise#markAttentionLL(ListInterface, CommonShell)
+   * @see mitll.langtest.client.qc.QCNPFExercise#markAttentionLL
    */
   public void markState(String id, STATE state, long creatorID) {
     db.getUserListManager().markState(id, state, creatorID);
