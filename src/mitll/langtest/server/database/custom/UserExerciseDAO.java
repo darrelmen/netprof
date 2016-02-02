@@ -8,10 +8,10 @@ import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.CommonUserExercise;
-import mitll.langtest.shared.custom.UserExercise;
+import mitll.langtest.shared.exercise.MutableUserExercise;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -80,10 +80,10 @@ public class UserExerciseDAO extends DAO {
    * <p>
    * Uses return generated keys to get the user id
    *
-   * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise, String)
-   * @see #update(mitll.langtest.shared.custom.UserExercise, boolean)
+   * @see UserListManager#reallyCreateNewItem
+   * @see #update
    */
-  public void add(UserExercise userExercise, boolean isOverride) {
+  public  void add(CommonExercise userExercise, boolean isOverride) {
     List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
 
     try {
@@ -112,7 +112,7 @@ public class UserExerciseDAO extends DAO {
       statement.setString(i++, fixSingleQuote(userExercise.getEnglish()));
       statement.setString(i++, fixSingleQuote(userExercise.getForeignLanguage()));
       statement.setString(i++, fixSingleQuote(userExercise.getTransliteration()));
-      statement.setLong(i++, userExercise.getCreator());
+      statement.setLong(i++, userExercise.getCombinedMutableUserExercise().getCreator());
       statement.setString(i++, fixSingleQuote(userExercise.getContext()));
       statement.setString(i++, fixSingleQuote(userExercise.getContextTranslation()));
       statement.setBoolean(i++, isOverride);
@@ -146,7 +146,7 @@ public class UserExerciseDAO extends DAO {
       }
       //logger.debug("unique id = " + id);
 
-      userExercise.setUniqueID(id);
+      userExercise.getCombinedMutableUserExercise().setUniqueID(id);
 
       // TODO : consider making this an actual prepared statement?
       boolean predefined = userExercise.isPredefined();
@@ -157,11 +157,11 @@ public class UserExerciseDAO extends DAO {
             "SET " +
             EXERCISEID +
             "='" + customID + "' " +
-            "WHERE uniqueid=" + userExercise.getUniqueID();
+            "WHERE uniqueid=" + userExercise.getCombinedMutableUserExercise().getUniqueID();
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.executeUpdate();
         preparedStatement.close();
-        userExercise.setID(customID);
+        userExercise.getCombinedMutableUserExercise().setID(customID);
 
         //logger.debug("\tuserExercise= " + userExercise);
       }
@@ -229,14 +229,14 @@ public class UserExerciseDAO extends DAO {
       List<CommonExercise> userExercises = getUserExercises(sql);
       long now = System.currentTimeMillis();
 
-      if (DEBUG || (now-then) > 30) {
-        logger.debug("getOnList : took " + (now-then) +
+      if (DEBUG || (now - then) > 30) {
+        logger.debug("getOnList : took " + (now - then) +
             " found " + userExercises.size() + " exercises userExercises on list " + listID);
       }
 
 
       for (CommonExercise ue : userExercises) {
-       // if (DEBUG) logger.debug("\ton list " + listID + " " + ue.getID() + " / " + ue.getUniqueID() + " : " + ue);
+        // if (DEBUG) logger.debug("\ton list " + listID + " " + ue.getID() + " / " + ue.getUniqueID() + " : " + ue);
         if (ue.isPredefined()) {
           CommonExercise byID = getExercise(ue);
 
@@ -513,7 +513,7 @@ public class UserExerciseDAO extends DAO {
   }
 
   private Map<String, String> getUnitToValue(ResultSet rs, List<String> typeOrder) throws SQLException {
-    String first  = rs.getString(UNIT);
+    String first = rs.getString(UNIT);
     String second = rs.getString(LESSON);
     Map<String, String> unitToValue = new HashMap<String, String>();
 
@@ -548,7 +548,7 @@ public class UserExerciseDAO extends DAO {
    * @param createIfDoesntExist
    * @see UserListManager#editItem(mitll.langtest.shared.custom.UserExercise, boolean, String)
    */
-  public void update(UserExercise userExercise, boolean createIfDoesntExist) {
+  public void update(CommonExercise userExercise, boolean createIfDoesntExist) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + USEREXERCISE +
