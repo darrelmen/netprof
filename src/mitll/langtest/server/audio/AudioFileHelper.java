@@ -106,7 +106,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
             }
             count++;
           } else {
-            countPhones(exercise.getCombinedMutableUserExercise());
+            countPhones(exercise.getMutable());
           }
         }
 
@@ -121,6 +121,11 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
     return asrScoring.validLTS(exercise.getForeignLanguage());
   }
 
+  /**
+   * @see #checkLTSAndCountPhones(List)
+   * @param exercise
+   * @param <T>
+   */
   private <T extends CommonShell & MutableExercise> void countPhones(T exercise) {
     ASR.PhoneInfo bagOfPhones = asrScoring.getBagOfPhones(exercise.getForeignLanguage());
     exercise.setBagOfPhones(bagOfPhones.getPhoneSet());

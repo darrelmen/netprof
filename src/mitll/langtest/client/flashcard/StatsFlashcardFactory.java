@@ -22,7 +22,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.exercise.*;
@@ -160,7 +159,7 @@ public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & An
         ADD_KEY_BINDING,
         StatsFlashcardFactory.this.controlState,
         soundFeedback,
-        soundFeedback.endListener, StatsFlashcardFactory.this.instance, exerciseList) {
+        soundFeedback.getEndListener(), StatsFlashcardFactory.this.instance, exerciseList) {
       @Override
       protected void gotShuffleClick(boolean b) {
         sticky.resetStorage();
@@ -215,7 +214,7 @@ public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & An
   }
 
   private long latestResultID = -1;
-  private final MySoundFeedback soundFeedback = new MySoundFeedback();
+  private final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
 
   public void resetStorage() {
     sticky.resetStorage();
@@ -243,7 +242,8 @@ public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & An
           ADD_KEY_BINDING,
           StatsFlashcardFactory.this.controlState,
           soundFeedback,
-          soundFeedback.endListener, StatsFlashcardFactory.this.instance, exerciseListToUse);
+          soundFeedback.getEndListener(),
+          StatsFlashcardFactory.this.instance, exerciseListToUse);
      // logger.info("made " + this.getElement().getId() + " for " + e.getID());
     }
 
@@ -698,39 +698,4 @@ public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & An
     }
   }
 
-  public class MySoundFeedback extends SoundFeedback {
-    public MySoundFeedback() {
-      super(StatsFlashcardFactory.this.controller.getSoundManager());
-    }
-
-    public synchronized void queueSong(String song, SoundFeedback.EndListener endListener) {
-      //logger.info("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
-      destroySound(); // if there's something playing, stop it!
-      createSound(song, endListener);
-    }
-
-    public synchronized void queueSong(String song) {
-      //logger.info("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
-      destroySound(); // if there's something playing, stop it!
-      createSound(song, null);
-    }
-
-    public synchronized void clear() {
-      //  logger.info("\t stop playing current sound -------  "+ System.currentTimeMillis());
-      destroySound(); // if there's something playing, stop it!
-    }
-
-    // TODO : remove this empty listener
-    private final SoundFeedback.EndListener endListener = new SoundFeedback.EndListener() {
-      @Override
-      public void songStarted() {
-        //logger.info("song started --------- "+ System.currentTimeMillis());
-      }
-
-      @Override
-      public void songEnded() {
-        //logger.info("song ended   --------- " + System.currentTimeMillis());
-      }
-    };
-  }
 }
