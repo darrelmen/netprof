@@ -244,7 +244,7 @@ public class AudioExport {
 
       // TODO : some horrible hacks to deal with UserExercise vs Exercise confusion about fields.
       // WORD_EXPRESSION
-      String english1 = english ? exercise.getRefSentence() : exercise.getEnglish();
+      String english1 = english ? exercise.getForeignLanguage() : exercise.getEnglish();
       row.createCell(j++).setCellValue(english1);
 
       if (!english) {

@@ -11,6 +11,7 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.logging.Logger;
@@ -18,7 +19,7 @@ import java.util.logging.Logger;
 /**
  * Created by GO22670 on 3/28/2014.
  */
-public abstract class FlexListLayout<T extends Shell> implements RequiresResize {
+public abstract class FlexListLayout<T extends CommonShell> implements RequiresResize {
   private Logger logger = Logger.getLogger("FlexListLayout");
 
   public PagingExerciseList<T> npfExerciseList;
@@ -135,7 +136,7 @@ public abstract class FlexListLayout<T extends Shell> implements RequiresResize 
     return exerciseList;
   }
 
-  protected abstract ExercisePanelFactory getFactory(final PagingExerciseList exerciseList, final String instanceName);
+  protected abstract ExercisePanelFactory<T> getFactory(final PagingExerciseList<T> exerciseList, final String instanceName);
 
   protected abstract PagingExerciseList<T> makeExerciseList(final Panel topRow, Panel currentExercisePanel,
                                                    final String instanceName, boolean incorrectFirst);
