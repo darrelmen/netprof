@@ -58,46 +58,9 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
     //logger.debug("lang " + language + " looking at " + exercisesForState.size());
 
     for (T exercise : exercisesForState) {
-      String english = exercise.getEnglish();
-      if (english != null && !english.isEmpty()) {
-        addEntryToTrie(new ExerciseWrapper<T>(exercise, true));
-        Collection<String> tokens = smallVocabDecoder.getTokens(english.toLowerCase());
-        if (tokens.size() > 1) {
-          for (String token : tokens) {
-            addEntry(exercise, token);
-          }
-        }
-      }
+      addEnglish(smallVocabDecoder, exercise);
       if (includeForeign) {
-        String fl = exercise.getForeignLanguage();
-        if (fl != null && !fl.isEmpty()) {
-          addEntryToTrie(new ExerciseWrapper<T>(exercise, false));
-
-          Collection<String> tokens = isMandarin ?
-              getMandarinTokens(smallVocabDecoder, exercise) : smallVocabDecoder.getTokens(fl);
-          for (String token : tokens) {
-            addEntry(exercise, token);
-            addEntry(exercise, removeDiacritics(token));
-          }
-
-          if (hasClickableCharacters) {
-            final CharacterIterator it = new StringCharacterIterator(fl);
-
-            for(char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
-              Character character = c;
-              if (!Character.isSpaceChar(c)) {
-                addEntry(exercise, character.toString());
-              }
-            }
-          }
-
-          String transliteration = exercise.getTransliteration();
-
-          for (String t : smallVocabDecoder.getTokens(transliteration)) {
-            addEntry(exercise, t);
-            addEntry(exercise, removeDiacritics(t));
-          }
-        }
+        addForeign(smallVocabDecoder, isMandarin, hasClickableCharacters, exercise);
       }
       else {
         for (String t : smallVocabDecoder.getTokens(exercise.getMeaning())) {
@@ -113,8 +76,66 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
     }
   }
 
+  /**
+   * Mandarin has a special tokenizer.
+   *
+   * @param smallVocabDecoder
+   * @param isMandarin
+   * @param hasClickableCharacters
+   * @param exercise
+   */
+  private void addForeign(SmallVocabDecoder smallVocabDecoder, boolean isMandarin, boolean hasClickableCharacters,
+                          T exercise) {
+    String fl = exercise.getForeignLanguage();
+    if (fl != null && !fl.isEmpty()) {
+      addEntryToTrie(new ExerciseWrapper<T>(exercise, false));
+
+      Collection<String> tokens = isMandarin ?
+          getMandarinTokens(smallVocabDecoder, exercise) : smallVocabDecoder.getTokens(fl);
+      for (String token : tokens) {
+        addEntry(exercise, token);
+        addEntry(exercise, removeDiacritics(token));
+      }
+
+      if (hasClickableCharacters) {
+        addClickableCharacters(exercise, fl);
+      }
+
+      String transliteration = exercise.getTransliteration();
+
+      for (String t : smallVocabDecoder.getTokens(transliteration)) {
+        addEntry(exercise, t);
+        addEntry(exercise, removeDiacritics(t));
+      }
+    }
+  }
+
+  private void addEnglish(SmallVocabDecoder smallVocabDecoder, T exercise) {
+    String english = exercise.getEnglish();
+    if (english != null && !english.isEmpty()) {
+      addEntryToTrie(new ExerciseWrapper<T>(exercise, true));
+      Collection<String> tokens = smallVocabDecoder.getTokens(english.toLowerCase());
+      if (tokens.size() > 1) {
+        for (String token : tokens) {
+          addEntry(exercise, token);
+        }
+      }
+    }
+  }
+
+  private void addClickableCharacters(T exercise, String fl) {
+    final CharacterIterator it = new StringCharacterIterator(fl);
+
+    for(char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
+      Character character = c;
+      if (!Character.isSpaceChar(c)) {
+        addEntry(exercise, character.toString());
+      }
+    }
+  }
+
   private boolean addEntry(T exercise, String token) {
-    return addEntryToTrie(new ExerciseWrapper<T>(token, exercise));
+    return addEntryToTrie(new ExerciseWrapper<T>(token.toLowerCase(), exercise));
   }
 
   private Collection<String> getMandarinTokens(SmallVocabDecoder smallVocabDecoder, T e) {
@@ -142,7 +163,7 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
      * @see ExerciseTrie#ExerciseTrie
      */
     public ExerciseWrapper(T e, boolean useEnglish) {
-      this((useEnglish ? e.getEnglish().toLowerCase() : e.getForeignLanguage()), e);
+      this((useEnglish ? e.getEnglish().toLowerCase() : e.getForeignLanguage().toLowerCase()), e);
     }
 
     public ExerciseWrapper(String value, T e) {
