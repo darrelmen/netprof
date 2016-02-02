@@ -19,13 +19,17 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
+import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
@@ -43,8 +47,8 @@ import java.util.logging.Logger;
  * Time: 5:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class CommentNPFExercise<T extends CommonShell & AudioAttributeExercise & AnnotationExercise & ScoredExercise> extends NPFExercise<T> {
-  private final Logger logger = Logger.getLogger("CommentNPFExercise");
+public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T> {
+  private Logger logger = Logger.getLogger("CommentNPFExercise");
 
   private static final String CONTEXT = "context";
   private static final String CONTEXT_SENTENCE = "Context Sentence";
@@ -56,7 +60,6 @@ public class CommentNPFExercise<T extends CommonShell & AudioAttributeExercise &
   public static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";//"\\p{P}";
   public static final String SPACE_REGEX = " ";
   private static final String REF_AUDIO = "refAudio";
-  private final MutableAnnotationExercise mutableAnnotation;
 
   private AudioAttribute defaultAudio, maleAudio, femaleAudio;
   private PlayAudioPanel contextPlay;
@@ -69,18 +72,19 @@ public class CommentNPFExercise<T extends CommonShell & AudioAttributeExercise &
    * @param listContainer
    * @param addKeyHandler
    * @param instance
-   * @param mutableAnnotation
+   * @paramx mutableAnnotation
+   * @see mitll.langtest.client.custom.Navigation#Navigation(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback)
+   * @see mitll.langtest.client.custom.content.NPFHelper#getFactory(PagingExerciseList, String, boolean)
    */
   public CommentNPFExercise(T e, ExerciseController controller, ListInterface<T> listContainer,
-                            boolean addKeyHandler, String instance, MutableAnnotationExercise mutableAnnotation) {
+                            boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, 1.0f, addKeyHandler, instance);
-    this.mutableAnnotation = mutableAnnotation;
   }
 
   /**
    * @param content
    * @return
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getQuestionContent(T)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getQuestionContent
    */
   @Override
   protected Widget getQuestionContent(final T e, String content) {
@@ -114,10 +118,18 @@ public class CommentNPFExercise<T extends CommonShell & AudioAttributeExercise &
     return column;
   }
 
+  /**
+   * @see #getEntry(String, String, String, ExerciseAnnotation)
+   * @see #makeFastAndSlowAudio(String)
+   * @return
+   */
   private CommentBox<T> getCommentBox() {
+    if (logger == null) {
+      logger = Logger.getLogger("CommentNPFExercise");
+    }
     logger.info("exercise " + exercise);
-    logger.info("mutableAnnotation " + mutableAnnotation);
-    return new CommentBox<T>(exercise, controller, this, mutableAnnotation);
+   // logger.info("mutableAnnotation " + mutableAnnotation);
+    return new CommentBox<T>(exercise, controller, this, exercise.getMutableAnnotation());
   }
 
   private void addContextButton(final T e, DivWidget row) {
