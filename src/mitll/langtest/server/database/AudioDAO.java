@@ -13,6 +13,8 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.MutableAudioExercise;
+import mitll.langtest.shared.exercise.MutableExercise;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -208,16 +210,20 @@ public class AudioDAO extends DAO {
     //  logger.debug("\tremoving  " + toRemove.size());
     //}
 
+    MutableAudioExercise mutable = firstExercise.getMutableAudio();
     for (AudioAttribute attr : toRemove) {
-      if (!firstExercise.removeAudio(attr)) logger.warn("huh? didn't remove " + attr);
+
+      if (!mutable.removeAudio(attr)) logger.warn("huh? didn't remove " + attr);
       //else {
       //   logger.debug("\tremoving " +attr);
       //  }
     }
   }
 
-  private void attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir, AudioConversion audioConversion, AudioAttribute attr) {
-    firstExercise.addAudio(attr);
+  private void attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir,
+                           AudioConversion audioConversion, AudioAttribute attr) {
+    MutableAudioExercise mutable = firstExercise.getMutableAudio();
+    mutable.addAudio(attr);
     //   logger.debug("\trelativeConfigDir '" + relativeConfigDir + "'");
 
     if (attr.getAudioRef() == null) logger.error("huh? no audio ref for " + attr + " under " + firstExercise);
