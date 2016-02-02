@@ -16,7 +16,7 @@ import java.util.*;
  * Time: 1:03 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AmasExerciseImpl implements Shell /*implements CommonExercise*/ {
+public class AmasExerciseImpl implements CommonShell /*implements CommonExercise*/ {
   public static final String EN = "en";
   public static final String FL = "fl";
  // private static final int MAX_TOOLTIP_LENGTH = 15;
@@ -316,5 +316,36 @@ public class AmasExerciseImpl implements Shell /*implements CommonExercise*/ {
   //      " audio count = " + audioAttributes1.size()+
     //    (builder.toString().isEmpty() ? "":" \n\tmissing user audio " + builder.toString()) +
         " unit->lesson " + getUnitToValue();
+  }
+
+  // TODO : workaround for the moment - hard to use the current exercise lists without extending from CommonShell...?
+  @Override
+  public String getEnglish() {
+    return null;
+  }
+
+  @Override
+  public String getMeaning() {
+    return null;
+  }
+
+  @Override
+  public String getForeignLanguage() {
+    return null;
+  }
+
+  @Override
+  public String getTransliteration() {
+    return null;
+  }
+
+  @Override
+  public String getContext() {
+    return null;
+  }
+
+  @Override
+  public String getContextTranslation() {
+    return null;
   }
 }
