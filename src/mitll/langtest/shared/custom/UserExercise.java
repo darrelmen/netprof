@@ -220,18 +220,13 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
 
   @Override
   public MutableAnnotationExercise getMutableAnnotation() {
-    return null;
+    return this;
   }
 
   @Override
   public CombinedMutableUserExercise getCombinedMutableUserExercise() {
     return this;
   }
-
-//  @Override
-//  public UserExercise toUserExercise() {
-//    return this;
-//  }
 
   /**
    * @return
