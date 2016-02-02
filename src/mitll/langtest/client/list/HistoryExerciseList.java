@@ -122,7 +122,7 @@ public class HistoryExerciseList<T extends CommonShell> extends PagingExerciseLi
       logger.info("------------ HistoryExerciseList.pushNewItem : push history '" + historyToken + "' -------------- " + search + " : " + exerciseID);
 
     String token = History.getToken();
-    logger.info("\tpushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
+   // logger.info("\tpushNewItem : current token '" + token + "' vs new id '" + exerciseID +"'");
 
     token = getSelectionFromToken(token);
     if (DEBUG)
@@ -145,11 +145,11 @@ public class HistoryExerciseList<T extends CommonShell> extends PagingExerciseLi
   protected void pushFirstListBoxSelection() {
     String initToken = History.getToken();
     if (initToken.length() == 0) {
-      logger.info("pushFirstListBoxSelection : history token is blank " + getInstance());
+      //logger.info("pushFirstListBoxSelection : history token is blank " + getInstance());
 
       pushNewSectionHistoryToken();
     } else {
-      logger.info("pushFirstListBoxSelection fire history for token from URL: " + initToken + " instance " + getInstance());
+      //logger.info("pushFirstListBoxSelection fire history for token from URL: " + initToken + " instance " + getInstance());
       History.fireCurrentHistoryState();
     }
   }
@@ -164,8 +164,8 @@ public class HistoryExerciseList<T extends CommonShell> extends PagingExerciseLi
 
     if (currentToken.equals(historyToken)) {
       if (isEmpty() || historyToken.isEmpty()) {
-        logger.info("pushNewSectionHistoryToken : noSectionsGetExercises for token '" + historyToken +
-            "' " + "current has " + getSize() + " instance " + getInstance());
+/*        logger.info("pushNewSectionHistoryToken : noSectionsGetExercises for token '" + historyToken +
+            "' " + "current has " + getSize() + " instance " + getInstance());*/
 
         noSectionsGetExercises(userID);
       } else {
