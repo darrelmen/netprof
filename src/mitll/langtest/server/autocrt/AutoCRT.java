@@ -495,7 +495,8 @@ public class AutoCRT {
           " (" + answer1.length() + ") expected " + expectedGrade + " given " + exerciseExport.id +
           " keys  " + exerciseExport.key +  " rg " + exerciseExport.rgs.size() + " : " + grades);*/
 
-      double classScore = AutoGradeExperiment.getScore(getClassifier(), answer1, exerciseExport);
+      // TODO : don't use Jacob classifier for now - 2/1/16 GWFV
+      double classScore = 0;//AutoGradeExperiment.getScore(getClassifier(), answer1, exerciseExport);
 
       long now = System.currentTimeMillis();
       // List<ResponseAndGrade> rgs = exerciseExport.rgs;
@@ -738,11 +739,17 @@ public class AutoCRT {
 
       long then = System.currentTimeMillis();
       logger.info("training classifier...");
-      AutoGradeExperiment.saveClassifierAfterExport(export, serializedClassifier.getAbsolutePath());
+
+      // TODO : don't support Jacob Classifier for now 2/1/16 GWFV
+      // AutoGradeExperiment.saveClassifierAfterExport(export, serializedClassifier.getAbsolutePath());
+
       long now = System.currentTimeMillis();
 
       logger.info("took " + ((now - then) / 1000) + " seconds to save classifier to " + serializedClassifier.getAbsolutePath());
-      classifier = AutoGradeExperiment.getClassifierFromSavedModel(serializedClassifier.getAbsolutePath(), export);
+
+      // TODO : don't support Jacob Classifier for now 2/1/16 GWFV
+      //classifier = AutoGradeExperiment.getClassifierFromSavedModel(serializedClassifier.getAbsolutePath(), export);
+
       return classifier;
     }
   }
@@ -766,8 +773,10 @@ public class AutoCRT {
     }
     readConfigFile(configDir);
     then = now;
-    Classifier<AutoGradeExperiment.Event> classifier =
-        AutoGradeExperiment.getClassifierFromSavedModel(serializedClassifier.getAbsolutePath(), export);
+    // TODO : don't support Jacob Classifier for now 2/1/16 GWFV
+
+    Classifier<AutoGradeExperiment.Event> classifier = null;
+//        AutoGradeExperiment.getClassifierFromSavedModel(serializedClassifier.getAbsolutePath(), export);
     reportTime(then);
     return classifier;
   }

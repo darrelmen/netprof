@@ -669,7 +669,7 @@ public class ScoreServlet extends DatabaseServlet {
     if (doFlashcard) {
       answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, -1, deviceType, device, reqid, allowAlternates);
     } else {
-      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, wavPath, exercise1.getRefSentence(), exerciseID, usePhoneToDisplay);
+      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, wavPath, exercise1.getForeignLanguage(), exerciseID, usePhoneToDisplay);
       answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(), deviceType, device, reqid, allowAlternates);
       answer.setPretestScore(asrScoreForAudio);
     }
@@ -692,7 +692,7 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private AudioAnswer getAudioAnswerAlign(int reqid, String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile,
                                           String deviceType, String device, CommonExercise exercise1, boolean usePhoneToDisplay) {
-    PretestScore asrScoreForAudio = getASRScoreForAudioNoCache(reqid, saveFile.getAbsolutePath(), exercise1.getRefSentence(), exerciseID, usePhoneToDisplay);
+    PretestScore asrScoreForAudio = getASRScoreForAudioNoCache(reqid, saveFile.getAbsolutePath(), exercise1.getForeignLanguage(), exerciseID, usePhoneToDisplay);
     AudioAnswer answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(), deviceType, device, reqid, false);
     answer.setPretestScore(asrScoreForAudio);
     return answer;
