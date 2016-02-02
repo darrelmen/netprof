@@ -252,9 +252,13 @@ public class NPFHelper implements RequiresResize {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
         if (showQC) {
-          return new QCNPFExercise<CommonExercise>(e, controller, exerciseList, instanceName);
+          QCNPFExercise<CommonExercise> widgets = new QCNPFExercise<>(e, controller, exerciseList, instanceName);
+          widgets.addContent();
+          return widgets;
         } else {
-          return new CommentNPFExercise<CommonExercise>(e, controller, exerciseList, false, instanceName, e.getMutableAnnotation());
+          CommentNPFExercise<CommonExercise> widgets = new CommentNPFExercise<>(e, controller, exerciseList, false, instanceName, e.getMutableAnnotation());
+          widgets.addContent();
+          return widgets;
         }
       }
     };

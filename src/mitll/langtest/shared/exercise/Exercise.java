@@ -26,7 +26,6 @@ import java.util.Set;
 public class Exercise extends AudioExercise implements CommonExercise, MutableExercise, MutableAudioExercise, MutableAnnotationExercise {
   private transient String refAudioIndex;
   private transient Collection<String> refSentences = new ArrayList<String>();
-  //private List<String> translitSentences = new ArrayList<String>();
   private List<CorrectAndScore> scores;
   private float avgScore;
 
