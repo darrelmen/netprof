@@ -237,11 +237,6 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     return !getID().startsWith(CUSTOM_PREFIX);
   }
 
-/*  @Override
-  public long getModifiedDateTimestamp() {
-    return modifiedTimestamp;
-  }*/
-
   public List<CorrectAndScore> getScores() {
     return scores;
   }
@@ -299,6 +294,10 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
         // " :" + getAudioAttributes() +
         " unit/lesson " + getUnitToValue() +
         " state " + getState() + "/" + getSecondState() +
-        " modified " + modifiedTimestamp;
+        " modified " + new Date(modifiedTimestamp);
+  }
+
+  public long getModifiedTimestamp() {
+    return modifiedTimestamp;
   }
 }
