@@ -4,7 +4,9 @@
 
 package mitll.langtest.server.scoring;
 
-import corpus.*;
+import corpus.EmptyLTS;
+import corpus.LTS;
+import corpus.ModernStandardArabicLTS;
 import mitll.langtest.server.database.AudioExport;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
@@ -27,60 +29,59 @@ public class LTSFactory implements CollationSort {
 
   // known languages
   public enum Language {
-    ARABIC, DARI, EGYPTIAN, ENGLISH, FARSI, JAPANESE, IRAQI, LEVANTINE, KOREAN, MANDARIN, MSA, PASHTO, RUSSIAN, SPANISH, SUDANESE, TAGALOG, URDU
+    ARABIC, DARI, EGYPTIAN, ENGLISH, FARSI, FRENCH, GERMAN, JAPANESE, IRAQI, LEVANTINE, KOREAN, MANDARIN, MSA,
+    PASHTO, PORTUGUESE, RUSSIAN, SPANISH, SUDANESE, TAGALOG, URDU
   }
-  // TODO : what about Japanese, Korean, ... for LTS?
 
-  private final Map<String, LTS> languageToLTS = new HashMap<String, LTS>();
   private final LTS unknown = new EmptyLTS();
+  private LTS ltsForLanguage = unknown; /// attempt to deal with undefined LTS...
 
   /**
+   * TODO : what about Japanese, Korean, ... for LTS?
+   * Does reflection to make an appropriate LTS - expecting something like corpus.EnglishLTS
+   * <p>
+   * ARABIC, MSA, and IRAQI all map to MSA LTS
+   *
    * @param thisLanguage
    * @see ASRScoring#ASRScoring
    */
   private LTSFactory(Language thisLanguage) {
     this.thisLanguage = thisLanguage;
-    languageToLTS.put(Language.ARABIC.name().toLowerCase(), new ModernStandardArabicLTS());
-    languageToLTS.put(Language.DARI.name().toLowerCase(), new DariLTS());
-    languageToLTS.put(Language.EGYPTIAN.name().toLowerCase(), new EgyptianLTS());
-    languageToLTS.put(Language.ENGLISH.name().toLowerCase(), new EnglishLTS());
-    languageToLTS.put(Language.FARSI.name().toLowerCase(), new FarsiLTS());
-    // languageToLTS.put(Language.JAPANESE.name().toLowerCase(), new LevantineLTS());
-    languageToLTS.put(Language.LEVANTINE.name().toLowerCase(), new LevantineLTS());
-    languageToLTS.put(Language.MANDARIN.name().toLowerCase(), unknown);
-    languageToLTS.put(Language.MSA.name().toLowerCase(), new ModernStandardArabicLTS());
-    languageToLTS.put(Language.IRAQI.name().toLowerCase(), new ModernStandardArabicLTS());
+    String name = thisLanguage.name();
+    String classPrefix = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+    String className = "corpus." + classPrefix + "LTS";
+
     try {
-      languageToLTS.put(Language.PASHTO.name().toLowerCase(), new PashtoLTS());
-    } catch (Exception e) {
-      logger.warn("got " + e);
+      switch (thisLanguage) {
+        case ARABIC:
+        case MSA:
+        case IRAQI:
+          ltsForLanguage = new ModernStandardArabicLTS();
+          break;
+        case MANDARIN:
+          ltsForLanguage = unknown;
+          break;
+        default:
+          Class<?> aClass = Class.forName(className);
+          ltsForLanguage = (LTS) aClass.newInstance();
+          break;
+      }
+    } catch (ClassNotFoundException e) {
+      logger.error("Couldn't find LTS class '" + className + "'");
+    } catch (InstantiationException e) {
+      logger.error("Couldn't make instance of LTS class " + className, e);
+    } catch (IllegalAccessException e) {
+      logger.error("Not allowed to make instance of LTS class " + className, e);
     }
-    try {
-      languageToLTS.put(Language.RUSSIAN.name().toLowerCase(), new RussianLTS());
-    } catch (Exception e) {
-      logger.warn("got " + e);
-    }
-    try {
-      languageToLTS.put(Language.SPANISH.name().toLowerCase(), new SpanishLTS());
-    } catch (Exception e) {
-      logger.warn("got " + e);
-    }
-    try {
-      languageToLTS.put(Language.SUDANESE.name().toLowerCase(), new SudaneseLTS());
-    } catch (Exception e) {
-      logger.warn("got " + e);
-    }
-    try {
-      languageToLTS.put(Language.TAGALOG.name().toLowerCase(), unknown);
-    } catch (Exception e) {
-      logger.warn("got " + e);
-    }
-    try {
-      languageToLTS.put(Language.URDU.name().toLowerCase(), new UrduLTS());
-    } catch (Exception e) {
-      logger.warn("got " + e);
-    }
+
+    logger.debug("lts for " + name + " found at " + className + " is " + ltsForLanguage);
   }
+
+  /**
+   * @return
+   * @see mitll.langtest.server.scoring.ASRScoring#ASRScoring
+   */
+  public LTS getLTSClass() { return ltsForLanguage; }
 
   /**
    * @param thisLanguage
@@ -93,12 +94,17 @@ public class LTSFactory implements CollationSort {
   /**
    * @return
    * @see mitll.langtest.server.scoring.ASRScoring#getCollator
+   * @see #sort(List)
    */
-  //@Override
   public Collator getCollator() {
     return Collator.getInstance(getLocale(thisLanguage));
   }
 
+  /**
+   * @see Scoring#sort(List)
+   * @param toSort
+   * @param <T>
+   */
   public <T extends CommonExercise> void sort(List<T> toSort) {
     Collator collator = getCollator();
     final Map<T, CollationKey> exToKey = new HashMap<T, CollationKey>();
@@ -238,21 +244,5 @@ public class LTSFactory implements CollationSort {
 //    logger.debug("Language Code: " + locale.getLanguage() + ", Language Display Name: " + locale.getDisplayLanguage());
 //    logger.debug("Country Code: " + locale.getCountry() + ", Country Display Name: " + locale.getDisplayCountry());
     return locale;
-  }
-
-  /**
-   * @param language
-   * @return
-   * @see mitll.langtest.server.scoring.ASRScoring#ASRScoring
-   */
-  public LTS getLTSClass(String language) {
-    LTS letterToSoundClass = languageToLTS.get(language.toLowerCase());
-
-    if (letterToSoundClass == null) {
-      logger.warn("NOTE: we have no LTS for '" + language + "' in " + new TreeSet<String>(languageToLTS.keySet()) +
-          " , using the empty LTS class : " + unknown.getClass());
-      letterToSoundClass = unknown;
-    }
-    return letterToSoundClass;
   }
 }
