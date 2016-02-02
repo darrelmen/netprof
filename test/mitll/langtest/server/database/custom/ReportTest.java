@@ -8,7 +8,6 @@ import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonUserExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
@@ -554,7 +553,7 @@ public class ReportTest {
 
     // OK, database should show it now
     testList = userListManager.getUserListByID(listid, new ArrayList<String>());
-    Collection<CommonUserExercise> exercises = testList.getExercises();
+    Collection<?> exercises = testList.getExercises();
     assertTrue(exercises.contains(english));
     // tooltip should never be empty
     return english;

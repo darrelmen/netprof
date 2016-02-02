@@ -30,8 +30,10 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -69,10 +71,12 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @see StatsFlashcardFactory.StatsPracticePanel#StatsPracticePanel
    *
    */
-  public BootstrapExercisePanel(final T e, final LangTestDatabaseAsync service,
-                                final ExerciseController controller, boolean addKeyBinding,
+  public BootstrapExercisePanel(final T e,
+                                final LangTestDatabaseAsync service,
+                                final ExerciseController controller,
+                                boolean addKeyBinding,
                                 final ControlState controlState,
-                                StatsFlashcardFactory.MySoundFeedback soundFeedback,
+                                MySoundFeedback soundFeedback,
                                 SoundFeedback.EndListener endListener,
                                 String instance, ListInterface exerciseList) {
     super(e, service, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
@@ -254,7 +258,9 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    */
   private RecordButtonPanel getAnswerWidget(final String exerciseID, LangTestDatabaseAsync service,
                                             ExerciseController controller, final boolean addKeyBinding, String instance) {
-    return new FlashcardRecordButtonPanel(this, service, controller, exerciseID, 1, instance, Collections.emptyMap()) {
+    Map<String, Collection<String>> typeToSelection = Collections.emptyMap();
+    AudioAnswerListener exercisePanel = this;
+    return new FlashcardRecordButtonPanel(exercisePanel, service, controller, exerciseID, 1, instance, typeToSelection) {
       final FlashcardRecordButtonPanel outer = this;
       @Override
       protected RecordButton makeRecordButton(final ExerciseController controller, String buttonTitle) {
