@@ -4,6 +4,7 @@
 
 package mitll.langtest.shared.custom;
 
+import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
@@ -41,11 +42,11 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @param creator
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
-  public UserExercise(CommonShell shell, long creator) {
+/*  public UserExercise(CommonShell shell, long creator) {
     super(shell.getID());
     isPredef = !shell.getID().startsWith(CUSTOM_PREFIX);
     this.creator = creator;
-  }
+  }*/
 
   /**
    * Tooltip is the english phrase, but if it's empty, use the foreign language.
@@ -57,7 +58,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @param foreignLanguage
    * @param transliteration
    * @see mitll.langtest.client.custom.dialog.EditItem#createNewItem(long)
-   * @see mitll.langtest.client.custom.dialog.EditItem#getNewItem() (long)
+   * @see mitll.langtest.client.custom.dialog.EditItem#getNewItem
    */
   public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
                       String transliteration) {
@@ -98,7 +99,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
 
   /**
    * @param exercise
-   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
+   * @see mitll.langtest.client.custom.content.ReviewItemHelper.ReviewFlexListLayout#getFactory(PagingExerciseList, String)
    */
   public <T extends CommonShell & AnnotationExercise & AudioRefExercise> UserExercise(T exercise) {
     super(exercise.getID());
