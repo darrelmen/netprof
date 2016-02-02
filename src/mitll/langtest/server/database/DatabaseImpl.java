@@ -211,7 +211,9 @@ public class DatabaseImpl implements Database {
   /**
    * @return
    */
-  public Analysis getAnalysis() { return analysis; }
+  public Analysis getAnalysis() {
+    return analysis;
+  }
 
   public RefResultDAO getRefResultDAO() {
     return refresultDAO;
@@ -335,9 +337,9 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * @return
    * @see mitll.langtest.server.DownloadServlet#returnSpreadsheet(HttpServletResponse, DatabaseImpl, String)
    * @see LangTestDatabaseImpl#getTypeOrder()
-   * @return
    */
   public SectionHelper<CommonExercise> getSectionHelper() {
     getExercises();
@@ -426,7 +428,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
    * @see mitll.langtest.client.custom.dialog.EditableExercise#postEditItem
    */
-  public void editItem(UserExercise userExercise) {
+  public void editItem(CommonExercise userExercise) {
     logger.debug("editItem ex #" + userExercise.getID() + " mediaDir : " + getServerProps().getMediaDir() +
         " initially audio was\n\t " + userExercise.getAudioAttributes());
 
@@ -454,8 +456,9 @@ public class DatabaseImpl implements Database {
       boolean b = original.removeAll(defects);  // TODO - does this work really without a compareTo?
       logger.debug(b ? "removed defects " + original.size() + " now" : " didn't remove any defects - " + defects.size());
 
+      MutableAudioExercise mutableAudio = exercise.getMutableAudio();
       for (AudioAttribute attribute : defects) {
-        if (!exercise.removeAudio(attribute)) {
+        if (!mutableAudio.removeAudio(attribute)) {
           logger.warn("huh? couldn't remove " + attribute.getKey() + " from " + exercise.getID());
         }
       }
@@ -485,19 +488,21 @@ public class DatabaseImpl implements Database {
    * @return
    * @see #editItem(mitll.langtest.shared.custom.UserExercise)
    */
-  private Set<AudioAttribute> getAndMarkDefects(UserExercise userExercise, Map<String, ExerciseAnnotation> fieldToAnnotation) {
+  private Set<AudioAttribute> getAndMarkDefects(CommonExercise userExercise, Map<String, ExerciseAnnotation> fieldToAnnotation) {
     Set<AudioAttribute> defects = new HashSet<AudioAttribute>();
 
     for (Map.Entry<String, ExerciseAnnotation> fieldAnno : fieldToAnnotation.entrySet()) {
       if (!fieldAnno.getValue().isCorrect()) {
         AudioAttribute audioAttribute = userExercise.getAudioRefToAttr().get(fieldAnno.getKey());
         if (audioAttribute != null) {
-          logger.debug("getAndMarkDefects : found defect " + audioAttribute + " anno : " + fieldAnno.getValue() + " field  " + fieldAnno.getKey());
+          logger.debug("getAndMarkDefects : found defect " + audioAttribute + " anno : " + fieldAnno.getValue() +
+              " field  " + fieldAnno.getKey());
           // logger.debug("\tmarking defect on audio");
           defects.add(audioAttribute);
           audioDAO.markDefect(audioAttribute);
         } else if (!fieldAnno.getKey().equals("transliteration")) {
-          logger.warn("\tcan't mark defect on audio : looking for field '" + fieldAnno.getKey() + "' in " + userExercise.getAudioRefToAttr().keySet());
+          logger.warn("\tcan't mark defect on audio : looking for field '" + fieldAnno.getKey() +
+              "' in " + userExercise.getAudioRefToAttr().keySet());
         }
       }
     }
@@ -508,7 +513,7 @@ public class DatabaseImpl implements Database {
   /**
    * @param audioAttribute
    * @see mitll.langtest.server.LangTestDatabaseImpl#markAudioDefect(mitll.langtest.shared.exercise.AudioAttribute, String)
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.shared.exercise.AudioAttribute, mitll.langtest.client.custom.tabs.RememberTabAndContent)
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio
    */
   public void markAudioDefect(AudioAttribute audioAttribute) {
     if (audioDAO.markDefect(audioAttribute) < 1) {
@@ -1106,11 +1111,11 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise
    * @see mitll.langtest.server.LangTestDatabaseImpl#duplicateExercise(mitll.langtest.shared.custom.UserExercise)
    */
-  public UserExercise duplicateExercise(UserExercise exercise) {
+  public CommonExercise duplicateExercise(CommonExercise exercise) {
     logger.debug("to duplicate  " + exercise);
 
     //logger.debug("anno before " + exercise.getFieldToAnnotation());
-    UserExercise duplicate = getUserListManager().duplicate(exercise);
+    CommonExercise duplicate = getUserListManager().duplicate(exercise);
 
     if (!exercise.isPredefined()) {
       logger.warn("huh? got non-predef " + exercise);
@@ -1129,7 +1134,7 @@ public class DatabaseImpl implements Database {
 
     logger.debug("exercise state " + exercise.getState());
 
-    userListManager.setState(duplicate, exercise.getState(), exercise.getCreator());
+    userListManager.setState(duplicate, exercise.getState(), exercise.getCombinedMutableUserExercise().getCreator());
 
     logger.debug("duplicate after " + duplicate);
 
@@ -1167,7 +1172,9 @@ public class DatabaseImpl implements Database {
    * @return
    * @see mitll.langtest.server.LoadTesting#getExercise
    */
-  private CommonExercise getUserExerciseWhere(String id) { return userExerciseDAO.getWhere(id);  }
+  private CommonExercise getUserExerciseWhere(String id) {
+    return userExerciseDAO.getWhere(id);
+  }
 
   @Override
   public ServerProperties getServerProps() {
@@ -1226,7 +1233,7 @@ public class DatabaseImpl implements Database {
     String language1 = getLanguage();
     if (listid == -1) return language1 + "_Unknown";
 
-    UserList userListByID = getUserListByID(listid);
+    UserList<CommonExercise> userListByID = getUserListByID(listid);
 
     if (userListByID == null) {
       logger.error("huh? can't find user list " + listid);
@@ -1234,7 +1241,7 @@ public class DatabaseImpl implements Database {
     } else {
       //logger.debug("writing contents of " + userListByID);
       long then = System.currentTimeMillis();
-      Collection<CommonUserExercise> exercises = userListByID.getExercises();
+      Collection<CommonExercise> exercises = userListByID.getExercises();
       for (CommonExercise ex : exercises) {
         userListManager.addAnnotations(ex);
         getAudioDAO().attachAudio(ex, pathHelper.getInstallPath(), configDir);
@@ -1264,8 +1271,10 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  public UserList getUserListByID(long listid) {
-    return getUserListManager().getUserListByID(listid, getSectionHelper().getTypeOrder());
+  //  public <T extends CommonExercise> UserList<T> getUserListByID(long listid) {
+  public UserList<CommonExercise> getUserListByID(long listid) {
+    UserList<CommonExercise> userListByID = getUserListManager().getUserListByID(listid, getSectionHelper().getTypeOrder());
+    return userListByID;
   }
 
   public String getPrefix(Map<String, Collection<String>> typeToSection) {
