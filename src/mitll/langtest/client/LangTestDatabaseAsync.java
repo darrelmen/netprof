@@ -27,6 +27,11 @@ import java.util.Map;
  * The async counterpart of <code>LangTestDatabase</code>.
  */
 public interface LangTestDatabaseAsync {
+  <T extends CommonShell> void getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID,
+                      int userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples,
+                      boolean incorrectFirstOrder, boolean onlyWithAudioAnno,
+                      AsyncCallback<ExerciseListWrapper<T>> async);
+
   void getUsers(AsyncCallback<List<User>> async);
   void getUserBy(long id, AsyncCallback<User> async);
 
@@ -42,11 +47,13 @@ public interface LangTestDatabaseAsync {
   void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID,
                             AsyncCallback<ImageResponse> async);
 
-  void getScoreForAnswer(long userID, String exerciseID, int questionID, String answer, String answerType, long timeSpent, Map<String, Collection<String>> typeToSection, AsyncCallback<Answer> async);
+  void getScoreForAnswer(long userID, String exerciseID, int questionID, String answer, String answerType,
+                         long timeSpent, Map<String, Collection<String>> typeToSection, AsyncCallback<Answer> async);
 
   void addStudentAnswer(long resultID, boolean correct, AsyncCallback<Void> async);
 
-  void getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<String> exids, AsyncCallback<QuizCorrectAndScore> async);
+  void getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<String> exids,
+                        AsyncCallback<QuizCorrectAndScore> async);
 
   <T extends Shell> void getExercise(String id, long userID, boolean isFlashcardReq, AsyncCallback<T> async);
 
@@ -73,9 +80,6 @@ public interface LangTestDatabaseAsync {
 
   void logMessage(String message, AsyncCallback<Void> async);
 
-  <T extends Shell> void getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID,
-                      int userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples,
-                      boolean incorrectFirstOrder, boolean onlyWithAudioAnno, AsyncCallback<ExerciseListWrapper<T>> async);
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
@@ -85,13 +89,13 @@ public interface LangTestDatabaseAsync {
 
   void addItemToUserList(long userListID, UserExercise userExercise, AsyncCallback<Void> async);
 
-  void reallyCreateNewItem(long userListID, UserExercise userExercise, AsyncCallback<UserExercise> async);
+  void reallyCreateNewItem(long userListID, CombinedMutableUserExercise userExercise, AsyncCallback<CommonExercise> async);
 
   void addUserList(long userid, String name, String description, String dliClass, boolean isPublic, AsyncCallback<Long> async);
 
   void addVisitor(long userListID, long user, AsyncCallback<Void> asyncCallback);
 
-  void editItem(UserExercise userExercise, AsyncCallback<Void> async);
+  void editItem(CommonExercise userExercise, AsyncCallback<Void> async);
 
   void addAnnotation(String exerciseID, String field, String status, String comment, long userID, AsyncCallback<Void> async);
 
@@ -105,7 +109,7 @@ public interface LangTestDatabaseAsync {
 
   void deleteItemFromList(long listid, String exid, AsyncCallback<Boolean> async);
 
-  void duplicateExercise(UserExercise id, AsyncCallback<UserExercise> async);
+  void duplicateExercise(CommonExercise id, AsyncCallback<CommonExercise> async);
 
   void deleteItem(String exid, AsyncCallback<Boolean> async);
 
