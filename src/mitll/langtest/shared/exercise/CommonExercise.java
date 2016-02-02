@@ -12,38 +12,14 @@ import java.util.List;
  */
 public interface CommonExercise extends CommonShell, AudioAttributeExercise, AnnotationExercise, ScoredExercise {
   /**
-   * @xdeprecated  - synonym for fl
+   * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#getRefSentences(CommonExercise, String, boolean)
    * @return
    */
-//  String getRefSentence();
-
   Collection<String> getRefSentences();
 
   CommonShell getShell();
 
-  //  long getModifiedDateTimestamp();
-
-  /**
-   * @see mitll.langtest.server.database.ResultDAO#attachScoreHistory(long, CommonExercise, boolean)
-   * @param scoreTotal
-   */
-/*
-  void setScores(List<CorrectAndScore> scoreTotal);
-*/
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotationsAndAudio
-   * @paramx v
-   */
-/*
-  void setAvgScore(float v);
-*/
-
   List<String> getFirstPron();
-
-/*
-  void setRefSentences(Collection<String> orDefault);
-*/
 
   String getRefAudioIndex();
 
@@ -52,7 +28,5 @@ public interface CommonExercise extends CommonShell, AudioAttributeExercise, Ann
   MutableExercise getMutable();
   MutableAudioExercise getMutableAudio();
   MutableAnnotationExercise getMutableAnnotation();
-
   CombinedMutableUserExercise getCombinedMutableUserExercise();
-
 }
