@@ -13,10 +13,7 @@ import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.STATE;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.instrumentation.Event;
@@ -38,7 +35,7 @@ import java.util.Map;
 public interface LangTestDatabase extends RemoteService {
   boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
 
-  <T extends Shell> ExerciseListWrapper<T> getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection,
+  <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection,
                                      String prefix, long userListID, int userID, String role,
                                      boolean onlyUnrecordedByMe, boolean onlyExamples, boolean incorrectFirstOrder,
                                      boolean onlyWithAudioAnno);
@@ -158,11 +155,11 @@ public interface LangTestDatabase extends RemoteService {
 
   boolean isValidForeignPhrase(String foreign);
 
-  UserExercise reallyCreateNewItem(long userListID, UserExercise userExercise);
+  CommonExercise reallyCreateNewItem(long userListID, CombinedMutableUserExercise userExercise);
 
-  UserExercise duplicateExercise(UserExercise id);
+  CommonExercise duplicateExercise(CommonExercise id);
 
-  void editItem(UserExercise userExercise);
+  void editItem(CommonExercise userExercise);
 
   void addAnnotation(String exerciseID, String field, String status, String comment, long userID);
   void markReviewed(String exid, boolean isCorrect, long creatorID);
