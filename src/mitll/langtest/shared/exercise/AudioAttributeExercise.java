@@ -12,13 +12,8 @@ import java.util.Set;
  *
  * Created by go22670 on 1/5/16.
  */
-public interface AudioAttributeExercise extends AudioRefExercise {
-
+public interface AudioAttributeExercise extends AudioRefExercise/*, MutableAudioExercise*/ {
   String getRefAudioWithPrefs(Set<Long> prefs);
-
-  AudioAttribute getRegularSpeed();
-
-  AudioAttribute getSlowSpeed();
 
   /**
    * @see mitll.langtest.server.DatabaseServlet#getJsonForExercise(CommonExercise)
@@ -34,16 +29,7 @@ public interface AudioAttributeExercise extends AudioRefExercise {
 
   Collection<AudioAttribute> getDefaultUserAudio();
 
-  /**
-   * Sorted by user age. Gotta choose something...
-   * @param malesMap
-   * @return
-   */
-  List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap);
-
   Map<String, AudioAttribute> getAudioRefToAttr();
-
-  Map<MiniUser, List<AudioAttribute>> getUserMap(boolean isMale);
 
   /**
    * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget()
@@ -52,7 +38,4 @@ public interface AudioAttributeExercise extends AudioRefExercise {
    */
   Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Set<Long> preferredUsers);
 
-  void addAudio(AudioAttribute audioAttribute);
-
-  boolean removeAudio(AudioAttribute audioAttribute);
 }
