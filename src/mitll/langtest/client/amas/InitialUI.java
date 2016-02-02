@@ -86,12 +86,13 @@ public class InitialUI {
   }
 
   /**
+   * TODO : FIX ME
    * @return
    * @see #populateRootPanel()
    */
   private Panel makeHeaderRow() {
     headerRow = new FluidRow();
-    headerRow.add(new Column(12, flashcard.getNPFHeaderRow()));
+   // headerRow.add(new Column(12, flashcard.getNPFHeaderRow()));
     return headerRow;
   }
 
@@ -112,6 +113,8 @@ public class InitialUI {
   }
 
   /**
+   *    * TODO : FIX ME
+
    * @param verticalContainer
    * @param firstRow          where we put the flash permission window if it gets shown
    * @seex #handleCDToken(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, String)
@@ -124,10 +127,15 @@ public class InitialUI {
     /**
      * {@link #makeFlashContainer}
      */
-    firstRow.add(langTest.getFlashRecordPanel());
+  //  firstRow.add(langTest.getFlashRecordPanel());
     langTest.modeSelect();
 
-    learnHelper = new AutoCRTChapterNPFHelper(service, langTest, langTest.getUserManager(), langTest);
+
+    //  TODO : FIX ME
+    learnHelper = new AutoCRTChapterNPFHelper(service, langTest,
+        //langTest.getUserManager(),
+        null,
+        langTest);
     learnHelper.addNPFToContent(firstRow, "autoCRT");
   }
 
@@ -164,9 +172,12 @@ public class InitialUI {
     }
   }
 
+  /**
+   *  TODO : FIX ME
+   */
   void configureUIGivenUser() {
     if (learnHelper != null && learnHelper.getExerciseList() != null) {
-      learnHelper.getExerciseList().restoreListFromHistory();
+      //learnHelper.getExerciseList().restoreListFromHistory();
     }
   }
 }
