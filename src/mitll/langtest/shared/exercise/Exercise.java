@@ -23,7 +23,7 @@ import java.util.Set;
  * Time: 1:03 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Exercise extends AudioExercise implements CommonExercise {
+public class Exercise extends AudioExercise implements CommonExercise, MutableExercise, MutableAudioExercise, MutableAnnotationExercise {
   private transient String refAudioIndex;
   private transient Collection<String> refSentences = new ArrayList<String>();
   //private List<String> translitSentences = new ArrayList<String>();
@@ -32,12 +32,13 @@ public class Exercise extends AudioExercise implements CommonExercise {
 
   private transient List<String> firstPron = new ArrayList<String>();
 
-  public Exercise() {}
+  public Exercise() {
+  }
 
   /**
    * @param id
-   * @paramx content
    * @param context
+   * @paramx content
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    */
   public Exercise(String id, String context, String contextTranslation, String meaning, String refAudioIndex) {
@@ -46,10 +47,6 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.contextTranslation = contextTranslation;
     this.meaning = meaning;
     this.refAudioIndex = refAudioIndex;
-  }
-
-  public String getRefSentence() {
-    return getForeignLanguage();
   }
 
   @Override
@@ -76,13 +73,39 @@ public class Exercise extends AudioExercise implements CommonExercise {
     return true;
   }
 
+  @Override
+  public MutableExercise getMutable() {
+    return this;
+  }
+
+  @Override
+  public MutableAudioExercise getMutableAudio() {
+    return this;
+  }
+
+  @Override
+  public MutableAnnotationExercise getMutableAnnotation() {
+    return this;
+  }
+
+  @Override
+  public CombinedMutableUserExercise getCombinedMutableUserExercise() {
+//    throw new IllegalAccessException("shouldn't call this method.");
+    return null;
+  }
+
   public void setForeignLanguage(String foreignLanguage) {
     this.foreignLanguage = foreignLanguage;
   }
 
+  @Override
+  public void setTransliteration(String transliteration) {
+   setTranslitSentence(transliteration);
+  }
+
   /**
-   * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise(String, String, String, String, String, boolean)
    * @param translitSentence
+   * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise(String, String, String, String, String, boolean)
    */
   public void setTranslitSentence(String translitSentence) {
 //    translitSentences.clear();
@@ -98,28 +121,6 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.englishSentence = englishSentence;
   }
 
-/*  public void setMeaning(String meaning) {
-    this.meaning = meaning;
-  }*/
-
-
-//  @Override
-//  public long getModifiedDateTimestamp() {
-//    return 0;
-//  }
-/*
-
-  @Override
-  public STATE getState() {
-    return state;
-  }
-
-  @Override
-  public void setState(STATE state) {
-    this.state = state;
-  }
-*/
-
   public List<CorrectAndScore> getScores() {
     return scores;
   }
@@ -134,8 +135,8 @@ public class Exercise extends AudioExercise implements CommonExercise {
   }
 
   /**
-   * @see ResultDAO#attachScoreHistory
    * @param avgScore
+   * @see ResultDAO#attachScoreHistory
    */
   public void setAvgScore(float avgScore) {
     this.avgScore = avgScore;
@@ -159,6 +160,11 @@ public class Exercise extends AudioExercise implements CommonExercise {
     this.firstPron = firstPron;
   }
 
+  @Override
+  public void setEnglish(String english) {
+    this.englishSentence = english;
+  }
+
   public String toString() {
     Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
 
@@ -172,9 +178,9 @@ public class Exercise extends AudioExercise implements CommonExercise {
 
     return "Exercise " + getID() + //" content bytes = " + content.length() +
         " english '" + getEnglish() +
-        "'/'" + getRefSentence() + "' " +
-        "meaning '" +getMeaning()+
-        "' transliteration '" +getTransliteration()+
+        "'/'" + getForeignLanguage() + "' " +
+        "meaning '" + getMeaning() +
+        "' transliteration '" + getTransliteration() +
         "' context " + getContext() + "/" + getContextTranslation() +
         " audio count = " + audioAttributes1.size() +
         (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
