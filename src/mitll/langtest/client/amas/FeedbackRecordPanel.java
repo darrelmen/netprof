@@ -18,6 +18,7 @@ import mitll.langtest.shared.Answer;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -96,7 +97,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
    * @see mitll.langtest.client.exercise.NavigationHelper#clickNext
    */
   @Override
-  public void postAnswers(ExerciseController controller, Shell completedExercise) {
+  public void postAnswers(ExerciseController controller, AmasExerciseImpl completedExercise) {
     if (isCompleted()) {
       exerciseList.loadNextExercise(completedExercise);
     } else {
