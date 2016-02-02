@@ -266,6 +266,16 @@
         </jar>
     </target>
 
+    <target depends="build" name="classroomGerman">
+        <jar destfile="npfClassroomGerman.war" basedir="war"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/german/**,scoring/bin.linux64/**,scoring/configurations/**"
+        >
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
     <target depends="build" name="classroomIraqi">
         <jar destfile="npfClassroomIraqi.war" basedir="war"
              includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/iraqi/**,scoring/bin.linux64/**,scoring/configurations/**"
