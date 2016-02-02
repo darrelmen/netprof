@@ -14,6 +14,7 @@ import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
+import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -30,7 +31,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class AmasExercisePanel extends VerticalPanel implements
-    PostAnswerProvider, ProvidesResize, RequiresResize, ExerciseQuestionState {
+    PostAnswerProvider<AmasExerciseImpl>, ProvidesResize, RequiresResize, ExerciseQuestionState {
   private Logger logger = Logger.getLogger("AmasExercisePanel");
 
   private static final int QUESTION_WIDTH = 700;
@@ -48,7 +49,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
 
   protected final LangTestDatabaseAsync service;
   protected final NavigationHelper navigationHelper;
-  protected final ResponseExerciseList exerciseList;
+  protected final ResponseExerciseList<AmasExerciseImpl> exerciseList;
   protected final Map<Integer, Widget> indexToWidget = new HashMap<Integer, Widget>();
 
   protected Map<Integer, Tab> indexToTab = new TreeMap<Integer, Tab>();
