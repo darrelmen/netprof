@@ -64,33 +64,42 @@ import java.util.logging.Logger;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
- *
+ * <p>
  * Release Versions:
- *
+ * <p>
  * 1.1
- *  - final state of analysis feature - off by default, on with ?analysis
+ * - final state of analysis feature - off by default, on with ?analysis
  * 1.1.1
- *  - fix for custom english entries
+ * - fix for custom english entries
  * 1.1.2
- *  - Fix for highlight of mixed case context
- *  - Added code for trimming silence
+ * - Fix for highlight of mixed case context
+ * - Added code for trimming silence
  * 1.1.3
- *  - Trims silence from beginning and end of recordings with sox
+ * - Trims silence from beginning and end of recordings with sox
  * 1.1.4
- *  - Trims silence from all ref audio
+ * - Trims silence from all ref audio
+ * 1.1.5
+ * - German support - fixes for trie lookup of lowercase characters
+ * 1.1.6
+ * - ScoreServlet report changes - export user table, add option to filter for items with or without audio
+ * 1.1.7
+ * - Duplicate exercise id bug with russian - see https://gh.ll.mit.edu/DLI-LTEA/Development/issues/504 and small change to json rate(sec) output
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private Logger logger = Logger.getLogger("LangTest");
 
-  private static final String VERSION_INFO = "1.1.4";
+  private static final String VERSION_INFO = "1.1.7";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
-  private static final List<String> SITE_LIST = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean","Iraqi",
-      "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Russian", "Spanish", "Sudanese", "Tagalog", "Urdu");
+  public static final List<String> SITE_LIST = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "German",
+      "Korean", "Iraqi",
+      "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Russian", "Spanish", "Sudanese", "Tagalog",
+      "Urdu");
 
   /**
    * How far to the right to shift the list of sites...
+   *
    * @see #getLinksToSites()
    */
   private static final int LEFT_LIST_WIDTH = 267;
@@ -126,7 +135,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * This gets called first.
-   *
+   * <p>
    * Make an exception handler that displays the exception.
    */
   public void onModuleLoad() {
@@ -138,8 +147,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void onFailure(Throwable caught) {
         if (caught instanceof IncompatibleRemoteServiceException) {
           Window.alert("This application has recently been updated.\nPlease refresh this page, or restart your browser." +
-            "\nIf you still see this message, clear your cache. (" + caught.getMessage() +
-            ")");
+              "\nIf you still see this message, clear your cache. (" + caught.getMessage() +
+              ")");
         } else {
           long now = System.currentTimeMillis();
           String message = "onModuleLoad.getProperties : (failure) took " + (now - then) + " millis";
@@ -170,6 +179,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * Log browser exception on server, include user and exercise ids.  Consider including chapter selection.
+   *
    * @see #onModuleLoad()
    */
   private void dealWithExceptions() {
@@ -194,8 +204,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     boolean isStackOverflow = exceptionAsString.contains("Maximum call stack size exceeded");
     if (isStackOverflow && lastWasStackOverflow) { // we get overwhelmed by repeated exceptions
       return ""; // skip repeat exceptions
-    }
-    else {
+    } else {
       lastWasStackOverflow = isStackOverflow;
     }
     logMessageOnServer(exceptionAsString, "got browser exception : ");
@@ -210,7 +219,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     String toSend = prefix + suffix;
     if (toSend.length() > MAX_EXCEPTION_STRING) {
-      toSend = toSend.substring(0, MAX_EXCEPTION_STRING)+"...";
+      toSend = toSend.substring(0, MAX_EXCEPTION_STRING) + "...";
     }
     getButtonFactory().logEvent(UNKNOWN, UNKNOWN, exerciseID, toSend, user);
   }
@@ -231,7 +240,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio(String, String, int, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck)
    * @param reqid
    * @param path
    * @param type
@@ -239,6 +247,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param height
    * @param exerciseID
    * @param client
+   * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio(String, String, int, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck)
    */
   @Override
   public void getImage(int reqid, final String path, final String type, int toUse, int height, String exerciseID, AsyncCallback<ImageResponse> client) {
@@ -287,9 +296,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private final Cache<String, ImageResponse> imageCache = CacheBuilder.newBuilder()
-    .maximumSize(MAX_CACHE_SIZE)
-    .expireAfterWrite(7, TimeUnit.DAYS)
-    .build();
+      .maximumSize(MAX_CACHE_SIZE)
+      .expireAfterWrite(7, TimeUnit.DAYS)
+      .build();
 
   /**
    *
@@ -316,8 +325,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see #onModuleLoad2()
    * @return
+   * @see #onModuleLoad2()
    */
   private void populateRootPanel() {
     Container verticalContainer = getRootContainer();
@@ -326,7 +335,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     Panel firstRow = makeFirstTwoRows(verticalContainer);
 
     if (!showLogin(verticalContainer, firstRow)) {
-     // logger.info("populate below header...");
+      // logger.info("populate below header...");
       populateBelowHeader(verticalContainer, firstRow);
     }
   }
@@ -353,7 +362,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       logger.info("adding headstart current exercise");
       RootPanel.get().add(getHeadstart(currentExerciseVPanel));
     } else {
-    //  logger.info("adding normal container...");
+      //  logger.info("adding normal container...");
 
       RootPanel.get().add(verticalContainer);
 
@@ -385,9 +394,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see #populateBelowHeader
    * @param currentExerciseVPanel
    * @return
+   * @see #populateBelowHeader
    */
   private Container getHeadstart(Panel currentExerciseVPanel) {
     // show fancy lace background image
@@ -407,17 +416,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.user.UserManager#login()
    */
   @Override
-  public void showLogin() {  populateRootPanel();  }
+  public void showLogin() {
+    populateRootPanel();
+  }
 
   /**
    * So we have three different views here : the login page, the reset password page, and the content developer
    * enabled feedback page.
    *
-   * @see #showLogin()
-   * @see #populateRootPanel()
    * @param verticalContainer
    * @param firstRow
    * @return false if we didn't do either of the special pages and should do the normal navigation view
+   * @see #showLogin()
+   * @see #populateRootPanel()
    */
   public boolean showLogin(final Container verticalContainer, final Panel firstRow) {
     final EventRegistration eventRegistration = this;
@@ -432,7 +443,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // are we here to enable a CD user?
     final String cdToken = props.getCdEnableToken();
     if (!cdToken.isEmpty()
-        //&& !cdToken.equals(staleToken)
+      //&& !cdToken.equals(staleToken)
         ) {
       logger.info("showLogin token '" + resetPassToken + "' for enabling cd user");
 
@@ -443,7 +454,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     // are we here to show the login screen?
     boolean show = userManager.isUserExpired() || userManager.getUserID() == null;
     if (show) {
-      logger.info("user is not valid : user expired " + userManager.isUserExpired() +" / " +userManager.getUserID());
+      logger.info("user is not valid : user expired " + userManager.isUserExpired() + " / " + userManager.getUserID());
 
       Panel content = new UserPassLogin(service, getProps(), userManager, eventRegistration).getContent();
       firstRow.add(content);
@@ -453,7 +464,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       flashcard.setCogVisible(false);
       return true;
     }
- //   logger.info("user is valid...");
+    //   logger.info("user is valid...");
 
     flashcard.setCogVisible(true);
     return false;
@@ -492,7 +503,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * Reload window after showing content developer has been approved.
-   * <p/>
+   * <p>
    * Mainly something Tamas would see.
    *
    * @param verticalContainer
@@ -504,7 +515,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     logger.info("enabling token " + cdToken + " for email " + emailR);
     service.enableCDUser(cdToken, emailR, Window.Location.getHref(), new AsyncCallback<String>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
       public void onSuccess(String result) {
@@ -548,14 +560,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private String trimURL(String url) {
     if (url.contains("127.0.0.1")) {
       return "http://127.0.0.1:8888/LangTest.html?gwt.codesvr=127.0.0.1:9997";
-    }
-    else return url.split("\\?")[0].split("\\#")[0];
+    } else return url.split("\\?")[0].split("\\#")[0];
   }
 
   /**
-   * @see #populateRootPanel()
    * @param verticalContainer
    * @return
+   * @see #populateRootPanel()
    */
   private Panel makeFirstTwoRows(Container verticalContainer) {
     verticalContainer.add(headerRow = makeHeaderRow());
@@ -606,34 +617,39 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     Element element = DOM.getElementById("favicon");   // set the page title to be consistent
     if (element != null) {
-       element.setAttribute("href", LANGTEST_IMAGES + "NewProF1_48x48.png");
+      element.setAttribute("href", LANGTEST_IMAGES + "NewProF1_48x48.png");
     }
   }
 
   /**
-   * @see #makeHeaderRow()
    * @return
+   * @see #makeHeaderRow()
    */
   private HTML getReleaseStatus() {
     browserCheck.getBrowserAndVersion();
     return new HTML(getInfoLine());
   }
 
-  public String getBrowserInfo() { return browserCheck.getBrowserAndVersion();}
+  public String getBrowserInfo() {
+    return browserCheck.getBrowserAndVersion();
+  }
 
   private String getInfoLine() {
     String releaseDate = VERSION +
         (props.getReleaseDate() != null ? " " + props.getReleaseDate() : "");
     return "<span><font size=-2>" +
-      browserCheck.ver + "&nbsp;"+
-      releaseDate + (flashRecordPanel.usingWebRTC() ? " Flashless recording" : "")+
-      "</font></span>";
+        browserCheck.ver + "&nbsp;" +
+        releaseDate + (flashRecordPanel.usingWebRTC() ? " Flashless recording" : "") +
+        "</font></span>";
   }
 
-  private void setupSoundManager() {  soundManager = new SoundManagerStatic();  }
+  private void setupSoundManager() {
+    soundManager = new SoundManagerStatic();
+  }
 
   /**
    * Tell the exercise list when the browser window changes size
+   *
    * @paramx widgets
    */
   private void addResizeHandler() {
@@ -647,12 +663,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
   }
 
-  public int getHeightOfTopRows() { return headerRow.getOffsetHeight();  }
+  public int getHeightOfTopRows() {
+    return headerRow.getOffsetHeight();
+  }
 
   /**
-   * @see #populateRootPanel()
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#ScoringAudioPanel(String, String, LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, mitll.langtest.client.scoring.ScoreListener, int, String, String)
    * @return
+   * @see #populateRootPanel()
+   * @see mitll.langtest.client.scoring.ScoringAudioPanel#ScoringAudioPanel
    */
   public boolean showOnlyOneExercise() {
     return props.getExercise_title() != null;
@@ -660,8 +678,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * Check the URL parameters for special modes.
-   *
+   * <p>
    * If in goodwave (pronunciation scoring) mode or auto crt mode, skip the user login.
+   *
    * @see #onModuleLoad2()
    * @see #resetState()
    */
@@ -690,6 +709,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         hideFlash();
         checkLogin();
       }
+
       /**
        * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#noMicrophoneFound()
        */
@@ -753,12 +773,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
+   * @return
    * @see #gotUser
    * @see #makeHeaderRow()
-   * @return
    */
   private String getGreeting() {
-    return userManager.getUserID() == null ? "" : (""+  userManager.getUserID());
+    return userManager.getUserID() == null ? "" : ("" + userManager.getUserID());
   }
 
   /**
@@ -772,33 +792,34 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
-  public StartupInfo getStartupInfo() { return startupInfo; }
+  public StartupInfo getStartupInfo() {
+    return startupInfo;
+  }
 
   /**
    * Init Flash recorder once we login.
-   *
+   * <p>
    * Only get the exercises if the user has accepted mic access.
    *
+   * @param user
    * @see #makeFlashContainer
    * @see UserManager#gotNewUser(mitll.langtest.shared.User)
    * @see UserManager#storeUser
-   * @param user
    */
   public void gotUser(User user) {
     reallySetFactory();
-    long userID= -1;
+    long userID = -1;
     if (user != null) {
       userID = user.getId();
     }
 
-  //  logger.info("gotUser : userID " + userID);
+    //  logger.info("gotUser : userID " + userID);
 
     flashcard.setUserName(getGreeting());
     if (userID != lastUser) {
       configureUIGivenUser(userID);
       logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
-    }
-    else {
+    } else {
       logger.info("ignoring got user for current user " + userID);
       navigation.refreshInitialState();
     }
@@ -809,9 +830,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see #gotUser
    * @param userID
    * @return
+   * @see #gotUser
    */
   private void configureUIGivenUser(long userID) {
     logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser +
@@ -833,8 +854,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (flashRecordPanel.gotPermission()) {
       //logger.info("checkInitFlash : initFlash - has permission");
       checkLogin();
-    }
-    else {
+    } else {
       //logger.info("checkInitFlash : initFlash - no permission yet");
       if (flashRecordPanel.initFlash()) {
         checkLogin();
@@ -843,13 +863,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
-  public EventLogger getButtonFactory() { return buttonFactory; }
+  public EventLogger getButtonFactory() {
+    return buttonFactory;
+  }
 
   @Override
-  public void register(Button button) { buttonFactory.register(this, button, "N/A");  }
+  public void register(Button button) {
+    buttonFactory.register(this, button, "N/A");
+  }
 
   @Override
-  public void register(Button button, String exid) {  buttonFactory.register(this, button, exid);  }
+  public void register(Button button, String exid) {
+    buttonFactory.register(this, button, exid);
+  }
 
   @Override
   public void register(Button button, String exid, String context) {
@@ -870,10 +896,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void logEvent(UIObject button, String widgetType, String exid, String context) {
     buttonFactory.logEvent(button, widgetType, exid, context, getUser());
   }
+
   @Override
   public void logEvent(Tab button, String widgetType, String exid, String context) {
     buttonFactory.logEvent(button, widgetType, exid, context, getUser());
   }
+
   void logEvent(String widgetID, String widgetType, String exid, String context) {
     buttonFactory.logEvent(widgetID, widgetType, exid, context, getUser());
   }
@@ -901,7 +929,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
-  public void rememberAudioType(String audioType) {  this.audioType = audioType;  }
+  public void rememberAudioType(String audioType) {
+    this.audioType = audioType;
+  }
 
   public boolean showCompleted() {
     return isReviewMode() || getAudioType().equals(Result.AUDIO_TYPE_RECORDER);
@@ -909,6 +939,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * TODO : Hack - don't use audio type like this
+   *
    * @return
    */
   @Override
@@ -916,44 +947,79 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (permissions.contains(User.Permission.RECORD_AUDIO)) return Result.AUDIO_TYPE_RECORDER;
     else return audioType;
   }
-  private boolean isReviewMode() { return audioType.equals(Result.AUDIO_TYPE_REVIEW); }
+
+  private boolean isReviewMode() {
+    return audioType.equals(Result.AUDIO_TYPE_REVIEW);
+  }
 
   private final Set<User.Permission> permissions = new HashSet<User.Permission>();
 
   /**
    * When we login, we ask for permissions for the user from the server.
    *
-   * @see mitll.langtest.client.user.UserManager#login()
    * @param permission
    * @param on
+   * @see mitll.langtest.client.user.UserManager#login()
    */
   public void setPermission(User.Permission permission, boolean on) {
     if (on) permissions.add(permission);
     else permissions.remove(permission);
   }
 
-  public Collection<User.Permission> getPermissions() { return permissions; }
+  public Collection<User.Permission> getPermissions() {
+    return permissions;
+  }
 
   /**
-   * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
    * @return
+   * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
    */
-  public int getUser() { return userManager.getUser(); }
-  public boolean isTeacher() { return userManager.isTeacher(); }
-  public PropertyHandler getProps() { return props; }
+  public int getUser() {
+    return userManager.getUser();
+  }
 
-  public boolean useBkgColorForRef() {  return props.isBkgColorForRef(); }
+  public boolean isTeacher() {
+    return userManager.isTeacher();
+  }
 
-  public int getRecordTimeout() {  return props.getRecordTimeout(); }
-  public boolean isGrading() {  return props.isGrading(); }
-  public boolean isLogClientMessages() {  return props.isLogClientMessages(); }
-  public String getLanguage() {  return props.getLanguage(); }
-  public boolean isRightAlignContent() {  return props.isRightAlignContent(); }
+  public PropertyHandler getProps() {
+    return props;
+  }
 
-  public LangTestDatabaseAsync getService() { return service; }
-  public UserFeedback getFeedback() { return this; }
+  public boolean useBkgColorForRef() {
+    return props.isBkgColorForRef();
+  }
+
+  public int getRecordTimeout() {
+    return props.getRecordTimeout();
+  }
+
+  public boolean isGrading() {
+    return props.isGrading();
+  }
+
+  public boolean isLogClientMessages() {
+    return props.isLogClientMessages();
+  }
+
+  public String getLanguage() {
+    return props.getLanguage();
+  }
+
+  public boolean isRightAlignContent() {
+    return props.isRightAlignContent();
+  }
+
+  public LangTestDatabaseAsync getService() {
+    return service;
+  }
+
+  public UserFeedback getFeedback() {
+    return this;
+  }
 
   // recording methods...
+
   /**
    * Recording interface
    */
@@ -963,12 +1029,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * Recording interface
+   *
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    */
   public void stopRecording(WavCallback wavCallback) {
 //    long now = System.currentTimeMillis();
-   // logger.info("stopRecording : time recording in UI " + (now - then) + " millis");
+    // logger.info("stopRecording : time recording in UI " + (now - then) + " millis");
 
     flashRecordPanel.stopRecording(wavCallback);
   }
@@ -977,7 +1044,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Recording interface
    */
 
-  public SoundManagerAPI getSoundManager() { return soundManager;  }
+  public SoundManagerAPI getSoundManager() {
+    return soundManager;
+  }
 
   public void showErrorMessage(String title, String msg) {
     DialogHelper dialogHelper = new DialogHelper(false);
@@ -986,8 +1055,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see mitll.langtest.client.recorder.FlashcardRecordButton#FlashcardRecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, String)
    * @param listener
+   * @see mitll.langtest.client.recorder.FlashcardRecordButton#FlashcardRecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean, boolean, mitll.langtest.client.exercise.ExerciseController, String)
    */
   @Override
   public void addKeyListener(KeyPressHelper.KeyListener listener) {
@@ -998,10 +1067,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
-  public boolean isRecordingEnabled() {  return flashRecordPanel.gotPermission();  }
+  public boolean isRecordingEnabled() {
+    return flashRecordPanel.gotPermission();
+  }
 
   @Override
-  public boolean usingFlashRecorder() {  return flashRecordPanel.usingFlash();  }
+  public boolean usingFlashRecorder() {
+    return flashRecordPanel.usingFlash();
+  }
 
   private class LogoutClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
@@ -1016,8 +1089,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
+
         public void onSuccess() {
-          new UserTable(props,userManager.isAdmin()).showUsers(service);
+          new UserTable(props, userManager.isAdmin()).showUsers(service);
         }
       });
     }
@@ -1029,6 +1103,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
+
         public void onSuccess() {
           new EventTable().show(service);
         }
@@ -1038,11 +1113,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private class ResultsClickHandler implements ClickHandler {
     EventRegistration outer = LangTest.this;
+
     public void onClick(ClickEvent event) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
+
         public void onSuccess() {
           ResultManager resultManager = new ResultManager(service, props.getNameForAnswer(),
               getStartupInfo().getTypeOrder(), outer, LangTest.this);
@@ -1058,6 +1135,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
+
         public void onSuccess() {
           new MonitoringManager(service, props).showResults();
         }
