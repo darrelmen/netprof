@@ -33,6 +33,7 @@ public class CommentBox<T extends Shell & AnnotationExercise> extends PopupConta
   private final CommentAnnotator commentAnnotator;
   private final EventRegistration registration;
   private MyPopup commentPopup;
+  MutableAnnotationExercise annotationExercise;
 
   /**
    * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getQuestionContent(mitll.langtest.shared.exercise.CommonExercise, String)
@@ -41,10 +42,11 @@ public class CommentBox<T extends Shell & AnnotationExercise> extends PopupConta
    * @param registration
    * @param commentAnnotator
    */
-  public CommentBox(T exercise, EventRegistration registration, CommentAnnotator commentAnnotator) {
+  public CommentBox(T exercise, EventRegistration registration, CommentAnnotator commentAnnotator, MutableAnnotationExercise annotationExercise) {
     this.exercise = exercise;
     this.registration = registration;
     this.commentAnnotator = commentAnnotator;
+    this.annotationExercise = annotationExercise;
   }
 
   /**
@@ -142,7 +144,8 @@ public class CommentBox<T extends Shell & AnnotationExercise> extends PopupConta
       public void onClick(ClickEvent event) {
         commentEntryText.setText("");
         showOrHideCommentButton(commentButton, clear, true);
-        exercise.addAnnotation(field, "correct", "");
+
+        annotationExercise.addAnnotation(field, "correct", "");
         setButtonTitle(commentButton, true, "");
         commentAnnotator.addCorrectComment(field);
       }
