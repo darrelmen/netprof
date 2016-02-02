@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  * TODOx : concept of rounds explicit?
  * TODO : review table...?
  */
-public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & AnnotationExercise & ScoredExercise>
+public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & AnnotationExercise & ScoredExercise & MutableAnnotationExercise>
     extends ExercisePanelFactory<T>
     implements RequiresResize {
   private Logger logger = Logger.getLogger("StatsFlashcardFactory");
