@@ -155,7 +155,7 @@ public class AttachAudio {
         if (exists) {
           if (!audioPaths.contains(child)) {
             audio.setAudioRef(child);   // remember to prefix the path
-            imported.addAudio(audio);
+            imported.getMutableAudio().addAudio(audio);
             audioPaths.add(child);
           }
         } else {
