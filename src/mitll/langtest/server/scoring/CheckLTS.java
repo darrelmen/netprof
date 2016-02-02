@@ -46,7 +46,7 @@ class CheckLTS {
   /**
    * @param foreignLanguagePhrase
    * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTS
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
    */
   public ASR.PhoneInfo getBagOfPhones(String foreignLanguagePhrase) {
     return checkLTS2(letterToSoundClass, foreignLanguagePhrase);
@@ -65,7 +65,7 @@ class CheckLTS {
     Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
 
     String language = isMandarin ? " MANDARIN " : "";
-    //logger.debug("checkLTS '" + language + "' tokens : '" +tokens +"'");
+    //logger.debug("checkLTSOnForeignPhrase '" + language + "' tokens : '" +tokens +"'");
     Set<String> oov = new HashSet<>();
     Set<String> inlts = new HashSet<>();
     Set<String> indict = new HashSet<>();
@@ -78,7 +78,7 @@ class CheckLTS {
         if (isMandarin) {
           String segmentation = smallVocabDecoder.segmentation(trim);
           if (segmentation.isEmpty()) {
-            logger.warn("checkLTS: mandarin token : '" + token + "' invalid!");
+            logger.warn("checkLTSOnForeignPhrase: mandarin token : '" + token + "' invalid!");
             oov.add(trim);
           }
         } else {
@@ -87,7 +87,7 @@ class CheckLTS {
               process[0][0].length() == 0 || (process.length == 1 && process[0].length == 1 && process[0][0].equals("aa"))) {
             boolean htkEntry = htkDictionary.contains(token);
             if (!htkEntry && !htkDictionary.isEmpty()) {
-              logger.warn("checkLTS with " + lts + "/" + languageProperty + " token #" + i +
+              logger.warn("checkLTSOnForeignPhrase with " + lts + "/" + languageProperty + " token #" + i +
                       " : '" + token + "' hash " + token.hashCode() +
                       " is invalid in '" + foreignLanguagePhrase +
                       "' and not in dictionary of size " + htkDictionary.size()
