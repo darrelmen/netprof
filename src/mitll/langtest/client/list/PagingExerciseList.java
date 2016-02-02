@@ -37,7 +37,7 @@ import java.util.logging.Logger;
  * Time: 5:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingExerciseList<T extends Shell> extends ExerciseList<T> {
+public class PagingExerciseList<T extends CommonShell> extends ExerciseList<T> {
   private Logger logger = Logger.getLogger("PagingExerciseList");
 
   protected final ExerciseController controller;
