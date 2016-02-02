@@ -6,37 +6,22 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.excel.UserDAOToExcel;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
+import net.sf.json.JSON;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.DataFormat;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
-import java.io.IOException;
 import java.io.OutputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.sql.*;
+import java.util.*;
 
+//@SuppressWarnings("ALL")
 public class UserDAO extends DAO {
-  private static final String DEFECT_DETECTOR = "defectDetector";
   private static final Logger logger = Logger.getLogger(UserDAO.class);
+
+  private static final String DEFECT_DETECTOR = "defectDetector";
   public static final String USERS = "users";
   public static final String MALE = "male";
   public static final String FEMALE = "female";
@@ -47,7 +32,7 @@ public class UserDAO extends DAO {
   private static final String DEVICE = "device";
   private static final String USER_ID = "userID";
   private static final List<User.Permission> CD_PERMISSIONS = Arrays.asList(User.Permission.QUALITY_CONTROL, User.Permission.RECORD_AUDIO);
-  private static final List<User.Permission> EMPTY_PERM = new ArrayList<User.Permission>();
+  private static final List<User.Permission> EMPTY_PERM = new ArrayList<>();
   private static final String ENABLED = "enabled";
   private static final String RESET_PASSWORD_KEY = "resetPasswordKey";
   private static final String ENABLED_REQ_KEY = "enabledReqKey";
@@ -57,32 +42,13 @@ public class UserDAO extends DAO {
   private long defectDetector;
   private boolean enableAllUsers;
 
-  public static final String ID = "id";
+  private static final String ID = "id";
   private static final String AGE = "age";
   private static final String GENDER = "gender";
   private static final String EXPERIENCE = "experience";
   private static final String IPADDR = "ipaddr";
   private static final String DIALECT = "dialect";
   private static final String TIMESTAMP = "timestamp";
-  /**
-   * For spreadsheet download
-   */
-  private static final List<String> COLUMNS2 = Arrays.asList(ID,
-      "userid",
-      DIALECT,
-      AGE,
-      GENDER,
-      EXPERIENCE,
-      "permissions",
-      "items complete?",
-      "num recordings", "rate(sec)",
-      IPADDR,
-      TIMESTAMP,
-      KIND,
-      PASS,
-      EMAIL,
-      DEVICE
-  );
   public static final int DEFAULT_USER_ID = -1;
   public static final int DEFAULT_MALE_ID = -2;
   public static final int DEFAULT_FEMALE_ID = -3;
@@ -106,7 +72,7 @@ public class UserDAO extends DAO {
 
       defectDetector = userExists(DEFECT_DETECTOR);
       if (defectDetector == -1) {
-        defectDetector = addUser(89, MALE, 0, "", UNKNOWN, UNKNOWN, DEFECT_DETECTOR, false, new ArrayList<User.Permission>(), User.Kind.STUDENT, "", "", "");
+        defectDetector = addUser(89, MALE, 0, "", UNKNOWN, UNKNOWN, DEFECT_DETECTOR, false, new ArrayList<>(), User.Kind.STUDENT, "", "", "");
       }
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -179,7 +145,7 @@ public class UserDAO extends DAO {
 
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
-   * <p/>
+   * <p>
    * Uses return generated keys to get the user id
    *
    * @param age
@@ -468,7 +434,7 @@ public class UserDAO extends DAO {
 
       //logger.debug("found " + numColumns + " in users table");
 
-      Set<String> expected = new HashSet<String>();
+      Set<String> expected = new HashSet<>();
       expected.addAll(Arrays.asList(ID, AGE, GENDER, EXPERIENCE,
           IPADDR, "nativelang", DIALECT, USER_ID.toLowerCase(), TIMESTAMP, ENABLED));
       expected.removeAll(getColumns(USERS));
@@ -483,14 +449,14 @@ public class UserDAO extends DAO {
       }
       Collection<String> columns = getColumns(USERS);
 
-      for (String col : new HashSet<String>(Arrays.asList(NATIVE_LANG, DIALECT, USER_ID, PERMISSIONS, KIND, PASS, EMAIL,
+      for (String col : new HashSet<>(Arrays.asList(NATIVE_LANG, DIALECT, USER_ID, PERMISSIONS, KIND, PASS, EMAIL,
           DEVICE, ENABLED_REQ_KEY, RESET_PASSWORD_KEY))) {
         if (!columns.contains(col.toLowerCase())) {
           addVarchar(connection, USERS, col);
         }
       }
- // drop old default current timestamp
-      statement = connection.prepareStatement("ALTER TABLE " +USERS+ " ALTER " + TIMESTAMP + " TIMESTAMP NOT NULL");
+      // drop old default current timestamp
+      statement = connection.prepareStatement("ALTER TABLE " + USERS + " ALTER " + TIMESTAMP + " TIMESTAMP NOT NULL");
       statement.execute();
       statement.close();
     } finally {
@@ -519,8 +485,8 @@ public class UserDAO extends DAO {
 
   public List<User> getUsersDevices() {
     return getUsers("SELECT * from users" +
-            " where device like 'i%'" +
-            " order by " + ID + " ASC"
+        " where device like 'i%'" +
+        " order by " + ID + " ASC"
     );
   }
 
@@ -530,7 +496,7 @@ public class UserDAO extends DAO {
    */
   public Map<Long, MiniUser> getMiniUsers() {
     List<User> users = getUsers();
-    Map<Long, MiniUser> mini = new HashMap<Long, MiniUser>();
+    Map<Long, MiniUser> mini = new HashMap<>();
     for (User user : users) mini.put(user.getId(), new MiniUser(user));
     return mini;
   }
@@ -538,7 +504,7 @@ public class UserDAO extends DAO {
   /**
    * @param userid
    * @return
-   * @see AudioDAO#getAudioAttribute(int, int, String, String, long, String, int)
+   * @see AudioDAO#getAudioAttribute
    */
   public MiniUser getMiniUser(long userid) {
     User userWhere = getUserWhere(userid);
@@ -615,17 +581,17 @@ public class UserDAO extends DAO {
       logger.error("Got " + ee, ee);
       database.logEvent("unk", "getUsers: " + ee.toString(), 0, UNKNOWN);
     }
-    return new ArrayList<User>();
+    return new ArrayList<>();
   }
 
   private List<User> getUsers(ResultSet rs) throws SQLException {
-    List<User> users = new ArrayList<User>();
+    List<User> users = new ArrayList<>();
 
     while (rs.next()) {
       String userid;
 
       String perms = rs.getString(PERMISSIONS);
-      Collection<User.Permission> permissions = new ArrayList<User.Permission>();
+      Collection<User.Permission> permissions = new ArrayList<>();
       userid = rs.getString("userid"); // userid
 
       if (perms != null) {
@@ -700,7 +666,7 @@ public class UserDAO extends DAO {
   }
 
   private Map<Long, User> getUserMap(boolean getMale, List<User> users) {
-    Map<Long, User> idToUser = new HashMap<Long, User>();
+    Map<Long, User> idToUser = new HashMap<>();
     for (User u : users) {
       if (u.isMale() && getMale || (!u.isMale() && !getMale)) {
         idToUser.put(u.getId(), u);
@@ -714,100 +680,13 @@ public class UserDAO extends DAO {
    * @return
    */
   private Map<Long, User> getMap(List<User> users) {
-    Map<Long, User> idToUser = new HashMap<Long, User>();
+    Map<Long, User> idToUser = new HashMap<>();
     for (User u : users) {
       idToUser.put(u.getId(), u);
     }
     return idToUser;
   }
 
-  public void toXLSX(OutputStream out, List<User> users) {
-    writeToStream(out, getSpreadsheet(users));
-  }
-
-  private SXSSFWorkbook getSpreadsheet(List<User> users) {
-    long then = System.currentTimeMillis();
-
-    SXSSFWorkbook wb = new SXSSFWorkbook(1000); // keep 100 rows in memory, exceeding rows will be flushed to disk
-
-    Sheet sheet = wb.createSheet("Users");
-    int rownum = 0;
-    Row headerRow = sheet.createRow(rownum++);
-    for (int i = 0; i < COLUMNS2.size(); i++) {
-      Cell headerCell = headerRow.createCell(i);
-      headerCell.setCellValue(COLUMNS2.get(i));
-    }
-
-    CellStyle cellStyle = wb.createCellStyle();
-    DataFormat dataFormat = wb.createDataFormat();
-
-    cellStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss"));
-
-    for (User user : users) {
-      Row row = sheet.createRow(rownum++);
-      int j = 0;
-      row.createCell(j++).setCellValue(user.getId());
-      row.createCell(j++).setCellValue(user.getUserID());
-      row.createCell(j++).setCellValue(user.getDialect());
-      row.createCell(j++).setCellValue(user.getAge());
-      row.createCell(j++).setCellValue(user.getGender() == 0 ? MALE : FEMALE);
-      row.createCell(j++).setCellValue(user.getExperience());
-
-      row.createCell(j++).setCellValue(user.getPermissions().toString().replaceAll("\\[", "").replaceAll("\\]", ""));
-      row.createCell(j++).setCellValue(user.isComplete() ? "Yes" : ("No (" + Math.round(100 * user.getCompletePercent()) + "%)"));
-      row.createCell(j++).setCellValue("" + user.getNumResults());
-      row.createCell(j++).setCellValue("" + roundToHundredth(user.getRate()));
-
-//      row.createCell(j++).setCellValue(user.getNativeLang());
-      row.createCell(j++).setCellValue(user.getIpaddr());
-
-      Cell cell = row.createCell(j++);
-      try {
-        SimpleDateFormat sdf = new SimpleDateFormat();
-        String format = sdf.format(new Date(user.getTimestampMillis()));
-        cell.setCellValue(format);
-      } catch (Exception e) {
-        cell.setCellValue("Unknown");
-      }
-      cell.setCellStyle(cellStyle);
-
-      User.Kind userKind = user.getUserKind();
-      row.createCell(j++).setCellValue(userKind.toString());
-      String passwordHash = user.getPasswordHash();
-      row.createCell(j++).setCellValue(passwordHash == null || passwordHash.isEmpty() ? "NO_PASSWORD" : "HAS_PASSWORD");
-      String emailHash = user.getEmailHash();
-      row.createCell(j++).setCellValue(emailHash == null || emailHash.isEmpty() ? "NO_EMAIL" : "HAS_EMAIL");
-      row.createCell(j++).setCellValue(user.getDevice());
-    }
-    long now = System.currentTimeMillis();
-    long diff = now - then;
-    if (diff > 100) {
-      logger.info("toXLSX : took " + diff + " millis to write " + rownum +
-          " rows to sheet, or " + diff / rownum + " millis/row.");
-    }
-    return wb;
-  }
-
-  private void writeToStream(OutputStream out, SXSSFWorkbook wb) {
-    long now;
-    try {
-      long then = System.currentTimeMillis();
-      wb.write(out);
-      now = System.currentTimeMillis();
-      if (now - then > 100) {
-        logger.warn(language + " : toXLSX : took " + (now - then) + " millis to write excel to output stream ");
-      }
-      out.close();
-      wb.dispose();
-    } catch (IOException e) {
-      logger.error("got " + e, e);
-      database.logEvent("unk", "(" + language + ") toXLSX: " + e.toString(), 0, UNKNOWN);
-    }
-  }
-
-  private float roundToHundredth(double totalHours) {
-    return ((float) ((Math.round(totalHours * 100)))) / 100f;
-  }
 
   public boolean changePassword(Long remove, String passwordH) {
     try {
@@ -903,5 +782,13 @@ public class UserDAO extends DAO {
       database.logEvent("unk", "changeEnabled user: " + userid + " " + ee.toString(), 0, UNKNOWN);
     }
     return false;
+  }
+
+  public void toXLSX(OutputStream out, List<User> users) {
+    new UserDAOToExcel().toXLSX(out, users, language);
+  }
+
+  public JSON toJSON(List<User> users) {
+    return new UserDAOToExcel().toJSON(users);
   }
 }
