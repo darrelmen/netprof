@@ -26,8 +26,7 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 
@@ -44,7 +43,7 @@ import java.util.logging.Logger;
  * Time: 5:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T> {
+public class CommentNPFExercise<T extends CommonShell & AudioAttributeExercise & AnnotationExercise & ScoredExercise> extends NPFExercise<T> {
   private final Logger logger = Logger.getLogger("CommentNPFExercise");
 
   private static final String CONTEXT = "context";
@@ -57,25 +56,27 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
   public static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";//"\\p{P}";
   public static final String SPACE_REGEX = " ";
   private static final String REF_AUDIO = "refAudio";
+  private final MutableAnnotationExercise mutableAnnotation;
 
   private AudioAttribute defaultAudio, maleAudio, femaleAudio;
   private PlayAudioPanel contextPlay;
   private CommentBox commentBox;
 
   public CommentNPFExercise(T e, ExerciseController controller, ListInterface<T> listContainer,
-                            boolean addKeyHandler, String instance) {
+                            boolean addKeyHandler, String instance, MutableAnnotationExercise mutableAnnotation) {
     super(e, controller, listContainer, 1.0f, addKeyHandler, instance);
+    this.mutableAnnotation = mutableAnnotation;
   }
 
   /**
    * @param content
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.exercise.T)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getQuestionContent(T)
    */
   @Override
   protected Widget getQuestionContent(final T e, String content) {
     if (commentBox == null) // defensive...
-      this.commentBox = new CommentBox(e, controller, this);
+      this.commentBox = new CommentBox<T>(e, controller, this, mutableAnnotation);
 
     Panel column = new VerticalPanel();
     column.getElement().setId("QuestionContent");
@@ -84,7 +85,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     DivWidget row = new DivWidget();
     row.getElement().setId("QuestionContent_item");
 
-    Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getRefSentence());
+    Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getForeignLanguage());
     entry.addStyleName("floatLeft");
     row.add(entry);
 
@@ -170,7 +171,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @see #getContext(T)
    */
   private String highlightVocabItemInContext(T e, String context) {
-    String trim = e.getRefSentence().trim();
+    String trim   = e.getForeignLanguage().trim();
     String toFind = removePunct(trim);
 
     // todone split on spaces, find matching words if no contigious overlap
@@ -336,8 +337,8 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @param label
    * @param value
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.exercise.T, String)
-   * @see #getContext(mitll.langtest.shared.exercise.T)
+   * @see #getQuestionContent(T, String)
+   * @see #getContext(T)
    */
   private Widget getEntry(T e, final String field, final String label, String value) {
     return getEntry(field, label, value, e.getAnnotation(field));
@@ -349,7 +350,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @param value
    * @param annotation
    * @return
-   * @see #getEntry(mitll.langtest.shared.exercise.T, String, String, String)
+   * @see #getEntry(T, String, String, String)
    * @see #makeFastAndSlowAudio(String)
    */
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {

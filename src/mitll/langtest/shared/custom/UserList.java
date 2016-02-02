@@ -9,8 +9,6 @@ import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.BaseExercise;
-import mitll.langtest.shared.exercise.CommonUserExercise;
-import mitll.langtest.shared.exercise.ExerciseShell;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.ArrayList;
@@ -114,6 +112,8 @@ public class UserList<T extends Shell> extends BaseExercise {
   }
 
   public boolean remove(T newUserExercise) {  return exercises.remove(newUserExercise); }
+
+  public boolean removeAndCheck(String id) { return remove(id) != null; }
 
   public T remove(String id) {
     T toRemove = null;

@@ -16,7 +16,7 @@ import java.util.*;
  * Time: 8:37 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UserExercise extends AudioExercise implements CommonUserExercise {
+public class UserExercise extends AudioExercise implements CombinedMutableUserExercise {
   public static final String CUSTOM_PREFIX = "Custom_";
   private long uniqueID = -1; //set by database
 
@@ -123,10 +123,10 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     }
   }
 
-  @Override
+/*  @Override
   public String getRefSentence() {
     return foreignLanguage;
-  }
+  }*/
 
   @Override
   public Collection<String> getRefSentences() {
@@ -147,7 +147,6 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     return "";
   }
 */
-
   @Override
   public long getCreator() {
     return creator;
@@ -165,7 +164,7 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
     this.uniqueID = uniqueID;
   }
 
-  @Override
+  // @Override
   public long getUniqueID() {
     return uniqueID;
   }
@@ -174,7 +173,9 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
    * @param english
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#grabInfoFromFormAndStuffInfoExercise()
    */
-  public void setEnglish(String english) {  this.englishSentence = english;  }
+  public void setEnglish(String english) {
+    this.englishSentence = english;
+  }
 
   public void setForeignLanguage(String foreignLanguage) {
     this.foreignLanguage = foreignLanguage;
@@ -208,9 +209,29 @@ public class UserExercise extends AudioExercise implements CommonUserExercise {
   }
 
   @Override
-  public UserExercise toUserExercise() {
+  public MutableExercise getMutable() {
     return this;
   }
+
+  @Override
+  public MutableAudioExercise getMutableAudio() {
+    return this;
+  }
+
+  @Override
+  public MutableAnnotationExercise getMutableAnnotation() {
+    return null;
+  }
+
+  @Override
+  public CombinedMutableUserExercise getCombinedMutableUserExercise() {
+    return this;
+  }
+
+//  @Override
+//  public UserExercise toUserExercise() {
+//    return this;
+//  }
 
   /**
    * @return

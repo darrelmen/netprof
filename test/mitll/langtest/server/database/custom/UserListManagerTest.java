@@ -513,7 +513,7 @@ public class UserListManagerTest {
     assertTrue(!listsForUser.contains(testList));
   }
 
-  @Test
+/*  @Test
   public void testAddExercise() {
     List<User> users = addAndGetUsers("test2");
     User owner = users.iterator().next();
@@ -553,7 +553,7 @@ public class UserListManagerTest {
     testList = userListManager.getUserListByID(listid, new ArrayList<String>());
     next = testList.getExercises().iterator().next();
     assertTrue(next.getEnglish().equals(CHANGED));
-  }
+  }*/
 
   private UserExercise addAndDelete(User owner, UserListManager userListManager, long listid, UserList testList) {
     UserExercise english = addExercise(owner, userListManager, listid, testList);
