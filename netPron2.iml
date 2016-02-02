@@ -50,7 +50,6 @@
       <excludeFolder url="file://$MODULE_DIR$/gwt-unitCache" />
       <excludeFolder url="file://$MODULE_DIR$/imagewriter" />
       <excludeFolder url="file://$MODULE_DIR$/test-classes" />
-      <excludeFolder url="file://$MODULE_DIR$/test/mitll/langtest/server/database/custom" />
       <excludeFolder url="file://$MODULE_DIR$/war/WEB-INF/classes" />
       <excludeFolder url="file://$MODULE_DIR$/war/WEB-INF/deploy" />
       <excludeFolder url="file://$MODULE_DIR$/war/WEB-INF/deploy/langtest" />
@@ -78,7 +77,6 @@
       <excludeFolder url="file://$MODULE_DIR$/war/config/pilot" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/russian" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/spanish" />
-      <excludeFolder url="file://$MODULE_DIR$/war/config/sudanese" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/tagalog" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/unitFlashcard" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/urdu" />
