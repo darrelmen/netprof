@@ -142,7 +142,8 @@ public class Navigation implements RequiresResize, ShowTab {
         return new ExercisePanelFactory<CommonExercise>(service, feedback, controller, exerciseList) {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
-            return new CommentNPFExercise<CommonExercise>(e, controller, exerciseList, false, "classroom", e.getMutableAnnotation());
+            CommentNPFExercise<CommonExercise> classroom = new CommentNPFExercise<>(e, controller, exerciseList, false, "classroom");
+            return classroom;
           }
         };
       }
