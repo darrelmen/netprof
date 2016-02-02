@@ -33,7 +33,7 @@ public class InDictFilter {
    * @see #isValid(String)
    */
   private boolean isPhraseInDict(String phrase) {
-    return audioFileHelper.checkLTS(phrase);
+    return audioFileHelper.checkLTSOnForeignPhrase(phrase);
   }
 
   /**
