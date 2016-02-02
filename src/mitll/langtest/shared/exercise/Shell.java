@@ -7,8 +7,7 @@ import java.util.Map;
 /**
  * Created by go22670 on 1/4/16.
  */
-public interface Shell extends IsSerializable {
-  String getID();
+public interface Shell extends HasID {
   STATE getState();
   void setState(STATE state);
 
