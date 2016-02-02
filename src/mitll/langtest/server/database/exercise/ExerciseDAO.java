@@ -11,8 +11,6 @@ import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonUserExercise;
-import mitll.langtest.shared.exercise.Shell;
 
 import java.util.Collection;
 import java.util.List;

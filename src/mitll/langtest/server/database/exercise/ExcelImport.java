@@ -288,7 +288,7 @@ public class ExcelImport implements ExerciseDAO {
       if (orDefault.isEmpty()) {
         logger.error("huh? no fl for " + e);
       } else {
-        e.setRefSentences(orDefault);
+        e.getMutable().setRefSentences(orDefault);
         //   if (orDefault.size() > 1) logger.info("For " + e.getID() + " found " + orDefault.size());
       }
     }
