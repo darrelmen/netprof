@@ -7,21 +7,12 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.UserDAO;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonUserExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.sql.*;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
