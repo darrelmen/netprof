@@ -24,6 +24,8 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
@@ -37,7 +39,7 @@ import java.util.logging.Logger;
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExerciseList<T extends Shell>
+public abstract class ExerciseList<T extends CommonShell>
     extends VerticalPanel
     implements ListInterface<T>, ProvidesResize, ValueChangeHandler<String> {
   private final Logger logger = Logger.getLogger("ExerciseList");
@@ -396,7 +398,7 @@ public abstract class ExerciseList<T extends Shell>
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    * @see #rememberAndLoadFirst(java.util.List)
    */
-  public void rememberAndLoadFirst(List<T> exercises, T firstExercise,
+  public void rememberAndLoadFirst(List<T> exercises, CommonExercise firstExercise,
                                    String selectionID) {
     logger.info("ExerciseList : rememberAndLoadFirst instance '" + getInstance() +
         "' remembering " + exercises.size() + " exercises, " + selectionID +
@@ -470,7 +472,7 @@ public abstract class ExerciseList<T extends Shell>
    * If we're not already showing this item, ask there server for the exercise.
    * Does this by pushing a history item and then noticing the history item change.
    *
-   * @see #rememberAndLoadFirst(java.util.List, mitll.langtest.shared.exercise.CommonExercise, String)
+   * @see #rememberAndLoadFirst
    */
   protected void loadFirstExercise() {
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
