@@ -29,9 +29,7 @@ import java.util.Collections;
 public class ModalInfoDialog {
   private final KeyPressHelper enterKeyButtonHelper = new KeyPressHelper();
 
-  //private int messageHeading = 5;
-  public ModalInfoDialog() {
-  }
+  public ModalInfoDialog() {}
 
   public ModalInfoDialog(String title, String message) {
     this(title, message, null);
