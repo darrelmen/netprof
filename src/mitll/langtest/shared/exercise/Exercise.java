@@ -90,6 +90,7 @@ public class Exercise extends AudioExercise implements CommonExercise, MutableEx
 
   @Override
   public CombinedMutableUserExercise getCombinedMutableUserExercise() {
+    new Exception("shouldn't call this method.");
 //    throw new IllegalAccessException("shouldn't call this method.");
     return null;
   }

@@ -288,7 +288,7 @@ public class EditItem {
    * @param pagingContainer
    * @param doNewExercise
    * @param setFields
-   * @see #populatePanel(mitll.langtest.shared.exercise.CommonUserExercise, com.google.gwt.user.client.ui.Panel, mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, com.google.gwt.user.client.ui.HasText, mitll.langtest.client.list.ListInterface)
+   * @see #populatePanel
    */
   private void addEditOrAddPanel(CommonExercise newExercise, HasText itemMarker,
                                  UserList<CommonExercise> originalList,
