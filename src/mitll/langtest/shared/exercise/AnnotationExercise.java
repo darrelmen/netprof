@@ -13,7 +13,5 @@ public interface AnnotationExercise {
 
   ExerciseAnnotation getAnnotation(String field);
 
-  void addAnnotation(String field, String status, String comment);
-
   Collection<String> getFields();
 }
