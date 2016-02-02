@@ -398,7 +398,7 @@ public class RefResultDecoder {
           audioConversion.ensureWriteMP3(audioRef, pathHelper.getInstallPath(), trimInfo.didTrim(), title, author);
         }
       } else {
-        logger.warn("no file for " + exid + " " + attribute + " at audio file " + bestAudio);
+//        logger.warn("no file for " + exid + " " + attribute + " at audio file " + bestAudio);
       }
     }
 
