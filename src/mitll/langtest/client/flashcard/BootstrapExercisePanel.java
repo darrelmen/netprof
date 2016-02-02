@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  * Time: 3:07 PM
  * To change this template use File | Settings | File Templates.
  */
-public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & AnnotationExercise & ScoredExercise>
+public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & AnnotationExercise & ScoredExercise & MutableAnnotationExercise>
     extends FlashcardPanel<T>
     implements AudioAnswerListener {
   private Logger logger;
