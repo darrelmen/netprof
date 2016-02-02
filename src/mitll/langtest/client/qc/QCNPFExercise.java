@@ -29,6 +29,7 @@ import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
@@ -48,7 +49,7 @@ import java.util.logging.Logger;
  * Time: 5:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class QCNPFExercise<T extends CommonShell & AudioAttributeExercise & AnnotationExercise & ScoredExercise> extends GoodwaveExercisePanel<T> {
+public class QCNPFExercise<T extends CommonShell & AudioRefExercise & AnnotationExercise & ScoredExercise> extends GoodwaveExercisePanel<T> {
   private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
   private static final String DEFECT = "Defect?";
@@ -84,6 +85,13 @@ public class QCNPFExercise<T extends CommonShell & AudioAttributeExercise & Anno
   private Tooltip approvedTooltip;
   private Tooltip nextTooltip;
 
+  /**
+   * @see mitll.langtest.client.custom.content.NPFHelper#getFactory(PagingExerciseList, String, boolean)
+   * @param e
+   * @param controller
+   * @param listContainer
+   * @param instance
+   */
   public QCNPFExercise(T e, ExerciseController controller, ListInterface<T> listContainer,
                        String instance) {
     super(e, controller, listContainer, 1.0f, false, instance);
