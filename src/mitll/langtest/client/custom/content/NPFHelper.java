@@ -23,7 +23,7 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,16 +88,16 @@ public class NPFHelper implements RequiresResize {
    */
   public void showNPF(UserList<CommonExercise> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises,
                       CommonExercise toSelect) {
-   // logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
+    // logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
     this.instanceName = instanceName;
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
       madeNPFContent = true;
-     // logger.info("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
+      // logger.info("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
       addNPFToContent(ul, content, instanceName, loadExercises, toSelect);
     } else {
-    //  logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
+      //  logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
       rememberAndLoadFirst(ul, toSelect);
     }
   }
@@ -208,7 +208,7 @@ public class NPFHelper implements RequiresResize {
   private void rememberAndLoadFirst(final UserList<CommonExercise> ul, CommonExercise toSelect) {
     npfExerciseList.setUserListID(ul.getUniqueID());
     List<CommonExercise> copy = new ArrayList<>(ul.getExercises());
-  //  logger.info("rememberAndLoadFirst " + copy.size() + " exercises from  " +ul.getName());
+    //  logger.info("rememberAndLoadFirst " + copy.size() + " exercises from  " +ul.getName());
     //  npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
     npfExerciseList.rememberAndLoadFirst(copy, toSelect, "");
     npfExerciseList.setWidth("270px");
@@ -246,18 +246,17 @@ public class NPFHelper implements RequiresResize {
     exerciseList.setFactory(getFactory(exerciseList, instanceName, showQC));
   }
 
-  protected ExercisePanelFactory<CommonExercise> getFactory(final PagingExerciseList<CommonExercise> exerciseList, final String instanceName,
-                                            final boolean showQC) {
+  protected ExercisePanelFactory<CommonExercise> getFactory(final PagingExerciseList<CommonExercise> exerciseList,
+                                                            final String instanceName,
+                                                            final boolean showQC) {
     return new ExercisePanelFactory<CommonExercise>(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
         if (showQC) {
           QCNPFExercise<CommonExercise> widgets = new QCNPFExercise<>(e, controller, exerciseList, instanceName);
-          widgets.addContent();
           return widgets;
         } else {
-          CommentNPFExercise<CommonExercise> widgets = new CommentNPFExercise<>(e, controller, exerciseList, false, instanceName, e.getMutableAnnotation());
-          widgets.addContent();
+          CommentNPFExercise<CommonExercise> widgets = new CommentNPFExercise<>(e, controller, exerciseList, false, instanceName);
           return widgets;
         }
       }
