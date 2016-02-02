@@ -23,8 +23,7 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +37,7 @@ import java.util.logging.Logger;
  * Time: 3:27 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> implements RequiresResize {
+public class NPFHelper implements RequiresResize {
   Logger logger = Logger.getLogger("NPFHelper");
 
   protected static final String LIST_COMPLETE = "List complete!";
@@ -50,7 +49,7 @@ public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> impleme
   protected final UserManager userManager;
 
   protected final UserFeedback feedback;
-  public PagingExerciseList<T> npfExerciseList;
+  public PagingExerciseList<CommonExercise> npfExerciseList;
   private final boolean showQC;
   DivWidget contentPanel;
   protected String instanceName;
@@ -73,7 +72,7 @@ public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> impleme
     this.showQC = showQC;
   }
 
-  public void showNPF(UL ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
+  public void showNPF(UserList<CommonExercise> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
     showNPF(ul, tabAndContent, instanceName, loadExercises, null);
   }
 
@@ -87,8 +86,8 @@ public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> impleme
    * @param toSelect
    * @see mitll.langtest.client.custom.ListManager#getListOperations
    */
-  public void showNPF(UL ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises,
-                      T toSelect) {
+  public void showNPF(UserList<CommonExercise> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises,
+                      CommonExercise toSelect) {
    // logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
     this.instanceName = instanceName;
     DivWidget content = tabAndContent.getContent();
@@ -107,8 +106,8 @@ public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> impleme
     return npfExerciseList;
   }
 
-  private void addNPFToContent(UL ul, Panel listContent, String instanceName, boolean loadExercises,
-                               T toSelect) {
+  private void addNPFToContent(UserList<CommonExercise> ul, Panel listContent, String instanceName, boolean loadExercises,
+                               CommonExercise toSelect) {
     listContent.add(doNPF(ul, instanceName, loadExercises, toSelect));
     listContent.addStyleName("userListBackground");
   }
@@ -123,7 +122,7 @@ public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> impleme
    * @return
    * @see #addNPFToContent(UserList, Panel, String, boolean, CommonExercise)
    */
-  private Panel doNPF(UL ul, String instanceName, boolean loadExercises, T toSelect) {
+  private Panel doNPF(UserList<CommonExercise> ul, String instanceName, boolean loadExercises, CommonExercise toSelect) {
     // System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul);
     Panel hp = doInternalLayout(ul, instanceName);
     if (loadExercises) {
@@ -140,7 +139,7 @@ public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> impleme
    * @return
    * @see #doNPF
    */
-  protected Panel doInternalLayout(UL ul, String instanceName) {
+  protected Panel doInternalLayout(UserList<CommonExercise> ul, String instanceName) {
 //    logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
 
     // row 1
@@ -171,7 +170,7 @@ public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> impleme
     left.add(exerciseListOnLeftSide);
   }
 
-  protected Panel getRightSideContent(UL ul, String instanceName) {
+  protected Panel getRightSideContent(UserList<CommonExercise> ul, String instanceName) {
     Panel npfContentPanel = new SimplePanel();
     npfContentPanel.addStyleName("floatRight");
     npfContentPanel.getElement().setId("internalLayout_RightContent");
@@ -186,8 +185,8 @@ public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> impleme
    * @return
    * @see #doNPF
    */
-  PagingExerciseList makeNPFExerciseList(Panel right, String instanceName) {
-    final PagingExerciseList exerciseList = makeExerciseList(right, instanceName);
+  PagingExerciseList<CommonExercise> makeNPFExerciseList(Panel right, String instanceName) {
+    final PagingExerciseList<CommonExercise> exerciseList = makeExerciseList(right, instanceName);
     setFactory(exerciseList, instanceName, showQC);
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
@@ -206,9 +205,9 @@ public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> impleme
    * @see #doNPF
    * @see #showNPF
    */
-  private void rememberAndLoadFirst(final UL ul, T toSelect) {
+  private void rememberAndLoadFirst(final UserList<CommonExercise> ul, CommonExercise toSelect) {
     npfExerciseList.setUserListID(ul.getUniqueID());
-    List<T> copy = new ArrayList<>(ul.getExercises());
+    List<CommonExercise> copy = new ArrayList<>(ul.getExercises());
   //  logger.info("rememberAndLoadFirst " + copy.size() + " exercises from  " +ul.getName());
     //  npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
     npfExerciseList.rememberAndLoadFirst(copy, toSelect, "");
@@ -222,8 +221,8 @@ public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> impleme
    * @return
    * @see #makeNPFExerciseList
    */
-  PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
-    return new NPExerciseList(right, service, feedback, controller,
+  PagingExerciseList<CommonExercise> makeExerciseList(final Panel right, final String instanceName) {
+    return new NPExerciseList<CommonExercise>(right, service, feedback, controller,
         true, instanceName, false) {
       @Override
       protected void onLastItem() {
@@ -243,19 +242,19 @@ public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> impleme
    * @param showQC
    * @see #makeNPFExerciseList(com.google.gwt.user.client.ui.Panel, String)
    */
-  void setFactory(final PagingExerciseList<T> exerciseList, final String instanceName, boolean showQC) {
+  void setFactory(final PagingExerciseList<CommonExercise> exerciseList, final String instanceName, boolean showQC) {
     exerciseList.setFactory(getFactory(exerciseList, instanceName, showQC));
   }
 
-  protected ExercisePanelFactory<T> getFactory(final PagingExerciseList<T> exerciseList, final String instanceName,
+  protected ExercisePanelFactory<CommonExercise> getFactory(final PagingExerciseList<CommonExercise> exerciseList, final String instanceName,
                                             final boolean showQC) {
-    return new ExercisePanelFactory<T>(service, feedback, controller, exerciseList) {
+    return new ExercisePanelFactory<CommonExercise>(service, feedback, controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(T e) {
+      public Panel getExercisePanel(CommonExercise e) {
         if (showQC) {
-          return new QCNPFExercise<T>(e, controller, exerciseList, instanceName);
+          return new QCNPFExercise<CommonExercise>(e, controller, exerciseList, instanceName);
         } else {
-          return new CommentNPFExercise<T>(e, controller, exerciseList, false, instanceName);
+          return new CommentNPFExercise<CommonExercise>(e, controller, exerciseList, false, instanceName, e.getMutableAnnotation());
         }
       }
     };
@@ -277,5 +276,4 @@ public class NPFHelper<T extends CommonExercise, UL extends UserList<T>> impleme
   public String getInstanceName() {
     return instanceName;
   }
-
 }
