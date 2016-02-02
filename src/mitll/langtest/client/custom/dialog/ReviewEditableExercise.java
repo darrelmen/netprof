@@ -32,7 +32,10 @@ import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.EmptyScoreListener;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.PlayListener;
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
@@ -43,7 +46,10 @@ import java.util.logging.Logger;
 /**
  * Created by GO22670 on 3/28/2014.
  */
-public class ReviewEditableExercise<T extends CommonExercise, UL extends UserList<T>> extends EditableExercise<T,UL> {
+public class ReviewEditableExercise//<T extends CommonShell & AudioRefExercise & CombinedMutableUserExercise,
+  //  X extends CommonShell & AnnotationExercise,
+    //UL extends UserList<T>>
+    extends EditableExerciseDialog/*<T, UL>*/ {
   private final Logger logger = Logger.getLogger("ReviewEditableExercise");
 
   private static final String FIXED = "Mark Fixed";
@@ -60,34 +66,38 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
   private static final String MALE = "Male";
   private static final String FEMALE = "Female";
 
-  private final PagingExerciseList<T> exerciseList;
+  private final PagingExerciseList<CommonExercise> exerciseList;
   private final ListInterface predefinedContentList;
   private static final String WAV = ".wav";
   private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
+ // AudioAttributeExercise audioAttributeExercise;
+  //X annotationExercise;
 
   /**
    * @param itemMarker
    * @param changedUserExercise
    * @param originalList
    * @param exerciseList
-   * @param predefinedContent - this should be a reference to the Learn tab exercise list, but it's not getting set.
+   * @param predefinedContent   - this should be a reference to the Learn tab exercise list, but it's not getting set.
    * @see mitll.langtest.client.custom.content.ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
    */
   public ReviewEditableExercise(LangTestDatabaseAsync service,
                                 ExerciseController controller,
                                 HasText itemMarker,
-                                T changedUserExercise,
+                                CommonExercise changedUserExercise,
 
-                                UL originalList,
-                                PagingExerciseList<T> exerciseList,
+                                UserList<CommonExercise> originalList,
+                                PagingExerciseList<CommonExercise> exerciseList,
                                 ListInterface predefinedContent,
                                 NPFHelper npfHelper) {
     super(service, controller,
-      null,
-      itemMarker, changedUserExercise, originalList, exerciseList, predefinedContent, npfHelper);
+        null,
+        itemMarker, changedUserExercise, originalList, exerciseList, predefinedContent, npfHelper);
     this.exerciseList = exerciseList;
     this.predefinedContentList = predefinedContent;
 //    if (predefinedContentList == null) new Exception().printStackTrace();
+   // audioAttributeExercise  = changedUserExercise;
+   // this.annotationExercise = changedUserExercise;
   }
 
   private List<RememberTabAndContent> tabs;
@@ -98,33 +108,36 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
    */
   @Override
   protected Panel makeAudioRow() {
-    Map<MiniUser, List<AudioAttribute>> malesMap   = newUserExercise.getUserMap(true);
-    Map<MiniUser, List<AudioAttribute>> femalesMap = newUserExercise.getUserMap(false);
+    AudioAttributeExercise audioAttributeExercise = newUserExercise;
 
-    List<MiniUser> maleUsers   = newUserExercise.getSortedUsers(malesMap);
-    List<MiniUser> femaleUsers = newUserExercise.getSortedUsers(femalesMap);
+    Map<MiniUser, List<AudioAttribute>> malesMap = audioAttributeExercise.getUserMap(true);
+    Map<MiniUser, List<AudioAttribute>> femalesMap = audioAttributeExercise.getUserMap(false);
 
-    tabs = new ArrayList<RememberTabAndContent>();
+    List<MiniUser> maleUsers = audioAttributeExercise.getSortedUsers(malesMap);
+    List<MiniUser> femaleUsers = audioAttributeExercise.getSortedUsers(femalesMap);
+
+    tabs = new ArrayList<>();
 
     TabPanel tabPanel = new TabPanel();
     addTabsForUsers(newUserExercise, tabPanel, malesMap, maleUsers);
     addTabsForUsers(newUserExercise, tabPanel, femalesMap, femaleUsers);
 
-    RememberTabAndContent tabAndContent = getRememberTabAndContent(tabPanel, ADD_AUDIO,false);
+    RememberTabAndContent tabAndContent = getRememberTabAndContent(tabPanel, ADD_AUDIO, false);
     DivWidget widget = getRecordingWidget();
 
     tabAndContent.getContent().add(widget);
     tabAndContent.getTab().setIcon(IconType.PLUS);
 
-    /*if (!maleUsers.isEmpty() || !femaleUsers.isEmpty())*/ tabPanel.selectTab(0);
+    /*if (!maleUsers.isEmpty() || !femaleUsers.isEmpty())*/
+    tabPanel.selectTab(0);
 
     return tabPanel;
   }
 
   private DivWidget getRecordingWidget() {
     DivWidget widget = new DivWidget();
-    widget.add(getRecordAudioWithAnno(widget,Result.AUDIO_TYPE_REGULAR));
-    widget.add(getRecordAudioWithAnno(widget,Result.AUDIO_TYPE_SLOW));
+    widget.add(getRecordAudioWithAnno(widget, Result.AUDIO_TYPE_REGULAR));
+    widget.add(getRecordAudioWithAnno(widget, Result.AUDIO_TYPE_SLOW));
 
     return widget;
   }
@@ -149,14 +162,15 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
   /**
    * Make tabs in order of users
    *
-   * @see #makeAudioRow()
-   * @param e
+   * @param commonExercise
    * @param tabPanel
    * @param userToAudio
    * @param users
+   * @see #makeAudioRow()
    */
-  private void addTabsForUsers(CommonExercise e, TabPanel tabPanel, Map<MiniUser, List<AudioAttribute>> userToAudio,
-                               List<MiniUser> users) {
+  private <X extends CommonShell & AnnotationExercise> void addTabsForUsers(X commonExercise, TabPanel tabPanel,
+                                                                            Map<MiniUser, List<AudioAttribute>> userToAudio,
+                                                                            List<MiniUser> users) {
     int me = controller.getUser();
     for (MiniUser user : users) {
 
@@ -173,7 +187,7 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
           if (!audio.isHasBeenPlayed()) {
             allHaveBeenPlayed = false;
           }
-          Widget panelForAudio = getPanelForAudio(e, audio, tabAndContent);
+          Widget panelForAudio = getPanelForAudio(commonExercise, audio, tabAndContent);
           if (audioAttributes.size() == 2 && audioAttributes.indexOf(audio) == 0) {
             panelForAudio.addStyleName("bottomFiveMargin");
           }
@@ -201,16 +215,16 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
   }
 
   private String getUserTitle(int me, MiniUser user) {
-    return (user.isDefault()) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : (user.getId() == me) ? "by You (" +user.getUserID()+ ")" : getUserTitle(user);
+    return (user.isDefault()) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : (user.getId() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
   }
 
   private String getUserTitle(MiniUser user) {
-    return (user.isMale() ? MALE : FEMALE)+
-      (
-         // controller.getProps().isAdminView()
-        user.isAdmin()
-          ?" (" + user.getUserID() + ")" :"") +
-      " age " + user.getAge();
+    return (user.isMale() ? MALE : FEMALE) +
+        (
+            // controller.getProps().isAdminView()
+            user.isAdmin()
+                ? " (" + user.getUserID() + ")" : "") +
+        " age " + user.getAge();
   }
 
   @Override
@@ -229,13 +243,15 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
   private final Set<Widget> audioWasPlayed = new HashSet<Widget>();
   private final Set<Widget> toResize = new HashSet<Widget>();
 
-  private Widget getPanelForAudio(final T exercise, final AudioAttribute audio, RememberTabAndContent tabAndContent) {
+  private <X extends CommonShell & AnnotationExercise> Widget getPanelForAudio(final X exercise,
+                                                                               final AudioAttribute audio,
+                                                                               RememberTabAndContent tabAndContent) {
     String audioRef = audio.getAudioRef();
     if (audioRef != null) {
       audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
     }
-    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<T>(audioRef, exercise.getRefSentence(), service, controller,
-      controller.getProps().showSpectrogram(), new EmptyScoreListener(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED, exercise.getID(),
+    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, exercise.getForeignLanguage(), service, controller,
+        controller.getProps().showSpectrogram(), new EmptyScoreListener(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED, exercise.getID(),
         exercise, npfHelper.getInstanceName()) {
 
       /**
@@ -301,10 +317,10 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
   }
 
   /**
-   * @see #getPanelForAudio(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.shared.exercise.AudioAttribute, RememberTabAndContent)
    * @param id
    * @param audio
    * @param audioPanel
+   * @see #getPanelForAudio
    */
   private void noteAudioHasBeenPlayed(final String id, final AudioAttribute audio, final ASRScoringAudioPanel audioPanel) {
     audioPanel.addPlayListener(new PlayListener() {
@@ -318,25 +334,25 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
       }
 
       @Override
-      public void playStopped() {}
+      public void playStopped() {
+      }
     });
   }
 
   /**
-   * @see #getPanelForAudio(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.shared.exercise.AudioAttribute, RememberTabAndContent)
    * @param e
    * @param audio
    * @return
+   * @see #getPanelForAudio(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.shared.exercise.AudioAttribute, RememberTabAndContent)
    */
-  private Widget getCommentLine(CommonExercise e, AudioAttribute audio) {
+  private <E extends AnnotationExercise> Widget getCommentLine(E e, AudioAttribute audio) {
     ExerciseAnnotation audioAnnotation = e.getAnnotation(audio.getAudioRef());
     if (audioAnnotation != null && !audioAnnotation.isCorrect()) {
       HTML child = new HTML(audioAnnotation.getComment().isEmpty() ? "EMPTY COMMENT" : audioAnnotation.getComment());
       child.getElement().getStyle().setFontSize(14, Style.Unit.PX);
       child.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
       return child;
-    }
-    else {
+    } else {
       return null;
     }
   }
@@ -379,7 +395,7 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
       }
     });
 
-    if (newUserExercise.checkPredef()) {   // for now, only the owner of the list can remove or add to their list
+    if (newUserExercise.getCombinedMutableUserExercise().checkPredef()) {   // for now, only the owner of the list can remove or add to their list
       row.add(getRemove());
       row.add(getDuplicate());
     }
@@ -407,7 +423,8 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
           public void gotYes() {
             service.deleteItem(newUserExercise.getID(), new AsyncCallback<Boolean>() {
               @Override
-              public void onFailure(Throwable caught) {}
+              public void onFailure(Throwable caught) {
+              }
 
               @Override
               public void onSuccess(Boolean result) {
@@ -418,7 +435,8 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
           }
 
           @Override
-          public void gotNo() {}
+          public void gotNo() {
+          }
         });
       }
     });
@@ -447,21 +465,21 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
    */
   private void duplicateExercise(final Button duplicate) {
     duplicate.setEnabled(false);
-    newUserExercise.setCreator(controller.getUser());
+    newUserExercise.getCombinedMutableUserExercise().setCreator(controller.getUser());
     CommonShell commonShell = exerciseList.byID(newUserExercise.getID());
     if (commonShell != null) {
       newUserExercise.setState(commonShell.getState());
       newUserExercise.setSecondState(commonShell.getSecondState());
     }
     //logger.info("to duplicate " + newUserExercise + " state " + newUserExercise.getState());
-    service.duplicateExercise(newUserExercise, new AsyncCallback<UserExercise>() {
+    service.duplicateExercise(newUserExercise, new AsyncCallback<CommonExercise>() {
       @Override
       public void onFailure(Throwable caught) {
         duplicate.setEnabled(true);
       }
 
       @Override
-      public void onSuccess(UserExercise result) {
+      public void onSuccess(CommonExercise result) {
         duplicate.setEnabled(true);
 
         exerciseList.addExerciseAfter(newUserExercise, result);
@@ -499,7 +517,8 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
   }
 
   @Override
-  protected void checkIfNeedsRefAudio() {}
+  protected void checkIfNeedsRefAudio() {
+  }
 
   /**
    * TODOx : why do we have to do a sequence of server calls -- how about just one???
@@ -529,7 +548,8 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
 
       service.setExerciseState(id, STATE.FIXED, user, new AsyncCallback<Void>() {
         @Override
-        public void onFailure(Throwable caught) {}
+        public void onFailure(Throwable caught) {
+        }
 
         @Override
         public void onSuccess(Void result) {
@@ -540,14 +560,19 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
         }
       });
     } //else {
-      //logger.info("----> doAfterEditComplete : button not clicked ");
-   // }
+    //logger.info("----> doAfterEditComplete : button not clicked ");
+    // }
   }
-  @Override
-  protected String getEnglishLabel() { return "English<br/>";  }
 
   @Override
-  protected String getTransliterationLabel() { return "Transliteration";  }
+  protected String getEnglishLabel() {
+    return "English<br/>";
+  }
+
+  @Override
+  protected String getTransliterationLabel() {
+    return "Transliteration";
+  }
 
   private class MyRecordAudioPanel extends RecordAudioPanel {
     private Button deleteButton;
@@ -555,7 +580,7 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
 
     public MyRecordAudioPanel(DivWidget widget, String audioType, String instance) {
       super(ReviewEditableExercise.this.newUserExercise, ReviewEditableExercise.this.controller, widget,
-        ReviewEditableExercise.this.service, 0, false, audioType, instance);
+          ReviewEditableExercise.this.service, 0, false, audioType, instance);
       this.audioType = audioType;
     }
 
@@ -569,7 +594,7 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
         public void useResult(AudioAnswer result) {
           super.useResult(result);
           if (result.isValid()) {
-            newUserExercise.addAudio(result.getAudioAttribute());
+            newUserExercise.getMutableAudio().addAudio(result.getAudioAttribute());
             deleteButton.setEnabled(true);
           }
         }
@@ -577,8 +602,8 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
     }
 
     /**
-     * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, String, String)
      * @return
+     * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, String, String)
      */
     @Override
     protected Widget getAfterPlayWidget() {
@@ -594,7 +619,7 @@ public class ReviewEditableExercise<T extends CommonExercise, UL extends UserLis
 
             @Override
             public void onSuccess(Void result) {
-             // widgets.getParent().setVisible(false);
+              // widgets.getParent().setVisible(false);
               getWaveform().setVisible(false);
               getPlayButton().setEnabled(false);
               if (comment != null) comment.setVisible(false);
