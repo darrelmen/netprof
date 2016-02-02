@@ -38,7 +38,6 @@ import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -143,7 +142,7 @@ public class Navigation implements RequiresResize, ShowTab {
         return new ExercisePanelFactory<CommonExercise>(service, feedback, controller, exerciseList) {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
-            return new CommentNPFExercise<CommonExercise>(e, controller, exerciseList, false, "classroom");
+            return new CommentNPFExercise<CommonExercise>(e, controller, exerciseList, false, "classroom", e.getMutableAnnotation());
           }
         };
       }
