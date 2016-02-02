@@ -9,6 +9,7 @@ import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.BaseExercise;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import java.util.Map;
  * Time: 8:18 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UserList<T extends Shell> extends BaseExercise {
+public class UserList<T extends HasID> extends BaseExercise {
   public static final String MY_LIST = "Favorites";
 
   private long uniqueID;
@@ -137,9 +138,10 @@ public class UserList<T extends Shell> extends BaseExercise {
     return getExercises().contains(userExercise);
   }
 
-  public boolean containsByID(T userExercise) {
+  public boolean containsByID(String id) {
+   // String id = userExercise.getID();
     for (T ex : getExercises()) {
-      if (ex.getID().equals(userExercise.getID())) return true;
+      if (ex.getID().equals(id)) return true;
     }
     return false;
   }
