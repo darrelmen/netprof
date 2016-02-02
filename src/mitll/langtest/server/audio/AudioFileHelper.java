@@ -18,6 +18,8 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -83,10 +85,12 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
   }
 
   /**
+   * NOTE : has side effect of setting the number of phones!
    * @param exercises
    * @see LangTestDatabaseImpl#getExercises()
    */
-  public void checkLTS(List<CommonExercise> exercises) {
+ // public <T extends CommonShell & MutableExercise> void checkLTSAndCountPhones(List<T> exercises) {
+    public void checkLTSAndCountPhones(List<CommonExercise> exercises) {
     synchronized (this) {
       if (!checkedLTS) {
         checkedLTS = true;
@@ -102,7 +106,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
             }
             count++;
           } else {
-            countPhones(exercise);
+            countPhones(exercise.getCombinedMutableUserExercise());
           }
         }
 
@@ -113,11 +117,11 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
     }
   }
 
-  private boolean isInDictOrLTS(CommonExercise exercise) {
+  private boolean isInDictOrLTS(CommonShell exercise) {
     return asrScoring.validLTS(exercise.getForeignLanguage());
   }
 
-  private void countPhones(CommonExercise exercise) {
+  private <T extends CommonShell & MutableExercise> void countPhones(T exercise) {
     ASR.PhoneInfo bagOfPhones = asrScoring.getBagOfPhones(exercise.getForeignLanguage());
     exercise.setBagOfPhones(bagOfPhones.getPhoneSet());
     exercise.setFirstPron(bagOfPhones.getFirstPron());
@@ -133,7 +137,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
    */
-  public boolean checkLTS(String foreignLanguagePhrase) {
+  public boolean checkLTSOnForeignPhrase(String foreignLanguagePhrase) {
     makeASRScoring();
     return asrScoring.validLTS(foreignLanguagePhrase);
   }
@@ -566,7 +570,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
    * @see #decodeOneAttribute(CommonExercise, AudioAttribute, boolean)
    */
   public PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, boolean usePhoneToDisplay, boolean useOldSchool) {
-    return getASRScoreForAudio(0, testAudioPath, exercise.getRefSentence(), 128, 128, false,
+    return getASRScoreForAudio(0, testAudioPath, exercise.getForeignLanguage(), 128, 128, false,
         false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exercise.getID(), null, usePhoneToDisplay, useOldSchool);
   }
 
@@ -781,7 +785,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
   /**
    * @param phrases
    * @return
-   * @see AutoCRT#getScoreForAudio(String, int, File)
+   * @see AutoCRT#getScoreForAudio
    */
   public Collection<String> getValidPhrases(Collection<String> phrases) {
     makeASRScoring(); // TODO : evil
