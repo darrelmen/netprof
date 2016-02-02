@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
@@ -25,7 +26,7 @@ import java.util.logging.Logger;
 /**
  * Created by GO22670 on 6/5/2014.
  */
-class UserListCallback<T extends Shell, UL extends UserList<T>> implements AsyncCallback<Collection<UL>> {
+class UserListCallback<T extends CommonExercise, UL extends UserList<T>> implements AsyncCallback<Collection<UL>> {
   private final Logger logger = Logger.getLogger("UserListCallback");
 
   private static final String NO_LISTS_CREATED_YET = "No lists created yet.";
