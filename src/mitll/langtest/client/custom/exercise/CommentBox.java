@@ -18,16 +18,21 @@ import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.scoring.CommentAnnotator;
-import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.exercise.AnnotationExercise;
+import mitll.langtest.shared.exercise.MutableAnnotationExercise;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 9/8/14.
  */
 public class CommentBox<T extends Shell & AnnotationExercise> extends PopupContainer {
+  private final Logger logger = Logger.getLogger("CommentBox");
+
   private static final String COMMENT_BUTTON_GROUP_NEW = "comment-button-group-new";
   private final T exercise;
   private final CommentAnnotator commentAnnotator;
@@ -36,17 +41,23 @@ public class CommentBox<T extends Shell & AnnotationExercise> extends PopupConta
   MutableAnnotationExercise annotationExercise;
 
   /**
-   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getQuestionContent(mitll.langtest.shared.exercise.CommonExercise, String)
-   * @see mitll.langtest.client.flashcard.FlashcardPanel#getFirstRow(mitll.langtest.client.exercise.ExerciseController)
    * @param exercise
    * @param registration
    * @param commentAnnotator
+   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getQuestionContent(mitll.langtest.shared.exercise.CommonExercise, String)
+   * @see mitll.langtest.client.flashcard.FlashcardPanel#getFirstRow(mitll.langtest.client.exercise.ExerciseController)
    */
   public CommentBox(T exercise, EventRegistration registration, CommentAnnotator commentAnnotator, MutableAnnotationExercise annotationExercise) {
     this.exercise = exercise;
     this.registration = registration;
     this.commentAnnotator = commentAnnotator;
     this.annotationExercise = annotationExercise;
+    if (annotationExercise == null) {
+      logger.warning("CommentBox huh? annotation exercise is null : " + annotationExercise);
+    }
+    else {
+      logger.info("CommentBox got " +annotationExercise);
+    }
   }
 
   /**
@@ -87,7 +98,7 @@ public class CommentBox<T extends Shell & AnnotationExercise> extends PopupConta
     // content on left side, comment button on right
 
     Panel row = new HorizontalPanel();
-    row.getElement().setId("comment_and_clear_container_for_"+field);
+    row.getElement().setId("comment_and_clear_container_for_" + field);
     if (content != null) row.add(content);
     row.add(commentButton);
     row.add(clearButton);
@@ -96,7 +107,9 @@ public class CommentBox<T extends Shell & AnnotationExercise> extends PopupConta
     return row;
   }
 
-  public boolean isPopupShowing() { return commentPopup.isShowing(); }
+  public boolean isPopupShowing() {
+    return commentPopup.isShowing();
+  }
 
   /**
    * @param field
@@ -217,7 +230,10 @@ public class CommentBox<T extends Shell & AnnotationExercise> extends PopupConta
 
   private final Map<String, String> fieldToComment = new HashMap<String, String>();
 
-  private void showQC(UIObject qcCol)           { qcCol.addStyleName(COMMENT_BUTTON_GROUP_NEW);  }
+  private void showQC(UIObject qcCol) {
+    qcCol.addStyleName(COMMENT_BUTTON_GROUP_NEW);
+  }
+
   private void showQCHasComment(UIObject child) {
     child.removeStyleName(COMMENT_BUTTON_GROUP_NEW);
   }
