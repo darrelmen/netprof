@@ -15,6 +15,7 @@ import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
@@ -32,8 +33,13 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScore> {
-  public static final int HISTORY_COL_WIDTH = 105;
   private final Logger logger = Logger.getLogger("ScoreHistoryContainer");
+
+  public static final int HISTORY_COL_WIDTH = 105;
+
+  protected static final String ENGLISH = "English";
+  private final boolean english;
+
 
   private static final int MAX_LENGTH_ID = 15;
   public static final int TABLE_HISTORY_WIDTH = 420;
@@ -45,6 +51,8 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
 
   public ScoreHistoryContainer(ExerciseController controller, List<CommonShell> allExercises) {
     super(controller);
+    english = controller.getLanguage().equals(ENGLISH);
+
     sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
 
     for (CommonShell commonShell : allExercises) {
@@ -168,6 +176,8 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
         });
     return columnSortHandler2;
   }
+
+
 
   private ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> getScoreSorter(Column<ExerciseCorrectAndScore, SafeHtml> scoreCol,
                                                                                 List<ExerciseCorrectAndScore> dataList) {
@@ -297,6 +307,31 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
     };
   }
 
+
+  /**
+   * Confusing for english - english col should be foreign language for english,
+   * @param shell
+   * @return
+   */
+  protected String getEnglishText(CommonShell shell) {
+//    logger.info("getEnglishText " + shell.getID() + " en " + shell.getEnglish() + " fl " + shell.getForeignLanguage() + " mn " + shell.getMeaning());
+    return english && !shell.getEnglish().equals(EditItem.NEW_ITEM) ? shell.getForeignLanguage() : shell.getEnglish();
+  }
+
+  /**
+   * Confusing for english - fl text should be english or meaning if there is meaning
+   * @param shell
+   * @return
+   */
+  protected String getFLText(CommonShell shell) {
+    String toShow = shell.getForeignLanguage();
+    if (english && !shell.getEnglish().equals(EditItem.NEW_ITEM)) {
+      String meaning = shell.getMeaning();
+      toShow = meaning.isEmpty() ? shell.getEnglish() : meaning;
+    }
+    return toShow;
+  }
+
   public interface LocalTableResources extends CellTable.Resources {
     /**
      * The styles applied to the table.
@@ -317,4 +352,6 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
     @Source({CellTable.Style.DEFAULT_CSS, "RTLScoresCellTableStyleSheet.css"})
     PagingContainer.TableResources.TableStyle cellTableStyle();
   }
+
+
 }
