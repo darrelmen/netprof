@@ -25,9 +25,10 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.AudioRefExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ScoredExercise;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -249,7 +250,7 @@ public class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExerci
         boolean anyAdded = false;
     //    logger.info("\tpopulateListChoices : found list " + result.size() + " choices");
         for (final UserList ul : result) {
-          if (!ul.containsByID(e)) {
+          if (!ul.containsByID(e.getID())) {
             activeCount++;
             anyAdded = true;
             final NavLink widget = new NavLink(ul.getName());
@@ -258,7 +259,8 @@ public class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExerci
               @Override
               public void onClick(ClickEvent event) {
                 controller.logEvent(w1,"DropUp",e.getID(), ADDING_TO_LIST + ul.getID() +"/"+ul.getName());
-                service.addItemToUserList(ul.getUniqueID(), new UserExercise(e, controller.getUser()), new AsyncCallback<Void>() {
+
+                service.addItemToUserList(ul.getUniqueID(), e.getID(), new AsyncCallback<Void>() {
                   @Override
                   public void onFailure(Throwable caught) {}
 
