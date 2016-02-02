@@ -521,7 +521,7 @@ public class UserListManager {
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    * @see mitll.langtest.server.LangTestDatabaseImpl#addItemToUserList(long, mitll.langtest.shared.custom.UserExercise)
    */
-  public void addItemToUserList(long userListID, UserExercise userExercise) {
+  public void addItemToUserList(long userListID, String userExercise) {
     addItemToList(userListID, userExercise);
   }
 
@@ -530,25 +530,25 @@ public class UserListManager {
    * @param userExercise
    * @param mediaDir
    * @see mitll.langtest.server.LangTestDatabaseImpl#reallyCreateNewItem
-   * @see #addItemToUserList(long, mitll.langtest.shared.custom.UserExercise)
+   * @see #addItemToUserList
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
   public void reallyCreateNewItem(long userListID, CommonExercise userExercise, String mediaDir) {
     userExerciseDAO.add(userExercise, false);
 
-    addItemToList(userListID, userExercise);
+    addItemToList(userListID, userExercise.getID());
     editItem(userExercise, false, mediaDir);
   }
 
   /**
    * @param userListID
    * @param userExercise
-   * @see #addItemToUserList(long, mitll.langtest.shared.custom.UserExercise)
+   * @see #addItemToUserList
    */
-  private void addItemToList(long userListID, Shell userExercise) {
+  private void addItemToList(long userListID, String userExercise) {
     UserList where = userListDAO.getWhere(userListID, true);
     if (where != null) {
-      userListExerciseJoinDAO.add(where, userExercise.getID());
+      userListExerciseJoinDAO.add(where, userExercise);
       userListDAO.updateModified(userListID);
     }
     if (where == null) {
@@ -560,7 +560,7 @@ public class UserListManager {
    * @param userExercise
    * @param createIfDoesntExist
    * @param mediaDir
-   * @see mitll.langtest.server.LangTestDatabaseImpl#editItem(mitll.langtest.shared.custom.UserExercise)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#editItem
    * @see mitll.langtest.client.custom.dialog.EditableExercise#postEditItem
    */
   public void editItem(CommonExercise userExercise,
@@ -573,7 +573,7 @@ public class UserListManager {
   /**
    * @param userExercise
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#duplicateExercise(mitll.langtest.shared.custom.UserExercise)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#duplicateExercise
    */
   public CommonExercise duplicate(CommonExercise userExercise) {
     String id = userExercise.getID();
