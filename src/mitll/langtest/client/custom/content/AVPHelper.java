@@ -50,7 +50,7 @@ public class AVPHelper extends NPFHelper {
    * @return
    */
   @Override
-  protected Panel getRightSideContent(UserList ul, String instanceName) {
+  protected Panel getRightSideContent(UserList<CommonShell> ul, String instanceName) {
     Panel npfContentPanel = new SimplePanel();
     npfContentPanel.getElement().setId("AVPHelper_internalLayout_RightSideContent");
     this.ul = ul;
