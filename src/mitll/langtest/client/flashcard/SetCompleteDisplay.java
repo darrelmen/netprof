@@ -195,7 +195,7 @@ public class SetCompleteDisplay {
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#showFeedbackCharts(List, List)
    */
   public Panel getScoreHistory(List<ExerciseCorrectAndScore> sortedHistory,
-                               List<CommonShell> allExercises, ExerciseController controller) {
+                               List<? extends CommonShell> allExercises, ExerciseController controller) {
     ScoreHistoryContainer scoreHistoryContainer = new ScoreHistoryContainer(controller, allExercises);
     return scoreHistoryContainer.getTableWithPager(sortedHistory);
   }
