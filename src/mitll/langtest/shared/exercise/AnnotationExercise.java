@@ -14,4 +14,7 @@ public interface AnnotationExercise {
   ExerciseAnnotation getAnnotation(String field);
 
   Collection<String> getFields();
+
+ // MutableAnnotationExercise getMutableAnnotation();
+
 }
