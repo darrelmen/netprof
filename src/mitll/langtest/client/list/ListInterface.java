@@ -14,6 +14,7 @@ import mitll.langtest.client.custom.dialog.PrevNextList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.exercise.Shell;
 
@@ -27,7 +28,7 @@ import java.util.Map;
  * Time: 5:25 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface ListInterface<T extends Shell> extends RequiresResize {
+public interface ListInterface<T extends Shell> extends RequiresResize, Reloadable {
   /**
    * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList(Panel, String)
    * @param factory
@@ -42,7 +43,7 @@ public interface ListInterface<T extends Shell> extends RequiresResize {
   boolean getExercises(long userID);
 
   /**
-   * @see mitll.langtest.client.custom.dialog.EditableExercise#doAfterEditComplete(ListInterface, boolean)
+   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#doAfterEditComplete(ListInterface, boolean)
    * @param id
    */
   void reloadWith(String id);
@@ -66,13 +67,13 @@ public interface ListInterface<T extends Shell> extends RequiresResize {
    * @return
    * @see ListInterface#loadNextExercise
    */
-  boolean loadNextExercise(T current);
+  boolean loadNextExercise(HasID current);
 
   boolean loadNextExercise(String id);
 
   boolean loadPrev();
 
-  boolean loadPreviousExercise(T current);
+  boolean loadPreviousExercise(HasID current);
 
   void checkAndAskServer(String id);
 
@@ -90,10 +91,10 @@ public interface ListInterface<T extends Shell> extends RequiresResize {
    * @return
    */
   boolean onFirst();
-  boolean onFirst(T current);
+  boolean onFirst(HasID current);
 
   boolean onLast();
-  boolean onLast(T current);
+  boolean onLast(HasID current);
   /**
    * @see mitll.langtest.client.LangTest#resetState()
    */
@@ -124,7 +125,6 @@ public interface ListInterface<T extends Shell> extends RequiresResize {
    * @return
    */
   Panel getCreatedPanel();
-  void reload();
 
   void redraw();
   void setState(String id, STATE state);
