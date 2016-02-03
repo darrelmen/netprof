@@ -6,6 +6,7 @@ package mitll.langtest.client.custom.content;
 
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.HasIcon;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.Scheduler;
@@ -25,6 +26,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +75,7 @@ public class NPFHelper implements RequiresResize {
     this.showQC = showQC;
   }
 
-  public void showNPF(UserList<CommonExercise> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
+  public void showNPF(UserList<CommonShell> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
     showNPF(ul, tabAndContent, instanceName, loadExercises, null);
   }
 
@@ -87,8 +89,8 @@ public class NPFHelper implements RequiresResize {
    * @param toSelect
    * @see mitll.langtest.client.custom.ListManager#getListOperations
    */
-  public void showNPF(UserList<CommonExercise> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises,
-                      CommonExercise toSelect) {
+  public void showNPF(UserList<CommonShell> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises,
+                      HasID toSelect) {
     logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
     this.instanceName = instanceName;
     DivWidget content = tabAndContent.getContent();
@@ -107,8 +109,8 @@ public class NPFHelper implements RequiresResize {
     return npfExerciseList;
   }
 
-  private void addNPFToContent(UserList<CommonExercise> ul, Panel listContent, String instanceName, boolean loadExercises,
-                               CommonExercise toSelect) {
+  private void addNPFToContent(UserList<CommonShell> ul, Panel listContent, String instanceName, boolean loadExercises,
+                               HasID toSelect) {
     listContent.add(doNPF(ul, instanceName, loadExercises, toSelect));
     listContent.addStyleName("userListBackground");
   }
@@ -121,10 +123,10 @@ public class NPFHelper implements RequiresResize {
    * @param loadExercises
    * @param toSelect
    * @return
-   * @see #addNPFToContent(UserList, Panel, String, boolean, CommonExercise)
+   * @see #addNPFToContent
    */
-  private Panel doNPF(UserList<CommonExercise> ul, String instanceName, boolean loadExercises, CommonExercise toSelect) {
-    logger.info(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul + " of size ");
+  private Panel doNPF(UserList<CommonShell> ul, String instanceName, boolean loadExercises, HasID toSelect) {
+    //logger.info(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul + " of size ");
 
     Panel hp = doInternalLayout(ul, instanceName);
     if (loadExercises) {
@@ -141,7 +143,7 @@ public class NPFHelper implements RequiresResize {
    * @return
    * @see #doNPF
    */
-  protected Panel doInternalLayout(UserList<CommonExercise> ul, String instanceName) {
+  protected Panel doInternalLayout(UserList<CommonShell> ul, String instanceName) {
 //    logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
 
     // row 1
@@ -172,7 +174,7 @@ public class NPFHelper implements RequiresResize {
     left.add(exerciseListOnLeftSide);
   }
 
-  protected Panel getRightSideContent(UserList<CommonExercise> ul, String instanceName) {
+  protected Panel getRightSideContent(UserList<CommonShell> ul, String instanceName) {
     Panel npfContentPanel = new SimplePanel();
     npfContentPanel.addStyleName("floatRight");
     npfContentPanel.getElement().setId("internalLayout_RightContent");
@@ -200,19 +202,20 @@ public class NPFHelper implements RequiresResize {
   }
 
   /**
-   * TODO : avoid unparameterized list here.
+   * TODOx : avoid unparameterized list here.
+   * TODO : why do we copy the list?
    *
    * @param ul
-   * @param toSelect
+   * @param toSelect for now just the id?
    * @see #doNPF
    * @see #showNPF
    */
-  private void rememberAndLoadFirst(final UserList<CommonExercise> ul, CommonExercise toSelect) {
+  private void rememberAndLoadFirst(final UserList<CommonShell> ul, HasID toSelect) {
     npfExerciseList.setUserListID(ul.getUniqueID());
 
     List<CommonShell> copy = new ArrayList<CommonShell>();
 
-    for (CommonExercise ex : ul.getExercises()) {
+    for (CommonShell ex : ul.getExercises()) {
       copy.add(ex);
     }
     //List<CommonShell> copy = new ArrayList<>(ul.getExercises());
