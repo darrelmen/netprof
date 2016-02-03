@@ -137,7 +137,7 @@ public class UserListDAO extends DAO {
 
       finish(connection, statement);
 
-    //  logger.debug("now " + getCount(USER_EXERCISE_LIST) + " and user exercise is " + userList);
+      logger.debug("add : now " + getCount(USER_EXERCISE_LIST) + " and user exercise is " + userList);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
