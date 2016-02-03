@@ -96,10 +96,10 @@ public class Exercise extends AudioExercise implements CommonExercise, MutableEx
 
   public CommonAnnotatable getCommonAnnotatable() { return this; }
 
-
+/*
   public void setForeignLanguage(String foreignLanguage) {
     this.foreignLanguage = foreignLanguage;
-  }
+  }*/
 
   @Override
   public void setTransliteration(String transliteration) {
@@ -111,8 +111,6 @@ public class Exercise extends AudioExercise implements CommonExercise, MutableEx
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise(String, String, String, String, String, boolean)
    */
   public void setTranslitSentence(String translitSentence) {
-//    translitSentences.clear();
-//    translitSentences.add(translitSentence);
     this.transliteration = translitSentence;
   }
 
@@ -161,11 +159,6 @@ public class Exercise extends AudioExercise implements CommonExercise, MutableEx
   @Override
   public void setFirstPron(List<String> firstPron) {
     this.firstPron = firstPron;
-  }
-
-  @Override
-  public void setEnglish(String english) {
-    this.englishSentence = english;
   }
 
   public String toString() {
