@@ -18,6 +18,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserExercise;
@@ -29,9 +30,9 @@ import mitll.langtest.shared.exercise.*;
  */
 public class ReviewItemHelper extends NPFHelper{
   //private Logger logger = Logger.getLogger("ReviewItemHelper");
-  private FlexListLayout<CommonExercise> flexListLayout;
+  private FlexListLayout<CommonShell,CommonExercise> flexListLayout;
   private final HasText itemMarker;
-  private final ListInterface<CommonExercise> predefinedContent;
+  private final Reloadable predefinedContent;
   private final NPFHelper npfHelper;
 
   /**
@@ -44,8 +45,9 @@ public class ReviewItemHelper extends NPFHelper{
    * @see mitll.langtest.client.custom.ListManager#ListManager(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback, TabPanel)
    */
   public ReviewItemHelper(final LangTestDatabaseAsync service, final UserFeedback feedback,
-                          final UserManager userManager, final ExerciseController controller,
-                          final ListInterface<CommonExercise> predefinedContent,
+                          final UserManager userManager,
+                          final ExerciseController controller,
+                          final Reloadable predefinedContent,
                           NPFHelper npfHelper) {
     super(service, feedback, userManager, controller, true);
     this.itemMarker = null;
@@ -82,7 +84,7 @@ public class ReviewItemHelper extends NPFHelper{
   }
 
   // private class ReviewFlexListLayout<CommonExercise extends CommonShell & AnnotationExercise & AudioRefExercise> extends FlexListLayout<CommonExercise> {
-  private class ReviewFlexListLayout/*<CommonExercise extends CommonShell & AudioRefExercise & CombinedMutableUserExercise & AnnotationExercise>*/ extends FlexListLayout<CommonExercise> {
+  private class ReviewFlexListLayout extends FlexListLayout<CommonShell,CommonExercise> {
     private final UserList<CommonExercise> ul;
 
     public ReviewFlexListLayout(UserList<CommonExercise> ul) {
@@ -91,15 +93,17 @@ public class ReviewItemHelper extends NPFHelper{
     }
 
     @Override
-    protected ExercisePanelFactory<CommonExercise> getFactory(final PagingExerciseList<CommonExercise> pagingExerciseList, String instanceName) {
-      return new ExercisePanelFactory<CommonExercise>(service, feedback, controller, predefinedContent) {
+    protected ExercisePanelFactory<CommonShell,CommonExercise> getFactory(final PagingExerciseList<CommonShell,CommonExercise> pagingExerciseList, String instanceName) {
+      return new ExercisePanelFactory<CommonShell,CommonExercise>(service, feedback, controller, pagingExerciseList) {
         @Override
         public Panel getExercisePanel(CommonExercise exercise) {
           CommonExercise userExercise = new UserExercise(exercise);
+
           ReviewEditableExercise reviewEditableExercise =
               new ReviewEditableExercise(service, controller, itemMarker,
                   userExercise, ul,
                   pagingExerciseList, predefinedContent, npfHelper);
+
           SimplePanel ignoredContainer = new SimplePanel();
 
           Panel widgets = reviewEditableExercise.addNew(
@@ -115,10 +119,10 @@ public class ReviewItemHelper extends NPFHelper{
     }
 
     @Override
-    protected PagingExerciseList<CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
+    protected PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
                                                                   String instanceName, boolean incorrectFirst) {
       FlexListLayout outer = this;
-      return new NPFlexSectionExerciseList<CommonExercise>(outer, topRow, currentExercisePanel, instanceName, incorrectFirst) {
+      return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, incorrectFirst) {
         com.github.gwtbootstrap.client.ui.CheckBox onlyAudio;
 
         @Override
