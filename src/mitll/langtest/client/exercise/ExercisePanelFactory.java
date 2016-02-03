@@ -17,7 +17,7 @@ import mitll.langtest.shared.exercise.Shell;
  * Time: 6:18 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExercisePanelFactory <T extends Shell> {
+public abstract class ExercisePanelFactory <T extends Shell, U extends Shell> {
   protected final LangTestDatabaseAsync service;
   protected final UserFeedback userFeedback;
   protected final ExerciseController controller;
@@ -31,7 +31,8 @@ public abstract class ExercisePanelFactory <T extends Shell> {
    * @param exerciseList
    */
   public ExercisePanelFactory(final LangTestDatabaseAsync service, final UserFeedback userFeedback,
-                              final ExerciseController controller, ListInterface<T> exerciseList) {
+                              final ExerciseController controller,
+                              ListInterface<T> exerciseList) {
     this.service = service;
     this.userFeedback = userFeedback;
     this.controller = controller;
@@ -47,5 +48,5 @@ public abstract class ExercisePanelFactory <T extends Shell> {
    * @param e
    * @return
    */
-  public abstract Panel getExercisePanel(T e);
+  public abstract Panel getExercisePanel(U e);
 }
