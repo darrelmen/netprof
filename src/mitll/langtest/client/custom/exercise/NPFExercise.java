@@ -65,14 +65,14 @@ public class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExerci
    * @param instance
    * @see mitll.langtest.client.custom.content.NPFHelper#setFactory(mitll.langtest.client.list.PagingExerciseList, String, boolean)
    */
-  NPFExercise(T e, ExerciseController controller, ListInterface<T> listContainer, float screenPortion,
+  NPFExercise(T e, ExerciseController controller, ListInterface<CommonShell> listContainer, float screenPortion,
               boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, screenPortion, addKeyHandler, instance);
   }
 
   @Override
   protected NavigationHelper getNavigationHelper(ExerciseController controller,
-                                                           ListInterface<T> listContainer, boolean addKeyHandler) {
+                                                           ListInterface<CommonShell> listContainer, boolean addKeyHandler) {
     NavigationHelper navigationHelper = super.getNavigationHelper(controller, listContainer, addKeyHandler);
     navigationHelper.add(makeAddToList(getLocalExercise(), controller));
     navigationHelper.add(getNextListButton());
