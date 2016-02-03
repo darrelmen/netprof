@@ -23,7 +23,7 @@ import java.util.Set;
  * Time: 1:03 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Exercise extends AudioExercise implements CommonExercise, MutableExercise, MutableAudioExercise, MutableAnnotationExercise {
+public class Exercise extends AudioExercise implements CommonExercise, MutableExercise, MutableAudioExercise, MutableAnnotationExercise, CommonAnnotatable {
   private transient String refAudioIndex;
   private transient Collection<String> refSentences = new ArrayList<String>();
   private List<CorrectAndScore> scores;
@@ -93,6 +93,9 @@ public class Exercise extends AudioExercise implements CommonExercise, MutableEx
 //    throw new IllegalAccessException("shouldn't call this method.");
     return null;
   }
+
+  public CommonAnnotatable getCommonAnnotatable() { return this; }
+
 
   public void setForeignLanguage(String foreignLanguage) {
     this.foreignLanguage = foreignLanguage;
