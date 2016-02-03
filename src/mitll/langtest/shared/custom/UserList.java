@@ -41,6 +41,7 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   /**
    * @see mitll.langtest.server.database.custom.UserListManager#createUserList(long, String, String, String, boolean)
+   * @see mitll.langtest.server.database.custom.UserListDAO#getWhere(long, boolean)
    * @param uniqueID
    * @param user
    * @param name
@@ -61,12 +62,12 @@ public class UserList<T extends HasID> extends BaseExercise {
    * @see mitll.langtest.client.custom.dialog.EditItem#makeListOfOnlyYourItems(UserList)
    * @param ul
    */
-  public UserList(UserList ul) {
+  public UserList(UserList<T> ul) {
     this(ul.uniqueID, ul.getCreator(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate());
   }
 
   public UserList<T> getCopy() {
-    UserList<T> copy  = new UserList<>();
+    UserList<T> copy  = new UserList<>(this);
     for (T ue : getExercises()) {
       copy.addExercise(ue);
     }
@@ -130,6 +131,12 @@ public class UserList<T extends HasID> extends BaseExercise {
     return creator;
   }
   public long getUniqueID() { return uniqueID; }
+
+  /**
+   * @see mitll.langtest.server.database.custom.UserListDAO#add(UserList)
+   * @see mitll.langtest.server.database.custom.UserListManager#getCommentedList(Collection)
+   * @param uniqueID
+   */
   public void setUniqueID(long uniqueID) {
     this.uniqueID = uniqueID;
   }
@@ -139,7 +146,6 @@ public class UserList<T extends HasID> extends BaseExercise {
   }
 
   public boolean containsByID(String id) {
-   // String id = userExercise.getID();
     for (T ex : getExercises()) {
       if (ex.getID().equals(id)) return true;
     }
@@ -165,7 +171,8 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   @Override
   public String toString() {
-    return "UserList #" + getUniqueID() + " '"+name + "' by " + creator.getId() +
+    long id = creator == null ? -1 :creator.getId();
+    return "UserList #" + getUniqueID() + " '"+name + "' by " + id +
       " : " + (isReview ? " REVIEW " : "")+
       " :"+
       " with " + getExercises().size() + " exercises.";
