@@ -38,7 +38,7 @@ public class CommentBox<T extends Shell & AnnotationExercise> extends PopupConta
   private final CommentAnnotator commentAnnotator;
   private final EventRegistration registration;
   private MyPopup commentPopup;
-  MutableAnnotationExercise annotationExercise;
+  private MutableAnnotationExercise annotationExercise;
 
   /**
    * @param exercise
@@ -52,12 +52,12 @@ public class CommentBox<T extends Shell & AnnotationExercise> extends PopupConta
     this.registration = registration;
     this.commentAnnotator = commentAnnotator;
     this.annotationExercise = annotationExercise;
-    if (annotationExercise == null) {
-      logger.warning("CommentBox huh? annotation exercise is null : " + annotationExercise);
-    }
-    else {
-      logger.info("CommentBox got " +annotationExercise);
-    }
+//    if (annotationExercise == null) {
+//      logger.warning("CommentBox huh? annotation exercise is null : " + annotationExercise);
+//    }
+//    else {
+//      logger.info("CommentBox got " +annotationExercise);
+//    }
   }
 
   /**
