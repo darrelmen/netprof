@@ -37,7 +37,7 @@ import java.util.logging.Logger;
  * Time: 5:32 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FlexSectionExerciseList<T extends CommonShell> extends NPExerciseList<T> {
+public class FlexSectionExerciseList extends NPExerciseList {
   private Logger logger = Logger.getLogger("FlexSectionExerciseList");
   private static final int LABEL_MARGIN_BOTTOM = 10;
 
@@ -69,7 +69,7 @@ public class FlexSectionExerciseList<T extends CommonShell> extends NPExerciseLi
    * @param controller
    * @param instance
    * @param incorrectFirst
-   * @see NPFlexSectionExerciseList#MyFlexSectionExerciseList(com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.Panel, String, boolean)
+   * @see NPFlexSectionExerciseList#MyFlexSectionExerciseList
    */
   public FlexSectionExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
