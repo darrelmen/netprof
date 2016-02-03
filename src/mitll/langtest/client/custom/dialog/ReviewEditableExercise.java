@@ -28,6 +28,7 @@ import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.EmptyScoreListener;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
@@ -36,7 +37,6 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 
@@ -47,7 +47,7 @@ import java.util.logging.Logger;
  * Created by GO22670 on 3/28/2014.
  */
 public class ReviewEditableExercise//<T extends CommonShell & AudioRefExercise & CombinedMutableUserExercise,
-  //  X extends CommonShell & AnnotationExercise,
+    //  X extends CommonShell & AnnotationExercise,
     //UL extends UserList<T>>
     extends EditableExerciseDialog/*<T, UL>*/ {
   private final Logger logger = Logger.getLogger("ReviewEditableExercise");
@@ -58,6 +58,7 @@ public class ReviewEditableExercise//<T extends CommonShell & AudioRefExercise &
   private static final String DELETE_THIS_ITEM = "Delete this item.";
   private static final String ARE_YOU_SURE = "Are you sure?";
   private static final String REALLY_DELETE_ITEM = "Really delete whole item and all audio cuts?";
+  public static final List<String> MSGS = Arrays.asList(REALLY_DELETE_ITEM);
   private static final String COPY_THIS_ITEM = "Copy this item.";
   private static final String REGULAR_SPEED = " Regular speed";
   private static final String SLOW_SPEED = " Slow speed";
@@ -66,11 +67,11 @@ public class ReviewEditableExercise//<T extends CommonShell & AudioRefExercise &
   private static final String MALE = "Male";
   private static final String FEMALE = "Female";
 
-  private final PagingExerciseList<CommonExercise> exerciseList;
-  private final ListInterface predefinedContentList;
+  private final PagingExerciseList<CommonShell, CommonExercise> exerciseList;
+  private final Reloadable predefinedContentList;
   private static final String WAV = ".wav";
   private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
- // AudioAttributeExercise audioAttributeExercise;
+  // AudioAttributeExercise audioAttributeExercise;
   //X annotationExercise;
 
   /**
@@ -87,8 +88,8 @@ public class ReviewEditableExercise//<T extends CommonShell & AudioRefExercise &
                                 CommonExercise changedUserExercise,
 
                                 UserList<CommonExercise> originalList,
-                                PagingExerciseList<CommonExercise> exerciseList,
-                                ListInterface predefinedContent,
+                                PagingExerciseList<CommonShell, CommonExercise> exerciseList,
+                                Reloadable predefinedContent,
                                 NPFHelper npfHelper) {
     super(service, controller,
         null,
@@ -96,8 +97,8 @@ public class ReviewEditableExercise//<T extends CommonShell & AudioRefExercise &
     this.exerciseList = exerciseList;
     this.predefinedContentList = predefinedContent;
 //    if (predefinedContentList == null) new Exception().printStackTrace();
-   // audioAttributeExercise  = changedUserExercise;
-   // this.annotationExercise = changedUserExercise;
+    // audioAttributeExercise  = changedUserExercise;
+    // this.annotationExercise = changedUserExercise;
   }
 
   private List<RememberTabAndContent> tabs;
@@ -343,7 +344,7 @@ public class ReviewEditableExercise//<T extends CommonShell & AudioRefExercise &
    * @param e
    * @param audio
    * @return
-   * @see #getPanelForAudio(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.shared.exercise.AudioAttribute, RememberTabAndContent)
+   * @see #getPanelForAudio
    */
   private <E extends AnnotationExercise> Widget getCommentLine(E e, AudioAttribute audio) {
     ExerciseAnnotation audioAnnotation = e.getAnnotation(audio.getAudioRef());
@@ -377,7 +378,9 @@ public class ReviewEditableExercise//<T extends CommonShell & AudioRefExercise &
    * @see #addNew
    */
   @Override
-  protected Panel getCreateButton(final UserList ul, final ListInterface pagingContainer, final Panel toAddTo,
+  protected Panel getCreateButton(final UserList<CommonExercise> ul,
+                                  final ListInterface<CommonShell> pagingContainer,
+                                  final Panel toAddTo,
                                   final ControlGroup normalSpeedRecording) {
     Panel row = new DivWidget();
     row.addStyleName("marginBottomTen");
@@ -418,7 +421,7 @@ public class ReviewEditableExercise//<T extends CommonShell & AudioRefExercise &
       @Override
       public void onClick(ClickEvent event) {
         DialogHelper dialogHelper = new DialogHelper(true);
-        dialogHelper.show(ARE_YOU_SURE, Arrays.asList(REALLY_DELETE_ITEM), new DialogHelper.CloseListener() {
+        dialogHelper.show(ARE_YOU_SURE, MSGS, new DialogHelper.CloseListener() {
           @Override
           public void gotYes() {
             service.deleteItem(newUserExercise.getID(), new AsyncCallback<Boolean>() {
@@ -530,7 +533,7 @@ public class ReviewEditableExercise//<T extends CommonShell & AudioRefExercise &
    * @see #postEditItem(mitll.langtest.client.list.ListInterface, boolean)
    */
   @Override
-  protected void doAfterEditComplete(ListInterface pagingContainer, boolean buttonClicked) {
+  protected void doAfterEditComplete(ListInterface<CommonShell> pagingContainer, boolean buttonClicked) {
     super.doAfterEditComplete(pagingContainer, buttonClicked);
 
     if (buttonClicked) {
@@ -540,10 +543,10 @@ public class ReviewEditableExercise//<T extends CommonShell & AudioRefExercise &
       logger.info("doAfterEditComplete : forgetting " + id + " user " + user);
 
       if (!ul.remove(newUserExercise)) {
-        System.err.println("\ndoAfterEditComplete : error - didn't remove " + id + " from ul " + ul);
+        logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from ul " + ul);
       }
       if (!originalList.remove(newUserExercise)) {
-        System.err.println("\ndoAfterEditComplete : error - didn't remove " + id + " from original " + originalList);
+        logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from original " + originalList);
       }
 
       service.setExerciseState(id, STATE.FIXED, user, new AsyncCallback<Void>() {
