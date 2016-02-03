@@ -6,7 +6,6 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -19,15 +18,14 @@ import java.util.logging.Logger;
 /**
  * Created by GO22670 on 3/28/2014.
  */
-public abstract class FlexListLayout<T extends CommonShell> implements RequiresResize {
+public abstract class FlexListLayout<T extends CommonShell, U extends Shell> implements RequiresResize {
   private Logger logger = Logger.getLogger("FlexListLayout");
 
-  public PagingExerciseList<T> npfExerciseList;
+  public PagingExerciseList<T, U> npfExerciseList;
 
   final ExerciseController controller;
   final LangTestDatabaseAsync service;
   final UserFeedback feedback;
-//  private final UserManager userManager;
   final boolean incorrectFirst;
 
   /**
@@ -43,12 +41,13 @@ public abstract class FlexListLayout<T extends CommonShell> implements RequiresR
     this.controller = controller;
     this.service = service;
     this.feedback = feedback;
-  //  this.userManager = userManager;
+    //  this.userManager = userManager;
     this.incorrectFirst = false;
   }
 
   /**
    * TODO : don't pass in user list
+   *
    * @param ul
    * @param instanceName
    * @return
@@ -82,7 +81,7 @@ public abstract class FlexListLayout<T extends CommonShell> implements RequiresR
     long uniqueID = ul == null ? -1 : ul.getUniqueID();
 
     // TODO : only has to be paging b/c it needs to setUserListID
-    PagingExerciseList<T> widgets = makeNPFExerciseList(topRow, currentExerciseVPanel, instanceName, uniqueID, incorrectFirst);
+    PagingExerciseList<T, U> widgets = makeNPFExerciseList(topRow, currentExerciseVPanel, instanceName, uniqueID, incorrectFirst);
     npfExerciseList = widgets;
 
     addThirdColumn(bottomRow);
@@ -105,7 +104,8 @@ public abstract class FlexListLayout<T extends CommonShell> implements RequiresR
     return currentExerciseVPanel;
   }
 
-  protected void addThirdColumn(Panel bottomRow) {}
+  protected void addThirdColumn(Panel bottomRow) {
+  }
 
   protected void styleBottomRow(Panel bottomRow) {
     bottomRow.setWidth("100%");
@@ -121,9 +121,9 @@ public abstract class FlexListLayout<T extends CommonShell> implements RequiresR
    * @return
    * @see #doInternalLayout(UserList, String)
    */
-  private PagingExerciseList<T> makeNPFExerciseList(final Panel topRow, Panel currentExercisePanel, String instanceName,
-                                           long userListID, boolean incorrectFirst) {
-    final PagingExerciseList<T> exerciseList = makeExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst);
+  private PagingExerciseList<T, U> makeNPFExerciseList(final Panel topRow, Panel currentExercisePanel, String instanceName,
+                                                       long userListID, boolean incorrectFirst) {
+    final PagingExerciseList<T, U> exerciseList = makeExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst);
     exerciseList.setUserListID(userListID);
 
     exerciseList.setFactory(getFactory(exerciseList, instanceName));
@@ -136,10 +136,10 @@ public abstract class FlexListLayout<T extends CommonShell> implements RequiresR
     return exerciseList;
   }
 
-  protected abstract ExercisePanelFactory<T> getFactory(final PagingExerciseList<T> exerciseList, final String instanceName);
+  protected abstract ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList, final String instanceName);
 
-  protected abstract PagingExerciseList<T> makeExerciseList(final Panel topRow, Panel currentExercisePanel,
-                                                   final String instanceName, boolean incorrectFirst);
+  protected abstract PagingExerciseList<T, U> makeExerciseList(final Panel topRow, Panel currentExercisePanel,
+                                                               final String instanceName, boolean incorrectFirst);
 //  {
 //    return new NPFlexSectionExerciseList<T>(this, topRow, currentExercisePanel, instanceName, incorrectFirst);
 //  }
