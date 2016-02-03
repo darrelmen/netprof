@@ -47,12 +47,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   private static final Map<String, Collection<String>> TYPE_TO_SELECTION = new HashMap<String, Collection<String>>();
   private static final int MAX_MSG_LEN = 200;
+  private static final boolean DEBUG = false;
   protected boolean incorrectFirstOrder = false;
 
   protected SimplePanel innerContainer;
   protected final LangTestDatabaseAsync service;
   private final UserFeedback feedback;
-  private ExercisePanelFactory<T,U> factory;
+  private ExercisePanelFactory<T, U> factory;
   private final ExerciseController controller;
 
   protected Panel createdPanel;
@@ -61,6 +62,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   private String instance;
   private final List<ListChangeListener<T>> listeners = new ArrayList<>();
   protected boolean doShuffle;
+
 
   /**
    * @param currentExerciseVPanel
@@ -72,7 +74,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @seex mitll.langtest.client.LangTest#makeExerciseList
    */
   protected ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                         ExercisePanelFactory<T,U> factory,
+                         ExercisePanelFactory<T, U> factory,
                          ExerciseController controller,
                          String instance, boolean incorrectFirst) {
     this.instance = instance;
@@ -100,8 +102,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
   }
 
- // @Override
- private void removeHistoryListener() {
+  // @Override
+  private void removeHistoryListener() {
     if (handlerRegistration != null) {
       handlerRegistration.removeHandler();
       handlerRegistration = null;
@@ -127,12 +129,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     currentExerciseVPanel.addStyleName("floatLeft");
   }
 
-  public void addWidgets() {}
+  public void addWidgets() {
+  }
 
-    /**
-     * @param factory
-     * @see mitll.langtest.client.LangTest#reallySetFactory()
-     */
+  /**
+   * @param factory
+   * @see mitll.langtest.client.LangTest#reallySetFactory()
+   */
   public void setFactory(ExercisePanelFactory factory) {
     this.factory = factory;
     addHistoryListener();
@@ -170,12 +173,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     reloadWith(getCurrentExerciseID());
   }
 
-    /**
-     * After re-fetching the ids, select this one.
-     *
-     * @param id
-     * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#doAfterEditComplete
-     */
+  /**
+   * After re-fetching the ids, select this one.
+   *
+   * @param id
+   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#doAfterEditComplete
+   */
   @Override
   public void reloadWith(String id) {
 //    logger.info("ExerciseList.reloadWith id = " + id + " for user " + controller.getUser() + " instance " + getInstance());
@@ -200,8 +203,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     String token = History.getToken();
     token = getSelectionFromToken(token);
     String idFromToken = getIDFromToken(token);
-    logger.info("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
-        "' vs new exercise " + exerciseID + " instance " + getInstance());
+/*    logger.info("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
+        "' vs new exercise " + exerciseID + " instance " + getInstance());*/
+
     if (token != null && idFromToken.equals(exerciseID)) {
       //logger.info("\tpushFirstSelection : (" + getInstance() + ") current token " + token + " same as new " + exerciseID);
       checkAndAskServer(exerciseID);
@@ -384,8 +388,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   /**
    * @see mitll.langtest.client.list.ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    */
-  protected void gotEmptyExerciseList() {}
-  public void rememberAndLoadFirst(List<T> exercises) { rememberAndLoadFirst(exercises, null, "All");  }
+  protected void gotEmptyExerciseList() {
+  }
+
+  public void rememberAndLoadFirst(List<T> exercises) {
+    rememberAndLoadFirst(exercises, null, "All");
+  }
 
   /**
    * Calls remember exercises -- interacts with flashcard mode and the shuffle option there.
@@ -431,7 +439,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       //  logger.info("ExerciseList : rememberAndLoadFirst using first = " + firstExercise);
 
       pushFirstSelection(firstExercise.getID());
-   //   useExercise(firstExercise);   // allows us to skip another round trip with the server to ask for the first exercise
+      //   useExercise(firstExercise);   // allows us to skip another round trip with the server to ask for the first exercise
 //      } else {
 //        logger.info("ExerciseList : rememberAndLoadFirst finding first - " +
 //            firstExerciseShell.getID() + " != " +firstExercise.getID());
@@ -443,7 +451,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     listLoaded();
   }
 
-  protected void listLoaded() {}
+  protected void listLoaded() {
+  }
 
   boolean isStaleResponse(ExerciseListWrapper result) {
     return result.getReqID() < lastReqID;
@@ -722,7 +731,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
           " in " + getSize() + " exercises : " + getKeys());
     } else {
       Shell next = getAt(i + 1);
-      logger.info("ExerciseList.getNextExercise " + next);
+      if (DEBUG) logger.info("ExerciseList.getNextExercise " + next);
       loadExercise(next.getID());
     }
   }
@@ -790,7 +799,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   @Override
   public boolean loadNextExercise(HasID current) {
-    logger.info("ExerciseList.loadNextExercise current is : " + current + " instance " + instance);
+    if (DEBUG) logger.info("ExerciseList.loadNextExercise current is : " + current + " instance " + instance);
     String id = current.getID();
     int i = getIndex(id);
     boolean onLast = isOnLastItem(i);
@@ -807,7 +816,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   public boolean loadNextExercise(String id) {
-    logger.info("ExerciseList.loadNextExercise id = " + id + " instance " + instance);
+    if (DEBUG) logger.info("ExerciseList.loadNextExercise id = " + id + " instance " + instance);
     T exerciseByID = byID(id);
     if (exerciseByID == null) logger.warning("huh? couldn't find exercise with id " + exerciseByID);
     return exerciseByID != null && loadNextExercise(exerciseByID);
@@ -828,7 +837,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   /**
    * @param current
    * @return true if on first
-   * @see mitll.langtest.client.exercise.NavigationHelper#clickPrev(Shell)
+   * @see mitll.langtest.client.exercise.NavigationHelper#clickPrev
    */
   @Override
   public boolean loadPreviousExercise(HasID current) {

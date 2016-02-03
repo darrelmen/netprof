@@ -102,7 +102,6 @@ public class EditItem {
     this.itemMarker = itemMarker; // TODO : something less awkward
 
     UserList<CommonExercise> copy = makeListOfOnlyYourItems(originalList);
-    // UserList<Shell> copy = (UserList<Shell>) userList;
 
     exerciseList = makeExerciseList(contentOnRight, EDIT_ITEM, copy, originalList, includeAddItem);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide(controller.getProps()));
@@ -134,7 +133,7 @@ public class EditItem {
                                                            UserList<CommonExercise> ul,
                                                            UserList<CommonExercise> originalList,
                                                            final boolean includeAddItem) {
-    logger.info("EditItem.makeExerciseList - ul = " + ul.getName() + " " + includeAddItem);
+    logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
 
     if (includeAddItem) {
       CommonExercise newItem = getNewItem();
@@ -207,9 +206,6 @@ public class EditItem {
   private CommonExercise getNewItem() {
     UserExercise userExercise = new UserExercise(-1, NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, "", "");
     return userExercise;
-//    CommonUserExercise commonUserExercise = userExercise;
-//    T commonUserExercise2 = (T) commonUserExercise;
-//    return commonUserExercise2;
   }
 
   private void setFactory(final PagingExerciseList<CommonShell,CommonExercise> exerciseList,
