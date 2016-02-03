@@ -11,6 +11,7 @@ import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.HasIcon;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
@@ -74,7 +75,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
   public static final int DEFAULT_MALE_ID = -2;
   public static final int DEFAULT_FEMALE_ID = -3;
-  private static final MiniUser DEFAULT_MALE   = new MiniUser(DEFAULT_MALE_ID,   30, 0, "Male", false);
+  private static final MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, 0, "Male", false);
   private static final MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, "Female", false);
 
   private Set<String> incorrectFields;
@@ -86,13 +87,14 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   private Tooltip nextTooltip;
 
   /**
-   * @see mitll.langtest.client.custom.content.NPFHelper#getFactory(PagingExerciseList, String, boolean)
    * @param e
    * @param controller
    * @param listContainer
    * @param instance
+   * @see mitll.langtest.client.custom.content.NPFHelper#getFactory(PagingExerciseList, String, boolean)
    */
-  public QCNPFExercise(T e, ExerciseController controller, ListInterface<T> listContainer,
+  public QCNPFExercise(T e, ExerciseController controller,
+                       ListInterface<CommonShell> listContainer,
                        String instance) {
     super(e, controller, listContainer, 1.0f, false, instance);
 
@@ -101,17 +103,22 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
   @Override
   protected ASRScorePanel makeScorePanel(T e, String instance) {
-    audioWasPlayed = new HashSet<Widget>();
-    toResize = new ArrayList<RequiresResize>();
-
-    incorrectFields = new HashSet<String>();
+    if (audioWasPlayed == null) {
+      initAudioWasPlayed();
+    }
     return null;
   }
 
+  private void initAudioWasPlayed() {
+    audioWasPlayed = new HashSet<Widget>();
+    toResize = new ArrayList<RequiresResize>();
+    incorrectFields = new HashSet<String>();
+  }
+
   /**
+   * @param div
    * @see GoodwaveExercisePanel#addUserRecorder
    * @see #getQuestionContent
-   * @param div
    */
   @Override
   protected void addGroupingStyle(Widget div) {
@@ -125,26 +132,31 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    * @param controller
    * @param listContainer
    * @param addKeyHandler
    * @return
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    */
-  protected NavigationHelper getNavigationHelper(ExerciseController controller,
-                                                 final ListInterface<T> listContainer, boolean addKeyHandler) {
-    NavigationHelper navHelper = new NavigationHelper<T>(exercise, controller, new PostAnswerProvider<T>() {
+  protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
+                                                 final ListInterface<CommonShell> listContainer, boolean addKeyHandler) {
+    NavigationHelper<CommonShell> navHelper = new NavigationHelper<CommonShell>(exercise, controller,
+        new PostAnswerProvider() {
       @Override
-      public void postAnswers(ExerciseController controller, T completedExercise) {
+      public void postAnswers(ExerciseController controller, HasID completedExercise) {
         nextWasPressed(listContainer, completedExercise);
       }
-    }, listContainer, addKeyHandler) {
+    },
+        listContainer, addKeyHandler) {
       /**
        * So only allow next button when all audio has been played
        * @param exercise
        */
       @Override
-      protected void enableNext(T exercise) {
+      protected void enableNext(HasID exercise) {
+        if (audioWasPlayed == null) {
+          initAudioWasPlayed();
+        }
         boolean allPlayed = audioWasPlayed.size() == toResize.size();
         next.setEnabled(allPlayed);
       }
@@ -163,10 +175,10 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   }
 
   /**
-   * @see #getNavigationHelper(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, boolean)
    * @param listContainer
    * @param widgets
    * @return
+   * @see #getNavigationHelper(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, boolean)
    */
   private Button addApprovedButton(final ListInterface listContainer, NavigationHelper widgets) {
     Button approved = new Button(APPROVED);
@@ -201,19 +213,19 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   }
 
   @Override
-  protected void nextWasPressed(ListInterface listContainer, T completedExercise) {
+  protected void nextWasPressed(ListInterface listContainer, HasID completedExercise) {
     //System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
     super.nextWasPressed(listContainer, completedExercise);
     markReviewed(listContainer, completedExercise);
   }
 
   /**
-   * @see #addApprovedButton(mitll.langtest.client.list.ListInterface, mitll.langtest.client.exercise.NavigationHelper)
-   * @see #nextWasPressed(mitll.langtest.client.list.ListInterface, mitll.langtest.shared.exercise.CommonShell)
    * @param listContainer
    * @param completedExercise
+   * @see #addApprovedButton(mitll.langtest.client.list.ListInterface, mitll.langtest.client.exercise.NavigationHelper)
+   * @see #nextWasPressed
    */
-  private <S extends Shell> void markReviewed(ListInterface listContainer, S completedExercise) {
+  private void markReviewed(ListInterface listContainer, HasID completedExercise) {
     if (isCourseContent()) {
       markReviewed(completedExercise);
       boolean allCorrect = incorrectFields.isEmpty();
@@ -225,19 +237,22 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
   /**
    * So if the attention LL button has been pressed, clicking next should not step on that setting
+   *
    * @param listContainer
    * @param completedExercise
    */
-  private  <S extends Shell> void markAttentionLL(ListInterface listContainer, S completedExercise) {
+  private void markAttentionLL(ListInterface listContainer, HasID completedExercise) {
     if (isCourseContent()) {
       service.markState(completedExercise.getID(), STATE.ATTN_LL, controller.getUser(),
-        new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {}
+          new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
 
-          @Override
-          public void onSuccess(Void result) { }
-        });
+            @Override
+            public void onSuccess(Void result) {
+            }
+          });
 
       listContainer.setSecondState(completedExercise.getID(), STATE.ATTN_LL);
       listContainer.redraw();
@@ -249,29 +264,31 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   }
 
   /**
+   * @param completedExercise
    * @see #checkBoxWasClicked(boolean, String, com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.FocusWidget)
    * @see #markReviewed(mitll.langtest.client.list.ListInterface, mitll.langtest.shared.exercise.CommonShell)
-   * @param completedExercise
    */
-  private <S extends Shell> void markReviewed(final S completedExercise) {
+  private void markReviewed(final HasID completedExercise) {
     boolean allCorrect = incorrectFields.isEmpty();
     //System.out.println("markReviewed : exercise " + completedExercise.getID() + " instance " + instance + " allCorrect " + allCorrect);
 
     service.markReviewed(completedExercise.getID(), allCorrect, controller.getUser(),
-      new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {}
+        new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
 
-        @Override
-        public void onSuccess(Void result) {
-          //System.out.println("\tmarkReviewed.onSuccess exercise " + completedExercise.getID() + " marked reviewed!");
+          @Override
+          public void onSuccess(Void result) {
+            //System.out.println("\tmarkReviewed.onSuccess exercise " + completedExercise.getID() + " marked reviewed!");
+          }
         }
-      }
     );
   }
 
   /**
    * No user recorder for QC
+   *
    * @param service
    * @param controller    used in subclasses for audio control
    * @param toAddTo
@@ -280,7 +297,8 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    */
   @Override
   protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo,
-                                 float screenPortion, T exercise) {}
+                                 float screenPortion, T exercise) {
+  }
 
   /**
    * @param content
@@ -363,6 +381,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   /**
    * For all the users, show a tab for each audio cut they've recorded (regular and slow speed).
    * Special logic included for default users so a QC person can set the gender.
+   *
    * @param e
    * @param tabPanel
    * @param malesMap
@@ -440,7 +459,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   /**
    * TODO : this may be undone if someone deletes the audio cut - since this essentially masks out old score
    * default audio.
-   * <p/>
+   * <p>
    * TODO:  add list of all audio by this user.
    *
    * @param tabAndContent
@@ -483,12 +502,14 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   public void markGender(final MiniUser defaultFemale, final Button offButton,
                          final AudioAttribute audio, final RememberTabAndContent tabAndContent,
                          final List<AudioAttribute> allByUser, final Button next,
-                          boolean isMale) {
+                         boolean isMale) {
     offButton.setEnabled(false);
 
     service.markGender(audio, isMale, new AsyncCallback<Void>() {
       @Override
-      public void onFailure(Throwable caught) {  offButton.setEnabled(true);   }
+      public void onFailure(Throwable caught) {
+        offButton.setEnabled(true);
+      }
 
       @Override
       public void onSuccess(Void result) {
@@ -508,7 +529,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     StringBuilder builder = new StringBuilder();
     AudioAttribute last = allByUser.get(allByUser.size() - 1);
     for (AudioAttribute audioAttribute : allByUser) {
-      builder.append(isGenericDefault(audioAttribute) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : audioAttribute.isMale() ? "Male":"Female");
+      builder.append(isGenericDefault(audioAttribute) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : audioAttribute.isMale() ? "Male" : "Female");
       if (audioAttribute != last) builder.append("/");
     }
     return builder.toString();
@@ -518,9 +539,9 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     return audioAttribute.getUser().getId() == -1;
   }
 
-  private Button makeGroupButton(ButtonGroup buttonGroup,String title) {
+  private Button makeGroupButton(ButtonGroup buttonGroup, String title) {
     Button onButton = new Button(title);
-    onButton.getElement().setId("MaleFemale"+"_"+title);
+    onButton.getElement().setId("MaleFemale" + "_" + title);
     controller.register(onButton, exercise.getID());
     buttonGroup.add(onButton);
     return onButton;
@@ -528,14 +549,14 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
   private String getUserTitle(int me, MiniUser user) {
     return
-         user.getId() == -1 ? GoodwaveExercisePanel.DEFAULT_SPEAKER :
-        (user.getId() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
+        user.getId() == -1 ? GoodwaveExercisePanel.DEFAULT_SPEAKER :
+            (user.getId() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
   }
 
   private String getUserTitle(MiniUser user) {
     return (user.isMale() ? "Male" : "Female") +
         (user.isAdmin()
-                ? " (" + user.getUserID() + ")" : "") +
+            ? " (" + user.getUserID() + ")" : "") +
         " age " + user.getAge();
   }
 
@@ -554,14 +575,14 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
       audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
     }
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<T>(audioRef, e.getForeignLanguage(), service, controller,
-      controller.getProps().showSpectrogram(), scorePanel, 70, audio.isRegularSpeed()?" Regular speed":" Slow speed", e.getID(), e, instance);
+        controller.getProps().showSpectrogram(), scorePanel, 70, audio.isRegularSpeed() ? " Regular speed" : " Slow speed", e.getID(), e, instance);
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     audioPanel.addPlayListener(new PlayListener() {
       @Override
       public void playStarted() {
         audioWasPlayed.add(audioPanel);
-        logger.info("playing audio " + audio.getAudioRef() + " has " +tabs.size() + " tabs, now " + audioWasPlayed.size()  + " played");
+        logger.info("playing audio " + audio.getAudioRef() + " has " + tabs.size() + " tabs, now " + audioWasPlayed.size() + " played");
         //if (audioWasPlayed.size() == toResize.size()) {
         // all components played
         setApproveButtonState();
@@ -573,7 +594,8 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
       }
 
       @Override
-      public void playStopped() {}
+      public void playStopped() {
+      }
     });
     ExerciseAnnotation audioAnnotation = e.getAnnotation(audio.getAudioRef());
 
@@ -612,17 +634,17 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
       incorrectFields.add(field);
     }
     final Panel commentRow = new FlowPanel();
-    commentRow.getElement().setId("QCNPFExercise_commentRow_"+field);
+    commentRow.getElement().setId("QCNPFExercise_commentRow_" + field);
 
     final Widget qcCol = getQCCheckBox(field, commentEntry, alreadyMarkedCorrect, commentRow);
-    qcCol.getElement().setId("QCNPFExercise_qcCol_"+field);
+    qcCol.getElement().setId("QCNPFExercise_qcCol_" + field);
 
     populateCommentRow(commentEntry, alreadyMarkedCorrect, commentRow);
 
     // comment to left, content to right
 
     Panel row = new FlowPanel();
-    row.getElement().setId("QCNPFExercise_row_"+field);
+    row.getElement().setId("QCNPFExercise_row_" + field);
 
     row.addStyleName("trueInlineStyle");
     qcCol.addStyleName("floatLeft");
@@ -630,14 +652,14 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     row.add(content);
 
     Panel rowContainer = new FlowPanel();
-    rowContainer.getElement().setId("QCNPFExercise_rowContainer_"+field);
+    rowContainer.getElement().setId("QCNPFExercise_rowContainer_" + field);
     rowContainer.addStyleName("topFiveMargin");
     rowContainer.addStyleName("blockStyle");
     rowContainer.add(row);
     rowContainer.add(commentRow);
 
     // why????
-  //  rowContainer.setWidth("650px");
+    //  rowContainer.setWidth("650px");
 
     return rowContainer;
   }
@@ -647,10 +669,10 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   }
 
   /**
-   * @see #getCommentWidget(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
    * @param commentEntry
    * @param alreadyMarkedCorrect
    * @param commentRow
+   * @see #getCommentWidget(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
    */
   private void populateCommentRow(FocusWidget commentEntry, boolean alreadyMarkedCorrect, Panel commentRow) {
     commentRow.setVisible(!alreadyMarkedCorrect);
@@ -662,14 +684,14 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   }
 
   /**
-   * @see #getCommentWidget(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
    * @param field
    * @param annotation
    * @return
+   * @see #getCommentWidget(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
    */
   private FocusWidget makeCommentEntry(final String field, ExerciseAnnotation annotation) {
     final TextBox commentEntry = new TextBox();
-    commentEntry.getElement().setId("QCNPFExercise_Comment_TextBox_"+field);
+    commentEntry.getElement().setId("QCNPFExercise_Comment_TextBox_" + field);
     commentEntry.addStyleName("topFiveMargin");
     if (annotation != null) {
       commentEntry.setText(annotation.getComment());
@@ -689,12 +711,12 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   }
 
   /**
-   * @see #getQCCheckBox
    * @param field
    * @param commentRow
    * @param commentEntry
    * @param alreadyMarkedCorrect
    * @return
+   * @see #getQCCheckBox
    */
   private CheckBox makeCheckBox(final String field, final Panel commentRow, final FocusWidget commentEntry,
                                 boolean alreadyMarkedCorrect) {
@@ -702,7 +724,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
     final CheckBox checkBox = new CheckBox("");
     checkBox.getElement().setId("CheckBox_" + field);
-    checkBox.addStyleName(isComment? "wideCenteredRadio" :"centeredRadio");
+    checkBox.addStyleName(isComment ? "wideCenteredRadio" : "centeredRadio");
     checkBox.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -717,11 +739,11 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   }
 
   /**
-   * @see #makeCheckBox
    * @param isIncorrect
    * @param field
    * @param commentRow
    * @param commentEntry
+   * @see #makeCheckBox
    */
   private void checkBoxWasClicked(boolean isIncorrect, String field, Panel commentRow, FocusWidget commentEntry) {
     commentRow.setVisible(isIncorrect);
@@ -729,8 +751,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
     if (isIncorrect) {
       incorrectFields.add(field);
-    }
-    else {
+    } else {
       incorrectFields.remove(field);
       addCorrectComment(field);
     }
@@ -739,18 +760,18 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
     if (isCourseContent()) {
       String id = exercise.getID();
-     // System.out.println("\tcheckBoxWasClicked : instance = '" +instance +"'");
+      // System.out.println("\tcheckBoxWasClicked : instance = '" +instance +"'");
       //if (instance.equalsIgnoreCase(Navigation.CLASSROOM)) {
-        STATE state = incorrectFields.isEmpty() ? STATE.UNSET : STATE.DEFECT;
-        exercise.setState(state);
-        listContainer.setState(id, state);
-     //   System.out.println("\tcheckBoxWasClicked : state now = '" +state +"'");
+      STATE state = incorrectFields.isEmpty() ? STATE.UNSET : STATE.DEFECT;
+      exercise.setState(state);
+      listContainer.setState(id, state);
+      //   System.out.println("\tcheckBoxWasClicked : state now = '" +state +"'");
 
-        listContainer.redraw();
-    //  }
-    //  else {
-    //    System.out.println("\tcheckBoxWasClicked : ignoring instance = '" +instance +"'");
-   //   }
+      listContainer.redraw();
+      //  }
+      //  else {
+      //    System.out.println("\tcheckBoxWasClicked : ignoring instance = '" +instance +"'");
+      //   }
 
       setApproveButtonState();
       markReviewed(exercise);
