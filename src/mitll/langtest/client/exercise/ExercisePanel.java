@@ -5,11 +5,13 @@
 package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.base.HasIcon;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
@@ -26,8 +28,8 @@ import java.util.logging.Logger;
  * Time: 1:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExercisePanel<T extends Shell> extends VerticalPanel implements
-    BusyPanel, PostAnswerProvider<T>, ProvidesResize, RequiresResize {
+public abstract class ExercisePanel<L extends Shell, T extends Shell> extends VerticalPanel implements
+    BusyPanel, PostAnswerProvider, ProvidesResize, RequiresResize {
   private Logger logger = Logger.getLogger("ExercisePanel");
 
   private static final int CONTENT_SCROLL_HEIGHT = 220;
@@ -36,8 +38,8 @@ public abstract class ExercisePanel<T extends Shell> extends VerticalPanel imple
   private final Set<Widget> completed = new HashSet<Widget>();
   protected T exercise = null;
   protected final ExerciseController controller;
-  private final NavigationHelper<T> navigationHelper;
-  protected final ListInterface<T> exerciseList;
+  private final NavigationHelper<L> navigationHelper;
+  protected final ListInterface<L> exerciseList;
   private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
   protected final String message;
   protected final String instance;
@@ -53,7 +55,8 @@ public abstract class ExercisePanel<T extends Shell> extends VerticalPanel imple
    * @see mitll.langtest.client.list.ListInterface#loadExercise
    */
   public ExercisePanel(final T e, final LangTestDatabaseAsync service,
-                       final ExerciseController controller, ListInterface<T> exerciseList, String instructionMessage,
+                       final ExerciseController controller,
+                       ListInterface<L> exerciseList, String instructionMessage,
                        String instance) {
     this.exercise = e;
     this.controller = controller;
@@ -86,8 +89,8 @@ public abstract class ExercisePanel<T extends Shell> extends VerticalPanel imple
     getElement().setId("ExercisePanel");
   }
 
-  protected NavigationHelper<T> getNavigationHelper(ExerciseController controller) {
-    return new NavigationHelper<T>(exercise, controller, this, exerciseList, true, true, true);
+  protected NavigationHelper<L> getNavigationHelper(ExerciseController controller) {
+    return new NavigationHelper<L>(exercise, controller, this, exerciseList, true, true, true);
   }
 
   protected void addInstructions() {
@@ -128,7 +131,7 @@ public abstract class ExercisePanel<T extends Shell> extends VerticalPanel imple
   /**
    * @param content
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.exercise.T)
+   * @see #getQuestionContent
    */
   protected HTML getMaybeRTLContent(String content) {
     boolean rightAlignContent = controller.isRightAlignContent();
@@ -237,7 +240,7 @@ public abstract class ExercisePanel<T extends Shell> extends VerticalPanel imple
   protected void onUnload() {
     super.onUnload();
    // System.out.println("onUnload : doing unload of prev/next handler " +keyHandler);
-    navigationHelper.removeKeyHandler();
+    amasNavigationHelper.removeKeyHandler();
   }*/
 
   /**
@@ -251,7 +254,7 @@ public abstract class ExercisePanel<T extends Shell> extends VerticalPanel imple
    * @see NavigationHelper#getNextAndPreviousButtons
    */
   @Override
-  public abstract void postAnswers(final ExerciseController controller, final T completedExercise); /*{
+  public abstract void postAnswers(final ExerciseController controller, final HasID completedExercise); /*{
     int i = 1;
     int user = controller.getUser();
     final Set<Widget> incomplete = new HashSet<Widget>();
@@ -295,7 +298,7 @@ public abstract class ExercisePanel<T extends Shell> extends VerticalPanel imple
 /*  private void showPopup(String toShow) {
     final PopupPanel popupImage = new PopupPanel(true);
     popupImage.add(new HTML(toShow));
-    popupImage.showRelativeTo(navigationHelper.getNext());
+    popupImage.showRelativeTo(amasNavigationHelper.getNext());
     Timer t = new Timer() {
       @Override
       public void run() { popupImage.hide(); }
