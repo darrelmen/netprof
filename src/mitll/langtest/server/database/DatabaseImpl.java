@@ -1249,7 +1249,7 @@ public class DatabaseImpl implements Database {
       List<CommonExercise> copyAsExercises = new ArrayList<>();
 
       for (CommonShell ex : userListByID.getExercises()) {
-        copyAsExercises.add(getExercise(ex.getID()));
+        copyAsExercises.add(getCustomOrPredefExercise(ex.getID()));
       }
       for (CommonExercise ex : copyAsExercises) {
         userListManager.addAnnotations(ex);
