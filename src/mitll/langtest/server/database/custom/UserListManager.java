@@ -284,8 +284,8 @@ public class UserListManager {
     return userListDAO.hasByName(userid, name);
   }
 
-  public UserList getByName(long userid, String name) {
-    List<UserList> byName = userListDAO.getByName(userid, name);
+  public UserList<CommonShell> getByName(long userid, String name) {
+    List<UserList<CommonShell>> byName = userListDAO.getByName(userid, name);
     return byName == null ? null : byName.iterator().next();
   }
 
@@ -299,14 +299,14 @@ public class UserListManager {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getListsForUser
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
-  public Collection<UserList> getListsForUser(long userid, boolean listsICreated, boolean visitedLists) {
+  public Collection<UserList<CommonShell>> getListsForUser(long userid, boolean listsICreated, boolean visitedLists) {
     if (userid == -1) {
       return Collections.emptyList();
     }
     if (DEBUG)
       logger.debug("getListsForUser for user #" + userid + " only created " + listsICreated + " visited " + visitedLists);
 
-    List<UserList> listsForUser = new ArrayList<UserList>();
+    List<UserList<CommonShell>> listsForUser = new ArrayList<>();
     UserList favorite = null;
     Set<Long> ids = new HashSet<Long>();
     if (listsICreated) {
@@ -365,7 +365,7 @@ public class UserListManager {
    * @param typeOrder
    * @return
    */
-  public UserList getCommentedList(Collection<String> typeOrder) {
+  public UserList<CommonShell> getCommentedList(Collection<String> typeOrder) {
     //Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(true); // skip unset items!
 
     Collection<String> defectExercises = reviewedDAO.getDefectExercises();
@@ -382,12 +382,12 @@ public class UserListManager {
     List<CommonExercise> include = userExerciseDAO.getWhere(idToCreator.keySet());
     //logger.debug("getCommentedList include " + include.size() + " included ");
 
-    UserList reviewList = getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, idToCreator.keySet(), COMMENT_MAGIC_ID, typeOrder);
+    UserList<CommonShell> reviewList = getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, idToCreator.keySet(), COMMENT_MAGIC_ID, typeOrder);
     reviewList.setUniqueID(COMMENT_MAGIC_ID);
     return reviewList;
   }
 
-  public UserList getAttentionList(Collection<String> typeOrder) {
+  public UserList<CommonShell> getAttentionList(Collection<String> typeOrder) {
     Map<String, ReviewedDAO.StateCreator> exerciseToState = secondStateDAO.getExerciseToState(false);
 
     //logger.debug("attention " + exerciseToState);
@@ -413,7 +413,7 @@ public class UserListManager {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getReviewLists()
    * @see #markCorrectness(String, boolean, long)
    */
-  public UserList<CommonExercise> getDefectList(Collection<String> typeOrder) {
+  public UserList<CommonShell> getDefectList(Collection<String> typeOrder) {
     Set<String> defectIds = new HashSet<String>();
     Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState(false);
     //logger.debug("\tgetDefectList exerciseToState=" + exerciseToState.size());
@@ -442,16 +442,16 @@ public class UserListManager {
    * @see #getCommentedList(java.util.Collection)
    * @see #getDefectList(java.util.Collection)
    */
-  private UserList<CommonExercise> getReviewList(List<CommonExercise> allKnown, String name, String description,
+  private UserList<CommonShell> getReviewList(List<CommonExercise> allKnown, String name, String description,
                                  Collection<String> ids, long userListMaginID, Collection<String> typeOrder) {
     Map<String, CommonExercise> idToUser = new HashMap<>();
     for (CommonExercise ue : allKnown) idToUser.put(ue.getID(), ue);
 
-    List<CommonExercise> onList = getReviewedUserExercises(idToUser, ids);
+    List<CommonShell> onList = getReviewedUserExercises(idToUser, ids);
 
     // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
     User user = getQCUser();
-    UserList<CommonExercise> userList = new UserList<CommonExercise>(userListMaginID, user, name, description, "", false);
+    UserList<CommonShell> userList = new UserList<CommonShell>(userListMaginID, user, name, description, "", false);
     userList.setReview(true);
 
     new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(onList, false);
@@ -475,8 +475,8 @@ public class UserListManager {
    * @return
    * @see #getReviewList(java.util.List, String, String, java.util.Collection, long, java.util.Collection)
    */
-  private List<CommonExercise> getReviewedUserExercises(Map<String, CommonExercise> idToUserExercise, Collection<String> ids) {
-    List<CommonExercise> onList = new ArrayList<>();
+  private List<CommonShell> getReviewedUserExercises(Map<String, CommonExercise> idToUserExercise, Collection<String> ids) {
+    List<CommonShell> onList = new ArrayList<>();
 
     for (String id : ids) {
       if (id.startsWith(UserExercise.CUSTOM_PREFIX)) {   // add user defined exercises
@@ -490,7 +490,7 @@ public class UserListManager {
         CommonExercise byID = userExerciseDAO.getPredefExercise(id);
         if (byID != null) {
           //logger.debug("getReviewedUserExercises : found " + byID + " tooltip " + byID.getTooltip());
-          UserExercise e = new UserExercise(byID);
+          UserExercise e = new UserExercise(byID, byID.getCreator());
           onList.add(e); // all predefined references
           //e.setTooltip(byID.getCombinedTooltip());
           //logger.debug("getReviewedUserExercises : found " + e.getID() + " tooltip " + e.getTooltip());
@@ -499,9 +499,9 @@ public class UserListManager {
         }
       }
     }
-    Collections.sort(onList, new Comparator<CommonExercise>() {
+    Collections.sort(onList, new Comparator<HasID>() {
       @Override
-      public int compare(CommonExercise o1, CommonExercise o2) {
+      public int compare(HasID o1, HasID o2) {
         return o1.getID().compareTo(o2.getID());
       }
     });
@@ -516,7 +516,7 @@ public class UserListManager {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUserListsForText
    */
-  public List<UserList> getUserListsForText(String search, long userid) {
+  public List<UserList<CommonShell>> getUserListsForText(String search, long userid) {
     return userListDAO.getAllPublic(userid);
   }
 
@@ -570,7 +570,7 @@ public class UserListManager {
    * @param createIfDoesntExist
    * @param mediaDir
    * @see mitll.langtest.server.LangTestDatabaseImpl#editItem
-   * @see mitll.langtest.client.custom.dialog.EditableExercise#postEditItem
+   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */
   public void editItem(CommonExercise userExercise,
                        boolean createIfDoesntExist,
@@ -682,7 +682,7 @@ public class UserListManager {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
    * @see mitll.langtest.server.database.DatabaseImpl#getUserListName(long)
    */
-  public UserList<CommonExercise> getUserListByID(long id, Collection<String> typeOrder) {
+  public UserList<CommonShell> getUserListByID(long id, Collection<String> typeOrder) {
     if (id == -1) {
       logger.error("getUserListByID : huh? asking for id " + id);
       return null;
@@ -698,7 +698,7 @@ public class UserListManager {
    * @param userListID
    * @param user
    * @see mitll.langtest.server.LangTestDatabaseImpl#addVisitor
-   * @see mitll.langtest.client.custom.Navigation#addVisitor
+   * @seex mitll.langtest.client.custom.Navigation#addVisitor
    */
   public void addVisitor(long userListID, long user) {
     //logger.debug("addVisitor - user " + user + " visits " + userList.getUniqueID());
