@@ -116,7 +116,7 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
   }
 
   private void addContent() {
-    logger.info("doing addContent on " + this);
+   // logger.info("doing addContent on " + this);
 
     final Panel center = new VerticalPanel();
     center.getElement().setId("GoodwaveVerticalCenter");
