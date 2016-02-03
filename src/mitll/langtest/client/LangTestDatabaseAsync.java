@@ -83,9 +83,9 @@ public interface LangTestDatabaseAsync {
 
   void getStartupInfo(AsyncCallback<StartupInfo> async);
 
-  void getUserListsForText(String search, long userid, AsyncCallback<Collection<UserList>> async);
+  void getUserListsForText(String search, long userid, AsyncCallback<Collection<UserList<CommonShell>>> async);
 
-  void getListsForUser(long userid, boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList>> async);
+  void getListsForUser(long userid, boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList<CommonShell>>> async);
 
   void addItemToUserList(long userListID, String exID, AsyncCallback<Void> async);
 
@@ -123,7 +123,7 @@ public interface LangTestDatabaseAsync {
 
   void markState(String id, STATE state, long creatorID, AsyncCallback<Void> async);
 
-  void getReviewLists(AsyncCallback<List<UserList>> async);
+  void getReviewLists(AsyncCallback<List<UserList<CommonShell>>> async);
 
   void markAudioDefect(AudioAttribute audioAttribute, String exid, AsyncCallback<Void> async);
 
