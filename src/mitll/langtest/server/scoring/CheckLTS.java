@@ -32,10 +32,12 @@ class CheckLTS {
    * @param languageProperty
    * @see Scoring#Scoring(String, ServerProperties, LogAndNotify)
    */
-  public CheckLTS(LTS lts, HTKDictionary htkDictionary, String languageProperty) {
+  public CheckLTS(LTS lts, HTKDictionary htkDictionary, String languageProperty, boolean hasModel) {
     this.letterToSoundClass = lts;
     this.htkDictionary = htkDictionary;
-    if (htkDictionary.isEmpty()) logger.warn("\n\n\n dict is empty?");
+    if (htkDictionary.isEmpty() && hasModel) {
+      logger.warn("\n\n\n dict is empty?");
+    }
     String language = languageProperty != null ? languageProperty : "";
     this.languageProperty = language;
     isMandarin = language.equalsIgnoreCase("mandarin");
@@ -45,7 +47,7 @@ class CheckLTS {
   /**
    * @param foreignLanguagePhrase
    * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#inDictOrLTS
+   * @see mitll.langtest.server.scoring.Scoring#checkLTS(String)
    */
   public Set<String> checkLTS(String foreignLanguagePhrase) {
     return checkLTS(letterToSoundClass, foreignLanguagePhrase);
