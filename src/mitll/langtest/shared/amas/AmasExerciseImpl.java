@@ -348,4 +348,9 @@ public class AmasExerciseImpl implements CommonShell /*implements CommonExercise
   public String getContextTranslation() {
     return null;
   }
+
+  @Override
+  public MutableShell getMutableShell() {
+    return null;
+  }
 }
