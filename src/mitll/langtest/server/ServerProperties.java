@@ -216,6 +216,7 @@ public class ServerProperties {
     return getDefaultTrue(SKIP_SEMICOLONS);
   }
 
+  public boolean hasModel() { return !isNoModel(); }
   public boolean isNoModel() {
     return getDefaultFalse(NO_MODEL);
   }
