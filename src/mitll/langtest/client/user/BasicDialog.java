@@ -21,6 +21,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.recorder.RecordButton;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -210,7 +211,7 @@ public class BasicDialog {
   }
 
   protected void markError(FormField dialectGroup, String message) {
-    System.out.println("mark error " + message + " on " + dialectGroup.getWidget().getElement().getId());
+    logger.info("mark error " + message + " on " + dialectGroup.getWidget().getElement().getId());
     markError(dialectGroup, TRY_AGAIN, message);
   }
 
@@ -242,6 +243,8 @@ public class BasicDialog {
   }
 
   protected void markErrorBlur(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement right) {
+    logger.info("markErrorBlur " +header + " message " +message);
+
     dialectGroup.setType(ControlGroupType.ERROR);
     dialect.setFocus(true);
     setupPopoverBlur(dialect, header, message, right, new MyPopover(false), dialectGroup);
@@ -267,7 +270,7 @@ public class BasicDialog {
         ageEntryGroup.group.setType(validAge ? ControlGroupType.NONE : ControlGroupType.ERROR);
       } catch (NumberFormatException e) {
 
-        // System.out.println("marked error on " + ageEntryGroup);
+        // logger.info("marked error on " + ageEntryGroup);
         ageEntryGroup.group.setType(ControlGroupType.ERROR);
       }
     }
@@ -309,7 +312,7 @@ public class BasicDialog {
   }
 
   void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement) {
-    // System.out.println("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
+    // logger.info("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
     dialectGroup.setType(ControlGroupType.ERROR);
     dialect.setFocus(true);
 //    setupPopover(dialect, header, message, placement);
@@ -318,13 +321,13 @@ public class BasicDialog {
     try {
       widget = dialectGroup.getWidget(1);
     } catch (Exception e) {
-      //System.out.println("no nested object...");
+      //logger.info("no nested object...");
     }
     setupPopoverThatHidesItself(widget, header, message, placement);
   }
 
 /*  void markError(Widget dialect, String message) {
-    // System.out.println("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
+    // logger.info("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
     // dialect.setFocus(true);
 //    setupPopover(dialect, header, message, placement);
     setupPopoverThatHidesItself(dialect, "Error", message, Placement.RIGHT);
@@ -358,7 +361,7 @@ public class BasicDialog {
 
   public Popover markErrorBlurFocus(Widget widget, HasBlurHandlers dialect, String heading, String message,
                                     Placement placement, boolean showOnlyOnce) {
-    // System.out.println("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
+    // logger.info("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
     // dialect.setFocus(true);
 //    setupPopover(dialect, header, message, placement);
     return setupPopoverBlurNoControl(widget, dialect, heading, message, placement, new MyPopover(showOnlyOnce));
@@ -366,14 +369,14 @@ public class BasicDialog {
 
 /*
   void markError(Widget dialect, String header, String message, Placement placement) {
-    // System.out.println("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
+    // logger.info("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
     Widget widget = dialect;
     setupPopoverThatHidesItself(widget, header, message, placement);
   }
 */
 
   private void setupPopoverThatHidesItself(final Widget w, String heading, final String message, Placement placement) {
-    System.out.println("\tsetupPopoverThatHidesItself triggering popover on '" + w.getTitle() + "' with " + heading + "/" + message);
+    logger.info("\tsetupPopoverThatHidesItself triggering popover on '" + w.getTitle() + "' with " + heading + "/" + message);
     setupPopover(w, heading, message, placement);
   }
 
@@ -466,11 +469,29 @@ public class BasicDialog {
     showPopover(popover, w, heading, message, placement, isHTML);
   }
 
+  /**
+   * @see RecordButton#showTooLoud()
+   * @param w
+   * @param heading
+   * @param message
+   * @param placement
+   */
   public void showPopover(Widget w, String heading, String message, Placement placement) {
     showPopover(new Popover(), w, heading, message, placement, true);
   }
 
+  /**
+   *
+   * @param popover
+   * @param w
+   * @param heading
+   * @param message
+   * @param placement
+   * @param isHTML
+   */
   public void showPopover(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML) {
+    logger.info("showPopover : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
+
     simplePopover(popover, w, heading, message, placement, isHTML);
     popover.show();
   }
@@ -578,7 +599,7 @@ public class BasicDialog {
     //  this.showOnlyOnce = showOnlyOnce;
     }
     public void dontFireAgain() {
-    //  System.out.println(this + " dontFireAgain ...");
+    //  logger.info(this + " dontFireAgain ...");
 
       hide();
       setTrigger(Trigger.MANUAL);
@@ -589,21 +610,21 @@ public class BasicDialog {
     public void show() {
       super.show();
       wasShown = true;
-      System.out.println(this + " got show...");
+      logger.info(this + " got show...");
     }
 
     @Override
     public void hide() {
       super.hide();
-      System.out.println(this + " got hide...");
+      logger.info(this + " got hide...");
       if (wasShown && showOnlyOnce && !disabled) {
-        System.out.println(this + " \tdisabling...");
+        logger.info(this + " \tdisabling...");
         disabled = true;
         wasShown = false;
         dontFireAgain();
       }
       else {
-        System.out.println(this + " not disabling...");
+        logger.info(this + " not disabling...");
 
       }
     }
@@ -639,6 +660,8 @@ public class BasicDialog {
       return box.getText();
     }
 
+    public boolean isEmpty() { return getText().isEmpty(); }
+
     public void setRightSide(Widget rightSide) {
       this.rightSide = rightSide;
     }
@@ -655,31 +678,6 @@ public class BasicDialog {
       return "FormField value " + getText();
     }
   }
-
-/*  protected class ListBoxFormField {
-    public final ListBox box;
-    private final ControlGroup group;
-
-    public ListBoxFormField(final ListBox box, ControlGroup group) {
-      this.group = group;
-      this.box = box;
-    }
-
-    public String getValue() {
-      return box.getItemText(box.getSelectedIndex());
-    }
-
-    void markSimpleError(String message, Placement placement) {
-      box.setFocus(true);
-      setupPopover(box, TRY_AGAIN, message, placement, false);
-    }
-
-    public void setVisible(boolean v) { box.setVisible(v); group.setVisible(v); }
-
-    public String toString() {
-      return "Box: " + getValue();
-    }
-  }*/
 
   /**
    * @param w
