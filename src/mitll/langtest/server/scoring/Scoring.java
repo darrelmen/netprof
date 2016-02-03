@@ -100,7 +100,7 @@ public abstract class Scoring {
 
     readDictionary();
     makeDecoder();
-    checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language);
+    checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language, props.hasModel());
   }
 
   protected LTS getLTS() {
@@ -428,7 +428,12 @@ public abstract class Scoring {
       }
       return htkDictionary;
     } else {
-      logger.error("\n\n\n---> makeDict : Can't find dict file at " + dictFile);
+      if (props.isNoModel()) {
+        logger.info("---> makeDict : Can't find dict file at " + dictFile);
+      }
+      else {
+        logger.error("\n\n\n---> makeDict : Can't find dict file at " + dictFile);
+      }
       return new HTKDictionary();
     }
   }
