@@ -43,7 +43,9 @@ public class UserListManager {
   public static final long REVIEW_MAGIC_ID = -100;
   public static final long COMMENT_MAGIC_ID = -200;
   private static final long ATTN_LL_MAGIC_ID = -300;
-  private static final boolean DEBUG = false;
+
+  private static final boolean DEBUG = true;
+
   public static final String DUP = "_dup_";
 
   private final UserDAO userDAO;
@@ -337,6 +339,9 @@ public class UserListManager {
       logger.debug("getListsForUser found " + listsForUser.size() +
           " lists for user #" + userid + " only created " + listsICreated + " visited " + visitedLists +
           "\n\tfavorite " + favorite);
+      if (listsForUser.size() < 4) {
+        for (UserList ul : listsForUser) logger.debug("\t" + ul);
+      }
     }
 
     return listsForUser;
@@ -548,12 +553,15 @@ public class UserListManager {
    */
   private void addItemToList(long userListID, String userExercise) {
     UserList where = userListDAO.getWhere(userListID, true);
+
+    logger.warn("addItemToList: couldn't find ul with id " + userListID + " and " + userExercise);
+
     if (where != null) {
       userListExerciseJoinDAO.add(where, userExercise);
       userListDAO.updateModified(userListID);
     }
     if (where == null) {
-      logger.error("\n\nreallyCreateNewItem : couldn't find ul with id " + userListID);
+      logger.error("\n\naddItemToList : couldn't find ul with id " + userListID);
     }
   }
 
@@ -854,7 +862,7 @@ public class UserListManager {
     logger.debug("deleteList " + id);
     userListExerciseJoinDAO.removeListRefs(id);
     boolean b = listExists(id);
-    if (!b) logger.warn("\thuh? no list " + id);
+    if (!b) logger.warn("\tdeleteList huh? no list " + id);
     return b && userListDAO.remove(id);
   }
 
