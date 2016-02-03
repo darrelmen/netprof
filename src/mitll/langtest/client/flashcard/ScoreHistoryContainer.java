@@ -49,7 +49,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   private final Map<String, CommonShell> idToExercise = new HashMap<>();
   private ExerciseComparator sorter;
 
-  public ScoreHistoryContainer(ExerciseController controller, List<CommonShell> allExercises) {
+  public ScoreHistoryContainer(ExerciseController controller, List<? extends CommonShell> allExercises) {
     super(controller);
     english = controller.getLanguage().equals(ENGLISH);
 
