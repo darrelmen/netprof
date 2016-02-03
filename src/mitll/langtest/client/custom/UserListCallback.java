@@ -67,7 +67,7 @@ class UserListCallback<T extends CommonExercise, UL extends UserList<T>> impleme
                           UserManager userManager,
                           boolean showIsPublic,
                           String optionalExercise) {
-    logger.info("UserListCallback instance '" + instanceName + "' only my lists " + onlyMyLists);
+    //logger.info("UserListCallback instance '" + instanceName + "' only my lists " + onlyMyLists);
 
     this.listManager = listManager;
     this.contentPanel = contentPanel;
@@ -87,7 +87,7 @@ class UserListCallback<T extends CommonExercise, UL extends UserList<T>> impleme
 
   @Override
   public void onSuccess(final Collection<UL> result) {
-    logger.info("\tUserListCallback : Displaying " + result.size() + " user lists for " + instanceName);
+    //logger.info("\tUserListCallback : Displaying " + result.size() + " user lists for " + instanceName);
     if (result.isEmpty()) {
       child.add(new Heading(3, allLists ? NO_LISTS_YET : NO_LISTS_CREATED_YET));
     } else {
