@@ -54,7 +54,7 @@ import java.util.logging.Logger;
  */
 public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & ScoredExercise> extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
-  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
+  //private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
   public static final String MANDARIN = "Mandarin";
   public static final String KOREAN = "Korean";
