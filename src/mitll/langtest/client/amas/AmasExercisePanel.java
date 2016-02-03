@@ -14,7 +14,6 @@ import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
-import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -31,7 +30,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class AmasExercisePanel extends VerticalPanel implements
-    PostAnswerProvider<AmasExerciseImpl>, ProvidesResize, RequiresResize, ExerciseQuestionState {
+    PostAnswerProvider, ProvidesResize, RequiresResize, ExerciseQuestionState {
   private Logger logger = Logger.getLogger("AmasExercisePanel");
 
   private static final int QUESTION_WIDTH = 700;
@@ -48,8 +47,8 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
   protected final ExerciseController controller;
 
   protected final LangTestDatabaseAsync service;
-  protected final NavigationHelper navigationHelper;
-  protected final ResponseExerciseList<AmasExerciseImpl> exerciseList;
+  protected final AmasNavigationHelper amasNavigationHelper;
+  protected final ResponseExerciseList exerciseList;
   protected final Map<Integer, Widget> indexToWidget = new HashMap<Integer, Widget>();
 
   protected Map<Integer, Tab> indexToTab = new TreeMap<Integer, Tab>();
@@ -69,7 +68,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
     this.controller = controller;
     this.service = service;
     this.exerciseList = exerciseList;
-    this.navigationHelper = getNavigationHelper(controller);
+    this.amasNavigationHelper = getNavigationHelper(controller);
 
     // attempt to left justify
     HorizontalPanel hp = new HorizontalPanel();
@@ -91,13 +90,13 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
     addQuestions(e, service, controller);
 
     // add next and prev buttons
-    add(navigationHelper);
-    navigationHelper.addStyleName("topMargin");
+    add(amasNavigationHelper);
+    amasNavigationHelper.addStyleName("topMargin");
     getElement().setId("AmasExercisePanel");
   }
 
-  private NavigationHelper getNavigationHelper(ExerciseController controller) {
-    return new NavigationHelper(exercise, controller, this, exerciseList, true, true);
+  private AmasNavigationHelper getNavigationHelper(ExerciseController controller) {
+    return new AmasNavigationHelper(exercise, controller, this, exerciseList, true, true);
   }
 
   private void addInstructions(int numQuestions) {
@@ -415,7 +414,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
   }
 
   protected void enableNext() {
-    navigationHelper.enableNextButton(isCompleted());
+    amasNavigationHelper.enableNextButton(isCompleted());
   }
 
   protected boolean isCompleted() {return completedTabs.size() == answers.size();  }
