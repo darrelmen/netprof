@@ -756,6 +756,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param isFlashcardReq
    * @return
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise
+   * @see mitll.langtest.client.list.ExerciseList#goGetNextAndCacheIt(String)
+   * @see mitll.langtest.client.analysis.PlayAudio#playLast(String, long)
    */
   public <T extends Shell> T getExercise(String id, long userID, boolean isFlashcardReq) {
     long then = System.currentTimeMillis();
@@ -806,6 +808,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     } else {
       logger.info(getLanguage() + " : couldn't find exercise with id '" + id + "'");
     }
+    // return byID;
+    // TODO : why doesn't this work?
     return (T) byID;
   }
 
@@ -1199,7 +1203,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.custom.ListManager#viewLessons
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
-  public Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean visited) {
+  public Collection<UserList<CommonShell>> getListsForUser(long userid, boolean onlyCreated, boolean visited) {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
     return db.getUserListManager().getListsForUser(userid, onlyCreated, visited);
   }
@@ -1211,7 +1215,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.custom.ListManager#viewLessons
    */
   @Override
-  public Collection<UserList> getUserListsForText(String search, long userid) {
+  public Collection<UserList<CommonShell>> getUserListsForText(String search, long userid) {
     return db.getUserListManager().getUserListsForText(search, userid);
   }
 
@@ -1274,10 +1278,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.custom.ListManager#viewReview
    */
   @Override
-  public List<UserList> getReviewLists() {
-    List<UserList> lists = new ArrayList<UserList>();
+  public List<UserList<CommonShell>> getReviewLists() {
+    List<UserList<CommonShell>> lists = new ArrayList<>();
     UserListManager userListManager = db.getUserListManager();
-    UserList defectList = userListManager.getDefectList(getTypeOrder());
+    UserList<CommonShell> defectList = userListManager.getDefectList(getTypeOrder());
     lists.add(defectList);
 
     lists.add(userListManager.getCommentedList(getTypeOrder()));
@@ -1330,7 +1334,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
   public CommonExercise reallyCreateNewItem(long userListID, CombinedMutableUserExercise userExercise) {
-    logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
+    //logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
 
     db.getUserListManager().reallyCreateNewItem(userListID, userExercise, serverProps.getMediaDir());
 
@@ -2133,7 +2137,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
                                               Map<String, Collection<String>> typeToSection, long userListID) {
     //logger.debug("getUserHistoryForList " + userid + " and " + ids + " type to section " + typeToSection);
-    UserList<CommonExercise> userListByID = userListID != -1 ? db.getUserListByID(userListID) : null;
+    UserList<CommonShell> userListByID = userListID != -1 ? db.getUserListByID(userListID) : null;
     List<String> allIDs = new ArrayList<String>();
     Map<String, CollationKey> idToKey = new HashMap<String, CollationKey>();
 
