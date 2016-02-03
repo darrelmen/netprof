@@ -36,6 +36,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonAnnotatable;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
@@ -125,21 +126,21 @@ public class Navigation implements RequiresResize, ShowTab {
     this.controller = controller;
     this.feedback = feedback;
     storage = new KeyStorage(controller);
-    learnHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller, null
+    learnHelper = new SimpleChapterNPFHelper<CommonShell,CommonExercise>(service, feedback, userManager, controller, null
     ) {
       @Override
-      protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                                               UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
-        return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
+      protected FlexListLayout<CommonShell,CommonExercise> getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
+                                               UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper<CommonShell,CommonExercise> outer) {
+        return new MyFlexListLayout<CommonShell,CommonExercise>(service, feedback, userManager, controller, outer) {
           @Override
-          protected PagingExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
+          protected PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
             return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst);
           }
         };
       }
 
-      protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
-        return new ExercisePanelFactory<CommonExercise>(service, feedback, controller, exerciseList) {
+      protected ExercisePanelFactory<CommonShell,CommonExercise> getFactory(final PagingExerciseList<CommonShell,CommonExercise> exerciseList) {
+        return new ExercisePanelFactory<CommonShell,CommonExercise>(service, feedback, controller, exerciseList) {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
             CommentNPFExercise<CommonExercise> classroom = new CommentNPFExercise<>(e, controller, exerciseList, false, "classroom");
@@ -166,24 +167,30 @@ public class Navigation implements RequiresResize, ShowTab {
 
     defectHelper = new ChapterNPFHelper(service, feedback, userManager, controller, true);
 
-    markDefectsHelper = new SimpleChapterNPFHelper(service, feedback, userManager, controller,
+    markDefectsHelper = new SimpleChapterNPFHelper<CommonShell,CommonExercise>(service, feedback, userManager, controller,
         learnHelper.getExerciseList()
     ) {
       @Override
-      protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper outer) {
-        return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
+      protected FlexListLayout<CommonShell,CommonExercise> getMyListLayout(LangTestDatabaseAsync service,
+                                                                           UserFeedback feedback,
+                                                                           UserManager userManager,
+                                                                           ExerciseController controller,
+                                                                           SimpleChapterNPFHelper<CommonShell,CommonExercise> outer) {
+        return new MyFlexListLayout<CommonShell,CommonExercise>(service, feedback, userManager, controller, outer) {
           @Override
-          protected PagingExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
+          protected PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(Panel topRow,
+                                                                                    Panel currentExercisePanel,
+                                                                                    String instanceName, boolean incorrectFirst) {
             return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst);
           }
         };
       }
 
-      protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
-        return new ExercisePanelFactory<CommonExercise>(service, feedback, controller, exerciseList) {
+      protected ExercisePanelFactory<CommonShell,CommonExercise> getFactory(final PagingExerciseList<CommonShell,CommonExercise> exerciseList) {
+        return new ExercisePanelFactory<CommonShell,CommonExercise>(service, feedback, controller, exerciseList) {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
-            return new QCNPFExercise<CommonExercise>(e, controller, exerciseList, MARK_DEFECTS1);
+            return new QCNPFExercise<>(e, controller, exerciseList, MARK_DEFECTS1);
 
           }
         };
@@ -210,17 +217,19 @@ public class Navigation implements RequiresResize, ShowTab {
    * @return
    * @see #Navigation(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
    */
-  private <T extends CommonShell>SimpleChapterNPFHelper makePracticeHelper(final LangTestDatabaseAsync service, final UserManager userManager,
-                                                                           final ExerciseController controller, final UserFeedback feedback) {
-    return new SimpleChapterNPFHelper(service, feedback, userManager, controller,
+  private SimpleChapterNPFHelper<CommonShell,CommonExercise> makePracticeHelper(final LangTestDatabaseAsync service,
+                                                                           final UserManager userManager,
+                                                                           final ExerciseController controller,
+                                                                           final UserFeedback feedback) {
+    return new SimpleChapterNPFHelper<CommonShell,CommonExercise>(service, feedback, userManager, controller,
         null
     ) {
       StatsFlashcardFactory statsFlashcardFactory;
       Widget outerBottomRow;
 
       @Override
-      protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList) {
-        statsFlashcardFactory = new StatsFlashcardFactory(service, feedback, controller, exerciseList, "practice", null);
+      protected ExercisePanelFactory<CommonShell,CommonExercise> getFactory(PagingExerciseList<CommonShell,CommonExercise> exerciseList) {
+        statsFlashcardFactory = new StatsFlashcardFactory<CommonShell,CommonExercise>(service, feedback, controller, exerciseList, "practice", null);
         statsFlashcardFactory.setContentPanel(outerBottomRow);
         return statsFlashcardFactory;
       }
@@ -234,22 +243,22 @@ public class Navigation implements RequiresResize, ShowTab {
       }
 
       @Override
-      protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
+      protected FlexListLayout<CommonShell,CommonExercise> getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
                                                UserManager userManager, ExerciseController controller,
-                                               SimpleChapterNPFHelper outer) {
-        return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
+                                               SimpleChapterNPFHelper<CommonShell,CommonExercise> outer) {
+        return new MyFlexListLayout<CommonShell,CommonExercise>(service, feedback, userManager, controller, outer) {
           FlexListLayout outer = this;
           @Override
-          protected PagingExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
+          protected PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
                                                         boolean incorrectFirst) {
-            return new NPFlexSectionExerciseList<T>(outer, topRow, currentExercisePanel, instanceName, true) {
+            return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, true) {
               @Override
-              protected T findFirstExercise() {
+              protected CommonShell findFirstExercise() {
                 String currentExerciseID = statsFlashcardFactory.getCurrentExerciseID();
                 if (currentExerciseID != null && !currentExerciseID.trim().isEmpty()) {
                   logger.info("findFirstExercise ---> found previous state current ex = " + currentExerciseID);
 
-                  T shell = byID(currentExerciseID);
+                  CommonShell shell = byID(currentExerciseID);
 
                   if (shell == null) {
                     logger.warning("huh? can't find " + currentExerciseID);
@@ -719,8 +728,7 @@ public class Navigation implements RequiresResize, ShowTab {
    * @param iconType
    * @param label
    * @return
-   * @see mitll.langtest.client.custom.Navigation#getNav()
-   * @see Navigation#getListOperations
+   * @see mitll.langtest.client.custom.Navigation#makeFirstLevelTab(TabPanel, IconType, String)
    */
   private TabAndContent makeTab(TabPanel tabPanel, IconType iconType, String label) {
     return new TabAndContent(tabPanel, iconType, label);
