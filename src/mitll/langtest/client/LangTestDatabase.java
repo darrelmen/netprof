@@ -11,7 +11,6 @@ import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.analysis.WordScore;
-import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
@@ -149,8 +148,13 @@ public interface LangTestDatabase extends RemoteService {
   long addUserList(long userid, String name, String description, String dliClass, boolean isPublic);
   void setPublicOnList(long userListID, boolean isPublic);
   void addVisitor(long userListID, long user);
-  Collection<UserList> getListsForUser(long userid, boolean onlyCreated, boolean visited);
-  Collection<UserList> getUserListsForText(String search, long userid);
+
+
+  Collection<UserList<CommonShell>> getListsForUser(long userid, boolean onlyCreated, boolean visited);
+  Collection<UserList<CommonShell>> getUserListsForText(String search, long userid);
+  List<UserList<CommonShell>> getReviewLists();
+
+
   void addItemToUserList(long userListID, String exID);
 
   boolean isValidForeignPhrase(String foreign);
@@ -166,8 +170,6 @@ public interface LangTestDatabase extends RemoteService {
   void markState(String id, STATE state, long creatorID);
 
   void setExerciseState(String id, STATE state, long userID);
-
-  List<UserList> getReviewLists();
 
   boolean deleteList(long id);
   boolean deleteItemFromList(long listid, String exid);
