@@ -17,8 +17,8 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 /**
  * Created by GO22670 on 6/5/2014.
  */
-class UserListCallback<T extends CommonExercise, UL extends UserList<T>> implements AsyncCallback<Collection<UL>> {
+class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>>> {
   private final Logger logger = Logger.getLogger("UserListCallback");
 
   private static final String NO_LISTS_CREATED_YET = "No lists created yet.";
@@ -37,7 +37,7 @@ class UserListCallback<T extends CommonExercise, UL extends UserList<T>> impleme
 
   private final ListManager listManager;
   private final Panel contentPanel;
-  private final Panel child;
+  private final Panel insideContentPanel;
   private final ScrollPanel listScrollPanel;
   private final boolean allLists;
   private final String instanceName;
@@ -48,7 +48,7 @@ class UserListCallback<T extends CommonExercise, UL extends UserList<T>> impleme
 
   /**
    * @param contentPanel
-   * @param child
+   * @param insideContentPanel
    * @param listScrollPanel
    * @param instanceName
    * @param onlyMyLists
@@ -60,18 +60,18 @@ class UserListCallback<T extends CommonExercise, UL extends UserList<T>> impleme
    */
   public UserListCallback(ListManager listManager,
                           Panel contentPanel,
-                          Panel child,
+                          Panel insideContentPanel,
                           ScrollPanel listScrollPanel,
                           String instanceName,
-                          boolean onlyMyLists, boolean allLists,
+                          boolean onlyMyLists,
+                          boolean allLists,
                           UserManager userManager,
                           boolean showIsPublic,
                           String optionalExercise) {
     //logger.info("UserListCallback instance '" + instanceName + "' only my lists " + onlyMyLists);
-
     this.listManager = listManager;
     this.contentPanel = contentPanel;
-    this.child = child;
+    this.insideContentPanel = insideContentPanel;
     this.listScrollPanel = listScrollPanel;
     this.instanceName = instanceName;
     this.onlyMyLists = onlyMyLists;
@@ -86,11 +86,18 @@ class UserListCallback<T extends CommonExercise, UL extends UserList<T>> impleme
   }
 
   @Override
-  public void onSuccess(final Collection<UL> result) {
-    //logger.info("\tUserListCallback : Displaying " + result.size() + " user lists for " + instanceName);
+  public void onSuccess(final Collection<UserList<CommonShell>> result) {
+    logger.info("\tUserListCallback.onSuccess : Displaying " + result.size() + " user lists for " + instanceName);
     if (result.isEmpty()) {
-      child.add(new Heading(3, allLists ? NO_LISTS_YET : NO_LISTS_CREATED_YET));
+      logger.info("\t\tUserListCallback.onSuccess : Displaying empty set");
+
+      insideContentPanel.clear();
+      listScrollPanel.clear();
+      insideContentPanel.add(getNoListsCreated());
     } else {
+
+      logger.info("\t\tUserListCallback.onSuccess : Displaying " + result.size() + " user lists for " + instanceName);
+
       listScrollPanel.getElement().setId("scrollPanel");
 
       setScrollPanelWidth(listScrollPanel);
@@ -100,18 +107,18 @@ class UserListCallback<T extends CommonExercise, UL extends UserList<T>> impleme
       insideScroll.addStyleName("userListContainer");
       listScrollPanel.add(insideScroll);
 
-      Map<String, List<UL>> nameToLists = populateNameToList(result);
+      Map<String, List<UserList<CommonShell>>> nameToLists = populateNameToList(result);
 
       boolean anyAdded = addUserListsToDisplay(result, insideScroll, nameToLists);
       if (!anyAdded) {
         insideScroll.add(new Heading(3, allLists ? NO_LISTS_CREATED_OR_VISITED_YET : NO_LISTS_CREATED_YET));
       }
-      child.add(listScrollPanel);
+      insideContentPanel.add(listScrollPanel);
 
       if (!optionalExercise.isEmpty()) {
         logger.info("onSuccess find list for " + optionalExercise);
-        for (UL ul : result) {
-          for (T ex : ul.getExercises()) {
+        for (UserList<? extends HasID> ul : result) {
+          for (HasID ex : ul.getExercises()) {
             if (ex.getID().equals(optionalExercise)) {
               logger.info("onSuccess ex " + optionalExercise + " is on " + ul);
               listManager.showList(ul, contentPanel, instanceName, ex);
@@ -125,18 +132,22 @@ class UserListCallback<T extends CommonExercise, UL extends UserList<T>> impleme
     }
   }
 
+  private Heading getNoListsCreated() {
+    return new Heading(3, allLists ? NO_LISTS_YET : NO_LISTS_CREATED_YET);
+  }
+
   /**
    * @param result
    * @see #onSuccess(java.util.Collection)
    */
-  private void selectPreviousList(Collection<UL> result) {
+  private void selectPreviousList(Collection<UserList<CommonShell>> result) {
     String clickedUserList = listManager.getStorage().getValue(Navigation.CLICKED_USER_LIST);
     if (clickedUserList != null && !clickedUserList.isEmpty()) {
       showList(result, Long.parseLong(clickedUserList));
     }
   }
 
-  private void showList(Collection<UL> result, long id) {
+  private void showList(Collection<UserList<CommonShell>> result, long id) {
     for (UserList ul : result) {
       if (ul.getUniqueID() == id) {
         listManager.showList(ul, contentPanel, instanceName, null);
@@ -145,14 +156,17 @@ class UserListCallback<T extends CommonExercise, UL extends UserList<T>> impleme
     }
   }
 
-  private Map<String, List<UL>> populateNameToList(Collection<UL> result) {
-    Map<String, List<UL>> nameToLists = new HashMap<>();
+  private Map<String, List<UserList<CommonShell>>> populateNameToList(Collection<UserList<CommonShell>> result) {
+    Map<String, List<UserList<CommonShell>>> nameToLists = new HashMap<>();
 
-    for (final UL ul : result) {
-      List<UL> userLists = nameToLists.get(ul.getName());
+    for (final UserList<CommonShell> ul : result) {
+      List<UserList<CommonShell>> userLists = nameToLists.get(ul.getName());
       if (userLists == null) nameToLists.put(ul.getName(), userLists = new ArrayList<>());
       userLists.add(ul);
     }
+
+//    logger.info("populateNameToList " +nameToLists);
+
     return nameToLists;
   }
 
@@ -163,10 +177,11 @@ class UserListCallback<T extends CommonExercise, UL extends UserList<T>> impleme
    * @return
    * @see #onSuccess(java.util.Collection)
    */
-  private boolean addUserListsToDisplay(Collection<UL> result, Panel insideScroll, Map<String, List<UL>> nameToLists) {
+  private boolean addUserListsToDisplay(Collection<UserList<CommonShell>> result, Panel insideScroll,
+                                        Map<String, List<UserList<CommonShell>>> nameToLists) {
     boolean anyAdded = false;
-    for (final UL ul : result) {
-      List<UL> collisions = nameToLists.get(ul.getName());
+    for (final UserList<CommonShell> ul : result) {
+      List<UserList<CommonShell>> collisions = nameToLists.get(ul.getName());
       boolean showMore = false;
       if (collisions.size() > 1) {
         if (collisions.indexOf(ul) > 0) showMore = true;
@@ -245,8 +260,8 @@ class UserListCallback<T extends CommonExercise, UL extends UserList<T>> impleme
     Panel r1 = new FlowPanel();
     r1.addStyleName("trueInlineStyle");
     String name = ul.getName();
-/*    Widget child = makeItemMarker2(ul);
-    child.addStyleName("leftFiveMargin");*/
+/*    Widget insideContentPanel = makeItemMarker2(ul);
+    insideContentPanel.addStyleName("leftFiveMargin");*/
 
     Heading h4 = new Heading(4, name, ul.getExercises().size() + " items");
     h4.addStyleName("floatLeft");
