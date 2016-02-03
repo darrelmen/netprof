@@ -235,7 +235,8 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   }
 
   void addRecordingAndFeedbackWidgets(String exerciseID, LangTestDatabaseAsync service, ExerciseController controller, Panel contentMiddle) {
-     logger.warning("adding empty recording and feedback widgets " + this.getClass());
+    boolean noModel = controller.getProps().isNoModel();
+    if (!noModel) logger.warning("addRecordingAndFeedbackWidgets : adding empty recording and feedback widgets " + this.getClass());
   }
 
   /**
