@@ -127,8 +127,6 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     if (logger == null) {
       logger = Logger.getLogger("CommentNPFExercise");
     }
-    logger.info("exercise " + exercise);
-   // logger.info("mutableAnnotation " + mutableAnnotation);
     T exercise = this.exercise;
     return new CommentBox<T>(this.exercise, controller, this, exercise.getMutableAnnotation());
   }
@@ -383,7 +381,6 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    */
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
     CommentBox<T> commentBox = getCommentBox();
-    logger.info("getEntry commentBox ");
     return commentBox.getEntry(field, getContentWidget(label, value, false), annotation);
   }
 
