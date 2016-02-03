@@ -24,8 +24,8 @@ import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
@@ -40,10 +40,10 @@ import java.util.logging.Logger;
  * TODOx : concept of rounds explicit?
  * TODO : review table...?
  */
-public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & AnnotationExercise & ScoredExercise & MutableAnnotationExercise>
-    extends ExercisePanelFactory<T>
+public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExercise>
+    extends ExercisePanelFactory<L, T>
     implements RequiresResize {
-  private Logger logger = Logger.getLogger("StatsFlashcardFactory");
+  private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
   private static final String REMAINING = "Remaining";
   private static final String INCORRECT = "Incorrect";
@@ -54,21 +54,21 @@ public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & An
   private static final String SKIP_TO_END = "See your scores";
   private static final boolean ADD_KEY_BINDING = true;
   private static final String GO_BACK = "Go back";
-  public static final String N_A = "N/A";
+  private static final String N_A = "N/A";
 
-  private T currentExercise;
+  private HasID currentExercise;
   private final ControlState controlState;
-  private List<CommonShell> allExercises;//, originalExercises;
+  private List<L> allExercises;//, originalExercises;
 
-  private final Map<String, Boolean> exToCorrect = new HashMap<String, Boolean>();
-  private final Map<String, Double> exToScore = new HashMap<String, Double>();
-  private final Set<Long> resultIDs = new HashSet<Long>();
+  private final Map<String, Boolean> exToCorrect = new HashMap<>();
+  private final Map<String, Double> exToScore = new HashMap<>();
+  private final Set<Long> resultIDs = new HashSet<>();
   private String selectionID = "";
   private final String instance;
-  final StickyState sticky;
-  Panel scoreHistory;
+  private final StickyState sticky;
+  private Panel scoreHistory;
   private Map<String, Collection<String>> selection = new HashMap<>();
-  UserList ul;
+  private final UserList ul;
   private Widget contentPanel;
 
 
@@ -83,23 +83,23 @@ public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & An
    * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
    */
   public StatsFlashcardFactory(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller,
-                               ListInterface exerciseList, String instance, UserList ul) {
+                               ListInterface<L> exerciseList, String instance, UserList ul) {
     super(service, feedback, controller, exerciseList);
     controlState = new ControlState();
     this.instance = instance;
     this.ul = ul;
     if (exerciseList != null) { // TODO ? can this ever happen?
-      exerciseList.addListChangedListener(new ListChangeListener<CommonShell>() {
+      exerciseList.addListChangedListener(new ListChangeListener<L>() {
         /**
          * @param items
          * @param selectionID
          * @see mitll.langtest.client.list.ExerciseList#rememberAndLoadFirst
          */
         @Override
-        public void listChanged(List<CommonShell> items, String selectionID) {
+        public void listChanged(List<L> items, String selectionID) {
           StatsFlashcardFactory.this.selectionID = selectionID;
           allExercises = items;
-      //    logger.info("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
+          //    logger.info("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
           reset();
         }
       });
@@ -148,12 +148,13 @@ public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & An
 
     boolean b = noModel || !recordingEnabled;
 
-    return b ? getNoRecordFlashcardPanel(e) :
-        new StatsPracticePanel(e, exerciseList);
+    return b ?
+        getNoRecordFlashcardPanel(e.getCommonAnnotatable()) :
+        new StatsPracticePanel(e.getCommonAnnotatable(), exerciseList);
   }
 
-  private FlashcardPanel<T> getNoRecordFlashcardPanel(final T e) {
-    return new FlashcardPanel<T>(e,
+  private FlashcardPanel<CommonAnnotatable> getNoRecordFlashcardPanel(final CommonAnnotatable e) {
+    return new FlashcardPanel<CommonAnnotatable>(e,
         StatsFlashcardFactory.this.service,
         StatsFlashcardFactory.this.controller,
         ADD_KEY_BINDING,
@@ -231,11 +232,11 @@ public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & An
   /**
    * @see ExercisePanelFactory#getExercisePanel(Shell)
    */
-  private class StatsPracticePanel extends BootstrapExercisePanel<T> {
+  private class StatsPracticePanel extends BootstrapExercisePanel<CommonAnnotatable> {
     private Widget container;
     final SetCompleteDisplay completeDisplay = new SetCompleteDisplay();
 
-    public StatsPracticePanel(T e, ListInterface exerciseListToUse) {
+    public StatsPracticePanel(CommonAnnotatable e, ListInterface<L> exerciseListToUse) {
       super(e,
           StatsFlashcardFactory.this.service,
           StatsFlashcardFactory.this.controller,
@@ -244,7 +245,7 @@ public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & An
           soundFeedback,
           soundFeedback.getEndListener(),
           StatsFlashcardFactory.this.instance, exerciseListToUse);
-     // logger.info("made " + this.getElement().getId() + " for " + e.getID());
+      // logger.info("made " + this.getElement().getId() + " for " + e.getID());
     }
 
     @Override
@@ -331,8 +332,7 @@ public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & An
       sticky.resetStorage();
       if (exercise == null) {
         System.err.println("StatsPracticePanel.onSetComplete. : err : no exercise?");
-      }
-      else {
+      } else {
         sticky.storeCurrent(exercise);
       }
 
@@ -340,7 +340,7 @@ public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & An
 
       Set<String> ids = exToCorrect.keySet();
 
-      Set<String> copies = new HashSet<String>(ids);
+      Set<String> copies = new HashSet<>(ids);
       if (copies.isEmpty()) {
         for (CommonShell t : allExercises) {
           copies.add(t.getID());
@@ -369,14 +369,14 @@ public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & An
 
       contentPanel.removeStyleName("centerPractice");
       contentPanel.addStyleName("noWidthCenterPractice");
-    //  logger.info("showFeedbackCharts ---- \n\n\n");
+      //  logger.info("showFeedbackCharts ---- \n\n\n");
 
       HorizontalPanel widgets = new HorizontalPanel();
       container = widgets;
       scoreHistory = completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
       scoreHistory.add(getButtonsBelowScoreHistory());
       widgets.add(scoreHistory);
-      completeDisplay.addLeftAndRightCharts(result, exToScore, getCorrect(), getIncorrect(), allExercises.size(),widgets);
+      completeDisplay.addLeftAndRightCharts(result, exToScore, getCorrect(), getIncorrect(), allExercises.size(), widgets);
       belowContentDiv.add(container);
     }
 
@@ -416,7 +416,7 @@ public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & An
     /**
      * @see #getIncorrectListButton()
      */
-    protected void doIncorrectFirst() {
+    void doIncorrectFirst() {
       showFlashcardDisplay();
 
       currentExercise = null;
@@ -490,7 +490,7 @@ public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & An
       String lastID = allExercises.get(allExercises.size() - 1).getID();
       String currentExerciseID = sticky.getCurrentExerciseID();
 
-       logger.info("startOver : current " + currentExerciseID);
+      logger.info("startOver : current " + currentExerciseID);
 
       if (currentExerciseID != null && !currentExerciseID.isEmpty() && !currentExerciseID.equals(lastID)) {
         exerciseList.loadExercise(currentExerciseID);
@@ -505,10 +505,10 @@ public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & An
     }
 
     private void makeFlashcardButtonsVisible() {
-     contentPanel.removeStyleName("noWidthCenterPractice");
+      contentPanel.removeStyleName("noWidthCenterPractice");
       contentPanel.addStyleName("centerPractice");
 
-   //   logger.info("makeFlashcardButtonsVisible ---- \n\n\n");
+      //   logger.info("makeFlashcardButtonsVisible ---- \n\n\n");
 
       startOver.setVisible(true);
       startOver.setEnabled(true);
@@ -584,7 +584,7 @@ public class StatsFlashcardFactory<T extends CommonShell & AudioRefExercise & An
       return startOver;
     }
 
-    protected void abortPlayback() {
+    void abortPlayback() {
       cancelTimer();
       soundFeedback.clear();
     }
