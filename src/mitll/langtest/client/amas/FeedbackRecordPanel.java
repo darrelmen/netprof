@@ -18,7 +18,7 @@ import mitll.langtest.shared.Answer;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -97,7 +97,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
    * @see mitll.langtest.client.exercise.NavigationHelper#clickNext
    */
   @Override
-  public void postAnswers(ExerciseController controller, AmasExerciseImpl completedExercise) {
+  public void postAnswers(ExerciseController controller, HasID completedExercise) {
     if (isCompleted()) {
       exerciseList.loadNextExercise(completedExercise);
     } else {
@@ -171,8 +171,8 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
   }
 
   /**
-   * @see #FeedbackRecordPanel(AmasExerciseImpl, LangTestDatabaseAsync, ExerciseController, ListInterface, QuizScorePanel)
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel.AnswerPanel
+   * @see #FeedbackRecordPanel
+   * @see mitll.langtest.client.amas.FeedbackRecordPanel.AnswerPanel#getStudentAnswer(LangTestDatabaseAsync, int)
    */
   private void getScores(final boolean firstTime) {
     service.getScoresForUser(exerciseList.getTypeToSelection(), controller.getUser(), exerciseList.getIDs(), new AsyncCallback<QuizCorrectAndScore>() {
@@ -209,7 +209,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
   protected void enableNext() {
     boolean wasSelfScored = selfScoreQuestions.contains(currentTab);
 
-    navigationHelper.enableNextButton(wasSelfScored);
+    amasNavigationHelper.enableNextButton(wasSelfScored);
 
     if (isCompleted()) {
       exerciseList.setState(exercise.getID(), STATE.APPROVED);
