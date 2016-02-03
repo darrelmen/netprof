@@ -24,6 +24,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +39,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class NPFHelper implements RequiresResize {
-  Logger logger = Logger.getLogger("NPFHelper");
+  private Logger logger = Logger.getLogger("NPFHelper");
 
   protected static final String LIST_COMPLETE = "List complete!";
   protected static final String COMPLETE = "Complete";
@@ -49,7 +50,7 @@ public class NPFHelper implements RequiresResize {
   protected final UserManager userManager;
 
   protected final UserFeedback feedback;
-  public PagingExerciseList<CommonExercise> npfExerciseList;
+  public PagingExerciseList<CommonShell, CommonExercise> npfExerciseList;
   private final boolean showQC;
   DivWidget contentPanel;
   protected String instanceName;
@@ -88,7 +89,7 @@ public class NPFHelper implements RequiresResize {
    */
   public void showNPF(UserList<CommonExercise> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises,
                       CommonExercise toSelect) {
-    // logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
+    logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
     this.instanceName = instanceName;
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
@@ -123,7 +124,8 @@ public class NPFHelper implements RequiresResize {
    * @see #addNPFToContent(UserList, Panel, String, boolean, CommonExercise)
    */
   private Panel doNPF(UserList<CommonExercise> ul, String instanceName, boolean loadExercises, CommonExercise toSelect) {
-    // System.out.println(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul);
+    logger.info(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul + " of size ");
+
     Panel hp = doInternalLayout(ul, instanceName);
     if (loadExercises) {
       rememberAndLoadFirst(ul, toSelect);
@@ -185,8 +187,8 @@ public class NPFHelper implements RequiresResize {
    * @return
    * @see #doNPF
    */
-  PagingExerciseList<CommonExercise> makeNPFExerciseList(Panel right, String instanceName) {
-    final PagingExerciseList<CommonExercise> exerciseList = makeExerciseList(right, instanceName);
+  PagingExerciseList<CommonShell, CommonExercise> makeNPFExerciseList(Panel right, String instanceName) {
+    final PagingExerciseList<CommonShell, CommonExercise> exerciseList = makeExerciseList(right, instanceName);
     setFactory(exerciseList, instanceName, showQC);
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
@@ -207,7 +209,13 @@ public class NPFHelper implements RequiresResize {
    */
   private void rememberAndLoadFirst(final UserList<CommonExercise> ul, CommonExercise toSelect) {
     npfExerciseList.setUserListID(ul.getUniqueID());
-    List<CommonExercise> copy = new ArrayList<>(ul.getExercises());
+
+    List<CommonShell> copy = new ArrayList<CommonShell>();
+
+    for (CommonExercise ex : ul.getExercises()) {
+      copy.add(ex);
+    }
+    //List<CommonShell> copy = new ArrayList<>(ul.getExercises());
     //  logger.info("rememberAndLoadFirst " + copy.size() + " exercises from  " +ul.getName());
     //  npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
     npfExerciseList.rememberAndLoadFirst(copy, toSelect, "");
@@ -221,8 +229,8 @@ public class NPFHelper implements RequiresResize {
    * @return
    * @see #makeNPFExerciseList
    */
-  PagingExerciseList<CommonExercise> makeExerciseList(final Panel right, final String instanceName) {
-    return new NPExerciseList<CommonExercise>(right, service, feedback, controller,
+  PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, final String instanceName) {
+    return new NPExerciseList(right, service, feedback, controller,
         true, instanceName, false) {
       @Override
       protected void onLastItem() {
@@ -242,21 +250,22 @@ public class NPFHelper implements RequiresResize {
    * @param showQC
    * @see #makeNPFExerciseList(com.google.gwt.user.client.ui.Panel, String)
    */
-  void setFactory(final PagingExerciseList<CommonExercise> exerciseList, final String instanceName, boolean showQC) {
+  void setFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList, final String instanceName, boolean showQC) {
     exerciseList.setFactory(getFactory(exerciseList, instanceName, showQC));
   }
 
-  protected ExercisePanelFactory<CommonExercise> getFactory(final PagingExerciseList<CommonExercise> exerciseList,
-                                                            final String instanceName,
-                                                            final boolean showQC) {
-    return new ExercisePanelFactory<CommonExercise>(service, feedback, controller, exerciseList) {
+  protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(
+      final PagingExerciseList<CommonShell, CommonExercise> exerciseList,
+      final String instanceName,
+      final boolean showQC) {
+    return new ExercisePanelFactory<CommonShell, CommonExercise>(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
         if (showQC) {
-          QCNPFExercise<CommonExercise> widgets = new QCNPFExercise<>(e, controller, exerciseList, instanceName);
+          QCNPFExercise<CommonExercise> widgets = new QCNPFExercise<CommonExercise>(e, controller, exerciseList, instanceName);
           return widgets;
         } else {
-          CommentNPFExercise<CommonExercise> widgets = new CommentNPFExercise<>(e, controller, exerciseList, false, instanceName);
+          CommentNPFExercise<CommonExercise> widgets = new CommentNPFExercise<CommonExercise>(e, controller, exerciseList, false, instanceName);
           return widgets;
         }
       }
