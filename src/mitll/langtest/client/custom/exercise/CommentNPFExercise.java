@@ -76,7 +76,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @see mitll.langtest.client.custom.Navigation#Navigation(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback)
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory(PagingExerciseList, String, boolean)
    */
-  public CommentNPFExercise(T e, ExerciseController controller, ListInterface<T> listContainer,
+  public CommentNPFExercise(T e, ExerciseController controller, ListInterface<CommonShell> listContainer,
                             boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, 1.0f, addKeyHandler, instance);
   }
@@ -129,7 +129,8 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     }
     logger.info("exercise " + exercise);
    // logger.info("mutableAnnotation " + mutableAnnotation);
-    return new CommentBox<T>(exercise, controller, this, exercise.getMutableAnnotation());
+    T exercise = this.exercise;
+    return new CommentBox<T>(this.exercise, controller, this, exercise.getMutableAnnotation());
   }
 
   private void addContextButton(final T e, DivWidget row) {

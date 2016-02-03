@@ -30,14 +30,14 @@ import java.util.logging.Logger;
 
 /**
  * Show exercises with a cell table that can handle thousands of rows.
- * Does tooltips using tooltip field on {@link CommonShell#getTooltip}
+ * Does tooltips using tooltip field on...?
  * <p/>
  * User: GO22670
  * Date: 11/27/12
  * Time: 5:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingExerciseList<T extends CommonShell> extends ExerciseList<T> {
+public class PagingExerciseList<T extends CommonShell, U extends Shell> extends ExerciseList<T,U> {
   private Logger logger = Logger.getLogger("PagingExerciseList");
 
   protected final ExerciseController controller;
@@ -63,7 +63,7 @@ public class PagingExerciseList<T extends CommonShell> extends ExerciseList<T> {
    * @see mitll.langtest.client.custom.content.NPFHelper#makeExerciseList(Panel, String)
    */
   public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            ExercisePanelFactory<T> factory, ExerciseController controller,
+                            ExercisePanelFactory<T,U> factory, ExerciseController controller,
                             boolean showTypeAhead, String instance, boolean incorrectFirst) {
     super(currentExerciseVPanel, service, feedback, factory, controller, instance, incorrectFirst);
     this.controller = controller;
@@ -79,7 +79,8 @@ public class PagingExerciseList<T extends CommonShell> extends ExerciseList<T> {
 
   @Override
   public void setState(String id, STATE state) {
-    byID(id).setState(state);
+    T t = byID(id);
+    t.setState(state);
   }
 
   @Override
@@ -127,7 +128,7 @@ public class PagingExerciseList<T extends CommonShell> extends ExerciseList<T> {
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
    */
   protected ClickablePagingContainer<T> makePagingContainer() {
-    final PagingExerciseList<T> outer = this;
+    final PagingExerciseList<T,U> outer = this;
     pagingContainer =
         new ClickablePagingContainer<T>(controller) {
           @Override
