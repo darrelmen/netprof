@@ -65,8 +65,8 @@ public class NewUserExercise extends BasicDialog {
   CreateFirstRecordAudioPanel rap;
   CreateFirstRecordAudioPanel rapSlow;
 
-  ControlGroup normalSpeedRecording;
-  ControlGroup slowSpeedRecording;
+  ControlGroup normalSpeedRecording = null;
+  ControlGroup slowSpeedRecording = null;
   UserList<CommonExercise> ul;
   UserList<CommonExercise> originalList;
   /**
@@ -126,11 +126,11 @@ public class NewUserExercise extends BasicDialog {
 
     addItemsAtTop(container);
     container.add(upper);
-    /*FormField formField =*/
+
     makeForeignLangRow(upper);
     final String id1 = ul.getID();
-    String id = "NewUserExercise_ForeignLang_entry_for_list_" + id1;
-    foreignLang.box.getElement().setId(id);
+
+    foreignLang.box.getElement().setId( "NewUserExercise_ForeignLang_entry_for_list_" + id1);
 
     // focusOn(formField); // Bad idea since steals the focus after search
     makeTranslitRow(upper);
@@ -147,6 +147,9 @@ public class NewUserExercise extends BasicDialog {
     this.listInterface = listInterface;
 
     container.add(getCreateButton(ul, listInterface, toAddTo, normalSpeedRecording));
+
+    logger.info("addNew (" +this.getClass()+
+        ") : adding blur handler to " +foreignLang.getWidget().getElement().getId());
 
     foreignLang.box.addBlurHandler(new BlurHandler() {
       @Override
@@ -181,6 +184,7 @@ public class NewUserExercise extends BasicDialog {
     FluidRow row = new FluidRow();
 
     normalSpeedRecording = makeRegularAudioPanel(row);
+    logger.info("makeAudioRow ---> " + normalSpeedRecording);
     normalSpeedRecording.addStyleName("buttonGroupInset3");
 
     slowSpeedRecording = makeSlowAudioPanel(row);
@@ -195,6 +199,7 @@ public class NewUserExercise extends BasicDialog {
   }
 
   private void gotBlur() {
+    logger.info("----> Got blur ");
     gotBlur(english, foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo);
   }
 
@@ -286,6 +291,8 @@ public class NewUserExercise extends BasicDialog {
   }
 
   FormField makeForeignLangRow(Panel container) {
+    logger.info("NewUserExercise.makeForeignLangRow --->");
+
     Panel row = new FluidRow();
     container.add(row);
     foreignLang = addControlFormField(row, getLanguage(), false, 1, 150, "");
@@ -315,7 +322,7 @@ public class NewUserExercise extends BasicDialog {
 */
 
   public <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
-    logger.info("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
+    logger.info("setFields : setting fields with " + newUserExercise);
 
     // english
     String english = newUserExercise.getEnglish();
@@ -444,9 +451,7 @@ public class NewUserExercise extends BasicDialog {
   private void isValidForeignPhrase(final UserList<CommonExercise> ul,
                                     final ListInterface<CommonShell> pagingContainer, final Panel toAddTo,
                                     final boolean onClick) {
-    //String foreignLangText = foreignLang.getText();
-/*    logger.info("isValidForeignPhrase : checking phrase " + foreignLangText +
-      " before adding/changing " + newUserExercise);*/
+    logger.info("isValidForeignPhrase : checking phrase " + foreignLang.getText() + " before adding/changing " + newUserExercise);
 
     service.isValidForeignPhrase(foreignLang.getText(), new AsyncCallback<Boolean>() {
       @Override
@@ -455,6 +460,9 @@ public class NewUserExercise extends BasicDialog {
 
       @Override
       public void onSuccess(Boolean result) {
+        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getText() +
+            " before adding/changing " + newUserExercise + " -> " +result);
+
         if (result) {
           checkIfNeedsRefAudio();
           grabInfoFromFormAndStuffInfoExercise();
@@ -497,9 +505,11 @@ public class NewUserExercise extends BasicDialog {
    * @param onClick
    * @see #isValidForeignPhrase
    */
-  /*<U extends CommonShell & AudioRefExercise & MutableUserExercise> */void afterValidForeignPhrase(final UserList<CommonExercise> ul,
-                                                                                                    final ListInterface<CommonShell> exerciseList,
-                                                                                                    final Panel toAddTo, boolean onClick) {
+  /*<U extends CommonShell & AudioRefExercise & MutableUserExercise> */
+  void afterValidForeignPhrase(final UserList<CommonExercise> ul,
+                               final ListInterface<CommonShell> exerciseList,
+                               final Panel toAddTo,
+                               boolean onClick) {
     CombinedMutableUserExercise exerciseToSend = newUserExercise.getCombinedMutableUserExercise();
 
     service.reallyCreateNewItem(ul.getUniqueID(), exerciseToSend, new AsyncCallback<CommonExercise>() {
