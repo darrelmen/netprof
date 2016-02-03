@@ -39,7 +39,7 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
    * @see mitll.langtest.client.custom.SimpleChapterNPFHelper.MyFlexListLayout#getFactory
    */
   protected ExercisePanelFactory getFactory(final PagingExerciseList exerciseList) {
-    return new ExercisePanelFactory<AmasExerciseImpl>(service, controller.getFeedback(), controller, exerciseList) {
+    return new ExercisePanelFactory<AmasExerciseImpl,AmasExerciseImpl>(service, controller.getFeedback(), controller, exerciseList) {
       @Override
       public Panel getExercisePanel(AmasExerciseImpl e) {
         if (child != null) {
