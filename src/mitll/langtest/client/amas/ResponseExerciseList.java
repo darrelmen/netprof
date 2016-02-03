@@ -24,7 +24,6 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
-import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 
 import java.util.Arrays;
@@ -39,7 +38,7 @@ import java.util.logging.Logger;
  * Time: 4:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ResponseExerciseList<T extends AmasExerciseImpl> extends SingleSelectExerciseList<T> {
+public class ResponseExerciseList extends SingleSelectExerciseList {
   private Logger logger = Logger.getLogger("ResponseExerciseList");
 
   private static final String SPEECH = "Speech";
@@ -90,11 +89,11 @@ public class ResponseExerciseList<T extends AmasExerciseImpl> extends SingleSele
    * @seex mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
    * @see #addComponents()
    */
-  protected ClickablePagingContainer<T> makePagingContainer() {
-    final PagingExerciseList<T> outer = this;
-    pagingContainer = new ClickablePagingContainer<T>(controller) {
+  protected ClickablePagingContainer<AmasExerciseImpl> makePagingContainer() {
+    final PagingExerciseList<AmasExerciseImpl, AmasExerciseImpl> outer = this;
+    pagingContainer = new ClickablePagingContainer<AmasExerciseImpl>(controller) {
       @Override
-      protected void gotClickOnItem(T e) {
+      protected void gotClickOnItem(AmasExerciseImpl e) {
         outer.gotClickOnItem(e);
       }
     };
@@ -216,7 +215,7 @@ public class ResponseExerciseList<T extends AmasExerciseImpl> extends SingleSele
 //  }
 
   /**
-   * @see ListInterface#loadNextExercise(Shell)
+   * @see ListInterface#loadNextExercise
    */
   @Override
   protected void onLastItem() {
@@ -229,7 +228,7 @@ public class ResponseExerciseList<T extends AmasExerciseImpl> extends SingleSele
    */
   protected void takeAgain() {
     String first = getQuizStatus();
-    Collection<String> singleton =  Arrays.asList(first, "Would you like to take this test again?");
+    Collection<String> singleton = Arrays.asList(first, "Would you like to take this test again?");
     new DialogHelper(CONGRATULATIONS, singleton, new DialogHelper.CloseListener() {
       @Override
       public void gotYes() {
@@ -242,9 +241,10 @@ public class ResponseExerciseList<T extends AmasExerciseImpl> extends SingleSele
       }
     });
   }
+
   private String getQuizStatus() {
-    String quiz = "Quiz #" +getQuiz();
-    String level = "ILR Level " +getILRLevel();
+    String quiz = "Quiz #" + getQuiz();
+    String level = "ILR Level " + getILRLevel();
     return getTestType() + " " + quiz + " at " + level + " is complete.";
   }
 
@@ -257,13 +257,14 @@ public class ResponseExerciseList<T extends AmasExerciseImpl> extends SingleSele
     Collection<String> strings = getTypeToSelection().get("Test type");
     return strings == null ? "" : strings.iterator().next();
   }
+
   private String getILRLevel() {
     Collection<String> strings = getTypeToSelection().get("ILR Level");
     return strings == null ? "" : strings.iterator().next();
   }
 
   private void quizCompleteDisplay() {
-    showMessage(getQuizStatus(),true);
+    showMessage(getQuizStatus(), true);
     getScores();
   }
 
@@ -274,6 +275,7 @@ public class ResponseExerciseList<T extends AmasExerciseImpl> extends SingleSele
 
   /**
    * TODO : who should call this????
+   *
    * @param typeToSection
    */
 //  @Override
@@ -281,11 +283,15 @@ public class ResponseExerciseList<T extends AmasExerciseImpl> extends SingleSele
     loadExercisesUsingPrefix(typeToSection, getPrefix(), false);
   }
 
-  @Override
-  public boolean loadNextExercise(T current) {
+  /**
+   * @see FeedbackRecordPanel#postAnswers(ExerciseController, AmasExerciseImpl)
+   * @param current
+   * @return
+   */
+  public boolean loadNextExercise(AmasExerciseImpl current) {
     //logger.info("loadNextExercise " + current.getID() );
     boolean b = super.loadNextExercise(current);
-   // controller.showAdvance(this);
+    // controller.showAdvance(this);
     return b;
   }
 
