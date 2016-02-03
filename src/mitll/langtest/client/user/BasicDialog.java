@@ -38,6 +38,8 @@ import java.util.logging.Logger;
 public class BasicDialog {
   private Logger logger = Logger.getLogger("BasicDialog");
 
+  private static final boolean DEBUG = false;
+
   public static final int ILR_CHOICE_WIDTH = 80;
   // public static final int MIN_LENGTH_USER_ID = 8;
   protected static final String TRY_AGAIN = "Try Again";
@@ -211,7 +213,7 @@ public class BasicDialog {
   }
 
   protected void markError(FormField dialectGroup, String message) {
-    logger.info("mark error " + message + " on " + dialectGroup.getWidget().getElement().getId());
+    if (DEBUG) logger.info("mark error " + message + " on " + dialectGroup.getWidget().getElement().getId());
     markError(dialectGroup, TRY_AGAIN, message);
   }
 
@@ -243,7 +245,7 @@ public class BasicDialog {
   }
 
   protected void markErrorBlur(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement right) {
-    logger.info("markErrorBlur " +header + " message " +message);
+    if (DEBUG) logger.info("markErrorBlur " +header + " message " +message);
 
     dialectGroup.setType(ControlGroupType.ERROR);
     dialect.setFocus(true);
@@ -270,7 +272,7 @@ public class BasicDialog {
         ageEntryGroup.group.setType(validAge ? ControlGroupType.NONE : ControlGroupType.ERROR);
       } catch (NumberFormatException e) {
 
-        // logger.info("marked error on " + ageEntryGroup);
+        // if (DEBUG) logger.info("marked error on " + ageEntryGroup);
         ageEntryGroup.group.setType(ControlGroupType.ERROR);
       }
     }
@@ -312,7 +314,7 @@ public class BasicDialog {
   }
 
   void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement) {
-    // logger.info("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
+    // if (DEBUG) logger.info("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
     dialectGroup.setType(ControlGroupType.ERROR);
     dialect.setFocus(true);
 //    setupPopover(dialect, header, message, placement);
@@ -321,13 +323,13 @@ public class BasicDialog {
     try {
       widget = dialectGroup.getWidget(1);
     } catch (Exception e) {
-      //logger.info("no nested object...");
+      //if (DEBUG) logger.info("no nested object...");
     }
     setupPopoverThatHidesItself(widget, header, message, placement);
   }
 
 /*  void markError(Widget dialect, String message) {
-    // logger.info("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
+    // if (DEBUG) logger.info("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
     // dialect.setFocus(true);
 //    setupPopover(dialect, header, message, placement);
     setupPopoverThatHidesItself(dialect, "Error", message, Placement.RIGHT);
@@ -361,7 +363,7 @@ public class BasicDialog {
 
   public Popover markErrorBlurFocus(Widget widget, HasBlurHandlers dialect, String heading, String message,
                                     Placement placement, boolean showOnlyOnce) {
-    // logger.info("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
+    // if (DEBUG) logger.info("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
     // dialect.setFocus(true);
 //    setupPopover(dialect, header, message, placement);
     return setupPopoverBlurNoControl(widget, dialect, heading, message, placement, new MyPopover(showOnlyOnce));
@@ -369,14 +371,14 @@ public class BasicDialog {
 
 /*
   void markError(Widget dialect, String header, String message, Placement placement) {
-    // logger.info("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
+    // if (DEBUG) logger.info("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
     Widget widget = dialect;
     setupPopoverThatHidesItself(widget, header, message, placement);
   }
 */
 
   private void setupPopoverThatHidesItself(final Widget w, String heading, final String message, Placement placement) {
-    logger.info("\tsetupPopoverThatHidesItself triggering popover on '" + w.getTitle() + "' with " + heading + "/" + message);
+    if (DEBUG) logger.info("\tsetupPopoverThatHidesItself triggering popover on '" + w.getTitle() + "' with " + heading + "/" + message);
     setupPopover(w, heading, message, placement);
   }
 
@@ -410,7 +412,7 @@ public class BasicDialog {
     w.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        logger.info("got blur, dismissing popover...");
+        if (DEBUG) logger.info("got blur, dismissing popover...");
         popover.dontFireAgain();
         dialectGroup.setType(ControlGroupType.NONE);
       }
@@ -425,7 +427,7 @@ public class BasicDialog {
     hasBlurHandlers.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        logger.info("got blur, dismissing popover, with no control.");
+        if (DEBUG) logger.info("got blur, dismissing popover, with no control.");
 
         popover.dontFireAgain();
       }
@@ -445,7 +447,7 @@ public class BasicDialog {
    * @see UserPassLogin#getSignUpForm()
    */
   void setupPopover(final FocusWidget w, String heading, final String message, Placement placement, boolean isHTML) {
-    logger.info(" : setupPopover (bad)   : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message);
+    if (DEBUG) logger.info(" : setupPopover (bad)   : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message);
     final Popover popover = new Popover();
     configurePopup(popover, w, heading, message, placement, isHTML);
 
@@ -461,7 +463,7 @@ public class BasicDialog {
   }
 
   private void configurePopup(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML) {
-    logger.info("configurePopup : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
+    if (DEBUG) logger.info("configurePopup : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
 
     if (w instanceof Focusable) {
       requestFocus((Focusable) w);
@@ -490,7 +492,7 @@ public class BasicDialog {
    * @param isHTML
    */
   public void showPopover(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML) {
-    logger.info("showPopover : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
+    if (DEBUG) logger.info("showPopover : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
 
     simplePopover(popover, w, heading, message, placement, isHTML);
     popover.show();
@@ -501,13 +503,13 @@ public class BasicDialog {
   }*/
 
   private void simplePopover(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML) {
-    logger.info("simplePopover : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
+    if (DEBUG) logger.info("simplePopover : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
     popover.setWidget(w);
     popover.setHtml(isHTML);
     popover.setText(message);
     if (heading != null) {
 
-      logger.info("simplePopover : set heading " + heading);
+      if (DEBUG) logger.info("simplePopover : set heading " + heading);
 
       popover.setHeading(heading);
     }
@@ -599,7 +601,7 @@ public class BasicDialog {
     //  this.showOnlyOnce = showOnlyOnce;
     }
     public void dontFireAgain() {
-    //  logger.info(this + " dontFireAgain ...");
+    //  if (DEBUG) logger.info(this + " dontFireAgain ...");
 
       hide();
       setTrigger(Trigger.MANUAL);
@@ -610,21 +612,21 @@ public class BasicDialog {
     public void show() {
       super.show();
       wasShown = true;
-      logger.info(this + " got show...");
+      if (DEBUG) logger.info(this + " got show...");
     }
 
     @Override
     public void hide() {
       super.hide();
-      logger.info(this + " got hide...");
+      if (DEBUG) logger.info(this + " got hide...");
       if (wasShown && showOnlyOnce && !disabled) {
-        logger.info(this + " \tdisabling...");
+        if (DEBUG) logger.info(this + " \tdisabling...");
         disabled = true;
         wasShown = false;
         dontFireAgain();
       }
       else {
-        logger.info(this + " not disabling...");
+        if (DEBUG) logger.info(this + " not disabling...");
 
       }
     }
