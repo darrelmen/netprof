@@ -1330,16 +1330,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
   public CommonExercise reallyCreateNewItem(long userListID, CombinedMutableUserExercise userExercise) {
+    logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
+
     db.getUserListManager().reallyCreateNewItem(userListID, userExercise, serverProps.getMediaDir());
 
     for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
       logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + userExercise.getID());
       db.getAudioDAO().updateExerciseID(audioAttribute.getUniqueID(), userExercise.getID());
     }
-    logger.debug("reallyCreateNewItem : made user exercise " + userExercise);
+    logger.debug("\treallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
 
-
-    return userExercise;//.getShell();
+    return userExercise;
   }
 
   /**
