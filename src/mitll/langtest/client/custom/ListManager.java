@@ -33,6 +33,8 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.List;
@@ -41,7 +43,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 10/20/15.
  */
-public class ListManager<T extends Shell> implements RequiresResize {
+public class ListManager implements RequiresResize {
   private final Logger logger = Logger.getLogger("ListManager");
 
   private final KeyStorage storage;
@@ -249,7 +251,7 @@ public class ListManager<T extends Shell> implements RequiresResize {
   /**
    * @param onlyMine
    * @param onlyVisited
-   * @see #getNav
+   * @seex #getNav
    * @see #showMyLists
    * @see #deleteList(com.github.gwtbootstrap.client.ui.Button, mitll.langtest.shared.custom.UserList, boolean)
    * @see #clickOnYourLists(long)
@@ -283,22 +285,27 @@ public class ListManager<T extends Shell> implements RequiresResize {
     contentPanel.clear();
     contentPanel.getElement().setId("contentPanel");
 
-    final Panel child = new DivWidget();
-    contentPanel.add(child);
-    child.addStyleName("exerciseBackground");
+    final Panel insideContentPanel = new DivWidget();
+    insideContentPanel.getElement().setId("insideContentPanel");
+    contentPanel.add(insideContentPanel);
+    insideContentPanel.addStyleName("exerciseBackground");
     listScrollPanel = new ScrollPanel();
 
     if (getAll) {
       logger.info("viewLessons----> getAll optional " + optionalExercise);
       service.getUserListsForText("", controller.getUser(),
-          new UserListCallback(this, contentPanel, child, listScrollPanel, LESSONS + "_All", false, true, userManager,
-              onlyMine, optionalExercise));
+          new UserListCallback(this, contentPanel, insideContentPanel, listScrollPanel,
+              LESSONS + "_All",
+              false, true,
+              userManager, onlyMine, optionalExercise));
     } else {
  //     logger.info("viewLessons for user #" + userManager.getUser());
       service.getListsForUser(userManager.getUser(), onlyMine,
           onlyVisited,
-          new UserListCallback(this, contentPanel, child, listScrollPanel,
-              LESSONS + (onlyMine ? "_Mine" : "_Others"), onlyMine, false, userManager, onlyMine, optionalExercise));
+          new UserListCallback(this, contentPanel, insideContentPanel, listScrollPanel,
+              LESSONS + (onlyMine ? "_Mine" : "_Others"),
+              onlyMine, false,
+              userManager, onlyMine, optionalExercise));
     }
   }
 
@@ -313,13 +320,13 @@ public class ListManager<T extends Shell> implements RequiresResize {
     final ListManager outer = this;
     final Panel child = getContentChild(contentPanel);
 //    logger.info("------> viewReview : reviewLessons for " + userManager.getUser());
-    service.getReviewLists(new AsyncCallback<List<UserList>>() {
+    service.getReviewLists(new AsyncCallback<List<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
       }
 
       @Override
-      public void onSuccess(List<UserList> reviewLists) {
+      public void onSuccess(List<UserList<CommonShell>> reviewLists) {
         logger.info("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + reviewLists);
 
         new UserListCallback(outer, contentPanel, child,
@@ -382,7 +389,7 @@ public class ListManager<T extends Shell> implements RequiresResize {
    * @see UserListCallback#getDisplayRowPerList(mitll.langtest.shared.custom.UserList, boolean, boolean)
    * @see UserListCallback#selectPreviousList
    */
-  void showList(final UserList ul, Panel contentPanel, final String instanceName, CommonExercise toSelect) {
+  void showList(final UserList ul, Panel contentPanel, final String instanceName, HasID toSelect) {
     logger.info("showList " + ul + " instance '" + instanceName + "'");
     controller.logEvent(contentPanel, "Tab", "UserList_" + ul.getID(), "Show List");
 
@@ -409,9 +416,9 @@ public class ListManager<T extends Shell> implements RequiresResize {
    * @param instanceName
    * @param toSelect
    * @return
-   * @see #showList(UserList, Panel, String, CommonExercise)
+   * @see #showList(UserList, Panel, String, HasID)
    */
-  private Panel makeTabContent(UserList ul, String instanceName, CommonExercise toSelect) {
+  private Panel makeTabContent(UserList ul, String instanceName, HasID toSelect) {
     FluidContainer container = new FluidContainer();
     container.getElement().setId("showListContainer");
 
@@ -467,7 +474,7 @@ public class ListManager<T extends Shell> implements RequiresResize {
    * Avoid marking lists that you have created as also visited by you.
    *
    * @param ul
-   * @see #showList(UserList, Panel, String, CommonExercise)
+   * @see #showList
    */
   private void addVisitor(UserList ul) {
     long user = (long) controller.getUser();
@@ -489,10 +496,11 @@ public class ListManager<T extends Shell> implements RequiresResize {
    * @param instanceName
    * @param toSelect
    * @return
-   * @see #showList(UserList, Panel, String, CommonExercise)
+   * @see #showList
    */
-  private TabPanel getListOperations(final UserList ul, final String instanceName, final CommonExercise toSelect) {
-    logger.info("getListOperations : '" + instanceName + " for list " + ul);
+  private TabPanel getListOperations(final UserList<CommonShell> ul, final String instanceName, final HasID toSelect) {
+   // logger.info("getListOperations : '" + instanceName + " for list " + ul);
+
     boolean created = createdByYou(ul) || instanceName.equals(REVIEW) || instanceName.equals(COMMENT);
 
     final TabPanel tabPanel = new TabPanel();
@@ -550,10 +558,9 @@ public class ListManager<T extends Shell> implements RequiresResize {
           controller.logEvent(editTab.getTab(), "Tab", "UserList_" + ul.getID(), EDIT_ITEM);
           if ((isReview || isComment)) {
             //    logger.info("getListOperations : showNPF ");
-
             reviewItem.showNPF(ul, editTab, getInstanceName(isReview), false, toSelect);
           } else {
-            logger.info("getListOperations : showEditItem ");
+            //logger.info("getListOperations : showEditItem ");
             showEditItem(ul, editTab, editItem, !ul.isFavorite());
           }
         }
@@ -573,13 +580,13 @@ public class ListManager<T extends Shell> implements RequiresResize {
    * @param learnTab
    * @param ul
    * @param instanceName1
-   * @see #getListOperations(UserList, String, CommonExercise)
+   * @see #getListOperations
    */
-  private void showLearnTab(TabAndContent learnTab, UserList ul, String instanceName1, CommonExercise toSelect) {
+  private void showLearnTab(TabAndContent learnTab, UserList<CommonShell> ul, String instanceName1, HasID toSelect) {
     showLearnTab(ul, learnTab, instanceName1, toSelect);
   }
 
-  private void showLearnTab(UserList ul, TabAndContent learn, String instanceName1, CommonExercise toSelect) {
+  private void showLearnTab(UserList<CommonShell> ul, TabAndContent learn, String instanceName1, HasID toSelect) {
     npfHelper.showNPF(ul, learn, instanceName1, true, toSelect);
   }
 
@@ -597,6 +604,8 @@ public class ListManager<T extends Shell> implements RequiresResize {
       @Override
       public void onSuccess(Boolean result) {
         if (result) {
+          logger.info("deleteList ---> did do deleteList " + ul.getUniqueID());
+
           refreshViewLessons(onlyMyLists, false);
         } else {
           logger.warning("deleteList ---> did not do deleteList " + ul.getUniqueID());
@@ -657,7 +666,7 @@ public class ListManager<T extends Shell> implements RequiresResize {
   private void selectTabGivenHistory(TabPanel tabPanel, TabAndContent learn, TabAndContent practice,
                                      TabAndContent edit,
                                      UserList ul, String instanceName1, boolean isReview, boolean isComment,
-                                     boolean isNormalList, CommonExercise toSelect) {
+                                     boolean isNormalList, HasID toSelect) {
     boolean chosePrev = selectPreviouslyClickedSubTab(tabPanel, learn, practice, edit,
         ul, instanceName1, isReview, isComment, isNormalList);
 
