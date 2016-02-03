@@ -87,7 +87,7 @@ public class ReviewEditableExercise//<T extends CommonShell & AudioRefExercise &
                                 HasText itemMarker,
                                 CommonExercise changedUserExercise,
 
-                                UserList<CommonExercise> originalList,
+                                UserList<CommonShell> originalList,
                                 PagingExerciseList<CommonShell, CommonExercise> exerciseList,
                                 Reloadable predefinedContent,
                                 NPFHelper npfHelper) {
@@ -380,7 +380,7 @@ public class ReviewEditableExercise//<T extends CommonShell & AudioRefExercise &
    * @see #addNew
    */
   @Override
-  protected Panel getCreateButton(final UserList<CommonExercise> ul,
+  protected Panel getCreateButton(final UserList<CommonShell> ul,
                                   final ListInterface<CommonShell> pagingContainer,
                                   final Panel toAddTo,
                                   final ControlGroup normalSpeedRecording) {
