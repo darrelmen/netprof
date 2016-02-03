@@ -18,6 +18,9 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Shell;
 
 /**
 * Created with IntelliJ IDEA.
@@ -62,7 +65,7 @@ public class AVPHelper extends NPFHelper {
    * @return
    */
   @Override
-  protected PagingExerciseList makeExerciseList(final Panel right, final String instanceName) {
+  PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(final Panel right, final String instanceName) {
     HistoryExerciseList widgets = new NPExerciseList(right, service, feedback, controller,
         true, instanceName, true) {
       @Override
@@ -78,13 +81,13 @@ public class AVPHelper extends NPFHelper {
       protected void addMinWidthStyle(Panel leftColumn) {
       }
     };
-    final ExercisePanelFactory factory = getFactory(null, instanceName, true);
+    final ExercisePanelFactory<CommonShell,CommonExercise> factory = getFactory(null, instanceName, true);
     widgets.setFactory(factory);
     return widgets;
   }
 
   @Override
-  protected ExercisePanelFactory getFactory(PagingExerciseList exerciseList, final String instanceName, boolean showQC) {
+  protected ExercisePanelFactory<CommonShell,CommonExercise> getFactory(PagingExerciseList exerciseList, final String instanceName, boolean showQC) {
     StatsFlashcardFactory avpHelper = new StatsFlashcardFactory(service, feedback, controller, exerciseList, "AVPHelper", ul);
     avpHelper.setContentPanel(contentPanel);
     return avpHelper;
