@@ -16,7 +16,6 @@ import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.user.UserFeedback;
@@ -64,7 +63,7 @@ public class ReviewItemHelper extends NPFHelper{
    * @see #doNPF
    */
   @Override
-  protected Panel doInternalLayout(final UserList<CommonExercise> ul, String instanceName) {
+  protected Panel doInternalLayout(final UserList<CommonShell> ul, String instanceName) {
 //    logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
     this.flexListLayout = new ReviewFlexListLayout(ul);
     Panel widgets = flexListLayout.doInternalLayout(ul, instanceName);
@@ -85,9 +84,9 @@ public class ReviewItemHelper extends NPFHelper{
 
   // private class ReviewFlexListLayout<CommonExercise extends CommonShell & AnnotationExercise & AudioRefExercise> extends FlexListLayout<CommonExercise> {
   private class ReviewFlexListLayout extends FlexListLayout<CommonShell,CommonExercise> {
-    private final UserList<CommonExercise> ul;
+    private final UserList<CommonShell> ul;
 
-    public ReviewFlexListLayout(UserList<CommonExercise> ul) {
+    public ReviewFlexListLayout(UserList<CommonShell> ul) {
       super(ReviewItemHelper.this.service, ReviewItemHelper.this.feedback, ReviewItemHelper.this.userManager, ReviewItemHelper.this.controller);
       this.ul = ul;
     }
@@ -97,7 +96,7 @@ public class ReviewItemHelper extends NPFHelper{
       return new ExercisePanelFactory<CommonShell,CommonExercise>(service, feedback, controller, pagingExerciseList) {
         @Override
         public Panel getExercisePanel(CommonExercise exercise) {
-          CommonExercise userExercise = new UserExercise(exercise);
+          CommonExercise userExercise = new UserExercise(exercise, exercise.getCreator());
 
           ReviewEditableExercise reviewEditableExercise =
               new ReviewEditableExercise(service, controller, itemMarker,
