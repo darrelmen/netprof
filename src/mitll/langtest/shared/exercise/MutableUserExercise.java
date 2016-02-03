@@ -16,12 +16,6 @@ public interface MutableUserExercise {
   void setID(String id);
 
   /**
-   * @see mitll.langtest.client.custom.dialog.EditItem#getCreator(UserList, String)
-   * @return
-   */
-  long getCreator();
-
-  /**
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#reallyChange(ListInterface, boolean)
    * @param id
    */
@@ -38,8 +32,6 @@ public interface MutableUserExercise {
    * @return
    */
   long getUniqueID();
-
-  //boolean isPredefined();
 
   /**
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getCreateButton(UserList, ListInterface, Panel, ControlGroup)
