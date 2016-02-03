@@ -27,6 +27,8 @@ import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -107,9 +109,10 @@ public class ListManager<T extends Shell> implements RequiresResize {
     });
 
     npfHelper = new NPFHelper(service, feedback, userManager, controller, false);
-    reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, npfHelper.getExerciseList(), npfHelper);
+    Reloadable exerciseList = npfHelper.getExerciseList();
+    reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, exerciseList, npfHelper);
     avpHelper = new AVPHelper(service, feedback, userManager, controller);
-    editItem = new EditItem(service, userManager, controller, npfHelper.getExerciseList(), feedback, npfHelper);
+    editItem = new EditItem(service, userManager, controller, exerciseList, feedback, npfHelper);
   }
 
   public void addStudyLists(final TabAndContent studyLists) {
