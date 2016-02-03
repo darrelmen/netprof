@@ -43,12 +43,13 @@ public class NewUserExercise extends BasicDialog {
 
   private static final String FOREIGN_LANGUAGE = "Foreign Language";
   private static final String CREATE = "Create";
-  static final String ENGLISH_LABEL = "English (optional)";
+  static final String ENGLISH_LABEL = "English";// (optional)";
   static final String ENGLISH_LABEL_2 = "Meaning (optional)";
   static final String TRANSLITERATION_OPTIONAL = "Transliteration (optional)";
   static final String NORMAL_SPEED_REFERENCE_RECORDING = "Normal speed reference recording";
   static final String SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL = "Slow speed reference recording (optional)";
   private static final String ENTER_THE_FOREIGN_LANGUAGE_PHRASE = "Enter the foreign language phrase.";
+  private static final String ENTER_THE_ENGLISH_PHRASE = "Enter the english equivalent.";
   private static final String RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE = "Record reference audio for the foreign language phrase.";
   private static final String REMOVE_FROM_LIST = "Remove from list";
 
@@ -99,6 +100,8 @@ public class NewUserExercise extends BasicDialog {
     this.newUserExercise = newExercise;//newExercise.toUserExercise();
     this.instance = instance;
     this.originalList = originalList;
+
+    logger.info("user list is " + originalList);
   }
 
   /**
@@ -130,7 +133,7 @@ public class NewUserExercise extends BasicDialog {
     makeForeignLangRow(upper);
     final String id1 = ul.getID();
 
-    foreignLang.box.getElement().setId( "NewUserExercise_ForeignLang_entry_for_list_" + id1);
+    foreignLang.box.getElement().setId("NewUserExercise_ForeignLang_entry_for_list_" + id1);
 
     // focusOn(formField); // Bad idea since steals the focus after search
     makeTranslitRow(upper);
@@ -148,8 +151,8 @@ public class NewUserExercise extends BasicDialog {
 
     container.add(getCreateButton(ul, listInterface, toAddTo, normalSpeedRecording));
 
-    logger.info("addNew (" +this.getClass()+
-        ") : adding blur handler to " +foreignLang.getWidget().getElement().getId());
+//    logger.info("addNew (" +this.getClass()+
+//        ") : adding blur handler to " +foreignLang.getWidget().getElement().getId());
 
     foreignLang.box.addBlurHandler(new BlurHandler() {
       @Override
@@ -184,7 +187,7 @@ public class NewUserExercise extends BasicDialog {
     FluidRow row = new FluidRow();
 
     normalSpeedRecording = makeRegularAudioPanel(row);
-    logger.info("makeAudioRow ---> " + normalSpeedRecording);
+    // logger.info("makeAudioRow ---> " + normalSpeedRecording);
     normalSpeedRecording.addStyleName("buttonGroupInset3");
 
     slowSpeedRecording = makeSlowAudioPanel(row);
@@ -199,7 +202,6 @@ public class NewUserExercise extends BasicDialog {
   }
 
   private void gotBlur() {
-    logger.info("----> Got blur ");
     gotBlur(english, foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo);
   }
 
@@ -322,7 +324,7 @@ public class NewUserExercise extends BasicDialog {
 */
 
   public <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
-    logger.info("setFields : setting fields with " + newUserExercise);
+    //  logger.info("setFields : setting fields with " + newUserExercise);
 
     // english
     String english = newUserExercise.getEnglish();
@@ -421,13 +423,18 @@ public class NewUserExercise extends BasicDialog {
    * @see #audioPosted()
    * @see #makeCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.exercise.RecordAudioPanel, com.github.gwtbootstrap.client.ui.ControlGroup)
    */
-  void validateThenPost(FormField foreignLang, RecordAudioPanel rap,
+  void validateThenPost(FormField foreignLang,
+                        RecordAudioPanel rap,
                         ControlGroup normalSpeedRecording,
                         UserList<CommonExercise> ul,
                         ListInterface<CommonShell> pagingContainer,
-                        Panel toAddTo, boolean onClick, boolean foreignChanged) {
+                        Panel toAddTo,
+                        boolean onClick,
+                        boolean foreignChanged) {
     if (foreignLang.getText().isEmpty()) {
       markError(foreignLang, ENTER_THE_FOREIGN_LANGUAGE_PHRASE);
+    } else if (english.getText().isEmpty()) {
+      markError(english, ENTER_THE_ENGLISH_PHRASE);
     } else if (validateForm(foreignLang, rap, normalSpeedRecording, foreignChanged)) {
       isValidForeignPhrase(ul, pagingContainer, toAddTo, onClick);
     } else {
@@ -461,7 +468,7 @@ public class NewUserExercise extends BasicDialog {
       @Override
       public void onSuccess(Boolean result) {
         logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getText() +
-            " before adding/changing " + newUserExercise + " -> " +result);
+            " before adding/changing " + newUserExercise + " -> " + result);
 
         if (result) {
           checkIfNeedsRefAudio();
@@ -505,12 +512,13 @@ public class NewUserExercise extends BasicDialog {
    * @param onClick
    * @see #isValidForeignPhrase
    */
-  /*<U extends CommonShell & AudioRefExercise & MutableUserExercise> */
   void afterValidForeignPhrase(final UserList<CommonExercise> ul,
                                final ListInterface<CommonShell> exerciseList,
                                final Panel toAddTo,
                                boolean onClick) {
     CombinedMutableUserExercise exerciseToSend = newUserExercise.getCombinedMutableUserExercise();
+
+    logger.info("user list is " + ul);
 
     service.reallyCreateNewItem(ul.getUniqueID(), exerciseToSend, new AsyncCallback<CommonExercise>() {
       @Override
