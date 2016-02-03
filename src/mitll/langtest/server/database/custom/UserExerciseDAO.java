@@ -11,7 +11,6 @@ import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.MutableUserExercise;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -217,9 +216,9 @@ public class UserExerciseDAO extends DAO {
    * @return
    * @see mitll.langtest.server.database.custom.UserListDAO#populateList
    */
-  public List<CommonExercise> getOnList(long listID) {
+  public List<CommonShell> getOnList(long listID) {
     String sql = getJoin(listID);
-    List<CommonExercise> userExercises2 = new ArrayList<>();
+    List<CommonShell> userExercises2 = new ArrayList<>();
 
     try {
       if (DEBUG) logger.debug("\tusing for user exercise = " + sql);
@@ -240,7 +239,7 @@ public class UserExerciseDAO extends DAO {
           CommonExercise byID = getExercise(ue);
 
           if (byID != null) {
-            userExercises2.add(new UserExercise(byID)); // all predefined references
+            userExercises2.add(new UserExercise(byID, byID.getCreator())); // all predefined references
           } else {
             logger.error("getOnList: huh can't find '" + ue.getID() + "'");
           }
@@ -255,7 +254,7 @@ public class UserExerciseDAO extends DAO {
       for (String exid : getExercises(join2)) {
         CommonExercise exercise = getPredefExercise(exid);
         if (exercise != null) {
-          UserExercise e = new UserExercise(exercise);
+          UserExercise e = new UserExercise(exercise, exercise.getCreator());
           userExercises2.add(e);
           if (isEnglish) {
             e.setEnglish(exercise.getMeaning());
