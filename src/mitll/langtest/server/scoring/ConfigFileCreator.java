@@ -48,7 +48,7 @@ public class ConfigFileCreator {
   private static final String DECODE_CFG_TEMPLATE_PROP = "decodeConfigTemplate";
   private static final String DECODE_CFG_TEMPLATE_DEFAULT = "arabic-nn-model-decode.cfg.template";
 
-  private static final String DEFAULT_MODELS_DIR = "models.dli-levantine";
+ // private static final String DEFAULT_MODELS_DIR = "models.dli-levantine";
 
   public ConfigFileCreator(Map<String, String> properties, LTS letterToSoundClass, String scoringDir) {
     this.properties = properties;
@@ -115,10 +115,11 @@ public class ConfigFileCreator {
 
   /**
    * @see mitll.langtest.server.scoring.ASRScoring#makeDict()
-   * @return
+   * @return null if no model dir defined
    */
   public String getDictFile() {
-    return getDictFile(getModelsDir());
+    String modelsDir = getModelsDir();
+    return modelsDir == null ? null :getDictFile(modelsDir);
   }
 
   private String getDictFile(String modelsDir) {
@@ -131,8 +132,17 @@ public class ConfigFileCreator {
     return dictFile;
   }
 
+  /**
+   *
+   * @return null if no model dir defined
+   */
   public String getModelsDir() {
-    String modelsDir = scoringDir + File.separator + getProp(MODELS_DIR_VARIABLE, DEFAULT_MODELS_DIR);
+    String modelsDirProp = getProp(MODELS_DIR_VARIABLE);
+    return modelsDirProp == null ? null:getModelsDir(modelsDirProp);
+  }
+
+  private String getModelsDir(String modelsDirProp) {
+    String modelsDir = scoringDir + File.separator + modelsDirProp;
     if (platform.startsWith("win")) {
       modelsDir = doWindowsSlashReplace(modelsDir);
     }
@@ -145,5 +155,8 @@ public class ConfigFileCreator {
 
   private String getProp(String var, String defaultValue) {
     return properties.containsKey(var) ? properties.get(var) : defaultValue;
+  }
+  private String getProp(String var) {
+    return properties.get(var);
   }
 }

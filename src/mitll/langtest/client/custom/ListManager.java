@@ -662,7 +662,7 @@ public class ListManager<T extends Shell> implements RequiresResize {
         ul, instanceName1, isReview, isComment, isNormalList);
 
     if (!chosePrev) {
-      logger.info("selectTabGivenHistory ul " + ul.getName() + " private " + ul.isPrivate() + " empty " + ul.isEmpty() + " ");
+      //logger.info("selectTabGivenHistory ul " + ul.getName() + " private " + ul.isPrivate() + " empty " + ul.isEmpty() + " ");
 
       if (createdByYou(ul) &&
           //!ul.isPrivate() &&
@@ -677,7 +677,7 @@ public class ListManager<T extends Shell> implements RequiresResize {
         showLearnTab(learn, ul, instanceName1, toSelect);
       }
     } else {
-      logger.info("selectTabGivenHistory choose prev ");
+//      logger.info("selectTabGivenHistory choose prev ");
     }
   }
 
