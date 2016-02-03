@@ -599,7 +599,7 @@ public class ListManager<T extends Shell> implements RequiresResize {
         if (result) {
           refreshViewLessons(onlyMyLists, false);
         } else {
-          logger.warning("---> did not do deleteList " + ul.getUniqueID());
+          logger.warning("deleteList ---> did not do deleteList " + ul.getUniqueID());
         }
       }
     });
