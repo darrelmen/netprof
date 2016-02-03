@@ -9,6 +9,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -176,15 +177,15 @@ public class UserListDAO extends DAO {
    * @param userid
    * @return
    */
-  public List<UserList> getAllByUser(long userid) {
+  public List<UserList<CommonShell>> getAllByUser(long userid) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
         CREATORID + "=" + userid+
         " order by modified desc";
 
-      List<UserList> lists = getWhere(sql);
+      List<UserList<CommonShell>> lists = getWhere(sql);
 
-      for (UserList ul : lists) {
+      for (UserList<CommonShell> ul : lists) {
         populateList(ul);
       }
 //      logger.debug("getAllByUser by " + userid + " is " + lists.size());
@@ -202,16 +203,16 @@ public class UserListDAO extends DAO {
    * @param userid
    * @return
    */
-  public List<UserList> getAllPublic(long userid) {
+  public List<UserList<CommonShell>> getAllPublic(long userid) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
         ISPRIVATE +
         "=false" +
         " order by modified DESC ";
 
-      List<UserList> userLists = getUserLists(sql, userid);
-      List<UserList> toReturn = new ArrayList<UserList>();
-      for (UserList ul : userLists) {
+      List<UserList<CommonShell>> userLists = getUserLists(sql, userid);
+      List<UserList<CommonShell>> toReturn = new ArrayList<>();
+      for (UserList<CommonShell> ul : userLists) {
         if (!ul.isEmpty()) {
           //logger.debug("getAllPublic : found userLists for " + userid + " : " +ul);
 
@@ -239,7 +240,7 @@ public class UserListDAO extends DAO {
     return false;
   }
 
-  public List<UserList> getByName(long userid, String name) {
+  public List<UserList<CommonShell>> getByName(long userid, String name) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
         NAME +
@@ -266,24 +267,24 @@ public class UserListDAO extends DAO {
    * @param unique
    * @return
    */
-  public UserList getWithExercises(long unique) {
-    UserList where = getWhere(unique, true);
+  public UserList<CommonShell> getWithExercises(long unique) {
+    UserList<CommonShell> where = getWhere(unique, true);
     populateList(where);
     return where;
   }
 
   /**
    * @see #getWithExercises(long)
-   * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise, String)
+   * @see UserListManager#reallyCreateNewItem
    * @param unique
    * @param warnIfMissing
    * @return
    */
-  public UserList getWhere(long unique, boolean warnIfMissing) {
+  public UserList<CommonShell> getWhere(long unique, boolean warnIfMissing) {
     if (unique < 0) return null;
     String sql = "SELECT * from " + USER_EXERCISE_LIST + " where uniqueid=" + unique + " order by modified";
     try {
-      List<UserList> lists = getUserLists(sql,-1);
+      List<UserList<CommonShell>> lists = getUserLists(sql,-1);
       if (lists.isEmpty()) {
         if (warnIfMissing) logger.error("getVisitorsOfList : huh? no user list with id " + unique + " and sql " + sql);
         return null;
@@ -301,13 +302,13 @@ public class UserListDAO extends DAO {
    * @param userid
    * @return
    */
-  public Collection<UserList> getListsForUser(long userid) {
+  public Collection<UserList<CommonShell>> getListsForUser(long userid) {
     final List<Long> listsForVisitor = userListVisitorJoinDAO.getListsForVisitor(userid);
-    List<UserList> objects = Collections.emptyList();
-    List<UserList> userLists = listsForVisitor.isEmpty() ? objects : getIn(listsForVisitor);
-    Collections.sort(userLists, new Comparator<UserList>() {
+    List<UserList<CommonShell>> objects = Collections.emptyList();
+    List<UserList<CommonShell>> userLists = listsForVisitor.isEmpty() ? objects : getIn(listsForVisitor);
+    Collections.sort(userLists, new Comparator<UserList<?>>() {
       @Override
-      public int compare(UserList o1, UserList o2) {
+      public int compare(UserList<?> o1, UserList<?> o2) {
         int i1 = listsForVisitor.indexOf(o1.getUniqueID());
         int i2 = listsForVisitor.indexOf(o2.getUniqueID());
         return i1 < i2 ? -1 : i2 > i1 ? +1 : 0;
@@ -316,13 +317,13 @@ public class UserListDAO extends DAO {
     return userLists;
   }
 
-  private List<UserList> getIn(Collection<Long> ids) {
+  private List<UserList<CommonShell>> getIn(Collection<Long> ids) {
     String s = ids.toString();
     s = s.replaceAll("\\[","").replaceAll("\\]","");
     String sql = "SELECT * from " + USER_EXERCISE_LIST + " where uniqueid in (" + s + ") order by modified";
     //logger.debug("sql for get in " + sql);
     try {
-      List<UserList> lists = getUserLists(sql,-1);
+      List<UserList<CommonShell>> lists = getUserLists(sql,-1);
       if (lists.isEmpty()) {
       //  if (warnIfMissing) logger.error("getVisitorsOfList : huh? no user list with id " + unique + " and sql " + sql);
         return Collections.emptyList();
@@ -332,7 +333,7 @@ public class UserListDAO extends DAO {
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
-    return null;
+    return Collections.emptyList();
   }
 
 
@@ -345,10 +346,10 @@ public class UserListDAO extends DAO {
    * @return
    * @throws SQLException
    */
-  private List<UserList> getUserLists(String sql, long userid) throws SQLException {
-    List<UserList> lists = getWhere(sql);
+  private List<UserList<CommonShell>> getUserLists(String sql, long userid) throws SQLException {
+    List<UserList<CommonShell>> lists = getWhere(sql);
 
-    for (UserList ul : lists) {
+    for (UserList<CommonShell> ul : lists) {
       if (userid == -1 || ul.getCreator().getId() == userid || !ul.isFavorite()) {   // skip other's favorites
         populateList(ul);
       }
@@ -356,15 +357,15 @@ public class UserListDAO extends DAO {
     return lists;
   }
 
-  private List<UserList> getWhere(String sql) throws SQLException {
+  private List<UserList<CommonShell>> getWhere(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
-    List<UserList> lists = new ArrayList<UserList>();
+    List<UserList<CommonShell>> lists = new ArrayList<>();
 
     while (rs.next()) {
       long uniqueid = rs.getLong("uniqueid");
-      lists.add(new UserList(uniqueid, //id
+      lists.add(new UserList<CommonShell>(uniqueid, //id
         userDAO.getUserWhere(rs.getLong(CREATORID)), // age
         rs.getString(NAME), // exp
         rs.getString("description"), // exp
@@ -385,8 +386,8 @@ public class UserListDAO extends DAO {
    * @see #getAllByUser(long)
    * @param where
    */
-  private void populateList(UserList<CommonExercise> where) {
-    List<CommonExercise> onList = userExerciseDAO.getOnList(where.getUniqueID());
+  private void populateList(UserList<CommonShell> where) {
+    List<CommonShell> onList = userExerciseDAO.getOnList(where.getUniqueID());
     where.setExercises(onList);
   }
 
