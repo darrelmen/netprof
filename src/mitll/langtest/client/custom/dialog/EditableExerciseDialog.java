@@ -19,8 +19,8 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 
@@ -29,9 +29,9 @@ import java.util.logging.Logger;
 /**
  * Creates a dialog that lets you edit an item
  * <p>
- * Created by GO22670 on 3/28/2014.
+ * Created by GO22670 on 3/28/2014. <T extends CommonShell & AudioRefExercise & CombinedMutableUserExercise, UL extends UserList<?>>
  */
-class EditableExerciseDialog/*<T extends CommonShell & AudioRefExercise & CombinedMutableUserExercise, UL extends UserList<?>>*/ extends NewUserExercise {
+class EditableExerciseDialog extends NewUserExercise {
   private Logger logger = Logger.getLogger("EditableExerciseDialog");
 
   public static final int LABEL_WIDTH = 105;
@@ -44,8 +44,8 @@ class EditableExerciseDialog/*<T extends CommonShell & AudioRefExercise & Combin
   private String originalEnglish = "";
   //final UL originalList;
 
-  protected final PagingExerciseList<CommonExercise> exerciseList;
-  protected final ListInterface<Shell> predefinedContentList;
+  protected final PagingExerciseList<CommonShell,CommonExercise> exerciseList;
+  protected final Reloadable predefinedContentList;
   protected final NPFHelper npfHelper;
 
   /**
@@ -62,8 +62,8 @@ class EditableExerciseDialog/*<T extends CommonShell & AudioRefExercise & Combin
                                 CommonExercise changedUserExercise,
                                 UserList<CommonExercise> originalList,
 
-                                PagingExerciseList<CommonExercise> exerciseList,
-                                ListInterface predefinedContent,
+                                PagingExerciseList<CommonShell,CommonExercise> exerciseList,
+                                Reloadable predefinedContent,
                                 NPFHelper npfHelper) {
     super(service, controller, itemMarker, editItem, changedUserExercise, npfHelper.getInstanceName(), originalList);
     fastAnno.addStyleName("editComment");
@@ -82,7 +82,7 @@ class EditableExerciseDialog/*<T extends CommonShell & AudioRefExercise & Combin
                          RecordAudioPanel rap,
                          ControlGroup normalSpeedRecording,
                          UserList<CommonExercise> ul,
-                         ListInterface<CommonExercise> pagingContainer,
+                         ListInterface<CommonShell> pagingContainer,
                          Panel toAddTo) {
     boolean changed = foreignChanged();
     validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, false, changed);
@@ -124,7 +124,9 @@ class EditableExerciseDialog/*<T extends CommonShell & AudioRefExercise & Combin
    * @see NewUserExercise#addNew
    */
   @Override
-  protected Panel getCreateButton(final UserList ul, ListInterface pagingContainer, Panel toAddTo,
+  protected Panel getCreateButton(UserList<CommonExercise> ul,
+                                  ListInterface<CommonShell> pagingContainer,
+                                  Panel toAddTo,
                                   ControlGroup normalSpeedRecording) {
     Panel row = new DivWidget();
     row.addStyleName("marginBottomTen");
@@ -147,8 +149,8 @@ class EditableExerciseDialog/*<T extends CommonShell & AudioRefExercise & Combin
    * @return
    * @see #getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
    */
-  PrevNextList<CommonExercise> getPrevNext(ListInterface<CommonExercise> pagingContainer) {
-    CommonExercise shell = pagingContainer.byID(newUserExercise.getID());
+  PrevNextList<CommonShell> getPrevNext(ListInterface<CommonShell> pagingContainer) {
+    CommonShell shell = pagingContainer.byID(newUserExercise.getID());
     return new PrevNextList<>(shell, exerciseList, shouldDisableNext(), controller);
   }
 
@@ -259,7 +261,7 @@ class EditableExerciseDialog/*<T extends CommonShell & AudioRefExercise & Combin
     postChangeIfDirty(exerciseList, false);
   }
 
-  private void postChangeIfDirty(ListInterface exerciseList, boolean onClick) {
+  private void postChangeIfDirty(ListInterface<CommonShell> exerciseList, boolean onClick) {
     if (foreignChanged() || translitChanged() || englishChanged() || refAudioChanged() || slowRefAudioChanged() || onClick) {
       logger.info("postChangeIfDirty:  change " + foreignChanged() + translitChanged() + englishChanged() + refAudioChanged() + slowRefAudioChanged());
       reallyChange(exerciseList, onClick);
@@ -331,7 +333,7 @@ class EditableExerciseDialog/*<T extends CommonShell & AudioRefExercise & Combin
    * @see #postChangeIfDirty(mitll.langtest.client.list.ListInterface, boolean)
    * @see #audioPosted()
    */
-  void reallyChange(final ListInterface pagingContainer, final boolean buttonClicked) {
+  void reallyChange(final ListInterface<CommonShell> pagingContainer, final boolean buttonClicked) {
     newUserExercise.getCombinedMutableUserExercise().setCreator(controller.getUser());
     postEditItem(pagingContainer, buttonClicked);
   }
@@ -341,7 +343,7 @@ class EditableExerciseDialog/*<T extends CommonShell & AudioRefExercise & Combin
    * @param buttonClicked
    * @see #reallyChange(mitll.langtest.client.list.ListInterface, boolean)
    */
-  private void postEditItem(final ListInterface pagingContainer, final boolean buttonClicked) {
+  private void postEditItem(final ListInterface<CommonShell> pagingContainer, final boolean buttonClicked) {
     logger.info("postEditItem : edit item " + buttonClicked);
 
     grabInfoFromFormAndStuffInfoExercise();
@@ -372,14 +374,14 @@ class EditableExerciseDialog/*<T extends CommonShell & AudioRefExercise & Combin
    * @param buttonClicked
    * @see #reallyChange(mitll.langtest.client.list.ListInterface, boolean)
    */
-  void doAfterEditComplete(ListInterface pagingContainer, boolean buttonClicked) {
+  void doAfterEditComplete(ListInterface<CommonShell> pagingContainer, boolean buttonClicked) {
     if (predefinedContentList != null) {
-      logger.info("doAfterEditComplete : change tooltip " + buttonClicked + " id " + predefinedContentList.getCurrentExerciseID());
+      logger.info("doAfterEditComplete : change tooltip " + buttonClicked);// + " id " + predefinedContentList.getCurrentExerciseID());
     }
 
     changeTooltip(pagingContainer);
     if (predefinedContentList != null) {
-      predefinedContentList.reloadWith(predefinedContentList.getCurrentExerciseID());
+      predefinedContentList.reloadWithCurrent();
     }
   }
 
@@ -387,19 +389,20 @@ class EditableExerciseDialog/*<T extends CommonShell & AudioRefExercise & Combin
    * @param pagingContainer
    * @see #doAfterEditComplete(ListInterface, boolean)
    */
-  private void changeTooltip(ListInterface pagingContainer) {
-    Shell byID = pagingContainer.byID(newUserExercise.getID());
+  private void changeTooltip(ListInterface<CommonShell> pagingContainer) {
+    CommonShell byID = pagingContainer.byID(newUserExercise.getID());
     if (byID == null) {
       logger.warning("changeTooltip : huh? can't find exercise with id " + newUserExercise.getID());
     } else {
 //      byID.setTooltip(newUserExercise.getCombinedTooltip());
-      if (byID instanceof UserExercise) {
-        UserExercise byID1 = (UserExercise) byID;
-        byID1.setEnglish(newUserExercise.getEnglish());
-        byID1.setForeignLanguage(newUserExercise.getForeignLanguage());
+      if (byID instanceof CommonExercise) {
+        CommonExercise byID1 = (CommonExercise) byID;
+        MutableExercise mutable = byID1.getMutable();
+        mutable.setEnglish(newUserExercise.getEnglish());
+        mutable.setForeignLanguage(newUserExercise.getForeignLanguage());
 
 //        logger.info("\tchangeTooltip : for " + newUserExercise.getID() + " now " + byID.getTooltip());
-
+//
       }
       //    logger.info("changeTooltip : for " + newUserExercise.getID() + " now " + byID.getTooltip());
 

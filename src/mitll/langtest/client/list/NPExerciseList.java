@@ -14,7 +14,7 @@ import mitll.langtest.shared.exercise.Shell;
 /**
  * Created by go22670 on 1/5/16.
  */
-public class NPExerciseList<T extends CommonShell> extends HistoryExerciseList<T> {
+public class NPExerciseList extends HistoryExerciseList<CommonShell,CommonExercise> {
   protected NPExerciseList(Panel currentExerciseVPanel,
                            LangTestDatabaseAsync service,
                            UserFeedback feedback,
@@ -29,14 +29,14 @@ public class NPExerciseList<T extends CommonShell> extends HistoryExerciseList<T
    * @return
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
    */
-  protected ClickablePagingContainer<T> makePagingContainer() {
-    final PagingExerciseList<T> outer = this;
+  protected ClickablePagingContainer<CommonShell> makePagingContainer() {
+    final PagingExerciseList<CommonShell,CommonExercise> outer = this;
     pagingContainer =
-        new PagingContainer<T>(controller,
+        new PagingContainer<CommonShell>(controller,
             getVerticalUnaccountedFor(),
             getRole().equals(Result.AUDIO_TYPE_RECORDER)) {
           @Override
-          protected void gotClickOnItem(T e) {
+          protected void gotClickOnItem(CommonShell e) {
             outer.gotClickOnItem(e);
           }
         };
