@@ -412,7 +412,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
    * @see #rememberAndLoadFirst(java.util.List)
    */
-  public void rememberAndLoadFirst(List<T> exercises, CommonExercise firstExercise,
+  public void rememberAndLoadFirst(List<T> exercises, HasID firstExercise,
                                    String selectionID) {
 /*
     logger.info("ExerciseList : rememberAndLoadFirst instance '" + getInstance() +
@@ -612,14 +612,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see #checkAndAskServer(String)
    */
   protected void askServerForExercise(String itemID) {
-    //logger.info("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
     controller.checkUser();
     if (cachedNext != null && cachedNext.getID().equals(itemID)) {
-      //logger.info("\tExerciseList.askServerForExercise using cached id = " + itemID + " instance " + instance);
-
+      logger.info("\tExerciseList.askServerForExercise using cached id = " + itemID + " instance " + instance);
       useExercise(cachedNext);
     } else {
       pendingReq = true;
+      logger.info("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
       service.getExercise(itemID, controller.getUser(), incorrectFirstOrder, new ExerciseAsyncCallback());
     }
 

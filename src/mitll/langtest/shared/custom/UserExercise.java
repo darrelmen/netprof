@@ -99,9 +99,10 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
 
   /**
    * @param exercise
+   * @param creatorID
    * @see mitll.langtest.client.custom.content.ReviewItemHelper.ReviewFlexListLayout#getFactory(PagingExerciseList, String)
    */
-  public <T extends CommonShell & AnnotationExercise & AudioRefExercise> UserExercise(T exercise) {
+  public <T extends CommonShell & AnnotationExercise & AudioRefExercise> UserExercise(T exercise, long creatorID) {
     super(exercise.getID());
     this.isPredef = true;
     this.englishSentence = exercise.getEnglish();
@@ -116,6 +117,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     setContext(exercise.getContext());
     setContextTranslation(exercise.getContextTranslation());
     copyAudio(exercise);
+    this.creator = creatorID;
   }
 
   private void copyAudio(AudioRefExercise exercise) {
@@ -124,30 +126,11 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     }
   }
 
-/*  @Override
-  public String getRefSentence() {
-    return foreignLanguage;
-  }*/
-
   @Override
   public Collection<String> getRefSentences() {
     return refSentences;
   }
 
-/*  @Override
-  public String getTransliteration() {
-    return transliteration;
-  }*/
-
-  /**
-   * @return
-   */
-/*
-  @Override
-  public String getContent() {
-    return "";
-  }
-*/
   @Override
   public long getCreator() {
     return creator;
@@ -165,19 +148,9 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     this.uniqueID = uniqueID;
   }
 
-  // @Override
   public long getUniqueID() {
     return uniqueID;
   }
-
-  /**
-   * @param english
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#grabInfoFromFormAndStuffInfoExercise()
-   */
-/*  public void setEnglish(String english) {
-    this.englishSentence = english;
-  }*/
-
 
   public void setTransliteration(String transliteration) {
     this.transliteration = transliteration;
