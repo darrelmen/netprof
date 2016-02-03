@@ -142,9 +142,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       logger.warning("Recording is *not* enabled!");
     }
     boolean noModel = controller.getProps().isNoModel();
-    if (noModel) {
-      logger.warning("No model?");
-    }
+//    if (noModel) {
+//      logger.warning("No model?");
+//    }
 
     boolean b = noModel || !recordingEnabled;
 
