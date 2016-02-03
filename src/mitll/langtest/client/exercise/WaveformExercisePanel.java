@@ -5,6 +5,7 @@
 package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.base.HasIcon;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -24,7 +25,7 @@ import java.util.Collection;
  * Time: 6:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class WaveformExercisePanel<T extends CommonShell & AudioRefExercise> extends ExercisePanel<T> {
+public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell & AudioRefExercise> extends ExercisePanel<L,T> {
   private static final String RECORD_PROMPT  = "Record the word or phrase, first at normal speed, then again at slow speed.";
   private static final String RECORD_PROMPT2 = "Record the in-context sentence.";
   private static final String EXAMPLE_RECORD = "EXAMPLE_RECORD";
@@ -40,7 +41,7 @@ public class WaveformExercisePanel<T extends CommonShell & AudioRefExercise> ext
    * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#getFactory(mitll.langtest.client.list.PagingExerciseList)
    */
   public WaveformExercisePanel(final T e, final LangTestDatabaseAsync service,
-                               final ExerciseController controller, ListInterface<T> exerciseList,
+                               final ExerciseController controller, ListInterface<L> exerciseList,
                                boolean doNormalRecording, String instance) {
     super(e, service, controller, exerciseList, doNormalRecording ? "" : EXAMPLE_RECORD, instance);
     getElement().setId("WaveformExercisePanel");
@@ -157,7 +158,7 @@ public class WaveformExercisePanel<T extends CommonShell & AudioRefExercise> ext
     return flow;
   }
 
-  Widget getItemHeader(T e) {
+  Widget getItemHeader(HasID e) {
     Heading w = new Heading(GoodwaveExercisePanel.HEADING_FOR_UNIT_LESSON, "Item", e.getID());
     w.getElement().setId("ItemHeading");
     return w;
@@ -179,11 +180,13 @@ public class WaveformExercisePanel<T extends CommonShell & AudioRefExercise> ext
    *
    * @param controller
    * @param completedExercise
-   * @see mitll.langtest.client.exercise.NavigationHelper#clickNext(ExerciseController, mitll.langtest.shared.exercise.T)
+   * @see mitll.langtest.client.exercise.NavigationHelper#clickNext
    */
   @Override
-  public void postAnswers(ExerciseController controller, T completedExercise) {
-    completedExercise.setState(STATE.RECORDED);
+  public void postAnswers(ExerciseController controller, HasID completedExercise) {
+  //  completedExercise.setState(STATE.RECORDED);
+    // TODO : gah = do we really need to do this???
+
     exerciseList.setState(completedExercise.getID(), STATE.RECORDED);
     exerciseList.redraw();
     exerciseList.loadNextExercise(completedExercise);
