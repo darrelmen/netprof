@@ -96,9 +96,6 @@ public class ReviewEditableExercise//<T extends CommonShell & AudioRefExercise &
         itemMarker, changedUserExercise, originalList, exerciseList, predefinedContent, npfHelper);
     this.exerciseList = exerciseList;
     this.predefinedContentList = predefinedContent;
-//    if (predefinedContentList == null) new Exception().printStackTrace();
-    // audioAttributeExercise  = changedUserExercise;
-    // this.annotationExercise = changedUserExercise;
   }
 
   private List<RememberTabAndContent> tabs;
@@ -222,23 +219,28 @@ public class ReviewEditableExercise//<T extends CommonShell & AudioRefExercise &
   private String getUserTitle(MiniUser user) {
     return (user.isMale() ? MALE : FEMALE) +
         (
-            // controller.getProps().isAdminView()
             user.isAdmin()
                 ? " (" + user.getUserID() + ")" : "") +
         " age " + user.getAge();
   }
 
+  /**
+   * Don't warn user to check if audio is consistent if there isn't any.
+   * @return
+   */
   @Override
   boolean checkForForeignChange() {
-    boolean b = super.checkForForeignChange();
+    boolean didChange = super.checkForForeignChange();
 
-    if (b) {
-      for (RememberTabAndContent tab : tabs) {
-        setupPopover(tab.getContent(), getWarningHeader(), getWarningForFL(), Placement.TOP, DELAY_MILLIS, false);
+    if (didChange) {
+      if (hasAudio()) {
+        for (RememberTabAndContent tab : tabs) {
+          setupPopover(tab.getContent(), getWarningHeader(), getWarningForFL(), Placement.TOP, DELAY_MILLIS, false);
+        }
       }
     }
 
-    return b;
+    return didChange;
   }
 
   private final Set<Widget> audioWasPlayed = new HashSet<Widget>();
