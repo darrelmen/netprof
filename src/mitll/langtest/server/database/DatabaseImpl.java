@@ -918,7 +918,7 @@ public class DatabaseImpl implements Database {
    * <p>
    * TODO : also, this a lot of work just to get the one ref audio recording.
    *
-   * @param all
+   * @paramx all
    * @see DatabaseImpl#getExerciseIDToRefAudio()
    */
 /*  public <A extends AudioAttributeExercise> void attachAudio(Collection<A> all) {
@@ -1235,30 +1235,32 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.DownloadServlet#writeUserList(javax.servlet.http.HttpServletResponse, DatabaseImpl, String)
    */
   public String writeZip(OutputStream out, long listid, PathHelper pathHelper) throws Exception {
-    String language1 = getLanguage();
-    if (listid == -1) return language1 + "_Unknown";
+    String language = getLanguage();
+    if (listid == -1) return language + "_Unknown";
 
-    UserList<CommonExercise> userListByID = getUserListByID(listid);
+    UserList<CommonShell> userListByID = getUserListByID(listid);
 
     if (userListByID == null) {
       logger.error("huh? can't find user list " + listid);
-      return language1 + "_Unknown";
+      return language + "_Unknown";
     } else {
       //logger.debug("writing contents of " + userListByID);
       long then = System.currentTimeMillis();
-      Collection<CommonExercise> exercises = userListByID.getExercises();
-      for (CommonExercise ex : exercises) {
+      List<CommonExercise> copyAsExercises = new ArrayList<>();
+
+      for (CommonShell ex : userListByID.getExercises()) {
+        copyAsExercises.add(getExercise(ex.getID()));
+      }
+      for (CommonExercise ex : copyAsExercises) {
         userListManager.addAnnotations(ex);
         getAudioDAO().attachAudio(ex, pathHelper.getInstallPath(), configDir);
-        //logger.debug("ex " + ex.getID() + " males   " + ex.getUserMap(true));
-        //logger.debug("ex " + ex.getID() + " females " + ex.getUserMap(false));
       }
       long now = System.currentTimeMillis();
       logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
-      new AudioExport(getServerProps()).writeZip(out, userListByID.getName(), getSectionHelper(), exercises, language1,
+      new AudioExport(getServerProps()).writeZip(out, userListByID.getName(), getSectionHelper(), copyAsExercises, language,
           getAudioDAO(), installPath, configDir, listid == UserListManager.REVIEW_MAGIC_ID);
     }
-    return language1 + "_" + userListByID.getName();
+    return language + "_" + userListByID.getName();
   }
 
   public int attachAudio(CommonExercise ex) {
@@ -1277,9 +1279,8 @@ public class DatabaseImpl implements Database {
   }
 
   //  public <T extends CommonExercise> UserList<T> getUserListByID(long listid) {
-  public UserList<CommonExercise> getUserListByID(long listid) {
-    UserList<CommonExercise> userListByID = getUserListManager().getUserListByID(listid, getSectionHelper().getTypeOrder());
-    return userListByID;
+  public UserList<CommonShell> getUserListByID(long listid) {
+    return getUserListManager().getUserListByID(listid, getSectionHelper().getTypeOrder());
   }
 
   public String getPrefix(Map<String, Collection<String>> typeToSection) {
@@ -1376,12 +1377,11 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   *
    * @return
    */
   public Map<String, Float> getMaleFemaleProgress() {
     UserDAO userDAO = getUserDAO();
-    Map<Long, User> userMapMales   = userDAO.getUserMap(true);
+    Map<Long, User> userMapMales = userDAO.getUserMap(true);
     Map<Long, User> userMapFemales = userDAO.getUserMap(false);
 
     Collection<? extends CommonShell> exercises = getExercises();
