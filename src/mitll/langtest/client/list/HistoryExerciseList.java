@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  * Time: 3:21 PM
  * To change this template use File | Settings | File Templates.
  */
-public class HistoryExerciseList<T extends CommonShell> extends PagingExerciseList<T> {
+public class HistoryExerciseList<T extends CommonShell, U extends Shell> extends PagingExerciseList<T,U> {
   private Logger logger = Logger.getLogger("HistoryExerciseList");
 
   public static final String ANY = "Clear";
