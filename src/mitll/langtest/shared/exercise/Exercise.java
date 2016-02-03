@@ -73,6 +73,11 @@ public class Exercise extends AudioExercise implements CommonExercise, MutableEx
   }
 
   @Override
+  public long getCreator() {
+    return -5;
+  }
+
+  @Override
   public MutableExercise getMutable() {
     return this;
   }
