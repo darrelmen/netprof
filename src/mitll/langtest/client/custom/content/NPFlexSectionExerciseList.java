@@ -14,8 +14,8 @@ import mitll.langtest.shared.exercise.CommonShell;
 /**
  * Created by go22670 on 1/26/16.
  */
-public class NPFlexSectionExerciseList<T extends CommonShell> extends FlexSectionExerciseList<T> {
-  private FlexListLayout flexListLayout;
+public class NPFlexSectionExerciseList extends FlexSectionExerciseList {
+  //private FlexListLayout flexListLayout;
 
   /**
    * @param topRow
@@ -29,7 +29,7 @@ public class NPFlexSectionExerciseList<T extends CommonShell> extends FlexSectio
                                    boolean incorrectFirst) {
     super(topRow, currentExercisePanel, flexListLayout.service, flexListLayout.feedback,
         flexListLayout.controller, instanceName, incorrectFirst);
-    this.flexListLayout = flexListLayout;
+    //this.flexListLayout = flexListLayout;
   }
 
   @Override
