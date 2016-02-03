@@ -134,10 +134,10 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     return refSentences;
   }
 
-  @Override
+/*  @Override
   public String getTransliteration() {
     return transliteration;
-  }
+  }*/
 
   /**
    * @return
@@ -174,13 +174,10 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @param english
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#grabInfoFromFormAndStuffInfoExercise()
    */
-  public void setEnglish(String english) {
+/*  public void setEnglish(String english) {
     this.englishSentence = english;
-  }
+  }*/
 
-  public void setForeignLanguage(String foreignLanguage) {
-    this.foreignLanguage = foreignLanguage;
-  }
 
   public void setTransliteration(String transliteration) {
     this.transliteration = transliteration;
