@@ -29,4 +29,5 @@ public interface CommonExercise extends CommonShell, AudioAttributeExercise, Ann
   MutableAudioExercise getMutableAudio();
   MutableAnnotationExercise getMutableAnnotation();
   CombinedMutableUserExercise getCombinedMutableUserExercise();
+  CommonAnnotatable getCommonAnnotatable();
 }
