@@ -385,7 +385,7 @@ public abstract class Scoring {
   /**
    * @param foreignLanguagePhrase
    * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#inDictOrLTS
+   * @see mitll.langtest.server.scoring.Scoring#validLTS(String)
    */
   Set<String> checkLTS(String foreignLanguagePhrase) {
     return checkLTSHelper.checkLTS(foreignLanguagePhrase);
@@ -418,7 +418,7 @@ public abstract class Scoring {
    */
   private HTKDictionary makeDict() {
     String dictFile = configFileCreator.getDictFile();
-    if (new File(dictFile).exists()) {
+    if (dictFile != null && new File(dictFile).exists()) {
       long then = System.currentTimeMillis();
       HTKDictionary htkDictionary = new HTKDictionary(dictFile);
       long now = System.currentTimeMillis();
