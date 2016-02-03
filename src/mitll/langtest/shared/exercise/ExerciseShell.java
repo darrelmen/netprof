@@ -15,7 +15,7 @@ import mitll.langtest.shared.custom.UserList;
  *
  * TODO : UserList should not extend this
  */
-public class ExerciseShell extends BaseExercise implements CommonShell {
+public class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   protected String englishSentence;
   protected String meaning;
   protected String foreignLanguage;
@@ -93,8 +93,22 @@ public class ExerciseShell extends BaseExercise implements CommonShell {
   }
 
   @Override
+  public MutableShell getMutableShell() {
+    return this;
+  }
+
+  @Override
   public String getTransliteration() {
     return transliteration;
+  }
+
+  public void setForeignLanguage(String foreignLanguage) {
+    this.foreignLanguage = foreignLanguage;
+  }
+
+  @Override
+  public void setEnglish(String english) {
+    this.englishSentence = english;
   }
 
   public String toString() {
