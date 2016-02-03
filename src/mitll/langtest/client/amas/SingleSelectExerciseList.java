@@ -14,14 +14,12 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.amas.AmasExerciseImpl;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -33,11 +31,11 @@ import java.util.logging.Logger;
  * Time: 5:32 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class SingleSelectExerciseList<T extends CommonShell> extends HistoryExerciseList<T> {
+public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasExerciseImpl, AmasExerciseImpl> {
   public static final int NUM_CHOICES = 3;
   private final Logger logger = Logger.getLogger("SingleSelectExerciseList");
 
-  private static final String PLEASE_SELECT  = "Please select a quiz, test type, ILR level, and response type";
+  private static final String PLEASE_SELECT = "Please select a quiz, test type, ILR level, and response type";
   private static final String PLEASE_SELECT2 = "Please select a test type, ILR level, and response type";
   private static final int CLASSROOM_VERTICAL_EXTRA = 270;
   private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
@@ -179,7 +177,7 @@ public abstract class SingleSelectExerciseList<T extends CommonShell> extends Hi
   public void gotSelection() {
     int count = getNumSelections();
     if (count == NUM_CHOICES) {
-   //   logger.info("gotSelection count = " + count);
+      //   logger.info("gotSelection count = " + count);
       pushNewSectionHistoryToken();
     }
   }
@@ -209,7 +207,7 @@ public abstract class SingleSelectExerciseList<T extends CommonShell> extends Hi
    */
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {
-   // logger.info("restoreListBoxState " + selectionState);
+    // logger.info("restoreListBoxState " + selectionState);
     super.restoreListBoxState(selectionState);
     showSelectionState(selectionState);
   }
@@ -231,7 +229,7 @@ public abstract class SingleSelectExerciseList<T extends CommonShell> extends Hi
       showDefaultStatus();
     } else {
       StringBuilder status = new StringBuilder();
-     // logger.info("\tshowSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
+      // logger.info("\tshowSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
 
       for (String type : typeOrder) {
         Collection<String> selectedItems = typeToSection.get(type);
@@ -292,17 +290,16 @@ public abstract class SingleSelectExerciseList<T extends CommonShell> extends Hi
     SectionWidget quiz = typeToBox.get("Quiz");
     if (getNumSelections() < NUM_CHOICES) {
       showMessage(quiz.hasOnlyOne() ? PLEASE_SELECT2 : PLEASE_SELECT, false);
-    }
-    else {
-      showMessage("There are no questions for this quiz, test type, and ILR Level.<br/>Please make another selection.",false);
+    } else {
+      showMessage("There are no questions for this quiz, test type, and ILR Level.<br/>Please make another selection.", false);
     }
   }
 
 
   /**
+   * @param toShow
    * @see SingleSelectExerciseList#gotEmptyExerciseList()
    * @see #quizCompleteDisplay()
-   * @param toShow
    */
   protected void showMessage(String toShow, boolean addStartOver) {
     createdPanel = new SimplePanel();

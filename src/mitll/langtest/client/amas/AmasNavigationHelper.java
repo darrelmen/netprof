@@ -8,7 +8,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Shell;
 
 /**
@@ -20,7 +19,7 @@ import mitll.langtest.shared.exercise.Shell;
  * Time: 6:36 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NavigationHelper extends HorizontalPanel {
+public class AmasNavigationHelper extends HorizontalPanel {
   private static final String CONTINUE = "Continue";
 
   private Button next;
@@ -28,15 +27,15 @@ public class NavigationHelper extends HorizontalPanel {
   private final PostAnswerProvider provider;
   private final ListInterface listContainer;
 
-  public NavigationHelper(Shell exercise, ExerciseController controller, PostAnswerProvider provider,
-                          ListInterface listContainer, boolean addButtons,
-                          boolean enableNextOnlyWhenAllCompleted) {
+  public AmasNavigationHelper(Shell exercise, ExerciseController controller, PostAnswerProvider provider,
+                              ListInterface listContainer, boolean addButtons,
+                              boolean enableNextOnlyWhenAllCompleted) {
     this.provider = provider;
     this.listContainer = listContainer;
     this.enableNextOnlyWhenAllCompleted = enableNextOnlyWhenAllCompleted;
     setSpacing(5);
     getNextAndPreviousButtons(exercise, controller, addButtons);
-    getElement().setId("NavigationHelper");
+    getElement().setId("AmasNavigationHelper");
     addStyleName("rightTenMargin");
     controller.register(next, exercise.getID());
   }
@@ -46,7 +45,7 @@ public class NavigationHelper extends HorizontalPanel {
    * @param e
    * @param controller
    * @param addButtons
-   * @see NavigationHelper#NavigationHelper
+   * @see AmasNavigationHelper#AmasNavigationHelper
    */
   private void getNextAndPreviousButtons(final Shell e,
                                          final ExerciseController controller, boolean addButtons) {

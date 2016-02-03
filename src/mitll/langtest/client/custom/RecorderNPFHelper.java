@@ -21,17 +21,19 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.exercise.AudioRefExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.Collection;
 import java.util.Map;
 
 /**
+ * Sets up recording both ref recordings and context ref recordings.
+ *
  * Created by go22670 on 2/10/15.
+ *
+ * <T extends CommonShell & AudioRefExercise>
  */
-class RecorderNPFHelper<T extends CommonShell & AudioRefExercise> extends SimpleChapterNPFHelper<T> {
+class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell,CommonExercise> {
   private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
 
   final boolean doNormalRecording;
@@ -52,31 +54,31 @@ class RecorderNPFHelper<T extends CommonShell & AudioRefExercise> extends Simple
   }
 
   @Override
-  protected ExercisePanelFactory<T> getFactory(final PagingExerciseList<T> exerciseList) {
+  protected ExercisePanelFactory<CommonShell,CommonExercise> getFactory(final PagingExerciseList<CommonShell,CommonExercise> exerciseList) {
     final String oinstance = exerciseList.getInstance();
-    return new ExercisePanelFactory<T>(service, feedback, controller, exerciseList) {
+    return new ExercisePanelFactory<CommonShell,CommonExercise>(service, feedback, controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(final T e) {
+      public Panel getExercisePanel(final CommonExercise e) {
         return new MyWaveformExercisePanel(e, controller, exerciseList, oinstance);
       }
     };
   }
 
   @Override
-  protected FlexListLayout getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
+  protected FlexListLayout<CommonShell,CommonExercise> getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
                                            final UserManager userManager, ExerciseController controller,
-                                           SimpleChapterNPFHelper outer) {
-    return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
+                                           SimpleChapterNPFHelper<CommonShell,CommonExercise> outer) {
+    return new MyFlexListLayout<CommonShell,CommonExercise>(service, feedback, userManager, controller, outer) {
 
       FlexListLayout outerLayout = this;
       @Override
-      protected PagingExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
-                                                    boolean incorrectFirst) {
-        return new NPFlexSectionExerciseList<T>(outerLayout, topRow, currentExercisePanel, instanceName, incorrectFirst) {
+      protected PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
+                                                                                boolean incorrectFirst) {
+        return new NPFlexSectionExerciseList(outerLayout, topRow, currentExercisePanel, instanceName, incorrectFirst) {
           private CheckBox filterOnly;
 
           @Override
-          protected void addTableWithPager(ClickablePagingContainer pagingContainer) {
+          protected void addTableWithPager(ClickablePagingContainer<CommonShell> pagingContainer) {
             // row 1
             Panel column = new FlowPanel();
             add(column);
@@ -185,10 +187,10 @@ class RecorderNPFHelper<T extends CommonShell & AudioRefExercise> extends Simple
     return (int) (ratio * 100f);
   }
 
-  private class MyWaveformExercisePanel extends WaveformExercisePanel<T> {
-    private final T e; // TODO REMOVE!
+  private class MyWaveformExercisePanel extends WaveformExercisePanel<CommonShell,CommonExercise> {
+    private final CommonExercise e; // TODO REMOVE!
 
-    public MyWaveformExercisePanel(T e, ExerciseController controller1, ListInterface exerciseList1, String instance) {
+    public MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface<CommonShell> exerciseList1, String instance) {
       super(e, service, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
       this.e = e;
     }
@@ -210,8 +212,13 @@ class RecorderNPFHelper<T extends CommonShell & AudioRefExercise> extends Simple
       }
     }
 
+    /**
+     * @see RecorderNPFHelper.MyWaveformExercisePanel#postAnswers(ExerciseController, CommonExercise)
+     * @param controller
+     * @param completedExercise
+     */
     @Override
-    public void postAnswers(ExerciseController controller, T completedExercise) {
+    public void postAnswers(ExerciseController controller, HasID completedExercise) {
       super.postAnswers(controller, completedExercise);
       tellOtherListExerciseDirty(e);
     }
