@@ -55,6 +55,7 @@ public class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExerci
   private DropdownButton addToList;
   private int activeCount = 0;
   final PopupContainer popupContainer = new PopupContainer();
+  private Collection<UserList<CommonShell>> listsForUser = Collections.emptyList();
 
   /**
    * @param e
@@ -71,21 +72,21 @@ public class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExerci
   }
 
   @Override
-  protected NavigationHelper getNavigationHelper(ExerciseController controller,
-                                                           ListInterface<CommonShell> listContainer, boolean addKeyHandler) {
-    NavigationHelper navigationHelper = super.getNavigationHelper(controller, listContainer, addKeyHandler);
-    navigationHelper.add(makeAddToList(getLocalExercise(), controller));
+  protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
+                                                              ListInterface<CommonShell> listContainer, boolean addKeyHandler) {
+    NavigationHelper<CommonShell> navigationHelper = super.getNavigationHelper(controller, listContainer, addKeyHandler);
+    navigationHelper.add(makeAddToList(getLocalExercise().getID(), controller));
     navigationHelper.add(getNextListButton());
     return navigationHelper;
   }
 
   /**
-   * @see #getNavigationHelper(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, boolean)
-   * @param e
+   * @param exercise
    * @param controller
    * @return
+   * @see #getNavigationHelper(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, boolean)
    */
-  private Panel makeAddToList(T e, ExerciseController controller) {
+  private Panel makeAddToList(String exercise, ExerciseController controller) {
     addToList = new DropdownButton(ADD_TO_LIST);
     addToList.getElement().setId("NPFExercise_AddToList");
     addToList.setDropup(true);
@@ -93,7 +94,7 @@ public class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExerci
     addToList.setType(ButtonType.PRIMARY);
     addTooltip(addToList, ADD_ITEM);
     addToList.addStyleName("leftFiveMargin");
-    populateListChoices(e, controller, addToList);
+    populateListChoices(exercise, controller, addToList);
     return addToList;
   }
 
@@ -110,8 +111,7 @@ public class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExerci
         boolean duplicateName = isDuplicateName(textBox.getText());
         if (duplicateName) {
           textBox.getElement().getStyle().setColor("red");
-        }
-        else {
+        } else {
           textBox.getElement().getStyle().setColor("black");
         }
       }
@@ -132,8 +132,8 @@ public class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExerci
     popupContainer.configureTextBox("", textBox, commentPopup);
 
     configureNewListButton(newListButton,
-      commentPopup,
-      textBox);
+        commentPopup,
+        textBox);
     return newListButton;
   }
 
@@ -187,33 +187,33 @@ public class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExerci
   }
 
   /**
-   * @see #makeANewList(com.github.gwtbootstrap.client.ui.TextBox)
    * @param userID
    * @param title
    * @param textBox
+   * @see #makeANewList(com.github.gwtbootstrap.client.ui.TextBox)
    */
   private void addUserList(long userID, String title, final TextBox textBox) {
-    logger.info("user " +userID + " adding list " +title);
+    logger.info("user " + userID + " adding list " + title);
     String audioType = controller.getAudioType();
     boolean isStudent = audioType.equalsIgnoreCase(PRACTICE);
     service.addUserList(userID,
-      title,
-      "",
-      "", !isStudent, new AsyncCallback<Long>() {
-        @Override
-        public void onFailure(Throwable caught) {
-        }
+        title,
+        "",
+        "", !isStudent, new AsyncCallback<Long>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
 
-        @Override
-        public void onSuccess(Long result) {
-          if (result == -1) {
-            System.err.println("should never happen!");
-          } else {
-            textBox.setText("");
-            wasRevealed();
+          @Override
+          public void onSuccess(Long result) {
+            if (result == -1) {
+              System.err.println("should never happen!");
+            } else {
+              textBox.setText("");
+              wasRevealed();
+            }
           }
         }
-      }
     );
   }
 
@@ -223,34 +223,37 @@ public class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExerci
    * @see Navigation#getNav()
    */
   @Override
-  public void wasRevealed() { populateListChoices(exercise, controller, addToList);  }
+  public void wasRevealed() {
+    populateListChoices(exercise.getID(), controller, addToList);
+  }
 
-  private Collection<UserList> listsForUser = Collections.emptyList();
+
   /**
    * Ask server for the set of current lists for this user.
-   *
+   * <p>
    * TODO : do this better -- tell server to return lists that don't have exercise in them.
    *
-   * @param e
+   * @param exercise
    * @param controller
    * @param w1
    * @see #makeAddToList
    * @see #wasRevealed()
    */
-  private void populateListChoices(final T e, final ExerciseController controller, final DropdownBase w1) {
-    service.getListsForUser(controller.getUser(), true, false, new AsyncCallback<Collection<UserList>>() {
+  private void populateListChoices(final String id, final ExerciseController controller, final DropdownBase w1) {
+    service.getListsForUser(controller.getUser(), true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
-      public void onSuccess(Collection<UserList> result) {
+      public void onSuccess(Collection<UserList<CommonShell>> result) {
         listsForUser = result;
         w1.clear();
         activeCount = 0;
         boolean anyAdded = false;
-    //    logger.info("\tpopulateListChoices : found list " + result.size() + " choices");
+        //    logger.info("\tpopulateListChoices : found list " + result.size() + " choices");
         for (final UserList ul : result) {
-          if (!ul.containsByID(e.getID())) {
+          if (!ul.containsByID(id)) {
             activeCount++;
             anyAdded = true;
             final NavLink widget = new NavLink(ul.getName());
@@ -258,11 +261,12 @@ public class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExerci
             widget.addClickHandler(new ClickHandler() {
               @Override
               public void onClick(ClickEvent event) {
-                controller.logEvent(w1,"DropUp",e.getID(), ADDING_TO_LIST + ul.getID() +"/"+ul.getName());
+                controller.logEvent(w1, "DropUp", id, ADDING_TO_LIST + ul.getID() + "/" + ul.getName());
 
-                service.addItemToUserList(ul.getUniqueID(), e.getID(), new AsyncCallback<Void>() {
+                service.addItemToUserList(ul.getUniqueID(), id, new AsyncCallback<Void>() {
                   @Override
-                  public void onFailure(Throwable caught) {}
+                  public void onFailure(Throwable caught) {
+                  }
 
                   @Override
                   public void onSuccess(Void result) {
@@ -286,5 +290,4 @@ public class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExerci
       }
     });
   }
-
 }
