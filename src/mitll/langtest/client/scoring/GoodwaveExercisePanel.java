@@ -36,6 +36,7 @@ import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
@@ -96,7 +97,7 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    */
   public GoodwaveExercisePanel(final T commonExercise, final ExerciseController controller,
-                               final ListInterface<T> listContainer,
+                               final ListInterface<CommonShell> listContainer,
                                float screenPortion, boolean addKeyHandler, String instance) {
     this.exercise = commonExercise;
     this.controller = controller;
@@ -143,11 +144,11 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
   }
 
 
-  protected NavigationHelper getNavigationHelper(ExerciseController controller,
-                                                 final ListInterface<T> listContainer, boolean addKeyHandler) {
-    return new NavigationHelper<T>(getLocalExercise(), controller, new PostAnswerProvider<T>() {
+  protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
+                                                              final ListInterface<CommonShell> listContainer, boolean addKeyHandler) {
+    return new NavigationHelper<CommonShell>(getLocalExercise(), controller, new PostAnswerProvider() {
       @Override
-      public void postAnswers(ExerciseController controller, T completedExercise) {
+      public void postAnswers(ExerciseController controller, HasID completedExercise) {
         nextWasPressed(listContainer, completedExercise);
       }
     }, listContainer, true, addKeyHandler, false);
@@ -166,7 +167,7 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
     listContainer.loadNextExercise(exercise.getID());
   }
 
-  protected void nextWasPressed(ListInterface listContainer, T completedExercise) {
+  protected void nextWasPressed(ListInterface listContainer, HasID completedExercise) {
     navigationHelper.enableNextButton(false);
     listContainer.loadNextExercise(completedExercise.getID());
   }
