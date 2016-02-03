@@ -443,7 +443,7 @@ public class UserListManager {
    * @see #getDefectList(java.util.Collection)
    */
   private UserList<CommonShell> getReviewList(List<CommonExercise> allKnown, String name, String description,
-                                 Collection<String> ids, long userListMaginID, Collection<String> typeOrder) {
+                                              Collection<String> ids, long userListMaginID, Collection<String> typeOrder) {
     Map<String, CommonExercise> idToUser = new HashMap<>();
     for (CommonExercise ue : allKnown) idToUser.put(ue.getID(), ue);
 
@@ -588,10 +588,9 @@ public class UserListManager {
     String id = userExercise.getID();
     String newid;
     if (id.contains("dup")) {
-       newid = id.split("dup")[0] + DUP +System.currentTimeMillis();
-    }
-    else {
-       newid = id + DUP +System.currentTimeMillis();
+      newid = id.split("dup")[0] + DUP + System.currentTimeMillis();
+    } else {
+      newid = id + DUP + System.currentTimeMillis();
     }
 
     logger.debug("duplicating " + userExercise + " with id " + newid);
@@ -697,8 +696,8 @@ public class UserListManager {
   /**
    * @param userListID
    * @param user
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addVisitor
    * @seex mitll.langtest.client.custom.Navigation#addVisitor
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addVisitor
    */
   public void addVisitor(long userListID, long user) {
     //logger.debug("addVisitor - user " + user + " visits " + userList.getUniqueID());
@@ -858,6 +857,12 @@ public class UserListManager {
     markState(id, correct ? STATE.APPROVED : STATE.DEFECT, userID);
   }
 
+  /**
+   * @param id
+   * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#deleteList(long)
+   * @see mitll.langtest.client.custom.ListManager#deleteList
+   */
   public boolean deleteList(long id) {
     logger.debug("deleteList " + id);
     userListExerciseJoinDAO.removeListRefs(id);
