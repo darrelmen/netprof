@@ -36,6 +36,8 @@ public class LTSFactory implements CollationSort {
   private final LTS unknown = new EmptyLTS();
   private LTS ltsForLanguage = unknown; /// attempt to deal with undefined LTS...
 
+  public static boolean isEmpty(LTS lts) { return lts.getClass() == EmptyLTS.class; }
+
   /**
    * TODO : what about Japanese, Korean, ... for LTS?
    * Does reflection to make an appropriate LTS - expecting something like corpus.EnglishLTS
