@@ -99,6 +99,11 @@ public class DBExercise extends BaseObject implements CommonShell {
     return null;
   }
 
+  @Override
+  public MutableShell getMutableShell() {
+    return null;
+  }
+
   public void setForeignLanguage(CommonShell shell) {
     addField(FIELDS.FL.name(), shell.getForeignLanguage());
   }
