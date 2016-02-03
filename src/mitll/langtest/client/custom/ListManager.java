@@ -262,6 +262,7 @@ public class ListManager implements RequiresResize {
 
   /**
    * @see Navigation#selectPreviousTab(String)
+   * @see #addListTabs(TabPanel)
    */
   public void viewBrowse() {
     viewLessons(browse.getContent(), true, false, false, "");
@@ -292,7 +293,7 @@ public class ListManager implements RequiresResize {
     listScrollPanel = new ScrollPanel();
 
     if (getAll) {
-      logger.info("viewLessons----> getAll optional " + optionalExercise);
+     // logger.info("viewLessons----> getAll optional " + optionalExercise);
       service.getUserListsForText("", controller.getUser(),
           new UserListCallback(this, contentPanel, insideContentPanel, listScrollPanel,
               LESSONS + "_All",
@@ -596,19 +597,21 @@ public class ListManager implements RequiresResize {
 
   void deleteList(Button delete, final UserList ul, final boolean onlyMyLists) {
     controller.logEvent(delete, "Button", "UserList_" + ul.getID(), "Delete");
-    service.deleteList(ul.getUniqueID(), new AsyncCallback<Boolean>() {
+    final long uniqueID = ul.getUniqueID();
+
+    service.deleteList(uniqueID, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
+        logger.warning("delete list call failed?");
       }
 
       @Override
       public void onSuccess(Boolean result) {
         if (result) {
-          logger.info("deleteList ---> did do deleteList " + ul.getUniqueID());
-
+          logger.info("deleteList ---> did do deleteList " + uniqueID);
           refreshViewLessons(onlyMyLists, false);
         } else {
-          logger.warning("deleteList ---> did not do deleteList " + ul.getUniqueID());
+          logger.warning("deleteList ---> did not do deleteList " + uniqueID);
         }
       }
     });
