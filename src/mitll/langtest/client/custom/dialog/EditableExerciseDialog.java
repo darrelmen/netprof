@@ -60,7 +60,7 @@ class EditableExerciseDialog extends NewUserExercise {
                                 EditItem editItem,
                                 HasText itemMarker,
                                 CommonExercise changedUserExercise,
-                                UserList<CommonExercise> originalList,
+                                UserList<CommonShell> originalList,
 
                                 PagingExerciseList<CommonShell, CommonExercise> exerciseList,
                                 Reloadable predefinedContent,
@@ -79,7 +79,7 @@ class EditableExerciseDialog extends NewUserExercise {
                          FormField foreignLang,
                          RecordAudioPanel rap,
                          ControlGroup normalSpeedRecording,
-                         UserList<CommonExercise> ul,
+                         UserList<CommonShell> ul,
                          ListInterface<CommonShell> pagingContainer,
                          Panel toAddTo) {
     boolean changed = foreignChanged();
@@ -122,7 +122,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see NewUserExercise#addNew
    */
   @Override
-  protected Panel getCreateButton(UserList<CommonExercise> ul,
+  protected Panel getCreateButton(UserList<CommonShell> ul,
                                   ListInterface<CommonShell> pagingContainer,
                                   Panel toAddTo,
                                   ControlGroup normalSpeedRecording) {
@@ -257,7 +257,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see #isValidForeignPhrase
    */
   @Override
-  void afterValidForeignPhrase(final UserList<CommonExercise> ul,
+  void afterValidForeignPhrase(final UserList<CommonShell> ul,
                                final ListInterface<CommonShell> exerciseList,
                                final Panel toAddTo,
                                boolean onClick) {
