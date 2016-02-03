@@ -245,7 +245,12 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
     FluidContainer w = new FluidContainer();
     widgets.add(w);
 
-    addWidgetsForList(ul, showMore, w, onlyMyLists);
+    boolean yourList = isYourList(ul);
+    if (yourList && !onlyMyLists) {
+      w.addStyleName("correctCard");
+    }
+
+    addWidgetsForList(ul, showMore, w, onlyMyLists, yourList);
     return widgets;
   }
 
@@ -254,9 +259,9 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
    * @param showMore
    * @param container
    * @param onlyMyLists
-   * @see UserListCallback#getDisplayRowPerList
+   * @see #getDisplayRowPerList
    */
-  private void addWidgetsForList(final UserList ul, boolean showMore, final Panel container, boolean onlyMyLists) {
+  private void addWidgetsForList(final UserList ul, boolean showMore, final Panel container, boolean onlyMyLists, boolean yourList) {
     Panel r1 = new FlowPanel();
     r1.addStyleName("trueInlineStyle");
     String name = ul.getName();
@@ -273,20 +278,16 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
 
     if (!empty) {
       h4 = getDescription(subtext);
-
       r1.add(h4);
     }
 
     if (!cmempty) {
       h4 = getClassMarker(ul);
-
       r1.add(h4);
     }
 
-    boolean yourList = isYourList(ul);
-    if (yourList) {
-      Button deleteButton = getDelete(ul, onlyMyLists);
-      r1.add(deleteButton);
+    if (yourList && onlyMyLists) {
+      r1.add(getDelete(ul, onlyMyLists));
     }
 
     if (!ul.isFavorite()) {
@@ -333,6 +334,12 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
     return isPublic;
   }
 
+  /**
+   * @param ul
+   * @param onlyMyLists
+   * @return
+   * @see #addWidgetsForList
+   */
   private Button getDelete(UserList ul, boolean onlyMyLists) {
     Button deleteButton = makeDeleteButton(ul, onlyMyLists);
     deleteButton.addStyleName("floatRight");
