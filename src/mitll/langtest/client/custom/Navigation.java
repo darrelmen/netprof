@@ -566,20 +566,20 @@ public class Navigation implements RequiresResize, ShowTab {
         " : getting user lists " + controller.isReviewMode());*/
     String value = storage.getValue(CLICKED_TAB);
     if (value.isEmpty()) {   // no previous tab
-      service.getListsForUser(userManager.getUser(), true, true, new AsyncCallback<Collection<UserList>>() {
+      service.getListsForUser(userManager.getUser(), true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
         @Override
         public void onFailure(Throwable caught) {
         }
 
         @Override
-        public void onSuccess(Collection<UserList> result) {
+        public void onSuccess(Collection<UserList<CommonShell>> result) {
           if (result.size() == 1 && // if only one empty list - one you've created
               result.iterator().next().isEmpty()) {
             // choose default tab to show
             showDefaultInitialTab();
           } else {
             boolean foundCreated = false;
-            for (UserList ul : result) {
+            for (UserList<?> ul : result) {
               if (createdByYou(ul)) {
                 foundCreated = true;
                 break;
