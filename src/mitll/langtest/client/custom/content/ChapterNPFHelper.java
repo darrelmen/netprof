@@ -13,12 +13,19 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+
+import java.util.logging.Logger;
 
 /**
+ * Shows defect list.
+ *
  * Created by GO22670 on 3/26/2014.
  */
 public class ChapterNPFHelper extends NPFHelper {
-  private final FlexListLayout<CommonExercise> flexListLayout;
+  private Logger logger = Logger.getLogger("ChapterNPFHelper");
+
+  private final FlexListLayout<CommonShell,CommonExercise> flexListLayout;
 
   /**
    * Makes defect helper.
@@ -34,22 +41,18 @@ public class ChapterNPFHelper extends NPFHelper {
                           final UserManager userManager, final ExerciseController controller, final boolean showQC) {
     super(service, feedback, userManager, controller, showQC);
     final NPFHelper outer = this;
-    this.flexListLayout = new FlexListLayout<CommonExercise>(service, feedback, userManager, controller) {
+    this.flexListLayout = new FlexListLayout<CommonShell,CommonExercise>(service, feedback, userManager, controller) {
       @Override
-      protected ExercisePanelFactory<CommonExercise> getFactory(PagingExerciseList exerciseList, String instanceName) {
+      protected ExercisePanelFactory<CommonShell,CommonExercise> getFactory(PagingExerciseList<CommonShell,CommonExercise> exerciseList, String instanceName) {
         return outer.getFactory(exerciseList, instanceName, showQC);
       }
 
       @Override
-      protected PagingExerciseList<CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
-        return new NPFlexSectionExerciseList<CommonExercise>(this, topRow, currentExercisePanel, instanceName, incorrectFirst);
+      protected PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
+        return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst);
       }
     };
   }
-
-  //  {
-//    return new NPFlexSectionExerciseList<T>(this, topRow, currentExercisePanel, instanceName, incorrectFirst);
-//  }
 
   /**
    * Left and right components
@@ -72,7 +75,7 @@ public class ChapterNPFHelper extends NPFHelper {
     } else if (npfExerciseList != null) {
       npfExerciseList.onResize();
     } else {
-      System.out.println("ChapterNPFHelper.onResize : not sending resize event - flexListLayout is null?");
+      logger.warning("ChapterNPFHelper.onResize : not sending resize event - flexListLayout is null?");
     }
   }
 }
