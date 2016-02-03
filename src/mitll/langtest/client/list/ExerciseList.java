@@ -26,6 +26,7 @@ import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
@@ -39,7 +40,7 @@ import java.util.logging.Logger;
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExerciseList<T extends CommonShell>
+public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     extends VerticalPanel
     implements ListInterface<T>, ProvidesResize, ValueChangeHandler<String> {
   private final Logger logger = Logger.getLogger("ExerciseList");
@@ -51,7 +52,7 @@ public abstract class ExerciseList<T extends CommonShell>
   protected SimplePanel innerContainer;
   protected final LangTestDatabaseAsync service;
   private final UserFeedback feedback;
-  private ExercisePanelFactory<T> factory;
+  private ExercisePanelFactory<T,U> factory;
   private final ExerciseController controller;
 
   protected Panel createdPanel;
@@ -71,7 +72,7 @@ public abstract class ExerciseList<T extends CommonShell>
    * @seex mitll.langtest.client.LangTest#makeExerciseList
    */
   protected ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                         ExercisePanelFactory<T> factory,
+                         ExercisePanelFactory<T,U> factory,
                          ExerciseController controller,
                          String instance, boolean incorrectFirst) {
     this.instance = instance;
@@ -164,12 +165,17 @@ public abstract class ExerciseList<T extends CommonShell>
         incorrectFirstOrder, false, new SetExercisesCallback(""));
   }
 
-  /**
-   * After re-fetching the ids, select this one.
-   *
-   * @param id
-   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#doAfterEditComplete
-   */
+  @Override
+  public void reloadWithCurrent() {
+    reloadWith(getCurrentExerciseID());
+  }
+
+    /**
+     * After re-fetching the ids, select this one.
+     *
+     * @param id
+     * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#doAfterEditComplete
+     */
   @Override
   public void reloadWith(String id) {
 //    logger.info("ExerciseList.reloadWith id = " + id + " for user " + controller.getUser() + " instance " + getInstance());
@@ -587,7 +593,7 @@ public abstract class ExerciseList<T extends CommonShell>
     }
   }
 
-  private T cachedNext = null;
+  private U cachedNext = null;
   private boolean pendingReq = false;
 
   /**
@@ -616,13 +622,13 @@ public abstract class ExerciseList<T extends CommonShell>
     int i = getIndex(itemID);
     if (!isOnLastItem(i)) {
       T next = getAt(i + 1);
-      service.getExercise(next.getID(), controller.getUser(), incorrectFirstOrder, new AsyncCallback<T>() {
+      service.getExercise(next.getID(), controller.getUser(), incorrectFirstOrder, new AsyncCallback<U>() {
         @Override
         public void onFailure(Throwable caught) {
         }
 
         @Override
-        public void onSuccess(T result) {
+        public void onSuccess(U result) {
           cachedNext = result;
           //logger.info("\tExerciseList.askServerForExercise got cached id = " + cachedNext.getID() + " instance " + instance);
         }
@@ -630,7 +636,7 @@ public abstract class ExerciseList<T extends CommonShell>
     }
   }
 
-  private class ExerciseAsyncCallback implements AsyncCallback<T> {
+  private class ExerciseAsyncCallback implements AsyncCallback<U> {
     @Override
     public void onFailure(Throwable caught) {
       pendingReq = false;
@@ -647,7 +653,7 @@ public abstract class ExerciseList<T extends CommonShell>
     }
 
     @Override
-    public void onSuccess(T result) {
+    public void onSuccess(U result) {
       pendingReq = false;
 
       if (result == null) {
@@ -663,7 +669,7 @@ public abstract class ExerciseList<T extends CommonShell>
    * @see #rememberAndLoadFirst(java.util.List, mitll.langtest.shared.exercise.CommonExercise, String)
    * @see ExerciseAsyncCallback#onSuccess
    */
-  protected void useExercise(final T commonExercise) {
+  protected void useExercise(final U commonExercise) {
     //  logger.info("ExerciseList.useExercise : commonExercise " + commonExercise.getID());
     String itemID = commonExercise.getID();
     markCurrentExercise(itemID);
@@ -687,7 +693,7 @@ public abstract class ExerciseList<T extends CommonShell>
    * @param exercise
    * @see #useExercise
    */
-  private Panel makeExercisePanel(T exercise) {
+  private Panel makeExercisePanel(U exercise) {
     logger.info("ExerciseList.makeExercisePanel : " + exercise + " instance " + instance);
     Panel exercisePanel = factory.getExercisePanel(exercise);
     innerContainer.setWidget(exercisePanel);
@@ -708,7 +714,7 @@ public abstract class ExerciseList<T extends CommonShell>
    * @param current
    * @see ListInterface#loadNextExercise
    */
-  private void getNextExercise(T current) {
+  private void getNextExercise(HasID current) {
     // logger.info("ExerciseList.getNextExercise " + current);
     int i = getIndex(current.getID());
     if (i == -1) {
@@ -780,10 +786,10 @@ public abstract class ExerciseList<T extends CommonShell>
   /**
    * @param current
    * @return
-   * @seex NavigationHelper#loadNextExercise
+   * @seex AmasNavigationHelper#loadNextExercise
    */
   @Override
-  public boolean loadNextExercise(T current) {
+  public boolean loadNextExercise(HasID current) {
     logger.info("ExerciseList.loadNextExercise current is : " + current + " instance " + instance);
     String id = current.getID();
     int i = getIndex(id);
@@ -822,10 +828,10 @@ public abstract class ExerciseList<T extends CommonShell>
   /**
    * @param current
    * @return true if on first
-   * @seex NavigationHelper#loadPreviousExercise
+   * @see mitll.langtest.client.exercise.NavigationHelper#clickPrev(Shell)
    */
   @Override
-  public boolean loadPreviousExercise(T current) {
+  public boolean loadPreviousExercise(HasID current) {
     int i = getIndex(current.getID());
     boolean onFirst = i == 0;
     if (!onFirst) {
@@ -869,7 +875,7 @@ public abstract class ExerciseList<T extends CommonShell>
    * @return
    * @see mitll.langtest.client.exercise.NavigationHelper#makePrevButton
    */
-  public boolean onFirst(T current) {
+  public boolean onFirst(HasID current) {
     boolean b = current == null || getSize() == 1 || getIndex(current.getID()) == 0;
     //logger.info("onFirst : of " +getSize() +", on checking " + current + " = " + b);
     return b;
@@ -880,7 +886,7 @@ public abstract class ExerciseList<T extends CommonShell>
   }
 
   @Override
-  public boolean onLast(T current) {
+  public boolean onLast(HasID current) {
     boolean b = current == null || getSize() == 1 || isOnLastItem(getIndex(current.getID()));
     return b;
   }
