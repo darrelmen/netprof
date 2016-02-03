@@ -6,6 +6,8 @@ package mitll.langtest.server.scoring;
 
 import corpus.HTKDictionary;
 import corpus.LTS;
+import mitll.langtest.server.LogAndNotify;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.SLFFile;
 import org.apache.log4j.Logger;
 
@@ -24,6 +26,12 @@ class CheckLTS {
   private final boolean isMandarin;
   private static final boolean DEBUG = false;
 
+  /**
+   * @param lts
+   * @param htkDictionary
+   * @param languageProperty
+   * @see Scoring#Scoring(String, ServerProperties, LogAndNotify)
+   */
   public CheckLTS(LTS lts, HTKDictionary htkDictionary, String languageProperty) {
     this.letterToSoundClass = lts;
     this.htkDictionary = htkDictionary;
@@ -53,6 +61,7 @@ class CheckLTS {
   }
 
   int shown = 0;
+
   /**
    * So chinese is special -- it doesn't do lts -- it just uses a dictionary
    *
@@ -62,11 +71,20 @@ class CheckLTS {
    * @see #checkLTS(String)
    */
   private Set<String> checkLTS(LTS lts, String foreignLanguagePhrase) {
+    if (htkDictionary.isEmpty() && LTSFactory.isEmpty(lts)) {
+      if (shown++ < 20) {
+        logger.debug("skipping LTS since dict is empty and using the empty LTS : " + lts);
+      }
+      return Collections.emptySet();
+    }
+
     SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
     Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
 
     String language = isMandarin ? " MANDARIN " : "";
-    //logger.debug("checkLTSOnForeignPhrase '" + language + "' tokens : '" +tokens +"'");
+
+    logger.debug("checkLTS '" + language + "' tokens : '" + tokens + "' lts " + lts + " dict size " + htkDictionary.size());
+
     Set<String> oov = new HashSet<>();
     Set<String> inlts = new HashSet<>();
     Set<String> indict = new HashSet<>();
