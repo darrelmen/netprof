@@ -17,7 +17,7 @@ import java.util.*;
  * Time: 8:37 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UserExercise extends AudioExercise implements CombinedMutableUserExercise {
+public class UserExercise extends AudioExercise implements CombinedMutableUserExercise, CommonAnnotatable {
   public static final String CUSTOM_PREFIX = "Custom_";
   private long uniqueID = -1; //set by database
 
@@ -226,6 +226,11 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
 
   @Override
   public CombinedMutableUserExercise getCombinedMutableUserExercise() {
+    return this;
+  }
+
+  @Override
+  public CommonAnnotatable getCommonAnnotatable() {
     return this;
   }
 
