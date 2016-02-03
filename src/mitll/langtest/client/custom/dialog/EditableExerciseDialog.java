@@ -174,7 +174,8 @@ class EditableExerciseDialog extends NewUserExercise {
   protected Panel makeEnglishRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
-    english = makeBoxAndAnno(row, getEnglishLabel(), "(optional)", englishAnno);
+    String subtext = "";
+    english = makeBoxAndAnno(row, getEnglishLabel(), subtext, englishAnno);
     return row;
   }
 
@@ -202,7 +203,8 @@ class EditableExerciseDialog extends NewUserExercise {
   protected void makeTranslitRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
-    translit = makeBoxAndAnno(row, getTransliterationLabel(), "(optional)", translitAnno);
+    String subtext = "";
+    translit = makeBoxAndAnno(row, getTransliterationLabel(), subtext, translitAnno);
   }
 
   protected String getTransliterationLabel() {
