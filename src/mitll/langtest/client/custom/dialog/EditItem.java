@@ -23,6 +23,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserExercise;
@@ -54,12 +55,12 @@ public class EditItem {
   protected final LangTestDatabaseAsync service;
   private final UserManager userManager;
 
-  protected final ListInterface<Shell> predefinedContentList;
+  protected final Reloadable predefinedContentList;
 
   private UserFeedback feedback = null;
   private HasText itemMarker;
 
-  protected PagingExerciseList<CommonExercise> exerciseList;
+  protected PagingExerciseList<CommonShell,CommonExercise> exerciseList;
   protected final NPFHelper npfHelper;
 
   /**
@@ -70,7 +71,7 @@ public class EditItem {
    * @see mitll.langtest.client.custom.Navigation#Navigation
    */
   public EditItem(final LangTestDatabaseAsync service, final UserManager userManager, ExerciseController controller,
-                  ListInterface<Shell> listInterface, UserFeedback feedback, NPFHelper npfHelper) {
+                  Reloadable listInterface, UserFeedback feedback, NPFHelper npfHelper) {
     this.controller = controller;
     this.service = service;
     this.userManager = userManager;
@@ -128,7 +129,7 @@ public class EditItem {
    * @return
    * @see #editItem
    */
-  private PagingExerciseList<CommonExercise> makeExerciseList(Panel right,
+  private PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(Panel right,
                                                            String instanceName,
                                                            UserList<CommonExercise> ul,
                                                            UserList<CommonExercise> originalList,
@@ -141,8 +142,8 @@ public class EditItem {
       ul.addExercise(newItem);
     }
 
-    final PagingExerciseList<CommonExercise> exerciseList =
-        new NPExerciseList<CommonExercise>(right, service, feedback, controller,
+    final PagingExerciseList<CommonShell,CommonExercise> exerciseList =
+        new NPExerciseList(right, service, feedback, controller,
             true, instanceName, false) {
           @Override
           protected void onLastItem() {
@@ -166,11 +167,11 @@ public class EditItem {
           }
 
           @Override
-          public List<CommonExercise> rememberExercises(List<CommonExercise> result) {
+          public List<CommonShell> rememberExercises(List<CommonShell> result) {
             clear();
             boolean addNewItem = includeAddItem;
 
-            for (final CommonExercise es : result) {
+            for (final CommonShell es : result) {
               addExercise(es);
               if (includeAddItem && es.getID().equals(NEW_EXERCISE_ID)) {
                 addNewItem = false;
@@ -211,11 +212,12 @@ public class EditItem {
 //    return commonUserExercise2;
   }
 
-  private void setFactory(final PagingExerciseList<CommonExercise> exerciseList, final UserList<CommonExercise> ul,
+  private void setFactory(final PagingExerciseList<CommonShell,CommonExercise> exerciseList,
+                          final UserList<CommonExercise> ul,
                           final UserList<CommonExercise> originalList) {
     final PagingExerciseList outer = exerciseList;
 
-    exerciseList.setFactory(new ExercisePanelFactory<CommonExercise>(service, feedback, controller, exerciseList) {
+    exerciseList.setFactory(new ExercisePanelFactory<CommonShell,CommonExercise>(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
         Panel panel = new SimplePanel();
@@ -233,9 +235,9 @@ public class EditItem {
    * @param npfExerciseList
    * @see #editItem
    */
-  private void rememberAndLoadFirst(final UserList<CommonExercise> ul, PagingExerciseList<CommonExercise> npfExerciseList) {
+  private void rememberAndLoadFirst(final UserList<CommonExercise> ul, PagingExerciseList<CommonShell,CommonExercise> npfExerciseList) {
     npfExerciseList.setUserListID(ul.getUniqueID());
-    List<CommonExercise> userExercises = new ArrayList<>();
+    List<CommonShell> userExercises = new ArrayList<>();
     Collection<CommonExercise> exercises = ul.getExercises();
     for (CommonExercise e : exercises) {
       userExercises.add(e);  // TODO something better here
@@ -254,7 +256,8 @@ public class EditItem {
    * @param pagingContainer
    * @see #setFactory(mitll.langtest.client.list.PagingExerciseList, mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList)
    */
-  private void populatePanel(CommonExercise exercise, final Panel right, final UserList<CommonExercise> ul, final UserList<CommonExercise> originalList, final HasText itemMarker,
+  private void populatePanel(CommonExercise exercise, final Panel right, final UserList<CommonExercise> ul,
+                             final UserList<CommonExercise> originalList, final HasText itemMarker,
                              final ListInterface pagingContainer) {
     if (exercise.getID().equals(NEW_EXERCISE_ID)) {
       if (newExercise == null) {
@@ -335,7 +338,7 @@ public class EditItem {
           @Override
           public Panel addNew(UserList<CommonExercise> ul,
                               UserList<CommonExercise> originalList,
-                              ListInterface<CommonExercise> listInterface,
+                              ListInterface<CommonShell> listInterface,
                               Panel toAddTo) {
             final FluidContainer container = new FluidContainer();
 
