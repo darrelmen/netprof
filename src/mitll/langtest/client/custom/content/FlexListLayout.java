@@ -31,13 +31,12 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
   /**
    * @param service
    * @param feedback
-   * @param userManager
    * @param controller
    * @see ChapterNPFHelper#ChapterNPFHelper(LangTestDatabaseAsync, UserFeedback, UserManager, ExerciseController, boolean)
    * @see ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
    */
   public FlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                        UserManager userManager, ExerciseController controller) {
+                        ExerciseController controller) {
     this.controller = controller;
     this.service = service;
     this.feedback = feedback;
