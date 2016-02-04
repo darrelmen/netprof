@@ -51,7 +51,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class QCNPFExercise<T extends CommonShell & AudioRefExercise & AnnotationExercise & ScoredExercise> extends GoodwaveExercisePanel<T> {
-  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
+  private Logger logger = Logger.getLogger("QCNPFExercise");
 
   private static final String DEFECT = "Defect?";
 
@@ -651,6 +651,12 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     row.add(qcCol);
     if (addLeftMargin) {
       content.getElement().getStyle().setMarginLeft(80, Style.Unit.PX);
+    }
+    else {
+      if (logger == null) {
+        logger = Logger.getLogger("QCNPFExercise");
+      }
+      logger.warning("not adding left margin for " + field);
     }
     row.add(content);
 
