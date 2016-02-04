@@ -220,13 +220,12 @@ public class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExerci
   /**
    * Every time this panel becomes visible again, we need to check the lists for this user.
    *
-   * @see Navigation#getNav()
+   * @see Navigation#getTabPanel()
    */
   @Override
   public void wasRevealed() {
     populateListChoices(exercise.getID(), controller, addToList);
   }
-
 
   /**
    * Ask server for the set of current lists for this user.
