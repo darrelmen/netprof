@@ -19,9 +19,7 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.MutableAnnotationExercise;
-import mitll.langtest.shared.exercise.Shell;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,38 +28,32 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 9/8/14.
  */
-public class CommentBox<T extends Shell & AnnotationExercise> extends PopupContainer {
+public class CommentBox extends PopupContainer {
   private final Logger logger = Logger.getLogger("CommentBox");
 
   private static final String COMMENT_BUTTON_GROUP_NEW = "comment-button-group-new";
-  private final T exercise;
+  private final String exerciseID;
   private final CommentAnnotator commentAnnotator;
   private final EventRegistration registration;
   private MyPopup commentPopup;
   private MutableAnnotationExercise annotationExercise;
 
   /**
-   * @param exercise
+   * @param exerciseID
    * @param registration
    * @param commentAnnotator
    * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getQuestionContent(mitll.langtest.shared.exercise.CommonExercise, String)
    * @see mitll.langtest.client.flashcard.FlashcardPanel#getFirstRow(mitll.langtest.client.exercise.ExerciseController)
    */
-  public CommentBox(T exercise, EventRegistration registration, CommentAnnotator commentAnnotator, MutableAnnotationExercise annotationExercise) {
-    this.exercise = exercise;
+  public CommentBox(String exerciseID, EventRegistration registration, CommentAnnotator commentAnnotator, MutableAnnotationExercise annotationExercise) {
+    this.exerciseID = exerciseID;
     this.registration = registration;
     this.commentAnnotator = commentAnnotator;
     this.annotationExercise = annotationExercise;
-//    if (annotationExercise == null) {
-//      logger.warning("CommentBox huh? annotation exercise is null : " + annotationExercise);
-//    }
-//    else {
-//      logger.info("CommentBox got " +annotationExercise);
-//    }
   }
 
   /**
-   * @param field      of the exercise to comment on
+   * @param field      of the exerciseID to comment on
    * @param content    to wrap
    * @param annotation to get current comment from
    * @return three part widget -- content, comment button, and clear button
@@ -70,7 +62,6 @@ public class CommentBox<T extends Shell & AnnotationExercise> extends PopupConta
    */
   public Widget getEntry(String field, Widget content, ExerciseAnnotation annotation) {
     final Button commentButton = new Button();
-    //commentButton.getElement().setId("commentButton_for_"+field);
 
     if (field.endsWith(AudioTag.COMPRESSED_TYPE)) {
       field = field.replaceAll("." + AudioTag.COMPRESSED_TYPE, ".wav");
@@ -89,7 +80,7 @@ public class CommentBox<T extends Shell & AnnotationExercise> extends PopupConta
     String comment = !isCorrect ? annotation.getComment() : "";
 /*    System.out.println("getEntry : field " + field + " annotation " + annotation +
       " correct " + isCorrect + " comment '" + comment+
-      "', fields " + exercise.getFields());*/
+      "', fields " + exerciseID.getFields());*/
 
     configureCommentButton(commentButton,
         isCorrect, commentPopup,
@@ -146,7 +137,7 @@ public class CommentBox<T extends Shell & AnnotationExercise> extends PopupConta
                                 final Widget commentButton, final String field) {
     final Button clear = new Button("");
     clear.getElement().setId("CommentNPFExercise_" + field);
-    registration.register(clear, exercise.getID(), "clear comment");
+    registration.register(clear, exerciseID, "clear comment");
     clear.addStyleName("leftFiveMargin");
     addTooltip(clear, "Clear comment");
 
@@ -182,14 +173,20 @@ public class CommentBox<T extends Shell & AnnotationExercise> extends PopupConta
       addCloseHandler(new CloseHandler<PopupPanel>() {
         @Override
         public void onClose(CloseEvent<PopupPanel> event) {
-          registration.logEvent(commentBox, "Comment_TextBox", exercise.getID(), "submit comment '" + commentBox.getValue() +
-              "'");
+          registration.logEvent(commentBox, "Comment_TextBox", exerciseID, "submit comment '" + commentBox.getValue() + "'");
           commentComplete(commentBox, field, commentButton, clearButton);
         }
       });
     }
   }
 
+  /**
+   *
+   * @param commentButton
+   * @param clearButton
+   * @param isCorrect
+   * @see #commentComplete
+   */
   private void showOrHideCommentButton(UIObject commentButton, UIObject clearButton, boolean isCorrect) {
     if (isCorrect) {
       showQC(commentButton);
@@ -215,9 +212,9 @@ public class CommentBox<T extends Shell & AnnotationExercise> extends PopupConta
     commentButton.setSize(ButtonSize.MINI);
     commentButton.addStyleName("leftTenMargin");
     commentButton.getElement().setId("CommentNPFExercise_comment");
-    registration.register(commentButton, exercise.getID(), "show comment");
+    registration.register(commentButton, exerciseID, "show comment");
 
-    final Tooltip tooltip = setButtonTitle(commentButton, alreadyMarkedCorrect, comment);
+    Tooltip tooltip = setButtonTitle(commentButton, alreadyMarkedCorrect, comment);
     configurePopupButton(commentButton, commentPopup, commentEntry, tooltip);
 
     showQC(commentButton);
@@ -230,12 +227,22 @@ public class CommentBox<T extends Shell & AnnotationExercise> extends PopupConta
 
   private final Map<String, String> fieldToComment = new HashMap<String, String>();
 
-  private void showQC(UIObject qcCol) {
-    qcCol.addStyleName(COMMENT_BUTTON_GROUP_NEW);
+  /**
+   * @see #configureCommentButton(Button, boolean, PopupPanel, String, TextBox)
+   * @param commentButton
+   */
+  private void showQC(UIObject commentButton) {
+    commentButton.addStyleName(COMMENT_BUTTON_GROUP_NEW);
+  //  commentButton.removeStyleName("blueBackground");
   }
 
-  private void showQCHasComment(UIObject child) {
-    child.removeStyleName(COMMENT_BUTTON_GROUP_NEW);
+  /**
+   * @see #showOrHideCommentButton(UIObject, UIObject, boolean)
+   * @param commentButton
+   */
+  private void showQCHasComment(UIObject commentButton) {
+    commentButton.removeStyleName(COMMENT_BUTTON_GROUP_NEW);
+   // child.addStyleName("blueBackground");
   }
 
   /**
@@ -245,8 +252,12 @@ public class CommentBox<T extends Shell & AnnotationExercise> extends PopupConta
    * @param clearButton
    * @see MyPopup#configure(com.github.gwtbootstrap.client.ui.TextBox, com.google.gwt.user.client.ui.Widget, com.google.gwt.user.client.ui.Widget)
    */
-  private <T extends TextBox> void commentComplete(T commentEntry, String field, Widget commentButton, Widget clearButton) {
+  private <T extends ValueBoxBase> void commentComplete(T commentEntry, String field, Widget commentButton, Widget clearButton) {
     String comment = commentEntry.getText();
+    commentComplete(field, commentButton, clearButton, comment);
+  }
+
+  private void commentComplete(String field, Widget commentButton, Widget clearButton, String comment) {
     String previous = fieldToComment.get(field);
     if (previous == null || !previous.equals(comment)) {
       fieldToComment.put(field, comment);
@@ -260,7 +271,7 @@ public class CommentBox<T extends Shell & AnnotationExercise> extends PopupConta
       } else {
         commentAnnotator.addIncorrectComment(comment, field);
       }
-      //System.out.println("\t commentComplete : annotations now " + exercise.getFields());
+      //System.out.println("\t commentComplete : annotations now " + exerciseID.getFields());
     }
   }
 
