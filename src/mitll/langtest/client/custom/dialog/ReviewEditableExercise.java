@@ -20,7 +20,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.custom.content.NPFHelper;
+import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -55,7 +55,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   private static final String DELETE_THIS_ITEM = "Delete this item.";
   private static final String ARE_YOU_SURE = "Are you sure?";
   private static final String REALLY_DELETE_ITEM = "Really delete whole item and all audio cuts?";
-  public static final List<String> MSGS = Arrays.asList(REALLY_DELETE_ITEM);
+  private static final List<String> MSGS = Collections.singletonList(REALLY_DELETE_ITEM);
   private static final String COPY_THIS_ITEM = "Copy this item.";
   private static final String REGULAR_SPEED = " Regular speed";
   private static final String SLOW_SPEED = " Slow speed";
@@ -65,7 +65,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   private static final String FEMALE = "Female";
 
   private final PagingExerciseList<CommonShell, CommonExercise> exerciseList;
-  private final Reloadable predefinedContentList;
+  // private final ReloadableContainer predefinedContentList;
   private static final String WAV = ".wav";
   private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
 
@@ -74,7 +74,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @param changedUserExercise
    * @param originalList
    * @param exerciseList
-   * @param predefinedContent   - this should be a reference to the Learn tab exercise list, but it's not getting set.
+   * @paramx predefinedContent   - this should be a reference to the Learn tab exercise list, but it's not getting set.
    * @see mitll.langtest.client.custom.content.ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
    */
   public ReviewEditableExercise(LangTestDatabaseAsync service,
@@ -84,13 +84,15 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
                                 UserList<CommonShell> originalList,
                                 PagingExerciseList<CommonShell, CommonExercise> exerciseList,
-                                Reloadable predefinedContent,
-                                NPFHelper npfHelper) {
+                                ReloadableContainer predefinedContent,
+                                String instanceName) {
     super(service, controller,
         null,
-        itemMarker, changedUserExercise, originalList, exerciseList, predefinedContent, npfHelper);
+        itemMarker, changedUserExercise, originalList, exerciseList,
+        predefinedContent,
+        instanceName);
     this.exerciseList = exerciseList;
-    this.predefinedContentList = predefinedContent;
+    //  this.predefinedContentList = predefinedContent;
   }
 
   private List<RememberTabAndContent> tabs;
@@ -221,6 +223,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
   /**
    * Don't warn user to check if audio is consistent if there isn't any.
+   *
    * @return
    */
   @Override
@@ -250,7 +253,9 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     }
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, exercise.getForeignLanguage(), service, controller,
         controller.getProps().showSpectrogram(), new EmptyScoreListener(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED, exercise.getID(),
-        exercise, npfHelper.getInstanceName()) {
+        exercise, instance
+        //npfHelper.getInstanceName()
+    ) {
 
       /**
        * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, String, String)
@@ -290,9 +295,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
           @Override
           public void onSuccess(Void result) {
             widgets.getParent().setVisible(false);
-            if (predefinedContentList != null) {
-              predefinedContentList.reload();
-            }
+            reloadLearnList();
             // TODO : need to update other lists too?
           }
         });
@@ -302,9 +305,19 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     return getDeleteButton(tip, handler);
   }
 
+  private void reloadLearnList() {
+    Reloadable exerciseList = predefinedContentList.getReloadable();//npfHelper.getExerciseList();
+    if (exerciseList != null) {
+      exerciseList.clearCachedExercise();
+      exerciseList.reload();
+    } else {
+      logger.warning("reloadLearnList : no exercise list ref ");
+    }
+  }
+
+  // String tip = "Delete this audio cut.  Original recorder can re-record.";
   private Button getDeleteButton(String tip, ClickHandler handler) {
     Button delete = new Button("Delete Audio");
-    // String tip = "Delete this audio cut.  Original recorder can re-record.";
     addTooltip(delete, tip);
     delete.addStyleName("leftFiveMargin");
     delete.setType(ButtonType.WARNING);
@@ -387,6 +400,10 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     row.add(prevNext);
 
     final Button fixed = makeFixedButton();
+
+    if (logger != null) {
+      logger.info(this.getClass() + " adding create button - review editable.");
+    }
 
     fixed.addClickHandler(new ClickHandler() {
       @Override
@@ -553,9 +570,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
         @Override
         public void onSuccess(Void result) {
-          if (predefinedContentList != null) {
-            predefinedContentList.reload();
-          }
+          reloadLearnList();
+
           exerciseList.forgetExercise(id);
         }
       });
@@ -624,10 +640,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
               getPlayButton().setEnabled(false);
               if (comment != null) comment.setVisible(false);
 
-              if (predefinedContentList != null) {
-                predefinedContentList.reload();
-              }
-              // TODO : need to update other lists too?
+              reloadLearnList();
             }
           });
         }
