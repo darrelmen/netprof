@@ -6,7 +6,6 @@ package mitll.langtest.client.custom.content;
 
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.base.HasIcon;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.Scheduler;
@@ -52,10 +51,10 @@ public class NPFHelper implements RequiresResize {
   protected final UserManager userManager;
 
   protected final UserFeedback feedback;
-  public PagingExerciseList<CommonShell, CommonExercise> npfExerciseList;
+  public PagingExerciseList<CommonShell, CommonExercise> npfExerciseList = null;
   private final boolean showQC;
   DivWidget contentPanel;
-  protected String instanceName;
+  protected String instanceName = "unset";
 
   /**
    * @param service
@@ -64,7 +63,7 @@ public class NPFHelper implements RequiresResize {
    * @param controller
    * @param showQC
    * @see mitll.langtest.client.custom.Navigation#Navigation
-   * @see mitll.langtest.client.custom.ListManager#ListManager(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback, TabPanel)
+   * @see mitll.langtest.client.custom.ListManager#ListManager
    */
   public NPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
                    ExerciseController controller, boolean showQC) {
@@ -75,6 +74,13 @@ public class NPFHelper implements RequiresResize {
     this.showQC = showQC;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.ListManager#selectPreviouslyClickedSubTab(TabPanel, TabAndContent, TabAndContent, TabAndContent, UserList, String, boolean, boolean, boolean)
+   * @param ul
+   * @param tabAndContent
+   * @param instanceName
+   * @param loadExercises
+   */
   public void showNPF(UserList<CommonShell> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
     showNPF(ul, tabAndContent, instanceName, loadExercises, null);
   }
@@ -105,7 +111,9 @@ public class NPFHelper implements RequiresResize {
     }
   }
 
-  public ListInterface getExerciseList() {
+  public ListInterface<?> getExerciseList() {
+    logger.info("\t: getExerciseList instanceName = " + instanceName + " : " + (npfExerciseList != null ? " exercise list exists " : "null???"));
+
     return npfExerciseList;
   }
 
