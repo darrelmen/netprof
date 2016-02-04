@@ -266,7 +266,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   /**
    * @param completedExercise
    * @see #checkBoxWasClicked(boolean, String, com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.FocusWidget)
-   * @see #markReviewed(mitll.langtest.client.list.ListInterface, mitll.langtest.shared.exercise.CommonShell)
+   * @see #markReviewed
    */
   private void markReviewed(final HasID completedExercise) {
     boolean allCorrect = incorrectFields.isEmpty();
@@ -374,7 +374,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     ExerciseAnnotation refAudio = e.getAnnotation(REF_AUDIO);
     Panel column = new FlowPanel();
     column.addStyleName("blockStyle");
-    column.add(getCommentWidget(REF_AUDIO, new Label(NO_AUDIO_RECORDED), refAudio));
+    column.add(getCommentWidget(REF_AUDIO, new Label(NO_AUDIO_RECORDED), refAudio,false));
     return column;
   }
 
@@ -467,7 +467,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    * @param next
    * @param allByUser
    * @return
-   * @see #addTabsForUsers(mitll.langtest.shared.exercise.T, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
+   * @see #addTabsForUsers
    */
   private DivWidget getGenderGroup(final RememberTabAndContent tabAndContent, final AudioAttribute audio, final Button next, final List<AudioAttribute> allByUser) {
     ButtonToolbar w = new ButtonToolbar();
@@ -567,7 +567,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    * @param e
    * @param audio
    * @return both the comment widget and the audio panel
-   * @see #addTabsForUsers(mitll.langtest.shared.exercise.T, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
+   * @see #addTabsForUsers
    */
   private Pair getPanelForAudio(final T e, final AudioAttribute audio) {
     String audioRef = audio.getAudioRef();
@@ -599,7 +599,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     });
     ExerciseAnnotation audioAnnotation = e.getAnnotation(audio.getAudioRef());
 
-    Widget entry = getCommentWidget(audio.getAudioRef(), audioPanel, audioAnnotation);
+    Widget entry = getCommentWidget(audio.getAudioRef(), audioPanel, audioAnnotation,false);
     return new Pair(entry, audioPanel);
   }
 
@@ -618,7 +618,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   }
 
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
-    return getCommentWidget(field, getContentWidget(label, value, true), annotation);
+    return getCommentWidget(field, getContentWidget(label, value, true), annotation, true);
   }
 
   /**
@@ -626,7 +626,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    * @param annotation
    * @return
    */
-  private Widget getCommentWidget(final String field, Widget content, ExerciseAnnotation annotation) {
+  private Widget getCommentWidget(final String field, Widget content, ExerciseAnnotation annotation, boolean addLeftMargin) {
     final FocusWidget commentEntry = makeCommentEntry(field, annotation);
 
     boolean alreadyMarkedCorrect = annotation == null || annotation.getStatus() == null || annotation.getStatus().equals("correct");
@@ -649,6 +649,9 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     row.addStyleName("trueInlineStyle");
     qcCol.addStyleName("floatLeft");
     row.add(qcCol);
+    if (addLeftMargin) {
+      content.getElement().getStyle().setMarginLeft(80, Style.Unit.PX);
+    }
     row.add(content);
 
     Panel rowContainer = new FlowPanel();
@@ -672,7 +675,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    * @param commentEntry
    * @param alreadyMarkedCorrect
    * @param commentRow
-   * @see #getCommentWidget(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
+   * @see #getCommentWidget
    */
   private void populateCommentRow(FocusWidget commentEntry, boolean alreadyMarkedCorrect, Panel commentRow) {
     commentRow.setVisible(!alreadyMarkedCorrect);
