@@ -46,10 +46,7 @@ import java.util.logging.Logger;
 /**
  * Created by GO22670 on 3/28/2014.
  */
-public class ReviewEditableExercise//<T extends CommonShell & AudioRefExercise & CombinedMutableUserExercise,
-    //  X extends CommonShell & AnnotationExercise,
-    //UL extends UserList<T>>
-    extends EditableExerciseDialog/*<T, UL>*/ {
+public class ReviewEditableExercise extends EditableExerciseDialog {
   private final Logger logger = Logger.getLogger("ReviewEditableExercise");
 
   private static final String FIXED = "Mark Fixed";
@@ -71,8 +68,6 @@ public class ReviewEditableExercise//<T extends CommonShell & AudioRefExercise &
   private final Reloadable predefinedContentList;
   private static final String WAV = ".wav";
   private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
-  // AudioAttributeExercise audioAttributeExercise;
-  //X annotationExercise;
 
   /**
    * @param itemMarker
