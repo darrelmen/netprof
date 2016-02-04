@@ -16,11 +16,13 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.BasicDialog;
@@ -89,7 +91,8 @@ public class NewUserExercise extends BasicDialog {
    * @see EditItem#getAddOrEditPanel
    */
   public NewUserExercise(final LangTestDatabaseAsync service,
-                         ExerciseController controller, HasText itemMarker, EditItem editItem,
+                         ExerciseController controller,
+                         HasText itemMarker, EditItem editItem,
                          CommonExercise newExercise,
                          String instance,
                          UserList<CommonShell> originalList) {
@@ -210,7 +213,7 @@ public class NewUserExercise extends BasicDialog {
                UserList<CommonShell> ul,
                ListInterface<CommonShell> pagingContainer,
                Panel toAddTo) {
-    grabInfoFromFormAndStuffInfoExercise();
+    grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable());
   }
 
   /**
@@ -239,12 +242,12 @@ public class NewUserExercise extends BasicDialog {
    * @param uniqueID
    * @param ul
    * @param exerciseList
-   * @param npfExerciseList
+   * @param learnContainer
    */
   void deleteItem(final String id, final long uniqueID,
                   final UserList<?> ul,
                   final PagingExerciseList<?,?> exerciseList,
-                  final PagingExerciseList<?,?> npfExerciseList) {
+                  final ReloadableContainer learnContainer) {
     service.deleteItemFromList(uniqueID, id, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -262,9 +265,9 @@ public class NewUserExercise extends BasicDialog {
         if (!originalList.removeAndCheck(id)) {
           logger.warning("deleteItem huh? didn't remove the item " + id + " from " + originalList);
         }
-        if (npfExerciseList != null) {
-          npfExerciseList.redraw();
-        }
+       // if (npfExerciseList != null) {
+        learnContainer.getReloadable().redraw();   // TODO : or reload???
+       // }
       }
     });
   }
@@ -367,10 +370,14 @@ public class NewUserExercise extends BasicDialog {
    * @return
    * @see #addNew
    */
-  Panel getCreateButton(UserList<CommonShell> ul,
+  protected Panel getCreateButton(UserList<CommonShell> ul,
                         ListInterface<CommonShell> pagingContainer,
                         Panel toAddTo,
                         ControlGroup normalSpeedRecording) {
+    if (logger != null) {
+      logger.info(this.getClass() + " adding create button - new user");
+    }
+
     Button submit = makeCreateButton(ul, pagingContainer, toAddTo, foreignLang, rap, normalSpeedRecording);
     submit.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
     submit.getElement().getStyle().setMarginRight(15, Style.Unit.PX);
@@ -458,7 +465,7 @@ public class NewUserExercise extends BasicDialog {
   private void isValidForeignPhrase(final UserList<CommonShell> ul,
                                     final ListInterface<CommonShell> pagingContainer, final Panel toAddTo,
                                     final boolean onClick) {
-    logger.info("isValidForeignPhrase : checking phrase " + foreignLang.getText() + " before adding/changing " + newUserExercise);
+  //  logger.info("isValidForeignPhrase : checking phrase " + foreignLang.getText() + " before adding/changing " + newUserExercise);
 
     service.isValidForeignPhrase(foreignLang.getText(), new AsyncCallback<Boolean>() {
       @Override
@@ -467,12 +474,12 @@ public class NewUserExercise extends BasicDialog {
 
       @Override
       public void onSuccess(Boolean result) {
-        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getText() +
-            " before adding/changing " + newUserExercise + " -> " + result);
+/*        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getText() +
+            " before adding/changing " + newUserExercise + " -> " + result);*/
 
         if (result) {
           checkIfNeedsRefAudio();
-          grabInfoFromFormAndStuffInfoExercise();
+          grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable());
           afterValidForeignPhrase(ul, pagingContainer, toAddTo, onClick);
         } else {
           markError(foreignLang, "The " + FOREIGN_LANGUAGE +
@@ -482,14 +489,11 @@ public class NewUserExercise extends BasicDialog {
     });
   }
 
-  void grabInfoFromFormAndStuffInfoExercise() {
-    MutableExercise mutableExercise = newUserExercise.getMutable();
-
+  void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise ) {
     mutableExercise.setEnglish(english.getText());
     mutableExercise.setForeignLanguage(foreignLang.getText());
     mutableExercise.setTransliteration(translit.getText());
-
-    logger.info("now after getting fields " + mutableExercise);
+  //  logger.info("now after getting fields " + mutableExercise);
   }
 
   void checkIfNeedsRefAudio() {
@@ -518,11 +522,10 @@ public class NewUserExercise extends BasicDialog {
                                final ListInterface<CommonShell> exerciseList,
                                final Panel toAddTo,
                                boolean onClick) {
-    CombinedMutableUserExercise exerciseToSend = newUserExercise.getCombinedMutableUserExercise();
-
+  //  CombinedMutableUserExercise exerciseToSend = newUserExercise.getCombinedMutableUserExercise();
  //   logger.info("user list is " + ul);
 
-    service.reallyCreateNewItem(ul.getUniqueID(), exerciseToSend, new AsyncCallback<CommonExercise>() {
+    service.reallyCreateNewItem(ul.getUniqueID(), newUserExercise, new AsyncCallback<CommonExercise>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -562,7 +565,12 @@ public class NewUserExercise extends BasicDialog {
 
     Shell toMoveToEnd = moveNewExerciseToEndOfList(newExercise, exerciseList);
 
-    exerciseList.checkAndAskServer(toMoveToEnd.getID());
+    exerciseList.clearCachedExercise(); // if we don't it will just use the cached exercise, if it's the current one
+    String id = toMoveToEnd.getID();
+
+    logger.info("afterItemCreated checkAndAskServer " + id);
+
+    exerciseList.checkAndAskServer(id);
 
     toAddTo.clear();
     toAddTo.add(addNew(ul, originalList, exerciseList, toAddTo));
