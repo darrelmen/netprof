@@ -42,7 +42,6 @@ class EditableExerciseDialog extends NewUserExercise {
   private final HTML slowAnno = new HTML();
   private String originalForeign = "";
   private String originalEnglish = "";
-  //final UL originalList;
 
   protected final PagingExerciseList<CommonShell, CommonExercise> exerciseList;
   protected final Reloadable predefinedContentList;
@@ -284,7 +283,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * If the translation is new but the audio isn't, ask and clear
    *
    * @return
-   * @paramx listener
+   * @see #afterValidForeignPhrase(UserList, ListInterface, Panel, boolean)
    */
   boolean checkForForeignChange() {
     boolean didChange = foreignChanged();
