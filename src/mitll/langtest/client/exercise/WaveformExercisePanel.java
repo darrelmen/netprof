@@ -5,18 +5,21 @@
 package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.base.HasIcon;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.exercise.AudioRefExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.exercise.STATE;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.logging.Logger;
 
 /**
  * Does fancy flashing record bulb while recording.
@@ -26,6 +29,8 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell & AudioRefExercise> extends ExercisePanel<L,T> {
+  private Logger logger = Logger.getLogger("WaveformExercisePanel");
+
   private static final String RECORD_PROMPT  = "Record the word or phrase, first at normal speed, then again at slow speed.";
   private static final String RECORD_PROMPT2 = "Record the in-context sentence.";
   private static final String EXAMPLE_RECORD = "EXAMPLE_RECORD";
@@ -186,6 +191,8 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
   public void postAnswers(ExerciseController controller, HasID completedExercise) {
   //  completedExercise.setState(STATE.RECORDED);
     // TODO : gah = do we really need to do this???
+
+    logger.info("Not setting state on " +completedExercise.getID());
 
     exerciseList.setState(completedExercise.getID(), STATE.RECORDED);
     exerciseList.redraw();
