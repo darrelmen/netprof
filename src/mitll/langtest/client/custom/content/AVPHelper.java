@@ -66,7 +66,7 @@ public class AVPHelper extends NPFHelper {
    */
   @Override
   PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(final Panel right, final String instanceName) {
-    HistoryExerciseList widgets = new NPExerciseList(right, service, feedback, controller,
+    PagingExerciseList<CommonShell,CommonExercise> widgets = new NPExerciseList(right, service, feedback, controller,
         true, instanceName, true) {
       @Override
       protected void onLastItem() {
@@ -87,7 +87,7 @@ public class AVPHelper extends NPFHelper {
   }
 
   @Override
-  protected ExercisePanelFactory<CommonShell,CommonExercise> getFactory(PagingExerciseList exerciseList, final String instanceName, boolean showQC) {
+  protected ExercisePanelFactory<CommonShell,CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList, final String instanceName, boolean showQC) {
     StatsFlashcardFactory avpHelper = new StatsFlashcardFactory(service, feedback, controller, exerciseList, "AVPHelper", ul);
     avpHelper.setContentPanel(contentPanel);
     return avpHelper;
