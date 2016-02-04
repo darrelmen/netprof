@@ -969,7 +969,7 @@ public class ExcelImport implements ExerciseDAO {
 
     imported.setEnglishSentence(english);
     if (translit.length() > 0) {
-      imported.setTranslitSentence(translit);
+      imported.setTransliteration(translit);
     }
 
     List<String> translations = new ArrayList<String>();
