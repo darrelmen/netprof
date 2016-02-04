@@ -31,7 +31,10 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.SoundFeedback;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.AnnotationExercise;
+import mitll.langtest.shared.exercise.AudioRefExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.MutableAnnotationExercise;
 
 import java.util.logging.Logger;
 
@@ -127,14 +130,14 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
 
     inner.add(threePartContent);
 
-  //  logger.info("Adding recording widgets to " + inner2.getElement().getId());
+    //  logger.info("Adding recording widgets to " + inner2.getElement().getId());
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         addRecordingAndFeedbackWidgets(exercise.getID(), service, controller, inner2);
       }
     });
 
-  //  logger.info("After adding recording widgets to " + inner2.getElement().getId());
+    //  logger.info("After adding recording widgets to " + inner2.getElement().getId());
 
     inner2.add(getFinalWidgets());
 
@@ -160,8 +163,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
    * @see #FlashcardPanel
    */
   DivWidget getFirstRow(ExerciseController controller) {
-    DivWidget firstRow = new DivWidget();
-    commentBox = new CommentBox<T>(exercise, controller, new CommentAnnotator() {
+    commentBox = new CommentBox(exercise.getID(), controller, new CommentAnnotator() {
       @Override
       public void addIncorrectComment(String commentToPost, String field) {
         addAnnotation(field, GoodwaveExercisePanel.INCORRECT, commentToPost);
@@ -171,13 +173,15 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
       public void addCorrectComment(String field) {
         addAnnotation(field, GoodwaveExercisePanel.CORRECT, "");
       }
-    },exercise);
+    }, exercise);
+
     DivWidget left = new DivWidget();
     left.add(commentBox.getEntry(QCNPFExercise.FOREIGN_LANGUAGE, null, exercise.getAnnotation(QCNPFExercise.FOREIGN_LANGUAGE)));
     left.addStyleName("floatLeft");
     left.getElement().setId("leftCommentBoxContainer");
     // left.setWidth("50%");
 
+    DivWidget firstRow = new DivWidget();
     firstRow.add(left);
     firstRow.getElement().setId("firstRow");
     return firstRow;
@@ -236,7 +240,8 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
 
   void addRecordingAndFeedbackWidgets(String exerciseID, LangTestDatabaseAsync service, ExerciseController controller, Panel contentMiddle) {
     boolean noModel = controller.getProps().isNoModel();
-    if (!noModel) logger.warning("addRecordingAndFeedbackWidgets : adding empty recording and feedback widgets " + this.getClass());
+    if (!noModel)
+      logger.warning("addRecordingAndFeedbackWidgets : adding empty recording and feedback widgets " + this.getClass());
   }
 
   /**
@@ -664,7 +669,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
 
   private FocusPanel makeEnglishPhrase(String englishSentence) {
     Heading englishHeading = new Heading(1, englishSentence);
-  //  englishHeading.getElement().getStyle().setWidth(500, Style.Unit.PX);
+    //  englishHeading.getElement().getStyle().setWidth(500, Style.Unit.PX);
     englishHeading.getElement().setId("EnglishPhrase");
     FocusPanel widgets = new FocusPanel();
     widgets.add(englishHeading);
@@ -802,6 +807,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   void showForeign() {
     foreign.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
   }
+
   void showEnglish() {
     english.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
   }
@@ -877,7 +883,9 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
    * @return
    * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, String)
    */
-  boolean otherReasonToIgnoreKeyPress() {  return commentBox.isPopupShowing();  }
+  boolean otherReasonToIgnoreKeyPress() {
+    return commentBox.isPopupShowing();
+  }
 
   private class ClickableSimplePanel extends SimplePanel {
     public HandlerRegistration addClickHandler(ClickHandler handler) {
