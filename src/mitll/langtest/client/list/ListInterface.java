@@ -29,6 +29,12 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public interface ListInterface<T extends Shell> extends RequiresResize, Reloadable {
+  T byID(String name);
+
+  void addExercise(T es);
+
+  T simpleRemove(String id);
+
   /**
    * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList(Panel, String)
    * @param factory
@@ -55,9 +61,6 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
    */
   Widget getExerciseListOnLeftSide(PropertyHandler props);
 
-  T byID(String name);
-
-  void loadExercise(String itemID);
 
   boolean loadNext();
 
@@ -84,7 +87,6 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
    */
   boolean loadByID(String id);
 
-  String getCurrentExerciseID();
 
   /**
    * @see PrevNextList#clickNext()
@@ -106,9 +108,6 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
    * @see mitll.langtest.client.custom.content.NPFHelper#makeExerciseList(com.google.gwt.user.client.ui.Panel, String)
    */
   void reloadExercises();
-  void addExercise(T es);
-
-  T simpleRemove(String id);
 
   int getSize();
 
@@ -121,12 +120,12 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
   void hide();
 
   /**
-   * @see Navigation#getNav()
+   * @see Navigation#getTabPanel()
    * @return
    */
   Panel getCreatedPanel();
 
-  void redraw();
+//  void redraw();
   void setState(String id, STATE state);
   void setSecondState(String id, STATE state);
 
@@ -144,4 +143,7 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
   void searchBoxEntry(String text);
 
   int getIndex(String currentID);
+
+ // void clearCachedExercise();
+
 }
