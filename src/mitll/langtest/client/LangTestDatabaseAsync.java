@@ -89,7 +89,7 @@ public interface LangTestDatabaseAsync {
 
   void addItemToUserList(long userListID, String exID, AsyncCallback<Void> async);
 
-  void reallyCreateNewItem(long userListID, CombinedMutableUserExercise userExercise, AsyncCallback<CommonExercise> async);
+  void reallyCreateNewItem(long userListID, CommonExercise userExercise, AsyncCallback<CommonExercise> async);
 
   void addUserList(long userid, String name, String description, String dliClass, boolean isPublic, AsyncCallback<Long> async);
 
