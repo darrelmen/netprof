@@ -1333,7 +1333,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userExercise
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
-  public CommonExercise reallyCreateNewItem(long userListID, CombinedMutableUserExercise userExercise) {
+  public CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise) {
     //logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
 
     db.getUserListManager().reallyCreateNewItem(userListID, userExercise, serverProps.getMediaDir());
