@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,6 +28,7 @@ import java.util.Collections;
  * To change this template use File | Settings | File Templates.
  */
 public class ModalInfoDialog {
+  private static final List<String> MESSAGES = Collections.emptyList();
   private final KeyPressHelper enterKeyButtonHelper = new KeyPressHelper();
 
   public ModalInfoDialog() {}
@@ -35,22 +37,25 @@ public class ModalInfoDialog {
     this(title, message, null);
   }
 
+  public ModalInfoDialog(String title, Widget widget) {
+    this(title, MESSAGES, widget, null);
+  }
+
   public ModalInfoDialog(String title, String message, HiddenHandler handler) {
     this(title, Collections.singleton(message), null, handler);
   }
 
   public ModalInfoDialog(String title, Collection<String> messages, Widget widget, HiddenHandler handler) {
-    final Modal modal = getModal(title, messages, widget, handler);
-    modal.show();
+    getModal(title, messages, widget, handler).show();
   }
 
   public Modal getModal(String title, String message, Widget widget, HiddenHandler handler) {
     return getModal(title, Collections.singleton(message), widget, handler);
   }
 
-  public Modal getModal(String title, String message) {
+/*  public Modal getModal(String title, String message) {
     return getModal(title, Collections.singleton(message), null, null);
-  }
+  }*/
 
   public Modal getModal(String title, Collection<String> messages, Widget widget, HiddenHandler handler) {
     final Modal modal = new Modal(true);
