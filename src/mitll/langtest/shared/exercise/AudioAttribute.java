@@ -154,6 +154,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return attributes.containsKey(name) && attributes.get(name).equals(value);
   }
 
+  public boolean isContextAudio() { return getAudioType().startsWith(CONTEXT); }
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded
    * @return
