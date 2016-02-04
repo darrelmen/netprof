@@ -25,7 +25,7 @@ import java.util.*;
 public class JsonSupport {
   private static final Logger logger = Logger.getLogger(JsonSupport.class);
 
-  private final SectionHelper sectionHelper;
+  private final SectionHelper<CommonExercise> sectionHelper;
   private final ResultDAO resultDAO;
   private final RefResultDAO refResultDAO;
   private final AudioDAO audioDAO;
@@ -43,7 +43,7 @@ public class JsonSupport {
    * @param configDir
    * @param installPath
    */
-  public JsonSupport(SectionHelper sectionHelper, ResultDAO resultDAO,RefResultDAO refResultDAO, AudioDAO audioDAO,
+  public JsonSupport(SectionHelper<CommonExercise> sectionHelper, ResultDAO resultDAO,RefResultDAO refResultDAO, AudioDAO audioDAO,
                      PhoneDAO phoneDAO,String configDir, String installPath) {
     this.sectionHelper = sectionHelper;
     this.resultDAO = resultDAO;
