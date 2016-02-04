@@ -46,6 +46,7 @@ import java.util.logging.Logger;
 public class UserPassLogin extends UserDialog {
   private final Logger logger = Logger.getLogger("UserPassLogin");
   private static final String CLASSROOM = "NetProF";
+  private static final String WELCOME_MESSAGE = "Welcome to " + CLASSROOM + "!";
 
   //  private static final boolean CHECK_AGE = false;
   private static final String WAIT_FOR_APPROVAL = "Wait for approval";
@@ -96,7 +97,7 @@ public class UserPassLogin extends UserDialog {
   private static final String HELP = "Help";
   private static final String AGE_ERR_MSG = "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".";
 
-  public static final String SHOWN_HELLO = "shownHello";
+  private static final String SHOWN_HELLO = "shownHello";
 
   private final UserManager userManager;
   private final KeyPressHelper enterKeyButtonHelper;
@@ -154,7 +155,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   private void showWelcome() {
-    Modal modal = new ModalInfoDialog().getModal("Welcome to " + CLASSROOM + "!",
+    Modal modal = new ModalInfoDialog().getModal(WELCOME_MESSAGE,
         //"<h4>" + CLASSROOM + " has been updated.</h4>" +
         getLoginInfo(), null, new HiddenHandler() {
           @Override
