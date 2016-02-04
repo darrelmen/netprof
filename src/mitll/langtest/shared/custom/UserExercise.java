@@ -21,10 +21,6 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   public static final String CUSTOM_PREFIX = "Custom_";
   private long uniqueID = -1; //set by database
 
-  private String transliteration;
-  private String context;
-  private String contextTranslation;
-
   private long creator;
   private boolean isPredef;
   private boolean isOverride;
@@ -36,17 +32,6 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
 
   public UserExercise() {
   }  // just for serialization
-
-  /**
-   * @param shell
-   * @param creator
-   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
-   */
-/*  public UserExercise(CommonShell shell, long creator) {
-    super(shell.getID());
-    isPredef = !shell.getID().startsWith(CUSTOM_PREFIX);
-    this.creator = creator;
-  }*/
 
   /**
    * Tooltip is the english phrase, but if it's empty, use the foreign language.
@@ -260,7 +245,8 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
         (isOverride ? " <Override>" : "") +
         " creator " + getCreator() +
         " : English '" + getEnglish() + "', " +
-        "foreign language '" + getForeignLanguage() + "'" + " (" + getTransliteration() + ") " +
+        "foreign language '" + getForeignLanguage() + "'" +
+        " transliteation '" + getTransliteration() + "' " +
         "meaning '" + getMeaning() + "' " +
         "context '" + getContext() + "' " +
         "contextTranslation '" + getContextTranslation() + "' " +
