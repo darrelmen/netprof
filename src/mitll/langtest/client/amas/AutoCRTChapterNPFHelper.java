@@ -71,7 +71,7 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
   protected FlexListLayout getMyListLayout(final LangTestDatabaseAsync service, final UserFeedback feedback,
                                            UserManager userManager, final ExerciseController controller,
                                            SimpleChapterNPFHelper outer) {
-    return new MyFlexListLayout(service, feedback, userManager, controller, outer) {
+    return new MyFlexListLayout(service, feedback, controller, outer) {
       @Override
       protected PagingExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
                                                     boolean incorrectFirst) {
