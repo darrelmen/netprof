@@ -44,7 +44,7 @@ public class UserListManager {
   public static final long COMMENT_MAGIC_ID = -200;
   private static final long ATTN_LL_MAGIC_ID = -300;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   public static final String DUP = "_dup_";
 
