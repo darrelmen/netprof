@@ -653,10 +653,10 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
       content.getElement().getStyle().setMarginLeft(80, Style.Unit.PX);
     }
     else {
-      if (logger == null) {
+/*      if (logger == null) {
         logger = Logger.getLogger("QCNPFExercise");
       }
-      logger.warning("not adding left margin for " + field);
+      logger.warning("not adding left margin for " + field);*/
     }
     row.add(content);
 
