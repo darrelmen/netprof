@@ -34,10 +34,7 @@ import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -50,20 +47,18 @@ import java.util.logging.Logger;
 public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T> {
   private Logger logger = Logger.getLogger("CommentNPFExercise");
 
-  private static final String CONTEXT = "context";
   private static final String CONTEXT_SENTENCE = "Context Sentence";
   private static final String DEFAULT = "Default";
 
   private static final String NO_REFERENCE_AUDIO = "No reference audio";
   private static final String M = "M";
   private static final String F = "F";
-  public static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";//"\\p{P}";
+  public static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";
   public static final String SPACE_REGEX = " ";
   private static final String REF_AUDIO = "refAudio";
 
   private AudioAttribute defaultAudio, maleAudio, femaleAudio;
   private PlayAudioPanel contextPlay;
-  //private CommentBox commentBox;
 
   /**
    *
@@ -88,8 +83,6 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    */
   @Override
   protected Widget getQuestionContent(final T e, String content) {
-     // gettCommentBox(e);
-
     Panel column = new VerticalPanel();
     column.getElement().setId("QuestionContent");
     column.setWidth("100%");
@@ -118,21 +111,9 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     return column;
   }
 
-  /**
-   * @see #getEntry(String, String, String, ExerciseAnnotation)
-   * @see #makeFastAndSlowAudio(String)
-   * @return
-   */
-  private CommentBox<T> getCommentBox() {
-    if (logger == null) {
-      logger = Logger.getLogger("CommentNPFExercise");
-    }
-    T exercise = this.exercise;
-    return new CommentBox<T>(this.exercise, controller, this, exercise.getMutableAnnotation());
-  }
-
   private void addContextButton(final T e, DivWidget row) {
-    String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
+    String originalContext = e.getContext();
+    String context = originalContext != null && !originalContext.trim().isEmpty() ? originalContext : "";
 
     if (!context.isEmpty() && controller.getProps().showContextButton()) {
       Button show = new Button(CONTEXT_SENTENCE);
@@ -141,8 +122,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
       show.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          List<String> messages = Collections.emptyList();
-          new ModalInfoDialog(CONTEXT_SENTENCE, messages, getContext(e), null);
+          new ModalInfoDialog(CONTEXT_SENTENCE, getContext(e));
         }
       });
 
@@ -160,7 +140,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @return
    * @see #addContextButton
    */
-  private Panel getContext(T e) {
+  private <U extends CommonShell & AnnotationExercise & AudioRefExercise> Panel getContext(U e) {
     String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
     String contextTranslation = e.getContextTranslation() != null && !e.getContextTranslation().trim().isEmpty() ? e.getContextTranslation() : "";
     boolean same = context.equals(contextTranslation);
@@ -169,18 +149,22 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
       Panel hp = new HorizontalPanel();
       Panel vp = new VerticalPanel();
       addGenderChoices(e, hp);
-      context = highlightVocabItemInContext(e, context);
-      Widget entry = getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, context);
+      String highlightedVocabItemInContext = highlightVocabItemInContext(e, context);
+      Widget entry = getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, highlightedVocabItemInContext);
       vp.add(entry);
 
-      if (!contextTranslation.isEmpty() && !same) {
-        Widget translationEntry = getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION, contextTranslation);
-        vp.add(translationEntry);
-      }
+      addContextTranslation(e, contextTranslation, same, vp);
       hp.add(vp);
       return hp;
     } else {
       return null;
+    }
+  }
+
+  private void addContextTranslation(AnnotationExercise e, String contextTranslation, boolean same, Panel vp) {
+    if (!contextTranslation.isEmpty() && !same) {
+      Widget translationEntry = getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION, contextTranslation);
+      vp.add(translationEntry);
     }
   }
 
@@ -194,10 +178,15 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @param e
    * @param context
    * @return
-   * @see #getContext(T)
+   * @see #getContext
    */
-  private String highlightVocabItemInContext(T e, String context) {
-    String trim   = e.getForeignLanguage().trim();
+  private String highlightVocabItemInContext(CommonShell e, String context) {
+    String foreignLanguage = e.getForeignLanguage();
+    return getHighlightedItemInContext(context, foreignLanguage);
+  }
+
+  private String getHighlightedItemInContext(String context, String foreignLanguage) {
+    String trim   = foreignLanguage.trim();
     String toFind = removePunct(trim);
 
     // todone split on spaces, find matching words if no contigious overlap
@@ -249,13 +238,13 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @param hp
    * @see #getContext
    */
-  private void addGenderChoices(T e, Panel hp) {
+  private void addGenderChoices(AudioRefExercise e, Panel hp) {
     // first, choose male and female voices
 
     long maleTime = 0, femaleTime = 0;
     Set<Long> preferredUsers = controller.getProps().getPreferredVoices();
     for (AudioAttribute audioAttribute : e.getAudioAttributes()) {
-      if (audioAttribute.getAudioType().startsWith(CONTEXT)) {
+      if (audioAttribute.isContextAudio()) {
         long user = audioAttribute.getUser().getId();
         if (user == -1) {
           defaultAudio = audioAttribute;
@@ -296,11 +285,11 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
 
       hp.add(contextPlay);
 
-      List<String> choices = new ArrayList<String>();
+      List<String> choices = new ArrayList<>();
       if (maleAudio != null) choices.add(M);
       if (femaleAudio != null) choices.add(F);
       if (defaultAudio != null && (maleAudio == null || femaleAudio == null)) {
-        logger.info("Adding default choice since found " + defaultAudio);
+        //logger.info("Adding default choice since found " + defaultAudio);
         choices.add(DEFAULT); //better not happen
       }
 
@@ -313,24 +302,18 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @return
    * @see #addPlayAndVoiceChoices
    */
-  private DivWidget getShowGroup(List<String> choices) {
-    ButtonToolbar w = new ButtonToolbar();
+  private DivWidget getShowGroup(Collection<String> choices) {
+    ButtonToolbar buttonToolbar = new ButtonToolbar();
     ButtonGroup buttonGroup = new ButtonGroup();
     buttonGroup.setToggle(ToggleType.RADIO);
-    w.add(buttonGroup);
+    buttonToolbar.add(buttonGroup);
 
     boolean first = true;
     for (final String choice : choices) {
       Button choice1 = getChoice(choice, first, new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          if (choice.equals(M)) {
-            contextPlay.playAudio(maleAudio.getAudioRef());
-          } else if (choice.equals(F)) {
-            contextPlay.playAudio(femaleAudio.getAudioRef());
-          } else {
-            contextPlay.playAudio(defaultAudio.getAudioRef());
-          }
+          contextPlay.playAudio(getAudioRef(choice));
         }
       });
       buttonGroup.add(choice1);
@@ -339,12 +322,28 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
       first = false;
     }
 
-    Style style = w.getElement().getStyle();
+    Style style = buttonToolbar.getElement().getStyle();
     style.setMarginTop(-6, Style.Unit.PX);
     style.setMarginBottom(0, Style.Unit.PX);
     style.setMarginLeft(5, Style.Unit.PX);
 
-    return w;
+    return buttonToolbar;
+  }
+
+  private String getAudioRef(String choice) {
+    String audioRef;
+    switch (choice) {
+      case M:
+        audioRef = maleAudio.getAudioRef();
+        break;
+      case F:
+        audioRef = femaleAudio.getAudioRef();
+        break;
+      default:
+        audioRef = defaultAudio.getAudioRef();
+        break;
+    }
+    return audioRef;
   }
 
   private Button getChoice(String title, boolean isActive, ClickHandler handler) {
@@ -364,9 +363,9 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @param value
    * @return
    * @see #getQuestionContent(T, String)
-   * @see #getContext(T)
+   * @see #getContext
    */
-  private Widget getEntry(T e, final String field, final String label, String value) {
+  private Widget getEntry(AnnotationExercise e, final String field, final String label, String value) {
     return getEntry(field, label, value, e.getAnnotation(field));
   }
 
@@ -376,12 +375,11 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @param value
    * @param annotation
    * @return
-   * @see #getEntry(T, String, String, String)
+   * @see #getEntry
    * @see #makeFastAndSlowAudio(String)
    */
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
-    CommentBox<T> commentBox = getCommentBox();
-    return commentBox.getEntry(field, getContentWidget(label, value, false), annotation);
+    return getCommentBox().getEntry(field, getContentWidget(label, value, false), annotation);
   }
 
   /**
@@ -404,5 +402,19 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
         vp.add(entry);
       }
     };
+  }
+
+
+  /**
+   * @see #getEntry(String, String, String, ExerciseAnnotation)
+   * @see #makeFastAndSlowAudio(String)
+   * @return
+   */
+  private CommentBox getCommentBox() {
+    if (logger == null) {
+      logger = Logger.getLogger("CommentNPFExercise");
+    }
+    T exercise = this.exercise;
+    return new CommentBox(this.exercise.getID(), controller, this, exercise.getMutableAnnotation());
   }
 }

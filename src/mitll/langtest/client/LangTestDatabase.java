@@ -159,7 +159,7 @@ public interface LangTestDatabase extends RemoteService {
 
   boolean isValidForeignPhrase(String foreign);
 
-  CommonExercise reallyCreateNewItem(long userListID, CombinedMutableUserExercise userExercise);
+  CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise);
 
   CommonExercise duplicateExercise(CommonExercise id);
 

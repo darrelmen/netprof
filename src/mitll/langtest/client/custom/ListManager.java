@@ -27,15 +27,12 @@ import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.Shell;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -91,9 +88,22 @@ public class ListManager implements RequiresResize {
   private static final String SUB_TAB = "subTab";
   private static final String EDIT_ITEM = "editItem";
 
-  public ListManager(final LangTestDatabaseAsync service, final UserManager userManager,
+  /**
+   * @param service
+   * @param userManager
+   * @param controller
+   * @param feedback
+   * @param tabPanel
+   * @see Navigation#getTabPanel()
+   */
+  public ListManager(final LangTestDatabaseAsync service,
+                     final UserManager userManager,
                      final ExerciseController controller,
-                     UserFeedback feedback, TabPanel tabPanel) {
+                     UserFeedback feedback,
+                     TabPanel tabPanel,
+                     ReloadableContainer exerciseList) {
+
+    if (exerciseList == null) logger.warning("huh? exerciselist is null?\n\n\n");
     this.service = service;
     this.userManager = userManager;
     this.controller = controller;
@@ -110,11 +120,11 @@ public class ListManager implements RequiresResize {
       }
     });
 
-    npfHelper = new NPFHelper(service, feedback, userManager, controller, false);
-    Reloadable exerciseList = npfHelper.getExerciseList();
-    reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, exerciseList, npfHelper);
-    avpHelper = new AVPHelper(service, feedback, userManager, controller);
-    editItem = new EditItem(service, userManager, controller, exerciseList, feedback, npfHelper);
+    npfHelper  = new NPFHelper(service, feedback, userManager, controller, false);
+   // Reloadable exerciseList = npfHelper.getExerciseList();
+    reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, exerciseList);//, npfHelper);
+    avpHelper  = new AVPHelper(service, feedback, userManager, controller);
+    editItem   = new EditItem(service, userManager, controller, exerciseList, feedback);//, npfHelper);
   }
 
   public void addStudyLists(final TabAndContent studyLists) {
@@ -148,6 +158,7 @@ public class ListManager implements RequiresResize {
   public void clickOnYourStuff() {
     yourStuff.clickOnTab();
   }
+
   public void clickOnCreate() {
     create.clickOnTab();
   }
@@ -251,7 +262,7 @@ public class ListManager implements RequiresResize {
   /**
    * @param onlyMine
    * @param onlyVisited
-   * @seex #getNav
+   * @seex #getTabPanel
    * @see #showMyLists
    * @see #deleteList(com.github.gwtbootstrap.client.ui.Button, mitll.langtest.shared.custom.UserList, boolean)
    * @see #clickOnYourLists(long)
@@ -293,14 +304,14 @@ public class ListManager implements RequiresResize {
     listScrollPanel = new ScrollPanel();
 
     if (getAll) {
-     // logger.info("viewLessons----> getAll optional " + optionalExercise);
+      // logger.info("viewLessons----> getAll optional " + optionalExercise);
       service.getUserListsForText("", controller.getUser(),
           new UserListCallback(this, contentPanel, insideContentPanel, listScrollPanel,
               LESSONS + "_All",
               false, true,
               userManager, onlyMine, optionalExercise));
     } else {
- //     logger.info("viewLessons for user #" + userManager.getUser());
+      //     logger.info("viewLessons for user #" + userManager.getUser());
       service.getListsForUser(userManager.getUser(), onlyMine,
           onlyVisited,
           new UserListCallback(this, contentPanel, insideContentPanel, listScrollPanel,
@@ -500,7 +511,7 @@ public class ListManager implements RequiresResize {
    * @see #showList
    */
   private TabPanel getListOperations(final UserList<CommonShell> ul, final String instanceName, final HasID toSelect) {
-   // logger.info("getListOperations : '" + instanceName + " for list " + ul);
+    // logger.info("getListOperations : '" + instanceName + " for list " + ul);
 
     boolean created = createdByYou(ul) || instanceName.equals(REVIEW) || instanceName.equals(COMMENT);
 
@@ -536,7 +547,7 @@ public class ListManager implements RequiresResize {
         @Override
         public void onClick(ClickEvent event) {
           storage.storeValue(SUB_TAB, PRACTICE1);
-   //       logger.info("getListOperations : got click on practice " + fpractice.getContent().getElement().getId());
+          //       logger.info("getListOperations : got click on practice " + fpractice.getContent().getElement().getId());
           avpHelper.setContentPanel(fpractice.getContent());
           avpHelper.showNPF(ul, fpractice, PRACTICE1, true, toSelect);
           controller.logEvent(fpractice.getTab(), "Tab", "UserList_" + ul.getID(), PRACTICE1);
@@ -683,7 +694,7 @@ public class ListManager implements RequiresResize {
         logger.info("selectTabGivenHistory doing showEditReviewOrComment");
         showEditReviewOrComment(ul, isNormalList, edit, isReview, isComment);
       } else {
-        logger.info("selectTabGivenHistory doing sublearn");
+        logger.info("selectTabGivenHistory doing sublearn " + instanceName1);
 
         tabPanel.selectTab(SUBTAB_LEARN_INDEX);
         showLearnTab(learn, ul, instanceName1, toSelect);
@@ -716,7 +727,7 @@ public class ListManager implements RequiresResize {
                                                 boolean isReview, boolean isComment,
                                                 boolean isNormalList) {
     String subTab = storage.getValue(SUB_TAB);
-   // logger.info("selectPreviouslyClickedSubTab : subtab '" + subTab + "'");
+    // logger.info("selectPreviouslyClickedSubTab : subtab '" + subTab + "'");
 
     boolean chosePrev = false;
     if (subTab != null) {
@@ -725,7 +736,7 @@ public class ListManager implements RequiresResize {
         case LEARN:
           tabPanel.selectTab(SUBTAB_LEARN_INDEX);
           learnTab.clickOnTab();
-          showLearnTab(learnTab, ul, instanceName1,null);
+          showLearnTab(learnTab, ul, instanceName1, null);
           break;
         case PRACTICE1:
           tabPanel.selectTab(SUBTAB_PRACTICE_INDEX);
@@ -748,7 +759,7 @@ public class ListManager implements RequiresResize {
 
           break;
         default:
-        //  logger.info("selectPreviouslyClickedSubTab : no subtab?");
+          //  logger.info("selectPreviouslyClickedSubTab : no subtab?");
           chosePrev = false;
           break;
       }
