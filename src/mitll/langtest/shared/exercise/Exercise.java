@@ -108,15 +108,8 @@ public class Exercise extends AudioExercise implements CommonExercise, MutableEx
 
   @Override
   public void setTransliteration(String transliteration) {
-   setTranslitSentence(transliteration);
-  }
+    this.transliteration = transliteration;
 
-  /**
-   * @param translitSentence
-   * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise(String, String, String, String, String, boolean)
-   */
-  public void setTranslitSentence(String translitSentence) {
-    this.transliteration = translitSentence;
   }
 
   /**
