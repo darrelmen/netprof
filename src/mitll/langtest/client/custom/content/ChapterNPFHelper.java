@@ -41,7 +41,7 @@ public class ChapterNPFHelper extends NPFHelper {
                           final UserManager userManager, final ExerciseController controller, final boolean showQC) {
     super(service, feedback, userManager, controller, showQC);
     final NPFHelper outer = this;
-    this.flexListLayout = new FlexListLayout<CommonShell,CommonExercise>(service, feedback, userManager, controller) {
+    this.flexListLayout = new FlexListLayout<CommonShell,CommonExercise>(service, feedback, controller) {
       @Override
       protected ExercisePanelFactory<CommonShell,CommonExercise> getFactory(PagingExerciseList<CommonShell,CommonExercise> exerciseList, String instanceName) {
         return outer.getFactory(exerciseList, instanceName, showQC);

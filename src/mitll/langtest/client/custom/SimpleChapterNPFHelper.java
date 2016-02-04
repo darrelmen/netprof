@@ -16,9 +16,9 @@ import mitll.langtest.client.exercise.WaveformExercisePanel;
 import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.exercise.AudioAttributeExercise;
 import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
@@ -32,7 +32,8 @@ import java.util.logging.Logger;
  * Time: 3:27 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends CommonShell & AudioRefExercise> implements RequiresResize {
+public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends CommonShell & AudioRefExercise>
+    implements ReloadableContainer, RequiresResize {
   private Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
 
   private boolean madeNPFContent = false;
@@ -43,7 +44,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
 
   protected final UserFeedback feedback;
   protected ExerciseList npfExerciseList;
-  private final ListInterface predefinedContentList;
+  private final ReloadableContainer predefinedContentList;
 
   /**
    * @param service
@@ -53,9 +54,11 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @see Navigation#Navigation
    * @see Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
    */
-  public SimpleChapterNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
+  public SimpleChapterNPFHelper(LangTestDatabaseAsync service,
+                                UserFeedback feedback,
+                                UserManager userManager,
                                 ExerciseController controller,
-                                ListInterface predefinedContentList) {
+                                ReloadableContainer predefinedContentList) {
     this.service = service;
     this.feedback = feedback;
     this.controller = controller;
@@ -90,6 +93,11 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     }
   }
 
+  /**
+   * @see #showNPF(TabAndContent, String)
+   * @param listContent
+   * @param instanceName
+   */
   protected void addNPFToContent(Panel listContent, String instanceName) {
     listContent.add(doNPF(instanceName));
     listContent.addStyleName("userListBackground");
@@ -102,6 +110,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    *
    * @param instanceName
    * @return
+   * @see #addNPFToContent(Panel, String)
    */
   private Panel doNPF(String instanceName) {
     //logger.info(getClass() + " : doNPF instanceName = " + instanceName + " for list loadExercises " + loadExercises);
@@ -110,7 +119,12 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     return widgets;
   }
 
-  public ListInterface getExerciseList() {
+  public ListInterface<?> getExerciseList() {
+    return npfExerciseList;
+  }
+
+  @Override
+  public Reloadable getReloadable() {
     return npfExerciseList;
   }
 
@@ -146,9 +160,9 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   }
 
   protected void tellOtherListExerciseDirty(HasID e) {
-    if (predefinedContentList != null && e.getID().equals(predefinedContentList.getCurrentExerciseID())) {
+    if (predefinedContentList != null && e.getID().equals(predefinedContentList.getReloadable().getCurrentExerciseID())) {
       logger.info("WaveformExercisePanel.reloading " + e.getID());
-      predefinedContentList.loadExercise(e.getID());
+      predefinedContentList.getReloadable().loadExercise(e.getID());
     } else {
       logger.info("WaveformExercisePanel.not reloading " + e.getID());
     }
@@ -170,9 +184,9 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   protected abstract static class MyFlexListLayout<T extends CommonShell, U extends CommonShell & AudioRefExercise> extends FlexListLayout<T,U> {
     private final SimpleChapterNPFHelper<T,U> outer;
 
-    public MyFlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
-                            ExerciseController controller, SimpleChapterNPFHelper<T,U> outer) {
-      super(service, feedback, userManager, controller);
+    public MyFlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
+                            ExerciseController controller, SimpleChapterNPFHelper<T, U> outer) {
+      super(service, feedback, controller);
       this.outer = outer;
     }
 
