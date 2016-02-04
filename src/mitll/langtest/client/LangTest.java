@@ -55,7 +55,6 @@ import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
@@ -84,17 +83,34 @@ import java.util.logging.Logger;
  * - ScoreServlet report changes - export user table, add option to filter for items with or without audio
  * 1.1.7
  * - Duplicate exercise id bug with russian - see https://gh.ll.mit.edu/DLI-LTEA/Development/issues/504 and small change to json rate(sec) output
+ * 1.2.0
+ * - Refactor to add in Amas website support, and steps toward supporting getting content from json
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private Logger logger = Logger.getLogger("LangTest");
 
-  private static final String VERSION_INFO = "1.1.7";
+  private static final String VERSION_INFO = "1.2.0";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
-  public static final List<String> SITE_LIST = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "German",
-      "Korean", "Iraqi",
-      "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Russian", "Spanish", "Sudanese", "Tagalog",
+  public static final List<String> SITE_LIST = Arrays.asList(
+      "Dari",
+      "Egyptian",
+      "English",
+      "Farsi",
+      "German",
+      "Korean",
+      "Iraqi",
+      "Levantine",
+      "Mandarin",
+      "MSA",
+      "Pashto1",
+      "Pashto2",
+      "Pashto3",
+      "Russian",
+      "Spanish",
+      "Sudanese",
+      "Tagalog",
       "Urdu");
 
   /**
@@ -375,7 +391,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     navigation = new Navigation(service, userManager, this, this);
 
-    firstRow.add(navigation.getNav());
+    firstRow.add(navigation.getTabPanel());
     verticalContainer.add(getLinksToSites());
   }
 
