@@ -16,14 +16,13 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.custom.content.NPFHelper;
+import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserExercise;
@@ -58,29 +57,34 @@ public class EditItem {
   protected final LangTestDatabaseAsync service;
   private final UserManager userManager;
 
-  protected final Reloadable predefinedContentList;
+  protected final ReloadableContainer predefinedContentList;
 
   private UserFeedback feedback = null;
   private HasText itemMarker;
 
   protected PagingExerciseList<CommonShell, CommonExercise> exerciseList;
-  protected final NPFHelper npfHelper;
+  // protected final NPFHelper npfHelper;
+  protected final String instanceName;
 
   /**
    * @param service
    * @param userManager
    * @param controller
-   * @param npfHelper
+   * @paramx npfHelper
    * @see mitll.langtest.client.custom.Navigation#Navigation
    */
   public EditItem(final LangTestDatabaseAsync service, final UserManager userManager, ExerciseController controller,
-                  Reloadable listInterface, UserFeedback feedback, NPFHelper npfHelper) {
+                  ReloadableContainer predefinedContentList, UserFeedback feedback
+      //,
+                  //                NPFHelper npfHelper
+        //          String instanceName
+  ) {
     this.controller = controller;
     this.service = service;
     this.userManager = userManager;
-    this.predefinedContentList = listInterface;
+    this.predefinedContentList = predefinedContentList;
     this.feedback = feedback;
-    this.npfHelper = npfHelper;
+    this.instanceName = "EditItem";//instanceName;
     //logger.info(getClass() + " : npfHelper " + npfHelper);
   }
 
@@ -208,7 +212,6 @@ public class EditItem {
    */
   private CommonExercise getNewItem() {
     return new UserExercise(-1, NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, "", "");
-   // return userExercise;
   }
 
   private void setFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList,
@@ -324,18 +327,21 @@ public class EditItem {
    * @return
    * @see #populatePanel
    */
-  private NewUserExercise getAddOrEditPanel(CommonExercise exercise, HasText itemMarker, UserList<CommonShell> originalList, boolean doNewExercise) {
+  private NewUserExercise getAddOrEditPanel(CommonExercise exercise, HasText itemMarker,
+                                            UserList<CommonShell> originalList, boolean doNewExercise) {
     NewUserExercise editableExercise;
     if (doNewExercise) { // whole new exercise
       editableExercise = new NewUserExercise(service, controller, itemMarker, this, exercise, getInstance(), originalList);
     } else {
       boolean iCreatedThisItem = didICreateThisItem(exercise);
       if (iCreatedThisItem) {  // it's mine!
-        editableExercise = new EditableExerciseDialog(service, controller, this, itemMarker, exercise/*.toUserExercise()*/,
+        editableExercise = new EditableExerciseDialog(service, controller, this, itemMarker, exercise,
             originalList,
             exerciseList,
             predefinedContentList,
-            npfHelper);
+            getInstance()
+            //    npfHelper
+        );
       } else {
         editableExercise = new RemoveFromListOnlyExercise(itemMarker, exercise, originalList);
       }
@@ -344,7 +350,7 @@ public class EditItem {
   }
 
   private String getInstance() {
-    return npfHelper.getInstanceName();
+    return instanceName;//npfHelper.getInstanceName();
   }
 
   /**
@@ -355,7 +361,7 @@ public class EditItem {
    */
   private boolean didICreateThisItem(CommonExercise exercise) {
     boolean isMine = exercise.getCreator() == controller.getUser();
-    logger.info("for " + exercise + " vs " +controller.getUser() + " is Mine " + isMine);
+    logger.info("for " + exercise + " vs " + controller.getUser() + " is Mine " + isMine);
     return isMine;
   }
 
@@ -388,8 +394,10 @@ public class EditItem {
         @Override
         public void onClick(ClickEvent event) {
 //          logger.info(getClass() + " : makeDeleteButton npfHelperList (2) " + npfHelper);
+          deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, predefinedContentList
+              //    npfHelper.npfExerciseList
 
-          deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, npfHelper.npfExerciseList);
+          );
         }
       });
 
@@ -402,14 +410,4 @@ public class EditItem {
     }
   }
 
-/*
-  private long getCreator(UserList<? extends HasID> originalList, String id) {
-    for (HasID ue : originalList.getExercises()) {
-      if (ue.getID().equals(id)) {
-        return ue.getCombinedMutableUserExercise().getCreator();
-      }
-    }
-    return -1;
-  }
-*/
 }
