@@ -36,8 +36,8 @@ import java.util.Map;
 class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell,CommonExercise> {
   private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
 
-  final boolean doNormalRecording;
-  boolean added = false;
+  private final boolean doNormalRecording;
+  private boolean added = false;
 
   /**
    * @param service
@@ -48,7 +48,8 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell,CommonExercis
    * @see Navigation#Navigation
    */
   public RecorderNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
-                           ExerciseController controller, boolean doNormalRecording, ListInterface exerciseList) {
+                           ExerciseController controller, boolean doNormalRecording,
+                           ReloadableContainer exerciseList) {
     super(service, feedback, userManager, controller, exerciseList);
     this.doNormalRecording = doNormalRecording;
   }
@@ -68,9 +69,9 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell,CommonExercis
   protected FlexListLayout<CommonShell,CommonExercise> getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
                                            final UserManager userManager, ExerciseController controller,
                                            SimpleChapterNPFHelper<CommonShell,CommonExercise> outer) {
-    return new MyFlexListLayout<CommonShell,CommonExercise>(service, feedback, userManager, controller, outer) {
+    return new MyFlexListLayout<CommonShell,CommonExercise>(service, feedback, controller, outer) {
 
-      FlexListLayout outerLayout = this;
+      final FlexListLayout outerLayout = this;
       @Override
       protected PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
                                                                                 boolean incorrectFirst) {
@@ -118,7 +119,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell,CommonExercis
   }
 
 
-  final FlexTable flex = new FlexTable();
+  private final FlexTable flex = new FlexTable();
 
   private Widget doMaleFemale() {
     flex.addStyleName("topMargin");
@@ -213,7 +214,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell,CommonExercis
     }
 
     /**
-     * @see RecorderNPFHelper.MyWaveformExercisePanel#postAnswers(ExerciseController, CommonExercise)
+     * @see RecorderNPFHelper.MyWaveformExercisePanel#postAnswers
      * @param controller
      * @param completedExercise
      */
