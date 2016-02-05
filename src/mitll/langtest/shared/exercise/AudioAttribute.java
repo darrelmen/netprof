@@ -41,6 +41,10 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   private long userid;
   private long timestamp;
   private long durationInMillis;
+  /**
+   * Don't sent to client - just server side
+   */
+  private transient String transcript = "";
 
   // 9/24/14 : setting it here may stop intermittent gwt rpc exceptions
   private Map<String, String> attributes = new HashMap<String, String>();
@@ -59,17 +63,20 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    * @param durationInMillis
    * @param type
    * @param user
+   * @param transcript what the speaker read at the time of recording
    */
   public AudioAttribute(int uniqueID, long userid,
                         String exid,
                         String audioRef,
-                        long timestamp, long durationInMillis, String type, MiniUser user) {
+                        long timestamp, long durationInMillis, String type, MiniUser user, String transcript) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.exid = exid;
     this.audioRef = audioRef;
     this.timestamp = timestamp;
     this.durationInMillis = durationInMillis;
+    this.transcript = transcript;
+
     this.setUser(user);
     if (type.equals(Result.AUDIO_TYPE_REGULAR)) markRegular();
     else if (type.equals(Result.AUDIO_TYPE_SLOW)) markSlow();
@@ -83,7 +90,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   /**
-   * @see mitll.langtest.shared.AudioExercise#setRefAudio(String)
+   * @see mitll.langtest.shared.exercise.AudioExercise#setRefAudio(String)
    * @param audioRef
    */
   protected AudioAttribute(String audioRef) {
@@ -211,8 +218,8 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public long getUserid() { return userid; }
 
   /**
-   * @see mitll.langtest.client.qc.QCNPFExercise#addTabsForUsers(CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#addTabsForUsers(CommonExercise, com.github.gwtbootstrap.client.ui.TabPanel, java.util.Map, java.util.List)
+   * @see mitll.langtest.client.qc.QCNPFExercise#addTabsForUsers
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#addTabsForUsers
    * @return
    */
   public boolean isHasBeenPlayed() {
@@ -237,6 +244,12 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   @Override
   public String toString() {
-    return "Audio id " +uniqueID + " : " + audioRef + " attrs " + attributes + " by " + userid +"/"+user;
+    return "Audio id " +uniqueID + " : " + audioRef + " attrs " + attributes + " by " + userid +"/"+user +
+        " transcript '" +transcript+
+        "' ";
+  }
+
+  public String getTranscript() {
+    return transcript;
   }
 }
