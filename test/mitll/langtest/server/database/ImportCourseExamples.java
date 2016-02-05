@@ -121,7 +121,8 @@ public class ImportCourseExamples {
   }
 */
 
-  private static void copyAudio(Map<Long, Map<String, Result>> userToResultsRegular, Map<Long, Long> oldToNew, AudioDAO audioDAO,
+  private static void copyAudio(Map<Long, Map<String, Result>> userToResultsRegular, Map<Long, Long> oldToNew,
+                                AudioDAO audioDAO,
                                 String destAudioDir, String candidateAudioDir) {
     int count = 0;
     int bad = 0;
