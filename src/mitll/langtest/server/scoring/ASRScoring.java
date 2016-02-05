@@ -511,7 +511,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
       logger.error("Got assertion error " + e, e);
       return new Scores((int) (System.currentTimeMillis() - then));
     } catch (Exception ee) {
-      String msg = "Running align/decode on " + sentence;
+      String msg = "getScoresFromHydec : Running align/decode on " + sentence;
       logger.warn(msg + " Got " + ee.getMessage());
 
       langTestDatabase.logAndNotifyServerException(ee, msg);

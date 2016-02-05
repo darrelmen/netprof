@@ -85,7 +85,7 @@ class CheckLTS {
 
     String language = isMandarin ? " MANDARIN " : "";
 
-    logger.debug("checkLTS '" + language + "' tokens : '" + tokens + "' lts " + lts + " dict size " + htkDictionary.size());
+    //logger.debug("checkLTS '" + language + "' tokens : '" + tokens + "' lts " + lts + " dict size " + htkDictionary.size());
 
     Set<String> oov = new HashSet<>();
     Set<String> inlts = new HashSet<>();
