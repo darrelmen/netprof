@@ -81,16 +81,10 @@ public class Navigation implements RequiresResize, ShowTab {
   private final UserManager userManager;
   private final SimpleChapterNPFHelper practiceHelper;
 
-  // private final NPFHelper npfHelper;
-//  private final NPFHelper avpHelper;
   private DialogWindow dialogWindow;
 
-  // private final EditItem editItem;
-
-  //  private final ChapterNPFHelper defectHelper;
   private final SimpleChapterNPFHelper recorderHelper, recordExampleHelper;
   private final SimpleChapterNPFHelper markDefectsHelper, learnHelper;
-//  private final ReviewItemHelper reviewItem;
 
   private final KeyStorage storage;
   private ListManager listManager;
@@ -148,8 +142,6 @@ public class Navigation implements RequiresResize, ShowTab {
       }
     };
 
-    //  avpHelper = new AVPHelper(service, feedback, userManager, controller);
-
     service.getContextPractice(new AsyncCallback<ContextPractice>() {
       public void onSuccess(ContextPractice cpw) {
         dialogWindow = new DialogWindow(service, controller, cpw);
@@ -160,8 +152,6 @@ public class Navigation implements RequiresResize, ShowTab {
       }
       //TODO: this is naughty
     });
-
-    //  defectHelper = new ChapterNPFHelper(service, feedback, userManager, controller, true);
 
     markDefectsHelper = new SimpleChapterNPFHelper<CommonShell, CommonExercise>(service, feedback, userManager, controller, learnHelper) {
       @Override
@@ -190,32 +180,9 @@ public class Navigation implements RequiresResize, ShowTab {
       }
     };
 
-    practiceHelper = makePracticeHelper(service, userManager, controller, feedback);
-    // ListInterface exerciseList = learnHelper.getExerciseList();
-    //  logger.info("Navigation : npfHelper exercise list is " + exerciseList);
-//    npfHelper = new NPFHelper(service, feedback, userManager, controller, false);
-    //reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, learnHelper);//, npfHelper);
-    // logger.info("Navigation : made review item helper " + reviewItem);
-
-//    editItem = new EditItem(service, userManager, controller, learnHelper, feedback);//, npfHelper);
-
+    practiceHelper      = new PracticeHelper(service, feedback, userManager, controller);
     recorderHelper      = new RecorderNPFHelper(service, feedback, userManager, controller, true,  learnHelper);
     recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false, learnHelper);
-  }
-
-  /**
-   * @param service
-   * @param userManager
-   * @param controller
-   * @param feedback
-   * @return
-   * @see #Navigation(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
-   */
-  private SimpleChapterNPFHelper<CommonShell, CommonExercise> makePracticeHelper(final LangTestDatabaseAsync service,
-                                                                                 final UserManager userManager,
-                                                                                 final ExerciseController controller,
-                                                                                 final UserFeedback feedback) {
-    return new PracticeHelper(service, feedback, userManager, controller);
   }
 
   /**
