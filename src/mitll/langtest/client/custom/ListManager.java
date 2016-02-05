@@ -59,7 +59,7 @@ public class ListManager implements RequiresResize {
   private final ReviewItemHelper reviewItem;
   private final EditItem editItem;
 
-  private static final String PRACTICE = "Audio Vocabulary Practice"; //"Audio Flashcards"; // "Do Flashcards";
+  private static final String PRACTICE = "Audio Vocabulary Practice";
   private static final String REVIEW = "review";
   private static final String COMMENT = "comment";
   private static final String ATTENTION = "attention";
@@ -102,8 +102,8 @@ public class ListManager implements RequiresResize {
                      UserFeedback feedback,
                      TabPanel tabPanel,
                      ReloadableContainer exerciseList) {
-
     if (exerciseList == null) logger.warning("huh? exerciselist is null?\n\n\n");
+
     this.service = service;
     this.userManager = userManager;
     this.controller = controller;
@@ -121,7 +121,6 @@ public class ListManager implements RequiresResize {
     });
 
     npfHelper  = new NPFHelper(service, feedback, userManager, controller, false);
-   // Reloadable exerciseList = npfHelper.getExerciseList();
     reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, exerciseList);//, npfHelper);
     avpHelper  = new AVPHelper(service, feedback, userManager, controller);
     editItem   = new EditItem(service, userManager, controller, exerciseList, feedback);//, npfHelper);
