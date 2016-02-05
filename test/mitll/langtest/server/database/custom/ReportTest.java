@@ -370,7 +370,7 @@ public class ReportTest {
     return "war" + File.separator + "config" + File.separator + ENGLISH;
   }
 
-  @Test
+/*  @Test
   public void testAdd() {
     List<User> users = database.getUsers();
     long user;
@@ -399,10 +399,10 @@ public class ReportTest {
     // remove again
     removeList(user, userListManager, listid, false);
 
-  }
+  }*/
 
   // make sure we can remove lists that have been visited
-  @Test
+/*  @Test
   public void testAddVisitor() {
     List<User> users = addAndGetUsers("test2");
     logger.debug("1 users size " + users.size());
@@ -444,10 +444,10 @@ public class ReportTest {
     // after removing, I shouldn't see it
     Collection<UserList> listsForUser3 = userListManager.getListsForUser(visitor, false, false);
     assertTrue(!listsForUser3.contains(test));
-  }
+  }*/
 
   @Test
-  public void testAddVisitor2() {
+/*  public void testAddVisitor2() {
     List<User> users = database.getUsers();
     logger.debug("1 users size " + users.size());
     if (users.isEmpty()) {
@@ -492,7 +492,7 @@ public class ReportTest {
 
     listsForUser = userListManager.getListsForUser(owner.getId(), false, false);
     assertTrue(!listsForUser.contains(testList));
-  }
+  }*/
 
  /* @Test
   public void testAddExercise() {
@@ -597,11 +597,13 @@ public class ReportTest {
     return l;
   }
 
+/*
   private long addListCheck(long user, UserListManager userListManager, String name) {
     return addListCheck(user, userListManager, name, true);
   }
+*/
 
-  private long addListCheck(long user, UserListManager userListManager, String name, boolean expectSuccess) {
+/*  private long addListCheck(long user, UserListManager userListManager, String name, boolean expectSuccess) {
     long listid = addList(user, userListManager, name);
     if (expectSuccess) {
       if (listid == -1) {
@@ -616,13 +618,13 @@ public class ReportTest {
       assertTrue(listid == -1);
     }
     return listid;
-  }
-
+  }*/
+/*
   private void removeList(long user, UserListManager userListManager, long listid) {
     removeList(user, userListManager, listid, true);
-  }
+  }*/
 
-  private void removeList(long user, UserListManager userListManager, long listid, boolean expectSuccess) {
+/*  private void removeList(long user, UserListManager userListManager, long listid, boolean expectSuccess) {
     boolean b = userListManager.deleteList(listid);
     if (expectSuccess) {
       assertTrue(b);
@@ -639,5 +641,5 @@ public class ReportTest {
     Collection<UserList> listsForUser1 = userListManager.getListsForUser(user, false, false);
     assertTrue(" size is " + listsForUser1.size(), listsForUser1.size() == 2);
     return listid;
-  }
+  }*/
 }
