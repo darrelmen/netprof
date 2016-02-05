@@ -429,13 +429,23 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see #reallyChange(mitll.langtest.client.list.ListInterface, boolean)
    */
   void doAfterEditComplete(ListInterface<CommonShell> pagingContainer, boolean buttonClicked) {
-    if (predefinedContentList != null) {
-      if (DEBUG) logger.info("doAfterEditComplete : change tooltip " + buttonClicked);// + " id " + predefinedContentList.getCurrentExerciseID());
-    }
-
     changeTooltip(pagingContainer);
     if (predefinedContentList != null) {
-      predefinedContentList.getReloadable().reloadWithCurrent();
+      if (DEBUG) logger.info("doAfterEditComplete : predef content list not null");// + " id " + predefinedContentList.getCurrentExerciseID());
+
+      Reloadable reloadable = predefinedContentList.getReloadable();
+
+      //if (DEBUG || true) {
+        if (reloadable == null) {
+          logger.warning("doAfterEditComplete : reloadable null????");// + " id " + predefinedContentList.getCurrentExerciseID());
+        }
+      //}
+
+      reloadable.reloadWithCurrent();
+    }
+    else {
+   //   if (DEBUG || true) logger.warning("doAfterEditComplete : no predef content " + buttonClicked);// + " id " + predefinedContentList.getCurrentExerciseID());
+
     }
   }
 
@@ -449,13 +459,11 @@ class EditableExerciseDialog extends NewUserExercise {
     if (byID == null) {
       logger.warning("changeTooltip : huh? can't find exercise with id " + newUserExercise.getID());
     } else {
-//      byID.setTooltip(newUserExercise.getCombinedTooltip());
       MutableShell mutableShell = byID.getMutableShell();
-
       mutableShell.setEnglish(newUserExercise.getEnglish());
       mutableShell.setForeignLanguage(newUserExercise.getForeignLanguage());
 
-      if (DEBUG) logger.info("\tchangeTooltip : for " + newUserExercise.getID() + " now " + newUserExercise);
+      if (DEBUG || true) logger.info("\tchangeTooltip : for " + newUserExercise.getID() + " now " + newUserExercise);
 
       pagingContainer.redraw();   // show change to tooltip!
     }
