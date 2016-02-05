@@ -92,7 +92,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         predefinedContent,
         instanceName);
     this.exerciseList = exerciseList;
-    //  this.predefinedContentList = predefinedContent;
   }
 
   private List<RememberTabAndContent> tabs;
@@ -401,9 +400,9 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
     final Button fixed = makeFixedButton();
 
-    if (logger != null) {
-      logger.info(this.getClass() + " adding create button - review editable.");
-    }
+//    if (logger != null) {
+//      logger.info(this.getClass() + " adding create button - review editable.");
+//    }
 
     fixed.addClickHandler(new ClickHandler() {
       @Override
