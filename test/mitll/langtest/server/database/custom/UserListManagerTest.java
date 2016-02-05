@@ -388,7 +388,7 @@ public class UserListManagerTest {
     return "war" + File.separator + "config" + File.separator + ENGLISH;
   }
 
-  @Test
+/*  @Test
   public void testAdd() {
     List<User> users = database.getUsers();
     long user;
@@ -417,9 +417,10 @@ public class UserListManagerTest {
     // remove again
     removeList(user, userListManager, listid, false);
 
-  }
+  }*/
 
   // make sure we can remove lists that have been visited
+/*
   @Test
   public void testAddVisitor() {
     List<User> users = addAndGetUsers("test2");
@@ -463,8 +464,9 @@ public class UserListManagerTest {
     Collection<UserList> listsForUser3 = userListManager.getListsForUser(visitor, false, false);
     assertTrue(!listsForUser3.contains(test));
   }
+*/
 
-  @Test
+/*  @Test
   public void testAddVisitor2() {
     List<User> users = database.getUsers();
     logger.debug("1 users size " + users.size());
@@ -510,7 +512,7 @@ public class UserListManagerTest {
 
     listsForUser = userListManager.getListsForUser(owner.getId(), false, false);
     assertTrue(!listsForUser.contains(testList));
-  }
+  }*/
 
 /*  @Test
   public void testAddExercise() {
@@ -615,7 +617,7 @@ public class UserListManagerTest {
     return l;
   }
 
-  private long addListCheck(long user, UserListManager userListManager, String name) {
+/*  private long addListCheck(long user, UserListManager userListManager, String name) {
     return addListCheck(user, userListManager, name, true);
   }
 
@@ -634,8 +636,8 @@ public class UserListManagerTest {
       assertTrue(listid == -1);
     }
     return listid;
-  }
-
+  }*/
+/*
   private void removeList(long user, UserListManager userListManager, long listid) {
     removeList(user, userListManager, listid, true);
   }
@@ -657,5 +659,5 @@ public class UserListManagerTest {
     Collection<UserList> listsForUser1 = userListManager.getListsForUser(user, false, false);
     assertTrue(" size is " + listsForUser1.size(), listsForUser1.size() == 2);
     return listid;
-  }
+  }*/
 }
