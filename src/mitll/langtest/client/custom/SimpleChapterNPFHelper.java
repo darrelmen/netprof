@@ -52,7 +52,6 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @param userManager
    * @param controller
    * @see Navigation#Navigation
-   * @see Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
    */
   public SimpleChapterNPFHelper(LangTestDatabaseAsync service,
                                 UserFeedback feedback,
@@ -120,11 +119,16 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   }
 
   public ListInterface<?> getExerciseList() {
+   // logger.info(getClass() + " : getExerciseList called ");
+
     return npfExerciseList;
   }
 
   @Override
   public Reloadable getReloadable() {
+
+   // logger.info(getClass() + " : getReloadable called ");
+
     return npfExerciseList;
   }
 
@@ -161,10 +165,10 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
 
   protected void tellOtherListExerciseDirty(HasID e) {
     if (predefinedContentList != null && e.getID().equals(predefinedContentList.getReloadable().getCurrentExerciseID())) {
-      logger.info("WaveformExercisePanel.reloading " + e.getID());
+      logger.info("SimpleChapterNPFHelper.reloading " + e.getID());
       predefinedContentList.getReloadable().loadExercise(e.getID());
     } else {
-      logger.info("WaveformExercisePanel.not reloading " + e.getID());
+      logger.info("\n\n\n--> SimpleChapterNPFHelper.not reloading " + e.getID());
     }
   }
 
