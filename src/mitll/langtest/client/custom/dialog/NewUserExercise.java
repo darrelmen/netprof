@@ -100,11 +100,9 @@ public class NewUserExercise extends BasicDialog {
     this.service = service;
     this.itemMarker = itemMarker;
     this.editItem = editItem;
-    this.newUserExercise = newExercise;//newExercise.toUserExercise();
+    this.newUserExercise = newExercise;
     this.instance = instance;
     this.originalList = originalList;
-
-    logger.info("user list is " + originalList);
   }
 
   /**
@@ -296,7 +294,7 @@ public class NewUserExercise extends BasicDialog {
   }
 
   FormField makeForeignLangRow(Panel container) {
-    logger.info("NewUserExercise.makeForeignLangRow --->");
+  //  logger.info("NewUserExercise.makeForeignLangRow --->");
 
     Panel row = new FluidRow();
     container.add(row);
