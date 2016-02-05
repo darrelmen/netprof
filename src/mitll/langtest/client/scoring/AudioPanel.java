@@ -504,7 +504,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
           long roundtrip = now - then;
 
           if (!result.successful) {
-            logger.warning("got error for request for type " + type);
+            logger.warning("getImageURLForAudio : got error for request for type " + type + " and " +path + " and exid " + exerciseID);
             if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);
           } else if (result.req == -1 || isMostRecentRequest(type, result.req)) { // could be cached
             showResult(result, imageAndCheck);
