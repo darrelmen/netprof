@@ -7,12 +7,7 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.LogAndNotify;
 import org.apache.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,7 +25,10 @@ public class DAO {
 
   protected final Database database;
 
-  protected DAO(Database database) { this.database = database; this.logAndNotify = database.getLogAndNotify(); }
+  protected DAO(Database database) {
+    this.database = database;
+    this.logAndNotify = database.getLogAndNotify();
+  }
 
   protected int getNumColumns(Connection connection, String table) throws SQLException {
     Statement stmt = connection.createStatement();
@@ -45,9 +43,9 @@ public class DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListVisitorJoinDAO#createUserListTable(Database)
    * @param table
    * @return column names, all lower case
+   * @see mitll.langtest.server.database.custom.UserListVisitorJoinDAO#createUserListTable(Database)
    */
   protected Collection<String> getColumns(String table) {
     Set<String> columns = new HashSet<String>();
@@ -59,7 +57,7 @@ public class DAO {
 
       // Get result set meta data
       ResultSetMetaData rsmd = rs.getMetaData();
-      for (int i = 1; i < rsmd.getColumnCount()+1; i++) {
+      for (int i = 1; i < rsmd.getColumnCount() + 1; i++) {
         columns.add(rsmd.getColumnName(i).toLowerCase());
       }
 
@@ -68,7 +66,7 @@ public class DAO {
 
       database.closeConnection(connection);
     } catch (Exception e) {
-      logger.error("doing getColumns: got " +e,e);
+      logger.error("doing getColumns: got " + e, e);
     }
     //logger.info("table " +table + " has " +columns);
     return columns;
@@ -90,16 +88,16 @@ public class DAO {
   }
 
   protected boolean remove(String table, String idField, long itemId) {
-    String sql = "DELETE FROM " + table +" WHERE " + idField + "=" + itemId;
+    String sql = "DELETE FROM " + table + " WHERE " + idField + "=" + itemId;
 
     return doSqlOn(sql, table, true);
   }
 
   protected boolean remove(String table, String idField, String itemId, boolean warnIfDidntAlter) {
-    String sql = "DELETE FROM " + table +" WHERE " +
-      idField +
-      "='" + itemId +
-      "'";
+    String sql = "DELETE FROM " + table + " WHERE " +
+        idField +
+        "='" + itemId +
+        "'";
 
     return doSqlOn(sql, table, warnIfDidntAlter);
   }
@@ -120,7 +118,7 @@ public class DAO {
       database.closeConnection(connection);
 
       int count = getCount(table);
-    //  logger.debug("now " + count + " in " + table);
+      //  logger.debug("now " + count + " in " + table);
       if (before - count != 1 && warnIfDidntAlter) {
         logger.warn("DAO.doSqlOn : now " + count +
             " there were " + before + " before for " + table);
@@ -133,32 +131,28 @@ public class DAO {
     return false;
   }
 
-  public Database getDatabase() { return database; }
+  public Database getDatabase() {
+    return database;
+  }
 
   protected void addVarchar(Connection connection, String table, String col) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
-      table + " ADD " + col + " VARCHAR");
-    statement.execute();
-    statement.close();
+    alterTable(connection, table, col, "VARCHAR");
   }
 
   protected void addBoolean(Connection connection, String table, String col) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
-        table + " ADD " + col + " BOOLEAN");
-    statement.execute();
-    statement.close();
+    alterTable(connection, table, col, "BOOLEAN");
   }
 
   protected void addFloat(Connection connection, String table, String col) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
-        table + " ADD " + col + " FLOAT");
-    statement.execute();
-    statement.close();
+    alterTable(connection, table, col, "FLOAT");
   }
 
   protected void addInt(Connection connection, String table, String col) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
-        table + " ADD " + col + " INTEGER");
+    alterTable(connection, table, col, "INTEGER");
+  }
+
+  private void alterTable(Connection connection, String table, String col, String type) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + table + " ADD " + col + " " + type);
     statement.execute();
     statement.close();
   }
@@ -172,7 +166,7 @@ public class DAO {
         table +
         "(" +
         column +
-        ");" );
+        ");");
     statement.execute();
     statement.close();
     database.closeConnection(connection);
@@ -218,10 +212,9 @@ public class DAO {
   }
 
   /**
-   *
    * @see RefResultDAO#createResultTable(Connection)
    */
-  void drop(String table,Connection connection) {
+  void drop(String table, Connection connection) {
     try {
       PreparedStatement statement = connection.prepareStatement("DROP TABLE " + table);
       if (!statement.execute()) {
@@ -232,8 +225,7 @@ public class DAO {
         if (!preparedStatement.execute()) {
           logger.error("2 couldn't drop table " + table);
         }
-      }
-      else {
+      } else {
         statement.close();
       }
       database.closeConnection(connection);
