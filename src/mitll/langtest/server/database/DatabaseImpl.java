@@ -67,6 +67,7 @@ public class DatabaseImpl implements Database {
   private static final int LOG_THRESHOLD = 10;
   private static final String UNKNOWN = "unknown";
   private static final String SIL = "sil";
+  public static final String TRANSLITERATION = "transliteration";
 
   private String installPath;
   private ExerciseDAO exerciseDAO = null;
@@ -488,19 +489,21 @@ public class DatabaseImpl implements Database {
    * @return
    * @see #editItem
    */
-  private Set<AudioAttribute> getAndMarkDefects(CommonExercise userExercise, Map<String, ExerciseAnnotation> fieldToAnnotation) {
+  private Set<AudioAttribute> getAndMarkDefects(AudioAttributeExercise userExercise,
+                                                Map<String, ExerciseAnnotation> fieldToAnnotation) {
     Set<AudioAttribute> defects = new HashSet<AudioAttribute>();
 
     for (Map.Entry<String, ExerciseAnnotation> fieldAnno : fieldToAnnotation.entrySet()) {
-      if (!fieldAnno.getValue().isCorrect()) {
+      if (!fieldAnno.getValue().isCorrect()) {  // i.e. defect
         AudioAttribute audioAttribute = userExercise.getAudioRefToAttr().get(fieldAnno.getKey());
         if (audioAttribute != null) {
-          logger.debug("getAndMarkDefects : found defect " + audioAttribute + " anno : " + fieldAnno.getValue() +
+          logger.debug("getAndMarkDefects : found defect " + audioAttribute +
+              " anno : " + fieldAnno.getValue() +
               " field  " + fieldAnno.getKey());
           // logger.debug("\tmarking defect on audio");
           defects.add(audioAttribute);
           audioDAO.markDefect(audioAttribute);
-        } else if (!fieldAnno.getKey().equals("transliteration")) {
+        } else if (!fieldAnno.getKey().equals(TRANSLITERATION)) {
           logger.warn("\tcan't mark defect on audio : looking for field '" + fieldAnno.getKey() +
               "' in " + userExercise.getAudioRefToAttr().keySet());
         }
