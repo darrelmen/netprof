@@ -3,7 +3,8 @@
               Any modifications will be overwritten.
               To include a user specific buildfile here, simply create one in the same
               directory with the processing instruction <?eclipse.ant.import?>
-              as the first entry and export the buildfile again. --><project basedir="." default="patch" name="LangTest">
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="patch" name="LangTest">
     <property environment="env"/>
     <property name="ECLIPSE_HOME" value="../../../eclipse_juno"/>
     <property name="imagewriter.location" value="imagewriter"/>
@@ -16,11 +17,11 @@
     </tstamp>
 
     <!-- Arguments to gwtc and devmode targets -->
-    <property name="gwt.args" value="" />
+    <property name="gwt.args" value=""/>
     <property name="gwt.lib" value="gwt/lib"/>
     <property name="tomcat.deploy" value="../../../apache-tomcat-7.0.25/webapps"/>
 
-    <path id="GWT SDK [GWT - 2.5.0].libraryclasspath">
+    <path id="GWT.libraryclasspath">
         <pathelement location="gwt/gwt-user.jar"/>
         <pathelement location="gwt/gwt-dev.jar"/>
         <pathelement location="gwt/validation-api-1.0.0.GA-sources.jar"/>
@@ -33,11 +34,15 @@
     <path id="LangTest.classpath">
         <pathelement location="war/WEB-INF/classes"/>
         <pathelement location="test-classes"/>
-        <path refid="GWT SDK [GWT - 2.5.0].libraryclasspath"/>
+        <path refid="GWT.libraryclasspath"/>
         <pathelement location="war/WEB-INF/lib/json-lib-2.4-jdk15.jar"/>
         <pathelement location="war/WEB-INF/lib/commons-codec-1.6.jar"/>
-        <pathelement location="war/WEB-INF/lib/guava-16.0.1.jar"/>
-        <pathelement location="war/WEB-INF/lib/guava-gwt-16.0.1.jar"/>
+        <pathelement location="war/WEB-INF/lib/guava-18.0.jar"/>
+        <pathelement location="war/WEB-INF/lib/guava-gwt-18.0.jar"/>
+
+        <!--        <pathelement location="war/WEB-INF/lib/guava-19.0.jar"/>
+                <pathelement location="war/WEB-INF/lib/guava-gwt-19.0.jar"/>-->
+
         <pathelement location="war/WEB-INF/lib/log4j-1.2.17.jar"/>
         <path refid="imagewriter.classpath"/>
         <pathelement location="war/WEB-INF/lib/pronz.jar"/>
@@ -74,7 +79,7 @@
     <target depends="build-subprojects,gwtc" name="build"/>
 
     <target depends="build" name="war">
-        <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**" >
+        <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**">
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
             </manifest>
@@ -82,12 +87,14 @@
     </target>
 
     <target depends="build" name="warArabic">
-        <jar destfile="npArabicText.war" basedir="war" excludes="answers/**,audioimages/**,scoring/**,fastAndSlowRef/**" >
+        <jar destfile="npArabicText.war" basedir="war"
+             excludes="answers/**,audioimages/**,scoring/**,fastAndSlowRef/**">
         </jar>
     </target>
 
     <target depends="build" name="warLevantine">
-        <jar destfile="hs2Levantine.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**,config/first/**,config/autocrt/**,config/dari/**,config/pilot/**,config/msa/**,config/pashto/**,config/urdu/**,scoring/models.dli-dari/**,scoring/models.wsj01-16/**,scoring/models.dli-ara/**,scoring/models.dli-ara.old/**,scoring/models.wsj01-16/**,scoring/models.dli-pashto/**,scoring/models.dli-ara/**" >
+        <jar destfile="hs2Levantine.war" basedir="war"
+             excludes="answers/**,audioimages/**,scoring/tmp/**,config/first/**,config/autocrt/**,config/dari/**,config/pilot/**,config/msa/**,config/pashto/**,config/urdu/**,scoring/models.dli-dari/**,scoring/models.wsj01-16/**,scoring/models.dli-ara/**,scoring/models.dli-ara.old/**,scoring/models.wsj01-16/**,scoring/models.dli-pashto/**,scoring/models.dli-ara/**">
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
             </manifest>
@@ -130,7 +137,7 @@
     <target depends="build" name="avpCRTDemo">
         <jar destfile="avpCRTDemo.war" basedir="war"
              includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pilot/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
-                >
+        >
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -141,7 +148,7 @@
     <target depends="build" name="crtMSA">
         <jar destfile="crtMSA.war" basedir="war"
              includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pilot/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
-                >
+        >
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -153,7 +160,7 @@
     <target depends="build" name="levantineFlashcard">
         <jar destfile="levantineFlashcard.war" basedir="war"
              includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/unitFlashcard/**,soundmanager2.js,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-levantine/**"
-                >
+        >
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -165,7 +172,7 @@
     <target depends="build" name="hsMSA">
         <jar destfile="hsMSA.war" basedir="war"
              includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/msa/headstartMedia/**,config/msa/MSA-headstart.*,config/msa/msa.h2*,config/msa/*.properties,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
-                >
+        >
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -176,7 +183,7 @@
     <target depends="build" name="hsFarsi">
         <jar destfile="hsFarsi.war" basedir="war"
              includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/farsi/headstartAudio/**,config/farsi/*xlsx,config/farsi/farsiHS.h2*,config/farsi/*.properties,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-farsi/**"
-                >
+        >
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -187,7 +194,7 @@
     <target depends="build" name="hsPashto">
         <jar destfile="hsPashto.war" basedir="war"
              includes="favicon.ico,flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/pashto/headstartAudio/**,config/pashto/*xlsx,config/pashto/pashtoHS.h2*,config/pashto/*.properties,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-pashto/**"
-                >
+        >
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -199,7 +206,7 @@
     <target depends="build" name="npMSADC">
         <jar destfile="npMSADC.war" basedir="war"
              includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/msa/media/**,config/msa/trans*,config/msa/MSA-headstart.*,config/msa/msa.h2*,config/msa/*.properties,config/msa/missing*,scoring/bin.linux64/**,scoring/bin.win32/**,scoring/configurations/**,scoring/models.dli-ara/**"
-                >
+        >
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -211,7 +218,7 @@
     <target depends="build" name="classroomEnglish">
         <jar destfile="npfClassroomEnglish.war" basedir="war"
              includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/english/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
-                >
+        >
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -224,7 +231,7 @@
         <jar destfile="npfClassroomRussian.war" basedir="war"
              includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/russian/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
              excludes="config/russian/*.tar,config/russian/candidateAudio/**"
-                >
+        >
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -235,7 +242,7 @@
     <target depends="build" name="classroomEgyptian">
         <jar destfile="npfClassroomEgyptian.war" basedir="war"
              includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/egyptian/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
-            >
+        >
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -246,7 +253,7 @@
     <target depends="build" name="classroomSpanish">
         <jar destfile="npfClassroomSpanish.war" basedir="war"
              includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/spanish/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
-                >
+        >
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -258,7 +265,7 @@
     <target depends="build" name="classroomTagalog">
         <jar destfile="npfClassroomTagalog.war" basedir="war"
              includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/tagalog/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
-                >
+        >
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -279,7 +286,7 @@
     <target depends="build" name="classroomIraqi">
         <jar destfile="npfClassroomIraqi.war" basedir="war"
              includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/iraqi/**,scoring/bin.linux64/**,scoring/configurations/**"
-                >
+        >
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
             </manifest>
@@ -289,7 +296,7 @@
     <target depends="build" name="mandarinClassroom">
         <jar destfile="cmMITClassroom.war" basedir="war"
              includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/mandarinClassroom/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.wsj01-16/**"
-                >
+        >
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -300,7 +307,7 @@
     <target depends="build" name="classroomJapanese">
         <jar destfile="npfClassroomJapanese.war" basedir="war"
              includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/japanese/**,scoring/bin.linux64/**,scoring/configurations/**"
-                >
+        >
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -311,7 +318,7 @@
     <target depends="build" name="classroomKorean">
         <jar destfile="npfClassroomKorean.war" basedir="war"
              includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/korean/**,scoring/bin.linux64/**,scoring/configurations/**"
-                >
+        >
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
@@ -320,17 +327,16 @@
     </target>
 
 
-
     <target depends="build" name="crtDari">
-    <jar destfile="crtDari.war" basedir="war"
-         includes="*.png,*.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dari/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.dli-dari/**"
-            >
+        <jar destfile="crtDari.war" basedir="war"
+             includes="*.png,*.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/dari/**,scoring/bin.linux64/**,scoring/configurations/**,scoring/models.dli-dari/**"
+        >
 
-        <manifest>
-            <attribute name="Built-Date" value="${current.time}"/>
-        </manifest>
-    </jar>
-</target>
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
 
 
     <target depends="build" name="dataCollectAdmin2">
@@ -376,7 +382,8 @@
     </target>
 
     <target depends="build" name="warAutocrt">
-        <jar destfile="npAutocrt.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**,config/first/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**">
+        <jar destfile="npAutocrt.war" basedir="war"
+             excludes="answers/**,audioimages/**,scoring/tmp/**,config/first/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**">
         </jar>
     </target>
 
@@ -394,10 +401,10 @@
     </target>
 
     <target depends="build-subprojects,javac" name="light-war">
-        <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**" >
+        <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**">
         </jar>
     </target>
-    
+
     <target name="build-subprojects" depends="cleanall">
         <ant antfile="build.xml" dir="${imagewriter.location}" inheritAll="false" target="build-project">
             <propertyset>
@@ -416,7 +423,7 @@
                 <path refid="LangTest.classpath"/>
             </classpath>
             <!-- add jvmarg -Xss16M or similar if you see a StackOverflowError -->
-            <jvmarg value="-Xmx512M"/>
+            <jvmarg value="-Xmx768M"/>
             <arg line="-war"/>
             <arg value="war"/>
             <arg line="-style"/>
@@ -425,13 +432,13 @@
             <arg value="OBF"/>
             <arg line="-localWorkers"/>
             <arg value="6"/>
-<!--
-            <arg value="-compileReport"/>
--->
+            <!--
+                        <arg value="-compileReport"/>
+            -->
 
-<!--        <arg line="-logLevel"/>
-            <arg value="DEBUG"/>
--->
+<!--            <arg line="-logLevel"/>
+            <arg value="DEBUG"/>-->
+
             <arg line="${gwt.args}"/>
             <arg value="mitll.langtest.LangTest"/>
         </java>
@@ -439,17 +446,18 @@
 
     <target depends="init" name="javac">
         <echo message="${ant.project.name}: ${ant.file}"/>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="war/WEB-INF/classes" includeantruntime="false" source="${source}" target="${target}">
+        <javac debug="true" debuglevel="${debuglevel}" destdir="war/WEB-INF/classes" includeantruntime="false"
+               source="${source}" target="${target}">
             <src path="src"/>
             <classpath refid="LangTest.classpath"/>
             <compilerarg line="-encoding utf-8"/>
         </javac>
-<!--
-        <javac debug="true" debuglevel="${debuglevel}" destdir="test-classes" includeantruntime="false" source="${source}" target="${target}">
-            <src path="test"/>
-            <classpath refid="LangTest.classpath"/>
-        </javac>
--->
+        <!--
+                <javac debug="true" debuglevel="${debuglevel}" destdir="test-classes" includeantruntime="false" source="${source}" target="${target}">
+                    <src path="test"/>
+                    <classpath refid="LangTest.classpath"/>
+                </javac>
+        -->
         <copy todir="war/WEB-INF/lib">
             <fileset dir="${imagewriter.location}" includes="imagewriter.jar"/>
         </copy>
