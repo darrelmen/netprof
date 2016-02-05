@@ -134,53 +134,57 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell,CommonExercis
 
       @Override
       public void onSuccess(Map<String, Float> result) {
-        float total = result.get("total");
-
-        //  logger.debug("ref audio coverage " + result);
-//         System.out.println("\n\n\nref audio coverage " + result);
-
-        int r = 0;
-        int col = 0;
-
-        String sp = "&nbsp;";
-        String p = "<b>";
-        String s = "</b>" + sp;
-        flex.setHTML(r, col++, "Male ");
-        flex.setHTML(r, col++, sp + result.get("male").intValue() + "");
-        flex.setHTML(r, col++, p + getPercent(result.get("male"), total) + "%" + s);
-
-        flex.setHTML(r, col++, "regular");
-        flex.setHTML(r, col++, sp + result.get("maleFast").intValue());
-        flex.setHTML(r, col++, p + getPercent(result.get("maleFast"), total) + "%" + s);
-
-        flex.setHTML(r, col++, "slow");
-        flex.setHTML(r, col++, sp + result.get("maleSlow").intValue());
-        flex.setHTML(r++, col++, p + getPercent(result.get("maleSlow"), total) + "%" + s);
-
-        col = 0;
-        flex.setHTML(r, col++, "Female");
-        flex.setHTML(r, col++, sp + result.get("female").intValue());
-        flex.setHTML(r, col++, p + getPercent(result.get("female"), total) + "%" + s);
-
-        flex.setHTML(r, col++, "regular");
-        flex.setHTML(r, col++, sp + result.get("femaleFast").intValue());
-        flex.setHTML(r, col++, p + getPercent(result.get("femaleFast"), total) + "%" + s);
-
-        flex.setHTML(r, col++, "slow");
-        flex.setHTML(r, col++, sp + result.get("femaleSlow").intValue());
-        flex.setHTML(r++, col++, p + getPercent(result.get("femaleSlow"), total) + "%" + s);
-        col = 0;
-
-        flex.setHTML(r, col++, "Context Male ");
-        flex.setHTML(r, col++, sp + result.get("maleContext").intValue() + "");
-        flex.setHTML(r, col++, p + getPercent(result.get("maleContext"), total) + "%" + s);
-
-        flex.setHTML(r, col++, "Female");
-        flex.setHTML(r, col++, sp + result.get("femaleContext").intValue() + "");
-        flex.setHTML(r, col++, p + getPercent(result.get("femaleContext"), total) + "%" + s);
-        // do the next one...
+        populateProgressReport(result);
       }
     });
+  }
+
+  private void populateProgressReport(Map<String, Float> result) {
+    float total = result.get("total");
+
+    //  logger.debug("ref audio coverage " + result);
+//         System.out.println("\n\n\nref audio coverage " + result);
+
+    int r = 0;
+    int col = 0;
+
+    String sp = "&nbsp;";
+    String p = "<b>";
+    String s = "</b>" + sp;
+    flex.setHTML(r, col++, "Male ");
+    flex.setHTML(r, col++, sp + result.get("male").intValue() + "");
+    flex.setHTML(r, col++, p + getPercent(result.get("male"), total) + "%" + s);
+
+    flex.setHTML(r, col++, "regular");
+    flex.setHTML(r, col++, sp + result.get("maleFast").intValue());
+    flex.setHTML(r, col++, p + getPercent(result.get("maleFast"), total) + "%" + s);
+
+    flex.setHTML(r, col++, "slow");
+    flex.setHTML(r, col++, sp + result.get("maleSlow").intValue());
+    flex.setHTML(r++, col++, p + getPercent(result.get("maleSlow"), total) + "%" + s);
+
+    col = 0;
+    flex.setHTML(r, col++, "Female");
+    flex.setHTML(r, col++, sp + result.get("female").intValue());
+    flex.setHTML(r, col++, p + getPercent(result.get("female"), total) + "%" + s);
+
+    flex.setHTML(r, col++, "regular");
+    flex.setHTML(r, col++, sp + result.get("femaleFast").intValue());
+    flex.setHTML(r, col++, p + getPercent(result.get("femaleFast"), total) + "%" + s);
+
+    flex.setHTML(r, col++, "slow");
+    flex.setHTML(r, col++, sp + result.get("femaleSlow").intValue());
+    flex.setHTML(r++, col++, p + getPercent(result.get("femaleSlow"), total) + "%" + s);
+    col = 0;
+
+    flex.setHTML(r, col++, "Context Male ");
+    flex.setHTML(r, col++, sp + result.get("maleContext").intValue() + "");
+    flex.setHTML(r, col++, p + getPercent(result.get("maleContext"), total) + "%" + s);
+
+    flex.setHTML(r, col++, "Female");
+    flex.setHTML(r, col++, sp + result.get("femaleContext").intValue() + "");
+    flex.setHTML(r, col++, p + getPercent(result.get("femaleContext"), total) + "%" + s);
+    // do the next one...
   }
 
   private int getPercent(Float male, float total) {
