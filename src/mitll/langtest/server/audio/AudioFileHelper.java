@@ -192,7 +192,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
     long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > MIN_WARN_DUR) {
-      logger.debug("took " + diff + " millis to write wav file " + validity.durationInMillis + " millis long");
+      logger.debug("writeAudioFile: took " + diff + " millis to write wav file " + validity.durationInMillis + " millis long");
     }
     boolean isValid = validity.getValidity() == AudioAnswer.Validity.OK || (serverProps.isQuietAudioOK() && validity.getValidity() == AudioAnswer.Validity.TOO_QUIET);
     return getAudioAnswerDecoding(exerciseID, exercise1, questionID, user, reqid, audioType, doFlashcard, recordInResults,
@@ -272,8 +272,8 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
       JSONObject json = new ScoreToJSON().getJsonFromAnswer(answer);
       // logger.debug("json is " + json);
       long now = System.currentTimeMillis();
-      if (now - then > 10) {
-        logger.debug("took " + (now - then) + " to convert answer to json");
+      if (now - then > 20) {
+        logger.debug("getAudioAnswerDecoding : took " + (now - then) + " to convert answer to json");
       }
       String scoreJson = json.toString();
       PretestScore pretestScore = answer.getPretestScore();
@@ -406,7 +406,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
   private void checkValidity(String exerciseID, int questionID, int user, File file, AudioCheck.ValidityAndDur validity,
                              boolean isValid) {
     if (!isValid) {
-      logger.warn("got invalid audio file (" + validity +
+      logger.warn("checkValidity : got invalid audio file (" + validity +
           ") user = " + user + " exerciseID " + exerciseID +
           " question " + questionID + " file " + file.getAbsolutePath());
     }
@@ -521,6 +521,15 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
         validity.getValidity(), reqid, validity.durationInMillis);
   }
 
+  /**
+   * @see AutoCRT#getScoreForAudio(String, int, File, boolean)
+   * @see DecodeCorrectnessChecker#getFlashcardAnswer(File, Collection, AudioAnswer, boolean, boolean)
+   * @param testAudioFile
+   * @param lmSentences
+   * @param canUseCache
+   * @param useOldSchool
+   * @return
+   */
   @Override
   public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache, boolean useOldSchool) {
     return getASRScoreForAudio(testAudioFile, lmSentences, canUseCache, serverProps.usePhoneToDisplay(), useOldSchool);
@@ -637,14 +646,14 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
 
     makeASRScoring();
     if (testAudioFile == null) {
-      logger.error("huh? no test audio file for " + sentence);
+      logger.error("getASRScoreForAudio huh? no test audio file for " + sentence);
       return new PretestScore(); // very defensive
     }
     testAudioFile = mp3Support.dealWithMP3Audio(testAudioFile);
     if (!new File(testAudioFile).exists()) {
       String absolutePath = pathHelper.getAbsolute(pathHelper.getInstallPath(), testAudioFile).getAbsolutePath();
       if (!new File(absolutePath).exists()) {
-        logger.error("huh? no testAudioFile for " + sentence + " at " + new File(testAudioFile).getAbsolutePath() + " or " + absolutePath);
+        logger.error("getASRScoreForAudio huh? no testAudioFile for " + sentence + " at " + new File(testAudioFile).getAbsolutePath() + " or " + absolutePath);
         return new PretestScore();
       }
     }
@@ -670,7 +679,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
         usePhoneToDisplay);
 
     if (!pretestScore.isRanNormally() && isWebservice(asrScoring)) {
-      logger.warn("Using hydec as fallback for " + (decode ? " decoding " : " aligning ") + testAudioFile);
+      logger.warn("getASRScoreForAudio Using hydec as fallback for " + (decode ? " decoding " : " aligning ") + testAudioFile);
       pretestScore = oldschoolScoring.scoreRepeat(
           testAudioDir, removeSuffix(testAudioName),
           sentence, lmSentences,
