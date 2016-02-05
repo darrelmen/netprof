@@ -197,7 +197,7 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
    * @see #getAnswerAndRecordButtonRow(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
   private RecordButtonPanel getAnswerWidget(final String exercise, LangTestDatabaseAsync service,
-                                            ExerciseController controller, final boolean addKeyBinding, String instance,
+                                            final ExerciseController controller, final boolean addKeyBinding, String instance,
                                             int qid,
                                             Map<String, Collection<String>> typeToSelection) {
     PressAndHoldExercisePanel widgets = this;
