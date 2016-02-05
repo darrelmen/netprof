@@ -185,13 +185,13 @@ public class DynamicRange {
                     logger.info("start over last -------> ");
                   } else {
                     double res = srms(windowTotal, window);
-                    if (false) {
+  /*                  if (false) {
                       logger.info("c " + c + " " + sIndex +
                           " fres " + fres +
                           " lres " + lres +
                           " res " + res + " currTotal " + currTotal +
                           " currentBuf " + currentBuf + " total " + windowTotal + " " + windowCount + " vs " + window);
-                    }
+                    }*/
                     if (res > maxrms) maxrms = res;
                     else if (res < minrms) minrms = res;
                   }
