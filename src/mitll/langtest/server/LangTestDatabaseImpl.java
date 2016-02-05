@@ -1109,13 +1109,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
-    PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
+    String sentenceToUse = getSentenceToUse(sentence);
+    PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentenceToUse, width, height, useScoreToColorBkg,
         false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, cachedResult, usePhoneToDisplay1, false);
     long timeToRunHydec = System.currentTimeMillis() - then;
 
     logger.debug("getASRScoreForAudio : scoring file " + testAudioFile + " for " +
         " exid " + exerciseID +
-        " sentence " + sentence.length() + " characters long : " +
+        " sentence " + sentenceToUse.length() + " characters long : " +
         " score " + asrScoreForAudio.getHydecScore() +
         " took " + timeToRunHydec + " millis " + " usePhoneToDisplay " + usePhoneToDisplay1);
 
@@ -1125,6 +1126,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return asrScoreForAudio;
   }
 
+  /**
+   * Hack for percent sign in english - must be a better way.
+   * Tried adding it to dict but didn't seem to work.
+   * @param sentence
+   * @return
+   */
+  private String getSentenceToUse(String sentence) {
+    boolean english = getLanguage().equalsIgnoreCase("English") && sentence.equals("%") || sentence.equals("％");
+    if (english) {
+      //logger.info("convert " +sentence + " to percent");
+    }
+    else {
+      boolean english1 = getLanguage().equalsIgnoreCase("English");
+      boolean equals = sentence.equals("%") || sentence.equals("％");
+      logger.info("NOT convert '" +sentence + "' to percent : " +english1 + " equals " + equals);
+
+    }
+    return english ? "percent" : sentence;
+  }
   /**
    * @param reqid
    * @param resultID
