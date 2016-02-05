@@ -871,16 +871,24 @@ public class UserListManager {
     return b && userListDAO.remove(id);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#deleteItemFromList(long, String)
+   * @param listid
+   * @param exid
+   * @param typeOrder
+   * @return
+   */
   public boolean deleteItemFromList(long listid, String exid, Collection<String> typeOrder) {
     logger.debug("deleteItemFromList " + listid + " " + exid);
 
-    UserList userListByID = getUserListByID(listid, typeOrder);
-    if (userListByID == null) return false;
-    /*boolean remove =*/
-    userListByID.remove(exid);
-    boolean remove = userListExerciseJoinDAO.remove(listid, exid);
+    UserList<?> userListByID = getUserListByID(listid, typeOrder);
+    if (userListByID == null) {
+      logger.warn("deleteItemFromList huh? no user list with id " + listid);
+      return false;
+    }
 
-    return remove;
+    userListByID.remove(exid);
+    return userListExerciseJoinDAO.remove(listid, exid);
   }
 
   public void setPublicOnList(long userListID, boolean isPublic) {
