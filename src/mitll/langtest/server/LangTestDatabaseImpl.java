@@ -1325,7 +1325,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param listid
    * @param exid
    * @return
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#deleteItem(String, long, UserList, PagingExerciseList, PagingExerciseList)
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#deleteItem
    */
   @Override
   public boolean deleteItemFromList(long listid, String exid) {
@@ -2030,7 +2030,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return AudioAttribute that represents the audio that has been added to the exercise
    * @see #writeAudioFile
    */
-  private AudioAttribute addToAudioTable(int user, String audioType, CommonExercise exercise1, String exerciseID, AudioAnswer audioAnswer) {
+  private AudioAttribute addToAudioTable(int user, String audioType, CommonExercise exercise1, String exerciseID,
+                                         AudioAnswer audioAnswer) {
     String exercise = exercise1 == null ? exerciseID : exercise1.getID();
     File fileRef = pathHelper.getAbsoluteFile(audioAnswer.getPath());
     String destFileName = audioType + "_" + System.currentTimeMillis() + "_by_" + user + ".wav";
@@ -2040,7 +2041,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String permanentAudioPath = new PathWriter().
         getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise, foreignLanguage, artist, serverProps);
     AudioAttribute audioAttribute =
-        db.getAudioDAO().addOrUpdate(user, exercise, audioType, permanentAudioPath, System.currentTimeMillis(), audioAnswer.getDurationInMillis());
+        db.getAudioDAO().addOrUpdate(user, exercise, audioType, permanentAudioPath, System.currentTimeMillis(),
+            audioAnswer.getDurationInMillis(), foreignLanguage);
     audioAnswer.setPath(audioAttribute.getAudioRef());
     logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " audio answer has " + audioAttribute);
 
