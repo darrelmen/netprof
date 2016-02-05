@@ -19,8 +19,8 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
-import java.util.*;
-import java.util.logging.Logger;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PagingContainer<T extends CommonShell> extends ClickablePagingContainer<T> {
-  private final Logger logger = Logger.getLogger("PagingContainer");
+ // private final Logger logger = Logger.getLogger("PagingContainer");
 
   private static final int MAX_LENGTH_ID = 17;
   private final boolean isRecorder;
@@ -251,5 +251,4 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
     }
     return toShow;
   }
-
 }
