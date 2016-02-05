@@ -130,7 +130,6 @@ public class AnswerDAO extends DAO {
       this.withFlash = withFlash;
       this.validity = validity;
       this.snr = snr;
-
     }
   }
 
@@ -155,18 +154,16 @@ public class AnswerDAO extends DAO {
    * @param processDur
    * @param roundTripDur
    * @throws java.sql.SQLException
-   * @see #addAnswer(Database, int, String, int, String, String, boolean, String, long, boolean, float, String, String, String, boolean, int, int)
+   * @see #addAnswer
    */
   private long addAnswerToTable(Connection connection, int userid, String id, int questionID,
                                 String answer, String audioFile,
                                 boolean valid, String audioType, long durationInMillis,
                                 boolean correct, float pronScore, String deviceType, String device, String scoreJson,
                                 boolean withFlash, int processDur, int roundTripDur, String validity, double snr) throws SQLException {
-    logger.debug("adding answer for exid #" + id + " correct " + correct + " score " + pronScore +
+    logger.debug("addAnswerToTable : adding answer for exid #" + id + " correct " + correct + " score " + pronScore +
         " audio type " + audioType + " answer " + answer + " process " + processDur +
-
         " validity " + validity + " snr " + snr+
-
         " json " + scoreJson);
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
