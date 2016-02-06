@@ -6,9 +6,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.UserDAO;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.AudioExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.*;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -103,7 +101,8 @@ public class AttachAudio {
    *
    * @param imported
    * @paramx id
-   * @see #getExercise(String, String, String, String, String, String, String, String, boolean)
+   * @see ExcelImport#attachAudio
+   * @see ExcelImport#getRawExercises()
    */
   public <T extends CommonExercise> int attachAudio(T imported) {
     //String mediaDir1 = mediaDir.replaceAll("bestAudio","");
@@ -125,16 +124,20 @@ public class AttachAudio {
   }
 
   public <T extends CommonExercise> int attachAudio(T imported, int missing, List<AudioAttribute> audioAttributes) {
-    String id = imported.getID();
+    MutableAudioExercise mutableAudio = imported.getMutableAudio();
 
     if (audioAttributes == null) {
       missingExerciseCount++;
-      if (missingExerciseCount < 10) logger.error("attachAudio can't find " + id);
+      if (missingExerciseCount < 10) {
+        String id = imported.getID();
+        logger.error("attachAudio can't find " + id);
+      }
     } else if (!audioAttributes.isEmpty()) {
       Set<String> audioPaths = new HashSet<String>();
       for (AudioAttribute audioAttribute : imported.getAudioAttributes()) {
         audioPaths.add(audioAttribute.getAudioRef());
       }
+
       for (AudioAttribute audio : audioAttributes) {
         String child = mediaDir1 + File.separator + audio.getAudioRef();
         /*  if (child.contains("bestAudio\bestAudio")) {
@@ -145,24 +148,28 @@ public class AttachAudio {
         boolean exists = test.exists();
         if (!exists) {
           //   logger.debug("child " + test.getAbsolutePath() + " doesn't exist");
-          test = new File(installPath, audio.getAudioRef());
-          exists = test.exists();
-          if (!exists) {
+          //test = new File(installPath, audio.getAudioRef());
+         // exists = test.exists();
+         // if (!exists) {
             //     logger.debug("child " + test.getAbsolutePath() + " doesn't exist");
-          }
+          //}
           child = audio.getAudioRef();
         }
         if (exists) {
           if (!audioPaths.contains(child)) {
+            boolean sameTranscript = checkMatchingTranscript(imported, audio);
+            if (!sameTranscript) {
+              logger.warn("for " + imported + " audio transcript " + audio.getTranscript() + " doesn't match");
+            }
             audio.setAudioRef(child);   // remember to prefix the path
-            imported.getMutableAudio().addAudio(audio);
+            mutableAudio.addAudio(audio);
             audioPaths.add(child);
           }
         } else {
           missing++;
           c++;
           if (c < 5) {
-            logger.warn("file " + test.getAbsolutePath() + " does not exist - \t" + audio.getAudioRef());
+            logger.warn("attachAudio file " + test.getAbsolutePath() + " does not exist - \t" + audio.getAudioRef());
 //            if (c < 2) {
 //              logger.warn("installPath " + installPath + "mediaDir " + mediaDir + " mediaDir1 " + mediaDir1);
 //            }
@@ -171,6 +178,17 @@ public class AttachAudio {
       }
     }
     return missing;
+  }
+
+  /**
+   * Check to see transcript matches.
+   * @param imported
+   * @param audio
+   * @return
+   */
+  private boolean checkMatchingTranscript(CommonShell imported, AudioAttribute audio) {
+    String transcript = audio.getTranscript();
+    return transcript.isEmpty() || transcript.toLowerCase().equals(imported.getForeignLanguage().toLowerCase());
   }
 
   /**
