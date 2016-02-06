@@ -83,13 +83,7 @@ public class ExcelImport implements ExerciseDAO {
     this.file = file;
     this.serverProps = serverProps;
     maxExercises = serverProps.getMaxNumExercises();
-    // this.mediaDir = mediaDir;
-//    mediaDir1 = mediaDir.replaceAll("bestAudio", "");
     this.addDefects = addDefects;
-//    this.installPath = new File(installPath);
-//    if (!this.installPath.exists()) {
-//      logger.warn("\n\n\nhuh? install path " + this.installPath.getAbsolutePath() + " doesn't exist???");
-//    }
     // turn off missing fast/slow for classroom
     shouldHaveRefAudio = false;
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
@@ -160,11 +154,6 @@ public class ExcelImport implements ExerciseDAO {
           attachAudio.attachAudio(ex);
           AudioExercise audioExercise = (AudioExercise) ex;
           attachAudio.addOldSchoolAudio(ex.getRefAudioIndex(), audioExercise);
-
-          // if (!ex.hasRefAudio()) missing++;
-//          if (ex.getID().equals("166")) {
-//            logger.info("Ex " + ex.getID() + " ref " + ex.getRefAudio());
-//          }
         }
       }
     }
