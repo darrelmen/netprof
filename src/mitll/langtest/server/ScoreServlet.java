@@ -7,12 +7,12 @@ package mitll.langtest.server;
 import com.google.common.io.Files;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -187,6 +187,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * Defaults to this year.
+   *
    * @param queryString
    * @return
    */
@@ -469,7 +470,6 @@ public class ScoreServlet extends DatabaseServlet {
     response.setCharacterEncoding("UTF-8");
 
     response.setHeader("Content-disposition", "attachment; filename=reportForYear" + year + ".html");
-
   }
 
   /**
@@ -484,7 +484,13 @@ public class ScoreServlet extends DatabaseServlet {
     db.getExercises();
 
     JSONObject jsonObject = new JSONObject();
-    jsonObject.put(CONTENT, getContentAsJson(removeExercisesWithMissingAudio));
+    JsonExport jsonExport = new JsonExport(
+        audioFileHelper == null ? Collections.emptyMap() : audioFileHelper.getPhoneToCount(),
+        db.getSectionHelper(),
+        serverProps.getPreferredVoices()
+    );
+
+    jsonObject.put(CONTENT, jsonExport.getContentAsJson(removeExercisesWithMissingAudio));
     addVersion(jsonObject);
 
     return jsonObject;
@@ -495,6 +501,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #getJsonNestedChapters
    */
+/*
   private JSONArray getContentAsJson(boolean removeExercisesWithMissingAudio) {
     JSONArray jsonArray = new JSONArray();
     Map<String, Collection<String>> typeToValues = new HashMap<>();
@@ -510,6 +517,7 @@ public class ScoreServlet extends DatabaseServlet {
     }
     return jsonArray;
   }
+*/
 
   /**
    * @param node
@@ -518,7 +526,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #getContentAsJson
    */
-  private JSONObject getJsonForNode(SectionNode node, Map<String, Collection<String>> typeToValues, boolean removeExercisesWithMissingAudio) {
+/*  private JSONObject getJsonForNode(SectionNode node, Map<String, Collection<String>> typeToValues, boolean removeExercisesWithMissingAudio) {
     JSONObject jsonForNode = new JSONObject();
     jsonForNode.put(TYPE, node.getType());
     jsonForNode.put(NAME, node.getName());
@@ -536,34 +544,8 @@ public class ScoreServlet extends DatabaseServlet {
     }
     jsonForNode.put(CHILDREN, jsonArray);
     return jsonForNode;
-  }
+  }*/
 
-  /**
-   * @param typeToValues                    for this unit and chapter
-   * @param removeExercisesWithMissingAudio
-   * @return
-   * @see #getJsonForNode
-   */
-  private JSONArray getJsonForSelection(Map<String, Collection<String>> typeToValues, boolean removeExercisesWithMissingAudio) {
-    Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToValues);
-
-    List<CommonExercise> copy = new ArrayList<>(exercisesForState);
-
-    //  boolean removeExercisesWithMissingAudio = REMOVE_EXERCISES_WITH_MISSING_AUDIO;
-    if (removeExercisesWithMissingAudio) {
-      Iterator<CommonExercise> iterator = copy.iterator();
-      for (; iterator.hasNext(); ) {
-        CommonExercise next = iterator.next();
-        if (!next.hasRefAudio()) iterator.remove();
-      }
-    }
-    if (audioFileHelper != null) {
-      getExerciseSorter().sortedByPronLengthThenPhone(copy, audioFileHelper.getPhoneToCount());
-    } else {
-      logger.warn("audioFileHelper not set yet!");
-    }
-    return getJsonArray(copy);
-  }
 
   /**
    * TODO : move to JSONSupport
@@ -577,7 +559,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #getJsonForSelection(Map, boolean)
    */
-  private JSONArray getJsonArray(List<CommonExercise> copy) {
+/*  private JSONArray getJsonArray(List<CommonExercise> copy) {
     JSONArray exercises = new JSONArray();
 
     Map<String, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
@@ -592,9 +574,11 @@ public class ScoreServlet extends DatabaseServlet {
       exercises.add(getJsonForExercise(exercise));
     }
     return exercises;
-  }
+  }*/
 
   /**
+   * REALLY IMPORTANT.
+   * <p>
    * Write the posted audio file to a location based on the user id and the exercise id.
    * If request type is decode, decode the file and return score info in json.
    * <p>
@@ -989,7 +973,15 @@ public class ScoreServlet extends DatabaseServlet {
     Collections.sort(sectionNodes);
 
     JSONObject jsonObject = new JSONObject();
-    jsonObject.put(CONTENT, getContentAsJson2(sectionNodes, removeExercisesWithMissingAudio));
+
+
+    JsonExport jsonExport = new JsonExport(
+        audioFileHelper == null ? Collections.emptyMap() : audioFileHelper.getPhoneToCount(),
+        db.getSectionHelper(),
+        serverProps.getPreferredVoices()
+    );
+
+    jsonObject.put(CONTENT, jsonExport.getContentAsJson2(sectionNodes, removeExercisesWithMissingAudio));
     addVersion(jsonObject);
 
     return jsonObject;
@@ -1006,7 +998,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #getJsonLeastRecordedChapters(boolean)
    */
-  private JSONArray getContentAsJson2(Collection<SectionNode> sectionNodes, boolean removeExercisesWithMissingAudio) {
+/*  private JSONArray getContentAsJson2(Collection<SectionNode> sectionNodes, boolean removeExercisesWithMissingAudio) {
     JSONArray jsonArray = new JSONArray();
     Map<String, Collection<String>> typeToValues = new HashMap<>();
 
@@ -1022,7 +1014,7 @@ public class ScoreServlet extends DatabaseServlet {
       }
     }
     return jsonArray;
-  }
+  }*/
 
   /**
    * @param node
@@ -1031,7 +1023,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #getContentAsJson2
    */
-  private JSONObject getJsonForNode2(SectionNode node, Map<String, Collection<String>> typeToValues, boolean removeExercisesWithMissingAudio) {
+/*  private JSONObject getJsonForNode2(SectionNode node, Map<String, Collection<String>> typeToValues, boolean removeExercisesWithMissingAudio) {
     JSONObject jsonForNode = new JSONObject();
     jsonForNode.put(TYPE, node.getType());
     jsonForNode.put(NAME, node.getName());
@@ -1052,7 +1044,7 @@ public class ScoreServlet extends DatabaseServlet {
     }
     jsonForNode.put(CHILDREN, jsonArray);
     return jsonForNode;
-  }
+  }*/
 
   /**
    * @param node
