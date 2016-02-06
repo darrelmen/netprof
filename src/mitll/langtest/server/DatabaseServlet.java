@@ -6,6 +6,7 @@ package mitll.langtest.server;
 
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -133,16 +134,16 @@ public class DatabaseServlet extends HttpServlet {
     ex.put("ct", exercise.getContext());
     ex.put("ctr", exercise.getContextTranslation());
     AudioAttribute latestContext = exercise.getLatestContext(true);
-    if (latestContext != null) {
-      String author = latestContext.getUser().getUserID();
-      if (CHECK_FOR_MP3) ensureMP3(latestContext.getAudioRef(), exercise.getContext(), author);
-    }
+    //if (latestContext != null) {
+    //  String author = latestContext.getUser().getUserID();
+    //  if (CHECK_FOR_MP3) ensureMP3(latestContext.getAudioRef(), exercise.getContext(), author);
+   // }
     ex.put("ctmref", latestContext == null ? NO : latestContext.getAudioRef());
     latestContext = exercise.getLatestContext(false);
-    if (latestContext != null) {
-      String author = latestContext.getUser().getUserID();
-      if (CHECK_FOR_MP3) ensureMP3(latestContext.getAudioRef(), exercise.getContext(), author);
-    }
+   // if (latestContext != null) {
+     // String author = latestContext.getUser().getUserID();
+     // if (CHECK_FOR_MP3) ensureMP3(latestContext.getAudioRef(), exercise.getContext(), author);
+   // }
     ex.put("ctfref", latestContext == null ? NO : latestContext.getAudioRef());
     ex.put("ref", exercise.hasRefAudio() ? exercise.getRefAudioWithPrefs(serverProps.getPreferredVoices()) : NO);
 
@@ -159,10 +160,11 @@ public class DatabaseServlet extends HttpServlet {
    * @param ex
    * @see #getJsonForExercise
    */
-  private void addLatestRefs(CommonExercise exercise, JSONObject ex) {
+  private void addLatestRefs(AudioRefExercise exercise, JSONObject ex) {
+    Set<Long> preferredVoices = serverProps.getPreferredVoices();
+
     String mr = null, ms = null, fr = null, fs = null;
     long mrt = 0, mst = 0, frt = 0, fst = 0;
-    Set<Long> preferredVoices = serverProps.getPreferredVoices();
     AudioAttribute mra = null, msa = null, fra = null, fsa = null;
 
     for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
@@ -209,7 +211,7 @@ public class DatabaseServlet extends HttpServlet {
 
     // male regular speed reference audio (m.r.r.)
     // we want the item text so we can label the mp3 with a title
-    String foreignLanguage = exercise.getForeignLanguage();
+    //String foreignLanguage = exercise.getForeignLanguage();
 
 //    if (mr != null) {
 //      if (CHECK_FOR_MP3) ensureMP3(mr, foreignLanguage, author);
