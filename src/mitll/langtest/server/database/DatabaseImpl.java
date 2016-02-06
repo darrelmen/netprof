@@ -427,7 +427,7 @@ public class DatabaseImpl implements Database {
   /**
    * @param userExercise
    * @see mitll.langtest.server.LangTestDatabaseImpl#editItem
-   * @see mitll.langtest.client.custom.dialog.EditableExercise#postEditItem
+   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */
   public void editItem(CommonExercise userExercise) {
     logger.debug("editItem ex #" + userExercise.getID() + " mediaDir : " + getServerProps().getMediaDir() +
@@ -913,43 +913,9 @@ public class DatabaseImpl implements Database {
     }
   }
 
-
-  /**
-   * So the story is we get the user exercises out of the database on demand.
-   * <p>
-   * We need to join with the audio table entries every time.
-   * <p>
-   * TODO : also, this a lot of work just to get the one ref audio recording.
-   *
-   * @paramx all
-   * @see DatabaseImpl#getExerciseIDToRefAudio()
-   */
-/*  public <A extends AudioAttributeExercise> void attachAudio(Collection<A> all) {
-    attachAudio.setExToAudio(audioDAO.getExToAudio());
-    int user = 0;
-    int examined = 0;
-    for (A ex : all) {
-      if (!ex.hasRefAudio()) {
-        attachAudio.attachAudio(ex);
-        examined++;
-
-        if (!ex.hasRefAudio()) {
-          user++;
-        }
-        // else if (ex.getID().startsWith("Custom")) {
-//          logger.warn("found audio for " + ex.getID());
-        // }
-      }
-    }
-    if (user > 0) {
-      logger.info(//"out of " + exercises.size() + //" " + missing +
-          " are missing ref audio, out of " + examined + " user exercises missing = " + user);
-    }
-  }*/
   public AnswerDAO getAnswerDAO() {
     return answerDAO;
   }
-
   public UploadDAO getUploadDAO() {
     return uploadDAO;
   }
@@ -1152,7 +1118,7 @@ public class DatabaseImpl implements Database {
    * @param id
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#deleteItem(String)
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#deleteItem(String, long, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.PagingExerciseList, mitll.langtest.client.list.PagingExerciseList)
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#deleteItem
    */
   public boolean deleteItem(String id) {
     getAddRemoveDAO().add(id, AddRemoveDAO.REMOVE);
@@ -1268,6 +1234,20 @@ public class DatabaseImpl implements Database {
 
   public int attachAudio(CommonExercise ex) {
     return getAudioDAO().attachAudio(ex, installPath, configDir);
+  }
+
+  public void attachAllAudio(List<CommonExercise> copy) {
+    AudioDAO audioDAO = getAudioDAO();
+
+    Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
+    for (CommonExercise exercise : copy) {
+      List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
+      if (audioAttributes != null) {
+        audioDAO.attachAudio(exercise, installPath, configDir, audioAttributes);
+      }
+      //if (!debug) ensureMP3s(exercise);
+     // exercises.add(getJsonForExercise(exercise));
+    }
   }
 
   public String getUserListName(long listid) {
