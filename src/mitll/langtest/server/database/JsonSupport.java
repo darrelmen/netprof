@@ -34,7 +34,7 @@ public class JsonSupport {
   private final String installPath;
 
   /**
-   *
+   * @see mitll.langtest.server.database.DatabaseImpl#setInstallPath(String, String, String)
    * @param sectionHelper
    * @param resultDAO
    * @param refResultDAO
@@ -114,7 +114,7 @@ public class JsonSupport {
    * @param collator
    * @return
    */
-  public JSONObject getJsonScoreHistoryRecorded(long userid,
+/*  public JSONObject getJsonScoreHistoryRecorded(long userid,
                                                 Map<String, Collection<String>> typeToSection,
                                                 Collator collator
   ) {
@@ -172,7 +172,7 @@ public class JsonSupport {
     container.put("lastCorrect", ""+recordedForUser.size());
     container.put("lastIncorrect", Integer.toString(0));
     return container;
-  }
+  }*/
 
   /**
    * scoreJson has the complete scoring json for the last item only.
