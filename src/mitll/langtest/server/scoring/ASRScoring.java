@@ -30,6 +30,8 @@ import scala.Tuple2;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -77,15 +79,20 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
    */
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-                                  String sentence, Collection<String> lmSentences, String imageOutDir,
+                                  String sentence,
+                                  Collection<String> lmSentences,
+
+                                  String imageOutDir,
                                   int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-                                  boolean decode, String tmpDir,
+                                  boolean decode,
                                   boolean useCache, String prefix, Result precalcResult, boolean usePhoneToDisplay) {
     return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
         sentence,
+        lmSentences,
+
         scoringDir,
         imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
-        decode, tmpDir,
+        decode,
         useCache, prefix, precalcResult, usePhoneToDisplay);
   }
 
@@ -105,28 +112,29 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @param testAudioDir          where the audio is
    * @param testAudioFileNoSuffix file name without a suffix - wav file, any sample rate
    * @param sentence              to align
+   * @param lmSentences
    * @param scoringDir            where the hydec subset is (models, bin.linux64, etc.)
    * @param imageOutDir           where to write the images (audioImage)
    * @param imageWidth            image width
    * @param imageHeight           image height
    * @param useScoreForBkgColor   true if we want to color the segments by score else all are gray
    * @param decode                if true, skips writing image files
-   * @param tmpDir                where to run hydec
    * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
    * @param prefix                on the names of the image files, if they are written
-   * @param precalcResult
-   * @return score info coming back from alignment/reco
+   * @param precalcResult         @return score info coming back from alignment/reco
    * @see ASR#scoreRepeat
    */
   private PretestScore scoreRepeatExercise(String testAudioDir,
                                            String testAudioFileNoSuffix,
                                            String sentence,
+                                           Collection<String> lmSentences,
                                            String scoringDir,
 
                                            String imageOutDir,
-                                           int imageWidth, int imageHeight,
+                                           int imageWidth,
+                                           int imageHeight,
                                            boolean useScoreForBkgColor,
-                                           boolean decode, String tmpDir,
+                                           boolean decode,
                                            boolean useCache, String prefix,
                                            Result precalcResult,
                                            boolean usePhoneToDisplay) {
@@ -174,7 +182,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     PrecalcScores precalcScores = new PrecalcScores(props, precalcResult, usePhoneToDisplay);
 
     if (precalcScores.isValid()) {
-    //  logger.info("got valid precalc  " + precalcScores);
+      //  logger.info("got valid precalc  " + precalcScores);
       scores = precalcScores.getScores();
       jsonObject = precalcScores.getJsonObject();
     } else {
@@ -182,8 +190,8 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
         logger.debug("unusable precalc result, so recalculating : " + precalcResult);
       }
 
-  //    logger.debug("recalculating : " + precalcResult);
-      scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir, useCache);
+      //    logger.debug("recalculating : " + precalcResult);
+      scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, lmSentences, scoringDir, decode, useCache);
     }
     if (scores == null) {
       logger.error("getScoreForAudio failed to generate scores.");
@@ -256,17 +264,18 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @param testAudioDir          audio file directory
    * @param testAudioFileNoSuffix file name without suffix
    * @param sentence              for alignment, the sentence to align, for decoding, the vocab list to use to filter against the dictionary
+   * @param lmSentences
    * @param scoringDir            war/scoring path
    * @param decode                true if doing decoding, false for alignment
-   * @param tmpDir                to use to run hydec in
-   * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
-   * @return Scores -- hydec score and event (word/phoneme) scores
+   * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score    @return Scores -- hydec score and event (word/phoneme) scores
    * @see #scoreRepeatExercise
    */
-  private Scores getScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
+  private Scores getScoreForAudio(String testAudioDir,
+                                  String testAudioFileNoSuffix,
                                   String sentence,
+                                  Collection<String> lmSentences,
                                   String scoringDir,
-                                  boolean decode, String tmpDir, boolean useCache) {
+                                  boolean decode, boolean useCache) {
     String key = testAudioDir + File.separator + testAudioFileNoSuffix;
     Scores scores = useCache ? audioToScore.getIfPresent(key) : null;
 
@@ -276,7 +285,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     if (scores == null) {
       if (DEBUG)
         logger.debug("no cached score for file '" + key + "', so doing " + (decode ? "decoding" : "alignment") + " on " + sentence);
-      scores = calcScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, scoringDir, decode, tmpDir);
+      scores = calcScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, lmSentences, scoringDir, decode);
       audioToScore.put(key, scores);
     } else {
       if (DEBUG) logger.debug("found cached score for file '" + key + "'");
@@ -296,24 +305,42 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @param testAudioDir
    * @param testAudioFileNoSuffix
    * @param sentence              only for align
+   * @param lmSentences
    * @param scoringDir
    * @return Scores which is the overall score and the event scores
-   * @see #getScoreForAudio(String, String, String, String, boolean, String, boolean)
+   * @see #getScoreForAudio(String, String, String, Collection, String, boolean, boolean)
    */
-  private Scores calcScoreForAudio(String testAudioDir, String testAudioFileNoSuffix,
+  private Scores calcScoreForAudio(String testAudioDir,
+                                   String testAudioFileNoSuffix,
                                    String sentence,
+                                   Collection<String> lmSentences,
                                    String scoringDir,
-                                   boolean decode, String tmpDir) {
-    Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tmpDir, "", scoringDir, new Log(null, true));
+                                   boolean decode) {
+
+    try {
+      Path tempDir = Files.createTempDirectory("calcScoreForAudio_" + languageProperty);
+
+      Dirs dirs = pronz.dirs.Dirs$.MODULE$.apply(tempDir.toFile().getAbsolutePath(), "", scoringDir, new Log(null, true));
 /*    if (false) logger.debug("dirs is " + dirs +
       " audio dir " + testAudioDir + " audio " + testAudioFileNoSuffix + " sentence " + sentence + " decode " + decode + " scoring dir " + scoringDir);
 */
-    Audio testAudio = Audio$.MODULE$.apply(
-        testAudioDir, testAudioFileNoSuffix,
-        false /* notForScoring */, dirs);
+      Audio testAudio = Audio$.MODULE$.apply(
+          testAudioDir, testAudioFileNoSuffix,
+          false /* notForScoring */, dirs);
 
-    //logger.debug("testAudio is " + testAudio + " dir " + testAudio.dir());
-    return computeRepeatExerciseScores(testAudio, sentence, tmpDir, decode);
+      //logger.debug("testAudio is " + testAudio + " dir " + testAudio.dir());
+      if (lmSentences != null) {
+        new SLFFile().createSimpleSLFFile(lmSentences, tempDir.toFile().getAbsolutePath(), -1.2f);
+      }
+
+      Scores scores = computeRepeatExerciseScores(testAudio, sentence, tempDir, decode);
+      maybeKeepHydecDir(tempDir, scores.hydraScore);
+
+      return scores;
+    } catch (IOException e) {
+      logger.error("calcScoreForAudio can't create temp dir - ");
+      return new Scores();
+    }
   }
 
   /**
@@ -446,16 +473,16 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @param sentence
    * @param decode
    * @return Scores - score for audio, given the sentence and event info
-   * @see #calcScoreForAudio(String, String, String, String, boolean, String)
+   * @see #calcScoreForAudio
    */
-  private Scores computeRepeatExerciseScores(Audio testAudio, String sentence, String tmpDir, boolean decode) {
+  private Scores computeRepeatExerciseScores(Audio testAudio, String sentence, Path tmpDir, boolean decode) {
     String modelsDir = configFileCreator.getModelsDir();
 
     // Make sure that we have an absolute path to the config and dict files.
     // Make sure that we have absolute paths.
 
     // do template replace on config file
-    String configFile = configFileCreator.getHydecConfigFile(tmpDir, modelsDir, decode);
+    String configFile = configFileCreator.getHydecConfigFile(tmpDir.toFile().getAbsolutePath(), modelsDir, decode);
 
     // do some sanity checking
     boolean configExists = new File(configFile).exists();
@@ -465,16 +492,21 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     }
 
     Scores scoresFromHydec = getScoresFromHydec(testAudio, sentence, configFile);
-    double hydecScore = scoresFromHydec.hydraScore;
+    return scoresFromHydec;
+  }
+
+  private void maybeKeepHydecDir(Path tmpDir, double hydecScore) {
     if (hydecScore > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
       try {
         //logger.debug("deleting " + tmpDir + " since score is " +hydecScore);
-        FileUtils.deleteDirectory(new File(tmpDir));
+        FileUtils.deleteDirectory(tmpDir.toFile());
+        // tmpDir.toFile().delete();
       } catch (IOException e) {
         logger.error("Deleting dir " + tmpDir + " got " + e, e);
       }
+    } else {
+      tmpDir.toFile().deleteOnExit();
     }
-    return scoresFromHydec;
   }
 
   /**
@@ -485,7 +517,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @param configFile
    * @return
    * @see SmallVocabDecoder
-   * @see #computeRepeatExerciseScores(pronz.speech.Audio, String, String, boolean)
+   * @see #computeRepeatExerciseScores
    */
   private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
     sentence = svd.getTrimmed(sentence);
@@ -499,7 +531,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
 
-      logger.debug("getScoresFromHydec : " +languageProperty +
+      logger.debug("getScoresFromHydec : " + languageProperty +
           " scoring '" + sentence + "' (" + sentence.length() + ") got score " + hydec_score +
           " and took " + timeToRunHydec + " millis");
 
@@ -526,5 +558,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
     return scores;
   }
 
-  private Scores getEmptyScores() { return new Scores(); }
+  private Scores getEmptyScores() {
+    return new Scores();
+  }
 }
