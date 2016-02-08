@@ -459,9 +459,16 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    * @return
    * @see #getAudioAnswerDecoding
    */
-  private AudioAnswer getAudioAnswer(CommonExercise exercise1, int reqid, boolean doFlashcard, String wavPath, File file,
-                                     AudioCheck.ValidityAndDur validity, boolean isValid, boolean canUseCache,
-                                     boolean allowAlternates, boolean useOldSchool) {
+  private AudioAnswer getAudioAnswer(CommonExercise exercise1,
+                                     int reqid,
+                                     boolean doFlashcard,
+                                     String wavPath,
+                                     File file,
+                                     AudioCheck.ValidityAndDur validity,
+                                     boolean isValid,
+                                     boolean canUseCache,
+                                     boolean allowAlternates,
+                                     boolean useOldSchool) {
     String url = pathHelper.ensureForwardSlashes(wavPath);
 
     return (isValid && !serverProps.isNoModel()) ?
@@ -485,7 +492,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
 
     if (audioAnswer.isValid()) {
       PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, file.getAbsolutePath(), textToAlign, null, -1, -1, false,
-          false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), identifier, null, usePhoneToDisplay, false);
+          false, serverProps.useScoreCache(), identifier, null, usePhoneToDisplay, false);
 
       audioAnswer.setPretestScore(asrScoreForAudio);
     } else {
@@ -511,6 +518,14 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
         validity.getValidity(), reqid, validity.durationInMillis);
   }
 
+  /**
+   * @see AutoCRT#getFlashcardAnswer(File, Collection, AudioAnswer, boolean, boolean)
+   * @param testAudioFile
+   * @param lmSentences
+   * @param canUseCache
+   * @param useOldSchool
+   * @return
+   */
   @Override
   public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache, boolean useOldSchool) {
     return getASRScoreForAudio(testAudioFile, lmSentences, canUseCache, serverProps.usePhoneToDisplay(), useOldSchool);
@@ -532,11 +547,11 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    */
   private PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache,
                                            boolean usePhoneToDisplay, boolean useOldSchool) {
-    String tmpDir = Files.createTempDir().getAbsolutePath();
+   // String tmpDir = Files.createTempDir().getAbsolutePath();
     makeASRScoring();
     List<String> unk = new ArrayList<String>();
 
-    createSLFFile(lmSentences, tmpDir, -1.2f);
+   // createSLFFile(lmSentences, tmpDir, -1.2f);
 
     if (isMacOrWin() || useOldSchoolServiceOnly || useOldSchool) {  // i.e. NOT using cool new jcodr webservice
       unk.add(SLFFile.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
@@ -544,7 +559,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
 
     String vocab = asrScoring.getUsedTokens(lmSentences, unk); // this is basically the transcript
     String prefix = usePhoneToDisplay ? "phoneToDisplay" : "";
-    return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, lmSentences, 128, 128, false, true, tmpDir,
+    return getASRScoreForAudio(0, testAudioFile.getPath(), vocab, lmSentences, 128, 128, false, true,
         canUseCache && serverProps.useScoreCache(), prefix, null, usePhoneToDisplay, useOldSchool);
   }
 
@@ -555,7 +570,6 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    * @return
    * @see #getASRScoreForAudio
    */
-
   private void createSLFFile(Collection<String> lmSentences, String tmpDir, float unknownModelBiasWeight) {
     new SLFFile().createSimpleSLFFile(lmSentences, tmpDir, unknownModelBiasWeight);
   }
@@ -566,7 +580,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    */
   public PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, boolean usePhoneToDisplay, boolean useOldSchool) {
     return getASRScoreForAudio(0, testAudioPath, exercise.getRefSentence(), 128, 128, false,
-        false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exercise.getID(), null, usePhoneToDisplay, useOldSchool);
+        false, serverProps.useScoreCache(), exercise.getID(), null, usePhoneToDisplay, useOldSchool);
   }
 
   /**
@@ -579,7 +593,6 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    * @param height             image dim
    * @param useScoreToColorBkg
    * @param decode
-   * @param tmpDir
    * @param useCache
    * @param prefix
    * @param precalcResult
@@ -591,9 +604,9 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    **/
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg,
-                                          boolean decode, String tmpDir, boolean useCache, String prefix, Result precalcResult,
+                                          boolean decode, boolean useCache, String prefix, Result precalcResult,
                                           boolean usePhoneToDisplay, boolean useOldSchool) {
-    return getASRScoreForAudio(reqid, testAudioFile, sentence, null, width, height, useScoreToColorBkg, decode, tmpDir,
+    return getASRScoreForAudio(reqid, testAudioFile, sentence, null, width, height, useScoreToColorBkg, decode,
         useCache, prefix, precalcResult, usePhoneToDisplay, useOldSchool);
   }
 
@@ -609,7 +622,6 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    * @param height
    * @param useScoreToColorBkg
    * @param decode
-   * @param tmpDir
    * @param useCache
    * @param prefix
    * @param precalcResult
@@ -617,9 +629,13 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
    * @return
    * @see #getASRScoreForAudio(File, Collection, boolean, boolean, boolean)
    */
-  private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence, Collection<String> lmSentences,
+  private PretestScore getASRScoreForAudio(int reqid,
+                                           String testAudioFile,
+                                           String sentence,
+                                           Collection<String> lmSentences,
+
                                            int width, int height, boolean useScoreToColorBkg,
-                                           boolean decode, String tmpDir, boolean useCache, String prefix, Result precalcResult,
+                                           boolean decode, boolean useCache, String prefix, Result precalcResult,
                                            boolean usePhoneToDisplay, boolean useOldSchool) {
     logger.debug("getASRScoreForAudio (" + serverProps.getLanguage() + ")" + (decode ? " Decoding " : " Aligning ") +
         "" + testAudioFile + " with sentence '" + sentence + "' req# " + reqid +
@@ -656,7 +672,8 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
     PretestScore pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
         sentence, lmSentences,
-        pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix, precalcResult,
+
+        pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, useCache, prefix, precalcResult,
         usePhoneToDisplay);
 
     if (!pretestScore.isRanNormally() && isWebservice(asrScoring)) {
@@ -664,7 +681,8 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
       pretestScore = oldschoolScoring.scoreRepeat(
           testAudioDir, removeSuffix(testAudioName),
           sentence, lmSentences,
-          pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, tmpDir, useCache, prefix, precalcResult,
+
+          pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, useCache, prefix, precalcResult,
           usePhoneToDisplay);
     }
     pretestScore.setReqid(reqid);
@@ -746,7 +764,7 @@ public class AudioFileHelper implements CollationSort, AutoCRTScoring {
 
   /**
    * @return
-   * @see #getASRScoreForAudio(int, String, String, Collection, int, int, boolean, boolean, String, boolean, String, Result, boolean, boolean)
+   * @see #getASRScoreForAudio(int, String, String, Collection, int, int, boolean, boolean, boolean, String, Result, boolean, boolean)
    */
   private ASR getASRScoring() {
     return webserviceScoring;
