@@ -7,7 +7,6 @@ package mitll.langtest.server;
 import audio.image.ImageType;
 import audio.imagewriter.SimpleImageWriter;
 import com.github.gwtbootstrap.client.ui.Button;
-import com.google.common.io.Files;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
@@ -544,7 +543,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userID
    * @param firstExercise
    * @param isFlashcardReq
-   * @see LoadTesting#getExercise(String, long, boolean)
+   * @seex LoadTesting#getExercise(String, long, boolean)
    * @see #makeExerciseListWrapper(int, java.util.Collection, long, String, boolean, boolean)
    */
   private void addAnnotationsAndAudio(long userID, CommonExercise firstExercise, boolean isFlashcardReq) {
@@ -1013,14 +1012,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
         String audioFilePath = result.getAnswer();
         ensureMP3(audioFilePath, sentence, "" + result.getUserid());
-        File tempDir = Files.createTempDir();
+       // Path tempDir = Files.createTempDirectory("getResultASRInfo_"+getLanguage());
         //logger.info("resultID " +resultID+ " temp dir " + tempDir.getAbsolutePath());
+      //  File tempDirForHydec = tempDir.toFile();
         asrScoreForAudio = audioFileHelper.getASRScoreForAudio(1,
             audioFilePath, sentence,
             width, height,
             true,  // make transcript images with colored segments
             false, // false = do alignment
-            tempDir.getAbsolutePath(),
             serverProps.useScoreCache(), exerciseID, result, serverProps.usePhoneToDisplay(), false);
       }
     } catch (Exception e) {
@@ -1067,7 +1066,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
     PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-        false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, cachedResult, usePhoneToDisplay1, false);
+        false, serverProps.useScoreCache(), exerciseID, cachedResult, usePhoneToDisplay1, false);
     long timeToRunHydec = System.currentTimeMillis() - then;
 
     logger.debug("getASRScoreForAudio : scoring file " + testAudioFile + " for " +
