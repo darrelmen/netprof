@@ -38,6 +38,7 @@ public class RefResultDecoder {
   private final AudioFileHelper audioFileHelper;
   private boolean stopDecode = false;
   private final PathHelper pathHelper;
+  private final AudioConversion audioConversion;
 
   /**
    * @param db
@@ -52,7 +53,7 @@ public class RefResultDecoder {
     this.serverProps = serverProperties;
     this.pathHelper = pathHelper;
     this.audioFileHelper = audioFileHelper;
-    //  this.langTestDatabase = langTestDatabase;
+    this.audioConversion = new AudioConversion(serverProperties);
   }
 
   /**
@@ -359,7 +360,6 @@ public class RefResultDecoder {
     return count;
   }
 
-  private final AudioConversion audioConversion = new AudioConversion(null);
 
   /**
    * @param audioAttributes
@@ -385,7 +385,7 @@ public class RefResultDecoder {
           } catch (IOException e) {
             logger.error("got " + e, e);
           }
-          AudioConversion.TrimInfo trimInfo = audioConversion.trimSilence(absoluteFile, true);
+          AudioConversion.TrimInfo trimInfo = audioConversion.trimSilence(absoluteFile);
           if (trimInfo.didTrim()) {
             // drop ref result info
             logger.debug("trimmed " + exid + " " + attribute + " audio " + bestAudio);
