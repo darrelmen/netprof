@@ -4,14 +4,15 @@
 
 package mitll.langtest.server.load;
 
-import com.google.common.io.Files;
+//import com.google.common.io.Files;
+
 import mitll.langtest.server.DatabaseServlet;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -20,6 +21,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
@@ -27,10 +29,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
- * <p/>
+ * <p>
  * User: GO22670
  */
 //@SuppressWarnings("serial")
@@ -38,8 +42,8 @@ public class LoadTestServlet extends DatabaseServlet {
   private static final Logger logger = Logger.getLogger(LoadTestServlet.class);
   public static final String DATABASE_REFERENCE = "databaseReference";
   public static final String LOAD_TESTING = "loadTesting";
- // public static final String ADD_ANON_USER = "addAnonUser";
- // public static final String GET_EXERCISE_I_DS_FOR = "getExerciseIDsFor";
+  // public static final String ADD_ANON_USER = "addAnonUser";
+  // public static final String GET_EXERCISE_I_DS_FOR = "getExerciseIDsFor";
   public static final String GET_EXERCISE = "getExercise";
   public static final String GET_FIRST_EXERCISE = "getFirstExercise";
   public static final String GET_RANDOM_EXERCISE = "getRandomExercise";
@@ -249,14 +253,16 @@ public class LoadTestServlet extends DatabaseServlet {
       logger.debug("got " + name + " " + next.getContentType() + " " + next.getFieldName() + " " + next.isInMemory() + " " + next.getSize());
 
 
-      File tempDir = Files.createTempDir();
+      Path tempDir = Files.createTempDirectory("getJsonForParts");
       File saveFile = new File(tempDir + File.separator + "MyAudioFile.wav");
       // opens input stream of the request for reading data
       writeToFile(next.getInputStream(), saveFile);
       long now = System.currentTimeMillis();
       logger.debug("took " + (now - then) + " millis to parse request and write the file");
       //    logger.debug("wrote to file " + saveFile.getAbsolutePath());
-      return getJsonForWordAndAudio(word, saveFile);
+      JSONObject jsonForWordAndAudio = getJsonForWordAndAudio(word, saveFile);
+      FileUtils.deleteDirectory(tempDir.toFile());
+      return jsonForWordAndAudio;
 
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -400,7 +406,7 @@ public class LoadTestServlet extends DatabaseServlet {
     String word = request.getHeader("word");
     boolean isFlashcard = request.getHeader("flashcard") != null;
 
-    File tempDir = Files.createTempDir();
+    File tempDir = Files.createTempDirectory("getJsonForAudio").toFile();
     File saveFile = new File(tempDir + File.separator + fileName);
 
     // prints out all header values
@@ -557,7 +563,7 @@ public class LoadTestServlet extends DatabaseServlet {
     PretestScore asrScoreForAudio = null;
     try {
       asrScoreForAudio = audioFileHelper.getASRScoreForAudio(-1, testAudioFile, sentence, 128, 128, false,
-          false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), "", null,usePhoneToDisplay, false);
+          false, serverProps.useScoreCache(), "", null, usePhoneToDisplay, false);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
