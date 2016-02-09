@@ -27,10 +27,10 @@ import java.util.*;
  */
 public class RefResultDecoder {
   private static final Logger logger = Logger.getLogger(RefResultDecoder.class);
+
   private static final boolean DO_REF_DECODE = true;
   private static final boolean DO_TRIM = true;
-  public static final int SLEEP_BETWEEN_DECODES = 2000;
-//  private static final boolean RUN_MISSING_INFO = false;
+  private static final int SLEEP_BETWEEN_DECODES = 2000;
 
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
@@ -38,7 +38,7 @@ public class RefResultDecoder {
   private final AudioFileHelper audioFileHelper;
   private boolean stopDecode = false;
   private final PathHelper pathHelper;
-  //private final LangTestDatabaseImpl langTestDatabase;
+  private final AudioConversion audioConversion;
 
   /**
    * @param db
@@ -53,7 +53,7 @@ public class RefResultDecoder {
     this.serverProps = serverProperties;
     this.pathHelper = pathHelper;
     this.audioFileHelper = audioFileHelper;
-    //  this.langTestDatabase = langTestDatabase;
+    this.audioConversion = new AudioConversion(serverProperties);
   }
 
   /**
@@ -259,9 +259,7 @@ public class RefResultDecoder {
       logger.debug("writeRefDecode : Out of " + attrc + " best audio files, " + maleAudio + " male, " + femaleAudio + " female, " +
           defaultAudio + " default " + "decoded " + count);
 
-
-      if (serverProps.addMissingInfo()
-          ) {
+      if (serverProps.addMissingInfo()) {
         runMissingInfo(exercises);
       } else {
         logger.debug("not looking for missing info");
@@ -297,7 +295,7 @@ public class RefResultDecoder {
     List<Result> results = db.getRefResultDAO().getResults();
 //    logger.debug(getLanguage() + " found " + results.size() + " previous ref results");
 
-    Set<String> decodedFiles = new HashSet<String>();
+    Set<String> decodedFiles = new HashSet<>();
 //    int count = 0;
     for (Result res : results) {
 //      if (count++ < 20) {
@@ -326,7 +324,7 @@ public class RefResultDecoder {
   private int doDecode(Set<String> decodedFiles, CommonExercise exercise, Collection<AudioAttribute> audioAttributes) {
     int count = 0;
     boolean doHydec = serverProps.shouldDoDecodeWithHydec();
-    List<AudioAttribute> toDecode = new ArrayList<AudioAttribute>();
+    List<AudioAttribute> toDecode = new ArrayList<>();
     for (AudioAttribute attribute : audioAttributes) {
       if (!attribute.isExampleSentence()) {
         String bestAudio = getFile(attribute);
@@ -339,9 +337,21 @@ public class RefResultDecoder {
       if (stopDecode) return 0;
 
       try {
-        audioFileHelper.decodeOneAttribute(exercise, attribute, doHydec);
-        sleep(SLEEP_BETWEEN_DECODES);
-        count++;
+        String audioRef = attribute.getAudioRef();
+
+        boolean fileExists = false;
+        if (!audioRef.contains("context=")) {
+          //logger.debug("doing alignment -- ");
+          // Do alignment...
+          File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
+          fileExists = absoluteFile.exists();
+        }
+
+        if (fileExists) {
+          audioFileHelper.decodeOneAttribute(exercise, attribute, doHydec);
+          sleep(SLEEP_BETWEEN_DECODES);
+          count++;
+        }
       } catch (Exception e) {
         logger.error("Got " + e, e);
       }
@@ -350,7 +360,6 @@ public class RefResultDecoder {
     return count;
   }
 
-  private final AudioConversion audioConversion = new AudioConversion(null);
 
   /**
    * @param audioAttributes
@@ -376,7 +385,7 @@ public class RefResultDecoder {
           } catch (IOException e) {
             logger.error("got " + e, e);
           }
-          AudioConversion.TrimInfo trimInfo = audioConversion.trimSilence(absoluteFile, true);
+          AudioConversion.TrimInfo trimInfo = audioConversion.trimSilence(absoluteFile);
           if (trimInfo.didTrim()) {
             // drop ref result info
             logger.debug("trimmed " + exid + " " + attribute + " audio " + bestAudio);
@@ -398,7 +407,9 @@ public class RefResultDecoder {
           audioConversion.ensureWriteMP3(audioRef, pathHelper.getInstallPath(), trimInfo.didTrim(), title, author);
         }
       } else {
-        logger.warn("no file for " + exid + " " + attribute + " at audio file " + bestAudio);
+  //      if (count < 20) {
+    //      logger.warn("no file for " + exid + " " + attribute + " at audio file " + bestAudio);
+      //  }
       }
     }
 
