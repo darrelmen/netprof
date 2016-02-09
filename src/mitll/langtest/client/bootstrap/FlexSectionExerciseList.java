@@ -69,7 +69,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
    * @param controller
    * @param instance
    * @param incorrectFirst
-   * @see NPFlexSectionExerciseList#MyFlexSectionExerciseList
+   * @see NPFlexSectionExerciseList#NPFlexSectionExerciseList
    */
   public FlexSectionExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                  UserFeedback feedback,
@@ -142,7 +142,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
    * @param types
    * @see #getTypeOrder(com.github.gwtbootstrap.client.ui.FluidContainer)
    */
-  private void addButtonRow(List<SectionNode> rootNodes, final FluidContainer container, Collection<String> types) {
+  private void addButtonRow(Collection<SectionNode> rootNodes, final FluidContainer container, Collection<String> types) {
 /*    System.out.println("FlexSectionExerciseList.addButtonRow for user = " + userID + " got types " +
       types + " num root nodes " + rootNodes.size() + " instance " + instance);*/
     if (types.isEmpty()) {
@@ -428,7 +428,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
 
   /**
    * @param types
-   * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
+   * @see #addButtonRow(java.util.Collection, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
    */
   private void populateButtonGroups(Collection<String> types) {
     typeToBox.clear();
@@ -442,13 +442,13 @@ public class FlexSectionExerciseList extends NPExerciseList {
     }
   }
 
-  private Map<String, SectionNode> getNameToNode(List<SectionNode> rootNodes) {
+  private Map<String, SectionNode> getNameToNode(Collection<SectionNode> rootNodes) {
     Map<String, SectionNode> nameToNode = new HashMap<String, SectionNode>();
     for (SectionNode n : rootNodes) nameToNode.put(n.getName(), n);
     return nameToNode;
   }
 
-  private List<String> getLabels(List<SectionNode> nodes) {
+  private List<String> getLabels(Collection<SectionNode> nodes) {
     List<String> items = new ArrayList<String>();
     for (SectionNode n : nodes) items.add(n.getName());
     return items;
@@ -695,7 +695,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
   /**
    * Actually kick off getting the exercises.
    *
-   * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
+   * @see #addButtonRow(java.util.Collection, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
    */
   private void setSizesAndPushFirst() {
     //System.out.println("setSizesAndPushFirst instance " + instance);
@@ -747,7 +747,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
    * @param sectionWidget
    * @see FlexSectionExerciseList#addButtonRow
    */
-  private List<ButtonWithChildren> addButtonGroup(Panel parentColumn, List<SectionNode> rootNodes,
+  private List<ButtonWithChildren> addButtonGroup(Panel parentColumn, Collection<SectionNode> rootNodes,
                                                   String typeForOriginal,
                                                   List<String> remainingTypes, ButtonGroupSectionWidget sectionWidget) {
     Map<String, SectionNode> nameToNode = getNameToNode(rootNodes);
@@ -764,7 +764,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
       String section = sortedItems.get(i);
       SectionNode sectionNode = nameToNode.get(section);
 
-      List<SectionNode> children = sectionNode.getChildren();
+      Collection<SectionNode> children = sectionNode.getChildren();
 
       ButtonWithChildren buttonForSection = makeSubgroupButton(sectionWidget, section, buttonType, false);
       buttonChildren.add(buttonForSection);
