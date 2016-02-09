@@ -36,9 +36,9 @@ import java.util.*;
 @SuppressWarnings("serial")
 public class ScoreServlet extends DatabaseServlet {
   private static final Logger logger = Logger.getLogger(ScoreServlet.class);
+
   private static final String REQUEST = "request";
   private static final String NESTED_CHAPTERS = "nestedChapters";
-  private static final String LEAST_RECORDED_CHAPTERS = "leastRecordedChapters";
   private static final String ALIGN = "align";
   private static final String DECODE = "decode";
   private static final String SCORE = "score";
@@ -64,19 +64,15 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String VALID = "valid";
   private static final String REQID = "reqid";
   private static final String INVALID = "invalid";
-  private static final String TYPE = "type";
-  private static final String NAME = "name";
-  private static final String ITEMS = "items";
   private static final String VERSION = "version";
   private static final String CONTEXT = "context";
   private static final String WIDGET = "widget";
-  private static final String CHILDREN = "children";
   private static final String REQUEST1 = "request=";
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
 
   private static final String YEAR = "year";
-  public static final String JSON_REPORT = "jsonReport";
-  public static final String REPORT = "report";
+  private static final String JSON_REPORT = "jsonReport";
+  private static final String REPORT = "report";
   private boolean removeExercisesWithMissingAudioDefault = true;
 
   private RestUserManagement userManagement;
@@ -584,7 +580,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @param reqid             label response with req id so the client can tell if it got a stale response
    * @param exerciseID        for this exercise
    * @param user              by this user
-   * @param request
+   * @param request           not sure when this wouldn't be decode
    * @param wavPath           relative path to posted audio file
    * @param saveFile          File handle to file
    * @param deviceType        iPad,iPhone, or browser
@@ -915,7 +911,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private class UserAndSelection {
-    private String[] split1;
+    private final String[] split1;
     private String user;
     private Map<String, Collection<String>> selection;
 
