@@ -13,6 +13,7 @@ import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.MutableAudioExercise;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -20,6 +21,7 @@ import java.io.OutputStream;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Create, drop, alter, read from the results table.
@@ -86,6 +88,11 @@ public class AudioDAO extends DAO {
   }
 
   /**
+   * TODO : Seems really expensive - avoid doing this if we can.
+   *
+   * @see AudioExport#writeFolderContents(ZipOutputStream, List, AudioDAO, String, String, String, boolean)
+   * @see AudioExport#writeFolderContentsContextOnly(ZipOutputStream, List, AudioDAO, String, String, String, boolean, String)
+   * @see DatabaseImpl#attachAllAudio(List)
    * @return
    * @see ExerciseDAO#setAudioDAO(AudioDAO, String, String)
    */
@@ -118,11 +125,11 @@ public class AudioDAO extends DAO {
    *
    * @return
    * @see #getExToAudio
+   * @see Report#getReport(JSONObject, int)
    */
   public Collection<AudioAttribute> getAudioAttributes() {
     try {
-      String sql = SELECT_ALL +
-          " WHERE " + DEFECT + "=false";
+      String sql = SELECT_ALL + " WHERE " + DEFECT + "=false";
       return getResultsSQL(sql);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -159,6 +166,8 @@ public class AudioDAO extends DAO {
   }
 
   /**
+   * TODO : rewrite this so it's not insane -adding and removing attributes??
+   *
    * Complicated, but separates old school "Default Speaker" audio into a second pile.
    * If we've already added an audio attribute with the path for a default speaker, then we remove it.
    * <p>
@@ -170,7 +179,7 @@ public class AudioDAO extends DAO {
    * @param audioAttributes
    * @see mitll.langtest.server.database.AudioExport#writeFolderContents(java.util.zip.ZipOutputStream, java.util.List, AudioDAO, String, String, String, boolean)
    * @see #attachAudio
-   * @see mitll.langtest.server.ScoreServlet#getJsonArray(List)
+   * @see mitll.langtest.server.json.JsonExport#getJsonArray
    * @see
    */
   public void attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir,
@@ -222,7 +231,6 @@ public class AudioDAO extends DAO {
 
     MutableAudioExercise mutable = firstExercise.getMutableAudio();
     for (AudioAttribute attr : toRemove) {
-
       if (!mutable.removeAudio(attr)) logger.warn("huh? didn't remove " + attr);
       //else {
       //   logger.debug("\tremoving " +attr);
@@ -340,7 +348,8 @@ public class AudioDAO extends DAO {
       String s = getInClause(userIDs);
       if (!s.isEmpty()) s = s.substring(0, s.length() - 1);
       String sql = "SELECT distinct " + Database.EXID +
-          " FROM " + AUDIO + " WHERE " +
+          " FROM " + AUDIO +
+          " WHERE " +
           (s.isEmpty() ? "" : USERID + " IN (" + s + ") AND ") +
           DEFECT + "<>true " +
           " AND " + AUDIO_TYPE + "='" +
@@ -363,7 +372,7 @@ public class AudioDAO extends DAO {
     return results;
   }
 
-  public Map<String, Integer> getExToCount() {
+/*  public Map<String, Integer> getExToCount() {
     String sql = "select exid, count(exid) from (select distinct exid,userid from audio where defect=false and audiotype='regular')  group by exid\n";
 
     Map<String, Integer> results = new HashMap<>();
@@ -383,7 +392,7 @@ public class AudioDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return results;
-  }
+  }*/
 
   /**
    * @param userMapMales
@@ -430,7 +439,7 @@ public class AudioDAO extends DAO {
   private int getCountForGender(Set<Long> userIds, String audioSpeed,
                                 Set<String> uniqueIDs) {
     Set<String> idsOfRecordedExercises = new HashSet<>();
-    Set<String> idsOfStaleExercises = new HashSet<>();
+  //  Set<String> idsOfStaleExercises = new HashSet<>();
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String s = getInClause(userIds);
@@ -449,7 +458,7 @@ public class AudioDAO extends DAO {
         if (uniqueIDs.contains(exid)) {
           idsOfRecordedExercises.add(exid);
         } else {
-          idsOfStaleExercises.add(exid);
+    //      idsOfStaleExercises.add(exid);
           //logger.debug("skipping stale exid " + exid);
         }
       }
