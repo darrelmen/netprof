@@ -7,6 +7,7 @@ package mitll.langtest.shared;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -49,12 +50,12 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
     }
   }
 
-  public void setWeight(float weight) {
+/*  public void setWeight(float weight) {
     if (!isLeaf()) System.err.println("don't set weight on a non-leaf");
     this.weight = weight;
-  }
+  }*/
 
-  public List<SectionNode> getChildren() { return children; }
+  public Collection<SectionNode> getChildren() { return children; }
 
   @Override
   public int compareTo(SectionNode o) {
