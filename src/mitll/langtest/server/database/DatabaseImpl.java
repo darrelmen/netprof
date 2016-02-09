@@ -89,7 +89,7 @@ public class DatabaseImpl implements Database {
   private DatabaseConnection connection = null;
   private MonitoringSupport monitoringSupport;
 
-  private String lessonPlanFile;
+//  private String lessonPlanFile;
   private final String configDir;
   private final ServerProperties serverProps;
   private final LogAndNotify logAndNotify;
@@ -127,8 +127,7 @@ public class DatabaseImpl implements Database {
     this.connection = connection;
     this.configDir = relativeConfigDir;
     this.serverProps = serverProps;
-    this.lessonPlanFile = serverProps.getLessonPlan();
-    //  this.useFile = lessonPlanFile != null;
+  //  this.lessonPlanFile = serverProps.getLessonPlan();
     this.logAndNotify = logAndNotify;
 
     try {
@@ -331,7 +330,6 @@ public class DatabaseImpl implements Database {
   public void setInstallPath(String installPath, String lessonPlanFile, String mediaDir) {
     // logger.debug("got install path " + installPath + " media " + mediaDir);
     this.installPath = installPath;
-    this.lessonPlanFile = lessonPlanFile;
     makeDAO(lessonPlanFile, mediaDir, installPath);
     this.jsonSupport = new JsonSupport(getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
         getPhoneDAO(), configDir, installPath);
@@ -352,9 +350,11 @@ public class DatabaseImpl implements Database {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
    */
-  public List<CommonExercise> getExercises() {
+/*
+  public Collection<CommonExercise> getExercises() {
     return getExercises(lessonPlanFile);
   }
+*/
 
   /**
    * @param id
@@ -369,19 +369,14 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @param lessonPlanFile
    * @return
    * @see #getExercises()
    */
-  private List<CommonExercise> getExercises(String lessonPlanFile) {
-    if (lessonPlanFile == null) {
-      logger.error("huh? lesson plan file is null???", new Exception());
-      return Collections.emptyList();
-    }
+  public Collection<CommonExercise> getExercises() {
     //logger.debug("using lesson plan file " +lessonPlanFile + " at " + installPath);
     List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
     if (rawExercises.isEmpty()) {
-      logger.warn("no exercises in " + lessonPlanFile + " at " + installPath);
+      logger.warn("no exercises in " + getServerProps().getLessonPlan() + " at " + installPath);
     }
     return rawExercises;
   }
@@ -390,13 +385,10 @@ public class DatabaseImpl implements Database {
    * Lazy, latchy instantiation of DAOs.
    * Not sure why it really has to be this way.
    *
-   * @param lessonPlanFile
    * @param mediaDir
-   * @see #getExercises(String)
    */
   private void makeDAO(String lessonPlanFile, String mediaDir, String installPath) {
     if (exerciseDAO == null) {
-      //  logger.debug(lessonPlanFile);
       synchronized (this) {
         this.exerciseDAO = new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
       }
@@ -668,7 +660,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#init
    */
   public void preloadExercises() {
-    getExercises(lessonPlanFile);
+    getExercises();
   }
 
   public void preloadContextPractice() {
@@ -1241,11 +1233,11 @@ public class DatabaseImpl implements Database {
     return getAudioDAO().attachAudio(ex, installPath, configDir);
   }
 
-  public void attachAllAudio(List<CommonExercise> copy) {
+  public void attachAllAudio() {
     AudioDAO audioDAO = getAudioDAO();
 
     Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
-    for (CommonExercise exercise : copy) {
+    for (CommonExercise exercise : getExercises()) {
       List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
       if (audioAttributes != null) {
         audioDAO.attachAudio(exercise, installPath, configDir, audioAttributes);
