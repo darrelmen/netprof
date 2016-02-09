@@ -376,7 +376,7 @@ public class DatabaseImpl implements Database {
     //logger.debug("using lesson plan file " +lessonPlanFile + " at " + installPath);
     List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
     if (rawExercises.isEmpty()) {
-      logger.warn("no exercises in " + getServerProps().getLessonPlan() + " at " + installPath);
+      logger.warn("getExercises no exercises in " + getServerProps().getLessonPlan() + " at " + installPath);
     }
     return rawExercises;
   }
