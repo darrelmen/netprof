@@ -25,6 +25,8 @@ import org.apache.log4j.Logger;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -90,12 +92,12 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
                                   String sentence, Collection<String> lmSentences, String imageOutDir,
                                   int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-                                  boolean decode, String tmpDir,
+                                  boolean decode,
                                   boolean useCache, String prefix, Result precalcResult, boolean usePhoneToDisplay) {
     return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
         sentence, lmSentences,
         imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
-        decode, tmpDir,
+        decode,
         useCache, prefix, precalcResult, usePhoneToDisplay);
   }
 
@@ -120,23 +122,25 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    * @param imageHeight           image height
    * @param useScoreForBkgColor   true if we want to color the segments by score else all are gray
    * @param decode                if true, skips writing image files
-   * @param tmpDir                where to run hydec
    * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
    * @param prefix                on the names of the image files, if they are written
    * @param precalcResult
    * @param usePhoneToDisplay     @return score info coming back from alignment/reco
+   * @paramx tmpDir                where to run hydec
    * @paramx scoringDir            where the hydec subset is (models, bin.linux64, etc.)
    * @see ASR#scoreRepeat
    */
   // JESS alignment and decoding
   private PretestScore scoreRepeatExercise(String testAudioDir,
                                            String testAudioFileNoSuffix,
-                                           String sentence, Collection<String> lmSentences, // TODO make two params, transcript and lm (null if no slf)
+                                           String sentence,
+                                           Collection<String> lmSentences, // TODO make two params, transcript and lm (null if no slf)
 
                                            String imageOutDir,
-                                           int imageWidth, int imageHeight,
+                                           int imageWidth,
+                                           int imageHeight,
                                            boolean useScoreForBkgColor,
-                                           boolean decode, String tmpDir,
+                                           boolean decode,
                                            boolean useCache, String prefix,
                                            Result precalcResult,
                                            boolean usePhoneToDisplay) {
@@ -203,22 +207,34 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     if (scores == null) {
       long then = System.currentTimeMillis();
       int end = (int) (duration * 100.0);
-      Object[] result = runHydra(rawAudioPath, sentence, lmSentences, tmpDir, decode, end);
-      if (result == null) {
-        return new PretestScore(0);
-      } else {
-        processDur = (int) (System.currentTimeMillis() - then);
-        scores = (Scores) result[0];
-        wordLab = (String) result[1];
-        phoneLab = (String) result[2];
-        if (scores.isValid()) {
-          if (wordLab.contains("UNKNOWN")) {
-            logger.info("note : hydra result includes UNKNOWNMODEL : " + wordLab);
-          }
-          Cache<String, Object[]> stringCache = decode ? decodeAudioToScore : alignAudioToScore;
-          stringCache.put(key, new Object[]{scores, wordLab, phoneLab});
+      Path tempDir = null;
+      try {
+        tempDir = Files.createTempDirectory("scoreRepeatExercise_" + languageProperty);
+
+        File tempFile = tempDir.toFile();
+        Object[] result = runHydra(rawAudioPath, sentence, lmSentences, tempFile.getAbsolutePath(), decode, end);
+        if (result == null) {
+          return new PretestScore(0);
         } else {
-          logger.warn("scoreRepeatExercise skipping invalid response from hydra.");
+          processDur = (int) (System.currentTimeMillis() - then);
+          scores = (Scores) result[0];
+          wordLab = (String) result[1];
+          phoneLab = (String) result[2];
+          if (scores.isValid()) {
+            if (wordLab.contains("UNKNOWN")) {
+              logger.info("note : hydra result includes UNKNOWNMODEL : " + wordLab);
+            }
+            cacheHydraResult(decode, key, scores, phoneLab, wordLab);
+          } else {
+            logger.warn("scoreRepeatExercise skipping invalid response from hydra.");
+          }
+        }
+
+      } catch (IOException e) {
+        logger.error("got " + e, e);
+      } finally {
+        if (tempDir != null) {
+          tempDir.toFile().deleteOnExit(); // clean up temp file
         }
       }
     }
@@ -228,6 +244,11 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     }
     return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix,
         scores, phoneLab, wordLab, duration, processDur, usePhoneToDisplay, jsonObject);
+  }
+
+  private void cacheHydraResult(boolean decode, String key, Scores scores, String phoneLab, String wordLab) {
+    Cache<String, Object[]> stringCache = decode ? decodeAudioToScore : alignAudioToScore;
+    stringCache.put(key, new Object[]{scores, wordLab, phoneLab});
   }
 
   /**
@@ -288,8 +309,8 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    * @see #runHydra(String, String, Collection, String, boolean, int)
    */
   private String createHydraDict(String transcript) {
-    if (letterToSoundClass == null) {
-      logger.warn(this + " :  LTS is null???");
+    if (getLTS() == null) {
+      logger.warn(this + " : createHydraDict : LTS is null???");
     }
 
     String dict = "[";
@@ -318,14 +339,14 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
             dict += " sp";
           }
         } else {
-          if (letterToSoundClass == null) {
+          if (getLTS() == null) {
             logger.warn(this + " " + languageProperty + " : LTS is null???");
           } else {
 
             String word1 = word.toLowerCase();
-            String[][] process = letterToSoundClass.process(word1);
+            String[][] process = getLTS().process(word1);
             if (process == null) {
-              logger.error("couldn't get letter to sound map from " + letterToSoundClass + " for " + word1);
+              logger.error("couldn't get letter to sound map from " + getLTS() + " for " + word1);
             } else {
               for (String[] pron : process) {
                 if (ctr != 0) dict += ";";
@@ -356,7 +377,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    * @param decode
    * @param end         frame number of end of file (I think)
    * @return
-   * @see #scoreRepeatExercise(String, String, String, Collection, String, int, int, boolean, boolean, String, boolean, String, Result, boolean)
+   * @see #scoreRepeatExercise
    */
   private Object[] runHydra(String audioPath, String transcript, Collection<String> lmSentences, String tmpDir, boolean decode, int end) {
     // reference trans
@@ -376,7 +397,9 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
       cleaned = slfFile.cleanToken(slfOut[1]);
     }
 
-    String hydraInput = tmpDir + "/:" + audioPath + ":" + hydraDict + ":" + smallLM + ":xxx,0," + end + ",[<s>;" + cleaned.replaceAll("\\p{Z}", ";") + ";</s>]";
+    String hydraInput = tmpDir + "/:" + audioPath + ":" + hydraDict + ":" +
+        smallLM + ":xxx,0," + end + ",[<s>;" + cleaned.replaceAll("\\p{Z}", ";") + ";</s>]";
+
     long then = System.currentTimeMillis();
     HTTPClient httpClient = new HTTPClient(ip, port, "dcodr");
 
@@ -471,8 +494,8 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    */
   private String getUniqueTokensInLM(Collection<String> lmSentences, List<String> backgroundVocab) {
     String sentence;
-    Set<String> backSet = new HashSet<String>(backgroundVocab);
-    List<String> mergedVocab = new ArrayList<String>(backgroundVocab);
+    Set<String> backSet = new HashSet<>(backgroundVocab);
+    List<String> mergedVocab = new ArrayList<>(backgroundVocab);
     List<String> foregroundVocab = svDecoderHelper.getSimpleVocab(lmSentences, FOREGROUND_VOCAB_LIMIT);
     for (String foregroundToken : foregroundVocab) {
       if (!backSet.contains(foregroundToken)) {
@@ -498,12 +521,12 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    * @see #scoreRepeatExercise
    */
   private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(EventAndFileInfo eventAndFileInfo) {
-    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
+    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<>();
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
       List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
       if (endTimes == null) {
-        typeToEndTimes.put(key, endTimes = new ArrayList<TranscriptSegment>());
+        typeToEndTimes.put(key, endTimes = new ArrayList<>());
       }
       for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
         TranscriptEvent value = event.getValue();
@@ -569,7 +592,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
       }
       return Collections.emptyMap();
     } else {
-      Map<String, Float> phoneToScore = new HashMap<String, Float>();
+      Map<String, Float> phoneToScore = new HashMap<>();
       for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
         String key = phoneScorePair.getKey();
         if (!key.equals("sil")) {
