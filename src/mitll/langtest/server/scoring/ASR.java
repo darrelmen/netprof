@@ -15,7 +15,7 @@ import java.util.Set;
 
 // TODO make this actually have method signatures...
 public interface ASR {
-	<T extends CommonExercise> void sort(List<T> toSort);
+
 	Collator getCollator();
 	boolean validLTS(String foreignLanguagePhrase);
 	PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
@@ -33,7 +33,6 @@ public interface ASR {
 	 * @param imageHeight
 	 * @param useScoreForBkgColor
 	 * @param decode
-	 * @param tmpDir
 	 * @param useCache
 	 * @param prefix
 	 * @param precalcResult
@@ -43,7 +42,7 @@ public interface ASR {
 	PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
 													 String sentence, Collection<String> lmSentences, String imageOutDir,
 													 int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-													 boolean decode, String tmpDir,
+													 boolean decode,
 													 boolean useCache, String prefix, Result precalcResult, boolean usePhoneToDisplay);
 
 	/**

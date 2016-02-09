@@ -192,8 +192,7 @@ public class UserExerciseDAO extends DAO {
         "creatorid INT, " +
         CONTEXT + " VARCHAR, " +
         CONTEXT_TRANSLATION + " VARCHAR, " +
-        "override" +
-        " BOOLEAN, " +
+        OVERRIDE + " BOOLEAN, " +
         UNIT +
         " VARCHAR, " +
         LESSON +
@@ -366,7 +365,9 @@ public class UserExerciseDAO extends DAO {
    * @see #setAudioDAO(mitll.langtest.server.database.AudioDAO)
    */
   public Collection<CommonUserExercise> getOverrides() {
-    String sql = "SELECT * from " + USEREXERCISE + " where override=true";
+    String sql = "SELECT * from " + USEREXERCISE + " where " +
+        OVERRIDE +
+        "=true";
     try {
       return getUserExercises(sql);
     } catch (SQLException e) {
@@ -463,9 +464,9 @@ public class UserExerciseDAO extends DAO {
   }
 
   /**
-   * @param e
-   * @param ref
-   * @param sref
+   * @paramx e
+   * @paramx ref
+   * @paramx sref
    * @see #getUserExercises(String)
    */
 /*  private void addMissingAudio(UserExercise e, String ref, String sref) {
