@@ -79,17 +79,35 @@ import java.util.logging.Logger;
  * - Trims silence from all ref audio
  * 1.1.5
  * - German support - fixes for trie lookup of lowercase characters
+ * 1.1.6
+ * - ScoreServlet report changes - export user table, add option to filter for items with or without audio
+ * 1.1.7
+ * - Duplicate exercise id bug with russian - see https://gh.ll.mit.edu/DLI-LTEA/Development/issues/504 and small change to json rate(sec) output
+ * 1.1.8
+ * - Fix leaving around lots of temp directories
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private Logger logger = Logger.getLogger("LangTest");
 
-  private static final String VERSION_INFO = "1.1.5";
+  private static final String VERSION_INFO = "1.1.8";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
-  private static final List<String> SITE_LIST = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "German",
-      "Korean", "Iraqi",
-      "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Russian", "Spanish", "Sudanese", "Tagalog", "Urdu");
+  public static final List<String> SITE_LIST = Arrays.asList(
+      "Dari", "Egyptian", "English", "Farsi", "German",
+      "Korean",
+      "Iraqi",
+      "Levantine",
+      "Mandarin",
+      "MSA",
+      "Pashto1",
+      "Pashto2",
+      "Pashto3",
+      "Russian",
+      "Spanish",
+      "Sudanese",
+      "Tagalog",
+      "Urdu");
 
   /**
    * How far to the right to shift the list of sites...
