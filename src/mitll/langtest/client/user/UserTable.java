@@ -29,8 +29,10 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class UserTable extends PagerTable {
-  public static final String AGE = "Age";
   private Logger logger = Logger.getLogger("UserTable");
+
+  private static final String AGE = "Age";
+  private static final int IP_ADDR_MAX_LENGTH = 20;
 
   private static final String REGISTERED_USERS = "Registered Users";
 
@@ -212,19 +214,7 @@ public class UserTable extends PagerTable {
     TextColumn<User> ipaddr = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
-        String ipaddr1 = contact.getIpaddr();
-        if (ipaddr1 == null) {
-          return "Unknown";
-        } else {
-          //  System.out.println("got " + ipaddr1);
-          int at = ipaddr1.lastIndexOf("at");
-
-          ipaddr1 = at == -1 ? ipaddr1 : ipaddr1.substring(0, at);
-          if (ipaddr1.startsWith(IP_PREFIX)) {
-            ipaddr1 = ipaddr1.substring(IP_PREFIX.length());
-          }
-          return ipaddr1;
-        }
+        return getIPAddr(contact);
       }
     };
 
@@ -306,6 +296,22 @@ public class UserTable extends PagerTable {
     // Create a SimplePager.
     // return getPagerAndTable(table, table, 10, 10);
     return getOldSchoolPagerAndTable(table, table, PAGE_SIZE1, PAGE_SIZE1, rightOfPager);
+  }
+
+  private String getIPAddr(User contact) {
+    String ipaddr1 = contact.getIpaddr();
+    if (ipaddr1 == null) {
+      return "Unknown";
+    } else {
+      //  System.out.println("got " + ipaddr1);
+      int at = ipaddr1.lastIndexOf("at");
+
+      ipaddr1 = at == -1 ? ipaddr1 : ipaddr1.substring(0, at);
+      if (ipaddr1.startsWith(IP_PREFIX)) {
+        ipaddr1 = ipaddr1.substring(IP_PREFIX.length());
+      }
+      return ipaddr1.length() > IP_ADDR_MAX_LENGTH ? (ipaddr1.substring(0, IP_ADDR_MAX_LENGTH) +"...") : ipaddr1;
+    }
   }
 
   private CellTable<User> getTable() {
