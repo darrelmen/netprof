@@ -83,6 +83,8 @@ import java.util.logging.Logger;
  * - ScoreServlet report changes - export user table, add option to filter for items with or without audio
  * 1.1.7
  * - Duplicate exercise id bug with russian - see https://gh.ll.mit.edu/DLI-LTEA/Development/issues/504 and small change to json rate(sec) output
+ * 1.1.8
+ * - Fix leaving around lots of temp directories
  * 1.2.0
  * - Refactor to add in Amas website support, and steps toward supporting getting content from json
  */
