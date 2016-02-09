@@ -433,30 +433,34 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     remove.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        DialogHelper dialogHelper = new DialogHelper(true);
-        dialogHelper.show(ARE_YOU_SURE, MSGS, new DialogHelper.CloseListener() {
-          @Override
-          public void gotYes() {
-            service.deleteItem(newUserExercise.getID(), new AsyncCallback<Boolean>() {
-              @Override
-              public void onFailure(Throwable caught) {
-              }
-
-              @Override
-              public void onSuccess(Boolean result) {
-                exerciseList.removeExercise(newUserExercise);
-                originalList.remove(newUserExercise.getID());
-              }
-            });
-          }
-
-          @Override
-          public void gotNo() {
-          }
-        });
+        confirmThenDeleteItem();
       }
     });
     return remove;
+  }
+
+  private void confirmThenDeleteItem() {
+    DialogHelper dialogHelper = new DialogHelper(true);
+    dialogHelper.show(ARE_YOU_SURE, MSGS, new DialogHelper.CloseListener() {
+      @Override
+      public void gotYes() {
+        service.deleteItem(newUserExercise.getID(), new AsyncCallback<Boolean>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
+
+          @Override
+          public void onSuccess(Boolean result) {
+            exerciseList.removeExercise(newUserExercise);
+            originalList.remove(newUserExercise.getID());
+          }
+        });
+      }
+
+      @Override
+      public void gotNo() {
+      }
+    });
   }
 
   private Button getDuplicate() {
