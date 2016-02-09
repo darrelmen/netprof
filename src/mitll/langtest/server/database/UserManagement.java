@@ -4,6 +4,7 @@
 
 package mitll.langtest.server.database;
 
+import mitll.langtest.client.LangTest;
 import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
@@ -25,10 +26,6 @@ import java.util.*;
 public class UserManagement {
   private static final Logger logger = Logger.getLogger(UserManagement.class);
 
-  private final List<String> sites = Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean", "Levantine",
-      "Mandarin",
-      "MSA", "Pashto1", "Pashto2", "Pashto3", "Spanish", "Sudanese", "Tagalog", "Urdu");
-
   private final ExerciseDAO exerciseDAO;
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
@@ -45,6 +42,8 @@ public class UserManagement {
    * Check other sites to see if the user exists somewhere else, and if so go ahead and use that person
    * here.
    *
+   * TODO : read the list of sites from a file
+   *
    * @param login
    * @param passwordH
    * @return
@@ -58,7 +57,7 @@ public class UserManagement {
     if (user == null && !passwordH.isEmpty()) {
       logger.debug("userExists : checking '" + login + "'");
 
-      for (String site : sites) {
+      for (String site : LangTest.SITE_LIST) {
         String url = "https://np.ll.mit.edu/npfClassroom" + site.replaceAll("Mandarin", "CM") + "/scoreServlet";
         String json = new HTTPClient("", 0).readFromGET(url + "?hasUser=" + login + "&passwordH=" + passwordH);
 
