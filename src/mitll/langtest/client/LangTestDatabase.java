@@ -64,9 +64,9 @@ public interface LangTestDatabase extends RemoteService {
 
   /**
    * TODO : return result id
-   * @see mitll.langtest.client.flashcard.TextResponse#getScoreForGuess
+   * @see mitll.langtest.client.amas.TextResponse#getScoreForGuess
    * @param userID
-   * @param e
+   * @param exerciseID
    * @param questionID
    * @param answer
    * @param answerType
