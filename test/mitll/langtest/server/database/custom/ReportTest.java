@@ -42,7 +42,7 @@ public class ReportTest {
     String config = "spanish";//"mandarin";
     dbName = "npfSpanish";//"mandarin";// "mandarin";
 
-    getDatabase(config,"npfSpanish");
+    getDatabase(config, "npfSpanish");
   }
 
   private static void getDatabase(String config, String dbName) {
@@ -61,13 +61,13 @@ public class ReportTest {
 
   @Test
   public void testReport() {
-    database.doReport(new PathHelper("war"),"");
+    database.doReport(new PathHelper("war"), "", 2016);
   }
 
   @Test
   public void testPhoneReport() {
     Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
-   // typeToValues.put("Lesson", Arrays.asList("1-1"));
+    // typeToValues.put("Lesson", Arrays.asList("1-1"));
     typeToValues.put("Unit", Arrays.asList("1"));
     typeToValues.put("Chapter", Arrays.asList("1A"));
     int userid = 113;
@@ -124,28 +124,28 @@ public class ReportTest {
     Map<Integer, Integer> weekToCount = new TreeMap<Integer, Integer>();
     for (User user : users) {
       //try {
-       // if (user.getTimestamp().isEmpty()) continue;
-       // Date parse = simpleDateFormat2.parse(user.getTimestamp());
+      // if (user.getTimestamp().isEmpty()) continue;
+      // Date parse = simpleDateFormat2.parse(user.getTimestamp());
       long created = user.getTimestampMillis();
-        if (created > january1st.getTime()) {
-          ytd++;
+      if (created > january1st.getTime()) {
+        ytd++;
 
-          calendar.setTimeInMillis(created);
-          int i = calendar.get(Calendar.MONTH);
-          String month1 = getMonth(i);
-          Integer integer = monthToCount.get(month1);
-          monthToCount.put(month1, (integer == null) ? 1 : integer + 1);
+        calendar.setTimeInMillis(created);
+        int i = calendar.get(Calendar.MONTH);
+        String month1 = getMonth(i);
+        Integer integer = monthToCount.get(month1);
+        monthToCount.put(month1, (integer == null) ? 1 : integer + 1);
 
-          int w = calendar.get(Calendar.WEEK_OF_YEAR);
-          Integer integer2 = weekToCount.get(w);
+        int w = calendar.get(Calendar.WEEK_OF_YEAR);
+        Integer integer2 = weekToCount.get(w);
 
-          weekToCount.put(w, (integer2 == null) ? 1 : integer2 + 1);
-        } else {
-         // logger.debug("NO time " + user.getTimestamp() + " " + parse);
-        }
-     /// } catch (ParseException e) {
-     //   e.printStackTrace();
-     // }
+        weekToCount.put(w, (integer2 == null) ? 1 : integer2 + 1);
+      } else {
+        // logger.debug("NO time " + user.getTimestamp() + " " + parse);
+      }
+      /// } catch (ParseException e) {
+      //   e.printStackTrace();
+      // }
     }
     logger.debug("ytd " + ytd);
     logger.debug("month " + monthToCount);
@@ -159,11 +159,11 @@ public class ReportTest {
   private void getResults() {
     Calendar calendar = new GregorianCalendar();
     int year = calendar.get(Calendar.YEAR);
-   // logger.debug("year " + year);
+    // logger.debug("year " + year);
     calendar.set(Calendar.YEAR, year);
     calendar.set(Calendar.DAY_OF_YEAR, 1);
     Date january1st = calendar.getTime();
-  //  logger.debug("jan first " + january1st);
+    //  logger.debug("jan first " + january1st);
 
     int ytd = 0;
 
