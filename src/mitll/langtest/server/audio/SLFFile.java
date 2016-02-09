@@ -10,6 +10,7 @@ import mitll.langtest.server.scoring.SmallVocabDecoder;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by go22670 on 1/17/14.
@@ -38,7 +39,7 @@ public class SLFFile {
    * @return
    */
   public String createSimpleSLFFile(Collection<String> lmSentences, String tmpDir, float unknownModelBiasWeight) {
-    String slfFile = tmpDir + File.separator + ASRScoring.SMALL_LM_SLF;
+    String slfFile = getSLFPath(tmpDir);
 
     String unknownModelBias = String.format("%.2f", unknownModelBiasWeight);
     String linkWeight = String.format("%.2f", EQUAL_LINK_CONSTANT);
@@ -94,10 +95,19 @@ public class SLFFile {
     //logger.debug("wrote " + slfFile + " exists " + new File(slfFile).exists());
     return slfFile;
   }
-  
+
+  public String getSLFPath(String tmpDir) {
+    return tmpDir + File.separator + ASRScoring.SMALL_LM_SLF;
+  }
+
+  /**
+   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra(String, String, Collection, String, boolean, int)
+   * @param lmSentences
+   * @return
+   */
   // creates string LM for hydra
   public String[] createSimpleSLFFile(Collection<String> lmSentences) {
-	  ArrayList<String> slf = new ArrayList<String>();
+	  List<String> slf = new ArrayList<String>();
 	  slf.add("VERSION=1.0;");
 
 	  int linkCount = 0;
