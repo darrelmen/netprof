@@ -138,12 +138,12 @@ public class ScoreServlet extends DatabaseServlet {
           } else {
             if (nestedChapters == null || (System.currentTimeMillis() - whenCached > REFRESH_CONTENT_INTERVAL)) {
               nestedChapters = getJsonNestedChapters(true);
-              whenCached = System.currentTimeMillis();
+              whenCached     = System.currentTimeMillis();
             }
             toReturn = nestedChapters;
           }
-        } else if (matchesRequest(queryString, LEAST_RECORDED_CHAPTERS)) { // JUST FOR APPEN
-          toReturn = getJsonLeastRecordedChapters(getRemoveExercisesParam(queryString).equals("true"));
+//        } else if (matchesRequest(queryString, LEAST_RECORDED_CHAPTERS)) { // JUST FOR APPEN
+//          toReturn = getJsonLeastRecordedChapters(getRemoveExercisesParam(queryString).equals("true"));
         } else if (userManagement.doGet(request, response, queryString, toReturn)) {
           logger.info("doGet handled user command for " + queryString);
         } else if (matchesRequest(queryString, CHAPTER_HISTORY)) {
@@ -294,12 +294,11 @@ public class ScoreServlet extends DatabaseServlet {
       toReturn.put(ERROR, "expecting at least two query parameters");
     } else {
       UserAndSelection userAndSelection = new UserAndSelection(split1).invoke();
-      String user = userAndSelection.getUser();
       Map<String, Collection<String>> selection = userAndSelection.getSelection();
 
       //logger.debug("chapterHistory " + user + " selection " + selection);
       try {
-        long l = Long.parseLong(user);
+        long l = Long.parseLong(userAndSelection.getUser());
         toReturn = db.getJsonScoreHistory(l, selection, getExerciseSorter());
       } catch (NumberFormatException e) {
         toReturn.put(ERROR, "User id should be a number");
@@ -334,7 +333,7 @@ public class ScoreServlet extends DatabaseServlet {
    *
    * @return
    * @see #doGet
-   * @see #getJsonForSelection
+   * @see #getChapterHistory(String, JSONObject)
    */
   private ExerciseSorter getExerciseSorter() {
     Map<String, Integer> phoneToCount = audioFileHelper == null ? new HashMap<>() : audioFileHelper.getPhoneToCount();
@@ -473,7 +472,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * join against audio dao ex->audio map again to get user exercise audio! {@link #getJsonArray(java.util.List)}
+   * join against audio dao ex->audio map again to get user exercise audio! {@link JsonExport#getJsonArray(java.util.List)}
    *
    * @param removeExercisesWithMissingAudio
    * @return
@@ -950,11 +949,11 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * Just for appen -
    *
-   * @param removeExercisesWithMissingAudio
+   * @paramx removeExercisesWithMissingAudio
    * @return
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private JSONObject getJsonLeastRecordedChapters(boolean removeExercisesWithMissingAudio) {
+/*  private JSONObject getJsonLeastRecordedChapters(boolean removeExercisesWithMissingAudio) {
     setInstallPath(db);
     db.getExercises();
 
@@ -985,7 +984,7 @@ public class ScoreServlet extends DatabaseServlet {
     addVersion(jsonObject);
 
     return jsonObject;
-  }
+  }*/
 
   private void addVersion(JSONObject jsonObject) {
     jsonObject.put(VERSION, "1.0");
@@ -1052,7 +1051,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @param exToCount
    * @see #getJsonLeastRecordedChapters(boolean)
    */
-  private void recurse(SectionNode node, Map<String, Collection<String>> typeToValues, Map<String, Integer> exToCount) {
+/*  private void recurse(SectionNode node, Map<String, Collection<String>> typeToValues, Map<String, Integer> exToCount) {
     if (node.isLeaf()) {
       Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToValues);
       float total = 0f;
@@ -1075,7 +1074,7 @@ public class ScoreServlet extends DatabaseServlet {
         typeToValues.remove(type);
       }
     }
-  }
+  }*/
 
   /**
    * @param db
