@@ -62,7 +62,7 @@ public class BaseExercise implements IsSerializable, Shell  {
   }
 
   /**
-   * @see UserExercise#UserExercise(CommonExercise)
+   * @see UserExercise#UserExercise
    * @param unitToValue
    */
   public void setUnitToValue(Map<String, String> unitToValue) {
