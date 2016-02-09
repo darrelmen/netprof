@@ -10,7 +10,6 @@ import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -54,7 +53,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String DEVICE_TYPE = "deviceType";
   private static final String DEVICE = "device";
   private static final String EVENT = "event";
-  private static final String CONTENT = "content";
+  public static final String CONTENT = "content";
   private static final String HAS_MODEL = "hasModel";
   private static final long REFRESH_CONTENT_INTERVAL = 12 * 60 * 60 * 1000L;
 
@@ -76,6 +75,8 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
 
   private static final String YEAR = "year";
+  public static final String JSON_REPORT = "jsonReport";
+  public static final String REPORT = "report";
   private boolean removeExercisesWithMissingAudioDefault = true;
 
   private RestUserManagement userManagement;
@@ -138,7 +139,7 @@ public class ScoreServlet extends DatabaseServlet {
           } else {
             if (nestedChapters == null || (System.currentTimeMillis() - whenCached > REFRESH_CONTENT_INTERVAL)) {
               nestedChapters = getJsonNestedChapters(true);
-              whenCached     = System.currentTimeMillis();
+              whenCached = System.currentTimeMillis();
             }
             toReturn = nestedChapters;
           }
@@ -152,12 +153,14 @@ public class ScoreServlet extends DatabaseServlet {
         } else if (matchesRequest(queryString, REF_INFO)) {
           queryString = removePrefix(queryString, REF_INFO);
           toReturn = getRefInfo(queryString, toReturn);
-        } else if (matchesRequest(queryString, "jsonReport")) {
-          queryString = removePrefix(queryString, "jsonReport");
+        } else if (matchesRequest(queryString, JSON_REPORT)) {
+          queryString = removePrefix(queryString, JSON_REPORT);
           int year = getYear(queryString);
           getReport(toReturn, year);
-        } else if (matchesRequest(queryString, "report")) {
-          queryString = removePrefix(queryString, "report");
+        } else if (matchesRequest(queryString, "export")) {
+          toReturn = getJSONForExercises();
+        } else if (matchesRequest(queryString, REPORT)) {
+          queryString = removePrefix(queryString, REPORT);
           int year = getYear(queryString);
           configureResponseHTML(response, year);
           reply(response, getReport(toReturn, year));
@@ -179,7 +182,7 @@ public class ScoreServlet extends DatabaseServlet {
     }
 
     long now = System.currentTimeMillis();
-logger.info("took " + (now-then) + " millis to do " + queryString);
+    logger.info("doGet : took " + (now - then) + " millis to do " + request.getQueryString());
     reply(response, toReturn.toString());
   }
 
@@ -477,14 +480,32 @@ logger.info("took " + (now-then) + " millis to do " + queryString);
    * join against audio dao ex->audio map again to get user exercise audio! {@link JsonExport#getJsonArray(java.util.List)}
    *
    * @param removeExercisesWithMissingAudio
-   * @return
+   * @return json for content
    * @see #doGet
    */
   private JSONObject getJsonNestedChapters(boolean removeExercisesWithMissingAudio) {
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put(CONTENT, getJSONExport().getContentAsJson(removeExercisesWithMissingAudio));
+    addVersion(jsonObject);
+
+    return jsonObject;
+  }
+
+  private JSONObject getJSONForExercises() {
+    return getJSONExerciseExport(getJSONExport());
+  }
+
+  private JSONObject getJSONExerciseExport(JsonExport jsonExport) {
+    JSONObject jsonObject = new JSONObject();
+    addVersion(jsonObject);
+    jsonExport.addJSONExerciseExport(jsonObject, db.getExercises());
+    return jsonObject;
+  }
+
+  private JsonExport getJSONExport() {
     setInstallPath(db);
     db.getExercises();
 
-    JSONObject jsonObject = new JSONObject();
     JsonExport jsonExport = new JsonExport(
         audioFileHelper == null ? Collections.emptyMap() : audioFileHelper.getPhoneToCount(),
         db.getSectionHelper(),
@@ -492,10 +513,7 @@ logger.info("took " + (now-then) + " millis to do " + queryString);
     );
 
     db.attachAllAudio();
-    jsonObject.put(CONTENT, jsonExport.getContentAsJson(removeExercisesWithMissingAudio));
-    addVersion(jsonObject);
-
-    return jsonObject;
+    return jsonExport;
   }
 
   /**
@@ -722,6 +740,12 @@ logger.info("took " + (now-then) + " millis to do " + queryString);
     final String path = answer.getPath();
     final String foreignLanguage = exercise1.getForeignLanguage();
 
+    ensureMP3Later(user, path, foreignLanguage);
+
+    return answer;
+  }
+
+  private void ensureMP3Later(final int user, final String path, final String foreignLanguage) {
     new Thread(new Runnable() {
       @Override
       public void run() {
@@ -731,8 +755,6 @@ logger.info("took " + (now-then) + " millis to do " + queryString);
         //       logger.debug("Took " + (now-then) + " millis to write mp3 version");
       }
     }).start();
-
-    return answer;
   }
 
   /**
@@ -869,9 +891,10 @@ logger.info("took " + (now-then) + " millis to do " + queryString);
         false, false, exerciseID, null, usePhoneToDisplay, false);
   }
 
-   private void addVersion(JSONObject jsonObject) {
+  private void addVersion(JSONObject jsonObject) {
     jsonObject.put(VERSION, "1.0");
     jsonObject.put(HAS_MODEL, !db.getServerProps().isNoModel());
+    jsonObject.put("Date", new Date().toString());
   }
 
   /**
