@@ -135,7 +135,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
    * @param types
    * @see #getTypeOrder(com.github.gwtbootstrap.client.ui.FluidContainer)
    */
-  private void addButtonRow(List<SectionNode> rootNodes, final FluidContainer container, Collection<String> types) {
+  private void addButtonRow(Collection<SectionNode> rootNodes, final FluidContainer container, Collection<String> types) {
     logger.info("SectionExerciseList.addButtonRow for user = " + controller.getUser() + " got types " +
         types + " num root nodes " + rootNodes.size());
     if (types.isEmpty()) {
@@ -195,7 +195,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
     return bottomRow;
   }
 
-  private List<String> getLabels(List<SectionNode> nodes) {
+  private List<String> getLabels(Collection<SectionNode> nodes) {
     List<String> items = new ArrayList<String>();
     for (SectionNode n : nodes) items.add(n.getName());
     return items;
