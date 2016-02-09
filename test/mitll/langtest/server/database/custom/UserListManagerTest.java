@@ -50,7 +50,7 @@ public class UserListManagerTest {
     String media = parent + File.separator + "media";
     logger.debug("media " + media);
     database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(), "media");
-    List<CommonExercise> exercises = database.getExercises();
+    Collection<CommonExercise> exercises = database.getExercises();
   }
 
   private static AudioFileHelper audioFileHelper;
