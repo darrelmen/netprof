@@ -69,7 +69,7 @@ public class UserListManagerTest {
   public void testReport() {
    // Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
   //  typeToValues.put("Lesson", Arrays.asList("1-1"));
-    database.doReport(new PathHelper("war"),"");
+    database.doReport(new PathHelper("war"),"",2016);
   }
 
   @Test
