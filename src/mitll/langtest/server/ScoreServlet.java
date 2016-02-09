@@ -115,6 +115,7 @@ public class ScoreServlet extends DatabaseServlet {
     logger.debug("ScoreServlet.doGet : Request " + request.getQueryString() + " path " + pathInfo +
         " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
 
+    long then = System.currentTimeMillis();
     configureResponse(response);
 
     getAudioFileHelper();
@@ -177,6 +178,8 @@ public class ScoreServlet extends DatabaseServlet {
       logger.error("got " + e, e);
     }
 
+    long now = System.currentTimeMillis();
+logger.info("took " + (now-then) + " millis to do " + queryString);
     reply(response, toReturn.toString());
   }
 
@@ -488,91 +491,12 @@ public class ScoreServlet extends DatabaseServlet {
         serverProps.getPreferredVoices()
     );
 
+    db.attachAllAudio();
     jsonObject.put(CONTENT, jsonExport.getContentAsJson(removeExercisesWithMissingAudio));
     addVersion(jsonObject);
 
     return jsonObject;
   }
-
-  /**
-   * @param removeExercisesWithMissingAudio
-   * @return
-   * @see #getJsonNestedChapters
-   */
-/*
-  private JSONArray getContentAsJson(boolean removeExercisesWithMissingAudio) {
-    JSONArray jsonArray = new JSONArray();
-    Map<String, Collection<String>> typeToValues = new HashMap<>();
-
-    List<SectionNode> sectionNodes = db.getSectionHelper().getSectionNodes();
-    for (SectionNode node : sectionNodes) {
-      String type = node.getType();
-      typeToValues.put(type, Collections.singletonList(node.getName()));
-      JSONObject jsonForNode = getJsonForNode(node, typeToValues, removeExercisesWithMissingAudio);
-      typeToValues.remove(type);
-
-      jsonArray.add(jsonForNode);
-    }
-    return jsonArray;
-  }
-*/
-
-  /**
-   * @param node
-   * @param typeToValues
-   * @param removeExercisesWithMissingAudio
-   * @return
-   * @see #getContentAsJson
-   */
-/*  private JSONObject getJsonForNode(SectionNode node, Map<String, Collection<String>> typeToValues, boolean removeExercisesWithMissingAudio) {
-    JSONObject jsonForNode = new JSONObject();
-    jsonForNode.put(TYPE, node.getType());
-    jsonForNode.put(NAME, node.getName());
-    JSONArray jsonArray = new JSONArray();
-
-    if (node.isLeaf()) {
-      JSONArray exercises = getJsonForSelection(typeToValues, removeExercisesWithMissingAudio);
-      jsonForNode.put(ITEMS, exercises);
-    } else {
-      for (SectionNode child : node.getChildren()) {
-        typeToValues.put(child.getType(), Collections.singletonList(child.getName()));
-        jsonArray.add(getJsonForNode(child, typeToValues, removeExercisesWithMissingAudio));
-        typeToValues.remove(child.getType());
-      }
-    }
-    jsonForNode.put(CHILDREN, jsonArray);
-    return jsonForNode;
-  }*/
-
-
-  /**
-   * TODO : move to JSONSupport
-   * <p>
-   * This is the json that describes an individual entry.
-   * <p>
-   * Makes sure to attach audio to exercises (this is especially important for userexercises that mask out
-   * exercises with new reference audio).
-   *
-   * @param copy
-   * @return
-   * @see #getJsonForSelection(Map, boolean)
-   */
-/*  private JSONArray getJsonArray(List<CommonExercise> copy) {
-    JSONArray exercises = new JSONArray();
-
-    Map<String, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
-    String installPath = pathHelper.getInstallPath();
-
-    for (CommonExercise exercise : copy) {
-      List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
-      if (audioAttributes != null) {
-        db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
-      }
-      //if (!debug) ensureMP3s(exercise);
-      exercises.add(getJsonForExercise(exercise));
-    }
-    return exercises;
-  }*/
 
   /**
    * REALLY IMPORTANT.
@@ -945,135 +869,10 @@ public class ScoreServlet extends DatabaseServlet {
         false, false, exerciseID, null, usePhoneToDisplay, false);
   }
 
-  /**
-   * Just for appen -
-   *
-   * @paramx removeExercisesWithMissingAudio
-   * @return
-   * @see #doGet(HttpServletRequest, HttpServletResponse)
-   */
-/*  private JSONObject getJsonLeastRecordedChapters(boolean removeExercisesWithMissingAudio) {
-    setInstallPath(db);
-    db.getExercises();
-
-    Map<String, Integer> exToCount = db.getAudioDAO().getExToCount();
-
-    Map<String, Collection<String>> typeToValues = new HashMap<>();
-
-    List<SectionNode> sectionNodes = db.getSectionHelper().getSectionNodes();
-    for (SectionNode node : sectionNodes) {
-      String type = node.getType();
-      typeToValues.put(type, Collections.singletonList(node.getName()));
-      recurse(node, typeToValues, exToCount);
-      typeToValues.remove(type);
-    }
-
-    Collections.sort(sectionNodes);
-
-    JSONObject jsonObject = new JSONObject();
-
-
-    JsonExport jsonExport = new JsonExport(
-        audioFileHelper == null ? Collections.emptyMap() : audioFileHelper.getPhoneToCount(),
-        db.getSectionHelper(),
-        serverProps.getPreferredVoices()
-    );
-
-    jsonObject.put(CONTENT, jsonExport.getContentAsJson2(sectionNodes, removeExercisesWithMissingAudio));
-    addVersion(jsonObject);
-
-    return jsonObject;
-  }*/
-
-  private void addVersion(JSONObject jsonObject) {
+   private void addVersion(JSONObject jsonObject) {
     jsonObject.put(VERSION, "1.0");
     jsonObject.put(HAS_MODEL, !db.getServerProps().isNoModel());
   }
-
-  /**
-   * @param sectionNodes
-   * @param removeExercisesWithMissingAudio
-   * @return
-   * @see #getJsonLeastRecordedChapters(boolean)
-   */
-/*  private JSONArray getContentAsJson2(Collection<SectionNode> sectionNodes, boolean removeExercisesWithMissingAudio) {
-    JSONArray jsonArray = new JSONArray();
-    Map<String, Collection<String>> typeToValues = new HashMap<>();
-
-    if (audioFileHelper != null) {
-
-      for (SectionNode node : sectionNodes) {
-        String type = node.getType();
-        typeToValues.put(type, Collections.singletonList(node.getName()));
-        JSONObject jsonForNode = getJsonForNode2(node, typeToValues, removeExercisesWithMissingAudio);
-        typeToValues.remove(type);
-
-        jsonArray.add(jsonForNode);
-      }
-    }
-    return jsonArray;
-  }*/
-
-  /**
-   * @param node
-   * @param typeToValues
-   * @param removeExercisesWithMissingAudio
-   * @return
-   * @see #getContentAsJson2
-   */
-/*  private JSONObject getJsonForNode2(SectionNode node, Map<String, Collection<String>> typeToValues, boolean removeExercisesWithMissingAudio) {
-    JSONObject jsonForNode = new JSONObject();
-    jsonForNode.put(TYPE, node.getType());
-    jsonForNode.put(NAME, node.getName());
-    JSONArray jsonArray = new JSONArray();
-
-    if (node.isLeaf()) {
-      JSONArray exercises = getJsonForSelection(typeToValues, removeExercisesWithMissingAudio);
-      jsonForNode.put(ITEMS, exercises);
-    } else {
-      List<SectionNode> children = node.getChildren();
-      Collections.sort(children); // by avg recorded number
-
-      for (SectionNode child : children) {
-        typeToValues.put(child.getType(), Collections.singletonList(child.getName()));
-        jsonArray.add(getJsonForNode2(child, typeToValues, removeExercisesWithMissingAudio));
-        typeToValues.remove(child.getType());
-      }
-    }
-    jsonForNode.put(CHILDREN, jsonArray);
-    return jsonForNode;
-  }*/
-
-  /**
-   * @param node
-   * @param typeToValues
-   * @param exToCount
-   * @see #getJsonLeastRecordedChapters(boolean)
-   */
-/*  private void recurse(SectionNode node, Map<String, Collection<String>> typeToValues, Map<String, Integer> exToCount) {
-    if (node.isLeaf()) {
-      Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToValues);
-      float total = 0f;
-      for (CommonExercise ex : exercisesForState) {
-        Integer integer = exToCount.get(ex.getID());
-        if (integer == null) {
-          //        logger.error("huh? unknown ex id " +ex.getID());
-        } else {
-          total += integer.floatValue();
-        }
-      }
-      total /= new Integer(exercisesForState.size()).floatValue();
-      node.setWeight(total); // avg number of recordings
-      //  logger.debug("set weight on " +node);
-    } else {
-      for (SectionNode child : node.getChildren()) {
-        String type = child.getType();
-        typeToValues.put(type, Collections.singletonList(child.getName()));
-        recurse(child, typeToValues, exToCount);
-        typeToValues.remove(type);
-      }
-    }
-  }*/
 
   /**
    * @param db
