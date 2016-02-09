@@ -3,6 +3,7 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
@@ -28,18 +29,18 @@ import static org.junit.Assert.*;
  * Created by GO22670 on 1/30/14.
  */
 public class ReportTest {
-  private static final String CHANGED = "changed";
+  //private static final String CHANGED = "changed";
   private static final String ENGLISH = "english";
   private static final Logger logger = Logger.getLogger(ReportTest.class);
   private static DatabaseImpl database;
-  private static String dbName;
+  //private static String dbName;
 
   @BeforeClass
   public static void setup() {
     logger.debug("setup called");
 
     String config = "spanish";//"mandarin";
-    dbName = "npfSpanish";//"mandarin";// "mandarin";
+   // dbName = "npfSpanish";//"mandarin";// "mandarin";
 
     getDatabase(config, "npfSpanish");
   }
@@ -57,6 +58,12 @@ public class ReportTest {
     database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(), "media");
     Collection<CommonExercise> exercises = database.getExercises();
   }
+
+  @Test
+  public void testExport() {
+    new JsonExport(null,null,null).getExercisesAsJson(database.getExercises());
+  }
+
 
   @Test
   public void testReport() {
@@ -536,7 +543,7 @@ public class ReportTest {
     assertTrue(next.getEnglish().equals(CHANGED));
   }*/
 
-  private UserExercise addAndDelete(User owner, UserListManager userListManager, long listid, UserList testList) {
+  public UserExercise addAndDelete(User owner, UserListManager userListManager, long listid, UserList testList) {
     UserExercise english = addExercise(owner, userListManager, listid, testList);
 
     boolean b = userListManager.deleteItemFromList(listid, english.getID(), new ArrayList<String>());
