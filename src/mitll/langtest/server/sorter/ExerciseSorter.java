@@ -36,7 +36,7 @@ public class ExerciseSorter extends SimpleSorter {
   }
 
   /**
-   * @see ScoreServlet#getJsonForSelection(Map)
+   * @see mitll.langtest.server.json.JsonExport#getJsonForSelection
    * @param toSort
    * @param phoneToCount
    */
