@@ -29,10 +29,10 @@ public class BrowserCheck {
     browserToVersion.put(SAFARI, 5);
   }
 
-    /**
-     * @see LangTest#onModuleLoad2()
-     * @return
-     */
+  /**
+   * @return
+   * @see LangTest#onModuleLoad2()
+   */
   public BrowserCheck checkForCompatibleBrowser() {
     if (browser.equals("Unknown")) getBrowserAndVersion();
     Integer min = browserToVersion.get(browser);
@@ -43,14 +43,14 @@ public class BrowserCheck {
     int ieVersion = getIEVersion();
     if (ieVersion < 9 && ieVersion > 0) {
       Window.alert("Your browser is IE version " + version +
-        ". We strongly recommend upgrading to version " + min + " or later.");
+          ". We strongly recommend upgrading to version " + min + " or later.");
     }
     if (min == null) {
       // Window.alert("Your browser is " + browser + " version " + version + ". We strongly recommend any of " + browserToVersion.keySet());
     } else if (ver < min) {
       if (!browser.equals(FIREFOX) || !version.startsWith("10.0")) {
         Window.alert("Your browser is " + browser + " version " + version +
-          ". We strongly recommend upgrading to version " + min + " or later.");
+            ". We strongly recommend upgrading to version " + min + " or later.");
       }
     } else {
       //System.out.println("browser " +browser + " ver " + ver + " version " + version + " vs " + min);
@@ -68,48 +68,48 @@ public class BrowserCheck {
    */
   public String getBrowserAndVersion() {
     String agent = getUserAgent();
-      return getBrowser(agent);
+    return getBrowser(agent);
   }
 
-    public String getBrowser(String agent) {
-        agent = agent.toLowerCase();
-        if (agent.contains(FIREFOX)) {
-            version = agent.substring(agent.indexOf(FIREFOX) + FIREFOX.length() + 1).split("\\s+")[0];
-            browser = FIREFOX;
-        } else if (agent.contains(CHROME)) {
-            version = agent.substring(agent.indexOf(CHROME) + CHROME.length() + 1).split("\\s+")[0];
-            browser = CHROME;
-        } else if (agent.contains(MSIE)) {
-            version = agent.substring(agent.indexOf(MSIE) + MSIE.length() + 1).split(";")[0];
-            browser = "IE";
-        } else if (agent.contains(SAFARI)) {
-            version = agent.substring(agent.indexOf(SAFARI) + SAFARI.length() + 1).split("\\s+")[0];
-            if (version.length() > 1) {
-                version = version.substring(0, 1);
-            }
-            browser = SAFARI;
-        } else {
-            browser = getAppName();
-        }
+  public String getBrowser(String agent) {
+    agent = agent.toLowerCase();
+    if (agent.contains(FIREFOX)) {
+      version = agent.substring(agent.indexOf(FIREFOX) + FIREFOX.length() + 1).split("\\s+")[0];
+      browser = FIREFOX;
+    } else if (agent.contains(CHROME)) {
+      version = agent.substring(agent.indexOf(CHROME) + CHROME.length() + 1).split("\\s+")[0];
+      browser = CHROME;
+    } else if (agent.contains(MSIE)) {
+      version = agent.substring(agent.indexOf(MSIE) + MSIE.length() + 1).split(";")[0];
+      browser = "IE";
+    } else if (agent.contains(SAFARI)) {
+      version = agent.substring(agent.indexOf(SAFARI) + SAFARI.length() + 1).split("\\s+")[0];
+      if (version.length() > 1) {
+        version = version.substring(0, 1);
+      }
+      browser = SAFARI;
+    } else {
+      browser = getAppName();
+    }
 
-        String major = version.split("\\.")[0];
-        try {
-            ver = Integer.parseInt(major);
-        } catch (NumberFormatException e) {
-            System.err.println("couldn't parse " + agent + " and " + major);
-            e.printStackTrace();
-        }
-        return browser + " " + ver;
+    String major = version.split("\\.")[0];
+    try {
+      ver = Integer.parseInt(major);
+    } catch (NumberFormatException e) {
+      System.err.println("couldn't parse " + agent + " and " + major);
+      e.printStackTrace();
+    }
+    return browser + " " + ver;
   }
 
-    /**
-     * Gets the navigator.appName.
-     *
-     * @return the window's navigator.appName.
-     */
-    private static native String getAppName() /*-{
-        return $wnd.navigator.appName;
-    }-*/;
+  /**
+   * Gets the navigator.appName.
+   *
+   * @return the window's navigator.appName.
+   */
+  private static native String getAppName() /*-{
+      return $wnd.navigator.appName;
+  }-*/;
 
   private static native String getUserAgent() /*-{
       return navigator.userAgent.toLowerCase();
