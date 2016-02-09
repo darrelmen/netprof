@@ -70,7 +70,7 @@ public class AudioTest {
           //System.out.println("Got " + replacement.getName());
           // String trimmed = new AudioConversion(null).doTrimSilence(replacement.getAbsolutePath());
           /*File trimmedFile =*/
-          double v = new AudioConversion(null).trimSilence(replacement, false).getDuration();
+          double v = new AudioConversion(null).trimSilence(replacement).getDuration();
           //   File file2 = new File(trimmed);
           //   System.out.println("after " + trimmed + " exists " + file2.exists()+
           //       ": "+new AudioCheck(null).getDurationInSeconds(file2) + " : " +v);
@@ -95,7 +95,7 @@ public class AudioTest {
 
     FileUtils.copyFile(replacement, destFile);
 
-    double v2 = new AudioConversion(null).trimSilence(destFile, false).getDuration();
+    double v2 = new AudioConversion(null).trimSilence(destFile).getDuration();
 
     double v3 = audioCheck.getDurationInSeconds(destFile);
 
