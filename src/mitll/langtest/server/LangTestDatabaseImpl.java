@@ -7,7 +7,6 @@ package mitll.langtest.server;
 import audio.image.ImageType;
 import audio.imagewriter.SimpleImageWriter;
 import com.github.gwtbootstrap.client.ui.Button;
-import com.google.common.io.Files;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
@@ -544,7 +543,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userID
    * @param firstExercise
    * @param isFlashcardReq
-   * @see LoadTesting#getExercise(String, long, boolean)
+   * @seex LoadTesting#getExercise(String, long, boolean)
    * @see #makeExerciseListWrapper(int, java.util.Collection, long, String, boolean, boolean)
    */
   private void addAnnotationsAndAudio(long userID, CommonExercise firstExercise, boolean isFlashcardReq) {
@@ -695,7 +694,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public List<CommonShell> getShells(List<String> ids) {
     List<CommonShell> shells = new ArrayList<>();
-    for (String id : ids) shells.add(db.getCustomOrPredefExercise(id).getShell());
+    for (String id : ids) {
+      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(id);
+      if (customOrPredefExercise == null) {
+        logger.warn("Couldn't find exercise for " +id);
+      }
+      else {
+        shells.add(customOrPredefExercise.getShell());
+      }
+    }
     return shells;
   }
 
@@ -831,12 +838,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     if (fullTrie == null) {
       fullTrie = new ExerciseTrie(exercises, getLanguage(), audioFileHelper.getSmallVocabDecoder());
-    }
-
-    audioFileHelper.checkLTS(exercises);
-    if (getServletContext().getAttribute(AUDIO_FILE_HELPER_REFERENCE) == null) {
+      audioFileHelper.checkLTS(exercises);
       shareAudioFileHelper(getServletContext());
     }
+
+//    if (getServletContext().getAttribute(AUDIO_FILE_HELPER_REFERENCE) == null) {
+//    }
     now = System.currentTimeMillis();
     if (now - then > 200) {
       logger.info("took " + (now - then) + " millis to get the predef exercise list for " + getLanguage());
@@ -861,8 +868,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       String parent = pathHelper.getInstallPath();
 
       if (!audioConversion.exists(wavFile, parent)) {
-        if (warnMissingFile)
+        if (warnMissingFile) {
           logger.warn("ensureMP3 : can't find " + wavFile + " under " + parent + " trying config... ");
+        }
         parent = configDir;
       }
       if (!audioConversion.exists(wavFile, parent)) {
@@ -1004,14 +1012,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
         String audioFilePath = result.getAnswer();
         ensureMP3(audioFilePath, sentence, "" + result.getUserid());
-        File tempDir = Files.createTempDir();
+       // Path tempDir = Files.createTempDirectory("getResultASRInfo_"+getLanguage());
         //logger.info("resultID " +resultID+ " temp dir " + tempDir.getAbsolutePath());
+      //  File tempDirForHydec = tempDir.toFile();
         asrScoreForAudio = audioFileHelper.getASRScoreForAudio(1,
             audioFilePath, sentence,
             width, height,
             true,  // make transcript images with colored segments
             false, // false = do alignment
-            tempDir.getAbsolutePath(),
             serverProps.useScoreCache(), exerciseID, result, serverProps.usePhoneToDisplay(), false);
       }
     } catch (Exception e) {
@@ -1044,20 +1052,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private PretestScore getPretestScore(int reqid, long resultID, String testAudioFile, String sentence,
                                        int width, int height, boolean useScoreToColorBkg, String exerciseID, boolean usePhoneToDisplay) {
+    if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
     long then = System.currentTimeMillis();
 
     String[] split = testAudioFile.split(File.separator);
     String answer = split[split.length - 1];
     Result cachedResult = db.getRefResultDAO().getResult(exerciseID, answer.replaceAll(".mp3", ".wav"));
     if (cachedResult != null) {
-      logger.debug("Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID());
+      logger.debug("getASRScoreForAudio Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID());
     } else {
-      logger.debug("Cache MISS : align exercise id = " + exerciseID + " file " + answer);
+      logger.debug("getASRScoreForAudio Cache MISS : align exercise id = " + exerciseID + " file " + answer);
     }
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
     PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-        false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, cachedResult, usePhoneToDisplay1, false);
+        false, serverProps.useScoreCache(), exerciseID, cachedResult, usePhoneToDisplay1, false);
     long timeToRunHydec = System.currentTimeMillis() - then;
 
     logger.debug("getASRScoreForAudio : scoring file " + testAudioFile + " for " +
@@ -2026,15 +2035,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.monitoring.MonitoringManager#doMaleFemale
    */
   @Override
-  public Map<String, Float> getMaleFemaleProgress() {
-    Map<Long, User> userMapMales = db.getUserDAO().getUserMap(true);
-    Map<Long, User> userMapFemales = db.getUserDAO().getUserMap(false);
-
-    float total = getExercises().size();
-    Set<String> uniqueIDs = new HashSet<String>();
-    for (CommonShell shell : getExercises()) uniqueIDs.add(shell.getID());
-    return db.getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs);
-  }
+  public Map<String, Float> getMaleFemaleProgress() {  return db.getMaleFemaleProgress();  }
 
   /**
    * Map of overall, male, female to list of counts (ex 0 had 7, ex 1, had 5, etc.)
