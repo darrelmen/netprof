@@ -50,6 +50,25 @@ public class JsonExport {
     this.preferredVoices = preferredVoices;
   }
 
+  public Collection<CommonExercise> getExercises(String json) {
+
+    JSONObject object = JSONObject.fromObject(json);
+    JSONArray content = object.getJSONArray(ScoreServlet.CONTENT);
+    List<CommonExercise> exercises = new ArrayList<>();
+    for (int i = 0; i < content.size(); i++) {
+      JSONObject jsonObject = content.getJSONObject(i);
+
+      CommonExercise commonShell = toExercise(jsonObject);
+      exercises.add(commonShell);
+    }
+
+    for (CommonExercise ex : exercises.subList(0, 10)) {
+      logger.info("got " + ex);
+    }
+    return exercises;
+
+  }
+
   public <T extends CommonShell & AudioAttributeExercise> void addJSONExerciseExport(JSONObject jsonObject,
                                                                                      Collection<T> exercises) {
 
@@ -98,16 +117,16 @@ public class JsonExport {
       }
     });
 
-   // int c = 0;
+    // int c = 0;
     for (T exercise : exercises) {
-      JSONObject jsonForCommonExercise = getJsonForCommonExercise(exercise);
+      JSONObject jsonForCommonExercise = getJsonForCommonExercise(exercise, true);
       Map<String, String> unitToValue = exercise.getUnitToValue();
       for (Map.Entry<String, String> pair : unitToValue.entrySet()) {
         jsonForCommonExercise.put(pair.getKey(), pair.getValue());
       }
 
       jsonArray.add(jsonForCommonExercise);
-     //  if (c++ > 10)break;
+      //  if (c++ > 10)break;
     }
     return jsonArray;
   }
@@ -216,7 +235,7 @@ public class JsonExport {
    * @return
    */
   private <T extends CommonShell & AudioAttributeExercise> JSONObject getJsonForExercise(T exercise) {
-    JSONObject ex = getJsonForCommonExercise(exercise);
+    JSONObject ex = getJsonForCommonExercise(exercise, false);
 
     AudioAttribute latestContext = exercise.getLatestContext(true);
     //if (latestContext != null) {
@@ -237,15 +256,27 @@ public class JsonExport {
     return ex;
   }
 
-  private JSONObject getJsonForCommonExercise(CommonShell exercise) {
+  private JSONObject getJsonForCommonExercise(CommonShell exercise, boolean addMeaning) {
     JSONObject ex = new JSONObject();
     ex.put(ID, exercise.getID());
     ex.put(FL, exercise.getForeignLanguage());
-    ex.put(TL, exercise.getTransliteration() == null ? "":exercise.getTransliteration());
+    ex.put(TL, exercise.getTransliteration() == null ? "" : exercise.getTransliteration());
     ex.put(EN, exercise.getEnglish());
-    ex.put(CT, exercise.getContext() == null ? "":exercise.getContext());
-    ex.put(CTR, exercise.getContextTranslation() == null ? "":exercise.getContextTranslation());
+    if (addMeaning) ex.put("MN", exercise.getMeaning());
+    ex.put(CT, exercise.getContext() == null ? "" : exercise.getContext());
+    ex.put(CTR, exercise.getContextTranslation() == null ? "" : exercise.getContextTranslation());
     return ex;
+  }
+
+  private CommonExercise toExercise(JSONObject jsonObject) {
+    CommonExercise exercise = new Exercise(
+        jsonObject.getString(ID),
+        jsonObject.getString(EN), "",
+        jsonObject.getString(FL),
+        jsonObject.getString(TL),
+        jsonObject.getString(CT),
+        jsonObject.getString(CTR));
+    return exercise;
   }
 
   /**
