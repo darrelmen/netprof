@@ -19,9 +19,9 @@ import java.util.*;
  */
 public class SectionHelper<T extends Shell>  {
   private static final Logger logger = Logger.getLogger(SectionHelper.class);
-  private static final String unitType = "unit";
-  private static final String chapterType = "chapter";
-  private static final String weekType = "week";
+//  private static final String unitType = "unit";
+//  private static final String chapterType = "chapter";
+//  private static final String weekType = "week";
 
   private List<String> predefinedTypeOrder = new ArrayList<String>();
 
@@ -73,7 +73,7 @@ public class SectionHelper<T extends Shell>  {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getSectionNodes()
    * @return
    */
-  public List<SectionNode> getSectionNodes() {  return getChildren(getTypeOrder());  }
+  public Collection<SectionNode> getSectionNodes() {  return getChildren(getTypeOrder());  }
 
   private List<SectionNode> getChildren(List<String> typeOrder) {
     if (typeOrder.isEmpty()) return Collections.emptyList();
