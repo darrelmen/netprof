@@ -36,7 +36,7 @@ public class PretestScore implements IsSerializable {
 
   /**
    * @param score
-   * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result)
+   * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise
    */
   public PretestScore(float score) {
     this.hydecScore = score;
@@ -125,7 +125,7 @@ public class PretestScore implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#getASRScoreForAudio(int, String, String, Collection, int, int, boolean, boolean, String, boolean, String, Result, boolean, boolean)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getASRScoreForAudio
    * @param json
    */
   public void setJson(String json) {
@@ -133,7 +133,7 @@ public class PretestScore implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#getASRScoreForAudio(int, String, String, Collection, int, int, boolean, boolean, String, boolean, String, Result, boolean, boolean)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getASRScoreForAudio
    * @return
    */
   public boolean isRanNormally() {
