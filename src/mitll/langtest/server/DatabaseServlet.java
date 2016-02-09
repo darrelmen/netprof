@@ -93,12 +93,14 @@ public class DatabaseServlet extends HttpServlet {
   }
 
   /**
-   * @see mitll.langtest.server.load.LoadTestServlet#getJsonArray(List)
-   * @param byID
+   * @seex mitll.langtest.server.load.LoadTestServlet#getJsonArray(List)
+   * @paramx byID
    */
+/*
   protected void ensureMP3s(CommonExercise byID) {
     ensureMP3(byID, pathHelper, configDir);
   }
+*/
 
   protected void writeToFile(InputStream inputStream, File saveFile) throws IOException {
     // opens an output stream for writing file
