@@ -38,6 +38,7 @@ public class RefResultDecoder {
   private final AudioFileHelper audioFileHelper;
   private boolean stopDecode = false;
   private final PathHelper pathHelper;
+  private final AudioConversion audioConversion;
 
   /**
    * @param db
@@ -52,7 +53,7 @@ public class RefResultDecoder {
     this.serverProps = serverProperties;
     this.pathHelper = pathHelper;
     this.audioFileHelper = audioFileHelper;
-    //  this.langTestDatabase = langTestDatabase;
+    this.audioConversion = new AudioConversion(serverProperties);
   }
 
   /**
@@ -60,7 +61,7 @@ public class RefResultDecoder {
    * @param relativeConfigDir
    * @see LangTestDatabaseImpl#init()
    */
-  public void doRefDecode(final List<CommonExercise> exercises, final String relativeConfigDir) {
+  public void doRefDecode(final Collection<CommonExercise> exercises, final String relativeConfigDir) {
     new Thread(new Runnable() {
       @Override
       public void run() {
@@ -86,7 +87,7 @@ public class RefResultDecoder {
    * @param exercises
    * @see #runMissingInfo(List)
    */
-  private void doMissingInfo(final List<CommonExercise> exercises) {
+  private void doMissingInfo(final Collection<CommonExercise> exercises) {
     List<Result> resultsToDecode = db.getResultDAO().getResultsToDecode();
     int count = 0;
 
@@ -120,7 +121,7 @@ public class RefResultDecoder {
     }
   }
 
-  private void trimRef(List<CommonExercise> exercises, String relativeConfigDir) {
+  private void trimRef(Collection<CommonExercise> exercises, String relativeConfigDir) {
     if (DO_TRIM) {
       Map<String, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
       String installPath = pathHelper.getInstallPath();
@@ -195,9 +196,9 @@ public class RefResultDecoder {
   /**
    * Do alignment and decoding on all the reference audio and store the results in the RefResult table.
    *
-   * @see #doRefDecode(List, String)
+   * @see #doRefDecode
    */
-  private void writeRefDecode(List<CommonExercise> exercises, String relativeConfigDir) {
+  private void writeRefDecode(Collection<CommonExercise> exercises, String relativeConfigDir) {
     if (DO_REF_DECODE) {
       Map<String, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
       String installPath = pathHelper.getInstallPath();
@@ -266,7 +267,7 @@ public class RefResultDecoder {
     }
   }
 
-  private void runMissingInfo(final List<CommonExercise> exercises) {
+  private void runMissingInfo(final Collection<CommonExercise> exercises) {
     new Thread(new Runnable() {
       @Override
       public void run() {
@@ -359,7 +360,6 @@ public class RefResultDecoder {
     return count;
   }
 
-  private final AudioConversion audioConversion = new AudioConversion(null);
 
   /**
    * @param audioAttributes
@@ -385,7 +385,7 @@ public class RefResultDecoder {
           } catch (IOException e) {
             logger.error("got " + e, e);
           }
-          AudioConversion.TrimInfo trimInfo = audioConversion.trimSilence(absoluteFile, true);
+          AudioConversion.TrimInfo trimInfo = audioConversion.trimSilence(absoluteFile);
           if (trimInfo.didTrim()) {
             // drop ref result info
             logger.debug("trimmed " + exid + " " + attribute + " audio " + bestAudio);
