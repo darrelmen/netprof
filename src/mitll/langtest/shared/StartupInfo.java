@@ -20,7 +20,7 @@ import java.util.Map;
 public class StartupInfo implements IsSerializable {
   private Map<String, String> properties;
   private Collection<String> typeOrder;
-  private List<SectionNode> sectionNodes;
+  private Collection<SectionNode> sectionNodes;
 
   public StartupInfo() {} // for serialization
 
@@ -30,7 +30,7 @@ public class StartupInfo implements IsSerializable {
    * @param typeOrder
    * @param sectionNodes
    */
-  public StartupInfo(Map<String, String> properties, Collection<String> typeOrder, List<SectionNode> sectionNodes) {
+  public StartupInfo(Map<String, String> properties, Collection<String> typeOrder, Collection<SectionNode> sectionNodes) {
     this.properties = properties;
     this.typeOrder = typeOrder;
     this.sectionNodes = sectionNodes;
@@ -44,7 +44,7 @@ public class StartupInfo implements IsSerializable {
     return typeOrder;
   }
 
-  public List<SectionNode> getSectionNodes() {
+  public Collection<SectionNode> getSectionNodes() {
     return sectionNodes;
   }
 
