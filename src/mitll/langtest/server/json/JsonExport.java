@@ -25,6 +25,12 @@ public class JsonExport {
   private final SectionHelper<CommonExercise> sectionHelper;
   private final Set<Long> preferredVoices;
 
+  /**
+   * @see mitll.langtest.server.ScoreServlet#getJsonNestedChapters(boolean)
+   * @param phoneToCount
+   * @param sectionHelper
+   * @param preferredVoices
+   */
   public JsonExport(Map<String, Integer> phoneToCount, SectionHelper<CommonExercise> sectionHelper,
                     Set<Long> preferredVoices) {
     this.phoneToCount = phoneToCount;
@@ -101,8 +107,8 @@ public class JsonExport {
       }
     }
 //    if (audioFileHelper != null) {
-      getExerciseSorter().sortedByPronLengthThenPhone(copy, phoneToCount);// audioFileHelper.getPhoneToCount());
-  ///  }
+    getExerciseSorter().sortedByPronLengthThenPhone(copy, phoneToCount);// audioFileHelper.getPhoneToCount());
+    ///  }
     /* else {
       logger.warn("audioFileHelper not set yet!");
     }*/
@@ -110,7 +116,6 @@ public class JsonExport {
   }
 
   private ExerciseSorter getExerciseSorter() {
-    //Map<String, Integer> phoneToCount = audioFileHelper == null ? new HashMap<>() : audioFileHelper.getPhoneToCount();
     return new ExerciseSorter(sectionHelper.getTypeOrder(), phoneToCount);
   }
 
