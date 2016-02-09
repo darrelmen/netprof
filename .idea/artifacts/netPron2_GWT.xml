@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact name="netPron2:GWT">
-    <output-path>$PROJECT_DIR$/out/artifacts/netPron2_GWT</output-path>
-    <root id="root">
-      <element id="gwt-compiler-output" facet="netPron2/gwt/GWT" />
-    </root>
-  </artifact>
-</component>
