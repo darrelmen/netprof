@@ -71,7 +71,9 @@ public class JsonExport {
   }
 
   private void addSections(JSONArray nesting, Collection<SectionNode> sectionNodes) {
-    for (SectionNode node : sectionNodes) {
+    List<SectionNode> sorted = new ArrayList<>(sectionNodes);
+    Collections.sort(sorted);
+    for (SectionNode node : sorted) {
       JSONObject forNode = new JSONObject();
       forNode.put("type", node.getType());
       forNode.put("name", node.getName());
@@ -96,6 +98,7 @@ public class JsonExport {
       }
     });
 
+   // int c = 0;
     for (T exercise : exercises) {
       JSONObject jsonForCommonExercise = getJsonForCommonExercise(exercise);
       Map<String, String> unitToValue = exercise.getUnitToValue();
@@ -104,7 +107,7 @@ public class JsonExport {
       }
 
       jsonArray.add(jsonForCommonExercise);
-
+     //  if (c++ > 10)break;
     }
     return jsonArray;
   }
@@ -238,10 +241,10 @@ public class JsonExport {
     JSONObject ex = new JSONObject();
     ex.put(ID, exercise.getID());
     ex.put(FL, exercise.getForeignLanguage());
-    ex.put(TL, exercise.getTransliteration());
+    ex.put(TL, exercise.getTransliteration() == null ? "":exercise.getTransliteration());
     ex.put(EN, exercise.getEnglish());
-    ex.put(CT, exercise.getContext());
-    ex.put(CTR, exercise.getContextTranslation());
+    ex.put(CT, exercise.getContext() == null ? "":exercise.getContext());
+    ex.put(CTR, exercise.getContextTranslation() == null ? "":exercise.getContextTranslation());
     return ex;
   }
 
