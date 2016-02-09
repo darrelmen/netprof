@@ -15,6 +15,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.MutableAudioExercise;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
+import org.apache.log4j.net.SyslogAppender;
 
 import java.io.File;
 import java.io.OutputStream;
@@ -92,14 +93,16 @@ public class AudioDAO extends DAO {
    *
    * @see AudioExport#writeFolderContents(ZipOutputStream, List, AudioDAO, String, String, String, boolean)
    * @see AudioExport#writeFolderContentsContextOnly(ZipOutputStream, List, AudioDAO, String, String, String, boolean, String)
-   * @see DatabaseImpl#attachAllAudio(List)
+   * @see DatabaseImpl#attachAllAudio
    * @return
    * @see ExerciseDAO#setAudioDAO(AudioDAO, String, String)
    */
   public Map<String, List<AudioAttribute>> getExToAudio() {
+    long then = System.currentTimeMillis();
     Map<String, List<AudioAttribute>> exToAudio = new HashMap<>();
     Map<String, Set<String>> idToPaths = new HashMap<>();
-    for (AudioAttribute audio : getAudioAttributes()) {
+    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
+    for (AudioAttribute audio : audioAttributes1) {
       String exid = audio.getExid();
       List<AudioAttribute> audioAttributes = exToAudio.get(exid);
       Set<String> paths = idToPaths.get(exid);
@@ -116,6 +119,9 @@ public class AudioDAO extends DAO {
       //logger.warn("skipping " +audioRef + " on " + exid);
       //  }
     }
+    long now = System.currentTimeMillis();
+    logger.info("getExToAudio took " +(now-then) + " millis to get  " + audioAttributes1.size()+ " audio entries");
+
 //    logger.debug("map size is " + exToAudio.size());
     return exToAudio;
   }
@@ -244,11 +250,16 @@ public class AudioDAO extends DAO {
     mutable.addAudio(attr);
     //   logger.debug("\trelativeConfigDir '" + relativeConfigDir + "'");
 
-    if (attr.getAudioRef() == null) logger.error("huh? no audio ref for " + attr + " under " + firstExercise);
+    if (attr.getAudioRef() == null) logger.error("attachAudio huh? no audio ref for " + attr + " under " + firstExercise);
     else if (!audioConversion.exists(attr.getAudioRef(), installPath)) {
-      //    logger.debug("\twas '" + attr.getAudioRef() + "'");
-      attr.setAudioRef(relativeConfigDir + File.separator + attr.getAudioRef());
-      //    logger.debug("\tnow '" + attr.getAudioRef() + "'");
+      if (audioConversion.exists(attr.getAudioRef(),relativeConfigDir)) {
+        logger.debug("\tattachAudio was '" + attr.getAudioRef() + "'");
+        attr.setAudioRef(relativeConfigDir + File.separator + attr.getAudioRef());
+        logger.debug("\tattachAudio now '" + attr.getAudioRef() + "'");
+      }
+      else {
+        logger.debug("\tattachAudio couldn't find audio file at '" + attr.getAudioRef() + "'");
+      }
     }
   }
 
@@ -955,7 +966,7 @@ public class AudioDAO extends DAO {
   /**
    * @param attribute
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#getAndMarkDefects(CommonExercise, Map)
+   * @see mitll.langtest.server.database.DatabaseImpl#getAndMarkDefects
    * @see DatabaseImpl#markAudioDefect(AudioAttribute)
    */
   public int markDefect(AudioAttribute attribute) {
@@ -970,7 +981,7 @@ public class AudioDAO extends DAO {
    * @param audioType  at this speed
    * @return > 0 if audio was marked defective
    * @see mitll.langtest.server.database.DatabaseImpl#editItem
-   * @see mitll.langtest.client.custom.dialog.EditableExercise#postEditItem
+   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */
   private int markDefect(int userid, String exerciseID, String audioType) {
     try {
