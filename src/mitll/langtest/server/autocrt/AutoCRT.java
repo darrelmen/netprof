@@ -53,6 +53,7 @@ public class AutoCRT {
    * @param useOldSchool
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
+   * @see mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(CommonExercise, File, AudioAnswer)
    */
   public PretestScore getFlashcardAnswer(CommonExercise commonExercise, File audioFile, AudioAnswer answer,
                                          String language, boolean canUseCache, boolean allowAlternates, boolean useOldSchool) {
@@ -94,7 +95,7 @@ public class AutoCRT {
    * @param canUseCache
    * @param useOldSchool
    * @return PretestScore word/phone alignment with scores
-   * @paramx firstPronLength
+
    * @see #getFlashcardAnswer
    */
   private PretestScore getFlashcardAnswer(File audioFile, Collection<String> possibleSentences, AudioAnswer answer,
