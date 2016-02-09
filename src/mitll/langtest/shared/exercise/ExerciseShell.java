@@ -12,7 +12,7 @@ import mitll.langtest.shared.custom.UserList;
  * Date: 11/29/12
  * Time: 3:00 PM
  * To change this template use File | Settings | File Templates.
- *
+ * <p>
  * TODO : UserList should not extend this
  */
 public class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
@@ -23,7 +23,8 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
   protected String transliteration;
   protected String contextTranslation;
 
-  public ExerciseShell() {}
+  public ExerciseShell() {
+  }
 
   /**
    * @param id
@@ -41,7 +42,8 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
    * @param foreignLanguage
    * @param transliteration
    * @param context
-   *@param contextTranslation @see #getShell()
+   * @param contextTranslation
+   * @see #getShell()
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShells
    */
   private ExerciseShell(String id, String englishSentence, String meaning, String foreignLanguage,
