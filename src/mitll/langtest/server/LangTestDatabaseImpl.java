@@ -684,7 +684,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @see #getStartupInfo()
    */
-  private List<SectionNode> getSectionNodes() {
+  private Collection<SectionNode> getSectionNodes() {
     return db.getSectionHelper().getSectionNodes();
   }
 
