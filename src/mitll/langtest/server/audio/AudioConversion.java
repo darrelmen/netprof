@@ -7,7 +7,6 @@ package mitll.langtest.server.audio;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.Result;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -17,7 +16,8 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.*;
-import java.util.Collection;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * Does mp3 conversion using a shell call to lame.
@@ -47,20 +47,16 @@ public class AudioConversion {
   private AudioCheck audioCheck;
   private static final boolean DEBUG = false;
 
-  private File tempDir;
   private final String soxPath;
+  private final String language;
 
   /**
    * @param props
    */
   public AudioConversion(ServerProperties props) {
+    this.language = props.getLanguage();
     soxPath = getSox();
-    try {
-      audioCheck = new AudioCheck(props);
-      tempDir = createTempDirectory();
-    } catch (IOException e) {
-      logger.error("couldn't make temp dir?");
-    }
+    audioCheck = new AudioCheck(props);
   }
 
   /**
@@ -85,7 +81,7 @@ public class AudioConversion {
     }
     AudioCheck.ValidityAndDur valid = isValid(file, useSensitiveTooLoudCheck);
     if (valid.getValidity() == AudioAnswer.Validity.OK) {
-      valid.setDuration(trimSilence(file, false).getDuration());
+      valid.setDuration(trimSilence(file).getDuration());
     }
     return valid;
   }
@@ -178,12 +174,11 @@ public class AudioConversion {
         long then = System.currentTimeMillis();
         //     String convertTo16KHZ = new AudioConverter().convertTo16KHZ(binPath, wavFile.getAbsolutePath());
         String convertTo16KHZ = convertTo16KHZ(wavFile.getAbsolutePath());
-        wavFile = copyFile(wavFile, convertTo16KHZ, SIXTEEN_K_SUFFIX);
+        wavFile = copyFileAndDeleteOriginal(wavFile, convertTo16KHZ, SIXTEEN_K_SUFFIX);
 
         long now = System.currentTimeMillis();
         logger.info("convertTo16Khz : took " + (now - then) + " millis to convert original " + orig.getName() + " at " + sampleRate +
             " to 16K wav file : " + wavFile.getName());
-
       }
     } catch (IOException e) {
       logger.error("Got " + e, e);
@@ -193,16 +188,17 @@ public class AudioConversion {
 
   /**
    * Note that wavFile input will be changed if trim is successful.
+   *
+   * If trimming doesn't really change the length, we leave it alone {@link #DIFF_THRESHOLD}.
    * <p>
    * Trimmed file will be empty if it's not successful.
    *
-   * @param wavFile
-   * @param makeCopyOfOriginal
+   * @param wavFile to trim silence from - will be replaced in place
    * @return
    * @see #convertBase64ToAudioFiles(String, File, boolean)
    */
-  public TrimInfo trimSilence(final File wavFile, boolean makeCopyOfOriginal) {
-  //  logger.info("trimSilence " + wavFile.getAbsolutePath());
+  public TrimInfo trimSilence(final File wavFile) {
+    //  logger.info("trimSilence " + wavFile.getAbsolutePath());
     if (!wavFile.exists()) {
       logger.error("trimSilence " + wavFile + " doesn't exist");
       return new TrimInfo();
@@ -215,7 +211,8 @@ public class AudioConversion {
       double durationInSecondsTrimmed = audioCheck.getDurationInSeconds(trimmed);
       double diff = durationInSeconds - durationInSecondsTrimmed;
       if (durationInSecondsTrimmed > 0.1 && diff > DIFF_THRESHOLD) {
-        FileUtils.copyFile(new File(trimmed), wavFile);
+        //FileUtils.copyFile(new File(trimmed), wavFile);
+        copyAndDeleteOriginal(trimmed, wavFile);
 
         long now = System.currentTimeMillis();
         if (now - then > 0) {
@@ -224,7 +221,7 @@ public class AudioConversion {
         }
         return new TrimInfo(durationInSecondsTrimmed, true);
       } else {
-        long now = System.currentTimeMillis();
+      //  long now = System.currentTimeMillis();
 /*        logger.info("trimSilence : took " + (now - then) + " millis to NOT convert original " + wavFile.getName() +
             " to trim wav file : " + durationInSeconds + " before, " + durationInSecondsTrimmed + " after.");*/
 
@@ -263,7 +260,7 @@ public class AudioConversion {
     }
   }
 
-  private File copyFile(final File wavFile, final String sourceFile, final String suffix) throws IOException {
+  private File copyFileAndDeleteOriginal(final File wavFile, final String sourceFile, final String suffix) throws IOException {
 //    logger.info("orig " + wavFile.getName() + " source " + sourceFile + " suffix " + suffix);
     String name1 = wavFile.getName();
     String dest = wavFile.getParent() + File.separator + removeSuffix(name1) + suffix + ".wav";
@@ -271,14 +268,29 @@ public class AudioConversion {
     File replacement = new File(dest);
     File srcFile = new File(sourceFile);
 //    logger.info("srcFile " + srcFile + " exists " + srcFile.exists());
+    copyAndDeleteOriginal(srcFile, replacement);
+
+    return replacement;
+  }
+
+  private void copyAndDeleteOriginal(String srcFile, File replacement) throws IOException {
+    copyAndDeleteOriginal(new File(srcFile), replacement);
+  }
+
+  private void copyAndDeleteOriginal(File srcFile, File replacement) throws IOException {
     FileUtils.copyFile(srcFile, replacement);
 
     // cleanup
-    String parent = srcFile.getParent();
-    File file = new File(parent);
-    FileUtils.deleteDirectory(file);
+    deleteParentTempDir(srcFile);
+  }
 
-    return replacement;
+  private File makeTempDir(String prefix) throws IOException {
+    Path audioConversion = Files.createTempDirectory("AudioConversion_makeTempDir_" + language + "_for_" + prefix);
+    return audioConversion.toFile();
+  }
+
+  private void deleteParentTempDir(File srcFile) throws IOException {
+    FileUtils.deleteDirectory(new File(srcFile.getParent()));
   }
 
   /**
@@ -288,10 +300,10 @@ public class AudioConversion {
    * @see #convertTo16Khz(File)
    */
   private String convertTo16KHZ(String pathToAudioFile) throws IOException {
-    return sampleAt16KHZ(pathToAudioFile, createTempDirectory());
+    return sampleAt16KHZ(pathToAudioFile, makeTempFile("convertTo16KHZ"));
   }
 
-  private File createTempDirectory() throws IOException {
+/*  private File makeTempDir() throws IOException {
     File temp = File.createTempFile("temp", Long.toString(System.nanoTime()));
 
     if (!temp.delete()) {
@@ -303,11 +315,13 @@ public class AudioConversion {
     }
 
     return temp;
-  }
+  }*/
 
-  private String sampleAt16KHZ(String pathToAudioFile, File tempDirectory) throws IOException {
-    final String tempForWavz = tempDirectory + File.separator + "tempForWavz.wav";
+  private String sampleAt16KHZ(String pathToAudioFile, String tempForWavz) throws IOException {
+    // final String tempForWavz = tempDirectory + File.separator + "tempForWavz.wav";
     //log.info("running sox on " + tempForWavz);
+    // final String tempForWavz = tempSampled.getAbsolutePath();
+
 
     // i.e. sox inputFile -s -2 -c 1 -q tempForWavz.wav rate 16000
     ProcessBuilder soxFirst = new ProcessBuilder(soxPath,
@@ -328,12 +342,13 @@ public class AudioConversion {
    * sox audio-in audio-out silence 1 0.01 -90d gain -3 highpass 80.0
    *
    * @param pathToAudioFile
-   * @return
+   * @return audio in a temp dir
    * @throws IOException
+   * @see #getHighPassFilterFile(String)
    */
   private String doHighPassFilter(String pathToAudioFile) throws IOException {
-    checkTempDir();
-    final String tempForWavz = tempDir + File.separator + "tempHighPass.wav";
+    //checkTempDir();
+    final String tempForWavz = makeTempFile("doHighPassFilter");
 
     ProcessBuilder soxFirst = new ProcessBuilder(
         soxPath,
@@ -342,21 +357,26 @@ public class AudioConversion {
         "silence", "1", "0.01", "-90d", "gain", "-3", "highpass", "80.0");
 
     if (!new ProcessRunner().runProcess(soxFirst)) {
-      boolean exists = tempDir.exists();
-      logger.info("Exists " + exists);
-      logger.error("couldn't do high pass filter on " + pathToAudioFile);
+      //  boolean exists = tempDir.exists();
+      // logger.info("Exists " + exists);
+      logger.warn("doHighPassFilter couldn't do high pass filter on " + pathToAudioFile);
       String asRunnable = soxFirst.command().toString().replaceAll(",", " ");
-      logger.info("path " + asRunnable);
+      logger.warn("doHighPassFilter path " + asRunnable);
     }
 
     return tempForWavz;
   }
 
-  private void checkTempDir() throws IOException {
-    if (tempDir == null || !tempDir.exists()) {
-      tempDir = createTempDirectory();
-    }
+  private String makeTempFile(String prefix) throws IOException {
+    File doHighPassFilter = makeTempDir(prefix);
+    return doHighPassFilter + File.separator + "temp" + prefix + ".wav";
   }
+
+/*  private void checkTempDir() throws IOException {
+    if (tempDir == null || !tempDir.exists()) {
+      tempDir = makeTempDir();
+    }
+  }*/
 
   /**
    * TODO: Why all the stuff with a temp dir???
@@ -365,12 +385,14 @@ public class AudioConversion {
    * sox $sourcewav $outputwav vad -t 6 -p 0.20 reverse vad -t 6 -p 0.20 reverse
    *
    * @param pathToAudioFile
-   * @return
+   * @return file that should be cleaned up
    * @throws IOException
    */
   private String doTrimSilence(String pathToAudioFile) throws IOException {
-    checkTempDir();
-    final String tempTrimmed = tempDir + File.separator + "tempTrim.wav";
+//    File timeSilenceDir = makeTempDir("doTrimSilence");
+//    final String tempTrimmed = timeSilenceDir + File.separator + "tempTrim.wav";
+    final String tempTrimmed = makeTempFile("doTrimSilence");
+
 //    logger.info("doTrimSilence running sox on " + pathToAudioFile + " to produce " + tempTrimmed);
 
     ProcessBuilder soxFirst = new ProcessBuilder(
@@ -380,8 +402,8 @@ public class AudioConversion {
         "vad", "-t", T_VALUE, "-p", "" + TRIM_SILENCE_BEFORE_AND_AFTER, "reverse", "vad", "-t", T_VALUE, "-p", "" + TRIM_SILENCE_BEFORE_AND_AFTER, "reverse");
 
     if (!new ProcessRunner().runProcess(soxFirst)) {
-      boolean exists = tempDir.exists();
-      logger.info("tempDir Exists " + exists);
+      // boolean exists = tempDir.exists();
+      // logger.info("tempDir Exists " + exists);
       logger.info("pathToAudioFile exists " + new File(pathToAudioFile).exists());
       logger.info("tempTrimmed exists     " + new File(tempTrimmed).exists());
       logger.error("couldn't do trim silence on " + pathToAudioFile);
@@ -398,7 +420,7 @@ public class AudioConversion {
   /**
    * @param wavFile
    * @param rawFile
-   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#scoreRepeatExercise(String, String, String, Collection, String, int, int, boolean, boolean, String, boolean, String, Result, boolean)
+   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#scoreRepeatExercise
    */
   // assumes 16Khz
   public static void wav2raw(String wavFile, String rawFile) {
@@ -510,7 +532,11 @@ public class AudioConversion {
    */
   public void normalizeLevels(File absolutePathToWav) {
     try {
-      File tempFile = File.createTempFile("normalized_" + removeSuffix(absolutePathToWav.getName()) + "_" + System.currentTimeMillis(), ".wav");
+      //File normalizeLevels = makeTempDir("normalizeLevels");
+      //File tempFile = File.createTempFile("normalized_" + removeSuffix(absolutePathToWav.getName()) + "_" + System.currentTimeMillis(), ".wav");
+
+      final File tempFile = new File(makeTempFile("normalizeLevels"));
+
       //logger.debug("sox conversion from " + absolutePathToWav + " to " + tempFile.getAbsolutePath());
 
       ProcessBuilder soxFirst2 = new ProcessBuilder(soxPath,
@@ -528,7 +554,9 @@ public class AudioConversion {
       //logger.debug("wrote normalized to " + tempFile.getAbsolutePath());
       //}
 
-      FileUtils.copyFile(tempFile, absolutePathToWav);
+//      FileUtils.copyFile(tempFile, absolutePathToWav);
+
+      copyAndDeleteOriginal(tempFile, absolutePathToWav);
     } catch (IOException e) {
       logger.error("normalizing " + absolutePathToWav + " got " + e, e);
     }
