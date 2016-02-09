@@ -35,7 +35,7 @@ public class JsonExport {
   /**
    * @param removeExercisesWithMissingAudio
    * @return
-   * @see #getJsonNestedChapters
+   * @see mitll.langtest.server.ScoreServlet#getJsonNestedChapters
    */
   public JSONArray getContentAsJson(boolean removeExercisesWithMissingAudio) {
     JSONArray jsonArray = new JSONArray();
@@ -264,9 +264,9 @@ public class JsonExport {
    * @param sectionNodes
    * @param removeExercisesWithMissingAudio
    * @return
-   * @see #getJsonLeastRecordedChapters
+   * @seexx mitll.langtest.server.ScoreServlet#getJsonLeastRecordedChapters
    */
-  public JSONArray getContentAsJson2(Collection<SectionNode> sectionNodes, boolean removeExercisesWithMissingAudio) {
+/*  public JSONArray getContentAsJson2(Collection<SectionNode> sectionNodes, boolean removeExercisesWithMissingAudio) {
     JSONArray jsonArray = new JSONArray();
     Map<String, Collection<String>> typeToValues = new HashMap<>();
 
@@ -281,7 +281,7 @@ public class JsonExport {
       }
     //}
     return jsonArray;
-  }
+  }*/
 
   /**
    * @param node
@@ -290,7 +290,7 @@ public class JsonExport {
    * @return
    * @see #getContentAsJson2
    */
-  private JSONObject getJsonForNode2(SectionNode node, Map<String, Collection<String>> typeToValues, boolean removeExercisesWithMissingAudio) {
+/*  private JSONObject getJsonForNode2(SectionNode node, Map<String, Collection<String>> typeToValues, boolean removeExercisesWithMissingAudio) {
     JSONObject jsonForNode = new JSONObject();
     jsonForNode.put(TYPE, node.getType());
     jsonForNode.put(NAME, node.getName());
@@ -311,5 +311,5 @@ public class JsonExport {
     }
     jsonForNode.put(CHILDREN, jsonArray);
     return jsonForNode;
-  }
+  }*/
 }
