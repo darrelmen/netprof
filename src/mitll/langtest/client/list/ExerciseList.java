@@ -223,7 +223,7 @@ public abstract class ExerciseList
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   void pushNewItem(String search, String exerciseID) {
-    logger.info("------------ ExerciseList.pushNewItem : (" + getInstance() + ") push history " + exerciseID + " - ");
+    //logger.info("------------ ExerciseList.pushNewItem : (" + getInstance() + ") push history " + exerciseID + " - ");
     History.newItem("#" + "search=" + search + ";" +
         "item=" + exerciseID + ";instance=" + getInstance());
   }
@@ -394,9 +394,11 @@ public abstract class ExerciseList
    */
   public void rememberAndLoadFirst(List<CommonShell> exercises, CommonExercise firstExercise,
                                     String selectionID) {
+/*
     logger.info("ExerciseList : rememberAndLoadFirst instance '" + getInstance() +
         "' remembering " + exercises.size() + " exercises, " + selectionID +
         " first = " + firstExercise);
+*/
 
     exercises = rememberExercises(exercises);
     for (ListChangeListener<CommonShell> listener : listeners) {
@@ -414,7 +416,7 @@ public abstract class ExerciseList
     if (firstExercise != null) {
 //      CommonShell firstExerciseShell = findFirstExercise();
 //      if (firstExerciseShell.getID().equals(firstExercise.getID())) {
-        logger.info("ExerciseList : rememberAndLoadFirst using first = " + firstExercise);
+      //  logger.info("ExerciseList : rememberAndLoadFirst using first = " + firstExercise);
 
       pushFirstSelection(firstExercise.getID());
    //   useExercise(firstExercise);   // allows us to skip another round trip with the server to ask for the first exercise
