@@ -37,6 +37,7 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -209,7 +210,8 @@ public class UserPassLogin extends UserDialog {
   private Panel getLinksToSites() {
     Panel hp = new HorizontalPanel();
     hp.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
-    for (String site : Arrays.asList("Dari", "Egyptian", "English", "Farsi", "Korean", "Levantine", "Mandarin", "MSA", "Pashto1", "Pashto2", "Pashto3", "Spanish", "Sudanese", "Urdu")) {
+
+    for (String site : LangTest.SITE_LIST) {
       Anchor w = new Anchor(site, "https://np.ll.mit.edu/npfClassroom" + site.replaceAll("Mandarin", "CM"));
       w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
       hp.add(w);
