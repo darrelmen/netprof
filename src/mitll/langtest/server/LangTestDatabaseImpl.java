@@ -29,7 +29,6 @@ import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.server.test.RecoTest;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
@@ -39,11 +38,7 @@ import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.STATE;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.instrumentation.Event;
@@ -60,8 +55,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.text.CollationKey;
 import java.text.Collator;
 import java.util.*;
@@ -771,7 +764,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public <T extends Shell> T getExercise(String id, long userID, boolean isFlashcardReq) {
     long then = System.currentTimeMillis();
-    List<CommonExercise> exercises = getExercises();
+    Collection<CommonExercise> exercises = getExercises();
 
     long then2 = System.currentTimeMillis();
 
@@ -1070,14 +1063,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
         String audioFilePath = result.getAnswer();
         ensureMP3(audioFilePath, sentence, "" + result.getUserid());
-        File tempDir = Files.createTempDirectory("scoring").toFile();
         //logger.info("resultID " +resultID+ " temp dir " + tempDir.getAbsolutePath());
         asrScoreForAudio = audioFileHelper.getASRScoreForAudio(1,
             audioFilePath, sentence,
             width, height,
             true,  // make transcript images with colored segments
             false, // false = do alignment
-            tempDir.getAbsolutePath(),
             serverProps.useScoreCache(), exerciseID, result, serverProps.usePhoneToDisplay(), false);
       }
     } catch (Exception e) {
@@ -1123,15 +1114,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
+
     String sentenceToUse = getSentenceToUse(sentence);
-    Path scoring = null;
-    try {
-      scoring = Files.createTempDirectory("Scoring");
-    } catch (IOException e) {
-      logger.error("got "+e,e);
-    }
     PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentenceToUse, width, height, useScoreToColorBkg,
-        false, scoring.toFile().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, cachedResult, usePhoneToDisplay1, false);
+        false, serverProps.useScoreCache(), exerciseID, cachedResult, usePhoneToDisplay1, false);
+
     long timeToRunHydec = System.currentTimeMillis() - then;
 
     logger.debug("getASRScoreForAudio : scoring file " + testAudioFile + " for " +
@@ -1149,6 +1136,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Hack for percent sign in english - must be a better way.
    * Tried adding it to dict but didn't seem to work.
+   *
    * @param sentence
    * @return
    */
@@ -1156,15 +1144,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     boolean english = getLanguage().equalsIgnoreCase("English") && sentence.equals("%") || sentence.equals("％");
     if (english) {
       //logger.info("convert " +sentence + " to percent");
-    }
-    else {
+    } else {
       boolean english1 = getLanguage().equalsIgnoreCase("English");
       boolean equals = sentence.equals("%") || sentence.equals("％");
-      logger.info("NOT convert '" +sentence + "' to percent : " +english1 + " equals " + equals);
-
+      //logger.info("NOT convert '" +sentence + "' to percent : " +english1 + " equals " + equals);
     }
     return english ? "percent" : sentence;
   }
+
   /**
    * @param reqid
    * @param resultID
@@ -1401,7 +1388,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param id
    * @return
    * @see ReviewEditableExercise#confirmThenDeleteItem
-  */
+   */
   public boolean deleteItem(String id) {
     boolean b = db.deleteItem(id);
     if (b) {
@@ -2259,9 +2246,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     readProperties(getServletContext());
     setInstallPath(db);
     audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this);
-    if (serverProps.doRecoTest() || serverProps.doRecoTest2()) {
-      new RecoTest(this, serverProps, pathHelper, audioFileHelper);
-    }
+//    if (serverProps.doRecoTest() || serverProps.doRecoTest2()) {
+//      new RecoTest(this, serverProps, pathHelper, audioFileHelper);
+//    }
     try {
       db.preloadExercises();
       db.preloadContextPractice();
@@ -2270,7 +2257,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     } catch (Exception e) {
       logger.error("couldn't load database " + e, e);
     }
-    List<CommonExercise> exercises = getExercises();
+    Collection<CommonExercise> exercises = getExercises();
 
     this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, audioFileHelper);
     refResultDecoder.doRefDecode(exercises, relativeConfigDir);
