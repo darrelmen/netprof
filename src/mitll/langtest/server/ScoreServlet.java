@@ -4,12 +4,13 @@
 
 package mitll.langtest.server;
 
-import com.google.common.io.Files;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -71,13 +72,17 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String CONTEXT = "context";
   private static final String WIDGET = "widget";
   private static final String CHILDREN = "children";
+  private static final String REQUEST1 = "request=";
+  private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
+
+  private static final String YEAR = "year";
+  private boolean removeExercisesWithMissingAudioDefault = true;
 
   private RestUserManagement userManagement;
 
   private enum Request {DECODE, ALIGN, RECORD}
 
   // Doug said to remove items with missing audio. 1/12/15
-  private boolean REMOVE_EXERCISES_WITH_MISSING_AUDIO;
   private static final String START = "start";
   private static final String END = "end";
 
@@ -115,29 +120,49 @@ public class ScoreServlet extends DatabaseServlet {
     getAudioFileHelper();
     String queryString = request.getQueryString();
     JSONObject toReturn = new JSONObject();
+    //toReturn.put(ERROR, "expecting request");
+
     try {
       if (queryString != null) {
         queryString = URLDecoder.decode(queryString, "UTF-8");
-        if (queryString.startsWith(NESTED_CHAPTERS)) {
-          if (nestedChapters == null || (System.currentTimeMillis() - whenCached > REFRESH_CONTENT_INTERVAL)) {
-            nestedChapters = getJsonNestedChapters();
-            whenCached = System.currentTimeMillis();
+        if (matchesRequest(queryString, NESTED_CHAPTERS)) {
+          String[] split1 = queryString.split("&");
+          if (split1.length == 2) {
+            String removeExercisesWithMissingAudio = getRemoveExercisesParam(queryString);
+            if (removeExercisesWithMissingAudio.equals("true") || removeExercisesWithMissingAudio.equals("false")) {
+              toReturn = getJsonNestedChapters(removeExercisesWithMissingAudio.equals("true"));
+            } else {
+              toReturn.put(ERROR, "expecting param " + REMOVE_EXERCISES_WITH_MISSING_AUDIO);
+            }
+          } else {
+            if (nestedChapters == null || (System.currentTimeMillis() - whenCached > REFRESH_CONTENT_INTERVAL)) {
+              nestedChapters = getJsonNestedChapters(true);
+              whenCached = System.currentTimeMillis();
+            }
+            toReturn = nestedChapters;
           }
-          toReturn = nestedChapters;
-        } else if (queryString.startsWith(LEAST_RECORDED_CHAPTERS)) {
-          toReturn = getJsonLeastRecordedChapters();
-        } else if (
-            userManagement.doGet(request, response, queryString, toReturn)
-            ) {
-          logger.info("handled user command for " + queryString);
-        } else if (queryString.startsWith(CHAPTER_HISTORY) || queryString.startsWith("request=" + CHAPTER_HISTORY)) {
-          queryString = queryString.substring(queryString.indexOf(CHAPTER_HISTORY) + CHAPTER_HISTORY.length());
+        } else if (matchesRequest(queryString, LEAST_RECORDED_CHAPTERS)) { // JUST FOR APPEN
+          toReturn = getJsonLeastRecordedChapters(getRemoveExercisesParam(queryString).equals("true"));
+        } else if (userManagement.doGet(request, response, queryString, toReturn)) {
+          logger.info("doGet handled user command for " + queryString);
+        } else if (matchesRequest(queryString, CHAPTER_HISTORY)) {
+          queryString = removePrefix(queryString, CHAPTER_HISTORY);
           toReturn = getChapterHistory(queryString, toReturn);
-        } else if (queryString.startsWith(REF_INFO) || queryString.startsWith("request=" + REF_INFO)) {
-          queryString = queryString.substring(queryString.indexOf(REF_INFO) + REF_INFO.length());
+        } else if (matchesRequest(queryString, REF_INFO)) {
+          queryString = removePrefix(queryString, REF_INFO);
           toReturn = getRefInfo(queryString, toReturn);
-        } else if (queryString.startsWith(PHONE_REPORT) || queryString.startsWith("request=" + PHONE_REPORT)) {
-          queryString = queryString.substring(queryString.indexOf(PHONE_REPORT) + PHONE_REPORT.length());
+        } else if (matchesRequest(queryString, "jsonReport")) {
+          queryString = removePrefix(queryString, "jsonReport");
+          int year = getYear(queryString);
+          getReport(toReturn, year);
+        } else if (matchesRequest(queryString, "report")) {
+          queryString = removePrefix(queryString, "report");
+          int year = getYear(queryString);
+          configureResponseHTML(response, year);
+          reply(response, getReport(toReturn, year));
+          return;
+        } else if (matchesRequest(queryString, PHONE_REPORT)) {
+          queryString = removePrefix(queryString, PHONE_REPORT);
           String[] split1 = queryString.split("&");
           if (split1.length < 2) {
             toReturn.put(ERROR, "expecting at least two query parameters");
@@ -152,9 +177,82 @@ public class ScoreServlet extends DatabaseServlet {
       logger.error("got " + e, e);
     }
 
-    String x = toReturn.toString();
-    reply(response, x);
+    reply(response, toReturn.toString());
   }
+
+  private String getReport(JSONObject jsonObject, int year) {
+    return db.getReport(year, jsonObject);
+  }
+
+  /**
+   * Defaults to this year.
+   * @param queryString
+   * @return
+   */
+  private int getYear(String queryString) {
+    String[] split1 = queryString.split("&");
+    int year;
+    if (split1.length == 2) {
+      String param = split1[1];
+//      logger.info("Got param " + param);
+      year = getParamIntValue(param, YEAR);
+      if (year == -1) {
+        year = Calendar.getInstance().get(Calendar.YEAR);
+      }
+    } else {
+      year = Calendar.getInstance().get(Calendar.YEAR);
+    }
+    return year;
+  }
+
+  private String removePrefix(String queryString, String prefix) {
+    return queryString.substring(queryString.indexOf(prefix) + prefix.length());
+  }
+
+  private boolean matchesRequest(String queryString, String expected) {
+    return queryString.startsWith(expected) || queryString.startsWith(REQUEST1 + expected);
+  }
+
+  /**
+   * Check for a parameter to control what we send back
+   *
+   * @param queryString
+   * @return
+   */
+  private String getRemoveExercisesParam(String queryString) {
+    String[] split1 = queryString.split("&");
+    if (split1.length == 2) {
+      return getParamValue(split1[1], REMOVE_EXERCISES_WITH_MISSING_AUDIO);
+    }
+    return removeExercisesWithMissingAudioDefault ? "true" : "false";
+  }
+
+  private String getParamValue(String s, String param) {
+    boolean hasParam = s.startsWith(param);
+    if (!hasParam) {
+      return "expecting param " + param;
+    }
+    return s.equals(param + "=true") ? "true" : "false";
+  }
+
+  private int getParamIntValue(String arg, String param) {
+    boolean hasParam = arg.startsWith(param);
+    if (!hasParam) {
+      return -1;
+    }
+    String[] split = arg.split("=");
+    try {
+      if (split.length == 2) {
+        return Integer.parseInt(split[1]);
+      } else {
+        return Integer.parseInt(arg);
+      }
+    } catch (NumberFormatException e) {
+      logger.warn("got " + e + " on " + arg);
+      return -1;
+    }
+  }
+
 
   /**
    * @param toReturn
@@ -163,21 +261,9 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private JSONObject getPhoneReport(JSONObject toReturn, String[] split1) {
-    String user = "";
-    Map<String, Collection<String>> selection = new TreeMap<String, Collection<String>>();
-    for (String param : split1) {
-      //logger.debug("param '" +param+               "'");
-      String[] split = param.split("=");
-      if (split.length == 2) {
-        String key = split[0];
-        String value = split[1];
-        if (key.equals(USER)) {
-          user = value;
-        } else {
-          selection.put(key, Collections.singleton(value));
-        }
-      }
-    }
+    UserAndSelection userAndSelection = new UserAndSelection(split1).invoke();
+    String user = userAndSelection.getUser();
+    Map<String, Collection<String>> selection = userAndSelection.getSelection();
 
     logger.debug("getPhoneReport (" + serverProps.getLanguage() + ") : user " + user + " selection " + selection);
     try {
@@ -205,21 +291,9 @@ public class ScoreServlet extends DatabaseServlet {
     if (split1.length < 2) {
       toReturn.put(ERROR, "expecting at least two query parameters");
     } else {
-      String user = "";
-      Map<String, Collection<String>> selection = new TreeMap<String, Collection<String>>();
-      for (String param : split1) {
-        //logger.debug("param '" +param+               "'");
-        String[] split = param.split("=");
-        if (split.length == 2) {
-          String key = split[0];
-          String value = split[1];
-          if (key.equals(USER)) {
-            user = value;
-          } else {
-            selection.put(key, Collections.singleton(value));
-          }
-        }
-      }
+      UserAndSelection userAndSelection = new UserAndSelection(split1).invoke();
+      String user = userAndSelection.getUser();
+      Map<String, Collection<String>> selection = userAndSelection.getSelection();
 
       //logger.debug("chapterHistory " + user + " selection " + selection);
       try {
@@ -237,7 +311,7 @@ public class ScoreServlet extends DatabaseServlet {
     if (split1.length < 2) {
       toReturn.put(ERROR, "expecting at least two query parameters");
     } else {
-      Map<String, Collection<String>> selection = new TreeMap<String, Collection<String>>();
+      Map<String, Collection<String>> selection = new TreeMap<>();
       for (String param : split1) {
         String[] split = param.split("=");
         if (split.length == 2) {
@@ -261,7 +335,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #getJsonForSelection
    */
   private ExerciseSorter getExerciseSorter() {
-    Map<String, Integer> phoneToCount = audioFileHelper == null ? new HashMap<String, Integer>() : audioFileHelper.getPhoneToCount();
+    Map<String, Integer> phoneToCount = audioFileHelper == null ? new HashMap<>() : audioFileHelper.getPhoneToCount();
     return new ExerciseSorter(db.getSectionHelper().getTypeOrder(), phoneToCount);
   }
 
@@ -309,6 +383,8 @@ public class ScoreServlet extends DatabaseServlet {
 
     JSONObject jsonObject = new JSONObject();
     if (requestType != null) {
+      logger.debug("doPost got request " + requestType + " device " + deviceType + "/" + device);
+
       if (requestType.startsWith(ADD_USER)) {
         userManagement.addUser(request, requestType, deviceType, device, jsonObject);
       } else if (requestType.startsWith(ALIGN) || requestType.startsWith(DECODE) ||
@@ -328,8 +404,12 @@ public class ScoreServlet extends DatabaseServlet {
         }
       } else {
         jsonObject.put(ERROR, "unknown req " + requestType);
+
+        logger.warn("doPost unknown request " + requestType + " device " + deviceType + "/" + device);
+
       }
     } else {
+      logger.info("request type is null?");
       jsonObject = getJsonForAudio(request, null, deviceType, device);
     }
 
@@ -383,35 +463,45 @@ public class ScoreServlet extends DatabaseServlet {
     response.setCharacterEncoding("UTF-8");
   }
 
+  private void configureResponseHTML(HttpServletResponse response, int year) {
+    response.setContentType("test/html; charset=UTF-8");
+    response.setCharacterEncoding("UTF-8");
+
+    response.setHeader("Content-disposition", "attachment; filename=reportForYear" + year + ".html");
+
+  }
+
   /**
    * join against audio dao ex->audio map again to get user exercise audio! {@link #getJsonArray(java.util.List)}
    *
+   * @param removeExercisesWithMissingAudio
    * @return
    * @see #doGet
    */
-  private JSONObject getJsonNestedChapters() {
+  private JSONObject getJsonNestedChapters(boolean removeExercisesWithMissingAudio) {
     setInstallPath(db);
     db.getExercises();
 
     JSONObject jsonObject = new JSONObject();
-    jsonObject.put(CONTENT, getContentAsJson());
+    jsonObject.put(CONTENT, getContentAsJson(removeExercisesWithMissingAudio));
     addVersion(jsonObject);
 
     return jsonObject;
   }
 
   /**
+   * @param removeExercisesWithMissingAudio
    * @return
    * @see #getJsonNestedChapters
    */
-  private JSONArray getContentAsJson() {
+  private JSONArray getContentAsJson(boolean removeExercisesWithMissingAudio) {
     JSONArray jsonArray = new JSONArray();
-    Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
+    Map<String, Collection<String>> typeToValues = new HashMap<>();
 
     for (SectionNode node : db.getSectionHelper().getSectionNodes()) {
       String type = node.getType();
       typeToValues.put(type, Collections.singletonList(node.getName()));
-      JSONObject jsonForNode = getJsonForNode(node, typeToValues);
+      JSONObject jsonForNode = getJsonForNode(node, typeToValues, removeExercisesWithMissingAudio);
       typeToValues.remove(type);
 
       jsonArray.add(jsonForNode);
@@ -422,22 +512,23 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * @param node
    * @param typeToValues
+   * @param removeExercisesWithMissingAudio
    * @return
    * @see #getContentAsJson
    */
-  private JSONObject getJsonForNode(SectionNode node, Map<String, Collection<String>> typeToValues) {
+  private JSONObject getJsonForNode(SectionNode node, Map<String, Collection<String>> typeToValues, boolean removeExercisesWithMissingAudio) {
     JSONObject jsonForNode = new JSONObject();
     jsonForNode.put(TYPE, node.getType());
     jsonForNode.put(NAME, node.getName());
     JSONArray jsonArray = new JSONArray();
 
     if (node.isLeaf()) {
-      JSONArray exercises = getJsonForSelection(typeToValues);
+      JSONArray exercises = getJsonForSelection(typeToValues, removeExercisesWithMissingAudio);
       jsonForNode.put(ITEMS, exercises);
     } else {
       for (SectionNode child : node.getChildren()) {
         typeToValues.put(child.getType(), Collections.singletonList(child.getName()));
-        jsonArray.add(getJsonForNode(child, typeToValues));
+        jsonArray.add(getJsonForNode(child, typeToValues, removeExercisesWithMissingAudio));
         typeToValues.remove(child.getType());
       }
     }
@@ -446,16 +537,18 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @param typeToValues for this unit and chapter
+   * @param typeToValues                    for this unit and chapter
+   * @param removeExercisesWithMissingAudio
    * @return
    * @see #getJsonForNode
    */
-  private JSONArray getJsonForSelection(Map<String, Collection<String>> typeToValues) {
+  private JSONArray getJsonForSelection(Map<String, Collection<String>> typeToValues, boolean removeExercisesWithMissingAudio) {
     Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToValues);
 
-    List<CommonExercise> copy = new ArrayList<CommonExercise>(exercisesForState);
+    List<CommonExercise> copy = new ArrayList<>(exercisesForState);
 
-    if (REMOVE_EXERCISES_WITH_MISSING_AUDIO) {
+    //  boolean removeExercisesWithMissingAudio = REMOVE_EXERCISES_WITH_MISSING_AUDIO;
+    if (removeExercisesWithMissingAudio) {
       Iterator<CommonExercise> iterator = copy.iterator();
       for (; iterator.hasNext(); ) {
         CommonExercise next = iterator.next();
@@ -472,7 +565,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * TODO : move to JSONSupport
-   *
+   * <p>
    * This is the json that describes an individual entry.
    * <p>
    * Makes sure to attach audio to exercises (this is especially important for userexercises that mask out
@@ -480,7 +573,7 @@ public class ScoreServlet extends DatabaseServlet {
    *
    * @param copy
    * @return
-   * @see #getJsonForSelection(Map)
+   * @see #getJsonForSelection(Map, boolean)
    */
   private JSONArray getJsonArray(List<CommonExercise> copy) {
     JSONArray exercises = new JSONArray();
@@ -520,8 +613,10 @@ public class ScoreServlet extends DatabaseServlet {
     String user = request.getHeader(USER);
     String exerciseID = request.getHeader("exercise");
     int reqid = getReqID(request);
+
     logger.debug("getJsonForAudio got request " + requestType + " for user " + user + " exercise " + exerciseID +
-        " req " + reqid);
+        " req " + reqid + " device " + deviceType + "/" + device);
+
     int i = userManagement.getUserFromParam(user);
     String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, 0, i);
     File saveFile = pathHelper.getAbsoluteFile(wavPath);
@@ -551,9 +646,8 @@ public class ScoreServlet extends DatabaseServlet {
     //logger.debug("got req id " + reqid);
     if (reqid == null) reqid = "1";
     try {
-      int req = Integer.parseInt(reqid);
       //logger.debug("returning req id " + req);
-      return req;
+      return Integer.parseInt(reqid);
     } catch (NumberFormatException e) {
       logger.warn("Got parse error on reqid " + reqid);
     }
@@ -786,7 +880,7 @@ public class ScoreServlet extends DatabaseServlet {
       audioFileHelper = getAudioFileHelperRef();
       this.userManagement = new RestUserManagement(db, serverProps, pathHelper);
       //loadTesting = getLoadTesting();
-      REMOVE_EXERCISES_WITH_MISSING_AUDIO = serverProps.removeExercisesWithMissingAudio();
+      removeExercisesWithMissingAudioDefault = serverProps.removeExercisesWithMissingAudio();
     }
   }
 
@@ -848,7 +942,7 @@ public class ScoreServlet extends DatabaseServlet {
   private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                            String exerciseID, boolean usePhoneToDisplay) {
     return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, 128, 128, false,
-        false, Files.createTempDir().getAbsolutePath(), serverProps.useScoreCache(), exerciseID, null, usePhoneToDisplay, false);
+        false, serverProps.useScoreCache(), exerciseID, null, usePhoneToDisplay, false);
   }
 
   /**
@@ -864,22 +958,23 @@ public class ScoreServlet extends DatabaseServlet {
                                                   String exerciseID, boolean usePhoneToDisplay) {
     //  logger.debug("getASRScoreForAudioNoCache for " + testAudioFile + " under " + sentence);
     return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, 128, 128, false,
-        false, Files.createTempDir().getAbsolutePath(), false, exerciseID, null, usePhoneToDisplay, false);
+        false, false, exerciseID, null, usePhoneToDisplay, false);
   }
 
   /**
    * Just for appen -
    *
+   * @param removeExercisesWithMissingAudio
    * @return
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private JSONObject getJsonLeastRecordedChapters() {
+  private JSONObject getJsonLeastRecordedChapters(boolean removeExercisesWithMissingAudio) {
     setInstallPath(db);
     db.getExercises();
 
     Map<String, Integer> exToCount = db.getAudioDAO().getExToCount();
 
-    Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
+    Map<String, Collection<String>> typeToValues = new HashMap<>();
 
     List<SectionNode> sectionNodes = db.getSectionHelper().getSectionNodes();
     for (SectionNode node : sectionNodes) {
@@ -892,7 +987,7 @@ public class ScoreServlet extends DatabaseServlet {
     Collections.sort(sectionNodes);
 
     JSONObject jsonObject = new JSONObject();
-    jsonObject.put(CONTENT, getContentAsJson2(sectionNodes));
+    jsonObject.put(CONTENT, getContentAsJson2(sectionNodes, removeExercisesWithMissingAudio));
     addVersion(jsonObject);
 
     return jsonObject;
@@ -905,19 +1000,20 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * @param sectionNodes
+   * @param removeExercisesWithMissingAudio
    * @return
-   * @see #getJsonLeastRecordedChapters()
+   * @see #getJsonLeastRecordedChapters(boolean)
    */
-  private JSONArray getContentAsJson2(Collection<SectionNode> sectionNodes) {
+  private JSONArray getContentAsJson2(Collection<SectionNode> sectionNodes, boolean removeExercisesWithMissingAudio) {
     JSONArray jsonArray = new JSONArray();
-    Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
+    Map<String, Collection<String>> typeToValues = new HashMap<>();
 
     if (audioFileHelper != null) {
 
       for (SectionNode node : sectionNodes) {
         String type = node.getType();
         typeToValues.put(type, Collections.singletonList(node.getName()));
-        JSONObject jsonForNode = getJsonForNode2(node, typeToValues);
+        JSONObject jsonForNode = getJsonForNode2(node, typeToValues, removeExercisesWithMissingAudio);
         typeToValues.remove(type);
 
         jsonArray.add(jsonForNode);
@@ -929,17 +1025,18 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * @param node
    * @param typeToValues
+   * @param removeExercisesWithMissingAudio
    * @return
    * @see #getContentAsJson2
    */
-  private JSONObject getJsonForNode2(SectionNode node, Map<String, Collection<String>> typeToValues) {
+  private JSONObject getJsonForNode2(SectionNode node, Map<String, Collection<String>> typeToValues, boolean removeExercisesWithMissingAudio) {
     JSONObject jsonForNode = new JSONObject();
     jsonForNode.put(TYPE, node.getType());
     jsonForNode.put(NAME, node.getName());
     JSONArray jsonArray = new JSONArray();
 
     if (node.isLeaf()) {
-      JSONArray exercises = getJsonForSelection(typeToValues);
+      JSONArray exercises = getJsonForSelection(typeToValues, removeExercisesWithMissingAudio);
       jsonForNode.put(ITEMS, exercises);
     } else {
       List<SectionNode> children = node.getChildren();
@@ -947,7 +1044,7 @@ public class ScoreServlet extends DatabaseServlet {
 
       for (SectionNode child : children) {
         typeToValues.put(child.getType(), Collections.singletonList(child.getName()));
-        jsonArray.add(getJsonForNode2(child, typeToValues));
+        jsonArray.add(getJsonForNode2(child, typeToValues, removeExercisesWithMissingAudio));
         typeToValues.remove(child.getType());
       }
     }
@@ -959,7 +1056,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @param node
    * @param typeToValues
    * @param exToCount
-   * @see #getJsonLeastRecordedChapters()
+   * @see #getJsonLeastRecordedChapters(boolean)
    */
   private void recurse(SectionNode node, Map<String, Collection<String>> typeToValues, Map<String, Integer> exToCount) {
     if (node.isLeaf()) {
@@ -989,7 +1086,7 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * @param db
    * @return
-   * @see #getJsonNestedChapters()
+   * @see #getJsonNestedChapters(boolean)
    */
   private void setInstallPath(DatabaseImpl db) {
     String lessonPlanFile = getLessonPlan();
@@ -1001,5 +1098,42 @@ public class ScoreServlet extends DatabaseServlet {
 
   private String getLessonPlan() {
     return configDir + File.separator + serverProps.getLessonPlan();
+  }
+
+  private class UserAndSelection {
+    private String[] split1;
+    private String user;
+    private Map<String, Collection<String>> selection;
+
+    public UserAndSelection(String... split1) {
+      this.split1 = split1;
+    }
+
+    public String getUser() {
+      return user;
+    }
+
+    public Map<String, Collection<String>> getSelection() {
+      return selection;
+    }
+
+    public UserAndSelection invoke() {
+      user = "";
+      selection = new TreeMap<>();
+      for (String param : split1) {
+        //logger.debug("param '" +param+               "'");
+        String[] split = param.split("=");
+        if (split.length == 2) {
+          String key = split[0];
+          String value = split[1];
+          if (key.equals(USER)) {
+            user = value;
+          } else {
+            selection.put(key, Collections.singleton(value));
+          }
+        }
+      }
+      return this;
+    }
   }
 }
