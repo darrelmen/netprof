@@ -41,7 +41,7 @@ public class InvalidateAudioTest {
 
     Map<String, CommonExercise> idToNewEx = getIDToExercise(newDB);
 
-    List<CommonExercise> oldExercises = getDatabase(config, config + "Old", "quizletOld.properties").getExercises();
+    Collection<CommonExercise> oldExercises = getDatabase(config, config + "Old", "quizletOld.properties").getExercises();
     logger.warn("OLD found " + oldExercises.size() + " exercises");
 
     Set<String> idsOfDefects = new TreeSet<String>();
@@ -82,7 +82,7 @@ public class InvalidateAudioTest {
     Map<String, CommonExercise> idToNewEx = getIDToExercise(newDB);
     SmallVocabDecoder smallVocabDecoder = getSmallVocabDecoder(newDB);
 
-    List<CommonExercise> oldExercises = getDatabase(config, config + "Old", "quizletOld.properties").getExercises();
+    Collection<CommonExercise> oldExercises = getDatabase(config, config + "Old", "quizletOld.properties").getExercises();
     logger.warn("OLD found " + oldExercises.size() + " exercises");
 
     Set<String> idsOfDefects = new TreeSet<String>();
@@ -151,7 +151,7 @@ public class InvalidateAudioTest {
 
   private Map<String, CommonExercise> getIDToExercise(DatabaseImpl newDB) {
     Map<String, CommonExercise> idToNewEx = new HashMap<String, CommonExercise>();
-    List<CommonExercise> currentExercises = newDB.getExercises();
+    Collection<CommonExercise> currentExercises = newDB.getExercises();
     logger.warn("found " + currentExercises.size() + " exercises");
     for (CommonExercise ex : currentExercises) idToNewEx.put(ex.getID(), ex);
     return idToNewEx;
