@@ -48,6 +48,17 @@ public class Exercise extends AudioExercise implements CommonExercise, MutableEx
     this.refAudioIndex = refAudioIndex;
   }
 
+  public Exercise(String id, String englishSentence, String meaning, String foreignLanguage,
+                  String transliteration, String context, String contextTranslation) {
+    super(id);
+    setEnglishSentence(englishSentence);
+    this.meaning = meaning;
+    setForeignLanguage(foreignLanguage);
+    setTransliteration(transliteration);
+    this.context = context;
+    this.contextTranslation = contextTranslation;
+  }
+
   @Override
   public Collection<String> getRefSentences() {
     return refSentences;
@@ -101,15 +112,9 @@ public class Exercise extends AudioExercise implements CommonExercise, MutableEx
 
   public CommonAnnotatable getCommonAnnotatable() { return this; }
 
-/*
-  public void setForeignLanguage(String foreignLanguage) {
-    this.foreignLanguage = foreignLanguage;
-  }*/
-
   @Override
   public void setTransliteration(String transliteration) {
     this.transliteration = transliteration;
-
   }
 
   /**
