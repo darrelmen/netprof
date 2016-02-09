@@ -1232,6 +1232,11 @@ public class DatabaseImpl implements Database {
     return language + "_" + userListByID.getName();
   }
 
+  /**
+   * JUST FOR TESTING?
+   * @param ex
+   * @return
+   */
   public int attachAudio(CommonExercise ex) {
     return getAudioDAO().attachAudio(ex, installPath, configDir);
   }
