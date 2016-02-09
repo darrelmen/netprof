@@ -4,8 +4,10 @@
 
 package mitll.langtest.server.audio;
 
+import com.google.common.io.Files;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.AudioAnswer;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import javax.sound.sampled.AudioFormat;
@@ -102,13 +104,15 @@ public class AudioCheck {
    */
   public ValidityAndDur checkWavFile(File file) {
     ValidityAndDur validityAndDur = checkWavFileWithClipThreshold(file, true);
-    addDynamicRange(file, /*false, */validityAndDur);
+    addDynamicRange(file, validityAndDur);
     return validityAndDur;
   }
 
   private void addDynamicRange(File file, ValidityAndDur validityAndDur) {
     String highPassFilterFile = new AudioConversion(props).getHighPassFilterFile(file.getAbsolutePath());
-    DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(new File(highPassFilterFile));
+    File highPass = new File(highPassFilterFile);
+    DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(highPass);
+    deleteParentTempDir(highPass);
     if (dynamicRange.maxMin < MIN_DYNAMIC_RANGE) {
       logger.warn("file " + file.getName() + " doesn't meet dynamic range threshold (" + MIN_DYNAMIC_RANGE+
           "):\n" + dynamicRange);
@@ -116,6 +120,15 @@ public class AudioCheck {
     }
     validityAndDur.setMaxMinRange(dynamicRange.maxMin);
   }
+
+  private void deleteParentTempDir(File srcFile) {
+    try {
+      FileUtils.deleteDirectory(new File(srcFile.getParent()));
+    } catch (IOException e) {
+      logger.error("on " +srcFile+ " got " +e,e);
+    }
+  }
+
 
   /**
    * Verify audio messages
