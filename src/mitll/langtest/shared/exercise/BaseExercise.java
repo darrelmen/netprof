@@ -11,12 +11,13 @@ import java.util.Map;
  */
 public class BaseExercise implements IsSerializable, Shell  {
   protected String id;
-  protected Map<String, String> unitToValue = new HashMap<String, String>();
+  protected Map<String, String> unitToValue = new HashMap<>();
   private STATE state = STATE.UNSET;
   private STATE secondState = STATE.UNSET;
 
   public BaseExercise() {}
-  public BaseExercise(String id ) { this.id = id;}
+
+  protected BaseExercise(String id ) { this.id = id;}
 
   public String getID() {
     return id;
@@ -55,9 +56,6 @@ public class BaseExercise implements IsSerializable, Shell  {
    */
   public void addUnitToValue(String unit, String value) {
     if (value == null) return;
-//    if (value.isEmpty()) {
-//      System.out.println("addUnitToValue " + unit + " value " + value);
-//    }
     this.getUnitToValue().put(unit, value);
   }
 
