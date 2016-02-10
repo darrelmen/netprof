@@ -397,7 +397,7 @@ public class FileExerciseDAO {
    * @see #getContentFromIncludeFile
    */
   private void readFromFile(String installPath, File include, StringBuilder builder) throws IOException {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(include), ENCODING));
+    BufferedReader reader = getBufferedReader(new FileInputStream(include));
     String line2;
     while ((line2 = reader.readLine()) != null) {
       line2 = line2.trim();
