@@ -38,6 +38,9 @@ public class ServerProperties {
   private static final String MIRA_LEN   = "https://mira.ll.mit.edu/scorer/item";
   private static final String MIRA_DEFAULT = MIRA_LEN;
   private static final String MIRA_CLASSIFIER_URL = "miraClassifierURL";
+  public static final String WEBSERVICE_HOST_IP1 = "webserviceHostIP";
+  public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
+  public static final String LESSON_PLAN_FILE = "lessonPlanFile";
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
 
   /**
@@ -48,12 +51,12 @@ public class ServerProperties {
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
   private static final String H2_DATABASE = "h2Database";
-  private static final String H2_DATABASE_DEFAULT = "vlr-parle";   //likely never what you want
+//  private static final String H2_DATABASE_DEFAULT = "vlr-parle";   //likely never what you want
   private static final String LANGUAGE = "language";
 
   private static final String MEDIA_DIR = "mediaDir";
-  private static final String RECO_TEST = "recoTest";
-  private static final String RECO_TEST2 = "recoTest2";
+//  private static final String RECO_TEST = "recoTest";
+//  private static final String RECO_TEST2 = "recoTest2";
   private static final String MIN_PRON_SCORE = "minPronScore";
   private static final String MIN_PRON_SCORE_DEFAULT = ""+0.31f;//"0.20";
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
@@ -137,11 +140,11 @@ public class ServerProperties {
   }
 
   public String getWebserviceIP() {
-    return props.getProperty("webserviceHostIP", WEBSERVICE_HOST_IP);
+    return props.getProperty(WEBSERVICE_HOST_IP1, WEBSERVICE_HOST_IP);
   }
 
   public int getWebservicePort() {
-    int ip = Integer.parseInt(props.getProperty("webserviceHostPort", "-1"));
+    int ip = Integer.parseInt(props.getProperty(WEBSERVICE_HOST_PORT, "-1"));
     if (ip == 1)
       logger.error("No webservice host port found.");
     return ip;
@@ -152,20 +155,20 @@ public class ServerProperties {
    * @see LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
    */
   public String getH2Database() {
-    return props.getProperty(H2_DATABASE, H2_DATABASE_DEFAULT);
+    return props.getProperty(H2_DATABASE, "npf"+props.getProperty(LANGUAGE));
   }
 
   public String getLessonPlan() {
-    return props.getProperty("lessonPlanFile", "lesson.plan");
+    return props.getProperty(LESSON_PLAN_FILE, props.getProperty(LANGUAGE)+".json");
   }
 
-  public boolean doRecoTest() {
+/*  public boolean doRecoTest() {
     return getDefaultFalse(RECO_TEST);
   }
 
   public boolean doRecoTest2() {
     return getDefaultFalse(RECO_TEST2);
-  }
+  }*/
 
   public boolean useScoreCache() {
     return getDefaultTrue(USE_SCORE_CACHE);
@@ -425,8 +428,6 @@ public class ServerProperties {
           String key = split[0].trim();
           String value = split[1].trim();
           phoneToDisplay.put(key, value);
-          // phoneToDisplay.put(key.toLowerCase(), value);
-          //phoneToDisplay.put(key.toUpperCase(), value);
         }
       }
       reader.close();
