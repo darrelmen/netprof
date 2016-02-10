@@ -32,6 +32,10 @@ public class JsonExport {
   private static final String EN = "en";
   private static final String CT = "ct";
   private static final String CTR = "ctr";
+  public static final String MN = "mn";
+  public static final String COUNT = "Count";
+  public static final String UNIT_ORDER = "UnitOrder";
+  public static final String UNIT_CHAPTER_NESTING = "UnitChapterNesting";
   private final Map<String, Integer> phoneToCount;
   private final SectionHelper<CommonExercise> sectionHelper;
   private final Set<Long> preferredVoices;
@@ -50,15 +54,16 @@ public class JsonExport {
     this.preferredVoices = preferredVoices;
   }
 
-  public Collection<CommonExercise> getExercises(String json) {
-
+  public List<CommonExercise> getExercises(String json) {
     JSONObject object = JSONObject.fromObject(json);
+    JSONArray jsonArray = object.getJSONArray(UNIT_ORDER);
+    List<String> types = new ArrayList<>();
+    for (int i = 0; i < jsonArray.size(); i++) types.add(jsonArray.getString(i));
     JSONArray content = object.getJSONArray(ScoreServlet.CONTENT);
     List<CommonExercise> exercises = new ArrayList<>();
     for (int i = 0; i < content.size(); i++) {
       JSONObject jsonObject = content.getJSONObject(i);
-
-      CommonExercise commonShell = toExercise(jsonObject);
+      CommonExercise commonShell = toExercise(jsonObject, types);
       exercises.add(commonShell);
     }
 
@@ -72,20 +77,20 @@ public class JsonExport {
   public <T extends CommonShell & AudioAttributeExercise> void addJSONExerciseExport(JSONObject jsonObject,
                                                                                      Collection<T> exercises) {
 
-    jsonObject.put("Count", exercises.size());
+    jsonObject.put(COUNT, exercises.size());
 
     JSONArray value = new JSONArray();
     for (String type : sectionHelper.getTypeOrder()) {
       value.add(type);
     }
-    jsonObject.put("UnitOrder", value);
+    jsonObject.put(UNIT_ORDER, value);
 
     JSONArray nesting = new JSONArray();
 
     Collection<SectionNode> sectionNodes = sectionHelper.getSectionNodes();
     addSections(nesting, sectionNodes);
 
-    jsonObject.put("UnitChapterNesting", nesting);
+    jsonObject.put(UNIT_CHAPTER_NESTING, nesting);
     jsonObject.put(ScoreServlet.CONTENT, getExercisesAsJson(exercises));
   }
 
@@ -262,20 +267,26 @@ public class JsonExport {
     ex.put(FL, exercise.getForeignLanguage());
     ex.put(TL, exercise.getTransliteration() == null ? "" : exercise.getTransliteration());
     ex.put(EN, exercise.getEnglish());
-    if (addMeaning) ex.put("MN", exercise.getMeaning());
+    if (addMeaning) ex.put(MN, exercise.getMeaning());
     ex.put(CT, exercise.getContext() == null ? "" : exercise.getContext());
     ex.put(CTR, exercise.getContextTranslation() == null ? "" : exercise.getContextTranslation());
     return ex;
   }
 
-  private CommonExercise toExercise(JSONObject jsonObject) {
+  private CommonExercise toExercise(JSONObject jsonObject, Collection<String> types) {
     CommonExercise exercise = new Exercise(
         jsonObject.getString(ID),
-        jsonObject.getString(EN), "",
+        jsonObject.getString(EN),
+        jsonObject.getString(MN),
         jsonObject.getString(FL),
         jsonObject.getString(TL),
         jsonObject.getString(CT),
         jsonObject.getString(CTR));
+    for (String type : types) {
+      String value = jsonObject.getString(type);
+      if (value == null) logger.error("missing " + type + " on " + exercise.getID());
+      else exercise.addUnitToValue(type, value);
+    }
     return exercise;
   }
 
