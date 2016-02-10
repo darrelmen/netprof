@@ -40,7 +40,7 @@ public interface ExerciseDAO {
 
   /**
    * @see DatabaseImpl#getSectionHelper()
-   * @see UserExerciseDAO#add(UserExercise, boolean)
+   * @see UserExerciseDAO#add
    * @see UserExerciseDAO#getUserExercises(String)
    * @see ExcelImport#removeExercises()
    * @return
@@ -48,14 +48,14 @@ public interface ExerciseDAO {
   SectionHelper<CommonExercise> getSectionHelper();
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#editItem(UserExercise)
+   * @see mitll.langtest.server.database.DatabaseImpl#editItem
    * @param userExercise
    * @return
    */
   CommonExercise addOverlay(CommonExercise userExercise);
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#duplicateExercise(UserExercise)
+   * @see mitll.langtest.server.database.DatabaseImpl#duplicateExercise
    * @param userExercise
    */
   void add(CommonExercise userExercise);
