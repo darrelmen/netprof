@@ -1,0 +1,385 @@
+package mitll.langtest.server.database.exercise;
+
+import mitll.langtest.client.qc.QCNPFExercise;
+import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.AudioDAO;
+import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.custom.AddRemoveDAO;
+import mitll.langtest.server.database.custom.UserExerciseDAO;
+import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.shared.exercise.AudioExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import org.apache.log4j.Logger;
+
+import java.io.File;
+import java.util.*;
+
+/**
+ * Created by go22670 on 2/10/16.
+ */
+public abstract class BaseExerciseDAO {
+  private static final Logger logger = Logger.getLogger(BaseExerciseDAO.class);
+
+  protected final Map<String, CommonExercise> idToExercise = new HashMap<>();
+  protected final SectionHelper<CommonExercise> sectionHelper = new SectionHelper<>();
+  protected final String language;
+  protected final ServerProperties serverProps;
+  protected final UserListManager userListManager;
+  protected final boolean addDefects;
+//  protected final Map<String, Map<String, String>> idToDefectMap = new HashMap<>();
+  protected List<CommonExercise> exercises = null;
+  protected AddRemoveDAO addRemoveDAO;
+  protected UserExerciseDAO userExerciseDAO;
+  protected AttachAudio attachAudio;
+  private AudioDAO audioDAO;
+
+  public BaseExerciseDAO(ServerProperties serverProps, UserListManager userListManager, boolean addDefects) {
+    this.serverProps = serverProps;
+    this.userListManager = userListManager;
+    this.language = serverProps.getLanguage();
+    this.addDefects = addDefects;
+  }
+
+
+  /**
+   * @return
+   * @see DatabaseImpl#getExercises()
+   */
+  public List<CommonExercise> getRawExercises() {
+    synchronized (this) {
+      if (exercises == null) {
+        exercises = readExercises();
+
+        afterReadingExercises();
+      }
+    }
+    return exercises;
+  }
+
+  void afterReadingExercises() {
+    addAlternatives(exercises);
+
+    populateIdToExercise();
+
+    addDefects(findDefects());
+
+    // remove exercises to remove
+    // mask over old items that have been overridden
+    addOverlays(removeExercises());
+
+    // add new items
+    addNewExercises();
+
+    for (CommonExercise ex : exercises) {
+      attachAudio.attachAudio(ex);
+      attachAudio.addOldSchoolAudio(ex.getRefAudioIndex(), (AudioExercise) ex);
+    }
+  }
+
+  /**
+   * @return
+   * @see DatabaseImpl#getSectionHelper()
+   */
+  public SectionHelper<CommonExercise> getSectionHelper() {
+    return sectionHelper;
+  }
+
+  /**
+   * TODO : what if they add a user exercise and add audio to it, or record new audio for other exercises???
+   *
+   * @param audioDAO
+   * @param mediaDir
+   * @param installPath
+   * @see DatabaseImpl#makeDAO
+   */
+  public void setAudioDAO(AudioDAO audioDAO, String mediaDir, String installPath) {
+    this.audioDAO = audioDAO;
+
+    File fileInstallPath = new File(installPath);
+    if (!fileInstallPath.exists()) {
+      logger.warn("\n\n\nhuh? install path " + fileInstallPath.getAbsolutePath() + " doesn't exist???");
+    }
+
+    this.attachAudio = new AttachAudio(mediaDir, mediaDir.replaceAll("bestAudio", ""), fileInstallPath,
+        serverProps.getAudioOffset(), audioDAO.getExToAudio());
+  }
+
+  protected void populateIdToExercise() {
+    for (CommonExercise e : exercises) idToExercise.put(e.getID(), e);
+
+    if (exercises.size() != idToExercise.size()) {
+      logger.warn(exercises.size() + " but id->ex " + idToExercise.size());
+    }
+  }
+
+  /**
+   * So the story is we get the user exercises out of the database on demand.
+   * <p>
+   * We need to join with the audio table entries every time.
+   * <p>
+   * TODO : also, this a lot of work just to get the one ref audio recording.
+   *
+   * @param all
+   * @see DatabaseImpl#getExerciseIDToRefAudio()
+   */
+  public void attachAudio(Collection<CommonExercise> all) {
+    attachAudio.setExToAudio(audioDAO.getExToAudio());
+    int user = 0;
+    int examined = 0;
+    for (CommonExercise ex : all) {
+      if (!ex.hasRefAudio()) {
+        attachAudio.attachAudio(ex);
+        examined++;
+
+        if (!ex.hasRefAudio()) {
+          user++;
+        }
+        // else if (ex.getID().startsWith("Custom")) {
+//          logger.warn("found audio for " + ex.getID());
+        // }
+      }
+    }
+    if (user > 0) {
+      logger.info("out of " + exercises.size() + //" " + missing +
+          " are missing ref audio, out of " + examined + " user exercises missing = " + user);
+    }
+  }
+
+  /**
+   * Don't add overlays for exercises that have been removed.
+   *
+   * @param removes
+   */
+  protected void addOverlays(Collection<String> removes) {
+    Collection<CommonExercise> overrides = userExerciseDAO.getOverrides();
+
+    if (overrides.size() > 0) {
+      logger.debug("addOverlays found " + overrides.size() + " overrides : ");
+      // for (CommonUserExercise exercise : overrides) logger.info("\t" + exercise);
+    }
+    if (removes.size() > 0) {
+      logger.debug("addOverlays found " + removes.size() + " to remove " + removes);
+    }
+
+    int override = 0;
+    for (CommonExercise userExercise : overrides) {
+      if (!removes.contains(userExercise.getID())) {
+        CommonExercise exercise = getExercise(userExercise.getID());
+        if (exercise != null) {
+          // logger.debug("addOverlays refresh exercise for " + userExercise.getID());
+          sectionHelper.refreshExercise(exercise);
+          addOverlay(userExercise);
+          override++;
+        } else {
+          logger.warn("----> addOverlays not adding as overlay " + userExercise.getID());
+        }
+      }
+    }
+    if (override > 0) {
+      logger.debug("addOverlays overlay count was " + override);
+    }
+  }
+
+  /**
+   * @param userExercise
+   * @return old exercises
+   * @see DatabaseImpl#editItem
+   * @see #getRawExercises()
+   */
+  public CommonExercise addOverlay(CommonExercise userExercise) {
+    CommonExercise exercise = getExercise(userExercise.getID());
+
+    if (exercise == null) {
+      logger.error("addOverlay : huh? can't find " + userExercise);
+    } else {
+      //logger.debug("addOverlay at " +userExercise.getID() + " found " +exercise);
+      synchronized (this) {
+        int i = exercises.indexOf(exercise);
+        if (i == -1) {
+          logger.error("addOverlay : huh? couldn't find " + exercise);
+        } else {
+          exercises.set(i, userExercise);
+        }
+        idToExercise.put(userExercise.getID(), userExercise);
+
+        //  logger.debug("addOverlay : after " + getExercise(userExercise.getID()));
+      }
+    }
+    return exercise;
+  }
+
+  /**
+   * @param ue
+   * @see DatabaseImpl#duplicateExercise
+   * @see #addNewExercises()
+   */
+  public void add(CommonExercise ue) {
+    synchronized (this) {
+      exercises.add(ue);
+      idToExercise.put(ue.getID(), ue);
+
+      if (exercises.size() != idToExercise.size()) {
+        logger.warn("add " + exercises.size() + " exercises but id->ex " + idToExercise.size());
+      }
+    }
+  }
+
+  /**
+   * @return true if exercise with this id was removed
+   * @see DatabaseImpl#deleteItem(String)
+   */
+  public boolean remove(String id) {
+    synchronized (this) {
+      if (!idToExercise.containsKey(id)) return false;
+      CommonExercise remove = idToExercise.remove(id);
+      return exercises.remove(remove);
+    }
+  }
+
+  public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
+    this.userExerciseDAO = userExerciseDAO;
+  }
+
+  /**
+   * @param addRemoveDAO
+   * @see #addNewExercises()
+   * @see #removeExercises()
+   */
+  public void setAddRemoveDAO(AddRemoveDAO addRemoveDAO) {
+    this.addRemoveDAO = addRemoveDAO;
+  }
+
+  /**
+   * @param id
+   * @return
+   * @see UserExerciseDAO#getPredefExercise(String)
+   * @see DatabaseImpl#getExercise(String)
+   */
+  public CommonExercise getExercise(String id) {
+    if (idToExercise.isEmpty()) {
+      logger.error("huh? couldn't find any exercises..? " + id);
+    }
+
+    synchronized (this) {
+      CommonExercise exercise = idToExercise.get(id);
+      //if (exercise == null) logger.warn("no '" +id+"'  in " + idToExercise.keySet().size()+" keys");
+      return exercise;
+    }
+  }
+
+  protected void addDefects(Map<String, Map<String, String>> exTofieldToDefect) {
+    if (addDefects) {
+      int count = 0;
+      for (Map.Entry<String, Map<String, String>> pair : exTofieldToDefect.entrySet()) {
+        for (Map.Entry<String, String> fieldToDefect : pair.getValue().entrySet()) {
+          if (userListManager.addDefect(pair.getKey(), fieldToDefect.getKey(), fieldToDefect.getValue())) {
+            count++;
+          }
+        }
+      }
+      if (count > 0) {
+        logger.info("Automatically added " + exTofieldToDefect.size() + "/" + count + " defects");
+      }
+    } else {
+      logger.info("NOT Automatically adding " + exTofieldToDefect.size() + " defects");
+    }
+  }
+
+  private Map<String, Map<String, String>> findDefects() {
+    Map<String, Map<String, String>> idToDefectMap = new HashMap<>();
+
+    for (CommonShell shell : exercises) {
+      Map<String, String> fieldToDefect = new HashMap<>();
+      checkForSemicolons(fieldToDefect, shell.getForeignLanguage(), shell.getTransliteration());
+
+      if (shell.getEnglish().isEmpty()) {
+        //if (serverProps.isClassroomMode()) {
+        //english = "NO ENGLISH";    // DON'CommonExercise DO THIS - it messes up the indexing.
+        fieldToDefect.put("english", "missing english");
+        // }
+        //logger.info("-------- > for row " + next.getRowNum() + " english is blank ");
+        // else {
+        //   englishSkipped++;
+        // }
+      }
+      if (!fieldToDefect.isEmpty()) {
+        idToDefectMap.put(shell.getID(), fieldToDefect);
+      }
+    }
+    return idToDefectMap;
+  }
+
+  /**
+   * @see #getRawExercises()
+   */
+  private void addNewExercises() {
+    for (String id : addRemoveDAO.getAdds()) {
+      CommonExercise where = userExerciseDAO.getWhere(id);
+      if (where == null) {
+        logger.error("getRawExercises huh? couldn't find user exercise from add exercise table in user exercise table : " + id);
+      } else {
+        if (idToExercise.containsKey(id)) {
+          logger.debug("addNewExercises SKIPPING new user exercise " + where.getID() + " since already added from spreadsheet : " + where);
+        } else {
+          logger.debug("addNewExercises adding new user exercise " + where.getID() + " : " + where);
+          add(where);
+          getSectionHelper().addExercise(where);
+        }
+      }
+    }
+  }
+
+  private Collection<String> removeExercises() {
+    Collection<String> removes = addRemoveDAO.getRemoves();
+
+    if (!removes.isEmpty())
+      logger.debug("removeExercises : Removing " + removes.size() + " exercises marked as deleted.");
+
+    for (String id : removes) {
+      CommonExercise remove = idToExercise.remove(id);
+      if (remove != null) {
+        boolean remove1 = exercises.remove(remove);
+        if (!remove1) logger.error("huh? remove inconsistency??");
+        getSectionHelper().removeExercise(remove);
+      }
+    }
+    return removes;
+  }
+
+  /**
+   * Keep track of possible alternatives for each english word - e.g. Good Bye = Ciao OR Adios
+   */
+  protected void addAlternatives(List<CommonExercise> exercises) {
+    Map<String, Set<String>> englishToFL = new HashMap<>();
+    for (CommonExercise e : exercises) {
+      Set<String> refs = englishToFL.getOrDefault(e.getEnglish(), new HashSet<>());
+      if (refs.isEmpty()) englishToFL.put(e.getEnglish(), refs);
+      refs.add(e.getForeignLanguage());
+    }
+
+    for (CommonExercise e : exercises) {
+      Set<String> orDefault = englishToFL.getOrDefault(e.getEnglish(), new HashSet<>());
+      if (orDefault.isEmpty()) {
+        logger.error("huh? no fl for " + e);
+      } else {
+        e.getMutable().setRefSentences(orDefault);
+        //   if (orDefault.size() > 1) logger.info("For " + e.getID() + " found " + orDefault.size());
+      }
+    }
+  }
+
+  abstract List<CommonExercise> readExercises();
+
+  protected void checkForSemicolons(Map<String, String> fieldToDefect, String foreignLanguagePhrase, String translit) {
+    if (foreignLanguagePhrase.contains(";")) {
+      fieldToDefect.put(QCNPFExercise.FOREIGN_LANGUAGE, "contains semicolon - should this item be split?");
+    }
+    if (translit.contains(";")) {
+      fieldToDefect.put(QCNPFExercise.TRANSLITERATION, "contains semicolon - should this item be split?");
+    }
+/*    if (INCLUDE_ENGLISH_SEMI_AS_DEFECT && english.contains(";")) {
+      fieldToDefect.put(QCNPFExercise.ENGLISH, "contains semicolon - should this item be split?");
+    }*/
+  }
+}
