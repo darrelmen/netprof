@@ -108,7 +108,9 @@ public class ButtonFactory implements EventLogger {
                   new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                      if (!caught.getMessage().trim().equals("0")) {
+                      if (caught != null &&
+                          caught.getMessage() != null &&
+                          !caught.getMessage().trim().equals("0")) {
                         // System.err.println("FAILED to send event for " + widgetID + " message '" + caught.getMessage() +"'");
                         caught.printStackTrace();
                       }
