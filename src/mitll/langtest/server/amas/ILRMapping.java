@@ -128,8 +128,7 @@ public class ILRMapping<T extends Shell> {
   }
 
   private BufferedReader getReader(String lessonPlanFile) throws FileNotFoundException, UnsupportedEncodingException {
-    FileInputStream resourceAsStream = new FileInputStream(lessonPlanFile);
-    return new BufferedReader(new InputStreamReader(resourceAsStream, ENCODING));
+    return new BufferedReader(new InputStreamReader(new FileInputStream(lessonPlanFile), ENCODING));
   }
 
   public void report(Map<String, T> idToExercise) {
