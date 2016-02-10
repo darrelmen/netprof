@@ -53,12 +53,10 @@ public class JSONExportTest {
     JSONArray exercisesAsJson = jsonExport.getExercisesAsJson(database.getExercises());
     logger.info("got " +exercisesAsJson);
 
-
     JSONObject jsonObject = new JSONObject();
     jsonExport.addJSONExerciseExport(jsonObject,database.getExercises());
 
     logger.info("got " +jsonObject);
-
   }
 
   @Test
@@ -69,5 +67,13 @@ public class JSONExportTest {
     logger.info("got " +jsonObject);
 
   }
-
+  @Test
+  public void testExport3() {
+    JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null);
+    JSONObject jsonObject = new JSONObject();
+    jsonExport.addJSONExerciseExport(jsonObject,database.getExercises());
+    logger.info("got " +jsonObject);
+    String s = jsonObject.toString();
+    Collection<CommonExercise> exercises = jsonExport.getExercises(s);
+  }
 }
