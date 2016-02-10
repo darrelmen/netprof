@@ -118,7 +118,7 @@ public class PerformanceTest extends BaseTest {
     //  String lessonPlanFile2 = parent + File.separator + "testSecond.xlsx";
 
     ExcelImport excelImport = new ExcelImport(lessonPlanFile, database.getServerProps());
-    List<CommonExercise> exercises = excelImport.readExercises();
+    List<CommonExercise> exercises = excelImport.getRawExercises();
 
     //   ExcelImport excelImport2 = new ExcelImport(lessonPlanFile2, database.getServerProps());
     //   List<CommonExercise> exercises2 = excelImport2.readExercises();
