@@ -19,10 +19,6 @@ import java.util.*;
  */
 public class SectionHelper<T extends Shell> {
   private static final Logger logger = Logger.getLogger(SectionHelper.class);
-//  private static final String unitType = "unit";
-//  private static final String chapterType = "chapter";
-//  private static final String weekType = "week";
-
   private List<String> predefinedTypeOrder = new ArrayList<String>();
 
   private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();
@@ -211,13 +207,6 @@ public class SectionHelper<T extends Shell> {
     }
   }
 
-/*
-  @Deprecated
-  public Pair addUnitToLesson(T exercise, String unitName) { return addExerciseToLesson(exercise, unitType, unitName);}
-  public Pair addChapterToLesson(T exercise, String unitName) { return addExerciseToLesson(exercise, chapterType, unitName);}
-  public Pair addWeekToLesson(T exercise, String unitName) { return addExerciseToLesson(exercise, weekType, unitName);}
-*/
-
   /**
    * @param where
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesFromFiltered(java.util.Map, mitll.langtest.shared.custom.UserList)
@@ -298,7 +287,6 @@ public class SectionHelper<T extends Shell> {
     }
   }
 
-
   private Map<String, Lesson<T>> getSectionToLesson(String section) {
     Map<String, Lesson<T>> unit = typeToUnitToLesson.get(section);
     if (unit == null) {
@@ -315,7 +303,7 @@ public class SectionHelper<T extends Shell> {
     this.predefinedTypeOrder = predefinedTypeOrder;
   }
 
-  public static class Pair {
+  public final static class Pair {
     private final String type;
     private final String section;
 
@@ -335,7 +323,6 @@ public class SectionHelper<T extends Shell> {
       others.remove(p);
       for (Pair o : others) {
         addAssociation(p, o);
-        // addAssociation(o, p);
       }
     }
   }
@@ -357,9 +344,6 @@ public class SectionHelper<T extends Shell> {
     if (sections == null) subsections.put(otherType, sections = new HashSet<String>());
     sections.add(otherSection);
   }
-
-/*  public Set<String> getSections() { return typeToUnitToLesson.keySet(); }
-  public Map<String, Lesson> getSection(String type) { return typeToUnitToLesson.get(type);  }*/
 
   public void report() {
     logger.debug("type order " + getTypeOrder());
