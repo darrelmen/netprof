@@ -43,8 +43,11 @@ public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO {
     try {
       byte[] encoded = Files.readAllBytes(Paths.get(jsonFile));
       String asString = new String(encoded, ENCODING);
+      logger.info("readExercises reading from " + jsonFile);
 
-      return jsonExport.getExercises(asString);
+      List<CommonExercise> exercises = jsonExport.getExercises(asString);
+      logger.info("read " +exercises.size() + " from " + jsonFile);
+      return exercises;
     } catch (IOException e) {
       logger.error("got " +e,e);
     }
