@@ -124,7 +124,7 @@ public class PropertyHandler {
   private boolean grading = false;
   private boolean bkgColorForRef = false;
   private String exercise_title;
-  private String appTitle = DLI_LANGUAGE_TESTING;
+  private String appTitle = null;//DLI_LANGUAGE_TESTING;
   private boolean demoMode;
 
   private boolean showWelcome = true;// default value
@@ -141,7 +141,7 @@ public class PropertyHandler {
 
   private int recordTimeout = DEFAULT_TIMEOUT;
 
-  private String splashTitle;
+  private String splashTitle = null;
   private boolean rightAlignContent;
   private LOGIN_TYPE loginType = LOGIN_TYPE.STUDENT;
 
@@ -197,23 +197,35 @@ public class PropertyHandler {
       else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
       else if (key.equals(ENABLE_ALL_USERS)) enableAllUsers = getBoolean(value);
       else if (key.equals(USE_PHONE_TO_DISPLAY)) {
-        logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
+       // logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
         usePhoneToDisplay = getBoolean(value);
       } else if (key.equals(PREFERRED_VOICES)) {
-        for (String userid : value.split(",")) {
-          try {
-            preferredVoices.add(Long.parseLong(userid));
-            //  logger.info("pref users " + preferredVoices);
-          } catch (NumberFormatException e) {
-            logger.warning("couldn't parse userid " + userid);
-          }
-        }
+        getPreferredVoices(value);
       } else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
         } catch (IllegalArgumentException e) {
-          System.err.println("unknown value for " + key + " : " + value);
+          logger.warning("unknown value for " + key + " : " + value);
         }
+      }
+    }
+
+    if (appTitle == null) {
+      appTitle = language + " Pronunciation Feedback BETA";
+    }
+    if (splashTitle == null) {
+      splashTitle = language + " feedback and practice BETA";
+
+    }
+  }
+
+  private void getPreferredVoices(String value) {
+    for (String userid : value.split(",")) {
+      try {
+        preferredVoices.add(Long.parseLong(userid));
+        //  logger.info("pref users " + preferredVoices);
+      } catch (NumberFormatException e) {
+        logger.warning("couldn't parse userid " + userid);
       }
     }
   }
@@ -227,7 +239,7 @@ public class PropertyHandler {
       }
       return i;
     } catch (NumberFormatException e) {
-      System.err.println("couldn't parse " + value + "using " + defValue + " for " + propName);
+      logger.warning("couldn't parse " + value + "using " + defValue + " for " + propName);
     }
     return defValue;
   }
@@ -238,7 +250,7 @@ public class PropertyHandler {
       if (value == null) return defValue;
       return Float.parseFloat(value);
     } catch (NumberFormatException e) {
-      System.err.println("couldn't parse " + value + "using " + defValue +" for " + propName);
+      logger.warning("couldn't parse " + value + "using " + defValue +" for " + propName);
     }
     return defValue;
   }
@@ -334,7 +346,7 @@ public class PropertyHandler {
       try {
         this.loginType = LOGIN_TYPE.valueOf(loginType);
       } catch (IllegalArgumentException e) {
-        System.err.println("couldn't parse " + loginType);
+        logger.warning("couldn't parse " + loginType);
       }
     }
 
