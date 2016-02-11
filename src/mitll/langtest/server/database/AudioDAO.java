@@ -258,7 +258,7 @@ public class AudioDAO extends DAO {
         logger.debug("\tattachAudio now '" + attr.getAudioRef() + "'");
       }
       else {
-        logger.debug("\tattachAudio couldn't find audio file at '" + attr.getAudioRef() + "'");
+       // logger.debug("\tattachAudio couldn't find audio file at '" + attr.getAudioRef() + "'");
       }
     }
   }
