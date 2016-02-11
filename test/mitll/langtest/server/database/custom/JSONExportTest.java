@@ -5,6 +5,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.JSONExerciseDAO;
 import mitll.langtest.server.json.JsonExport;
+import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.exercise.CommonExercise;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -135,11 +136,11 @@ public class JSONExportTest {
 
       String[] split = text.split("\\},\\{");
       try (PrintWriter out = new PrintWriter(file)) {
-        for (int i = 0; i < split.length;i++) {
+        for (int i = 0; i < split.length; i++) {
           String s = split[i];
           out.print(s);
 
-          if (i < split.length-1) {
+          if (i < split.length - 1) {
             out.println("},");
             out.print("{");
           }
@@ -176,9 +177,9 @@ public class JSONExportTest {
       e.printStackTrace();
     }
   }
+
   @Test
   public void testExport5() {
-
     Collection<CommonExercise> exercises = database.getExercises();
     logger.info("Got " + exercises.size());
   }
@@ -193,6 +194,10 @@ public class JSONExportTest {
     List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
 
     logger.info("Got " + rawExercises.size());
+    for (SectionNode node : exerciseDAO.getSectionHelper().getSectionNodes()) {
+      Collection<CommonExercise> exercisesForSelectionState = exerciseDAO.getSectionHelper().getExercisesForSelectionState(node.getType(), node.getName());
+      logger.info("for " + node + " got " + exercisesForSelectionState.size());
+    }
 
     //for (CommonExercise exercise : rawExercises) logger.debug(exercise);
   }
