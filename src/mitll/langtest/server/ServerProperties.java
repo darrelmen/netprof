@@ -58,7 +58,7 @@ public class ServerProperties {
 //  private static final String RECO_TEST = "recoTest";
 //  private static final String RECO_TEST2 = "recoTest2";
   private static final String MIN_PRON_SCORE = "minPronScore";
-  private static final String MIN_PRON_SCORE_DEFAULT = ""+0.31f;//"0.20";
+  private static final String MIN_PRON_SCORE_DEFAULT = ""+0.31f;
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
   private static final String AUDIO_OFFSET = "audioOffset";
