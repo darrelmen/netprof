@@ -20,7 +20,7 @@ import java.util.List;
 public class SectionNode implements IsSerializable, Comparable<SectionNode> {
   private String type;
   private String name;
-  private transient float weight;
+ // private transient float weight;
 
   private List<SectionNode> children = new ArrayList<SectionNode>();
 
@@ -39,7 +39,7 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
   public String getType() { return type; }
   public boolean isLeaf() { return children.isEmpty(); }
 
-  public float getWeight() {
+/*  public float getWeight() {
     if (isLeaf()) return weight;
     else { // avg children
       float total = 0f;
@@ -48,7 +48,7 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
       }
       return total/ (float) children.size();
     }
-  }
+  }*/
 
 /*  public void setWeight(float weight) {
     if (!isLeaf()) System.err.println("don't set weight on a non-leaf");
@@ -59,14 +59,18 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
 
   @Override
   public int compareTo(SectionNode o) {
-    int i = new Float(getWeight()).compareTo(o.getWeight());
+/*    int i = new Float(getWeight()).compareTo(o.getWeight());
     if (i == 0) return name.compareTo(o.name);
-    else return i;
+    else return i;*/
+
+    return name.compareTo(o.name);
   }
 
   public String toString() {
+    String example = children.toString();//children.isEmpty() ? "" :children.get(0).toString();
     return getType() +"="+name +
-        (children.isEmpty() ? "" : (" : [(" + children.size() + ") " + children +"]")) +
-            " w " + getWeight();
+        (this.children.isEmpty() ? "" : (" : [(" + this.children.size() + "), e.g. " + example +"]"));
+        //+
+        //    " w " + getWeight();
   }
 }
