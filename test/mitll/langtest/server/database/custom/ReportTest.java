@@ -59,10 +59,10 @@ public class ReportTest {
     Collection<CommonExercise> exercises = database.getExercises();
   }
 
-  @Test
+/*  @Test
   public void testExport() {
     new JsonExport(null,null,null).getExercisesAsJson(database.getExercises());
-  }
+  }*/
 
 
   @Test
