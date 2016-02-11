@@ -76,7 +76,9 @@ public class LTSFactory implements CollationSort {
       logger.error("Not allowed to make instance of LTS class " + className, e);
     }
 
-    logger.debug("lts for " + name + " found at " + className + " is " + ltsForLanguage);
+    if (isEmpty(ltsForLanguage)) {
+      logger.debug("lts for " + name + " found at " + className + " is " + ltsForLanguage);
+    }
   }
 
   /**
