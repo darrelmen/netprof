@@ -43,7 +43,7 @@ public class AudioExercise extends ExerciseShell {
    * @param prefs
    * @return
    */
-  public String getRefAudioWithPrefs(Set<Long> prefs) {
+  public String getRefAudioWithPrefs(Collection<Long> prefs) {
     AudioAttribute audio = getRegularSpeedWithPrefs(prefs);
     return audio != null ? audio.getAudioRef() : null;
   }
@@ -54,7 +54,7 @@ public class AudioExercise extends ExerciseShell {
    */
   public AudioAttribute getRegularSpeed() {  return getAudio(SPEED, REGULAR); }
 
-  public AudioAttribute getRegularSpeedWithPrefs(Set<Long> prefs) {
+  public AudioAttribute getRegularSpeedWithPrefs(Collection<Long> prefs) {
     return getAudioPreferUsers(SPEED, REGULAR, prefs);
   }
 
@@ -87,7 +87,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.ExcelImport#addOldSchoolAudio(String, Exercise)
+   * @see mitll.langtest.server.database.exercise.ExcelImport#addOldSchoolAudio
    * @param ref
    * @param user
    */
@@ -119,7 +119,7 @@ public class AudioExercise extends ExerciseShell {
     return null;
   }
 
-  AudioAttribute getAudioPreferUsers(String name, String value, Set<Long> prefs) {
+  AudioAttribute getAudioPreferUsers(String name, String value, Collection<Long> prefs) {
     AudioAttribute candidate = null;
    // long latest = 0;
     for (AudioAttribute audio : getAudioAttributes()) {
@@ -328,9 +328,9 @@ public class AudioExercise extends ExerciseShell {
    * @param isMale
    * @param preferredUsers
    * @return singleton map not containing default user -
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget()
+   * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget
    */
-  public Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Set<Long> preferredUsers) {
+  public Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Collection<Long> preferredUsers) {
     Map<MiniUser, List<AudioAttribute>> userToAudio = getUserToAudio(isMale);
     //System.out.println("\tgetMostRecentAudio userToAudio " + userToAudio + " " + preferredUsers);
 
