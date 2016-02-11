@@ -17,7 +17,7 @@ import java.util.*;
  * Time: 4:34 PM
  * To change this template use File | Settings | File Templates.
  */
-public class SectionHelper<T extends Shell>  {
+public class SectionHelper<T extends Shell> {
   private static final Logger logger = Logger.getLogger(SectionHelper.class);
 //  private static final String unitType = "unit";
 //  private static final String chapterType = "chapter";
@@ -25,13 +25,13 @@ public class SectionHelper<T extends Shell>  {
 
   private List<String> predefinedTypeOrder = new ArrayList<String>();
 
-  private final Map<String,Map<String,Lesson<T>>> typeToUnitToLesson = new HashMap<>();
+  private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
   private final Map<String, Map<String, Map<String, Collection<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String, Map<String, Collection<String>>>>();
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getTypeOrder()
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getTypeOrder()
    */
   public List<String> getTypeOrder() {
     if (predefinedTypeOrder.isEmpty()) {
@@ -70,10 +70,12 @@ public class SectionHelper<T extends Shell>  {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getSectionNodes()
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getSectionNodes()
    */
-  public Collection<SectionNode> getSectionNodes() {  return getChildren(getTypeOrder());  }
+  public Collection<SectionNode> getSectionNodes() {
+    return getChildren(getTypeOrder());
+  }
 
   private List<SectionNode> getChildren(List<String> typeOrder) {
     if (typeOrder.isEmpty()) return Collections.emptyList();
@@ -110,10 +112,10 @@ public class SectionHelper<T extends Shell>  {
   }
 
   /**
-   * @see #getChildren(java.util.List)
    * @param typeOrder
    * @param parent
    * @param typeToSections
+   * @see #getChildren(java.util.List)
    */
   private void addChildren(List<String> typeOrder, SectionNode parent, Map<String, Collection<String>> typeToSections) {
     List<String> remainingTypes = typeOrder.subList(1, typeOrder.size());
@@ -122,8 +124,7 @@ public class SectionHelper<T extends Shell>  {
     Collection<String> children = typeToSections.get(nextType);
     if (children == null) {
       logger.error("huh? can't find " + nextType + " in " + typeToSections);
-    }
-    else {
+    } else {
       for (String childSection : children) {
         SectionNode child = new SectionNode(nextType, childSection);
         parent.addChild(child);
@@ -136,6 +137,12 @@ public class SectionHelper<T extends Shell>  {
         }
       }
     }
+  }
+
+  public Collection<T> getExercisesForSelectionState(String type, String value) {
+    Map<String, Collection<String>> typeToSection = new HashMap<>();
+    typeToSection.put(type, Collections.singleton(value));
+    return getExercisesForSelectionState(typeToSection);
   }
 
   /**
@@ -158,8 +165,7 @@ public class SectionHelper<T extends Shell>  {
         } else {
           currentList.retainAll(exercisesForSection);
         }
-      }
-      else {
+      } else {
         logger.warn("huh? typeToSelection type " + type + " is not in " + typeToUnitToLesson.keySet());
       }
     }
@@ -177,10 +183,10 @@ public class SectionHelper<T extends Shell>  {
   }
 
   /**
-   * @see #getExercisesForSelectionState(java.util.Map)
    * @param type
    * @param sections
    * @return
+   * @see #getExercisesForSelectionState(java.util.Map)
    */
   private Collection<T> getExercisesForSection(String type, Collection<String> sections) {
     Map<String, Lesson<T>> sectionToLesson = typeToUnitToLesson.get(type);
@@ -213,9 +219,9 @@ public class SectionHelper<T extends Shell>  {
 */
 
   /**
+   * @param where
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesFromFiltered(java.util.Map, mitll.langtest.shared.custom.UserList)
    * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
-   * @param where
    */
   public void addExercise(T where) {
     List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
@@ -227,12 +233,12 @@ public class SectionHelper<T extends Shell>  {
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.ExcelImport#recordUnitChapterWeek
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesFromFiltered(java.util.Map, mitll.langtest.shared.custom.UserList)
    * @param exercise
    * @param type
    * @param unitName
    * @return
+   * @see mitll.langtest.server.database.exercise.ExcelImport#recordUnitChapterWeek
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesFromFiltered(java.util.Map, mitll.langtest.shared.custom.UserList)
    */
   public Pair addExerciseToLesson(T exercise, String type, String unitName) {
     Map<String, Lesson<T>> unit = getSectionToLesson(type);
@@ -254,7 +260,7 @@ public class SectionHelper<T extends Shell>  {
 
   public void removeExercise(T exercise) {
     Map<String, String> unitToValue = exercise.getUnitToValue();
-  //  logger.debug("Removing " + exercise.getID() + " with " +unitToValue);
+    //  logger.debug("Removing " + exercise.getID() + " with " +unitToValue);
     if (unitToValue != null) {
       for (Map.Entry<String, String> pair : unitToValue.entrySet()) {
         if (!removeExerciseToLesson(exercise, pair.getKey(), pair.getValue())) {
@@ -270,25 +276,23 @@ public class SectionHelper<T extends Shell>  {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
    * @param exercise
    * @param type
    * @param unitName
    * @return
+   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
    */
   private boolean removeExerciseToLesson(T exercise, String type, String unitName) {
     Map<String, Lesson<T>> unit = getSectionToLesson(type);
     if (unit == null) {
-      logger.error("no unit for " +type + " in " +typeToUnitToLesson.keySet());
+      logger.error("no unit for " + type + " in " + typeToUnitToLesson.keySet());
       return false;
-    }
-    else {
+    } else {
       Lesson<T> tLesson = unit.get(unitName);
       if (tLesson == null) {
-        logger.error("no lesson for " +type + "/" +unitName + " in " +unit.keySet());
+        logger.error("no lesson for " + type + "/" + unitName + " in " + unit.keySet());
         return false;
-      }
-      else {
+      } else {
         return tLesson.remove(exercise);
       }
     }
@@ -304,15 +308,16 @@ public class SectionHelper<T extends Shell>  {
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.ExcelImport#readFromSheet(org.apache.poi.ss.usermodel.Sheet)
    * @param predefinedTypeOrder
+   * @see mitll.langtest.server.database.exercise.ExcelImport#readFromSheet(org.apache.poi.ss.usermodel.Sheet)
    */
   public void setPredefinedTypeOrder(List<String> predefinedTypeOrder) {
     this.predefinedTypeOrder = predefinedTypeOrder;
   }
 
   public static class Pair {
-    private final String type; private final String section;
+    private final String type;
+    private final String section;
 
     public Pair(String type, String section) {
       this.type = type;
@@ -321,8 +326,8 @@ public class SectionHelper<T extends Shell>  {
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.ExcelImport#recordUnitChapterWeek
    * @param pairs
+   * @see mitll.langtest.server.database.exercise.ExcelImport#recordUnitChapterWeek
    */
   public void addAssociations(Collection<Pair> pairs) {
     for (Pair p : pairs) {
