@@ -41,7 +41,6 @@ public abstract class BaseExerciseDAO {
     this.addDefects = addDefects;
   }
 
-
   /**
    * @return
    * @see DatabaseImpl#getExercises()
@@ -71,9 +70,14 @@ public abstract class BaseExerciseDAO {
     // add new items
     addNewExercises();
 
+    //logger.info("trying to attach audio to " + exercises.size());
     for (CommonExercise ex : exercises) {
       attachAudio.attachAudio(ex);
-      attachAudio.addOldSchoolAudio(ex.getRefAudioIndex(), (AudioExercise) ex);
+      String refAudioIndex = ex.getRefAudioIndex();
+      if (refAudioIndex != null && !refAudioIndex.isEmpty()) {
+        attachAudio.addOldSchoolAudio(refAudioIndex, (AudioExercise) ex);
+      }
+     // if (ex.hasRefAudio()) logger.info("ex " + ex.getID() + " has audio");
     }
   }
 
@@ -172,7 +176,7 @@ public abstract class BaseExerciseDAO {
           addOverlay(userExercise);
           override++;
         } else {
-          logger.warn("----> addOverlays not adding as overlay " + userExercise.getID());
+          logger.warn("----> addOverlays not adding as overlay " + userExercise.getID() + " since it's not in the original list");
         }
       }
     }
@@ -331,20 +335,25 @@ public abstract class BaseExerciseDAO {
   }
 
   private Collection<String> removeExercises() {
-    Collection<String> removes = addRemoveDAO.getRemoves();
+    if (addRemoveDAO != null) {
+      Collection<String> removes = addRemoveDAO.getRemoves();
 
-    if (!removes.isEmpty())
-      logger.debug("removeExercises : Removing " + removes.size() + " exercises marked as deleted.");
+      if (!removes.isEmpty())
+        logger.debug("removeExercises : Removing " + removes.size() + " exercises marked as deleted.");
 
-    for (String id : removes) {
-      CommonExercise remove = idToExercise.remove(id);
-      if (remove != null) {
-        boolean remove1 = exercises.remove(remove);
-        if (!remove1) logger.error("huh? remove inconsistency??");
-        getSectionHelper().removeExercise(remove);
+      for (String id : removes) {
+        CommonExercise remove = idToExercise.remove(id);
+        if (remove != null) {
+          boolean remove1 = exercises.remove(remove);
+          if (!remove1) logger.error("huh? remove inconsistency??");
+          getSectionHelper().removeExercise(remove);
+        }
       }
+      return removes;
     }
-    return removes;
+    else {
+      return Collections.emptyList();
+    }
   }
 
   /**
