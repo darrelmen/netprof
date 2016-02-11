@@ -642,7 +642,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
     List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
 
     if (unit.length() == 0 && chapter.length() == 0 && week.length() == 0) {
-      unit = "Blank";
+      unit = "Other";
+      chapter = "Other";
     }
 
     // hack to trim off leading tics
