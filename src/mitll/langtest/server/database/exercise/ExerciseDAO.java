@@ -9,7 +9,6 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.UserManagement;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
-import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.util.Collection;
@@ -24,74 +23,58 @@ import java.util.List;
  */
 public interface ExerciseDAO {
   /**
+   * @return
    * @see DatabaseImpl#getExercise(String)
    * @see DatabaseImpl#makeDAO(String, String, String)
    * @see UserManagement#getUsers()
-   * @return
    */
   List<CommonExercise> getRawExercises();
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getExercise(String)
    * @param id
    * @return
+   * @see mitll.langtest.server.database.DatabaseImpl#getExercise(String)
    */
   CommonExercise getExercise(String id);
 
   /**
+   * @return
    * @see DatabaseImpl#getSectionHelper()
    * @see UserExerciseDAO#add
    * @see UserExerciseDAO#getUserExercises(String)
    * @see ExcelImport#removeExercises()
-   * @return
    */
   SectionHelper<CommonExercise> getSectionHelper();
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#editItem
    * @param userExercise
    * @return
+   * @see mitll.langtest.server.database.DatabaseImpl#editItem
    */
   CommonExercise addOverlay(CommonExercise userExercise);
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#duplicateExercise
    * @param userExercise
+   * @see mitll.langtest.server.database.DatabaseImpl#duplicateExercise
    */
   void add(CommonExercise userExercise);
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
    * @param id
    * @return
+   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
    */
   boolean remove(String id);
 
- // void setDependencies(String mediaDir, String installPath);
-
   /**
+   * @param userExerciseDAO
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO(String, String, String)
-    * @param userExerciseDAO
    */
-  void setUserExerciseDAO(UserExerciseDAO userExerciseDAO);
+  void setDependencies(String mediaDir, String installPath, UserExerciseDAO userExerciseDAO, AddRemoveDAO addRemoveDAO, AudioDAO audioDAO);
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO(String, String, String)
-   * @param addRemoveDAO
-   */
-  void setAddRemoveDAO(AddRemoveDAO addRemoveDAO);
-
-  /**
-   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO(String, String, String)
-   * @param audioDAO
-   * @param mediaDir
-   * @param installPath
-   */
-  void setAudioDAO(AudioDAO audioDAO, String mediaDir, String installPath);
-
-  /**
-   * @see DatabaseImpl#getExerciseIDToRefAudio()
    * @param all
+   * @see DatabaseImpl#getExerciseIDToRefAudio()
    */
   void attachAudio(Collection<CommonExercise> all);
 }
