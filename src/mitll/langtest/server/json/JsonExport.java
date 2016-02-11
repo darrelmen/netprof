@@ -56,9 +56,8 @@ public class JsonExport {
 
   public List<CommonExercise> getExercises(String json) {
     JSONObject object = JSONObject.fromObject(json);
-    JSONArray jsonArray = object.getJSONArray(UNIT_ORDER);
-    List<String> types = new ArrayList<>();
-    for (int i = 0; i < jsonArray.size(); i++) types.add(jsonArray.getString(i));
+    Collection<String> types = getTypes(object);
+
     JSONArray content = object.getJSONArray(ScoreServlet.CONTENT);
     List<CommonExercise> exercises = new ArrayList<>();
     for (int i = 0; i < content.size(); i++) {
@@ -71,12 +70,18 @@ public class JsonExport {
       logger.info("got " + ex);
     }
     return exercises;
+  }
 
+  List<String> getTypes(JSONObject object) {
+    JSONArray jsonArray = object.getJSONArray(UNIT_ORDER);
+
+    List<String> types = new ArrayList<>();
+    for (int i = 0; i < jsonArray.size(); i++) types.add(jsonArray.getString(i));
+    return types;
   }
 
   public <T extends CommonShell & AudioAttributeExercise> void addJSONExerciseExport(JSONObject jsonObject,
                                                                                      Collection<T> exercises) {
-
     jsonObject.put(COUNT, exercises.size());
 
     JSONArray value = new JSONArray();
