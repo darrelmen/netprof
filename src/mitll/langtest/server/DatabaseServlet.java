@@ -39,9 +39,9 @@ public class DatabaseServlet extends HttpServlet {
    * @param configDir
    * @return
    */
-  private boolean ensureMP3(CommonExercise byID, PathHelper pathHelper, String configDir) {
+/*  private boolean ensureMP3(CommonExercise byID, PathHelper pathHelper, String configDir) {
     return ensureMP3(byID.getRefAudio(), pathHelper, configDir, byID.getForeignLanguage(), "");
-  }
+  }*/
 
   /**
    * @see mitll.langtest.server.ScoreServlet#getAnswer
@@ -127,7 +127,7 @@ public class DatabaseServlet extends HttpServlet {
    * @param exercise
    * @return
    */
-  protected JSONObject getJsonForExercise(CommonExercise exercise) {
+/*  protected JSONObject getJsonForExercise(CommonExercise exercise) {
     JSONObject ex = new JSONObject();
     ex.put("id", exercise.getID());
     ex.put("fl", exercise.getForeignLanguage());
@@ -152,7 +152,7 @@ public class DatabaseServlet extends HttpServlet {
     addLatestRefs(exercise, ex);
 
     return ex;
-  }
+  }*/
 
   /**
    * Male/female reg/slow speed
@@ -162,7 +162,7 @@ public class DatabaseServlet extends HttpServlet {
    * @param ex
    * @see #getJsonForExercise
    */
-  private void addLatestRefs(AudioRefExercise exercise, JSONObject ex) {
+/*  private void addLatestRefs(AudioRefExercise exercise, JSONObject ex) {
     Set<Long> preferredVoices = serverProps.getPreferredVoices();
 
     String mr = null, ms = null, fr = null, fs = null;
@@ -234,5 +234,5 @@ public class DatabaseServlet extends HttpServlet {
 //      if (CHECK_FOR_MP3) ensureMP3(fs, foreignLanguage, author);
 //    }
     ex.put("fsr", fs == null ? NO : fs);
-  }
+  }*/
 }
