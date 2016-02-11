@@ -16,10 +16,7 @@ import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.contextPractice.ContextPracticeImport;
 import mitll.langtest.server.database.custom.*;
-import mitll.langtest.server.database.exercise.ExcelImport;
-import mitll.langtest.server.database.exercise.ExerciseDAO;
-import mitll.langtest.server.database.exercise.SectionHelper;
-import mitll.langtest.server.database.exercise.UploadDAO;
+import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.ParseResultJson;
@@ -390,12 +387,15 @@ public class DatabaseImpl implements Database {
   private void makeDAO(String lessonPlanFile, String mediaDir, String installPath) {
     if (exerciseDAO == null) {
       synchronized (this) {
-        this.exerciseDAO = new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
+        if (lessonPlanFile.endsWith(".json")) {
+          this.exerciseDAO = new JSONExerciseDAO(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
+        }
+        else {
+          this.exerciseDAO = new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
+        }
       }
       userExerciseDAO.setExerciseDAO(exerciseDAO);
-      exerciseDAO.setUserExerciseDAO(userExerciseDAO);
-      exerciseDAO.setAddRemoveDAO(addRemoveDAO);
-      exerciseDAO.setAudioDAO(audioDAO, mediaDir, installPath);
+      setDependencies(mediaDir, installPath);
 
       exerciseDAO.getRawExercises();
 
@@ -406,6 +406,17 @@ public class DatabaseImpl implements Database {
 
       analysis = new Analysis(this, phoneDAO, getExerciseIDToRefAudio());
     }
+  }
+
+  private void setDependencies(String mediaDir, String installPath) {
+    ExerciseDAO exerciseDAO = this.exerciseDAO;
+    setDependencies(mediaDir, installPath, exerciseDAO);
+  }
+
+  public void setDependencies(String mediaDir, String installPath, ExerciseDAO exerciseDAO) {
+    exerciseDAO.setUserExerciseDAO(userExerciseDAO);
+    exerciseDAO.setAddRemoveDAO(addRemoveDAO);
+    exerciseDAO.setAudioDAO(audioDAO, mediaDir, installPath);
   }
 
   private void makeContextPractice(String contextPracticeFile, String installPath) {
