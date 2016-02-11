@@ -20,18 +20,19 @@ import java.util.*;
  */
 public abstract class BaseExerciseDAO {
   private static final Logger logger = Logger.getLogger(BaseExerciseDAO.class);
+  private static final String CONTAINS_SEMI = "contains semicolon - should this item be split?";
 
-  protected final Map<String, CommonExercise> idToExercise = new HashMap<>();
+  private final Map<String, CommonExercise> idToExercise = new HashMap<>();
   protected final SectionHelper<CommonExercise> sectionHelper = new SectionHelper<>();
   protected final String language;
   protected final ServerProperties serverProps;
-  protected final UserListManager userListManager;
-  protected final boolean addDefects;
-//  protected final Map<String, Map<String, String>> idToDefectMap = new HashMap<>();
-  protected List<CommonExercise> exercises = null;
-  protected AddRemoveDAO addRemoveDAO;
-  protected UserExerciseDAO userExerciseDAO;
-  protected AttachAudio attachAudio;
+  private final UserListManager userListManager;
+  private final boolean addDefects;
+  //  protected final Map<String, Map<String, String>> idToDefectMap = new HashMap<>();
+  private List<CommonExercise> exercises = null;
+  private AddRemoveDAO addRemoveDAO;
+  private UserExerciseDAO userExerciseDAO;
+  private AttachAudio attachAudio;
   private AudioDAO audioDAO;
 
   public BaseExerciseDAO(ServerProperties serverProps, UserListManager userListManager, boolean addDefects) {
@@ -56,7 +57,7 @@ public abstract class BaseExerciseDAO {
     return exercises;
   }
 
-  void afterReadingExercises() {
+  private void afterReadingExercises() {
     addAlternatives(exercises);
 
     populateIdToExercise();
@@ -77,8 +78,9 @@ public abstract class BaseExerciseDAO {
       if (refAudioIndex != null && !refAudioIndex.isEmpty()) {
         attachAudio.addOldSchoolAudio(refAudioIndex, (AudioExercise) ex);
       }
-     // if (ex.hasRefAudio()) logger.info("ex " + ex.getID() + " has audio");
+      // if (ex.hasRefAudio()) logger.info("ex " + ex.getID() + " has audio");
     }
+    // sectionHelper.report();
   }
 
   /**
@@ -97,7 +99,7 @@ public abstract class BaseExerciseDAO {
    * @param installPath
    * @see DatabaseImpl#makeDAO
    */
-  public void setAudioDAO(AudioDAO audioDAO, String mediaDir, String installPath) {
+  private void setAudioDAO(AudioDAO audioDAO, String mediaDir, String installPath) {
     this.audioDAO = audioDAO;
 
     File fileInstallPath = new File(installPath);
@@ -109,11 +111,19 @@ public abstract class BaseExerciseDAO {
         serverProps.getAudioOffset(), audioDAO.getExToAudio());
   }
 
-  protected void populateIdToExercise() {
-    for (CommonExercise e : exercises) idToExercise.put(e.getID(), e);
+  /**
+   *
+   */
+  private void populateIdToExercise() {
+//    logger.info("populateIdToExercise Examining " + exercises.size() + " exercises");
+    for (CommonExercise e : exercises) {
+      idToExercise.put(e.getID(), e);
+    }
 
-    if (exercises.size() != idToExercise.size()) {
-      logger.warn(exercises.size() + " but id->ex " + idToExercise.size());
+    int listSize = exercises.size();
+    int mapSize = idToExercise.size();
+    if (listSize != mapSize) {
+      logger.warn(listSize + " but id->ex " + mapSize);
     }
   }
 
@@ -155,7 +165,7 @@ public abstract class BaseExerciseDAO {
    *
    * @param removes
    */
-  protected void addOverlays(Collection<String> removes) {
+  private void addOverlays(Collection<String> removes) {
     Collection<CommonExercise> overrides = userExerciseDAO.getOverrides();
 
     if (overrides.size() > 0) {
@@ -167,21 +177,33 @@ public abstract class BaseExerciseDAO {
     }
 
     int override = 0;
+    int removedSoSkipped = 0;
+    SortedSet<String> staleOverrides = new TreeSet<String>();
     for (CommonExercise userExercise : overrides) {
-      if (!removes.contains(userExercise.getID())) {
-        CommonExercise exercise = getExercise(userExercise.getID());
+      String overrideID = userExercise.getID();
+      if (!removes.contains(overrideID)) {
+        CommonExercise exercise = getExercise(overrideID);
         if (exercise != null) {
           // logger.debug("addOverlays refresh exercise for " + userExercise.getID());
           sectionHelper.refreshExercise(exercise);
           addOverlay(userExercise);
           override++;
         } else {
-          logger.warn("----> addOverlays not adding as overlay " + userExercise.getID() + " since it's not in the original list");
+          staleOverrides.add(overrideID);
+          //logger.warn("----> addOverlays not adding as overlay '" + overrideID + "' since it's not in the original list of size " + idToExercise.size());
         }
+      } else {
+        removedSoSkipped++;
       }
     }
     if (override > 0) {
       logger.debug("addOverlays overlay count was " + override);
+    }
+    if (!staleOverrides.isEmpty()) {
+      logger.debug("addOverlays skipped " + staleOverrides.size() + " stale overrides - the original list doesn't contain them any more.");
+    }
+    if (removedSoSkipped > 0) {
+      logger.debug("addOverlays skipped overlays b/c removed = " + removedSoSkipped);
     }
   }
 
@@ -235,13 +257,21 @@ public abstract class BaseExerciseDAO {
    */
   public boolean remove(String id) {
     synchronized (this) {
-      if (!idToExercise.containsKey(id)) return false;
+//      if (!idToExercise.containsKey(id)) return false;
       CommonExercise remove = idToExercise.remove(id);
+      if (remove == null) return false;
       return exercises.remove(remove);
     }
   }
 
-  public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
+
+  public void setDependencies(String mediaDir, String installPath, UserExerciseDAO userExerciseDAO, AddRemoveDAO addRemoveDAO, AudioDAO audioDAO) {
+    this.userExerciseDAO = userExerciseDAO;
+    this.addRemoveDAO = addRemoveDAO;
+    setAudioDAO(audioDAO, mediaDir, installPath);
+  }
+
+  private void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
   }
 
@@ -250,7 +280,7 @@ public abstract class BaseExerciseDAO {
    * @see #addNewExercises()
    * @see #removeExercises()
    */
-  public void setAddRemoveDAO(AddRemoveDAO addRemoveDAO) {
+  private void setAddRemoveDAO(AddRemoveDAO addRemoveDAO) {
     this.addRemoveDAO = addRemoveDAO;
   }
 
@@ -272,7 +302,7 @@ public abstract class BaseExerciseDAO {
     }
   }
 
-  protected void addDefects(Map<String, Map<String, String>> exTofieldToDefect) {
+  private void addDefects(Map<String, Map<String, String>> exTofieldToDefect) {
     if (addDefects) {
       int count = 0;
       for (Map.Entry<String, Map<String, String>> pair : exTofieldToDefect.entrySet()) {
@@ -350,8 +380,7 @@ public abstract class BaseExerciseDAO {
         }
       }
       return removes;
-    }
-    else {
+    } else {
       return Collections.emptyList();
     }
   }
@@ -359,7 +388,7 @@ public abstract class BaseExerciseDAO {
   /**
    * Keep track of possible alternatives for each english word - e.g. Good Bye = Ciao OR Adios
    */
-  protected void addAlternatives(List<CommonExercise> exercises) {
+  private void addAlternatives(List<CommonExercise> exercises) {
     Map<String, Set<String>> englishToFL = new HashMap<>();
     for (CommonExercise e : exercises) {
       Set<String> refs = englishToFL.getOrDefault(e.getEnglish(), new HashSet<>());
@@ -380,12 +409,12 @@ public abstract class BaseExerciseDAO {
 
   abstract List<CommonExercise> readExercises();
 
-  protected void checkForSemicolons(Map<String, String> fieldToDefect, String foreignLanguagePhrase, String translit) {
+  private void checkForSemicolons(Map<String, String> fieldToDefect, String foreignLanguagePhrase, String translit) {
     if (foreignLanguagePhrase.contains(";")) {
-      fieldToDefect.put(QCNPFExercise.FOREIGN_LANGUAGE, "contains semicolon - should this item be split?");
+      fieldToDefect.put(QCNPFExercise.FOREIGN_LANGUAGE, CONTAINS_SEMI);
     }
     if (translit.contains(";")) {
-      fieldToDefect.put(QCNPFExercise.TRANSLITERATION, "contains semicolon - should this item be split?");
+      fieldToDefect.put(QCNPFExercise.TRANSLITERATION, CONTAINS_SEMI);
     }
 /*    if (INCLUDE_ENGLISH_SEMI_AS_DEFECT && english.contains(";")) {
       fieldToDefect.put(QCNPFExercise.ENGLISH, "contains semicolon - should this item be split?");
