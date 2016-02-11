@@ -9,8 +9,7 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by go22670 on 2/10/16.
@@ -46,6 +45,15 @@ public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO {
       logger.info("readExercises reading from " + jsonFile);
 
       List<CommonExercise> exercises = jsonExport.getExercises(asString);
+
+      for (CommonExercise ex : exercises) {
+        Collection<SectionHelper.Pair> pairs = new ArrayList<>();
+        for (Map.Entry<String,String> pair : ex.getUnitToValue().entrySet()) {
+          pairs.add(getSectionHelper().addExerciseToLesson(ex, pair.getKey(), pair.getValue()));
+        }
+        getSectionHelper().addAssociations(pairs);
+      }
+
       logger.info("read " +exercises.size() + " from " + jsonFile);
       return exercises;
     } catch (IOException e) {
