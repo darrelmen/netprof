@@ -446,6 +446,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   private String getUserID(long userid) {
     User userWhere = db.getUserDAO().getUserWhere(userid);
+    if (userWhere == null) logger.error("huh? can't find user by " + userid);
     return userWhere == null ? "" + userid : userWhere.getUserID();
   }
 
