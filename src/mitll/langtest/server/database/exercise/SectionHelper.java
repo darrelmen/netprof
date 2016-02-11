@@ -278,7 +278,20 @@ public class SectionHelper<T extends Shell>  {
    */
   private boolean removeExerciseToLesson(T exercise, String type, String unitName) {
     Map<String, Lesson<T>> unit = getSectionToLesson(type);
-    return unit.get(unitName).remove(exercise);
+    if (unit == null) {
+      logger.error("no unit for " +type + " in " +typeToUnitToLesson.keySet());
+      return false;
+    }
+    else {
+      Lesson<T> tLesson = unit.get(unitName);
+      if (tLesson == null) {
+        logger.error("no lesson for " +type + "/" +unitName + " in " +unit.keySet());
+        return false;
+      }
+      else {
+        return tLesson.remove(exercise);
+      }
+    }
   }
 
 
