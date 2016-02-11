@@ -67,6 +67,8 @@ public interface ExerciseDAO {
    */
   boolean remove(String id);
 
+ // void setDependencies(String mediaDir, String installPath);
+
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO(String, String, String)
     * @param userExerciseDAO
