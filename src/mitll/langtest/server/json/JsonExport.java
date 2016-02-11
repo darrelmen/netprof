@@ -1,6 +1,7 @@
 package mitll.langtest.server.json;
 
 import mitll.langtest.server.ScoreServlet;
+import mitll.langtest.server.database.exercise.JSONExerciseDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.SectionNode;
@@ -32,13 +33,13 @@ public class JsonExport {
   private static final String EN = "en";
   private static final String CT = "ct";
   private static final String CTR = "ctr";
-  public static final String MN = "mn";
-  public static final String COUNT = "Count";
-  public static final String UNIT_ORDER = "UnitOrder";
-  public static final String UNIT_CHAPTER_NESTING = "UnitChapterNesting";
+  private static final String MN = "mn";
+  private static final String COUNT = "Count";
+  private static final String UNIT_ORDER = "UnitOrder";
+  private static final String UNIT_CHAPTER_NESTING = "UnitChapterNesting";
   private final Map<String, Integer> phoneToCount;
   private final SectionHelper<CommonExercise> sectionHelper;
-  private final Set<Long> preferredVoices;
+  private final Collection<Long> preferredVoices;
 
   /**
    * @param phoneToCount
@@ -48,12 +49,17 @@ public class JsonExport {
    */
   public JsonExport(Map<String, Integer> phoneToCount,
                     SectionHelper<CommonExercise> sectionHelper,
-                    Set<Long> preferredVoices) {
+                    Collection<Long> preferredVoices) {
     this.phoneToCount = phoneToCount;
     this.sectionHelper = sectionHelper;
     this.preferredVoices = preferredVoices;
   }
 
+  /**
+   * @param json
+   * @return
+   * @see JSONExerciseDAO#readExercises
+   */
   public List<CommonExercise> getExercises(String json) {
     JSONObject object = JSONObject.fromObject(json);
     Collection<String> types = getTypes(object);
@@ -72,7 +78,7 @@ public class JsonExport {
     return exercises;
   }
 
-  List<String> getTypes(JSONObject object) {
+  private List<String> getTypes(JSONObject object) {
     JSONArray jsonArray = object.getJSONArray(UNIT_ORDER);
 
     List<String> types = new ArrayList<>();
@@ -80,45 +86,78 @@ public class JsonExport {
     return types;
   }
 
-  public <T extends CommonShell & AudioAttributeExercise> void addJSONExerciseExport(JSONObject jsonObject,
-                                                                                     Collection<T> exercises) {
+  /**
+   * @param jsonObject
+   * @param exercises
+   * @param <T>
+   * @see ScoreServlet#getJSONExerciseExport
+   */
+  public <T extends CommonShell/* & AudioAttributeExercise*/> void addJSONExerciseExport(JSONObject jsonObject,
+                                                                                         Collection<T> exercises) {
     jsonObject.put(COUNT, exercises.size());
+    jsonObject.put(UNIT_ORDER, addUnitsInOrder());
+    jsonObject.put(UNIT_CHAPTER_NESTING, addSections(sectionHelper.getSectionNodes()));
+    jsonObject.put(ScoreServlet.CONTENT, getExercisesAsJson(exercises));
+  }
 
+  private JSONArray addUnitsInOrder() {
     JSONArray value = new JSONArray();
     for (String type : sectionHelper.getTypeOrder()) {
       value.add(type);
     }
-    jsonObject.put(UNIT_ORDER, value);
-
-    JSONArray nesting = new JSONArray();
-
-    Collection<SectionNode> sectionNodes = sectionHelper.getSectionNodes();
-    addSections(nesting, sectionNodes);
-
-    jsonObject.put(UNIT_CHAPTER_NESTING, nesting);
-    jsonObject.put(ScoreServlet.CONTENT, getExercisesAsJson(exercises));
+    return value;
   }
 
-  private void addSections(JSONArray nesting, Collection<SectionNode> sectionNodes) {
+  private JSONArray addSections(Collection<SectionNode> sectionNodes) {
+    JSONArray nesting = new JSONArray();
+
     List<SectionNode> sorted = new ArrayList<>(sectionNodes);
     Collections.sort(sorted);
     for (SectionNode node : sorted) {
       JSONObject forNode = new JSONObject();
       forNode.put("type", node.getType());
       forNode.put("name", node.getName());
-      JSONArray children = new JSONArray();
+//      JSONArray children = new JSONArray();
 
       Collection<SectionNode> children1 = node.getChildren();
-      if (!children1.isEmpty()) {
+      JSONArray children = children1.isEmpty() ? new JSONArray() : addSections(children1);
+
+ /*     if (!children1.isEmpty()) {
         addSections(children, children1);
       }
+ */
       forNode.put("children", children);
       nesting.add(forNode);
     }
+    return nesting;
   }
 
-  public <T extends CommonShell & AudioAttributeExercise> JSONArray getExercisesAsJson(Collection<T> exercises) {
+  /**
+   * @param exercises
+   * @param <T>
+   * @return
+   * @see #addJSONExerciseExport(JSONObject, Collection)
+   */
+  public <T extends CommonShell/* & AudioAttributeExercise*/> JSONArray getExercisesAsJson(Collection<T> exercises) {
     JSONArray jsonArray = new JSONArray();
+    Collection<T> sortedByID = getSortedByID(exercises);
+
+    // int c = 0;
+    for (T exercise : sortedByID) {
+      JSONObject jsonForCommonExercise = getJsonForCommonExercise(exercise, true);
+      addUnitAndChapter(exercise, jsonForCommonExercise);
+//      Map<String, String> unitToValue = exercise.getUnitToValue();
+//      for (Map.Entry<String, String> pair : unitToValue.entrySet()) {
+//        jsonForCommonExercise.put(pair.getKey(), pair.getValue());
+//      }
+
+      jsonArray.add(jsonForCommonExercise);
+      //  if (c++ > 10)break;
+    }
+    return jsonArray;
+  }
+
+  <T extends CommonShell> Collection<T> getSortedByID(Collection<T> exercises) {
     List<T> copy = new ArrayList<>(exercises);
     Collections.sort(copy, new Comparator<T>() {
       @Override
@@ -126,19 +165,19 @@ public class JsonExport {
         return o1.getID().compareTo(o2.getID());
       }
     });
+    return copy;
+  }
 
-    // int c = 0;
-    for (T exercise : exercises) {
-      JSONObject jsonForCommonExercise = getJsonForCommonExercise(exercise, true);
-      Map<String, String> unitToValue = exercise.getUnitToValue();
-      for (Map.Entry<String, String> pair : unitToValue.entrySet()) {
-        jsonForCommonExercise.put(pair.getKey(), pair.getValue());
+  int c = 0;
+  <T extends CommonShell> void addUnitAndChapter(T exercise, JSONObject jsonForCommonExercise) {
+    for (String type : sectionHelper.getTypeOrder()) {
+      String value = exercise.getUnitToValue().get(type);
+      if (value == null) {
+        if (c++ <10)logger.warn("huh? no value for " + type + " for " + exercise.getID() + " : " + exercise.getUnitToValue());
+        value = "";
       }
-
-      jsonArray.add(jsonForCommonExercise);
-      //  if (c++ > 10)break;
+      jsonForCommonExercise.put(type, value);
     }
-    return jsonArray;
   }
 
   /**
@@ -247,6 +286,13 @@ public class JsonExport {
   private <T extends CommonShell & AudioAttributeExercise> JSONObject getJsonForExercise(T exercise) {
     JSONObject ex = getJsonForCommonExercise(exercise, false);
 
+    addContextAudioRefs(exercise, ex);
+    addLatestRefs(preferredVoices, exercise, ex);
+
+    return ex;
+  }
+
+  private <T extends AudioAttributeExercise> void addContextAudioRefs(T exercise, JSONObject ex) {
     AudioAttribute latestContext = exercise.getLatestContext(true);
     //if (latestContext != null) {
     //  String author = latestContext.getUser().getUserID();
@@ -260,10 +306,6 @@ public class JsonExport {
     // }
     ex.put(CTFREF, latestContext == null ? NO : latestContext.getAudioRef());
     ex.put(REF, exercise.hasRefAudio() ? exercise.getRefAudioWithPrefs(preferredVoices) : NO);
-
-    addLatestRefs(preferredVoices, exercise, ex);
-
-    return ex;
   }
 
   private JSONObject getJsonForCommonExercise(CommonShell exercise, boolean addMeaning) {
@@ -278,6 +320,12 @@ public class JsonExport {
     return ex;
   }
 
+  /**
+   * @param jsonObject
+   * @param types
+   * @return
+   * @see #getExercises(String)
+   */
   private CommonExercise toExercise(JSONObject jsonObject, Collection<String> types) {
     CommonExercise exercise = new Exercise(
         jsonObject.getString(ID),
@@ -312,7 +360,7 @@ public class JsonExport {
    * @param ex
    * @see #getJsonForExercise
    */
-  private void addLatestRefs(Set<Long> preferredVoices, AudioRefExercise exercise, JSONObject ex) {
+  private void addLatestRefs(Collection<Long> preferredVoices, AudioRefExercise exercise, JSONObject ex) {
     String mr = null, ms = null, fr = null, fs = null;
     long mrt = 0, mst = 0, frt = 0, fst = 0;
     AudioAttribute mra = null, msa = null, fra = null, fsa = null;
