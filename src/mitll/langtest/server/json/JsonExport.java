@@ -282,10 +282,19 @@ public class JsonExport {
         jsonObject.getString(TL),
         jsonObject.getString(CT),
         jsonObject.getString(CTR));
-    for (String type : types) {
-      String value = jsonObject.getString(type);
-      if (value == null) logger.error("missing " + type + " on " + exercise.getID());
-      else exercise.addUnitToValue(type, value);
+
+    try {
+      for (String type : types) {
+        if (jsonObject.has(type)) {
+          String value = jsonObject.getString(type);
+          if (value == null) logger.error("toExercise : missing " + type + " on " + exercise.getID());
+          else exercise.addUnitToValue(type, value);
+        } else {
+          exercise.addUnitToValue(type, "");
+        }
+      }
+    } catch (Exception e) {
+      logger.warn("toExercise : got " + e + " for " + exercise.getID());
     }
     return exercise;
   }
