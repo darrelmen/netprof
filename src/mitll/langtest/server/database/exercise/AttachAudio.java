@@ -10,10 +10,7 @@ import mitll.langtest.shared.exercise.*;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by go22670 on 11/10/15.
@@ -114,16 +111,16 @@ public class AttachAudio {
       missing = attachAudio(imported, missing, audioAttributes);
       //logger.debug("added " + c + " to " + id);
     }
-    if (!imported.hasRefAudio() && imported.getID().startsWith("Custom")) {
-     // logger.warn("ex " + imported.getID() + " has no ref audio.");
-    }
+//    if (!imported.hasRefAudio() && imported.getID().startsWith("Custom")) {
+//      logger.warn("ex " + imported.getID() + " has no ref audio.");
+ //   }
     //else {
     // logger.debug("can't find '" + id + "' in " + exToAudio.keySet().size() + " keys, e.g. '" + exToAudio.keySet().iterator().next() +"'");
     //}
     return missing;
   }
 
-  public <T extends CommonExercise> int attachAudio(T imported, int missing, List<AudioAttribute> audioAttributes) {
+  public <T extends CommonExercise> int attachAudio(T imported, int missing, Collection<AudioAttribute> audioAttributes) {
     MutableAudioExercise mutableAudio = imported.getMutableAudio();
 
     if (audioAttributes == null) {
@@ -164,11 +161,15 @@ public class AttachAudio {
             audio.setAudioRef(child);   // remember to prefix the path
             mutableAudio.addAudio(audio);
             audioPaths.add(child);
+//            logger.debug("imported " +imported.getID()+ " now " + imported.getAudioAttributes());
+          }
+          else {
+            logger.debug("skipping " + child);
           }
         } else {
           missing++;
           c++;
-          if (c < 5) {
+          if (c < 10) {
             logger.warn("attachAudio file " + test.getAbsolutePath() + " does not exist - \t" + audio.getAudioRef());
 //            if (c < 2) {
 //              logger.warn("installPath " + installPath + "mediaDir " + mediaDir + " mediaDir1 " + mediaDir1);
