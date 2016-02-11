@@ -1,6 +1,7 @@
 package mitll.langtest.shared.exercise;
 
 import mitll.langtest.shared.MiniUser;
+import net.sf.json.JSONObject;
 
 import java.util.Collection;
 import java.util.List;
@@ -8,20 +9,18 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * TODO : divide this into read only base class
  *
  * Created by go22670 on 1/5/16.
  */
-public interface AudioAttributeExercise extends AudioRefExercise/*, MutableAudioExercise*/ {
-  String getRefAudioWithPrefs(Set<Long> prefs);
+public interface AudioAttributeExercise extends AudioRefExercise {
+  String getRefAudioWithPrefs(Collection<Long> prefs);
 
   /**
    * @see mitll.langtest.server.DatabaseServlet#getJsonForExercise(CommonExercise)
-   * @see mitll.langtest.server.ScoreServlet#getJsonArray(java.util.List)
+   * @see mitll.langtest.server.json.JsonExport#addContextAudioRefs(AudioAttributeExercise, JSONObject)
    * @return
    */
   AudioAttribute getLatestContext(boolean isMale);
-
 
   AudioAttribute getRecordingsBy(long userID, String speed);
 
@@ -36,6 +35,6 @@ public interface AudioAttributeExercise extends AudioRefExercise/*, MutableAudio
    * @param isMale
    * @return
    */
-  Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Set<Long> preferredUsers);
+  Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Collection<Long> preferredUsers);
 
 }
