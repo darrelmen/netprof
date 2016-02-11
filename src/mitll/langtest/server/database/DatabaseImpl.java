@@ -86,7 +86,7 @@ public class DatabaseImpl implements Database {
   private DatabaseConnection connection = null;
   private MonitoringSupport monitoringSupport;
 
-//  private String lessonPlanFile;
+  //  private String lessonPlanFile;
   private final String configDir;
   private final ServerProperties serverProps;
   private final LogAndNotify logAndNotify;
@@ -124,7 +124,7 @@ public class DatabaseImpl implements Database {
     this.connection = connection;
     this.configDir = relativeConfigDir;
     this.serverProps = serverProps;
-  //  this.lessonPlanFile = serverProps.getLessonPlan();
+    //  this.lessonPlanFile = serverProps.getLessonPlan();
     this.logAndNotify = logAndNotify;
 
     try {
@@ -389,8 +389,7 @@ public class DatabaseImpl implements Database {
       synchronized (this) {
         if (lessonPlanFile.endsWith(".json")) {
           this.exerciseDAO = new JSONExerciseDAO(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
-        }
-        else {
+        } else {
           this.exerciseDAO = new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
         }
       }
@@ -414,9 +413,7 @@ public class DatabaseImpl implements Database {
   }
 
   public void setDependencies(String mediaDir, String installPath, ExerciseDAO exerciseDAO) {
-    exerciseDAO.setUserExerciseDAO(userExerciseDAO);
-    exerciseDAO.setAddRemoveDAO(addRemoveDAO);
-    exerciseDAO.setAudioDAO(audioDAO, mediaDir, installPath);
+    exerciseDAO.setDependencies(mediaDir, installPath, userExerciseDAO, addRemoveDAO, audioDAO);
   }
 
   private void makeContextPractice(String contextPracticeFile, String installPath) {
@@ -919,6 +916,7 @@ public class DatabaseImpl implements Database {
   public AnswerDAO getAnswerDAO() {
     return answerDAO;
   }
+
   public UploadDAO getUploadDAO() {
     return uploadDAO;
   }
@@ -1237,6 +1235,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * JUST FOR TESTING?
+   *
    * @param ex
    * @return
    */
@@ -1254,7 +1253,7 @@ public class DatabaseImpl implements Database {
         audioDAO.attachAudio(exercise, installPath, configDir, audioAttributes);
       }
       //if (!debug) ensureMP3s(exercise);
-     // exercises.add(getJsonForExercise(exercise));
+      // exercises.add(getJsonForExercise(exercise));
     }
   }
 

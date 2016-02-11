@@ -1,6 +1,7 @@
 package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.JSONExerciseDAO;
@@ -23,10 +24,20 @@ import java.util.List;
 /**
  * Created by go22670 on 2/9/16.
  */
-public class JSONExportTest {
+public class JSONExportTest extends JsonExport {
   private static final String ENGLISH = "english";
   private static final Logger logger = Logger.getLogger(JSONExportTest.class);
   private static DatabaseImpl database;
+
+  /**
+   * @param phoneToCount
+   * @param sectionHelper
+   * @param preferredVoices
+   * @see ScoreServlet#getJsonNestedChapters(boolean)
+   */
+  public JSONExportTest() {
+    super(null, null, null);
+  }
   //private static String dbName;
 
   @BeforeClass
@@ -79,7 +90,7 @@ public class JSONExportTest {
     JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null);
     JSONObject jsonObject = new JSONObject();
     jsonExport.addJSONExerciseExport(jsonObject, database.getExercises());
-    logger.info("got " + jsonObject);
+    //logger.info("got " + jsonObject);
     String s = jsonObject.toString();
 
 
@@ -111,9 +122,8 @@ public class JSONExportTest {
     }
   }
 
-
   @Test
-  public void testExportSmall() {
+  public void testExportSpanish() {
     JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null);
     Collection<CommonExercise> exercises = database.getExercises();
     List<CommonExercise> copy = new ArrayList<>(exercises);
@@ -198,7 +208,6 @@ public class JSONExportTest {
       Collection<CommonExercise> exercisesForSelectionState = exerciseDAO.getSectionHelper().getExercisesForSelectionState(node.getType(), node.getName());
       logger.info("for " + node + " got " + exercisesForSelectionState.size());
     }
-
     //for (CommonExercise exercise : rawExercises) logger.debug(exercise);
   }
 }
