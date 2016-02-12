@@ -127,14 +127,14 @@ public class JSONExportTest extends JsonExport {
     JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null);
     Collection<CommonExercise> exercises = database.getExercises();
     List<CommonExercise> copy = new ArrayList<>(exercises);
-    List<CommonExercise> exercises1 = copy;//.subList(0, 4000);
+    List<CommonExercise> exercises1 = copy;//.subList(0, 4000);excel
 
     JSONObject jsonObject = new JSONObject();
     jsonExport.addJSONExerciseExport(jsonObject, exercises1);
-    logger.info("got " + jsonObject);
+ //   logger.info("got " + jsonObject);
     String text = jsonObject.toString();
 
-    String pathname = "spanish.json";
+    String pathname = "spanishNew.json";
     File file = new File(pathname);
     logger.debug("writing to  " + file.getAbsolutePath());
 
