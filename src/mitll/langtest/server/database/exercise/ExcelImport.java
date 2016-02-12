@@ -4,7 +4,6 @@
 
 package mitll.langtest.server.database.exercise;
 
-import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.exercise.*;
@@ -70,6 +69,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
                      boolean addDefects) {
     super(serverProps, userListManager, addDefects);
     this.file = file;
+
+    logger.info("Reading from " + file);
     maxExercises = serverProps.getMaxNumExercises();
     // turn off missing fast/slow for classroom
     shouldHaveRefAudio = false;
@@ -82,7 +83,10 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
   }
 
   protected List<CommonExercise> readExercises() {
-    return readExercises(new File(file));
+    File file = new File(this.file);
+    logger.info("readExercises Reading from " + file.getAbsolutePath());
+
+    return readExercises(file);
   }
 
   /**
@@ -338,7 +342,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
 
               CommonExercise imported = isDelete ? null : getExercise(idToUse, english, foreignLanguagePhrase, translit,
-                  meaning, context, contextTranslation, hasAudioIndex ? getCell(next, audioIndex) : "", true);
+                  meaning, context, contextTranslation, hasAudioIndex ? getCell(next, audioIndex) : "");
 
               if (!isDelete &&
                   (imported.hasRefAudio() || !shouldHaveRefAudio)) {  // skip items without ref audio, for now.
@@ -505,7 +509,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
               CommonExercise imported = getExercise(idToUse, english, foreignLanguagePhrase, translit,
-                  meaning, context, contextTranslation, (audioIndex != -1) ? getCell(next, audioIndex) : "", false);
+                  meaning, context, contextTranslation, (audioIndex != -1) ? getCell(next, audioIndex) : "");
               if (isDelete) {
                 deleted++;
               } else if (imported.hasRefAudio() || !shouldHaveRefAudio) {  // skip items without ref audio, for now.
@@ -605,7 +609,6 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
    * @param translit
    * @param meaning
    * @param context
-   * @param lookForOldAudio
    * @return
    * @paramx weightIndex
    * @see #readFromSheet(org.apache.poi.ss.usermodel.Sheet)
@@ -613,9 +616,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
   private CommonExercise getExercise(String id,
                                      String english, String foreignLanguagePhrase, String translit, String meaning,
                                      String context, String contextTranslation,
-                                     String audioIndex, boolean lookForOldAudio) {
-    Exercise imported = getExercise(id, meaning, context, contextTranslation,
-        audioIndex, lookForOldAudio);
+                                     String audioIndex) {
+    Exercise imported = getExercise(id, meaning, context, contextTranslation, audioIndex);
     //   logger.debug("id " + id + " context " + imported.getContext());
 
     imported.setEnglishSentence(english);
@@ -678,25 +680,13 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
    * @param context
    * @param contextTranslation
    * @param refAudioIndex
-   * @param lookForOldAudio
    * @return
-   * @see #getExercise(String, String, String, String, String, String, String, String, boolean)
+   * @see #getExercise(String, String, String, String, String, String, String, String)
    */
   private Exercise getExercise(String id,
                                String meaning,
-                               String context, String contextTranslation, String refAudioIndex, boolean lookForOldAudio) {
-//    String content = ExerciseFormatter.getContent(foreignLanguagePhrase, translit, english, meaning, context,
-//        contextTranslation, language);
-    Exercise imported = new Exercise(id, /*content,*/ context, contextTranslation, meaning, refAudioIndex);
-
-    //logger.debug("id  " + id+  " context " + imported.getContext());
-    //imported.setMeaning(meaning);
-
-//    if (lookForOldAudio) {
-//      attachAudio.addOldSchoolAudio(refAudioIndex, imported);
-//    }
-
-    return imported;
+                               String context, String contextTranslation, String refAudioIndex) {
+    return new Exercise(id, context, contextTranslation, meaning, refAudioIndex);
   }
 
   private String getCell(Row next, int col) {
