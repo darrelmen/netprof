@@ -82,7 +82,9 @@ public abstract class BaseExerciseDAO {
       }
       // if (ex.hasRefAudio()) logger.info("ex " + ex.getID() + " has audio");
     }
-    // sectionHelper.report();
+
+    logger.info("looking for 724 " + getExercise("724"));
+    sectionHelper.report();
   }
 
   /**
@@ -147,17 +149,11 @@ public abstract class BaseExerciseDAO {
       if (!ex.hasRefAudio()) {
         attachAudio.attachAudio(ex);
         examined++;
-
-        if (!ex.hasRefAudio()) {
-          user++;
-        }
-        // else if (ex.getID().startsWith("Custom")) {
-//          logger.warn("found audio for " + ex.getID());
-        // }
+        if (!ex.hasRefAudio()) user++;
       }
     }
     if (user > 0) {
-      logger.info("out of " + exercises.size() + //" " + missing +
+      logger.info("attachAudio out of " + exercises.size() + //" " + missing +
           " are missing ref audio, out of " + examined + " user exercises missing = " + user);
     }
   }
@@ -190,11 +186,15 @@ public abstract class BaseExerciseDAO {
         if (isKnownExercise(overrideID)) {
         //  logger.info("for " + overrideID + " got " + userExercise.getUnitToValue());
           // don't use the unit->value map stored in the user exercise table...
-          userExercise.getCombinedMutableUserExercise().setUnitToValue(getExercise(overrideID).getUnitToValue());
+          Map<String, String> unitToValue = getExercise(overrideID).getUnitToValue();
+          userExercise.getCombinedMutableUserExercise().setUnitToValue(unitToValue);
 
           //logger.debug("addOverlays refresh exercise for " + userExercise.getID() + " " + userExercise.getUnitToValue());
           sectionHelper.refreshExercise(userExercise);
           addOverlay(userExercise);
+
+//          Collection<CommonExercise> exercisesForSimpleSelectionState = sectionHelper.getExercisesForSimpleSelectionState(unitToValue);
+//          for (CommonExercise exercise:exercisesForSimpleSelectionState) if (exercise.getID().equals(overrideID)) logger.warn("found " + exercise);
           override++;
         } else {
           staleOverrides.add(overrideID);
