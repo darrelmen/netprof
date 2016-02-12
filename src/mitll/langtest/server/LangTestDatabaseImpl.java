@@ -807,7 +807,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     checkPerformance(id, then);
 
     if (byID != null) {
-      //logger.debug("returning (" + language + ") exercise " + byID.getID());
+      logger.debug("returning (" + language + ") exercise " + byID.getID() + " : " + byID);
     } else {
       logger.info(getLanguage() + " : couldn't find exercise with id '" + id + "'");
     }
