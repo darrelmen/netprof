@@ -42,9 +42,10 @@ public class AudioConversion {
   private static final float SIXTEEN_K = 16000f;
   private static final float TRIM_SILENCE_BEFORE_AND_AFTER = 0.30f;
   private static final String T_VALUE = "" + 7;
-  public static final String LAME = "lame";
+  private static final String LAME = "lame";
   private static final double DIFF_THRESHOLD = 0.2;
-  private AudioCheck audioCheck;
+  private static final boolean SPEW = true;
+  private final AudioCheck audioCheck;
   private static final boolean DEBUG = false;
 
   private final String soxPath;
@@ -651,7 +652,7 @@ public class AudioConversion {
     File testMP3 = new File(mp3File);
     if (!testMP3.exists()) {
       if (!new File(pathToAudioFile).exists()) {
-        logger.error("huh? source file " + pathToAudioFile + " doesn't exist?");
+        if (SPEW) logger.error("huh? source file " + pathToAudioFile + " doesn't exist?");
       } else {
         logger.error("didn't write MP3 : " + testMP3.getAbsolutePath() +
             " exe path " + lamePath +
