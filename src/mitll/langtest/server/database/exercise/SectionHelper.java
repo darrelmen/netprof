@@ -135,6 +135,12 @@ public class SectionHelper<T extends Shell> {
     }
   }
 
+  public Collection<T> getExercisesForSimpleSelectionState(Map<String, String> simpleMap) {
+    Map<String, Collection<String>> typeToSection = new HashMap<>();
+    for (Map.Entry<String,String> pair : simpleMap.entrySet()) typeToSection.put(pair.getKey(),Collections.singleton(pair.getValue()));
+    return getExercisesForSelectionState(typeToSection);
+  }
+
   public Collection<T> getExercisesForSelectionState(String type, String value) {
     Map<String, Collection<String>> typeToSection = new HashMap<>();
     typeToSection.put(type, Collections.singleton(value));
@@ -248,9 +254,9 @@ public class SectionHelper<T extends Shell> {
   }
 
   /**
+   * @param exercise
    * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
    * @see BaseExerciseDAO#removeExercises()
-   * @param exercise
    */
   public boolean removeExercise(T exercise) {
     Map<String, String> unitToValue = exercise.getUnitToValue();
@@ -362,6 +368,10 @@ public class SectionHelper<T extends Shell> {
       if (!sections.isEmpty()) {
         logger.debug("report : Section type : " + key + " : sections " + sections);
       }
+    }
+    for (SectionNode node : getSectionNodes()) {
+      Collection<T> exercisesForSelectionState = getExercisesForSelectionState(node.getType(), node.getName());
+      logger.info("for " + node + " got " + exercisesForSelectionState.size());
     }
   }
 }
