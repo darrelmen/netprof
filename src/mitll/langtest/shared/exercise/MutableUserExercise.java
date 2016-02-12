@@ -5,6 +5,8 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.custom.UserList;
 
+import java.util.Map;
+
 /**
  * Created by go22670 on 2/1/16.
  */
@@ -38,4 +40,7 @@ public interface MutableUserExercise {
    * @return
    */
   boolean checkPredef();
+
+  void setUnitToValue(Map<String, String> unitToValue);
+
 }
