@@ -21,6 +21,8 @@ import java.util.*;
 public abstract class BaseExerciseDAO {
   private static final Logger logger = Logger.getLogger(BaseExerciseDAO.class);
   private static final String CONTAINS_SEMI = "contains semicolon - should this item be split?";
+  public static final String ENGLISH = "english";
+  public static final String MISSING_ENGLISH = "missing english";
 
   private final Map<String, CommonExercise> idToExercise = new HashMap<>();
   protected final SectionHelper<CommonExercise> sectionHelper = new SectionHelper<>();
@@ -28,7 +30,7 @@ public abstract class BaseExerciseDAO {
   protected final ServerProperties serverProps;
   private final UserListManager userListManager;
   private final boolean addDefects;
-  //  protected final Map<String, Map<String, String>> idToDefectMap = new HashMap<>();
+
   private List<CommonExercise> exercises = null;
   private AddRemoveDAO addRemoveDAO;
   private UserExerciseDAO userExerciseDAO;
@@ -161,6 +163,7 @@ public abstract class BaseExerciseDAO {
   }
 
   /**
+   * TODO : better to use a filter
    * Don't add overlays for exercises that have been removed.
    *
    * @param removes
@@ -181,19 +184,22 @@ public abstract class BaseExerciseDAO {
     SortedSet<String> staleOverrides = new TreeSet<String>();
     for (CommonExercise userExercise : overrides) {
       String overrideID = userExercise.getID();
-      if (!removes.contains(overrideID)) {
-        CommonExercise exercise = getExercise(overrideID);
-        if (exercise != null) {
-          // logger.debug("addOverlays refresh exercise for " + userExercise.getID());
-          sectionHelper.refreshExercise(exercise);
+      if (removes.contains(overrideID)) {
+        removedSoSkipped++;
+      } else {
+        if (isKnownExercise(overrideID)) {
+        //  logger.info("for " + overrideID + " got " + userExercise.getUnitToValue());
+          // don't use the unit->value map stored in the user exercise table...
+          userExercise.getCombinedMutableUserExercise().setUnitToValue(getExercise(overrideID).getUnitToValue());
+
+          //logger.debug("addOverlays refresh exercise for " + userExercise.getID() + " " + userExercise.getUnitToValue());
+          sectionHelper.refreshExercise(userExercise);
           addOverlay(userExercise);
           override++;
         } else {
           staleOverrides.add(overrideID);
           //logger.warn("----> addOverlays not adding as overlay '" + overrideID + "' since it's not in the original list of size " + idToExercise.size());
         }
-      } else {
-        removedSoSkipped++;
       }
     }
     if (override > 0) {
@@ -211,28 +217,28 @@ public abstract class BaseExerciseDAO {
    * @param userExercise
    * @return old exercises
    * @see DatabaseImpl#editItem
-   * @see #getRawExercises()
    */
   public CommonExercise addOverlay(CommonExercise userExercise) {
-    CommonExercise exercise = getExercise(userExercise.getID());
+    String idOfNewExercise = userExercise.getID();
+    CommonExercise currentExercise = getExercise(idOfNewExercise);
 
-    if (exercise == null) {
+    if (currentExercise == null) {
       logger.error("addOverlay : huh? can't find " + userExercise);
     } else {
-      //logger.debug("addOverlay at " +userExercise.getID() + " found " +exercise);
+      //logger.debug("addOverlay at " +userExercise.getID() + " found " +currentExercise);
       synchronized (this) {
-        int i = exercises.indexOf(exercise);
+        int i = exercises.indexOf(currentExercise);
         if (i == -1) {
-          logger.error("addOverlay : huh? couldn't find " + exercise);
+          logger.error("addOverlay : huh? couldn't find " + currentExercise);
         } else {
           exercises.set(i, userExercise);
         }
-        idToExercise.put(userExercise.getID(), userExercise);
+        idToExercise.put(idOfNewExercise, userExercise);
 
         //  logger.debug("addOverlay : after " + getExercise(userExercise.getID()));
       }
     }
-    return exercise;
+    return currentExercise;
   }
 
   /**
@@ -257,7 +263,6 @@ public abstract class BaseExerciseDAO {
    */
   public boolean remove(String id) {
     synchronized (this) {
-//      if (!idToExercise.containsKey(id)) return false;
       CommonExercise remove = idToExercise.remove(id);
       if (remove == null) return false;
       return exercises.remove(remove);
@@ -269,19 +274,6 @@ public abstract class BaseExerciseDAO {
     this.userExerciseDAO = userExerciseDAO;
     this.addRemoveDAO = addRemoveDAO;
     setAudioDAO(audioDAO, mediaDir, installPath);
-  }
-
-  private void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
-    this.userExerciseDAO = userExerciseDAO;
-  }
-
-  /**
-   * @param addRemoveDAO
-   * @see #addNewExercises()
-   * @see #removeExercises()
-   */
-  private void setAddRemoveDAO(AddRemoveDAO addRemoveDAO) {
-    this.addRemoveDAO = addRemoveDAO;
   }
 
   /**
@@ -328,15 +320,9 @@ public abstract class BaseExerciseDAO {
       checkForSemicolons(fieldToDefect, shell.getForeignLanguage(), shell.getTransliteration());
 
       if (shell.getEnglish().isEmpty()) {
-        //if (serverProps.isClassroomMode()) {
-        //english = "NO ENGLISH";    // DON'CommonExercise DO THIS - it messes up the indexing.
-        fieldToDefect.put("english", "missing english");
-        // }
-        //logger.info("-------- > for row " + next.getRowNum() + " english is blank ");
-        // else {
-        //   englishSkipped++;
-        // }
+        fieldToDefect.put(ENGLISH, MISSING_ENGLISH);
       }
+
       if (!fieldToDefect.isEmpty()) {
         idToDefectMap.put(shell.getID(), fieldToDefect);
       }
@@ -353,7 +339,7 @@ public abstract class BaseExerciseDAO {
       if (where == null) {
         logger.error("getRawExercises huh? couldn't find user exercise from add exercise table in user exercise table : " + id);
       } else {
-        if (idToExercise.containsKey(id)) {
+        if (isKnownExercise(id)) {
           logger.debug("addNewExercises SKIPPING new user exercise " + where.getID() + " since already added from spreadsheet : " + where);
         } else {
           logger.debug("addNewExercises adding new user exercise " + where.getID() + " : " + where);
@@ -362,6 +348,10 @@ public abstract class BaseExerciseDAO {
         }
       }
     }
+  }
+
+  private boolean isKnownExercise(String id) {
+    return idToExercise.containsKey(id);
   }
 
   private Collection<String> removeExercises() {
