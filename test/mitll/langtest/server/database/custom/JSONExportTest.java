@@ -25,7 +25,6 @@ import java.util.List;
  * Created by go22670 on 2/9/16.
  */
 public class JSONExportTest extends JsonExport {
-  private static final String ENGLISH = "english";
   private static final Logger logger = Logger.getLogger(JSONExportTest.class);
   private static DatabaseImpl database;
 
@@ -42,27 +41,33 @@ public class JSONExportTest extends JsonExport {
 
   @BeforeClass
   public static void setup() {
-    logger.debug("setup called");
-
-    String config = "spanish";//"mandarin";
-    // dbName = "npfSpanish";//"mandarin";// "mandarin";
-
-    getDatabase(config, "npfSpanish");
+    getDatabase("mandarin");
   }
 
-  private static void getDatabase(String config, String dbName) {
+  private static void getDatabase(String config) {
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParent();
     logger.debug("config dir " + parent);
     logger.debug("config     " + file.getName());
     //  dbName = "npfEnglish";//"mandarin";// "mandarin";
-    database = new DatabaseImpl(parent, file.getName(), dbName, new ServerProperties(parent, file.getName()), new PathHelper("war"), false, null);
+    ServerProperties serverProps = new ServerProperties(parent, file.getName());
+    String dbName = serverProps.getH2Database();
+    database = new DatabaseImpl(parent, file.getName(), dbName, serverProps, new PathHelper("war"), false, null);
     logger.debug("made " + database);
     String media = parent + File.separator + "media";
     logger.debug("media " + media);
     database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(), "media");
-    Collection<CommonExercise> exercises = database.getExercises();
+     database.getExercises();
   }
+
+  @Test
+  public void testRead() {
+    database.getSectionHelper();
+
+    CommonExercise exercise = database.getExercise("724");
+    logger.warn("\n\ntestRead got " +exercise);
+  }
+
 
   @Test
   public void testExport() {
@@ -124,6 +129,15 @@ public class JSONExportTest extends JsonExport {
 
   @Test
   public void testExportSpanish() {
+    exportTo("spanishNew.json");
+  }
+
+  @Test
+  public void testExportMandarin() {
+    exportTo("mandarin.json");
+  }
+
+  void exportTo(String pathname) {
     JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null);
     Collection<CommonExercise> exercises = database.getExercises();
     List<CommonExercise> copy = new ArrayList<>(exercises);
@@ -131,10 +145,9 @@ public class JSONExportTest extends JsonExport {
 
     JSONObject jsonObject = new JSONObject();
     jsonExport.addJSONExerciseExport(jsonObject, exercises1);
- //   logger.info("got " + jsonObject);
+    //   logger.info("got " + jsonObject);
     String text = jsonObject.toString();
 
-    String pathname = "spanishNew.json";
     File file = new File(pathname);
     logger.debug("writing to  " + file.getAbsolutePath());
 
