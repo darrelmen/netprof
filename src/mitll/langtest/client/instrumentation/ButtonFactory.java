@@ -16,8 +16,6 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.exercise.ExerciseController;
 
-import java.util.logging.Logger;
-
 /**
  * Does event logging for widgets -- calls service to log event.
  * Created by GO22670 on 3/24/2014.
@@ -26,10 +24,9 @@ public class ButtonFactory implements EventLogger {
   //private Logger logger = Logger.getLogger("ButtonFactory");
   private final LangTestDatabaseAsync service;
   private final PropertyHandler props;
-  private ExerciseController controller;
+  private final ExerciseController controller;
 
   /**
-   *
    * @param service
    * @param props
    * @param controller
@@ -86,6 +83,7 @@ public class ButtonFactory implements EventLogger {
 
   /**
    * Somehow this has service being null sometimes?
+   *
    * @param widgetID
    * @param widgetType
    * @param exid
@@ -96,10 +94,16 @@ public class ButtonFactory implements EventLogger {
   public void logEvent(final String widgetID, final String widgetType, final String exid, final String context,
                        final long userid) {
     // System.out.println("logEvent event for " + widgetID + " " + widgetType + " exid " + exid + " context " + context + " user " + userid);
-    try {
-      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-        public void execute() {
-          if (props != null && controller != null && service != null) {
+
+    ButtonFactory outer = this;
+
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        try {
+          if (outer != null &&
+              props != null &&
+              controller != null &&
+              service != null) {
             String turkID = props.getTurkID();
             String browserInfo = controller.getBrowserInfo();
 
@@ -123,10 +127,9 @@ public class ButtonFactory implements EventLogger {
                   });
             }
           }
+        } catch (Exception e) {
         }
-      });
-    } catch (Exception e) {
-//      logger.warning("Got " +e);
-    }
+      }
+    });
   }
 }
