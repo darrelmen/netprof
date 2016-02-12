@@ -76,9 +76,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
     shouldHaveRefAudio = false;
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
-    this.unitIndex = serverProps.getUnitChapterWeek()[0];
+    this.unitIndex    = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
-    this.weekIndex = serverProps.getUnitChapterWeek()[2];
+    this.weekIndex    = serverProps.getUnitChapterWeek()[2];
     if (DEBUG) logger.debug("unit " + unitIndex + " chapter " + chapterIndex + " week " + weekIndex);
   }
 
@@ -180,14 +180,12 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
    */
   private Collection<CommonExercise> readFromSheet(Sheet sheet) {
     List<CommonExercise> exercises = new ArrayList<CommonExercise>();
-    // logger.debug("for " + sheet.getSheetName() + " regions " +sheet.getNumMergedRegions());
     int id = 0;
     boolean gotHeader = false;
 
     int colIndexOffset = -1;
 
     int transliterationIndex = -1;
-    //int weightIndex = -1;
     int meaningIndex = -1;
     int idIndex = -1;
     int contextIndex = -1;
@@ -209,19 +207,12 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
       Iterator<Row> iter = sheet.rowIterator();
       Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
       boolean gotUCW = unitIndex != -1;
+      List<String> columns = iter.hasNext() ? getHeader(iter.next()): Collections.emptyList();
+
       for (; iter.hasNext(); ) {
         Row next = iter.next();
         if (id > maxExercises) break;
         boolean inMergedRow = rowToRange.keySet().contains(next.getRowNum());
-        //Map<String, String> fieldToDefect = new HashMap<String, String>();
-        List<String> columns = new ArrayList<String>();
-        if (!gotHeader) {
-          Iterator<Cell> cellIterator = next.cellIterator();
-          while (cellIterator.hasNext()) {
-            Cell next1 = cellIterator.next();
-            columns.add(next1.toString().trim());
-          }
-        }
 
         if (!gotHeader) {
           List<String> predefinedTypeOrder = new ArrayList<String>();
@@ -232,8 +223,6 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
               colIndexOffset = columns.indexOf(col);
             } else if (colNormalized.contains("transliteration")) {
               transliterationIndex = columns.indexOf(col);
-//            } else if (colNormalized.contains("weight")) {
-              //             weightIndex = columns.indexOf(col);
             } else if (colNormalized.contains(MEANING)) {
               meaningIndex = columns.indexOf(col);
             } else if (colNormalized.contains(ID)) {
@@ -296,19 +285,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
           if (inMergedRow && !lastRowValues.isEmpty()) {
             if (english.length() == 0) {
               english = lastRowValues.get(0);
-              //logger.info("\n\n\n-------- > for row " + next.getRowNum() + " english using " + english);
             }
           }
-/*          if (english.length() == 0) {
-            //if (serverProps.isClassroomMode()) {
-            //english = "NO ENGLISH";    // DON'CommonExercise DO THIS - it messes up the indexing.
-            fieldToDefect.put("english", "missing english");
-            // }
-            //logger.info("-------- > for row " + next.getRowNum() + " english is blank ");
-            // else {
-            //   englishSkipped++;
-            // }
-          }*/
           if (gotHeader && english.length() > 0) {
             if (inMergedRow) logger.info("got merged row ------------ ");
 
@@ -336,7 +314,6 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
               String givenIndex = getCell(next, idIndex);
               String context = getCell(next, contextIndex);
               String contextTranslation = getCell(next, contextTranslationIndex);
-  //            checkForSemicolons(fieldToDefect, foreignLanguagePhrase, translit);
 
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
@@ -353,9 +330,6 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
                 } else {
                   knownIds.add(imported.getID());
                   rememberExercise(exercises, imported);
-/*                  if (!fieldToDefect.isEmpty()) {
-                    idToDefectMap.put(imported.getID(), fieldToDefect);
-                  }*/
                 }
               } else {
                 if (isDelete) {
@@ -393,6 +367,18 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
     return exercises;
   }
 
+  private List<String> getHeader( Row next) {
+    List<String> columns = new ArrayList<String>();
+
+      Iterator<Cell> cellIterator = next.cellIterator();
+      while (cellIterator.hasNext()) {
+        Cell next1 = cellIterator.next();
+        columns.add(next1.toString().trim());
+      }
+
+    return columns;
+  }
+
   private boolean contextTransMatch(String colNormalized) {
     return colNormalized.contains(CONTEXT_TRANSLATION) || colNormalized.contains(TRANSLATION_OF_CONTEXT.toLowerCase());
   }
@@ -418,17 +404,11 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
     try {
       Iterator<Row> iter = sheet.rowIterator();
       boolean gotUCW = unitIndex != -1;
+
+      List<String> columns = iter.hasNext() ? getHeader(iter.next()): Collections.emptyList();
+
       for (; iter.hasNext(); ) {
         Row next = iter.next();
-       // Map<String, String> fieldToDefect = new HashMap<String, String>();
-        List<String> columns = new ArrayList<String>();
-        if (!gotHeader) {
-          Iterator<Cell> cellIterator = next.cellIterator();
-          while (cellIterator.hasNext()) {
-            Cell next1 = cellIterator.next();
-            columns.add(next1.toString().trim());
-          }
-        }
 
         if (!gotHeader) {
           for (String col : columns) {
@@ -465,8 +445,6 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
             } else if (colNormalized.contains("week")) {
               weekIndex = columns.indexOf(col);
               weekName = col;
-//            } else if (colNormalized.contains("weight")) {
-//              weightIndex = columns.indexOf(col);
             }
           }
 
@@ -486,25 +464,12 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
           String foreignLanguagePhrase = cleanTics(getCell(next, colIndex).trim());
           String translit = getCell(next, transliterationIndex);
 
-          //logger.info("for row " + next.getRowNum() + " english = " + english + " in merged " + inMergedRow + " last row " + lastRowValues.size());
-
-/*          if (english.length() == 0) {
-            /// if (serverProps.isClassroomMode()) {
-            //english = "NO ENGLISH";    // DON'T DO THIS - it messes up the indexing.
-            fieldToDefect.put("english", "missing english");
-            // }
-            //logger.info("-------- > for row " + next.getRowNum() + " english is blank ");
-            // else {
-            //   englishSkipped++;
-            // }
-          }*/
           if (gotHeader && english.length() > 0) {
             if (skipSemicolons && (foreignLanguagePhrase.contains(";") || translit.contains(";"))) {
               String meaning = getCell(next, meaningIndex);
               String givenIndex = getCell(next, idIndex);
               String context = getCell(next, contextIndex);
               String contextTranslation = getCell(next, contextTranslationIndex);
-              //checkForSemicolons(fieldToDefect, foreignLanguagePhrase, translit);
 
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
@@ -516,9 +481,6 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
                 recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
 
                 rememberExercise(exercises, imported);
-/*                if (!fieldToDefect.isEmpty()) {
-                  idToDefectMap.put(imported.getID(), fieldToDefect);
-                }*/
               }
             }
           }
@@ -529,7 +491,6 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
     }
 
     logStatistics(id, semis, skipped, englishSkipped, deleted);
-    //  if (missingExerciseCount > 0) logger.debug("missing ex count " + missingExerciseCount);
     return exercises;
   }
 
