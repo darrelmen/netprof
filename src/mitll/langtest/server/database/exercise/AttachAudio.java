@@ -56,7 +56,7 @@ public class AttachAudio {
    *
    * @param refAudioIndex override place to look for audio
    * @param imported      to attach audio to
-   * @see ExcelImport#getExercise(String, String, String, String, String, String, String, String, boolean)
+   * @see ExcelImport#getExercise
    */
   public <T extends AudioExercise> void addOldSchoolAudio(String refAudioIndex, T imported) {
     String id = imported.getID();
@@ -188,8 +188,14 @@ public class AttachAudio {
    * @return
    */
   private boolean checkMatchingTranscript(CommonShell imported, AudioAttribute audio) {
-    String transcript = audio.getTranscript();
-    return transcript.isEmpty() || transcript.toLowerCase().equals(imported.getForeignLanguage().toLowerCase());
+    try {
+      String transcript = audio.getTranscript();
+      String foreignLanguage = imported.getForeignLanguage();
+      return transcript == null || foreignLanguage.isEmpty() || transcript.isEmpty() || transcript.toLowerCase().equals(foreignLanguage.toLowerCase());
+    } catch (Exception e) {
+      logger.warn("huh? got " +e + " on " + imported.getID(),e);
+      return true;
+    }
   }
 
   /**
