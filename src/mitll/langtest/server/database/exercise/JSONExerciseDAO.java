@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -40,9 +41,10 @@ public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO {
     JsonExport jsonExport = new JsonExport(null, sectionHelper, null);
 
     try {
-      byte[] encoded = Files.readAllBytes(Paths.get(jsonFile));
+      Path path = Paths.get(jsonFile);
+      byte[] encoded = Files.readAllBytes(path);
       String asString = new String(encoded, ENCODING);
-      logger.info("readExercises reading from " + jsonFile);
+      logger.info("readExercises reading from " + path.toFile().getAbsolutePath());
 
       List<CommonExercise> exercises = jsonExport.getExercises(asString);
 
