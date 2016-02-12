@@ -215,8 +215,7 @@ public class JsonExport {
     JSONArray jsonArray = new JSONArray();
 
     if (node.isLeaf()) {
-      JSONArray exercises = getJsonForSelection(typeToValues, removeExercisesWithMissingAudio);
-      jsonForNode.put(ITEMS, exercises);
+      jsonForNode.put(ITEMS, getJsonForSelection(typeToValues, removeExercisesWithMissingAudio));
     } else {
       for (SectionNode child : node.getChildren()) {
         typeToValues.put(child.getType(), Collections.singletonList(child.getName()));
