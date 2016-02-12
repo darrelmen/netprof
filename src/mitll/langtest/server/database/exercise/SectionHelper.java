@@ -247,16 +247,25 @@ public class SectionHelper<T extends Shell> {
     unitForName.addExercise(exercise);
   }
 
-  public void removeExercise(T exercise) {
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
+   * @see BaseExerciseDAO#removeExercises()
+   * @param exercise
+   */
+  public boolean removeExercise(T exercise) {
     Map<String, String> unitToValue = exercise.getUnitToValue();
     //  logger.debug("Removing " + exercise.getID() + " with " +unitToValue);
+    boolean didRemove = false;
     if (unitToValue != null) {
+      didRemove = true;
       for (Map.Entry<String, String> pair : unitToValue.entrySet()) {
         if (!removeExerciseToLesson(exercise, pair.getKey(), pair.getValue())) {
           logger.warn("removeExercise didn't remove " + exercise.getID() + " for " + pair);
+          didRemove = false;
         }
       }
     }
+    return didRemove;
   }
 
   public void refreshExercise(T exercise) {
