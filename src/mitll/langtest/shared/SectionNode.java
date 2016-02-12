@@ -20,57 +20,50 @@ import java.util.List;
 public class SectionNode implements IsSerializable, Comparable<SectionNode> {
   private String type;
   private String name;
- // private transient float weight;
 
   private List<SectionNode> children = new ArrayList<SectionNode>();
 
-  public SectionNode() {}   // required for serialization
+  public SectionNode() {
+  }   // required for serialization
 
   /**
-   * @see mitll.langtest.server.database.exercise.SectionHelper#addChildren(java.util.List, SectionNode, java.util.Map)
    * @param type
    * @param name
+   * @see mitll.langtest.server.database.exercise.SectionHelper#addChildren(java.util.List, SectionNode, java.util.Map)
    */
-  public SectionNode(String type, String name) { this.type = type; this.name = name; }
+  public SectionNode(String type, String name) {
+    this.type = type;
+    this.name = name;
+  }
 
-  public void addChild(SectionNode node) { children.add(node);}
+  public void addChild(SectionNode node) {
+    children.add(node);
+  }
 
-  public String getName() { return name; }
-  public String getType() { return type; }
-  public boolean isLeaf() { return children.isEmpty(); }
+  public String getName() {
+    return name;
+  }
 
-/*  public float getWeight() {
-    if (isLeaf()) return weight;
-    else { // avg children
-      float total = 0f;
-      for (SectionNode child : children) {
-        total += child.getWeight();
-      }
-      return total/ (float) children.size();
-    }
-  }*/
+  public String getType() {
+    return type;
+  }
 
-/*  public void setWeight(float weight) {
-    if (!isLeaf()) System.err.println("don't set weight on a non-leaf");
-    this.weight = weight;
-  }*/
+  public boolean isLeaf() {
+    return children.isEmpty();
+  }
 
-  public Collection<SectionNode> getChildren() { return children; }
+  public Collection<SectionNode> getChildren() {
+    return children;
+  }
 
   @Override
   public int compareTo(SectionNode o) {
-/*    int i = new Float(getWeight()).compareTo(o.getWeight());
-    if (i == 0) return name.compareTo(o.name);
-    else return i;*/
-
     return name.compareTo(o.name);
   }
 
   public String toString() {
     String example = children.toString();//children.isEmpty() ? "" :children.get(0).toString();
-    return getType() +"="+name +
-        (this.children.isEmpty() ? "" : (" : [(" + this.children.size() + "), e.g. " + example +"]"));
-        //+
-        //    " w " + getWeight();
+    return getType() + "=" + name +
+        (this.children.isEmpty() ? "" : (" : [(" + this.children.size() + "), e.g. " + example + "]"));
   }
 }
