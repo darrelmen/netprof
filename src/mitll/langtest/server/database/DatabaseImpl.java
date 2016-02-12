@@ -344,16 +344,6 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercises
-   */
-/*
-  public Collection<CommonExercise> getExercises() {
-    return getExercises(lessonPlanFile);
-  }
-*/
-
-  /**
    * @param id
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultASRInfo(long, int, int)
@@ -1129,6 +1119,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * Special code to mask out unit/chapter from database in userexercise table.
    * @param id
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String, long, boolean)
@@ -1137,6 +1128,14 @@ public class DatabaseImpl implements Database {
     CommonExercise byID = getUserExerciseWhere(id);  // allow custom items to mask out non-custom items
     if (byID == null) {
       byID = getExercise(id);
+    }
+    else {
+      CommonExercise predef = getExercise(id);
+      if (predef != null) {
+        // DON'T use the unit/chapter from database, at least for now
+        Map<String, String> unitToValue = predef.getUnitToValue();
+        byID.getCombinedMutableUserExercise().setUnitToValue(unitToValue);
+      }
     }
     return byID;
   }
