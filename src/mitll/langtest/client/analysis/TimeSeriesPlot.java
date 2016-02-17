@@ -6,9 +6,9 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.UserPerformance;
+import mitll.langtest.shared.exercise.CommonShell;
 import org.moxieapps.gwt.highcharts.client.*;
 
 import java.util.Date;
@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 11/20/15.
  */
 public class TimeSeriesPlot extends DivWidget {
-//  private final Logger logger = Logger.getLogger("TimeSeriesPlot");
+  private final Logger logger = Logger.getLogger("TimeSeriesPlot");
   protected static final String AVERAGE = "Average";
   private final Map<Long, PhoneSession> timeToSession = new TreeMap<>();
 
@@ -59,11 +59,27 @@ public class TimeSeriesPlot extends DivWidget {
     }
   }
 
-  protected String getAvgTooltip(ToolTipData toolTipData, String seriesName1) {
+  /**
+   * Show count in session if small - since error bars won't be displayed.
+   * @param toolTipData
+   * @param seriesName1
+   * @return
+   */
+  String getAvgTooltip(ToolTipData toolTipData, String seriesName1) {
     String dateToShow = getDateToShow(toolTipData);
+    PhoneSession session = timeToSession.get(toolTipData.getXAsLong());
+
+    String countInfo = (session.getCount() < 10) ? "<br/>n = " + session.getCount() : "";
+
+    return getTooltipPrefix(seriesName1, dateToShow) +
+        "Mean = " + toolTipData.getYAsLong() + "%" +
+        countInfo;
+  }
+
+  private String getTooltipPrefix(String seriesName1, String dateToShow) {
     return "<b>" + seriesName1 + "</b>" +
         "<br/>" + dateToShow +
-        "<br/>Mean = " + toolTipData.getYAsLong() + "%";
+        "<br/>";
   }
 
   /**
@@ -76,17 +92,14 @@ public class TimeSeriesPlot extends DivWidget {
   protected String getErrorBarToolTip(ToolTipData toolTipData, String seriesName1) {
     String dateToShow = getDateToShow(toolTipData);
     Point point = toolTipData.getPoint();
-    PhoneSession session = timeToSession.get(toolTipData.getXAsLong());
+    String s = getSessionCount(toolTipData);
+    String range = "range " + point.getLow() + "-" + point.getHigh();
+    return getTooltipPrefix(seriesName1, dateToShow) + range + s;
+  }
 
-    String s = session == null ? "" : (" n = " + session.getCount());
-    String range = /*point == null ? "" :*/ ("range " + point.getLow() + "-" + point.getHigh());
-    return "<b>" + seriesName1 + "</b>" +
-        "<br/>" +
-        dateToShow
-        +
-        "<br/>" +
-        //"Mean = " + toolTipData.getYAsLong() + "%" +
-        range + s;
+  private String getSessionCount(ToolTipData toolTipData) {
+    PhoneSession session = timeToSession.get(toolTipData.getXAsLong());
+    return session == null ? "" : (" n = " + session.getCount());
   }
 
   protected String getDateToShow(ToolTipData toolTipData) {
@@ -114,6 +127,7 @@ public class TimeSeriesPlot extends DivWidget {
 
   /**
    * Could also use Calendar...
+   *
    * @param nowFormat
    * @param shortForDate
    * @return
@@ -124,9 +138,9 @@ public class TimeSeriesPlot extends DivWidget {
   }
 
   /**
+   * @param phoneSessions
    * @see AnalysisPlot#setVisibility(long, long)
    * @see PhonePlot#showErrorBarData(List, String, boolean)
-   * @param phoneSessions
    */
   protected void setPhoneSessions(List<PhoneSession> phoneSessions) {
     timeToSession.clear();
@@ -142,7 +156,7 @@ public class TimeSeriesPlot extends DivWidget {
    * @param chart
    * @param seriesTitle
    * @param hidden
-   * @see PhonePlot#getErrorBarChart(String, String, String, List, boolean)
+   * @see PhonePlot#getErrorBarChart
    * @see AnalysisPlot#addErrorBars(UserPerformance, Chart)
    */
   protected Series addErrorBarSeries(List<PhoneSession> phoneSessions, Chart chart, String seriesTitle, boolean hidden) {
@@ -151,8 +165,8 @@ public class TimeSeriesPlot extends DivWidget {
     int i = 0;
     PhoneSession lastSession = getLastSession(phoneSessions);
     for (PhoneSession ts : phoneSessions) {
-      long middle = getSessionTime(lastSession, ts);
-      data[i][0] = middle;
+    //  logger.info("addErrorBarSeries - " + ts);
+      data[i][0] = getSessionTime(lastSession, ts);
       double mean = ts.getMean();
       double stdev = ts.getStdev();
 
