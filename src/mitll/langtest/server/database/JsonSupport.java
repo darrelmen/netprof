@@ -15,8 +15,6 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.math.BigDecimal;
-import java.text.CollationKey;
-import java.text.Collator;
 import java.util.*;
 
 /**
@@ -34,7 +32,6 @@ public class JsonSupport {
   private final String installPath;
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#setInstallPath(String, String, String)
    * @param sectionHelper
    * @param resultDAO
    * @param refResultDAO
@@ -42,9 +39,10 @@ public class JsonSupport {
    * @param phoneDAO
    * @param configDir
    * @param installPath
+   * @see mitll.langtest.server.database.DatabaseImpl#setInstallPath(String, String, String)
    */
-  public JsonSupport(SectionHelper<CommonExercise> sectionHelper, ResultDAO resultDAO,RefResultDAO refResultDAO, AudioDAO audioDAO,
-                     PhoneDAO phoneDAO,String configDir, String installPath) {
+  public JsonSupport(SectionHelper<CommonExercise> sectionHelper, ResultDAO resultDAO, RefResultDAO refResultDAO, AudioDAO audioDAO,
+                     PhoneDAO phoneDAO, String configDir, String installPath) {
     this.sectionHelper = sectionHelper;
     this.resultDAO = resultDAO;
     this.refResultDAO = refResultDAO;
@@ -53,12 +51,13 @@ public class JsonSupport {
     this.configDir = configDir;
     this.installPath = installPath;
   }
+
   /**
-   * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    * @param userid
    * @param typeToSection
-   * @paramx collator
    * @return
+   * @paramx collator
+   * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   public JSONObject getJsonScoreHistory(long userid,
                                         Map<String, Collection<String>> typeToSection,
@@ -88,11 +87,11 @@ public class JsonSupport {
     return addJsonHistory(exerciseCorrectAndScores);
   }
 
-    /**
-     * @see DatabaseImpl#getJsonRefResult(Map) 
-     * @param typeToSection
-     * @return
-     */
+  /**
+   * @param typeToSection
+   * @return
+   * @see DatabaseImpl#getJsonRefResult(Map)
+   */
   public JSONObject getJsonRefResults(Map<String, Collection<String>> typeToSection) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToSection);
     List<String> allIDs = new ArrayList<String>();
@@ -177,9 +176,9 @@ public class JsonSupport {
   /**
    * scoreJson has the complete scoring json for the last item only.
    *
-   * @see #getJsonScoreHistory
    * @param exerciseCorrectAndScores
    * @return
+   * @see #getJsonScoreHistory
    */
   private JSONObject addJsonHistory(Collection<ExerciseCorrectAndScore> exerciseCorrectAndScores) {
     JSONArray scores = new JSONArray();
@@ -192,7 +191,8 @@ public class JsonSupport {
       boolean lastCorrect = getHistoryAsJson(history, correctAndScoresLimited);
       boolean empty = correctAndScoresLimited.isEmpty();
       if (!empty) {
-        if (lastCorrect) correct++; else incorrect++;
+        if (lastCorrect) correct++;
+        else incorrect++;
       }
 
       JSONObject exAndScores = new JSONObject();
@@ -200,19 +200,18 @@ public class JsonSupport {
       exAndScores.put("s", Integer.toString(ex.getAvgScorePercent()));
       exAndScores.put("h", history);
       exAndScores.put("scores", getScoresAsJson(correctAndScoresLimited));
-      exAndScores.put("scoreJson",empty?"":correctAndScoresLimited.get(correctAndScoresLimited.size()-1).getScoreJson());
+      exAndScores.put("scoreJson", empty ? "" : correctAndScoresLimited.get(correctAndScoresLimited.size() - 1).getScoreJson());
       scores.add(exAndScores);
     }
 
     JSONObject container = new JSONObject();
     container.put("scores", scores);
-    container.put("lastCorrect",   Integer.toString(correct));
+    container.put("lastCorrect", Integer.toString(correct));
     container.put("lastIncorrect", Integer.toString(incorrect));
     return container;
   }
 
   /**
-   *
    * @param history
    * @param correctAndScoresLimited
    * @return array of Y's and N's
@@ -228,7 +227,7 @@ public class JsonSupport {
   }
 
 
-  private JSONArray getScoresAsJson( Collection<CorrectAndScore> correctAndScoresLimited) {
+  private JSONArray getScoresAsJson(Collection<CorrectAndScore> correctAndScoresLimited) {
     JSONArray history = new JSONArray();
 
     for (CorrectAndScore cs : correctAndScoresLimited) {
@@ -237,7 +236,10 @@ public class JsonSupport {
     return history;
   }
 
-  private static float round(float d) { return round(d, 3);	}
+  private static float round(float d) {
+    return round(d, 3);
+  }
+
   private static float round(float d, int decimalPlace) {
     BigDecimal bd = new BigDecimal(Float.toString(d));
     bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
@@ -247,20 +249,21 @@ public class JsonSupport {
   /**
    * Wasteful... - why do we do attach audio on every call?
    * And exToAudio is wasteful too...
-   *
+   * <p>
    * For all the exercises in a chapter
-
-   Get latest results
-   Get phones for latest
-
-   //Score phones
-   Sort phone scores – asc
-
-   Map phone->example
-
-   Join phone->word
-
-   Sort word by score asc
+   * <p>
+   * Get latest results
+   * Get phones for latest
+   * <p>
+   * //Score phones
+   * Sort phone scores – asc
+   * <p>
+   * Map phone->example
+   * <p>
+   * Join phone->word
+   * <p>
+   * Sort word by score asc
+   *
    * @return
    * @see mitll.langtest.server.ScoreServlet#getPhoneReport
    * @see DatabaseImpl#getJsonPhoneReport(long, Map)
@@ -272,7 +275,7 @@ public class JsonSupport {
     Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
     long now = System.currentTimeMillis();
 
-    if (now-then > 500) logger.warn("took " + (now-then) + " millis to get ex->audio map");
+    if (now - then > 500) logger.warn("took " + (now - then) + " millis to get ex->audio map");
 
     List<String> ids = new ArrayList<String>();
     Map<String, String> idToRef = new HashMap<String, String>();
@@ -288,7 +291,7 @@ public class JsonSupport {
 
     now = System.currentTimeMillis();
 
-    if (now-then > 300) logger.warn("getJsonPhoneReport : took " + (now-then) + " millis to attach audio again!");
+    if (now - then > 300) logger.warn("getJsonPhoneReport : took " + (now - then) + " millis to attach audio again!");
 
     return phoneDAO.getWorstPhonesJson(userid, ids, idToRef);
   }
