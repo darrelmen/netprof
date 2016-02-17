@@ -42,13 +42,13 @@ import java.util.logging.Logger;
 class UserContainer extends SimplePagingContainer<UserInfo> {
   private final Logger logger = Logger.getLogger("UserContainer");
 
-  private static final String SIGNED_UP1 = "Started";//Signed Up";
+  private static final String SIGNED_UP1 = "Started";
 
   private static final int MAX_LENGTH_ID = 13;
 
   private static final int ID_WIDTH = 130;
   public static final int TABLE_WIDTH = 420;
-  private static final int SIGNED_UP = 90;
+  private static final int SIGNED_UP = 95;
   private static final String CURRENT = "Curr.";
   private static final int CURRENT_WIDTH = 60;
   private static final int DIFF_WIDTH = 55;
