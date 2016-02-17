@@ -537,9 +537,9 @@ public class UserDAO extends DAO {
    */
   public User getUserWhere(long userid) {
     String sql = "SELECT * from users where " + ID + "=" + userid + ";";
-    long then = System.currentTimeMillis();
-    List<User> users = getUsers(sql);
-    long now = System.currentTimeMillis();
+    //long then = System.currentTimeMillis();
+    Collection<User> users = getUsers(sql);
+   // long now = System.currentTimeMillis();
     //logger.debug("getUserWhere took " +(now-then) + " millis.");
 
     if (users.isEmpty()) {
@@ -548,7 +548,7 @@ public class UserDAO extends DAO {
       }
       return null;
     } else if (users.size() > 1) {
-      logger.warn(language + " : huh? " + users.size() + " with  id " + userid);
+      logger.warn(language + " : getUserWhere huh? " + users.size() + " with id " + userid + " expecting only one.");
     }
 
     return users.iterator().next();

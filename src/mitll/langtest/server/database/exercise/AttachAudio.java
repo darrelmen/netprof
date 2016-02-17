@@ -4,7 +4,6 @@
 
 package mitll.langtest.server.database.exercise;
 
-import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.exercise.*;
 import org.apache.log4j.Logger;
@@ -33,10 +32,11 @@ public class AttachAudio {
    * @param installPath
    * @param audioOffset
    * @param exToAudio
-   * @see ExerciseDAO#setAudioDAO(AudioDAO, String, String)
+   * @see BaseExerciseDAO#setAudioDAO
    */
   public AttachAudio(String mediaDir,
-                     String mediaDir1, File installPath,
+                     String mediaDir1,
+                     File installPath,
                      int audioOffset,
                      Map<String, List<AudioAttribute>> exToAudio) {
     this.mediaDir = mediaDir;
@@ -102,13 +102,16 @@ public class AttachAudio {
    * @see ExcelImport#getRawExercises()
    */
   public <T extends CommonExercise> int attachAudio(T imported) {
-    //String mediaDir1 = mediaDir.replaceAll("bestAudio","");
-    //logger.debug("media dir " + mediaDir1);
     String id = imported.getID();
     int missing = 0;
     if (exToAudio.containsKey(id) || exToAudio.containsKey(id + "/1") || exToAudio.containsKey(id + "/2")) {
       List<AudioAttribute> audioAttributes = exToAudio.get(id);
+
+   //   if (audioAttributes.isEmpty()) logger.info("huh? audio attr empty for " + id);
       missing = attachAudio(imported, missing, audioAttributes);
+
+    //  if (imported.hasRefAudio()) logger.info("for " +id + " attached " + imported.getAudioAttributes().size() + " audio refs");
+
       //logger.debug("added " + c + " to " + id);
     }
 //    if (!imported.hasRefAudio() && imported.getID().startsWith("Custom")) {
@@ -120,7 +123,15 @@ public class AttachAudio {
     return missing;
   }
 
-  public <T extends CommonExercise> int attachAudio(T imported, int missing, Collection<AudioAttribute> audioAttributes) {
+  /**
+   *
+   * @param imported
+   * @param missing
+   * @param audioAttributes
+   * @param <T>
+   * @return
+   */
+  private <T extends CommonExercise> int attachAudio(T imported, int missing, Collection<AudioAttribute> audioAttributes) {
     MutableAudioExercise mutableAudio = imported.getMutableAudio();
 
     if (audioAttributes == null) {
@@ -130,7 +141,7 @@ public class AttachAudio {
         logger.error("attachAudio can't find " + id);
       }
     } else if (!audioAttributes.isEmpty()) {
-      Set<String> audioPaths = new HashSet<String>();
+      Set<String> audioPaths = new HashSet<>();
       for (AudioAttribute audioAttribute : imported.getAudioAttributes()) {
         audioPaths.add(audioAttribute.getAudioRef());
       }
@@ -144,14 +155,15 @@ public class AttachAudio {
 
         boolean exists = test.exists();
         if (!exists) {
-          //   logger.debug("child " + test.getAbsolutePath() + " doesn't exist");
-          //test = new File(installPath, audio.getAudioRef());
-         // exists = test.exists();
+         // if (imported.getID().equals("50264")) logger.debug("mediaDir1 " + mediaDir1 + "child " + test.getAbsolutePath() + " doesn't exist");
+          test = new File(installPath, audio.getAudioRef());
+          exists = test.exists();
          // if (!exists) {
             //     logger.debug("child " + test.getAbsolutePath() + " doesn't exist");
           //}
           child = audio.getAudioRef();
         }
+
         if (exists) {
           if (!audioPaths.contains(child)) {
             boolean sameTranscript = checkMatchingTranscript(imported, audio);
