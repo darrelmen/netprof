@@ -109,7 +109,9 @@ public class DatabaseImpl implements Database {
    */
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
                       PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify) {
-    this(new H2Connection(configDir, dbName, mustAlreadyExist), configDir, relativeConfigDir, dbName, serverProps, pathHelper, logAndNotify);
+    this(new H2Connection(configDir, dbName, mustAlreadyExist, logAndNotify), configDir, relativeConfigDir, dbName,
+        serverProps,
+        pathHelper, logAndNotify);
   }
 
   public DatabaseImpl(DatabaseConnection connection,
@@ -325,7 +327,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath
    */
   public void setInstallPath(String installPath, String lessonPlanFile, String mediaDir) {
-    // logger.debug("got install path " + installPath + " media " + mediaDir);
+  //  logger.debug("got install path " + installPath + " media " + mediaDir);
     this.installPath = installPath;
     makeDAO(lessonPlanFile, mediaDir, installPath);
     this.jsonSupport = new JsonSupport(getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
@@ -880,14 +882,10 @@ public class DatabaseImpl implements Database {
    */
   public Map<String, String> getExerciseIDToRefAudio() {
     Map<String, String> join = new HashMap<>();
-
     populateIDToRefAudio(join, getExercises());
-
     Collection<CommonExercise> all = userExerciseDAO.getAll();
     exerciseDAO.attachAudio(all);
-
     populateIDToRefAudio(join, all);
-
     return join;
   }
 
@@ -901,6 +899,7 @@ public class DatabaseImpl implements Database {
         join.put(id, refAudio);
       }
     }
+    if (join.isEmpty()) logger.warn("huh? no ref audio on " + all.size() + " exercises???");
   }
 
   public AnswerDAO getAnswerDAO() {
@@ -1120,6 +1119,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * Special code to mask out unit/chapter from database in userexercise table.
+   *
    * @param id
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String, long, boolean)
@@ -1128,8 +1128,7 @@ public class DatabaseImpl implements Database {
     CommonExercise byID = getUserExerciseWhere(id);  // allow custom items to mask out non-custom items
     if (byID == null) {
       byID = getExercise(id);
-    }
-    else {
+    } else {
       CommonExercise predef = getExercise(id);
       if (predef != null) {
         // DON'T use the unit/chapter from database, at least for now
