@@ -87,11 +87,13 @@ import java.util.logging.Logger;
  * - Fix leaving around lots of temp directories
  * 1.2.0
  * - Refactor to add in Amas website support, and steps toward supporting getting content from json
+ * 1.2.1
+ * - bug fix for display of ref audio in analysis
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private Logger logger = Logger.getLogger("LangTest");
 
-  private static final String VERSION_INFO = "1.2.0";
+  private static final String VERSION_INFO = "1.2.1";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
