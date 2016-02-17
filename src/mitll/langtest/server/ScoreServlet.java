@@ -73,6 +73,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String YEAR = "year";
   private static final String JSON_REPORT = "jsonReport";
   private static final String REPORT = "report";
+  public static final String VERSION_NOW = "1.0";
   private boolean removeExercisesWithMissingAudioDefault = true;
 
   private RestUserManagement userManagement;
@@ -178,7 +179,10 @@ public class ScoreServlet extends DatabaseServlet {
     }
 
     long now = System.currentTimeMillis();
-    logger.info("doGet : took " + (now - then) + " millis to do " + request.getQueryString());
+    long l = now - then;
+    if (l > 10) {
+      logger.info("doGet : took " + l + " millis to do " + request.getQueryString());
+    }
     reply(response, toReturn.toString());
   }
 
@@ -803,11 +807,13 @@ public class ScoreServlet extends DatabaseServlet {
       setPaths();
 
       db = getDatabase();
-      serverProps = db.getServerProps();
-      audioFileHelper = getAudioFileHelperRef();
-      this.userManagement = new RestUserManagement(db, serverProps, pathHelper);
-      //loadTesting = getLoadTesting();
-      removeExercisesWithMissingAudioDefault = serverProps.removeExercisesWithMissingAudio();
+      if (db != null) {
+        serverProps = db.getServerProps();
+        audioFileHelper = getAudioFileHelperRef();
+        this.userManagement = new RestUserManagement(db, serverProps, pathHelper);
+        //loadTesting = getLoadTesting();
+        removeExercisesWithMissingAudioDefault = serverProps.removeExercisesWithMissingAudio();
+      }
     }
   }
 
@@ -889,7 +895,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private void addVersion(JSONObject jsonObject) {
-    jsonObject.put(VERSION, "1.0");
+    jsonObject.put(VERSION, VERSION_NOW);
     jsonObject.put(HAS_MODEL, !db.getServerProps().isNoModel());
     jsonObject.put("Date", new Date().toString());
   }
