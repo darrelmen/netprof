@@ -23,6 +23,7 @@ import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.server.database.WordDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.decoder.RefResultDecoder;
@@ -379,7 +380,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (now - then > 100) {
       logger.debug("used " + exercises2.size() + " exercises to build a hierarchy in " + (now - then) + " millis");
     }
-    helper.report();
+    //helper.report();
     Collection<T> exercisesForState = helper.getExercisesForSelectionState(typeToSelection);
     // logger.debug("\tafter found " + exercisesForState.size() + " matches to " + typeToSelection);
     return exercisesForState;
@@ -2208,7 +2209,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public List<WordScore> getWordScores(long id, int minRecordings) {
-    return db.getAnalysis().getWordScoresForUser(id, minRecordings);
+    List<WordScore> wordScoresForUser = db.getAnalysis().getWordScoresForUser(id, minRecordings);
+    for (WordScore ws : wordScoresForUser) if (ws.getNativeAudio() != null) logger.info("got " +ws.getId() + " " + ws.getNativeAudio());
+    return wordScoresForUser;
   }
 
   @Override
@@ -2342,8 +2345,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String lessonPlanFile = getLessonPlan();
     if (!new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
-    db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile,
-        relativeConfigDir + File.separator + serverProps.getMediaDir());
+    String mediaDir = relativeConfigDir + File.separator + serverProps.getMediaDir();
+    logger.debug("setInstallPath " + pathHelper.getInstallPath() + " " + lessonPlanFile + " media " + serverProps.getMediaDir() + " rel media " + mediaDir);
+    db.setInstallPath(pathHelper.getInstallPath(),
+        lessonPlanFile,
+        mediaDir);
   }
 
   private String getLessonPlan() {
