@@ -24,34 +24,26 @@ import java.util.Date;
 public class Analysis extends DAO {
   private static final Logger logger = Logger.getLogger(Analysis.class);
 
- // private static final int MAX_EXAMPLES = 50;
   private static final boolean DEBUG = false;
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
   private static final float MIN_SCORE_TO_SHOW = 0.20f;
-  //  private static final int DESIRED_NUM_SESSIONS = 15;
-//  public static final int MIN_SESSION_SIZE = 9;
   private final ParseResultJson parseResultJson;
   private final PhoneDAO phoneDAO;
   private Map<String, String> exToRef;
-  private static final long MINUTE = 60 * 1000;
-  private static final long HOUR = 60 * MINUTE;
-  //  private static final long FIVEMIN = 5 * MINUTE;
-  private static final long DAY = 24 * HOUR;
-//  private static final long WEEK = 7 * DAY;
-//  private static final long MONTH = 4 * WEEK;
-//  private static final long SESSION_GAP = 10 * MINUTE;  // 5 minutes
 
   /**
    * @param database
    * @param phoneDAO
    * @see DatabaseImpl#getAnalysis()
+   * @see DatabaseImpl#makeDAO(String, String, String)
    */
   public Analysis(Database database, PhoneDAO phoneDAO, Map<String, String> exToRef) {
     super(database);
     parseResultJson = new ParseResultJson(database.getServerProps());
     this.phoneDAO = phoneDAO;
-    this.setExToRef(exToRef);
+    this.exToRef = exToRef;
+    logger.info("Analysis : exToRef has " + exToRef.size() +"\n\n");
   }
 
   private final Set<String> lincoln = new HashSet<>(Arrays.asList("gvidaver", "rbudd", "jmelot", "esalesky", "gatewood",
@@ -313,28 +305,6 @@ public class Analysis extends DAO {
 
       if (DEBUG)
         logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - then) + " millis to phone report");
-
-      //Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
-
-/*      if (DEBUG) logger.info("getPhonesForUser report phonesForUser " + phonesForUser);
-
-      for (Map.Entry<String, List<WordAndScore>> pair : phonesForUser.entrySet()) {
-        String phone = pair.getKey();
-        List<WordAndScore> value = pair.getValue();
-        if (DEBUG) logger.info(phone + " = " + value.size() + " first " + value.get(0));
-        List<WordAndScore> subset = new ArrayList<>();
-
-        Set<String> unique = new HashSet<>();
-        for (WordAndScore ws : value) {
-          if (!unique.contains(ws.getWord())) {
-            unique.add(ws.getWord());
-            subset.add(ws);
-            if (unique.size() == MAX_EXAMPLES) break;
-          }
-        }
-        phonesForUser.put(phone, subset);
-      }*/
-
       if (DEBUG) logger.info("getPhonesForUser report phoneReport " + phoneReport);
 
       if (DEBUG) {
@@ -513,7 +483,7 @@ public class Analysis extends DAO {
 
     if (DEBUG || true) {
       logger.info("total " + count + " missing audio " + missing +
-          " iPad = " + iPad + " flashcard " + flashcard + " learn " + learn);
+          " iPad = " + iPad + " flashcard " + flashcard + " learn " + learn + " exToRef " + exToRef.size());
       if (!missingAudio.isEmpty()) logger.info("missing audio " + missingAudio);
     }
 
@@ -539,44 +509,25 @@ public class Analysis extends DAO {
     List<WordScore> results = new ArrayList<WordScore>();
 
     long then = System.currentTimeMillis();
-
-//    int c = 0;
     int skipped = 0;
-   // Map<String, WordScore> idToScore = new HashMap<>();
-  //  List<WordScore> wordScores = new ArrayList<>();
-
     for (BestScore bs : bestScores) {
       String json = bs.getJson();
       if (json == null) {
         //c++;
-        logger.error("huh? no json for " + bs);
+        logger.error("getWordScore huh? no json for " + bs);
       } else if (json.equals("{}")) {
-        logger.warn("json is empty for " + bs);
+        logger.warn("getWordScore json is empty for " + bs);
         // skip low scores
       } else if (bs.getScore() > MIN_SCORE_TO_SHOW) {
         if (json.isEmpty()) logger.warn("no json for " + bs);
         Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(json);
-        //  results.add(new WordScore(bs, netPronImageTypeListMap));
         WordScore wordScore = new WordScore(bs, netPronImageTypeListMap);
-     //   WordScore current = idToScore.get(wordScore.getId());
-//        if (current == null || current.getTimestamp() < wordScore.getTimestamp()) {
-//          if (idToScore.containsKey(wordScore.getId())) {
-//            WordScore wordScore1 = idToScore.get(wordScore.getId());
-//            logger.warn("getWordScore stepping on " + new Date(wordScore1.getTimestamp()));
-//          }
-//          idToScore.put(wordScore.getId(), wordScore);
-//        }
-//        else {
-//          logger.warn("skip " +current + " and " + wordScore);
-//        }
         results.add(wordScore);
       } else {
+//        logger.warn("getWordScore score " + bs.getScore()  + " is below threshold.");
         skipped++;
       }
     }
-
-    //results.addAll(wordScores.values());
-   // Collections.sort(results);
 
     long now = System.currentTimeMillis();
     if (now - then > 50) {
@@ -592,9 +543,5 @@ public class Analysis extends DAO {
     logger.info("getWordScore out of " + bestScores.size() + " skipped " + skipped);
 
     return results;
-  }
-
-  private void setExToRef(Map<String, String> exToRef) {
-    this.exToRef = exToRef;
   }
 }
