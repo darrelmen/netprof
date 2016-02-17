@@ -286,9 +286,9 @@ public abstract class BaseExerciseDAO {
    * @see DatabaseImpl#getExercise(String)
    */
   public CommonExercise getExercise(String id) {
-    if (idToExercise.isEmpty()) {
-      logger.error("huh? couldn't find any exercises..? " + id);
-    }
+//    if (idToExercise.isEmpty()) {
+//      logger.error("huh? couldn't find any exercises..? " + id);
+//    }
 
     synchronized (this) {
       CommonExercise exercise = idToExercise.get(id);
