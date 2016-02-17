@@ -207,7 +207,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
       Iterator<Row> iter = sheet.rowIterator();
       Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
       boolean gotUCW = unitIndex != -1;
-      List<String> columns = iter.hasNext() ? getHeader(iter.next()): Collections.emptyList();
+      List<String> columns;
 
       for (; iter.hasNext(); ) {
         Row next = iter.next();
@@ -215,6 +215,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
         boolean inMergedRow = rowToRange.keySet().contains(next.getRowNum());
 
         if (!gotHeader) {
+          columns = getHeader(next); // could be several junk rows at the top of the spreadsheet
+
           List<String> predefinedTypeOrder = new ArrayList<String>();
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
@@ -405,12 +407,14 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
       Iterator<Row> iter = sheet.rowIterator();
       boolean gotUCW = unitIndex != -1;
 
-      List<String> columns = iter.hasNext() ? getHeader(iter.next()): Collections.emptyList();
+      List<String> columns;
 
       for (; iter.hasNext(); ) {
         Row next = iter.next();
 
         if (!gotHeader) {
+          columns = getHeader(next); // could be several junk rows at the top of the spreadsheet
+
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
             if (colNormalized.startsWith(WORD)) {
