@@ -8,18 +8,18 @@ import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundPlayer;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.TimeAndScore;
 import mitll.langtest.shared.analysis.UserPerformance;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.CommonShell;
 import org.moxieapps.gwt.highcharts.client.*;
 import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEvent;
 import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEventHandler;
@@ -36,6 +36,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/19/15.
  */
 public class AnalysisPlot extends TimeSeriesPlot {
+  public static final int MIN_SESSION_COUNT = 50;
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
   private static final int X_OFFSET_LEGEND = 65;
@@ -78,11 +79,13 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
   private Chart chart = null;
   private AnalysisTab.TIME_HORIZON timeHorizon;
-  private long lastTime;
+  /**
+   * @see #setRawBestScores(List)
+   */
   private long firstTime;
+  private long lastTime;
   private final List<Long> weeks = new ArrayList<>();
   private final List<Long> months = new ArrayList<>();
-  // private final Icon playFeedback;
 
   /**
    * @param service
@@ -102,7 +105,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
     this.service = service;
     this.userid = userid;
-    //  this.playFeedback = playFeedback;
     populateGranToLabel();
 
     this.playAudio = new PlayAudio(service, new SoundPlayer(soundManagerAPI), playFeedback);
@@ -112,7 +114,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
   }
 
   private void populateGranToLabel() {
-    this.granToLabel = new HashMap<Long, String>();
+    this.granToLabel = new HashMap<>();
     granToLabel.put(HOUR, "Hour");
     granToLabel.put(QUARTER, "6 Hours");
     granToLabel.put(DAY, "Day");
@@ -147,7 +149,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
   private SortedSet<Long> getPeriods(List<PhoneSession> phoneSessions, long granularity, final long lastTime) {
     int i = phoneSessions.size() - 1;
-    SortedSet<Long> months2 = new TreeSet<Long>();
+    SortedSet<Long> months2 = new TreeSet<>();
     //   logger.info("Examine  " + granularity + " : " + phoneSessions.size() + " last " + new Date(lastTime));
     long start = lastTime - granularity;
     long last = lastTime;
@@ -186,7 +188,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
   private void addChart(UserPerformance userPerformance, String userChosenID) {
     clear();
-    //   listeners.clear();
+
     List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
     float v = userPerformance.getRawAverage() * 100;
     int rawTotal = rawBestScores.size();
@@ -209,7 +211,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
         if (chart != null) {
           // logger.info("doing deferred ---------- ");
           for (Series series : seriesToVisible.keySet()) {
-            String name = series.getName();
+            //  String name = series.getName();
             Boolean expected = seriesToVisible.get(series);
             if (expected) {
 //              logger.info("showSeriesByVisible defer : series " + name + "/" + series + " : " + series.isVisible());
@@ -268,11 +270,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
     List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
 
-    TimeAndScore first = rawBestScores.get(0);
-    TimeAndScore last = rawBestScores.get(rawBestScores.size() - 1);
-
-    long diff = last.getTimestamp() - first.getTimestamp();
-    boolean shortPeriod = diff < QUARTER;
+    boolean shortPeriod = isShortPeriod(rawBestScores);
     addSeries(rawBestScores,
         userPerformance.getiPadTimeAndScores(),
         userPerformance.getLearnTimeAndScores(),
@@ -289,6 +287,20 @@ public class AnalysisPlot extends TimeSeriesPlot {
     return chart;
   }
 
+  private boolean isShortPeriod(List<TimeAndScore> rawBestScores) {
+    if (rawBestScores.size() < 2) return true;
+    TimeAndScore first = rawBestScores.get(0);
+    TimeAndScore last = rawBestScores.get(rawBestScores.size() - 1);
+
+    long diff = last.getTimestamp() - first.getTimestamp();
+    return diff < QUARTER;
+  }
+
+  /**
+   * @param userPerformance
+   * @param chart
+   * @see #getChart(String, String, String, UserPerformance)
+   */
   private void addErrorBars(UserPerformance userPerformance, Chart chart) {
     granToError.clear();
     granularityToSessions = userPerformance.getGranularityToSessions();
@@ -297,20 +309,23 @@ public class AnalysisPlot extends TimeSeriesPlot {
     Collections.sort(grans);
     for (Long gran : grans) {
       String label = granToLabel.get(gran);
-      //logger.info("Adding for " + label);
+   //   logger.info("addErrorBars Adding for " + label);
       List<PhoneSession> phoneSessions = granularityToSessions.get(gran);
-      Series series = addErrorBarSeries(phoneSessions, chart, label, true);
-      granToError.put(gran, series);
+      granToError.put(gran, addErrorBarSeries(phoneSessions, chart, label, true));
 
       Series avgSeries = addMeans(phoneSessions, chart, label, true);
       granToAverage.put(gran, avgSeries);
     }
 
     long now = System.currentTimeMillis();
+
+//    logger.info("setVisiblity for " + new Date(now));
     setVisibility(now - YEARS, now);
   }
 
   /**
+   * Choose which granularity of data to show - hours, weeks, month, etc.
+   *
    * @param start
    * @param end
    * @see #addErrorBars(UserPerformance, Chart)
@@ -321,17 +336,14 @@ public class AnalysisPlot extends TimeSeriesPlot {
     List<Long> grans = new ArrayList<>(granularityToSessions.keySet());
 
     Collections.sort(grans);
-    boolean oneSet = false;
 
     Series errorSeries = null;
     Series averageSeries = null;
 
-    for (Long gran : grans) {
-      Series series = granToError.get(gran);
-      seriesToVisible.put(series, false);
-      Series avgSeries = granToAverage.get(gran);
-      seriesToVisible.put(avgSeries, false);
+    hideAllSeries();
 
+    boolean oneSet = false;
+    for (Long gran : grans) {
       if (!oneSet) {
         List<PhoneSession> phoneSessions = granularityToSessions.get(gran);
 
@@ -343,7 +355,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
             //  logger.info("\t " + gran + " session " + session);
             size++;
             total += session.getCount();
-            if (session.getCount() > 50) anyBigger = true;
+            if (session.getCount() > MIN_SESSION_COUNT) anyBigger = true;
           }
         }
         //       String label = granToLabel.get(gran);
@@ -352,8 +364,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
         if (PhoneSession.chooseThisSize(size, total, anyBigger)) {
           oneSet = true;
-          errorSeries = series;
-          averageSeries = avgSeries;
+          errorSeries = granToError.get(gran);
+          averageSeries = granToAverage.get(gran);
           setPhoneSessions(granularityToSessions.get(gran));
           //logger.info("setVisibility 1 chose " + seriesInfo + " : " + size + " visible " + series.isVisible());
         }
@@ -366,6 +378,15 @@ public class AnalysisPlot extends TimeSeriesPlot {
     showErrorBarsOrDetail(oneSet, errorSeries, averageSeries);
   }
 
+  private void hideAllSeries() {
+    for (Long gran : granularityToSessions.keySet()) {
+      Series series = granToError.get(gran);
+      seriesToVisible.put(series, false);
+      Series avgSeries = granToAverage.get(gran);
+      seriesToVisible.put(avgSeries, false);
+    }
+  }
+
   private void showErrorBarsOrDetail(boolean oneSet, Series errorSeries, Series averageSeries) {
     for (Series series : detailSeries) seriesToVisible.put(series, false);
     if (!oneSet) {
@@ -375,6 +396,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
       Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
         public void execute() {
+          // logger.info("showErrorBarsOrDetail - redraw");
+
           for (Series series : detailSeries) {
             series.setVisible(true, false);
           }
@@ -500,13 +523,12 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * @param yValuesForUser
    * @param chart
    * @param seriesTitle
-   * @paramx gameTimeSeconds
    * @see #getChart
    */
-  private void addSeries(List<TimeAndScore> yValuesForUser,
-                         List<TimeAndScore> iPadData,
-                         List<TimeAndScore> learnData,
-                         List<TimeAndScore> avpData,
+  private void addSeries(Collection<TimeAndScore> yValuesForUser,
+                         Collection<TimeAndScore> iPadData,
+                         Collection<TimeAndScore> learnData,
+                         Collection<TimeAndScore> avpData,
                          Chart chart,
                          String seriesTitle, boolean visible) {
     addCumulativeAverage(yValuesForUser, chart, seriesTitle, visible);
@@ -516,7 +538,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     addBrowserData(avpData, chart, true, visible);
   }
 
-  private void addCumulativeAverage(List<TimeAndScore> yValuesForUser, Chart chart, String seriesTitle, boolean isVisible) {
+  private void addCumulativeAverage(Collection<TimeAndScore> yValuesForUser, Chart chart, String seriesTitle, boolean isVisible) {
     Number[][] data = new Number[yValuesForUser.size()][2];
     int i = 0;
     for (TimeAndScore ts : yValuesForUser) {
@@ -537,7 +559,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     detailSeries.add(series);
   }
 
-  private void addDeviceData(List<TimeAndScore> iPadData, Chart chart, boolean isVisible) {
+  private void addDeviceData(Collection<TimeAndScore> iPadData, Chart chart, boolean isVisible) {
     if (!iPadData.isEmpty()) {
       Number[][] data = getDataForTimeAndScore(iPadData);
 
@@ -551,7 +573,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     }
   }
 
-  private void addBrowserData(List<TimeAndScore> browserData, Chart chart, boolean isAVP, boolean isVisible) {
+  private void addBrowserData(Collection<TimeAndScore> browserData, Chart chart, boolean isAVP, boolean isVisible) {
     if (!browserData.isEmpty()) {
       Number[][] data = getDataForTimeAndScore(browserData);
 
@@ -566,7 +588,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     }
   }
 
-  private Number[][] getDataForTimeAndScore(List<TimeAndScore> yValuesForUser) {
+  private Number[][] getDataForTimeAndScore(Collection<TimeAndScore> yValuesForUser) {
     Number[][] data = new Number[yValuesForUser.size()][2];
 
     int i = 0;
@@ -591,19 +613,23 @@ public class AnalysisPlot extends TimeSeriesPlot {
         .setMax(100);
 
     chart.getXAxis()
+        .setStartOnTick(true)
+        .setEndOnTick(true)
         .setType(Axis.Type.DATE_TIME).setAxisSetExtremesEventHandler(new AxisSetExtremesEventHandler() {
       @Override
       public boolean onSetExtremes(AxisSetExtremesEvent axisSetExtremesEvent) {
         if (axisSetExtremesEvent != null) {
+         // logger.info("configureChart window " + firstTime + " " + lastTime);
+
           gotExtremes(axisSetExtremesEvent);
-        } else {
-          logger.warning("got null event");
         }
+        //else {
+        //  logger.warning("got null event");
+        // }
         return true;
       }
     });
 
-    //   int clientHeight = Window.getClientHeight();
     int chartHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
     chart.setHeight(chartHeight + "px");
   }
@@ -625,6 +651,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
     try {
       Number min = axisSetExtremesEvent.getMin();
       Number max = axisSetExtremesEvent.getMax();
+
+   //   logger.info("gotExtremes got min " + min + " max " + max);
       if (min != null && min.longValue() > 0) {
         long end = max.longValue();
         setVisibility(min.longValue(), end);
@@ -638,11 +666,13 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
     } catch (Exception e) {
       e.printStackTrace();
-      logger.warning("Got " +e);
+      logger.warning("Got " + e);
     }
   }
 
   /**
+   * Remember time window of data (x-axis).
+   *
    * @param rawBestScores
    * @see #addChart(UserPerformance, String)
    */
@@ -658,8 +688,11 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
     if (!rawBestScores.isEmpty()) {
       TimeAndScore timeAndScore = rawBestScores.get(rawBestScores.size() - 1);
+
       this.firstTime = rawBestScores.get(0).getTimestamp();
       this.lastTime = timeAndScore.getTimestamp();
+      // logger.info("setRawBestScores is firstTime " + new Date(firstTime) + " - " + new Date(lastTime));
+
       service.getShells(toGet, new AsyncCallback<List<CommonShell>>() {
         @Override
         public void onFailure(Throwable throwable) {
@@ -670,6 +703,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
           for (CommonShell shell : commonShells) idToEx.put(shell.getID(), shell);
         }
       });
+    } else {
+      //logger.info("rawBest is empty?");
     }
   }
 
@@ -682,9 +717,9 @@ public class AnalysisPlot extends TimeSeriesPlot {
   }
 
   /**
-   * @see AnalysisTab#getClickHandler(AnalysisTab.TIME_HORIZON)
    * @param timeHorizon
    * @return
+   * @see AnalysisTab#getClickHandler(AnalysisTab.TIME_HORIZON)
    */
   public long setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon) {
     this.timeHorizon = timeHorizon;
@@ -697,39 +732,48 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
   private TimeWidgets timeWidgets;
 
+  /**
+   * @param timeHorizon
+   * @return
+   * @see #setTimeHorizon(AnalysisTab.TIME_HORIZON)
+   */
   private Long goToLast(AnalysisTab.TIME_HORIZON timeHorizon) {
     this.timeHorizon = timeHorizon;
 
+    // logger.info("goToLast set time from " + new Date(firstTime) + " to " + new Date(lastTime));
     switch (timeHorizon) {
       case WEEK:
-        long from = lastTime - WEEK;
-        chart.getXAxis().setExtremes(from, lastTime);
+        long prevWeek = lastTime - WEEK;
+        chart.getXAxis().setExtremes(prevWeek, lastTime + HOUR);
 
-        Long aLong = weeks.get(weeks.size() - 1);
-        index = weeks.size() - 1;
+        int lastWeekIndex = weeks.size() - 1;
+        Long lastWeek = weeks.get(lastWeekIndex);
+        this.index = lastWeekIndex;
 
         timeWidgets.prevButton.setEnabled(weeks.size() > 1);
         timeWidgets.nextButton.setEnabled(false);
-        timeWidgets.display.setText(getShortDate(aLong));
-        timeChanged(from, lastTime);
-        return from;
+        timeWidgets.display.setText(getShortDate(lastWeek));
+
+        timeChanged(prevWeek, lastTime);
+
+        return prevWeek;
       case MONTH:
-        long from2 = lastTime - MONTH;
-        chart.getXAxis().setExtremes(from2, lastTime);
+        long startOfPrevMonth = lastTime - MONTH;
+        chart.getXAxis().setExtremes(startOfPrevMonth, lastTime + HOUR);
 
-        Long aLong2 = months.get(months.size() - 1);
-
-        index = months.size() - 1;
+        int lastMonthIndex = months.size() - 1;
+        Long lastMonth = months.get(lastMonthIndex);
+        this.index = lastMonthIndex;
 
         timeWidgets.prevButton.setEnabled(months.size() > 1);
         timeWidgets.nextButton.setEnabled(false);
-        timeWidgets.display.setText(getShortDate(aLong2));
+        timeWidgets.display.setText(getShortDate(lastMonth));
 
-        timeChanged(from2, lastTime);
+        timeChanged(startOfPrevMonth, lastTime);
 
-        return from2;
+        return startOfPrevMonth;
       case ALL:
-        chart.getXAxis().setExtremes(firstTime, lastTime);
+        chart.getXAxis().setExtremes(firstTime - HOUR, lastTime + HOUR);
         setTimeWindowControlsToAll();
         timeChanged(firstTime, lastTime);
 
@@ -774,6 +818,12 @@ public class AnalysisPlot extends TimeSeriesPlot {
     showTimePeriod(offset, periods);
   }
 
+  /**
+   * @param offset
+   * @param periods
+   * @see #gotNextClick()
+   * @see #gotPrevClick()
+   */
   private void showTimePeriod(long offset, List<Long> periods) {
     Long aLong = periods.get(index);
     timeWidgets.display.setText(getShortDate(aLong));
@@ -786,10 +836,6 @@ public class AnalysisPlot extends TimeSeriesPlot {
   public void setTimeWidgets(TimeWidgets timeWidgets) {
     this.timeWidgets = timeWidgets;
   }
-//
-//  public TimeWidgets getTimeWidgets() {
-//    return timeWidgets;
-//  }
 
   public interface TimeChangeListener {
     void timeChanged(long from, long to);
