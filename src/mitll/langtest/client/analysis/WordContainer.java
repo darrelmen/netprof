@@ -331,6 +331,7 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
         if (shell.getNativeAudio() != null) {
           return PlayAudioWidget.getAudioTagHTML(shell.getNativeAudio(), title);
         } else {
+          //if  (exercise != null) logger.info("no native audio for " + exercise.getID());
           return new SafeHtmlBuilder().toSafeHtml();
         }
       }
