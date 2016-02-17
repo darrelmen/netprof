@@ -34,15 +34,18 @@ public class H2Connection implements DatabaseConnection {
   private static final int MAX_MEMORY_ROWS = 1000000;
   private static final int maxMemoryRows = MAX_MEMORY_ROWS;
   private static final boolean USE_MVCC = false;
+  LogAndNotify logAndNotify;
 
   /**
+   *
+   *
    * @see mitll.langtest.server.database.DatabaseImpl#DatabaseImpl(String, String, String, ServerProperties, PathHelper, boolean, LogAndNotify)
    * @param configDir
    * @param dbName
    * @param mustAlreadyExist
    */
-  public H2Connection(String configDir, String dbName, boolean mustAlreadyExist) {
-    this(configDir, dbName, CACHE_SIZE_KB, QUERY_CACHE_SIZE, mustAlreadyExist);
+  public H2Connection(String configDir, String dbName, boolean mustAlreadyExist, LogAndNotify logAndNotify) {
+    this(configDir, dbName, CACHE_SIZE_KB, QUERY_CACHE_SIZE, mustAlreadyExist, logAndNotify);
   }
 
   /**
@@ -50,9 +53,11 @@ public class H2Connection implements DatabaseConnection {
    * @param dbName
    * @see mitll.langtest.server.database.DatabaseImpl#DatabaseImpl
    */
-  private H2Connection(String configDir, String dbName, int cacheSizeKB, int queryCacheSize, boolean mustAlreadyExist) {
+  private H2Connection(String configDir, String dbName, int cacheSizeKB, int queryCacheSize, boolean mustAlreadyExist,
+                       LogAndNotify logAndNotify) {
     this.cacheSizeKB = cacheSizeKB;
     this.queryCacheSize = queryCacheSize;
+    this.logAndNotify = logAndNotify;
     connect(configDir + File.separator + dbName, mustAlreadyExist);
   }
 
@@ -83,7 +88,9 @@ public class H2Connection implements DatabaseConnection {
       try {
         conn = DriverManager.getConnection(url, "", "");
       } catch (SQLException e) {
-        logger.error("couldn't get connection ", e);
+        String message = "couldn't get connection to " + url;
+        logger.error(message, e);
+        logAndNotify.logAndNotifyServerException(e, message);
 
         contextDestroyed();
       }
@@ -105,10 +112,12 @@ public class H2Connection implements DatabaseConnection {
     logger.info("send shutdown on connection " + conn);
     try {
       Connection connection = getConnection(this.getClass().toString());
-      Statement stat = connection.createStatement();
-      stat.execute("SHUTDOWN");
-      stat.close();
-      connection.close();
+      if (connection != null) {
+        Statement stat = connection.createStatement();
+        stat.execute("SHUTDOWN");
+        stat.close();
+        connection.close();
+      }
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
