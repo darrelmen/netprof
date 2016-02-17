@@ -73,7 +73,7 @@ public abstract class BaseExerciseDAO {
     // add new items
     addNewExercises();
 
-    //logger.info("trying to attach audio to " + exercises.size());
+    logger.info("afterReadingExercises trying to attach audio to " + exercises.size());
     for (CommonExercise ex : exercises) {
       attachAudio.attachAudio(ex);
       String refAudioIndex = ex.getRefAudioIndex();
@@ -83,8 +83,8 @@ public abstract class BaseExerciseDAO {
       // if (ex.hasRefAudio()) logger.info("ex " + ex.getID() + " has audio");
     }
 
-    logger.info("looking for 724 " + getExercise("724"));
-    sectionHelper.report();
+   // logger.info("looking for 724 " + getExercise("724"));
+  //  sectionHelper.report();
   }
 
   /**
@@ -111,7 +111,9 @@ public abstract class BaseExerciseDAO {
       logger.warn("\n\n\nhuh? install path " + fileInstallPath.getAbsolutePath() + " doesn't exist???");
     }
 
-    this.attachAudio = new AttachAudio(mediaDir, mediaDir.replaceAll("bestAudio", ""), fileInstallPath,
+    this.attachAudio = new AttachAudio(
+        mediaDir,
+        mediaDir.replaceAll("bestAudio", ""), fileInstallPath,
         serverProps.getAudioOffset(), audioDAO.getExToAudio());
   }
 
@@ -270,7 +272,8 @@ public abstract class BaseExerciseDAO {
   }
 
 
-  public void setDependencies(String mediaDir, String installPath, UserExerciseDAO userExerciseDAO, AddRemoveDAO addRemoveDAO, AudioDAO audioDAO) {
+  public void setDependencies(String mediaDir, String installPath,
+                              UserExerciseDAO userExerciseDAO, AddRemoveDAO addRemoveDAO, AudioDAO audioDAO) {
     this.userExerciseDAO = userExerciseDAO;
     this.addRemoveDAO = addRemoveDAO;
     setAudioDAO(audioDAO, mediaDir, installPath);
