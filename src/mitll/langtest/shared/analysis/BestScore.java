@@ -52,7 +52,7 @@ public class BestScore extends SimpleTimeAndScore implements Comparable<BestScor
     return "ex " + getExId() + "/ res " + getResultID() +
         " : " + new Date(getTimestamp()) + " # " +
         //count +
-        " : " + getScore();
+        " : " + getScore() + " native " + nativeAudio + " ref " + fileRef;
   }
 
   public String getExId() {
