@@ -4,7 +4,6 @@
 
 package mitll.langtest.server.audio;
 
-import com.google.common.io.Files;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
@@ -15,9 +14,9 @@ import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.scoring.*;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.scoring.PretestScore;
