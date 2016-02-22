@@ -250,28 +250,28 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }-*/;
 
   public static native void installFailure() /*-{
-      var recorderHasConsole = (window.console || console.log);
-      if (recorderHasConsole) {
-          console.log("got event installFailure");
-      }
+      //var recorderHasConsole = (window.console || console.log);
+      //if (recorderHasConsole) {
+      //    console.log("got event installFailure");
+      //}
 
       $wnd.micNotConnected();
   }-*/;
 
   public static native void installFailure2() /*-{
-        var recorderHasConsole = (window.console || console.log);
-        if (recorderHasConsole) {
-            console.log("got event installFailure2");
-        }
+        //var recorderHasConsole = (window.console || console.log);
+        //if (recorderHasConsole) {
+        //    console.log("got event installFailure2");
+        //}
 
     //    $wnd.micNotConnected();
     }-*/;
 
   public static native void swfCallbackCalled() /*-{
-      var recorderHasConsole = (window.console || console.log);
-      if (recorderHasConsole) {
-          console.log("got event swfCallbackCalled");
-      }
+      //var recorderHasConsole = (window.console || console.log);
+      //if (recorderHasConsole) {
+      //    console.log("got event swfCallbackCalled");
+      //}
   }-*/;
 
   /**
