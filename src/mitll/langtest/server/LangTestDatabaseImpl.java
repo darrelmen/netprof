@@ -808,7 +808,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     checkPerformance(id, then);
 
     if (byID != null) {
-      logger.debug("returning (" + language + ") exercise " + byID.getID() + " : " + byID);
+      //logger.debug("returning (" + language + ") exercise " + byID.getID() + " : " + byID);
     } else {
       logger.info(getLanguage() + " : couldn't find exercise with id '" + id + "'");
     }
@@ -2210,7 +2210,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public List<WordScore> getWordScores(long id, int minRecordings) {
     List<WordScore> wordScoresForUser = db.getAnalysis().getWordScoresForUser(id, minRecordings);
-    for (WordScore ws : wordScoresForUser) if (ws.getNativeAudio() != null) logger.info("got " +ws.getId() + " " + ws.getNativeAudio());
+//    for (WordScore ws : wordScoresForUser) if (ws.getNativeAudio() != null) logger.info("got " +ws.getId() + " " + ws.getNativeAudio());
     return wordScoresForUser;
   }
 
