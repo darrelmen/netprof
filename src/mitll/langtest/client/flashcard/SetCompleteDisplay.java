@@ -17,6 +17,7 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import org.moxieapps.gwt.highcharts.client.Chart;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -195,7 +196,7 @@ public class SetCompleteDisplay {
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#showFeedbackCharts(List, List)
    */
   public Panel getScoreHistory(List<ExerciseCorrectAndScore> sortedHistory,
-                               List<? extends CommonShell> allExercises, ExerciseController controller) {
+                               Collection<? extends CommonShell> allExercises, ExerciseController controller) {
     ScoreHistoryContainer scoreHistoryContainer = new ScoreHistoryContainer(controller, allExercises);
     return scoreHistoryContainer.getTableWithPager(sortedHistory);
   }
