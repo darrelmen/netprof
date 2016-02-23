@@ -1,20 +1,15 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.shared.Result;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.*;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -147,7 +142,7 @@ public class DumpRefResultTest extends BaseTest {
           "\n");
       i++;
     }
-    finish(connection, statement, rs);
+    finish(statement, rs);
     logger.debug("wrote " + i);
     return results;
   }
