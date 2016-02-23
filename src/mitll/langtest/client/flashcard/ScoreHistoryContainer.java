@@ -23,10 +23,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -49,7 +46,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   private final Map<String, CommonShell> idToExercise = new HashMap<>();
   private ExerciseComparator sorter;
 
-  public ScoreHistoryContainer(ExerciseController controller, List<? extends CommonShell> allExercises) {
+  public ScoreHistoryContainer(ExerciseController controller, Collection<? extends CommonShell> allExercises) {
     super(controller);
     english = controller.getLanguage().equals(ENGLISH);
 
@@ -61,7 +58,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   }
 
   /**
-   * @see SetCompleteDisplay#getScoreHistory(List, List, ExerciseController)
+   * @see SetCompleteDisplay#getScoreHistory
    * @param sortedHistory
    * @return
    */
