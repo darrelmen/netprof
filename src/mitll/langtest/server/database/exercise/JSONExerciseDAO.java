@@ -15,7 +15,7 @@ import java.util.*;
 /**
  * Created by go22670 on 2/10/16.
  */
-public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO {
+public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
   private static final Logger logger = Logger.getLogger(JSONExerciseDAO.class);
 
   private static final String ENCODING = "UTF8";
