@@ -27,7 +27,7 @@ public class AmasExerciseImpl implements CommonShell /*implements CommonExercise
   private List<String> refSentences = new ArrayList<String>();
 
   private transient List<String> firstPron = new ArrayList<String>();
-  protected String id;
+  private String id;
   private STATE state = STATE.UNSET;
   private String altID;
 
@@ -53,7 +53,7 @@ public class AmasExerciseImpl implements CommonShell /*implements CommonExercise
    * @param content
    * @param sentenceRef
    * @param tooltip
-   * @see mitll.langtest.server.amas.FileExerciseDAO#getSimpleExerciseForLine(String, int)
+   * @see mitll.langtest.server.amas.FileExerciseDAO#getSimpleExerciseForLine
    */
   public AmasExerciseImpl(String id, String content, String sentenceRef, String tooltip) {
     this.id = id;

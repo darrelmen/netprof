@@ -18,7 +18,7 @@ import java.util.*;
 /**
  * Created by go22670 on 2/10/16.
  */
-public abstract class BaseExerciseDAO {
+public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private static final Logger logger = Logger.getLogger(BaseExerciseDAO.class);
   private static final String CONTAINS_SEMI = "contains semicolon - should this item be split?";
   public static final String ENGLISH = "english";
