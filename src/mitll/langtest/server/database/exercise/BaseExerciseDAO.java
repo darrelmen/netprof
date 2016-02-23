@@ -44,6 +44,10 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
     this.addDefects = addDefects;
   }
 
+  public int getNumExercises() {
+    return getRawExercises().size();
+  }
+
   /**
    * @return
    * @see DatabaseImpl#getExercises()
