@@ -1,6 +1,5 @@
 package mitll.langtest.server.amas;
 
-import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.exercise.SimpleExerciseDAO;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
@@ -31,16 +30,16 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
   private static final int MAX_ERRORS = 100;
   private static final String MP3 = ".mp3";
   private static final boolean WRITE_ANSWER_KEY = false;
-  public static final boolean DEBUG = false;
+  private static final boolean DEBUG = false;
   private final String mediaDir;
 
   private List<T> exercises;
   private final Map<String, T> idToExercise = new HashMap<>();
-  private final SectionHelper<T> sectionHelper = new SectionHelper<T>();
-  private final List<String> errors = new ArrayList<String>();
+  private final SectionHelper<T> sectionHelper = new SectionHelper<>();
+  private final List<String> errors = new ArrayList<>();
   private final ILRMapping ilrMapping;
-  private String configDir;
-  private String language;
+  private final String configDir;
+  private final String language;
 
   /**
    * @param mediaDir
@@ -97,12 +96,15 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
    * @param lessonPlanFile
    * @seex mitll.langtest.server.database.DatabaseImpl#getRawExercises
    */
-  public synchronized void readFastAndSlowExercises(final String installPath, String configDir, String lessonPlanFile) {
+  private synchronized void readFastAndSlowExercises(final String installPath, String configDir, String lessonPlanFile) {
     if (exercises != null) return;
     File file = new File(lessonPlanFile);
     if (!file.exists()) {
       logger.error("can't find '" + file + "'");
       return;
+    }
+    else {
+      logger.info("readFastAndSlowExercises found lesson plan file at " + file.getAbsolutePath());
     }
 
     InputStream resourceAsStream;
@@ -188,6 +190,7 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
       ilrMapping.finalStep();
       reader.close();
       if (WRITE_ANSWER_KEY) {
+        BufferedWriter writer = null;
         writer.close();
       }
     } catch (IOException e) {
@@ -473,7 +476,7 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
    */
   private void addQuestion(String question, String answers, AmasExerciseImpl amasExerciseImpl, boolean isFLQ, int qid) {
     List<String> alternateAnswers = Arrays.asList(answers.split("\\|\\|"));
-    List<String> copy = new ArrayList<String>();
+    List<String> copy = new ArrayList<>();
     for (String answer : alternateAnswers) {
       List<String> c = Arrays.asList(answer.split(";"));
       for (String ans : c) {
@@ -485,17 +488,15 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
     //List<String> objects = alternateAnswers.size() > 1 ? alternateAnswers.subList(1, alternateAnswers.size()) : EMPTY_LIST;
 
     // logger.debug("to " + exercise.getID() + " adding " + question + " lang " + lang);
-    List<String> serializableCollection = new ArrayList<String>(alternateAnswers);
+    List<String> serializableCollection = new ArrayList<>(alternateAnswers);
 
     String lang = isFLQ ? AmasExerciseImpl.FL : AmasExerciseImpl.EN;
     amasExerciseImpl.addQuestion(lang, question, serializableCollection);
   }
 
-  private BufferedWriter writer = null;
-
   private void doBuffer() {
     try {
-      writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("expandedAnswerKey_" + language +
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("expandedAnswerKey_" + language +
           ".csv"), "UTF8"));
       writer.write("id,qid,orig,expansion\n");
     } catch (IOException e) {
@@ -551,6 +552,7 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
     if (isFLQ) {
       try {
         if (WRITE_ANSWER_KEY) {
+          BufferedWriter writer = null;
           writer.write(exid + "," + qid + "," + ans.trim() + "\n");
         }
       } catch (IOException e) {
