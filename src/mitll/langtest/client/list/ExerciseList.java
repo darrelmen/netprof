@@ -24,7 +24,6 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.Shell;
@@ -355,7 +354,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         if (result.getExercises().isEmpty()) {
           gotEmptyExerciseList();
         }
-        List<T> exercises = result.getExercises();
+        Collection<T> exercises = result.getExercises();
         exercises = rememberExercises(exercises);
         for (ListChangeListener<T> listener : listeners) {
           listener.listChanged(exercises, "");
@@ -391,7 +390,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   protected void gotEmptyExerciseList() {
   }
 
-  public void rememberAndLoadFirst(List<T> exercises) {
+  public void rememberAndLoadFirst(Collection<T> exercises) {
     rememberAndLoadFirst(exercises, null, "All");
   }
 
@@ -410,9 +409,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @param firstExercise - the initial exercise returned from getExercises
    * @param selectionID   - in the context of this selection
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
-   * @see #rememberAndLoadFirst(java.util.List)
+   * @see #rememberAndLoadFirst(Collection)
    */
-  public void rememberAndLoadFirst(List<T> exercises, HasID firstExercise,
+  public void rememberAndLoadFirst(Collection<T> exercises, HasID firstExercise,
                                    String selectionID) {
 /*
     if (DEBUG) logger.info("ExerciseList : rememberAndLoadFirst instance '" + getInstance() +
@@ -458,7 +457,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     return result.getReqID() < lastReqID;
   }
 
-  public abstract List<T> rememberExercises(List<T> result);
+  public abstract Collection<T> rememberExercises(Collection<T> result);
 
   /**
    * Worry about deleting the currently visible item.
@@ -920,7 +919,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     listeners.add(listener);
   }
 
-  protected abstract List<T> getInOrder();
+  protected abstract Collection<T> getInOrder();
 
   /**
    * @param doShuffle
