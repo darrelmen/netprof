@@ -4,9 +4,7 @@
 
 package mitll.langtest.client.amas;
 
-import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.Container;
-import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.user.client.ui.Panel;
@@ -22,38 +20,13 @@ import java.util.logging.Logger;
  * Created by go22670 on 12/21/15.
  */
 public class AMASInitialUI extends InitialUI {
-  private Logger logger = Logger.getLogger("AMASInitialUI");
+  private final Logger logger = Logger.getLogger("AMASInitialUI");
 
 //  private static final int NO_USER_INITIAL = -2;
 
   public AMASInitialUI(LangTest langTest, UserManager userManager) {
     super(langTest, userManager);
   }
-
-  /**
-   * If in ODA Mode, wait until we start a QUIZ?
-   * <p>
-   * Then only show the content part of it...
-   *
-   * @return
-   * @see #onModuleLoad2()
-   * @see #showLogin
-   * @see #populateRootAfterLogin()
-   */
-  void populateRootPanel() {
-    Container verticalContainer = getRootContainer();
-    // header/title line
-    // first row ---------------
-    Panel firstRow = makeFirstTwoRows(verticalContainer);
-
-    if (props.isOdaMode()) {
-      headerRow.setVisible(false);
-      populateBelowHeader(verticalContainer, firstRow);
-    } else if (!showLogin()) {
-      populateBelowHeader(verticalContainer, firstRow);
-    }
-  }
-
 
   /**
    * @param verticalContainer
@@ -111,7 +84,8 @@ public class AMASInitialUI extends InitialUI {
    * @see #populateRootPanel()
    * @see #showLogin()
    */
-  void populateBelowHeader(Container verticalContainer, Panel firstRow) {
+  @Override
+  protected void populateBelowHeader(Container verticalContainer, Panel firstRow) {
     RootPanel.get().clear();
     RootPanel.get().add(verticalContainer);
     /**
@@ -120,6 +94,7 @@ public class AMASInitialUI extends InitialUI {
     //  firstRow.add(langTest.getFlashRecordPanel());
     langTest.modeSelect();
 
+    logger.info("populateBelowHeader");
 
     //  TODO : FIX ME
     learnHelper = new AutoCRTChapterNPFHelper(service, langTest,
@@ -129,7 +104,7 @@ public class AMASInitialUI extends InitialUI {
     learnHelper.addNPFToContent(firstRow, "autoCRT");
   }
 
-
+  @Override
   public void onResize() {
     if (learnHelper != null) learnHelper.onResize();
   }
@@ -165,13 +140,37 @@ public class AMASInitialUI extends InitialUI {
     }
   }
 
-  // private long lastUser = NO_USER_INITIAL;
+
+  /**
+   * If in ODA Mode, wait until we start a QUIZ?
+   * <p>
+   * Then only show the content part of it...
+   *
+   * @return
+   * @see #onModuleLoad2()
+   * @see #showLogin
+   * @see #populateRootAfterLogin()
+   */
+  private void populateRootPanel() {
+    Container verticalContainer = getRootContainer();
+    // header/title line
+    // first row ---------------
+    Panel firstRow = makeFirstTwoRows(verticalContainer);
+
+    if (props.isOdaMode()) {
+      headerRow.setVisible(false);
+      populateBelowHeader(verticalContainer, firstRow);
+    } else if (!showLogin()) {
+      populateBelowHeader(verticalContainer, firstRow);
+    }
+  }
 
   /**
    * @param userID
    * @return
    * @see #gotUser
    */
+  @Override
   public void configureUIGivenUser(long userID) {
     boolean diff = lastUser != userID;
 
@@ -184,7 +183,7 @@ public class AMASInitialUI extends InitialUI {
   /**
    * TODO : FIX ME
    */
-  void configureUIGivenUser() {
+  private void configureUIGivenUser() {
     if (learnHelper != null && learnHelper.getExerciseList() != null) {
       //learnHelper.getExerciseList().restoreListFromHistory();
     }
