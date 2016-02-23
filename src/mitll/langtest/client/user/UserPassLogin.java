@@ -208,6 +208,7 @@ public class UserPassLogin extends UserDialog {
 
   private Panel getLinksToSites() {
     Panel hp = new HorizontalPanel();
+    hp.getElement().setId("UserPassLogin_linksToSites");
     hp.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
 
     String sitePrefix = props.getSitePrefix();
@@ -588,6 +589,17 @@ public class UserPassLogin extends UserDialog {
 
     fieldset.add(getRolesChoices());
 
+    getContentDevCheckbox();
+
+    if (!props.isAMAS()) fieldset.add(contentDevCheckbox);
+
+    makeRegistrationInfo(fieldset);
+    fieldset.add(getSignUpButton(userBox, emailBox));
+
+    return form;
+  }
+
+  private void getContentDevCheckbox() {
     SafeHtmlBuilder builder = new SafeHtmlBuilder();
     builder.appendHtmlConstant(RECORD_REFERENCE_AUDIO);
     contentDevCheckbox = new CheckBox(builder.toSafeHtml());
@@ -615,13 +627,6 @@ public class UserPassLogin extends UserDialog {
     if (!props.enableAllUsers()) {
       getRecordAudioPopover();
     }
-
-    fieldset.add(contentDevCheckbox);
-
-    makeRegistrationInfo(fieldset);
-    fieldset.add(getSignUpButton(userBox, emailBox));
-
-    return form;
   }
 
   private void getRecordAudioPopover() {
