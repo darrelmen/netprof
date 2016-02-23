@@ -79,7 +79,7 @@ public class PropertyHandler {
   private boolean usePhoneToDisplay;
 
   private String AMAS_WELCOME = "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)";
-  private static final String PRONUNCIATION_FEEDBACK = "NetProF – Networked Pronunciation Feedback";//"Classroom";//NetProF";//"PRONUNCIATION FEEDBACK";
+  private static final String PRONUNCIATION_FEEDBACK = "NetProF – Network Pronunciation Feedback";//"Classroom";//NetProF";//"PRONUNCIATION FEEDBACK";
   private static final String AMAS_PRONUNCIATION_FEEDBACK = "AMAS — Automatic Multi-Skilled Assessment System";
 
   private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
@@ -156,7 +156,7 @@ public class PropertyHandler {
   private boolean grading = false;
   private boolean bkgColorForRef = false;
   private String exercise_title;
-  private String appTitle = null;//DLI_LANGUAGE_TESTING;
+  private String appTitle = null;
   private boolean demoMode;
 
   private boolean showWelcome = true;// default value
@@ -245,6 +245,10 @@ public class PropertyHandler {
 
     if (appTitle == null) {
       appTitle = language + getAppTitleSuffix();
+    }
+
+    if (isAMAS()) {
+      appTitle = getAppTitleSuffix();
     }
     if (splashTitle == null) {
       splashTitle = language + getSpashTitleSuffix();
@@ -444,6 +448,7 @@ public class PropertyHandler {
   }
 
   public String getAppTitle() {
+    logger.info("app title " + appTitle);
     return appTitle;
   }
 
