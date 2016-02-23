@@ -315,7 +315,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private <T extends CommonShell> void sortExercises(String role, List<T> commonExercises) {
-    new ExerciseSorter(getTypeOrder()).getSortedByUnitThenAlpha(commonExercises, role.equals(Result.AUDIO_TYPE_RECORDER));
+    new ExerciseSorter(db.getTypeOrder()).getSortedByUnitThenAlpha(commonExercises, role.equals(Result.AUDIO_TYPE_RECORDER));
     //new ExerciseSorter(getTypeOrder()).getSortedByUnitThenPhone(commonExercises, false, audioFileHelper.getPhoneToCount(), false);
   }
 
@@ -760,20 +760,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#getTypeOrder(com.github.gwtbootstrap.client.ui.FluidContainer)
    */
-  private Collection<String> getTypeOrder() {
+/*  private Collection<String> getTypeOrder() {
     SectionHelper sectionHelper = db.getSectionHelper();
     if (sectionHelper == null) logger.warn("no section helper for " + db);
     List<String> objects = Collections.emptyList();
     return (sectionHelper == null) ? objects : sectionHelper.getTypeOrder();
-  }
+  }*/
 
   /**
    * @return
    * @see #getStartupInfo()
    */
-  private Collection<SectionNode> getSectionNodes() {
+/*  private Collection<SectionNode> getSectionNodes() {
     return db.getSectionHelper().getSectionNodes();
-  }
+  }*/
 
   /**
    * @param ids
@@ -1106,7 +1106,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public StartupInfo getStartupInfo() {
-    return new StartupInfo(serverProps.getProperties(), getTypeOrder(), getSectionNodes());
+    return new StartupInfo(serverProps.getProperties(), db.getTypeOrder(), db.getSectionNodes());
   }
 
   /**
@@ -1379,12 +1379,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public List<UserList<CommonShell>> getReviewLists() {
     List<UserList<CommonShell>> lists = new ArrayList<>();
     UserListManager userListManager = db.getUserListManager();
-    UserList<CommonShell> defectList = userListManager.getDefectList(getTypeOrder());
+    UserList<CommonShell> defectList = userListManager.getDefectList(db.getTypeOrder());
     lists.add(defectList);
 
-    lists.add(userListManager.getCommentedList(getTypeOrder()));
+    lists.add(userListManager.getCommentedList(db.getTypeOrder()));
     if (!serverProps.isNoModel()) {
-      lists.add(userListManager.getAttentionList(getTypeOrder()));
+      lists.add(userListManager.getAttentionList(db.getTypeOrder()));
     }
     return lists;
   }
@@ -1407,7 +1407,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public boolean deleteItemFromList(long listid, String exid) {
-    return db.getUserListManager().deleteItemFromList(listid, exid, getTypeOrder());
+    return db.getUserListManager().deleteItemFromList(listid, exid, db.getTypeOrder());
   }
 
   /**
@@ -1747,7 +1747,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     Trie<MonitorResult> trie;
 
-    for (String type : getTypeOrder()) {
+    for (String type : db.getTypeOrder()) {
       if (unitToValue.containsKey(type)) {
 
         // logger.debug("getResults making trie for " + type);
@@ -1819,7 +1819,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Collection<String> matches = new TreeSet<String>();
     Trie<MonitorResult> trie;
 
-    for (String type : getTypeOrder()) {
+    for (String type : db.getTypeOrder()) {
       if (unitToValue.containsKey(type)) {
 
         //    logger.debug("getResultAlternatives making trie for " + type);
