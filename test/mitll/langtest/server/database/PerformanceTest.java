@@ -6,6 +6,7 @@ import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.exercise.ExcelImport;
 import mitll.langtest.server.database.exercise.UploadDAO;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.exercise.*;
 import net.sf.json.JSONObject;
@@ -99,13 +100,15 @@ public class PerformanceTest extends BaseTest {
 
     H2Connection connection = getH2Connection(path);
     String spanish = "spanish";
-    DatabaseImpl database = getDatabase(connection, spanish, path);
+    DatabaseImpl<?> database = getDatabase(connection, spanish, path);
 
     UploadDAO uploadDAO = database.getUploadDAO();
 
     dumpUploads(uploadDAO.getUploads());
 
-    uploadDAO.addUpload(new Upload(database.getUsers().get(0).getId(), "note", "file", spanish, "spanishURL"));
+    List<User> users = database.getUsers();
+    User o = users.get(0);
+    uploadDAO.addUpload(new Upload(o.getId(), "note", "file", spanish, "spanishURL"));
 
     dumpUploads(uploadDAO.getUploads());
 
