@@ -1,13 +1,9 @@
 package mitll.langtest.server.amas;
 
-import mitll.langtest.server.database.AudioDAO;
-import mitll.langtest.server.database.custom.AddRemoveDAO;
-import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.exercise.SimpleExerciseDAO;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.log4j.Logger;
 
@@ -35,6 +31,7 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
   private static final int MAX_ERRORS = 100;
   private static final String MP3 = ".mp3";
   private static final boolean WRITE_ANSWER_KEY = false;
+  public static final boolean DEBUG = false;
   private final String mediaDir;
 
   private List<T> exercises;
@@ -254,25 +251,27 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
 
     File include = getIncludeFile(configDir, includeFile);
 
-//    logger.debug("config      " + configDir);
-//    logger.debug("this.config " + this.configDir);
-//    logger.debug("include     " + include.getAbsolutePath());
-//    logger.debug("installPath " + installPath);
+    if (DEBUG) {
+      logger.debug("config      " + configDir);
+      logger.debug("this.config " + this.configDir);
+      logger.debug("include     " + include.getAbsolutePath());
+      logger.debug("installPath " + installPath);
+    }
 
     if (!include.exists()) {
       File configDirFile = new File(installPath, configDir);
-/*      logger.warn("couldn't open file " + include.getName() + " at " +include.getAbsolutePath() + " config '" + configDir +"' with install path'" +
+      if (DEBUG) logger.warn("couldn't open file " + include.getName() + " at " +include.getAbsolutePath() + " config '" + configDir +"' with install path'" +
         installPath +
-        "' new config dir " + configDirFile.getAbsolutePath());*/
+        "' new config dir " + configDirFile.getAbsolutePath());
       //   logger.debug("1 config " + configDirFile.getAbsolutePath());
       include = getIncludeFile(configDirFile.getAbsolutePath(), includeFile);
     }
 
     if (!include.exists()) {
       File configDirFile = new File(installPath);
-/*      logger.warn("couldn't open file " + include.getName() + " at " +include.getAbsolutePath() + " config '" + configDir +"' with install path'" +
+      if (DEBUG)  logger.warn("couldn't open file " + include.getName() + " at " +include.getAbsolutePath() + " config '" + configDir +"' with install path'" +
         installPath +
-        "' new config dir " + configDirFile.getAbsolutePath());*/
+        "' new config dir " + configDirFile.getAbsolutePath());
       // logger.debug("2 config " + configDirFile.getAbsolutePath());
       include = getIncludeFile(configDirFile.getAbsolutePath(), includeFile);
       //  logger.debug("path " +include.getAbsolutePath());
@@ -280,9 +279,9 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
 
     if (!include.exists()) {
       File configDirFile = new File(installPath, this.configDir);
-/*      logger.warn("couldn't open file " + include.getName() + " at " +include.getAbsolutePath() + " config '" + configDir +"' with install path'" +
+      if (DEBUG) logger.warn("couldn't open file " + include.getName() + " at " +include.getAbsolutePath() + " config '" + configDir +"' with install path'" +
         installPath +
-        "' new config dir " + configDirFile.getAbsolutePath());*/
+        "' new config dir " + configDirFile.getAbsolutePath());
       // logger.debug("3 config " + configDirFile.getAbsolutePath());
       include = getIncludeFile(configDirFile.getAbsolutePath(), includeFile);
     }
@@ -567,5 +566,9 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
 
   public List<T> getRawExercises() {
     return exercises;
+  }
+
+  public int getNumExercises() {
+    return getRawExercises().size();
   }
 }
