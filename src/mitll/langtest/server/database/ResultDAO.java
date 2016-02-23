@@ -1398,7 +1398,7 @@ public class ResultDAO extends DAO {
    * @param out
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public void writeExcelToStream(Collection<MonitorResult> results, List<String> typeOrder, OutputStream out) {
+  public void writeExcelToStream(Collection<MonitorResult> results, Collection<String> typeOrder, OutputStream out) {
     new ResultDAOToExcel().writeExcelToStream(results, typeOrder, out);
   }
 }
