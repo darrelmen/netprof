@@ -164,7 +164,10 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   }
 
   protected void tellOtherListExerciseDirty(HasID e) {
-    if (predefinedContentList != null && e.getID().equals(predefinedContentList.getReloadable().getCurrentExerciseID())) {
+    if (predefinedContentList != null &&
+        predefinedContentList.getReloadable() != null &&
+        predefinedContentList.getReloadable().getCurrentExerciseID() != null &&
+        e.getID().equals(predefinedContentList.getReloadable().getCurrentExerciseID())) {
       logger.info("SimpleChapterNPFHelper.reloading " + e.getID());
       predefinedContentList.getReloadable().loadExercise(e.getID());
     } else {
