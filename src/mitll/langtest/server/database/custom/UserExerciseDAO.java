@@ -32,7 +32,7 @@ public class UserExerciseDAO extends DAO {
   private static final String CONTEXT = "context";
   private static final String CONTEXT_TRANSLATION = "contextTranslation";
 
-  private ExerciseDAO exerciseDAO;
+  private ExerciseDAO<CommonExercise> exerciseDAO;
   private static final boolean DEBUG = false;
 
   public UserExerciseDAO(Database database) {
