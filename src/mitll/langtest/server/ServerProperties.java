@@ -236,6 +236,10 @@ public class ServerProperties {
     return getDefaultFalse(DO_DECODE);
   }
 
+  public boolean isAMAS() {
+    return getDefaultFalse("isAMAS");
+  }
+
   public boolean shouldTrimAudio() {
     return getDefaultTrue(DO_TRIM);
   }
