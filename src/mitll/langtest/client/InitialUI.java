@@ -27,40 +27,13 @@ import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.client.user.UserTable;
 import mitll.langtest.shared.User;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 2/23/16.
  */
 public class InitialUI {
-
-  private Logger logger = Logger.getLogger("InitialUI");
-
-  private static final String VERSION_INFO = "1.2.1";
-
-  private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
-
-  public static final List<String> SITE_LIST = Arrays.asList(
-      "Dari",
-      "Egyptian",
-      "English",
-      "Farsi",
-      "German",
-      "Korean",
-      "Iraqi",
-      "Levantine",
-      "Mandarin",
-      "MSA",
-      "Pashto1",
-      "Pashto2",
-      "Pashto3",
-      "Russian",
-      "Spanish",
-      "Sudanese",
-      "Tagalog",
-      "Urdu");
+  private final Logger logger = Logger.getLogger("InitialUI");
 
   /**
    * How far to the right to shift the list of sites...
@@ -69,31 +42,23 @@ public class InitialUI {
    */
   private static final int LEFT_LIST_WIDTH = 267;
 
-  private static final String UNKNOWN = "unknown";
-  public static final String LANGTEST_IMAGES = "langtest/images/";
-  private static final String DIVIDER = "|";
-  private static final int MAX_EXCEPTION_STRING = 300;
-  private static final int MAX_CACHE_SIZE = 100;
+  private static final String LANGTEST_IMAGES = "langtest/images/";
   private static final int NO_USER_INITIAL = -2;
 
-  private UserManager userManager;
-//  private FlashRecordPanelHeadless flashRecordPanel;
+  private final UserManager userManager;
 
   protected long lastUser = NO_USER_INITIAL;
-//  private String audioType = Result.AUDIO_TYPE_UNSET;
 
   protected final LangTest langTest;
   protected final PropertyHandler props;
   protected AutoCRTChapterNPFHelper learnHelper;
 
-
   protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
 
-  protected Flashcard flashcard;
+  private final Flashcard flashcard;
 
   protected Panel headerRow;
   protected Panel firstRow;
-  // private FlashRecordPanelHeadless flashRecordPanel;
   private Navigation navigation;
   private final BrowserCheck browserCheck = new BrowserCheck();
 
@@ -104,8 +69,12 @@ public class InitialUI {
     flashcard = new Flashcard(props);
   }
 
-  Container verticalContainer;
+  private Container verticalContainer;
 
+  /**
+   * @see LangTest#showLogin()
+   * @see LangTest#populateRootPanel()
+   */
   void populateRootPanel() {
     Container verticalContainer = getRootContainer();
     this.verticalContainer = verticalContainer;
@@ -114,6 +83,7 @@ public class InitialUI {
     Panel firstRow = makeFirstTwoRows(verticalContainer);
 
     if (!showLogin()) {
+      logger.info("not show login -");
       populateBelowHeader(verticalContainer, firstRow);
     }
   }
@@ -139,7 +109,7 @@ public class InitialUI {
    * @return
    * @see #populateRootPanel()
    */
-  protected Panel makeHeaderRow() {
+  private Panel makeHeaderRow() {
     Widget title = flashcard.makeNPFHeaderRow(props.getSplash(), true, getGreeting(),
         getReleaseStatus(),
         new LogoutClickHandler(),
@@ -174,9 +144,11 @@ public class InitialUI {
     return new HTML(langTest.getInfoLine());
   }
 
+/*
   public String getBrowserInfo() {
     return browserCheck.getBrowserAndVersion();
   }
+*/
 
 /*  protected String getInfoLine() {
     String releaseDate = VERSION +
@@ -195,7 +167,7 @@ public class InitialUI {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest.LogoutClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
+   * @seex mitll.langtest.client.LangTest.LogoutClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
    */
   private void resetState() {
     History.newItem(""); // clear history!
@@ -233,7 +205,7 @@ public class InitialUI {
   }
 
   private class ResultsClickHandler implements ClickHandler {
-    EventRegistration outer = langTest;
+    final EventRegistration outer = langTest;
 
     public void onClick(ClickEvent event) {
       GWT.runAsync(new RunAsyncCallback() {
@@ -272,6 +244,7 @@ public class InitialUI {
    * @return
    */
   protected Container getRootContainer() {
+    logger.info("getRootContainer");
     RootPanel.get().clear();   // necessary?
 
     Container verticalContainer = new FluidContainer();
@@ -292,7 +265,7 @@ public class InitialUI {
    * @see #populateRootPanel()
    * @see #showLogin()
    */
-  void populateBelowHeader(Container verticalContainer, Panel firstRow) {
+  protected void populateBelowHeader(Container verticalContainer, Panel firstRow) {
     if (showOnlyOneExercise()) {
       Panel currentExerciseVPanel = new FlowPanel();
       currentExerciseVPanel.getElement().setId("currentExercisePanel");
@@ -321,7 +294,7 @@ public class InitialUI {
    * @see #populateRootPanel()
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#ScoringAudioPanel
    */
-  public boolean showOnlyOneExercise() {
+  private boolean showOnlyOneExercise() {
     return props.getExercise_title() != null;
   }
 
@@ -349,7 +322,7 @@ public class InitialUI {
     style.setMarginLeft(LEFT_LIST_WIDTH, Style.Unit.PX);
     style.setMarginTop(10, Style.Unit.PX);
 
-    for (String site : SITE_LIST) {
+    for (String site : props.getSites()) {
       Anchor w = new Anchor(site, "https://np.ll.mit.edu/npfClassroom" + site.replaceAll("Mandarin", "CM"));
       w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
       hp.add(w);
@@ -481,7 +454,7 @@ public class InitialUI {
     flashcard.setCogVisible(false);
   }
 
-  public void trimURLAndReload() {
+  private void trimURLAndReload() {
     Timer t = new Timer() {
       @Override
       public void run() {
@@ -492,7 +465,7 @@ public class InitialUI {
     t.schedule(3000);
   }
 
-  public void trimURL() {
+  private void trimURL() {
     Window.Location.replace(trimURL(Window.Location.getHref()));
   }
 
@@ -540,7 +513,7 @@ public class InitialUI {
       userID = user.getId();
     }
 
-    //  logger.info("gotUser : userID " + userID);
+     logger.info("gotUser : userID " + userID);
 
     flashcard.setUserName(getGreeting());
     if (userID != lastUser) {
@@ -548,7 +521,7 @@ public class InitialUI {
       langTest.logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
     } else {
       logger.info("ignoring got user for current user " + userID);
-      navigation.refreshInitialState();
+      if (navigation != null) navigation.refreshInitialState();
     }
     if (userID > -1) {
       flashcard.setCogVisible(true);
