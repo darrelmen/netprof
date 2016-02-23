@@ -6,9 +6,7 @@ package mitll.langtest.client;
 
 import com.google.gwt.user.client.Window;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -77,9 +75,39 @@ public class PropertyHandler {
 
   private boolean adminView, analysis = false;
   private boolean enableAllUsers;
+  private boolean isAMAS;
   private boolean usePhoneToDisplay;
 
-  private  String amasWelcome = "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)";
+  private String AMAS_WELCOME = "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)";
+  private static final String PRONUNCIATION_FEEDBACK = "NetProF – Networked Pronunciation Feedback";//"Classroom";//NetProF";//"PRONUNCIATION FEEDBACK";
+  private static final String AMAS_PRONUNCIATION_FEEDBACK = "AMAS — Automatic Multi-Skilled Assessment System";
+
+  private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
+  private static final String AMAS_INITIAL_PROMPT = "Test your Listening and Reading Skills.";//"Learn how to pronounce words and practice vocabulary.";
+
+
+  public static final List<String> SITE_LIST = Arrays.asList(
+      "Dari",
+      "Egyptian",
+      "English",
+      "Farsi",
+      "German",
+      "Korean",
+      "Iraqi",
+      "Levantine",
+      "Mandarin",
+      "MSA",
+      "Pashto1",
+      "Pashto2",
+      "Pashto3",
+      "Russian",
+      "Spanish",
+      "Sudanese",
+      "Tagalog",
+      "Urdu");
+
+  private static final List<String> AMAS_SITES = Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
+
 
   /**
    * @return
@@ -107,6 +135,10 @@ public class PropertyHandler {
 
   public boolean shouldUsePhoneToDisplay() {
     return usePhoneToDisplay;
+  }
+
+  public boolean isAMAS() {
+    return isAMAS;
   }
 
   public enum LOGIN_TYPE {ANONYMOUS, STUDENT}
@@ -196,8 +228,9 @@ public class PropertyHandler {
       else if (key.equals(QUIET_AUDIO_OK)) quietAudioOK = getBoolean(value);
       else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
       else if (key.equals(ENABLE_ALL_USERS)) enableAllUsers = getBoolean(value);
+      else if (key.equals("isAMAS")) isAMAS = getBoolean(value);
       else if (key.equals(USE_PHONE_TO_DISPLAY)) {
-       // logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
+        // logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
         usePhoneToDisplay = getBoolean(value);
       } else if (key.equals(PREFERRED_VOICES)) {
         getPreferredVoices(value);
@@ -211,12 +244,39 @@ public class PropertyHandler {
     }
 
     if (appTitle == null) {
-      appTitle = language + " Pronunciation Feedback BETA";
+      appTitle = language + getAppTitleSuffix();
     }
     if (splashTitle == null) {
-      splashTitle = language + " feedback and practice BETA";
-
+      splashTitle = language + getSpashTitleSuffix();
     }
+  }
+
+  private String getSpashTitleSuffix() {
+    return isAMAS() ? "" : " feedback and practice BETA";
+  }
+
+  private String getAppTitleSuffix() {
+    return isAMAS() ? AMAS_PRONUNCIATION_FEEDBACK : " Pronunciation Feedback BETA";
+  }
+
+  public String getInitialPrompt() {
+    return isAMAS() ? AMAS_INITIAL_PROMPT : INITIAL_PROMPT;
+  }
+
+  public String getFirstBullet() {
+    return isAMAS() ? "Receive feedback on strengths and weaknesses." : "Practice vocabulary with audio flashcards.";
+  }
+
+  public String getWelcomeMessage() {
+    return isAMAS() ? AMAS_WELCOME : "Welcome to " + "NetProF" + "!";
+  }
+
+  public Collection<String> getSites() {
+    return isAMAS() ? AMAS_SITES : SITE_LIST;
+  }
+
+  public String getSitePrefix() {
+    return isAMAS() ? "https://np.ll.mit.edu/amas" : "https://np.ll.mit.edu/npfClassroom";
   }
 
   private void getPreferredVoices(String value) {
@@ -516,8 +576,7 @@ public class PropertyHandler {
       String candidate = s.split("\\*\\*\\*")[0];
       if (knownChoice(candidate)) {
         responseType = candidate;
-      }
-      else {
+      } else {
         logger.warning("responseType unknown " + candidate);
       }
     }
@@ -526,6 +585,7 @@ public class PropertyHandler {
   public String getResponseType() {
     return responseType;
   }
+
   public void setResponseType(String responseType) {
     this.responseType = responseType;
   }
@@ -591,5 +651,20 @@ public class PropertyHandler {
         "LTEA personnel will approve your account.<br/>" +
         "You will receive an email once it's approved.<br/>" +
         "You will not be able to access NetProF until approval is granted.";
+  }
+
+  public String getAMASHelpMessage() {
+    return
+        "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)<br/>" +
+            "<br/>" +
+            "If you are a first-time user of this site, or an existing user of an earlier version of AMAS you will need " +
+            "to use the \"Sign Up\" box to add/update a password and an email address to your account. Your email is " +
+            "only used if you ever forget your password.<br/>" +
+            "<br/>" +
+            "Once you create/update your Username, Email, and Password, click on “sign up” and you will be taken to " +
+            "the site. For future access, use the Login box to access the AMAS site.<br/>" +
+            "<br/>" +
+            "The site will remember your login information on this computer for up to one year. You will need to login " +
+            "with your username and password again if you access AMAS from a different machine.";
   }
 }
