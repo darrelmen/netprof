@@ -342,13 +342,25 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @return
    * @see mitll.langtest.server.DownloadServlet#returnSpreadsheet(HttpServletResponse, DatabaseImpl, String)
-   * @see LangTestDatabaseImpl#getTypeOrder()
+   * @see DatabaseImpl#getTypeOrder
    */
   public SectionHelper<CommonExercise> getSectionHelper() {
     if (serverProps.isAMAS()) return new SectionHelper<>();
 
     getExercises();
     return exerciseDAO.getSectionHelper();
+  }
+
+  public Collection<String> getTypeOrder() {
+    SectionHelper sectionHelper = (serverProps.isAMAS()) ? getAMASSectionHelper() : getSectionHelper();
+    if (sectionHelper == null) logger.warn("no section helper for " + this);
+    List<String> objects = Collections.emptyList();
+    return (sectionHelper == null) ? objects : sectionHelper.getTypeOrder();
+  }
+
+  public Collection<SectionNode> getSectionNodes() {
+    SectionHelper<?> sectionHelper = (serverProps.isAMAS()) ? getAMASSectionHelper() : getSectionHelper();
+    return sectionHelper.getSectionNodes();
   }
 
   /**
@@ -729,7 +741,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#userExists(String, String)
    */
   public User userExists(HttpServletRequest request, String login, String passwordH) {
-    return userManagement.userExists(request, login, passwordH, );
+    return userManagement.userExists(request, login, passwordH, serverProps);
   }
 
   /**
