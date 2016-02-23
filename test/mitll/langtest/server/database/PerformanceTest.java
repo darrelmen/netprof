@@ -105,7 +105,7 @@ public class PerformanceTest extends BaseTest {
 
     dumpUploads(uploadDAO.getUploads());
 
-    uploadDAO.addUpload(new Upload(database.getUsers().get(0).getId(), "note", "file", spanish, "spanishURL"));
+    //uploadDAO.addUpload(new Upload(database.getUsers().get(0).getId(), "note", "file", spanish, "spanishURL"));
 
     dumpUploads(uploadDAO.getUploads());
 
