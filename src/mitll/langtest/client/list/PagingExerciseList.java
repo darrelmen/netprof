@@ -20,7 +20,6 @@ import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.exercise.Shell;
@@ -295,7 +294,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
     onResize();
   }
 
-  private List<T> inOrderResult;
+  private Collection<T> inOrderResult;
 
   /**
    * A little complicated -- if {@link #doShuffle} is true, shuffles the exercises
@@ -305,13 +304,14 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
    * @see #simpleSetShuffle(boolean)
    */
   @Override
-  public List<T> rememberExercises(List<T> result) {
+  public Collection<T> rememberExercises(Collection<T> result) {
     inOrderResult = result;
     if (doShuffle) {
       logger.info(getInstance() + " : rememberExercises - shuffling " + result.size() + " items");
 
-      result = new ArrayList<T>(result);
-      Shuffler.shuffle(result);
+      ArrayList<T> ts = new ArrayList<>(result);
+      result = ts;
+      Shuffler.shuffle(ts);
     }
     clear();
     int c = 0;
@@ -323,7 +323,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
   }
 
   @Override
-  protected List<T> getInOrder() {
+  protected Collection<T> getInOrder() {
     return inOrderResult;
   }
 
@@ -363,7 +363,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
   }
 
   /**
-   * @see ExerciseList#rememberExercises(List)
+   * @see ExerciseList#rememberExercises(Collection)
    * @param es
    */
   @Override
