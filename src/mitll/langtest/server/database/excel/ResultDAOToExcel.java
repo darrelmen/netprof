@@ -28,11 +28,11 @@ public class ResultDAOToExcel {
    * @param out
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public void writeExcelToStream(Collection<MonitorResult> results, List<String> typeOrder, OutputStream out) {
+  public void writeExcelToStream(Collection<MonitorResult> results, Collection<String> typeOrder, OutputStream out) {
     writeToStream(out, writeExcel(results, typeOrder));
   }
 
-  private SXSSFWorkbook writeExcel(Collection<MonitorResult> results, List<String> typeOrder
+  private SXSSFWorkbook writeExcel(Collection<MonitorResult> results, Collection<String> typeOrder
   ) {
     long now;
     long then = System.currentTimeMillis();
