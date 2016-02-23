@@ -36,8 +36,6 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -45,8 +43,8 @@ import java.util.logging.Logger;
  */
 public class UserPassLogin extends UserDialog {
   private final Logger logger = Logger.getLogger("UserPassLogin");
-  private static final String CLASSROOM = "NetProF";
-  private static final String WELCOME_MESSAGE = "Welcome to " + CLASSROOM + "!";
+//  private static final String CLASSROOM = "NetProF";
+//  private static final String WELCOME_MESSAGE = "Welcome to " + CLASSROOM + "!";
 
   //  private static final boolean CHECK_AGE = false;
   private static final String WAIT_FOR_APPROVAL = "Wait for approval";
@@ -69,8 +67,8 @@ public class UserPassLogin extends UserDialog {
   private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer user id.";
   private static final String VALID_EMAIL = "Please enter a valid email address.";
   private static final String PLEASE_WAIT = "Please wait";
-  private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
-  private static final String FIRST_BULLET = "Practice vocabulary with audio flashcards.";//"Do flashcards to learn or review vocabulary";
+  // private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
+//  private static final String FIRST_BULLET = "Practice vocabulary with audio flashcards.";//"Do flashcards to learn or review vocabulary";
   private static final String SECOND_BULLET = "Record your voice and get feedback on your pronunciation.";//"Get feedback on your pronunciation";
   private static final String THIRD_BULLET = "Create and share vocab lists for study and review.";//"Make your own lists of words to study later or to share.";
   private static final String PLEASE_ENTER_A_PASSWORD = "Please enter a password";
@@ -155,7 +153,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   private void showWelcome() {
-    Modal modal = new ModalInfoDialog().getModal(WELCOME_MESSAGE,
+    Modal modal = new ModalInfoDialog().getModal(props.getWelcomeMessage(),
         //"<h4>" + CLASSROOM + " has been updated.</h4>" +
         getLoginInfo(), null, new HiddenHandler() {
           @Override
@@ -212,8 +210,9 @@ public class UserPassLogin extends UserDialog {
     Panel hp = new HorizontalPanel();
     hp.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
 
-    for (String site : LangTest.SITE_LIST) {
-      Anchor w = new Anchor(site, "https://np.ll.mit.edu/npfClassroom" + site.replaceAll("Mandarin", "CM"));
+    String sitePrefix = props.getSitePrefix();
+    for (String site : props.getSites()) {
+      Anchor w = new Anchor(site, sitePrefix + site.replaceAll("Mandarin", "CM"));
       w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
       hp.add(w);
     }
@@ -892,19 +891,17 @@ public class UserPassLogin extends UserDialog {
     leftAndRight.add(left);
     int size = 1;
     //   int subSize = size + 2;
-    Heading w2 = new Heading(size, INITIAL_PROMPT);
+    Heading w2 = new Heading(size, props.getInitialPrompt());
     left.add(w2);
     w2.getElement().getStyle().setPaddingBottom(24, Style.Unit.PX);
     w2.getElement().getStyle().setTextAlign(Style.TextAlign.LEFT);
-    Widget w1 = new HTML(FIRST_BULLET);
-    Panel h = new HorizontalPanel();
-    h.add(new Image(LangTest.LANGTEST_IMAGES + "NewProF2_48x48.png"));
-    h.add(w1);
-    configure(h);
 
-    left.add(h);
-    w1.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
-    configure(w1);
+    addBullett(left, props.getFirstBullet(), "NewProF2_48x48.png");
+    if (!props.isAMAS()) {
+      addBullett(left, SECOND_BULLET, "NewProF1_48x48.png");
+      addBullett(left, THIRD_BULLET, "listIcon_48x48_transparent.png");
+    }
+/*    Panel h;
 
     Widget w = new HTML(SECOND_BULLET);
 
@@ -925,10 +922,29 @@ public class UserPassLogin extends UserDialog {
     h.add(w3);
     configure(h);
 
-    left.add(h);
+    left.add(h);*/
 
-    w3.getElement().getStyle().setMarginTop(-1, Style.Unit.PX);
-    configure(w3);
+//    w3.getElement().getStyle().setMarginTop(-1, Style.Unit.PX);
+//    configure(w3);
+  }
+
+  private void addFirstBullet(DivWidget left) {
+    String bulletText = props.getFirstBullet();
+    String image = "NewProF2_48x48.png";
+
+    addBullett(left, bulletText, image);
+  }
+
+  private void addBullett(DivWidget left, String bulletText, String image) {
+    Widget w1 = new HTML(bulletText);
+    Panel h = new HorizontalPanel();
+    h.add(new Image(LangTest.LANGTEST_IMAGES + image));
+    h.add(w1);
+    configure(h);
+
+    left.add(h);
+    w1.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
+    configure(w1);
   }
 
   private void configure(Panel h) {
