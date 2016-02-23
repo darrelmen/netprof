@@ -10,6 +10,7 @@ import mitll.langtest.server.database.UserManagement;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
 import java.util.List;
@@ -21,21 +22,7 @@ import java.util.List;
  * Time: 3:42 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface ExerciseDAO {
-  /**
-   * @return
-   * @see DatabaseImpl#getExercise(String)
-   * @see DatabaseImpl#makeDAO(String, String, String)
-   * @see UserManagement#getUsers()
-   */
-  List<CommonExercise> getRawExercises();
-
-  /**
-   * @param id
-   * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#getExercise(String)
-   */
-  CommonExercise getExercise(String id);
+public interface ExerciseDAO<T extends CommonShell> extends SimpleExerciseDAO<T> {
 
   /**
    * @return
