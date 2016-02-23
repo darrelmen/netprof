@@ -14,6 +14,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.shared.User;
@@ -62,7 +63,7 @@ public class Flashcard implements RequiresResize {
    * @param splashText
    * @param userName
    * @return
-   * @see mitll.langtest.client.LangTest#makeHeaderRow()
+   * @see InitialUI#makeHeaderRow()
    */
   public Panel makeNPFHeaderRow(String splashText, boolean isBeta, String userName, HTML browserInfo,
                                 ClickHandler logoutClickHandler,
@@ -85,7 +86,7 @@ public class Flashcard implements RequiresResize {
    * @param monitoring
    * @param events
    * @return
-   * @see mitll.langtest.client.LangTest#makeHeaderRow()
+   * @see mitll.langtest.client.LangTest#makeHeaderRow
    */
   private Panel getHeaderRow(String splashText,
                              boolean isBeta, String userName,
@@ -171,7 +172,16 @@ public class Flashcard implements RequiresResize {
     return subtitle;
   }
 
-  private void makeCogMenu(ClickHandler logoutClickHandler, ClickHandler users, ClickHandler results, ClickHandler monitoring, ClickHandler events) {
+  /**
+   * @see #getHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
+   * @param logoutClickHandler
+   * @param users
+   * @param results
+   * @param monitoring
+   * @param events
+   */
+  private void makeCogMenu(ClickHandler logoutClickHandler, ClickHandler users, ClickHandler results,
+                           ClickHandler monitoring, ClickHandler events) {
     cogMenu = makeMenu(users, results, monitoring, events);
     cogMenu.addStyleName("cogStyle");
     NavLink widget1 = new NavLink(LOG_OUT);
