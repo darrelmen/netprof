@@ -1,7 +1,14 @@
 package mitll.langtest.server.amas;
 
+import mitll.langtest.server.database.AudioDAO;
+import mitll.langtest.server.database.custom.AddRemoveDAO;
+import mitll.langtest.server.database.custom.UserExerciseDAO;
+import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.exercise.SimpleExerciseDAO;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.log4j.Logger;
 
 import java.io.*;
@@ -18,7 +25,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  * hasn't been used in a long time
  */
-public class FileExerciseDAO {
+public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO<T> {
   private static final Logger logger = Logger.getLogger(FileExerciseDAO.class);
 
   private static final String FILE_PREFIX = "file://";
@@ -30,9 +37,9 @@ public class FileExerciseDAO {
   private static final boolean WRITE_ANSWER_KEY = false;
   private final String mediaDir;
 
-  private List<AmasExerciseImpl> exercises;
-  private final Map<String, AmasExerciseImpl> idToExercise = new HashMap<String, AmasExerciseImpl>();
-  private final SectionHelper sectionHelper = new SectionHelper();
+  private List<T> exercises;
+  private final Map<String, T> idToExercise = new HashMap<>();
+  private final SectionHelper<T> sectionHelper = new SectionHelper<T>();
   private final List<String> errors = new ArrayList<String>();
   private final ILRMapping ilrMapping;
   private String configDir;
@@ -42,18 +49,20 @@ public class FileExerciseDAO {
    * @param mediaDir
    * @param language
    * @param mappingFile
-   * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO
+   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
    */
-  public FileExerciseDAO(String mediaDir, String language, String configDir, String mappingFile) {
+  public FileExerciseDAO(String mediaDir, String language, String configDir, String mappingFile, String installPath) {
     this.mediaDir = mediaDir;
     this.language = language;
     logger.debug("media dir " + mediaDir);
     ilrMapping = new ILRMapping(configDir, sectionHelper, mappingFile, false); // TODO : correct???
     this.configDir = configDir;
+
+    readFastAndSlowExercises(installPath, configDir, mappingFile);
   }
 
-//  @Override
-  public SectionHelper getSectionHelper() {
+  //  @Override
+  public SectionHelper<T> getSectionHelper() {
     return sectionHelper;
   }
 
@@ -74,7 +83,7 @@ public class FileExerciseDAO {
   }
 */
 
-  public AmasExerciseImpl getExercise(String id) {
+  public T getExercise(String id) {
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
     if (!idToExercise.containsKey(id)) {
       logger.warn("couldn't find " + id + " in " + idToExercise.size() + " exercises...");
@@ -82,14 +91,14 @@ public class FileExerciseDAO {
     return idToExercise.get(id);
   }
 
-  private void populateIDToExercise(List<AmasExerciseImpl> exercises) {
-    for (AmasExerciseImpl e : exercises) idToExercise.put(e.getID(), e);
+  private void populateIDToExercise(List<T> exercises) {
+    for (T e : exercises) idToExercise.put(e.getID(), e);
   }
 
   /**
    * @param installPath
    * @param lessonPlanFile
-   * @see mitll.langtest.server.database.DatabaseImpl#getRawExercises
+   * @seex mitll.langtest.server.database.DatabaseImpl#getRawExercises
    */
   public synchronized void readFastAndSlowExercises(final String installPath, String configDir, String lessonPlanFile) {
     if (exercises != null) return;
@@ -118,9 +127,9 @@ public class FileExerciseDAO {
    * @return
    * @see #readFastAndSlowExercises(String, String, String)
    */
-  private List<AmasExerciseImpl> readExercises(String installPath, String configDir, String lessonPlanFile,
-                                             InputStream resourceAsStream) {
-    List<AmasExerciseImpl> exercises = new ArrayList<>();
+  private List<T> readExercises(String installPath, String configDir, String lessonPlanFile,
+                                               InputStream resourceAsStream) {
+    List<T> exercises = new ArrayList<>();
 
     try {
       BufferedReader reader = getBufferedReader(resourceAsStream);
@@ -158,7 +167,8 @@ public class FileExerciseDAO {
                 lastAmasExerciseImpl.addQuestions(AmasExerciseImpl.FL, amasExerciseImpl.getForeignLanguageQuestions());
               }
             } else {
-              exercises.add(amasExerciseImpl);
+              T something = (T)amasExerciseImpl; // TODO : how not to force this???
+              exercises.add(something);
               ilrMapping.addMappingAssoc(amasExerciseImpl.getID(), amasExerciseImpl);
               lastAmasExerciseImpl = amasExerciseImpl;
             }
@@ -555,7 +565,7 @@ public class FileExerciseDAO {
     return wavPath.replaceAll("\\\\", "/");
   }
 
-  public List<AmasExerciseImpl> getRawExercises() {
+  public List<T> getRawExercises() {
     return exercises;
   }
 }
