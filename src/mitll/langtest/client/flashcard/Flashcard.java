@@ -25,7 +25,6 @@ import java.util.Collection;
  * Does fancy font sizing depending on available width...
  */
 public class Flashcard implements RequiresResize {
-  private static final String PRONUNCIATION_FEEDBACK = "NetProF – Networked Pronunciation Feedback";//"Classroom";//NetProF";//"PRONUNCIATION FEEDBACK";
   private static final double MAX_FONT_EM = 1.7d;
   private static final int SLOP = 55;
   private static final String NEW_PRO_F1_PNG = "NewProF1.png";
@@ -48,11 +47,13 @@ public class Flashcard implements RequiresResize {
   private HTML browserInfo;
   private Panel qc, recordAudio;
   private Dropdown cogMenu;
+  PropertyHandler props;
 
   /**
-   * @see mitll.langtest.client.LangTest#makeHeaderRow()
+   * @see mitll.langtest.client.InitialUI#makeHeaderRow
    */
   public Flashcard(PropertyHandler props) {
+    this.props = props;
     this.nameForAnswer = props.getNameForAnswer() + "s";
     isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
     HREF = "mailto:" +
@@ -110,7 +111,7 @@ public class Flashcard implements RequiresResize {
     flashcard.addStyleName("headerBackground");
     flashcard.addStyleName("leftAlign");
     String betaMark = isBeta ? ("<span><font color='yellow'>" + "&nbsp;BETA" + "</font></span>") : "";
-    appName = new Paragraph("<span>" + Flashcard.PRONUNCIATION_FEEDBACK + "</span>" + betaMark);
+    appName = new Paragraph("<span>" + props.getAppTitle() + "</span>" + betaMark);
     appName.addStyleName("bigFont");
 
     flashcard.add(appName);
