@@ -8,6 +8,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Shell;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -25,7 +26,7 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
   public ExerciseListWrapper() {} // req for serialization
 
   private int reqID;
-  private List<T> exercises;
+  private Collection<T> exercises;
   private CommonExercise firstExercise;
 
   /**
@@ -34,7 +35,7 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
    * @param ids
    * @param firstExercise
    */
-  public ExerciseListWrapper(int reqID, List<T> ids, CommonExercise firstExercise) {
+  public ExerciseListWrapper(int reqID, Collection<T> ids, CommonExercise firstExercise) {
     this.reqID = reqID;
     this.exercises = ids;
     this.firstExercise = firstExercise;
@@ -43,7 +44,7 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
   public int getReqID() {
     return reqID;
   }
-  public List<T> getExercises() { return exercises;  }
+  public Collection<T> getExercises() { return exercises;  }
   public CommonExercise getFirstExercise() { return firstExercise;  }
 
   public String toString() {
