@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasExerciseImpl, AmasExerciseImpl> {
-  public static final int NUM_CHOICES = 3;
+  private static final int NUM_CHOICES = 3;
   private final Logger logger = Logger.getLogger("SingleSelectExerciseList");
 
   private static final String PLEASE_SELECT = "Please select a quiz, test type, ILR level, and response type";
@@ -40,7 +40,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
   private static final int CLASSROOM_VERTICAL_EXTRA = 270;
   private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
 
-  private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
+  private final List<ButtonType> buttonTypes = new ArrayList<>();
   private final Heading statusHeader = new Heading(4);
   private Collection<String> typeOrder;
   private final Panel sectionPanel;
@@ -119,6 +119,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
 
   private void getTypeOrder(final FluidContainer container) {
     typeOrder = controller.getStartupInfo().getTypeOrder();
+    logger.info("type order is " +typeOrder);
     addButtonRow(controller.getStartupInfo().getSectionNodes(), container, typeOrder);
   }
 
@@ -139,7 +140,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
     logger.info("SectionExerciseList.addButtonRow for user = " + controller.getUser() + " got types " +
         types + " num root nodes " + rootNodes.size());
     if (types.isEmpty()) {
-      logger.warning("huh? types is empty?");
+      logger.warning("addButtonRow : huh? types is empty?");
       return;
     }
     showDefaultStatus();
@@ -157,7 +158,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
       typeToBox.put(type, value);
       value.getButtonBar(firstTypeRow, type, sectionsInType, type, buttonTypes.get(index++), this);
 
-      List<SectionNode> newNodes = new ArrayList<SectionNode>();
+      List<SectionNode> newNodes = new ArrayList<>();
 
       for (SectionNode node : rootNodes) {
         newNodes.addAll(node.getChildren());
@@ -196,7 +197,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
   }
 
   private List<String> getLabels(Collection<SectionNode> nodes) {
-    List<String> items = new ArrayList<String>();
+    List<String> items = new ArrayList<>();
     for (SectionNode n : nodes) items.add(n.getName());
     return items;
   }
@@ -234,7 +235,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
       for (String type : typeOrder) {
         Collection<String> selectedItems = typeToSection.get(type);
         if (selectedItems != null) {
-          List<String> sorted = new ArrayList<String>();
+          List<String> sorted = new ArrayList<>();
           for (String selectedItem : selectedItems) {
             sorted.add(selectedItem);
           }
