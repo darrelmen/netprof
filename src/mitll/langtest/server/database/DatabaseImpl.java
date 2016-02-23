@@ -8,6 +8,7 @@ import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.amas.FileExerciseDAO;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.audio.SLFFile;
@@ -22,6 +23,7 @@ import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.*;
+import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
@@ -59,7 +61,7 @@ import java.util.*;
  * Time: 11:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class DatabaseImpl implements Database {
+public class DatabaseImpl<T extends CommonShell>  implements Database {
   private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
   private static final int LOG_THRESHOLD = 10;
   private static final String UNKNOWN = "unknown";
@@ -67,7 +69,9 @@ public class DatabaseImpl implements Database {
   public static final String TRANSLITERATION = "transliteration";
 
   private String installPath;
-  private ExerciseDAO exerciseDAO = null;
+  private ExerciseDAO<CommonExercise> exerciseDAO = null;
+ // private SimpleExerciseDAO<T> commonExerciseDAO = null;
+
   private UserDAO userDAO;
   private ResultDAO resultDAO;
   private RefResultDAO refresultDAO;
@@ -86,7 +90,6 @@ public class DatabaseImpl implements Database {
   private DatabaseConnection connection = null;
   private MonitoringSupport monitoringSupport;
 
-  //  private String lessonPlanFile;
   private final String configDir;
   private final ServerProperties serverProps;
   private final LogAndNotify logAndNotify;
@@ -96,6 +99,8 @@ public class DatabaseImpl implements Database {
   private static final boolean ADD_DEFECTS = true;
   private UserManagement userManagement;
   private Analysis analysis;
+  private final String absConfigDir;
+  FileExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
 
   /**
    * @param configDir
@@ -124,15 +129,15 @@ public class DatabaseImpl implements Database {
     long then;
     long now;
     this.connection = connection;
+    absConfigDir = configDir;
     this.configDir = relativeConfigDir;
     this.serverProps = serverProps;
-    //  this.lessonPlanFile = serverProps.getLessonPlan();
     this.logAndNotify = logAndNotify;
 
     try {
       Connection connection1 = getConnection();
       if (connection1 == null) {
-        logger.warn("couldn't open connection to database at " + configDir + " : " + dbName);
+        logger.warn("couldn't open connection to database at " + relativeConfigDir + " : " + dbName);
         return;
       } else {
         closeConnection(connection1);
@@ -327,7 +332,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath
    */
   public void setInstallPath(String installPath, String lessonPlanFile, String mediaDir) {
-  //  logger.debug("got install path " + installPath + " media " + mediaDir);
+    //  logger.debug("got install path " + installPath + " media " + mediaDir);
     this.installPath = installPath;
     makeDAO(lessonPlanFile, mediaDir, installPath);
     this.jsonSupport = new JsonSupport(getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
@@ -340,9 +345,10 @@ public class DatabaseImpl implements Database {
    * @see LangTestDatabaseImpl#getTypeOrder()
    */
   public SectionHelper<CommonExercise> getSectionHelper() {
+    if (serverProps.isAMAS()) return new SectionHelper<>();
+
     getExercises();
-    SectionHelper<CommonExercise> sectionHelper = exerciseDAO.getSectionHelper();
-    return sectionHelper;
+    return exerciseDAO.getSectionHelper();
   }
 
   /**
@@ -370,6 +376,11 @@ public class DatabaseImpl implements Database {
     return rawExercises;
   }
 
+  public Collection<AmasExerciseImpl> getAMASExercises() { return fileExerciseDAO.getRawExercises(); }
+  public AmasExerciseImpl getAMASExercise(String id) {
+    return fileExerciseDAO.getExercise(id);
+  }
+  public SectionHelper<AmasExerciseImpl> getAMASSectionHelper() { return fileExerciseDAO.getSectionHelper(); }
   /**
    * Lazy, latchy instantiation of DAOs.
    * Not sure why it really has to be this way.
@@ -379,31 +390,49 @@ public class DatabaseImpl implements Database {
   private void makeDAO(String lessonPlanFile, String mediaDir, String installPath) {
     if (exerciseDAO == null) {
       synchronized (this) {
-        if (lessonPlanFile.endsWith(".json")) {
-          this.exerciseDAO = new JSONExerciseDAO(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
+        if (serverProps.isAMAS()) {
+          fileExerciseDAO = new FileExerciseDAO<AmasExerciseImpl>(mediaDir, serverProps.getLanguage(), absConfigDir, lessonPlanFile, installPath);
+         // commonExerciseDAO = fileExerciseDAO;
         } else {
-          this.exerciseDAO = new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
+          if (lessonPlanFile.endsWith(".json")) {
+            this.exerciseDAO = new JSONExerciseDAO(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
+          } else {
+            this.exerciseDAO = new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
+          }
+      //    commonExerciseDAO = exerciseDAO;
+
+          userExerciseDAO.setExerciseDAO(exerciseDAO);
+          setDependencies(mediaDir, installPath);
+
+          exerciseDAO.getRawExercises();
+
+          userDAO.checkForFavorites(userListManager);
+          userExerciseDAO.setAudioDAO(audioDAO);
+
+          userManagement = new UserManagement(userDAO, exerciseDAO, resultDAO, userListManager);
+
+          analysis = new Analysis(this, phoneDAO, getExerciseIDToRefAudio());
         }
       }
-      userExerciseDAO.setExerciseDAO(exerciseDAO);
-      setDependencies(mediaDir, installPath);
-
-      exerciseDAO.getRawExercises();
-
-      userDAO.checkForFavorites(userListManager);
-      userExerciseDAO.setAudioDAO(audioDAO);
-
-      userManagement = new UserManagement(userDAO, exerciseDAO, resultDAO, userListManager);
-
-      analysis = new Analysis(this, phoneDAO, getExerciseIDToRefAudio());
     }
   }
 
+  /**
+   * @see #makeDAO(String, String, String)
+   * @param mediaDir
+   * @param installPath
+   */
   private void setDependencies(String mediaDir, String installPath) {
     ExerciseDAO exerciseDAO = this.exerciseDAO;
     setDependencies(mediaDir, installPath, exerciseDAO);
   }
 
+  /**
+   * Public for testing only...
+   * @param mediaDir
+   * @param installPath
+   * @param exerciseDAO
+   */
   public void setDependencies(String mediaDir, String installPath, ExerciseDAO exerciseDAO) {
     exerciseDAO.setDependencies(mediaDir, installPath, userExerciseDAO, addRemoveDAO, audioDAO);
   }
