@@ -6,42 +6,28 @@ package mitll.langtest.client.amas;
 
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.Container;
-import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
+import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabase;
-import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.client.flashcard.Flashcard;
+import mitll.langtest.client.user.UserManager;
+
+import java.util.logging.Logger;
 
 
 /**
  * Created by go22670 on 12/21/15.
  */
-public class InitialUI {
-  private final LangTest langTest;
-  private final PropertyHandler props;
-  private AutoCRTChapterNPFHelper learnHelper;
+public class AMASInitialUI extends InitialUI {
+  private Logger logger = Logger.getLogger("AMASInitialUI");
 
+//  private static final int NO_USER_INITIAL = -2;
 
-  private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
-
-  private final Flashcard flashcard;
-
-  private Panel headerRow;
-  private Panel firstRow;
-
-
-  public InitialUI(LangTest langTest, Flashcard flashcard) {
-    this.langTest = langTest;
-    this.flashcard = flashcard;
-    this.props = langTest.getProps();
+  public AMASInitialUI(LangTest langTest, UserManager userManager) {
+    super(langTest, userManager);
   }
 
   /**
@@ -63,7 +49,7 @@ public class InitialUI {
     if (props.isOdaMode()) {
       headerRow.setVisible(false);
       populateBelowHeader(verticalContainer, firstRow);
-    } else if (!langTest.showLogin(verticalContainer, firstRow)) {
+    } else if (!showLogin()) {
       populateBelowHeader(verticalContainer, firstRow);
     }
   }
@@ -74,7 +60,7 @@ public class InitialUI {
    * @return
    * @see #populateRootPanel()
    */
-  private Panel makeFirstTwoRows(Container verticalContainer) {
+/*  private Panel makeFirstTwoRows(Container verticalContainer) {
     verticalContainer.add(headerRow = makeHeaderRow());
     headerRow.getElement().setId("headerRow");
 
@@ -83,38 +69,42 @@ public class InitialUI {
     this.firstRow = firstRow;
     firstRow.getElement().setId("firstRow");
     return firstRow;
-  }
+  }*/
 
   /**
    * TODO : FIX ME
+   *
    * @return
    * @see #populateRootPanel()
    */
-  private Panel makeHeaderRow() {
+/*
+  protected Panel makeHeaderRow() {
+    logger.info("make header row ---- ");
     headerRow = new FluidRow();
-   // headerRow.add(new Column(12, flashcard.getNPFHeaderRow()));
+    headerRow.add(new Column(12, flashcard.getNPFHeaderRow()));
     return headerRow;
   }
+*/
 
   /**
-   *
    * @return
    */
-  private Container getRootContainer() {
+/*
+  protected Container getRootContainer() {
     RootPanel.get().clear();   // necessary?
 
     Container verticalContainer = new FluidContainer();
     verticalContainer.getElement().setId("root_vertical_container");
     return verticalContainer;
   }
-
+*/
   public int getHeightOfTopRows() {
     return headerRow.getOffsetHeight();
   }
 
   /**
-   *    * TODO : FIX ME
-
+   * * TODO : FIX ME
+   *
    * @param verticalContainer
    * @param firstRow          where we put the flash permission window if it gets shown
    * @seex #handleCDToken(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, String)
@@ -127,7 +117,7 @@ public class InitialUI {
     /**
      * {@link #makeFlashContainer}
      */
-  //  firstRow.add(langTest.getFlashRecordPanel());
+    //  firstRow.add(langTest.getFlashRecordPanel());
     langTest.modeSelect();
 
 
@@ -149,15 +139,18 @@ public class InitialUI {
    * @see mitll.langtest.client.user.UserManager#login()
    */
 
-  void showLogin() {
-    populateRootPanel();
-  }
+/*  public boolean showLogin() {
+   // populateRootPanel();
+    return true;
+  }*/
 
   /**
    * @see #gotUser
    * @see #configureUIGivenUser(long) (long)
    */
-  void populateRootAfterLogin() {
+  @Override
+  public void reallySetFactory() {
+    logger.info("reallySetFactory");
     if (!props.isOdaMode()) {
       int childCount = firstRow.getElement().getChildCount();
       // logger.info("populateRootAfterLogin root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
@@ -172,8 +165,24 @@ public class InitialUI {
     }
   }
 
+  // private long lastUser = NO_USER_INITIAL;
+
   /**
-   *  TODO : FIX ME
+   * @param userID
+   * @return
+   * @see #gotUser
+   */
+  public void configureUIGivenUser(long userID) {
+    boolean diff = lastUser != userID;
+
+    showUserPermissions(userID);
+
+    if (diff) configureUIGivenUser();
+  }
+
+
+  /**
+   * TODO : FIX ME
    */
   void configureUIGivenUser() {
     if (learnHelper != null && learnHelper.getExerciseList() != null) {
