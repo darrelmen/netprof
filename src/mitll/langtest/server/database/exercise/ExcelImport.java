@@ -26,7 +26,7 @@ import java.util.*;
  * Time: 8:07 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO {
+public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
   private static final Logger logger = Logger.getLogger(ExcelImport.class);
   private static final String CONTEXT_TRANSLATION = "context translation";
   private static final String TRANSLATION_OF_CONTEXT = "Translation of Context";
