@@ -33,6 +33,29 @@ public class ServerProperties {
   private static final String FALSE = "false";
   private static final String TRUE = "true";
 
+  public static final List<String> SITE_LIST = Arrays.asList(
+      "Dari",
+      "Egyptian",
+      "English",
+      "Farsi",
+      "German",
+      "Korean",
+      "Iraqi",
+      "Levantine",
+      "Mandarin",
+      "MSA",
+      "Pashto1",
+      "Pashto2",
+      "Pashto3",
+      "Russian",
+      "Spanish",
+      "Sudanese",
+      "Tagalog",
+      "Urdu");
+
+  private static final List<String> AMAS_SITES = Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
+
+
   public static final String MIRA_DEVEL_HOST = "mira-devel.llan.ll.mit.edu/scorer/item"; //"mira-devel.llan.ll.mit.edu/msa/item";
   private static final String MIRA_DEVEL = "https://" +MIRA_DEVEL_HOST;
   private static final String MIRA_LEN   = "https://mira.ll.mit.edu/scorer/item";
@@ -334,6 +357,8 @@ public class ServerProperties {
       }
     }
     miraClassifierURL = props.getProperty(MIRA_CLASSIFIER_URL, MIRA_DEFAULT);
+
+
   }
 
   private boolean getDefaultFalse(String param) {
@@ -527,5 +552,9 @@ public class ServerProperties {
 
   public String getMiraFlavor() {
     return props.getProperty("miraFlavor",getLanguage().toLowerCase()+"-amas3");
+  }
+
+  public Collection<String> getSites() {
+    return isAMAS() ? AMAS_SITES : SITE_LIST;
   }
 }
