@@ -173,7 +173,7 @@ public class EditItem {
           }
 
           @Override
-          public List<CommonShell> rememberExercises(List<CommonShell> result) {
+          public Collection<CommonShell> rememberExercises(Collection<CommonShell> result) {
             clear();
             boolean addNewItem = includeAddItem;
 
