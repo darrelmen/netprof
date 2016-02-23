@@ -4,7 +4,7 @@
 
 package mitll.langtest.client.list;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Created by go22670 on 2/11/14.
@@ -15,5 +15,5 @@ public interface ListChangeListener<T> {
    * @param items
    * @param selectionID
    */
-  public void listChanged(List<T> items, String selectionID);
+  public void listChanged(Collection<T> items, String selectionID);
 }
