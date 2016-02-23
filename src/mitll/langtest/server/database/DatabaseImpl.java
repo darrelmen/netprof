@@ -61,7 +61,7 @@ import java.util.*;
  * Time: 11:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class DatabaseImpl<T extends CommonShell>  implements Database {
+public class DatabaseImpl<T extends CommonShell> implements Database {
   private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
   private static final int LOG_THRESHOLD = 10;
   private static final String UNKNOWN = "unknown";
@@ -70,7 +70,7 @@ public class DatabaseImpl<T extends CommonShell>  implements Database {
 
   private String installPath;
   private ExerciseDAO<CommonExercise> exerciseDAO = null;
- // private SimpleExerciseDAO<T> commonExerciseDAO = null;
+  // private SimpleExerciseDAO<T> commonExerciseDAO = null;
 
   private UserDAO userDAO;
   private ResultDAO resultDAO;
@@ -369,6 +369,13 @@ public class DatabaseImpl<T extends CommonShell>  implements Database {
    */
   public Collection<CommonExercise> getExercises() {
     //logger.debug("using lesson plan file " +lessonPlanFile + " at " + installPath);
+    if (serverProps.isAMAS()) {
+      return Collections.emptyList();
+//      Collection<CommonExercise> copy = new ArrayList<>();
+//      for (CommonExercise exercise : getAMASExercises()) copy.add(exercise);
+//
+//      return getAMASExercises();
+    }
     List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
     if (rawExercises.isEmpty()) {
       logger.warn("getExercises no exercises in " + getServerProps().getLessonPlan() + " at " + installPath);
@@ -376,11 +383,18 @@ public class DatabaseImpl<T extends CommonShell>  implements Database {
     return rawExercises;
   }
 
-  public Collection<AmasExerciseImpl> getAMASExercises() { return fileExerciseDAO.getRawExercises(); }
+  public Collection<AmasExerciseImpl> getAMASExercises() {
+    return fileExerciseDAO.getRawExercises();
+  }
+
   public AmasExerciseImpl getAMASExercise(String id) {
     return fileExerciseDAO.getExercise(id);
   }
-  public SectionHelper<AmasExerciseImpl> getAMASSectionHelper() { return fileExerciseDAO.getSectionHelper(); }
+
+  public SectionHelper<AmasExerciseImpl> getAMASSectionHelper() {
+    return fileExerciseDAO.getSectionHelper();
+  }
+
   /**
    * Lazy, latchy instantiation of DAOs.
    * Not sure why it really has to be this way.
@@ -392,14 +406,13 @@ public class DatabaseImpl<T extends CommonShell>  implements Database {
       synchronized (this) {
         if (serverProps.isAMAS()) {
           fileExerciseDAO = new FileExerciseDAO<AmasExerciseImpl>(mediaDir, serverProps.getLanguage(), absConfigDir, lessonPlanFile, installPath);
-         // commonExerciseDAO = fileExerciseDAO;
+          userManagement = new UserManagement(userDAO, fileExerciseDAO.getNumExercises(), resultDAO, userListManager);
         } else {
           if (lessonPlanFile.endsWith(".json")) {
             this.exerciseDAO = new JSONExerciseDAO(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
           } else {
             this.exerciseDAO = new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
           }
-      //    commonExerciseDAO = exerciseDAO;
 
           userExerciseDAO.setExerciseDAO(exerciseDAO);
           setDependencies(mediaDir, installPath);
@@ -409,7 +422,7 @@ public class DatabaseImpl<T extends CommonShell>  implements Database {
           userDAO.checkForFavorites(userListManager);
           userExerciseDAO.setAudioDAO(audioDAO);
 
-          userManagement = new UserManagement(userDAO, exerciseDAO, resultDAO, userListManager);
+          userManagement = new UserManagement(userDAO, exerciseDAO.getNumExercises(), resultDAO, userListManager);
 
           analysis = new Analysis(this, phoneDAO, getExerciseIDToRefAudio());
         }
@@ -418,9 +431,9 @@ public class DatabaseImpl<T extends CommonShell>  implements Database {
   }
 
   /**
-   * @see #makeDAO(String, String, String)
    * @param mediaDir
    * @param installPath
+   * @see #makeDAO(String, String, String)
    */
   private void setDependencies(String mediaDir, String installPath) {
     ExerciseDAO exerciseDAO = this.exerciseDAO;
@@ -429,6 +442,7 @@ public class DatabaseImpl<T extends CommonShell>  implements Database {
 
   /**
    * Public for testing only...
+   *
    * @param mediaDir
    * @param installPath
    * @param exerciseDAO
@@ -715,7 +729,7 @@ public class DatabaseImpl<T extends CommonShell>  implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#userExists(String, String)
    */
   public User userExists(HttpServletRequest request, String login, String passwordH) {
-    return userManagement.userExists(request, login, passwordH);
+    return userManagement.userExists(request, login, passwordH, );
   }
 
   /**
