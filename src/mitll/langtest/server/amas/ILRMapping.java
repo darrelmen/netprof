@@ -27,6 +27,7 @@ public class ILRMapping<T extends Shell> {
   private final SectionHelper<T> sectionHelper;
   private static final String ENCODING = "UTF8";
   private final boolean usePredefOrder;
+
   /**
    * @see mitll.langtest.server.amas.FileExerciseDAO#FileExerciseDAO
    * @param configDir
@@ -39,11 +40,16 @@ public class ILRMapping<T extends Shell> {
     this.usePredefOrder = usePredefOrder;
     File ilrMapping = new File(configDir, mappingFile);
 //    logger.debug("config " + configDir + " " + new File(configDir).getAbsolutePath());
+    if (!ilrMapping.exists()) {
+      logger.warn("ILRMapping : can't find " + ilrMapping.getAbsolutePath());
+
+      ilrMapping = new File(mappingFile);
+    }
     if (ilrMapping.exists()) {
       readILRMapping2(ilrMapping);
     }
     else {
-      logger.debug("can't find " + ilrMapping.getAbsolutePath());
+      logger.warn("ILRMapping : can't find " + ilrMapping.getAbsolutePath());
     }
     sectionHelper.report();
   }
