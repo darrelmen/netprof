@@ -10,7 +10,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -23,7 +22,7 @@ import java.util.Date;
 public class BaseTest {
   private static final Logger logger = Logger.getLogger(BaseTest.class);
 
-  protected void finish(Connection connection, Statement statement, ResultSet rs) throws SQLException {
+  protected void finish(Statement statement, ResultSet rs) throws SQLException {
     rs.close();
     statement.close();
   }
@@ -80,6 +79,6 @@ public class BaseTest {
   }
 
   protected H2Connection getH2Connection(String path) {
-    return new H2Connection(".", path, true);
+    return new H2Connection(".", path, true,null);
   }
 }
