@@ -5,8 +5,7 @@
 package mitll.langtest.client;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.*;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.Tab;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.common.cache.Cache;
@@ -16,41 +15,35 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
-import mitll.langtest.client.custom.Navigation;
+import mitll.langtest.client.amas.AMASInitialUI;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.flashcard.Flashcard;
 import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventLogger;
-import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.client.instrumentation.EventTable;
-import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
-import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
-import mitll.langtest.client.user.*;
+import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.client.user.UserManager;
+import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.StartupInfo;
@@ -89,15 +82,17 @@ import java.util.logging.Logger;
  * - Refactor to add in Amas website support, and steps toward supporting getting content from json
  * 1.2.1
  * - bug fix for display of ref audio in analysis
+ * 1.2.2
+ * - support for AMAS
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private Logger logger = Logger.getLogger("LangTest");
 
-  private static final String VERSION_INFO = "1.2.1";
+  private static final String VERSION_INFO = "1.2.2";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
-  public static final List<String> SITE_LIST = Arrays.asList(
+/*  public static final List<String> SITE_LIST = Arrays.asList(
       "Dari",
       "Egyptian",
       "English",
@@ -115,14 +110,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       "Spanish",
       "Sudanese",
       "Tagalog",
-      "Urdu");
+      "Urdu");*/
 
   /**
    * How far to the right to shift the list of sites...
    *
-   * @see #getLinksToSites()
+   * @seex #getLinksToSites()
    */
-  private static final int LEFT_LIST_WIDTH = 267;
+ // private static final int LEFT_LIST_WIDTH = 267;
 
   private static final String UNKNOWN = "unknown";
   public static final String LANGTEST_IMAGES = "langtest/images/";
@@ -134,24 +129,25 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private UserManager userManager;
   private FlashRecordPanelHeadless flashRecordPanel;
 
-  private long lastUser = NO_USER_INITIAL;
+//  private long lastUser = NO_USER_INITIAL;
   private String audioType = Result.AUDIO_TYPE_UNSET;
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
   private PropertyHandler props;
-  private Flashcard flashcard;
+  // private Flashcard flashcard;
 
-  private Panel headerRow;
-  private Panel firstRow;
+//  private Panel headerRow;
+//  private Panel firstRow;
 
   private StartupInfo startupInfo;
 
-  private Navigation navigation;
+  // private Navigation navigation;
   private EventLogger buttonFactory;
-  private final KeyPressHelper keyPressHelper = new KeyPressHelper(false,true);
+  private final KeyPressHelper keyPressHelper = new KeyPressHelper(false, true);
   private boolean isMicConnected = true;
+  private InitialUI initialUI;
 
   /**
    * This gets called first.
@@ -336,12 +332,28 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     makeFlashContainer();
 
-    populateRootPanel();
+    if (props.isAMAS()) {
+      final LangTest outer = this;
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          downloadFailedAlert();
+        }
 
-    setPageTitle();
-    browserCheck.checkForCompatibleBrowser();
+        public void onSuccess() {
+          logger.info("run async to get amas ui");
+          initialUI = new AMASInitialUI(outer, userManager);
+          populateRootPanel();
+        }
+      });
+    } else {
+      this.initialUI = new InitialUI(this, userManager);
+      populateRootPanel();
 
-    loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
+      setPageTitle();
+      browserCheck.checkForCompatibleBrowser();
+
+      loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
+    }
   }
 
   /**
@@ -349,23 +361,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #onModuleLoad2()
    */
   private void populateRootPanel() {
-    Container verticalContainer = getRootContainer();
-    // header/title line
-    // first row ---------------
-    Panel firstRow = makeFirstTwoRows(verticalContainer);
-
-    if (!showLogin(verticalContainer, firstRow)) {
-      // logger.info("populate below header...");
-      populateBelowHeader(verticalContainer, firstRow);
-    }
-  }
-
-  private Container getRootContainer() {
     RootPanel.get().clear();   // necessary?
-
-    Container verticalContainer = new FluidContainer();
-    verticalContainer.getElement().setId("root_vertical_container");
-    return verticalContainer;
+    initialUI.populateRootPanel();
   }
 
   /**
@@ -375,7 +372,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #populateRootPanel()
    * @see #showLogin()
    */
-  private void populateBelowHeader(Container verticalContainer, Panel firstRow) {
+/*  private void populateBelowHeader(Container verticalContainer, Panel firstRow) {
     if (showOnlyOneExercise()) {
       Panel currentExerciseVPanel = new FlowPanel();
       currentExerciseVPanel.getElement().setId("currentExercisePanel");
@@ -386,9 +383,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
       RootPanel.get().add(verticalContainer);
 
-      /**
-       * {@link #makeFlashContainer}
-       */
+      *//**
+   * {@link #makeFlashContainer}
+   *//*
       firstRow.add(flashRecordPanel);
     }
     modeSelect();
@@ -397,8 +394,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     firstRow.add(navigation.getTabPanel());
     verticalContainer.add(getLinksToSites());
-  }
+  }*/
 
+/*
   private Panel getLinksToSites() {
     Panel hp = new HorizontalPanel();
     Style style = hp.getElement().getStyle();
@@ -412,12 +410,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
     return hp;
   }
+*/
 
   /**
    * @param currentExerciseVPanel
    * @return
    * @see #populateBelowHeader
    */
+/*
   private Container getHeadstart(Panel currentExerciseVPanel) {
     // show fancy lace background image
     currentExerciseVPanel.addStyleName("body");
@@ -430,6 +430,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     verticalContainer2.add(currentExerciseVPanel);
     return verticalContainer2;
   }
+*/
 
   /**
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(int)
@@ -437,7 +438,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   @Override
   public void showLogin() {
-    populateRootPanel();
+    initialUI.populateRootPanel();
   }
 
   /**
@@ -450,12 +451,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #showLogin()
    * @see #populateRootPanel()
    */
-  public boolean showLogin(final Container verticalContainer, final Panel firstRow) {
+/*  public boolean showLogin(final Container verticalContainer, final Panel firstRow) {
     final EventRegistration eventRegistration = this;
 
     // check if we're here as a result of resetting a password
     final String resetPassToken = props.getResetPassToken();
-    if (!resetPassToken.isEmpty()/* && !resetPassToken.equals(staleToken)*/) {
+    if (!resetPassToken.isEmpty()*//* && !resetPassToken.equals(staleToken)*//*) {
       handleResetPass(verticalContainer, firstRow, eventRegistration, resetPassToken);
       return true;
     }
@@ -488,8 +489,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     flashcard.setCogVisible(true);
     return false;
-  }
+  }*/
 
+/*
   private void handleResetPass(final Container verticalContainer, final Panel firstRow,
                                final EventRegistration eventRegistration, final String resetPassToken) {
     logger.info("showLogin token '" + resetPassToken + "' for password reset");
@@ -505,7 +507,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           logger.info("token '" + resetPassToken + "' is stale. Showing normal view");
           trimURL();
 
-          populateBelowHeader(verticalContainer, firstRow);
+          initialUI.populateBelowHeader(verticalContainer, firstRow);
           //  trimURLAndReload();
         } else {
           ResetPassword userPassLogin = new ResetPassword(service, getProps(), eventRegistration);
@@ -520,6 +522,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     RootPanel.get().add(verticalContainer);
     flashcard.setCogVisible(false);
   }
+*/
 
   /**
    * Reload window after showing content developer has been approved.
@@ -531,7 +534,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param cdToken
    * @param emailR
    */
-  private void handleCDToken(final Container verticalContainer, final Panel firstRow, final String cdToken, String emailR) {
+/*  private void handleCDToken(final Container verticalContainer, final Panel firstRow, final String cdToken, String emailR) {
     logger.info("enabling token " + cdToken + " for email " + emailR);
     service.enableCDUser(cdToken, emailR, Window.Location.getHref(), new AsyncCallback<String>() {
       @Override
@@ -555,8 +558,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     RootPanel.get().add(verticalContainer);
     flashcard.setCogVisible(false);
-  }
+  }*/
 
+/*
   public void trimURLAndReload() {
     Timer t = new Timer() {
       @Override
@@ -582,13 +586,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       return "http://127.0.0.1:8888/LangTest.html?gwt.codesvr=127.0.0.1:9997";
     } else return url.split("\\?")[0].split("\\#")[0];
   }
+*/
 
   /**
-   * @param verticalContainer
    * @return
+   * @paramx verticalContainer
    * @see #populateRootPanel()
    */
-  private Panel makeFirstTwoRows(Container verticalContainer) {
+/*  private Panel makeFirstTwoRows(Container verticalContainer) {
     verticalContainer.add(headerRow = makeHeaderRow());
     headerRow.getElement().setId("headerRow");
 
@@ -597,8 +602,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     this.firstRow = firstRow;
     firstRow.getElement().setId("firstRow");
     return firstRow;
-  }
-
+  }*/
   private void loadVisualizationPackages() {
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       @Override
@@ -613,6 +617,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    * @see #populateRootPanel()
    */
+/*
   private Panel makeHeaderRow() {
     flashcard = new Flashcard(props);
     Widget title = flashcard.makeNPFHeaderRow(props.getSplash(), true, getGreeting(),
@@ -628,6 +633,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     headerRow.add(new Column(12, title));
     return headerRow;
   }
+*/
 
   /**
    * Set the page title and favicon.
@@ -643,18 +649,18 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   /**
    * @return
-   * @see #makeHeaderRow()
+   * @seex #makeHeaderRow()
    */
-  private HTML getReleaseStatus() {
+/*  private HTML getReleaseStatus() {
     browserCheck.getBrowserAndVersion();
     return new HTML(getInfoLine());
   }
-
+  */
   public String getBrowserInfo() {
     return browserCheck.getBrowserAndVersion();
   }
 
-  private String getInfoLine() {
+  public String getInfoLine() {
     String releaseDate = VERSION +
         (props.getReleaseDate() != null ? " " + props.getReleaseDate() : "");
     return "<span><font size=-2>" +
@@ -675,16 +681,19 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void addResizeHandler() {
     Window.addResizeHandler(new ResizeHandler() {
       public void onResize(ResizeEvent event) {
+        initialUI.onResize();
+/*
         if (navigation != null) navigation.onResize();
         if (flashcard != null) {
           flashcard.onResize();
         }
+*/
       }
     });
   }
 
   public int getHeightOfTopRows() {
-    return headerRow.getOffsetHeight();
+    return initialUI.getHeightOfTopRows();
   }
 
   /**
@@ -701,8 +710,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * <p>
    * If in goodwave (pronunciation scoring) mode or auto crt mode, skip the user login.
    *
+   * @seex #resetState()
    * @see #onModuleLoad2()
-   * @see #resetState()
    */
   public void modeSelect() {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -745,7 +754,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
                   hideFlash();
                   checkLogin();
 
-                  flashcard.setSplash();
+                  initialUI.setSplash();
                   isMicConnected = false;
                 }
               }
@@ -763,7 +772,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           }
         });
 
-        flashcard.setSplash();
+        initialUI.setSplash();
         isMicConnected = false;
       }
     });
@@ -778,6 +787,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #gotUser
    * @see #configureUIGivenUser(long) (long)
    */
+/*
   private void reallySetFactory() {
     int childCount = firstRow.getElement().getChildCount();
 
@@ -791,26 +801,28 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
     }
   }
+*/
 
   /**
    * @return
    * @see #gotUser
    * @see #makeHeaderRow()
    */
+/*
   private String getGreeting() {
     return userManager.getUserID() == null ? "" : ("" + userManager.getUserID());
   }
+*/
 
   /**
-   * @see mitll.langtest.client.LangTest.LogoutClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
+   * @seex mitll.langtest.client.LangTest.LogoutClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
    */
-  private void resetState() {
+/*  private void resetState() {
     History.newItem(""); // clear history!
     userManager.clearUser();
     lastUser = NO_USER_INITIAL;
     modeSelect();
-  }
-
+  }*/
   @Override
   public StartupInfo getStartupInfo() {
     return startupInfo;
@@ -827,7 +839,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see UserManager#storeUser
    */
   public void gotUser(User user) {
-    reallySetFactory();
+    initialUI.gotUser(user);
+/*    reallySetFactory();
     long userID = -1;
     if (user != null) {
       userID = user.getId();
@@ -846,7 +859,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (userID > -1) {
       flashcard.setCogVisible(true);
       flashcard.setVisibleAdmin(user.isAdmin() || props.isAdminView() || user.isTeacher() || user.isCD());
-    }
+    }*/
   }
 
   /**
@@ -855,7 +868,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see #gotUser
    */
   private void configureUIGivenUser(long userID) {
-    logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser +
+    initialUI.configureUIGivenUser(userID);
+
+/*    logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser +
         " audio type " + getAudioType() + " perms " + getPermissions());
     reallySetFactory();
 //    logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
@@ -864,7 +879,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     lastUser = userID;
     flashcard.setBrowserInfo(getInfoLine());
-    flashcard.reflectPermissions(getPermissions());
+    flashcard.reflectPermissions(getPermissions());*/
   }
 
   /**
@@ -1040,6 +1055,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   // recording methods...
 
+  public Widget getFlashRecordPanel() {
+    return flashRecordPanel;
+  }
+
   /**
    * Recording interface
    */
@@ -1096,7 +1115,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return flashRecordPanel.usingFlash();
   }
 
-  private class LogoutClickHandler implements ClickHandler {
+/*  private class LogoutClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
       logEvent("No widget", "UserLoging", "N/A", "User Logout by " + lastUser);
       resetState();
@@ -1161,9 +1180,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         }
       });
     }
+  }*/
+
+
+  private void downloadFailedAlert() {
+    Window.alert("Code download failed");
   }
 
-  private void downloadFailedAlert() {  Window.alert("Code download failed");  }
 
   public boolean isMicAvailable() {
     return isMicConnected;
