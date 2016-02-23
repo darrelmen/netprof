@@ -5,6 +5,8 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
@@ -26,14 +28,14 @@ import java.util.*;
 public class UserManagement {
   private static final Logger logger = Logger.getLogger(UserManagement.class);
 
-  private final ExerciseDAO exerciseDAO;
+  private final int numExercises;
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
   private final UserListManager userListManager;
 
-  public UserManagement(UserDAO userDAO, ExerciseDAO exerciseDAO, ResultDAO resultDAO, UserListManager userListManager) {
+  public UserManagement(UserDAO userDAO, int numExercises, ResultDAO resultDAO, UserListManager userListManager) {
     this.userDAO = userDAO;
-    this.exerciseDAO = exerciseDAO;
+    this.numExercises = numExercises;
     this.resultDAO = resultDAO;
     this.userListManager = userListManager;
   }
@@ -51,13 +53,13 @@ public class UserManagement {
    * @see mitll.langtest.client.user.UserPassLogin#makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
    * @see mitll.langtest.server.LangTestDatabaseImpl#userExists(String, String)
    */
-  public User userExists(HttpServletRequest request, String login, String passwordH) {
+  public User userExists(HttpServletRequest request, String login, String passwordH, ServerProperties props) {
     User user = userDAO.getUser(login, passwordH);
 
     if (user == null && !passwordH.isEmpty()) {
       logger.debug("userExists : checking '" + login + "'");
 
-      for (String site : LangTest.SITE_LIST) {
+      for (String site : props.getSites()) {
         String url = "https://np.ll.mit.edu/npfClassroom" + site.replaceAll("Mandarin", "CM") + "/scoreServlet";
         String json = new HTTPClient("", 0).readFromGET(url + "?hasUser=" + login + "&passwordH=" + passwordH);
 
@@ -180,9 +182,11 @@ public class UserManagement {
    * @return assigned id
    */
   public long addUser(int age, String gender, int experience, String ipAddr,
-                      String nativeLang, String dialect, String userID, Collection<User.Permission> permissions, String device) {
+                      String nativeLang, String dialect, String userID, Collection<User.Permission> permissions,
+                      String device) {
     logger.debug("addUser " + userID);
-    long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false, permissions, User.Kind.STUDENT, "", "", device);
+    long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false, permissions,
+        User.Kind.STUDENT, "", "", device);
     userListManager.createFavorites(l);
     return l;
   }
@@ -191,7 +195,8 @@ public class UserManagement {
     String header = request.getHeader("User-Agent");
     SimpleDateFormat sdf = new SimpleDateFormat();
     String format = sdf.format(new Date());
-    return request.getRemoteHost() +/*"/"+ request.getRemoteAddr()+*/(header != null ? "/" + header : "") + " at " + format;
+    return request.getRemoteHost() +/*"/"+ request.getRemoteAddr()+*/(header != null ? "/" + header : "") +
+        " at " + format;
   }
 
   /**
@@ -214,7 +219,7 @@ public class UserManagement {
     try {
       Pair idToCount = populateUserToNumAnswers();
       users = userDAO.getUsers();
-      int total = exerciseDAO.getRawExercises().size();
+      //int total = exerciseDAO.getRawExercises().size();
       for (User u : users) {
         Integer numResults = idToCount.idToCount.get(u.getId());
         if (numResults != null) {
@@ -224,9 +229,9 @@ public class UserManagement {
             u.setRate(userToRate.get(u.getId()));
           }
           int size = idToCount.idToUniqueCount.get(u.getId()).size();
-          boolean complete = size >= total;
+          boolean complete = size >= numExercises;
           u.setComplete(complete);
-          u.setCompletePercent(Math.min(1.0f, (float) size / (float) total));
+          u.setCompletePercent(Math.min(1.0f, (float) size / (float) numExercises));
 /*          logger.debug("user " +u + " : results "+numResults + " unique " + size +
             " vs total exercises " + total + " complete " + complete);*/
         }
