@@ -58,7 +58,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   private HasID currentExercise;
   private final ControlState controlState;
-  private List<L> allExercises;//, originalExercises;
+  private Collection<L> allExercises;//, originalExercises;
 
   private final Map<String, Boolean> exToCorrect = new HashMap<>();
   private final Map<String, Double> exToScore = new HashMap<>();
@@ -96,7 +96,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
          * @see mitll.langtest.client.list.ExerciseList#rememberAndLoadFirst
          */
         @Override
-        public void listChanged(List<L> items, String selectionID) {
+        public void listChanged(Collection<L> items, String selectionID) {
           StatsFlashcardFactory.this.selectionID = selectionID;
           allExercises = items;
           //    logger.info("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
@@ -487,7 +487,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     void startOver() {
       makeFlashcardButtonsVisible();
 
-      String lastID = allExercises.get(allExercises.size() - 1).getID();
+      String lastID = "";
+      for (L ex : allExercises) {
+        lastID = ex.getID();
+      }
+//      String lastID = allExercises.get(allExercises.size() - 1).getID();
       String currentExerciseID = sticky.getCurrentExerciseID();
 
       logger.info("startOver : current " + currentExerciseID);
