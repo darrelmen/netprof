@@ -23,7 +23,6 @@ import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.UserDAO;
-import mitll.langtest.server.database.WordDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.decoder.RefResultDecoder;
@@ -34,6 +33,7 @@ import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.*;
+import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.UserPerformance;
@@ -74,27 +74,28 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public static final String DATABASE_REFERENCE = "databaseReference";
   public static final String AUDIO_FILE_HELPER_REFERENCE = "audioFileHelperReference";
   private static final int SLOW_EXERCISE_EMAIL = 2000;
-  //  private static final String ENGLISH = "English";
   private static final int MAX = 30;
   private static final int SLOW_MILLIS = 40;
-  public static final int WARN_DUR = 100;
+  private static final int WARN_DUR = 100;
   private static final int MIN_RECORDINGS = 5;
   private static final String WAV1 = "wav";
   private RefResultDecoder refResultDecoder;
 
   private static final boolean warnMissingFile = true;
 
-  private DatabaseImpl db;
+  private DatabaseImpl<CommonExercise> db;
   private AudioFileHelper audioFileHelper;
   private String relativeConfigDir;
   private String configDir;
   private ServerProperties serverProps;
-  AudioConversion audioConversion;
+  private AudioConversion audioConversion;
   private PathHelper pathHelper;
+
   /**
    * @see #getExercises()
    */
-  private ExerciseTrie fullTrie;
+  private ExerciseTrie fullTrie = null;
+  private ExerciseTrie<AmasExerciseImpl> amasFullTrie = null;
 
   private static final boolean DEBUG = false;
 
@@ -157,6 +158,57 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return ids;
   }
 
+
+  public ExerciseListWrapper<AmasExerciseImpl> getAMASExerciseIds(int reqID,
+                                                                  Map<String, Collection<String>> typeToSelection,
+                                                                  String prefix,
+                                                                  int userID) {
+    Collection<AmasExerciseImpl> exercises;
+
+    try {
+      if (typeToSelection.isEmpty()) {   // no unit-chapter filtering
+        // get initial exercise set, either from a user list or predefined
+        exercises = getAMASExercises();
+
+        // now if there's a prefix, filter by prefix match
+        if (!prefix.isEmpty()) {
+          // now do a trie over matches
+          exercises = getExercisesForSearchWithTrie(prefix, userID, exercises, true, amasFullTrie);
+        }
+        AmasSupport amasSupport = new AmasSupport();
+        exercises = amasSupport.filterByUnrecorded(userID, exercises, typeToSelection, db.getResultDAO());
+        // exercises = filterByOnlyAudioAnno(onlyWithAudioAnno, exercises);
+        //    int i = markRecordedState(userID, role, exercises, onlyExamples);
+        //  logger.debug("marked " +i + " as recorded");
+
+        // now sort : everything gets sorted the same way
+        //    List<AmasExerciseImpl> commonExercises;
+//        if (incorrectFirstOrder) {
+//          commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, userID, audioFileHelper.getCollator());
+//        } else {
+        //    commonExercises = new ArrayList<AmasExerciseImpl>(exercises);
+        //   sortExercises("", commonExercises);
+//        }
+
+        return new ExerciseListWrapper<AmasExerciseImpl>(reqID, exercises, null);
+      } else { // sort by unit-chapter selection
+        // builds unit-lesson hierarchy if non-empty type->selection over user list
+        Collection<AmasExerciseImpl> exercisesForSelectionState =
+            new AmasSupport().getExercisesForSelectionState(typeToSelection, prefix, userID,
+                db.getAMASSectionHelper(), db.getResultDAO());
+
+        Collection<AmasExerciseImpl> exercisesForSelectionState1 = exercisesForSelectionState;
+        ExerciseListWrapper<AmasExerciseImpl> amasExerciseExerciseListWrapper =
+            new ExerciseListWrapper<>(reqID, exercisesForSelectionState1, null);
+        return amasExerciseExerciseListWrapper;
+      }
+    } catch (Exception e) {
+      logger.warn("got " + e, e);
+      logAndNotifyServerException(e);
+      return new ExerciseListWrapper();
+    }
+  }
+
   /**
    * Complicated.
    * <p>
@@ -189,9 +241,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.list.PagingExerciseList#loadExercises
    */
   @Override
-  public <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix,
-                                                                       long userListID, int userID, String role, boolean onlyRecorderByMatchingGender,
-                                                                       boolean onlyExamples, boolean incorrectFirstOrder, boolean onlyWithAudioAnno) {
+  public <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(int reqID,
+                                                                       Map<String, Collection<String>> typeToSelection,
+                                                                       String prefix,
+                                                                       long userListID,
+                                                                       int userID,
+                                                                       String role,
+                                                                       boolean onlyRecorderByMatchingGender,
+                                                                       boolean onlyExamples,
+                                                                       boolean incorrectFirstOrder,
+                                                                       boolean onlyWithAudioAnno) {
+    if (serverProps.isAMAS()) {
+      ExerciseListWrapper<AmasExerciseImpl> amasExerciseIds = getAMASExerciseIds(reqID, typeToSelection, prefix, userID);
+      return (ExerciseListWrapper<T>) amasExerciseIds; // TODO : how to do this without forcing it.
+    }
+
     Collection<CommonExercise> exercises;
 
     logger.debug("getExerciseIds : (" + getLanguage() + ") " +
@@ -256,6 +320,27 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private <T extends CommonShell> Collection<T> getExercisesForSearch(String prefix, int userID, Collection<T> exercises, boolean predefExercises) {
+    ExerciseTrie<T> fullTrie = this.fullTrie;
+    return getExercisesForSearchWithTrie(prefix, userID, exercises, predefExercises, fullTrie);
+  }
+
+  private <T extends CommonShell> Collection<T> getExercisesForSearchWithTrie(String prefix,
+                                                                              int userID,
+                                                                              Collection<T> exercises,
+                                                                              boolean predefExercises,
+                                                                              // long then,
+                                                                              ExerciseTrie<T> fullTrie) {
+    ExerciseTrie<T> trie = predefExercises ? fullTrie : new ExerciseTrie<T>(exercises, getLanguage(), audioFileHelper.getSmallVocabDecoder());
+    exercises = trie.getExercises(prefix, audioFileHelper.getSmallVocabDecoder());
+
+    if (exercises.isEmpty()) { // allow lookup by id
+      T exercise = getExercise(prefix, userID, false);
+      if (exercise != null) exercises = Collections.singletonList(exercise);
+    }
+    return exercises;
+  }
+
+/*  private <T extends CommonShell> Collection<T> getAMASExercisesForSearch(String prefix, int userID, Collection<T> exercises, boolean predefExercises) {
     long then = System.currentTimeMillis();
     ExerciseTrie<T> trie = predefExercises ? fullTrie : new ExerciseTrie<T>(exercises, getLanguage(), audioFileHelper.getSmallVocabDecoder());
     exercises = trie.getExercises(prefix, audioFileHelper.getSmallVocabDecoder());
@@ -268,7 +353,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       if (exercise != null) exercises = Collections.singletonList(exercise);
     }
     return exercises;
-  }
+  }*/
+
 
   /**
    * For all the exercises the user has not recorded, do they have the required reg and slow speed recordings by a matching gender.
@@ -690,50 +776,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * Just for load testing.
-   *
-   * @return
-   * @see mitll.langtest.server.LoadTestServlet#doGet
-   */
-/*  @Override
-  public CommonExercise getRandomExercise() {
-    List<User> users = db.getUserDAO().getUsers();
-    if (users.isEmpty()) return null;
-
-    Random rand = new Random();
-    User user = users.get(rand.nextInt(users.size()));
-
-    ExerciseListWrapper exerciseIDs = getExerciseIDs((int) user.getId());
-
-    List<CommonShell> exercises = exerciseIDs.getExercises();
-
-    CommonShell shell = exercises.get(rand.nextInt(exercises.size()));
-
-    return getExercise(shell.getID(), user.getId(), false);
-  }
-
-  @Override
-  public CommonExercise getFirstExercise() {
-    List<User> users = db.getUserDAO().getUsers();
-
-    if (users.isEmpty()) return null;
-    User user = users.get(0);
-
-    ExerciseListWrapper exerciseIDs = getExerciseIDs((int) user.getId());
-
-    List<CommonShell> exercises = exerciseIDs.getExercises();
-
-    CommonShell shell = exercises.get(0);
-
-    return getExercise(shell.getID(), user.getId(), false);
-  }*/
-
-/*  private ExerciseListWrapper getExerciseIDs(int userID) {
-    Map<String, Collection<String>> objectObjectMap = Collections.emptyMap();
-    return getExerciseIds(0, objectObjectMap, "", -1, userID, "", false, false, false, false);
-  }*/
-
-  /**
    * @param ids
    * @return
    * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores(List)
@@ -764,6 +806,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.analysis.PlayAudio#playLast(String, long)
    */
   public <T extends Shell> T getExercise(String id, long userID, boolean isFlashcardReq) {
+    if (serverProps.isAMAS()) { // TODO : HOW TO AVOID CAST???
+      return (T) db.getAMASExercise(id);
+    }
+
     long then = System.currentTimeMillis();
     Collection<CommonExercise> exercises = getExercises();
 
@@ -873,13 +919,37 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
+  private Collection<AmasExerciseImpl> getAMASExercises() {
+//    logger.info("get exercises -------");
+    long then = System.currentTimeMillis();
+    Collection<AmasExerciseImpl> exercises = db.getAMASExercises();
+    if (amasFullTrie == null) {
+      amasFullTrie = new ExerciseTrie<AmasExerciseImpl>(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
+    }
+
+    try {
+
+      // audioFileHelper.checkLTS(exercises);
+    } catch (Exception e) {
+      logger.error("Got " + e, e);
+    }
+    if (getServletContext().getAttribute(AUDIO_FILE_HELPER_REFERENCE) == null) {
+      shareAudioFileHelper(getServletContext());
+    }
+    long now = System.currentTimeMillis();
+    if (now - then > 200) {
+      logger.info("took " + (now - then) + " millis to get the predef exercise list for " + serverProps.getLanguage());
+    }
+    return exercises;
+  }
+
   /**
-   * Called from the client:
+   * XCalled from the client:
    *
    * @return
    * @see mitll.langtest.client.list.ListInterface#getExercises
    */
-  public Collection<CommonExercise> getExercises() {
+  private Collection<CommonExercise> getExercises() {
     long then = System.currentTimeMillis();
     Collection<CommonExercise> exercises = db.getExercises();
     long now = System.currentTimeMillis();
@@ -899,8 +969,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return exercises;
   }
 
-  private void buildExerciseTrie() {
-    fullTrie = new ExerciseTrie<>(db.getExercises(), getLanguage(), audioFileHelper.getSmallVocabDecoder());
+  private <T extends CommonShell> void buildExerciseTrie() {
+    fullTrie = new ExerciseTrie<CommonExercise>(db.getExercises(), getLanguage(), audioFileHelper.getSmallVocabDecoder());
   }
 
   public ContextPractice getContextPractice() {
@@ -915,7 +985,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see #ensureMP3s(mitll.langtest.shared.exercise.CommonExercise)
    * @see #writeAudioFile
    */
-  public boolean ensureMP3(String wavFile, String title, String artist) {
+  private boolean ensureMP3(String wavFile, String title, String artist) {
     if (wavFile != null) {
       String parent = pathHelper.getInstallPath();
 
