@@ -1311,7 +1311,7 @@ public class ResultDAO extends DAO {
       statement = connection.prepareStatement("ALTER TABLE " + RESULTS + " ADD " +
           AUDIO_TYPE +
           " " +
-          "VARCHAR");
+          getVarchar());
       statement.execute();
       statement.close();
     } catch (SQLException e) {
