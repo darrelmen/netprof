@@ -83,7 +83,7 @@ public class InitialUI {
     Panel firstRow = makeFirstTwoRows(verticalContainer);
 
     if (!showLogin()) {
-      logger.info("not show login -");
+     // logger.info("not show login -");
       populateBelowHeader(verticalContainer, firstRow);
     }
   }
@@ -244,7 +244,7 @@ public class InitialUI {
    * @return
    */
   protected Container getRootContainer() {
-    logger.info("getRootContainer");
+   // logger.info("getRootContainer");
     RootPanel.get().clear();   // necessary?
 
     Container verticalContainer = new FluidContainer();
