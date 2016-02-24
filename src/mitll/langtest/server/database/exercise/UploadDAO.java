@@ -31,7 +31,7 @@ public class UploadDAO extends DAO {
   private static final String UPLOAD = "upload";
 
   private static final boolean DEBUG = false;
-  public static final String USER = "user";
+  public static final String USER = "userID";
   public static final String SOURCE = "source";
   public static final String PROJECT = "project";
   public static final String TIME = "time";
@@ -64,24 +64,32 @@ public class UploadDAO extends DAO {
    */
   private void createTable(Database database) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
-    PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " +
+    String sql = "CREATE TABLE IF NOT EXISTS " +
         UPLOAD +
         " (" +
-        "ID IDENTITY, " +
-        USER + " BIGINT, " +
-        SOURCE + " VARCHAR, " +
-        FILE_REF + " VARCHAR, " +
-        PROJECT + " VARCHAR, " +
-        NOTE + " VARCHAR, " +
+        ID +
+        " " +
+        getIdentity() +
+        ", " +
+        USER + " INTEGER" +
+        ", " +
+        SOURCE + " " + getVarchar() +", " +
+        FILE_REF + " " + getVarchar() +", " +
+        PROJECT + " " + getVarchar() +", " +
+        NOTE + " " + getVarchar() +", " +
         TIME + " TIMESTAMP, " +
         ENABLED + " BOOLEAN, " +
 
+        getPrimaryKey(ID)+
         "FOREIGN KEY(" +
         USER +
         ") REFERENCES " +
         UserDAO.USERS +
         "(ID)" +
-       ")");
+        ")";
+//    if (isPostgreSQL) sql = sql.toLowerCase();
+    logger.info("upload " + sql);
+    PreparedStatement statement = connection.prepareStatement(sql);
 
     finish(database, connection, statement);
   }
@@ -158,7 +166,7 @@ public class UploadDAO extends DAO {
     List<Upload> users = new ArrayList<Upload>();
 
     while (rs.next()) {
-      long id = rs.getLong("ID");
+      long id = rs.getLong(ID);
 
       users.add(new Upload(id,rs.getLong(USER),
           rs.getString(NOTE),
