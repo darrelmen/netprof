@@ -22,7 +22,7 @@ public class SelectionState {
   private final Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
   private String instance = "";
   private String search = "";
-  private final boolean debug = false;
+  private static final boolean DEBUG = false;
 
   /**
    * @see ExerciseList#getIDFromToken(String)
@@ -61,11 +61,11 @@ public class SelectionState {
     String[] parts = token.split(";");
 
     for (String part : parts) {
-      if (debug) logger.info("parseToken : part " + part + " : " + Arrays.asList(parts));
+      if (DEBUG) logger.info("parseToken : part " + part + " : " + Arrays.asList(parts));
 
       if (part.contains("=")) {
         String[] segments = part.split("=");
-        if (debug) logger.info("\tpart " + part + " : " + Arrays.asList(segments));
+        if (DEBUG) logger.info("\tpart " + part + " : " + Arrays.asList(segments));
         if (segments.length >1) {
           String type    = segments[0].trim();
           String section = segments[1].trim();
@@ -81,11 +81,11 @@ public class SelectionState {
             if (sections.isEmpty()) {
               logger.warning("\t\tparseToken : part " + part + " is badly formed ");
             } else {
-              if (debug) logger.info("\t\tparseToken : add " + type + " : " + sections);
+              if (DEBUG) logger.info("\t\tparseToken : add " + type + " : " + sections);
               if (type.equals(INSTANCE)) instance = section;
               else add(type, sections);
             }
-            if (debug) logger.info("\tparseToken : part " + part + " : " + type + "->" + section);
+            if (DEBUG) logger.info("\tparseToken : part " + part + " : " + type + "->" + section);
           }
         }
       } else if (part.length() > 0) {
@@ -101,7 +101,7 @@ public class SelectionState {
       setItem(itemValue);
     }*/
 
-    if (debug) logger.info("parseToken : got " + this + " from token '" + token + "'");
+    if (DEBUG) logger.info("parseToken : got " + this + " from token '" + token + "'");
   //  logger.info(getInfo());
   }
 
