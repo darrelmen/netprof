@@ -7,6 +7,7 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -20,6 +21,7 @@ import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
+import mitll.langtest.shared.custom.UserList;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -93,7 +95,8 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
 
   /**
    * @see #getExercises(long)
-   * @see mitll.langtest.client.custom.content.FlexListLayout#doInternalLayout(String)
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#getExercises(long)
+   * @see mitll.langtest.client.custom.content.FlexListLayout#doInternalLayout(UserList, String)
    */
   @Override
   public void addWidgets() {
@@ -119,7 +122,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
 
   private void getTypeOrder(final FluidContainer container) {
     typeOrder = controller.getStartupInfo().getTypeOrder();
-    logger.info("type order is " +typeOrder);
+    // logger.info("type order is " +typeOrder);
     addButtonRow(controller.getStartupInfo().getSectionNodes(), container, typeOrder);
   }
 
@@ -178,8 +181,10 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
   public void gotSelection() {
     int count = getNumSelections();
     if (count == NUM_CHOICES) {
-      //   logger.info("gotSelection count = " + count);
+      logger.info("gotSelection count = " + count);
       pushNewSectionHistoryToken();
+    } else {
+      logger.info("gotSelection count " + count + " < " + NUM_CHOICES);
     }
   }
 
@@ -287,7 +292,9 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
   /**
    * @seex HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.amas.ExerciseListWrapper)
    */
+  @Override
   protected void gotEmptyExerciseList() {
+    logger.info("gotEmptyExerciseList");
     SectionWidget quiz = typeToBox.get("Quiz");
     if (getNumSelections() < NUM_CHOICES) {
       showMessage(quiz.hasOnlyOne() ? PLEASE_SELECT2 : PLEASE_SELECT, false);
@@ -355,6 +362,8 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
    */
   @Override
   protected void loadFirstExercise() {
+    logger.info("loadFirstExercise : ---");
+
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
       logger.info("loadFirstExercise : current exercises is empty?");
       gotEmptyExerciseList();
@@ -370,6 +379,39 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
     for (SectionWidget v : typeToBox.values()) {
       ButtonBarSectionWidget value = (ButtonBarSectionWidget) v;
       value.simpleSelectOnlyOne();
+    }
+  }
+
+  public void restoreListFromHistory() {
+    String historyToken = History.getToken();
+    // logger.info("initial token " + historyToken);
+    restoreListFromHistory(historyToken);
+  }
+
+  private void restoreListFromHistory(String token) {
+    try {
+      SelectionState selectionState = getSelectionState(token);
+      if (DEBUG_ON_VALUE_CHANGE) {
+        logger.info(" HistoryExerciseList.onValueChange : restoreListBoxState '" + selectionState + "'");
+      }
+      restoreListBoxState(selectionState);
+      if (DEBUG_ON_VALUE_CHANGE) {
+        logger.info("HistoryExerciseList.onValueChange : selectionState '" + selectionState + "'");
+      }
+
+      // logger.info("gotSelection : got type " + type + " and " + text);
+      int count = getNumSelections();
+      if (count == 3) {
+        //    logger.info("push new token " + getHistoryToken());
+        logger.info("gotSelection count = " + count);
+        loadExercisesUsingPrefix(selectionState.getTypeToSection(), getPrefix(), false);
+      } else {
+        // logger.warning("not enough selections " +count);
+        gotEmptyExerciseList();
+      }
+    } catch (Exception e) {
+      logger.warning("HistoryExerciseList.onValueChange " + token + " badly formed. Got " + e);
+      e.printStackTrace();
     }
   }
 }
