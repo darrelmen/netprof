@@ -237,9 +237,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   void pushNewItem(String search, String exerciseID) {
-    //if (DEBUG) logger.info("------------ ExerciseList.pushNewItem : (" + getInstance() + ") push history " + exerciseID + " - ");
+    if (DEBUG) logger.info("------------ ExerciseList.pushNewItem : (" + getInstance() + ") push history " + exerciseID + " - ");
+    String instance = getInstance();
+    String suffix = instance.isEmpty() ? "": "instance=" + instance;
     History.newItem("#" + "search=" + search + ";" +
-        "item=" + exerciseID + ";instance=" + getInstance());
+        "item=" + exerciseID + ";" +
+        suffix);
   }
 
   public void onResize() {
@@ -315,13 +318,19 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       if (isStaleResponse(result)) {
         if (DEBUG) logger.info("----> SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
       } else {
-        gotExercises(true);
-        if (result.getExercises().isEmpty()) {
-          gotEmptyExerciseList();
-        }
+        gotExercises(result);
 
         rememberAndLoadFirst(result.getExercises(), result.getFirstExercise(), selectionID);
       }
+    }
+  }
+
+  void gotExercises(ExerciseListWrapper<T> result) {
+    gotExercises(true);
+    if (DEBUG) logger.info("ExerciseList.gotExercises result = " + result);
+
+    if (result.getExercises().isEmpty()) {
+      gotEmptyExerciseList();
     }
   }
 
@@ -350,10 +359,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         if (DEBUG) logger.info("----> SetExercisesCallbackWithID.onSuccess ignoring result " + result.getReqID() +
             " b/c before latest " + lastReqID);
       } else {
-        gotExercises(true);
-        if (result.getExercises().isEmpty()) {
-          gotEmptyExerciseList();
-        }
+        gotExercises(result);
         Collection<T> exercises = result.getExercises();
         exercises = rememberExercises(exercises);
         for (ListChangeListener<T> listener : listeners) {
@@ -496,7 +502,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       removeCurrentExercise();
     } else {
       T toLoad = findFirstExercise();
-//      if (DEBUG) logger.info("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
+      if (DEBUG) logger.info("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
       pushFirstSelection(toLoad.getID());
     }
   }
