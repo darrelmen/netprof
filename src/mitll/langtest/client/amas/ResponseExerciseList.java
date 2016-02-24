@@ -109,7 +109,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
     //logger.info("------------ ResponseExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
     historyToken = historyToken.contains(RESPONSE_TYPE_DIVIDER) ? historyToken.split(RESPONSE_TYPE_DIVIDER)[0] : historyToken;
     String historyToken1 = historyToken + RESPONSE_TYPE_DIVIDER + RESPONSE_TYPE + "=" + response;
-    // logger.info("history new item  " +historyToken1);
+    logger.info("setHistoryItem : history new item  " +historyToken1);
     History.newItem(historyToken1);
   }
 
