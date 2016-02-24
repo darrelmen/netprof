@@ -83,7 +83,7 @@ public class H2Connection implements DatabaseConnection {
     if (!test.exists()) {
       logger.error("no h2 db file at  " + test.getAbsolutePath() + "");
     } else {
-      logger.debug("connecting to " + url);
+      logger.debug("H2 : connecting to " + url);
       org.h2.Driver.load();
       try {
         conn = DriverManager.getConnection(url, "", "");
