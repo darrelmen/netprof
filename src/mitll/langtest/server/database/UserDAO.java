@@ -407,27 +407,32 @@ public class UserDAO extends DAO {
     Connection connection = database.getConnection(this.getClass().toString());
 
     try {
-      PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS users (" +
+      String sql = "CREATE TABLE IF NOT EXISTS users (" +
           ID +
-          " IDENTITY, " +
+          " " + getIdentity() +
+          ", " +
           "age INT, " +
           "gender INT, " +
           "experience INT, " +
-          "ipaddr VARCHAR, " +
-          "password VARCHAR, " +
-          "nativeLang VARCHAR, " +
-          "dialect VARCHAR, " +
-          USER_ID + " VARCHAR, " +
+          "ipaddr " + getVarchar() + ", " +
+          "password " + getVarchar() + ", " +
+          "nativeLang " + getVarchar() + ", " +
+          "dialect " + getVarchar() + ", " +
+          USER_ID + " " + getVarchar() + ", " +
           TIMESTAMP + " TIMESTAMP, " +//" AS CURRENT_TIMESTAMP, " +
           "enabled BOOLEAN, " +
-          RESET_PASSWORD_KEY + " VARCHAR, " +
-          ENABLED_REQ_KEY + " VARCHAR, " +
-          PERMISSIONS + " VARCHAR, " +
-          KIND + " VARCHAR, " +
-          PASS + " VARCHAR, " +
-          EMAIL + " VARCHAR, " +
-          DEVICE + " VARCHAR, " +
-          "CONSTRAINT pkusers PRIMARY KEY (id))");
+          RESET_PASSWORD_KEY + " " + getVarchar() + ", " +
+          ENABLED_REQ_KEY + " " + getVarchar() + ", " +
+          PERMISSIONS + " " + getVarchar() + ", " +
+          KIND + " " + getVarchar() + ", " +
+          PASS + " " + getVarchar() + ", " +
+          EMAIL + " " + getVarchar() + ", " +
+          DEVICE + " " + getVarchar() + ", " +
+          //getPrimaryKey() +
+          "CONSTRAINT pkusers PRIMARY KEY (id))";
+
+      logger.info("sql\n"+sql);
+      PreparedStatement statement = connection.prepareStatement(sql);
       statement.execute();
       statement.close();
       database.closeConnection(connection);
@@ -456,9 +461,9 @@ public class UserDAO extends DAO {
         }
       }
       // drop old default current timestamp
-      statement = connection.prepareStatement("ALTER TABLE " + USERS + " ALTER " + TIMESTAMP + " TIMESTAMP NOT NULL");
+/*      statement = connection.prepareStatement("ALTER TABLE " + USERS + " ALTER " + TIMESTAMP + " TIMESTAMP NOT NULL");
       statement.execute();
-      statement.close();
+      statement.close();*/
     } finally {
       database.closeConnection(connection);
     }
