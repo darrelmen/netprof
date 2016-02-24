@@ -698,9 +698,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
    * @see #addButtonRow(java.util.Collection, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
    */
   private void setSizesAndPushFirst() {
-    //System.out.println("setSizesAndPushFirst instance " + instance);
     pushFirstListBoxSelection();
-
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         setScrollPanelWidth();
