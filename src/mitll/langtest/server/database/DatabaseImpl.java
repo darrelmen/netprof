@@ -15,6 +15,8 @@ import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
+import mitll.langtest.server.database.connection.MySQLConnection;
+import mitll.langtest.server.database.connection.PostgreSQLConnection;
 import mitll.langtest.server.database.contextPractice.ContextPracticeImport;
 import mitll.langtest.server.database.custom.*;
 import mitll.langtest.server.database.exercise.*;
@@ -114,7 +116,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
                       PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify) {
-    this(new H2Connection(configDir, dbName, mustAlreadyExist, logAndNotify), configDir, relativeConfigDir, dbName,
+    this(serverProps.useH2() ?
+        new H2Connection(configDir, dbName, mustAlreadyExist, logAndNotify):
+        serverProps.usePostgres() ?
+            new PostgreSQLConnection(dbName,logAndNotify) :new MySQLConnection(dbName,logAndNotify),
+        configDir, relativeConfigDir, dbName,
         serverProps,
         pathHelper, logAndNotify);
   }
@@ -165,8 +171,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * Create or alter tables as needed.
    */
   private void initializeDAOs(PathHelper pathHelper) {
-    uploadDAO = new UploadDAO(this, getServerProps());
     userDAO = new UserDAO(this, getServerProps());
+    //uploadDAO = new UploadDAO(this, getServerProps());
     UserListDAO userListDAO = new UserListDAO(this, userDAO);
     addRemoveDAO = new AddRemoveDAO(this);
 
@@ -961,9 +967,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return answerDAO;
   }
 
+/*
   public UploadDAO getUploadDAO() {
     return uploadDAO;
   }
+*/
 
   /**
    * @param userID
