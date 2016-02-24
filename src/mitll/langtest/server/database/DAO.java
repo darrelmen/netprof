@@ -22,12 +22,18 @@ import java.util.Set;
 public class DAO {
   private static final Logger logger = Logger.getLogger(DAO.class);
   protected final LogAndNotify logAndNotify;
+  private final boolean isMYSQL;
+  protected final boolean isPostgreSQL;
+
+  public static final String ID = "ID";
 
   protected final Database database;
 
   protected DAO(Database database) {
     this.database = database;
     this.logAndNotify = database.getLogAndNotify();
+    isMYSQL = database.getServerProps().useMYSQL();
+    isPostgreSQL = database.getServerProps().usePostgres();
   }
 
   protected int getNumColumns(Connection connection, String table) throws SQLException {
@@ -238,6 +244,17 @@ public class DAO {
     logger.error("got " + ee, ee);
     logAndNotify.logAndNotifyServerException(ee);
   }
+
+  protected String getIdentity() {
+    return isMYSQL ? "BIGINT NOT NULL AUTO_INCREMENT" : isPostgreSQL ? "SERIAL" : "IDENTITY";
+  }
+
+  protected String getVarchar() {
+    return isMYSQL ? "VARCHAR(256)" : "VARCHAR";
+  }
+
+  protected String getPrimaryKey() { return getPrimaryKey(ID); }
+  protected String getPrimaryKey(String col) { return isMYSQL ? "PRIMARY KEY (" + col +  "), " : ""; }
 
 
   /**
