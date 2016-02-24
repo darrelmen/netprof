@@ -64,6 +64,9 @@ public class ServerProperties {
   public static final String WEBSERVICE_HOST_IP1 = "webserviceHostIP";
   public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
   public static final String LESSON_PLAN_FILE = "lessonPlanFile";
+  public static final String USE_MYSQL = "useMYSQL";
+  public static final String USE_H_2 = "useH2";
+  public static final String USE_POSTGRE_SQL = "usePostgreSQL";
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
 
   /**
@@ -114,6 +117,7 @@ public class ServerProperties {
   private final Set<Long> preferredVoices = new HashSet<Long>();
   private EmailList emailList;
   private final int userInitialScores = 20;
+//  boolean useH2 = false;
 
   /**
    * @param servletContext
@@ -557,4 +561,8 @@ public class ServerProperties {
   public Collection<String> getSites() {
     return isAMAS() ? AMAS_SITES : SITE_LIST;
   }
+
+  public boolean useMYSQL() { return getDefaultFalse(USE_MYSQL); }
+  public boolean useH2() { return getDefaultTrue(USE_H_2); }
+  public boolean usePostgres() { return getDefaultFalse(USE_POSTGRE_SQL);  }
 }
