@@ -5,7 +5,9 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.exercise.UploadDAO;
 
+import java.sql.ResultSet;
 import java.util.Date;
 
 /**
@@ -24,10 +26,29 @@ public class Upload implements IsSerializable {
   public Upload() {
   }
 
+  /**
+   * JUST FOR TESTING
+   * @param user
+   * @param note
+   * @param fileRef
+   * @param project
+   * @param sourceURL
+   */
   public Upload(long user, String note, String fileRef, String project, String sourceURL) {
     this(-1, user, note, fileRef, System.currentTimeMillis(), true, project, sourceURL);
   }
 
+  /**
+   * @see UploadDAO#getUploads(ResultSet)
+   * @param id
+   * @param user
+   * @param note
+   * @param fileRef
+   * @param timestamp
+   * @param enabled
+   * @param project
+   * @param sourceURL
+   */
   public Upload(long id, long user, String note, String fileRef, long timestamp, boolean enabled,
                 String project, String sourceURL) {
     this.id = id;
