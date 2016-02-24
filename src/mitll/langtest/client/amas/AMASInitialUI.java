@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserManager;
 
 import java.util.logging.Logger;
@@ -94,14 +95,14 @@ public class AMASInitialUI extends InitialUI {
     //  firstRow.add(langTest.getFlashRecordPanel());
     langTest.modeSelect();
 
-    logger.info("populateBelowHeader");
+    //logger.info("populateBelowHeader");
 
     //  TODO : FIX ME
     learnHelper = new AutoCRTChapterNPFHelper(service, langTest,
         //langTest.getUserManager(),
         null,
         langTest);
-    learnHelper.addNPFToContent(firstRow, "autoCRT");
+    learnHelper.addNPFToContent(firstRow, "");
   }
 
   @Override
@@ -185,7 +186,9 @@ public class AMASInitialUI extends InitialUI {
    */
   private void configureUIGivenUser() {
     if (learnHelper != null && learnHelper.getExerciseList() != null) {
-      //learnHelper.getExerciseList().restoreListFromHistory();
+      SingleSelectExerciseList exerciseList = (SingleSelectExerciseList) learnHelper.getExerciseList();
+
+      exerciseList.restoreListFromHistory();
     }
   }
 }
