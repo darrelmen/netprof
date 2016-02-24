@@ -46,7 +46,7 @@ public class TextResponse {
   private Map<String, Collection<String>> typeToSelection;
 
   /**
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel.AnswerPanel#doText
+   * @see mitll.langtest.client.amas.FeedbackRecordPanel.AnswerPanel#doText
    * @param user
    * @param typeToSelection
    */
@@ -63,9 +63,9 @@ public class TextResponse {
 
   /**
    * Has two rows -- the text input box and the score feedback
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel.AnswerPanel#doText
+   * @see mitll.langtest.client.amas.FeedbackRecordPanel.AnswerPanel#doText
    * @param toAddTo
-   * @param exercise
+   * @param exerciseID
    * @param service
    * @param controller
    * @param centered
