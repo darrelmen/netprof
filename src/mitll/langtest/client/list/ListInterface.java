@@ -125,7 +125,6 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
    */
   Panel getCreatedPanel();
 
-//  void redraw();
   void setState(String id, STATE state);
   void setSecondState(String id, STATE state);
 
@@ -143,7 +142,4 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
   void searchBoxEntry(String text);
 
   int getIndex(String currentID);
-
- // void clearCachedExercise();
-
 }
