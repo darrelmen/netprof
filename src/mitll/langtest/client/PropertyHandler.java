@@ -447,10 +447,7 @@ public class PropertyHandler {
     return exercise_title;
   }
 
-  public String getAppTitle() {
-    logger.info("app title " + appTitle);
-    return appTitle;
-  }
+  public String getAppTitle() { return appTitle;  }
 
   public boolean isDemoMode() {
     return demoMode;
