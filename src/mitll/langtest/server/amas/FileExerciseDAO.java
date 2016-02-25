@@ -57,28 +57,12 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
     readFastAndSlowExercises(installPath, configDir, mappingFile);
   }
 
-  //  @Override
+  @Override
   public SectionHelper<T> getSectionHelper() {
     return sectionHelper;
   }
 
-/*
   @Override
-  public boolean remove(String id) {
-    return false;
-  }
-
-  @Override
-  public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
-
-  }
-
-  @Override
-  public void setAddRemoveDAO(AddRemoveDAO addRemoveDAO) {
-
-  }
-*/
-
   public T getExercise(String id) {
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
     if (!idToExercise.containsKey(id)) {
@@ -94,7 +78,7 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
   /**
    * @param installPath
    * @param lessonPlanFile
-   * @seex mitll.langtest.server.database.DatabaseImpl#getRawExercises
+   * @see #FileExerciseDAO(String, String, String, String, String)
    */
   private synchronized void readFastAndSlowExercises(final String installPath, String configDir, String lessonPlanFile) {
     if (exercises != null) return;
