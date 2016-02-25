@@ -220,6 +220,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
     TabPanel tabPanel = new TabPanel();
     tabPanel.getWidget(0).getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
 
+    logger.info("for " +e.getID() + " got " + e.getQuestions().size());
     for (QAPair pair : e.getQuestions()) {
       Tab tabPane = new Tab();
       tabPane.setHeading("Question #" + questionNumber);
