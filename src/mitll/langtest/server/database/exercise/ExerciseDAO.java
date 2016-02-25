@@ -31,7 +31,7 @@ public interface ExerciseDAO<T extends CommonShell> extends SimpleExerciseDAO<T>
    * @see UserExerciseDAO#getUserExercises(String)
    * @see ExcelImport#removeExercises()
    */
-  SectionHelper<CommonExercise> getSectionHelper();
+ // SectionHelper<CommonExercise> getSectionHelper();
 
   /**
    * @param userExercise
