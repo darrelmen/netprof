@@ -89,14 +89,11 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     // logger.info("PostAudioRecordButton.postAudioFile : " +  getAudioType());
 
     service.writeAudioFile(base64EncodedWavFile,
-        getExerciseID(),
+        reqid, controller.getUser(), getExerciseID(),
         index,
-        controller.getUser(),
-        reqid,
-        true,
-        getAudioType(),
+        getAudioType(), controller.usingFlashRecorder(), "browser", controller.getBrowserInfo(), true,
         false, recordInResults,
-        shouldAddToAudioTable(), controller.usingFlashRecorder(), "browser", controller.getBrowserInfo(), false,
+        shouldAddToAudioTable(), false,
         new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
             long now = System.currentTimeMillis();
