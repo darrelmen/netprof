@@ -94,7 +94,7 @@ public class PerformanceTest extends BaseTest {
    * store in database as diffs - only store changed fields and new items.  Requires disable to only be
    * on last or last set of chunks.
    */
-  @Test
+/*  @Test
   public void testUpload() {
     String path = "../dbs/" + "npfSpanishTest";
 
@@ -142,7 +142,7 @@ public class PerformanceTest extends BaseTest {
 //      logger.info("got " + exObject + " e " + exObject.getEnglish() + " " + exObject.getForeignLanguage());
 //
 //    }
-  }
+  }*/
 
   public void convertToNewEx(List<DBExercise> objects, List<CommonExercise> exercises, int id,
                              Map<CommonExercise, DBExercise> oldToNew) {
