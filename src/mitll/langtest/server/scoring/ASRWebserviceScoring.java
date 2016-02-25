@@ -401,9 +401,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
         smallLM + ":xxx,0," + end + ",[<s>;" + cleaned.replaceAll("\\p{Z}", ";") + ";</s>]";
 
     long then = System.currentTimeMillis();
-    HTTPClient httpClient = new HTTPClient(ip, port, "dcodr");
-
-    String resultsStr = runHydra(hydraInput, httpClient);
+    String resultsStr = runHydra(hydraInput, new HTTPClient(ip, port, "dcodr"));
     if (resultsStr.startsWith("ERROR")) {
       String message = getFailureMessage(audioPath, transcript, lmSentences, decode);
       message = "hydra said " + resultsStr + " : " + message;

@@ -61,7 +61,7 @@ public class UserManagement {
 
       for (String site : props.getSites()) {
         String url = "https://np.ll.mit.edu/npfClassroom" + site.replaceAll("Mandarin", "CM") + "/scoreServlet";
-        String json = new HTTPClient("", 0).readFromGET(url + "?hasUser=" + login + "&passwordH=" + passwordH);
+        String json = new HTTPClient().readFromGET(url + "?hasUser=" + login + "&passwordH=" + passwordH);
 
         if (!json.isEmpty()) {
           try {
