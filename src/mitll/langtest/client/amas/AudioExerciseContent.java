@@ -14,6 +14,7 @@ import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -23,11 +24,11 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioExerciseContent {
- // private Logger logger = Logger.getLogger("AudioExerciseContent");
-
+  public static final boolean SHOW_ID = true;
+  private Logger logger = Logger.getLogger("AudioExerciseContent");
   private static final String QUESTION = "question";
   private static final String QUESTION_HEADING = "h4";
-  public static final String ITEM = "Passage";
+  private static final String ITEM = "Passage";
 
   private boolean rightAlignContent;
   private String responseType;
@@ -42,7 +43,7 @@ public class AudioExerciseContent {
    * @param index
    * @param totalInQuiz
    * @return
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#getQuestionContent
+   * @see mitll.langtest.client.amas.FeedbackRecordPanel#getQuestionContent
    */
   public Widget getQuestionContent(AmasExerciseImpl e, ExerciseController controller, boolean includeExerciseID,
                                    boolean showQuestion, String content, int index, int totalInQuiz) {
@@ -62,7 +63,8 @@ public class AudioExerciseContent {
    * @param totalInQuiz
    * @return
    */
-  private Panel makeFlashcardForCRT(AmasExerciseImpl e, String content, boolean includeExerciseID, boolean showQuestion, int index, int totalInQuiz) {
+  private Panel makeFlashcardForCRT(AmasExerciseImpl e, String content, boolean includeExerciseID,
+                                    boolean showQuestion, int index, int totalInQuiz) {
     Panel container = new FlowPanel();
     container.getElement().setId("makeFlashcardForCRT_container");
     addAudioRow(e, content, includeExerciseID, container, index, totalInQuiz);
@@ -82,7 +84,7 @@ public class AudioExerciseContent {
     List<QAPair> foreignLanguageQuestions = e.getForeignLanguageQuestions();
     QAPair qaPair = foreignLanguageQuestions.isEmpty() ? null : foreignLanguageQuestions.get(0);
     if (foreignLanguageQuestions.isEmpty()) {
-      System.err.println("huh? no fl questions for " + e);
+      logger.warning("huh? no fl questions for " + e);
     }
     return qaPair;
   }
@@ -94,20 +96,20 @@ public class AudioExerciseContent {
    * @param container
    * @param index
    * @param totalInQuiz
-   * @see #getContentFromPrefix(String)
-   * @seex #getAudioDiv
    * @see #makeFlashcardForCRT
    */
-  private void addAudioRow(AmasExerciseImpl e, String content, boolean includeExerciseID, Panel container, int index, int totalInQuiz) {
+  private void addAudioRow(AmasExerciseImpl e, String content, boolean includeExerciseID, Panel container,
+                           int index, int totalInQuiz) {
     Panel horiz = new FlowPanel();
     horiz.getElement().setId("item_and_content");
     container.add(horiz);
+    logger.info("for " + e.getID() + " include " + includeExerciseID);
     if (includeExerciseID) {
       DivWidget itemHeaderContainer = new DivWidget();
      // itemHeaderContainer.setWidth("100%");
       itemHeaderContainer.setHeight("20px");
       itemHeaderContainer.getElement().setId("itemHeaderContainer");
-      Heading child = getItemHeader(index, totalInQuiz);
+      Heading child = getItemHeader(index, totalInQuiz, e.getID());
       itemHeaderContainer.add(child);
       horiz.add(itemHeaderContainer);
     }
@@ -125,8 +127,8 @@ public class AudioExerciseContent {
     horiz.add(contentFromPrefix);
   }
 
-  private Heading getItemHeader(int index, int totalInQuiz) {
-    String text = ITEM + " #" + (index + 1) + " of " + totalInQuiz;
+  public static Heading getItemHeader(int index, int totalInQuiz, String id) {
+    String text = ITEM + " #" + (index + 1) + " of " + totalInQuiz + (SHOW_ID ?" : " + id : "");
     Heading child = new Heading(5, text);
     child.getElement().setId("audio_exercise_item_header");
     child.addStyleName("leftTenMargin");
