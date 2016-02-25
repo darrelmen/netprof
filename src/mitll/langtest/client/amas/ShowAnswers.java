@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.shared.amas.QAPair;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -16,8 +17,10 @@ import java.util.logging.Logger;
  */
 public class ShowAnswers {
   private Logger logger = Logger.getLogger("ShowAnswers");
+
   private static final String TWO_SPACES = "&nbsp;&nbsp;";
   private String language;
+
   /**
    * @see AmasExercisePanel#showAnswers(QAPair, HasWidgets, String, String)
    */
@@ -50,19 +53,20 @@ public class ShowAnswers {
    * @return
    * @see mitll.langtest.client.result.ResultManager#getAsyncTable(int, Widget)
    */
-  public Grid getGridOfAnswers(List<String> alternateAnswers) {
-    List<String> copy = trim(alternateAnswers);
+  public Grid getGridOfAnswers(Collection<String> alternateAnswers) {
+    Collection<String> copy = trim(alternateAnswers);
     int n = copy.size();
     float fn = ((float) n) / 3;
     double ceil = Math.ceil(fn);
     int cn = (int) ceil;
     int maxCols = 2 * cn;
 
-    // logger.info("n " + n + " fn " + fn + " ceil " + ceil + " cn " + cn + " max " + maxColsOld + " new " + maxCols);
+    logger.info("n " + n + " fn " + fn + " ceil " + ceil + " cn " + cn +
+        //" max " + maxColsOld +
+        " new " + maxCols);
 
     Grid grid = getGrid(n, maxCols);
-    String h4Prefix = "<h4 style='margin:0px' class='" + language +
-        "'>";
+    String h4Prefix = "<h4 style='margin:0px' class='" + language + "'>";
     if (n > 1) {
       SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder().appendHtmlConstant("<b>Possible answers</b>");
       grid.setHTML(0, 0, "");
@@ -88,27 +92,29 @@ public class ShowAnswers {
         i++;
       }
     } else {
-      SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder().appendHtmlConstant("<b>Answer" +
-          TWO_SPACES +
-          "</b>");
-      grid = new Grid(1, 2);
-//      if (isRTL) grid.addStyleName("arabicFont");
-      grid.addStyleName(language);
-
-      grid.setHTML(0, 0, safeHtmlBuilder.toSafeHtml());
-      String onlyAnswer = alternateAnswers.get(0);
-
-      grid.setHTML(0, 1, h4Prefix + onlyAnswer + "</h4>");
+      grid = getOneAnswer(alternateAnswers, h4Prefix);
     }
     return grid;
   }
 
-  private List<String> trim(List<String> alternateAnswers) {
+  Grid getOneAnswer(Collection<String> alternateAnswers, String h4Prefix) {
+    SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder().appendHtmlConstant("<b>Answer" + TWO_SPACES + "</b>");
+    Grid grid = new Grid(1, 2);
+    grid.addStyleName(language);
+    grid.setHTML(0, 0, safeHtmlBuilder.toSafeHtml());
+    String onlyAnswer = alternateAnswers.iterator().next();
+    grid.setHTML(0, 1, h4Prefix + onlyAnswer + "</h4>");
+    return grid;
+  }
+
+  private Collection<String> trim(Collection<String> alternateAnswers) {
     List<String> copy = new ArrayList<String>();
     for (String alt : alternateAnswers) {
       if (!alt.trim().isEmpty()) {
         copy.add(alt);
-      } else logger.warning("removed empty answer?");
+      } else {
+        logger.warning("trim removed empty answer?");
+      }
     }
     return copy;
   }
