@@ -13,9 +13,9 @@ import java.util.*;
 public class ILRMapping<T extends Shell> {
   private static final Logger logger = Logger.getLogger(ILRMapping.class);
   public static final String ILR_LEVEL = "ILR Level";
-  private static final String TEST_TYPE = "Test type";
-  private static final String LISTENING = "Listening";
-  private static final String READING = "Reading";
+  public static final String TEST_TYPE = "Test type";
+  public static final String LISTENING = "Listening";
+  public static final String READING = "Reading";
   private static final String QUIZ = "Quiz";
 
   private final Map<String,Set<String>> levelToExercises = new HashMap<String,Set<String>>();
