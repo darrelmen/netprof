@@ -23,55 +23,10 @@ import java.util.logging.Logger;
 public class AMASInitialUI extends InitialUI {
   private final Logger logger = Logger.getLogger("AMASInitialUI");
 
-//  private static final int NO_USER_INITIAL = -2;
-
   public AMASInitialUI(LangTest langTest, UserManager userManager) {
     super(langTest, userManager);
   }
 
-  /**
-   * @param verticalContainer
-   * @return
-   * @see #populateRootPanel()
-   */
-/*  private Panel makeFirstTwoRows(Container verticalContainer) {
-    verticalContainer.add(headerRow = makeHeaderRow());
-    headerRow.getElement().setId("headerRow");
-
-    Panel firstRow = new DivWidget();
-    verticalContainer.add(firstRow);
-    this.firstRow = firstRow;
-    firstRow.getElement().setId("firstRow");
-    return firstRow;
-  }*/
-
-  /**
-   * TODO : FIX ME
-   *
-   * @return
-   * @see #populateRootPanel()
-   */
-/*
-  protected Panel makeHeaderRow() {
-    logger.info("make header row ---- ");
-    headerRow = new FluidRow();
-    headerRow.add(new Column(12, flashcard.getNPFHeaderRow()));
-    return headerRow;
-  }
-*/
-
-  /**
-   * @return
-   */
-/*
-  protected Container getRootContainer() {
-    RootPanel.get().clear();   // necessary?
-
-    Container verticalContainer = new FluidContainer();
-    verticalContainer.getElement().setId("root_vertical_container");
-    return verticalContainer;
-  }
-*/
   public int getHeightOfTopRows() {
     return headerRow.getOffsetHeight();
   }
@@ -92,16 +47,12 @@ public class AMASInitialUI extends InitialUI {
     /**
      * {@link #makeFlashContainer}
      */
-    //  firstRow.add(langTest.getFlashRecordPanel());
+    firstRow.add(langTest.getFlashRecordPanel());
     langTest.modeSelect();
-
     //logger.info("populateBelowHeader");
 
     //  TODO : FIX ME
-    learnHelper = new AutoCRTChapterNPFHelper(service, langTest,
-        //langTest.getUserManager(),
-        null,
-        langTest);
+    learnHelper = new AutoCRTChapterNPFHelper(service, langTest, null, langTest);
     learnHelper.addNPFToContent(firstRow, "");
   }
 
@@ -109,16 +60,6 @@ public class AMASInitialUI extends InitialUI {
   public void onResize() {
     if (learnHelper != null) learnHelper.onResize();
   }
-
-  /**
-   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(int)
-   * @see mitll.langtest.client.user.UserManager#login()
-   */
-
-/*  public boolean showLogin() {
-   // populateRootPanel();
-    return true;
-  }*/
 
   /**
    * @see #gotUser
@@ -174,12 +115,10 @@ public class AMASInitialUI extends InitialUI {
   @Override
   public void configureUIGivenUser(long userID) {
     boolean diff = lastUser != userID;
-
     showUserPermissions(userID);
 
     if (diff) configureUIGivenUser();
   }
-
 
   /**
    * TODO : FIX ME
@@ -187,7 +126,6 @@ public class AMASInitialUI extends InitialUI {
   private void configureUIGivenUser() {
     if (learnHelper != null && learnHelper.getExerciseList() != null) {
       SingleSelectExerciseList exerciseList = (SingleSelectExerciseList) learnHelper.getExerciseList();
-
       exerciseList.restoreListFromHistory();
     }
   }
