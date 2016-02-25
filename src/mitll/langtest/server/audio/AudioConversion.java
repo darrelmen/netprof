@@ -5,7 +5,6 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -68,10 +67,11 @@ public class AudioConversion {
    * @param file                     where we want to write the wav file to
    * @param useSensitiveTooLoudCheck
    * @return true if audio is valid (not too short, not silence)
-   * @see AudioFileHelper#writeAudioFile(String, String, CommonExercise, int, int, int, String, boolean, boolean, boolean, String, String, boolean, boolean)
+   * @see AudioFileHelper#writeAudioFile(String, int, CommonExercise, int, String, int, String, boolean, String, String, boolean, boolean, boolean, boolean)
    * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment
    */
-  public AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString, File file, boolean useSensitiveTooLoudCheck) {
+  public AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString, File file,
+                                                             boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
     file.getParentFile().mkdirs();
     byte[] byteArray = getBytesFromBase64String(base64EncodedString);
 
@@ -80,8 +80,8 @@ public class AudioConversion {
     if (!file.exists()) {
       logger.error("writeAudioFile : huh? can't find " + file.getAbsolutePath());
     }
-    AudioCheck.ValidityAndDur valid = isValid(file, useSensitiveTooLoudCheck);
-    if (valid.getValidity() == AudioAnswer.Validity.OK) {
+    AudioCheck.ValidityAndDur valid = isValid(file, useSensitiveTooLoudCheck, quietAudioOK);
+    if (valid.isValid()) {
       valid.setDuration(trimSilence(file).getDuration());
     }
     return valid;
@@ -119,17 +119,21 @@ public class AudioConversion {
   /**
    * @param file
    * @param useSensitiveTooLoudCheck
+   * @param quietAudioOK
    * @return
    * @see #convertBase64ToAudioFiles(String, File, boolean)
-   * @see AudioFileHelper#getAnswer(String, CommonExercise, int, boolean, String, File, String, String, float, int, boolean)
+   * @see AudioFileHelper#getAnswer
    */
-  public AudioCheck.ValidityAndDur isValid(File file, boolean useSensitiveTooLoudCheck) {
+  public AudioCheck.ValidityAndDur isValid(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
     try {
-      return useSensitiveTooLoudCheck ? audioCheck.checkWavFileRejectAnyTooLoud(file) : audioCheck.checkWavFile(file);
+      AudioCheck.ValidityAndDur validityAndDur =
+          useSensitiveTooLoudCheck ? audioCheck.checkWavFileRejectAnyTooLoud(file, quietAudioOK) :
+              audioCheck.checkWavFile(file, quietAudioOK);
+      return validityAndDur;
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
-    return new AudioCheck.ValidityAndDur(AudioAnswer.Validity.INVALID);
+    return AudioCheck.INVALID_AUDIO;
   }
 
   /**
@@ -189,7 +193,7 @@ public class AudioConversion {
 
   /**
    * Note that wavFile input will be changed if trim is successful.
-   *
+   * <p>
    * If trimming doesn't really change the length, we leave it alone {@link #DIFF_THRESHOLD}.
    * <p>
    * Trimmed file will be empty if it's not successful.
@@ -222,7 +226,7 @@ public class AudioConversion {
         }
         return new TrimInfo(durationInSecondsTrimmed, true);
       } else {
-      //  long now = System.currentTimeMillis();
+        //  long now = System.currentTimeMillis();
 /*        logger.info("trimSilence : took " + (now - then) + " millis to NOT convert original " + wavFile.getName() +
             " to trim wav file : " + durationInSeconds + " before, " + durationInSecondsTrimmed + " after.");*/
 
