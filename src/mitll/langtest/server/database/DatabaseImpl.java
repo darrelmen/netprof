@@ -991,7 +991,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
-  public long addAudioAnswer(int userID, String exerciseID, int questionID,
+/*  public long addAudioAnswer(int userID, String exerciseID, int questionID,
                              String audioFile,
                              boolean valid,
                              String audioType, long durationInMillis, boolean correct, float score,
@@ -1001,10 +1001,27 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     if (valid && scoreJson.isEmpty()) {
       logger.warn("huh? no score json for valid audio " + audioFile + " on " + exerciseID);
     }
-    return answerDAO.addAnswer(this, userID, exerciseID, questionID, "", audioFile, valid,
+*//*    AnswerInfo info =new AnswerInfo(userID,
+        exerciseID,
+        questionID,
+        "",
+        audioFile,
+        valid,
         audioType,
-        durationInMillis, correct, score, deviceType, device, scoreJson, recordedWithFlash, processDur, 0, validity, snr);
-  }
+        durationInMillis,
+        correct,
+        score,
+        deviceType,
+        device,
+        scoreJson,
+        recordedWithFlash,
+        processDur,
+     //   0,
+        validity,
+        snr);*//*
+
+    return answerDAO.addAnswer(this, info);
+  }*/
 
   /**
    * @param userID
