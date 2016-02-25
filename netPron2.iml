@@ -96,5 +96,6 @@
     <orderEntry type="module" module-name="Audioimage" />
     <orderEntry type="library" name="guava-gwt-18.0" level="project" />
     <orderEntry type="library" name="guava-18.0 (2)" level="project" />
+    <orderEntry type="library" name="postgresql" level="project" />
   </component>
 </module>
