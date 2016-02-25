@@ -4,6 +4,7 @@
 
 package mitll.langtest.server;
 
+import mitll.langtest.server.database.AnswerInfo;
 import org.apache.log4j.Logger;
 
 import javax.servlet.GenericServlet;
@@ -34,7 +35,7 @@ public class PathHelper {
   }
 
   public PathHelper(String realContextPathTest) {
-    this((ServletContext)null);
+    this((ServletContext) null);
     this.realContextPathTest = realContextPathTest;
   }
 
@@ -43,10 +44,10 @@ public class PathHelper {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.exercise.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int, String)
    * @param filePath
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.exercise.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int, String)
    */
   public File getAbsoluteFile(String filePath) {
     return getAbsolute(getInstallPath(), filePath);
@@ -60,6 +61,7 @@ public class PathHelper {
    * Figure out from the servlet context {@link GenericServlet#getServletContext()} where this instance of the webapp was
    * installed.  This is really important since we use it to convert back and forth between
    * relative and absolute paths to audio and image files.
+   *
    * @return path to webapp install location
    */
   public String getInstallPath() {
@@ -77,40 +79,51 @@ public class PathHelper {
       String last = pathElements.get(pathElements.size() - 1);
       String nextToLast = pathElements.get(pathElements.size() - 2);
       if (last.equals(nextToLast)) {
-        realContextPath = realContextPath.substring(0, realContextPath.length() - last.length() -1);
+        realContextPath = realContextPath.substring(0, realContextPath.length() - last.length() - 1);
       }
     }
 
     return realContextPath;
   }
 
+/*
   public File getFileForAnswer(String plan, String exercise, int question, int user) {
     String tomcatWriteDirectory = getTomcatDir();
 
     String planAndTestPath = plan + File.separator + exercise + File.separator + question + File.separator + "subject-" + user;
     return getAbsoluteFile(getWavPath(tomcatWriteDirectory, planAndTestPath));
   }
+*/
 
   /**
    * Make a place to store the audio answer, of the form:<br></br>
-   *
+   * <p>
    * "answers"/plan/exercise/question/"subject-"user/"answer_"timestamp".wav"  <br></br>
-   *
+   * <p>
    * e.g. <br></br>
-   *
+   * <p>
    * answers\repeat\nl0020_ams\0\subject--1\answer_1349987649590.wav <br></br>
-   *
+   * <p>
    * or absolute  <br></br>
-   *
+   * <p>
    * C:\Users\go22670\apache-tomcat-7.0.25\webapps\netPron2\answers\repeat\nl0020_ams\0\subject--1\answer_1349987649590.wav
    *
-   * @see LangTestDatabaseImpl#writeAudioFile
    * @param plan
    * @param exercise
    * @param question
    * @param user
    * @return a path relative to the install dir
+   * @see LangTestDatabaseImpl#writeAudioFile
    */
+
+  public String getLocalPathToAnswer(AnswerInfo.AudioContext audioContext) {
+    return getLocalPathToAnswer(audioContext.getId(), audioContext.getQuestionID(), audioContext.getUserid());
+  }
+
+  public String getLocalPathToAnswer(String exercise, int question, int user) {
+    return getLocalPathToAnswer("plan", exercise, question, user);
+  }
+
   public String getLocalPathToAnswer(String plan, String exercise, int question, int user) {
     String tomcatWriteDirectory = getTomcatDir();
 
@@ -118,7 +131,9 @@ public class PathHelper {
     return getWavPath(tomcatWriteDirectory, planAndTestPath);
   }
 
-  public String getWavPathUnder(String planAndTestPath) { return getWavPath(getTomcatDir(), planAndTestPath); }
+  public String getWavPathUnder(String planAndTestPath) {
+    return getWavPath(getTomcatDir(), planAndTestPath);
+  }
 
   private String getWavPath(String tomcatWriteDirectory, String planAndTestPath) {
     String currentTestDir = tomcatWriteDirectory + File.separator + planAndTestPath;
@@ -141,8 +156,8 @@ public class PathHelper {
   }
 
   /**
-   * @see LangTestDatabaseImpl#getImageForAudioFile
    * @return path to image output dir
+   * @see LangTestDatabaseImpl#getImageForAudioFile
    */
   public String getImageOutDir() {
     String imageOutdir = context.getInitParameter("imageOutdir");
