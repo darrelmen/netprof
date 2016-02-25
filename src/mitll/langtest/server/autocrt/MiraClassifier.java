@@ -35,7 +35,7 @@ public class MiraClassifier {
    * @param url
    * @param additionalCorrect
    * @return
-   * @see AutoCRT#getScoreForExercise(CommonExercise, int, String, float)
+   * @see AutoCRT#getScoreForExercise
    */
   public Info getMiraScore(AmasExerciseImpl exercise, int questionID, String answer, String miraFlavor, String url,
                            Collection<String> additionalCorrect) {
@@ -66,13 +66,13 @@ public class MiraClassifier {
   public Info getMiraScore(int questionID, String answer, String miraFlavor, String url,
                            Collection<String> additionalCorrect, String id, QAPair qaPair) {
     String question = qaPair.getQuestion();
-    List<String> alternateAnswers = qaPair.getAlternateAnswers();
+    Collection<String> alternateAnswers = qaPair.getAlternateAnswers();
 
     return getMiraScore(questionID, answer, miraFlavor, url, id, question, alternateAnswers, additionalCorrect);
   }
 
   public Info getMiraScore(int questionID, String answer, String miraFlavor, String url, String id,
-                           String question, List<String> alternateAnswers, Collection<String> additionalCorrect) {
+                           String question, Collection<String> alternateAnswers, Collection<String> additionalCorrect) {
     JSONObject object = new JSONObject();
     object.put(LANGUAGE, miraFlavor);
     object.put(QUESTION, question);
