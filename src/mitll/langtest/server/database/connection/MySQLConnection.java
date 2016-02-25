@@ -26,7 +26,7 @@ public class MySQLConnection implements DatabaseConnection {
   private static final Logger logger = Logger.getLogger(MySQLConnection.class);
 
   private Connection conn;
-  private static final int MAX_MEMORY_ROWS = 1000000;
+  //private static final int MAX_MEMORY_ROWS = 1000000;
   LogAndNotify logAndNotify;
 
   /**
