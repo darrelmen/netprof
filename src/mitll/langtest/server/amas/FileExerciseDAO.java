@@ -400,7 +400,8 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
       if (line2.startsWith("File://")) {
         if (line2.endsWith(MP3)) {
           //logger.debug("skipping mp3 include line for now : " + line2);
-        } else if (line2.endsWith(".png")) {
+        }
+        else if (line2.endsWith(".png")) {
           String path = line2.substring("File://".length());
           String audioPath = getFilePath(installPath, path);
 
