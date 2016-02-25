@@ -31,7 +31,6 @@ import java.util.List;
  */
 public class PagingContainer<T extends CommonShell> extends ClickablePagingContainer<T> {
  // private final Logger logger = Logger.getLogger("PagingContainer");
-
   private static final int MAX_LENGTH_ID = 17;
   private final boolean isRecorder;
   private final ExerciseComparator sorter;
