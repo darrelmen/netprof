@@ -10,7 +10,6 @@ import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.analysis.WordScore;
-import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
@@ -35,9 +34,10 @@ public interface LangTestDatabaseAsync {
   void getUsers(AsyncCallback<List<User>> async);
   void getUserBy(long id, AsyncCallback<User> async);
 
-  void writeAudioFile(String base64EncodedString, String exercise, int question, int user,
-                      int reqid, boolean flq, String audioType, boolean doFlashcard, boolean recordInResults,
-                      boolean addToAudioTable, boolean recordedWithFlash, String deviceType, String device,
+  void writeAudioFile(String base64EncodedString, int reqid, int user, String exercise, int question,
+                      String audioType, boolean recordedWithFlash, String deviceType, String device,
+                      boolean flq, boolean doFlashcard, boolean recordInResults,
+                      boolean addToAudioTable,
                       boolean allowAlternates, AsyncCallback<AudioAnswer> async);
 
 
