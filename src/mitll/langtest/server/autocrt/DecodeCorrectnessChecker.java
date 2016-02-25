@@ -4,6 +4,7 @@
 
 package mitll.langtest.server.autocrt;
 
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.scoring.AlignDecode;
 import mitll.langtest.server.scoring.Scoring;
@@ -35,10 +36,10 @@ public class DecodeCorrectnessChecker {
   /**
    * @param alignDecode
    * @param minPronScore
-   * @see mitll.langtest.server.audio.AudioFileHelper#makeAutoCRT
+   * @see AudioFileHelper#makeDecodeCorrectnessChecker()
    */
   public DecodeCorrectnessChecker(AlignDecode alignDecode, double minPronScore) {
-    this.alignDecode = alignDecode;
+    this.alignDecode  = alignDecode;
     this.minPronScore = minPronScore;
   }
 
@@ -60,18 +61,26 @@ public class DecodeCorrectnessChecker {
     PretestScore flashcardAnswer = getFlashcardAnswer(audioFile, foregroundSentences, answer, canUseCache, useOldSchool);
 
     // log what happened
+    logDecodeOutput(answer, foregroundSentences, commonExercise.getID());
+
+    return flashcardAnswer;
+  }
+
+  private void logDecodeOutput(AudioAnswer answer, Collection<String> foregroundSentences, String id) {
+    String decodeOutput = answer.getDecodeOutput();
+    double score = answer.getScore();
+
     if (answer.isCorrect()) {
-      logger.info("correct response for exercise #" + commonExercise.getID() +
-          " reco sentence was '" + answer.getDecodeOutput() + "' vs " + "'" + foregroundSentences + "' " +
-          "pron score was " + answer.getScore() + " answer " + answer);
+      logger.info("correct response for exercise #" + id +
+          " reco sentence was '" + decodeOutput + "' vs " + "'" + foregroundSentences + "' " +
+          "pron score was " + score + " answer " + answer);
     } else {
       int length = foregroundSentences.isEmpty() ? 0 : foregroundSentences.iterator().next().length();
-      logger.info("getFlashcardAnswer : incorrect response for exercise #" + commonExercise.getID() +
-          " reco sentence was '" + answer.getDecodeOutput() + "' (" + answer.getDecodeOutput().length() +
+      logger.info("getFlashcardAnswer : incorrect response for exercise #" + id +
+          " reco sentence was '" + decodeOutput + "' (" + decodeOutput.length() +
           ") vs " + "'" + foregroundSentences + "' (" + length +
-          ") pron score was " + answer.getScore());
+          ") pron score was " + score);
     }
-    return flashcardAnswer;
   }
 
   /**
