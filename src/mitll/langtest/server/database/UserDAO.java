@@ -431,7 +431,7 @@ public class UserDAO extends DAO {
           //getPrimaryKey() +
           "CONSTRAINT pkusers PRIMARY KEY (id))";
 
-      logger.info("sql\n"+sql);
+  //    logger.info("sql\n"+sql);
       PreparedStatement statement = connection.prepareStatement(sql);
       statement.execute();
       statement.close();
