@@ -34,10 +34,10 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasExerciseImpl, AmasExerciseImpl> {
-  private static final int NUM_CHOICES = 3;
   private final Logger logger = Logger.getLogger("SingleSelectExerciseList");
+  private static final int NUM_CHOICES = 3;
 
-  private static final String PLEASE_SELECT = "Please select a quiz, test type, ILR level, and response type";
+  private static final String PLEASE_SELECT  = "Please select a quiz, test type, ILR level, and response type";
   private static final String PLEASE_SELECT2 = "Please select a test type, ILR level, and response type";
   private static final int CLASSROOM_VERTICAL_EXTRA = 270;
   private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
@@ -140,8 +140,8 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
    * @see #getTypeOrder(com.github.gwtbootstrap.client.ui.FluidContainer)
    */
   private void addButtonRow(Collection<SectionNode> rootNodes, final FluidContainer container, Collection<String> types) {
-    logger.info("SectionExerciseList.addButtonRow for user = " + controller.getUser() + " got types " +
-        types + " num root nodes " + rootNodes.size());
+/*    logger.info("addButtonRow for user = " + controller.getUser() + " got types " +
+        types + " num root nodes " + rootNodes.size());*/
     if (types.isEmpty()) {
       logger.warning("addButtonRow : huh? types is empty?");
       return;
@@ -180,11 +180,11 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
    */
   public void gotSelection() {
     int count = getNumSelections();
-    if (count == NUM_CHOICES) {
+    if (count == getNumChoices()) {
       logger.info("gotSelection count = " + count);
       pushNewSectionHistoryToken();
     } else {
-      logger.info("gotSelection count " + count + " < " + NUM_CHOICES);
+      logger.info("gotSelection count " + count + " < " + getNumChoices());
     }
   }
 
@@ -296,11 +296,16 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
   protected void gotEmptyExerciseList() {
     logger.info("gotEmptyExerciseList");
     SectionWidget quiz = typeToBox.get("Quiz");
-    if (getNumSelections() < NUM_CHOICES) {
-      showMessage(quiz.hasOnlyOne() ? PLEASE_SELECT2 : PLEASE_SELECT, false);
+    int numChoices = getNumChoices();
+    if (getNumSelections() < numChoices) {
+      showMessage(quiz == null || quiz.hasOnlyOne() ? PLEASE_SELECT2 : PLEASE_SELECT, false);
     } else {
       showMessage("There are no questions for this quiz, test type, and ILR Level.<br/>Please make another selection.", false);
     }
+  }
+
+  private int getNumChoices() {
+    return typeToBox.get("Quiz") == null ? NUM_CHOICES-1:NUM_CHOICES;
   }
 
 
