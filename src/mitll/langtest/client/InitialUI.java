@@ -273,7 +273,6 @@ public class InitialUI {
       RootPanel.get().add(getHeadstart(currentExerciseVPanel));
     } else {
       //  logger.info("adding normal container...");
-
       RootPanel.get().add(verticalContainer);
 
       /**
