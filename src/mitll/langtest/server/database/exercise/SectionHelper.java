@@ -30,6 +30,7 @@ public class SectionHelper<T extends Shell> {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getTypeOrder()
    */
   public List<String> getTypeOrder() {
+    logger.info("getTypeOrder " + predefinedTypeOrder);
     if (predefinedTypeOrder.isEmpty()) {
       List<String> types = new ArrayList<String>();
       types.addAll(typeToSectionToTypeToSections.keySet());
@@ -48,6 +49,8 @@ public class SectionHelper<T extends Shell> {
       return types;
     } else {
       Set<String> validTypes = typeToUnitToLesson.keySet();
+      logger.info("getTypeOrder validTypes " + validTypes);
+
       List<String> valid = new ArrayList<String>(predefinedTypeOrder);
       valid.retainAll(validTypes);
       return valid;
@@ -302,6 +305,11 @@ public class SectionHelper<T extends Shell> {
     }
   }
 
+  /**
+   * @see #addExerciseToLesson(Shell, String, String)
+   * @param section
+   * @return
+   */
   private Map<String, Lesson<T>> getSectionToLesson(String section) {
     Map<String, Lesson<T>> unit = typeToUnitToLesson.get(section);
     if (unit == null) {
@@ -361,17 +369,19 @@ public class SectionHelper<T extends Shell> {
   }
 
   public void report() {
-    logger.debug("type order " + getTypeOrder());
+//    logger.info("This " + this);
+    logger.debug("\nreport : type order " + getTypeOrder());
     for (String key : typeToUnitToLesson.keySet()) {
       Map<String, Lesson<T>> categoryToLesson = typeToUnitToLesson.get(key);
       Set<String> sections = categoryToLesson.keySet();
       if (!sections.isEmpty()) {
-        logger.debug("report : Section type : " + key + " : sections " + sections);
+        logger.debug("\treport : Section type : " + key + " : sections " + sections);
       }
     }
+    logger.debug("\t# section nodes " + getSectionNodes().size());
     for (SectionNode node : getSectionNodes()) {
       Collection<T> exercisesForSelectionState = getExercisesForSelectionState(node.getType(), node.getName());
-      logger.info("for " + node + " got " + exercisesForSelectionState.size());
+      logger.info("\tfor " + node + " got " + exercisesForSelectionState.size());
     }
   }
 }
