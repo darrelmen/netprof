@@ -735,8 +735,8 @@ public class ScoreServlet extends DatabaseServlet {
                                 String deviceType, String device, int reqid, boolean allowAlternates) {
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
 
-    AudioAnswer answer = audioFileHelper.getAnswer(exerciseID, exercise1, user, doFlashcard, wavPath, file, deviceType,
-        device, score, reqid, allowAlternates);
+    AudioAnswer answer = audioFileHelper.getAnswer(reqid, exercise1, user,exerciseID, wavPath, file, deviceType, device, score, doFlashcard,
+        allowAlternates);
 
     final String path = answer.getPath();
     final String foreignLanguage = exercise1.getForeignLanguage();
