@@ -1,46 +1,49 @@
 package mitll.langtest.shared.amas;
 
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.MutableShell;
+import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
+import java.io.InputStream;
 import java.util.*;
 
 /**
  * Representation of a individual item of work the user sees.  Could be a pronunciation exercise or a question(s)
  * based on a prompt.
- * <p/>
+ * <p>
  * TODO : consider subclass for pronunciation exercises?
- * <p/>
+ * <p>
  * User: GO22670
  * Date: 5/8/12
  * Time: 1:03 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AmasExerciseImpl implements CommonShell /*implements CommonExercise*/ {
+public class AmasExerciseImpl implements CommonShell {
   public static final String EN = "en";
   public static final String FL = "fl";
- // private static final int MAX_TOOLTIP_LENGTH = 15;
+//  private static final List<QAPair> QA_PAIRS = new ArrayList<>();
+
   private String content;
+  private String contentTrans;
+
+  private String orient;
+  private String orientTrans;
+  private String ilr;
+  private boolean isListening;
+  private String audioURL;
   private Map<String, String> unitToValue = new HashMap<String, String>();
 
   private Map<String, List<QAPair>> langToQuestion = null;
-  private List<String> refSentences = new ArrayList<String>();
 
-  private transient List<String> firstPron = new ArrayList<String>();
   private String id;
   private STATE state = STATE.UNSET;
   private String altID;
 
-  //  private String imageURL;
-  //  private String audioURL;
+  public AmasExerciseImpl() {
+  }  // required for serialization
 
-  public AmasExerciseImpl() {}  // required for serialization
 
-  /**
-   * @param id
-   * Exercise exercise = new Exercise(id, "", id, "", "", "");
-   * @see mitll.langtest.server.amas.FileExerciseDAO#readTSVLine(String, String, String, int)
-   */
   public AmasExerciseImpl(String id, String content, String altID) {
     this.id = id;
     this.content = content;
@@ -48,70 +51,61 @@ public class AmasExerciseImpl implements CommonShell /*implements CommonExercise
   }
 
   /**
-   * @seex UserExercise#toExercise()
-   * @param id
-   * @param content
-   * @param sentenceRef
-   * @param tooltip
-   * @see mitll.langtest.server.amas.FileExerciseDAO#getSimpleExerciseForLine
+   * @param id Exercise exercise = new Exercise(id, "", id, "", "", "");
+   * @see mitll.langtest.server.amas.FileExerciseDAO#readTSVLine(String, String, String, int)
    */
-  public AmasExerciseImpl(String id, String content, String sentenceRef, String tooltip) {
+  public AmasExerciseImpl(String id, String content, //String altID,
+                          String contentTrans,
+                          String orient,
+                          String orientTrans,
+                          boolean isListening,
+                          String ilr,
+                          String audioURL) {
     this.id = id;
-    this.setContent(content);
-    this.refSentences.add(sentenceRef);
+    this.content = content;
+    this.altID = id;  // TODO : how does this work? do we need to worry about it?
+    this.contentTrans = contentTrans;
+    this.orient = orient;
+    this.orientTrans = orientTrans;
+    this.isListening = isListening;
+    this.ilr = ilr;
+    this.audioURL = audioURL;
   }
 
-  /**
-   * @param id
-   * @param content
-   * @param sentenceRefs
-   * @param tooltip
-   * @see mitll.langtest.server.amas.FileExerciseDAO#getFlashcardExercise(int, String, String, String, String)
-   */
-
-  public AmasExerciseImpl(String id, String content, List<String> sentenceRefs, String tooltip) {
-    this.id = id;
-    this.setContent(content);
-    this.refSentences = sentenceRefs;
+  public String getAltID() {
+    return altID;
   }
 
-  //@Override
-  public String getAltID() { return altID;  }
+  public void addQuestion(boolean isFL, String question, String answer) throws Exception {
+ //   int before = getQuestions().size();
+    addQuestion(isFL ? FL : EN, question, answer);
+   // int after = getQuestions().size();
+  //  if (after-before != 1) throw new Exception("what? before " + before +
+   //     " after is " +after);
 
-/*  public CommonShell getShellCombinedTooltip() {
-    ExerciseShell exerciseShell = new ExerciseShell(getID(), getCombinedTooltip());
-    exerciseShell.setState(getState());
-    return exerciseShell;
-  }*/
+  }
 
-  /**
-   * Hack - if we have "N/A" for english, don't show it in the list.
-   *
-   * @return
-   */
-/*  public String getCombinedTooltip() {
-    String refSentence = getRefSentence();
-    if (refSentence.length() > MAX_TOOLTIP_LENGTH) {
-      refSentence = refSentence.substring(0, MAX_TOOLTIP_LENGTH);
-    }
-    boolean refSentenceEqualsTooltip = getTooltip().trim().equals(getRefSentence().trim());
-    String combined = refSentenceEqualsTooltip ? getTooltip() : getTooltip() + (refSentence.isEmpty() ? "" : " / " + refSentence);
-    if (getTooltip().isEmpty() || getTooltip().equals("N/A")) combined = refSentence;
-  //  if (combined.isEmpty()) combined = getTitle();
-    return combined;
-  }*/
+  public void addQuestion(String lang, String question, String answer) {
+    List<String> serializableCollection = new ArrayList<>();
+    serializableCollection.add(answer);
+    addQuestion(lang, new QAPair(question, serializableCollection));
+  }
 
   /**
    * @param lang
    * @param question
    * @param alternateAnswers
-   * @see mitll.langtest.server.database.exercise.FileExerciseDAO#addQuestion(String, String, AmasExerciseImpl, boolean)
+   * @see mitll.langtest.server.amas.FileExerciseDAO#addQuestion
    */
   public void addQuestion(String lang, String question, List<String> alternateAnswers) {
-    QAPair pair = new QAPair(question, alternateAnswers);
-    addQuestion(lang, pair);
+    addQuestion(lang, new QAPair(question, alternateAnswers));
   }
 
+  /**
+   * @param lang
+   * @param pairs
+   * @see mitll.langtest.server.amas.FileExerciseDAO#readExercises(String, String, String, InputStream)
+   */
   public void addQuestions(String lang, List<QAPair> pairs) {
     for (QAPair pair : pairs) {
       addQuestion(lang, pair);
@@ -119,7 +113,7 @@ public class AmasExerciseImpl implements CommonShell /*implements CommonExercise
   }
 
   private void addQuestion(String lang, QAPair pair) {
-    if (langToQuestion == null) langToQuestion = new HashMap<String, List<QAPair>>();
+    if (langToQuestion == null) langToQuestion = new HashMap<>();
     List<QAPair> qaPairs = langToQuestion.get(lang);
     if (qaPairs == null) {
       langToQuestion.put(lang, qaPairs = new ArrayList<QAPair>());
@@ -127,36 +121,19 @@ public class AmasExerciseImpl implements CommonShell /*implements CommonExercise
 
     qaPairs.add(pair);
   }
-/*
-  public String getRefSentence() {
-    StringBuilder builder = new StringBuilder();
-    for (String s : refSentences) {
-      builder.append(s).append(" ");
-    }
-    return builder.toString();
-  }*/
-
-/*
-  public String getTransliteration() {
-    return "";//    translitSentences.isEmpty() ? "" : translitSentences.get(0);
-  }
-*/
 
   /**
    * @return
    * @see mitll.langtest.server.database.Export#populateIdToExportMap(AmasExerciseImpl)
    */
-  //@Override
   public List<QAPair> getQuestions() {
-    List<QAPair> qaPairs = langToQuestion == null ? new ArrayList<QAPair>() : langToQuestion.get(FL);
-    return qaPairs == null ? new ArrayList<QAPair>() : qaPairs;
+    return getForeignLanguageQuestions();
   }
 
   /**
    * @return
    * @see mitll.langtest.server.database.Export#addPredefinedAnswers
    */
-  //@Override
   public List<QAPair> getEnglishQuestions() {
     List<QAPair> qaPairs = langToQuestion == null ? new ArrayList<QAPair>() : langToQuestion.get(EN);
     return qaPairs == null ? new ArrayList<QAPair>() : qaPairs;
@@ -172,93 +149,25 @@ public class AmasExerciseImpl implements CommonShell /*implements CommonExercise
     return qaPairs == null ? new ArrayList<QAPair>() : qaPairs;
   }
 
-/*
-  public String getEnglish() {
-    return "";
+  public String getContent() {
+    return content;
   }
-*/
 
-  public String getContent() {  return content; }
-
-  private void setContent(String content) {  this.content = content; }
-
-/*
-  @Override
-  public String getForeignLanguage() {
-    return getRefSentence();
+  public void setScores(List<CorrectAndScore> scores) {
   }
-*/
 
-//  public Exercise toExercise() {
-//    return this;
-//  }
-
-//  @Override
-  public void setScores(List<CorrectAndScore> scores) {}
-
-  public void setAvgScore(float avgScore) {
+  public Map<String, String> getUnitToValue() {
+    return unitToValue;
   }
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#countPhones
-   * @param bagOfPhones
-   */
-//  @Override
-  public void setBagOfPhones(Set<String> bagOfPhones) {
-  }
-
-/*
-  @Override
-  public String getImageURL() {
-    return null;//imageURL;
-  }
-*/
-
-  /**
-   *
-   * @paramx imageURL
-   */
-/*
-  public void setImageURL(String imageURL) {
-    this.imageURL = imageURL;
-  }
-*/
-
-/*  @Override
-  public String getAudioQuestionURL() {
-
-    return null;//audioURL;
-  }*/
-
-/*
-  public void setAudioURL(String audioURL) {
-    this.audioURL = audioURL;
-  }
-*/
-
-//  @Override
-  public List<String> getFirstPron() {
-    return firstPron;
-  }
-
-//  @Override
-  public void setFirstPron(List<String> firstPron) {
-    this.firstPron = firstPron;
-  }
-
-  public Map<String, String> getUnitToValue() { return unitToValue; }
-
-  /**
-   * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
    * @param unit
    * @param value
+   * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
    */
 
   public void addUnitToValue(String unit, String value) {
     if (value == null) return;
-    //if (value.isEmpty()) {
-    // System.out.println("addUnitToValue " + unit + " value " + value);
-    // }
     this.getUnitToValue().put(unit, value);
   }
 
@@ -286,6 +195,7 @@ public class AmasExerciseImpl implements CommonShell /*implements CommonExercise
 
   /**
    * TODO : refactor so this isn't needed.
+   *
    * @return
    */
   @Override
@@ -299,22 +209,13 @@ public class AmasExerciseImpl implements CommonShell /*implements CommonExercise
   }
 
   public String toString() {
-  //  Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
-
-    // warn about attr that have no user
-/*    StringBuilder builder = new StringBuilder();
-    for (AudioAttribute attr : audioAttributes1) {
-      if (attr.getUser() == null) {
-        builder.append("\t").append(attr.toString()).append("\n");
-      }
-    }*/
-
-    return "Exercise " + getID() +  (getAltID().isEmpty() ? "" : "/"+getAltID())+
-     //   " english '" + getEnglish() +
-     //   "'" +
-      //  "/'" + getRefSentence() +
-  //      " audio count = " + audioAttributes1.size()+
-    //    (builder.toString().isEmpty() ? "":" \n\tmissing user audio " + builder.toString()) +
+    return "Exercise " + getID() + (getAltID().isEmpty() ? "" : "/" + getAltID()) +
+         " Questions " + getQuestions() +
+        //   " english '" + getEnglish() +
+        //   "'" +
+        //  "/'" + getRefSentence() +
+        //      " audio count = " + audioAttributes1.size()+
+        //    (builder.toString().isEmpty() ? "":" \n\tmissing user audio " + builder.toString()) +
         " unit->lesson " + getUnitToValue();
   }
 
@@ -352,5 +253,29 @@ public class AmasExerciseImpl implements CommonShell /*implements CommonExercise
   @Override
   public MutableShell getMutableShell() {
     return null;
+  }
+
+  public String getContentTrans() {
+    return contentTrans;
+  }
+
+  public String getOrient() {
+    return orient;
+  }
+
+  public String getOrientTrans() {
+    return orientTrans;
+  }
+
+  public String getIlr() {
+    return ilr;
+  }
+
+  public boolean isListening() {
+    return isListening;
+  }
+
+  public String getAudioURL() {
+    return audioURL;
   }
 }
