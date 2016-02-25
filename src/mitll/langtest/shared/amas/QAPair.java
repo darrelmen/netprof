@@ -6,6 +6,7 @@ package mitll.langtest.shared.amas;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -13,8 +14,7 @@ import java.util.List;
  */
 public class QAPair implements IsSerializable {
   private String question;
-  //  private String answer;
-  private List<String> alternateAnswers;
+  private Collection<String> alternateAnswers;
 
   public QAPair() {
   }   // required for serialization
@@ -25,7 +25,7 @@ public class QAPair implements IsSerializable {
    * @paramx a
    * @see AmasExerciseImpl#addQuestion
    */
-  QAPair(String q, List<String> alternateAnswers) {
+  QAPair(String q, Collection<String> alternateAnswers) {
     question = q;
     this.alternateAnswers = alternateAnswers;
   }
@@ -40,26 +40,15 @@ public class QAPair implements IsSerializable {
   /**
    * @return
    */
-//    public String getAnswer() {  return answer;   }
-  public List<String> getAlternateAnswers() {
+  public Collection<String> getAlternateAnswers() {
     return alternateAnswers;
   }
-
-/*  public List<String> getAllAnswers() {
-    List<String> alternateAnswers = getAlternateAnswers();
-    alternateAnswers = new ArrayList<String>(alternateAnswers);
-
-    if (!alternateAnswers.contains(getAnswer())) {
-      alternateAnswers.add(getAnswer());
-    }
-    return alternateAnswers;
-  }*/
 
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof QAPair)) return false;
     QAPair otherpair = (QAPair) obj;
-    return question.equals(otherpair.question);// && answer.equals(otherpair.answer);
+    return question.equals(otherpair.question);
   }
 
   public String toString() {
