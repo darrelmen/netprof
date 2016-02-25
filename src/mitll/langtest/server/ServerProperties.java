@@ -31,7 +31,7 @@ public class ServerProperties {
   private static final Logger logger = Logger.getLogger(ServerProperties.class);
 
   private static final String FALSE = "false";
-  private static final String TRUE = "true";
+  private static final String TRUE  = "true";
 
   public static final List<String> SITE_LIST = Arrays.asList(
       "Dari",
@@ -77,7 +77,6 @@ public class ServerProperties {
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
   private static final String H2_DATABASE = "h2Database";
-//  private static final String H2_DATABASE_DEFAULT = "vlr-parle";   //likely never what you want
   private static final String LANGUAGE = "language";
 
   private static final String MEDIA_DIR = "mediaDir";
@@ -541,9 +540,11 @@ public class ServerProperties {
     return getDefaultFalse(RUN_REF_DECODE_WITH_HYDEC);
   }
 
+/*
   public boolean readExercisesFromDB() {
     return getDefaultFalse(READ_EXERCISES_FROM_DB);
   }
+*/
 
 
   public String getMiraClassifierURL() {
