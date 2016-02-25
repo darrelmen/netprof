@@ -77,12 +77,15 @@ public class AmasExerciseImpl implements CommonShell {
   }
 
   public void addQuestion(boolean isFL, String question, String answer) throws Exception {
- //   int before = getQuestions().size();
     addQuestion(isFL ? FL : EN, question, answer);
-   // int after = getQuestions().size();
-  //  if (after-before != 1) throw new Exception("what? before " + before +
-   //     " after is " +after);
+  }
 
+  public void addQuestion(boolean isFL, String question, String[] alternateAnswers) throws Exception {
+    addQuestion(isFL ? FL : EN, question, alternateAnswers);
+  }
+
+  public void addQuestion(boolean isFL, String question, Collection<String> alternateAnswers) throws Exception {
+    addQuestion(isFL ? FL : EN, question, alternateAnswers);
   }
 
   public void addQuestion(String lang, String question, String answer) {
@@ -91,13 +94,17 @@ public class AmasExerciseImpl implements CommonShell {
     addQuestion(lang, new QAPair(question, serializableCollection));
   }
 
+  public void addQuestion(String lang, String question, String[] alternateAnswers) {
+    addQuestion(lang, new QAPair(question, Arrays.asList(alternateAnswers)));
+  }
+
   /**
    * @param lang
    * @param question
    * @param alternateAnswers
    * @see mitll.langtest.server.amas.FileExerciseDAO#addQuestion
    */
-  public void addQuestion(String lang, String question, List<String> alternateAnswers) {
+  public void addQuestion(String lang, String question, Collection<String> alternateAnswers) {
     addQuestion(lang, new QAPair(question, alternateAnswers));
   }
 
@@ -179,9 +186,11 @@ public class AmasExerciseImpl implements CommonShell {
     return id;
   }
 
+/*
   public void setID(String id) {
     this.id = id;
   }
+*/
 
   @Override
   public STATE getState() {
@@ -210,7 +219,7 @@ public class AmasExerciseImpl implements CommonShell {
 
   public String toString() {
     return "Exercise " + getID() + (getAltID().isEmpty() ? "" : "/" + getAltID()) +
-         " Questions " + getQuestions() +
+        " Questions " + getQuestions() +
         //   " english '" + getEnglish() +
         //   "'" +
         //  "/'" + getRefSentence() +
