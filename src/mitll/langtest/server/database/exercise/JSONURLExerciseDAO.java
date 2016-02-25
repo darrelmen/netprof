@@ -33,10 +33,10 @@ public class JSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
       ServerProperties serverProps) {
     this.serverProps = serverProps;
     this.language = serverProps.getLanguage();
-    sectionHelper.setPredefinedTypeOrder(Arrays.asList(ILRMapping.TEST_TYPE,ILRMapping.ILR_LEVEL));
-   //sectionHelper.report();
+    sectionHelper.setPredefinedTypeOrder(Arrays.asList(ILRMapping.TEST_TYPE, ILRMapping.ILR_LEVEL));
+    //sectionHelper.report();
     this.exercises = readExercises();
-   // sectionHelper.report();
+    // sectionHelper.report();
     populateIDToExercise(exercises);
   }
 
@@ -59,8 +59,8 @@ public class JSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
         sectionHelper.addAssociations(pairs);
       }
 
-   //   logger.info("read " + exercises.size());
-     // sectionHelper.report();
+      //   logger.info("read " + exercises.size());
+      // sectionHelper.report();
       return exercises;
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -103,8 +103,8 @@ public class JSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
     }
 
     String ilr = metadata.getString("ilr");
-    if (ilr.endsWith(".0")) ilr = ilr.substring(0,ilr.length()-2);
-    else if (ilr.endsWith(".5")) ilr = ilr.substring(0,ilr.length()-2) + "+";
+    if (ilr.endsWith(".0")) ilr = ilr.substring(0, ilr.length() - 2);
+    else if (ilr.endsWith(".5")) ilr = ilr.substring(0, ilr.length() - 2) + "+";
 
     boolean lc = metadata.getString("Skill").equals("LC");
     AmasExerciseImpl exercise = new AmasExerciseImpl(
@@ -117,41 +117,38 @@ public class JSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
         ilr,
         srcAudio);
 
-    logger.error(qlist.keySet());
+//    logger.error(qlist.keySet());
 
     for (Object key : qlist.keySet()) {
       JSONObject jsonObject1 = qlist.getJSONObject((String) key);
-      String flq = jsonObject1.getString("stem");
-      String enq = jsonObject1.getString("stem-trans");
-      String fla = jsonObject1.getString("key-idea");
-      String ena = jsonObject1.getString("key-idea-trans");
+
       try {
-        exercise.addQuestion(true,  flq, fla);
+        String flq = jsonObject1.getString("stem");
+        String fla = jsonObject1.getString("key-idea");
+        //  for (String answer : fla.split("\\[.\\]")) {
+        String[] split = fla.split("\\[.\\]");
+        List<String> cleaned = new ArrayList<>();
+        for (String answer : split) {
+          String s = answer.replaceAll("<div>", "").replaceAll("</div>", "");
+          cleaned.add(s);
+        }
+        exercise.addQuestion(true, flq, cleaned);
+        // }
+
+        String enq = jsonObject1.getString("stem-trans");
+        String ena = jsonObject1.getString("key-idea-trans");
         exercise.addQuestion(false, enq, ena);
       } catch (Exception e) {
-        logger.error("Got " + e,e);
+        logger.error("Got " + e, e);
         return exercise;
       }
     }
 
-    logger.info("After " +exercise.getQuestions());
+//    logger.info("After " + exercise.getQuestions());
 
     exercise.addUnitToValue(ILRMapping.ILR_LEVEL, ilr);
     exercise.addUnitToValue(ILRMapping.TEST_TYPE, lc ? ILRMapping.LISTENING : ILRMapping.READING);
 
-    /*try {
-      for (String type : types) {
-        if (jsonObject.has(type)) {
-          String value = jsonObject.getString(type);
-          if (value == null) logger.error("toExercise : missing " + type + " on " + exercise.getID());
-          else exercise.addUnitToValue(type, value);
-        } else {
-          exercise.addUnitToValue(type, "");
-        }
-      }
-    } catch (Exception e) {
-      logger.warn("toExercise : got " + e + " for " + exercise.getID());
-    }*/
     return exercise;
   }
 
