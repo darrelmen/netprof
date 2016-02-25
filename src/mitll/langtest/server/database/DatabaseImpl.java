@@ -102,7 +102,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private UserManagement userManagement;
   private Analysis analysis;
   private final String absConfigDir;
-  FileExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
+  SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
 
   /**
    * @param configDir
@@ -351,7 +351,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see DatabaseImpl#getTypeOrder
    */
   public SectionHelper<CommonExercise> getSectionHelper() {
-    if (serverProps.isAMAS()) return new SectionHelper<>();
+    if (serverProps.isAMAS()) {
+      //return fileExerciseDAO.getSectionHelper();
+      return new SectionHelper<>();
+    }
 
     getExercises();
     return exerciseDAO.getSectionHelper();
@@ -386,13 +389,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see #getExercises()
    */
   public Collection<CommonExercise> getExercises() {
-    //logger.debug("using lesson plan file " +lessonPlanFile + " at " + installPath);
     if (serverProps.isAMAS()) {
       return Collections.emptyList();
-//      Collection<CommonExercise> copy = new ArrayList<>();
-//      for (CommonExercise exercise : getAMASExercises()) copy.add(exercise);
-//
-//      return getAMASExercises();
     }
     List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
     if (rawExercises.isEmpty()) {
@@ -422,11 +420,26 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private void makeDAO(String lessonPlanFile, String mediaDir, String installPath) {
     if (exerciseDAO == null) {
       synchronized (this) {
+        boolean isURL = serverProps.getLessonPlan().startsWith("http");
         if (serverProps.isAMAS()) {
-          fileExerciseDAO = new FileExerciseDAO<AmasExerciseImpl>(mediaDir, serverProps.getLanguage(), absConfigDir, lessonPlanFile, installPath);
-          userManagement = new UserManagement(userDAO, fileExerciseDAO.getNumExercises(), resultDAO, userListManager);
+
+          int numExercises;
+//          logger.info("Got " + lessonPlanFile);
+          if (isURL) {
+            this.fileExerciseDAO = new JSONURLExerciseDAO(getServerProps());
+            numExercises = fileExerciseDAO.getNumExercises();
+          }
+          else {
+            fileExerciseDAO = new FileExerciseDAO<>(mediaDir, serverProps.getLanguage(), absConfigDir, lessonPlanFile, installPath);
+            numExercises = fileExerciseDAO.getNumExercises();
+          }
+          userManagement = new UserManagement(userDAO, numExercises, resultDAO, userListManager);
+
         } else {
-          if (lessonPlanFile.endsWith(".json")) {
+          if (isURL) {
+            this.fileExerciseDAO = new JSONURLExerciseDAO(getServerProps());
+          }
+          else if (lessonPlanFile.endsWith(".json")) {
             this.exerciseDAO = new JSONExerciseDAO(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
           } else {
             this.exerciseDAO = new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
