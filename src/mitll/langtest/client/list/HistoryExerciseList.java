@@ -150,7 +150,6 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell> extends
     String initToken = History.getToken();
     if (initToken.length() == 0) {
       //logger.info("pushFirstListBoxSelection : history token is blank " + getInstance());
-
       pushNewSectionHistoryToken();
     } else {
       //logger.info("pushFirstListBoxSelection fire history for token from URL: " + initToken + " instance " + getInstance());
@@ -168,7 +167,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell> extends
 
     if (currentToken.equals(historyToken)) {
       if (isEmpty() || historyToken.isEmpty()) {
-        logger.info("pushNewSectionHistoryToken : noSectionsGetExercises for token '" + historyToken +
+        if (DEBUG) logger.info("pushNewSectionHistoryToken : noSectionsGetExercises for token '" + historyToken +
             "' " + "current has " + getSize() + " instance " + getInstance());
 
         noSectionsGetExercises(userID);
@@ -176,7 +175,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell> extends
         logger.info("pushNewSectionHistoryToken : skipping same token '" + historyToken + "'" + " instance " + getInstance());
       }
     } else {
-      logger.info("pushNewSectionHistoryToken : currentToken " + currentToken + " instance " + getInstance());
+      if (DEBUG) logger.info("pushNewSectionHistoryToken : currentToken " + currentToken + " instance " + getInstance());
       setHistoryItem(historyToken);
     }
   }
@@ -187,8 +186,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell> extends
    * @see #restoreListBoxState(SelectionState)
    */
   protected void selectItem(String type, Collection<String> sections) {
-    SectionWidget listBox = typeToBox.get(type);
-    listBox.selectItem(sections, false);
+    typeToBox.get(type).selectItem(sections, false);
   }
 
   /**
