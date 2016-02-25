@@ -70,7 +70,7 @@ public class DynamicRange {
    *
    * @param file audio byte array with header
    * @return true if well formed
-   * @see AudioConversion#isValid(File, boolean)
+   * @see AudioConversion#isValid(File, boolean, boolean)
    */
   public RMSInfo getDynamicRange(File file) {
     AudioInputStream ais = null;
