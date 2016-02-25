@@ -5,6 +5,7 @@ import mitll.langtest.server.database.exercise.JSONExerciseDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.exercise.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -77,6 +78,21 @@ public class JsonExport {
     }
     return exercises;
   }
+
+  /*public Collection<AmasExerciseImpl> getExercisesFromArray(String json) {
+    JSONArray content = JSONArray.fromObject(json);
+    List<AmasExerciseImpl> exercises = new ArrayList<>();
+    for (int i = 0; i < content.size(); i++) {
+      JSONObject jsonObject = content.getJSONObject(i);
+      exercises.add(toAMASExercise(jsonObject));
+    }
+
+    for (AmasExerciseImpl ex : exercises.subList(0, 10)) {
+      logger.info("got " + ex);
+    }
+
+    return exercises;
+  }*/
 
   private List<String> getTypes(JSONObject object) {
     JSONArray jsonArray = object.getJSONArray(UNIT_ORDER);
@@ -169,11 +185,13 @@ public class JsonExport {
   }
 
   int c = 0;
+
   <T extends CommonShell> void addUnitAndChapter(T exercise, JSONObject jsonForCommonExercise) {
     for (String type : sectionHelper.getTypeOrder()) {
       String value = exercise.getUnitToValue().get(type);
       if (value == null) {
-        if (c++ <10)logger.warn("huh? no value for " + type + " for " + exercise.getID() + " : " + exercise.getUnitToValue());
+        if (c++ < 10)
+          logger.warn("huh? no value for " + type + " for " + exercise.getID() + " : " + exercise.getUnitToValue());
         value = "";
       }
       jsonForCommonExercise.put(type, value);
@@ -350,6 +368,56 @@ public class JsonExport {
     }
     return exercise;
   }
+
+/*
+  private AmasExerciseImpl toAMASExercise(JSONObject jsonObject*/
+/*, Collection<String> types*//*
+) {
+    JSONObject metadata = jsonObject.getJSONObject("metadata");
+    JSONObject content = jsonObject.getJSONObject("content");
+    JSONObject qlist = jsonObject.getJSONObject("q-list");
+    JSONObject attlist = jsonObject.getJSONObject("att-lst");
+    String srcAudio = attlist.getString("src-att");
+
+    AmasExerciseImpl exercise = new AmasExerciseImpl(
+        metadata.getString("hubDID"),
+        content.getString("pass"),
+        content.getString("trans"),
+        content.getString("orient"),
+        content.getString("orient-trans"),
+        metadata.getString("Skill").equals("LC"),
+        metadata.getString("ilr"),
+        srcAudio);
+
+    for (Object key : qlist.keySet()) {
+      JSONObject jsonObject1 = qlist.getJSONObject((String) key);
+      String flq = jsonObject1.getString("stem");
+      String enq = jsonObject1.getString("stem-trans");
+      String fla = jsonObject1.getString("key-idea");
+      String ena = jsonObject1.getString("key-idea-trans");
+      exercise.addQuestion(true, flq, fla);
+      exercise.addQuestion(false, enq, ena);
+    }
+
+    */
+/*try {
+      for (String type : types) {
+        if (jsonObject.has(type)) {
+          String value = jsonObject.getString(type);
+          if (value == null) logger.error("toExercise : missing " + type + " on " + exercise.getID());
+          else exercise.addUnitToValue(type, value);
+        } else {
+          exercise.addUnitToValue(type, "");
+        }
+      }
+    } catch (Exception e) {
+      logger.warn("toExercise : got " + e + " for " + exercise.getID());
+    }*//*
+
+    return exercise;
+  }
+*/
+
 
   /**
    * Male/female reg/slow speed
