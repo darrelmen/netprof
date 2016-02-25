@@ -39,6 +39,7 @@ import java.util.logging.Logger;
  */
 public class FeedbackRecordPanel extends AmasExercisePanel {
   private Logger logger = Logger.getLogger("FeedbackRecordPanel");
+  public static final boolean INCLUDE_EXERCISE_ID = true;
 
   private static final String CHECK_ANSWER = "Check Answer";
   public static final int CONTENT_WIDTH = 535;
@@ -120,9 +121,11 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
     }
     Boolean listening = e.getUnitToValue().containsValue("Listening");
 
+    logger.info(e.getID() + " has listening " + listening);
     if (listening) {
       int index = exerciseList.getIndex(e.getID());
-      return new AudioExerciseContent().getQuestionContent(e, controller, true, false, content, index, exerciseList.getSize());
+      return new AudioExerciseContent().getQuestionContent(e, controller, INCLUDE_EXERCISE_ID, false, content, index,
+          exerciseList.getSize());
     } else {
       Widget maybeRTLContent = getMaybeRTLContent(content, CONTENT_WIDTH);
       maybeRTLContent.addStyleName("rightTenMargin");
