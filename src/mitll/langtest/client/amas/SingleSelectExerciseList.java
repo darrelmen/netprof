@@ -181,10 +181,10 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
   public void gotSelection() {
     int count = getNumSelections();
     if (count == getNumChoices()) {
-      logger.info("gotSelection count = " + count);
+    //  logger.info("gotSelection count = " + count);
       pushNewSectionHistoryToken();
     } else {
-      logger.info("gotSelection count " + count + " < " + getNumChoices());
+      //logger.info("gotSelection count " + count + " < " + getNumChoices());
     }
   }
 
