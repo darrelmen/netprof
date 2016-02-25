@@ -24,6 +24,7 @@ import java.util.List;
  * Date: 12/9/13
  * Time: 2:23 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated need to remove this
  */
 public class UploadDAO extends DAO {
   private static final Logger logger = Logger.getLogger(UploadDAO.class);
