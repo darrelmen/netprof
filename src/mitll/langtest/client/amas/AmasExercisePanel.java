@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PostAnswerProvider;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
 
@@ -21,7 +20,7 @@ import java.util.logging.Logger;
 /**
  * Note that for text input answers, the user is prevented from cut-copy-paste.<br></br>
  * <p>
- * Subclassed to provide for audio recording and playback {@link mitll.langtest.client.recorder.SimpleRecordExercisePanel} and
+ * Subclassed to provide for audio recording and playback and
  * grading of answers {@linkx mitll.langtest.client.grading.GradingExercisePanel}
  * <p>
  * User: GO22670
@@ -102,7 +101,8 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
   private void addInstructions(int numQuestions) {
     Heading prompt = new Heading(4, numQuestions == 1 ? PROMPT : PROMPT2);
     DivWidget widgets = new DivWidget();
-    Heading itemHeader = getItemHeader(exerciseList.getIndex(exercise.getID()), exerciseList.getSize());
+    Heading itemHeader = AudioExerciseContent.getItemHeader(exerciseList.getIndex(exercise.getID()),
+        exerciseList.getSize(), exercise.getID());
     widgets.add(itemHeader);
     itemHeader.addStyleName("floatLeft");
     widgets.add(prompt);
@@ -114,7 +114,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
   /**
    * @param e
    * @return
-   * @see #AmasExercisePanel(AmasExerciseImpl, LangTestDatabaseAsync, ExerciseController, ListInterface)
+   * @see #AmasExercisePanel
    */
   protected abstract Widget getQuestionContent(AmasExerciseImpl e);
 
@@ -137,9 +137,9 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
    * @param content
    * @param width
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.AmasExerciseImpl)
+   * @see #getQuestionContent
    * @see #getQuestionHeader
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#getQuestionContent
+   * @see mitll.langtest.client.amas.FeedbackRecordPanel#getQuestionContent
    */
   protected Widget getMaybeRTLContent(String content, int width) {
     content = content.replaceAll("<p> &nbsp; </p>", "").replaceAll("<h4>","").replaceAll("</h4>","");
@@ -160,15 +160,15 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
     return widget;
   }
 
-  private Heading getItemHeader(int index, int totalInQuiz) {
-    String text = AudioExerciseContent.ITEM + " #" + (index + 1) + " of " + totalInQuiz;
+/*  private Heading getItemHeader(int index, int totalInQuiz, String id) {
+    String text = AudioExerciseContent.ITEM + " #" + (index + 1) + " of " + totalInQuiz + " : " + id;
     Heading child = new Heading(5, text);
     child.getElement().setId("default_item_id_" + index + "_" + totalInQuiz);
     child.addStyleName("leftTenMargin");
     child.addStyleName("floatLeft");
     child.addStyleName("rightFiveMargin");
     return child;
-  }
+  }*/
 
   public void onResize() {}
 
@@ -305,7 +305,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
    * @param question
    * @return
    * @see #getQuestionHeader
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#getAnswerWidget
+   * @see mitll.langtest.client.amas.FeedbackRecordPanel#getAnswerWidget
    */
   protected Widget showAnswers(QAPair qaPair, HasWidgets toAddTo, String prefix, String question) {
     return new ShowAnswers(controller.getLanguage().toLowerCase()).showAnswers(qaPair, toAddTo, prefix, question);
@@ -314,8 +314,8 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
   /**
    * @param index
    * @param answerWidget
-   * @see #getAnswerWidget(mitll.langtest.shared.AmasExerciseImpl, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel.AnswerPanel#getStudentAnswer(LangTestDatabaseAsync, int)
+   * @see #getAnswerWidget
+   * @see mitll.langtest.client.amas.FeedbackRecordPanel.AnswerPanel#getStudentAnswer(LangTestDatabaseAsync, int)
    */
   protected void addAnswerWidget(int index, Widget answerWidget) {
     answers.add(answerWidget);
@@ -339,8 +339,8 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
 
  /**
    * @param answer
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel.AnswerPanel#addComboAnswer(AmasExerciseImpl, LangTestDatabaseAsync, ExerciseController, int, String, String, boolean)
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel.AnswerPanel#getTextResponse(ExerciseController)
+   * @see mitll.langtest.client.amas.FeedbackRecordPanel.AnswerPanel#addComboAnswer(AmasExerciseImpl, LangTestDatabaseAsync, ExerciseController, int, String, String, boolean)
+   * @see mitll.langtest.client.amas.FeedbackRecordPanel.AnswerPanel#getTextResponse(ExerciseController)
    */
   public void recordCompleted(Widget answer) {
     markTabComplete(getIndex(answer));
@@ -394,16 +394,13 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
   }
 
   /**
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#postAnswers(ExerciseController, AmasExerciseImpl)
+   * @see mitll.langtest.client.amas.FeedbackRecordPanel#postAnswers
    * @param index
    */
   private void selectTab(int index) {
     if (tabPanel != null) {
       tabPanel.selectTab(index);
     }
-  //  else {
-     // logger.warning("Tab panel is not defined???? \n\n\n");
-    //}
   }
 
   private void addTab(int questionNumber, Tab tabPane) {
