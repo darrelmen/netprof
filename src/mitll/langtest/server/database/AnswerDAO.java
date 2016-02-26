@@ -37,14 +37,18 @@ public class AnswerDAO extends DAO {
    * @param session
    * @param timeSpent
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
-   * @see mitll.langtest.client.flashcard.TextResponse#getScoreForGuess
+   * @see mitll.langtest.client.amas.TextResponse#getScoreForGuess
    */
   public long addTextAnswer(int userID,
                             String exerciseID, int questionID,
+
                             String answer,
                             String answerType,
+
                             boolean correct,
-                            float pronScore, float classifierScore, String session, long timeSpent) {
+                            float pronScore, float classifierScore,
+
+                            String session, long timeSpent) {
 /*    return addAnswer(database,userID,
         exerciseID, questionID, answer, "",
         true, answerType,
@@ -60,34 +64,13 @@ public class AnswerDAO extends DAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    */
   public long addAnswer(Database database,
-                        AnswerInfo answerInfo
-                        /*int userID,
-                        String id,
-                        int questionID,
-                        String answer,
-                        String audioFile,
-                        boolean valid,
-                        String audioType,
-                        long durationInMillis,
-                        boolean correct,
-                        float pronScore,
-                        String deviceType,
-                        String device,
-                        String scoreJson,
-                        boolean withFlash,
-                        int processDur,
-                        int roundTripDur,
-                        String validity,
-                        double snr*/) {
+                        AnswerInfo answerInfo) {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
       long newid = addAnswerToTable(connection, answerInfo);
-/*      userID, id, questionID, answer, audioFile, valid,
-          audioType, durationInMillis, correct, pronScore, deviceType, device, scoreJson, withFlash, processDur, roundTripDur,
-          validity, snr);*/
       long now = System.currentTimeMillis();
-      if (now - then > 100) System.out.println("took " + (now - then) + " millis to record answer.");
+      if (now - then > 100) logger.debug("took " + (now - then) + " millis to record answer.");
       return newid;
     } catch (Exception ee) {
       logger.error("addAnswer got " + ee, ee);
@@ -107,13 +90,7 @@ public class AnswerDAO extends DAO {
    * @throws java.sql.SQLException
    * @see #addAnswer
    */
-  private long addAnswerToTable(Connection connection,
-                                AnswerInfo info
-                                /* int userid, String id, int questionID,
-                                String answer, String audioFile,
-                                boolean valid, String audioType, long durationInMillis,
-                                boolean correct, float pronScore, String deviceType, String device, String scoreJson,
-                                boolean withFlash, int processDur, int roundTripDur, String validity, double snr*/) throws SQLException {
+  private long addAnswerToTable(Connection connection, AnswerInfo info) throws SQLException {
     logger.debug("addAnswerToTable : adding answer for " + info);
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
