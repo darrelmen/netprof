@@ -13,6 +13,7 @@ import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.scoring.AudioContext;
 
 import java.util.logging.Logger;
 
@@ -31,7 +32,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
   private final int index;
   private int reqid = 0;
-  //private T exercise;
   private String exerciseID;
   protected final ExerciseController controller;
   private final LangTestDatabaseAsync service;
@@ -49,7 +49,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    */
   public PostAudioRecordButton(String exerciseID, final ExerciseController controller, LangTestDatabaseAsync service,
                                int index, boolean recordInResults, String recordButtonTitle, String stopButtonTitle) {
-    super(controller.getRecordTimeout(), controller.getProps().doClickAndHold(), recordButtonTitle, stopButtonTitle, controller.getProps());
+    super(controller.getRecordTimeout(), controller.getProps().doClickAndHold(), recordButtonTitle, stopButtonTitle,
+        controller.getProps());
     setRecordingListener(this);
     this.index = index;
     this.exerciseID = exerciseID;
@@ -65,8 +66,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   public void setExercise(String exercise) {
     this.exerciseID = exercise;
   }
-//  public T getExercise() { return exercise; }
-
   protected String getExerciseID() {
     return exerciseID;
   }
@@ -88,10 +87,13 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     final long then = System.currentTimeMillis();
     // logger.info("PostAudioRecordButton.postAudioFile : " +  getAudioType());
 
+    AudioContext audioContext   = new AudioContext(reqid, controller.getUser(), getExerciseID(), index, getAudioType());
+
     service.writeAudioFile(base64EncodedWavFile,
-        reqid, controller.getUser(), getExerciseID(),
-        index,
-        getAudioType(), controller.usingFlashRecorder(), "browser", controller.getBrowserInfo(), true,
+        audioContext,
+        //reqid, controller.getUser(), getExerciseID(),        index,
+        //getAudioType(),
+        controller.usingFlashRecorder(), "browser", controller.getBrowserInfo(),
         false, recordInResults,
         shouldAddToAudioTable(), false,
         new AsyncCallback<AudioAnswer>() {
@@ -197,7 +199,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
   public abstract void useResult(AudioAnswer result);
-
   public boolean hasValidAudio() {
     return validAudio;
   }
