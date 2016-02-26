@@ -32,7 +32,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class TextResponse {
-//  private Logger logger = Logger.getLogger("TextResponse");
+  //  private Logger logger = Logger.getLogger("TextResponse");
   private static final int TEXT_BOX_WIDTH = 400;
   private static final int FEEDBACK_HEIGHT = 40;
 
@@ -46,9 +46,9 @@ public class TextResponse {
   private Map<String, Collection<String>> typeToSelection;
 
   /**
-   * @see mitll.langtest.client.amas.FeedbackRecordPanel.AnswerPanel#doText
    * @param user
    * @param typeToSelection
+   * @see mitll.langtest.client.amas.FeedbackRecordPanel.AnswerPanel#doText
    */
   public TextResponse(int user, Map<String, Collection<String>> typeToSelection) {
     this.user = user;
@@ -59,11 +59,13 @@ public class TextResponse {
     void answerPosted();
   }
 
-  public void setAnswerPostedCallback(AnswerPosted answerPosted) { this.answerPosted = answerPosted; }
+  public void setAnswerPostedCallback(AnswerPosted answerPosted) {
+    this.answerPosted = answerPosted;
+  }
 
   /**
    * Has two rows -- the text input box and the score feedback
-   * @see mitll.langtest.client.amas.FeedbackRecordPanel.AnswerPanel#doText
+   *
    * @param toAddTo
    * @param exerciseID
    * @param service
@@ -75,6 +77,7 @@ public class TextResponse {
    * @param buttonTitle
    * @param getFocus
    * @return
+   * @see mitll.langtest.client.amas.FeedbackRecordPanel.AnswerPanel#doText
    */
   public Widget addWidgets(Panel toAddTo, String exerciseID, LangTestDatabaseAsync service, ExerciseController controller,
                            boolean centered, boolean useWhite, boolean addKeyBinding, int questionID,
@@ -82,12 +85,11 @@ public class TextResponse {
     textScoreFeedback = new ScoreFeedback(useWhite);
 
     textResponseWidget = getTextResponseWidget(exerciseID, service, controller, getTextScoreFeedback(), centered,
-      addKeyBinding, questionID, buttonTitle, getFocus);
+        addKeyBinding, questionID, buttonTitle, getFocus);
 
     if (controller.isRightAlignContent()) {
       textResponseWidget.addStyleName("floatRight");
-    }
-    else {
+    } else {
       textResponseWidget.addStyleName("floatLeft");
     }
     textResponseWidget.addStyleName("topFiveMargin");
@@ -106,8 +108,7 @@ public class TextResponse {
   /**
    * Three parts - text input, check button, and feedback icon
    *
-   *
-   * @param exercise
+   * @param exerciseID
    * @param service
    * @param controller
    * @param scoreFeedback
@@ -141,7 +142,7 @@ public class TextResponse {
 
   private Button getAnswerButton(String buttonTitle) {
     final Button answerButton = new Button(buttonTitle);
-    answerButton.getElement().setId("check_"+buttonTitle);
+    answerButton.getElement().setId("check_" + buttonTitle);
     answerButton.addStyleName("rightFiveMargin");
     return answerButton;
   }
@@ -158,8 +159,7 @@ public class TextResponse {
   }
 
   /**
-   * @see #getTextResponseWidget
-   * @param exercise
+   * @param exerciseID
    * @param service
    * @param check
    * @param noPasteAnswer
@@ -167,6 +167,7 @@ public class TextResponse {
    * @param answerType
    * @param addEnterKeyBinding
    * @param questionID
+   * @see #getTextResponseWidget
    */
   private void setupSubmitButton(final String exerciseID, final LangTestDatabaseAsync service, final Button check,
                                  final TextBox noPasteAnswer, final ScoreFeedback scoreFeedback, final String answerType,
@@ -193,12 +194,12 @@ public class TextResponse {
   /**
    * Text box goes RTL.
    *
-   * @see #getTextResponseWidget
    * @param controller
    * @param allowPaste
    * @param check
    * @param getFocus
    * @return
+   * @see #getTextResponseWidget
    */
   private TextBox getAnswerBox(ExerciseController controller, boolean allowPaste, final Button check, boolean getFocus) {
     final TextBox noPasteAnswer = allowPaste ? new TextBox() : new NoPasteTextBox();
@@ -229,14 +230,14 @@ public class TextResponse {
   }
 
   /**
-   * @see #setupSubmitButton
    * @param guess
    * @param service
-   * @param exercise
+   * @param exerciseID
    * @param check
    * @param scoreFeedback
-   * @param answerType probably should be removed
+   * @param answerType    probably should be removed
    * @param questionID
+   * @see #setupSubmitButton
    */
   private void getScoreForGuess(final String guess, LangTestDatabaseAsync service, String exerciseID, final Button check,
                                 final ScoreFeedback scoreFeedback, String answerType, int questionID) {
@@ -247,32 +248,34 @@ public class TextResponse {
       scoreFeedback.setWaiting();
       check.setEnabled(false);
 
-      long timeSpent = System.currentTimeMillis()-timeShown;
+      long timeSpent = System.currentTimeMillis() - timeShown;
       timeShown = System.currentTimeMillis();
 
-      service.getScoreForAnswer(user, exerciseID, questionID, guess, answerType, timeSpent, typeToSelection, new AsyncCallback<Answer>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          check.setEnabled(true);
-        }
+      service.getScoreForAnswer(user, exerciseID, questionID, guess, answerType, timeSpent, typeToSelection,
+          new AsyncCallback<Answer>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              check.setEnabled(true);
+            }
 
-        @Override
-        public void onSuccess(Answer result) {
-          check.setEnabled(true);
-          gotScoreForGuess(result);
-        }
-      });
+            @Override
+            public void onSuccess(Answer result) {
+              check.setEnabled(true);
+              gotScoreForGuess(result);
+            }
+          });
     }
   }
 
   private static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";//"\\p{P}";
+
   private String removePunct(String t) {
     return t.replaceAll(PUNCT_REGEX, "");
   }
 
   /**
-   * @see #getScoreForGuess(String, LangTestDatabaseAsync, CommonExercise, Button, ScoreFeedback, String, int)
    * @param result
+   * @see #getScoreForGuess
    */
   protected void gotScoreForGuess(Answer result) {
     getTextScoreFeedback().showCRTFeedback();
@@ -287,5 +290,7 @@ public class TextResponse {
     }
   }
 
-  private ScoreFeedback getTextScoreFeedback() { return textScoreFeedback;  }
+  private ScoreFeedback getTextScoreFeedback() {
+    return textScoreFeedback;
+  }
 }
