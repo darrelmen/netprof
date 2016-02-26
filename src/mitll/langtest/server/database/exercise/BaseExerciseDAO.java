@@ -388,13 +388,15 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
   private void addAlternatives(List<CommonExercise> exercises) {
     Map<String, Set<String>> englishToFL = new HashMap<>();
     for (CommonExercise e : exercises) {
-      Set<String> refs = englishToFL.getOrDefault(e.getEnglish(), new HashSet<>());
+      HashSet<String> defaultValue = new HashSet<>();
+      Set<String> refs = englishToFL.getOrDefault(e.getEnglish(), defaultValue);
       if (refs.isEmpty()) englishToFL.put(e.getEnglish(), refs);
       refs.add(e.getForeignLanguage());
     }
 
     for (CommonExercise e : exercises) {
-      Set<String> orDefault = englishToFL.getOrDefault(e.getEnglish(), new HashSet<>());
+      final HashSet<String> defaultValue = new HashSet<>();
+      Set<String> orDefault = englishToFL.getOrDefault(e.getEnglish(), defaultValue);
       if (orDefault.isEmpty()) {
         logger.error("huh? no fl for " + e);
       } else {
