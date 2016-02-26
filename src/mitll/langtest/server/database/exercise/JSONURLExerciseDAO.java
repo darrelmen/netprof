@@ -30,14 +30,11 @@ public class JSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
    */
-  public JSONURLExerciseDAO(
-      ServerProperties serverProps) {
+  public JSONURLExerciseDAO(ServerProperties serverProps) {
     this.serverProps = serverProps;
     this.language = serverProps.getLanguage();
     sectionHelper.setPredefinedTypeOrder(Arrays.asList(ILRMapping.TEST_TYPE, ILRMapping.ILR_LEVEL));
-    //sectionHelper.report();
     this.exercises = readExercises();
-    // sectionHelper.report();
     populateIDToExercise(exercises);
   }
 
@@ -70,6 +67,7 @@ public class JSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
   }
 
   private String getJSON() throws IOException {
+    logger.info(serverProps.getLanguage() + " Reading from " + serverProps.getLessonPlan());
     return new HTTPClient().readFromGET(serverProps.getLessonPlan());
   }
 
@@ -90,7 +88,7 @@ public class JSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
     JSONObject qlist = content.getJSONObject("q-lst");
     JSONObject attlist = content.has(ATT_LST) ? content.getJSONObject(ATT_LST) : new JSONObject();
 
-   // logger.info("got " + attlist);
+    // logger.info("got " + attlist);
     String hubDID = metadata.getString("hubDID");
     String srcAudio = null;
     try {
@@ -106,7 +104,8 @@ public class JSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
 
     boolean lc = metadata.getString("Skill").equals("LC");
 
-    if (lc && (srcAudio == null || srcAudio.isEmpty())) logger.error("no audio for " + hubDID + " but it's listening comp");
+    if (lc && (srcAudio == null || srcAudio.isEmpty()))
+      logger.error("no audio for " + hubDID + " but it's listening comp");
 
     AmasExerciseImpl exercise = new AmasExerciseImpl(
         hubDID,
@@ -124,11 +123,11 @@ public class JSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
       try {
         String flq = jsonObject1.getString("stem");
         String fla = jsonObject1.getString("key-idea");
-        exercise.addQuestion(true, flq, getAnswerKey(fla));
+        exercise.addQuestion(true, removeMarkup(flq), getAnswerKey(fla));
 
         String enq = jsonObject1.getString("stem-trans");
         String ena = jsonObject1.getString("key-idea-trans");
-        exercise.addQuestion(false, enq, getAnswerKey(ena));
+        exercise.addQuestion(false, removeMarkup(enq), getAnswerKey(ena));
 
       } catch (Exception e) {
         logger.error("Got " + e, e);
@@ -146,10 +145,17 @@ public class JSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
     String[] split = fla.split("\\[.\\]");
     List<String> cleaned = new ArrayList<>();
     for (String answer : split) {
-      String s = answer.replaceAll("<div>", "").replaceAll("</div>", "");
-      cleaned.add(s);
+      String s = removeMarkup(answer);
+      if (!s.isEmpty()) {
+        cleaned.add(s);
+      }
     }
+  //  logger.info("got " + cleaned.size() + " :\n" +cleaned);
     return cleaned;
+  }
+
+  private String removeMarkup(String answer) {
+    return answer.replaceAll("<.*>", "").replaceAll("</.*>", "").replaceAll("<.* />", "").trim();
   }
 
 
