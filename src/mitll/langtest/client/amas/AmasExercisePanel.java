@@ -7,6 +7,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.media.client.Audio;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -35,8 +36,9 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
   private static final int QUESTION_WIDTH = 700;
   private static final int CONTENT_SCROLL_HEIGHT = 200;
 
-  private static final String PROMPT  = "Read the following text and answer the question below.";
-  private static final String PROMPT2 = "Read the following text and answer the questions below.";
+  private static final String PROMPT_PREFIX = "Read the following text and answer the";
+  private static final String PROMPT  = PROMPT_PREFIX + " question below.";
+  private static final String PROMPT2 = PROMPT_PREFIX + " questions below.";
 
   private final List<Widget> answers = new ArrayList<Widget>();
 
@@ -84,6 +86,15 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
     if (!listening) {
       addInstructions(numQuestions);
     }
+    else if (e.getOrient() != null) {
+      addInstructions("Orientation : " +e.getOrient(),true);
+      logger.info("AmasExercisePanel for " + e.getID() + " audio " +e.getAudioURL());
+      add(new Heading(4,"Listen to this audio and answer the question below"));
+      Audio ifSupported = Audio.createIfSupported();
+      String audioURL = e.getAudioURL();
+      ifSupported.setSrc(audioURL);
+      add(ifSupported);
+    }
     add(hp);
 
     addQuestions(e, service, controller);
@@ -98,17 +109,28 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
     return new AmasNavigationHelper(exercise, controller, this, exerciseList, true, true);
   }
 
+  /**
+   * @see #AmasExercisePanel(AmasExerciseImpl, LangTestDatabaseAsync, ExerciseController, ResponseExerciseList)
+   * @param numQuestions
+   */
   private void addInstructions(int numQuestions) {
-    Heading prompt = new Heading(4, numQuestions == 1 ? PROMPT : PROMPT2);
-    DivWidget widgets = new DivWidget();
-    Heading itemHeader = AudioExerciseContent.getItemHeader(exerciseList.getIndex(exercise.getID()),
-        exerciseList.getSize(), exercise.getID());
-    widgets.add(itemHeader);
-    itemHeader.addStyleName("floatLeft");
-    widgets.add(prompt);
-    prompt.addStyleName("floatRight");
+    addInstructions(numQuestions == 1 ? PROMPT : PROMPT2,false);
+  }
 
-    add(widgets);
+  private void addInstructions(String text, boolean useLanguage) {
+    DivWidget idInfoOnLeft = new DivWidget();
+    Widget itemHeader = AudioExerciseContent.getItemHeader(exerciseList.getIndex(exercise.getID()),
+        exerciseList.getSize(), exercise.getID());
+    idInfoOnLeft.add(itemHeader);
+    itemHeader.addStyleName("floatLeft");
+
+    Heading promptOnRight = new Heading(4, text);
+
+    if (useLanguage) promptOnRight.addStyleName(controller.getLanguage().toLowerCase());
+    idInfoOnLeft.add(promptOnRight);
+    promptOnRight.addStyleName("floatRight");
+
+    add(idInfoOnLeft);
   }
 
   /**
@@ -220,7 +242,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
     TabPanel tabPanel = new TabPanel();
     tabPanel.getWidget(0).getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
 
-    logger.info("for " +e.getID() + " got " + e.getQuestions().size());
+   // logger.info("for " +e.getID() + " got " + e.getQuestions().size());
     for (QAPair pair : e.getQuestions()) {
       Tab tabPane = new Tab();
       tabPane.setHeading("Question #" + questionNumber);
