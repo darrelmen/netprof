@@ -8,9 +8,18 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -24,11 +33,11 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -43,6 +52,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
 
   private static final String SPEECH = "Speech";
   private static final int MARGIN_TOP = 12;
+  private static final int MAX_LENGTH_ID = 35;
 
   private static final String RESPONSE_TYPE = "responseType";
   public static final String RESPONSE_TYPE_DIVIDER = "###";
@@ -96,9 +106,68 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
       protected void gotClickOnItem(AmasExerciseImpl e) {
         outer.gotClickOnItem(e);
       }
+      protected void addColumnsToTable()
+      {
+        addColumn(getExerciseIdColumn2(), new TextHeader("Item"));
+      }
+
+      /**
+       * @see #addColumnsToTable
+       * @return
+       */
+      private Column<AmasExerciseImpl, SafeHtml> getExerciseIdColumn2() {
+        return new Column<AmasExerciseImpl, SafeHtml>(new MySafeHtmlCell(true)) {
+
+          @Override
+          public void onBrowserEvent(Cell.Context context, Element elem, AmasExerciseImpl object, NativeEvent event) {
+            super.onBrowserEvent(context, elem, object, event);
+            if (BrowserEvents.CLICK.equals(event.getType())) {
+              gotClickOnItem(object);
+            }
+          }
+
+          @Override
+          public SafeHtml getValue(AmasExerciseImpl shell) {
+            String columnText = shell.getID();
+            String html = shell.getID();
+            if (columnText != null) {
+              if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
+              STATE state = shell.getState();
+
+              boolean isDefect = state == STATE.DEFECT;
+              boolean isFixed  = state == STATE.FIXED;
+
+              boolean recorded = state == STATE.RECORDED;
+              boolean approved = state == STATE.APPROVED || recorded;
+
+              boolean isSet = isDefect || isFixed || approved;
+
+              String icon =
+                  approved ? "icon-check" :
+                      isDefect ? "icon-bug" :
+                          isFixed ? "icon-thumbs-up" :
+                              "";
+
+              html = (isSet ?
+                  "<i " +
+                      (isDefect ? "style='color:red'" :
+                          isFixed ? "style='color:green'" :
+                              "") +
+                      " class='" +
+                      icon +
+                      "'></i>" +
+
+                      "&nbsp;" : "") + columnText;
+            }
+            return new SafeHtmlBuilder().appendHtmlConstant(html).toSafeHtml();
+          }
+        };
+      }
+
     };
     return pagingContainer;
   }
+
 
   /**
    * Adds the response type to the end of the history token
@@ -312,5 +381,19 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
         quizPanel.setVisible(true);
       }
     });
+  }
+
+  private static class MySafeHtmlCell extends SafeHtmlCell {
+    private final boolean consumeClicks;
+    public MySafeHtmlCell(boolean consumeClicks) {
+      this.consumeClicks = consumeClicks;
+    }
+
+    @Override
+    public Set<String> getConsumedEvents() {
+      Set<String> events = new HashSet<String>();
+      if (consumeClicks) events.add(BrowserEvents.CLICK);
+      return events;
+    }
   }
 }
