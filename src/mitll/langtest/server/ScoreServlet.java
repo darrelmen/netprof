@@ -29,7 +29,7 @@ import java.net.URLDecoder;
 import java.util.*;
 
 /**
- * All in support of Liz tethered iOS app.
+ * All in support of tethered iOS app.
  * <p>
  * User: GO22670
  */
@@ -91,9 +91,9 @@ public class ScoreServlet extends DatabaseServlet {
   private AudioFileHelper audioFileHelper;
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#shareLoadTesting
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#shareLoadTesting
    */
-  public static final String LOAD_TESTING = "loadTesting";
+ // public static final String LOAD_TESTING = "loadTesting";
 
   private static final String ADD_USER = "addUser";
   private static final double ALIGNMENT_SCORE_CORRECT = 0.5;
@@ -341,7 +341,8 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #getChapterHistory(String, JSONObject)
    */
   private ExerciseSorter getExerciseSorter() {
-    Map<String, Integer> phoneToCount = audioFileHelper == null ? new HashMap<>() : audioFileHelper.getPhoneToCount();
+    Map<String, Integer> stringIntegerHashMap = new HashMap<>();
+    Map<String, Integer> phoneToCount = audioFileHelper == null ? stringIntegerHashMap : audioFileHelper.getPhoneToCount();
     return new ExerciseSorter(db.getSectionHelper().getTypeOrder(), phoneToCount);
   }
 
@@ -507,8 +508,9 @@ public class ScoreServlet extends DatabaseServlet {
     setInstallPath(db);
     db.getExercises();
 
+    Map<String, Integer> stringIntegerMap = Collections.emptyMap();
     JsonExport jsonExport = new JsonExport(
-        audioFileHelper == null ? Collections.emptyMap() : audioFileHelper.getPhoneToCount(),
+        audioFileHelper == null ? stringIntegerMap : audioFileHelper.getPhoneToCount(),
         db.getSectionHelper(),
         serverProps.getPreferredVoices()
     );
