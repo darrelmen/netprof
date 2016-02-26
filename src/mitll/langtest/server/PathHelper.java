@@ -4,7 +4,7 @@
 
 package mitll.langtest.server;
 
-import mitll.langtest.server.database.AnswerInfo;
+import mitll.langtest.shared.scoring.AudioContext;
 import org.apache.log4j.Logger;
 
 import javax.servlet.GenericServlet;
@@ -116,7 +116,7 @@ public class PathHelper {
    * @see LangTestDatabaseImpl#writeAudioFile
    */
 
-  public String getLocalPathToAnswer(AnswerInfo.AudioContext audioContext) {
+  public String getLocalPathToAnswer(AudioContext audioContext) {
     return getLocalPathToAnswer(audioContext.getId(), audioContext.getQuestionID(), audioContext.getUserid());
   }
 
