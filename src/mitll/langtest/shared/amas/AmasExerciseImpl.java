@@ -51,7 +51,7 @@ public class AmasExerciseImpl implements CommonShell {
   }
 
   /**
-   * @param id Exercise exercise = new Exercise(id, "", id, "", "", "");
+   * @param id
    * @see mitll.langtest.server.amas.FileExerciseDAO#readTSVLine(String, String, String, int)
    */
   public AmasExerciseImpl(String id, String content, //String altID,
