@@ -25,7 +25,6 @@ public class AnswerInfo {
   private String validity;
   private double snr;
 
-
   public static class AudioContext {
     private int userid;
     private String id;
