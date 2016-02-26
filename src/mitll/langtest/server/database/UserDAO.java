@@ -72,7 +72,8 @@ public class UserDAO extends DAO {
 
       defectDetector = userExists(DEFECT_DETECTOR);
       if (defectDetector == -1) {
-        defectDetector = addUser(89, MALE, 0, "", UNKNOWN, UNKNOWN, DEFECT_DETECTOR, false, new ArrayList<>(), User.Kind.STUDENT, "", "", "");
+        List<User.Permission> permissions = Collections.emptyList();
+        defectDetector = addUser(89, MALE, 0, "", UNKNOWN, UNKNOWN, DEFECT_DETECTOR, false, permissions, User.Kind.STUDENT, "", "", "");
       }
     } catch (Exception e) {
       logger.error("got " + e, e);
