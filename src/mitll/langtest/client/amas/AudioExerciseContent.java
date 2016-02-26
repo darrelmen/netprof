@@ -128,7 +128,7 @@ public class AudioExerciseContent {
   }
 
   /**
-   * @see AmasExercisePanel#addInstructions(String)
+   * @see AmasExercisePanel#addInstructions
    * @param index
    * @param totalInQuiz
    * @param id
