@@ -18,6 +18,7 @@ public class JSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
   private static final Logger logger = Logger.getLogger(JSONURLExerciseDAO.class);
 
   public static final String ENGLISH = "english";
+  public static final String ATT_LST = "att-lst";
 
   private final Map<String, AmasExerciseImpl> idToExercise = new HashMap<>();
   protected final SectionHelper<AmasExerciseImpl> sectionHelper = new SectionHelper<>();
@@ -80,19 +81,16 @@ public class JSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
       exercises.add(toAMASExercise(jsonObject));
     }
 
-//    for (AmasExerciseImpl ex : exercises.subList(0, 10)) {
-//      logger.info("got " + ex);
-//    }
-
     return exercises;
   }
 
-  private AmasExerciseImpl toAMASExercise(JSONObject jsonObject/*, Collection<String> types*/) {
+  private AmasExerciseImpl toAMASExercise(JSONObject jsonObject) {
     JSONObject metadata = jsonObject.getJSONObject("metadata");
     JSONObject content = jsonObject.getJSONObject("content");
     JSONObject qlist = content.getJSONObject("q-lst");
-    JSONObject attlist = jsonObject.has("att-list") ? jsonObject.getJSONObject("att-lst") : new JSONObject();
+    JSONObject attlist = content.has(ATT_LST) ? content.getJSONObject(ATT_LST) : new JSONObject();
 
+   // logger.info("got " + attlist);
     String hubDID = metadata.getString("hubDID");
     String srcAudio = null;
     try {
@@ -107,6 +105,9 @@ public class JSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
     else if (ilr.endsWith(".5")) ilr = ilr.substring(0, ilr.length() - 2) + "+";
 
     boolean lc = metadata.getString("Skill").equals("LC");
+
+    if (lc && (srcAudio == null || srcAudio.isEmpty())) logger.error("no audio for " + hubDID + " but it's listening comp");
+
     AmasExerciseImpl exercise = new AmasExerciseImpl(
         hubDID,
         content.getString("pass"),
@@ -117,39 +118,38 @@ public class JSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
         ilr,
         srcAudio);
 
-//    logger.error(qlist.keySet());
-
     for (Object key : qlist.keySet()) {
       JSONObject jsonObject1 = qlist.getJSONObject((String) key);
 
       try {
         String flq = jsonObject1.getString("stem");
         String fla = jsonObject1.getString("key-idea");
-        //  for (String answer : fla.split("\\[.\\]")) {
-        String[] split = fla.split("\\[.\\]");
-        List<String> cleaned = new ArrayList<>();
-        for (String answer : split) {
-          String s = answer.replaceAll("<div>", "").replaceAll("</div>", "");
-          cleaned.add(s);
-        }
-        exercise.addQuestion(true, flq, cleaned);
-        // }
+        exercise.addQuestion(true, flq, getAnswerKey(fla));
 
         String enq = jsonObject1.getString("stem-trans");
         String ena = jsonObject1.getString("key-idea-trans");
-        exercise.addQuestion(false, enq, ena);
+        exercise.addQuestion(false, enq, getAnswerKey(ena));
+
       } catch (Exception e) {
         logger.error("Got " + e, e);
         return exercise;
       }
     }
 
-//    logger.info("After " + exercise.getQuestions());
-
     exercise.addUnitToValue(ILRMapping.ILR_LEVEL, ilr);
     exercise.addUnitToValue(ILRMapping.TEST_TYPE, lc ? ILRMapping.LISTENING : ILRMapping.READING);
 
     return exercise;
+  }
+
+  private List<String> getAnswerKey(String fla) {
+    String[] split = fla.split("\\[.\\]");
+    List<String> cleaned = new ArrayList<>();
+    for (String answer : split) {
+      String s = answer.replaceAll("<div>", "").replaceAll("</div>", "");
+      cleaned.add(s);
+    }
+    return cleaned;
   }
 
 
