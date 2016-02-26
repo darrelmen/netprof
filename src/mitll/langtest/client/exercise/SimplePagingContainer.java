@@ -32,12 +32,12 @@ public class SimplePagingContainer<T> implements RequiresResize {
   private static final float MAX_PAGES = 2f;
   private static final int MIN_PAGE_SIZE = 3;
   private static final float DEFAULT_PAGE_SIZE = 15f;
-  //  private static final boolean debug = false;
   protected final ExerciseController controller;
   protected ListDataProvider<T> dataProvider;
   protected CellTable<T> table;
   protected SingleSelectionModel<T> selectionModel;
   protected int verticalUnaccountedFor = 100;
+  //  private static final boolean debug = false;
 
   public SimplePagingContainer(ExerciseController controller) {
     this.controller = controller;
@@ -109,7 +109,8 @@ public class SimplePagingContainer<T> implements RequiresResize {
   protected void addSelectionModel() {
   }
 
-  protected void addColumnsToTable() {
+  protected void addColumnsToTable()
+  {
   }
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
