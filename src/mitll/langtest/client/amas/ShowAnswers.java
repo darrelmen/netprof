@@ -61,9 +61,9 @@ public class ShowAnswers {
     int cn = (int) ceil;
     int maxCols = 2 * cn;
 
-    logger.info("n " + n + " fn " + fn + " ceil " + ceil + " cn " + cn +
-        //" max " + maxColsOld +
-        " new " + maxCols);
+//    logger.info("n " + n + " fn " + fn + " ceil " + ceil + " cn " + cn +
+//        //" max " + maxColsOld +
+//        " new " + maxCols);
 
     Grid grid = getGrid(n, maxCols);
     String h4Prefix = "<h4 style='margin:0px' class='" + language + "'>";
