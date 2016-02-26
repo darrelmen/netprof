@@ -13,6 +13,7 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import net.sf.json.JSONArray;
@@ -682,15 +683,20 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #getJsonForAudioForUser
    */
-  private AudioAnswer getAudioAnswer(int reqid, String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile,
-                                     String deviceType, String device, CommonExercise exercise1, boolean allowAlternates, boolean usePhoneToDisplay) {
+  private AudioAnswer getAudioAnswer(int reqid, String exerciseID, int user,
+                                     boolean doFlashcard,
+                                     String wavPath, File saveFile,
+                                     String deviceType, String device, CommonExercise exercise1,
+                                     boolean allowAlternates, boolean usePhoneToDisplay) {
     AudioAnswer answer;
 
     if (doFlashcard) {
-      answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, -1, deviceType, device, reqid, allowAlternates);
+      answer = getAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, -1, deviceType, device, allowAlternates);
     } else {
-      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, wavPath, exercise1.getForeignLanguage(), exerciseID, usePhoneToDisplay);
-      answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(), deviceType, device, reqid, allowAlternates);
+      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, wavPath, exercise1.getForeignLanguage(), exerciseID,
+          usePhoneToDisplay);
+      answer = getAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(),
+          deviceType, device, allowAlternates);
       answer.setPretestScore(asrScoreForAudio);
     }
     return answer;
@@ -710,10 +716,14 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #getJsonForAudio
    */
-  private AudioAnswer getAudioAnswerAlign(int reqid, String exerciseID, int user, boolean doFlashcard, String wavPath, File saveFile,
-                                          String deviceType, String device, CommonExercise exercise1, boolean usePhoneToDisplay) {
-    PretestScore asrScoreForAudio = getASRScoreForAudioNoCache(reqid, saveFile.getAbsolutePath(), exercise1.getForeignLanguage(), exerciseID, usePhoneToDisplay);
-    AudioAnswer answer = getAnswer(exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(), deviceType, device, reqid, false);
+  private AudioAnswer getAudioAnswerAlign(int reqid, String exerciseID, int user, boolean doFlashcard, String wavPath,
+                                          File saveFile,
+                                          String deviceType, String device, CommonExercise exercise1,
+                                          boolean usePhoneToDisplay) {
+    PretestScore asrScoreForAudio = getASRScoreForAudioNoCache(reqid, saveFile.getAbsolutePath(),
+        exercise1.getForeignLanguage(), exerciseID, usePhoneToDisplay);
+    AudioAnswer answer = getAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(),
+        deviceType, device, false);
     answer.setPretestScore(asrScoreForAudio);
     return answer;
   }
@@ -721,6 +731,7 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * Don't wait for mp3 to write to return - can take 70 millis for a short file.
    *
+   * @param reqid
    * @param exerciseID
    * @param user
    * @param doFlashcard
@@ -728,16 +739,19 @@ public class ScoreServlet extends DatabaseServlet {
    * @param file
    * @param deviceType
    * @param device
-   * @param reqid
    * @param allowAlternates
    * @return
    * @see #getJsonForAudioForUser
    */
-  private AudioAnswer getAnswer(String exerciseID, int user, boolean doFlashcard, String wavPath, File file, float score,
-                                String deviceType, String device, int reqid, boolean allowAlternates) {
+  private AudioAnswer getAnswer(int reqid, String exerciseID, int user, boolean doFlashcard, String wavPath, File file, float score,
+                                String deviceType, String device, boolean allowAlternates) {
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
 
-    AudioAnswer answer = audioFileHelper.getAnswer(reqid, exercise1, user,exerciseID, wavPath, file, deviceType, device, score, doFlashcard,
+    AudioContext audioContext = new AudioContext(reqid, user, exerciseID, 0, doFlashcard ? "flashcard" : "learn");
+
+    AudioAnswer answer = audioFileHelper.getAnswer(exercise1,
+        audioContext,
+        wavPath, file, deviceType, device, score, doFlashcard,
         allowAlternates);
 
     final String path = answer.getPath();
