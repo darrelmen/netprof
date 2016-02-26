@@ -22,7 +22,6 @@ import java.util.*;
 public class AmasExerciseImpl implements CommonShell {
   public static final String EN = "en";
   public static final String FL = "fl";
-//  private static final List<QAPair> QA_PAIRS = new ArrayList<>();
 
   private String content;
   private String contentTrans;
@@ -186,12 +185,6 @@ public class AmasExerciseImpl implements CommonShell {
     return id;
   }
 
-/*
-  public void setID(String id) {
-    this.id = id;
-  }
-*/
-
   @Override
   public STATE getState() {
     return state;
@@ -219,13 +212,7 @@ public class AmasExerciseImpl implements CommonShell {
 
   public String toString() {
     return "Exercise " + getID() + (getAltID().isEmpty() ? "" : "/" + getAltID()) +
-        " Questions " + getQuestions() +
-        //   " english '" + getEnglish() +
-        //   "'" +
-        //  "/'" + getRefSentence() +
-        //      " audio count = " + audioAttributes1.size()+
-        //    (builder.toString().isEmpty() ? "":" \n\tmissing user audio " + builder.toString()) +
-        " unit->lesson " + getUnitToValue();
+        " Questions " + getQuestions() + " unit->lesson " + getUnitToValue();
   }
 
   // TODO : workaround for the moment - hard to use the current exercise lists without extending from CommonShell...?
@@ -262,6 +249,11 @@ public class AmasExerciseImpl implements CommonShell {
   @Override
   public MutableShell getMutableShell() {
     return null;
+  }
+
+  @Override
+  public Collection<String> getRefSentences() {
+    return Collections.singleton(getForeignLanguage());
   }
 
   public String getContentTrans() {
