@@ -11,6 +11,7 @@ import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
@@ -55,8 +56,9 @@ public class DecodeCorrectnessChecker {
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
-  public PretestScore getFlashcardAnswer(CommonExercise commonExercise, File audioFile, AudioAnswer answer,
-                                         String language, boolean canUseCache, boolean allowAlternates, boolean useOldSchool) {
+  public PretestScore getFlashcardAnswer(CommonShell commonExercise, File audioFile, AudioAnswer answer,
+                                         String language, boolean canUseCache, boolean allowAlternates,
+                                         boolean useOldSchool) {
     Collection<String> foregroundSentences = getRefSentences(commonExercise, language, allowAlternates);
     PretestScore flashcardAnswer = getFlashcardAnswer(audioFile, foregroundSentences, answer, canUseCache, useOldSchool);
 
@@ -167,7 +169,7 @@ public class DecodeCorrectnessChecker {
    * @return
    * @see #getFlashcardAnswer
    */
-  private Collection<String> getRefSentences(CommonExercise other, String language, boolean allowAlternates) {
+  private Collection<String> getRefSentences(CommonShell other, String language, boolean allowAlternates) {
     if (allowAlternates) {
       Set<String> ret = new HashSet<>();
       for (String alt : other.getRefSentences()) ret.add(getPhraseToDecode(alt, language));
