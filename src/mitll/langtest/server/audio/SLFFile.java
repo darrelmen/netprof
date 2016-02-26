@@ -25,7 +25,7 @@ public class SLFFile {
 
  // private static final String LINK_WEIGHT = "-1.00";
   public static final float EQUAL_LINK_CONSTANT = -1.00f;
-  public static final float UNKNOWN_MODEL_BIAS_CONSTANT = -1.20f;
+ // public static final float UNKNOWN_MODEL_BIAS_CONSTANT = -1.20f;
   private static final String UNKNOWN_MODEL_BIAS = "-1.20";
 
   /**
