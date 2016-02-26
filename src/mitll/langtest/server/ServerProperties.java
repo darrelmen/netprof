@@ -516,7 +516,8 @@ public class ServerProperties {
    * @see mitll.langtest.server.database.UserDAO#UserDAO
    */
   public Set<String> getAdmins() {
-    return emailList == null ? Collections.emptySet() : emailList.getAdmins();
+    Set<String> strings = Collections.emptySet();
+    return emailList == null ? strings : emailList.getAdmins();
   }
 
   public List<String> getReportEmails() {
