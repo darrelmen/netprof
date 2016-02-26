@@ -155,6 +155,7 @@ public class EmailHelper {
    * @param linkText
    */
   private void sendEmail(String link, String to, String subject, String message, String linkText) {
+    List<String> ccEmails = Collections.emptyList();
     mailSupport.sendEmail(NP_SERVER,
         link,
         to,
@@ -162,7 +163,7 @@ public class EmailHelper {
         subject,
         message,
         linkText,
-        Collections.emptyList());
+        ccEmails);
   }
 
   /**
