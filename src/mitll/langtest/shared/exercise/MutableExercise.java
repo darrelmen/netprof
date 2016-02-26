@@ -9,14 +9,14 @@ import java.util.Set;
 /**
  * Created by go22670 on 2/1/16.
  */
-public interface MutableExercise extends CommonShell {
+public interface MutableExercise extends CommonShell, MutableShell {
   void setBagOfPhones(Set<String> bagOfPhones);
 
   void setFirstPron(List<String> phones);
 
-  void setEnglish(String english);
+  //void setEnglish(String english);
 
-  void setForeignLanguage(String foreignLanguage);
+  //void setForeignLanguage(String foreignLanguage);
 
   void setTransliteration(String transliteration);
 
