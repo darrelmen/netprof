@@ -100,7 +100,8 @@ public class PhoneAnalysis {
     Map<Long, List<PhoneSessionInternal>> granularityToSessions = new HashMap<>();
     Map<Long, PhoneSessionInternal> granToCurrent = new HashMap<>();
     for (Long time : times) {
-      granularityToSessions.put(time, new ArrayList<>());
+      List<PhoneSessionInternal> value = new ArrayList<>();
+      granularityToSessions.put(time, value);
     }
 
     partition(answersForUser, times, granularityToSessions, granToCurrent);
