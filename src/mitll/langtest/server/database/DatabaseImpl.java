@@ -4,7 +4,6 @@
 
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -72,7 +71,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   private String installPath;
   private ExerciseDAO<CommonExercise> exerciseDAO = null;
-  // private SimpleExerciseDAO<T> commonExerciseDAO = null;
 
   private UserDAO userDAO;
   private ResultDAO resultDAO;
@@ -85,7 +83,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private UserExerciseDAO userExerciseDAO;
   private AddRemoveDAO addRemoveDAO;
   private EventDAO eventDAO;
-  private UploadDAO uploadDAO;
+  //private UploadDAO uploadDAO;
 
   private ContextPractice contextPractice;
 
