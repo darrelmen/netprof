@@ -6,6 +6,9 @@ package mitll.langtest.shared.exercise;
 
 import mitll.langtest.shared.custom.UserList;
 
+import java.util.Collection;
+import java.util.Collections;
+
 /**
  * Created with IntelliJ IDEA.
  * User: GO22670
@@ -97,6 +100,11 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
   @Override
   public MutableShell getMutableShell() {
     return this;
+  }
+
+  @Override
+  public Collection<String> getRefSentences() {
+    return Collections.singleton(getForeignLanguage());
   }
 
   @Override
