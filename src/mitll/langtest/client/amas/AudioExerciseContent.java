@@ -104,7 +104,8 @@ public class AudioExerciseContent {
     horiz.getElement().setId("item_and_content");
     container.add(horiz);
     logger.info("for " + e.getID() + " include " + includeExerciseID);
-    if (includeExerciseID) {
+
+    if (includeExerciseID && e.getOrient() == null) {
       DivWidget itemHeaderContainer = new DivWidget();
      // itemHeaderContainer.setWidth("100%");
       itemHeaderContainer.setHeight("20px");
@@ -115,10 +116,9 @@ public class AudioExerciseContent {
     }
 
     content = content.replaceAll("h2", "h4");
-    boolean isPlural = e.getQuestions().size() > 1;
-    content = changeAudioPrompt(content, isPlural);
+    content = changeAudioPrompt(content, e.getQuestions().size() > 1);
 
-    HTML contentFromPrefix = getContentFromPrefix(content);
+    Widget contentFromPrefix = getContentFromPrefix(e.getAudioURL() == null ? content : "");
 
     if (rightAlignContent) {
       contentFromPrefix.addStyleName("floatRight");
@@ -127,6 +127,13 @@ public class AudioExerciseContent {
     horiz.add(contentFromPrefix);
   }
 
+  /**
+   * @see AmasExercisePanel#addInstructions(String)
+   * @param index
+   * @param totalInQuiz
+   * @param id
+   * @return
+   */
   public static Heading getItemHeader(int index, int totalInQuiz, String id) {
     String text = ITEM + " #" + (index + 1) + " of " + totalInQuiz + (SHOW_ID ?" : " + id : "");
     Heading child = new Heading(5, text);
@@ -150,10 +157,15 @@ public class AudioExerciseContent {
     return contentPrefix;
   }
 
+  /**
+   * @see #addAudioRow(AmasExerciseImpl, String, boolean, Panel, int, int)
+   * @param suffix
+   * @param isPlural
+   * @return
+   */
   private String changeAudioPrompt(String suffix, boolean isPlural) {
     if (responseType.equals(PropertyHandler.TEXT)) {
-      String question = QUESTION;
-      suffix = suffix.replace("answer the " + question, "type your answer to the " + question);
+      suffix = suffix.replace("answer the " + QUESTION, "type your answer to the " + QUESTION);
     }
     if (isPlural) {
       suffix = suffix.replace(QUESTION, "questions");
@@ -170,7 +182,10 @@ public class AudioExerciseContent {
    */
   private HTML getMaybeRTLContent(String content, boolean requireAlignment) {
     HasDirection.Direction direction =
-        requireAlignment && rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
+        requireAlignment && rightAlignContent ?
+            HasDirection.Direction.RTL :
+            WordCountDirectionEstimator.get().estimateDirection(content);
+
     content = content
         .replaceAll("<p> &nbsp; </p>", "")
         .replaceAll("<h4>", "<div><h4 style='margin-left:0px' class='" + language + "'>")
