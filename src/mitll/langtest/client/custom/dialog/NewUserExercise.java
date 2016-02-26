@@ -491,7 +491,6 @@ public class NewUserExercise extends BasicDialog {
     mutableExercise.setEnglish(english.getText());
     mutableExercise.setForeignLanguage(foreignLang.getText());
     mutableExercise.setTransliteration(translit.getText());
-  //  logger.info("now after getting fields " + mutableExercise);
   }
 
   void checkIfNeedsRefAudio() {
