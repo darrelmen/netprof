@@ -251,8 +251,9 @@ public class Analysis extends DAO {
 
       Collection<UserInfo> values = best.values();
       if (values.isEmpty()) {
-        logger.warn("no best values for " + id);
-        return getWordScore(Collections.emptyList());
+        //logger.warn("no best values for " + id);
+        List<BestScore> bestScores = Collections.emptyList();
+        return getWordScore(bestScores);
       } else {
         UserInfo next = values.iterator().next();
         List<BestScore> resultsForQuery = next.getBestScores();
@@ -344,7 +345,10 @@ public class Analysis extends DAO {
     Map<Long, List<BestScore>> userToBest2 = new HashMap<>();
     Map<Long, Long> userToEarliest = new HashMap<>();
 
-    for (Long key : userToBest.keySet()) userToBest2.put(key, new ArrayList<>());
+    for (Long key : userToBest.keySet()) {
+      List<BestScore> value = new ArrayList<>();
+      userToBest2.put(key, value);
+    }
 
     for (Map.Entry<Long, List<BestScore>> pair : userToBest.entrySet()) {
       Long userID = pair.getKey();
