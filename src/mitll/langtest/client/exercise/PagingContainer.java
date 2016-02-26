@@ -234,7 +234,9 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
    */
   protected String getEnglishText(CommonShell shell) {
 //    logger.info("getEnglishText " + shell.getID() + " en " + shell.getEnglish() + " fl " + shell.getForeignLanguage() + " mn " + shell.getMeaning());
-    return english && !shell.getEnglish().equals(EditItem.NEW_ITEM) ? shell.getForeignLanguage() : shell.getEnglish();
+    String s = english && !shell.getEnglish().equals(EditItem.NEW_ITEM) ? shell.getForeignLanguage() : shell.getEnglish();
+    if (s.isEmpty()) s = shell.getID();
+    return s;
   }
 
   /**
@@ -248,6 +250,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
       String meaning = shell.getMeaning();
       toShow = meaning.isEmpty() ? shell.getEnglish() : meaning;
     }
+    if (toShow.isEmpty()) toShow = shell.getID();
     return toShow;
   }
 }
