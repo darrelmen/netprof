@@ -2,6 +2,8 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.shared.amas.AmasExerciseImpl;
+import mitll.langtest.shared.amas.QAPair;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.analysis.WordScore;
 import org.apache.log4j.Logger;
@@ -11,6 +13,8 @@ import org.junit.Test;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Created by go22670 on 2/17/16.
@@ -29,23 +33,29 @@ public class AMASReaderTest {
     String parent = file.getParent();
     logger.debug("config dir " + parent);
     logger.debug("config     " + file.getName());
-    //  dbName = "npfEnglish";//"mandarin";// "mandarin";
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
     String dbName = serverProps.getH2Database();
     database = new DatabaseImpl(parent, file.getName(), dbName, serverProps, new PathHelper("war"), false, null);
     logger.debug("made " + database);
     database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan(),
         serverProps.getMediaDir());
-//    database.getExercises();
   }
 
   @Test
   public void testMe() {
-    database.getSectionHelper().report();
+    //database.getAMASSectionHelper().report();
 
-
-    Collection exercises = database.getAMASExercises();
+    Collection<AmasExerciseImpl> exercises = database.getAMASExercises();
+    Stream<AmasExerciseImpl> amasExerciseStream = exercises.stream().filter(ex -> ex.getID().equals("AM-LB-002"));
+    Optional<AmasExerciseImpl> first = amasExerciseStream.findFirst();
+    AmasExerciseImpl amasExercise = first.get();
+    logger.info("first " + first+  " audio '" + amasExercise.getAudioURL() + "'");
+    QAPair next1 = amasExercise.getForeignLanguageQuestions().iterator().next();
+    logger.info("q " + next1);
+    AmasExerciseImpl next = exercises.iterator().next();
+    logger.info("e.g. " + next);
     logger.info("\n\ngot " + exercises.size());
-  }
 
+    database.getAMASSectionHelper().report();
+  }
 }
