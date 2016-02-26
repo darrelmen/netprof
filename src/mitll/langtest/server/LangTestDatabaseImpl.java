@@ -2382,9 +2382,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     db = makeDatabaseImpl(h2DatabaseFile);
     shareDB(servletContext);
-    shareLoadTesting(servletContext);
+//    shareLoadTesting(servletContext);
   }
 
+/*
   private void shareLoadTesting(ServletContext servletContext) {
     Object loadTesting = servletContext.getAttribute(ScoreServlet.LOAD_TESTING);
     if (loadTesting != null) {
@@ -2392,6 +2393,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     servletContext.setAttribute(ScoreServlet.LOAD_TESTING, this);
   }
+*/
 
   /**
    * @param servletContext
@@ -2431,7 +2433,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private void setInstallPath(DatabaseImpl db) {
     String lessonPlanFile = getLessonPlan();
-    if (!new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
+    if (!lessonPlanFile.startsWith("http") &&
+         !new File(lessonPlanFile).exists()) {
+      logger.error("couldn't find lesson plan file " + lessonPlanFile);
+    }
 
     String mediaDir = relativeConfigDir + File.separator + serverProps.getMediaDir();
     logger.debug("setInstallPath " + pathHelper.getInstallPath() + " " + lessonPlanFile + " media " + serverProps.getMediaDir() + " rel media " + mediaDir);
