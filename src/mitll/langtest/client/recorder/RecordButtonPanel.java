@@ -155,7 +155,8 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     service.writeAudioFile(base64EncodedWavFile,
         reqid, controller.getUser(), exerciseID,
         index,
-        audioType, controller.usingFlashRecorder(), "browser", device, false,
+        audioType, controller.usingFlashRecorder(), "browser", device,
+        false,
         doFlashcardAudio,
         true, false, allowAlternates, new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
