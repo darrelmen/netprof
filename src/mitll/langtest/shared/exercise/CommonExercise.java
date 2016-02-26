@@ -13,12 +13,6 @@ import java.util.List;
  * Created by GO22670 on 3/20/2014.
  */
 public interface CommonExercise extends CommonShell, AudioAttributeExercise, AnnotationExercise, ScoredExercise {
-  /**
-   * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#getRefSentences(CommonExercise, String, boolean)
-   * @return
-   */
-  Collection<String> getRefSentences();
-
   CommonShell getShell();
 
   List<String> getFirstPron();
