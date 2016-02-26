@@ -319,7 +319,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
     createdPanel.getElement().setId("placeHolderWhenNoExercises");
     createdPanel.add(new Heading(3, toShow));
 
-    innerContainer.getElement().getStyle().setMarginLeft(180, Style.Unit.PX);
+    //innerContainer.getElement().getStyle().setMarginLeft(180, Style.Unit.PX);
     VerticalPanel vp = new VerticalPanel();
     vp.add(createdPanel);
 
