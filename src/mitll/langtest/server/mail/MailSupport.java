@@ -48,7 +48,8 @@ public class MailSupport {
    * @param message
    */
   public void sendEmail(String serverName, String to, String replyTo, String subject, String message) {
-    sendEmail(serverName, null, to, replyTo, subject, message, null, Collections.emptyList());
+    List<String> ccEmails = Collections.emptyList();
+    sendEmail(serverName, null, to, replyTo, subject, message, null, ccEmails);
   }
 
   /**
