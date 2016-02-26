@@ -551,7 +551,7 @@ public class PhoneDAO extends DAO {
       phoneToMinimal.put(pair.getKey(), new ArrayList<>(wordToExample.values()));
     }
 
-    Map<String, Float> phoneToScore = new HashMap<>();
+   final Map<String, Float> phoneToScore = new HashMap<>();
     for (Map.Entry<String, List<WordAndScore>> pair : phoneToMinimal.entrySet()) {
       float total = 0;
       for (WordAndScore example : pair.getValue()) total += example.getScore();
@@ -562,7 +562,7 @@ public class PhoneDAO extends DAO {
     Collections.sort(sorted, new Comparator<String>() {
       @Override
       public int compare(String o1, String o2) {
-        Float current = phoneToScore.get(o1);
+        Float current  = phoneToScore.get(o1);
         Float current1 = phoneToScore.get(o2);
         int i = current.compareTo(current1);
         return i == 0 ? o1.compareTo(o2) : i;
