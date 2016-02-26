@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.audio.AudioCheck;
+import mitll.langtest.shared.scoring.AudioContext;
 
 /**
  * Created by go22670 on 2/24/16.
@@ -24,35 +25,6 @@ public class AnswerInfo {
   private int roundTripDur;
   private String validity;
   private double snr;
-
-  public static class AudioContext {
-    private int userid;
-    private String id;
-    private int questionID;
-    String audioType;
-
-    public AudioContext(int userid,
-                        String id,
-                        int questionID,
-                        String audioType) {
-      this.userid = userid;
-      this.id = id;
-      this.questionID = questionID;
-      this.audioType = audioType;
-    }
-
-    public int getUserid() {
-      return userid;
-    }
-
-    public String getId() {
-      return id;
-    }
-
-    public int getQuestionID() {
-      return questionID;
-    }
-  }
 
   public static class RecordingInfo {
     String answer;
@@ -103,10 +75,10 @@ public class AnswerInfo {
                     //     boolean valid,
                     AudioCheck.ValidityAndDur validity
   ) {
-    this(audioContext.userid,
-        audioContext.id,
-        audioContext.questionID,
-        audioContext.audioType,
+    this(audioContext.getUserid(),
+        audioContext.getId(),
+        audioContext.getQuestionID(),
+        audioContext.getAudioType(),
 
         recordingInfo.answer,
         recordingInfo.audioFile,
@@ -162,11 +134,14 @@ public class AnswerInfo {
         other.getAudioType(),
         other.getAnswer(),
         other.getAudioFile(),
-        other.getDeviceType(), other.getDevice(), other.isWithFlash(),
+        other.getDeviceType(),
+        other.getDevice(),
+        other.isWithFlash(),
 
         other.getDurationInMillis(),
         other.isValid(),
-        other.getValidity(), other.getSnr(),
+        other.getValidity(),
+        other.getSnr(),
 
         correct,
         pronScore,
