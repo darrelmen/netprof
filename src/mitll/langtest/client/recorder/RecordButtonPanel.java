@@ -14,6 +14,7 @@ import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.scoring.AudioContext;
 
 import java.util.Collection;
 import java.util.Map;
@@ -152,11 +153,15 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     String device = controller.getBrowserInfo();
     final int len = base64EncodedWavFile.length();
 
+    AudioContext audioContext   = new AudioContext(reqid, controller.getUser(), exerciseID, index, getAudioType());
+
     service.writeAudioFile(base64EncodedWavFile,
-        reqid, controller.getUser(), exerciseID,
-        index,
-        audioType, controller.usingFlashRecorder(), "browser", device,
-        false,
+//        reqid, controller.getUser(), exerciseID,
+//        index,
+//        audioType,
+//
+        audioContext,
+        controller.usingFlashRecorder(), "browser", device,
         doFlashcardAudio,
         true, false, allowAlternates, new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
