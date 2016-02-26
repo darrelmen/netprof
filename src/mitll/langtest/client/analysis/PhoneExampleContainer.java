@@ -190,6 +190,10 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
     new TooltipHelper().addTooltip(table, "Click on an item to review.");
   }
 
+  /**
+   * @see #addColumnsToTable()
+   * @return
+   */
   private Column<WordAndScore, SafeHtml> getItemColumn() {
     return new Column<WordAndScore, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
