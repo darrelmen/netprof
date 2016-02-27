@@ -72,7 +72,6 @@ public class AnswerInfo {
 
   public AnswerInfo(AudioContext audioContext,
                     RecordingInfo recordingInfo,
-                    //     boolean valid,
                     AudioCheck.ValidityAndDur validity
   ) {
     this(audioContext.getUserid(),
@@ -86,7 +85,6 @@ public class AnswerInfo {
         recordingInfo.device,
         recordingInfo.withFlash,
 
-        //    valid,
         validity);
   }
 
@@ -100,7 +98,6 @@ public class AnswerInfo {
                     String deviceType, String device,
                     boolean withFlash,
 
-                    //    boolean valid,
                     AudioCheck.ValidityAndDur validity) {
     this.userid = userid;
     this.id = id;
@@ -124,6 +121,7 @@ public class AnswerInfo {
   }
 
   public AnswerInfo(AnswerInfo other,
+
                     boolean correct,
                     float pronScore,
                     String scoreJson,
