@@ -486,17 +486,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * TODO : put this back
    *
-   * @param userID
-   * @param questionID
+   * @param audioContext
    * @param answer
-   * @param answerType
    * @param timeSpent
    * @param typeToSection
    * @return
    * @see mitll.langtest.client.amas.TextResponse#getScoreForGuess
    */
-  public Answer getScoreForAnswer(long userID, String exerciseID, int questionID, String answer,
-                                  String answerType, long timeSpent, Map<String, Collection<String>> typeToSection) {
+  public Answer getScoreForAnswer(AudioContext audioContext, String answer,
+                                  long timeSpent,
+                                  Map<String, Collection<String>> typeToSection) {
     // AutoCRT.CRTScores scoreForAnswer1 = audioFileHelper.getScoreForAnswer(exercise, questionID, answer);
     AutoCRT.CRTScores scoreForAnswer1 = new AutoCRT.CRTScores();
     double scoreForAnswer = serverProps.useMiraClassifier() ? scoreForAnswer1.getNewScore() : scoreForAnswer1.getOldScore();
@@ -505,9 +504,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     //  logger.warn("getScoreForAnswer user " + userID + " ex " + exercise.getID() + " qid " +questionID + " type " +typeToSection + " session " + session);
     boolean correct = scoreForAnswer > 0.5;
     // String exerciseID = exercise.getID();
-    long resultID = db.getAnswerDAO().addTextAnswer((int) userID,
-        exerciseID,
-        questionID, answer, answerType, correct,
+    long resultID = db.getAnswerDAO().addTextAnswer(audioContext,
+        //(int) userID,
+        //exerciseID,
+        //questionID,
+        answer,
+        //answerType,
+        correct,
         (float) scoreForAnswer, (float) scoreForAnswer, session, timeSpent);
 
     Answer answer1 = new Answer(scoreForAnswer, correct, resultID);
@@ -1126,7 +1129,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       String exerciseID = result.getExerciseID();
 
-      CommonExercise exercise = db.getExercise(exerciseID);
+      CommonShell exercise = serverProps.isAMAS() ? db.getAMASExercise(exerciseID) :
+          db.getExercise(exerciseID);
       if (exercise == null) {
         logger.warn(getLanguage() + " can't find exercise id " + exerciseID);
         return new PretestScore();
@@ -1644,7 +1648,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public long getUserIDForToken(String token) {
     User user = db.getUserDAO().getUserWhereResetKey(token);
     long l = (user == null) ? -1 : user.getId();
-   // logger.info("for token " + token + " got user id " + l);
+    // logger.info("for token " + token + " got user id " + l);
     return l;
   }
 
@@ -2026,8 +2030,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public AudioAnswer writeAudioFile(String base64EncodedString,
 
                                     AudioContext audioContext,
-                                    //                                   int reqid,
-                                    //                                 int user, String exercise, int questionID, String audioType,
 
                                     boolean recordedWithFlash, String deviceType, String device,
 
@@ -2038,7 +2040,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     int user = audioContext.getUserid();
     String audioType = audioContext.getAudioType();
 
-    CommonShell exercise1 = serverProps.isAMAS() ?
+    boolean amas = serverProps.isAMAS();
+    CommonShell exercise1 = amas ?
         db.getAMASExercise(exercise) :
         db.getCustomOrPredefExercise(exercise);  // allow custom items to mask out non-custom items
 
@@ -2053,10 +2056,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     // AudioContext audioContext   = new AudioContext(reqid, user, exercise, questionID, audioType);
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", "", deviceType, device, recordedWithFlash);
 
-    AudioAnswer audioAnswer = audioFileHelper.writeAudioFile(base64EncodedString,
-        exercise1,
-        audioContext, recordingInfo,
-        recordInResults, doFlashcard, allowAlternates, addToAudioTable);
+    AudioAnswer audioAnswer = amas ?
+        audioFileHelper.writeAMASAudioFile(base64EncodedString, db.getAMASExercise(exercise), audioContext, recordingInfo) :
+        audioFileHelper.writeAudioFile(base64EncodedString,
+            exercise1,
+            audioContext, recordingInfo,
+            recordInResults, doFlashcard, allowAlternates, addToAudioTable);
 
     if (addToAudioTable && audioAnswer.isValid()) {
       AudioAttribute attribute = addToAudioTable(user, audioType, exercise1, exercise, audioAnswer);
@@ -2069,7 +2074,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       // normalizeLevel(audioAnswer);
 
       String foreignLanguage = exercise1 == null ? "unknown" : exercise1.getForeignLanguage();
-      ensureMP3(audioAnswer.getPath(), foreignLanguage, getUserID(user));
+      String userID = getUserID(user);
+      if (userID == null) {
+        logger.warn("huh? no user for " + user);
+      }
+
+      ensureMP3(audioAnswer.getPath(), foreignLanguage, userID);
     }
     if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
       logger.warn("huh? got zero length recording " + user + " " + exercise);
@@ -2338,9 +2348,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     readProperties(getServletContext());
     setInstallPath(db);
     audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this);
-//    if (serverProps.doRecoTest() || serverProps.doRecoTest2()) {
-//      new RecoTest(this, serverProps, pathHelper, audioFileHelper);
-//    }
+
     try {
       db.preloadExercises();
       db.preloadContextPractice();
@@ -2349,10 +2357,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     } catch (Exception e) {
       logger.error("couldn't load database " + e, e);
     }
-    Collection<CommonExercise> exercises = getExercises();
-
     this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, audioFileHelper);
-    refResultDecoder.doRefDecode(exercises, relativeConfigDir);
+    refResultDecoder.doRefDecode(getExercises(), relativeConfigDir);
+    if (serverProps.isAMAS()) audioFileHelper.makeAutoCRT(relativeConfigDir);
   }
 
   private String getLanguage() {
@@ -2434,7 +2441,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private void setInstallPath(DatabaseImpl db) {
     String lessonPlanFile = getLessonPlan();
-    if (!lessonPlanFile.startsWith("http") &&
+    if (!serverProps.getLessonPlan().startsWith("http") &&
         !new File(lessonPlanFile).exists()) {
       logger.error("couldn't find lesson plan file " + lessonPlanFile);
     }
