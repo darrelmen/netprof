@@ -4,15 +4,15 @@ import ag.experiment.AutoGradeExperiment;
 import mira.classifier.Classifier;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.SLFFile;
-import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.export.ExerciseExport;
 import mitll.langtest.server.database.export.Export;
+import mitll.langtest.server.export.ExerciseExport;
 import mitll.langtest.server.export.ResponseAndGrade;
 import mitll.langtest.server.scoring.AlignDecode;
 import mitll.langtest.server.scoring.InDictFilter;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
+import mitll.langtest.shared.amas.QAPair;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
@@ -60,7 +60,7 @@ public class AutoCRT {
    * @param db
    * @param minPronScore
    * @param useMiraClassifier
-   * @see mitll.langtest.server.audio.AudioFileHelper#makeClassifier(String, AutoCRTScoring, DatabaseImpl)
+   * @see mitll.langtest.server.audio.AudioFileHelper#makeClassifier
    */
   public AutoCRT(Export exporter, AlignDecode db, InDictFilter inDictFilter,
                  String installPath, String relativeConfigDir, double minPronScore,
@@ -120,6 +120,7 @@ public class AutoCRT {
 
   /**
    * ONLY for testing.
+   *
    * @see MiraTest#testClassifier
    */
   public void close() {
@@ -159,7 +160,7 @@ public class AutoCRT {
   public void getAutoCRTDecodeOutput(AmasExerciseImpl exercise, int questionID, File audioFile, AudioAnswer answer,
                                      boolean useCache) {
     String exerciseID = exercise.getID();
-    PretestScore asrScoreForAudio = getScoreForAudio(exerciseID, questionID, audioFile, useCache);
+    PretestScore asrScoreForAudio = getScoreForAudio(exercise, exerciseID, questionID, audioFile, useCache);
     if (asrScoreForAudio == null) {
       logger.error("can't find pretest for " + exerciseID + "/" + questionID);
     } else {
@@ -238,8 +239,8 @@ public class AutoCRT {
    * @return the reco sentence and the score for this sentence
    * @see #getExportedAnswers(String, int)
    */
-  private PretestScore getScoreForAudio(String exerciseID, int questionID, File audioFile, boolean useCache) {
-    Collection<String> exportedAnswersOrig = getExportedAnswers(exerciseID, questionID);
+  private PretestScore getScoreForAudio(AmasExerciseImpl exercise, String exerciseID, int questionID, File audioFile, boolean useCache) {
+    Collection<String> exportedAnswersOrig = getPredefAnswers(exercise, questionID-1);
     if (exportedAnswersOrig == null) logger.warn("getScoreForAudio : can't find " + exerciseID + "/" + questionID);
     Collection<String> exportedAnswers = inDictFilter.getValidPhrases(exportedAnswersOrig);   // remove phrases that break hydec
     if (exportedAnswers == null)
@@ -260,6 +261,29 @@ public class AutoCRT {
     return asrScoreForAudio;
   }
 
+  public Collection<String> getPredefAnswers(AmasExerciseImpl exercise, int questionID) {
+    QAPair q = exercise.getQuestions().get(questionID);
+    String question = q.getQuestion();
+    List<String> possible = new ArrayList<>();
+    //  String answer1 = q.getAnswer();
+    possible.add(question);
+
+    for (String answer : q.getAlternateAnswers()) {
+      String removed = removePunct(answer.trim());
+      if (answer.trim().isEmpty() || removed.isEmpty()) {
+        logger.warn("huh? alternate answer is empty??? for " + q + " in " + exercise.getID());
+        logger.warn("exercise " + exercise);
+      } else {
+//        if (answer.length() < MIN_LENGTH) {
+//          logger.warn("for short answer " + answer + " len " + answer.length() +
+//              " added " + new ResponseAndGrade(answer, correctGrade, correctGrade) + " for " + q);
+//        }
+        possible.add(answer);
+//            count++;
+      }
+    }
+    return possible;
+  }
   /**
    * Decode the phrase from the exercise in {@link mitll.langtest.shared.CommonExercise#getForeignLanguage}
    *
@@ -381,7 +405,7 @@ public class AutoCRT {
    * @param rawRefSentence
    * @param language
    * @return
-/*   *//*
+  /*   *//*
   private String getPhraseToDecode(String rawRefSentence, String language) {
     return language.equalsIgnoreCase("mandarin") && !rawRefSentence.trim().equalsIgnoreCase(SLFFile.UNKNOWN_MODEL) ?
         Scoring.getSegmented(rawRefSentence.trim().toUpperCase()) :
@@ -407,6 +431,7 @@ public class AutoCRT {
    * @param recoSentence
    * @return
    */
+
   private String getAnnotatedResponse(String exercise, int questionID, String recoSentence) {
     List<String> good = new ArrayList<String>();
     List<String> bad = new ArrayList<String>();
@@ -437,12 +462,12 @@ public class AutoCRT {
   /**
    * Score a text response.
    *
-   * @see #markCorrectnessOnAnswer(CommonExercise, int, PretestScore, AudioAnswer)
-   * @see mitll.langtest.server.audio.AudioFileHelper#getScoreForAnswer(CommonExercise, int, String)
    * @param exercise
    * @param questionID
    * @param answer
    * @return
+   * @see #markCorrectnessOnAnswer(CommonExercise, int, PretestScore, AudioAnswer)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getScoreForAnswer(CommonExercise, int, String)
    */
   public CRTScores getScoreForExercise(AmasExerciseImpl exercise, int questionID, String answer) {
     return getScoreForExercise(exercise, questionID, answer, -1);
@@ -450,7 +475,7 @@ public class AutoCRT {
 
   /**
    * Only public for testing...
-   *
+   * <p>
    * For this exercise and question, score the answer.<br></br>
    * Do this by getting all other answers to this question and the answer key and given this information
    * and the answer, ask the classifier to score the answer.
@@ -720,6 +745,7 @@ public class AutoCRT {
    * @see AutoGradeExperiment
    */
   private Classifier<AutoGradeExperiment.Event> getClassifier() {
+    if (true) return null;
     if (classifier != null) return classifier;
 
 //    logger.debug("install " + installPath + " media " + mediaDir);
