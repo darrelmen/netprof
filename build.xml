@@ -78,6 +78,18 @@
     </target>
     <target depends="build-subprojects,gwtc" name="build"/>
 
+    <target depends="build" name="amasMSA">
+        <jar destfile="amasMSA.war" basedir="war"
+             includes="images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/amasMSA/**,soundmanager2.js"
+             excludes="WEB=INF/lib/pronz.jar">
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+
     <target depends="build" name="war">
         <jar destfile="netPron2.war" basedir="war" excludes="answers/**,audioimages/**,scoring/tmp/**">
             <manifest>
