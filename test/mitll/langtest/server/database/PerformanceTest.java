@@ -141,7 +141,7 @@ public class PerformanceTest extends BaseTest {
 //    }
   }*/
 
-  public void convertToNewEx(List<DBExercise> objects, List<CommonExercise> exercises, int id,
+/*  public void convertToNewEx(List<DBExercise> objects, List<CommonExercise> exercises, int id,
                              Map<CommonExercise, DBExercise> oldToNew) {
     List<CommonExercise> exercises1 = exercises;
     exercises1 = exercises.subList(0, 2);
@@ -182,13 +182,13 @@ public class PerformanceTest extends BaseTest {
       objects.add(dbExercise);
       oldToNew.put(ex, dbExercise);
     }
-  }
+  }*/
 
-  public void dumpUploads(Collection<Upload> uploads) {
+/*  public void dumpUploads(Collection<Upload> uploads) {
     for (Upload upload : uploads) {
       logger.info("got " + upload);
     }
-  }
+  }*/
 
   @Test
   public void testDavidSilver() {
