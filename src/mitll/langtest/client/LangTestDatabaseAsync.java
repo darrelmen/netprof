@@ -53,7 +53,7 @@ public interface LangTestDatabaseAsync {
   void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID,
                             AsyncCallback<ImageResponse> async);
 
-  void getScoreForAnswer(long userID, String exerciseID, int questionID, String answer, String answerType,
+  void getScoreForAnswer(AudioContext audioContext, String answer,
                          long timeSpent, Map<String, Collection<String>> typeToSection, AsyncCallback<Answer> async);
 
   void addStudentAnswer(long resultID, boolean correct, AsyncCallback<Void> async);
