@@ -46,6 +46,7 @@ public class AudioConversion {
   private static final boolean SPEW = true;
   private final AudioCheck audioCheck;
   private static final boolean DEBUG = false;
+  private static final int MIN_WARN_DUR = 30;
 
   private final String soxPath;
   private final String language;
@@ -72,6 +73,7 @@ public class AudioConversion {
    */
   public AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString, File file,
                                                              boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
+    long then = System.currentTimeMillis();
     file.getParentFile().mkdirs();
     byte[] byteArray = getBytesFromBase64String(base64EncodedString);
 
@@ -83,6 +85,12 @@ public class AudioConversion {
     AudioCheck.ValidityAndDur valid = isValid(file, useSensitiveTooLoudCheck, quietAudioOK);
     if (valid.isValid()) {
       valid.setDuration(trimSilence(file).getDuration());
+    }
+    long now = System.currentTimeMillis();
+    long diff = now - then;
+    if (diff > MIN_WARN_DUR) {
+      logger.debug("writeAudioFile: took " + diff + " millis to write wav file " + valid.durationInMillis +
+          " millis long");
     }
     return valid;
   }
@@ -641,9 +649,10 @@ public class AudioConversion {
    */
   private boolean convertFileAndCheck(String lamePath, String title, String pathToAudioFile, String mp3File, String author) {
     if (DEBUG) logger.debug("convert " + pathToAudioFile + " to " + mp3File);
-    if (title.length() > 30) {
+    if (title != null && title.length() > 30) {
       title = title.substring(0, 30);
     }
+    if (title == null) title = "";
     ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File, "--tt", title, "--ta", author);
     try {
       //logger.debug("running lame" + lameProc.command());
