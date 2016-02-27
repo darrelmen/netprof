@@ -74,16 +74,12 @@ public interface LangTestDatabase extends RemoteService {
   /**
    * TODO : return result id
    * @see mitll.langtest.client.amas.TextResponse#getScoreForGuess
-   * @param userID
-   * @param exerciseID
-   * @param questionID
-   * @param answer
-   * @param answerType
+   * @param audioContext
+   *@param answer
    * @param timeSpent
-   * @param typeToSection
-   * @return
+   * @param typeToSection    @return
    */
-  Answer getScoreForAnswer(long userID, String exerciseID, int questionID, String answer, String answerType, long timeSpent, Map<String, Collection<String>> typeToSection);
+  Answer getScoreForAnswer(AudioContext audioContext, String answer, long timeSpent, Map<String, Collection<String>> typeToSection);
 
   void addStudentAnswer(long resultID, boolean correct);
   QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<String> exids);
