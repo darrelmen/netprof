@@ -228,7 +228,7 @@ public class AmasExerciseImpl implements CommonShell {
 
   @Override
   public String getForeignLanguage() {
-    return null;
+    return "";
   }
 
   @Override
