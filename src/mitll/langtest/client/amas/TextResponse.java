@@ -19,10 +19,11 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NoPasteTextBox;
 import mitll.langtest.shared.Answer;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.scoring.AudioContext;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,7 +33,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class TextResponse {
-  //  private Logger logger = Logger.getLogger("TextResponse");
+  private Logger logger = Logger.getLogger("TextResponse");
   private static final int TEXT_BOX_WIDTH = 400;
   private static final int FEEDBACK_HEIGHT = 40;
 
@@ -185,8 +186,7 @@ public class TextResponse {
     check.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        String guess = noPasteAnswer.getText();
-        getScoreForGuess(guess, service, exerciseID, check, scoreFeedback, answerType, questionID);
+        getScoreForGuess(noPasteAnswer.getText(), service, exerciseID, check, scoreFeedback, answerType, questionID);
       }
     });
   }
@@ -251,7 +251,11 @@ public class TextResponse {
       long timeSpent = System.currentTimeMillis() - timeShown;
       timeShown = System.currentTimeMillis();
 
-      service.getScoreForAnswer(user, exerciseID, questionID, guess, answerType, timeSpent, typeToSelection,
+      AudioContext audioContext = new AudioContext(0, user, exerciseID, questionID, answerType);
+
+      logger.info("contexxt " + audioContext);
+      service.getScoreForAnswer(
+          audioContext, guess, timeSpent, typeToSelection,
           new AsyncCallback<Answer>() {
             @Override
             public void onFailure(Throwable caught) {
