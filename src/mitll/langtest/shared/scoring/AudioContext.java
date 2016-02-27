@@ -54,4 +54,8 @@ public class AudioContext  implements IsSerializable {
   public String getAudioType() {
     return audioType;
   }
+
+  public String toString() {
+    return "user " + userid + " id " + id + " q " + questionID + " req " + reqid + " type " + audioType;
+  }
 }

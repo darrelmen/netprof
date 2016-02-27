@@ -940,9 +940,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       join.put(id, exercise);
     }
 
-    for (CommonExercise exercise : userExerciseDAO.getAll()) {
-      String id = exercise.getID();
-      join.put(id, exercise);
+    if (userExerciseDAO != null && exerciseDAO != null) {
+      for (CommonExercise exercise : userExerciseDAO.getAll()) {
+        String id = exercise.getID();
+        join.put(id, exercise);
+      }
     }
     return join;
   }
