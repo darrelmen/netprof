@@ -39,10 +39,8 @@ public class MiraClassifier {
    */
   public Info getMiraScore(AmasExerciseImpl exercise, int questionID, String answer, String miraFlavor, String url,
                            Collection<String> additionalCorrect) {
-    String id = exercise.getID();
     List<QAPair> foreignLanguageQuestions = exercise.getForeignLanguageQuestions();
-
-    return getMiraScore(questionID, foreignLanguageQuestions, answer, miraFlavor, url, additionalCorrect, id);
+    return getMiraScore(questionID, foreignLanguageQuestions, answer, miraFlavor, url, additionalCorrect, exercise.getID());
   }
 
   /**
