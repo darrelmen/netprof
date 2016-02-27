@@ -6,6 +6,7 @@ import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -85,7 +86,7 @@ public class JSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
   private AmasExerciseImpl toAMASExercise(JSONObject jsonObject) {
     JSONObject metadata = jsonObject.getJSONObject("metadata");
     JSONObject content = jsonObject.getJSONObject("content");
-    JSONObject qlist = content.getJSONObject("q-lst");
+    JSONObject qlist   = content.getJSONObject("q-lst");
     JSONObject attlist = content.has(ATT_LST) ? content.getJSONObject(ATT_LST) : new JSONObject();
 
     // logger.info("got " + attlist);
@@ -123,7 +124,9 @@ public class JSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
       try {
         String flq = jsonObject1.getString("stem");
         String fla = jsonObject1.getString("key-idea");
-        exercise.addQuestion(true, removeMarkup(flq), getAnswerKey(fla));
+        String question = removeMarkup(flq);
+        if (question.isEmpty()) logger.error("huh? question empty for " + hubDID + " originally '" + flq +"'");
+        exercise.addQuestion(true, question, getAnswerKey(fla));
 
         String enq = jsonObject1.getString("stem-trans");
         String ena = jsonObject1.getString("key-idea-trans");
@@ -148,6 +151,9 @@ public class JSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
       String s = removeMarkup(answer);
       if (!s.isEmpty()) {
         cleaned.add(s);
+        if (s.length() < 3) {
+          logger.info("Adding '" + s + "'");
+        }
       }
     }
   //  logger.info("got " + cleaned.size() + " :\n" +cleaned);
@@ -155,7 +161,7 @@ public class JSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
   }
 
   private String removeMarkup(String answer) {
-    return answer.replaceAll("<.*>", "").replaceAll("</.*>", "").replaceAll("<.* />", "").trim();
+    return answer.replaceAll("<p>", "").replaceAll("</p>", "").replaceAll("<br />", "").trim().replaceAll("(^\\h*)|(\\h*$)","");
   }
 
 
