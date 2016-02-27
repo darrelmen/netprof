@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
 import mitll.langtest.shared.analysis.UserPerformance;
@@ -21,6 +22,7 @@ import java.util.stream.Stream;
  */
 public class AMASReaderTest {
   private static final Logger logger = Logger.getLogger(AMASReaderTest.class);
+  public static final String AM_LB_002 = "AM-LB-002";
   private static DatabaseImpl database;
 
   @BeforeClass
@@ -46,7 +48,7 @@ public class AMASReaderTest {
     //database.getAMASSectionHelper().report();
 
     Collection<AmasExerciseImpl> exercises = database.getAMASExercises();
-    Stream<AmasExerciseImpl> amasExerciseStream = exercises.stream().filter(ex -> ex.getID().equals("AM-LB-002"));
+    Stream<AmasExerciseImpl> amasExerciseStream = exercises.stream().filter(ex -> ex.getID().equals("AM-LA-004"));
     Optional<AmasExerciseImpl> first = amasExerciseStream.findFirst();
     AmasExerciseImpl amasExercise = first.get();
     logger.info("first " + first+  " audio '" + amasExercise.getAudioURL() + "'");
@@ -55,6 +57,10 @@ public class AMASReaderTest {
     AmasExerciseImpl next = exercises.iterator().next();
     logger.info("e.g. " + next);
     logger.info("\n\ngot " + exercises.size());
+
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
+
+    audioFileHelper.makeAutoCRT(".");
 
     database.getAMASSectionHelper().report();
   }
