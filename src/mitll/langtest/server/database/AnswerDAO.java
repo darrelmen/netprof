@@ -4,6 +4,8 @@
 
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.audio.AudioCheck;
+import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
@@ -39,22 +41,27 @@ public class AnswerDAO extends DAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
    * @see mitll.langtest.client.amas.TextResponse#getScoreForGuess
    */
-  public long addTextAnswer(int userID,
-                            String exerciseID, int questionID,
+  public long addTextAnswer(AudioContext audioContext,
+                            //int userID,
+                            // String exerciseID, int questionID,
 
                             String answer,
-                            String answerType,
+//                            String answerType,
 
                             boolean correct,
-                            float pronScore, float classifierScore,
+
+                            float pronScore,
+
+                            float classifierScore,
 
                             String session, long timeSpent) {
-/*    return addAnswer(database,userID,
-        exerciseID, questionID, answer, "",
-        true, answerType,
-        0,
-        correct, pronScore, classifierScore, "", "", "", false, false, session, timeSpent, 0, 0);*/
-    return 0;
+    AnswerInfo answerInfo = new AnswerInfo(
+        audioContext,
+        new AnswerInfo.RecordingInfo(answer, answer, "", "", true),
+        new AudioCheck.ValidityAndDur(0));
+
+    return addAnswer(database,
+        new AnswerInfo(answerInfo, new AnswerInfo.ScoreInfo(correct, pronScore, "", 0)));
   }
 
   /**
