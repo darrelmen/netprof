@@ -4,6 +4,7 @@
 
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -735,10 +736,17 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     getExercises();
   }
 
+  /**
+   * @see LangTestDatabaseImpl#init()
+   */
   public void preloadContextPractice() {
     makeContextPractice(getServerProps().getDialogFile(), installPath);
   }
 
+  /**
+   * @see LangTestDatabaseImpl#getContextPractice()
+   * @return
+   */
   public ContextPractice getContextPractice() {
     if (this.contextPractice == null) {
       makeContextPractice(getServerProps().getDialogFile(), installPath);
