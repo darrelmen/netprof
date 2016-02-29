@@ -17,16 +17,15 @@ import java.util.regex.Pattern;
  * Created by je24276 on 9/15/15.
  */
 public class ContextPracticeImport {
-
-  Pattern dialogEx = Pattern.compile("^\\s*Title\\s*:\\s*(.*)$");
-  Pattern speakerEx = Pattern.compile("^Speaker\\s*(\\d+)\\s*:\\s*(.*)$");
-  Pattern partEx = Pattern.compile("^\\s*(\\d+)\\s*:\\s*(.*)\\s*\\((.*),\\s*(.*)\\)\\s*$");
-  private Map<String, String> sentToAudioPath = new HashMap<String, String>();
-  private Map<String, String[]> dialogToPartsMap = new HashMap<String, String[]>();
-  private Map<String, String> sentToSlowAudioPath = new HashMap<String, String>();
-  private Map<String, HashMap<String, Integer>> dialogToSpeakerToLast = new HashMap<String, HashMap<String, Integer>>();
-  private Map<String, HashMap<Integer, String>> dialogToSentIndexToSpeaker = new HashMap<String, HashMap<Integer, String>>();
-  private Map<String, HashMap<Integer, String>> dialogToSentIndexToSent = new HashMap<String, HashMap<Integer, String>>();
+  private final Pattern dialogEx = Pattern.compile("^\\s*Title\\s*:\\s*(.*)$");
+  private final Pattern speakerEx = Pattern.compile("^Speaker\\s*(\\d+)\\s*:\\s*(.*)$");
+  private final Pattern partEx = Pattern.compile("^\\s*(\\d+)\\s*:\\s*(.*)\\s*\\((.*),\\s*(.*)\\)\\s*$");
+  private final Map<String, String> sentToAudioPath = new HashMap<>();
+  private final Map<String, String[]> dialogToPartsMap = new HashMap<>();
+  private final Map<String, String> sentToSlowAudioPath = new HashMap<>();
+  private final Map<String, Map<String, Integer>> dialogToSpeakerToLast = new HashMap<>();
+  private final Map<String, Map<Integer, String>> dialogToSentIndexToSpeaker = new HashMap<>();
+  private final Map<String, Map<Integer, String>> dialogToSentIndexToSent = new HashMap<>();
   private ContextPractice contextPractice;
 
   /**
@@ -43,12 +42,12 @@ public class ContextPracticeImport {
       String s;
 
       String currTitle = "";
-      HashMap<String, String> speakerToIdent = new HashMap<String, String>();
-      HashMap<String, String> identToSpeaker = new HashMap<String, String>();
-      HashMap<String, Integer> speakerToLast = new HashMap<String, Integer>();
-      HashMap<Integer, String> sentIndexToSpeaker = new HashMap<Integer, String>();
-      HashMap<Integer, String> sentIndexToSent = new HashMap<Integer, String>();
-      ArrayList<String> parts = new ArrayList<String>();
+      HashMap<String, String> speakerToIdent = new HashMap<>();
+      HashMap<String, String> identToSpeaker = new HashMap<>();
+      HashMap<String, Integer> speakerToLast = new HashMap<>();
+      HashMap<Integer, String> sentIndexToSpeaker = new HashMap<>();
+      HashMap<Integer, String> sentIndexToSent = new HashMap<>();
+      ArrayList<String> parts = new ArrayList<>();
       int sentIndex = 0;
       while ((s = fin.readLine()) != null) {
         Matcher dm = dialogEx.matcher(s);
@@ -62,12 +61,12 @@ public class ContextPracticeImport {
             dialogToSentIndexToSpeaker.put(currTitle, sentIndexToSpeaker);
           }
           currTitle = dm.group(1);
-          speakerToIdent = new HashMap<String, String>();
-          identToSpeaker = new HashMap<String, String>();
-          speakerToLast = new HashMap<String, Integer>();
-          sentIndexToSpeaker = new HashMap<Integer, String>();
-          sentIndexToSent = new HashMap<Integer, String>();
-          parts = new ArrayList<String>();
+          speakerToIdent = new HashMap<>();
+          identToSpeaker = new HashMap<>();
+          speakerToLast = new HashMap<>();
+          sentIndexToSpeaker = new HashMap<>();
+          sentIndexToSent = new HashMap<>();
+          parts = new ArrayList<>();
           sentIndex = 0;
         } else if (sm.matches()) {
           speakerToIdent.put(sm.group(2), sm.group(1));
