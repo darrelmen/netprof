@@ -35,6 +35,8 @@ import java.util.logging.Logger;
 public class InitialUI {
   private final Logger logger = Logger.getLogger("InitialUI");
 
+  public static final String LOGIN = "Login";
+
   /**
    * How far to the right to shift the list of sites...
    *
@@ -87,7 +89,6 @@ public class InitialUI {
       populateBelowHeader(verticalContainer, firstRow);
     }
   }
-
 
   /**
    * @param verticalContainer
@@ -143,21 +144,6 @@ public class InitialUI {
     browserCheck.getBrowserAndVersion();
     return new HTML(langTest.getInfoLine());
   }
-
-/*
-  public String getBrowserInfo() {
-    return browserCheck.getBrowserAndVersion();
-  }
-*/
-
-/*  protected String getInfoLine() {
-    String releaseDate = VERSION +
-        (props.getReleaseDate() != null ? " " + props.getReleaseDate() : "");
-    return "<span><font size=-2>" +
-        browserCheck.ver + "&nbsp;" +
-        releaseDate + (flashRecordPanel.usingWebRTC() ? " Flashless recording" : "") +
-        "</font></span>";
-  }*/
 
   private class LogoutClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
@@ -257,7 +243,7 @@ public class InitialUI {
   }
 
   /**
-   * * TODO : FIX ME
+   * * TODO : FIX ME for headstart
    *
    * @param verticalContainer
    * @param firstRow          where we put the flash permission window if it gets shown
@@ -341,9 +327,6 @@ public class InitialUI {
    * enabled feedback page.
    *
    * @return false if we didn't do either of the special pages and should do the normal navigation view
-   * @paramx verticalContainer
-   * @paramx firstRow
-   * @see #showLogin()
    * @see #populateRootPanel()
    */
   public boolean showLogin() {
@@ -351,16 +334,14 @@ public class InitialUI {
 
     // check if we're here as a result of resetting a password
     final String resetPassToken = props.getResetPassToken();
-    if (!resetPassToken.isEmpty()/* && !resetPassToken.equals(staleToken)*/) {
+    if (!resetPassToken.isEmpty()) {
       handleResetPass(verticalContainer, firstRow, eventRegistration, resetPassToken);
       return true;
     }
 
     // are we here to enable a CD user?
     final String cdToken = props.getCdEnableToken();
-    if (!cdToken.isEmpty()
-      //&& !cdToken.equals(staleToken)
-        ) {
+    if (!cdToken.isEmpty()) {
       logger.info("showLogin token '" + resetPassToken + "' for enabling cd user");
 
       handleCDToken(verticalContainer, firstRow, cdToken, props.getEmailRToken());
@@ -372,9 +353,7 @@ public class InitialUI {
     if (show) {
       logger.info("user is not valid : user expired " + userManager.isUserExpired() + " / " + userManager.getUserID());
 
-      Panel content = new UserPassLogin(service, props, userManager, eventRegistration).getContent();
-      firstRow.add(content);
-      content.getElement().setId("UserPassLogin");
+      firstRow.add(new UserPassLogin(service, props, userManager, eventRegistration).getContent());
       clearPadding(verticalContainer);
       RootPanel.get().add(verticalContainer);
       flashcard.setCogVisible(false);
@@ -388,8 +367,7 @@ public class InitialUI {
 
   private void handleResetPass(final Container verticalContainer, final Panel firstRow,
                                final EventRegistration eventRegistration, final String resetPassToken) {
-    logger.info("showLogin token '" + resetPassToken + "' for password reset");
-
+    //logger.info("showLogin token '" + resetPassToken + "' for password reset");
     service.getUserIDForToken(resetPassToken, new AsyncCallback<Long>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -400,14 +378,9 @@ public class InitialUI {
         if (result == null || result < 0) {
           logger.info("token '" + resetPassToken + "' is stale. Showing normal view");
           trimURL();
-
           populateBelowHeader(verticalContainer, firstRow);
-          //  trimURLAndReload();
         } else {
-          ResetPassword userPassLogin = new ResetPassword(service, props, eventRegistration);
-          Panel content = userPassLogin.getResetPassword(resetPassToken);
-          firstRow.add(content);
-          content.getElement().setId("ResetPassswordContent");
+          firstRow.add(new ResetPassword(service, props, eventRegistration).getResetPassword(resetPassToken));
           clearPadding(verticalContainer);
         }
       }
@@ -480,22 +453,6 @@ public class InitialUI {
   }
 
   /**
-   * @param verticalContainer
-   * @return
-   * @see #populateRootPanel()
-   */
-/*  private Panel makeFirstTwoRows(Container verticalContainer) {
-    verticalContainer.add(headerRow = makeHeaderRow());
-    headerRow.getElement().setId("headerRow");
-
-    Panel firstRow = new DivWidget();
-    verticalContainer.add(firstRow);
-    this.firstRow = firstRow;
-    firstRow.getElement().setId("firstRow");
-    return firstRow;
-  }*/
-
-  /**
    * Init Flash recorder once we login.
    * <p>
    * Only get the exercises if the user has accepted mic access.
@@ -506,13 +463,13 @@ public class InitialUI {
    * @see UserManager#storeUser
    */
   public void gotUser(User user) {
-    reallySetFactory();
+    populateRootPanelIfLogin();
     long userID = -1;
     if (user != null) {
       userID = user.getId();
     }
 
-     logger.info("gotUser : userID " + userID);
+    // logger.info("gotUser : userID " + userID);
 
     flashcard.setUserName(getGreeting());
     if (userID != lastUser) {
@@ -520,29 +477,11 @@ public class InitialUI {
       langTest.logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
     } else {
       logger.info("ignoring got user for current user " + userID);
-      if (navigation != null) navigation.refreshInitialState();
+      if (navigation != null) navigation.showPreviouslySelectedTab();
     }
     if (userID > -1) {
       flashcard.setCogVisible(true);
       flashcard.setVisibleAdmin(user.isAdmin() || props.isAdminView() || user.isTeacher() || user.isCD());
-    }
-  }
-
-  /**
-   * @see #gotUser
-   * @see #configureUIGivenUser(long) (long)
-   */
-  protected void reallySetFactory() {
-    int childCount = firstRow.getElement().getChildCount();
-
-    //logger.info("reallySetFactory root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
-    if (childCount > 0) {
-      Node child = firstRow.getElement().getChild(0);
-      Element as = Element.as(child);
-      if (as.getId().contains("Login")) {
-        logger.info("reallySetFactory found login...");
-        populateRootPanel();
-      }
     }
   }
 
@@ -554,12 +493,30 @@ public class InitialUI {
   public void configureUIGivenUser(long userID) {
 //    logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser +
 //        " audio type " + getAudioType() + " perms " + getPermissions());
-    reallySetFactory();
+    populateRootPanelIfLogin();
 //    logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
-
     navigation.showInitialState();
-
     showUserPermissions(userID);
+  }
+
+  /**
+   * @see #gotUser
+   * @see #configureUIGivenUser(long) (long)
+   */
+  protected void populateRootPanelIfLogin() {
+    int childCount = firstRow.getElement().getChildCount();
+
+    //logger.info("populateRootPanelIfLogin root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
+    if (childCount > 0) {
+      Node child = firstRow.getElement().getChild(0);
+      Element as = Element.as(child);
+      logger.info("populateRootPanelIfLogin found : '" + as.getId() +"'");
+
+      if (as.getId().contains(LOGIN)) {
+        logger.info("populateRootPanelIfLogin found login...");
+        populateRootPanel();
+      }
+    }
   }
 
   protected void showUserPermissions(long userID) {
@@ -571,32 +528,4 @@ public class InitialUI {
   public void setSplash() {
     flashcard.setSplash();
   }
-
-  /**
-   * @seex #gotUser
-   * @seex #configureUIGivenUser(long) (long)
-   */
-/*  void populateRootAfterLogin() {
-    if (!props.isOdaMode()) {
-      int childCount = firstRow.getElement().getChildCount();
-      // logger.info("populateRootAfterLogin root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
-      if (childCount > 0) {
-        Node child = firstRow.getElement().getChild(0);
-        Element as = Element.as(child);
-        if (as.getId().contains("Login")) {
-          //   logger.info("populateRootAfterLogin found login...");
-          populateRootPanel();
-        }
-      }
-    }
-  }*/
-
-  /**
-   * TODO : FIX ME
-   */
-/*  void configureUIGivenUser() {
-    if (learnHelper != null && learnHelper.getExerciseList() != null) {
-      //learnHelper.getExerciseList().restoreListFromHistory();
-    }
-  }*/
 }
