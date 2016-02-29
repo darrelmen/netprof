@@ -4,6 +4,7 @@
 
 package mitll.langtest.server;
 
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.mail.EmailList;
 import mitll.langtest.server.mail.MailSupport;
@@ -426,6 +427,10 @@ public class ServerProperties {
     else return s;
   }
 
+  /**
+   * @see DatabaseImpl#getContextPractice()
+   * @return
+   */
   public String getDialogFile() {
     return props.getProperty("dialog");
   }
