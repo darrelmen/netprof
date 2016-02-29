@@ -66,15 +66,15 @@ public class AMASInitialUI extends InitialUI {
    * @see #configureUIGivenUser(long) (long)
    */
   @Override
-  public void reallySetFactory() {
-    logger.info("reallySetFactory");
+  public void populateRootPanelIfLogin() {
+    logger.info("populateRootPanelIfLogin");
     if (!props.isOdaMode()) {
       int childCount = firstRow.getElement().getChildCount();
       // logger.info("populateRootAfterLogin root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
       if (childCount > 0) {
         Node child = firstRow.getElement().getChild(0);
         Element as = Element.as(child);
-        if (as.getId().contains("Login")) {
+        if (as.getId().contains(LOGIN)) {
           //   logger.info("populateRootAfterLogin found login...");
           populateRootPanel();
         }
