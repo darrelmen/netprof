@@ -9,6 +9,8 @@ import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -272,6 +274,8 @@ public class InitialUI {
 
     firstRow.add(navigation.getTabPanel());
     verticalContainer.add(getLinksToSites());
+
+    addResizeHandler();
   }
 
   /**
@@ -315,6 +319,18 @@ public class InitialUI {
     return hp;
   }
 
+  private void addResizeHandler() {
+    final InitialUI outer = this;
+    Window.addResizeHandler(new ResizeHandler() {
+      public void onResize(ResizeEvent event) {
+        outer.onResize();
+      }
+    });
+  }
+
+  /**
+   * @see LangTest#addResizeHandler()
+   */
   public void onResize() {
     if (navigation != null) navigation.onResize();
     if (flashcard != null) {
