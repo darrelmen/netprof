@@ -772,7 +772,6 @@ public class UserPassLogin extends UserDialog {
     signUp.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        //  System.out.println("signUp got click!");
         if (userBox.getValue().length() < MIN_LENGTH_USER_ID) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "short user id '" + userBox.getValue() + "'");
           markErrorBlur(signUpUser, PLEASE_ENTER_A_LONGER_USER_ID);
@@ -798,7 +797,6 @@ public class UserPassLogin extends UserDialog {
           //         eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in age ");
           //         markErrorBlur(registrationInfo.getAgeEntryGroup().box, AGE_ERR_MSG,Placement.TOP);
           //   registrationInfo.getAgeEntryGroup().markError(AGE_ERR_MSG);
-
         } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && registrationInfo.getDialectGroup().getText().isEmpty()) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in dialect ");
           markErrorBlur(registrationInfo.getDialectGroup(), "Enter a language dialect.");
@@ -902,39 +900,9 @@ public class UserPassLogin extends UserDialog {
     if (!props.isAMAS()) {
       addBullett(left, SECOND_BULLET, "NewProF1_48x48.png");
       addBullett(left, THIRD_BULLET, "listIcon_48x48_transparent.png");
-    }
-/*    Panel h;
-
-    Widget w = new HTML(SECOND_BULLET);
-
-    h = new HorizontalPanel();
-    h.add(new Image(LangTest.LANGTEST_IMAGES + "NewProF1_48x48.png"));
-    h.add(w);
-    configure(h);
-
-    left.add(h);
-    w.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
-    configure(w);
-
-    Widget w3 = new HTML(THIRD_BULLET);
-    left.add(w3);
-
-    h = new HorizontalPanel();
-    h.add(new Image(LangTest.LANGTEST_IMAGES + "listIcon_48x48_transparent.png"));
-    h.add(w3);
-    configure(h);
-
-    left.add(h);*/
-
 //    w3.getElement().getStyle().setMarginTop(-1, Style.Unit.PX);
 //    configure(w3);
-  }
-
-  private void addFirstBullet(DivWidget left) {
-    String bulletText = props.getFirstBullet();
-    String image = "NewProF2_48x48.png";
-
-    addBullett(left, bulletText, image);
+    }
   }
 
   private void addBullett(DivWidget left, String bulletText, String image) {
@@ -987,9 +955,7 @@ public class UserPassLogin extends UserDialog {
           markErrorBlur(password, emptyPassword ? PLEASE_ENTER_YOUR_PASSWORD : BAD_PASSWORD);
           signIn.setEnabled(true);
         } else {
-//          System.out.println("Found user " + result);
           logger.info("Found user " + result);
-
           foundExistingUser(result, emptyPassword, hashedPass);
         }
       }
