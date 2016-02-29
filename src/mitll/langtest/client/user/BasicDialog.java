@@ -41,11 +41,7 @@ public class BasicDialog {
   private static final boolean DEBUG = false;
 
   public static final int ILR_CHOICE_WIDTH = 80;
-  // public static final int MIN_LENGTH_USER_ID = 8;
   protected static final String TRY_AGAIN = "Try Again";
-  // static final String UNSET = "GENDER";
-  // private static final String MALE = "Male";
-  // private static final String FEMALE = "Female";
 
   protected FormField addControlFormField(Panel dialogBox, String label) {
     return addControlFormField(dialogBox, label, false, 0, 30, "");
