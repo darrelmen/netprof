@@ -36,9 +36,6 @@ public interface LangTestDatabaseAsync {
   void getUserBy(long id, AsyncCallback<User> async);
 
   void writeAudioFile(String base64EncodedString,
-//                      int reqid, int user, String exercise, int question,
-//                      String audioType,
-
                       AudioContext audioContext,
 
                       boolean recordedWithFlash, String deviceType, String device,
