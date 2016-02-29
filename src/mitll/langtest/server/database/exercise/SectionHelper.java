@@ -27,10 +27,10 @@ public class SectionHelper<T extends Shell> {
 
   /**
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getTypeOrder()
+   * @see mitll.langtest.server.database.DatabaseImpl#getTypeOrder
    */
   public List<String> getTypeOrder() {
-    logger.info("getTypeOrder " + predefinedTypeOrder);
+    //logger.info("getTypeOrder " + predefinedTypeOrder);
     if (predefinedTypeOrder.isEmpty()) {
       List<String> types = new ArrayList<String>();
       types.addAll(typeToSectionToTypeToSections.keySet());
@@ -49,7 +49,7 @@ public class SectionHelper<T extends Shell> {
       return types;
     } else {
       Set<String> validTypes = typeToUnitToLesson.keySet();
-      logger.info("getTypeOrder validTypes " + validTypes);
+      //logger.info("getTypeOrder validTypes " + validTypes);
 
       List<String> valid = new ArrayList<String>(predefinedTypeOrder);
       valid.retainAll(validTypes);
@@ -70,7 +70,7 @@ public class SectionHelper<T extends Shell> {
 
   /**
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getSectionNodes()
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getSectionNodes
    */
   public Collection<SectionNode> getSectionNodes() {
     return getChildren(getTypeOrder());
