@@ -8,9 +8,12 @@ import com.github.gwtbootstrap.client.ui.TabLink;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -19,6 +22,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.analysis.StudentAnalysis;
+import mitll.langtest.client.contextPractice.DialogViewer;
 import mitll.langtest.client.contextPractice.DialogWindow;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
@@ -49,6 +53,7 @@ import java.util.logging.Logger;
  */
 public class Navigation implements RequiresResize, ShowTab {
   public static final String STUDENT_ANALYSIS = "Student Analysis";
+  public static final String CUSTOM = "Custom";
   private final Logger logger = Logger.getLogger("Navigation");
 
   private static final String CHAPTERS = "Learn Pronunciation";
@@ -81,7 +86,7 @@ public class Navigation implements RequiresResize, ShowTab {
   private final UserManager userManager;
   private final SimpleChapterNPFHelper practiceHelper;
 
-  private DialogWindow dialogWindow;
+  private DialogViewer dialogWindow;
 
   private final SimpleChapterNPFHelper recorderHelper, recordExampleHelper;
   private final SimpleChapterNPFHelper markDefectsHelper, learnHelper;
@@ -95,7 +100,8 @@ public class Navigation implements RequiresResize, ShowTab {
   private TabAndContent dialog;
   private TabAndContent chapters;
   private TabAndContent analysis, studentAnalysis;
-  private TabAndContent review, recorderTab, recordExampleTab, markDefectsTab, practiceTab;
+  private TabAndContent review, recorderTab, recordExampleTab, markDefectsTab;
+  private TabAndContent practiceTab;
 
   private final Map<String, TabAndContent> nameToTab = new HashMap<String, TabAndContent>();
   private final Map<String, Integer> nameToIndex = new HashMap<String, Integer>();
@@ -142,16 +148,9 @@ public class Navigation implements RequiresResize, ShowTab {
       }
     };
 
-    service.getContextPractice(new AsyncCallback<ContextPractice>() {
-      public void onSuccess(ContextPractice cpw) {
-        dialogWindow = new DialogWindow(service, controller, cpw);
-      }
-
-      public void onFailure(Throwable caught) {
-        logger.info("getContextPractice failed");
-      }
-      //TODO: this is naughty
-    });
+    if (controller.getProps().hasDialog()) {
+      makeDialogWindow(service, controller);
+    }
 
     markDefectsHelper = new SimpleChapterNPFHelper<CommonShell, CommonExercise>(service, feedback, userManager, controller, learnHelper) {
       @Override
@@ -180,9 +179,31 @@ public class Navigation implements RequiresResize, ShowTab {
       }
     };
 
-    practiceHelper      = new PracticeHelper(service, feedback, userManager, controller);
-    recorderHelper      = new RecorderNPFHelper(service, feedback, userManager, controller, true,  learnHelper);
+    practiceHelper = new PracticeHelper(service, feedback, userManager, controller);
+    recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller, true, learnHelper);
     recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false, learnHelper);
+  }
+
+  void makeDialogWindow(final LangTestDatabaseAsync service, final ExerciseController controller) {
+    GWT.runAsync(new RunAsyncCallback() {
+      public void onFailure(Throwable caught) {
+        downloadFailedAlert();
+      }
+
+      public void onSuccess() {
+        service.getContextPractice(new AsyncCallback<ContextPractice>() {
+          public void onSuccess(ContextPractice cpw) {
+            logger.info("run async to get dialog ui");
+            dialogWindow = new DialogWindow(service, controller, cpw);
+          }
+
+          public void onFailure(Throwable caught) {
+            logger.info("getContextPractice failed");
+          }
+          //TODO: this is naughty
+        });
+      }
+    });
   }
 
   /**
@@ -412,16 +433,34 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private void addDialogTab() {
     if (controller.getProps().hasDialog()) {
-      dialog = makeFirstLevelTab(tabPanel, IconType.TH_LIST, PRACTICE_DIALOG);
-      dialog.getTab().addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          checkAndMaybeClearTab(PRACTICE_DIALOG);
-          logEvent(dialog, PRACTICE_DIALOG);
-          dialogWindow.viewDialog(dialog.getContent());
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          downloadFailedAlert();
+        }
+
+        public void onSuccess() {
+          reallyAddDialogTab();
+          showPreviouslySelectedTab();
         }
       });
     }
+  }
+
+  void reallyAddDialogTab() {
+    dialog = makeFirstLevelTab(tabPanel, IconType.TH_LIST, PRACTICE_DIALOG);
+    dialog.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        checkAndMaybeClearTab(PRACTICE_DIALOG);
+        logEvent(dialog, PRACTICE_DIALOG);
+        dialog.getContent().getElement().setId("contentPanel");
+        dialogWindow.viewDialog(dialog.getContent());
+      }
+    });
+  }
+
+  private void downloadFailedAlert() {
+    Window.alert("Code download failed");
   }
 
   private boolean isQC() {
@@ -436,69 +475,86 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private TabAndContent makeFirstLevelTab(TabPanel tabPanel, IconType iconType, String label) {
     TabAndContent tabAndContent = makeTab(tabPanel, iconType, label);
-    nameToIndex.put(label, tabs.size());
+    int size = tabs.size();
+    nameToIndex.put(label, size);
     tabs.add(tabAndContent);
     nameToTab.put(label, tabAndContent);
     return tabAndContent;
   }
 
-  private void checkAndMaybeClearTab(String value) {
-    //   String value1 = storage.getValue(CLICKED_TAB);
-    //logger.info("checkAndMaybeClearTab " + value1 + " vs "+value + " clearing " + CLICKED_USER_LIST);
-    storage.removeValue(CLICKED_USER_LIST);
-    storage.storeValue(CLICKED_TAB, value);
-  }
-
   /**
-   * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
+   * @see mitll.langtest.client.InitialUI#configureUIGivenUser
    */
   public void showInitialState() {
     addTabs();
 /*    logger.info("showInitialState show initial state for " + user +
         " : getting user lists " + controller.isReviewMode());*/
-    String value = storage.getValue(CLICKED_TAB);
-    if (value.isEmpty()) {   // no previous tab
-      service.getListsForUser(userManager.getUser(), true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
-        @Override
-        public void onFailure(Throwable caught) {
-        }
-
-        @Override
-        public void onSuccess(Collection<UserList<CommonShell>> result) {
-          if (result.size() == 1 && // if only one empty list - one you've created
-              result.iterator().next().isEmpty()) {
-            // choose default tab to show
-            showDefaultInitialTab();
-          } else {
-            boolean foundCreated = false;
-            for (UserList<?> ul : result) {
-              if (createdByYou(ul)) {
-                foundCreated = true;
-                break;
-              }
-            }
-            listManager.showMyLists(foundCreated, !foundCreated);
-          }
-        }
-      });
+    if (noPrevClickedTab()) {   // no previous tab
+      reallyShowInitialState();
     } else {
-      selectPreviousTab(value);
+      selectPreviousTab();
     }
   }
 
-  public void refreshInitialState() {
-    String value = storage.getValue(CLICKED_TAB);
-    if (value.isEmpty()) {   // no previous tab
-      showDefaultInitialTab();
+  void reallyShowInitialState() {
+    service.getListsForUser(userManager.getUser(), true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Collection<UserList<CommonShell>> result) {
+        if (result.size() == 1 && // if only one empty list - one you've created
+            result.iterator().next().isEmpty()) {
+          // choose default tab to show
+          showDefaultInitialTab(true);
+        } else {
+          boolean foundCreated = false;
+          for (UserList<?> ul : result) {
+            if (createdByYou(ul)) {
+              foundCreated = true;
+              break;
+            }
+          }
+          listManager.showMyLists(foundCreated, !foundCreated);
+        }
+      }
+    });
+  }
+
+  /**
+   *
+   */
+  public void showPreviouslySelectedTab() {
+    if (noPrevClickedTab()) {   // no previous tab
+      showDefaultInitialTab(true);
     } else {
-      selectPreviousTab(value);
+      selectPreviousTab();
     }
+  }
+
+  private void checkAndMaybeClearTab(String value) {
+//    String value1 = getClickedTab();
+//    logger.info("checkAndMaybeClearTab " + value1 + " vs " + value + " clearing " + CLICKED_USER_LIST);
+    storage.removeValue(CLICKED_USER_LIST);
+    storage.storeValue(CLICKED_TAB, value);
+  }
+
+  private boolean noPrevClickedTab() {
+    String value = getClickedTab();
+  //  logger.info("selected tab = " + value);
+    return value.isEmpty();
+  }
+
+  private String getClickedTab() {
+    return storage.getValue(CLICKED_TAB);
   }
 
   /**
    * @see #showInitialState()
    */
-  private void selectPreviousTab(String value) {
+  private void selectPreviousTab() {
+    String value = getClickedTab();
     TabAndContent tabAndContent = nameToTab.get(value);
     Integer tabIndex = nameToIndex.get(value);
 
@@ -558,32 +614,34 @@ public class Navigation implements RequiresResize, ShowTab {
         showStudentAnalysis();
       } else {
         logger.info("selectPreviousTab got unknown value '" + value + "'");
-        showDefaultInitialTab();
+        showDefaultInitialTab(true);
       }
     } else {
       logger.warning("selectPreviousTab : found value  '" + value + "' " +
           " but I only know about tabs : " + nameToIndex.keySet());
-      showDefaultInitialTab();
+      showDefaultInitialTab(false);
     }
   }
 
   /**
    * What to do when we don't know which tab to select
    * Right now show the learn pronunciation tab.
+   * @param setClickedStorage
    */
-  public void showDefaultInitialTab() {
-    checkAndMaybeClearTab(CHAPTERS);
+  public void showDefaultInitialTab(boolean setClickedStorage) {
+    if (setClickedStorage) {
+      checkAndMaybeClearTab(CHAPTERS);
+    }
     learnHelper.showNPF(chapters, LEARN);
 
     TabAndContent tabAndContent = nameToTab.get(CHAPTERS);
-    Integer tabIndex = nameToIndex.get(CHAPTERS);
-    tabPanel.selectTab(tabIndex);
+    tabPanel.selectTab(nameToIndex.get(CHAPTERS));
     clickOnTab(tabAndContent);
   }
 
   @Override
   public void showLearnAndItem(String id) {
-    if (id.startsWith("Custom")) {
+    if (id.startsWith(CUSTOM)) {
       tabPanel.selectTab(STUDY_LISTS_INDEX);
       DivWidget content = studyLists.getContent();
       Widget widget = content.getWidget(0);
@@ -591,7 +649,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
       listManager.findListAndSelect(id);
     } else {
-      showDefaultInitialTab();
+      showDefaultInitialTab(true);
 
       boolean b = learnHelper.getExerciseList().loadByID(id);
     }
@@ -602,7 +660,7 @@ public class Navigation implements RequiresResize, ShowTab {
    * @seex #clickOnYourLists(long)
    * @seex #selectPreviouslyClickedSubTab(com.github.gwtbootstrap.client.ui.TabPanel, TabAndContent, TabAndContent, TabAndContent, mitll.langtest.shared.custom.UserList, String, boolean, boolean, boolean, boolean)
    * @seex #showMyLists
-   * @see #selectPreviousTab(String)
+   * @see #selectPreviousTab
    */
   private void clickOnTab(final TabAndContent toUse) {
     if (toUse == null) {
