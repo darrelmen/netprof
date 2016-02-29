@@ -27,7 +27,6 @@ import mitll.langtest.client.instrumentation.EventRegistration;
  * Created by go22670 on 10/2/14.
  */
 public class ResetPassword extends UserDialog {
-
   private static final int MIN_PASSWORD = 4;
 
   private static final String PASSWORD = "Password";
