@@ -4,6 +4,7 @@
 
 package mitll.langtest.client.custom;
 
+import com.github.gwtbootstrap.client.ui.Container;
 import com.github.gwtbootstrap.client.ui.TabLink;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -114,7 +115,7 @@ public class Navigation implements RequiresResize, ShowTab {
    * @param controller
    * @param feedback
    * @paramx predefinedContentList
-   * @see mitll.langtest.client.LangTest#populateRootPanel()
+   * @see mitll.langtest.client.InitialUI#populateBelowHeader(Container, Panel)
    */
   public Navigation(final LangTestDatabaseAsync service, final UserManager userManager,
                     final ExerciseController controller, UserFeedback feedback) {
