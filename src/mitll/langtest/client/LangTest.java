@@ -17,8 +17,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.HasClickHandlers;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -97,7 +95,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final String DIVIDER = "|";
   private static final int MAX_EXCEPTION_STRING = 300;
   private static final int MAX_CACHE_SIZE = 100;
-  private static final int NO_USER_INITIAL = -2;
 
   private UserManager userManager;
   private FlashRecordPanelHeadless flashRecordPanel;
@@ -170,7 +167,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void onUncaughtException(Throwable throwable) {
         /*String exceptionAsString =*/
         logException(throwable);
-
  /*       if (SHOW_EXCEPTION_TO_USER) {
           if (exceptionAsString.length() > 0) {
             new ExceptionHandlerDialog().showExceptionInDialog(browserCheck, exceptionAsString);
@@ -295,8 +291,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     RootPanel.get().getElement().getStyle().setPaddingTop(2, Style.Unit.PX);
 
-    addResizeHandler();
-
     makeFlashContainer();
 
     if (props.isAMAS()) {
@@ -379,19 +373,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void setupSoundManager() {
     soundManager = new SoundManagerStatic();
-  }
-
-  /**
-   * Tell the exercise list when the browser window changes size
-   *
-   * @paramx widgets
-   */
-  private void addResizeHandler() {
-    Window.addResizeHandler(new ResizeHandler() {
-      public void onResize(ResizeEvent event) {
-        initialUI.onResize();
-      }
-    });
   }
 
   public int getHeightOfTopRows() {
@@ -658,10 +639,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public int getRecordTimeout() {
     return props.getRecordTimeout();
-  }
-
-  public boolean isGrading() {
-    return props.isGrading();
   }
 
   public boolean isLogClientMessages() {
