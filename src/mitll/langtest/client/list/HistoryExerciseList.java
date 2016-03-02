@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class HistoryExerciseList<T extends CommonShell, U extends Shell> extends PagingExerciseList<T, U> {
-  private Logger logger = Logger.getLogger("HistoryExerciseList");
+  private final Logger logger = Logger.getLogger("HistoryExerciseList");
 
   public static final String ANY = "Clear";
   protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
@@ -115,7 +115,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell> extends
    * @see ListInterface#loadExercise(String)
    * @see #pushFirstSelection(String)
    */
-  protected void pushNewItem(String search, String exerciseID) {
+  void pushNewItem(String search, String exerciseID) {
     if (DEBUG) logger.info("------------ HistoryExerciseList.pushNewItem : -- " + search + " : " + exerciseID);
 
     String historyToken = getHistoryToken(search, exerciseID);
