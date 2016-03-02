@@ -1387,6 +1387,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     getReport("").doReport(serverProps, site, mailSupport, pathHelper);
   }
 
+  /**
+   * @see mitll.langtest.server.ScoreServlet#getReport(JSONObject, int)
+   * @param year
+   * @param jsonObject
+   * @return
+   */
   public String getReport(int year, JSONObject jsonObject) {
     return getReport("").getReport(jsonObject, year);
   }
@@ -1470,7 +1476,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public Map<String, Float> getMaleFemaleProgress() {
     UserDAO userDAO = getUserDAO();
-    Map<Long, User> userMapMales = userDAO.getUserMap(true);
+    Map<Long, User> userMapMales   = userDAO.getUserMap(true);
     Map<Long, User> userMapFemales = userDAO.getUserMap(false);
 
     Collection<? extends CommonShell> exercises = getExercises();
