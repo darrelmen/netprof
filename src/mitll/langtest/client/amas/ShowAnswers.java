@@ -15,11 +15,11 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 10/1/15.
  */
-public class ShowAnswers {
-  private Logger logger = Logger.getLogger("ShowAnswers");
+class ShowAnswers {
+  private final Logger logger = Logger.getLogger("ShowAnswers");
 
   private static final String TWO_SPACES = "&nbsp;&nbsp;";
-  private String language;
+  private final String language;
 
   /**
    * @see AmasExercisePanel#showAnswers(QAPair, HasWidgets, String, String)
@@ -53,7 +53,7 @@ public class ShowAnswers {
    * @return
    * @see mitll.langtest.client.result.ResultManager#getAsyncTable(int, Widget)
    */
-  public Grid getGridOfAnswers(Collection<String> alternateAnswers) {
+  private Grid getGridOfAnswers(Collection<String> alternateAnswers) {
     Collection<String> copy = trim(alternateAnswers);
     int n = copy.size();
     float fn = ((float) n) / 3;
@@ -97,7 +97,7 @@ public class ShowAnswers {
     return grid;
   }
 
-  Grid getOneAnswer(Collection<String> alternateAnswers, String h4Prefix) {
+  private Grid getOneAnswer(Collection<String> alternateAnswers, String h4Prefix) {
     SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder().appendHtmlConstant("<b>Answer" + TWO_SPACES + "</b>");
     Grid grid = new Grid(1, 2);
     grid.addStyleName(language);
