@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 9/8/14.
  */
 public class SetCompleteDisplay {
-  public static final String PRONUNCIATION = "Pronunciation ";
+  private static final String PRONUNCIATION = "Pronunciation ";
   private final Logger logger = Logger.getLogger("SetCompleteDisplay");
 
   private static final String CORRECT_NBSP = "Correct&nbsp;%";

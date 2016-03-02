@@ -23,9 +23,9 @@ import java.util.logging.Logger;
  * Time: 5:45 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AudioExerciseContent {
-  public static final boolean SHOW_ID = true;
-  private Logger logger = Logger.getLogger("AudioExerciseContent");
+class AudioExerciseContent {
+  private static final boolean SHOW_ID = true;
+  private final Logger logger = Logger.getLogger("AudioExerciseContent");
   private static final String QUESTION = "question";
   private static final String QUESTION_HEADING = "h4";
   private static final String ITEM = "Passage";
