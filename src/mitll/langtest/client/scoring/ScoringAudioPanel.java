@@ -205,7 +205,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
     //if (ADD_CHECKBOX) wordTranscript.getCheck().setVisible(true);
   }
 
-  void getClickedOnSegment(int eventXPos, NetPronImageType type, EventSegment onClick) {
+  private void getClickedOnSegment(int eventXPos, NetPronImageType type, EventSegment onClick) {
     //int index = 0;
     List<TranscriptSegment> transcriptSegments = result.getsTypeToEndTimes().get(type);
     float wavFileLengthInSeconds = result.getWavFileLengthInSeconds();//transcriptSegments.get(transcriptSegments.size() - 1);
