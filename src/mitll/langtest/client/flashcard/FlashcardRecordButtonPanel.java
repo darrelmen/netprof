@@ -30,7 +30,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   private IconAnchor waiting;
   private IconAnchor correctIcon;
   private IconAnchor incorrect;
-  protected final String instance;
+  private final String instance;
 
   /**
    * @param exercisePanel
