@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class FlexSectionExerciseList extends NPExerciseList {
-  private Logger logger = Logger.getLogger("FlexSectionExerciseList");
+  private final Logger logger = Logger.getLogger("FlexSectionExerciseList");
   private static final int LABEL_MARGIN_BOTTOM = 10;
 
   private static final int HEADING_FOR_LABEL = 4;
@@ -71,10 +71,10 @@ public class FlexSectionExerciseList extends NPExerciseList {
    * @param incorrectFirst
    * @see NPFlexSectionExerciseList#NPFlexSectionExerciseList
    */
-  public FlexSectionExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
-                                 UserFeedback feedback,
-                                 ExerciseController controller,
-                                 String instance, boolean incorrectFirst) {
+  protected FlexSectionExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
+                                    UserFeedback feedback,
+                                    ExerciseController controller,
+                                    String instance, boolean incorrectFirst) {
     super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst);
 
     sectionPanel = new FluidContainer();

@@ -51,7 +51,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class QCNPFExercise<T extends CommonShell & AudioRefExercise & AnnotationExercise & ScoredExercise> extends GoodwaveExercisePanel<T> {
-  private Logger logger = Logger.getLogger("QCNPFExercise");
+  private final Logger logger = Logger.getLogger("QCNPFExercise");
 
   private static final String DEFECT = "Defect?";
 
@@ -73,8 +73,8 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   private static final String ATTENTION_LL = "Attention LL";
   private static final String MARK_FOR_LL_REVIEW = "Mark for review by Lincoln Laboratory.";
 
-  public static final int DEFAULT_MALE_ID = -2;
-  public static final int DEFAULT_FEMALE_ID = -3;
+  private static final int DEFAULT_MALE_ID = -2;
+  private static final int DEFAULT_FEMALE_ID = -3;
   private static final MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, 0, "Male", false);
   private static final MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, "Female", false);
 
@@ -499,10 +499,10 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     return w;
   }
 
-  public void markGender(final MiniUser defaultFemale, final Button offButton,
-                         final AudioAttribute audio, final RememberTabAndContent tabAndContent,
-                         final List<AudioAttribute> allByUser, final Button next,
-                         boolean isMale) {
+  private void markGender(final MiniUser defaultFemale, final Button offButton,
+                          final AudioAttribute audio, final RememberTabAndContent tabAndContent,
+                          final List<AudioAttribute> allByUser, final Button next,
+                          boolean isMale) {
     offButton.setEnabled(false);
 
     service.markGender(audio, isMale, new AsyncCallback<Void>() {
@@ -519,13 +519,13 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     });
   }
 
-  protected void showGenderChange(Button onButton, RememberTabAndContent tabAndContent, List<AudioAttribute> allByUser, Button next) {
+  private void showGenderChange(Button onButton, RememberTabAndContent tabAndContent, List<AudioAttribute> allByUser, Button next) {
     onButton.setEnabled(true);
     tabAndContent.getTab().setHeading(getTabLabelFromAudio(allByUser));
     next.setVisible(true);
   }
 
-  protected String getTabLabelFromAudio(List<AudioAttribute> allByUser) {
+  private String getTabLabelFromAudio(List<AudioAttribute> allByUser) {
     StringBuilder builder = new StringBuilder();
     AudioAttribute last = allByUser.get(allByUser.size() - 1);
     for (AudioAttribute audioAttribute : allByUser) {
