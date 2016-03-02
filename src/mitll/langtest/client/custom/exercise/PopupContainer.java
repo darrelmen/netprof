@@ -16,7 +16,7 @@ import mitll.langtest.client.PopupHelper;
 /**
  * Created by go22670 on 9/8/14.
  */
-public class PopupContainer {
+class PopupContainer {
   private final PopupHelper popupHelper = new PopupHelper();
 
   /**
@@ -105,9 +105,9 @@ public class PopupContainer {
    * @param textBox comment box to configure
    * @return
    */
-  protected FocusWidget configureTextBox(String initialText,
-                                         final HidePopupTextBox textBox,
-                                         final PopupPanel popup) {
+  void configureTextBox(String initialText,
+                               final HidePopupTextBox textBox,
+                               final PopupPanel popup) {
     if (initialText != null) {
       textBox.setText(initialText);
       if (textBox.getVisibleLength() < initialText.length()) {
@@ -118,7 +118,7 @@ public class PopupContainer {
     textBox.addStyleName("leftFiveMargin");
     textBox.configure(popup);
 
-    return textBox;
+    //return textBox;
   }
 
   public static class HidePopupTextBox extends TextBox {
@@ -136,7 +136,7 @@ public class PopupContainer {
         }
       });
     }
-    protected void onEnter() {
+    void onEnter() {
     }
   }
 }

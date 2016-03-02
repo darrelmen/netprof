@@ -39,7 +39,7 @@ public class ResetPassword extends UserDialog {
   private static final String CHANGE_PASSWORD = "Change Password";
   private static final String CHOOSE_A_NEW_PASSWORD = "Choose a new password";
   private final EventRegistration eventRegistration;
-  private KeyPressHelper enterKeyButtonHelper;
+  private final KeyPressHelper enterKeyButtonHelper;
 
   public ResetPassword(LangTestDatabaseAsync service, PropertyHandler props, EventRegistration eventRegistration) {
     super(service, props);
