@@ -53,18 +53,18 @@ public class EditItem {
   public static final String NEW_EXERCISE_ID = "NewExerciseID";
   private static final String EDIT_ITEM = "editItem";
 
-  protected final ExerciseController controller;
-  protected final LangTestDatabaseAsync service;
+  private final ExerciseController controller;
+  private final LangTestDatabaseAsync service;
   private final UserManager userManager;
 
-  protected final ReloadableContainer predefinedContentList;
+  private final ReloadableContainer predefinedContentList;
 
   private UserFeedback feedback = null;
   private HasText itemMarker;
 
-  protected PagingExerciseList<CommonShell, CommonExercise> exerciseList;
+  private PagingExerciseList<CommonShell, CommonExercise> exerciseList;
   // protected final NPFHelper npfHelper;
-  protected final String instanceName;
+  private final String instanceName;
 
   /**
    * @param service
@@ -122,8 +122,7 @@ public class EditItem {
   }
 
   private UserList<CommonShell> makeListOfOnlyYourItems(UserList<CommonShell> toCopy) {
-    UserList<CommonShell> copy = toCopy.getCopy();
-    return copy;
+    return toCopy.getCopy();
   }
 
   /**
