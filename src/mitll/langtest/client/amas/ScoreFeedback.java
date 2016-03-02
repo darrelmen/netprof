@@ -18,7 +18,7 @@ import mitll.langtest.client.sound.SoundFeedback;
  * Time: 6:02 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ScoreFeedback {
+class ScoreFeedback {
   private IconAnchor feedbackImage;
   private Panel scoreFeedbackColumn;
   private final ProgressBar scoreFeedback = new ProgressBar();
