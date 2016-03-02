@@ -36,7 +36,7 @@ public class CommentBox extends PopupContainer {
   private final CommentAnnotator commentAnnotator;
   private final EventRegistration registration;
   private MyPopup commentPopup;
-  private MutableAnnotationExercise annotationExercise;
+  private final MutableAnnotationExercise annotationExercise;
 
   /**
    * @param exerciseID
@@ -225,7 +225,7 @@ public class CommentBox extends PopupContainer {
     return addTooltip(button, tip);
   }
 
-  private final Map<String, String> fieldToComment = new HashMap<String, String>();
+  private final Map<String, String> fieldToComment = new HashMap<>();
 
   /**
    * @see #configureCommentButton(Button, boolean, PopupPanel, String, TextBox)
@@ -275,7 +275,7 @@ public class CommentBox extends PopupContainer {
     }
   }
 
-  protected Tooltip addTooltip(Widget w, String tip) {
+  private Tooltip addTooltip(Widget w, String tip) {
     return new TooltipHelper().addTooltip(w, tip);
   }
 }
