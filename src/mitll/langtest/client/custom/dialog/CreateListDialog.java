@@ -30,9 +30,9 @@ public class CreateListDialog extends BasicDialog {
   private static final String PRACTICE = "Practice";
 
   private static final String CLASS = "Course Info (optional)";
-  public static final String CREATE_LIST = "Create List";
-  public static final String TITLE = "Title";
-  public static final String DESCRIPTION_OPTIONAL = "Description (optional)";
+  private static final String CREATE_LIST = "Create List";
+  private static final String TITLE = "Title";
+  private static final String DESCRIPTION_OPTIONAL = "Description (optional)";
 /*  private static final boolean REQUIRE_DESC = false;
   private static final boolean REQUIRE_CLASS = false;*/
 
