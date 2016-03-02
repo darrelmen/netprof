@@ -345,11 +345,9 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
    */
   @Override
   public void timeChanged(long from, long to) {
- //   List<WordScore> filtered = new ArrayList<>();
     if (from == 0) {
       heading.setSubtext("");
       addItems(sortedHistory);
-   //   logger.info("Starting from 0");
     }
     else {
      // logger.info("Starting from " +from + " : " +to);
