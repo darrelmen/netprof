@@ -39,10 +39,10 @@ import java.util.logging.Logger;
  */
 public class FeedbackRecordPanel extends AmasExercisePanel {
   private Logger logger = Logger.getLogger("FeedbackRecordPanel");
-  public static final boolean INCLUDE_EXERCISE_ID = true;
+  private static final boolean INCLUDE_EXERCISE_ID = true;
 
   private static final String CHECK_ANSWER = "Check Answer";
-  public static final int CONTENT_WIDTH = 535;
+  private static final int CONTENT_WIDTH = 535;
 
   /**
    * We don't want to grab the focus since we also have a list search box which would magically lose the focus.
@@ -51,8 +51,8 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
   private static final String WERE_YOU_RIGHT = "Were you right?";
   private static final String AUDIO = "Audio";
   private List<TextResponse> textResponses;
-  private QuizScorePanel quizScorePanel;
-  private Set<Integer> selfScoreQuestions = new HashSet<Integer>();
+  private final QuizScorePanel quizScorePanel;
+  private final Set<Integer> selfScoreQuestions = new HashSet<Integer>();
 
   /**
    * @param e

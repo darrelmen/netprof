@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 public class InitialUI {
   private final Logger logger = Logger.getLogger("InitialUI");
 
-  public static final String LOGIN = "Login";
+  protected static final String LOGIN = "Login";
 
   /**
    * How far to the right to shift the list of sites...
@@ -331,7 +331,7 @@ public class InitialUI {
   /**
    * @see LangTest#addResizeHandler()
    */
-  public void onResize() {
+  protected void onResize() {
     if (navigation != null) navigation.onResize();
     if (flashcard != null) {
       flashcard.onResize();
@@ -345,7 +345,7 @@ public class InitialUI {
    * @return false if we didn't do either of the special pages and should do the normal navigation view
    * @see #populateRootPanel()
    */
-  public boolean showLogin() {
+  protected boolean showLogin() {
     final EventRegistration eventRegistration = langTest;
 
     // check if we're here as a result of resetting a password
@@ -506,7 +506,7 @@ public class InitialUI {
    * @return
    * @see #gotUser
    */
-  public void configureUIGivenUser(long userID) {
+  protected void configureUIGivenUser(long userID) {
 //    logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser +
 //        " audio type " + getAudioType() + " perms " + getPermissions());
     populateRootPanelIfLogin();
