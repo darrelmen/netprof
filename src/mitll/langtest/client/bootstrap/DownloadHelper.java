@@ -21,7 +21,7 @@ import java.util.Map;
 /**
  * Created by go22670 on 11/16/15.
  */
-public class DownloadHelper {
+class DownloadHelper {
   private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet and audio for selected sections.";
   private static final String DOWNLOAD_AUDIO = "downloadAudio";
 
