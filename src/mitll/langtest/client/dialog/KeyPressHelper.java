@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class KeyPressHelper {
-  private Logger logger = Logger.getLogger("KeyPressHelper");
+  private final Logger logger = Logger.getLogger("KeyPressHelper");
 
   private final boolean removeOnEnter;
   private HandlerRegistration keyHandler;
@@ -86,7 +86,7 @@ public class KeyPressHelper {
     }
   }
 
-  protected void makeKeyHandler() {
+  private void makeKeyHandler() {
     keyHandler = Event.addNativePreviewHandler(new
                                                    Event.NativePreviewHandler() {
 

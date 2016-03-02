@@ -37,11 +37,11 @@ import java.util.Map;
  *  TODO : make PostAudioRecordButton extend this class.
  */
 public abstract class SimplePostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
-  public static final String RELEASE_TO_STOP = "Release";// to stop";
+  private static final String RELEASE_TO_STOP = "Release";// to stop";
   private boolean validAudio = false;
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
   private int reqid = 0;
-  protected final ExerciseController controller;
+  private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final String textToAlign;
   private final String identifier;
@@ -68,8 +68,8 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
    * @param textToAlign to align the audio to
    * @param identifier  optional, but if you want to associate the audio with an item "e.g. Dialog Item #3".
    */
-  public SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
-                                     String textToAlign, String identifier) {
+  private SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
+                                      String textToAlign, String identifier) {
     this(controller, service, "Record", RELEASE_TO_STOP, textToAlign, identifier);
   }
 
@@ -80,8 +80,8 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
    * @param stopButtonTitle
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
    */
-  public SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
-                                     String recordButtonTitle, String stopButtonTitle, String textToAlign, String identifier) {
+  private SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
+                                      String recordButtonTitle, String stopButtonTitle, String textToAlign, String identifier) {
     super(controller.getRecordTimeout(), true, recordButtonTitle, stopButtonTitle, controller.getProps());
     setRecordingListener(this);
     this.controller = controller;
@@ -103,7 +103,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
       }
     }); }
 
-  protected void postAudioFile(String base64EncodedWavFile) {
+  private void postAudioFile(String base64EncodedWavFile) {
     reqid++;
 
     service.getAlignment(base64EncodedWavFile,
@@ -113,7 +113,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
         controller.getBrowserInfo(), getAlignmentCallback());
   }
 
-  protected AsyncCallback<AudioAnswer> getAlignmentCallback() {
+  private AsyncCallback<AudioAnswer> getAlignmentCallback() {
     final long then = System.currentTimeMillis();
 
     return new AsyncCallback<AudioAnswer>() {

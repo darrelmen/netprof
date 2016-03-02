@@ -29,7 +29,7 @@ import java.util.List;
  * @author Raymond Budd <a href=mailto:raymond.budd@ll.mit.edu>raymond.budd@ll.mit.edu</a>
  * @since May 16, 2013 3:43:26 PM
  */
-public class DecoratedFields {
+class DecoratedFields {
 //  protected static final Logger log = Logger.getLogger(DecoratedFields.class.getName());
 
   private ControlGroup ctrlGroup;
@@ -45,8 +45,8 @@ public class DecoratedFields {
     this(mainLabel, control, null, null);
   }
 
-  public DecoratedFields(String mainLabel, Widget control,
-                         String helpMsg, IconType labelIcon) {
+  private DecoratedFields(String mainLabel, Widget control,
+                          String helpMsg, IconType labelIcon) {
     List<Widget> controls = new ArrayList<Widget>();
     if (control != null) {
       controls.add(control);
@@ -66,7 +66,7 @@ public class DecoratedFields {
     System.out.println("info " + warn);
   }
 
-  public DecoratedFields(String mainLabel, Widget[] controlArr, String helpMsg, IconType labelIcon) {
+  private DecoratedFields(String mainLabel, Widget[] controlArr, String helpMsg, IconType labelIcon) {
     List<Widget> controls = new ArrayList<Widget>();
     if (controlArr != null) {
       for (int i = 0; i < controlArr.length; i++) {
@@ -84,8 +84,8 @@ public class DecoratedFields {
     init(mainLabel, controls, null, null);
   }
 
-  protected void init(String mainLabel, List<Widget> controls,
-                      String helpMsg, IconType labelIcon) {
+  private void init(String mainLabel, List<Widget> controls,
+                    String helpMsg, IconType labelIcon) {
     ctrlGroup = new ControlGroup();
     Controls ctrls = new Controls();
     ctrls.setControlsRow(true);
@@ -158,11 +158,11 @@ public class DecoratedFields {
     setMessage(helpMsg);
   }
 
-  public void setError(String errMsg) {
+  private void setError(String errMsg) {
     setMessage(errMsg, ControlGroupType.ERROR);
   }
 
-  public void setMessage(String newMsg) {
+  private void setMessage(String newMsg) {
     setMessage(newMsg, ControlGroupType.NONE);
   }
 
@@ -187,7 +187,7 @@ public class DecoratedFields {
     return label != null;
   }
 
-  public ControlLabel getLabel() {
+  private ControlLabel getLabel() {
     return label;
   }
 
@@ -195,11 +195,11 @@ public class DecoratedFields {
     return messageLocation;
   }
 
-  public List<Widget> getControls() {
+  private List<Widget> getControls() {
     return controls;
   }
 
-  public Widget getPrimaryControl() {
+  private Widget getPrimaryControl() {
     return (controls.size() > 0) ? controls.get(0) : null;
   }
 
@@ -219,7 +219,7 @@ public class DecoratedFields {
     return performBasicValidate(0);
   }
 
-  public boolean performBasicValidate(int minLength) {
+  private boolean performBasicValidate(int minLength) {
     this.clearError();
     String msg = null;
 
@@ -264,7 +264,7 @@ public class DecoratedFields {
    * @return the value, or null if the field is not of the required type,
    * or has no value
    */
-  public Object getValue() {
+  private Object getValue() {
     Widget w = getPrimaryControl();
     if (w instanceof HasValue<?>) {
       HasValue<?> valw = (HasValue<?>) w;
