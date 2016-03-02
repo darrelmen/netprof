@@ -16,24 +16,29 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
-import mitll.langtest.client.exercise.*;
+import mitll.langtest.client.exercise.ClickablePagingContainer;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.exercise.WaveformExercisePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 
 import java.util.Collection;
 import java.util.Map;
 
 /**
  * Sets up recording both ref recordings and context ref recordings.
- *
+ * <p>
  * Created by go22670 on 2/10/15.
- *
+ * <p>
  * <T extends CommonShell & AudioRefExercise>
  */
-class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell,CommonExercise> {
+class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
   private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
 
   private final boolean doNormalRecording;
@@ -55,9 +60,9 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell,CommonExercis
   }
 
   @Override
-  protected ExercisePanelFactory<CommonShell,CommonExercise> getFactory(final PagingExerciseList<CommonShell,CommonExercise> exerciseList) {
+  protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
     final String oinstance = exerciseList.getInstance();
-    return new ExercisePanelFactory<CommonShell,CommonExercise>(service, feedback, controller, exerciseList) {
+    return new ExercisePanelFactory<CommonShell, CommonExercise>(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(final CommonExercise e) {
         return new MyWaveformExercisePanel(e, controller, exerciseList, oinstance);
@@ -66,15 +71,16 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell,CommonExercis
   }
 
   @Override
-  protected FlexListLayout<CommonShell,CommonExercise> getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                                           final UserManager userManager, ExerciseController controller,
-                                           SimpleChapterNPFHelper<CommonShell,CommonExercise> outer) {
-    return new MyFlexListLayout<CommonShell,CommonExercise>(service, feedback, controller, outer) {
+  protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
+                                                                        final UserManager userManager, ExerciseController controller,
+                                                                        SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
+    return new MyFlexListLayout<CommonShell, CommonExercise>(service, feedback, controller, outer) {
 
       final FlexListLayout outerLayout = this;
+
       @Override
-      protected PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
-                                                                                boolean incorrectFirst) {
+      protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
+                                                                                 boolean incorrectFirst) {
         return new NPFlexSectionExerciseList(outerLayout, topRow, currentExercisePanel, instanceName, incorrectFirst) {
           private CheckBox filterOnly;
 
@@ -119,7 +125,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell,CommonExercis
   }
 
 
-  private final FlexTable flex = new FlexTable();
+  private final RecordingProgressTable flex = new RecordingProgressTable();
 
   private Widget doMaleFemale() {
     flex.addStyleName("topMargin");
@@ -130,69 +136,17 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell,CommonExercis
   private void getProgressInfo() {
     service.getMaleFemaleProgress(new AsyncCallback<Map<String, Float>>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
       public void onSuccess(Map<String, Float> result) {
-        populateProgressReport(result);
+        flex.populate(result);
       }
     });
   }
 
-  private void populateProgressReport(Map<String, Float> result) {
-    float total = result.get("total");
-
-    //  logger.debug("ref audio coverage " + result);
-//         System.out.println("\n\n\nref audio coverage " + result);
-
-    int r = 0;
-    int col = 0;
-
-    String sp = "&nbsp;";
-    String p = "<b>";
-    String s = "</b>" + sp;
-    flex.setHTML(r, col++, "Male ");
-    flex.setHTML(r, col++, sp + result.get("male").intValue() + "");
-    flex.setHTML(r, col++, p + getPercent(result.get("male"), total) + "%" + s);
-
-    flex.setHTML(r, col++, "regular");
-    flex.setHTML(r, col++, sp + result.get("maleFast").intValue());
-    flex.setHTML(r, col++, p + getPercent(result.get("maleFast"), total) + "%" + s);
-
-    flex.setHTML(r, col++, "slow");
-    flex.setHTML(r, col++, sp + result.get("maleSlow").intValue());
-    flex.setHTML(r++, col++, p + getPercent(result.get("maleSlow"), total) + "%" + s);
-
-    col = 0;
-    flex.setHTML(r, col++, "Female");
-    flex.setHTML(r, col++, sp + result.get("female").intValue());
-    flex.setHTML(r, col++, p + getPercent(result.get("female"), total) + "%" + s);
-
-    flex.setHTML(r, col++, "regular");
-    flex.setHTML(r, col++, sp + result.get("femaleFast").intValue());
-    flex.setHTML(r, col++, p + getPercent(result.get("femaleFast"), total) + "%" + s);
-
-    flex.setHTML(r, col++, "slow");
-    flex.setHTML(r, col++, sp + result.get("femaleSlow").intValue());
-    flex.setHTML(r++, col++, p + getPercent(result.get("femaleSlow"), total) + "%" + s);
-    col = 0;
-
-    flex.setHTML(r, col++, "Context Male ");
-    flex.setHTML(r, col++, sp + result.get("maleContext").intValue() + "");
-    flex.setHTML(r, col++, p + getPercent(result.get("maleContext"), total) + "%" + s);
-
-    flex.setHTML(r, col++, "Female");
-    flex.setHTML(r, col++, sp + result.get("femaleContext").intValue() + "");
-    flex.setHTML(r, col++, p + getPercent(result.get("femaleContext"), total) + "%" + s);
-    // do the next one...
-  }
-
-  private int getPercent(Float male, float total) {
-    float ratio = total > 0 ? male / (total) : 0;
-    return (int) (ratio * 100f);
-  }
-
-  private class MyWaveformExercisePanel extends WaveformExercisePanel<CommonShell,CommonExercise> {
+  private class MyWaveformExercisePanel extends WaveformExercisePanel<CommonShell, CommonExercise> {
     private final CommonExercise e; // TODO REMOVE!
 
     public MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface<CommonShell> exerciseList1, String instance) {
@@ -218,9 +172,9 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell,CommonExercis
     }
 
     /**
-     * @see RecorderNPFHelper.MyWaveformExercisePanel#postAnswers
      * @param controller
      * @param completedExercise
+     * @see RecorderNPFHelper.MyWaveformExercisePanel#postAnswers
      */
     @Override
     public void postAnswers(ExerciseController controller, HasID completedExercise) {
