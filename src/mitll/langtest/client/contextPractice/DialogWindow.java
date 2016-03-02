@@ -539,7 +539,7 @@ public class DialogWindow implements  DialogViewer {
     TooltipHelper tooltipHelper = new TooltipHelper();
     bar.setWidth(iscore + "px");
     bar.setHeight(HEIGHT + "px");
-    bar.getElement().getStyle().setBackgroundColor(chart.getColor(score));
+    bar.getElement().getStyle().setBackgroundColor(SimpleColumnChart.getColor(score));
     bar.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
 
     tooltipHelper.createAddTooltip(bar, "Score " + score + "%", Placement.BOTTOM);

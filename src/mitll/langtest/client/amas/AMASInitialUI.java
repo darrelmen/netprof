@@ -49,9 +49,6 @@ public class AMASInitialUI extends InitialUI {
      */
     firstRow.add(langTest.getFlashRecordPanel());
     langTest.modeSelect();
-    //logger.info("populateBelowHeader");
-
-    //  TODO : FIX ME
     learnHelper = new AutoCRTChapterNPFHelper(service, langTest, null, langTest);
     learnHelper.addNPFToContent(firstRow, "");
   }
@@ -67,7 +64,7 @@ public class AMASInitialUI extends InitialUI {
    */
   @Override
   public void populateRootPanelIfLogin() {
-    logger.info("populateRootPanelIfLogin");
+//    logger.info("populateRootPanelIfLogin");
     if (!props.isOdaMode()) {
       int childCount = firstRow.getElement().getChildCount();
       // logger.info("populateRootAfterLogin root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
@@ -89,9 +86,8 @@ public class AMASInitialUI extends InitialUI {
    * Then only show the content part of it...
    *
    * @return
-   * @see #onModuleLoad2()
    * @see #showLogin
-   * @see #populateRootAfterLogin()
+   * @see #populateRootPanelIfLogin()
    */
   private void populateRootPanel() {
     Container verticalContainer = getRootContainer();
