@@ -44,7 +44,7 @@ import java.util.logging.Logger;
 class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExercise & MutableAnnotationExercise> extends HorizontalPanel {
   private final Logger logger = Logger.getLogger("FlashcardPanel");
 
-  protected static final String PLAYING_AUDIO_HIGHLIGHT = "playingAudioHighlight";
+  static final String PLAYING_AUDIO_HIGHLIGHT = "playingAudioHighlight";
   private static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. " +
       "Do you have a flashblocker? Please add this site to its whitelist.</font>";
 
