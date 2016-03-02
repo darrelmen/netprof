@@ -118,7 +118,7 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
     }
   }
 
-  void clickPrev(HasID e) {
+  private void clickPrev(HasID e) {
     if (getPrev().isEnabled() && getPrev().isVisible()) {
       getPrev().setEnabled(false);
       listContainer.loadPreviousExercise(e);
@@ -132,7 +132,7 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
    * @param controller
    * @param exercise
    */
-  void clickNext(ExerciseController controller, HasID exercise) {
+  private void clickNext(ExerciseController controller, HasID exercise) {
     if (next.isEnabled() && next.isVisible()) {
       if (provider != null) {
         provider.postAnswers(controller, exercise);
@@ -140,7 +140,7 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
     }
   }
 
-  protected String getNextButtonText() {
+  private String getNextButtonText() {
     return "Next";
   }
 
@@ -149,5 +149,5 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
   }
 
   public Widget getNext() { return next; }
-  public Button getPrev() { return prev; }
+  private Button getPrev() { return prev; }
 }
