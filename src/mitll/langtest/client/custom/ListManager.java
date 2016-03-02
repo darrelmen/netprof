@@ -120,9 +120,9 @@ public class ListManager implements RequiresResize {
       }
     });
 
-    npfHelper  = new NPFHelper(service, feedback, userManager, controller, false);
-    reviewItem = new ReviewItemHelper(service, feedback, userManager, controller, exerciseList);//, npfHelper);
-    avpHelper  = new AVPHelper(service, feedback, userManager, controller);
+    npfHelper  = new NPFHelper(service, feedback, controller, false);
+    reviewItem = new ReviewItemHelper(service, feedback, controller, exerciseList);//, npfHelper);
+    avpHelper  = new AVPHelper(service, feedback, controller);
     editItem   = new EditItem(service, userManager, controller, exerciseList, feedback);//, npfHelper);
   }
 
@@ -454,8 +454,7 @@ public class ListManager implements RequiresResize {
 
     container.add(r1);
 
-    TabPanel listOperations = getListOperations(ul, instanceName, toSelect);
-    container.add(listOperations);
+    container.add(getListOperations(ul, instanceName, toSelect));
     return container;
   }
 
