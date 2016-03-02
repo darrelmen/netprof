@@ -35,8 +35,8 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 10/19/15.
  */
-public class AnalysisPlot extends TimeSeriesPlot {
-  public static final int MIN_SESSION_COUNT = 50;
+class AnalysisPlot extends TimeSeriesPlot {
+  private static final int MIN_SESSION_COUNT = 50;
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
   private static final int X_OFFSET_LEGEND = 65;

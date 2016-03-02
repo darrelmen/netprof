@@ -27,19 +27,19 @@ public class SimplePagingContainer<T> implements RequiresResize {
   public static final int MAX_WIDTH = 320;
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
   private static final int VERTICAL_SLOP = 35;
-  protected static final int ID_LINE_WRAP_LENGTH = 20;
+  static final int ID_LINE_WRAP_LENGTH = 20;
   private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 395;
   private static final float MAX_PAGES = 2f;
   private static final int MIN_PAGE_SIZE = 3;
   private static final float DEFAULT_PAGE_SIZE = 15f;
   protected final ExerciseController controller;
-  protected ListDataProvider<T> dataProvider;
+  ListDataProvider<T> dataProvider;
   protected CellTable<T> table;
   protected SingleSelectionModel<T> selectionModel;
-  protected int verticalUnaccountedFor = 100;
+  int verticalUnaccountedFor = 100;
   //  private static final boolean debug = false;
 
-  public SimplePagingContainer(ExerciseController controller) {
+  protected SimplePagingContainer(ExerciseController controller) {
     this.controller = controller;
   }
 
@@ -136,7 +136,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
   }
 
 
-  public void clear() {
+  protected void clear() {
     List<T> list = getList();
     list.clear();
 
@@ -159,7 +159,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
     }
   }
 
-  protected int getNumTableRowsGivenScreenHeight() {
+  int getNumTableRowsGivenScreenHeight() {
     int header = getTableHeaderHeight();
     int pixelsAbove = header + verticalUnaccountedFor;
     if (table.getElement().getAbsoluteTop() > 0) {
@@ -190,7 +190,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
     return rows;
   }
 
-  protected float adjustVerticalRatio(float ratio) {
+  float adjustVerticalRatio(float ratio) {
     return ratio;
   }
 
@@ -202,7 +202,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
     return controller.getHeightOfTopRows();
   }
 
-  public void addItem(T item) {
+  protected void addItem(T item) {
     getList().add(item);
   }
 

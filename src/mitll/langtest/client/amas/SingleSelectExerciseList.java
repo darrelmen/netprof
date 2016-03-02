@@ -86,7 +86,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
 
   /**
    * @param userID
-   * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
+   * @see mitll.langtest.client.list.HistoryExerciseList#noSectionsGetExercises
    */
   public boolean getExercises(final long userID) {
     addWidgets();
@@ -236,7 +236,6 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
     } else {
       StringBuilder status = new StringBuilder();
       // logger.info("\tshowSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
-
       for (String type : typeOrder) {
         Collection<String> selectedItems = typeToSection.get(type);
         if (selectedItems != null) {
@@ -308,13 +307,12 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
     return typeToBox.get("Quiz") == null ? NUM_CHOICES-1:NUM_CHOICES;
   }
 
-
   /**
    * @param toShow
    * @see SingleSelectExerciseList#gotEmptyExerciseList()
-   * @see #quizCompleteDisplay()
+   * @see ResponseExerciseList#quizCompleteDisplay
    */
-  protected void showMessage(String toShow, boolean addStartOver) {
+  void showMessage(String toShow, boolean addStartOver) {
     createdPanel = new SimplePanel();
     createdPanel.getElement().setId("placeHolderWhenNoExercises");
     createdPanel.add(new Heading(3, toShow));
@@ -323,15 +321,15 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
     VerticalPanel vp = new VerticalPanel();
     vp.add(createdPanel);
 
-    if (addStartOver) {
+ /*   if (addStartOver) {
       Button startOver = getStartOver();
       vp.add(startOver);
-    }
+    }*/
 
     innerContainer.setWidget(vp);
   }
 
-  private Button getStartOver() {
+/*  private Button getStartOver() {
     Button startOver = new Button("Start Test Over", IconType.REPEAT);
     startOver.setType(ButtonType.SUCCESS);
     startOver.getElement().getStyle().setMarginLeft(40, Style.Unit.PCT);
@@ -342,12 +340,12 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
       }
     });
     return startOver;
-  }
+  }*/
 
   /**
    * TODO : just for ODA - consider putting this back if we want to do ODA from amas...
    */
-  protected void incrementSession() {
+/*  void incrementSession() {
 //    String quiz = getQuiz() + ":"+getTestType()+ ":"+getILRLevel();
 //    service.incrementSession(controller.getUser(), quiz, new AsyncCallback<Void>() {
 //      @Override
@@ -359,8 +357,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
 //        loadExercises();
 //      }
 //    });
-  }
-
+  }*/
 
   /**
    * @seex #rememberAndLoadFirst(List, CommonExercise, String)
@@ -378,7 +375,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
   }
 
   /**
-   * @see #addButtonRow(List, FluidContainer, Collection)
+   * @see #addButtonRow
    */
   private void makeDefaultSelections() {
     for (SectionWidget v : typeToBox.values()) {
@@ -387,11 +384,11 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
     }
   }
 
-  public void restoreListFromHistory() {
-    String historyToken = History.getToken();
-    // logger.info("initial token " + historyToken);
-    restoreListFromHistory(historyToken);
-  }
+  /**
+   * When we log in we want to check the history in the url and set the current selection state to reflect it.
+   * @see AMASInitialUI#configureUIGivenUser()
+   */
+  public void restoreListFromHistory() {  restoreListFromHistory(History.getToken());  }
 
   private void restoreListFromHistory(String token) {
     try {
