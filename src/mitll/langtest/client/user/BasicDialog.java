@@ -36,12 +36,12 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class BasicDialog {
-  private Logger logger = Logger.getLogger("BasicDialog");
+  private final Logger logger = Logger.getLogger("BasicDialog");
 
   private static final boolean DEBUG = false;
 
-  public static final int ILR_CHOICE_WIDTH = 80;
-  protected static final String TRY_AGAIN = "Try Again";
+  private static final int ILR_CHOICE_WIDTH = 80;
+  static final String TRY_AGAIN = "Try Again";
 
   protected FormField addControlFormField(Panel dialogBox, String label) {
     return addControlFormField(dialogBox, label, false, 0, 30, "");
@@ -83,7 +83,7 @@ public class BasicDialog {
     return new ListBoxFormField(user, group);
   }*/
 
-  protected ControlGroup addControlGroupEntryNoLabel(Panel dialogBox, Widget widget) {
+  private ControlGroup addControlGroupEntryNoLabel(Panel dialogBox, Widget widget) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
     widget.addStyleName("leftFiveMargin");
@@ -141,7 +141,7 @@ public class BasicDialog {
     return userGroup;
   }
 
-  protected ControlGroup addControlGroupEntryHorizontal(Panel dialogBox, String label, Widget widget, int labelWidth, String subtext) {
+  private ControlGroup addControlGroupEntryHorizontal(Panel dialogBox, String label, Widget widget, int labelWidth, String subtext) {
     final ControlGroup userGroup = new ControlGroup();
 
     final HorizontalPanel hp = new HorizontalPanel();
@@ -183,7 +183,7 @@ public class BasicDialog {
     return userGroup;
   }
 
-  protected ControlGroup addControlGroup(String label, Widget leftSide, Widget rightSide) {
+  private ControlGroup addControlGroup(String label, Widget leftSide, Widget rightSide) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.add(new ControlLabel(label));
     leftSide.addStyleName("leftFiveMargin");
@@ -199,7 +199,7 @@ public class BasicDialog {
     return getListBox2(values, BasicDialog.ILR_CHOICE_WIDTH);
   }
 
-  ListBox getListBox2(Collection<String> values, int ilrChoiceWidth) {
+  private ListBox getListBox2(Collection<String> values, int ilrChoiceWidth) {
     final ListBox listBox = new ListBox(false);
     for (String s : values) {
       listBox.addItem(s);
@@ -221,7 +221,7 @@ public class BasicDialog {
     markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, header, message, right);
   }
 
-  protected void markErrorBlur(FormField dialectGroup, String header, String message, Placement right) {
+  void markErrorBlur(FormField dialectGroup, String header, String message, Placement right) {
     markErrorBlur(dialectGroup.group, dialectGroup.box, header, message, right);
   }
 
@@ -240,7 +240,7 @@ public class BasicDialog {
     setupPopoverThatHidesItself(dialect, header, message, right);
   }
 
-  protected void markErrorBlur(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement right) {
+  void markErrorBlur(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement right) {
     if (DEBUG) logger.info("markErrorBlur " +header + " message " +message);
 
     dialectGroup.setType(ControlGroupType.ERROR);
@@ -280,7 +280,7 @@ public class BasicDialog {
     return isValidAge(ageEntryGroup, UserDialog.MIN_AGE, UserDialog.MAX_AGE + 1);
   }
 
-  boolean isValidAge(FormField ageEntryGroup, int min, int max) {
+  private boolean isValidAge(FormField ageEntryGroup, int min, int max) {
     String text = ageEntryGroup.box.getText();
     if (text.length() == 0) {
       return false;
@@ -300,7 +300,7 @@ public class BasicDialog {
    * @param message
    * @see mitll.langtest.client.custom.dialog.EditableExercise#checkForForeignChange()
    */
-  protected void markError(ControlGroup dialectGroup, String header, String message, Placement placement) {
+  private void markError(ControlGroup dialectGroup, String header, String message, Placement placement) {
     dialectGroup.setType(ControlGroupType.ERROR);
     setupPopoverThatHidesItself(dialectGroup.getWidget(1), header, message, placement);
   }
@@ -357,8 +357,8 @@ public class BasicDialog {
     return markErrorBlurFocus(button, button, heading, message, placement, false);
   }
 
-  public Popover markErrorBlurFocus(Widget widget, HasBlurHandlers dialect, String heading, String message,
-                                    Placement placement, boolean showOnlyOnce) {
+  private Popover markErrorBlurFocus(Widget widget, HasBlurHandlers dialect, String heading, String message,
+                                     Placement placement, boolean showOnlyOnce) {
     // if (DEBUG) logger.info("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
     // dialect.setFocus(true);
 //    setupPopover(dialect, header, message, placement);
@@ -378,7 +378,7 @@ public class BasicDialog {
     setupPopover(w, heading, message, placement);
   }
 
-  protected void setupPopover(Widget w, String heading, String message, Placement placement) {
+  private void setupPopover(Widget w, String heading, String message, Placement placement) {
     int delayMillis = 3000;
     setupPopover(w, heading, message, placement, delayMillis, false);
   }
@@ -389,7 +389,7 @@ public class BasicDialog {
     return setupPopover(w, heading, message, placement, delayMillis, popover, isHTML);
   }
 
-  protected Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis, final MyPopover popover, boolean isHTML) {
+  Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis, final MyPopover popover, boolean isHTML) {
     configurePopup(popover, w, heading, message, placement, isHTML);
 
     Timer t = new Timer() {
@@ -402,7 +402,7 @@ public class BasicDialog {
     return popover;
   }
 
-  protected Popover setupPopoverBlur(FocusWidget w, String heading, String message, Placement placement, final MyPopover popover, final ControlGroup dialectGroup) {
+  private Popover setupPopoverBlur(FocusWidget w, String heading, String message, Placement placement, final MyPopover popover, final ControlGroup dialectGroup) {
     configurePopup(popover, w, heading, message, placement, true);
 
     w.addBlurHandler(new BlurHandler() {
@@ -487,7 +487,7 @@ public class BasicDialog {
    * @param placement
    * @param isHTML
    */
-  public void showPopover(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML) {
+  private void showPopover(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML) {
     if (DEBUG) logger.info("showPopover : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
 
     simplePopover(popover, w, heading, message, placement, isHTML);
@@ -520,7 +520,7 @@ public class BasicDialog {
 
   }
 
-  protected FormField addControlFormFieldWithPlaceholder(Panel dialogBox, boolean isPassword, int minLength, int maxLength, String hint) {
+  FormField addControlFormFieldWithPlaceholder(Panel dialogBox, boolean isPassword, int minLength, int maxLength, String hint) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
     user.setMaxLength(maxLength);
     user.setPlaceholder(hint);
@@ -545,9 +545,9 @@ public class BasicDialog {
   }
 */
 
-  Map<Widget, Popover> widgetToPopover = new HashMap<Widget, Popover>();
+  private final Map<Widget, Popover> widgetToPopover = new HashMap<Widget, Popover>();
 
-  public void addPopover(Widget widget, String header, String htmlStr) {
+  void addPopover(Widget widget, String header, String htmlStr) {
     Popover popover = widgetToPopover.get(widget);
     if (popover == null) {
       widgetToPopover.put(widget, popover = new Popover());
@@ -584,7 +584,7 @@ public class BasicDialog {
   }*/
 //static int pid = 0;
 
-  protected static class MyPopover extends Popover {
+  static class MyPopover extends Popover {
   //  boolean wasShown = false;
    // boolean showOnlyOnce = false;
    // boolean disabled = false;
