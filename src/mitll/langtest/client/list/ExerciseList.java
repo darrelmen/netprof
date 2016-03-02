@@ -47,7 +47,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   private static final Map<String, Collection<String>> TYPE_TO_SELECTION = new HashMap<String, Collection<String>>();
   private static final int MAX_MSG_LEN = 200;
   private static final boolean DEBUG = false;
-  protected boolean incorrectFirstOrder = false;
+  boolean incorrectFirstOrder = false;
 
   protected SimplePanel innerContainer;
   protected final LangTestDatabaseAsync service;
@@ -60,7 +60,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   final boolean allowPlusInURL;
   private final String instance;
   private final List<ListChangeListener<T>> listeners = new ArrayList<>();
-  protected boolean doShuffle;
+  boolean doShuffle;
 
   private U cachedNext = null;
   private boolean pendingReq = false;
@@ -74,10 +74,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @param instance
    * @seex mitll.langtest.client.LangTest#makeExerciseList
    */
-  protected ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                         ExercisePanelFactory<T, U> factory,
-                         ExerciseController controller,
-                         String instance, boolean incorrectFirst) {
+  ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
+               ExercisePanelFactory<T, U> factory,
+               ExerciseController controller,
+               String instance, boolean incorrectFirst) {
     this.instance = instance;
     this.service = service;
     this.feedback = feedback;
@@ -135,7 +135,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * @param factory
-   * @see mitll.langtest.client.LangTest#reallySetFactory()
+   * @see mitll.langtest.client.custom.content.NPFHelper#setFactory(PagingExerciseList, String, boolean)
    */
   public void setFactory(ExercisePanelFactory factory) {
     this.factory = factory;
@@ -147,7 +147,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    *
    * @param userID
    * @return true if we asked the server for exercises
-   * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
+   * @see mitll.langtest.client.LangTest#configureUIGivenUser
    * @see mitll.langtest.client.list.HistoryExerciseList#noSectionsGetExercises(long)
    */
   public boolean getExercises(long userID) {
@@ -160,7 +160,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#doAfterEditComplete(ListInterface, boolean)
-   * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
+   * @see mitll.langtest.client.LangTest#configureUIGivenUser
    */
   public void reload() {
     int user1 = controller.getUser();
@@ -280,7 +280,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    *
    * @return
    */
-  protected String getRole() {
+  String getRole() {
     String audioTypeRecorder = Result.AUDIO_TYPE_RECORDER;
     return getInstance() == null || getInstance().startsWith("record") ? audioTypeRecorder : getInstance();
   }
@@ -325,7 +325,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
   }
 
-  void gotExercises(ExerciseListWrapper<T> result) {
+  private void gotExercises(ExerciseListWrapper<T> result) {
     gotExercises(true);
     if (DEBUG) logger.info("ExerciseList.gotExercises result = " + result);
 
@@ -463,7 +463,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     return result.getReqID() < lastReqID;
   }
 
-  public abstract Collection<T> rememberExercises(Collection<T> result);
+  protected abstract Collection<T> rememberExercises(Collection<T> result);
 
   /**
    * Worry about deleting the currently visible item.
@@ -514,7 +514,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    *
    * @return
    */
-  protected T findFirstExercise() {
+  T findFirstExercise() {
     return getFirst();
   }
 
@@ -699,7 +699,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     return getCurrentExercise() != null ? getCurrentExercise().getID() : "Unknown";
   }
 
-  public abstract T getCurrentExercise();
+  protected abstract T getCurrentExercise();
 
   /**
    * @param exercise
