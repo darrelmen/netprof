@@ -44,7 +44,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private static final int HEIGHT = 18;
   private static final int ROW_LEFT_MARGIN = 18 + 5;
   private static final String PLAY_REFERENCE = "";
-  public static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
+  private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
 
   private final PretestGauge ASRGauge;
   private final Panel phoneList;
@@ -271,7 +271,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    * @param audioPath
    * @return link for this audio
    */
-  IconAnchor getDownload(final String audioPath, int i) {
+  private IconAnchor getDownload(final String audioPath, int i) {
     final IconAnchor download = new IconAnchor();
     download.getElement().setId("Download_user_audio_link_"+i);
     download.setIcon(IconType.DOWNLOAD);

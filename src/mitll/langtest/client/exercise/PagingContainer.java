@@ -34,7 +34,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
   private static final int MAX_LENGTH_ID = 17;
   private final boolean isRecorder;
   private final ExerciseComparator sorter;
-  protected static final String ENGLISH = "English";
+  private static final String ENGLISH = "English";
   private final boolean english;
 
   /**
@@ -232,7 +232,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
    * @param shell
    * @return
    */
-  protected String getEnglishText(CommonShell shell) {
+  private String getEnglishText(CommonShell shell) {
 //    logger.info("getEnglishText " + shell.getID() + " en " + shell.getEnglish() + " fl " + shell.getForeignLanguage() + " mn " + shell.getMeaning());
     String s = english && !shell.getEnglish().equals(EditItem.NEW_ITEM) ? shell.getForeignLanguage() : shell.getEnglish();
     if (s.isEmpty()) s = shell.getID();
@@ -244,7 +244,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
    * @param shell
    * @return
    */
-  protected String getFLText(CommonShell shell) {
+  private String getFLText(CommonShell shell) {
     String toShow = shell.getForeignLanguage();
     if (english && !shell.getEnglish().equals(EditItem.NEW_ITEM)) {
       String meaning = shell.getMeaning();
