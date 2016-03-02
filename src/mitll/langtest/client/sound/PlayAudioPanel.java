@@ -36,7 +36,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
-  private Logger logger = Logger.getLogger("PlayAudioPanel");
+  private final Logger logger = Logger.getLogger("PlayAudioPanel");
 
   /**
    * @see #setPlayButtonText
@@ -206,7 +206,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     this.listener = listener;
   }
 
-  public void addSimpleListener(SimpleAudioListener listener) {
+  private void addSimpleListener(SimpleAudioListener listener) {
     this.simpleAudioListener = listener;
   }
 
@@ -342,7 +342,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     this.currentPath = path;
   }
 
-  protected String wavToMP3(String path) {
+  private String wavToMP3(String path) {
     return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
   }
 
