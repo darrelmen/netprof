@@ -14,7 +14,7 @@ public class ControlState {
   private static final String AUDIO_ON = "audioOn";
   private static final String AUDIO_FEEDBACK_ON = "audioFeedbackOn";
   private static final String SHUFFLE_ON = "shuffleOn";
-  public static final String TRUE_VALUE = Boolean.TRUE.toString();
+  private static final String TRUE_VALUE = Boolean.TRUE.toString();
   private static int count = 0;
   private boolean audioOn = true;
   private boolean audioFeedbackOn = true;
@@ -76,7 +76,7 @@ public class ControlState {
     if (storage != null) storage.storeValue(SHOW_STATE, showState);
   }
 
-  public void storeValue(String slot,boolean shuffleOn) {
+  private void storeValue(String slot, boolean shuffleOn) {
     if (storage != null) {
       storage.storeValue(slot, Boolean.toString(shuffleOn));
     }

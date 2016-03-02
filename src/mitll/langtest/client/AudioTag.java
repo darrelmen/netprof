@@ -31,7 +31,7 @@ public class AudioTag {
    * @return
    * @see mitll.langtest.client.result.ResultManager#addColumnsToTable
    */
-  public SafeHtml getAudioTag(String result, boolean includeControls) {
+  private SafeHtml getAudioTag(String result, boolean includeControls) {
     result = ensureForwardSlashes(result);
     String firstSource = INCLUDE_ALTERNATE_AUDIO ?
         "<source type=\"audio/" + (INCLUDE_ALTERNATE_COMPRESSED ? ALTERNATE_TYPE : "wav") + "\" " +
@@ -53,7 +53,7 @@ public class AudioTag {
     return sb.toSafeHtml();
   }
 
-  public String ensureForwardSlashes(String wavPath) {
+  private String ensureForwardSlashes(String wavPath) {
     return wavPath.replaceAll("\\\\", "/");
   }
 }

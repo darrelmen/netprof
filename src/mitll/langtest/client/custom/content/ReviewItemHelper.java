@@ -18,7 +18,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -30,7 +29,9 @@ import java.util.logging.Logger;
  * Created by GO22670 on 3/26/2014.
  */
 public class ReviewItemHelper extends NPFHelper {
-  private Logger logger = Logger.getLogger("ReviewItemHelper");
+  private final Logger logger = Logger.getLogger("ReviewItemHelper");
+
+  private static final String ONLY_WITH_AUDIO_DEFECTS = "Only with audio defects";
 
   private FlexListLayout<CommonShell, CommonExercise> flexListLayout;
   private final HasText itemMarker;
@@ -40,24 +41,19 @@ public class ReviewItemHelper extends NPFHelper {
   /**
    * @param service
    * @param feedback
-   * @param userManager
    * @param controller
    * @param predefinedContent
    * @see mitll.langtest.client.custom.Navigation#Navigation
    * @see mitll.langtest.client.custom.ListManager#ListManager
    */
   public ReviewItemHelper(final LangTestDatabaseAsync service, final UserFeedback feedback,
-                          final UserManager userManager,
                           final ExerciseController controller,
                           final ReloadableContainer predefinedContent
-                          //    ,
-                          //                      NPFHelper npfHelper
   ) {
-    super(service, feedback, userManager, controller, true);
+    super(service, feedback, controller, true);
     this.itemMarker = null;
     this.predefinedContent = predefinedContent;
     if (predefinedContent == null) logger.warning("huh? predefinedContent is null");
-    // this.npfHelper = npfHelper;
   }
 
   /**
@@ -98,7 +94,7 @@ public class ReviewItemHelper extends NPFHelper {
     }
 
     @Override
-    protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> pagingExerciseList, String instanceName) {
+    protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> pagingExerciseList) {
       return new ExercisePanelFactory<CommonShell, CommonExercise>(service, feedback, controller, pagingExerciseList) {
         @Override
         public Panel getExercisePanel(CommonExercise exercise) {
@@ -108,7 +104,6 @@ public class ReviewItemHelper extends NPFHelper {
               new ReviewEditableExercise(service, controller, itemMarker,
                   userExercise, ul,
                   pagingExerciseList, predefinedContent,
-//                  npfHelper
                   "ReviewEditableExercise"
               );
 
@@ -131,7 +126,7 @@ public class ReviewItemHelper extends NPFHelper {
                                                                                String instanceName, boolean incorrectFirst) {
       FlexListLayout outer = this;
       return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, incorrectFirst) {
-        com.github.gwtbootstrap.client.ui.CheckBox onlyAudio;
+        //com.github.gwtbootstrap.client.ui.CheckBox onlyAudio;
 
         @Override
         protected void addTableWithPager(ClickablePagingContainer pagingContainer) {
@@ -141,8 +136,8 @@ public class ReviewItemHelper extends NPFHelper {
           addTypeAhead(column);
 
           // row 2
-          final com.github.gwtbootstrap.client.ui.CheckBox w = new com.github.gwtbootstrap.client.ui.CheckBox("Only with audio defects");
-          onlyAudio = w;
+          final com.github.gwtbootstrap.client.ui.CheckBox w = new com.github.gwtbootstrap.client.ui.CheckBox(ONLY_WITH_AUDIO_DEFECTS);
+          //onlyAudio = w;
           w.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
