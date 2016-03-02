@@ -210,7 +210,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   }
 
   protected class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton {
-    private long then,now;
+   // private long then,now;
 
     /**
      * @see #makePostAudioRecordButton(String, String)
@@ -230,15 +230,15 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
      */
     @Override
     public void startRecording() {
-      then = System.currentTimeMillis();
+     /// then = System.currentTimeMillis();
       super.startRecording();
       showStart();
     }
 
     @Override
     public void stopRecording() {
-      now = System.currentTimeMillis();
-      System.out.println("stopRecording " + now + " diff " + (now-then) + " millis");
+    //  now = System.currentTimeMillis();
+     // System.out.println("stopRecording " + now + " diff " + (now-then) + " millis");
 
       super.stopRecording();
       showStop();
@@ -253,7 +253,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     public void useResult(AudioAnswer result) {
       super.useResult(result);
       if (result.isValid()) {
-        System.out.println("tell other tabs that audio has arrived!");
+       // System.out.println("tell other tabs that audio has arrived!");
       }
     }
   }
