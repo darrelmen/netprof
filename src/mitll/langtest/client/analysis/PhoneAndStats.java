@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by go22670 on 10/22/15.
  */
-public class PhoneAndStats implements Comparable<PhoneAndStats>{
+class PhoneAndStats implements Comparable<PhoneAndStats>{
   private final String phone;
 
   private final int score, current;
