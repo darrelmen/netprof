@@ -20,9 +20,9 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 11/20/15.
  */
-public class TimeSeriesPlot extends DivWidget {
+class TimeSeriesPlot extends DivWidget {
   private final Logger logger = Logger.getLogger("TimeSeriesPlot");
-  protected static final String AVERAGE = "Average";
+  static final String AVERAGE = "Average";
   private final Map<Long, PhoneSession> timeToSession = new TreeMap<>();
 
   private final DateTimeFormat format = DateTimeFormat.getFormat("E MMM d yy h:mm a");
@@ -35,7 +35,7 @@ public class TimeSeriesPlot extends DivWidget {
    * @return
    * @see PhonePlot#getErrorBarChart(String)
    */
-  protected ToolTip getErrorBarToolTip() {
+  ToolTip getErrorBarToolTip() {
     return new ToolTip()
         .setFormatter(new ToolTipFormatter() {
           public String format(ToolTipData toolTipData) {
@@ -89,7 +89,7 @@ public class TimeSeriesPlot extends DivWidget {
    * @paramx dateToShow
    * @see AnalysisPlot#getTooltip(ToolTipData, String, CommonShell)
    */
-  protected String getErrorBarToolTip(ToolTipData toolTipData, String seriesName1) {
+  String getErrorBarToolTip(ToolTipData toolTipData, String seriesName1) {
     String dateToShow = getDateToShow(toolTipData);
     Point point = toolTipData.getPoint();
     String s = getSessionCount(toolTipData);
@@ -102,19 +102,19 @@ public class TimeSeriesPlot extends DivWidget {
     return session == null ? "" : (" n = " + session.getCount());
   }
 
-  protected String getDateToShow(ToolTipData toolTipData) {
+  String getDateToShow(ToolTipData toolTipData) {
     long xAsLong = toolTipData.getXAsLong();
     return getDateToShow(xAsLong);
   }
 
-  protected String getDateToShow(long xAsLong) {
+  private String getDateToShow(long xAsLong) {
     Date date = new Date(xAsLong);
     String shortForDate = shortFormat.format(date);
     DateTimeFormat toUse = sameYear(shortForDate) ? noYearFormat : format;
     return toUse.format(date);
   }
 
-  protected String getShortDate(long xAsLong) {
+  String getShortDate(long xAsLong) {
     Date date = new Date(xAsLong);
     String shortForDate = shortFormat.format(date);
     DateTimeFormat toUse = sameYear(shortForDate) ? superShortFormat : shortFormat;
@@ -142,7 +142,7 @@ public class TimeSeriesPlot extends DivWidget {
    * @see AnalysisPlot#setVisibility(long, long)
    * @see PhonePlot#showErrorBarData(List, String, boolean)
    */
-  protected void setPhoneSessions(List<PhoneSession> phoneSessions) {
+  void setPhoneSessions(List<PhoneSession> phoneSessions) {
     timeToSession.clear();
     PhoneSession lastSession = getLastSession(phoneSessions);
     for (PhoneSession session : phoneSessions) {
@@ -159,7 +159,7 @@ public class TimeSeriesPlot extends DivWidget {
    * @see PhonePlot#getErrorBarChart
    * @see AnalysisPlot#addErrorBars(UserPerformance, Chart)
    */
-  protected Series addErrorBarSeries(List<PhoneSession> phoneSessions, Chart chart, String seriesTitle, boolean hidden) {
+  Series addErrorBarSeries(List<PhoneSession> phoneSessions, Chart chart, String seriesTitle, boolean hidden) {
     Number[][] data = new Number[phoneSessions.size()][3];
 
     int i = 0;
@@ -204,7 +204,7 @@ public class TimeSeriesPlot extends DivWidget {
     return middle;
   }
 
-  protected Series addMeans(List<PhoneSession> iPadData, Chart chart, String seriesName, boolean hidden) {
+  Series addMeans(List<PhoneSession> iPadData, Chart chart, String seriesName, boolean hidden) {
     Series series = chart.createSeries()
         .setName(seriesName)
         .setPoints(getData(iPadData))

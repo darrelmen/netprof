@@ -34,16 +34,16 @@ import java.util.logging.Logger;
  */
 public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends CommonShell & AudioRefExercise>
     implements ReloadableContainer, RequiresResize {
-  private Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
+  private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
 
   private boolean madeNPFContent = false;
 
   protected final LangTestDatabaseAsync service;
   protected final ExerciseController controller;
-  protected final UserManager userManager;
+  private final UserManager userManager;
 
-  protected final UserFeedback feedback;
-  protected ExerciseList npfExerciseList;
+  final UserFeedback feedback;
+  private ExerciseList npfExerciseList;
   private final ReloadableContainer predefinedContentList;
 
   /**
@@ -79,7 +79,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @param instanceName  flex, review, etc.
    * @see Navigation#addPracticeTab()
    * @see Navigation#addTabs
-   * @see mitll.langtest.client.custom.Navigation#selectPreviousTab(String)
+   * @see mitll.langtest.client.custom.Navigation#selectPreviousTab
    */
   public void showNPF(TabAndContent tabAndContent, String instanceName) {
    // logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
@@ -118,23 +118,18 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     return widgets;
   }
 
-  public ListInterface<?> getExerciseList() {
-   // logger.info(getClass() + " : getExerciseList called ");
-
-    return npfExerciseList;
-  }
+  /**
+   * @see Navigation#getTabPanel()
+   * @return
+   */
+  public ListInterface<?> getExerciseList() {  return npfExerciseList;  }
 
   @Override
-  public Reloadable getReloadable() {
-
-   // logger.info(getClass() + " : getReloadable called ");
-
-    return npfExerciseList;
-  }
+  public Reloadable getReloadable() { return npfExerciseList;  }
 
   /**
    * @see Navigation#addPracticeTab()
-   * @see mitll.langtest.client.custom.Navigation#selectPreviousTab(String)
+   * @see mitll.langtest.client.custom.Navigation#selectPreviousTab
    */
   public void hideList() {
     npfExerciseList.hide();
@@ -163,12 +158,16 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     };
   }
 
-  protected void tellOtherListExerciseDirty(HasID e) {
+  /**
+   * @see mitll.langtest.client.custom.RecorderNPFHelper.MyWaveformExercisePanel#postAnswers(ExerciseController, HasID)
+   * @param e
+   */
+  void tellOtherListExerciseDirty(HasID e) {
     if (predefinedContentList != null &&
         predefinedContentList.getReloadable() != null &&
         predefinedContentList.getReloadable().getCurrentExerciseID() != null &&
         e.getID().equals(predefinedContentList.getReloadable().getCurrentExerciseID())) {
-      logger.info("SimpleChapterNPFHelper.reloading " + e.getID());
+     // logger.info("SimpleChapterNPFHelper.reloading " + e.getID());
       predefinedContentList.getReloadable().loadExercise(e.getID());
     } else {
       logger.info("\n\n\n--> SimpleChapterNPFHelper.not reloading " + e.getID());
@@ -186,7 +185,9 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     }
   }
 
+/*
   public void setContentPanel(DivWidget contentPanel) {}
+*/
 
   protected abstract static class MyFlexListLayout<T extends CommonShell, U extends CommonShell & AudioRefExercise> extends FlexListLayout<T,U> {
     private final SimpleChapterNPFHelper<T,U> outer;
@@ -198,7 +199,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     }
 
     @Override
-    protected ExercisePanelFactory<T,U> getFactory(PagingExerciseList<T,U> exerciseList, String instanceName) {
+    protected ExercisePanelFactory<T,U> getFactory(PagingExerciseList<T, U> exerciseList) {
       return outer.getFactory(exerciseList);
     }
   }
