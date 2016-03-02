@@ -16,7 +16,7 @@ public class BrowserCheck {
   private static final String SAFARI = "safari";
   private static final String IE = "IE";
 
-  public String browser = "Unknown";
+  private String browser = "Unknown";
   public int ver = 0;
   private String version = "";
 
