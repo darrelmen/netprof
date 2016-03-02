@@ -15,9 +15,9 @@ import java.util.Collection;
 /**
 * Created by go22670 on 3/16/15.
 */
-public class QuizScorePanel extends VerticalPanel {
+class QuizScorePanel extends VerticalPanel {
   //private Logger logger = Logger.getLogger("QuizScorePanel");
-  private Label selfScore = new Label("");
+  private final Label selfScore = new Label("");
   //private Label autoScore = new Label("");
 
   /**
