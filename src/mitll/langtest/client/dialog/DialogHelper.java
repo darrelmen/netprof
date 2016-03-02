@@ -38,7 +38,7 @@ public class DialogHelper {
     showErrorMessage(title, msgs);
   }
 
-  public void showErrorMessage(String title, Collection<String> msgs) {
+  private void showErrorMessage(String title, Collection<String> msgs) {
     show(title, msgs, "Close", null);
   }
 
@@ -56,7 +56,7 @@ public class DialogHelper {
    * @param title
    * @param msgs
    */
-  void show(String title, Collection<String> msgs, String buttonName, final CloseListener listener) {
+  private void show(String title, Collection<String> msgs, String buttonName, final CloseListener listener) {
     //final DialogBox dialogBox = new DialogBox();
     final Modal dialogBox = new Modal();
     Button closeButton;
