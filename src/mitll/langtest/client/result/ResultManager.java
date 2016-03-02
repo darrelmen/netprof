@@ -420,7 +420,7 @@ public class ResultManager extends PagerTable {
    *
    * @param selectedObject
    */
-  public void respondToClick(MonitorResult selectedObject) {
+  private void respondToClick(MonitorResult selectedObject) {
     reviewContainer.clear();
     if (selectedObject.getDurationInMillis() > 100 && selectedObject.isValid()) {
       // logger.info("audio type " + audioType);

@@ -20,7 +20,7 @@ import mitll.langtest.client.PropertyHandler;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class UserDialog extends BasicDialog {
-  protected static final int USER_ID_MAX_LENGTH = 35;
+  static final int USER_ID_MAX_LENGTH = 35;
 
   public static final int MIN_AGE = 12;
   public static final int MAX_AGE = 90;
@@ -48,11 +48,11 @@ public abstract class UserDialog extends BasicDialog {
     markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP);
   }
 
-  protected void markErrorBlur(FormField dialectGroup, String message) {
+  void markErrorBlur(FormField dialectGroup, String message) {
     markErrorBlur(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP);
   }
 
-  protected String trimURL(String url) {
+  String trimURL(String url) {
     if (url.contains("127.0.0.1")) return url.split("#")[0];
     else return url.split("\\?")[0].split("#")[0];
   }
