@@ -32,8 +32,8 @@ import java.util.logging.Logger;
  * Time: 1:45 PM
  * To change this template use File | Settings | File Templates.
  */
-public class TextResponse {
-  private Logger logger = Logger.getLogger("TextResponse");
+class TextResponse {
+  private final Logger logger = Logger.getLogger("TextResponse");
   private static final int TEXT_BOX_WIDTH = 400;
   private static final int FEEDBACK_HEIGHT = 40;
 
@@ -44,7 +44,7 @@ public class TextResponse {
   private Widget textResponseWidget;
 
   private long timeShown = System.currentTimeMillis();
-  private Map<String, Collection<String>> typeToSelection;
+  private final Map<String, Collection<String>> typeToSelection;
 
   /**
    * @param user
@@ -281,7 +281,7 @@ public class TextResponse {
    * @param result
    * @see #getScoreForGuess
    */
-  protected void gotScoreForGuess(Answer result) {
+  void gotScoreForGuess(Answer result) {
     getTextScoreFeedback().showCRTFeedback();
     if (answerPosted != null) {
       answerPosted.answerPosted();
