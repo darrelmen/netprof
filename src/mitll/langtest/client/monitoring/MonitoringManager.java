@@ -20,6 +20,7 @@ import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.custom.RecordingProgressTable;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.monitoring.Session;
 
@@ -764,11 +765,12 @@ public class MonitoringManager {
       @Override
       public void onSuccess(Map<String, Float> result) {
         vp.add(new HTML("<h2>Male/Female Reference Audio Coverage</h2>"));
-        FlexTable flex = new FlexTable();
+        RecordingProgressTable flex = new RecordingProgressTable();
         vp.add(flex);
+        flex.populate(result);
 
-        float total = result.get("total");
-        logger.info("ref audio coverage " + result);
+/*        float total = result.get("total");
+        //logger.info("ref audio coverage " + result);
 
         int r = 0;
 
@@ -806,7 +808,7 @@ public class MonitoringManager {
 
         flex.setHTML(r, 0, "Context Female " + answer);
         flex.setHTML(r, 1, result.get("femaleContext").intValue() + "");
-        flex.setHTML(r++, 2, getPercent(result.get("femaleContext"), total) + "%");
+        flex.setHTML(r++, 2, getPercent(result.get("femaleContext"), total) + "%");*/
         // do the next one...
         if (it != null) it.go();
       }
