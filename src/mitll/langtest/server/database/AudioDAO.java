@@ -47,6 +47,15 @@ public class AudioDAO extends DAO {
   private static final String CONTEXT_REGULAR = AUDIO_TYPE1;
   private static final String TRANSCRIPT = "transcript";
   public static final String UNKNOWN = "unknown";
+  public static final String TOTAL = "total";
+  public static final String MALE = "male";
+  public static final String FEMALE = "female";
+  public static final String MALE_FAST = "maleFast";
+  public static final String MALE_SLOW = "maleSlow";
+  public static final String FEMALE_FAST = "femaleFast";
+  public static final String FEMALE_SLOW = "femaleSlow";
+  public static final String MALE_CONTEXT = "maleContext";
+  public static final String FEMALE_CONTEXT = "femaleContext";
 
   private final boolean DEBUG = false;
   private final Connection connection;
@@ -427,15 +436,15 @@ public class AudioDAO extends DAO {
     float cfemale = getCountForGender(userMapFemales.keySet(), CONTEXT_REGULAR, uniqueIDs);
 
     Map<String, Float> report = new HashMap<>();
-    report.put("total", total);
-    report.put("male", male);
-    report.put("female", female);
-    report.put("maleFast", maleFast);
-    report.put("maleSlow", maleSlow);
-    report.put("femaleFast", femaleFast);
-    report.put("femaleSlow", femaleSlow);
-    report.put("maleContext", cmale);
-    report.put("femaleContext", cfemale);
+    report.put(TOTAL, total);
+    report.put(MALE, male);
+    report.put(FEMALE, female);
+    report.put(MALE_FAST, maleFast);
+    report.put(MALE_SLOW, maleSlow);
+    report.put(FEMALE_FAST, femaleFast);
+    report.put(FEMALE_SLOW, femaleSlow);
+    report.put(MALE_CONTEXT, cmale);
+    report.put(FEMALE_CONTEXT, cfemale);
     return report;
   }
 
