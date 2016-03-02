@@ -30,19 +30,19 @@ import java.util.logging.Logger;
  */
 public abstract class ExercisePanel<L extends Shell, T extends Shell> extends VerticalPanel implements
     BusyPanel, PostAnswerProvider, ProvidesResize, RequiresResize {
-  private Logger logger = Logger.getLogger("ExercisePanel");
+  private final Logger logger = Logger.getLogger("ExercisePanel");
 
   private static final int CONTENT_SCROLL_HEIGHT = 220;
   private static final String PROMPT = "Read the following text and answer the question or questions below.";
   private final List<Widget> answers = new ArrayList<Widget>();
   private final Set<Widget> completed = new HashSet<Widget>();
-  protected T exercise = null;
-  protected final ExerciseController controller;
+  T exercise = null;
+  final ExerciseController controller;
   private final NavigationHelper<L> navigationHelper;
-  protected final ListInterface<L> exerciseList;
+  final ListInterface<L> exerciseList;
   private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
-  protected final String message;
-  protected final String instance;
+  final String message;
+  final String instance;
 
   /**
    * @param e
@@ -54,10 +54,10 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
    * @see ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.list.ListInterface#loadExercise
    */
-  public ExercisePanel(final T e, final LangTestDatabaseAsync service,
-                       final ExerciseController controller,
-                       ListInterface<L> exerciseList, String instructionMessage,
-                       String instance) {
+  ExercisePanel(final T e, final LangTestDatabaseAsync service,
+                final ExerciseController controller,
+                ListInterface<L> exerciseList, String instructionMessage,
+                String instance) {
     this.exercise = e;
     this.controller = controller;
     this.exerciseList = exerciseList;
@@ -89,11 +89,11 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
     getElement().setId("ExercisePanel");
   }
 
-  protected NavigationHelper<L> getNavigationHelper(ExerciseController controller) {
+  private NavigationHelper<L> getNavigationHelper(ExerciseController controller) {
     return new NavigationHelper<L>(exercise, controller, this, exerciseList, true, true, true);
   }
 
-  protected void addInstructions() {
+  void addInstructions() {
     add(new Heading(4, PROMPT));
   }
 
@@ -133,7 +133,7 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
    * @return
    * @see #getQuestionContent
    */
-  protected HTML getMaybeRTLContent(String content) {
+  private HTML getMaybeRTLContent(String content) {
     boolean rightAlignContent = controller.isRightAlignContent();
     HasDirection.Direction direction =
         rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
@@ -190,7 +190,7 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
                                  int questionNumber) {
     // add question prompt
     Panel vp = new VerticalPanel();
-    addQuestionPrompt(vp);
+    //addQuestionPrompt(vp);
 
     // add answer widget
     vp.add(getAnswerWidget(exercise, service, controller, questionNumber));
@@ -201,9 +201,9 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
   /**
    * @param index
    * @param answerWidget
-   * @see #getAnswerWidget(mitll.langtest.shared.exercise.T, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
+   * @see #getAnswerWidget
    */
-  protected void addAnswerWidget(int index, Widget answerWidget) {
+  void addAnswerWidget(int index, Widget answerWidget) {
     answers.add(answerWidget);
     Set<Widget> objects = indexToWidgets.get(index);
     if (objects == null) indexToWidgets.put(index, objects = new HashSet<Widget>());
@@ -215,16 +215,16 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
    * @paramx vp
    * @paramx e
    */
-  protected void addQuestionPrompt(Panel vp) {
+/*  private void addQuestionPrompt(Panel vp) {
     HTML prompt = new HTML(getQuestionPrompt());
     prompt.getElement().setId("questionPrompt");
     prompt.addStyleName("marginBottomTen");
     vp.add(prompt);
-  }
+  }*/
 
-  protected String getQuestionPrompt() {
+/*  private String getQuestionPrompt() {
     return "";
-  }
+  }*/
 
 /*  protected String getWrittenPrompt(boolean promptInEnglish) {
     return THREE_SPACES +
@@ -306,8 +306,8 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
     t.schedule(3000);
   }*/
 
-  protected Widget getAnswerWidget(final T exercise, final LangTestDatabaseAsync service,
-                                   ExerciseController controller, final int index) {
+  Widget getAnswerWidget(final T exercise, final LangTestDatabaseAsync service,
+                         ExerciseController controller, final int index) {
     return null;
   }
 
@@ -386,13 +386,13 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
       }
     }
   }*/
-  protected void enableNext() {
+  private void enableNext() {
     //System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
     boolean isComplete = isCompleted();
     navigationHelper.enableNextButton(isComplete);
   }
 
-  protected boolean isCompleted() {
+  private boolean isCompleted() {
     boolean b = completed.size() == answers.size();
     if (b) {
       System.out.println("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
