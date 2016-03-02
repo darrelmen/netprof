@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.ReloadableContainer;
-import mitll.langtest.client.custom.content.NPFHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.list.ListInterface;
@@ -33,9 +32,9 @@ import java.util.logging.Logger;
  * Created by GO22670 on 3/28/2014. <T extends CommonShell & AudioRefExercise & CombinedMutableUserExercise, UL extends UserList<?>>
  */
 class EditableExerciseDialog extends NewUserExercise {
-  private Logger logger = Logger.getLogger("EditableExerciseDialog");
+  private final Logger logger = Logger.getLogger("EditableExerciseDialog");
 
-  public static final int LABEL_WIDTH = 105;
+  private static final int LABEL_WIDTH = 105;
   private final HTML englishAnno = new HTML();
   private final HTML translitAnno = new HTML();
   private final HTML foreignAnno = new HTML();
@@ -44,8 +43,8 @@ class EditableExerciseDialog extends NewUserExercise {
   private String originalForeign = "";
   private String originalEnglish = "";
 
-  protected final PagingExerciseList<CommonShell, CommonExercise> exerciseList;
-  protected final ReloadableContainer predefinedContentList;
+  private final PagingExerciseList<CommonShell, CommonExercise> exerciseList;
+  final ReloadableContainer predefinedContentList;
 //  protected final NPFHelper npfHelper;
   private static final boolean DEBUG = false;
 
@@ -78,8 +77,7 @@ class EditableExerciseDialog extends NewUserExercise {
   }
 
   @Override
-  protected void gotBlur(FormField english,
-                         FormField foreignLang,
+  protected void gotBlur(FormField foreignLang,
                          RecordAudioPanel rap,
                          ControlGroup normalSpeedRecording,
                          UserList<CommonShell> ul,
@@ -179,24 +177,23 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see #addNew(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel)
    */
   @Override
-  protected Panel makeEnglishRow(Panel container) {
+  protected void makeEnglishRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
     String subtext = "";
     english = makeBoxAndAnno(row, getEnglishLabel(), subtext, englishAnno);
-    return row;
+    //return row;
   }
 
   /**
    * @param container
    */
   @Override
-  protected FormField makeForeignLangRow(Panel container) {
+  protected void makeForeignLangRow(Panel container) {
     if (DEBUG) logger.info("EditableExerciseDialog.makeForeignLangRow --->");
 
     Panel row = new FluidRow();
     container.add(row);
-
 
     foreignAnno.getElement().setId("foreignLanguageAnnotation");
 
@@ -204,7 +201,7 @@ class EditableExerciseDialog extends NewUserExercise {
 
     foreignLang = makeBoxAndAnno(row, controller.getLanguage(), "", foreignAnno);
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
-    return foreignLang;
+   // return foreignLang;
   }
 
   @Override
@@ -215,7 +212,7 @@ class EditableExerciseDialog extends NewUserExercise {
     translit = makeBoxAndAnno(row, getTransliterationLabel(), subtext, translitAnno);
   }
 
-  protected String getTransliterationLabel() {
+  String getTransliterationLabel() {
     return TRANSLITERATION_OPTIONAL;
   }
 
@@ -250,7 +247,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @return
    * @see #makeEnglishRow(com.google.gwt.user.client.ui.Panel)
    */
-  protected FormField makeBoxAndAnno(Panel row, String label, String subtext, HTML annoBox) {
+  private FormField makeBoxAndAnno(Panel row, String label, String subtext, HTML annoBox) {
     FormField formField = addControlFormFieldHorizontal(row, label, subtext, false, 1, annoBox, LABEL_WIDTH);
     annoBox.addStyleName("leftFiveMargin");
     annoBox.addStyleName("editComment");
@@ -317,7 +314,7 @@ class EditableExerciseDialog extends NewUserExercise {
     return didChange;
   }
 
-  protected boolean hasAudio() {
+  boolean hasAudio() {
     return (
         normalSpeedRecording != null ||
             newUserExercise.getRefAudio() != null ||
@@ -330,7 +327,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see #checkForForeignChange()
    * @see ReviewEditableExercise#checkForForeignChange()
    */
-  protected String getWarningHeader() {
+  String getWarningHeader() {
     return "Consistent with " + controller.getLanguage() + "?";
   }
 
@@ -338,7 +335,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @return
    * @see ReviewEditableExercise#checkForForeignChange()
    */
-  protected String getWarningForFL() {
+  String getWarningForFL() {
     return "Is the audio consistent with \"" + foreignLang.getText() + "\" ?";
   }
 
@@ -347,11 +344,10 @@ class EditableExerciseDialog extends NewUserExercise {
   }
 
   private boolean foreignChanged() {
-    boolean b = !foreignLang.box.getText().equals(originalForeign);
-//    if (b)
+    //    if (b)
 //      logger.info("foreignChanged : foreign '" + foreignLang.box.getText() + "' != original '" + originalForeign + "'");
 
-    return b;
+    return !foreignLang.box.getText().equals(originalForeign);
   }
 
   /**
@@ -363,9 +359,8 @@ class EditableExerciseDialog extends NewUserExercise {
     String transliteration = newUserExercise.getTransliteration();
     String originalTransliteration = this.originalTransliteration;
 
-    boolean changed = !transliteration.equals(originalTransliteration);
     //  logger.info("translitChanged : translit '" + transliteration + "' vs original '" + originalTransliteration + "' changed  = " + changed);
-    return changed;
+    return !transliteration.equals(originalTransliteration);
   }
 
   private boolean refAudioChanged() {
