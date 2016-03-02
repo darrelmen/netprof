@@ -82,11 +82,13 @@ import java.util.logging.Logger;
  * - bug fix for display of ref audio in analysis
  * 1.2.2
  * - support for AMAS
+ * 1.2.3
+ * - integrate with domino to get content for AMAS
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
-  private Logger logger = Logger.getLogger("LangTest");
+  private final Logger logger = Logger.getLogger("LangTest");
 
-  private static final String VERSION_INFO = "1.2.2";
+  private static final String VERSION_INFO = "1.2.3";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
@@ -461,7 +463,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     });
   }
 
-  void hideFlash() {
+  private void hideFlash() {
     flashRecordPanel.hide();
     flashRecordPanel.hide2(); // must be a separate call!
   }
