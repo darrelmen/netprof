@@ -35,7 +35,7 @@ public class Flashcard implements RequiresResize {
   private static final int min = 720;
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@ll.mit.edu";
   private final String HREF;
-  public static final String NEED_HELP_QUESTIONS_CONTACT_US = "Need Help? Questions? Contact us.";
+  private static final String NEED_HELP_QUESTIONS_CONTACT_US = "Need Help? Questions? Contact us.";
 
   private final boolean isAnonymous;
   private Paragraph appName;
@@ -47,7 +47,7 @@ public class Flashcard implements RequiresResize {
   private HTML browserInfo;
   private Panel qc, recordAudio;
   private Dropdown cogMenu;
-  PropertyHandler props;
+  private final PropertyHandler props;
 
   /**
    * @see mitll.langtest.client.InitialUI#makeHeaderRow
