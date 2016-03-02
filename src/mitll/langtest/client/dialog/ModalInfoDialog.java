@@ -57,7 +57,7 @@ public class ModalInfoDialog {
     return getModal(title, Collections.singleton(message), null, null);
   }*/
 
-  public Modal getModal(String title, Collection<String> messages, Widget widget, HiddenHandler handler) {
+  private Modal getModal(String title, Collection<String> messages, Widget widget, HiddenHandler handler) {
     final Modal modal = new Modal(true);
     modal.setTitle(title);
     for (String m : messages) {
@@ -87,7 +87,7 @@ public class ModalInfoDialog {
     return modal;
   }
 
-  public Button getOKButton(final Modal modal) {
+  private Button getOKButton(final Modal modal) {
     final Button begin = new Button("OK");
     begin.setType(ButtonType.PRIMARY);
     begin.setEnabled(true);
