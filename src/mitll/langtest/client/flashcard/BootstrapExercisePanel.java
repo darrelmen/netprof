@@ -309,7 +309,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     };
   }
 
-  protected void recordingStarted() {}
+  void recordingStarted() {}
 
   /**
    * Show progress bar with score percentage, colored by score.
@@ -527,7 +527,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @see #cancelTimer()
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#recordingStarted()
    */
-  protected void removePlayingHighlight() {
+  void removePlayingHighlight() {
     removePlayingHighlight(isSiteEnglish() ? english : foreign);
   }
 
@@ -572,7 +572,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @param feedback make delay dependent on how long the text is
    * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
    */
-  protected void nextAfterDelay(boolean correct, String feedback) {
+  void nextAfterDelay(boolean correct, String feedback) {
     if (NEXT_ON_BAD_AUDIO) {
       logger.info("doing nextAfterDelay : correct " + correct + " feedback " + feedback);
       // Schedule the timer to run once in 1 seconds.
@@ -613,7 +613,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @see #nextAfterDelay(boolean, String)
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#nextAfterDelay(boolean, String)
    */
-  protected void loadNextOnTimer(final int delay) {
+  void loadNextOnTimer(final int delay) {
     //logger.info("loadNextOnTimer ----> load next on " + delay);
 
     if (!preventFutureTimerUse) {
@@ -635,7 +635,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   }
 
   private boolean preventFutureTimerUse = false;
-  protected void cancelTimer() {
+  void cancelTimer() {
     removePlayingHighlight();
 
     preventFutureTimerUse = true;
@@ -646,7 +646,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   /**
    * @see #nextAfterDelay(boolean, String)
    */
-  protected void loadNext() {}
+  void loadNext() {}
 
   /**
    * @see FlashcardPanel#FlashcardPanel

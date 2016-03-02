@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements AnalysisPlot.TimeChangeListener {
-  public static final int MAX_EXAMPLES = 10;
+  private static final int MAX_EXAMPLES = 10;
   private final Logger logger = Logger.getLogger("PhoneContainer");
 
   private static final int TABLE_WIDTH = 295;
@@ -358,12 +358,12 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     return columnSortHandler;
   }
 
-  public int compIntThenPhone(PhoneAndStats o1, PhoneAndStats o2, int a1, int a2) {
+  private int compIntThenPhone(PhoneAndStats o1, PhoneAndStats o2, int a1, int a2) {
     int i = Integer.valueOf(a1).compareTo(a2);
     return (i == 0) ? compPhones(o1, o2) : i;
   }
 
-  public int compPhones(PhoneAndStats o1, PhoneAndStats o2) {
+  private int compPhones(PhoneAndStats o1, PhoneAndStats o2) {
     return o1.getPhone().compareTo(o2.getPhone());
   }
 
@@ -618,7 +618,6 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
       }
     };
   }
-
 
   /**
    * MUST BE PUBLIC
