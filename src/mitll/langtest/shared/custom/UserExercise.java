@@ -4,6 +4,7 @@
 
 package mitll.langtest.shared.custom;
 
+import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -85,7 +86,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   /**
    * @param exercise
    * @param creatorID
-   * @see mitll.langtest.client.custom.content.ReviewItemHelper.ReviewFlexListLayout#getFactory(PagingExerciseList, String)
+   * @see FlexListLayout#getFactory(PagingExerciseList)
    */
   public <T extends CommonShell & AnnotationExercise & AudioRefExercise> UserExercise(T exercise, long creatorID) {
     super(exercise.getID());

@@ -12,14 +12,14 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 12/4/15.
  */
-public class TimeWidgets {
+class TimeWidgets {
   private final Logger logger = Logger.getLogger("TimeWidgets");
 
   final Button prevButton;
   final Button nextButton;
-  final Button all;
-  final Button week;
-  final Button month;
+  private final Button all;
+  private final Button week;
+  private final Button month;
   final HTML display;
 
   public TimeWidgets(Button prevButton, Button nextButton, HTML display, Button all, Button week, Button month) {

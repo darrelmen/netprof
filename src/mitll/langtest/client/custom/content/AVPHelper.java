@@ -12,15 +12,12 @@ import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
-import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Shell;
 
 /**
 * Created with IntelliJ IDEA.
@@ -36,11 +33,10 @@ public class AVPHelper extends NPFHelper {
    * @see mitll.langtest.client.custom.Navigation#Navigation
    * @param service
    * @param feedback
-   * @param userManager
    * @param controller
    */
-  public AVPHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller) {
-    super(service, feedback, userManager, controller, false);
+  public AVPHelper(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller) {
+    super(service, feedback, controller, false);
   }
 
   /**
@@ -87,8 +83,9 @@ public class AVPHelper extends NPFHelper {
   }
 
   @Override
-  protected ExercisePanelFactory<CommonShell,CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList, final String instanceName, boolean showQC) {
-    StatsFlashcardFactory avpHelper = new StatsFlashcardFactory(service, feedback, controller, exerciseList, "AVPHelper", ul);
+  ExercisePanelFactory<CommonShell,CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList, final String instanceName, boolean showQC) {
+    StatsFlashcardFactory<CommonShell,CommonExercise> avpHelper =
+        new StatsFlashcardFactory<>(service, feedback, controller, exerciseList, "AVPHelper", ul);
     avpHelper.setContentPanel(contentPanel);
     return avpHelper;
   }
