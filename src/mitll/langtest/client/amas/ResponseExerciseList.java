@@ -48,14 +48,14 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class ResponseExerciseList extends SingleSelectExerciseList {
-  private Logger logger = Logger.getLogger("ResponseExerciseList");
+  private final Logger logger = Logger.getLogger("ResponseExerciseList");
 
   private static final String SPEECH = "Speech";
   private static final int MARGIN_TOP = 12;
   private static final int MAX_LENGTH_ID = 35;
 
   private static final String RESPONSE_TYPE = "responseType";
-  public static final String RESPONSE_TYPE_DIVIDER = "###";
+  private static final String RESPONSE_TYPE_DIVIDER = "###";
   private QuizScorePanel quizPanel;
   private static final String CONGRATULATIONS = "Congratulations!";
 
@@ -273,29 +273,19 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
   }
 
   /**
-   * Deal with responseType being after ###
-   *
-   * @param token
-   * @return
-   */
-//  @Override
-//  protected String getSelectionFromToken(String token) {
-//    return token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0]; // remove any other parameters
-//  }
-
-  /**
    * @see ListInterface#loadNextExercise
    */
   @Override
   protected void onLastItem() {
-    takeAgain();
+//    takeAgain();
   }
 
-
   /**
+   * TODO : what do we do when we get to the end of a test?
    * @see ResponseExerciseList#onLastItem()
    */
-  protected void takeAgain() {
+/*
+  private void takeAgain() {
     String first = getQuizStatus();
     Collection<String> singleton = Arrays.asList(first, "Would you like to take this test again?");
     new DialogHelper(CONGRATULATIONS, singleton, new DialogHelper.CloseListener() {
@@ -310,6 +300,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
       }
     });
   }
+*/
 
   private String getQuizStatus() {
     String quiz = "Quiz #" + getQuiz();
@@ -353,22 +344,24 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
   }
 
   /**
-   * @see FeedbackRecordPanel#postAnswers(ExerciseController, AmasExerciseImpl)
+   * @see FeedbackRecordPanel#postAnswers
    * @param current
    * @return
    */
+/*
   public boolean loadNextExercise(AmasExerciseImpl current) {
     //logger.info("loadNextExercise " + current.getID() );
     boolean b = super.loadNextExercise(current);
     // controller.showAdvance(this);
     return b;
   }
+*/
 
   public void setQuizPanel(QuizScorePanel quizPanel) {
     this.quizPanel = quizPanel;
   }
 
-  protected void getScores() {
+  private void getScores() {
     service.getScoresForUser(getTypeToSelection(), controller.getUser(), getIDs(), new AsyncCallback<QuizCorrectAndScore>() {
       @Override
       public void onFailure(Throwable throwable) {

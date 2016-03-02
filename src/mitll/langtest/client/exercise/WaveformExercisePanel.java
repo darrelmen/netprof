@@ -29,7 +29,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell & AudioRefExercise> extends ExercisePanel<L,T> {
-  private Logger logger = Logger.getLogger("WaveformExercisePanel");
+  private final Logger logger = Logger.getLogger("WaveformExercisePanel");
 
   private static final String RECORD_PROMPT  = "Record the word or phrase, first at normal speed, then again at slow speed.";
   private static final String RECORD_PROMPT2 = "Record the in-context sentence.";
@@ -163,7 +163,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
     return flow;
   }
 
-  Widget getItemHeader(HasID e) {
+  private Widget getItemHeader(HasID e) {
     Heading w = new Heading(GoodwaveExercisePanel.HEADING_FOR_UNIT_LESSON, "Item", e.getID());
     w.getElement().setId("ItemHeading");
     return w;
