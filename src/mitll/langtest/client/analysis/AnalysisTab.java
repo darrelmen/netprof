@@ -42,7 +42,7 @@ public class AnalysisTab extends DivWidget {
   private final AnalysisPlot analysisPlot;
   private final ExerciseController controller;
   private TimeWidgets timeWidgets;
-  private Heading exampleHeader = new Heading(3, WORDS_USING_SOUND);
+  private final Heading exampleHeader = new Heading(3, WORDS_USING_SOUND);
 
   /**
    * @param service
