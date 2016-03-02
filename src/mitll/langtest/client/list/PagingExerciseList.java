@@ -37,14 +37,14 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PagingExerciseList<T extends CommonShell, U extends Shell> extends ExerciseList<T,U> {
-  private Logger logger = Logger.getLogger("PagingExerciseList");
+  private final Logger logger = Logger.getLogger("PagingExerciseList");
 
   protected final ExerciseController controller;
   protected ClickablePagingContainer<T> pagingContainer;
   private final boolean showTypeAhead;
 
   private TypeAhead typeAhead;
-  protected long userListID = -1;
+  long userListID = -1;
   private int unaccountedForVertical = 160;
   private boolean unrecorded;
   private boolean onlyExamples;
@@ -61,9 +61,9 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
    * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList(Panel, String)
    * @see mitll.langtest.client.custom.content.NPFHelper#makeExerciseList(Panel, String)
    */
-  public PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                            ExercisePanelFactory<T,U> factory, ExerciseController controller,
-                            boolean showTypeAhead, String instance, boolean incorrectFirst) {
+  PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
+                     ExercisePanelFactory<T, U> factory, ExerciseController controller,
+                     boolean showTypeAhead, String instance, boolean incorrectFirst) {
     super(currentExerciseVPanel, service, feedback, factory, controller, instance, incorrectFirst);
     this.controller = controller;
     this.showTypeAhead = showTypeAhead;
@@ -158,7 +158,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
    *
    * @return
    */
-  protected int getVerticalUnaccountedFor() {
+  int getVerticalUnaccountedFor() {
     return unaccountedForVertical;
   }
 
@@ -238,7 +238,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
     return typeAhead != null ? typeAhead.getText() : "";
   }
 
-  protected void setTypeAheadText(String t) { typeAhead.setText(t);}
+  void setTypeAheadText(String t) { typeAhead.setText(t);}
 
   @Override
   protected void gotExercises(boolean success) {
@@ -266,7 +266,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
   /**
    * @deprecated
    */
-  void tellUserPanelIsBusy() {
+  private void tellUserPanelIsBusy() {
     Window.alert("Please stop recording before changing items.");
   }
 
@@ -435,7 +435,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
    * @return
    * @see HistoryExerciseList#loadExercisesUsingPrefix(java.util.Map, String, boolean)
    */
-  public boolean getUnrecorded() {
+  boolean getUnrecorded() {
     return unrecorded;
   }
 
@@ -447,7 +447,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
     this.unrecorded = unrecorded;
   }
 
-  public boolean isOnlyExamples() {
+  boolean isOnlyExamples() {
     return onlyExamples;
   }
 
