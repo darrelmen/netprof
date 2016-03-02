@@ -18,14 +18,14 @@ import com.google.gwt.user.client.ui.Panel;
 public class TabAndContent {
   private final Tab tab;
   private final DivWidget content;
-  private String label;
+  private final String label;
 
   /**
    * @param iconType
    * @param label
    * @see mitll.langtest.client.custom.Navigation#makeTab(com.github.gwtbootstrap.client.ui.TabPanel, com.github.gwtbootstrap.client.ui.constants.IconType, String)
    */
-  public TabAndContent(IconType iconType, String label) {
+  TabAndContent(IconType iconType, String label) {
     Tab tab = new Tab();
     tab.asWidget().getElement().setId("Tab_" + label);
     tab.setIcon(iconType);
