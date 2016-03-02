@@ -240,8 +240,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     return didChange;
   }
 
-  private final Set<Widget> audioWasPlayed = new HashSet<Widget>();
-  private final Set<Widget> toResize = new HashSet<Widget>();
+  private final Set<Widget> audioWasPlayed = new HashSet<>();
+  private final Set<Widget> toResize = new HashSet<>();
 
   private <X extends CommonShell & AnnotationExercise> Widget getPanelForAudio(final X exercise,
                                                                                final AudioAttribute audio,
@@ -367,7 +367,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     }
   }
 
-  String wavToMP3(String path) {
+  private String wavToMP3(String path) {
     return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
   }
 
