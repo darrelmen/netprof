@@ -31,9 +31,10 @@ import java.util.logging.Logger;
  */
 public class ReviewScoringPanel extends ScoringAudioPanel {
   private static final int WIDTH_MARGIN = 230;
-  private Logger logger = Logger.getLogger("ReviewScoringPanel");
+  private final Logger logger = Logger.getLogger("ReviewScoringPanel");
   private HTML scoreInfo;
-  private Panel tablesContainer, belowContainer;
+  private final Panel tablesContainer;
+  private final Panel belowContainer;
 
   /**
    * @param refSentence

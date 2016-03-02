@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Created by go22670 on 10/19/15.
  */
-public class PhonePlot extends TimeSeriesPlot {
+class PhonePlot extends TimeSeriesPlot {
   //  private final Logger logger = Logger.getLogger("PhonePlot");
   private static final String PRONUNCIATION_SCORE = " trend";
   private static final int CHART_HEIGHT = 315;
