@@ -116,10 +116,6 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
   }
 
   protected abstract String getExerciseContent(T e);
-/*  {
-    logger.warning("getExerciseContent got " + e.getContent());
-    return e.getContent();
-  }*/
 
   Widget getContentScroller(HTML maybeRTLContent) {
     ScrollPanel scroller = new ScrollPanel(maybeRTLContent);
@@ -211,39 +207,6 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
   }
 
   /**
-   * @seex #addQuestions(mitll.langtest.shared.Exercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
-   * @paramx vp
-   * @paramx e
-   */
-/*  private void addQuestionPrompt(Panel vp) {
-    HTML prompt = new HTML(getQuestionPrompt());
-    prompt.getElement().setId("questionPrompt");
-    prompt.addStyleName("marginBottomTen");
-    vp.add(prompt);
-  }*/
-
-/*  private String getQuestionPrompt() {
-    return "";
-  }*/
-
-/*  protected String getWrittenPrompt(boolean promptInEnglish) {
-    return THREE_SPACES +
-        TYPE_YOUR_ANSWER_IN +(promptInEnglish ? ENGLISH : getLanguage()) +" :";
-  }*/
-
- /* private String getLanguage() {
-    String language = controller.getLanguage();
-    return (language == null || language.length() == 0) ? THE_FOREIGN_LANGUAGE : language;
-  }*/
-
-/*  @Override
-  protected void onUnload() {
-    super.onUnload();
-   // System.out.println("onUnload : doing unload of prev/next handler " +keyHandler);
-    amasNavigationHelper.removeKeyHandler();
-  }*/
-
-  /**
    * Record answers at the server.  For our purposes, add a row to the result table and possibly post
    * some audio and remember where it is.
    * <br></br>
@@ -254,57 +217,7 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
    * @see NavigationHelper#getNextAndPreviousButtons
    */
   @Override
-  public abstract void postAnswers(final ExerciseController controller, final HasID completedExercise); /*{
-    int i = 1;
-    int user = controller.getUser();
-    final Set<Widget> incomplete = new HashSet<Widget>();
-
-    System.out.println("ExercisePanel.postAnswers " + completedExercise);
-
-    boolean allHaveText = true;
-    for (final Widget tb : answers) {
-      String text = ((HasValue<String>) tb).getValue();
-      if (text.length() == 0) allHaveText = false;
-    }
-    if (!allHaveText) {
-      showPopup("Please answer " + (answers.size() == 1 ? "the question." : "all questions."));
-    } else {
-      incomplete.addAll(answers);
-      for (final Widget tb : answers) {
-        String text = ((HasValue<String>) tb).getValue();
-        service.addTextAnswer(user, exercise, i++, text, controller.getAudioType(), new AsyncCallback<Void>() {
-          public void onFailure(Throwable caught) {
-            controller.getFeedback().showErrorMessage("Server error", "Couldn't post answers for exercise.");
-          }
-
-          public void onSuccess(Void result) {
-            incomplete.remove(tb);
-            if (incomplete.isEmpty()) {
-              System.out.println("ExercisePanel.loadNextExercise " + completedExercise.getID());
-
-              exerciseList.loadNextExercise(completedExercise*//*.getID()*//*);
-            }
-            else {
-              System.out.println("ExercisePanel.postAnswers " + incomplete.size() + " incomplete...");
-
-            }
-          }
-        }
-        );
-      }
-    }
-  }*/
-
-/*  private void showPopup(String toShow) {
-    final PopupPanel popupImage = new PopupPanel(true);
-    popupImage.add(new HTML(toShow));
-    popupImage.showRelativeTo(amasNavigationHelper.getNext());
-    Timer t = new Timer() {
-      @Override
-      public void run() { popupImage.hide(); }
-    };
-    t.schedule(3000);
-  }*/
+  public abstract void postAnswers(final ExerciseController controller, final HasID completedExercise);
 
   Widget getAnswerWidget(final T exercise, final LangTestDatabaseAsync service,
                          ExerciseController controller, final int index) {
@@ -334,8 +247,7 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
         logger.warning("recordIncomplete : known : " + widget.getElement().getId());
       }
     }
-    // System.out.println("recordIncomplete : completed " + completed.size() + " vs total " + answers.size());
-
+    // logger.info("recordIncomplete : completed " + completed.size() + " vs total " + answers.size());
     enableNext();
   }
 
@@ -346,48 +258,18 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
   public void recordCompleted(Widget answer) {
     completed.add(answer);
 
-    System.out.println("recordCompleted : id " + answer.getElement().getId() +
+    logger.info("recordCompleted : id " + answer.getElement().getId() +
         " completed " + completed.size() + " vs total " + answers.size());
 
     if (completed.size() > answers.size()) {
       logger.warning("recordCompleted huh? more complete " + completed.size() + " than answers " + answers.size());
     }
 
-    // markTabsComplete();
     enableNext();
   }
 
-  /**
-   * If all the answer widgets within a question tab have been answered, put a little check mark icon
-   * on the tab to indicate it's complete.
-   */
-/*  private void markTabsComplete() {
-    for (Map.Entry<Integer, Set<Widget>> indexWidgetsPair : indexToWidgets.entrySet()) {
-      boolean allComplete = true;
-      Set<Widget> widgetsForTab = indexWidgetsPair.getValue();
-      Integer tabIndex = indexWidgetsPair.getKey();
-      //System.out.println("\trecordCompleted : checking " + tabIndex + " and " + widgetsForTab.size());
-
-      for (Widget widget : widgetsForTab) {
-        if (!completed.contains(widget)) {
-          //System.out.println("\trecordCompleted : tab# " + tabIndex + " is *not* complete : " + widget.getElement().getId());
-          allComplete = false;
-          break;
-        }
-       // else {
-          //System.out.println("\trecordCompleted : tab# " + tabIndex + " is      complete : " + widget.getElement().getId());
-      //  }
-      }
-      if (allComplete) {
-        //System.out.println("\trecordCompleted : tab# " + tabIndex + " is complete");
-        if (!indexToTab.isEmpty()) {
-          indexToTab.get(tabIndex).setIcon(IconType.CHECK);
-        }
-      }
-    }
-  }*/
   private void enableNext() {
-    //System.out.println("enableNext : answered " + completed.size() + " vs total " + answers.size());
+    //logger.info("enableNext : answered " + completed.size() + " vs total " + answers.size());
     boolean isComplete = isCompleted();
     navigationHelper.enableNextButton(isComplete);
   }
@@ -395,7 +277,7 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
   private boolean isCompleted() {
     boolean b = completed.size() == answers.size();
     if (b) {
-      System.out.println("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
+      logger.info("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
     }
     return b;
   }
