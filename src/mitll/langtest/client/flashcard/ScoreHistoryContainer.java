@@ -32,19 +32,19 @@ import java.util.logging.Logger;
 class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScore> {
   private final Logger logger = Logger.getLogger("ScoreHistoryContainer");
 
-  public static final int HISTORY_COL_WIDTH = 105;
+  private static final int HISTORY_COL_WIDTH = 105;
 
-  protected static final String ENGLISH = "English";
+  private static final String ENGLISH = "English";
   private final boolean english;
 
 
   private static final int MAX_LENGTH_ID = 15;
   public static final int TABLE_HISTORY_WIDTH = 420;
-  public static final int COL_WIDTH = 130;
-  public static final String CORRECT_INCORRECT_HISTORY_AND_AVERAGE_PRONUNCIATION_SCORE = "Correct/Incorrect history and average pronunciation score";
+  private static final int COL_WIDTH = 130;
+  private static final String CORRECT_INCORRECT_HISTORY_AND_AVERAGE_PRONUNCIATION_SCORE = "Correct/Incorrect history and average pronunciation score";
 
   private final Map<String, CommonShell> idToExercise = new HashMap<>();
-  private ExerciseComparator sorter;
+  private final ExerciseComparator sorter;
 
   public ScoreHistoryContainer(ExerciseController controller, Collection<? extends CommonShell> allExercises) {
     super(controller);
@@ -310,7 +310,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
    * @param shell
    * @return
    */
-  protected String getEnglishText(CommonShell shell) {
+  private String getEnglishText(CommonShell shell) {
 //    logger.info("getEnglishText " + shell.getID() + " en " + shell.getEnglish() + " fl " + shell.getForeignLanguage() + " mn " + shell.getMeaning());
     return english && !shell.getEnglish().equals(EditItem.NEW_ITEM) ? shell.getForeignLanguage() : shell.getEnglish();
   }
@@ -320,7 +320,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
    * @param shell
    * @return
    */
-  protected String getFLText(CommonShell shell) {
+  private String getFLText(CommonShell shell) {
     String toShow = shell.getForeignLanguage();
     if (english && !shell.getEnglish().equals(EditItem.NEW_ITEM)) {
       String meaning = shell.getMeaning();
