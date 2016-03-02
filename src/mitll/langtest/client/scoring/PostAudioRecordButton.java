@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class PostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
-  private Logger logger = Logger.getLogger("PostAudioRecordButton");
+  private final Logger logger = Logger.getLogger("PostAudioRecordButton");
 
   private boolean validAudio = false;
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
@@ -133,7 +133,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
 
-  public void addRT(AudioAnswer result, int roundtrip) {
+  private void addRT(AudioAnswer result, int roundtrip) {
     service.addRoundTrip(result.getResultID(), roundtrip, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
