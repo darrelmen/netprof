@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ * Copyright © 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  */
 
 package mitll.langtest.server.audio;
@@ -22,7 +22,6 @@ public class HTTPClient {
   private static final Logger logger = Logger.getLogger(HTTPClient.class);
 
   private HttpURLConnection httpConn;
-  //private BufferedReader receiver;
 
   public HTTPClient() {}
 
@@ -46,12 +45,6 @@ public class HTTPClient {
     this("http" + (secure ? "s" : "") + "://" + webserviceIP);
   }
 
-/*  public HTTPClient(String webserviceIP, int webservicePort, boolean secure) {
-    String protocol = "http" + (secure ? "s" : "");
-		String url = protocol + "://" + webserviceIP + ":" + webservicePort;
-		connect(url);
-	}*/
-
   /**
    * @param webserviceIP
    * @param webservicePort
@@ -60,25 +53,6 @@ public class HTTPClient {
   public HTTPClient(String webserviceIP, int webservicePort, String service) {
     this("http://" + webserviceIP + ":" + webservicePort + "/" + service);
   }
-
-  /**
-   * @param webserviceIP
-   * @param webservicePort
-   * @see mitll.langtest.server.database.UserManagement#userExists
-   */
-/*
-  public HTTPClient(String webserviceIP, int webservicePort) {
-    this("http://" + webserviceIP + ":" + webservicePort);
-  }
-*/
-
-/*  private void connect(String url) {
-    try {
-      httpConn = setupPostHttpConn(url);
-    } catch (IOException e) {
-      logger.error("Error constructing HTTPClient:\n" + e, e);
-    }
-  }*/
 
   /**
    * @param url
