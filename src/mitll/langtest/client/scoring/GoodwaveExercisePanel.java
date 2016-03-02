@@ -56,9 +56,9 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
   //private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
-  public static final String MANDARIN = "Mandarin";
-  public static final String KOREAN = "Korean";
-  public static final String JAPANESE = "Japanese";
+  private static final String MANDARIN = "Mandarin";
+  private static final String KOREAN = "Korean";
+  private static final String JAPANESE = "Japanese";
 
   private static final String REFERENCE = "";
   private static final String RECORD_YOURSELF = "Record";
@@ -96,9 +96,9 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
    * @param instance
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    */
-  public GoodwaveExercisePanel(final T commonExercise, final ExerciseController controller,
-                               final ListInterface<CommonShell> listContainer,
-                               float screenPortion, boolean addKeyHandler, String instance) {
+  protected GoodwaveExercisePanel(final T commonExercise, final ExerciseController controller,
+                                  final ListInterface<CommonShell> listContainer,
+                                  float screenPortion, boolean addKeyHandler, String instance) {
     this.exercise = commonExercise;
     this.controller = controller;
     this.service = controller.getService();
@@ -548,7 +548,7 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
     return t.replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
   }
 
-  public T getLocalExercise() {
+  protected T getLocalExercise() {
     return exercise;
   }
 
