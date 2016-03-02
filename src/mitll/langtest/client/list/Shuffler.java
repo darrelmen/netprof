@@ -12,7 +12,7 @@ import java.util.RandomAccess;
 /**
  * Created by GO22670 on 6/10/2014.
  */
-public class Shuffler {
+class Shuffler {
   private static final int SHUFFLE_THRESHOLD = 5;
 
   public static void shuffle(List<?> list) {
