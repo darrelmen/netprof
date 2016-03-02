@@ -39,9 +39,9 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioPanel<T extends Shell> extends VerticalPanel implements RequiresResize {
-  private Logger logger = Logger.getLogger("AudioPanel");
+  private final Logger logger = Logger.getLogger("AudioPanel");
 
-  public static final int LEFT_COLUMN_WIDTH = PagingContainer.MAX_WIDTH;
+  private static final int LEFT_COLUMN_WIDTH = PagingContainer.MAX_WIDTH;
 
   static final int MIN_WIDTH = 256;
   private static final float WAVEFORM_HEIGHT = 80f;//96;
@@ -60,7 +60,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   private final ScoreListener gaugePanel;
   protected final String exerciseID;
   protected String audioPath;
-  protected final Map<String, Integer> reqs = new HashMap<String, Integer>();
+  private final Map<String, Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
 
   private ImageAndCheck waveform;
@@ -69,7 +69,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   ImageAndCheck phones;
 
   private int lastWidth = 0;
-  protected AudioPositionPopup audioPositionPopup;
+  private AudioPositionPopup audioPositionPopup;
   protected final LangTestDatabaseAsync service;
   protected final SoundManagerAPI soundManager;
   private PlayAudioPanel playAudio;
@@ -79,8 +79,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   private boolean showSpectrogram = false;
   private final int rightMargin;
 
-  protected T exercise;
-  protected String instance;
+  protected final T exercise;
+  final String instance;
 
   private static final boolean debug = false;
   private static final boolean DEBUG_GET_IMAGES = false;
@@ -239,7 +239,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     return audioPath != null;
   }
 
-  public void doPause() {
+  void doPause() {
     if (playAudio != null) playAudio.doPause();
   }
 
@@ -440,7 +440,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     return getWidthForWaveform(LEFT_COLUMN_WIDTH, leftColumnWidth, rightSide);
   }
 
-  protected int getWidthForWaveform(int leftColumnWidth1, int leftColumnWidth, int rightSide) {
+  int getWidthForWaveform(int leftColumnWidth1, int leftColumnWidth, int rightSide) {
     int width = (int) ((screenPortion * ((float) Window.getClientWidth())) - leftColumnWidth) - rightSide;
     int i = width / 5;
     width = (i - 1) * 5;

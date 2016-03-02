@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 11/20/15.
  */
-public class PlayAudio {
+class PlayAudio {
   private final Logger logger = Logger.getLogger("PlayAudio");
 
   private static final String WAV = ".wav";
@@ -30,7 +30,7 @@ public class PlayAudio {
 
   private final LangTestDatabaseAsync service;
   private final SoundPlayer soundFeedback;
-  private Widget playFeedback;
+  private final Widget playFeedback;
 
   private Timer t;
 
