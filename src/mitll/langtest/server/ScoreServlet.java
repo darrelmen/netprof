@@ -187,9 +187,7 @@ public class ScoreServlet extends DatabaseServlet {
     reply(response, toReturn.toString());
   }
 
-  private String getReport(JSONObject jsonObject, int year) {
-    return db.getReport(year, jsonObject);
-  }
+  private String getReport(JSONObject jsonObject, int year) {  return db.getReport(year, jsonObject);  }
 
   /**
    * Defaults to this year.
