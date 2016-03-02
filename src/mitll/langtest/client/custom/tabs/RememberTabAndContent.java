@@ -14,7 +14,7 @@ import java.util.Set;
 * Created by GO22670 on 4/16/2014.
 */
 public class RememberTabAndContent extends TabAndContent {
-  private final Set<Widget> widgets = new HashSet<Widget>();
+  private final Set<Widget> widgets = new HashSet<>();
 
   /**
    * @see mitll.langtest.client.qc.QCNPFExercise#addTabsForUsers
