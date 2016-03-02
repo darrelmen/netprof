@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  * Time: 4:58 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExercise> extends GoodwaveExercisePanel<T> {
+class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExercise> extends GoodwaveExercisePanel<T> {
   private final Logger logger = Logger.getLogger("NPFExercise");
 
   private static final String ADD_ITEM = "Add Item to List";
@@ -54,7 +54,7 @@ public class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExerci
 
   private DropdownButton addToList;
   private int activeCount = 0;
-  final PopupContainer popupContainer = new PopupContainer();
+  private final PopupContainer popupContainer = new PopupContainer();
   private Collection<UserList<CommonShell>> listsForUser = Collections.emptyList();
 
   /**
@@ -232,7 +232,7 @@ public class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExerci
    * <p>
    * TODO : do this better -- tell server to return lists that don't have exercise in them.
    *
-   * @param exercise
+   * @param id
    * @param controller
    * @param w1
    * @see #makeAddToList
