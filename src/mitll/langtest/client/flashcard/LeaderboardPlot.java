@@ -13,14 +13,14 @@ import org.moxieapps.gwt.highcharts.client.labels.PlotBandLabel;
 
 import java.util.List;
 
-public class LeaderboardPlot {
-  public static final float HALF = 3f;
-  public static final String AVERAGE = "Class Average";
+class LeaderboardPlot {
+  private static final float HALF = 3f;
+  private static final String AVERAGE = "Class Average";
   private static final String TOP_SCORE = "Class Top Score";
   private static final String PERSONAL_BEST = "Personal Best";
   private static final String CORRECT = "Correct";
   private static final String SCORE = "Score";
-  public static final float GRAPH_MAX = 100f;
+  private static final float GRAPH_MAX = 100f;
 
   /**
    * @see StatsFlashcardFactory.StatsPracticePanel#makeChart(int, int, mitll.langtest.shared.flashcard.AVPHistoryForList)
