@@ -24,7 +24,7 @@ public class ExceptionHandlerDialog {
     showExceptionInDialog(browserCheck, text);
   }
 
-  public void showExceptionInDialog(BrowserCheck browserCheck, String text) {
+  private void showExceptionInDialog(BrowserCheck browserCheck, String text) {
     if (browserCheck != null && browserCheck.isIE7() && text.contains("Unknown runtime error")) { // hack for IE 7
       return;
     }

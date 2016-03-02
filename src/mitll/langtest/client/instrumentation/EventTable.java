@@ -35,7 +35,7 @@ public class EventTable extends PagerTable {
     showDialog(service);
   }
 
-  void showDialog(final LangTestDatabaseAsync service) {
+  private void showDialog(final LangTestDatabaseAsync service) {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("Events");
