@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  */
 public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> {
   private Logger logger = Logger.getLogger("ASRScoringAudioPanel");
-  public static final String SCORE = "score";
+  private static final String SCORE = "score";
   private final Set<String> tested = new HashSet<String>();
   private boolean useScoreToColorBkg = true;
 

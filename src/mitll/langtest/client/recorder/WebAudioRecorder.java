@@ -15,8 +15,8 @@ import java.util.logging.Logger;
  *
  * Created by GO22670 on 5/27/2014.
  */
-public class WebAudioRecorder {
-  private Logger logger = Logger.getLogger("WebAudioRecorder");
+class WebAudioRecorder {
+  private final Logger logger = Logger.getLogger("WebAudioRecorder");
   private static final int DELAY_MILLIS = 5000;
 
   private static boolean webAudioMicAvailable;
@@ -142,7 +142,7 @@ public class WebAudioRecorder {
   /**
    * @see mitll.langtest.client.LangTest#stopRecording(mitll.langtest.client.WavCallback)
    */
-  static WavCallback wavCallback = null;
+  private static WavCallback wavCallback = null;
   public void stopRecording(WavCallback wavCallback) {
     WebAudioRecorder.wavCallback = wavCallback;
     stopRecording();
