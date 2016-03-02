@@ -37,16 +37,16 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
-  public static final String WORDS_USING = "Words with ";
+  private static final String WORDS_USING = "Words with ";
   private final Logger logger = Logger.getLogger("PhoneExampleContainer");
 
-  public static final int PLAY_WIDTH = WordContainer.PLAY_WIDTH;
+  private static final int PLAY_WIDTH = WordContainer.PLAY_WIDTH;
   private static final int ITEM_WIDTH = 200;
-  private ShowTab learnTab;
+  private final ShowTab learnTab;
   private String phone;
   private final boolean isSpanish;
   private final TextHeader header = new TextHeader("Examples of sound");
-  private Heading heading;
+  private final Heading heading;
 
   /**
    * @param controller
