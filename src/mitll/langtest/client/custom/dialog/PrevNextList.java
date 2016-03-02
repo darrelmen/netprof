@@ -83,7 +83,7 @@ public class PrevNextList<T extends Shell> extends HorizontalPanel {
 
   /**
    */
-  void clickNext() {
+  private void clickNext() {
     if (next.isEnabled() && next.isVisible()) {
       boolean onLast = container.loadNext();
       next.setEnabled(!disableNext || !onLast);

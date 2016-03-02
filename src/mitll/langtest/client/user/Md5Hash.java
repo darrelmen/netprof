@@ -27,7 +27,7 @@ public class Md5Hash {
     return md5.digest();
   }
 
-  private static char[] HEX_CHARS =
+  private static final char[] HEX_CHARS =
       new char[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
   private static String toHexString(byte[] bytes) {
     char[] hexString = new char[2 * bytes.length];

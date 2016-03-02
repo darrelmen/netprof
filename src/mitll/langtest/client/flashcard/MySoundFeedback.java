@@ -6,7 +6,7 @@ import mitll.langtest.client.sound.SoundManagerAPI;
 /**
  * Created by go22670 on 2/2/16.
  */
-public class MySoundFeedback extends SoundFeedback {
+class MySoundFeedback extends SoundFeedback {
   public MySoundFeedback(SoundManagerAPI soundManagerAPI) {
     super(soundManagerAPI);
   //  this.statsFlashcardFactory = statsFlashcardFactory;
