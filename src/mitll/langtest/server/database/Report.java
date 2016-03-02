@@ -53,6 +53,13 @@ public class Report {
   private static final String TIME_ON_TASK = "Time on Task";
   public static final String MM_DD = "MM-dd";
   public static final String ALL_NEW_USERS = "All New Users";
+  public static final String ALL_USERS = "allUsers";
+  public static final String I_PAD_USERS = "iPadUsers";
+  public static final String OVERALL_TIME_ON_TASK = "overallTimeOnTask";
+  public static final String DEVICE_TIME_ON_TASK = "deviceTimeOnTask";
+  public static final String UNIQUE_USERS_YTD = "uniqueUsersYTD";
+  public static final String ALL_RECORDINGS1 = "allRecordings";
+  public static final String DEVICE_RECORDINGS1 = "deviceRecordings";
 
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
@@ -200,6 +207,12 @@ public class Report {
     return getReport(jsonObject, year);
   }
 
+  /**
+   * @see DatabaseImpl#getReport(int, JSONObject)
+   * @param jsonObject
+   * @param year
+   * @return
+   */
   public String getReport(JSONObject jsonObject, int year) {
   //  logger.info("doing year " + year);
     setUserStart();
@@ -210,20 +223,20 @@ public class Report {
     // all users
     JSONObject allUsers = new JSONObject();
     Set<Long> users = getUsers(builder, allUsers, year);
-    jsonObject.put("allUsers", allUsers);
+    jsonObject.put(ALL_USERS, allUsers);
 
     // ipad users
     JSONObject iPadUsers = new JSONObject();
     getUsers(builder, userDAO.getUsersDevices(), NEW_I_PAD_I_PHONE_USERS, iPadUsers, year);
-    jsonObject.put("iPadUsers", iPadUsers);
+    jsonObject.put(I_PAD_USERS, iPadUsers);
 
     JSONObject timeOnTaskJSON = new JSONObject();
     Set<Long> events = getEvents(builder, users, timeOnTaskJSON, year);
-    jsonObject.put("overallTimeOnTask", timeOnTaskJSON);
+    jsonObject.put(OVERALL_TIME_ON_TASK, timeOnTaskJSON);
 
     JSONObject deviceTimeOnTaskJSON = new JSONObject();
     Set<Long> eventsDevices = getEventsDevices(builder, users, deviceTimeOnTaskJSON, year);
-    jsonObject.put("deviceTimeOnTask", deviceTimeOnTaskJSON);
+    jsonObject.put(DEVICE_TIME_ON_TASK, deviceTimeOnTaskJSON);
 
     events.addAll(eventsDevices);
 
@@ -231,15 +244,15 @@ public class Report {
 
     JSONObject uniqueUsersYTD = new JSONObject();
     uniqueUsersYTD.put("count", events.size());
-    jsonObject.put("uniqueUsersYTD", uniqueUsersYTD);
+    jsonObject.put(UNIQUE_USERS_YTD, uniqueUsersYTD);
 
     JSONObject allRecordings = new JSONObject();
-    getResults(builder, users, /*pathHelper, language,*/ allRecordings, year);
-    jsonObject.put("allRecordings", allRecordings);
+    getResults(builder, users, allRecordings, year);
+    jsonObject.put(ALL_RECORDINGS1, allRecordings);
 
     JSONObject deviceRecordings = new JSONObject();
-    getResultsDevices(builder, users, /*pathHelper, language,*/ deviceRecordings, year);
-    jsonObject.put("deviceRecordings", deviceRecordings);
+    getResultsDevices(builder, users, deviceRecordings, year);
+    jsonObject.put(DEVICE_RECORDINGS1, deviceRecordings);
 
     Calendar calendar = getCalendarForYear(year);
     Date january1st = getJanuaryFirst(calendar, year);
