@@ -64,7 +64,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     return true;
   }
 
-  long then;
+  private long then;
   @Override
   public void startRecording() {
     if (parentPanel instanceof BusyPanel) {
@@ -134,7 +134,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     setPlayEnabled(false);
   }
 
-  void setPlayEnabled(boolean val) {
+  private void setPlayEnabled(boolean val) {
     //System.out.println("setPlayEnabled -- " + getElement().getId() + " : valid audio ? " + hasValidAudio() + " enable " + val);
     playAudioPanel.setEnabled(val && hasValidAudio());
   }
