@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.*;
 import java.util.logging.Logger;
 
 public class PopupHelper {
-  private Logger logger = Logger.getLogger("PopupHelper");
+  private final Logger logger = Logger.getLogger("PopupHelper");
 
   private static final int HIDE_DELAY = 2500;
 
