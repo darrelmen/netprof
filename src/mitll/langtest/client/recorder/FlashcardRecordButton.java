@@ -40,7 +40,7 @@ public class FlashcardRecordButton extends RecordButton {
   private boolean warnUserWhenNotSpace = true;
   private final boolean addKeyBinding;
   private final ExerciseController controller;
-  private Tooltip tooltip;
+  private final Tooltip tooltip;
 
   /**
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton
@@ -83,7 +83,7 @@ public class FlashcardRecordButton extends RecordButton {
 //    System.out.println("FlashcardRecordButton : using " + getElement().getId());
   }
 
-  protected void addKeyListener(ExerciseController controller, final String instance) {
+  private void addKeyListener(ExerciseController controller, final String instance) {
 
 
   //     System.out.println("FlashcardRecordButton.addKeyListener : using " + getElement().getId() + " for " + instance);
@@ -152,7 +152,7 @@ public class FlashcardRecordButton extends RecordButton {
 
   protected void gotLeftArrow()  {}
 
-  protected void checkKeyUp(NativeEvent event) {
+  private void checkKeyUp(NativeEvent event) {
     if (!shouldIgnoreKeyPress()) {
       boolean isSpace = checkIsSpace(event);
 
@@ -170,18 +170,12 @@ public class FlashcardRecordButton extends RecordButton {
 
   protected boolean shouldIgnoreKeyPress() {
     boolean b = !isAttached() || checkHidden(getElement().getId()) || controller.getUser() == -1;
-
-    //if (b) {
+   //if (b) {
       //System.out.println("attached " + isAttached());
    //   System.out.println("hidden   " + checkHidden(getElement().getId()));
     //  System.out.println("user     " + controller.getUser());
    // }
     return b;
-  }
-
-  @Override
-  protected void onUnload() {
-    super.onUnload();
   }
 
   private native boolean checkHidden(String id)  /*-{
@@ -200,7 +194,7 @@ public class FlashcardRecordButton extends RecordButton {
     return true;
   }
 
-  protected void showFirstRecordImage() {
+  void showFirstRecordImage() {
     setBaseIcon(MyCustomIconType.record1);
     setText("");
   }
