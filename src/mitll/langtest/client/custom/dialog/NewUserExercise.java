@@ -22,7 +22,6 @@ import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.BasicDialog;
@@ -40,13 +39,13 @@ import java.util.logging.Logger;
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NewUserExercise extends BasicDialog {
+class NewUserExercise extends BasicDialog {
   private final Logger logger = Logger.getLogger("NewUserExercise");
 
   private static final String FOREIGN_LANGUAGE = "Foreign Language";
   private static final String CREATE = "Create";
-  static final String ENGLISH_LABEL = "English";// (optional)";
-  static final String ENGLISH_LABEL_2 = "Meaning (optional)";
+  private static final String ENGLISH_LABEL = "English";// (optional)";
+  private static final String ENGLISH_LABEL_2 = "Meaning (optional)";
   static final String TRANSLITERATION_OPTIONAL = "Transliteration (optional)";
   static final String NORMAL_SPEED_REFERENCE_RECORDING = "Normal speed reference recording";
   static final String SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL = "Slow speed reference recording (optional)";
@@ -184,7 +183,7 @@ public class NewUserExercise extends BasicDialog {
    * @return
    * @see #addNew(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel)
    */
-  protected Panel makeAudioRow() {
+  Panel makeAudioRow() {
     FluidRow row = new FluidRow();
 
     normalSpeedRecording = makeRegularAudioPanel(row);
@@ -203,10 +202,10 @@ public class NewUserExercise extends BasicDialog {
   }
 
   private void gotBlur() {
-    gotBlur(english, foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo);
+    gotBlur(foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo);
   }
 
-  void gotBlur(FormField english, FormField foreignLang, RecordAudioPanel rap,
+  void gotBlur(FormField foreignLang, RecordAudioPanel rap,
                ControlGroup normalSpeedRecording,
                UserList<CommonShell> ul,
                ListInterface<CommonShell> pagingContainer,
@@ -270,7 +269,7 @@ public class NewUserExercise extends BasicDialog {
     });
   }
 
-  protected Button makeDeleteButton(UserList<?> ul) {
+  Button makeDeleteButton(UserList<?> ul) {
     Button delete = new Button(REMOVE_FROM_LIST);
     delete.getElement().setId("Remove_from_list");
     delete.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
@@ -281,19 +280,19 @@ public class NewUserExercise extends BasicDialog {
     return delete;
   }
 
-  Panel makeEnglishRow(Panel container) {
+  void makeEnglishRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
     english = addControlFormField(row, getEnglishLabel(), false, 1, 100, "");
 
-    return row;
+   // return row;
   }
 
-  protected String getEnglishLabel() {
+  String getEnglishLabel() {
     return getLanguage().equalsIgnoreCase("english") ? ENGLISH_LABEL_2 : ENGLISH_LABEL;
   }
 
-  FormField makeForeignLangRow(Panel container) {
+  void makeForeignLangRow(Panel container) {
   //  logger.info("NewUserExercise.makeForeignLangRow --->");
 
     Panel row = new FluidRow();
@@ -301,7 +300,7 @@ public class NewUserExercise extends BasicDialog {
     foreignLang = addControlFormField(row, getLanguage(), false, 1, 150, "");
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
 
-    return foreignLang;
+   // return foreignLang;
   }
 
   private String getLanguage() {
@@ -368,7 +367,7 @@ public class NewUserExercise extends BasicDialog {
    * @return
    * @see #addNew
    */
-  protected Panel getCreateButton(UserList<CommonShell> ul,
+  Panel getCreateButton(UserList<CommonShell> ul,
                         ListInterface<CommonShell> pagingContainer,
                         Panel toAddTo,
                         ControlGroup normalSpeedRecording) {

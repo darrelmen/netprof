@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PropertyHandler {
-  private Logger logger = Logger.getLogger("PropertyHandler");
+  private final Logger logger = Logger.getLogger("PropertyHandler");
 
   // property file property names
   private static final String ENABLE_ALL_USERS = "enableAllUsers";
@@ -78,7 +78,7 @@ public class PropertyHandler {
   private boolean isAMAS;
   private boolean usePhoneToDisplay;
 
-  private String AMAS_WELCOME = "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)";
+  private final String AMAS_WELCOME = "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)";
   private static final String PRONUNCIATION_FEEDBACK = "NetProF – Network Pronunciation Feedback";//"Classroom";//NetProF";//"PRONUNCIATION FEEDBACK";
   private static final String AMAS_PRONUNCIATION_FEEDBACK = "AMAS — Automatic Multi-Skilled Assessment System";
 
@@ -86,7 +86,7 @@ public class PropertyHandler {
   private static final String AMAS_INITIAL_PROMPT = "Test your Listening and Reading Skills.";//"Learn how to pronounce words and practice vocabulary.";
 
 
-  public static final List<String> SITE_LIST = Arrays.asList(
+  private static final List<String> SITE_LIST = Arrays.asList(
       "Dari",
       "Egyptian",
       "English",
@@ -147,7 +147,7 @@ public class PropertyHandler {
   private boolean clickAndHold = true;
   private boolean quietAudioOK;
   private boolean showContext = true;
-  private Set<Long> preferredVoices = new HashSet<Long>();
+  private final Set<Long> preferredVoices = new HashSet<Long>();
   private String resetPassToken = "";
   private String cdEnableToken = "", emailRToken = "";
 
@@ -426,7 +426,7 @@ public class PropertyHandler {
    * @see mitll.langtest.client.LangTest#modeSelect()
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
    */
-  public boolean isGrading() {
+  private boolean isGrading() {
     return grading;
   }
 

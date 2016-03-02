@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 * To change this template use File | Settings | File Templates.
 */
 public class SelectionState {
-  private Logger logger = Logger.getLogger("SelectionState");
+  private final Logger logger = Logger.getLogger("SelectionState");
 
   public static final String INSTANCE = "instance";
   private String item;
