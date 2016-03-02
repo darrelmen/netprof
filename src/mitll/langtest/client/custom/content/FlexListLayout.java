@@ -8,7 +8,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Shell;
@@ -19,20 +18,19 @@ import java.util.logging.Logger;
  * Created by GO22670 on 3/28/2014.
  */
 public abstract class FlexListLayout<T extends CommonShell, U extends Shell> implements RequiresResize {
-  private Logger logger = Logger.getLogger("FlexListLayout");
+  private final Logger logger = Logger.getLogger("FlexListLayout");
 
   public PagingExerciseList<T, U> npfExerciseList;
 
   final ExerciseController controller;
   final LangTestDatabaseAsync service;
   final UserFeedback feedback;
-  final boolean incorrectFirst;
+  private final boolean incorrectFirst;
 
   /**
    * @param service
    * @param feedback
    * @param controller
-   * @see ChapterNPFHelper#ChapterNPFHelper(LangTestDatabaseAsync, UserFeedback, UserManager, ExerciseController, boolean)
    * @see ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
    */
   public FlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
@@ -50,7 +48,6 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
    * @param ul
    * @param instanceName
    * @return
-   * @see ChapterNPFHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
    * @see ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
    */
   public Panel doInternalLayout(UserList<?> ul, String instanceName) {
@@ -125,7 +122,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     final PagingExerciseList<T, U> exerciseList = makeExerciseList(topRow, currentExercisePanel, instanceName, incorrectFirst);
     exerciseList.setUserListID(userListID);
 
-    exerciseList.setFactory(getFactory(exerciseList, instanceName));
+    exerciseList.setFactory(getFactory(exerciseList));
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
       public void execute() {
@@ -135,13 +132,10 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     return exerciseList;
   }
 
-  protected abstract ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList, final String instanceName);
+  protected abstract ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList);
 
   protected abstract PagingExerciseList<T, U> makeExerciseList(final Panel topRow, Panel currentExercisePanel,
                                                                final String instanceName, boolean incorrectFirst);
-//  {
-//    return new NPFlexSectionExerciseList<T>(this, topRow, currentExercisePanel, instanceName, incorrectFirst);
-//  }
 
   @Override
   public void onResize() {
