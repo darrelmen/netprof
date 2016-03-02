@@ -9,7 +9,6 @@ import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.exercise.CommonShell;
 
 /**
  * Created by go22670 on 1/26/16.
