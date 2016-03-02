@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  */
 public abstract class AmasExercisePanel extends VerticalPanel implements
     PostAnswerProvider, ProvidesResize, RequiresResize, ExerciseQuestionState {
-  private Logger logger = Logger.getLogger("AmasExercisePanel");
+  private final Logger logger = Logger.getLogger("AmasExercisePanel");
 
   private static final int QUESTION_WIDTH = 700;
   private static final int CONTENT_SCROLL_HEIGHT = 200;
@@ -42,19 +42,19 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
 
   private final List<Widget> answers = new ArrayList<Widget>();
 
-  private Set<Tab> completedTabs = new HashSet<>();
+  private final Set<Tab> completedTabs = new HashSet<>();
 
-  protected AmasExerciseImpl exercise = null;
-  protected final ExerciseController controller;
+  AmasExerciseImpl exercise = null;
+  final ExerciseController controller;
 
-  protected final LangTestDatabaseAsync service;
-  protected final AmasNavigationHelper amasNavigationHelper;
-  protected final ResponseExerciseList exerciseList;
-  protected final Map<Integer, Widget> indexToWidget = new HashMap<Integer, Widget>();
+  final LangTestDatabaseAsync service;
+  final AmasNavigationHelper amasNavigationHelper;
+  final ResponseExerciseList exerciseList;
+  private final Map<Integer, Widget> indexToWidget = new HashMap<Integer, Widget>();
 
-  protected Map<Integer, Tab> indexToTab = new TreeMap<Integer, Tab>();
+  private final Map<Integer, Tab> indexToTab = new TreeMap<Integer, Tab>();
   private TabPanel tabPanel;
-  protected Integer currentTab = 1;
+  Integer currentTab = 1;
 
   /**
    * @param e
@@ -63,8 +63,8 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
    * @param exerciseList
    * @see FeedbackRecordPanel#FeedbackRecordPanel
    */
-  protected AmasExercisePanel(final AmasExerciseImpl e, final LangTestDatabaseAsync service,
-                              final ExerciseController controller, ResponseExerciseList exerciseList) {
+  AmasExercisePanel(final AmasExerciseImpl e, final LangTestDatabaseAsync service,
+                    final ExerciseController controller, ResponseExerciseList exerciseList) {
     this.exercise = e;
     this.controller = controller;
     this.service = service;
@@ -139,7 +139,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
    */
   protected abstract Widget getQuestionContent(AmasExerciseImpl e);
 
-  protected Widget getContentScroller(Widget maybeRTLContent) {
+  Widget getContentScroller(Widget maybeRTLContent) {
     ScrollPanel scroller = new ScrollPanel(maybeRTLContent);
 
     scroller.setAlwaysShowScrollBars(true);
@@ -162,7 +162,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
    * @see #getQuestionHeader
    * @see mitll.langtest.client.amas.FeedbackRecordPanel#getQuestionContent
    */
-  protected Widget getMaybeRTLContent(String content, int width) {
+  Widget getMaybeRTLContent(String content, int width) {
     content = content.replaceAll("<p> &nbsp; </p>", "").replaceAll("<h4>", "").replaceAll("</h4>", "");
 
     Widget widget = new Heading(4, content);
@@ -329,7 +329,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
    * @see #getQuestionHeader
    * @see mitll.langtest.client.amas.FeedbackRecordPanel#getAnswerWidget
    */
-  protected Widget showAnswers(QAPair qaPair, HasWidgets toAddTo, String prefix, String question) {
+  Widget showAnswers(QAPair qaPair, HasWidgets toAddTo, String prefix, String question) {
     return new ShowAnswers(controller.getLanguage().toLowerCase()).showAnswers(qaPair, toAddTo, prefix, question);
   }
 
@@ -339,7 +339,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
    * @see #getAnswerWidget
    * @see mitll.langtest.client.amas.FeedbackRecordPanel.AnswerPanel#getStudentAnswer(LangTestDatabaseAsync, int)
    */
-  protected void addAnswerWidget(int index, Widget answerWidget) {
+  void addAnswerWidget(int index, Widget answerWidget) {
     answers.add(answerWidget);
     indexToWidget.put(index, answerWidget);
   }
@@ -383,7 +383,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
     return -1;
   }
 
-  protected void markTabComplete(Integer tabIndex) {
+  void markTabComplete(Integer tabIndex) {
     logger.info("markTabComplete " + tabIndex);
     Tab tab = getTab(tabIndex);
     if (tab == null) logger.warning("no tab with index " + tabIndex);
@@ -402,7 +402,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
   /**
    * @see FeedbackRecordPanel#getScores
    */
-  protected void selectFirstIncomplete() {
+  void selectFirstIncomplete() {
     //  logger.info("selectFirstIncomplete checking " +indexToTab.size() + " tabs");
     for (Map.Entry<Integer, Tab> pair : indexToTab.entrySet()) {
       if (!completedTabs.contains(pair.getValue())) {
@@ -432,15 +432,15 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
     indexToTab.put(questionNumber, tabPane);
   }
 
-  protected Tab getTab(Integer tabIndex) {
+  private Tab getTab(Integer tabIndex) {
     return indexToTab.get(tabIndex);
   }
 
-  protected void enableNext() {
+  void enableNext() {
     amasNavigationHelper.enableNextButton(isCompleted());
   }
 
-  protected boolean isCompleted() {
+  boolean isCompleted() {
     return completedTabs.size() == answers.size();
   }
 
