@@ -43,14 +43,15 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
   private boolean doFlashcardAudio = false;
   private boolean allowAlternates = false;
-  private final String audioType;
-  private long timeShown = System.currentTimeMillis();
-  private Map<String, Collection<String>> typeToSelection;
+
+//  private final String audioType;
+//  private long timeShown = System.currentTimeMillis();
+//  private final Map<String, Collection<String>> typeToSelection;
 
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
    *
-   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#FlashcardRecordButtonPanel(mitll.langtest.client.flashcard.AudioAnswerListener, LangTestDatabaseAsync, ExerciseController, String, int, String)
+   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#FlashcardRecordButtonPanel
    */
   protected RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
                               final String exerciseID, final int index,
@@ -62,8 +63,8 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     this.index = index;
     this.doFlashcardAudio = doFlashcardAudio;
     layoutRecordButton(recordButton = makeRecordButton(controller, recordButtonTitle));
-    this.audioType = audioType;
-    this.typeToSelection = typeToSelection;
+    //this.audioType = audioType;
+    //this.typeToSelection = typeToSelection;
   }
 
   protected RecordButton makeRecordButton(ExerciseController controller, String buttonTitle) {
@@ -78,7 +79,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   /**
    * @see RecordButtonPanel#RecordButtonPanel
    */
-  void layoutRecordButton(Widget button) {
+  private void layoutRecordButton(Widget button) {
     SimplePanel recordButtonContainer = new SimplePanel(button);
     recordButtonContainer.setWidth("75px");
     HorizontalPanel hp = new HorizontalPanel();
@@ -103,7 +104,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
    * @return
    * @seex FeedbackRecordPanel#getAnswerWidget
    */
-  public Panel getPanel() {
+  private Panel getPanel() {
     return this.panel;
   }
 
@@ -141,11 +142,12 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
 
   /**
    * TODO : add timeSpent, typeToSelection
+   *
    * @param outer
    * @param tries
    * @param base64EncodedWavFile
    */
-  protected void postAudioFile(final Panel outer, final int tries, final String base64EncodedWavFile) {
+  private void postAudioFile(final Panel outer, final int tries, final String base64EncodedWavFile) {
     //System.out.println("RecordButtonPanel : postAudioFile " );
     final long then = System.currentTimeMillis();
     reqid++;
@@ -153,13 +155,9 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     String device = controller.getBrowserInfo();
     final int len = base64EncodedWavFile.length();
 
-    AudioContext audioContext   = new AudioContext(reqid, controller.getUser(), exerciseID, index, getAudioType());
+    AudioContext audioContext = new AudioContext(reqid, controller.getUser(), exerciseID, index, getAudioType());
 
     service.writeAudioFile(base64EncodedWavFile,
-//        reqid, controller.getUser(), exerciseID,
-//        index,
-//        audioType,
-//
         audioContext,
         controller.usingFlashRecorder(), "browser", device,
         doFlashcardAudio,
@@ -170,7 +168,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
               postAudioFile(outer, tries - 1, base64EncodedWavFile); // TODO : try one more time...  ???
             } else {
               recordButton.setEnabled(true);
-              receivedAudioFailure();
+              // receivedAudioFailure();
               logMessage("failed to post " + getLog(then));
               Window.alert("writeAudioFile : stopRecording : Couldn't post answers for exercise.");
               new ExceptionHandlerDialog(caught);
@@ -213,7 +211,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
         });
   }
 
-  void logMessage(String message) {
+  private void logMessage(String message) {
     service.logMessage(message, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -225,7 +223,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     });
   }
 
-  protected String getAudioType() {
+  private String getAudioType() {
     return controller.getAudioType();
   }
 
@@ -238,9 +236,6 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   }
 
   protected void receivedAudioAnswer(AudioAnswer result, final Panel outer) {
-  }
-
-  protected void receivedAudioFailure() {
   }
 
   public void setAllowAlternates(boolean allowAlternates) {
