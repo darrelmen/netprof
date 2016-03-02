@@ -6,7 +6,7 @@ import mitll.langtest.client.sound.SoundFeedback;
 /**
  * Created by go22670 on 12/23/15.
  */
-public class MySoundFeedback extends SoundFeedback {
+class MySoundFeedback extends SoundFeedback {
   public MySoundFeedback(ExerciseController controller) {
     super(controller.getSoundManager());
   }
