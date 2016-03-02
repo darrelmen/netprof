@@ -33,12 +33,12 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class RecordButton extends Button {
-  private Logger logger = Logger.getLogger("RecordButton");
+  private final Logger logger = Logger.getLogger("RecordButton");
 
   private static final int PERIOD_MILLIS = 500;
   public static final String RECORD1 = "Record      ";
   public static final String STOP1 = "Recording...";
-  public static final String WINDOWS = "Win32";
+  private static final String WINDOWS = "Win32";
   private final String RECORD;
   private final String STOP;
 
@@ -47,11 +47,11 @@ public class RecordButton extends Button {
   private Timer recordTimer;
   private final int autoStopDelay;
   private final boolean doClickAndHold;
-  protected boolean mouseDown = false;
+  boolean mouseDown = false;
 
   private RecordingListener recordingListener;
-  PropertyHandler propertyHandler;
-  Timer afterStopTimer = null;
+  private final PropertyHandler propertyHandler;
+  private Timer afterStopTimer = null;
 
   public interface RecordingListener {
     void startRecording();
@@ -115,7 +115,7 @@ public class RecordButton extends Button {
    */
   protected void setRecordingListener(RecordingListener recordingListener) { this.recordingListener = recordingListener;  }
 
-  void setupRecordButton() {
+  private void setupRecordButton() {
     if (doClickAndHold) {
       addMouseDownHandler(new MouseDownHandler() {
         @Override
@@ -158,7 +158,7 @@ public class RecordButton extends Button {
     }
   }
 
-  protected void gotMouseOut() {
+  private void gotMouseOut() {
     if (mouseDown) {
       mouseDown = false;
       logger.info("got mouse out " + mouseDown);
@@ -168,7 +168,7 @@ public class RecordButton extends Button {
   /**
    * @see #setupRecordButton
    */
-  protected void doClick() {
+  void doClick() {
     if (isVisible() && isEnabled()) {
       startOrStopRecording();
     }
@@ -210,7 +210,7 @@ public class RecordButton extends Button {
     recordingListener.stopRecording();
   }
 
-  void showRecording() {
+  private void showRecording() {
     setIcon(IconType.STOP);
 
     if (showInitialRecordImage()) {
@@ -238,7 +238,7 @@ public class RecordButton extends Button {
     t.scheduleRepeating(PERIOD_MILLIS);
   }
 
-  void showStopped() {
+  private void showStopped() {
     setIcon(IconType.MICROPHONE);
 
     if (t != null) {
@@ -308,8 +308,8 @@ public class RecordButton extends Button {
     else return false;
   }
 
-  public void removeTooltip() {}
-  protected void showTooLoud() {
+  void removeTooltip() {}
+  private void showTooLoud() {
     final RecordButton widget = this;
     removeTooltip();
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
