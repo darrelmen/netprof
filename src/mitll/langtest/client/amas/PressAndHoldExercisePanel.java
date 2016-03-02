@@ -34,7 +34,7 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
 
   private static final String ANSWER_UPDATED = "Answer Updated";
   private Heading recoOutput;
-  public static final int HIDE_DELAY = 2500;
+  private static final int HIDE_DELAY = 2500;
 
   private final String exerciseID;
 
@@ -49,7 +49,7 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
   private RecordButton realRecordButton;
 
   private PlayAudioPanel playAudioPanel;
-  private DivWidget iconContainer = new DivWidget();
+  private final DivWidget iconContainer = new DivWidget();
   private Panel recoOutputContainer;
 
   /**
@@ -233,14 +233,6 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
           }
 
           @Override
-          protected void gotLeftArrow() {
-          }
-
-          @Override
-          protected void gotRightArrow() {
-          }
-
-          @Override
           protected boolean shouldIgnoreKeyPress() {
             return super.shouldIgnoreKeyPress();
           }
@@ -251,15 +243,6 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
           }
         };
 
-        // don't do this with search box on the page...
-        // without this, the arrow keys may go to the chapter selector
-/*
-        Scheduler.get().scheduleDeferred(new Command() {
-          public void execute() {
-            widgets.setFocus(true);
-          }
-        });
-*/
         return widgets;
       }
 
@@ -303,7 +286,7 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
    * @see #showCorrectFeedback
    * @see #showIncorrectFeedback
    */
-  protected void showPronScoreFeedback(double score) {
+  void showPronScoreFeedback(double score) {
   }
 //  void clearFeedback() {}
 //  private Heading getRecoOutput() { return recoOutput;  }
