@@ -53,8 +53,8 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class Navigation implements RequiresResize, ShowTab {
-  public static final String STUDENT_ANALYSIS = "Student Analysis";
-  public static final String CUSTOM = "Custom";
+  private static final String STUDENT_ANALYSIS = "Student Analysis";
+  private static final String CUSTOM = "Custom";
   private final Logger logger = Logger.getLogger("Navigation");
 
   private static final String CHAPTERS = "Learn Pronunciation";
@@ -94,7 +94,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private final KeyStorage storage;
   private ListManager listManager;
-  private UserFeedback feedback;
+  private final UserFeedback feedback;
 
   private TabPanel tabPanel;
   private TabAndContent studyLists;
@@ -104,10 +104,10 @@ public class Navigation implements RequiresResize, ShowTab {
   private TabAndContent review, recorderTab, recordExampleTab, markDefectsTab;
   private TabAndContent practiceTab;
 
-  private final Map<String, TabAndContent> nameToTab = new HashMap<String, TabAndContent>();
-  private final Map<String, Integer> nameToIndex = new HashMap<String, Integer>();
+  private final Map<String, TabAndContent> nameToTab = new HashMap<>();
+  private final Map<String, Integer> nameToIndex = new HashMap<>();
 
-  private final List<TabAndContent> tabs = new ArrayList<TabAndContent>();
+  private final List<TabAndContent> tabs = new ArrayList<>();
 
   /**
    * @param service
@@ -142,8 +142,7 @@ public class Navigation implements RequiresResize, ShowTab {
         return new ExercisePanelFactory<CommonShell, CommonExercise>(service, feedback, controller, exerciseList) {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
-            CommentNPFExercise<CommonExercise> classroom = new CommentNPFExercise<>(e, controller, exerciseList, false, "classroom");
-            return classroom;
+            return new CommentNPFExercise<>(e, controller, exerciseList, false, "classroom");
           }
         };
       }
@@ -185,7 +184,7 @@ public class Navigation implements RequiresResize, ShowTab {
     recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false, learnHelper);
   }
 
-  void makeDialogWindow(final LangTestDatabaseAsync service, final ExerciseController controller) {
+  private void makeDialogWindow(final LangTestDatabaseAsync service, final ExerciseController controller) {
     GWT.runAsync(new RunAsyncCallback() {
       public void onFailure(Throwable caught) {
         downloadFailedAlert();
@@ -208,6 +207,7 @@ public class Navigation implements RequiresResize, ShowTab {
   }
 
   /**
+   * TODO : clean this up - why a horrible hack for learn tab?
    * @return
    * @see #getTabPanel
    * @see mitll.langtest.client.LangTest#populateRootPanel()
@@ -427,7 +427,7 @@ public class Navigation implements RequiresResize, ShowTab {
       checkAndMaybeClearTab(PRACTICE);
       //    logger.info(" ------- showPracticeTab make practice tab  - ");
       practiceHelper.showNPF(practiceTab, PRACTICE);
-      practiceHelper.setContentPanel(practiceTab.getContent());
+      //practiceHelper.setContentPanel(practiceTab.getContent());
       practiceHelper.hideList();
     }
   }
@@ -447,7 +447,7 @@ public class Navigation implements RequiresResize, ShowTab {
     }
   }
 
-  void reallyAddDialogTab() {
+  private void reallyAddDialogTab() {
     dialog = makeFirstLevelTab(tabPanel, IconType.TH_LIST, PRACTICE_DIALOG);
     dialog.getTab().addClickHandler(new ClickHandler() {
       @Override
@@ -497,7 +497,7 @@ public class Navigation implements RequiresResize, ShowTab {
     }
   }
 
-  void reallyShowInitialState() {
+  private void reallyShowInitialState() {
     service.getListsForUser(userManager.getUser(), true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -629,7 +629,7 @@ public class Navigation implements RequiresResize, ShowTab {
    * Right now show the learn pronunciation tab.
    * @param setClickedStorage
    */
-  public void showDefaultInitialTab(boolean setClickedStorage) {
+  private void showDefaultInitialTab(boolean setClickedStorage) {
     if (setClickedStorage) {
       checkAndMaybeClearTab(CHAPTERS);
     }
