@@ -14,8 +14,8 @@ import mitll.langtest.client.exercise.ExerciseController;
 /**
  * Created by go22670 on 10/20/15.
  */
-public class DownloadLink {
-  ExerciseController controller;
+class DownloadLink {
+  private final ExerciseController controller;
   public DownloadLink(ExerciseController controller) {
     this.controller = controller;
   }
