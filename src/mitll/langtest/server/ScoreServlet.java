@@ -94,7 +94,7 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * @seex mitll.langtest.server.LangTestDatabaseImpl#shareLoadTesting
    */
- // public static final String LOAD_TESTING = "loadTesting";
+  // public static final String LOAD_TESTING = "loadTesting";
 
   private static final String ADD_USER = "addUser";
   private static final double ALIGNMENT_SCORE_CORRECT = 0.5;
@@ -110,70 +110,69 @@ public class ScoreServlet extends DatabaseServlet {
    */
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    String pathInfo = request.getPathInfo();
-    logger.debug("ScoreServlet.doGet : Request " + request.getQueryString() + " path " + pathInfo +
-        " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
+    String queryString = request.getQueryString();
+    if (queryString == null) queryString = ""; // how could this happen???
+    if (!queryString.contains(NESTED_CHAPTERS)) { // quiet output for polling from status webapp
+      String pathInfo = request.getPathInfo();
+      logger.debug("ScoreServlet.doGet : Request '" + queryString + "' path " + pathInfo +
+          " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
+    }
 
     long then = System.currentTimeMillis();
     configureResponse(response);
 
     getAudioFileHelper();
-    String queryString = request.getQueryString();
     JSONObject toReturn = new JSONObject();
     //toReturn.put(ERROR, "expecting request");
 
     try {
-      if (queryString != null) {
-        queryString = URLDecoder.decode(queryString, "UTF-8");
-        if (matchesRequest(queryString, NESTED_CHAPTERS)) {
-          String[] split1 = queryString.split("&");
-          if (split1.length == 2) {
-            String removeExercisesWithMissingAudio = getRemoveExercisesParam(queryString);
-            if (removeExercisesWithMissingAudio.equals("true") || removeExercisesWithMissingAudio.equals("false")) {
-              toReturn = getJsonNestedChapters(removeExercisesWithMissingAudio.equals("true"));
-            } else {
-              toReturn.put(ERROR, "expecting param " + REMOVE_EXERCISES_WITH_MISSING_AUDIO);
-            }
+      queryString = URLDecoder.decode(queryString, "UTF-8");
+      if (matchesRequest(queryString, NESTED_CHAPTERS)) {
+        String[] split1 = queryString.split("&");
+        if (split1.length == 2) {
+          String removeExercisesWithMissingAudio = getRemoveExercisesParam(queryString);
+          if (removeExercisesWithMissingAudio.equals("true") || removeExercisesWithMissingAudio.equals("false")) {
+            toReturn = getJsonNestedChapters(removeExercisesWithMissingAudio.equals("true"));
           } else {
-            if (nestedChapters == null || (System.currentTimeMillis() - whenCached > REFRESH_CONTENT_INTERVAL)) {
-              nestedChapters = getJsonNestedChapters(true);
-              whenCached = System.currentTimeMillis();
-            }
-            toReturn = nestedChapters;
-          }
-//        } else if (matchesRequest(queryString, LEAST_RECORDED_CHAPTERS)) { // JUST FOR APPEN
-//          toReturn = getJsonLeastRecordedChapters(getRemoveExercisesParam(queryString).equals("true"));
-        } else if (userManagement.doGet(request, response, queryString, toReturn)) {
-          logger.info("doGet handled user command for " + queryString);
-        } else if (matchesRequest(queryString, CHAPTER_HISTORY)) {
-          queryString = removePrefix(queryString, CHAPTER_HISTORY);
-          toReturn = getChapterHistory(queryString, toReturn);
-        } else if (matchesRequest(queryString, REF_INFO)) {
-          queryString = removePrefix(queryString, REF_INFO);
-          toReturn = getRefInfo(queryString, toReturn);
-        } else if (matchesRequest(queryString, JSON_REPORT)) {
-          queryString = removePrefix(queryString, JSON_REPORT);
-          int year = getYear(queryString);
-          getReport(toReturn, year);
-        } else if (matchesRequest(queryString, "export")) {
-          toReturn = getJSONForExercises();
-        } else if (matchesRequest(queryString, REPORT)) {
-          queryString = removePrefix(queryString, REPORT);
-          int year = getYear(queryString);
-          configureResponseHTML(response, year);
-          reply(response, getReport(toReturn, year));
-          return;
-        } else if (matchesRequest(queryString, PHONE_REPORT)) {
-          queryString = removePrefix(queryString, PHONE_REPORT);
-          String[] split1 = queryString.split("&");
-          if (split1.length < 2) {
-            toReturn.put(ERROR, "expecting at least two query parameters");
-          } else {
-            toReturn = getPhoneReport(toReturn, split1);
+            toReturn.put(ERROR, "expecting param " + REMOVE_EXERCISES_WITH_MISSING_AUDIO);
           }
         } else {
-          toReturn.put(ERROR, "unknown req " + queryString);
+          if (nestedChapters == null || (System.currentTimeMillis() - whenCached > REFRESH_CONTENT_INTERVAL)) {
+            nestedChapters = getJsonNestedChapters(true);
+            whenCached = System.currentTimeMillis();
+          }
+          toReturn = nestedChapters;
         }
+      } else if (userManagement.doGet(request, response, queryString, toReturn)) {
+        logger.info("doGet handled user command for " + queryString);
+      } else if (matchesRequest(queryString, CHAPTER_HISTORY)) {
+        queryString = removePrefix(queryString, CHAPTER_HISTORY);
+        toReturn = getChapterHistory(queryString, toReturn);
+      } else if (matchesRequest(queryString, REF_INFO)) {
+        queryString = removePrefix(queryString, REF_INFO);
+        toReturn = getRefInfo(queryString, toReturn);
+      } else if (matchesRequest(queryString, JSON_REPORT)) {
+        queryString = removePrefix(queryString, JSON_REPORT);
+        int year = getYear(queryString);
+        getReport(toReturn, year);
+      } else if (matchesRequest(queryString, "export")) {
+        toReturn = getJSONForExercises();
+      } else if (matchesRequest(queryString, REPORT)) {
+        queryString = removePrefix(queryString, REPORT);
+        int year = getYear(queryString);
+        configureResponseHTML(response, year);
+        reply(response, getReport(toReturn, year));
+        return;
+      } else if (matchesRequest(queryString, PHONE_REPORT)) {
+        queryString = removePrefix(queryString, PHONE_REPORT);
+        String[] split1 = queryString.split("&");
+        if (split1.length < 2) {
+          toReturn.put(ERROR, "expecting at least two query parameters");
+        } else {
+          toReturn = getPhoneReport(toReturn, split1);
+        }
+      } else {
+        toReturn.put(ERROR, "unknown req " + queryString);
       }
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -187,7 +186,9 @@ public class ScoreServlet extends DatabaseServlet {
     reply(response, toReturn.toString());
   }
 
-  private String getReport(JSONObject jsonObject, int year) {  return db.getReport(year, jsonObject);  }
+  private String getReport(JSONObject jsonObject, int year) {
+    return db.getReport(year, jsonObject);
+  }
 
   /**
    * Defaults to this year.
