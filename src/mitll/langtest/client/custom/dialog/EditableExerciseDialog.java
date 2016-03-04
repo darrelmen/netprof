@@ -64,16 +64,13 @@ class EditableExerciseDialog extends NewUserExercise {
 
                                 PagingExerciseList<CommonShell, CommonExercise> exerciseList,
                                 ReloadableContainer predefinedContent,
-                                String instanceName
-  //                              NPFHelper npfHelper
-  ) {
+                                String instanceName) {
     super(service, controller, itemMarker, editItem, changedUserExercise, instanceName, originalList);
     fastAnno.addStyleName("editComment");
     slowAnno.addStyleName("editComment");
     this.originalList = originalList;
     this.exerciseList = exerciseList;
     this.predefinedContentList = predefinedContent;
-    //this.npfHelper = npfHelper;
   }
 
   @Override
