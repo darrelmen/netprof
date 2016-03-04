@@ -25,7 +25,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   private long creator;
   private boolean isPredef;
   private boolean isOverride;
-  private long modifiedTimestamp;
+  private long modifiedTimestamp = 0;
   private List<CorrectAndScore> scores;
   private float avgScore;
   private transient Collection<String> refSentences;
@@ -263,7 +263,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
         " modified " + new Date(modifiedTimestamp);
   }
 
-  public long getModifiedTimestamp() {
+  public long getUpdateTime() {
     return modifiedTimestamp;
   }
 }
