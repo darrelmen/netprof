@@ -84,7 +84,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private UserExerciseDAO userExerciseDAO;
   private AddRemoveDAO addRemoveDAO;
   private EventDAO eventDAO;
-  //private UploadDAO uploadDAO;
 
   private ContextPractice contextPractice;
 
@@ -116,9 +115,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
                       PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify) {
     this(serverProps.useH2() ?
-        new H2Connection(configDir, dbName, mustAlreadyExist, logAndNotify):
-        serverProps.usePostgres() ?
-            new PostgreSQLConnection(dbName,logAndNotify) :new MySQLConnection(dbName,logAndNotify),
+            new H2Connection(configDir, dbName, mustAlreadyExist, logAndNotify) :
+            serverProps.usePostgres() ?
+                new PostgreSQLConnection(dbName, logAndNotify) : new MySQLConnection(dbName, logAndNotify),
         configDir, relativeConfigDir, dbName,
         serverProps,
         pathHelper, logAndNotify);
@@ -171,8 +170,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   private void initializeDAOs(PathHelper pathHelper) {
     userDAO = new UserDAO(this, getServerProps());
-    //uploadDAO = new UploadDAO(this, getServerProps());
-    UserListDAO userListDAO = new UserListDAO(this, userDAO);
     addRemoveDAO = new AddRemoveDAO(this);
 
     userExerciseDAO = new UserExerciseDAO(this);
@@ -183,7 +180,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     phoneDAO = new PhoneDAO(this);
     audioDAO = new AudioDAO(this, userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
-    userListManager = new UserListManager(userDAO, userListDAO, userListExerciseJoinDAO,
+    userListManager = new UserListManager(userDAO, new UserListDAO(this, userDAO), userListExerciseJoinDAO,
         new AnnotationDAO(this, userDAO),
         new ReviewedDAO(this, ReviewedDAO.REVIEWED),
         new ReviewedDAO(this, ReviewedDAO.SECOND_STATE),
@@ -420,15 +417,14 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     if (exerciseDAO == null) {
       synchronized (this) {
         boolean isURL = serverProps.getLessonPlan().startsWith("http");
-        if (serverProps.isAMAS()) {
-
+        boolean amas = serverProps.isAMAS();
+        if (amas) {
           int numExercises;
 //          logger.info("Got " + lessonPlanFile);
           if (isURL) {
-            this.fileExerciseDAO = new JSONURLExerciseDAO(getServerProps());
+            this.fileExerciseDAO = new AMASJSONURLExerciseDAO(getServerProps());
             numExercises = fileExerciseDAO.getNumExercises();
-          }
-          else {
+          } else {
             fileExerciseDAO = new FileExerciseDAO<>(mediaDir, serverProps.getLanguage(), absConfigDir, lessonPlanFile, installPath);
             numExercises = fileExerciseDAO.getNumExercises();
           }
@@ -436,9 +432,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
         } else {
           if (isURL) {
-            this.fileExerciseDAO = new JSONURLExerciseDAO(getServerProps());
-          }
-          else if (lessonPlanFile.endsWith(".json")) {
+            this.exerciseDAO = new JSONURLExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS);
+          } else if (lessonPlanFile.endsWith(".json")) {
             this.exerciseDAO = new JSONExerciseDAO(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
           } else {
             this.exerciseDAO = new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
@@ -744,8 +739,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
-   * @see LangTestDatabaseImpl#getContextPractice()
    * @return
+   * @see LangTestDatabaseImpl#getContextPractice()
    */
   public ContextPractice getContextPractice() {
     if (this.contextPractice == null) {
@@ -1388,10 +1383,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.ScoreServlet#getReport(JSONObject, int)
    * @param year
    * @param jsonObject
    * @return
+   * @see mitll.langtest.server.ScoreServlet#getReport(JSONObject, int)
    */
   public String getReport(int year, JSONObject jsonObject) {
     return getReport("").getReport(jsonObject, year);
@@ -1476,7 +1471,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public Map<String, Float> getMaleFemaleProgress() {
     UserDAO userDAO = getUserDAO();
-    Map<Long, User> userMapMales   = userDAO.getUserMap(true);
+    Map<Long, User> userMapMales = userDAO.getUserMap(true);
     Map<Long, User> userMapFemales = userDAO.getUserMap(false);
 
     Collection<? extends CommonShell> exercises = getExercises();
