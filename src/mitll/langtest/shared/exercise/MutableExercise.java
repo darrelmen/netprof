@@ -14,10 +14,6 @@ public interface MutableExercise extends CommonShell, MutableShell {
 
   void setFirstPron(List<String> phones);
 
-  //void setEnglish(String english);
-
-  //void setForeignLanguage(String foreignLanguage);
-
   void setTransliteration(String transliteration);
 
   /**
