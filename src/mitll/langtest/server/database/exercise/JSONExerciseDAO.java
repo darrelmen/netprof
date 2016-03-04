@@ -47,14 +47,7 @@ public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Comm
       logger.info("readExercises reading from " + path.toFile().getAbsolutePath());
 
       List<CommonExercise> exercises = jsonExport.getExercises(asString);
-
-      for (CommonExercise ex : exercises) {
-        Collection<SectionHelper.Pair> pairs = new ArrayList<>();
-        for (Map.Entry<String,String> pair : ex.getUnitToValue().entrySet()) {
-          pairs.add(getSectionHelper().addExerciseToLesson(ex, pair.getKey(), pair.getValue()));
-        }
-        getSectionHelper().addAssociations(pairs);
-      }
+      populateSections(exercises);
 
       logger.info("read " +exercises.size() + " from " + jsonFile);
       return exercises;
@@ -62,5 +55,15 @@ public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Comm
       logger.error("got " +e,e);
     }
     return Collections.emptyList();
+  }
+
+  protected void populateSections(List<CommonExercise> exercises) {
+    for (CommonExercise ex : exercises) {
+      Collection<SectionHelper.Pair> pairs = new ArrayList<>();
+      for (Map.Entry<String,String> pair : ex.getUnitToValue().entrySet()) {
+        pairs.add(getSectionHelper().addExerciseToLesson(ex, pair.getKey(), pair.getValue()));
+      }
+      getSectionHelper().addAssociations(pairs);
+    }
   }
 }
