@@ -4,9 +4,6 @@
 
 package mitll.langtest.shared.exercise;
 
-import mitll.langtest.shared.custom.UserList;
-
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -22,10 +19,12 @@ public interface CommonExercise extends CommonShell, AudioAttributeExercise, Ann
   boolean isPredefined();
 
   /**
-   * @see mitll.langtest.client.custom.dialog.EditItem#getCreator(UserList, String)
+   * @see mitll.langtest.client.custom.dialog.EditItem#didICreateThisItem(CommonExercise)
    * @return
    */
   long getCreator();
+
+  long getUpdateTime();
 
   MutableExercise getMutable();
   MutableAudioExercise getMutableAudio();
