@@ -582,8 +582,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                                      String english, String foreignLanguagePhrase, String translit, String meaning,
                                      String context, String contextTranslation,
                                      String audioIndex) {
-    Exercise imported = getExercise(id, meaning, context, contextTranslation, audioIndex);
-    //   logger.debug("id " + id + " context " + imported.getContext());
+    Exercise imported = new Exercise(id, context, contextTranslation, meaning, audioIndex);
 
     imported.setEnglishSentence(english);
     if (translit.length() > 0) {
@@ -637,21 +636,6 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
       pairs.add(getSectionHelper().addExerciseToLesson(imported, weekName, week));
     }
     getSectionHelper().addAssociations(pairs);
-  }
-
-  /**
-   * @param id
-   * @param meaning
-   * @param context
-   * @param contextTranslation
-   * @param refAudioIndex
-   * @return
-   * @see #getExercise(String, String, String, String, String, String, String, String)
-   */
-  private Exercise getExercise(String id,
-                               String meaning,
-                               String context, String contextTranslation, String refAudioIndex) {
-    return new Exercise(id, context, contextTranslation, meaning, refAudioIndex);
   }
 
   private String getCell(Row next, int col) {
