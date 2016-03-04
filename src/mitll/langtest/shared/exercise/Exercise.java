@@ -23,16 +23,17 @@ import java.util.Set;
  * Time: 1:03 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Exercise extends AudioExercise implements CommonExercise, MutableExercise, MutableAudioExercise, MutableAnnotationExercise, CommonAnnotatable {
+public class Exercise extends AudioExercise implements CommonExercise,
+    MutableExercise, MutableAudioExercise, MutableAnnotationExercise, CommonAnnotatable {
   private transient String refAudioIndex;
   private transient Collection<String> refSentences = new ArrayList<String>();
   private List<CorrectAndScore> scores;
   private float avgScore;
 
   private transient List<String> firstPron = new ArrayList<String>();
+  private long updateTime = 0;
 
-  public Exercise() {
-  }
+  public Exercise() {}
 
   /**
    * @param id
@@ -185,5 +186,13 @@ public class Exercise extends AudioExercise implements CommonExercise, MutableEx
         " audio count = " + audioAttributes1.size() +
         (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
         " unit->lesson " + getUnitToValue();
+  }
+
+  public void setUpdateTime(long updateTime) {
+    this.updateTime = updateTime;
+  }
+
+  public long getUpdateTime() {
+    return updateTime;
   }
 }
