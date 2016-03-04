@@ -130,9 +130,9 @@ public class UserListManager {
   private void setStateOnUserExercises(Map<String, ReviewedDAO.StateCreator> exerciseToState,
                                        Set<String> userExercisesRemaining, boolean firstState) {
     int count = 0;
-    List<CommonExercise> userExercises = userExerciseDAO.getWhere(userExercisesRemaining);
+    Collection<CommonExercise> userExercises = userExerciseDAO.getWhere(userExercisesRemaining);
 
-    for (CommonShell commonUserExercise : userExercises) {
+    for (Shell commonUserExercise : userExercises) {
       ReviewedDAO.StateCreator state = exerciseToState.get(commonUserExercise.getID());
       if (state == null) {
         logger.error("huh? can't find ex id " + commonUserExercise.getID());
@@ -379,7 +379,7 @@ public class UserListManager {
     }
     //logger.debug("getCommentedList After there are " + idToCreator.size() + " idToCreator items ");
 
-    List<CommonExercise> include = userExerciseDAO.getWhere(idToCreator.keySet());
+    Collection<CommonExercise> include = userExerciseDAO.getWhere(idToCreator.keySet());
     //logger.debug("getCommentedList include " + include.size() + " included ");
 
     UserList<CommonShell> reviewList = getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, idToCreator.keySet(), COMMENT_MAGIC_ID, typeOrder);
@@ -399,7 +399,7 @@ public class UserListManager {
       }
     }
 
-    List<CommonExercise> allKnown = userExerciseDAO.getWhere(defectIds);
+    Collection<CommonExercise> allKnown = userExerciseDAO.getWhere(defectIds);
     logger.debug("\tgetAttentionList ids #=" + allKnown.size());
 
     return getReviewList(allKnown, ATTENTION, "Items for LL review", defectIds, ATTN_LL_MAGIC_ID, typeOrder);
@@ -424,7 +424,7 @@ public class UserListManager {
       }
     }
 
-    List<CommonExercise> allKnown = userExerciseDAO.getWhere(defectIds);
+    Collection<CommonExercise> allKnown = userExerciseDAO.getWhere(defectIds);
     //logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
 
     return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID, typeOrder);
@@ -442,7 +442,7 @@ public class UserListManager {
    * @see #getCommentedList(java.util.Collection)
    * @see #getDefectList(java.util.Collection)
    */
-  private UserList<CommonShell> getReviewList(List<CommonExercise> allKnown, String name, String description,
+  private UserList<CommonShell> getReviewList(Collection<CommonExercise> allKnown, String name, String description,
                                               Collection<String> ids, long userListMaginID, Collection<String> typeOrder) {
     Map<String, CommonExercise> idToUser = new HashMap<>();
     for (CommonExercise ue : allKnown) idToUser.put(ue.getID(), ue);
@@ -473,7 +473,7 @@ public class UserListManager {
    * @param idToUserExercise
    * @param ids
    * @return
-   * @see #getReviewList(java.util.List, String, String, java.util.Collection, long, java.util.Collection)
+   * @see #getReviewList(java.util.Collection, String, String, java.util.Collection, long, java.util.Collection)
    */
   private List<CommonShell> getReviewedUserExercises(Map<String, CommonExercise> idToUserExercise, Collection<String> ids) {
     List<CommonShell> onList = new ArrayList<>();
@@ -798,7 +798,7 @@ public class UserListManager {
    * @see mitll.langtest.server.database.DatabaseImpl#duplicateExercise
    * @see mitll.langtest.server.database.custom.UserListManager#markState(java.util.Collection)
    */
-  public void setState(CommonShell shell, STATE state, long creatorID) {
+  public void setState(Shell shell, STATE state, long creatorID) {
     shell.setState(state);
     reviewedDAO.setState(shell.getID(), state, creatorID);
   }
@@ -810,7 +810,7 @@ public class UserListManager {
    * @see mitll.langtest.server.LangTestDatabaseImpl#setExerciseState(String, int, mitll.langtest.shared.exercise.CommonExercise)
    * @see mitll.langtest.server.database.custom.UserListManager#markState(String, mitll.langtest.shared.exercise.STATE, long)
    */
-  public void setSecondState(CommonShell shell, STATE state, long creatorID) {
+  public void setSecondState(Shell shell, STATE state, long creatorID) {
     shell.setSecondState(state);
     secondStateDAO.setState(shell.getID(), state, creatorID);
   }

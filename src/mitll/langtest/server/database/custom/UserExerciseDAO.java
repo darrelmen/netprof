@@ -8,9 +8,11 @@ import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.scoring.CollationSort;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -27,6 +29,7 @@ public class UserExerciseDAO extends DAO {
   private static final String LESSON = "lesson";
 
   private static final String USEREXERCISE = "userexercise";
+  public static final String GET_ALL_SQL = "SELECT * from " + USEREXERCISE;
   private static final String MODIFIED = "modified";
   private static final String STATE = "state";
   private static final String CONTEXT = "context";
@@ -224,7 +227,7 @@ public class UserExerciseDAO extends DAO {
       if (DEBUG) logger.debug("\tusing for user exercise = " + sql);
 
       long then = System.currentTimeMillis();
-      List<CommonExercise> userExercises = getUserExercises(sql);
+      Collection<CommonExercise> userExercises = getUserExercises(sql);
       long now = System.currentTimeMillis();
 
       if (DEBUG || (now - then) > 30) {
@@ -311,7 +314,7 @@ public class UserExerciseDAO extends DAO {
    * @return
    * @see #getOnList(long)
    */
-  private CommonExercise getExercise(CommonShell ue) {
+  private CommonExercise getExercise(HasID ue) {
     return getPredefExercise(ue.getID());
   }
 
@@ -334,29 +337,11 @@ public class UserExerciseDAO extends DAO {
   public CommonExercise getWhere(String exid) {
     exid = exid.replaceAll("\'", "");
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + "='" + exid + "'";
-    try {
-      List<CommonExercise> userExercises = getUserExercises(sql);
-      if (userExercises.isEmpty()) {
-        //logger.debug("getWhere : no custom exercise with id " + exid);
-        return null;
-      } else {
-        return userExercises.iterator().next();
-      }
-    } catch (SQLException e) {
-      logException(e);
-    }
-    return null;
+    Collection<CommonExercise> commonExercises = getCommonExercises(sql);
+    return commonExercises.isEmpty() ? null : commonExercises.iterator().next();
   }
 
-  public Collection<CommonExercise> getAll() {
-    String sql = "SELECT * from " + USEREXERCISE;
-    try {
-      return getUserExercises(sql);
-    } catch (SQLException e) {
-      logException(e);
-    }
-    return Collections.emptyList();
-  }
+  public Collection<CommonExercise> getAll() {  return getCommonExercises(GET_ALL_SQL);  }
 
   /**
    * @return
@@ -364,9 +349,10 @@ public class UserExerciseDAO extends DAO {
    * @see #setAudioDAO(mitll.langtest.server.database.AudioDAO)
    */
   public Collection<CommonExercise> getOverrides() {
-    String sql = "SELECT * from " + USEREXERCISE + " where " +
-        OVERRIDE +
-        "=true";
+    return getCommonExercises("SELECT * from " + USEREXERCISE + " where " +  OVERRIDE + "=true");
+  }
+
+  private Collection<CommonExercise> getCommonExercises(String sql) {
     try {
       return getUserExercises(sql);
     } catch (SQLException e) {
@@ -380,22 +366,10 @@ public class UserExerciseDAO extends DAO {
    * @return
    * @see UserListManager#getDefectList(java.util.Collection)
    */
-  public List<CommonExercise> getWhere(Collection<String> exids) {
+  public Collection<CommonExercise> getWhere(Collection<String> exids) {
     if (exids.isEmpty()) return new ArrayList<>();
-    String s = getIds(exids);
-    String sql = "SELECT * from " + USEREXERCISE + " where " +
-        EXERCISEID +
-        " in (" + s + ")";
-    try {
-      List<CommonExercise> userExercises = getUserExercises(sql);
-      if (userExercises.isEmpty()) {
-        logger.warn("getVisitorsOfList : no user exercises in " + exids.size() + " exercise ids");
-      }
-      return userExercises;
-    } catch (SQLException e) {
-      logException(e);
-    }
-    return null;
+    String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + " in (" + getIds(exids) + ")";
+    return getCommonExercises(sql);
   }
 
   private String getIds(Collection<String> exids) {
@@ -414,7 +388,7 @@ public class UserExerciseDAO extends DAO {
    * @see #getOverrides()
    * @see #getWhere(java.lang.String)
    */
-  private List<CommonExercise> getUserExercises(String sql) throws SQLException {
+  private Collection<CommonExercise> getUserExercises(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     List<CommonExercise> exercises = new ArrayList<>();
     try {
@@ -513,7 +487,7 @@ public class UserExerciseDAO extends DAO {
   }
 
   private Map<String, String> getUnitToValue(ResultSet rs, List<String> typeOrder) throws SQLException {
-    String first = rs.getString(UNIT);
+    String first  = rs.getString(UNIT);
     String second = rs.getString(LESSON);
     Map<String, String> unitToValue = new HashMap<String, String>();
 

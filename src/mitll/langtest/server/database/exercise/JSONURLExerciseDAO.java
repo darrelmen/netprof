@@ -10,7 +10,12 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.util.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by go22670 on 2/10/16.
@@ -31,9 +36,9 @@ public class JSONURLExerciseDAO extends JSONExerciseDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
    */
   public JSONURLExerciseDAO(
-                            ServerProperties serverProps,
-                            UserListManager userListManager,
-                            boolean addDefects) {
+      ServerProperties serverProps,
+      UserListManager userListManager,
+      boolean addDefects) {
     super("", serverProps, userListManager, addDefects);
   }
 
@@ -51,6 +56,7 @@ public class JSONURLExerciseDAO extends JSONExerciseDAO {
 
   private String getJSON() throws IOException {
     logger.info(serverProps.getLanguage() + " Reading from " + serverProps.getLessonPlan());
+    this.now = System.currentTimeMillis();
     return new HTTPClient().readFromGET(serverProps.getLessonPlan());
   }
 
@@ -64,12 +70,24 @@ public class JSONURLExerciseDAO extends JSONExerciseDAO {
     return exercises;
   }
 
+  private static final SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+  long now = System.currentTimeMillis();
+
   private Exercise toExercise(JSONObject jsonObject) {
     JSONObject metadata = jsonObject.getJSONObject("metadata");
-    JSONObject content  = jsonObject.getJSONObject("content");
-
-    // logger.info("got " + attlist);
+    JSONObject content = jsonObject.getJSONObject("content");
+    String updateTime = jsonObject.getString("updateTime");
     String npDID = metadata.getString("npDID");
+
+    long updateMillis = now;
+    try {
+      Date update = dateFmt.parse(updateTime);
+      updateMillis = update.getTime();
+    } catch (ParseException e) {
+      logger.warn(e.getMessage() + " : can't parse date '" + updateTime + "' for " + npDID);
+    }
+    // logger.info("got " + attlist);
     // logger.info("got " + attlist);
 
     String fl = content.getString("pass");
@@ -84,9 +102,10 @@ public class JSONURLExerciseDAO extends JSONExerciseDAO {
         english,
         meaning,
         fl,
-         transliteration,
+        transliteration,
         context,
         contextTranslation);
+    exercise.setUpdateTime(updateMillis);
 
 //    exercise.addUnitToValue(ILRMapping.ILR_LEVEL, ilr);
 //    exercise.addUnitToValue(ILRMapping.TEST_TYPE, lc ? ILRMapping.LISTENING : ILRMapping.READING);
