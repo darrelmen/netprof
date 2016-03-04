@@ -284,8 +284,6 @@ class NewUserExercise extends BasicDialog {
     Panel row = new FluidRow();
     container.add(row);
     english = addControlFormField(row, getEnglishLabel(), false, 1, 100, "");
-
-   // return row;
   }
 
   String getEnglishLabel() {
@@ -294,13 +292,10 @@ class NewUserExercise extends BasicDialog {
 
   void makeForeignLangRow(Panel container) {
   //  logger.info("NewUserExercise.makeForeignLangRow --->");
-
     Panel row = new FluidRow();
     container.add(row);
     foreignLang = addControlFormField(row, getLanguage(), false, 1, 150, "");
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
-
-   // return foreignLang;
   }
 
   private String getLanguage() {
@@ -325,7 +320,6 @@ class NewUserExercise extends BasicDialog {
 
   public <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
     //  logger.info("setFields : setting fields with " + newUserExercise);
-
     // english
     String english = newUserExercise.getEnglish();
     this.english.box.setText(english);
@@ -518,9 +512,7 @@ class NewUserExercise extends BasicDialog {
                                final ListInterface<CommonShell> exerciseList,
                                final Panel toAddTo,
                                boolean onClick) {
-  //  CombinedMutableUserExercise exerciseToSend = newUserExercise.getCombinedMutableUserExercise();
  //   logger.info("user list is " + ul);
-
     service.reallyCreateNewItem(ul.getUniqueID(), newUserExercise, new AsyncCallback<CommonExercise>() {
       @Override
       public void onFailure(Throwable caught) {
