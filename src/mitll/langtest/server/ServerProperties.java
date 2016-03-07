@@ -68,6 +68,7 @@ public class ServerProperties {
   public static final String USE_MYSQL = "useMYSQL";
   public static final String USE_H_2 = "useH2";
   public static final String USE_POSTGRE_SQL = "usePostgreSQL";
+  public static final String TYPE_ORDER = "typeOrder";
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
 
   /**
@@ -106,7 +107,7 @@ public class ServerProperties {
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
   private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
   private static final String BEST_AUDIO = "bestAudio";
-  private static final String READ_EXERCISES_FROM_DB = "readExercisesFromDB";
+ // private static final String READ_EXERCISES_FROM_DB = "readExercisesFromDB";
 
   private Properties props = new Properties();
 
@@ -117,7 +118,6 @@ public class ServerProperties {
   private final Set<Long> preferredVoices = new HashSet<Long>();
   private EmailList emailList;
   private final int userInitialScores = 20;
-//  boolean useH2 = false;
 
   /**
    * @param servletContext
@@ -224,6 +224,11 @@ public class ServerProperties {
     for (int i = 0; i < 3; i++)
       parsedUCW[i] = Integer.parseInt(ucw[i]);
     return parsedUCW;
+  }
+
+  public Collection<String> getTypes() {
+    String property = props.getProperty(TYPE_ORDER, "Unit,Chapter");
+    return Arrays.asList(property.split(","));
   }
 
   /**
