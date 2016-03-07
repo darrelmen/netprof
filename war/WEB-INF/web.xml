@@ -66,18 +66,18 @@
         <url-pattern>/scoreServlet/*</url-pattern>
     </servlet-mapping>
 
-    <servlet>
+<!--    <servlet>
         <servlet-name>loadTestServlet</servlet-name>
         <servlet-class>mitll.langtest.server.load.LoadTestServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>loadTestServlet</servlet-name>
         <url-pattern>/loadTest/*</url-pattern>
-    </servlet-mapping>
+    </servlet-mapping>-->
 
     <context-param>
         <param-name>config</param-name>
-        <param-value>german</param-value>
+        <param-value>dominoSpanish</param-value>
     </context-param>
 
     <context-param>
