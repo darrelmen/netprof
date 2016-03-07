@@ -23,8 +23,6 @@ import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 
-import java.util.logging.Logger;
-
 /**
  * Lets you show a user list with a paging container...
  * User: GO22670
@@ -34,13 +32,11 @@ import java.util.logging.Logger;
  */
 public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends CommonShell & AudioRefExercise>
     implements ReloadableContainer, RequiresResize {
-  private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
-
+  //private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
   private boolean madeNPFContent = false;
 
   protected final LangTestDatabaseAsync service;
   protected final ExerciseController controller;
-  private final UserManager userManager;
 
   final UserFeedback feedback;
   private ExerciseList npfExerciseList;
@@ -61,16 +57,16 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     this.service = service;
     this.feedback = feedback;
     this.controller = controller;
-    this.userManager = userManager;
     this.predefinedContentList = predefinedContentList;
 
-    final SimpleChapterNPFHelper<T,U> outer = this;
+    final SimpleChapterNPFHelper<T, U> outer = this;
     this.flexListLayout = getMyListLayout(service, feedback, userManager, controller, outer);
   }
 
-  protected abstract FlexListLayout<T,U> getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                                           UserManager userManager, ExerciseController controller,
-                                           SimpleChapterNPFHelper<T,U> outer);
+  protected abstract FlexListLayout<T, U> getMyListLayout(LangTestDatabaseAsync service,
+                                                          UserFeedback feedback,
+                                                          UserManager userManager, ExerciseController controller,
+                                                          SimpleChapterNPFHelper<T, U> outer);
 
   /**
    * Add npf widget to content of a tab - here marked tabAndContent
@@ -82,7 +78,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @see mitll.langtest.client.custom.Navigation#selectPreviousTab
    */
   public void showNPF(TabAndContent tabAndContent, String instanceName) {
-   // logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
+    // logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
@@ -93,16 +89,16 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   }
 
   /**
-   * @see #showNPF(TabAndContent, String)
    * @param listContent
    * @param instanceName
+   * @see #showNPF(TabAndContent, String)
    */
   protected void addNPFToContent(Panel listContent, String instanceName) {
     listContent.add(doNPF(instanceName));
     listContent.addStyleName("userListBackground");
   }
 
-  private final FlexListLayout<T,U> flexListLayout;
+  private final FlexListLayout<T, U> flexListLayout;
 
   /**
    * Make the instance name uses the unique id for the list.
@@ -119,13 +115,17 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   }
 
   /**
-   * @see Navigation#getTabPanel()
    * @return
+   * @see Navigation#getTabPanel()
    */
-  public ListInterface<?> getExerciseList() {  return npfExerciseList;  }
+  public ListInterface<?> getExerciseList() {
+    return npfExerciseList;
+  }
 
   @Override
-  public Reloadable getReloadable() { return npfExerciseList;  }
+  public Reloadable getReloadable() {
+    return npfExerciseList;
+  }
 
   /**
    * @see Navigation#addPracticeTab()
@@ -142,12 +142,12 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @return
    * @see mitll.langtest.client.exercise.WaveformExercisePanel
    */
-  protected ExercisePanelFactory<T,U> getFactory(final PagingExerciseList<T,U> exerciseList) {
+  protected ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList) {
     final String instance = exerciseList.getInstance();
-    return new ExercisePanelFactory<T,U>(service, feedback, controller, exerciseList) {
+    return new ExercisePanelFactory<T, U>(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(final U e) {
-        return new WaveformExercisePanel<T,U>(e, service, controller, exerciseList, true, instance) {
+        return new WaveformExercisePanel<T, U>(e, service, controller, exerciseList, true, instance) {
           @Override
           public void postAnswers(ExerciseController controller, HasID completedExercise) {
             super.postAnswers(controller, completedExercise);
@@ -159,18 +159,18 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   }
 
   /**
-   * @see mitll.langtest.client.custom.RecorderNPFHelper.MyWaveformExercisePanel#postAnswers(ExerciseController, HasID)
    * @param e
+   * @see mitll.langtest.client.custom.RecorderNPFHelper.MyWaveformExercisePanel#postAnswers(ExerciseController, HasID)
    */
   void tellOtherListExerciseDirty(HasID e) {
     if (predefinedContentList != null &&
         predefinedContentList.getReloadable() != null &&
         predefinedContentList.getReloadable().getCurrentExerciseID() != null &&
         e.getID().equals(predefinedContentList.getReloadable().getCurrentExerciseID())) {
-     // logger.info("SimpleChapterNPFHelper.reloading " + e.getID());
+      // logger.info("SimpleChapterNPFHelper.reloading " + e.getID());
       predefinedContentList.getReloadable().loadExercise(e.getID());
     } else {
-      logger.info("\n\n\n--> SimpleChapterNPFHelper.not reloading " + e.getID());
+  //    logger.info("\n\n\n--> SimpleChapterNPFHelper.not reloading " + e.getID());
     }
   }
 
@@ -181,16 +181,12 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     } else if (npfExerciseList != null) {
       npfExerciseList.onResize();
     } else {
-      logger.info("SimpleChapterNPFHelper.onResize : not sending resize event - flexListLayout is null?");
+//      logger.info("SimpleChapterNPFHelper.onResize : not sending resize event - flexListLayout is null?");
     }
   }
 
-/*
-  public void setContentPanel(DivWidget contentPanel) {}
-*/
-
-  protected abstract static class MyFlexListLayout<T extends CommonShell, U extends CommonShell & AudioRefExercise> extends FlexListLayout<T,U> {
-    private final SimpleChapterNPFHelper<T,U> outer;
+  protected abstract static class MyFlexListLayout<T extends CommonShell, U extends CommonShell & AudioRefExercise> extends FlexListLayout<T, U> {
+    private final SimpleChapterNPFHelper<T, U> outer;
 
     public MyFlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
                             ExerciseController controller, SimpleChapterNPFHelper<T, U> outer) {
@@ -199,7 +195,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     }
 
     @Override
-    protected ExercisePanelFactory<T,U> getFactory(PagingExerciseList<T, U> exerciseList) {
+    protected ExercisePanelFactory<T, U> getFactory(PagingExerciseList<T, U> exerciseList) {
       return outer.getFactory(exerciseList);
     }
   }
