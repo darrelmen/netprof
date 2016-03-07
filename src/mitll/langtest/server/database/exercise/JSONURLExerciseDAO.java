@@ -12,25 +12,14 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by go22670 on 2/10/16.
  */
 public class JSONURLExerciseDAO extends JSONExerciseDAO {
   private static final Logger logger = Logger.getLogger(JSONURLExerciseDAO.class);
-
-//  public static final String ENGLISH = "english";
-//
-//  private final Map<String, CommonExercise> idToExercise = new HashMap<>();
-//  protected final SectionHelper<CommonExercise> sectionHelper = new SectionHelper<>();
-//  protected final String language;
-//  protected final ServerProperties serverProps;
-
-//  private List<CommonExercise> exercises = null;
+  private final Collection<String> typeOrder;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
@@ -40,6 +29,7 @@ public class JSONURLExerciseDAO extends JSONExerciseDAO {
       UserListManager userListManager,
       boolean addDefects) {
     super("", serverProps, userListManager, addDefects);
+    this.typeOrder = serverProps.getTypes();
   }
 
   @Override
@@ -87,16 +77,15 @@ public class JSONURLExerciseDAO extends JSONExerciseDAO {
     } catch (ParseException e) {
       logger.warn(e.getMessage() + " : can't parse date '" + updateTime + "' for " + npDID);
     }
-    // logger.info("got " + attlist);
-    // logger.info("got " + attlist);
 
     String fl = content.getString("pass");
     String english = content.getString("trans");
-    String meaning = "";
-    String transliteration = "";
+    String meaning = content.getString("meaning");
+    String transliteration = content.getString("translit");
 
-    String context = "";
-    String contextTranslation = "";
+    String context = content.getString("context");
+    String contextTranslation = content.getString("context_trans");
+
     Exercise exercise = new Exercise(
         npDID,
         english,
@@ -107,8 +96,14 @@ public class JSONURLExerciseDAO extends JSONExerciseDAO {
         contextTranslation);
     exercise.setUpdateTime(updateMillis);
 
-//    exercise.addUnitToValue(ILRMapping.ILR_LEVEL, ilr);
-//    exercise.addUnitToValue(ILRMapping.TEST_TYPE, lc ? ILRMapping.LISTENING : ILRMapping.READING);
+    for (String type : typeOrder) {
+      try {
+        exercise.addUnitToValue(type, content.getString(type.toLowerCase()));
+      } catch (Exception e) {
+        logger.error("couldn't find unit/chapter '" + type + "' in content - see typeOrder property");
+      }
+    }
+
     return exercise;
   }
 }
