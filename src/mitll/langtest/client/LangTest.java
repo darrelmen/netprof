@@ -148,6 +148,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         long now = System.currentTimeMillis();
 
         startupInfo = startupInfo2;
+        logger.info("Got startup info " + startupInfo2);
         props = new PropertyHandler(startupInfo2.getProperties());
         if (isLogClientMessages()) {
           String message = "onModuleLoad.getProperties : (success) took " + (now - then) + " millis";
