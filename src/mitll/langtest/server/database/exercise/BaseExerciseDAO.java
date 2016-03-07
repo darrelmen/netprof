@@ -58,6 +58,8 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
         exercises = readExercises();
 
         afterReadingExercises();
+
+        sectionHelper.report();
       }
     }
     return exercises;
@@ -77,18 +79,14 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
     // add new items
     addNewExercises();
 
-    logger.info("afterReadingExercises trying to attach audio to " + exercises.size());
+//    logger.info("afterReadingExercises trying to attach audio to " + exercises.size());
     for (CommonExercise ex : exercises) {
       attachAudio.attachAudio(ex);
       String refAudioIndex = ex.getRefAudioIndex();
       if (refAudioIndex != null && !refAudioIndex.isEmpty()) {
         attachAudio.addOldSchoolAudio(refAudioIndex, (AudioExercise) ex);
       }
-      // if (ex.hasRefAudio()) logger.info("ex " + ex.getID() + " has audio");
     }
-
-    // logger.info("looking for 724 " + getExercise("724"));
-    //  sectionHelper.report();
   }
 
   /**
