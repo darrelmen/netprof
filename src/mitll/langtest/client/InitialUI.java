@@ -526,7 +526,7 @@ public class InitialUI {
     if (childCount > 0) {
       Node child = firstRow.getElement().getChild(0);
       Element as = Element.as(child);
-      logger.info("populateRootPanelIfLogin found : '" + as.getId() +"'");
+     // logger.info("populateRootPanelIfLogin found : '" + as.getId() +"'");
 
       if (as.getId().contains(LOGIN)) {
         logger.info("populateRootPanelIfLogin found login...");
