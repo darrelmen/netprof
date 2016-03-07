@@ -45,7 +45,7 @@ class EditableExerciseDialog extends NewUserExercise {
 
   private final PagingExerciseList<CommonShell, CommonExercise> exerciseList;
   final ReloadableContainer predefinedContentList;
-//  protected final NPFHelper npfHelper;
+  //  protected final NPFHelper npfHelper;
   private static final boolean DEBUG = false;
 
   /**
@@ -198,7 +198,7 @@ class EditableExerciseDialog extends NewUserExercise {
 
     foreignLang = makeBoxAndAnno(row, controller.getLanguage(), "", foreignAnno);
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
-   // return foreignLang;
+    // return foreignLang;
   }
 
   @Override
@@ -294,10 +294,12 @@ class EditableExerciseDialog extends NewUserExercise {
     if (didChange) {
       String header = getWarningHeader();
 
-      if (DEBUG) logger.info("checkForForeignChange normal speed : '" + normalSpeedRecording + "' ref changed '" + refAudioChanged() + "' new ref audio ref '" + newUserExercise.getRefAudio() + "'");
+      if (DEBUG)
+        logger.info("checkForForeignChange normal speed : '" + normalSpeedRecording + "' ref changed '" + refAudioChanged() + "' new ref audio ref '" + newUserExercise.getRefAudio() + "'");
 
       if (normalSpeedRecording != null && !refAudioChanged() && newUserExercise.getRefAudio() != null) {
-        if (DEBUG) logger.info("\tcheckForForeignChange show warning : normal speed : '" + (normalSpeedRecording != null) + "' ref changed '" + !refAudioChanged() + "' new ref audio ref '" + (newUserExercise.getRefAudio() != null) + "'");
+        if (DEBUG)
+          logger.info("\tcheckForForeignChange show warning : normal speed : '" + (normalSpeedRecording != null) + "' ref changed '" + !refAudioChanged() + "' new ref audio ref '" + (newUserExercise.getRefAudio() != null) + "'");
 
         markError(normalSpeedRecording, header, getWarningForFL());
       }
@@ -385,6 +387,7 @@ class EditableExerciseDialog extends NewUserExercise {
 
   /**
    * Wait for edit to succeed before altering original fields.
+   *
    * @param pagingContainer
    * @param buttonClicked
    * @see #reallyChange(mitll.langtest.client.list.ListInterface, boolean)
@@ -423,20 +426,18 @@ class EditableExerciseDialog extends NewUserExercise {
   void doAfterEditComplete(ListInterface<CommonShell> pagingContainer, boolean buttonClicked) {
     changeTooltip(pagingContainer);
     if (predefinedContentList != null) {
-      if (DEBUG) logger.info("doAfterEditComplete : predef content list not null");// + " id " + predefinedContentList.getCurrentExerciseID());
+      if (DEBUG)
+        logger.info("doAfterEditComplete : predef content list not null");// + " id " + predefinedContentList.getCurrentExerciseID());
 
       Reloadable reloadable = predefinedContentList.getReloadable();
 
-      //if (DEBUG || true) {
-        if (reloadable == null) {
-          logger.warning("doAfterEditComplete : reloadable null????");// + " id " + predefinedContentList.getCurrentExerciseID());
-        }
-      //}
-
-      reloadable.reloadWithCurrent();
-    }
-    else {
-   //   if (DEBUG || true) logger.warning("doAfterEditComplete : no predef content " + buttonClicked);// + " id " + predefinedContentList.getCurrentExerciseID());
+      if (reloadable == null) {
+        logger.warning("doAfterEditComplete : reloadable null????");// + " id " + predefinedContentList.getCurrentExerciseID());
+      } else {
+        reloadable.reloadWithCurrent();
+      }
+    } else {
+      //   if (DEBUG || true) logger.warning("doAfterEditComplete : no predef content " + buttonClicked);// + " id " + predefinedContentList.getCurrentExerciseID());
 
     }
   }
