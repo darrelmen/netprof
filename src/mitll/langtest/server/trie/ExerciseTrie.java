@@ -5,9 +5,6 @@
 package mitll.langtest.server.trie;
 
 import mitll.langtest.server.scoring.SmallVocabDecoder;
-import mitll.langtest.server.trie.TextEntityValue;
-import mitll.langtest.server.trie.Trie;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.log4j.Logger;
 
@@ -34,9 +31,9 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
 
   /**
    * Tokens are normalized to lower case.
-   *
+   * <p>
    * Also allow lookup by transliteration.
-   *
+   * <p>
    * For mandarin, add each individual character.
    *
    * @param exercisesForState
@@ -45,13 +42,13 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseListWrapperForPrefix
    */
   public ExerciseTrie(Collection<T> exercisesForState, String language,
-                                              SmallVocabDecoder smallVocabDecoder) {
+                      SmallVocabDecoder smallVocabDecoder) {
     boolean includeForeign = !language.equals(ENGLISH);
     startMakingNodes();
 
     long then = System.currentTimeMillis();
     boolean isMandarin = language.equalsIgnoreCase(MANDARIN);
-    boolean isKorean   = language.equalsIgnoreCase(KOREAN);
+    boolean isKorean = language.equalsIgnoreCase(KOREAN);
     boolean isJapanese = language.equalsIgnoreCase(JAPANESE);
     boolean hasClickableCharacters = isMandarin || isKorean || isJapanese;
 
@@ -61,8 +58,7 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
       addEnglish(smallVocabDecoder, exercise);
       if (includeForeign) {
         addForeign(smallVocabDecoder, isMandarin, hasClickableCharacters, exercise);
-      }
-      else {
+      } else {
         for (String t : smallVocabDecoder.getTokens(exercise.getMeaning())) {
           addEntry(exercise, t);
         }
@@ -126,7 +122,7 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
   private void addClickableCharacters(T exercise, String fl) {
     final CharacterIterator it = new StringCharacterIterator(fl);
 
-    for(char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
+    for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
       Character character = c;
       if (!Character.isSpaceChar(c)) {
         addEntry(exercise, character.toString());
