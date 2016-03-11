@@ -120,12 +120,13 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
   }
 
   /**
-   *
+   * @see #afterReadingExercises
    */
   private void populateIdToExercise() {
 //    logger.info("populateIdToExercise Examining " + exercises.size() + " exercises");
     for (CommonExercise e : exercises) {
       idToExercise.put(e.getID(), e);
+      idToExercise.put(e.getDisplayID(), e);
     }
 
     int listSize = exercises.size();
