@@ -104,17 +104,23 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     }
 
     boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
-    boolean useMeaningInsteadOfEnglish = isEnglish && e.getMeaning() != null && !e.getMeaning().trim().isEmpty();
+    boolean meaningValid = isMeaningValid(e);
+    boolean useMeaningInsteadOfEnglish = isEnglish && meaningValid;
     String english = useMeaningInsteadOfEnglish ? e.getMeaning() : e.getEnglish();
     if (!english.isEmpty() && !english.equals("N/A")) {
       String englishPrompt = useMeaningInsteadOfEnglish ? ExerciseFormatter.MEANING_PROMPT : ExerciseFormatter.ENGLISH_PROMPT;
       column.add(getEntry(e, QCNPFExercise.ENGLISH, englishPrompt, english));
     }
-    if (!useMeaningInsteadOfEnglish) {
+
+    if (!useMeaningInsteadOfEnglish && meaningValid) {
       column.add(getEntry(e, QCNPFExercise.MEANING, ExerciseFormatter.MEANING_PROMPT, e.getMeaning()));
     }
 
     return column;
+  }
+
+  private boolean isMeaningValid(T e) {
+    return e.getMeaning() != null && !e.getMeaning().trim().isEmpty();
   }
 
   private void addContextButton(final T e, DivWidget row) {
