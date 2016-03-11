@@ -85,7 +85,7 @@ public class RefResultDecoder {
 
   /**
    * @param exercises
-   * @see #runMissingInfo(List)
+   * @see #runMissingInfo
    */
   private void doMissingInfo(final Collection<CommonExercise> exercises) {
     List<Result> resultsToDecode = db.getResultDAO().getResultsToDecode();
