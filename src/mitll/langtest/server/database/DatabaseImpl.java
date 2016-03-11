@@ -923,7 +923,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     List<MonitorResult> monitorResults = resultDAO.getMonitorResults();
 
     for (MonitorResult result : monitorResults) {
-      result.setDisplayID(getExercise(result.getId()).getDisplayID());
+      CommonExercise exercise = getExercise(result.getId());
+      if (exercise != null) {
+        result.setDisplayID(exercise.getDisplayID());
+      }
     }
     return getMonitorResultsWithText(monitorResults);
   }
