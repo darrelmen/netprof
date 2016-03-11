@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
+import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.AudioRefExercise;
@@ -72,12 +73,10 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
    *
    */
   protected void addInstructions() {
-    if (!exercise.getUnitToValue().isEmpty()) {
-      Panel unitLessonForExercise = getUnitLessonForExercise();
-      unitLessonForExercise.add(getItemHeader(exercise));
-      add(unitLessonForExercise);
+    Panel flow = new UnitChapterItemHelper<T>(controller.getTypeOrder()).addUnitChapterItem(exercise, this);
+    if (flow != null) {
+      flow.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     }
-
     add(new Heading(4, isExampleRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));
   }
 
@@ -148,7 +147,11 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
     return fast;
   }
 
-  private Panel getUnitLessonForExercise() {
+  /**
+   * TODO : don't copy code
+   * @return
+   */
+/*  private Panel getUnitLessonForExercise() {
     Panel flow = new HorizontalPanel();
     flow.getElement().setId("getUnitLessonForExercise_unitLesson");
     flow.addStyleName("leftFiveMargin");
@@ -164,10 +167,10 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
   }
 
   private Widget getItemHeader(HasID e) {
-    Heading w = new Heading(GoodwaveExercisePanel.HEADING_FOR_UNIT_LESSON, "Item", e.getID());
+    Heading w = new Heading(GoodwaveExercisePanel.HEADING_FOR_UNIT_LESSON, GoodwaveExercisePanel.ITEM, e.getID());
     w.getElement().setId("ItemHeading");
     return w;
-  }
+  }*/
 
   protected Widget getContentScroller(HTML maybeRTLContent) {
     return maybeRTLContent;
