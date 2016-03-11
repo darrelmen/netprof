@@ -474,6 +474,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return startupInfo;
   }
 
+  public Collection<String> getTypeOrder() { return startupInfo.getTypeOrder(); }
+
   /**
    * Init Flash recorder once we login.
    * <p>
@@ -487,15 +489,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public void gotUser(User user) {
     initialUI.gotUser(user);
   }
-
-  /**
-   * @param userID
-   * @return
-   * @see #gotUser
-   */
-/*  private void configureUIGivenUser(long userID) {
-    initialUI.configureUIGivenUser(userID);
-  }*/
 
   /**
    * @see #modeSelect()

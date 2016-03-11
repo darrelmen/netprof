@@ -25,6 +25,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
   protected String context;
   protected String transliteration;
   protected String contextTranslation;
+  protected String displayID;
 
   public ExerciseShell() {
   }
@@ -35,7 +36,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
    * @see UserList#UserList()
    */
   public ExerciseShell(String id) {
-    this(id, "", "", "", "", "", "");
+    this(id, "", "", "", "", "", "", id);
   }
 
   /**
@@ -46,11 +47,12 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
    * @param transliteration
    * @param context
    * @param contextTranslation
+   * @param displayID
    * @see #getShell()
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShells
    */
   private ExerciseShell(String id, String englishSentence, String meaning, String foreignLanguage,
-                        String transliteration, String context, String contextTranslation) {
+                        String transliteration, String context, String contextTranslation, String displayID) {
     super(id);
     this.englishSentence = englishSentence;
     this.meaning = meaning;
@@ -58,6 +60,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
     this.transliteration = transliteration;
     this.context = context;
     this.contextTranslation = contextTranslation;
+    this.displayID = displayID;
   }
 
   /**
@@ -65,7 +68,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShells(java.util.Collection)
    */
   public CommonShell getShell() {
-    return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage, transliteration, context, contextTranslation);
+    return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage, transliteration, context, contextTranslation, displayID);
   }
 
   public String getEnglish() {
@@ -95,6 +98,11 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
   @Override
   public String getContextTranslation() {
     return contextTranslation;
+  }
+
+  @Override
+  public String getDisplayID() {
+    return displayID;
   }
 
   @Override
