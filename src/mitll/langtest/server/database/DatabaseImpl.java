@@ -920,7 +920,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(java.util.Map, long, String)
    */
   public List<MonitorResult> getMonitorResults() {
-    return getMonitorResultsWithText(resultDAO.getMonitorResults());
+    List<MonitorResult> monitorResults = resultDAO.getMonitorResults();
+
+    for (MonitorResult result : monitorResults) {
+      result.setDisplayID(getExercise(result.getId()).getDisplayID());
+    }
+    return getMonitorResultsWithText(monitorResults);
   }
 
   /**
@@ -938,15 +943,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private Map<String, CommonExercise> getIdToExerciseMap() {
     Map<String, CommonExercise> join = new HashMap<>();
 
-    for (CommonExercise exercise : getExercises()) {
-      String id = exercise.getID();
-      join.put(id, exercise);
-    }
+    for (CommonExercise exercise : getExercises()) { join.put(exercise.getID(), exercise); }
 
     if (userExerciseDAO != null && exerciseDAO != null) {
       for (CommonExercise exercise : userExerciseDAO.getAll()) {
-        String id = exercise.getID();
-        join.put(id, exercise);
+        join.put(exercise.getID(), exercise);
       }
     }
     return join;
@@ -1216,23 +1217,31 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * Special code to mask out unit/chapter from database in userexercise table.
    *
+   * Must check update times to make sure we don't mask out a newer entry.
    * @param id
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String, long, boolean)
    */
   public CommonExercise getCustomOrPredefExercise(String id) {
-    CommonExercise byID = getUserExerciseWhere(id);  // allow custom items to mask out non-custom items
-    if (byID == null) {
-      byID = getExercise(id);
+    CommonExercise userEx = getUserExerciseWhere(id);  // allow custom items to mask out non-custom items
+
+    CommonExercise toRet;
+
+    if (userEx == null) {
+      toRet = getExercise(id);
     } else {
+      long updateTime = userEx.getUpdateTime();
       CommonExercise predef = getExercise(id);
-      if (predef != null) {
+
+      boolean usePredef = predef != null && predef.getUpdateTime() > updateTime;
+      toRet = usePredef ? predef : userEx;
+
+      if (predef != null && !usePredef) {
         // DON'T use the unit/chapter from database, at least for now
-        Map<String, String> unitToValue = predef.getUnitToValue();
-        byID.getCombinedMutableUserExercise().setUnitToValue(unitToValue);
+        userEx.getCombinedMutableUserExercise().setUnitToValue(predef.getUnitToValue());
       }
     }
-    return byID;
+    return toRet;
   }
 
   /**
@@ -1418,7 +1427,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @param answer
    * @param answerID
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerDecoding(String, CommonExercise, int, int, int, String, boolean, boolean, boolean, String, File, AudioCheck.ValidityAndDur, boolean, String, String, boolean, boolean)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerDecoding
    */
   public void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
     PretestScore pretestScore = answer.getPretestScore();
