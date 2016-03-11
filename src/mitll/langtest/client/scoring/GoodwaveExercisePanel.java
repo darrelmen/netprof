@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * User: GO22670
@@ -52,7 +51,7 @@ import java.util.logging.Logger;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & ScoredExercise> extends HorizontalPanel
+public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & ScoredExercise> extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
   //private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
@@ -63,11 +62,15 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
   private static final String REFERENCE = "";
   private static final String RECORD_YOURSELF = "Record";
   private static final String RELEASE_TO_STOP = "Release";
+  /**
+   * @see mitll.langtest.client.exercise.WaveformExercisePanel#getUnitLessonForExercise
+   */
   public static final int HEADING_FOR_UNIT_LESSON = 4;
   public static final String CORRECT = "correct";
   public static final String INCORRECT = "incorrect";
   public static final String DEFAULT_SPEAKER = "Default Speaker";
   private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
+  public static final String ITEM = "Item";
   private final ListInterface listContainer;
   private boolean isBusy = false;
 
@@ -117,7 +120,6 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
 
   private void addContent() {
    // logger.info("doing addContent on " + this);
-
     final Panel center = new VerticalPanel();
     center.getElement().setId("GoodwaveVerticalCenter");
     center.addStyleName("floatLeft");
@@ -227,6 +229,7 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
   }
 
   /**
+   * Show unit and chapter info for every item.
    * @return
    * @see #getQuestionContent
    */
@@ -234,7 +237,7 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
     Panel flow = new HorizontalPanel();
     flow.getElement().setId("getUnitLessonForExercise_unitLesson");
     flow.addStyleName("leftFiveMargin");
-    //System.out.println("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
+    //logger.info("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
 
     for (String type : controller.getStartupInfo().getTypeOrder()) {
       Heading child = new Heading(HEADING_FOR_UNIT_LESSON, type, exercise.getUnitToValue().get(type));
@@ -257,40 +260,44 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
   }
 
   /**
-   * Show the instructions and the audio panel.<br></br>
-   * <p>
-   * Replace the html 5 audio tag with our fancy waveform widget.
+   * Three lines - the unit/chapter/item info, then the item content - vocab item, english, etc.
+   * And finally the audio panel showing the waveform.
    *
-   * @param e for this exercise
+   * @param exercise for this exercise
    * @return the panel that has the instructions and the audio panel
    * @see #GoodwaveExercisePanel
    */
-  private Widget getQuestionContent(T e) {
-    //  String content = e.getContent();
-    //  logger.info("getQuestionContent got content " + content);
-    final VerticalPanel vp = new VerticalPanel();
+  private Widget getQuestionContent(T exercise) {
+    Panel vp = new VerticalPanel();
     vp.getElement().setId("getQuestionContent_verticalContainer");
-
-    if (!e.getUnitToValue().isEmpty()) {
-      Panel unitLessonForExercise = getUnitLessonForExercise();
-      unitLessonForExercise.add(getItemHeader(e));
-      vp.add(unitLessonForExercise);
-    }
     vp.addStyleName("blockStyle");
 
-    Widget questionContent = getQuestionContent(e, "");//e.getContent());
+    new UnitChapterItemHelper<T>(controller.getTypeOrder()).addUnitChapterItem(exercise,vp);
+   // addUnitChapterItem(exercise, vp);
+    vp.add(getItemContent(exercise));
+    vp.add(getAudioPanel(exercise));
+    return vp;
+  }
 
-    vp.add(questionContent);
+/*  private void addUnitChapterItem(T exercise, Panel vp) {
+    Widget itemHeader = getItemHeader(exercise);
+    if (exercise.getUnitToValue().isEmpty()) {
+      vp.add(itemHeader);
+    }
+    else {
+      Panel unitLessonForExercise = getUnitLessonForExercise();
+      unitLessonForExercise.add(itemHeader);
+      vp.add(unitLessonForExercise);
+    }
+  }*/
 
-    Widget scoringAudioPanel = getScoringAudioPanel(e);
-    Panel div = new SimplePanel(scoringAudioPanel);
+  private Panel getAudioPanel(T e) {
+    Panel div = new SimplePanel(getScoringAudioPanel(e));
     div.getElement().setId("scoringAudioPanel_div");
     div.addStyleName("trueInlineStyle");
     div.addStyleName("floatLeft");
     addGroupingStyle(div);
-
-    vp.add(div);
-    return vp;
+    return div;
   }
 
   /**
@@ -298,18 +305,13 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
    * @return
    * @see #getQuestionContent
    */
-  private Widget getItemHeader(T e) {
-    Heading w = new Heading(HEADING_FOR_UNIT_LESSON, "Item", e.getID());
+/*  private Widget getItemHeader(T e) {
+    Heading w = new Heading(HEADING_FOR_UNIT_LESSON, ITEM, e.getID());
     w.getElement().setId("ItemHeading");
     return w;
-  }
+  }*/
 
-  protected Widget getQuestionContent(T e, String content) {
-    Widget questionContent = new HTML(content);
-    questionContent.getElement().setId("QuestionContent");
-    questionContent.addStyleName("floatLeft");
-    return questionContent;
-  }
+  protected abstract Widget getItemContent(T e);
 
   /**
    * @param e
@@ -417,6 +419,12 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
     return nameValueRow;
   }
 
+  /**
+   * @see #getContentWidget(String, String, boolean)
+   * @param label
+   * @param value
+   * @param nameValueRow
+   */
   private void getClickableWords(String label, String value, Panel nameValueRow) {
     String language = controller.getLanguage();
     boolean isMandarinOrKorean = hasClickableCharacters(language);
@@ -528,20 +536,6 @@ public class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & Sc
     answerAudio.setScreenPortion(screenPortion);
 
     return widgets;
-  }
-
-  protected List<String> getTokens(String sentence) {
-    List<String> all = new ArrayList<String>();
-    sentence = removePunct(sentence);//.replaceAll(CommentNPFExercise.PUNCT_REGEX, " ");
-    for (String untrimedToken : sentence.split(CommentNPFExercise.SPACE_REGEX)) { // split on spaces
-      String tt = untrimedToken.replaceAll(CommentNPFExercise.PUNCT_REGEX, ""); // remove all punct
-      String token = tt.trim();  // necessary?
-      if (token.length() > 0) {
-        all.add(token);
-      }
-    }
-
-    return all;
   }
 
   protected String removePunct(String t) {
