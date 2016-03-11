@@ -512,8 +512,6 @@ public class ResultManager extends PagerTable {
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);
     dataProvider.updateRowCount(numResults, true);
-
-    //  return dataProvider;
   }
 
   /**
