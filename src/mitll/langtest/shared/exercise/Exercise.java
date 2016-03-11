@@ -50,9 +50,13 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   public Exercise(String id,
-                  String englishSentence, String meaning, String foreignLanguage,
+                  String englishSentence,
+                  String foreignLanguage,
+                  String meaning,
                   String transliteration,
-                  String context, String contextTranslation) {
+                  String context,
+                  String contextTranslation,
+                  String displayID) {
     super(id);
     setEnglishSentence(englishSentence);
     this.meaning = meaning;
@@ -60,6 +64,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     setTransliteration(transliteration);
     this.context = context;
     this.contextTranslation = contextTranslation;
+    this.displayID = displayID;
   }
 
   @Override
@@ -86,6 +91,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return true;
   }
 
+  /**
+   * @see mitll.langtest.server.database.UserDAO#DEFAULT_USER_ID
+   * @return
+   */
   @Override
   public long getCreator() {
     return -5;
