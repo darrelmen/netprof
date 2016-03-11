@@ -369,8 +369,7 @@ public class SectionHelper<T extends Shell> {
   }
 
   public void report() {
-//    logger.info("This " + this);
-    logger.debug("\nreport : type order " + getTypeOrder());
+    logger.debug("report : type order " + getTypeOrder());
     for (String key : typeToUnitToLesson.keySet()) {
       Map<String, Lesson<T>> categoryToLesson = typeToUnitToLesson.get(key);
       Set<String> sections = categoryToLesson.keySet();
