@@ -23,16 +23,6 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public interface ExerciseDAO<T extends CommonShell> extends SimpleExerciseDAO<T> {
-
-  /**
-   * @return
-   * @see DatabaseImpl#getSectionHelper()
-   * @see UserExerciseDAO#add
-   * @see UserExerciseDAO#getUserExercises(String)
-   * @see ExcelImport#removeExercises()
-   */
- // SectionHelper<CommonExercise> getSectionHelper();
-
   /**
    * @param userExercise
    * @return
@@ -65,5 +55,5 @@ public interface ExerciseDAO<T extends CommonShell> extends SimpleExerciseDAO<T>
    */
   void attachAudio(Collection<CommonExercise> all);
 
-  int getNumExercises();
+  //int getNumExercises();
 }
