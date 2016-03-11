@@ -4,7 +4,6 @@
 
 package mitll.langtest.client.scoring;
 
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.Tooltip;
@@ -65,12 +64,12 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   /**
    * @see mitll.langtest.client.exercise.WaveformExercisePanel#getUnitLessonForExercise
    */
-  public static final int HEADING_FOR_UNIT_LESSON = 4;
+  private static final int HEADING_FOR_UNIT_LESSON = 4;
   public static final String CORRECT = "correct";
   public static final String INCORRECT = "incorrect";
   public static final String DEFAULT_SPEAKER = "Default Speaker";
   private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
-  public static final String ITEM = "Item";
+
   private final ListInterface listContainer;
   private boolean isBusy = false;
 
@@ -127,7 +126,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
 
     ASRScorePanel widgets = makeScorePanel(exercise, instance);
 
-    addQuestionContentRow(exercise, controller, center);
+    addQuestionContentRow(exercise, center);
 
     // content is on the left side
     add(center);
@@ -174,7 +173,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     listContainer.loadNextExercise(completedExercise.getID());
   }
 
-  protected void addQuestionContentRow(T e, ExerciseController controller, Panel hp) {
+  protected void addQuestionContentRow(T e, Panel hp) {
     hp.add(getQuestionContent(e));
   }
 
@@ -228,25 +227,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     div.addStyleName("buttonGroupInset6");
   }
 
-  /**
-   * Show unit and chapter info for every item.
-   * @return
-   * @see #getQuestionContent
-   */
-  private Panel getUnitLessonForExercise() {
-    Panel flow = new HorizontalPanel();
-    flow.getElement().setId("getUnitLessonForExercise_unitLesson");
-    flow.addStyleName("leftFiveMargin");
-    //logger.info("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
-
-    for (String type : controller.getStartupInfo().getTypeOrder()) {
-      Heading child = new Heading(HEADING_FOR_UNIT_LESSON, type, exercise.getUnitToValue().get(type));
-      child.addStyleName("rightFiveMargin");
-      flow.add(child);
-    }
-    return flow;
-  }
-
   public void onResize() {
     // logger.info("got onResize for" + instance);
     if (contentAudio != null) {
@@ -273,23 +253,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     vp.addStyleName("blockStyle");
 
     new UnitChapterItemHelper<T>(controller.getTypeOrder()).addUnitChapterItem(exercise,vp);
-   // addUnitChapterItem(exercise, vp);
     vp.add(getItemContent(exercise));
     vp.add(getAudioPanel(exercise));
     return vp;
   }
-
-/*  private void addUnitChapterItem(T exercise, Panel vp) {
-    Widget itemHeader = getItemHeader(exercise);
-    if (exercise.getUnitToValue().isEmpty()) {
-      vp.add(itemHeader);
-    }
-    else {
-      Panel unitLessonForExercise = getUnitLessonForExercise();
-      unitLessonForExercise.add(itemHeader);
-      vp.add(unitLessonForExercise);
-    }
-  }*/
 
   private Panel getAudioPanel(T e) {
     Panel div = new SimplePanel(getScoringAudioPanel(e));
@@ -355,14 +322,11 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
    */
   @Override
   public void addIncorrectComment(final String commentToPost, final String field) {
-/*    System.out.println(new Date() + " : post to server " + exercise.getID() +
-      " field " + field + " commentLabel '" + commentToPost + "' is incorrect");*/
     addAnnotation(field, INCORRECT, commentToPost);
   }
 
   @Override
   public void addCorrectComment(final String field) {
-    //  System.out.println(new Date() + " : post to server " + exercise.getID() + " field " + field + " is correct");
     addAnnotation(field, CORRECT, "");
   }
 
