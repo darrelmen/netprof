@@ -885,9 +885,7 @@ public class ResultDAO extends DAO {
       int roundTripDur = rs.getInt(ROUND_TRIP_DUR);
 
       MonitorResult result = new MonitorResult(uniqueID, userID, //id
-          // plan
-          exid, // id
-          // qid
+          exid,
           trimPathForWebPage2(answer), // answer
           valid, // valid
           timestamp.getTime(),
