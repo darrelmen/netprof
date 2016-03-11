@@ -43,7 +43,7 @@ public class Analysis extends DAO {
     parseResultJson = new ParseResultJson(database.getServerProps());
     this.phoneDAO = phoneDAO;
     this.exToRef = exToRef;
-    logger.info("Analysis : exToRef has " + exToRef.size() +"\n\n");
+    logger.info("Analysis : exToRef has " + exToRef.size());
   }
 
   private final Set<String> lincoln = new HashSet<>(Arrays.asList("gvidaver", "rbudd", "jmelot", "esalesky", "gatewood",
