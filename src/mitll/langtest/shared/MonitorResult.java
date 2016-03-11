@@ -14,7 +14,7 @@ import java.util.*;
 /**
  * So egyptian monitoring needs to show :
  * user id/id/unit/chapter/exercise text/audio/time/valid/duration/correct/score
- * <p/>
+ * <p>
  * Search on user, id,unit,chapter,exer
  * Created by go22670 on 9/24/14.
  */
@@ -55,10 +55,11 @@ public class MonitorResult implements IsSerializable {
 
   private Map<String, String> unitToValue;
 
-  public MonitorResult() {}
+  public MonitorResult() {
+  }
 
   /**
-   *  @param uniqueID
+   * @param uniqueID
    * @param userid
    * @param id
    * @param answer
@@ -72,11 +73,12 @@ public class MonitorResult implements IsSerializable {
    * @param withFlash
    * @param processDur
    * @param roundTripDur
-   *  @see mitll.langtest.server.database.ResultDAO#getMonitorResultsForQuery(Connection, PreparedStatement)
+   * @see mitll.langtest.server.database.ResultDAO#getMonitorResultsForQuery(Connection, PreparedStatement)
    */
   public MonitorResult(int uniqueID, long userid, String id, String answer,
                        boolean valid, long timestamp, String answerType, int durationInMillis,
-                       boolean correct, float pronScore, String device, boolean withFlash, int processDur, int roundTripDur, String validity, float snr) {
+                       boolean correct, float pronScore, String device, boolean withFlash, int processDur,
+                       int roundTripDur, String validity, float snr) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.id = id;
@@ -89,7 +91,7 @@ public class MonitorResult implements IsSerializable {
     this.pronScore = pronScore;
     this.device = device;
     this.withFlash = withFlash;
-    this.processDur   = processDur;
+    this.processDur = processDur;
     this.roundTripDur = roundTripDur;
     this.validity = validity;
     this.snr = snr;
@@ -115,7 +117,9 @@ public class MonitorResult implements IsSerializable {
     return answer;
   }
 
-  public boolean isValid() { return valid; }
+  public boolean isValid() {
+    return valid;
+  }
 
   public long getTimestamp() {
     return timestamp;
@@ -151,7 +155,7 @@ public class MonitorResult implements IsSerializable {
 
   /**
    * ONLY does the first column, for now...
-   *
+   * <p>
    * Expects a query where the columns are field_ASC or field_DESC
    *
    * @param columns
@@ -179,7 +183,7 @@ public class MonitorResult implements IsSerializable {
           if (split.length != 2) System.err.println("huh? col = " + col);
           boolean asc = split.length <= 1 || split[1].equals(ASC);
 
-        //  logger.info("col " + col + " asc = " + asc);
+          //  logger.info("col " + col + " asc = " + asc);
 
           // USERID ---------------
           long comp = 0;
@@ -303,8 +307,8 @@ public class MonitorResult implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.client.result.ResultManager#addResultColumn(CellTable)
    * @return
+   * @see mitll.langtest.client.result.ResultManager#addResultColumn(CellTable)
    */
   public String getDevice() {
     return device;
@@ -316,8 +320,7 @@ public class MonitorResult implements IsSerializable {
         " at " + new Date(timestamp) +
         "  ans " + answer +
         " audioType : " + audioType +
-     //   " context : " + context +
-        " device " + device+
+        " device " + device +
         " valid " + valid + " " + (correct ? "correct" : "incorrect") + " score " + pronScore;
   }
 
@@ -339,5 +342,9 @@ public class MonitorResult implements IsSerializable {
 
   public float getSnr() {
     return snr;
+  }
+
+  public void setDisplayID(String displayID) {
+    this.id = displayID;
   }
 }
