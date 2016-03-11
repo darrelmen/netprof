@@ -94,6 +94,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private PathHelper pathHelper;
 
   /**
+   * TODO : somehow make this typesafe
    * @see #getExercises()
    */
   private ExerciseTrie fullTrie = null;
@@ -195,19 +196,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         return new ExerciseListWrapper<AmasExerciseImpl>(reqID, exercises, null);
       } else { // sort by unit-chapter selection
         // builds unit-lesson hierarchy if non-empty type->selection over user list
-        Collection<AmasExerciseImpl> exercisesForSelectionState =
+        Collection<AmasExerciseImpl> exercisesForSelectionState1 =
             new AmasSupport().getExercisesForSelectionState(typeToSelection, prefix, userID,
-                db.getAMASSectionHelper(), db.getResultDAO());
-
-        Collection<AmasExerciseImpl> exercisesForSelectionState1 = exercisesForSelectionState;
-        ExerciseListWrapper<AmasExerciseImpl> amasExerciseExerciseListWrapper =
-            new ExerciseListWrapper<>(reqID, exercisesForSelectionState1, null);
-        return amasExerciseExerciseListWrapper;
+            db.getAMASSectionHelper(), db.getResultDAO());
+        return new ExerciseListWrapper<>(reqID, exercisesForSelectionState1, null);
       }
     } catch (Exception e) {
       logger.warn("got " + e, e);
       logAndNotifyServerException(e);
-      return new ExerciseListWrapper();
+      return new ExerciseListWrapper<>();
     }
   }
 
