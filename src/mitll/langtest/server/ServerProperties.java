@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ * Copyright © 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  */
 
 package mitll.langtest.server;
@@ -32,8 +32,11 @@ public class ServerProperties {
   private static final Logger logger = Logger.getLogger(ServerProperties.class);
 
   private static final String FALSE = "false";
-  private static final String TRUE  = "true";
+  private static final String TRUE = "true";
 
+  /**
+   * TODO : read this from a config file, or maybe from the sites.json file on np
+   */
   public static final List<String> SITE_LIST = Arrays.asList(
       "Dari",
       "Egyptian",
@@ -54,12 +57,13 @@ public class ServerProperties {
       "Tagalog",
       "Urdu");
 
-  private static final List<String> AMAS_SITES = Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
+  private static final List<String> AMAS_SITES =
+      Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
 
 
   public static final String MIRA_DEVEL_HOST = "mira-devel.llan.ll.mit.edu/scorer/item"; //"mira-devel.llan.ll.mit.edu/msa/item";
-  private static final String MIRA_DEVEL = "https://" +MIRA_DEVEL_HOST;
-  private static final String MIRA_LEN   = "https://mira.ll.mit.edu/scorer/item";
+  private static final String MIRA_DEVEL = "https://" + MIRA_DEVEL_HOST;
+  private static final String MIRA_LEN = "https://mira.ll.mit.edu/scorer/item";
   private static final String MIRA_DEFAULT = MIRA_LEN;
   private static final String MIRA_CLASSIFIER_URL = "miraClassifierURL";
   public static final String WEBSERVICE_HOST_IP1 = "webserviceHostIP";
@@ -82,10 +86,10 @@ public class ServerProperties {
   private static final String LANGUAGE = "language";
 
   private static final String MEDIA_DIR = "mediaDir";
-//  private static final String RECO_TEST = "recoTest";
+  //  private static final String RECO_TEST = "recoTest";
 //  private static final String RECO_TEST2 = "recoTest2";
   private static final String MIN_PRON_SCORE = "minPronScore";
-  private static final String MIN_PRON_SCORE_DEFAULT = ""+0.31f;
+  private static final String MIN_PRON_SCORE_DEFAULT = "" + 0.31f;
   private static final String USE_PREDEFINED_TYPE_ORDER = "usePredefinedTypeOrder";
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
   private static final String AUDIO_OFFSET = "audioOffset";
@@ -107,7 +111,7 @@ public class ServerProperties {
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
   private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
   private static final String BEST_AUDIO = "bestAudio";
- // private static final String READ_EXERCISES_FROM_DB = "readExercisesFromDB";
+  // private static final String READ_EXERCISES_FROM_DB = "readExercisesFromDB";
 
   private Properties props = new Properties();
 
@@ -118,6 +122,7 @@ public class ServerProperties {
   private final Set<Long> preferredVoices = new HashSet<Long>();
   private EmailList emailList;
   private final int userInitialScores = 20;
+  private boolean RTL;
 
   /**
    * @param servletContext
@@ -182,11 +187,11 @@ public class ServerProperties {
    * @see LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
    */
   public String getH2Database() {
-    return props.getProperty(H2_DATABASE, "npf"+props.getProperty(LANGUAGE));
+    return props.getProperty(H2_DATABASE, "npf" + props.getProperty(LANGUAGE));
   }
 
   public String getLessonPlan() {
-    return props.getProperty(LESSON_PLAN_FILE, props.getProperty(LANGUAGE)+".json");
+    return props.getProperty(LESSON_PLAN_FILE, props.getProperty(LANGUAGE) + ".json");
   }
 
 /*  public boolean doRecoTest() {
@@ -251,7 +256,10 @@ public class ServerProperties {
     return getDefaultTrue(SKIP_SEMICOLONS);
   }
 
-  public boolean hasModel() { return !isNoModel(); }
+  public boolean hasModel() {
+    return !isNoModel();
+  }
+
   public boolean isNoModel() {
     return getDefaultFalse(NO_MODEL);
   }
@@ -366,15 +374,13 @@ public class ServerProperties {
       }
     }
     miraClassifierURL = props.getProperty(MIRA_CLASSIFIER_URL, MIRA_DEFAULT);
-
-
   }
 
   private boolean getDefaultFalse(String param) {
     return props.getProperty(param, FALSE).equals(TRUE);
   }
 
-  private boolean getDefaultTrue(String param)  {
+  private boolean getDefaultTrue(String param) {
     return props.getProperty(param, TRUE).equals(TRUE);
   }
 
@@ -433,8 +439,8 @@ public class ServerProperties {
   }
 
   /**
-   * @see DatabaseImpl#getContextPractice()
    * @return
+   * @see DatabaseImpl#getContextPractice()
    */
   public String getDialogFile() {
     return props.getProperty("dialog");
@@ -551,13 +557,6 @@ public class ServerProperties {
     return getDefaultFalse(RUN_REF_DECODE_WITH_HYDEC);
   }
 
-/*
-  public boolean readExercisesFromDB() {
-    return getDefaultFalse(READ_EXERCISES_FROM_DB);
-  }
-*/
-
-
   public String getMiraClassifierURL() {
     return miraClassifierURL;
   }
@@ -567,14 +566,26 @@ public class ServerProperties {
   }
 
   public String getMiraFlavor() {
-    return props.getProperty("miraFlavor",getLanguage().toLowerCase()+"-amas3");
+    return props.getProperty("miraFlavor", getLanguage().toLowerCase() + "-amas3");
   }
 
   public Collection<String> getSites() {
     return isAMAS() ? AMAS_SITES : SITE_LIST;
   }
 
-  public boolean useMYSQL() { return getDefaultFalse(USE_MYSQL); }
-  public boolean useH2() { return getDefaultTrue(USE_H_2); }
-  public boolean usePostgres() { return getDefaultFalse(USE_POSTGRE_SQL);  }
+  public boolean useMYSQL() {
+    return getDefaultFalse(USE_MYSQL);
+  }
+
+  public boolean useH2() {
+    return getDefaultTrue(USE_H_2);
+  }
+
+  public boolean usePostgres() {
+    return getDefaultFalse(USE_POSTGRE_SQL);
+  }
+
+  public void setRTL(boolean isRTL) {
+    props.setProperty("rtl", isRTL ? "true" : "false");
+  }
 }
