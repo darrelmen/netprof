@@ -126,8 +126,8 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   }
 
   @Override
-  protected void addQuestionContentRow(T e, ExerciseController controller, Panel hp) {
-    super.addQuestionContentRow(e, controller, hp);
+  protected void addQuestionContentRow(T e, Panel hp) {
+    super.addQuestionContentRow(e, hp);
     hp.addStyleName("questionContentPadding");
   }
 
