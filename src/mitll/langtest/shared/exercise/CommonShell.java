@@ -17,6 +17,7 @@ public interface CommonShell extends Shell {
 
   String getContext();
   String getContextTranslation();
+  String getDisplayID();
 
   MutableShell getMutableShell();
 
