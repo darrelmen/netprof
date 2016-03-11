@@ -5,7 +5,6 @@
 package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.base.HasIcon;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.ui.*;
@@ -67,6 +66,28 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
     this.navigationHelper = getNavigationHelper(controller);
 
     // attempt to left justify
+    //HorizontalPanel hp = ;
+   // boolean showInstructions = !(getExerciseContent(e).toLowerCase().contains("listen"));   // hack
+   // if (showInstructions) {
+      addInstructions();
+   // }
+    add(getQuestionContent(e, controller));
+
+    addQuestions(e, service, controller);
+
+    // add next and prev buttons
+    add(navigationHelper);
+    navigationHelper.addStyleName("topMargin");
+    getElement().setId("ExercisePanel");
+  }
+
+  /**
+   * Worry about RTL
+   * @param e
+   * @param controller
+   * @return
+   */
+  private Widget getQuestionContent(T e, ExerciseController controller) {
     HorizontalPanel hp = new HorizontalPanel();
     hp.setWidth("100%");
     boolean rightAlignContent = controller.isRightAlignContent();
@@ -75,18 +96,7 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
     }
     hp.setHorizontalAlignment(rightAlignContent ? HasHorizontalAlignment.ALIGN_RIGHT : HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(getQuestionContent(e));
-    boolean showInstructions = !(getExerciseContent(e).toLowerCase().contains("listen"));   // hack
-    if (showInstructions) {
-      addInstructions();
-    }
-    add(hp);
-
-    addQuestions(e, service, controller);
-
-    // add next and prev buttons
-    add(navigationHelper);
-    navigationHelper.addStyleName("topMargin");
-    getElement().setId("ExercisePanel");
+    return hp;
   }
 
   private NavigationHelper<L> getNavigationHelper(ExerciseController controller) {
@@ -184,10 +194,7 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
 
   private Panel getQuestionPanel(T exercise, LangTestDatabaseAsync service, ExerciseController controller,
                                  int questionNumber) {
-    // add question prompt
     Panel vp = new VerticalPanel();
-    //addQuestionPrompt(vp);
-
     // add answer widget
     vp.add(getAnswerWidget(exercise, service, controller, questionNumber));
     vp.addStyleName("userNPFContent2");
