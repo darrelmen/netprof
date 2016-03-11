@@ -12,17 +12,16 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MutableAudioExercise;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
-import org.apache.log4j.net.SyslogAppender;
 
 import java.io.File;
 import java.io.OutputStream;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
-import java.util.zip.ZipOutputStream;
 
 /**
  * Create, drop, alter, read from the results table.
@@ -60,7 +59,13 @@ public class AudioDAO extends DAO {
   private final boolean DEBUG = false;
   private final Connection connection;
   private final UserDAO userDAO;
+  private ExerciseDAO<?> exerciseDAO;
 
+  /**
+   * @param database
+   * @param userDAO
+   * @see DatabaseImpl#initializeDAOs(PathHelper)
+   */
   public AudioDAO(Database database, UserDAO userDAO) {
     super(database);
     connection = database.getConnection(this.getClass().toString());
@@ -100,11 +105,11 @@ public class AudioDAO extends DAO {
   /**
    * TODO : Seems really expensive - avoid doing this if we can.
    *
-   * @see AudioExport#writeFolderContents(ZipOutputStream, List, AudioDAO, String, String, String, boolean)
-   * @see AudioExport#writeFolderContentsContextOnly(ZipOutputStream, List, AudioDAO, String, String, String, boolean, String)
-   * @see DatabaseImpl#attachAllAudio
    * @return
-   * @see ExerciseDAO#setAudioDAO(AudioDAO, String, String)
+   * @seex ExerciseDAO#setAudioDAO
+   * @see AudioExport#writeFolderContents
+   * @see AudioExport#writeFolderContentsContextOnly
+   * @see DatabaseImpl#attachAllAudio
    */
   public Map<String, List<AudioAttribute>> getExToAudio() {
     long then = System.currentTimeMillis();
@@ -129,10 +134,65 @@ public class AudioDAO extends DAO {
       //  }
     }
     long now = System.currentTimeMillis();
-    logger.info("getExToAudio took " +(now-then) + " millis to get  " + audioAttributes1.size()+ " audio entries");
+    logger.info("getExToAudio took " + (now - then) + " millis to get  " + audioAttributes1.size() + " audio entries");
 
 //    logger.debug("map size is " + exToAudio.size());
     return exToAudio;
+  }
+
+  public void markTranscripts() {
+    List<AudioAttribute> toUpdate = new ArrayList<>();
+
+    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
+    for (AudioAttribute audio : audioAttributes1) {
+      if (audio.getTranscript() == null || audio.getTranscript().isEmpty()) {
+        CommonShell exercise = exerciseDAO.getExercise(audio.getExid());
+        if (exercise != null) {
+          String fl = exercise.getForeignLanguage();
+          audio.setTranscript(fl);
+          toUpdate.add(audio);
+        }
+      }
+    }
+    updateTranscript(toUpdate);
+  }
+
+  private int updateTranscript(List<AudioAttribute> audio) {
+    int c = 0;
+
+    try {
+
+      logger.debug("updateTranscript ");
+      Connection connection = database.getConnection(this.getClass().toString());
+      String sql = "UPDATE " + AUDIO + " " +
+          "SET " + TRANSCRIPT + "=? " +
+          "WHERE " +
+          ID + "=?";
+
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      for (AudioAttribute audioAttribute : audio) {
+        int ii = 1;
+        statement.setString(ii++, audioAttribute.getTranscript());
+        statement.setInt(ii++, audioAttribute.getUniqueID());
+        int i = statement.executeUpdate();
+        if (i > 0) c++;
+      }
+
+      finish(connection, statement);
+
+      //return i > 0;
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
+
+    logger.info("did " + c + "/"+audio.size());
+
+    return c;
+  }
+
+  public void setExerciseDAO(ExerciseDAO<?> exerciseDAO) {
+    this.exerciseDAO = exerciseDAO;
   }
 
   /**
@@ -182,7 +242,7 @@ public class AudioDAO extends DAO {
 
   /**
    * TODO : rewrite this so it's not insane -adding and removing attributes??
-   *
+   * <p>
    * Complicated, but separates old school "Default Speaker" audio into a second pile.
    * If we've already added an audio attribute with the path for a default speaker, then we remove it.
    * <p>
@@ -259,15 +319,15 @@ public class AudioDAO extends DAO {
     mutable.addAudio(attr);
     //   logger.debug("\trelativeConfigDir '" + relativeConfigDir + "'");
 
-    if (attr.getAudioRef() == null) logger.error("attachAudio huh? no audio ref for " + attr + " under " + firstExercise);
+    if (attr.getAudioRef() == null)
+      logger.error("attachAudio huh? no audio ref for " + attr + " under " + firstExercise);
     else if (!audioConversion.exists(attr.getAudioRef(), installPath)) {
-      if (audioConversion.exists(attr.getAudioRef(),relativeConfigDir)) {
+      if (audioConversion.exists(attr.getAudioRef(), relativeConfigDir)) {
         logger.debug("\tattachAudio was '" + attr.getAudioRef() + "'");
         attr.setAudioRef(relativeConfigDir + File.separator + attr.getAudioRef());
         logger.debug("\tattachAudio now '" + attr.getAudioRef() + "'");
-      }
-      else {
-       // logger.debug("\tattachAudio couldn't find audio file at '" + attr.getAudioRef() + "'");
+      } else {
+        // logger.debug("\tattachAudio couldn't find audio file at '" + attr.getAudioRef() + "'");
       }
     }
   }
@@ -459,7 +519,7 @@ public class AudioDAO extends DAO {
   private int getCountForGender(Set<Long> userIds, String audioSpeed,
                                 Set<String> uniqueIDs) {
     Set<String> idsOfRecordedExercises = new HashSet<>();
-  //  Set<String> idsOfStaleExercises = new HashSet<>();
+    //  Set<String> idsOfStaleExercises = new HashSet<>();
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String s = getInClause(userIds);
@@ -478,7 +538,7 @@ public class AudioDAO extends DAO {
         if (uniqueIDs.contains(exid)) {
           idsOfRecordedExercises.add(exid);
         } else {
-    //      idsOfStaleExercises.add(exid);
+          //      idsOfStaleExercises.add(exid);
           //logger.debug("skipping stale exid " + exid);
         }
       }
@@ -647,7 +707,6 @@ public class AudioDAO extends DAO {
       }
       results.add(audioAttr);
     }
-
     //   logger.debug("found " + results.size() + " audio attributes");
 
     finish(connection, statement, rs);
@@ -679,6 +738,7 @@ public class AudioDAO extends DAO {
 
   /**
    * TODO : set transcript
+   *
    * @see mitll.langtest.server.database.ImportCourseExamples#copyAudio
    */
   public long add(Result result, int userid, String path) {
@@ -797,9 +857,7 @@ public class AudioDAO extends DAO {
           new Date(timestamp) + " type " + audioType + " dur " + durationInMillis);
       Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + AUDIO + " " +
-
           "SET " + USERID + "=? " +
-
           "WHERE " +
           Database.EXID + "=?" + " AND " +
           AUDIO_TYPE + "=? AND " +
@@ -1062,7 +1120,7 @@ public class AudioDAO extends DAO {
         AUDIO_REF + "," +
         ResultDAO.AUDIO_TYPE + "," +
         ResultDAO.DURATION + "," +
-        TRANSCRIPT+ "," +
+        TRANSCRIPT + "," +
         DEFECT +
         ") VALUES(?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
