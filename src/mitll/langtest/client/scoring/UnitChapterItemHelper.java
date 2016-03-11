@@ -7,11 +7,14 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 3/11/16.
  */
 public class UnitChapterItemHelper<T extends CommonShell> {
+  private Logger logger = Logger.getLogger("UnitChapterItemHelper");
+
   /**
    * @see mitll.langtest.client.exercise.WaveformExercisePanel#addInstructions
    */
@@ -28,7 +31,6 @@ public class UnitChapterItemHelper<T extends CommonShell> {
   public Panel addUnitChapterItem(T exercise, Panel vp) {
     Widget itemHeader = getItemHeader(exercise);
     if (exercise.getUnitToValue().isEmpty()) {
-      //  vp.add(itemHeader);
       return null;
     } else {
       Panel unitLessonForExercise = getUnitLessonForExercise(exercise);
@@ -44,6 +46,8 @@ public class UnitChapterItemHelper<T extends CommonShell> {
    * @see GoodwaveExercisePanel#getQuestionContent
    */
   private Widget getItemHeader(T e) {
+   // logger.info("got " + e + " and " + e.getDisplayID());
+
     Heading w = new Heading(HEADING_FOR_UNIT_LESSON, ITEM, e.getDisplayID());
     w.getElement().setId("ItemHeading");
     return w;
