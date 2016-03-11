@@ -42,7 +42,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   private long timestamp;
   private long durationInMillis;
   /**
-   * Don't sent to client - just server side
+   * Don't send to client - just server side
    */
   private transient String transcript = "";
 
@@ -251,5 +251,9 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   public String getTranscript() {
     return transcript;
+  }
+
+  public void setTranscript(String transcript) {
+    this.transcript = transcript;
   }
 }
