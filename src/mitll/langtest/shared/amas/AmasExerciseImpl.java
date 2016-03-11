@@ -79,9 +79,9 @@ public class AmasExerciseImpl implements CommonShell {
     addQuestion(isFL ? FL : EN, question, answer);
   }
 
-  public void addQuestion(boolean isFL, String question, String[] alternateAnswers) throws Exception {
+/*  public void addQuestion(boolean isFL, String question, String[] alternateAnswers) throws Exception {
     addQuestion(isFL ? FL : EN, question, alternateAnswers);
-  }
+  }*/
 
   public void addQuestion(boolean isFL, String question, Collection<String> alternateAnswers) throws Exception {
     addQuestion(isFL ? FL : EN, question, alternateAnswers);
@@ -206,9 +206,7 @@ public class AmasExerciseImpl implements CommonShell {
   }
 
   @Override
-  public void setSecondState(STATE state) {
-
-  }
+  public void setSecondState(STATE state) {}
 
   public String toString() {
     return "Exercise " + getID() + (getAltID().isEmpty() ? "" : "/" + getAltID()) +
@@ -244,6 +242,11 @@ public class AmasExerciseImpl implements CommonShell {
   @Override
   public String getContextTranslation() {
     return null;
+  }
+
+  @Override
+  public String getDisplayID() {
+    return id;
   }
 
   @Override
