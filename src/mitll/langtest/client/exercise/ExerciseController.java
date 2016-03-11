@@ -18,8 +18,11 @@ import mitll.langtest.shared.User;
 
 import java.util.Collection;
 
-
 /**
+ * Common services for UI components.
+ *
+ * TODO :  This could be made less of a grab bag of stuff - break into interfaces, etc.
+ *
  * Created with IntelliJ IDEA.
  * User: GO22670
  * Date: 5/9/12
@@ -56,7 +59,6 @@ public interface ExerciseController extends EventRegistration {
 
   String getLanguage();
   boolean isRightAlignContent();
- // int getLeftColumnWidth();
   int getHeightOfTopRows();
 
   PropertyHandler getProps();
@@ -65,6 +67,7 @@ public interface ExerciseController extends EventRegistration {
   void logMessageOnServer(String message, String prefix);
 
   StartupInfo getStartupInfo();
+  Collection<String> getTypeOrder();
 
   void addKeyListener(KeyPressHelper.KeyListener listener);
 
