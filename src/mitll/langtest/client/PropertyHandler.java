@@ -17,6 +17,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PropertyHandler {
+  public static final String RTL = "rtl";
   private final Logger logger = Logger.getLogger("PropertyHandler");
 
   // property file property names
@@ -218,7 +219,7 @@ public class PropertyHandler {
       else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
       else if (key.equals(LANGUAGE)) language = value;
       else if (key.equals(SPLASH_TITLE)) splashTitle = value;
-      else if (key.equals(RIGHT_ALIGN_CONTENT) || key.equals("rtl")) rightAlignContent = getBoolean(value);
+      else if (key.equals(RIGHT_ALIGN_CONTENT) || key.equals(RTL)) rightAlignContent = getBoolean(value);
       else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
       else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
@@ -507,6 +508,10 @@ public class PropertyHandler {
     return splashTitle;
   }
 
+  /**
+   * @see LangTest#isRightAlignContent()
+   * @return
+   */
   public boolean isRightAlignContent() {
     return rightAlignContent;
   }
