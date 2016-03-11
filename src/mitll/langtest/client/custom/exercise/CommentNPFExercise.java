@@ -27,6 +27,7 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel;
+import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -77,12 +78,11 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
   }
 
   /**
-   * @param content
    * @return
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getQuestionContent
    */
   @Override
-  protected Widget getQuestionContent(final T e, String content) {
+  protected Widget getItemContent(final T e) {
     Panel column = new VerticalPanel();
     column.getElement().setId("QuestionContent");
     column.setWidth("100%");
@@ -103,9 +103,15 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
       column.add(getEntry(e, QCNPFExercise.TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, translitSentence));
     }
 
-    String english = e.getMeaning() != null && !e.getMeaning().trim().isEmpty() ? e.getMeaning() : e.getEnglish();
+    boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
+    boolean useMeaningInsteadOfEnglish = isEnglish && e.getMeaning() != null && !e.getMeaning().trim().isEmpty();
+    String english = useMeaningInsteadOfEnglish ? e.getMeaning() : e.getEnglish();
     if (!english.isEmpty() && !english.equals("N/A")) {
-      column.add(getEntry(e, QCNPFExercise.ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, english));
+      String englishPrompt = useMeaningInsteadOfEnglish ? ExerciseFormatter.MEANING_PROMPT : ExerciseFormatter.ENGLISH_PROMPT;
+      column.add(getEntry(e, QCNPFExercise.ENGLISH, englishPrompt, english));
+    }
+    if (!useMeaningInsteadOfEnglish) {
+      column.add(getEntry(e, QCNPFExercise.MEANING, ExerciseFormatter.MEANING_PROMPT, e.getMeaning()));
     }
 
     return column;
@@ -204,7 +210,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
       //log("trim   " + trim + " len " + trim.length());
       //log("toFind " + toFind + " len " + trim.length());
 
-      List<String> tokens = getTokens(trim);
+      Collection<String> tokens = getTokens(trim);
       int startToken;
       int endToken = 0;
       StringBuilder builder = new StringBuilder();
@@ -225,6 +231,25 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
       context = builder.toString();
     }
     return context;
+  }
+
+  /**
+   * @see #getHighlightedItemInContext(String, String)
+   * @param sentence
+   * @return
+   */
+  private Collection<String> getTokens(String sentence) {
+    List<String> all = new ArrayList<String>();
+    sentence = removePunct(sentence);
+    for (String untrimedToken : sentence.split(CommentNPFExercise.SPACE_REGEX)) { // split on spaces
+      String tt = untrimedToken.replaceAll(CommentNPFExercise.PUNCT_REGEX, ""); // remove all punct
+      String token = tt.trim();  // necessary?
+      if (token.length() > 0) {
+        all.add(token);
+      }
+    }
+
+    return all;
   }
 
   /**
@@ -362,7 +387,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @param label
    * @param value
    * @return
-   * @see #getQuestionContent(T, String)
+   * @see GoodwaveExercisePanel#getQuestionContent(CommonShell)
    * @see #getContext
    */
   private Widget getEntry(AnnotationExercise e, final String field, final String label, String value) {
@@ -403,7 +428,6 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
       }
     };
   }
-
 
   /**
    * @see #getEntry(String, String, String, ExerciseAnnotation)
