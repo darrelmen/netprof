@@ -11,7 +11,6 @@ import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.base.HasIcon;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
@@ -58,6 +57,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   public static final String FOREIGN_LANGUAGE = "foreignLanguage";
   public static final String TRANSLITERATION = "transliteration";
   public static final String ENGLISH = "english";
+  public static final String MEANING = "meaning";
   public static final String CONTEXT = "context";
   public static final String CONTEXT_TRANSLATION = "context translation";
 
@@ -301,11 +301,10 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   }
 
   /**
-   * @param content
    * @return
    */
   @Override
-  protected Widget getQuestionContent(T e, String content) {
+  protected Widget getItemContent(T e) {
     Panel column = new FlowPanel();
     column.getElement().setId("QCNPFExercise_QuestionContent");
     column.addStyleName("floatLeft");
@@ -652,12 +651,12 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     if (addLeftMargin) {
       content.getElement().getStyle().setMarginLeft(80, Style.Unit.PX);
     }
-    else {
+    //else {
 /*      if (logger == null) {
         logger = Logger.getLogger("QCNPFExercise");
       }
       logger.warning("not adding left margin for " + field);*/
-    }
+   // }
     row.add(content);
 
     Panel rowContainer = new FlowPanel();
@@ -696,7 +695,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    * @param field
    * @param annotation
    * @return
-   * @see #getCommentWidget(String, com.google.gwt.user.client.ui.Widget, mitll.langtest.shared.ExerciseAnnotation)
+   * @see #getCommentWidget
    */
   private FocusWidget makeCommentEntry(final String field, ExerciseAnnotation annotation) {
     final TextBox commentEntry = new TextBox();
