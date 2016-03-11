@@ -279,7 +279,8 @@ public class ResultDAO extends DAO {
       }
     }
     if (n > 0) {
-      logger.warn("addUnitAndChapterToResults : skipped " + n + " out of " + monitorResults.size() + " bad join ids = " + unknownIDs);
+      logger.warn("addUnitAndChapterToResults : skipped " + n + " out of " + monitorResults.size() +
+          " # bad join ids = " + unknownIDs.size());
     }
   }
 
