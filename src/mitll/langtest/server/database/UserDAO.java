@@ -17,7 +17,6 @@ import java.io.OutputStream;
 import java.sql.*;
 import java.util.*;
 
-//@SuppressWarnings("ALL")
 public class UserDAO extends DAO {
   private static final Logger logger = Logger.getLogger(UserDAO.class);
 
