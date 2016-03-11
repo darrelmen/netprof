@@ -451,6 +451,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
           analysis = new Analysis(this, phoneDAO, getExerciseIDToRefAudio());
         }
+
+        audioDAO.setExerciseDAO(exerciseDAO);
+
+        audioDAO.markTranscripts();
       }
     }
   }
