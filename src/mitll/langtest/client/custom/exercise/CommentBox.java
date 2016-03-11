@@ -18,6 +18,7 @@ import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.scoring.CommentAnnotator;
+import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.exercise.MutableAnnotationExercise;
 
@@ -42,7 +43,7 @@ public class CommentBox extends PopupContainer {
    * @param exerciseID
    * @param registration
    * @param commentAnnotator
-   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getQuestionContent(mitll.langtest.shared.exercise.CommonExercise, String)
+   * @see GoodwaveExercisePanel#getQuestionContent(mitll.langtest.shared.exercise.CommonShell)
    * @see mitll.langtest.client.flashcard.FlashcardPanel#getFirstRow(mitll.langtest.client.exercise.ExerciseController)
    */
   public CommentBox(String exerciseID, EventRegistration registration, CommentAnnotator commentAnnotator, MutableAnnotationExercise annotationExercise) {
