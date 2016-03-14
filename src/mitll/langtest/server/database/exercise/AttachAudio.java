@@ -4,6 +4,7 @@
 
 package mitll.langtest.server.database.exercise;
 
+import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.exercise.*;
 import org.apache.log4j.Logger;
@@ -106,17 +107,13 @@ public class AttachAudio {
     int missing = 0;
     if (exToAudio.containsKey(id) || exToAudio.containsKey(id + "/1") || exToAudio.containsKey(id + "/2")) {
       List<AudioAttribute> audioAttributes = exToAudio.get(id);
-
-   //   if (audioAttributes.isEmpty()) logger.info("huh? audio attr empty for " + id);
+      //   if (audioAttributes.isEmpty()) logger.info("huh? audio attr empty for " + id);
       missing = attachAudio(imported, missing, audioAttributes);
-
-    //  if (imported.hasRefAudio()) logger.info("for " +id + " attached " + imported.getAudioAttributes().size() + " audio refs");
-
-      //logger.debug("added " + c + " to " + id);
+     //  if (imported.hasRefAudio()) logger.info("for " +id + " attached " + imported.getAudioAttributes().size() + " audio refs");
     }
 //    if (!imported.hasRefAudio() && imported.getID().startsWith("Custom")) {
 //      logger.warn("ex " + imported.getID() + " has no ref audio.");
- //   }
+    //   }
     //else {
     // logger.debug("can't find '" + id + "' in " + exToAudio.keySet().size() + " keys, e.g. '" + exToAudio.keySet().iterator().next() +"'");
     //}
@@ -124,7 +121,6 @@ public class AttachAudio {
   }
 
   /**
-   *
    * @param imported
    * @param missing
    * @param audioAttributes
@@ -148,34 +144,27 @@ public class AttachAudio {
 
       for (AudioAttribute audio : audioAttributes) {
         String child = mediaDir1 + File.separator + audio.getAudioRef();
-        /*  if (child.contains("bestAudio\bestAudio")) {
-            child = child.replaceAll("bestAudio\\bestAudio","bestAudio");
-          }*/
         File test = new File(installPath, child);
 
         boolean exists = test.exists();
         if (!exists) {
-         // if (imported.getID().equals("50264")) logger.debug("mediaDir1 " + mediaDir1 + "child " + test.getAbsolutePath() + " doesn't exist");
           test = new File(installPath, audio.getAudioRef());
           exists = test.exists();
-         // if (!exists) {
-            //     logger.debug("child " + test.getAbsolutePath() + " doesn't exist");
-          //}
           child = audio.getAudioRef();
         }
 
         if (exists) {
           if (!audioPaths.contains(child)) {
-            boolean sameTranscript = checkMatchingTranscript(imported, audio);
+            boolean sameTranscript = hasMatchingTranscript(imported, audio.getTranscript());
             if (!sameTranscript) {
+              // TODO : consider skipping adding audio with mismatch
               logger.warn("for " + imported + " audio transcript " + audio.getTranscript() + " doesn't match");
             }
             audio.setAudioRef(child);   // remember to prefix the path
             mutableAudio.addAudio(audio);
             audioPaths.add(child);
 //            logger.debug("imported " +imported.getID()+ " now " + imported.getAudioAttributes());
-          }
-          else {
+          } else {
             logger.debug("skipping " + child);
           }
         } else {
@@ -194,20 +183,26 @@ public class AttachAudio {
   }
 
   /**
-   * Check to see transcript matches.
+   * Check to see if the audio transcript matches the vocabulary item.
+   * Don't worry about punctuation or case.
+   *
    * @param imported
    * @param audio
    * @return
    */
-  private boolean checkMatchingTranscript(CommonShell imported, AudioAttribute audio) {
+  private boolean hasMatchingTranscript(CommonShell imported, String transcript) {
     try {
-      String transcript = audio.getTranscript();
       String foreignLanguage = imported.getForeignLanguage();
-      return transcript == null || foreignLanguage.isEmpty() || transcript.isEmpty() || transcript.toLowerCase().equals(foreignLanguage.toLowerCase());
+      return transcript == null || foreignLanguage.isEmpty() || transcript.isEmpty() ||
+          removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
     } catch (Exception e) {
-      logger.warn("huh? got " +e + " on " + imported.getID(),e);
+      logger.warn("huh? got " + e + " on " + imported.getID(), e);
       return true;
     }
+  }
+
+  protected String removePunct(String t) {
+    return t.replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
   }
 
   /**
