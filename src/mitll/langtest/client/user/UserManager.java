@@ -5,10 +5,8 @@
 package mitll.langtest.client.user;
 
 import com.google.gwt.storage.client.Storage;
-import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.KeyStorage;
@@ -38,11 +36,8 @@ public class UserManager {
 
   private static final int DAY_HOURS = 24;
   private static final long WEEK_HOURS = DAY_HOURS * 7;
-  //private static final int ONE_YEAR = 24 * 365;
 
   private static final long EXPIRATION_HOURS = 52 * WEEK_HOURS * HOUR_IN_MILLIS;
-  // private static final int SHORT_EXPIRATION_HOURS = DAY_HOURS;
-//  private static final int FOREVER_HOURS = ONE_YEAR;
 
   private static final int NO_USER_SET = -1;
   private static final String NO_USER_SET_STRING = "" + NO_USER_SET;
@@ -53,7 +48,7 @@ public class UserManager {
 
   private final LangTestDatabaseAsync service;
   private final UserNotification userNotification;
-  private final static boolean USE_COOKIE = false;
+ // private final static boolean USE_COOKIE = false;
   private long userID = NO_USER_SET;
   private String userChosenID = "";
 
@@ -94,6 +89,7 @@ public class UserManager {
   }
 
   /**
+   * TODO : if we have a user id from any site, try to use it to log in to this site.
    * @see #checkLogin()
    */
   private void login() {
@@ -135,7 +131,6 @@ public class UserManager {
   private void getPermissionsAndSetUser(final int user) {
     //console("getPermissionsAndSetUser : " + user);
     // logger.info("UserManager.getPermissionsAndSetUser " + user + " asking server for info...");
-
     service.getUserBy(user, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -149,7 +144,6 @@ public class UserManager {
 //          addAnonymousUser();
 //        } else
 //
-
         if (result == null || //loginType != PropertyHandler.LOGIN_TYPE.ANONYMOUS &&
             result.getUserKind() == User.Kind.ANONYMOUS) {
           clearUser();
@@ -243,7 +237,7 @@ public class UserManager {
    * For display purposes
    *
    * @return
-   * @see mitll.langtest.client.LangTest#getGreeting()
+   * @see mitll.langtest.client.InitialUI#getGreeting
    */
   public String getUserID() {
     if (Storage.isLocalStorageSupported()) {
@@ -270,13 +264,14 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#getUser
    */
   public int getUser() {
-    if (USE_COOKIE) {  // TODO : remove!
+/*    if (USE_COOKIE) {  // TODO : remove!
       String sid = Cookies.getCookie("sid");
       if (sid == null || sid.equals("" + NO_USER_SET)) {
         return NO_USER_SET;
       }
       return Integer.parseInt(sid);
-    } else if (Storage.isLocalStorageSupported()) {
+    } else*/
+    if (Storage.isLocalStorageSupported()) {
       String sid = getUserFromStorage();
       return (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
     } else {
@@ -375,7 +370,7 @@ public class UserManager {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#resetState()
+   * @see mitll.langtest.client.InitialUI#resetState()
    */
   public void clearUser() {
     clearCookieState();
@@ -383,9 +378,12 @@ public class UserManager {
 
   private void clearCookieState() {
     userNotification.rememberAudioType(Result.AUDIO_TYPE_UNSET);
+/*
     if (USE_COOKIE) {
       Cookies.setCookie("sid", "" + NO_USER_SET);
-    } else if (Storage.isLocalStorageSupported()) {
+    } else
+*/
+    if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
       localStorageIfSupported.removeItem(getUserIDCookie());
@@ -450,8 +448,8 @@ public class UserManager {
     return getUserSessionEnd(getUserSessionDuration());
   }
 
-  private long getUserSessionEnd(long DURATION) {
-    return System.currentTimeMillis() + DURATION;
+  private long getUserSessionEnd(long offset) {
+    return System.currentTimeMillis() + offset;
   }
 
   /**
