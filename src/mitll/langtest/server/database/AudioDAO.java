@@ -97,7 +97,8 @@ public class AudioDAO extends DAO {
   @Override
   protected void addBoolean(Connection connection, String table, String col) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
-        table + " ADD " + col + " BOOLEAN DEFAULT FALSE ");
+        table +
+        " ADD " + col + " BOOLEAN DEFAULT FALSE");
     statement.execute();
     statement.close();
   }
@@ -135,11 +136,13 @@ public class AudioDAO extends DAO {
     }
     long now = System.currentTimeMillis();
     logger.info("getExToAudio took " + (now - then) + " millis to get  " + audioAttributes1.size() + " audio entries");
-
 //    logger.debug("map size is " + exToAudio.size());
     return exToAudio;
   }
 
+  /**
+   * @see DatabaseImpl#makeDAO(String, String, String)
+   */
   public void markTranscripts() {
     List<AudioAttribute> toUpdate = new ArrayList<>();
 
@@ -148,8 +151,7 @@ public class AudioDAO extends DAO {
       if (audio.getTranscript() == null || audio.getTranscript().isEmpty()) {
         CommonShell exercise = exerciseDAO.getExercise(audio.getExid());
         if (exercise != null) {
-          String fl = exercise.getForeignLanguage();
-          audio.setTranscript(fl);
+          audio.setTranscript(exercise.getForeignLanguage());
           toUpdate.add(audio);
         }
       }
@@ -160,8 +162,8 @@ public class AudioDAO extends DAO {
   private int updateTranscript(List<AudioAttribute> audio) {
     int c = 0;
 
+    long then = System.currentTimeMillis();
     try {
-
       logger.debug("updateTranscript ");
       Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + AUDIO + " " +
@@ -180,14 +182,15 @@ public class AudioDAO extends DAO {
       }
 
       finish(connection, statement);
-
-      //return i > 0;
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
 
-    logger.info("did " + c + "/"+audio.size());
+    long now = System.currentTimeMillis();
 
+    if (c > 0) {
+      logger.info("updateTranscript did " + c + "/" + audio.size() + " in " + (now - then) + " millis");
+    }
     return c;
   }
 
