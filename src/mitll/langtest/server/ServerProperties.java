@@ -194,14 +194,6 @@ public class ServerProperties {
     return props.getProperty(LESSON_PLAN_FILE, props.getProperty(LANGUAGE) + ".json");
   }
 
-/*  public boolean doRecoTest() {
-    return getDefaultFalse(RECO_TEST);
-  }
-
-  public boolean doRecoTest2() {
-    return getDefaultFalse(RECO_TEST2);
-  }*/
-
   public boolean useScoreCache() {
     return getDefaultTrue(USE_SCORE_CACHE);
   }
