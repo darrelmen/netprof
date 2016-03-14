@@ -226,20 +226,25 @@ public class AudioDAO extends DAO {
   public int attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir) {
     Collection<AudioAttribute> audioAttributes = getAudioAttributes(firstExercise.getID());
 
-//    logger.debug("\tattachAudio : found " + audioAttributes.size() + " for " + firstExercise.getID());
-/*    for (AudioAttribute attribute : audioAttributes) {
-      logger.debug("\t\tattachAudio : exid " + firstExercise.getID() + " audio " + attribute);
-    }*/
+/*    if (DEBUG) {
+      logger.debug("\attachAudio : found " + audioAttributes.size() + " for " + firstExercise.getID());
+      for (AudioAttribute attribute : audioAttributes) {
+        logger.debug("\t\attachAudio : exid " + firstExercise.getID() + " audio " + attribute);
+      }
 
-//    for (AudioAttribute attribute : firstExercise.getAudioAttributes()) {
-//      logger.debug("\t\tbefore attachAudio on ex : exid " + firstExercise.getID() + " audio " + attribute);
-//    }
+      for (AudioAttribute attribute : firstExercise.getAudioAttributes()) {
+        logger.debug("\t\tbefore attachAudio on ex : exid " + firstExercise.getID() + " audio " + attribute);
+      }
+    }*/
 
     attachAudio(firstExercise, installPath, relativeConfigDir, audioAttributes);
 
-//    for (AudioAttribute attribute : firstExercise.getAudioAttributes()) {
-//      logger.debug("\t\tafter attachAudio : after on ex exid " + firstExercise.getID() + " audio " + attribute);
-//    }
+/*    if (DEBUG) {
+      for (AudioAttribute attribute : firstExercise.getAudioAttributes()) {
+        logger.debug("\t\tafter attachAudio : after on ex exid " + firstExercise.getID() + " audio " + attribute);
+      }
+    }*/
+
     return audioAttributes.size();
   }
 
@@ -255,7 +260,7 @@ public class AudioDAO extends DAO {
    * @param installPath
    * @param relativeConfigDir
    * @param audioAttributes
-   * @see mitll.langtest.server.database.AudioExport#writeFolderContents(java.util.zip.ZipOutputStream, java.util.List, AudioDAO, String, String, String, boolean)
+   * @see mitll.langtest.server.database.AudioExport#writeFolderContents
    * @see #attachAudio
    * @see mitll.langtest.server.json.JsonExport#getJsonArray
    * @see
@@ -283,7 +288,7 @@ public class AudioDAO extends DAO {
         defaultAudio.add(attr);
       } else {
         audioPaths.add(attr.getAudioRef());
-        attachAudio(firstExercise, installPath, relativeConfigDir, audioConversion, attr);
+        attachAudioAndFixPath(firstExercise, installPath, relativeConfigDir, audioConversion, attr);
         // logger.debug("\tadding path '" + attr.getAudioRef() + "' " + attr + " to " + firstExercise.getID());
       }
       //}
@@ -291,7 +296,7 @@ public class AudioDAO extends DAO {
 
     for (AudioAttribute attr : defaultAudio) {
       if (!audioPaths.contains(attr.getAudioRef())) {
-        attachAudio(firstExercise, installPath, relativeConfigDir, audioConversion, attr);
+        attachAudioAndFixPath(firstExercise, installPath, relativeConfigDir, audioConversion, attr);
       }
     }
 
@@ -316,22 +321,26 @@ public class AudioDAO extends DAO {
     }
   }
 
-  private void attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir,
-                           AudioConversion audioConversion, AudioAttribute attr) {
-    MutableAudioExercise mutable = firstExercise.getMutableAudio();
-    mutable.addAudio(attr);
-    //   logger.debug("\trelativeConfigDir '" + relativeConfigDir + "'");
+  private void attachAudioAndFixPath(CommonExercise firstExercise,
+                                     String installPath,
+                                     String relativeConfigDir,
+                                     AudioConversion audioConversion, AudioAttribute attr) {
+    if (attr.hasMatchingTranscript(firstExercise.getForeignLanguage())) {
+      firstExercise.getMutableAudio().addAudio(attr);
 
-    if (attr.getAudioRef() == null)
-      logger.error("attachAudio huh? no audio ref for " + attr + " under " + firstExercise);
-    else if (!audioConversion.exists(attr.getAudioRef(), installPath)) {
-      if (audioConversion.exists(attr.getAudioRef(), relativeConfigDir)) {
-        logger.debug("\tattachAudio was '" + attr.getAudioRef() + "'");
-        attr.setAudioRef(relativeConfigDir + File.separator + attr.getAudioRef());
-        logger.debug("\tattachAudio now '" + attr.getAudioRef() + "'");
-      } else {
-        // logger.debug("\tattachAudio couldn't find audio file at '" + attr.getAudioRef() + "'");
+      if (attr.getAudioRef() == null)
+        logger.error("attachAudioAndFixPath huh? no audio ref for " + attr + " under " + firstExercise);
+      else if (!audioConversion.exists(attr.getAudioRef(), installPath)) {
+        if (audioConversion.exists(attr.getAudioRef(), relativeConfigDir)) {
+          logger.debug("\tattachAudioAndFixPath was '" + attr.getAudioRef() + "'");
+          attr.setAudioRef(relativeConfigDir + File.separator + attr.getAudioRef());
+          logger.debug("\tattachAudioAndFixPath now '" + attr.getAudioRef() + "'");
+        } else {
+          // logger.debug("\tattachAudio couldn't find audio file at '" + attr.getAudioRef() + "'");
+        }
       }
+    } else {
+//      logger.info("not attaching audio " + attr.getUniqueID() + " to " + firstExercise.getID() + " since transcript has changed.");
     }
   }
 
@@ -846,7 +855,7 @@ public class AudioDAO extends DAO {
    * @param durationInMillis
    * @param transcript
    * @return AudioAttribute that represents the audio that has been added to the exercise
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.exercise.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
    * @see #addOrUpdateUser(int, AudioAttribute)
    */
   private void addOrUpdateUser(int userid, String audioRef, String exerciseID, long timestamp, String audioType,
@@ -906,7 +915,7 @@ public class AudioDAO extends DAO {
    * @param durationInMillis
    * @param transcript
    * @return AudioAttribute that represents the audio that has been added to the exercise
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.exercise.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
    */
   public AudioAttribute addOrUpdate(int userid, String exerciseID, String audioType, String audioRef, long timestamp,
                                     long durationInMillis, String transcript) {
