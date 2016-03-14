@@ -24,7 +24,7 @@ import java.util.Collection;
 /**
  * Does fancy font sizing depending on available width...
  */
-public class Flashcard implements RequiresResize {
+public class Banner implements RequiresResize {
   private static final double MAX_FONT_EM = 1.7d;
   private static final int SLOP = 55;
   private static final String NEW_PRO_F1_PNG = "NewProF1.png";
@@ -52,7 +52,7 @@ public class Flashcard implements RequiresResize {
   /**
    * @see mitll.langtest.client.InitialUI#makeHeaderRow
    */
-  public Flashcard(PropertyHandler props) {
+  public Banner(PropertyHandler props) {
     this.props = props;
     this.nameForAnswer = props.getNameForAnswer() + "s";
     isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
@@ -87,7 +87,7 @@ public class Flashcard implements RequiresResize {
    * @param monitoring
    * @param events
    * @return
-   * @see mitll.langtest.client.LangTest#makeHeaderRow
+   * @see #makeNPFHeaderRow
    */
   private Panel getHeaderRow(String splashText,
                              boolean isBeta, String userName,
@@ -117,7 +117,7 @@ public class Flashcard implements RequiresResize {
     flashcard.add(appName);
     flashcard.add(getSubtitle(splashText));
 
-    flashcardImage = new Image(LangTest.LANGTEST_IMAGES + Flashcard.NEW_PRO_F1_PNG);
+    flashcardImage = new Image(LangTest.LANGTEST_IMAGES + Banner.NEW_PRO_F1_PNG);
     flashcardImage.addStyleName("floatLeft");
     flashcardImage.addStyleName("rightFiveMargin");
     iconLeftHeader.add(flashcardImage);
@@ -166,11 +166,22 @@ public class Flashcard implements RequiresResize {
     return headerRow;
   }
 
+  /**
+   * @see #getHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
+   * @param splashText
+   * @return
+   */
   private Paragraph getSubtitle(String splashText) {
     subtitle = new Paragraph(splashText);
     subtitle.addStyleName("subtitleForeground");
     subtitle.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
     return subtitle;
+  }
+
+  public void setSubtitle() {
+    this.subtitle.setText(RECORDING_DISABLED);
+    subtitle.removeStyleName("subtitleForeground");
+    subtitle.addStyleName("subtitleNoRecordingForeground");
   }
 
   /**
@@ -304,12 +315,7 @@ public class Flashcard implements RequiresResize {
     this.userNameWidget.setText(name);
   }
 
-  public void setSplash() {
-    this.subtitle.setText(RECORDING_DISABLED);
 
-    subtitle.removeStyleName("subtitleForeground");
-    subtitle.addStyleName("subtitleNoRecordingForeground");
-  }
 
   @Override
   public void onResize() {
