@@ -18,6 +18,7 @@ import java.util.logging.Logger;
  */
 public class PropertyHandler {
   public static final String RTL = "rtl";
+  public static final String IS_AMAS = "isAMAS";
   private final Logger logger = Logger.getLogger("PropertyHandler");
 
   // property file property names
@@ -49,7 +50,7 @@ public class PropertyHandler {
   private static final String TURK_PARAM = "turk";
   private static final String NUM_GRADES_TO_COLLECT_PARAM = NUM_GRADES_TO_COLLECT;
 
-  private static final String DLI_LANGUAGE_TESTING = "NetProF";
+//  private static final String DLI_LANGUAGE_TESTING = "NetProF";
   private static final int DEFAULT_TIMEOUT = 45000;
   private static final String DEFAULT_EXERCISE = null;
   private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
@@ -80,12 +81,11 @@ public class PropertyHandler {
   private boolean usePhoneToDisplay;
 
   private final String AMAS_WELCOME = "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)";
-  private static final String PRONUNCIATION_FEEDBACK = "NetProF – Network Pronunciation Feedback";//"Classroom";//NetProF";//"PRONUNCIATION FEEDBACK";
+//  private static final String PRONUNCIATION_FEEDBACK = "NetProF – Network Pronunciation Feedback";//"Classroom";//NetProF";//"PRONUNCIATION FEEDBACK";
   private static final String AMAS_PRONUNCIATION_FEEDBACK = "AMAS — Automatic Multi-Skilled Assessment System";
 
   private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
   private static final String AMAS_INITIAL_PROMPT = "Test your Listening and Reading Skills.";//"Learn how to pronounce words and practice vocabulary.";
-
 
   private static final List<String> SITE_LIST = Arrays.asList(
       "Dari",
@@ -108,7 +108,7 @@ public class PropertyHandler {
       "Urdu");
 
   private static final List<String> AMAS_SITES = Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
-
+  private boolean beta;
 
   /**
    * @return
@@ -142,6 +142,10 @@ public class PropertyHandler {
     return isAMAS;
   }
 
+  public boolean isBeta() {
+    return false;
+  }
+
   public enum LOGIN_TYPE {ANONYMOUS, STUDENT}
 
   private boolean spectrogram = false;
@@ -157,7 +161,6 @@ public class PropertyHandler {
   private boolean grading = false;
   private boolean bkgColorForRef = false;
   private String exercise_title;
-  private String appTitle = null;
   private boolean demoMode;
 
   private boolean showWelcome = true;// default value
@@ -175,6 +178,8 @@ public class PropertyHandler {
   private int recordTimeout = DEFAULT_TIMEOUT;
 
   private String splashTitle = null;
+  private String appTitle = null;
+
   private boolean rightAlignContent;
   private LOGIN_TYPE loginType = LOGIN_TYPE.STUDENT;
 
@@ -229,7 +234,8 @@ public class PropertyHandler {
       else if (key.equals(QUIET_AUDIO_OK)) quietAudioOK = getBoolean(value);
       else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
       else if (key.equals(ENABLE_ALL_USERS)) enableAllUsers = getBoolean(value);
-      else if (key.equals("isAMAS")) isAMAS = getBoolean(value);
+      else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
+      //else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
       else if (key.equals(USE_PHONE_TO_DISPLAY)) {
         // logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
         usePhoneToDisplay = getBoolean(value);
@@ -252,16 +258,18 @@ public class PropertyHandler {
       appTitle = getAppTitleSuffix();
     }
     if (splashTitle == null) {
-      splashTitle = language + getSpashTitleSuffix();
+      splashTitle = "";//language + getSpashTitleSuffix();
     }
   }
 
+/*
   private String getSpashTitleSuffix() {
-    return isAMAS() ? "" : " feedback and practice BETA";
+    return isAMAS() ? "" : " feedback and practice";
   }
+*/
 
   private String getAppTitleSuffix() {
-    return isAMAS() ? AMAS_PRONUNCIATION_FEEDBACK : " Pronunciation Feedback BETA";
+    return isAMAS() ? AMAS_PRONUNCIATION_FEEDBACK : " Pronunciation Feedback";
   }
 
   public String getInitialPrompt() {
