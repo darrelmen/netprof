@@ -272,6 +272,26 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     this.exid = exid;
   }
 
+  /**
+   * Check to see if the audio transcript matches the vocabulary item.
+   * Don't worry about punctuation or case.
+   *
+   * @param foreignLanguage
+   * @return
+   */
+  public boolean hasMatchingTranscript(String foreignLanguage) {
+    try {
+      return transcript == null || foreignLanguage.isEmpty() || transcript.isEmpty() ||
+          removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  private String removePunct(String t) {
+    return t.replaceAll("\\p{P}", "").replaceAll("\\s++", "");
+  }
+
   @Override
   public String toString() {
     return "Audio id " + uniqueID + " : " + audioRef + " attrs " + attributes + " by " + userid + "/" + user +
