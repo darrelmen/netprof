@@ -759,25 +759,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @return
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#getTypeOrder(com.github.gwtbootstrap.client.ui.FluidContainer)
-   */
-/*  private Collection<String> getTypeOrder() {
-    SectionHelper sectionHelper = db.getSectionHelper();
-    if (sectionHelper == null) logger.warn("no section helper for " + db);
-    List<String> objects = Collections.emptyList();
-    return (sectionHelper == null) ? objects : sectionHelper.getTypeOrder();
-  }*/
-
-  /**
-   * @return
-   * @see #getStartupInfo()
-   */
-/*  private Collection<SectionNode> getSectionNodes() {
-    return db.getSectionHelper().getSectionNodes();
-  }*/
-
-  /**
    * @param ids
    * @return
    * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores(List)
