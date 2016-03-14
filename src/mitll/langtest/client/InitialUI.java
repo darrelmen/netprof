@@ -18,7 +18,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.amas.AutoCRTChapterNPFHelper;
 import mitll.langtest.client.custom.Navigation;
-import mitll.langtest.client.flashcard.Flashcard;
+import mitll.langtest.client.flashcard.Banner;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.instrumentation.EventTable;
 import mitll.langtest.client.monitoring.MonitoringManager;
@@ -59,7 +59,7 @@ public class InitialUI {
 
   protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
 
-  private final Flashcard flashcard;
+  private final Banner banner;
 
   protected Panel headerRow;
   protected Panel firstRow;
@@ -70,7 +70,7 @@ public class InitialUI {
     this.langTest = langTest;
     this.props = langTest.getProps();
     this.userManager = userManager;
-    flashcard = new Flashcard(props);
+    banner = new Banner(props);
   }
 
   private Container verticalContainer;
@@ -113,7 +113,7 @@ public class InitialUI {
    * @see #populateRootPanel()
    */
   private Panel makeHeaderRow() {
-    Widget title = flashcard.makeNPFHeaderRow(props.getSplash(), true, getGreeting(),
+    Widget title = banner.makeNPFHeaderRow(props.getSplash(), props.isBeta(), getGreeting(),
         getReleaseStatus(),
         new LogoutClickHandler(),
         new UsersClickHandler(),
@@ -333,8 +333,8 @@ public class InitialUI {
    */
   protected void onResize() {
     if (navigation != null) navigation.onResize();
-    if (flashcard != null) {
-      flashcard.onResize();
+    if (banner != null) {
+      banner.onResize();
     }
   }
 
@@ -372,12 +372,12 @@ public class InitialUI {
       firstRow.add(new UserPassLogin(service, props, userManager, eventRegistration).getContent());
       clearPadding(verticalContainer);
       RootPanel.get().add(verticalContainer);
-      flashcard.setCogVisible(false);
+      banner.setCogVisible(false);
       return true;
     }
     //   logger.info("user is valid...");
 
-    flashcard.setCogVisible(true);
+    banner.setCogVisible(true);
     return false;
   }
 
@@ -403,7 +403,7 @@ public class InitialUI {
     });
 
     RootPanel.get().add(verticalContainer);
-    flashcard.setCogVisible(false);
+    banner.setCogVisible(false);
   }
 
   /**
@@ -439,7 +439,7 @@ public class InitialUI {
     });
 
     RootPanel.get().add(verticalContainer);
-    flashcard.setCogVisible(false);
+    banner.setCogVisible(false);
   }
 
   private void trimURLAndReload() {
@@ -487,7 +487,7 @@ public class InitialUI {
 
     // logger.info("gotUser : userID " + userID);
 
-    flashcard.setUserName(getGreeting());
+    banner.setUserName(getGreeting());
     if (userID != lastUser) {
       configureUIGivenUser(userID);
       langTest.logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
@@ -496,8 +496,8 @@ public class InitialUI {
       if (navigation != null) navigation.showPreviouslySelectedTab();
     }
     if (userID > -1) {
-      flashcard.setCogVisible(true);
-      flashcard.setVisibleAdmin(user.isAdmin() || props.isAdminView() || user.isTeacher() || user.isCD());
+      banner.setCogVisible(true);
+      banner.setVisibleAdmin(user.isAdmin() || props.isAdminView() || user.isTeacher() || user.isCD());
     }
   }
 
@@ -537,11 +537,11 @@ public class InitialUI {
 
   protected void showUserPermissions(long userID) {
     lastUser = userID;
-    flashcard.setBrowserInfo(langTest.getInfoLine());
-    flashcard.reflectPermissions(langTest.getPermissions());
+    banner.setBrowserInfo(langTest.getInfoLine());
+    banner.reflectPermissions(langTest.getPermissions());
   }
 
   public void setSplash() {
-    flashcard.setSplash();
+    banner.setSubtitle();
   }
 }
