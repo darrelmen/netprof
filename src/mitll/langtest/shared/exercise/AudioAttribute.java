@@ -15,9 +15,9 @@ import java.util.Set;
 
 /**
  * What the client wants to know about a reference audio cut.
- * <p/>
+ * <p>
  * Includes info about who recorded it and when, for which exercise, and the path to the audio on the server.
- * <p/>
+ * <p>
  * Also indicates any attributes REGULAR or SLOW and whether it's been played by a reviewer.
  * User: GO22670
  * Date: 12/6/13
@@ -50,11 +50,10 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   private Map<String, String> attributes = new HashMap<String, String>();
   private boolean hasBeenPlayed;
 
-  public AudioAttribute() {}
+  public AudioAttribute() {
+  }
 
   /**
-   * @see mitll.langtest.server.database.AudioDAO#getAudioAttribute
-   * @see mitll.langtest.server.database.AudioDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
    * @param uniqueID
    * @param userid
    * @param exid
@@ -63,7 +62,9 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    * @param durationInMillis
    * @param type
    * @param user
-   * @param transcript what the speaker read at the time of recording
+   * @param transcript       what the speaker read at the time of recording
+   * @see mitll.langtest.server.database.AudioDAO#getAudioAttribute
+   * @see mitll.langtest.server.database.AudioDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
    */
   public AudioAttribute(int uniqueID, long userid,
                         String exid,
@@ -82,16 +83,15 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     else if (type.equals(Result.AUDIO_TYPE_SLOW)) markSlow();
     else if (type.equals(Result.AUDIO_TYPE_FAST_AND_SLOW)) {
       addAttribute(SPEED, REGULAR_AND_SLOW);
-    }
-    else if (type.contains("=")) { // e.g. context=regular or context=slow - or any key-value pair
+    } else if (type.contains("=")) { // e.g. context=regular or context=slow - or any key-value pair
       String[] split = type.split("=");
       addAttribute(split[0], split[1]);
     }
   }
 
   /**
-   * @see mitll.langtest.shared.exercise.AudioExercise#setRefAudio(String)
    * @param audioRef
+   * @see mitll.langtest.shared.exercise.AudioExercise#setRefAudio(String)
    */
   protected AudioAttribute(String audioRef) {
     this.audioRef = audioRef;
@@ -130,18 +130,21 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public boolean isSlow() {
     return matches(SPEED, SLOW);
   }
+
   public String getAudioType() {
     String speed = getSpeed();
     if (speed == null && !attributes.isEmpty()) {
       String s = attributes.toString();
-      return s.substring(1,s.length()-1);
-    }
-    else {
+      return s.substring(1, s.length() - 1);
+    } else {
       return speed;
     }
   }
 
-  public boolean isMale() { return user != null && user.isMale();  }
+  public boolean isMale() {
+    return user != null && user.isMale();
+  }
+
   public boolean isFemale() {
     return !isMale();
   }
@@ -151,7 +154,9 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return speed != null && speed.equalsIgnoreCase(REGULAR);
   }
 
-  public String getSpeed() { return getAttributes().get(SPEED); }
+  public String getSpeed() {
+    return getAttributes().get(SPEED);
+  }
 
   public boolean hasOnlySpeed() {
     return attributes.size() == 1 && attributes.containsKey(SPEED);
@@ -161,12 +166,17 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return attributes.containsKey(name) && attributes.get(name).equals(value);
   }
 
-  public boolean isContextAudio() { return getAudioType().startsWith(CONTEXT); }
+  public boolean isContextAudio() {
+    return getAudioType().startsWith(CONTEXT);
+  }
+
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded
    */
-  public boolean isExampleSentence() { return attributes.containsKey(CONTEXT);  }
+  public boolean isExampleSentence() {
+    return attributes.containsKey(CONTEXT);
+  }
 
   public void addAttribute(String name, String value) {
     if (attributes.containsKey(name)) {
@@ -176,15 +186,21 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     attributes.put(name, value);
   }
 
-  public String getAudioRef() { return audioRef;  }
+  public String getAudioRef() {
+    return audioRef;
+  }
 
   public Map<String, String> getAttributes() {
     return attributes;
   }
 
-  public Set<String> getAttributeKeys() { return attributes.keySet(); }
+  public Set<String> getAttributeKeys() {
+    return attributes.keySet();
+  }
 
-  public String getKey() { return "user="+userid+", "+getAttributes().toString(); }
+  public String getKey() {
+    return "user=" + userid + ", " + getAttributes().toString();
+  }
 
   public String getDisplay() {
     if (hasOnlySpeed()) {
@@ -207,50 +223,64 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     }
   }
 
-  public MiniUser getUser() { return user; }
+  public MiniUser getUser() {
+    return user;
+  }
 
   /**
-   * @see mitll.langtest.client.qc.QCNPFExercise#getGenderGroup(mitll.langtest.client.custom.tabs.RememberTabAndContent, AudioAttribute, com.github.gwtbootstrap.client.ui.Button, java.util.List)
    * @param user
+   * @see mitll.langtest.client.qc.QCNPFExercise#getGenderGroup(mitll.langtest.client.custom.tabs.RememberTabAndContent, AudioAttribute, com.github.gwtbootstrap.client.ui.Button, java.util.List)
    */
-  public void setUser(MiniUser user) { this.user = user;  }
+  public void setUser(MiniUser user) {
+    this.user = user;
+  }
 
-  public long getUserid() { return userid; }
+  public long getUserid() {
+    return userid;
+  }
 
   /**
+   * @return
    * @see mitll.langtest.client.qc.QCNPFExercise#addTabsForUsers
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#addTabsForUsers
-   * @return
    */
   public boolean isHasBeenPlayed() {
     return hasBeenPlayed;
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addPlayedMarkings(long, CommonExercise)
    * @param hasBeenPlayed
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addPlayedMarkings(long, CommonExercise)
    */
   public void setHasBeenPlayed(boolean hasBeenPlayed) {
     this.hasBeenPlayed = hasBeenPlayed;
   }
+
   public long getTimestamp() {
     return timestamp;
   }
+
   public long getDurationInMillis() {
     return durationInMillis;
   }
-  public int getUniqueID() { return uniqueID;  }
-  public void setExid(String exid) {  this.exid = exid;  }
+
+  public int getUniqueID() {
+    return uniqueID;
+  }
+
+  public void setExid(String exid) {
+    this.exid = exid;
+  }
 
   @Override
   public String toString() {
-    return "Audio id " +uniqueID + " : " + audioRef + " attrs " + attributes + " by " + userid +"/"+user +
-        " transcript '" +transcript+
+    return "Audio id " + uniqueID + " : " + audioRef + " attrs " + attributes + " by " + userid + "/" + user +
+        " transcript '" + transcript +
         "' ";
   }
 
   public String getTranscript() {
-    return transcript;
+    return transcript == null ? "" : transcript;
   }
 
   public void setTranscript(String transcript) {
