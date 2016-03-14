@@ -27,6 +27,8 @@ import java.util.*;
  */
 public class UserManagement {
   private static final Logger logger = Logger.getLogger(UserManagement.class);
+  public static final String NPF_CLASSROOM_PREFIX = "https://np.ll.mit.edu/npfClassroom";
+  public static final String NO_USER = "-1";
 
   private final int numExercises;
   private final UserDAO userDAO;
@@ -60,7 +62,7 @@ public class UserManagement {
       logger.debug("userExists : checking '" + login + "'");
 
       for (String site : props.getSites()) {
-        String url = "https://np.ll.mit.edu/npfClassroom" + site.replaceAll("Mandarin", "CM") + "/scoreServlet";
+        String url = NPF_CLASSROOM_PREFIX + site.replaceAll("Mandarin", "CM") + "/scoreServlet";
         String json = new HTTPClient().readFromGET(url + "?hasUser=" + login + "&passwordH=" + passwordH);
 
         if (!json.isEmpty()) {
@@ -69,7 +71,7 @@ public class UserManagement {
             Object userid = jsonObject.get(RestUserManagement.USERID);
             Object pc = jsonObject.get(RestUserManagement.PASSWORD_CORRECT);
 
-            if (!userid.toString().equals("-1")) {
+            if (!userid.toString().equals(NO_USER)) {
               logger.info(site + " : found user " + userid);
 
               if (pc.toString().equals("true")) {
