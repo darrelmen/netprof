@@ -4,10 +4,7 @@
 
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.LangTestDatabaseImpl;
-import mitll.langtest.server.LogAndNotify;
-import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.*;
 import mitll.langtest.server.amas.FileExerciseDAO;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.DecodeAlignOutput;
@@ -68,7 +65,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private static final int LOG_THRESHOLD = 10;
   private static final String UNKNOWN = "unknown";
   private static final String SIL = "sil";
-  public static final String TRANSLITERATION = "transliteration";
+  private static final String TRANSLITERATION = "transliteration";
 
   private String installPath;
   private ExerciseDAO<CommonExercise> exerciseDAO = null;
@@ -100,7 +97,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private UserManagement userManagement;
   private Analysis analysis;
   private final String absConfigDir;
-  SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
+  private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
 
   /**
    * @param configDir
@@ -900,24 +897,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return phoneDAO;
   }
 
-/*  public List<Result> getResultsWithGrades() {
-    List<Result> results = resultDAO.getResults();
-*//*    Map<Integer,Result> idToResult = new HashMap<Integer, Result>();
-    for (Result r : results) {
-      idToResult.put(r.getUniqueID(), r);
-      r.clearGradeInfo();
-    }
-    Collection<Grade> grades = gradeDAO.getGrades();
-    // logger.debug("found " + grades.size() + " grades");
-    for (Grade g : grades) {
-      Result result = idToResult.get(g.resultID);
-      if (result != null) {
-        result.addGrade(g);
-      }
-    }*//*
-    return results;
-  }*/
-
   /**
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultAlternatives(java.util.Map, long, String, String)
@@ -974,7 +953,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return join;
   }
 
-  public <T extends Shell & AudioAttributeExercise> void populateIDToRefAudio(Map<String, String> join, Collection<CommonExercise> all) {
+  private <T extends Shell & AudioAttributeExercise> void populateIDToRefAudio(Map<String, String> join, Collection<CommonExercise> all) {
     for (CommonExercise exercise : all) {
       String refAudio = exercise.getRefAudio();
       if (refAudio == null) {
@@ -990,12 +969,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public AnswerDAO getAnswerDAO() {
     return answerDAO;
   }
-
-/*
-  public UploadDAO getUploadDAO() {
-    return uploadDAO;
-  }
-*/
 
   /**
    * @param userID
@@ -1353,6 +1326,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return getAudioDAO().attachAudio(ex, installPath, configDir);
   }
 
+  /**
+   * @see ScoreServlet#getJSONExport
+   */
   public void attachAllAudio() {
     AudioDAO audioDAO = getAudioDAO();
 
