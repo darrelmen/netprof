@@ -531,10 +531,13 @@ public class AudioDAO extends DAO {
   private int getCountForGender(Set<Long> userIds, String audioSpeed,
                                 Set<String> uniqueIDs) {
     Set<String> idsOfRecordedExercises = new HashSet<>();
-    //  Set<String> idsOfStaleExercises = new HashSet<>();
+
+    Set<String> idsOfStaleExercises = new HashSet<>();
+
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String s = getInClause(userIds);
+     // logger.info("checking speed " + audioSpeed + " on " + userIds.size() + " users and " + uniqueIDs.size() + " ex ids");
       if (!s.isEmpty()) s = s.substring(0, s.length() - 1);
       String sql = "select " +
           "distinct " + Database.EXID +
@@ -550,12 +553,12 @@ public class AudioDAO extends DAO {
         if (uniqueIDs.contains(exid)) {
           idsOfRecordedExercises.add(exid);
         } else {
-          //      idsOfStaleExercises.add(exid);
-          //logger.debug("skipping stale exid " + exid);
+          idsOfStaleExercises.add(exid);
+  //        logger.debug("getCountForGender skipping stale exid " + exid);
         }
       }
       finish(connection, statement, rs);
- /*     logger.debug("getCountForGender : for " + audioSpeed + "\n\t" + sql + "\n\tgot " + idsOfRecordedExercises.size() +
+/*      logger.debug("getCountForGender : for " + audioSpeed + "\n\t" + sql + "\n\tgot " + idsOfRecordedExercises.size() +
           " and stale " +idsOfStaleExercises);*/
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
