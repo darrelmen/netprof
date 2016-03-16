@@ -57,11 +57,15 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 			if (exercises == null) {
 				exercises = readExercises();
 				afterReadingExercises();
-				// sectionHelper.report();
 			}
 		}
 		return exercises;
 	}
+
+	public void reload() {
+    exercises = null;
+    getRawExercises();
+  }
 
 	private void afterReadingExercises() {
 		addAlternatives(exercises);
