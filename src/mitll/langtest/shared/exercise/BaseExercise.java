@@ -23,6 +23,10 @@ public class BaseExercise implements IsSerializable, Shell  {
     return id;
   }
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserExerciseDAO#add(CommonExercise, boolean)
+   * @param id
+   */
   public void setID(String id) {
     this.id = id;
   }
