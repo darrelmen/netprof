@@ -143,9 +143,8 @@ public class ServerProperties {
   }
 
   private ServerProperties(ServletContext servletContext, String configDir, String configFile) {
-    String dateFromManifest = getDateFromManifest(servletContext);
     if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
-    readProps(configDir, configFile, dateFromManifest);
+    readProps(configDir, configFile, getDateFromManifest(servletContext));
 
     readPhonemeMap(configDir);
   }
@@ -366,6 +365,8 @@ public class ServerProperties {
       }
     }
     miraClassifierURL = props.getProperty(MIRA_CLASSIFIER_URL, MIRA_DEFAULT);
+
+    if (getLessonPlan().startsWith("http")) props.setProperty("talksToDomino", TRUE);
   }
 
   private boolean getDefaultFalse(String param) {
