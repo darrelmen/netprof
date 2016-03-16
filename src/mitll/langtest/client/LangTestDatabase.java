@@ -180,4 +180,6 @@ public interface LangTestDatabase extends RemoteService {
   String enableCDUser(String cdToken, String emailR, String url);
 
   ContextPractice getContextPractice();
+
+  void reloadExercises();
 }
