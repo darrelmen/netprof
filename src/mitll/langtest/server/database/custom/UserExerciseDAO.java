@@ -8,7 +8,6 @@ import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
-import mitll.langtest.server.scoring.CollationSort;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -36,7 +35,7 @@ public class UserExerciseDAO extends DAO {
   private static final String CONTEXT_TRANSLATION = "contextTranslation";
 
   private ExerciseDAO<CommonExercise> exerciseDAO;
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   public UserExerciseDAO(Database database) {
     super(database);
@@ -85,7 +84,7 @@ public class UserExerciseDAO extends DAO {
    * @see UserListManager#reallyCreateNewItem
    * @see #update
    */
-  public  void add(CommonExercise userExercise, boolean isOverride) {
+  public void add(CommonExercise userExercise, boolean isOverride) {
     List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
 
     try {
@@ -165,12 +164,12 @@ public class UserExerciseDAO extends DAO {
         preparedStatement.close();
         userExercise.getCombinedMutableUserExercise().setID(customID);
 
-        //logger.debug("\tuserExercise= " + userExercise);
+        logger.debug("\tuserExercise= " + userExercise);
       }
 
       finish(connection, statement);
 
-      //  logger.debug("now " + getCount(USEREXERCISE) + " user exercises and user exercise is " + userExercise);
+      logger.debug("now " + getCount(USEREXERCISE) + " user exercises and user exercise is " + userExercise);
       logger.debug("new " + (predefined ? " PREDEF " : " USER ") + " user exercise is " + userExercise);
     } catch (Exception ee) {
       logException(ee);
@@ -224,7 +223,7 @@ public class UserExerciseDAO extends DAO {
     List<CommonShell> userExercises2 = new ArrayList<>();
 
     try {
-      if (DEBUG) logger.debug("\tusing for user exercise = " + sql);
+      if (DEBUG) logger.debug("\tgetOnList using for user exercise = " + sql);
 
       long then = System.currentTimeMillis();
       Collection<CommonExercise> userExercises = getUserExercises(sql);
@@ -236,6 +235,7 @@ public class UserExerciseDAO extends DAO {
       }
 
 
+      int c = 0;
       for (CommonExercise ue : userExercises) {
         // if (DEBUG) logger.debug("\ton list " + listID + " " + ue.getID() + " / " + ue.getUniqueID() + " : " + ue);
         if (ue.isPredefined()) {
@@ -244,12 +244,14 @@ public class UserExerciseDAO extends DAO {
           if (byID != null) {
             userExercises2.add(new UserExercise(byID, byID.getCreator())); // all predefined references
           } else {
-            logger.error("getOnList: huh can't find '" + ue.getID() + "'");
+            if (c++< 10)
+            logger.error("getOnList: huh can't find user exercise '" + ue.getID() + "'");
           }
         } else {
           userExercises2.add(ue);
         }
       }
+      if (c > 0) logger.warn("huh? can't find " +c+"/"+userExercises.size() + " items???");
 
       boolean isEnglish = database.getLanguage().equalsIgnoreCase("english");
       String join2 = getJoin2(listID);
@@ -341,7 +343,9 @@ public class UserExerciseDAO extends DAO {
     return commonExercises.isEmpty() ? null : commonExercises.iterator().next();
   }
 
-  public Collection<CommonExercise> getAll() {  return getCommonExercises(GET_ALL_SQL);  }
+  public Collection<CommonExercise> getAll() {
+    return getCommonExercises(GET_ALL_SQL);
+  }
 
   /**
    * @return
@@ -349,7 +353,7 @@ public class UserExerciseDAO extends DAO {
    * @see #setAudioDAO(mitll.langtest.server.database.AudioDAO)
    */
   public Collection<CommonExercise> getOverrides() {
-    return getCommonExercises("SELECT * from " + USEREXERCISE + " where " +  OVERRIDE + "=true");
+    return getCommonExercises("SELECT * from " + USEREXERCISE + " where " + OVERRIDE + "=true");
   }
 
   private Collection<CommonExercise> getCommonExercises(String sql) {
@@ -487,7 +491,7 @@ public class UserExerciseDAO extends DAO {
   }
 
   private Map<String, String> getUnitToValue(ResultSet rs, List<String> typeOrder) throws SQLException {
-    String first  = rs.getString(UNIT);
+    String first = rs.getString(UNIT);
     String second = rs.getString(LESSON);
     Map<String, String> unitToValue = new HashMap<String, String>();
 
