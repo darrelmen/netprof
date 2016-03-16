@@ -331,7 +331,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                   logger.warn("readFromSheet : found duplicate entry under " + imported.getID() + " " + imported);
                 } else {
                   knownIds.add(imported.getID());
-                  rememberExercise(exercises, imported);
+                  exercises.add(imported);
                 }
               } else {
                 if (isDelete) {
