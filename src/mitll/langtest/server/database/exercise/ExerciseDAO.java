@@ -54,4 +54,6 @@ public interface ExerciseDAO<T extends CommonShell> extends SimpleExerciseDAO<T>
    * @see DatabaseImpl#getExerciseIDToRefAudio()
    */
   void attachAudio(Collection<CommonExercise> all);
+
+  void reload();
 }
