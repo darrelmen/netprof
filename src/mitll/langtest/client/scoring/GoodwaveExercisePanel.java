@@ -61,10 +61,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   private static final String REFERENCE = "";
   private static final String RECORD_YOURSELF = "Record";
   private static final String RELEASE_TO_STOP = "Release";
-  /**
-   * @see mitll.langtest.client.exercise.WaveformExercisePanel#getUnitLessonForExercise
-   */
-  private static final int HEADING_FOR_UNIT_LESSON = 4;
   public static final String CORRECT = "correct";
   public static final String INCORRECT = "incorrect";
   public static final String DEFAULT_SPEAKER = "Default Speaker";
@@ -118,7 +114,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   }
 
   private void addContent() {
-   // logger.info("doing addContent on " + this);
     final Panel center = new VerticalPanel();
     center.getElement().setId("GoodwaveVerticalCenter");
     center.addStyleName("floatLeft");
@@ -251,8 +246,9 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     Panel vp = new VerticalPanel();
     vp.getElement().setId("getQuestionContent_verticalContainer");
     vp.addStyleName("blockStyle");
+    vp.addStyleName("topFiveMargin");
 
-    new UnitChapterItemHelper<T>(controller.getTypeOrder()).addUnitChapterItem(exercise,vp);
+    new UnitChapterItemHelper<T>(controller.getTypeOrder()).addUnitChapterItem(exercise, vp);
     vp.add(getItemContent(exercise));
     vp.add(getAudioPanel(exercise));
     return vp;
@@ -266,17 +262,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     addGroupingStyle(div);
     return div;
   }
-
-  /**
-   * @param e
-   * @return
-   * @see #getQuestionContent
-   */
-/*  private Widget getItemHeader(T e) {
-    Heading w = new Heading(HEADING_FOR_UNIT_LESSON, ITEM, e.getID());
-    w.getElement().setId("ItemHeading");
-    return w;
-  }*/
 
   protected abstract Widget getItemContent(T e);
 
@@ -384,10 +369,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   }
 
   /**
-   * @see #getContentWidget(String, String, boolean)
    * @param label
    * @param value
    * @param nameValueRow
+   * @see #getContentWidget(String, String, boolean)
    */
   private void getClickableWords(String label, String value, Panel nameValueRow) {
     String language = controller.getLanguage();
