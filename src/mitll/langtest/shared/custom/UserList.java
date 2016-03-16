@@ -10,7 +10,6 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.BaseExercise;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.Shell;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,19 +36,20 @@ public class UserList<T extends HasID> extends BaseExercise {
   private boolean isReview;
   private List<T> exercises = new ArrayList<>();
 
-  public UserList(){}
+  public UserList() {
+  }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#createUserList(long, String, String, String, boolean)
-   * @see mitll.langtest.server.database.custom.UserListDAO#getWhere(long, boolean)
    * @param uniqueID
    * @param user
    * @param name
    * @param description
    * @param classMarker
+   * @see mitll.langtest.server.database.custom.UserListManager#createUserList(long, String, String, String, boolean)
+   * @see mitll.langtest.server.database.custom.UserListDAO#getWhere(long, boolean)
    */
-  public UserList(long uniqueID, User user, String name, String description, String classMarker, boolean isPrivate){
-    super(""+uniqueID);
+  public UserList(long uniqueID, User user, String name, String description, String classMarker, boolean isPrivate) {
+    super("" + uniqueID);
     this.uniqueID = uniqueID;
     this.creator = user;
     this.name = name;
@@ -59,15 +59,15 @@ public class UserList<T extends HasID> extends BaseExercise {
   }
 
   /**
-   * @see mitll.langtest.client.custom.dialog.EditItem#makeListOfOnlyYourItems(UserList)
    * @param ul
+   * @see mitll.langtest.client.custom.dialog.EditItem#makeListOfOnlyYourItems(UserList)
    */
   public UserList(UserList<T> ul) {
     this(ul.uniqueID, ul.getCreator(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate());
   }
 
   public UserList<T> getCopy() {
-    UserList<T> copy  = new UserList<>(this);
+    UserList<T> copy = new UserList<>(this);
     for (T ue : getExercises()) {
       copy.addExercise(ue);
     }
@@ -75,20 +75,23 @@ public class UserList<T extends HasID> extends BaseExercise {
   }
 
   /**
+   * @param toAdd
    * @see mitll.langtest.client.custom.dialog.EditItem#makeExerciseList(Panel, String, UserList, UserList, boolean)
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterItemCreated(UserExercise, UserList, ListInterface, Panel)
-   * @param toAdd
    */
-  public void addExercise(T toAdd) { exercises.add(toAdd);  }
+  public void addExercise(T toAdd) {
+    exercises.add(toAdd);
+  }
+
   public void addExerciseAfter(T after, T toAdd) {
     int index = exercises.indexOf(after);
     if (index == -1) {
       exercises.add(toAdd);
-    }
-    else {
-      exercises.add(index+1,toAdd);
+    } else {
+      exercises.add(index + 1, toAdd);
     }
   }
+
   public String getName() {
     return name;
   }
@@ -105,17 +108,25 @@ public class UserList<T extends HasID> extends BaseExercise {
     return exercises;
   }
 
+  public T getLast() {
+    return exercises.get(exercises.size() - 1);
+  }
+
   /**
-   * @see mitll.langtest.server.database.custom.UserListDAO#populateList(UserList)
    * @param exercises
+   * @see mitll.langtest.server.database.custom.UserListDAO#populateList(UserList)
    */
   public void setExercises(List<T> exercises) {
     this.exercises = exercises;
   }
 
-  public boolean remove(T newUserExercise) {  return exercises.remove(newUserExercise); }
+  public boolean remove(T newUserExercise) {
+    return exercises.remove(newUserExercise);
+  }
 
-  public boolean removeAndCheck(String id) { return remove(id) != null; }
+  public boolean removeAndCheck(String id) {
+    return remove(id) != null;
+  }
 
   public T remove(String id) {
     T toRemove = null;
@@ -130,12 +141,15 @@ public class UserList<T extends HasID> extends BaseExercise {
   public User getCreator() {
     return creator;
   }
-  public long getUniqueID() { return uniqueID; }
+
+  public long getUniqueID() {
+    return uniqueID;
+  }
 
   /**
+   * @param uniqueID
    * @see mitll.langtest.server.database.custom.UserListDAO#add(UserList)
    * @see mitll.langtest.server.database.custom.UserListManager#getCommentedList(Collection)
-   * @param uniqueID
    */
   public void setUniqueID(long uniqueID) {
     this.uniqueID = uniqueID;
@@ -157,13 +171,18 @@ public class UserList<T extends HasID> extends BaseExercise {
   }
 
   /**
+   * @return
    * @see mitll.langtest.client.custom.ListManager#selectTabGivenHistory
    * @see Navigation#showInitialState()
    * @see mitll.langtest.client.custom.UserListCallback#addUserListsToDisplay(Collection, Panel, Map)
-   * @return
    */
-  public boolean isEmpty() { return getExercises().isEmpty();  }
-  public boolean isFavorite() { return getName().equals(MY_LIST);  }
+  public boolean isEmpty() {
+    return getExercises().isEmpty();
+  }
+
+  public boolean isFavorite() {
+    return getName().equals(MY_LIST);
+  }
 
   public void setReview(boolean isReview) {
     this.isReview = isReview;
@@ -171,10 +190,10 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   @Override
   public String toString() {
-    long id = creator == null ? -1 :creator.getId();
-    return "UserList #" + getUniqueID() + " '"+name + "' by " + id +
-      " : " + (isReview ? " REVIEW " : "")+
-      " :"+
-      " with " + getExercises().size() + " exercises.";
+    long id = creator == null ? -1 : creator.getId();
+    return "UserList #" + getUniqueID() + " '" + name + "' by " + id +
+        " : " + (isReview ? " REVIEW " : "") +
+        " :" +
+        " with " + getExercises().size() + " exercises.";
   }
 }
