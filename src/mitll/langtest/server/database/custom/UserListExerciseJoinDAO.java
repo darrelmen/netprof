@@ -73,12 +73,12 @@ public class UserListExerciseJoinDAO extends DAO {
    * <p>
    * Uses return generated keys to get the user id
    *
-   * @see UserListManager#addItemToList(long, mitll.langtest.shared.custom.UserExercise)
+   * @see UserListManager#addItemToList
    */
   public void add(UserList userList, String uniqueID) {
     try {
       // there are much better ways of doing this...
-      logger.info("UserListExerciseJoinDAO.add :userList " + userList.getUniqueID() + " exercise " + uniqueID);
+      logger.info("UserListExerciseJoinDAO.add :userList #" + userList.getUniqueID() + " exercise id '" + uniqueID +"'");
 
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
