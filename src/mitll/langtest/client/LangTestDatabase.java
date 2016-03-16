@@ -58,12 +58,6 @@ public interface LangTestDatabase extends RemoteService {
 
   // answer DAO
   AudioAnswer writeAudioFile(String base64EncodedString,
-//                             int reqid, int user, String exercise, int question,
-//                             String audioType,
-
-                             //                      int reqid, int user, String exercise, int question,
-//                      String audioType,
-
                              AudioContext audioContext,
                              boolean recordedWithFlash, String deviceType, String device,
                              boolean doFlashcard, boolean recordInResults,
@@ -144,7 +138,6 @@ public interface LangTestDatabase extends RemoteService {
 
   void logMessage(String message);
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device);
-  //void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID);
 
   AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
                                        Map<String, Collection<String>> typeToSection, long userListID);
@@ -165,6 +158,7 @@ public interface LangTestDatabase extends RemoteService {
   boolean isValidForeignPhrase(String foreign);
 
   CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise);
+  Collection<CommonExercise> reallyCreateNewItems(long creator,long userListID, String userExerciseText);
 
   CommonExercise duplicateExercise(CommonExercise id);
 
