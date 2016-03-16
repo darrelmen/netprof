@@ -148,9 +148,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
       public void onSuccess(StartupInfo startupInfo2) {
         long now = System.currentTimeMillis();
-
         startupInfo = startupInfo2;
-        logger.info("Got startup info " + startupInfo2);
+        //   logger.info("Got startup info " + startupInfo2);
         props = new PropertyHandler(startupInfo2.getProperties());
         if (isLogClientMessages()) {
           String message = "onModuleLoad.getProperties : (success) took " + (now - then) + " millis";
@@ -476,7 +475,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return startupInfo;
   }
 
-  public Collection<String> getTypeOrder() { return startupInfo.getTypeOrder(); }
+  public Collection<String> getTypeOrder() {
+    return startupInfo.getTypeOrder();
+  }
 
   /**
    * Init Flash recorder once we login.
@@ -679,9 +680,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    */
   public void stopRecording(WavCallback wavCallback) {
-//    long now = System.currentTimeMillis();
-    // logger.info("stopRecording : time recording in UI " + (now - then) + " millis");
-
+    // logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
     flashRecordPanel.stopRecording(wavCallback);
   }
 
