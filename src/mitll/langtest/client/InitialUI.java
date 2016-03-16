@@ -113,13 +113,32 @@ public class InitialUI {
    * @see #populateRootPanel()
    */
   private Panel makeHeaderRow() {
+    ClickHandler reload = new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        service.reloadExercises(new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+
+          }
+
+          @Override
+          public void onSuccess(Void result) {
+            Window.Location.reload();
+          }
+        });
+      }
+    };
+    logger.info("talks to domino " + props.talksToDomino());
+    reload = (props.talksToDomino()) ?reload:null;
     Widget title = banner.makeNPFHeaderRow(props.getSplash(), props.isBeta(), getGreeting(),
         getReleaseStatus(),
         new LogoutClickHandler(),
         new UsersClickHandler(),
         new ResultsClickHandler(),
         new MonitoringClickHandler(),
-        new EventsClickHandler()
+        new EventsClickHandler(),
+        reload
     );
 
     headerRow = new FluidRow();
