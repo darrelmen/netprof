@@ -28,11 +28,12 @@ import java.util.Map;
  */
 public interface LangTestDatabaseAsync {
   <T extends CommonShell> void getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID,
-                      int userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples,
-                      boolean incorrectFirstOrder, boolean onlyWithAudioAnno,
-                      AsyncCallback<ExerciseListWrapper<T>> async);
+                                              int userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples,
+                                              boolean incorrectFirstOrder, boolean onlyWithAudioAnno,
+                                              AsyncCallback<ExerciseListWrapper<T>> async);
 
   void getUsers(AsyncCallback<List<User>> async);
+
   void getUserBy(long id, AsyncCallback<User> async);
 
   void writeAudioFile(String base64EncodedString,
@@ -137,13 +138,13 @@ public interface LangTestDatabaseAsync {
   void getMaleFemaleProgress(AsyncCallback<Map<String, Float>> async);
 
   /**
-   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile(String)
    * @param base64EncodedString
    * @param textToAlign
    * @param identifier
    * @param reqid
    * @param device
    * @param async
+   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile(String)
    */
   void getAlignment(String base64EncodedString,
                     String textToAlign,
@@ -191,4 +192,6 @@ public interface LangTestDatabaseAsync {
   void getUsersWithRecordings(AsyncCallback<Collection<UserInfo>> async);
 
   void getShells(List<String> ids, AsyncCallback<List<CommonShell>> async);
+
+  void reallyCreateNewItems(long creator, long userListID, String userExerciseText, AsyncCallback<Collection<CommonExercise>> async);
 }
