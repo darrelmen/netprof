@@ -456,6 +456,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
   }
 
+  public void reloadExercises() { exerciseDAO.reload(); }
+
   /**
    * @param mediaDir
    * @param installPath
