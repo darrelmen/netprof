@@ -554,7 +554,9 @@ public class UserListManager {
   private void addItemToList(long userListID, String userExercise) {
     UserList where = userListDAO.getWhere(userListID, true);
 
-    logger.warn("addItemToList: couldn't find ul with id " + userListID + " and " + userExercise);
+    if (where == null) {
+      logger.warn("addItemToList: couldn't find ul with id " + userListID + " and '" + userExercise +"'");
+    }
 
     if (where != null) {
       userListExerciseJoinDAO.add(where, userExercise);
