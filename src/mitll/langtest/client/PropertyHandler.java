@@ -146,6 +146,10 @@ public class PropertyHandler {
     return false;
   }
 
+  public boolean talksToDomino() {
+    return talksToDomino;
+  }
+
   public enum LOGIN_TYPE {ANONYMOUS, STUDENT}
 
   private boolean spectrogram = false;
@@ -192,7 +196,7 @@ public class PropertyHandler {
   public static final String TEXT = "Text";
   private static final String AUDIO = "Audio";
   private String responseType = AUDIO;
-
+boolean talksToDomino = false;
   /**
    * @param props
    * @see mitll.langtest.client.LangTest#onModuleLoad()
@@ -235,6 +239,7 @@ public class PropertyHandler {
       else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
       else if (key.equals(ENABLE_ALL_USERS)) enableAllUsers = getBoolean(value);
       else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
+      else if (key.equals("talksToDomino")) talksToDomino = getBoolean(value);
       //else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
       else if (key.equals(USE_PHONE_TO_DISPLAY)) {
         // logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
