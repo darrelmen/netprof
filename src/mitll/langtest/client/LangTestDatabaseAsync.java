@@ -194,4 +194,6 @@ public interface LangTestDatabaseAsync {
   void getShells(List<String> ids, AsyncCallback<List<CommonShell>> async);
 
   void reallyCreateNewItems(long creator, long userListID, String userExerciseText, AsyncCallback<Collection<CommonExercise>> async);
+
+  void reloadExercises(AsyncCallback<Void> async);
 }
