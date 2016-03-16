@@ -962,6 +962,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getContextPractice();
   }
 
+  @Override
+  public void reloadExercises() {
+    db.reloadExercises();
+  }
+
   /**
    * @param wavFile
    * @param title
