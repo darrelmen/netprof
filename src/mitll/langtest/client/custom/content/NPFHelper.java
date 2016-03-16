@@ -46,13 +46,11 @@ public class NPFHelper implements RequiresResize {
 
   final LangTestDatabaseAsync service;
   final ExerciseController controller;
-  //private final UserManager userManager;
 
   final UserFeedback feedback;
   PagingExerciseList<CommonShell, CommonExercise> npfExerciseList = null;
   private final boolean showQC;
   DivWidget contentPanel;
- // String instanceName = "unset";
 
   /**
    * @param service
@@ -66,16 +64,15 @@ public class NPFHelper implements RequiresResize {
     this.service = service;
     this.feedback = feedback;
     this.controller = controller;
-    //this.userManager = userManager;
     this.showQC = showQC;
   }
 
   /**
-   * @see mitll.langtest.client.custom.ListManager#selectPreviouslyClickedSubTab(TabPanel, TabAndContent, TabAndContent, TabAndContent, UserList, String, boolean, boolean, boolean)
    * @param ul
    * @param tabAndContent
    * @param instanceName
    * @param loadExercises
+   * @see mitll.langtest.client.custom.ListManager#selectPreviouslyClickedSubTab(TabPanel, TabAndContent, TabAndContent, TabAndContent, UserList, String, boolean, boolean, boolean)
    */
   public void showNPF(UserList<CommonShell> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises) {
     showNPF(ul, tabAndContent, instanceName, loadExercises, null);
@@ -93,27 +90,19 @@ public class NPFHelper implements RequiresResize {
    */
   public void showNPF(UserList<CommonShell> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises,
                       HasID toSelect) {
-    logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul);
-   // this.instanceName = instanceName;
+    logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul + " with " +ul.getExercises().size());
+
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
       madeNPFContent = true;
-      // logger.info("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
+      logger.info("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
       addNPFToContent(ul, content, instanceName, loadExercises, toSelect);
     } else {
-      //  logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
+      logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
       rememberAndLoadFirst(ul, toSelect);
     }
   }
-
-/*
-  public ListInterface<?> getExerciseList() {
-    logger.info("\t: getExerciseList instanceName = " + instanceName + " : " + (npfExerciseList != null ? " exercise list exists " : "null???"));
-
-    return npfExerciseList;
-  }
-*/
 
   private void addNPFToContent(UserList<CommonShell> ul, Panel listContent, String instanceName, boolean loadExercises,
                                HasID toSelect) {
@@ -208,7 +197,6 @@ public class NPFHelper implements RequiresResize {
   }
 
   /**
-   * TODOx : avoid unparameterized list here.
    * TODO : why do we copy the list?
    *
    * @param ul
@@ -220,13 +208,9 @@ public class NPFHelper implements RequiresResize {
     npfExerciseList.setUserListID(ul.getUniqueID());
 
     List<CommonShell> copy = new ArrayList<>();
-
     for (CommonShell ex : ul.getExercises()) {
       copy.add(ex);
     }
-    //List<CommonShell> copy = new ArrayList<>(ul.getExercises());
-    //  logger.info("rememberAndLoadFirst " + copy.size() + " exercises from  " +ul.getName());
-    //  npfExerciseList.rememberAndLoadFirst(new ArrayList<CommonShell>(ul.getExercises()));
     npfExerciseList.rememberAndLoadFirst(copy, toSelect, "");
     npfExerciseList.setWidth("270px");
     npfExerciseList.getElement().getStyle().setProperty("minWidth", "270px");
@@ -279,6 +263,10 @@ public class NPFHelper implements RequiresResize {
     };
   }
 
+  public void reload(UserList<CommonShell> userList) {
+    rememberAndLoadFirst(userList, null);
+  }
+
   @Override
   public void onResize() {
     if (npfExerciseList != null) {
@@ -291,8 +279,4 @@ public class NPFHelper implements RequiresResize {
   public void setContentPanel(DivWidget content) {
     this.contentPanel = content;
   }
-
-/*  public String getInstanceName() {
-    return instanceName;
-  }*/
 }
