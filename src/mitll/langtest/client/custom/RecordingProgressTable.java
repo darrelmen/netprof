@@ -21,6 +21,10 @@ public class RecordingProgressTable extends FlexTable {
   private static final String MALE = AudioDAO.MALE;
   private static final String MALE_FAST = AudioDAO.MALE_FAST;
 
+  /**
+   * @see RecorderNPFHelper#getProgressInfo
+   * @param result
+   */
   public void populate(Map<String, Float> result) {
     float total = result.get("total");
 
