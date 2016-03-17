@@ -46,7 +46,7 @@ public class UserListManager {
 
   private static final boolean DEBUG = false;
 
-  public static final String DUP = "_dup_";
+  private static final String DUP = "_dup_";
 
   private final UserDAO userDAO;
   private final ReviewedDAO reviewedDAO, secondStateDAO;
