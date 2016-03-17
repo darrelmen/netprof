@@ -28,14 +28,14 @@ public class UserExerciseDAO extends DAO {
   private static final String LESSON = "lesson";
 
   private static final String USEREXERCISE = "userexercise";
-  public static final String GET_ALL_SQL = "SELECT * from " + USEREXERCISE;
+  private static final String GET_ALL_SQL = "SELECT * from " + USEREXERCISE;
   private static final String MODIFIED = "modified";
   private static final String STATE = "state";
   private static final String CONTEXT = "context";
   private static final String CONTEXT_TRANSLATION = "contextTranslation";
 
   private ExerciseDAO<CommonExercise> exerciseDAO;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   public UserExerciseDAO(Database database) {
     super(database);
