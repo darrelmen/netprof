@@ -4,7 +4,9 @@
 
 package mitll.langtest.client.custom;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.InlineLabel;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -15,10 +17,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.TextArea;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.content.AVPHelper;
 import mitll.langtest.client.custom.content.NPFHelper;
@@ -34,6 +34,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -41,6 +42,8 @@ import java.util.logging.Logger;
  * Created by go22670 on 10/20/15.
  */
 public class ListManager implements RequiresResize {
+  public static final String IMPORT_ITEM = "importItem";
+  public static final boolean SHOW_IMPORT = false;
   private final Logger logger = Logger.getLogger("ListManager");
 
   private final KeyStorage storage;
@@ -120,10 +123,10 @@ public class ListManager implements RequiresResize {
       }
     });
 
-    npfHelper  = new NPFHelper(service, feedback, controller, false);
+    npfHelper = new NPFHelper(service, feedback, controller, false);
     reviewItem = new ReviewItemHelper(service, feedback, controller, exerciseList);//, npfHelper);
-    avpHelper  = new AVPHelper(service, feedback, controller);
-    editItem   = new EditItem(service, userManager, controller, exerciseList, feedback);//, npfHelper);
+    avpHelper = new AVPHelper(service, feedback, controller);
+    editItem = new EditItem(service, userManager, controller, exerciseList, feedback);//, npfHelper);
   }
 
   public void addStudyLists(final TabAndContent studyLists) {
@@ -146,7 +149,7 @@ public class ListManager implements RequiresResize {
    * @param w
    * @param tab
    * @see #addStudyLists(TabAndContent)
-   * @see Navigation#selectPreviousTab(String)
+   * @see Navigation#selectPreviousTab
    */
   public void showFirstUserListTab(TabPanel w, int tab) {
     yourStuff.clickOnTab();
@@ -271,7 +274,7 @@ public class ListManager implements RequiresResize {
   }
 
   /**
-   * @see Navigation#selectPreviousTab(String)
+   * @see Navigation#selectPreviousTab
    * @see #addListTabs(TabPanel)
    */
   public void viewBrowse() {
@@ -325,7 +328,7 @@ public class ListManager implements RequiresResize {
    *
    * @param contentPanel
    * @see Navigation#addTabs
-   * @see Navigation#selectPreviousTab(String)
+   * @see Navigation#selectPreviousTab
    */
   public void viewReview(final Panel contentPanel) {
     final ListManager outer = this;
@@ -338,8 +341,7 @@ public class ListManager implements RequiresResize {
 
       @Override
       public void onSuccess(List<UserList<CommonShell>> reviewLists) {
-        logger.info("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + reviewLists);
-
+        // logger.info("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + reviewLists);
         new UserListCallback(outer, contentPanel, child,
             new ScrollPanel(), REVIEW, false, false, userManager, false, "").onSuccess(reviewLists);
       }
@@ -511,7 +513,8 @@ public class ListManager implements RequiresResize {
   private TabPanel getListOperations(final UserList<CommonShell> ul, final String instanceName, final HasID toSelect) {
     // logger.info("getListOperations : '" + instanceName + " for list " + ul);
 
-    boolean created = createdByYou(ul) || instanceName.equals(REVIEW) || instanceName.equals(COMMENT);
+    boolean isMyList = createdByYou(ul);
+    boolean created = isMyList || instanceName.equals(REVIEW) || instanceName.equals(COMMENT);
 
     final TabPanel tabPanel = new TabPanel();
     final boolean isReview = instanceName.equals(REVIEW);
@@ -555,26 +558,13 @@ public class ListManager implements RequiresResize {
 
     // add add item and edit tabs (conditionally)
     TabAndContent editItemTab = null;
-    if (created && (!ul.isPrivate() || ul.getCreator().getId() == controller.getUser())) {
-      final TabAndContent editTab = makeTab(tabPanel, IconType.EDIT, isReview ? ADD_DELETE_EDIT_ITEM : ADD_OR_EDIT_ITEM);
-      editItemTab = editTab;
-      //  logger.info("getListOperations : making editTab");
-
-      editTab.getTab().addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          //    logger.info("getListOperations : got click on edit tab ");
-          storage.storeValue(SUB_TAB, EDIT_ITEM);
-          controller.logEvent(editTab.getTab(), "Tab", "UserList_" + ul.getID(), EDIT_ITEM);
-          if ((isReview || isComment)) {
-            //    logger.info("getListOperations : showNPF ");
-            reviewItem.showNPF(ul, editTab, getInstanceName(isReview), false, toSelect);
-          } else {
-            //logger.info("getListOperations : showEditItem ");
-            showEditItem(ul, editTab, editItem, !ul.isFavorite());
-          }
-        }
-      });
+    if (created && (!ul.isPrivate() || isMyList)) {
+      editItemTab = getEditTab(ul, toSelect, tabPanel, isReview, isComment);
+    }
+    if (SHOW_IMPORT) {
+      if (isMyList && !isReview && !isComment && !ul.isFavorite()) {
+        getImportTab(ul, tabPanel, learn, instanceName1);
+      }
     }
 
     // select the initial tab -- either add if an empty
@@ -586,6 +576,45 @@ public class ListManager implements RequiresResize {
     return tabPanel;
   }
 
+  private TabAndContent getEditTab(final UserList<CommonShell> ul, final HasID toSelect, TabPanel tabPanel,
+                                   final boolean isReview, final boolean isComment) {
+    final TabAndContent editTab = makeTab(tabPanel, IconType.EDIT, isReview ? ADD_DELETE_EDIT_ITEM : ADD_OR_EDIT_ITEM);
+    //  logger.info("getListOperations : making editTab");
+
+    editTab.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        //    logger.info("getListOperations : got click on edit tab ");
+        storage.storeValue(SUB_TAB, EDIT_ITEM);
+        controller.logEvent(editTab.getTab(), "Tab", "UserList_" + ul.getID(), EDIT_ITEM);
+        if ((isReview || isComment)) {
+          //    logger.info("getListOperations : showNPF ");
+          reviewItem.showNPF(ul, editTab, getInstanceName(isReview), false, toSelect);
+        } else {
+          //logger.info("getListOperations : showEditItem ");
+          showEditItem(ul, editTab, editItem, !ul.isFavorite());
+        }
+      }
+    });
+    return editTab;
+  }
+
+  private TabAndContent getImportTab(final UserList<CommonShell> ul, final TabPanel tabPanel,
+                                     final TabAndContent learnTab, final String instanceName
+  ) {
+    final TabAndContent importTab = makeTab(tabPanel, IconType.UPLOAD_ALT, "Import");
+    importTab.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        //    logger.info("getListOperations : got click on edit tab ");
+        storage.storeValue(SUB_TAB, IMPORT_ITEM);
+        controller.logEvent(importTab.getTab(), "Tab", "UserList_" + ul.getID(), IMPORT_ITEM);
+        showImportItem(ul, importTab, learnTab, instanceName, tabPanel);
+      }
+    });
+    return importTab;
+  }
+
   /**
    * @param learnTab
    * @param ul
@@ -593,14 +622,10 @@ public class ListManager implements RequiresResize {
    * @see #getListOperations
    */
   private void showLearnTab(TabAndContent learnTab, UserList<CommonShell> ul, String instanceName1, HasID toSelect) {
-    showLearnTab(ul, learnTab, instanceName1, toSelect);
+    npfHelper.showNPF(ul, learnTab, instanceName1, true, toSelect);
   }
 
-  private void showLearnTab(UserList<CommonShell> ul, TabAndContent learn, String instanceName1, HasID toSelect) {
-    npfHelper.showNPF(ul, learn, instanceName1, true, toSelect);
-  }
-
-  private boolean createdByYou(UserList ul) {
+  private boolean createdByYou(UserList<?> ul) {
     return ul.getCreator().getId() == userManager.getUser();
   }
 
@@ -650,16 +675,58 @@ public class ListManager implements RequiresResize {
 
   /**
    * @param ul
-   * @param addItem
+   * @param container
    * @see #getListOperations
    */
-  private void showEditItem(UserList ul, TabAndContent addItem, EditItem editItem, boolean includeAddItem) {
-    addItem.getContent().clear();
-    addItem.getContent().add(editItem.editItem(ul,
+  private void showEditItem(UserList ul, TabAndContent container, EditItem editItem, boolean includeAddItem) {
+    container.getContent().clear();
+    container.getContent().add(editItem.editItem(ul,
         new InlineLabel(),   // TODO get rid of this entirely
         includeAddItem));
   }
 
+  private void showImportItem(final UserList ul, final TabAndContent container, final TabAndContent learnTab, final String instanceName,
+                              final TabPanel tabPanel) {
+    container.getContent().clear();
+    DivWidget inner = new DivWidget();
+    DivWidget upper = new DivWidget();
+    upper.setWidth("600px");
+    final TextArea w = new TextArea();
+    w.setWidth("600px");
+
+    upper.add(w);
+    inner.add(upper);
+    w.setVisibleLines(20);
+    w.setCharacterWidth(150);
+
+    inner.add(new Heading(4, "Copy and paste tab separated lines with pairs of " +controller.getLanguage() + " item and its translation."));
+    inner.add(new Heading(4, "(Quizlet export format.)"));
+    Button anImport = new Button("Import");
+    anImport.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        service.reallyCreateNewItems(userManager.getUser(), ul.getUniqueID(), w.getText(), new AsyncCallback<Collection<CommonExercise>>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
+
+          @Override
+          public void onSuccess(Collection<CommonExercise> newExercise) {
+            logger.info("before " + ul.getExercises().size());
+            for (CommonExercise exercise : newExercise) ul.addExercise(exercise);
+            logger.info("after  " + ul.getExercises().size());
+
+            reallyShowLearnTab(tabPanel, learnTab, ul, instanceName);
+          }
+        });
+      }
+    });
+    DivWidget bottom = new DivWidget();
+    bottom.add(anImport);
+    bottom.addStyleName("topFiveMargin");
+    inner.add(bottom);
+    container.getContent().add(inner);
+  }
 
   /**
    * @param tabPanel
@@ -732,9 +799,7 @@ public class ListManager implements RequiresResize {
       chosePrev = true;
       switch (subTab) {
         case LEARN:
-          tabPanel.selectTab(SUBTAB_LEARN_INDEX);
-          learnTab.clickOnTab();
-          showLearnTab(learnTab, ul, instanceName1, null);
+          reallyShowLearnTab(tabPanel, learnTab, ul, instanceName1);
           break;
         case PRACTICE1:
           tabPanel.selectTab(SUBTAB_PRACTICE_INDEX);
@@ -765,6 +830,12 @@ public class ListManager implements RequiresResize {
     return chosePrev;
   }
 
+  private void reallyShowLearnTab(TabPanel tabPanel, TabAndContent learnTab, UserList ul, String instanceName1) {
+    tabPanel.selectTab(SUBTAB_LEARN_INDEX);
+    learnTab.clickOnTab();
+    showLearnTab(learnTab, ul, instanceName1, ul.getLast());
+  }
+
   private String getInstanceName(boolean isReview) {
     return (isReview ? REVIEW : COMMENT) + "_edit";
   }
@@ -775,7 +846,7 @@ public class ListManager implements RequiresResize {
    * @param finalEditItem
    * @param isReview
    * @param isComment
-   * @see #selectTabGivenHistory(TabPanel, TabAndContent, TabAndContent, TabAndContent, UserList, String, boolean, boolean, boolean, CommonExercise)
+   * @see #selectTabGivenHistory
    */
   private void showEditReviewOrComment(UserList ul, boolean isNormalList, TabAndContent finalEditItem,
                                        boolean isReview, boolean isComment) {
