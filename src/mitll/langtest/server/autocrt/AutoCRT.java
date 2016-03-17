@@ -261,7 +261,13 @@ public class AutoCRT {
     return asrScoreForAudio;
   }
 
-  public Collection<String> getPredefAnswers(AmasExerciseImpl exercise, int questionID) {
+  /**
+   * @see #getScoreForAudio(AmasExerciseImpl, String, int, File, boolean)
+   * @param exercise
+   * @param questionID
+   * @return
+   */
+  private Collection<String> getPredefAnswers(AmasExerciseImpl exercise, int questionID) {
     QAPair q = exercise.getQuestions().get(questionID);
     String question = q.getQuestion();
     List<String> possible = new ArrayList<>();
