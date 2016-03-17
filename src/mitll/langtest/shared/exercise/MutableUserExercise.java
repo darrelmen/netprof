@@ -12,6 +12,7 @@ import java.util.Map;
  */
 public interface MutableUserExercise {
   /**
+   * @see mitll.langtest.server.database.custom.UserExerciseDAO#add(CommonExercise, boolean)
    * @see mitll.langtest.server.database.custom.UserListManager#duplicate(CommonExercise)
    * @param id
    */
