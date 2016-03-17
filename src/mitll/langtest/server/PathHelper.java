@@ -24,11 +24,13 @@ public class PathHelper {
   private static final Logger logger = Logger.getLogger(PathHelper.class);
   public static final String ANSWERS = "answers";
   private static final String IMAGE_WRITER_IMAGES = "audioimages";
+  private static final String PLAN = "plan";
+  private static final String IMAGE_OUTDIR = "imageOutdir";
+  private static final String TOMCAT_WRITE_DIRECTORY_FULL_PATH = "tomcatWriteDirectoryFullPath";
 
   private String realContextPathTest;
   private final ServletContext context;
   private String configDir;
-
 
   public PathHelper(ServletContext context) {
     this.context = context;
@@ -46,7 +48,7 @@ public class PathHelper {
   /**
    * @param filePath
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.exercise.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
    * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int, String)
    */
   public File getAbsoluteFile(String filePath) {
@@ -86,15 +88,6 @@ public class PathHelper {
     return realContextPath;
   }
 
-/*
-  public File getFileForAnswer(String plan, String exercise, int question, int user) {
-    String tomcatWriteDirectory = getTomcatDir();
-
-    String planAndTestPath = plan + File.separator + exercise + File.separator + question + File.separator + "subject-" + user;
-    return getAbsoluteFile(getWavPath(tomcatWriteDirectory, planAndTestPath));
-  }
-*/
-
   /**
    * Make a place to store the audio answer, of the form:<br></br>
    * <p>
@@ -108,10 +101,7 @@ public class PathHelper {
    * <p>
    * C:\Users\go22670\apache-tomcat-7.0.25\webapps\netPron2\answers\repeat\nl0020_ams\0\subject--1\answer_1349987649590.wav
    *
-   * @param plan
-   * @param exercise
-   * @param question
-   * @param user
+   * @param audioContext
    * @return a path relative to the install dir
    * @see LangTestDatabaseImpl#writeAudioFile
    */
@@ -120,15 +110,13 @@ public class PathHelper {
     return getLocalPathToAnswer(audioContext.getId(), audioContext.getQuestionID(), audioContext.getUserid());
   }
 
-  public String getLocalPathToAnswer(String exercise, int question, int user) {
-    return getLocalPathToAnswer("plan", exercise, question, user);
+  private String getLocalPathToAnswer(String exercise, int question, int user) {
+    return getLocalPathToAnswer(PLAN, exercise, question, user);
   }
 
-  public String getLocalPathToAnswer(String plan, String exercise, int question, int user) {
-    String tomcatWriteDirectory = getTomcatDir();
-
+  String getLocalPathToAnswer(String plan, String exercise, int question, int user) {
     String planAndTestPath = plan + File.separator + exercise + File.separator + question + File.separator + "subject-" + user;
-    return getWavPath(tomcatWriteDirectory, planAndTestPath);
+    return getWavPath(getTomcatDir(), planAndTestPath);
   }
 
   public String getWavPathUnder(String planAndTestPath) {
@@ -144,7 +132,7 @@ public class PathHelper {
   }
 
   private String getTomcatDir() {
-    String tomcatWriteDirectory = context.getInitParameter("tomcatWriteDirectoryFullPath");
+    String tomcatWriteDirectory = context.getInitParameter(TOMCAT_WRITE_DIRECTORY_FULL_PATH);
     if (tomcatWriteDirectory == null) tomcatWriteDirectory = ANSWERS;
 
     File test = new File(tomcatWriteDirectory);
@@ -160,16 +148,14 @@ public class PathHelper {
    * @see LangTestDatabaseImpl#getImageForAudioFile
    */
   public String getImageOutDir() {
-    String imageOutdir = context.getInitParameter("imageOutdir");
+    String imageOutdir = context == null ? IMAGE_OUTDIR : context.getInitParameter(IMAGE_OUTDIR);
     if (imageOutdir == null) imageOutdir = IMAGE_WRITER_IMAGES;
 
     File test = new File(imageOutdir);
     if (!test.exists()) {
       test = getAbsoluteFile(imageOutdir);
-//      System.out.println("made image out dir at " + test.getAbsolutePath());
       boolean mkdirs = test.mkdirs();
       if (mkdirs) logger.debug("getImageOutDir : making dir at : " + test.getAbsolutePath());
-
     }
     return imageOutdir;
   }
