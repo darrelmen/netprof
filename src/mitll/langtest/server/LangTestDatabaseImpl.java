@@ -39,6 +39,7 @@ import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.analysis.WordScore;
+import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
@@ -95,6 +96,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * TODO : somehow make this typesafe
+   *
    * @see #getExercises()
    */
   private ExerciseTrie fullTrie = null;
@@ -198,7 +200,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         // builds unit-lesson hierarchy if non-empty type->selection over user list
         Collection<AmasExerciseImpl> exercisesForSelectionState1 =
             new AmasSupport().getExercisesForSelectionState(typeToSelection, prefix, userID,
-            db.getAMASSectionHelper(), db.getResultDAO());
+                db.getAMASSectionHelper(), db.getResultDAO());
         return new ExerciseListWrapper<>(reqID, exercisesForSelectionState1, null);
       }
     } catch (Exception e) {
@@ -436,7 +438,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private Collection<CommonExercise> filterByOnlyAudioAnno(boolean onlyAudioAnno,
                                                            Collection<CommonExercise> exercises) {
     if (onlyAudioAnno) {
-      Set<String> audioAnnos = db.getUserListManager().getAudioAnnos();
+      Set<String> audioAnnos = getUserListManager().getAudioAnnos();
 
       List<CommonExercise> copy = new ArrayList<CommonExercise>();
       // logger.debug("recorded already " + recordedForUser.size() + " checking " + exercises.size());
@@ -657,7 +659,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
       markRecordedState((int) userID, role, exerciseShells, onlyExamples);
     } else if (role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) || role.startsWith(Result.AUDIO_TYPE_REVIEW)) {
-      db.getUserListManager().markState(exerciseShells);
+      getUserListManager().markState(exerciseShells);
     }
 
     // TODO : do this the right way vis-a-vis type safe collection...
@@ -881,7 +883,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.exercise.CommonExercise, boolean)
    */
   private void addAnnotations(CommonExercise byID) {
-    db.getUserListManager().addAnnotations(byID);
+    getUserListManager().addAnnotations(byID);
   }
 
   /**
@@ -958,6 +960,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   public ContextPractice getContextPractice() {
     return db.getContextPractice();
+  }
+
+  @Override
+  public void reloadExercises() {
+    db.reloadExercises();
   }
 
   /**
@@ -1254,7 +1261,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public long addUserList(long userid, String name, String description, String dliClass, boolean isPublic) {
-    return db.getUserListManager().addUserList(userid, name, description, dliClass, isPublic);
+    return getUserListManager().addUserList(userid, name, description, dliClass, isPublic);
   }
 
   /**
@@ -1264,7 +1271,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public void setPublicOnList(long userListID, boolean isPublic) {
-    db.getUserListManager().setPublicOnList(userListID, isPublic);
+    getUserListManager().setPublicOnList(userListID, isPublic);
   }
 
   /**
@@ -1273,7 +1280,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.custom.ListManager#addVisitor(mitll.langtest.shared.custom.UserList)
    */
   public void addVisitor(long userListID, long user) {
-    db.getUserListManager().addVisitor(userListID, user);
+    getUserListManager().addVisitor(userListID, user);
   }
 
   /**
@@ -1287,7 +1294,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public Collection<UserList<CommonShell>> getListsForUser(long userid, boolean onlyCreated, boolean visited) {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
-    return db.getUserListManager().getListsForUser(userid, onlyCreated, visited);
+    return getUserListManager().getListsForUser(userid, onlyCreated, visited);
   }
 
   /**
@@ -1298,7 +1305,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public Collection<UserList<CommonShell>> getUserListsForText(String search, long userid) {
-    return db.getUserListManager().getUserListsForText(search, userid);
+    return getUserListManager().getUserListsForText(search, userid);
   }
 
   /**
@@ -1308,7 +1315,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   public void addItemToUserList(long userListID, String exID) {
-    db.getUserListManager().addItemToUserList(userListID, exID);
+    getUserListManager().addItemToUserList(userListID, exID);
   }
 
   /**
@@ -1321,7 +1328,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
-    db.getUserListManager().addAnnotation(exerciseID, field, status, comment, userID);
+    getUserListManager().addAnnotation(exerciseID, field, status, comment, userID);
   }
 
   /**
@@ -1331,7 +1338,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed
    */
   public void markReviewed(String id, boolean isCorrect, long creatorID) {
-    db.getUserListManager().markCorrectness(id, isCorrect, creatorID);
+    getUserListManager().markCorrectness(id, isCorrect, creatorID);
   }
 
   /**
@@ -1341,7 +1348,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.qc.QCNPFExercise#markAttentionLL
    */
   public void markState(String id, STATE state, long creatorID) {
-    db.getUserListManager().markState(id, state, creatorID);
+    getUserListManager().markState(id, state, creatorID);
   }
 
   /**
@@ -1352,7 +1359,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public void setExerciseState(String id, STATE state, long userID) {
-    db.getUserListManager().markState(id, state, userID);
+    getUserListManager().markState(id, state, userID);
   }
 
   /**
@@ -1362,7 +1369,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public List<UserList<CommonShell>> getReviewLists() {
     List<UserList<CommonShell>> lists = new ArrayList<>();
-    UserListManager userListManager = db.getUserListManager();
+    UserListManager userListManager = getUserListManager();
     UserList<CommonShell> defectList = userListManager.getDefectList(db.getTypeOrder());
     lists.add(defectList);
 
@@ -1380,7 +1387,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public boolean deleteList(long id) {
-    return db.getUserListManager().deleteList(id);
+    return getUserListManager().deleteList(id);
   }
 
   /**
@@ -1391,7 +1398,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public boolean deleteItemFromList(long listid, String exid) {
-    return db.getUserListManager().deleteItemFromList(listid, exid, db.getTypeOrder());
+    return getUserListManager().deleteItemFromList(listid, exid, db.getTypeOrder());
   }
 
   /**
@@ -1418,7 +1425,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise) {
     //logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
 
-    db.getUserListManager().reallyCreateNewItem(userListID, userExercise, serverProps.getMediaDir());
+    getUserListManager().reallyCreateNewItem(userListID, userExercise, serverProps.getMediaDir());
 
     for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
       logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + userExercise.getID());
@@ -1428,6 +1435,44 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     return userExercise;
   }
+
+  @Override
+  public Collection<CommonExercise> reallyCreateNewItems(long creator, long userListID, String userExerciseText) {
+    String[] lines = userExerciseText.split("\n");
+    logger.info("got " + lines.length + " lines");
+    List<CommonExercise> newItems = new ArrayList<>();
+    UserList<CommonShell> userListByID = db.getUserListManager().getUserListByID(userListID, Collections.emptyList());
+    int n = userListByID.getExercises().size();
+    Set<String> unique = new HashSet<>();
+    for (CommonShell shell : userListByID.getExercises()) unique.add(shell.getForeignLanguage());
+    for (String line : lines) {
+      String[] parts = line.split("\\t");
+      logger.info("\tgot " + parts.length + " parts");
+      if (parts.length > 1) {
+        UserExercise newItem = new UserExercise(-1, UserExercise.CUSTOM_PREFIX + "_" + (n++), creator, parts[1], parts[0], "");
+        newItems.add(newItem);
+        logger.info("new " + newItem);
+      }
+    }
+
+    List<CommonExercise> actualItems = new ArrayList<>();
+    for (CommonExercise candidate : newItems) {
+      String foreignLanguage = candidate.getForeignLanguage();
+      if (!unique.contains(foreignLanguage)) {
+        if (isValidForeignPhrase(foreignLanguage)) {
+          getUserListManager().reallyCreateNewItem(userListID, candidate, serverProps.getMediaDir());
+          actualItems.add(candidate);
+        }
+      }
+    }
+    logger.info("Returning " + actualItems.size());
+    return actualItems;
+  }
+
+  UserListManager getUserListManager() {
+    return db.getUserListManager();
+  }
+
 
   /**
    * @param exercise
@@ -1987,11 +2032,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * <p>
    * Client references below:
    *
-   * @param reqid               request id from the client, so it can potentially throw away out of order responses
-   * @param user                who is answering the question
-   * @param exercise            exercise within the plan
-   * @param questionID          question within the exercise
-   * @param audioType           regular or fast then slow audio recording
    * @param base64EncodedString generated by flash on the client
    * @param recordedWithFlash   mark if we recorded it using flash recorder or webrtc
    * @param deviceType
@@ -2001,6 +2041,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param addToAudioTable     if true, add to audio table -- only when recording reference audio for an item.
    * @param allowAlternates
    * @return AudioAnswer object with information about the audio on the server, including if audio is valid (not too short, etc.)
+   * @paramx reqid               request id from the client, so it can potentially throw away out of order responses
+   * @paramx user                who is answering the question
+   * @paramx exercise            exercise within the plan
+   * @paramx questionID          question within the exercise
+   * @paramx audioType           regular or fast then slow audio recording
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    */
@@ -2140,11 +2185,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private void setExerciseState(String exercise, int user, CommonShell exercise1) {
     if (exercise1 != null) {
-      STATE currentState = db.getUserListManager().getCurrentState(exercise);
+      STATE currentState = getUserListManager().getCurrentState(exercise);
       if (currentState == STATE.APPROVED) { // clear approved on new audio -- we need to review it again
-        db.getUserListManager().setState(exercise1, STATE.UNSET, user);
+        getUserListManager().setState(exercise1, STATE.UNSET, user);
       }
-      db.getUserListManager().setSecondState(exercise1, STATE.RECORDED, user);
+      getUserListManager().setSecondState(exercise1, STATE.RECORDED, user);
     }
   }
 
@@ -2330,7 +2375,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     try {
       db.preloadExercises();
       db.preloadContextPractice();
-      db.getUserListManager().setStateOnExercises();
+      getUserListManager().setStateOnExercises();
       db.doReport(serverProps, getServletContext().getRealPath(""), getMailSupport(), pathHelper);
     } catch (Exception e) {
       logger.error("couldn't load database " + e, e);
