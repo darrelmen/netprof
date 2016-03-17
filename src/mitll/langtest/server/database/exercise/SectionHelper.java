@@ -25,6 +25,11 @@ public class SectionHelper<T extends Shell> {
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
   private final Map<String, Map<String, Map<String, Collection<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String, Map<String, Collection<String>>>>();
 
+  public void clear() {
+    typeToUnitToLesson.clear();
+    typeToSectionToTypeToSections.clear();
+  }
+
   /**
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getTypeOrder
@@ -50,7 +55,6 @@ public class SectionHelper<T extends Shell> {
     } else {
       Set<String> validTypes = typeToUnitToLesson.keySet();
       //logger.info("getTypeOrder validTypes " + validTypes);
-
       List<String> valid = new ArrayList<String>(predefinedTypeOrder);
       valid.retainAll(validTypes);
       return valid;
