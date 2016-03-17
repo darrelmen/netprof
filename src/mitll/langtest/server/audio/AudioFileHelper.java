@@ -68,6 +68,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
    * @param db
    * @param langTestDatabase
    * @see mitll.langtest.server.ScoreServlet#getAudioFileHelper()
+   * @see LangTestDatabaseImpl#init
    */
   public AudioFileHelper(PathHelper pathHelper, ServerProperties serverProperties, DatabaseImpl db,
                          LogAndNotify langTestDatabase) {
@@ -78,6 +79,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
     this.useOldSchoolServiceOnly = serverProperties.getOldSchoolService();
     this.mp3Support = new MP3Support(pathHelper, serverProperties);
     audioConversion = new AudioConversion(serverProps);
+    makeASRScoring();
     makeDecodeCorrectnessChecker();
   }
 
@@ -680,7 +682,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
    * @param canUseCache
    * @param useOldSchool
    * @return
-   * @see AutoCRT#getScoreForAudio(String, int, File, boolean)
+   * @see AutoCRT#getScoreForAudio
    * @see DecodeCorrectnessChecker#getFlashcardAnswer(File, Collection, AudioAnswer, boolean, boolean)
    */
   @Override
@@ -712,6 +714,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
     }
 
     String vocab = asrScoring.getUsedTokens(lmSentences, unk); // this is basically the transcript
+    logger.info("from '" + lmSentences + "' to '" + vocab +"'");
     String prefix = usePhoneToDisplay ? "phoneToDisplay" : "";
     String path = testAudioFile.getPath();
 
@@ -719,17 +722,6 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
     return getASRScoreForAudio(0, path, vocab, lmSentences, 128, 128, false, true,
         canUseCache && serverProps.useScoreCache(), prefix, null, usePhoneToDisplay, useOldSchool);
   }
-
-  /**
-   * @param lmSentences
-   * @param tmpDir
-   * @param unknownModelBiasWeight
-   * @return
-   * @see #getASRScoreForAudio
-   */
-/*  private void createSLFFile(Collection<String> lmSentences, String tmpDir, float unknownModelBiasWeight) {
-    new SLFFile().createSimpleSLFFile(lmSentences, tmpDir, unknownModelBiasWeight);
-  }*/
 
   /**
    * @return
@@ -947,7 +939,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
   private void makeASRScoring() {
     if (webserviceScoring == null) {
       webserviceScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps, logAndNotify);
-      oldschoolScoring = new ASRScoring(pathHelper.getInstallPath(), serverProps, logAndNotify);
+      oldschoolScoring  = new ASRScoring(pathHelper.getInstallPath(), serverProps, logAndNotify);
     }
     asrScoring = oldschoolScoring;
   }
