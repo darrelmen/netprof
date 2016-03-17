@@ -46,7 +46,7 @@ public class UserListManager {
 
   private static final boolean DEBUG = false;
 
-  public static final String DUP = "_dup_";
+  private static final String DUP = "_dup_";
 
   private final UserDAO userDAO;
   private final ReviewedDAO reviewedDAO, secondStateDAO;
@@ -554,7 +554,9 @@ public class UserListManager {
   private void addItemToList(long userListID, String userExercise) {
     UserList where = userListDAO.getWhere(userListID, true);
 
-    logger.warn("addItemToList: couldn't find ul with id " + userListID + " and " + userExercise);
+    if (where == null) {
+      logger.warn("addItemToList: couldn't find ul with id " + userListID + " and '" + userExercise +"'");
+    }
 
     if (where != null) {
       userListExerciseJoinDAO.add(where, userExercise);
