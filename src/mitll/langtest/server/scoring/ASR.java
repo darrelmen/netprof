@@ -46,7 +46,7 @@ public interface ASR {
 													 boolean useCache, String prefix, Result precalcResult, boolean usePhoneToDisplay);
 
 	/**
-	 * @see mitll.langtest.server.audio.AudioFileHelper#countPhones(CommonExercise)
+	 * @see mitll.langtest.server.audio.AudioFileHelper#countPhones
 	 */
 	class PhoneInfo {
 		private final List<String> firstPron;
