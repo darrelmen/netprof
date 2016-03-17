@@ -57,11 +57,17 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 			if (exercises == null) {
 				exercises = readExercises();
 				afterReadingExercises();
-				// sectionHelper.report();
 			}
 		}
 		return exercises;
 	}
+
+	public void reload() {
+    exercises = null;
+    idToExercise.clear();
+    sectionHelper.clear();
+    getRawExercises();
+  }
 
 	private void afterReadingExercises() {
 		addAlternatives(exercises);
@@ -412,14 +418,14 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 	private void addAlternatives(List<CommonExercise> exercises) {
 		Map<String, Set<String>> englishToFL = new HashMap<>();
 		for (CommonExercise e : exercises) {
-			HashSet<String> defaultValue = new HashSet<>();
+			Set<String> defaultValue = new HashSet<>();
 			Set<String> refs = englishToFL.getOrDefault(e.getEnglish(), defaultValue);
 			if (refs.isEmpty()) englishToFL.put(e.getEnglish(), refs);
 			refs.add(e.getForeignLanguage());
 		}
 
 		for (CommonExercise e : exercises) {
-			final HashSet<String> defaultValue = new HashSet<>();
+			final Set<String> defaultValue = new HashSet<>();
 			Set<String> orDefault = englishToFL.getOrDefault(e.getEnglish(), defaultValue);
 			if (orDefault.isEmpty()) {
 				logger.error("huh? no fl for " + e);

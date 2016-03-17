@@ -1,10 +1,15 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.connection.H2Connection;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -13,6 +18,20 @@ import java.util.*;
 public class ReportAllTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(ReportAllTest.class);
   public static final boolean DO_ONE = false;
+
+  private static DatabaseImpl getDatabase(String config) {
+    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+    String parent = file.getParent();
+    String name = file.getName();
+
+    logger.debug("config dir " + parent + " config     " + name);
+    ServerProperties serverProps = new ServerProperties(parent, name);
+    DatabaseImpl database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps, new PathHelper("war"), false, null);
+    // logger.debug("made " + database);
+    database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan(),
+        serverProps.getMediaDir());
+    return database;
+  }
 
 
 
@@ -23,7 +42,7 @@ public class ReportAllTest extends BaseTest {
     for (String db : Arrays.asList("newSudanese2")) {
       String config = configs.get(i++);
 
-      H2Connection connection = getH2Connection("war/config/sudanese/"+db);
+      H2Connection connection = getH2Connection("war/config/sudanese/" + db);
       DatabaseImpl database = getDatabase(connection, config, db);
       Map<String, Float> maleFemaleProgress = database.getMaleFemaleProgress();
 
@@ -38,7 +57,11 @@ public class ReportAllTest extends BaseTest {
     }
   }
 
-
+  @Test
+  public void testMaleFemaleRefCoverageEgyptian() {
+    Map<String, Float> maleFemaleProgress = getDatabase("egyptian").getMaleFemaleProgress();
+    logger.info(maleFemaleProgress.toString());
+  }
 
   @Test
   public void testMaleFemaleRefCoverage() {
@@ -47,7 +70,7 @@ public class ReportAllTest extends BaseTest {
     for (String db : Arrays.asList("npfRussian")) {
       String config = configs.get(i++);
 
-      H2Connection connection = getH2Connection("war/config/russian/"+db);
+      H2Connection connection = getH2Connection("war/config/russian/" + db);
       DatabaseImpl database = getDatabase(connection, config, db);
       Map<String, Float> maleFemaleProgress = database.getMaleFemaleProgress();
 
@@ -79,7 +102,7 @@ public class ReportAllTest extends BaseTest {
 
       logger.info("doing " + config + " ------- ");
 
-      H2Connection connection = getH2Connection("war/config/english/"+db);
+      H2Connection connection = getH2Connection("war/config/english/" + db);
 
       DatabaseImpl database = getDatabase(connection, config, db);
       database.doReport(war, config, 2015);
