@@ -43,6 +43,7 @@ import java.util.logging.Logger;
  */
 public class ListManager implements RequiresResize {
   public static final String IMPORT_ITEM = "importItem";
+  public static final boolean SHOW_IMPORT = false;
   private final Logger logger = Logger.getLogger("ListManager");
 
   private final KeyStorage storage;
@@ -560,8 +561,10 @@ public class ListManager implements RequiresResize {
     if (created && (!ul.isPrivate() || isMyList)) {
       editItemTab = getEditTab(ul, toSelect, tabPanel, isReview, isComment);
     }
-    if (isMyList && !isReview && !isComment && !ul.isFavorite()) {
-      getImportTab(ul, tabPanel, learn, instanceName1);
+    if (SHOW_IMPORT) {
+      if (isMyList && !isReview && !isComment && !ul.isFavorite()) {
+        getImportTab(ul, tabPanel, learn, instanceName1);
+      }
     }
 
     // select the initial tab -- either add if an empty

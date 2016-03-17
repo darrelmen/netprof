@@ -15,6 +15,8 @@ import org.apache.log4j.Logger;
 import java.sql.*;
 import java.util.*;
 
+import static mitll.langtest.server.database.Database.EXID;
+
 /**
  * Create, drop, alter, read from the results table.
  * Note that writing to the table takes place in the {@link AnswerDAO}. Not sure if that's a good idea or not. :)
@@ -24,30 +26,31 @@ public class RefResultDAO extends DAO {
 
   private static final String ID = "id";
   private static final String USERID = "userid";
-  public static final String ANSWER = "answer";
+  private static final String ANSWER = "answer";
   private static final String SCORE_JSON = "scoreJson";
 
   private static final String REFRESULT = "refresult";
+  private static final String SELECT_ALL = "SELECT * FROM " + REFRESULT;
 
   private static final String DURATION = "duration";
   private static final String CORRECT = "correct";
   private static final String PRON_SCORE = "pronscore";
 
-  public static final String ALIGNSCORE = "ALIGNSCORE";
+  static final String ALIGNSCORE = "ALIGNSCORE";
   private static final String ALIGNJSON = "ALIGNJSON";
   private static final String NUMDECODE_PHONES = "NUMDECODEPHONES";
   private static final String NUM_ALIGN_PHONES = "NUMALIGNPHONES";
   private static final String MALE = "male";
-  public static final String SPEED = "speed";
-  public static final String DECODE_PROCESS_DUR = "decodeProcessDur";
-  public static final String ALIGN_PROCESS_DUR = "alignProcessDur";
-  public static final String HYDEC_DECODE_PRON_SCORE = "hydecDecodePronScore";
-  public static final String HYDEC_DECODE_PROCESS_DUR = "hydecDecodeProcessDur";
-  public static final String HYDEC_DECODE_NUM_PHONES = "hydecDecodeNumPhones";
-  public static final String HYDEC_ALIGN_PRON_SCORE = "hydecAlignPronScore";
-  public static final String HYDEC_ALIGN_PROCESS_DUR = "hydecAlignProcessDur";
-  public static final String HYDEC_ALIGN_NUM_PHONES = "hydecAlignNumPhones";
-  public static final String WORDS = "{\"words\":[]}";
+  static final String SPEED = "speed";
+  static final String DECODE_PROCESS_DUR = "decodeProcessDur";
+  static final String ALIGN_PROCESS_DUR = "alignProcessDur";
+  static final String HYDEC_DECODE_PRON_SCORE = "hydecDecodePronScore";
+  static final String HYDEC_DECODE_PROCESS_DUR = "hydecDecodeProcessDur";
+  private static final String HYDEC_DECODE_NUM_PHONES = "hydecDecodeNumPhones";
+  static final String HYDEC_ALIGN_PRON_SCORE = "hydecAlignPronScore";
+  static final String HYDEC_ALIGN_PROCESS_DUR = "hydecAlignProcessDur";
+  private static final String HYDEC_ALIGN_NUM_PHONES = "hydecAlignNumPhones";
+  private static final String WORDS = "{\"words\":[]}";
   private final boolean dropTable;
 //  private final boolean debug = false;
 
@@ -56,9 +59,13 @@ public class RefResultDAO extends DAO {
    * @param dropTable
    * @see DatabaseImpl#initializeDAOs(PathHelper)
    */
-  public RefResultDAO(Database database, boolean dropTable) {
+  RefResultDAO(Database database, boolean dropTable) {
     super(database);
     this.dropTable = dropTable;
+  }
+
+  public boolean removeForExercise(String exid) {
+    return remove(REFRESULT, EXID, exid, true);
   }
 
   private List<Result> cachedResultsForQuery = null;
@@ -145,7 +152,7 @@ public class RefResultDAO extends DAO {
             REFRESULT +
             "(" +
             "userid," +
-            Database.EXID + "," +
+            EXID + "," +
             Database.TIME + "," +
             ANSWER + "," +
             ResultDAO.DURATION + "," +
@@ -242,8 +249,7 @@ public class RefResultDAO extends DAO {
           return cachedResultsForQuery;
         }
       }
-      String sql = "SELECT * FROM " + REFRESULT;
-      List<Result> resultsForQuery = getResultsSQL(sql);
+      List<Result> resultsForQuery = getResultsSQL(SELECT_ALL);
 
       synchronized (this) {
         cachedResultsForQuery = resultsForQuery;
@@ -252,7 +258,7 @@ public class RefResultDAO extends DAO {
     } catch (Exception ee) {
       logException(ee);
     }
-    return new ArrayList<Result>();
+    return new ArrayList<>();
   }
 
   /**
@@ -262,8 +268,8 @@ public class RefResultDAO extends DAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
    */
   public Result getResult(String exid, String answer) {
-    String sql = "SELECT * FROM " + REFRESULT +
-        " WHERE " + Database.EXID + "='" + exid + "' AND " + ANSWER + " like '%" + answer + "'";
+    String sql = SELECT_ALL +
+        " WHERE " + EXID + "='" + exid + "' AND " + ANSWER + " like '%" + answer + "'";
     try {
       List<Result> resultsSQL = getResultsSQL(sql);
       if (resultsSQL.size() > 1) {
@@ -286,9 +292,9 @@ public class RefResultDAO extends DAO {
       String list = getInList(ids);
 
       String sql = "SELECT " +
-          Database.EXID + ", " + SCORE_JSON + ", " + ANSWER +
+          EXID + ", " + SCORE_JSON + ", " + ANSWER +
           " FROM " + REFRESULT + " WHERE " +
-          Database.EXID + " in (" + list + ")";
+          EXID + " in (" + list + ")";
 
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(sql);
@@ -298,13 +304,13 @@ public class RefResultDAO extends DAO {
       Map<String, List<String>> idToAnswers = new HashMap<>();
       Map<String, List<String>> idToJSONs = new HashMap<>();
       while (rs.next()) {
-        String exid = rs.getString(Database.EXID);
+        String exid = rs.getString(EXID);
         String answer = rs.getString(ANSWER);
         String json = rs.getString(SCORE_JSON);
 
         List<String> orDefault = idToAnswers.get(exid);
         if (orDefault == null) {
-          idToAnswers.put(exid, orDefault = new ArrayList<String>());
+          idToAnswers.put(exid, orDefault = new ArrayList<>());
           int i = answer.lastIndexOf("/");
           String fileName = (i > -1) ? answer.substring(i + 1) : answer;
           orDefault.add(fileName);
@@ -312,7 +318,7 @@ public class RefResultDAO extends DAO {
 
         List<String> orDefault2 = idToJSONs.get(exid);
         if (orDefault2 == null) {
-          idToJSONs.put(exid, orDefault2 = new ArrayList<String>());
+          idToJSONs.put(exid, orDefault2 = new ArrayList<>());
           orDefault2.add(json);
         }
       }
@@ -388,7 +394,7 @@ public class RefResultDAO extends DAO {
    */
   private List<Result> getResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
-    List<Result> results = new ArrayList<Result>();
+    List<Result> results = new ArrayList<>();
 
     int count = 0;
     int skipped = 0;
@@ -396,7 +402,7 @@ public class RefResultDAO extends DAO {
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
       long userID = rs.getLong(USERID);
-      String exid = rs.getString(Database.EXID);
+      String exid = rs.getString(EXID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       String answer = rs.getString(ANSWER);
       int dur = rs.getInt(DURATION);
@@ -503,7 +509,7 @@ public class RefResultDAO extends DAO {
 //      addInt(connection, REFRESULT, ALIGN_PROCESS_DUR);
 //    }
 
-    createIndex(database, Database.EXID, REFRESULT);
+    createIndex(database, EXID, REFRESULT);
     // seems to complain about index on CLOB???
     // createIndex(database, ANSWER, REFRESULT);
 
@@ -527,7 +533,7 @@ public class RefResultDAO extends DAO {
         " (" +
         ID + " IDENTITY, " +
         USERID + " INT, " +
-        Database.EXID + " VARCHAR, " +
+        EXID + " VARCHAR, " +
         Database.TIME + " TIMESTAMP, " +// " AS CURRENT_TIMESTAMP," +
         ANSWER + " VARCHAR," +
         DURATION + " INT," +
