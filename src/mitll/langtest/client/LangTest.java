@@ -86,11 +86,13 @@ import java.util.logging.Logger;
  * - integrate with domino to get content for AMAS
  * 1.2.4
  * - support for domino NetProF integration
+ * 1.2.5
+ * - fix for issue with collapsing words with commas in them, added removeRefResult to scoreServlet, partial support for import to lists
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  private static final String VERSION_INFO = "1.2.4";
+  private static final String VERSION_INFO = "1.2.5";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
@@ -148,9 +150,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
       public void onSuccess(StartupInfo startupInfo2) {
         long now = System.currentTimeMillis();
-
         startupInfo = startupInfo2;
-        logger.info("Got startup info " + startupInfo2);
+        //   logger.info("Got startup info " + startupInfo2);
         props = new PropertyHandler(startupInfo2.getProperties());
         if (isLogClientMessages()) {
           String message = "onModuleLoad.getProperties : (success) took " + (now - then) + " millis";
@@ -476,7 +477,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return startupInfo;
   }
 
-  public Collection<String> getTypeOrder() { return startupInfo.getTypeOrder(); }
+  public Collection<String> getTypeOrder() {
+    return startupInfo.getTypeOrder();
+  }
 
   /**
    * Init Flash recorder once we login.
@@ -679,9 +682,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    */
   public void stopRecording(WavCallback wavCallback) {
-//    long now = System.currentTimeMillis();
-    // logger.info("stopRecording : time recording in UI " + (now - then) + " millis");
-
+    // logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
     flashRecordPanel.stopRecording(wavCallback);
   }
 
