@@ -86,11 +86,13 @@ import java.util.logging.Logger;
  * - integrate with domino to get content for AMAS
  * 1.2.4
  * - support for domino NetProF integration
+ * 1.2.5
+ * - fix for issue with collapsing words with commas in them, added removeRefResult to scoreServlet, partial support for import to lists
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  private static final String VERSION_INFO = "1.2.4";
+  private static final String VERSION_INFO = "1.2.5";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
