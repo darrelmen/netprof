@@ -63,6 +63,7 @@ public class Banner implements RequiresResize {
   /**
    * @param splashText
    * @param userName
+   * @param reload
    * @return
    * @see InitialUI#makeHeaderRow()
    */
@@ -71,33 +72,8 @@ public class Banner implements RequiresResize {
                                 ClickHandler users,
                                 ClickHandler results,
                                 ClickHandler monitoring,
-                                ClickHandler events) {
-    return getHeaderRow(splashText, isBeta, userName, browserInfo, logoutClickHandler,
-        users, results, monitoring, events);
-  }
-
-  /**
-   * @param splashText
-   * @param isBeta
-   * @param userName
-   * @param browserInfo
-   * @param logoutClickHandler
-   * @param users
-   * @param results
-   * @param monitoring
-   * @param events
-   * @return
-   * @see #makeNPFHeaderRow
-   */
-  private Panel getHeaderRow(String splashText,
-                             boolean isBeta, String userName,
-                             HTML browserInfo,
-                             ClickHandler logoutClickHandler,
-
-                             ClickHandler users,
-                             ClickHandler results,
-                             ClickHandler monitoring,
-                             ClickHandler events) {
+                                ClickHandler events,
+                                ClickHandler reload) {
     HorizontalPanel headerRow = new HorizontalPanel();
     headerRow.setWidth("100%");
     headerRow.addStyleName("headerBackground");
@@ -142,7 +118,7 @@ public class Banner implements RequiresResize {
     hp.add(recordAudio = new SimplePanel());
 
     // add log out/admin options cogMenu
-    makeCogMenu(logoutClickHandler, users, results, monitoring, events);
+    makeCogMenu(logoutClickHandler, users, results, monitoring, events, reload);
 
     if (!isAnonymous) {
       hp.add(cogMenu);
@@ -167,9 +143,9 @@ public class Banner implements RequiresResize {
   }
 
   /**
-   * @see #getHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
    * @param splashText
    * @return
+   * @see #getHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
    */
   private Paragraph getSubtitle(String splashText) {
     subtitle = new Paragraph(splashText);
@@ -185,16 +161,16 @@ public class Banner implements RequiresResize {
   }
 
   /**
-   * @see #getHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
    * @param logoutClickHandler
    * @param users
    * @param results
    * @param monitoring
    * @param events
+   * @see #getHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
    */
   private void makeCogMenu(ClickHandler logoutClickHandler, ClickHandler users, ClickHandler results,
-                           ClickHandler monitoring, ClickHandler events) {
-    cogMenu = makeMenu(users, results, monitoring, events);
+                           ClickHandler monitoring, ClickHandler events, ClickHandler reload) {
+    cogMenu = makeMenu(users, results, monitoring, events, reload);
     cogMenu.addStyleName("cogStyle");
     NavLink widget1 = new NavLink(LOG_OUT);
     widget1.addClickHandler(logoutClickHandler);
@@ -266,7 +242,7 @@ public class Banner implements RequiresResize {
     return emailAnchor;
   }
 
-  private NavLink userC, resultsC, monitoringC, eventsC;
+  private NavLink userC, resultsC, monitoringC, eventsC, reloadLink;
 
   /**
    * @param users
@@ -275,7 +251,7 @@ public class Banner implements RequiresResize {
    * @return
    * @see #getHeaderRow
    */
-  private Dropdown makeMenu(ClickHandler users, ClickHandler results, ClickHandler monitoring, ClickHandler events) {
+  private Dropdown makeMenu(ClickHandler users, ClickHandler results, ClickHandler monitoring, ClickHandler events, ClickHandler reload) {
     Dropdown w = new Dropdown();
     w.setRightDropdown(true);
     w.setIcon(IconType.COG);
@@ -297,6 +273,11 @@ public class Banner implements RequiresResize {
     eventsC.addClickHandler(events);
     w.add(eventsC);
 
+    reloadLink = new NavLink("Reload from Domino");
+    if (reload != null) {
+      reloadLink.addClickHandler(reload);
+      w.add(reloadLink);
+    }
     return w;
   }
 
@@ -305,6 +286,7 @@ public class Banner implements RequiresResize {
     resultsC.setVisible(visibleAdmin);
     monitoringC.setVisible(visibleAdmin);
     eventsC.setVisible(visibleAdmin);
+    reloadLink.setVisible(visibleAdmin);
   }
 
   /**
@@ -314,7 +296,6 @@ public class Banner implements RequiresResize {
   public void setUserName(String name) {
     this.userNameWidget.setText(name);
   }
-
 
 
   @Override
