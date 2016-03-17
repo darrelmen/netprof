@@ -17,6 +17,7 @@ import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.custom.content.NPFHelper;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -147,7 +148,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    *
    * @param userID
    * @return true if we asked the server for exercises
-   * @see mitll.langtest.client.LangTest#configureUIGivenUser
    * @see mitll.langtest.client.list.HistoryExerciseList#noSectionsGetExercises(long)
    */
   public boolean getExercises(long userID) {
@@ -160,7 +160,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#doAfterEditComplete(ListInterface, boolean)
-   * @see mitll.langtest.client.LangTest#configureUIGivenUser
+   * @see NPFHelper#reload()
    */
   public void reload() {
     int user1 = controller.getUser();
