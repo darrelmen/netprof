@@ -456,6 +456,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
   }
 
+  public void reloadExercises() { exerciseDAO.reload(); }
+
   /**
    * @param mediaDir
    * @param installPath
@@ -1477,6 +1479,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         logger.warn("getMaleFemaleProgress found duplicate id " + id + " : " + shell);
       }
     }
+/*    logger.info("found " + total + " total exercises, " +
+        uniqueIDs.size() +
+        " unique");*/
 
     return getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs);
   }
