@@ -19,6 +19,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
+import org.apache.xpath.operations.Bool;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.util.*;
+import java.util.function.BooleanSupplier;
 
 /**
  * All in support of tethered iOS app.
@@ -75,6 +77,8 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String JSON_REPORT = "jsonReport";
   private static final String REPORT = "report";
   public static final String VERSION_NOW = "1.0";
+  public static final String EXPORT = "export";
+  public static final String REMOVE_REF_RESULT = "removeRefResult";
   private boolean removeExercisesWithMissingAudioDefault = true;
 
   private RestUserManagement userManagement;
@@ -155,8 +159,10 @@ public class ScoreServlet extends DatabaseServlet {
         queryString = removePrefix(queryString, JSON_REPORT);
         int year = getYear(queryString);
         getReport(toReturn, year);
-      } else if (matchesRequest(queryString, "export")) {
+      } else if (matchesRequest(queryString, EXPORT)) {
         toReturn = getJSONForExercises();
+      } else if (matchesRequest(queryString, REMOVE_REF_RESULT)) {
+        toReturn = removeRefResult(queryString);
       } else if (matchesRequest(queryString, REPORT)) {
         queryString = removePrefix(queryString, REPORT);
         int year = getYear(queryString);
@@ -184,6 +190,40 @@ public class ScoreServlet extends DatabaseServlet {
       logger.info("doGet : took " + l + " millis to do " + request.getQueryString());
     }
     reply(response, toReturn.toString());
+  }
+
+  /**
+   * Worries about sql injection attack.
+   * Remove ref result entry for an exercise, helpful if you want to clear the ref result for just one exercise
+   * @param queryString
+   * @return
+   */
+  private JSONObject removeRefResult(String queryString) {
+    String[] split = queryString.split("=");
+    if (split.length != 2) {
+      JSONObject jsonObject = new JSONObject();
+      jsonObject.put("success", Boolean.valueOf(false).toString());
+      jsonObject.put("error","Expecting exid");
+      return jsonObject;
+    }
+    else {
+      String exid = split[1];
+
+      CommonExercise exercise = db.getExercise(exid);
+      if (exercise == null) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("success", Boolean.valueOf(false).toString());
+        jsonObject.put("error","no exercise with that id");
+        return jsonObject;
+      }
+      else {
+        boolean b = db.getRefResultDAO().removeForExercise(exid);
+        //logger.info("Remove ref for " + exid + " got " + b);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("success", Boolean.valueOf(b).toString());
+        return jsonObject;
+      }
+    }
   }
 
   private String getReport(JSONObject jsonObject, int year) {
