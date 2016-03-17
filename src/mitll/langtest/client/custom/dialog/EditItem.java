@@ -63,7 +63,6 @@ public class EditItem {
   private HasText itemMarker;
 
   private PagingExerciseList<CommonShell, CommonExercise> exerciseList;
-  // protected final NPFHelper npfHelper;
   private final String instanceName;
 
   /**
@@ -75,9 +74,6 @@ public class EditItem {
    */
   public EditItem(final LangTestDatabaseAsync service, final UserManager userManager, ExerciseController controller,
                   ReloadableContainer predefinedContentList, UserFeedback feedback
-      //,
-                  //                NPFHelper npfHelper
-        //          String instanceName
   ) {
     this.controller = controller;
     this.service = service;
@@ -85,7 +81,6 @@ public class EditItem {
     this.predefinedContentList = predefinedContentList;
     this.feedback = feedback;
     this.instanceName = "EditItem";//instanceName;
-    //logger.info(getClass() + " : npfHelper " + npfHelper);
   }
 
   /**
@@ -393,10 +388,7 @@ public class EditItem {
         @Override
         public void onClick(ClickEvent event) {
 //          logger.info(getClass() + " : makeDeleteButton npfHelperList (2) " + npfHelper);
-          deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, predefinedContentList
-              //    npfHelper.npfExerciseList
-
-          );
+          deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, predefinedContentList);
         }
       });
 
@@ -408,5 +400,4 @@ public class EditItem {
     public <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
     }
   }
-
 }
