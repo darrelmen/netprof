@@ -415,7 +415,9 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
       if (results[0].isEmpty()) {
         String message = getFailureMessage(audioPath, transcript, lmSentences, decode);
         logger.error(message);
-        langTestDatabase.logAndNotifyServerException(null, message);
+        if (langTestDatabase != null) {  // skip during testing
+          langTestDatabase.logAndNotifyServerException(null, message);
+        }
         return null;
       }
       // TODO makes this a tuple3 type
