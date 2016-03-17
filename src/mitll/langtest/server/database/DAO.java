@@ -23,7 +23,7 @@ public class DAO {
   private static final Logger logger = Logger.getLogger(DAO.class);
   protected final LogAndNotify logAndNotify;
   private final boolean isMYSQL;
-  protected final boolean isPostgreSQL;
+  private final boolean isPostgreSQL;
 
   public static final String ID = "ID";
 
@@ -36,7 +36,7 @@ public class DAO {
     isPostgreSQL = database.getServerProps().usePostgres();
   }
 
-  protected int getNumColumns(Connection connection, String table) throws SQLException {
+  int getNumColumns(Connection connection, String table) throws SQLException {
     Statement stmt = connection.createStatement();
     ResultSet rs = stmt.executeQuery("SELECT * FROM " + table + " LIMIT 1");
 
@@ -95,7 +95,6 @@ public class DAO {
 
   protected boolean remove(String table, String idField, long itemId) {
     String sql = "DELETE FROM " + table + " WHERE " + idField + "=" + itemId;
-
     return doSqlOn(sql, table, true);
   }
 
@@ -125,7 +124,7 @@ public class DAO {
 
       int count = getCount(table);
       //  logger.debug("now " + count + " in " + table);
-      if (before - count != 1 && warnIfDidntAlter) {
+      if (before - count == 0 && warnIfDidntAlter) {
         logger.warn("DAO.doSqlOn : now " + count +
             " there were " + before + " before for " + table);
       }
@@ -253,7 +252,7 @@ public class DAO {
     return isMYSQL ? "VARCHAR(256)" : "VARCHAR";
   }
 
-  protected String getPrimaryKey() { return getPrimaryKey(ID); }
+  //protected String getPrimaryKey() { return getPrimaryKey(ID); }
   protected String getPrimaryKey(String col) { return isMYSQL ? "PRIMARY KEY (" + col +  "), " : ""; }
 
 
