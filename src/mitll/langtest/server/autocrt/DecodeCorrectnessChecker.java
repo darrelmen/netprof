@@ -61,7 +61,6 @@ public class DecodeCorrectnessChecker {
                                          boolean useOldSchool) {
     Collection<String> foregroundSentences = getRefSentences(commonExercise, language, allowAlternates);
     PretestScore flashcardAnswer = getFlashcardAnswer(audioFile, foregroundSentences, answer, canUseCache, useOldSchool);
-
     // log what happened
     logDecodeOutput(answer, foregroundSentences, commonExercise.getID());
 
@@ -157,7 +156,8 @@ public class DecodeCorrectnessChecker {
         }
         if (same) return true;
       } else {
-        if (DEBUG) logger.debug("not same number of tokens " + answerTokens + " " + answerTokens.size() + " vs " + recoTokens + " " + recoTokens.size());
+        if (DEBUG) logger.debug("not same number of tokens " + answerTokens + " " +
+            answerTokens.size() + " vs " + recoTokens + " " + recoTokens.size());
       }
     }
     return false;
@@ -211,12 +211,13 @@ public class DecodeCorrectnessChecker {
 
   /**
    * Replace elipsis with space. Then remove all punct.
+   * Replace commas with spaces.
    *
    *  Deal with forward slashes like in english.
    * @param t
    * @return
    */
   private String removePunct(String t) {
-    return t.replaceAll("\\.\\.\\.", " ").replaceAll("/", " ").replaceAll("\\p{P}", "");
+    return t.replaceAll("\\.\\.\\.", " ").replaceAll("/", " ").replaceAll(","," ").replaceAll("\\p{P}", "");
   }
 }
