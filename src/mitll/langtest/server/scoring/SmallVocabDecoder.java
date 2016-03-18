@@ -46,7 +46,7 @@ public class SmallVocabDecoder {
    * @return most frequent vocabulary words
    * @see ASRScoring#getUsedTokens
    */
-  public List<String> getVocab(Collection<String> background, int vocabSizeLimit) {
+  List<String> getVocab(Collection<String> background, int vocabSizeLimit) {
     return getSimpleVocab(background, vocabSizeLimit);
   }
 
@@ -55,7 +55,7 @@ public class SmallVocabDecoder {
    * @return
    * @see #getTokens(String)
    */
-  public   String toFull(String s) {
+  String toFull(String s) {
     StringBuilder builder = new StringBuilder();
 
     char fullWidthZero = '\uFF10';
@@ -80,7 +80,7 @@ public class SmallVocabDecoder {
    * @return
    * @see ASRScoring#getUniqueTokensInLM
    */
-  public List<String> getSimpleVocab(Collection<String> sentences, int vocabSizeLimit) {
+  List<String> getSimpleVocab(Collection<String> sentences, int vocabSizeLimit) {
     // count the tokens
     final Map<String, Integer> sc = new HashMap<String, Integer>();
     for (String sentence : sentences) {
@@ -175,7 +175,7 @@ public class SmallVocabDecoder {
    */
   //warning -- this will filter out UNKNOWNMODEL - where this matters, add it 
   //back in
-  public String segmentation(String phrase) {
+  String segmentation(String phrase) {
     String s = longest_prefix(phrase, 0);
     if (s.trim().isEmpty()) {
       return phrase;
