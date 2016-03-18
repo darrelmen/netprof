@@ -8,8 +8,6 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Tab;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
@@ -49,7 +47,6 @@ import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -255,7 +252,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void getImage(int reqid, final String key, String path, final String type, int toUse, int height,
                         String exerciseID, final AsyncCallback<ImageResponse> client) {
 
-    ImageResponse ifPresent = imageCache.getIfPresent(key);
+  //  ImageResponse ifPresent = imageCache.getIfPresent(key);
+    ImageResponse ifPresent = imageCache.get(key);
     if (ifPresent != null) {
       //logger.info("getImage for key " + key+ " found  " + ifPresent);
       ifPresent.req = -1;
@@ -280,10 +278,22 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  private final Cache<String, ImageResponse> imageCache = CacheBuilder.newBuilder()
-      .maximumSize(MAX_CACHE_SIZE)
-      .expireAfterWrite(7, TimeUnit.DAYS)
-      .build();
+  /*
+    private final Cache<String, ImageResponse> imageCache = CacheBuilder.newBuilder()
+        .maximumSize(MAX_CACHE_SIZE)
+        .expireAfterWrite(7, TimeUnit.DAYS)
+        .build();
+  */
+  Map<String, ImageResponse> imageCache = lruCache(MAX_CACHE_SIZE);
+
+  private static <K, V> Map<K, V> lruCache(final int maxSize) {
+    return new LinkedHashMap<K, V>(maxSize * 4 / 3, 0.75f, true) {
+      @Override
+      protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+        return size() > maxSize;
+      }
+    };
+  }
 
   /**
    *
