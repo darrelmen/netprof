@@ -37,9 +37,7 @@
         <path refid="GWT.libraryclasspath"/>
         <pathelement location="war/WEB-INF/lib/json-lib-2.4-jdk15.jar"/>
         <pathelement location="war/WEB-INF/lib/commons-codec-1.6.jar"/>
-        <pathelement location="war/WEB-INF/lib/guava-18.0.jar"/>
-        <pathelement location="war/WEB-INF/lib/guava-gwt-18.0.jar"/>
-
+        <pathelement location="war/WEB-INF/lib/guava-19.0.jar"/>
         <!--        <pathelement location="war/WEB-INF/lib/guava-19.0.jar"/>
                 <pathelement location="war/WEB-INF/lib/guava-gwt-19.0.jar"/>-->
 
