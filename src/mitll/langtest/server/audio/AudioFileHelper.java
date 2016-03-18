@@ -747,7 +747,8 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
    * @param precalcResult
    * @param useOldSchool
    * @return PretestScore
-   * @seex #getASRScoreForAudio(int, String, String, int, int, boolean)
+   * @see LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
+   * @see LangTestDatabaseImpl#getResultASRInfo(long, int, int)
    * @see AlignDecode#getASRScoreForAudio
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    **/
@@ -815,6 +816,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
     if (isEnglishSite()) {
       sentence = sentence.toUpperCase();  // hack for English
     }
+    sentence = sentence.replaceAll(","," ");
 
     ASR asrScoring = useOldSchool || serverProps.getOldSchoolService() ? oldschoolScoring : getASRScoring();
 
@@ -828,7 +830,9 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
         usePhoneToDisplay);
 
     if (!pretestScore.isRanNormally() && isWebservice(asrScoring)) {
-      logger.warn("getASRScoreForAudio Using hydec as fallback for " + (decode ? " decoding " : " aligning ") + testAudioFile);
+      logger.warn("getASRScoreForAudio Using hydec as fallback for " + (decode ? " decoding " : " aligning ") + testAudioFile + " against '" +
+          sentence+
+          "'");
       pretestScore = oldschoolScoring.scoreRepeat(
           testAudioDir, removeSuffix(testAudioName),
           sentence, lmSentences,
