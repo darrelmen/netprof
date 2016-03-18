@@ -41,7 +41,7 @@ import java.util.*;
 public class AudioFileHelper implements CollationSort, AlignDecode {
   private static final Logger logger = Logger.getLogger(AudioFileHelper.class);
   private static final String POSTED_AUDIO = "postedAudio";
-  private static final int MIN_WARN_DUR = 30;
+//  private static final int MIN_WARN_DUR = 30;
   private static final String REG = "reg";
   private static final String SLOW = "slow";
 
@@ -817,6 +817,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
       sentence = sentence.toUpperCase();  // hack for English
     }
     sentence = sentence.replaceAll(","," ");
+    sentence = getSentenceToUse(sentence);
 
     ASR asrScoring = useOldSchool || serverProps.getOldSchoolService() ? oldschoolScoring : getASRScoring();
 
@@ -847,6 +848,25 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
     pretestScore.setJson(json.toString());
 
     return pretestScore;
+  }
+
+  /**
+   * Hack for percent sign in english - must be a better way.
+   * Tried adding it to dict but didn't seem to work.
+   *
+   * @param sentence
+   * @return
+   */
+  private String getSentenceToUse(String sentence) {
+    boolean english = serverProps.getLanguage().equalsIgnoreCase("English") && sentence.equals("%") || sentence.equals("％");
+    if (english) {
+      //logger.info("convert " +sentence + " to percent");
+    } else {
+      //boolean english1 = getLanguage().equalsIgnoreCase("English");
+     // boolean equals = sentence.equals("%") || sentence.equals("％");
+      //logger.info("NOT convert '" +sentence + "' to percent : " +english1 + " equals " + equals);
+    }
+    return english ? "percent" : sentence;
   }
 
   private boolean isEnglishSite() {
