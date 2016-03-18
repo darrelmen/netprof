@@ -4,7 +4,6 @@
 
 package mitll.langtest.server.scoring;
 
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -15,7 +14,6 @@ import java.util.Set;
 
 // TODO make this actually have method signatures...
 public interface ASR {
-
 	Collator getCollator();
 	boolean validLTS(String foreignLanguagePhrase);
 	PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
