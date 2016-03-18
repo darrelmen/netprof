@@ -1177,15 +1177,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
 
-    String sentenceToUse = getSentenceToUse(sentence);
-    PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentenceToUse, width, height, useScoreToColorBkg,
+    PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
         false, serverProps.useScoreCache(), exerciseID, cachedResult, usePhoneToDisplay1, false);
 
     long timeToRunHydec = System.currentTimeMillis() - then;
 
     logger.debug("getASRScoreForAudio : scoring file " + testAudioFile + " for " +
         " exid " + exerciseID +
-        " sentence " + sentenceToUse.length() + " characters long : " +
+        " sentence " + sentence.length() + " characters long : " +
         " score " + asrScoreForAudio.getHydecScore() +
         " took " + timeToRunHydec + " millis " + " usePhoneToDisplay " + usePhoneToDisplay1);
 
@@ -1193,25 +1192,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       db.rememberScore(resultID, asrScoreForAudio);
     }
     return asrScoreForAudio;
-  }
-
-  /**
-   * Hack for percent sign in english - must be a better way.
-   * Tried adding it to dict but didn't seem to work.
-   *
-   * @param sentence
-   * @return
-   */
-  private String getSentenceToUse(String sentence) {
-    boolean english = getLanguage().equalsIgnoreCase("English") && sentence.equals("%") || sentence.equals("％");
-    if (english) {
-      //logger.info("convert " +sentence + " to percent");
-    } else {
-      boolean english1 = getLanguage().equalsIgnoreCase("English");
-      boolean equals = sentence.equals("%") || sentence.equals("％");
-      //logger.info("NOT convert '" +sentence + "' to percent : " +english1 + " equals " + equals);
-    }
-    return english ? "percent" : sentence;
   }
 
   /**
@@ -1424,14 +1404,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise) {
     //logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
-
     getUserListManager().reallyCreateNewItem(userListID, userExercise, serverProps.getMediaDir());
 
     for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
-      logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + userExercise.getID());
+//      logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + userExercise.getID());
       db.getAudioDAO().updateExerciseID(audioAttribute.getUniqueID(), userExercise.getID());
     }
-    logger.debug("\treallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
+  //  logger.debug("\treallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
 
     return userExercise;
   }
