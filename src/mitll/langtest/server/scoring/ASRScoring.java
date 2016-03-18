@@ -366,21 +366,17 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @see #getUsedTokens
    */
   private String getUniqueTokensInLM(Collection<String> lmSentences, List<String> backgroundVocab) {
-    String sentence;
     Set<String> backSet = new HashSet<String>(backgroundVocab);
     List<String> mergedVocab = new ArrayList<String>(backgroundVocab);
-    List<String> foregroundVocab = getSmallVocabDecoder().getSimpleVocab(lmSentences, FOREGROUND_VOCAB_LIMIT);
-    for (String foregroundToken : foregroundVocab) {
+    for (String foregroundToken : getSmallVocabDecoder().getSimpleVocab(lmSentences, FOREGROUND_VOCAB_LIMIT)) {
       if (!backSet.contains(foregroundToken)) {
         mergedVocab.add(foregroundToken);
       }
     }
+
     StringBuilder builder = new StringBuilder();
-
     for (String token : mergedVocab) builder.append(token).append(" ");
-
-    sentence = builder.toString();
-    return sentence;
+    return builder.toString().trim();
   }
 
   /**
