@@ -19,7 +19,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
-import org.apache.xpath.operations.Bool;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +28,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.util.*;
-import java.util.function.BooleanSupplier;
 
 /**
  * All in support of tethered iOS app.
