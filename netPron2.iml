@@ -18,7 +18,7 @@
       <configuration>
         <setting name="compilerMaxHeapSize" value="1024" />
         <setting name="gwtScriptOutputStyle" value="OBF" />
-        <setting name="gwtSdkUrl" value="file://$MODULE_DIR$/gwt" />
+        <setting name="gwtSdkUrl" value="file://$MODULE_DIR$/../gwt_2_8_03_17" />
         <setting name="webFacet" value="Web" />
       </configuration>
     </facet>
@@ -43,10 +43,6 @@
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/.settings" />
-      <excludeFolder url="file://$MODULE_DIR$/bestAudio" />
-      <excludeFolder url="file://$MODULE_DIR$/bogus" />
-      <excludeFolder url="file://$MODULE_DIR$/crash" />
-      <excludeFolder url="file://$MODULE_DIR$/dbAnalysis" />
       <excludeFolder url="file://$MODULE_DIR$/extras" />
       <excludeFolder url="file://$MODULE_DIR$/gwt-unitCache" />
       <excludeFolder url="file://$MODULE_DIR$/imagewriter" />
@@ -55,7 +51,6 @@
       <excludeFolder url="file://$MODULE_DIR$/recoverJapanese" />
       <excludeFolder url="file://$MODULE_DIR$/recovery" />
       <excludeFolder url="file://$MODULE_DIR$/test-classes" />
-      <excludeFolder url="file://$MODULE_DIR$/war/WEB-INF/classes" />
       <excludeFolder url="file://$MODULE_DIR$/war/WEB-INF/deploy" />
       <excludeFolder url="file://$MODULE_DIR$/war/WEB-INF/deploy/langtest" />
       <excludeFolder url="file://$MODULE_DIR$/war/bestAudio" />
@@ -66,7 +61,6 @@
       <excludeFolder url="file://$MODULE_DIR$/war/config/crtPashtoJune" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/dari" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/dataCollectAdmin" />
-      <excludeFolder url="file://$MODULE_DIR$/war/config/egyptian" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/farsi" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/farsi2" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/first" />
@@ -86,24 +80,20 @@
       <excludeFolder url="file://$MODULE_DIR$/war/langtest" />
       <excludeFolder url="file://$MODULE_DIR$/war/reports" />
       <excludeFolder url="file://$MODULE_DIR$/war/scoring" />
-      <excludeFolder url="file://$MODULE_DIR$/web" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="gwt" level="project" />
     <orderEntry type="library" name="lib2" level="project" />
     <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="library" name="lib1" level="project" />
     <orderEntry type="module" module-name="imagewriter" />
-    <orderEntry type="library" name="gwt-dev" level="project" />
     <orderEntry type="library" name="lib" level="project" />
-    <orderEntry type="library" name="gwt-user" level="project" />
     <orderEntry type="library" name="commons-beanutils-1.8.0" level="project" />
     <orderEntry type="library" name="gwt-dev" level="project" />
     <orderEntry type="library" name="gwt-user" level="project" />
     <orderEntry type="module" module-name="Audioimage" />
-    <orderEntry type="library" name="guava-gwt-18.0" level="project" />
-    <orderEntry type="library" name="guava-18.0 (2)" level="project" />
     <orderEntry type="library" name="postgresql" level="project" />
+    <orderEntry type="library" name="servlet-api" level="project" />
+    <orderEntry type="library" name="guava-19.0" level="project" />
   </component>
 </module>
