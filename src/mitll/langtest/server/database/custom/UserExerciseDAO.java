@@ -77,6 +77,8 @@ public class UserExerciseDAO extends DAO {
   }
 
   /**
+   * TODO : Consider how to add multiple context sentences?
+   *
    * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p>
    * Uses return generated keys to get the user id
@@ -106,7 +108,6 @@ public class UserExerciseDAO extends DAO {
               "," + MODIFIED +
               ") " +
               "VALUES(?,?,?,?,?,?,?,?,?,?,?" +
-              //",?" +
               ")");
       int i = 1;
       statement.setString(i++, userExercise.getID());
@@ -114,8 +115,17 @@ public class UserExerciseDAO extends DAO {
       statement.setString(i++, fixSingleQuote(userExercise.getForeignLanguage()));
       statement.setString(i++, fixSingleQuote(userExercise.getTransliteration()));
       statement.setLong(i++, userExercise.getCombinedMutableUserExercise().getCreator());
-      statement.setString(i++, fixSingleQuote(userExercise.getContext()));
-      statement.setString(i++, fixSingleQuote(userExercise.getContextTranslation()));
+
+      if (userExercise.hasContext()) {
+        CommonExercise next = userExercise.getDirectlyRelated().iterator().next();
+        statement.setString(i++, fixSingleQuote(next.getForeignLanguage()));
+        statement.setString(i++, fixSingleQuote(next.getEnglish()));
+      }
+      else {
+        statement.setString(i++, "");
+        statement.setString(i++, "");
+      }
+
       statement.setBoolean(i++, isOverride);
 
       Map<String, String> unitToValue = userExercise.getUnitToValue();

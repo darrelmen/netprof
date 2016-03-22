@@ -31,6 +31,9 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   private transient Collection<String> refSentences;
   private transient List<String> firstPron = new ArrayList<String>();
 
+  private Collection<CommonExercise> directlyRelated = new ArrayList<>();
+  private Collection<CommonExercise> mentions = new ArrayList<>();
+
   public UserExercise() {
   }  // just for serialization
 
@@ -51,10 +54,10 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     super(exerciseID);
     this.creator = creator;
     this.uniqueID = uniqueID;
-    this.englishSentence = english;
+    this.english = english;
     this.foreignLanguage = foreignLanguage;
     this.transliteration = transliteration;
-    isPredef = !exerciseID.startsWith(CUSTOM_PREFIX);
+    isPredef = checkPredef();//!exerciseID.startsWith(CUSTOM_PREFIX);
   }
 
   /**
@@ -79,8 +82,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.modifiedTimestamp = modifiedTimestamp;
-    this.context = context;
-    this.contextTranslation = contextTranslation;
+    addContext(context, contextTranslation);
   }
 
   /**
@@ -88,10 +90,10 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @param creatorID
    * @see FlexListLayout#getFactory(PagingExerciseList)
    */
-  public <T extends CommonShell & AnnotationExercise & AudioRefExercise> UserExercise(T exercise, long creatorID) {
+  public <T extends CommonExercise> UserExercise(T exercise, long creatorID) {
     super(exercise.getID());
     this.isPredef = true;
-    this.englishSentence = exercise.getEnglish();
+    this.english = exercise.getEnglish();
     this.foreignLanguage = exercise.getForeignLanguage();
     this.transliteration = exercise.getTransliteration();
     this.meaning = exercise.getMeaning();
@@ -100,8 +102,13 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     setUnitToValue(exercise.getUnitToValue());
     setState(exercise.getState());
     setSecondState(exercise.getSecondState());
-    setContext(exercise.getContext());
-    setContextTranslation(exercise.getContextTranslation());
+
+    for (CommonExercise contextEx : exercise.getDirectlyRelated()) {
+      addContextExercise(contextEx);
+    }
+    for (CommonExercise contextEx : exercise.getMentions()) {
+      addMentionedContext(contextEx);
+    }
     copyAudio(exercise);
     this.creator = creatorID;
   }
@@ -142,31 +149,36 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     this.transliteration = transliteration;
   }
 
-/*
-  @Override
-  public String getContext() {
-    return context;
-  }
-*/
-
-  private void setContext(String context) {
-    this.context = context;
-  }
-
-/*
-  @Override
-  public String getContextTranslation() {
-    return contextTranslation;
-  }
-*/
-
-  private void setContextTranslation(String contextTranslation) {
-    this.contextTranslation = contextTranslation;
+  protected void addContext(String context, String contextTranslation) {
+    if (context != null && !context.isEmpty()) {
+      UserExercise contextExercise = new UserExercise(-1, "c" + id, getCreator(), contextTranslation, english, "");
+      addContextExercise(contextExercise);
+    }
   }
 
   @Override
   public boolean isPredefined() {
     return isPredef;
+  }
+
+  protected void addContextExercise(CommonExercise contextExercise) {
+    directlyRelated.add(contextExercise);
+  }
+
+  public void addMentionedContext(CommonExercise exercise) {
+    mentions.add(exercise);
+  }
+
+  public boolean hasContext() {
+    return !getDirectlyRelated().isEmpty();
+  }
+
+  public Collection<CommonExercise> getDirectlyRelated() {
+    return directlyRelated;
+  }
+
+  public Collection<CommonExercise> getMentions() {
+    return mentions;
   }
 
   @Override
@@ -253,11 +265,9 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
         "foreign language '" + getForeignLanguage() + "'" +
         " transliteation '" + getTransliteration() + "' " +
         "meaning '" + getMeaning() + "' " +
-        "context '" + getContext() + "' " +
-        "contextTranslation '" + getContextTranslation() + "' " +
+        "context '" + getDirectlyRelated() + "' " +
         "' audio attr (" + getAudioAttributes().size() +
         ")" +
-        // " :" + getAudioAttributes() +
         " unit/lesson " + getUnitToValue() +
         " state " + getState() + "/" + getSecondState() +
         " modified " + new Date(modifiedTimestamp);

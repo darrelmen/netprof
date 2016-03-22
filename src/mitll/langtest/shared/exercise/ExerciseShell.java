@@ -6,6 +6,7 @@ package mitll.langtest.shared.exercise;
 
 import mitll.langtest.shared.custom.UserList;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -19,13 +20,11 @@ import java.util.Collections;
  * TODO : UserList should not extend this
  */
 public class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
-  protected String englishSentence;
+  protected String english;
   protected String meaning;
   protected String foreignLanguage;
-  protected String context;
   protected String transliteration;
-  protected String contextTranslation;
-  protected String displayID;
+  String displayID;
 
   public ExerciseShell() {
   }
@@ -36,30 +35,28 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
    * @see UserList#UserList()
    */
   public ExerciseShell(String id) {
-    this(id, "", "", "", "", "", "", id);
+    this(id, "", "", "", "", id);
   }
 
   /**
    * @param id
-   * @param englishSentence
+   * @param english
    * @param meaning
    * @param foreignLanguage
    * @param transliteration
-   * @param context
-   * @param contextTranslation
    * @param displayID
+   * @paramx context
+   * @paramx contextTranslation
    * @see #getShell()
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShells
    */
-  private ExerciseShell(String id, String englishSentence, String meaning, String foreignLanguage,
-                        String transliteration, String context, String contextTranslation, String displayID) {
+  private ExerciseShell(String id, String english, String meaning, String foreignLanguage,
+                        String transliteration, String displayID) {
     super(id);
-    this.englishSentence = englishSentence;
+    this.english = english;
     this.meaning = meaning;
     this.foreignLanguage = foreignLanguage;
     this.transliteration = transliteration;
-    this.context = context;
-    this.contextTranslation = contextTranslation;
     this.displayID = displayID;
   }
 
@@ -68,11 +65,11 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShells(java.util.Collection)
    */
   public CommonShell getShell() {
-    return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage, transliteration, context, contextTranslation, displayID);
+    return new ExerciseShell(getID(), english, meaning, foreignLanguage, transliteration, displayID);
   }
 
   public String getEnglish() {
-    return englishSentence;
+    return english;
   }
 
   @Override
@@ -88,16 +85,6 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
   @Override
   public boolean equals(Object other) {
     return other instanceof ExerciseShell && getID().equals(((ExerciseShell) other).getID());
-  }
-
-  @Override
-  public String getContext() {
-    return context;
-  }
-
-  @Override
-  public String getContextTranslation() {
-    return contextTranslation;
   }
 
   @Override
@@ -126,7 +113,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
 
   @Override
   public void setEnglish(String english) {
-    this.englishSentence = english;
+    this.english = english;
   }
 
   public String toString() {

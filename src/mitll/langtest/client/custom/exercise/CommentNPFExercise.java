@@ -31,11 +31,14 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
+import mitll.langtest.shared.exercise.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -62,7 +65,6 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
   private PlayAudioPanel contextPlay;
 
   /**
-   *
    * @param e
    * @param controller
    * @param listContainer
@@ -124,17 +126,21 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
   }
 
   private void addContextButton(final T e, DivWidget row) {
-    String originalContext = e.getContext();
-    String context = originalContext != null && !originalContext.trim().isEmpty() ? originalContext : "";
+    //String originalContext = e.getContext();
+    //String context = originalContext != null && !originalContext.trim().isEmpty() ? originalContext : "";
 
-    if (!context.isEmpty() && controller.getProps().showContextButton()) {
+    if (!e.getDirectlyRelated().isEmpty() && controller.getProps().showContextButton()) {
       Button show = new Button(CONTEXT_SENTENCE);
       show.setIcon(IconType.QUOTE_RIGHT);
       show.setType(ButtonType.SUCCESS);
       show.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          new ModalInfoDialog(CONTEXT_SENTENCE, getContext(e));
+          DivWidget container = new DivWidget();
+          for (CommonExercise contextEx : e.getDirectlyRelated()) {
+            container.add(getContext(contextEx, e.getForeignLanguage()));
+          }
+          new ModalInfoDialog(CONTEXT_SENTENCE, container);//getContext(e, e.getForeignLanguage()));
         }
       });
 
@@ -152,16 +158,16 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @return
    * @see #addContextButton
    */
-  private <U extends CommonShell & AnnotationExercise & AudioRefExercise> Panel getContext(U e) {
-    String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
-    String contextTranslation = e.getContextTranslation() != null && !e.getContextTranslation().trim().isEmpty() ? e.getContextTranslation() : "";
+  private <U extends CommonAudioExercise> Panel getContext(U e, String itemText) {
+    String context = e.getForeignLanguage();//e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
+    String contextTranslation = e.getEnglish();//e.getContextTranslation() != null && !e.getContextTranslation().trim().isEmpty() ? e.getContextTranslation() : "";
     boolean same = context.equals(contextTranslation);
 
     if (!context.isEmpty()) {
       Panel hp = new HorizontalPanel();
       Panel vp = new VerticalPanel();
       addGenderChoices(e, hp);
-      String highlightedVocabItemInContext = highlightVocabItemInContext(e, context);
+      String highlightedVocabItemInContext = getHighlightedItemInContext(context,itemText);
       Widget entry = getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, highlightedVocabItemInContext);
       vp.add(entry);
 
@@ -175,7 +181,8 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
 
   private void addContextTranslation(AnnotationExercise e, String contextTranslation, boolean same, Panel vp) {
     if (!contextTranslation.isEmpty() && !same) {
-      Widget translationEntry = getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION, contextTranslation);
+      Widget translationEntry = getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION,
+          contextTranslation);
       vp.add(translationEntry);
     }
   }
@@ -184,7 +191,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * Add underlines of item tokens in context sentence.
    * <p>
    * TODO : don't do this - make spans with different colors
-   *
+   * <p>
    * Worries about lower case/upper case mismatch.
    *
    * @param e
@@ -192,13 +199,20 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @return
    * @see #getContext
    */
+/*
   private String highlightVocabItemInContext(CommonShell e, String context) {
-    String foreignLanguage = e.getForeignLanguage();
-    return getHighlightedItemInContext(context, foreignLanguage);
+    return getHighlightedItemInContext(context, e.getForeignLanguage());
   }
+*/
 
+  /**
+   * @param context
+   * @param foreignLanguage
+   * @return html with underlines on the item text
+   * @see
+   */
   private String getHighlightedItemInContext(String context, String foreignLanguage) {
-    String trim   = foreignLanguage.trim();
+    String trim = foreignLanguage.trim();
     String toFind = removePunct(trim);
 
     // todone split on spaces, find matching words if no contigious overlap
@@ -229,7 +243,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
           builder.append("</u>");
         }
         //else {
-          //log("from " + endToken + " couldn't find token '" + token + "' len " + token.length() + " in '" + context + "'");
+        //log("from " + endToken + " couldn't find token '" + token + "' len " + token.length() + " in '" + context + "'");
         //}
       }
       builder.append(context.substring(endToken));
@@ -240,9 +254,9 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
   }
 
   /**
-   * @see #getHighlightedItemInContext(String, String)
    * @param sentence
    * @return
+   * @see #getHighlightedItemInContext(String, String)
    */
   private Collection<String> getTokens(String sentence) {
     List<String> all = new ArrayList<String>();
@@ -307,7 +321,6 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     AudioAttribute toUse = maleAudio != null ? maleAudio : femaleAudio != null ? femaleAudio : defaultAudio;
     String path = toUse == null ? null : toUse.getAudioRef();
     if (path != null) {
-      //System.out.println("adding context play option " + path);
       contextPlay = new PlayAudioPanel(controller, path)
           .setPlayLabel("")
           .setPauseLabel("")
@@ -436,9 +449,9 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
   }
 
   /**
+   * @return
    * @see #getEntry(String, String, String, ExerciseAnnotation)
    * @see #makeFastAndSlowAudio(String)
-   * @return
    */
   private CommentBox getCommentBox() {
     if (logger == null) {
