@@ -51,4 +51,21 @@ public class DecodeTest extends BaseTest {
     for (AudioAttribute audioAttribute : audioAttributes)
       audioFileHelper.decodeOneAttribute(exercise, audioAttribute, false);
   }
+
+  @Test
+  public void testSpanish() {
+    DatabaseImpl db = getDatabase("spanish");
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), db.getServerProps(), db, null);
+
+    CommonExercise exercise = db.getExercise("50264");
+    logger.info("got " +exercise);
+
+    Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
+    for (AudioAttribute audioAttribute : audioAttributes) {
+      logger.info("attr " + audioAttribute);
+    }
+    for (CommonExercise context : exercise.getDirectlyRelated()) {
+      logger.info("got " + context + " with " + context.getAudioAttributes());
+    }
+  }
 }
