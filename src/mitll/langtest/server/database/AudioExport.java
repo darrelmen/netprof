@@ -264,8 +264,16 @@ public class AudioExport {
       for (String type : typeOrder) {
         row.createCell(j++).setCellValue(exercise.getUnitToValue().get(type));
       }
-      row.createCell(j++).setCellValue(exercise.getContext());
-      row.createCell(j++).setCellValue(exercise.getContextTranslation());
+
+      if (exercise.hasContext()) {
+        CommonExercise next = exercise.getDirectlyRelated().iterator().next();
+        row.createCell(j++).setCellValue(next.getForeignLanguage());
+        row.createCell(j++).setCellValue(next.getEnglish());
+      }
+      else {
+        row.createCell(j++).setCellValue("");
+        row.createCell(j++).setCellValue("");
+      }
 
       if (isDefectList) {
 //        logger.debug("annos for " + exercise.getID() + "\tfields : " + exercise.getFieldToAnnotation());
