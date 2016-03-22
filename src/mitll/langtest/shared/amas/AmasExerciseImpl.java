@@ -235,16 +235,6 @@ public class AmasExerciseImpl implements CommonShell {
   }
 
   @Override
-  public String getContext() {
-    return null;
-  }
-
-  @Override
-  public String getContextTranslation() {
-    return null;
-  }
-
-  @Override
   public String getDisplayID() {
     return id;
   }
