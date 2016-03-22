@@ -6,6 +6,7 @@ package mitll.langtest.shared.exercise;
 
 import mitll.langtest.server.database.ResultDAO;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import net.sf.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,8 +16,6 @@ import java.util.Set;
 /**
  * Representation of a individual item of work the user sees.  Could be a pronunciation exercise or a question(s)
  * based on a prompt.
- * <p>
- * TODO : consider subclass for pronunciation exercises?
  * <p>
  * User: GO22670
  * Date: 5/8/12
@@ -33,22 +32,41 @@ public class Exercise extends AudioExercise implements CommonExercise,
   private transient List<String> firstPron = new ArrayList<String>();
   private long updateTime = 0;
 
-  public Exercise() {}
+  private Collection<CommonExercise> directlyRelated = new ArrayList<>();
+  private Collection<CommonExercise> mentions = new ArrayList<>();
+
+  // for serialization
+  public Exercise() {
+  }
 
   /**
    * @param id
-   * @param context
    * @paramx content
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    */
   public Exercise(String id, String context, String contextTranslation, String meaning, String refAudioIndex) {
     super(id);
-    this.context = context;
-    this.contextTranslation = contextTranslation;
     this.meaning = meaning;
     this.refAudioIndex = refAudioIndex;
+    addContext(context, contextTranslation);
   }
 
+  public Exercise(String id, String context, String contextTranslation) {
+    super(id);
+    this.foreignLanguage = context;
+    this.english = contextTranslation;
+  }
+
+  /**
+   * @param id
+   * @param englishSentence
+   * @param foreignLanguage
+   * @param meaning
+   * @param transliteration
+   * @param displayID
+   * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#toExercise(JSONObject)
+   * @see mitll.langtest.server.json.JsonExport#toExercise(JSONObject, Collection)
+   */
   public Exercise(String id,
                   String englishSentence,
                   String foreignLanguage,
@@ -62,9 +80,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.meaning = meaning;
     setForeignLanguage(foreignLanguage);
     setTransliteration(transliteration);
-    this.context = context;
-    this.contextTranslation = contextTranslation;
     this.displayID = displayID;
+    addContext(context, contextTranslation);
   }
 
   @Override
@@ -81,6 +98,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.refSentences = sentenceRefs;
   }
 
+  /**
+   * @return
+   * @deprecated we should convert these into audio table entries
+   */
   @Override
   public String getRefAudioIndex() {
     return refAudioIndex;
@@ -92,8 +113,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @see mitll.langtest.server.database.UserDAO#DEFAULT_USER_ID
    * @return
+   * @see mitll.langtest.server.database.UserDAO#DEFAULT_USER_ID
    */
   @Override
   public long getCreator() {
@@ -121,7 +142,16 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return null;
   }
 
-  public CommonAnnotatable getCommonAnnotatable() { return this; }
+  public CommonAnnotatable getCommonAnnotatable() {
+    return this;
+  }
+
+  protected void addContext(String context, String contextTranslation) {
+    if (!context.isEmpty()) {
+      Exercise contextExercise = new Exercise("c" + id, context, contextTranslation);
+      addContextExercise(contextExercise);
+    }
+  }
 
   @Override
   public void setTransliteration(String transliteration) {
@@ -133,7 +163,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    */
   public void setEnglishSentence(String englishSentence) {
-    this.englishSentence = englishSentence;
+    this.english = englishSentence;
   }
 
   public List<CorrectAndScore> getScores() {
@@ -186,12 +216,12 @@ public class Exercise extends AudioExercise implements CommonExercise,
       }
     }
 
-    return "Exercise " + getID() + "/"+getDisplayID()+
+    return "Exercise " + getID() + "/" + getDisplayID() +
         " english '" + getEnglish() +
         "'/'" + getForeignLanguage() + "' " +
         "meaning '" + getMeaning() +
         "' transliteration '" + getTransliteration() +
-        "' context " + getContext() + "/" + getContextTranslation() +
+        "' context " + getDirectlyRelated() +
         " audio count = " + audioAttributes1.size() +
         (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
         " unit->lesson " + getUnitToValue();
@@ -204,4 +234,26 @@ public class Exercise extends AudioExercise implements CommonExercise,
   public long getUpdateTime() {
     return updateTime;
   }
+
+
+  protected void addContextExercise(CommonExercise contextExercise) {
+    directlyRelated.add(contextExercise);
+  }
+
+  public void addMentionedContext(CommonExercise exercise) {
+    mentions.add(exercise);
+  }
+
+public boolean hasContext() {
+  return !getDirectlyRelated().isEmpty();
+}
+
+  public Collection<CommonExercise> getDirectlyRelated() {
+    return directlyRelated;
+  }
+
+  public Collection<CommonExercise> getMentions() {
+    return mentions;
+  }
+
 }
