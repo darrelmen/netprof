@@ -37,7 +37,7 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 	private AttachAudio attachAudio;
 	private AudioDAO audioDAO;
 
-	public BaseExerciseDAO(ServerProperties serverProps, UserListManager userListManager, boolean addDefects) {
+	BaseExerciseDAO(ServerProperties serverProps, UserListManager userListManager, boolean addDefects) {
 		this.serverProps = serverProps;
 		this.userListManager = userListManager;
 		this.language = serverProps.getLanguage();
@@ -83,9 +83,16 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 		// add new items
 		addNewExercises();
 
+		attachAudio();
+	}
+
+	/**
+	 * Worry about if the audio transcript doesn't match the exercise transcript
+	 */
+	private void attachAudio() {
 		Set<String> transcriptChanged = new HashSet<>();
 
-   // logger.info("afterReadingExercises trying to attach audio to " + exercises.size());
+		// logger.info("afterReadingExercises trying to attach audio to " + exercises.size());
 		for (CommonExercise ex : exercises) {
 			attachAudio.attachAudio(ex, transcriptChanged);
 			String refAudioIndex = ex.getRefAudioIndex();
@@ -300,11 +307,9 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 	public boolean remove(String id) {
 		synchronized (this) {
 			CommonExercise remove = idToExercise.remove(id);
-			if (remove == null) return false;
-			return exercises.remove(remove);
+			return remove != null && exercises.remove(remove);
 		}
 	}
-
 
 	public void setDependencies(String mediaDir, String installPath,
 															UserExerciseDAO userExerciseDAO, AddRemoveDAO addRemoveDAO, AudioDAO audioDAO) {
