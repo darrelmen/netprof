@@ -34,7 +34,7 @@ public class Banner implements RequiresResize {
   private static final double MIN_RATIO = 0.7;
   private static final int min = 720;
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@ll.mit.edu";
-  public static final String LTEA_DLIFLC_EDU = "ltea@dliflc.edu";
+  private static final String LTEA_DLIFLC_EDU = "ltea@dliflc.edu";
   private final String HREF;
   private static final String NEED_HELP_QUESTIONS_CONTACT_US = "Need Help? Questions? Contact us.";
 
