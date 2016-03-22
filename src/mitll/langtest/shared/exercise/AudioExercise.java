@@ -7,6 +7,7 @@ package mitll.langtest.shared.exercise;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.custom.UserExercise;
+import net.sf.json.JSONObject;
 
 import java.util.*;
 
@@ -39,7 +40,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.DatabaseServlet#getJsonForExercise
+   * @see mitll.langtest.server.json.JsonExport#addContextAudioRefs(AudioAttributeExercise, JSONObject)
    * @param prefs
    * @return
    */
@@ -87,7 +88,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.ExcelImport#addOldSchoolAudio
+   * @see mitll.langtest.server.database.exercise.AttachAudio#addOldSchoolAudio
    * @param ref
    * @param user
    */
@@ -145,8 +146,9 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
+   * @param isMale true if by male speaker
    * @return
-   * @see mitll.langtest.server.DatabaseServlet#getJsonForExercise(CommonExercise)
+   * @see mitll.langtest.server.json.JsonExport#addContextAudioRefs(AudioAttributeExercise, JSONObject)
    */
   public AudioAttribute getLatestContext(boolean isMale) {
     long latestTime = 0;
@@ -280,7 +282,7 @@ public class AudioExercise extends ExerciseShell {
    * Skip context audio
    * @param isMale
    * @return
-   * @see #getMostRecentAudio(boolean, java.util.Set)
+   * @see #getMostRecentAudio
    * @see #getUserMap(boolean)
    */
   private Map<MiniUser, List<AudioAttribute>> getUserToAudio(boolean isMale) {
@@ -304,7 +306,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget()
+   * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget
    * @return
    */
   public List<AudioAttribute> getDefaultUserAudio() {
@@ -423,7 +425,7 @@ public class AudioExercise extends ExerciseShell {
   public Map<String, ExerciseAnnotation> getFieldToAnnotation() {  return fieldToAnnotation;  }
 
   /**
-   * @see UserExercise#UserExercise(CommonExercise)
+   * @see UserExercise#UserExercise(CommonShell, long)
    * @param fieldToAnnotation
    */
   public void setFieldToAnnotation(Map<String, ExerciseAnnotation> fieldToAnnotation) {
