@@ -4,12 +4,13 @@
 
 package mitll.langtest.shared.exercise;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
  * Created by GO22670 on 3/20/2014.
  */
-public interface CommonExercise extends CommonShell, AudioAttributeExercise, AnnotationExercise, ScoredExercise {
+public interface CommonExercise extends CommonAudioExercise, ScoredExercise {
   CommonShell getShell();
 
   List<String> getFirstPron();
@@ -17,6 +18,11 @@ public interface CommonExercise extends CommonShell, AudioAttributeExercise, Ann
   String getRefAudioIndex();
 
   boolean isPredefined();
+
+  boolean hasContext();
+  Collection<CommonExercise> getDirectlyRelated();
+
+  Collection<CommonExercise> getMentions();
 
   /**
    * @see mitll.langtest.client.custom.dialog.EditItem#didICreateThisItem(CommonExercise)

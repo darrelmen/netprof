@@ -370,7 +370,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see #getExerciseIds
    * @see #getExercisesForSelectionState
    */
-  private Collection<CommonExercise> filterByUnrecorded(long userID, boolean onlyUnrecordedByMyGender, boolean onlyExamples,
+  private Collection<CommonExercise> filterByUnrecorded(long userID,
+                                                        boolean onlyUnrecordedByMyGender,
+                                                        boolean onlyExamples,
                                                         Collection<CommonExercise> exercises) {
     if (onlyUnrecordedByMyGender) {
       logger.debug("filterByUnrecorded : for " + userID + " only by same gender " + onlyUnrecordedByMyGender +
@@ -394,7 +396,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         String trim = exercise.getID().trim();
         if (allExercises.contains(trim)) {
           if (seen.contains(trim)) logger.warn("saw " + trim + " " + exercise + " again!");
-          if ((onlyExamples && hasContext(exercise)) || !onlyExamples) {
+          if (!onlyExamples || hasContext(exercise)) {
             seen.add(trim);
             copy.add(exercise);
           }
@@ -425,8 +427,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  private <X extends CommonShell> boolean hasContext(X exercise) {
-    return exercise.getContext() != null && !exercise.getContext().isEmpty();
+  private <X extends CommonExercise> boolean hasContext(X exercise) {
+    return !exercise.getDirectlyRelated().isEmpty();//.getContext() != null && !exercise.getContext().isEmpty();
   }
 
   /**
@@ -1114,15 +1116,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       String exerciseID = result.getExerciseID();
 
-      CommonShell exercise = serverProps.isAMAS() ? db.getAMASExercise(exerciseID) :
+      boolean isAMAS = serverProps.isAMAS();
+      CommonShell exercise = isAMAS ? db.getAMASExercise(exerciseID) :
           db.getExercise(exerciseID);
+
+      // maintain backward compatibility - so we can show old recordings of ref audio for the context sentence
+      String sentence = isAMAS ? exercise.getForeignLanguage() :
+          (result.getAudioType().contains("context")) ? db.getExercise(exerciseID).getDirectlyRelated().iterator().next().getForeignLanguage() : exercise.getForeignLanguage();
+
       if (exercise == null) {
         logger.warn(getLanguage() + " can't find exercise id " + exerciseID);
         return new PretestScore();
       } else {
-        String sentence = exercise.getForeignLanguage();
-        if (result.getAudioType().contains("context")) sentence = exercise.getContext();
-
         String audioFilePath = result.getAnswer();
         ensureMP3(audioFilePath, sentence, "" + result.getUserid());
         //logger.info("resultID " +resultID+ " temp dir " + tempDir.getAbsolutePath());
@@ -1410,7 +1415,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 //      logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + userExercise.getID());
       db.getAudioDAO().updateExerciseID(audioAttribute.getUniqueID(), userExercise.getID());
     }
-  //  logger.debug("\treallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
+    //  logger.debug("\treallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
 
     return userExercise;
   }
