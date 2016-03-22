@@ -67,9 +67,7 @@ public class JsonExport {
     JSONArray content = object.getJSONArray(ScoreServlet.CONTENT);
     List<CommonExercise> exercises = new ArrayList<>();
     for (int i = 0; i < content.size(); i++) {
-      JSONObject jsonObject = content.getJSONObject(i);
-      CommonExercise commonShell = toExercise(jsonObject, types);
-      exercises.add(commonShell);
+      exercises.add(toExercise(content.getJSONObject(i), types));
     }
 
     for (CommonExercise ex : exercises.subList(0, 10)) {
@@ -79,9 +77,8 @@ public class JsonExport {
   }
 
   private List<String> getTypes(JSONObject object) {
-    JSONArray jsonArray = object.getJSONArray(UNIT_ORDER);
-
     List<String> types = new ArrayList<>();
+    JSONArray jsonArray = object.getJSONArray(UNIT_ORDER);
     for (int i = 0; i < jsonArray.size(); i++) types.add(jsonArray.getString(i));
     return types;
   }
@@ -92,8 +89,7 @@ public class JsonExport {
    * @param <T>
    * @see ScoreServlet#getJSONExerciseExport
    */
-  public <T extends CommonShell/* & AudioAttributeExercise*/> void addJSONExerciseExport(JSONObject jsonObject,
-                                                                                         Collection<T> exercises) {
+  public <T extends CommonExercise> void addJSONExerciseExport(JSONObject jsonObject, Collection<T> exercises) {
     jsonObject.put(COUNT, exercises.size());
     jsonObject.put(UNIT_ORDER, addUnitsInOrder());
     jsonObject.put(UNIT_CHAPTER_NESTING, addSections(sectionHelper.getSectionNodes()));
@@ -132,7 +128,7 @@ public class JsonExport {
    * @return
    * @see #addJSONExerciseExport(JSONObject, Collection)
    */
-  public <T extends CommonShell/* & AudioAttributeExercise*/> JSONArray getExercisesAsJson(Collection<T> exercises) {
+  public <T extends CommonExercise> JSONArray getExercisesAsJson(Collection<T> exercises) {
     JSONArray jsonArray = new JSONArray();
     Collection<T> sortedByID = getSortedByID(exercises);
 
@@ -257,7 +253,7 @@ public class JsonExport {
    * @return
    * @see #getJsonForSelection(Map, boolean)
    */
-  private JSONArray getJsonArray(List<CommonExercise> copy) {
+  private JSONArray getJsonArray(Collection<CommonExercise> copy) {
     JSONArray exercises = new JSONArray();
     for (CommonExercise exercise : copy) {
       exercises.add(getJsonForExercise(exercise));
@@ -273,7 +269,7 @@ public class JsonExport {
    * @param exercise
    * @return
    */
-  private <T extends CommonShell & AudioAttributeExercise> JSONObject getJsonForExercise(T exercise) {
+  private <T extends CommonExercise> JSONObject getJsonForExercise(T exercise) {
     JSONObject ex = getJsonForCommonExercise(exercise, false);
 
     addContextAudioRefs(exercise, ex);
@@ -282,6 +278,15 @@ public class JsonExport {
     return ex;
   }
 
+  /**
+   * Add male & female context sentence audio and ref audio
+   *
+   * Used to consider checking for MP3 versions.
+   * @param exercise
+   * @param ex
+   * @param <T>
+   * @see #getJsonForExercise(CommonExercise)
+   */
   private <T extends AudioAttributeExercise> void addContextAudioRefs(T exercise, JSONObject ex) {
     AudioAttribute latestContext = exercise.getLatestContext(true);
     //if (latestContext != null) {
@@ -298,15 +303,31 @@ public class JsonExport {
     ex.put(REF, exercise.hasRefAudio() ? exercise.getRefAudioWithPrefs(preferredVoices) : NO);
   }
 
-  private JSONObject getJsonForCommonExercise(CommonShell exercise, boolean addMeaning) {
+  /**
+   * TODO : add json array of context sentences - be careful to maintain backward compatibility
+   * @param exercise
+   * @param addMeaning
+   * @return
+   */
+  private JSONObject getJsonForCommonExercise(CommonExercise exercise, boolean addMeaning) {
     JSONObject ex = new JSONObject();
     ex.put(ID, exercise.getID());
     ex.put(FL, exercise.getForeignLanguage());
     ex.put(TL, exercise.getTransliteration() == null ? "" : exercise.getTransliteration());
     ex.put(EN, exercise.getEnglish());
     if (addMeaning) ex.put(MN, exercise.getMeaning());
-    ex.put(CT, exercise.getContext() == null ? "" : exercise.getContext());
-    ex.put(CTR, exercise.getContextTranslation() == null ? "" : exercise.getContextTranslation());
+
+    boolean hasContext = !exercise.getDirectlyRelated().isEmpty();
+    if (hasContext) {
+      CommonExercise next = exercise.getDirectlyRelated().iterator().next();
+      ex.put(CT,  next.getForeignLanguage());
+      ex.put(CTR, next.getEnglish());
+    }
+    else {
+      ex.put(CT,  "");
+      ex.put(CTR, "");
+    }
+
     return ex;
   }
 

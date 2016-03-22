@@ -270,9 +270,15 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    * @return
    * @see #scoreRepeatExercise(String, String, String, Collection, String, int, int, boolean, boolean, String, boolean, String, Result, boolean)
    */
-  private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-                                       boolean decode, String prefix, String noSuffix, Scores scores, String phoneLab,
-                                       String wordLab, double duration, int processDur, boolean usePhoneToDisplay,
+  private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight,
+                                       boolean useScoreForBkgColor,
+                                       boolean decode, String prefix, String noSuffix,
+                                       Scores scores,
+                                       String phoneLab,
+                                       String wordLab,
+                                       double duration,
+                                       int processDur,
+                                       boolean usePhoneToDisplay,
                                        JSONObject jsonObject
   ) {
     String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") + (usePhoneToDisplay ? "_phoneToDisplay" : "");
@@ -303,9 +309,13 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 
   /**
    * TODO : Some phrases seem to break lts process?
+   * This will work for both align and decode modes, although align will ignore the unknownmodel.
+   *
+   * Create a dcodr input string dictionary, a sequence of words and their phone sequence:
+   * e.g. [distra?do,d i s t rf a i d o sp;UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil]
    *
    * @param transcript
-   * @return
+   * @return the dictionary for dcodr
    * @see #runHydra(String, String, Collection, String, boolean, int)
    */
   private String createHydraDict(String transcript) {
@@ -314,59 +324,55 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     }
 
     String dict = "[";
-    //transcript = "<s> " + transcript + " </s>";
-    int ctr = 0;
     for (String word : transcript.split(" ")) {
       String trim = word.trim();
       if (!trim.equals(word)) {
         logger.warn("trim is different '" + trim + "' != '" + word + "'");
         word = trim;
       }
-      if (!word.equals(" ") && !word.equals("")) {
+      if (!word.equals(" ") && !word.isEmpty()) {
         if (htkDictionary.contains(word)) {
           scala.collection.immutable.List<String[]> prons = htkDictionary.apply(word);
           for (int i = 0; i < prons.size(); i++) {
-            if (ctr != 0) dict += ";";
-            ctr++;
-            dict += word + ",";
-            String[] pron = prons.apply(i);
-            int ctr2 = 0;
-            for (String p : pron) {
-              if (ctr2 != 0) dict += " ";
-              ctr2 += 1;
-              dict += p;
-            }
-            dict += " sp";
+            dict += getPronStringForWord(word, prons.apply(i));
           }
         } else {
           if (getLTS() == null) {
             logger.warn(this + " " + languageProperty + " : LTS is null???");
           } else {
-
             String word1 = word.toLowerCase();
             String[][] process = getLTS().process(word1);
             if (process == null) {
               logger.error("couldn't get letter to sound map from " + getLTS() + " for " + word1);
             } else {
               for (String[] pron : process) {
-                if (ctr != 0) dict += ";";
-                ctr++;
-                dict += word + ",";
-                int ctr2 = 0;
-                for (String p : pron) {
-                  if (ctr2 != 0) dict += " ";
-                  ctr2 += 1;
-                  dict += p;
-                }
-                dict += " sp";
+                dict += getPronStringForWord(word, pron);
               }
             }
           }
         }
       }
     }
-    dict += ";UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil]";
+    dict += "UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil";
+    dict += "]";
     return dict;
+  }
+
+  /**
+   * TODO : (3/20/16) sp breaks wsdcodr when sent directly
+   * wsdcodr expects a pronunciation like : distraido,d i s t rf a i d o sp;
+   * @param word
+   * @param apply
+   * @return
+   */
+  private String getPronStringForWord(String word, String[] apply) {
+    return word + "," + listToSpaceSepSequence(apply) +" sp" + ";";
+  }
+
+  private String listToSpaceSepSequence(String[] pron) {
+    StringBuilder builder = new StringBuilder();
+    for (String p : pron) builder.append(p).append(" ");
+    return builder.toString().trim();
   }
 
   /**
