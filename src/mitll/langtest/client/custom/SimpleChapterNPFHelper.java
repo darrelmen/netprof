@@ -20,6 +20,7 @@ import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.exercise.AudioRefExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 
@@ -30,7 +31,7 @@ import mitll.langtest.shared.exercise.HasID;
  * Time: 3:27 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends CommonShell & AudioRefExercise>
+public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends CommonExercise>
     implements ReloadableContainer, RequiresResize {
   //private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
   private boolean madeNPFContent = false;
@@ -185,10 +186,10 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     }
   }
 
-  protected abstract static class MyFlexListLayout<T extends CommonShell, U extends CommonShell & AudioRefExercise> extends FlexListLayout<T, U> {
+  protected abstract static class MyFlexListLayout<T extends CommonShell, U extends CommonExercise> extends FlexListLayout<T, U> {
     private final SimpleChapterNPFHelper<T, U> outer;
 
-    public MyFlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
+    protected MyFlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
                             ExerciseController controller, SimpleChapterNPFHelper<T, U> outer) {
       super(service, feedback, controller);
       this.outer = outer;
