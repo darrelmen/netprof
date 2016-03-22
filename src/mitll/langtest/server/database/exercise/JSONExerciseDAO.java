@@ -13,7 +13,10 @@ import java.nio.file.Paths;
 import java.util.*;
 
 /**
+ * Get exercises from a json file.
+ *
  * Created by go22670 on 2/10/16.
+ *
  */
 public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
   private static final Logger logger = Logger.getLogger(JSONExerciseDAO.class);
@@ -42,14 +45,10 @@ public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Comm
 
     try {
       Path path = Paths.get(jsonFile);
-      byte[] encoded = Files.readAllBytes(path);
-      String asString = new String(encoded, ENCODING);
-      logger.info("readExercises reading from " + path.toFile().getAbsolutePath());
-
-      List<CommonExercise> exercises = jsonExport.getExercises(asString);
+      List<CommonExercise> exercises = jsonExport.getExercises(new String(Files.readAllBytes(path), ENCODING));
       populateSections(exercises);
 
-      logger.info("read " +exercises.size() + " from " + jsonFile);
+      logger.info("read " +exercises.size() + " from " + jsonFile + " at " + path.toFile().getAbsolutePath());
       return exercises;
     } catch (IOException e) {
       logger.error("got " +e,e);
@@ -57,7 +56,7 @@ public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Comm
     return Collections.emptyList();
   }
 
-  protected void populateSections(List<CommonExercise> exercises) {
+  void populateSections(Collection<CommonExercise> exercises) {
     for (CommonExercise ex : exercises) {
       Collection<SectionHelper.Pair> pairs = new ArrayList<>();
       for (Map.Entry<String,String> pair : ex.getUnitToValue().entrySet()) {

@@ -13,10 +13,7 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.exercise.AudioRefExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.STATE;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,8 +26,9 @@ import java.util.logging.Logger;
  * Time: 6:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell & AudioRefExercise> extends ExercisePanel<L,T> {
-  private final Logger logger = Logger.getLogger("WaveformExercisePanel");
+public class WaveformExercisePanel<L extends CommonShell, T extends CommonExercise> extends ExercisePanel<L,T> {
+//  private final Logger logger = Logger.getLogger("WaveformExercisePanel");
+  public static final String CONTEXT = "context=";
 
   private static final String RECORD_PROMPT  = "Record the word or phrase, first at normal speed, then again at slow speed.";
   private static final String RECORD_PROMPT2 = "Record the in-context sentence.";
@@ -85,11 +83,15 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
   }
   private boolean isNormalRecord() { return !isExampleRecord(); }
 
+  /**
+   * TODO : support recording audio for multiple context sentences...?
+   * @param e
+   * @return
+   */
   @Override
   protected String getExerciseContent(T e) {
-    //System.out.println("normal recording for " +e.getID());
     String context = isNormalRecord() ? e.getForeignLanguage() :
-        hasContext(exercise) ? exercise.getContext() : "No in-context audio for this exercise.";
+        hasContext(exercise) ? exercise.getDirectlyRelated().iterator().next().getForeignLanguage() : "No in-context audio for this exercise.";
     return ExerciseFormatter.getArabic(context);
   }
 
@@ -121,13 +123,13 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
   }
 
   private boolean hasContext(T exercise) {
-    return exercise.getContext() != null && !exercise.getContext().isEmpty();
+    return !exercise.getDirectlyRelated().isEmpty();// exercise.getContext() != null && !exercise.getContext().isEmpty();
   }
 
   private void addExampleSentenceRecorder(T exercise, LangTestDatabaseAsync service, ExerciseController controller,
                                           int index, Panel vp) {
     RecordAudioPanel fast = new RecordAudioPanel<T>(exercise, controller, this, service, index, false,
-        "context=" + Result.AUDIO_TYPE_REGULAR, instance);
+        CONTEXT + Result.AUDIO_TYPE_REGULAR, instance);
     audioPanels.add(fast);
     vp.add(fast);
 
@@ -146,31 +148,6 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
     addAnswerWidget(index, fast);
     return fast;
   }
-
-  /**
-   * TODO : don't copy code
-   * @return
-   */
-/*  private Panel getUnitLessonForExercise() {
-    Panel flow = new HorizontalPanel();
-    flow.getElement().setId("getUnitLessonForExercise_unitLesson");
-    flow.addStyleName("leftFiveMargin");
-    flow.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
-    //System.out.println("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
-
-    for (String type : controller.getStartupInfo().getTypeOrder()) {
-      Heading child = new Heading(GoodwaveExercisePanel.HEADING_FOR_UNIT_LESSON, type, exercise.getUnitToValue().get(type));
-      child.addStyleName("rightFiveMargin");
-      flow.add(child);
-    }
-    return flow;
-  }
-
-  private Widget getItemHeader(HasID e) {
-    Heading w = new Heading(GoodwaveExercisePanel.HEADING_FOR_UNIT_LESSON, GoodwaveExercisePanel.ITEM, e.getID());
-    w.getElement().setId("ItemHeading");
-    return w;
-  }*/
 
   protected Widget getContentScroller(HTML maybeRTLContent) {
     return maybeRTLContent;
@@ -194,9 +171,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
   public void postAnswers(ExerciseController controller, HasID completedExercise) {
   //  completedExercise.setState(STATE.RECORDED);
     // TODO : gah = do we really need to do this???
-
-    logger.info("Not setting state on " +completedExercise.getID());
-
+   // logger.info("Not setting state on " +completedExercise.getID());
     exerciseList.setState(completedExercise.getID(), STATE.RECORDED);
     exerciseList.redraw();
     exerciseList.loadNextExercise(completedExercise);
