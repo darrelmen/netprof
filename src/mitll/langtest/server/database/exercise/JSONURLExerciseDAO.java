@@ -22,7 +22,7 @@ import java.util.*;
  */
 public class JSONURLExerciseDAO extends JSONExerciseDAO {
   private static final Logger logger = Logger.getLogger(JSONURLExerciseDAO.class);
-  public static final String DOCUMENTS = "documents";
+  private static final String DOCUMENTS = "documents";
   private final Collection<String> typeOrder;
 
   /**
@@ -42,7 +42,7 @@ public class JSONURLExerciseDAO extends JSONExerciseDAO {
    * TODO :  Consider reading font from project info
    * @param serverProps
    */
-  void readProjectInfo(ServerProperties serverProps) {
+  private void readProjectInfo(ServerProperties serverProps) {
     String baseURL = serverProps.getLessonPlan();
 
     if (baseURL.endsWith(DOCUMENTS)) {
