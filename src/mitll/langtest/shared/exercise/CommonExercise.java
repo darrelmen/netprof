@@ -20,9 +20,12 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise {
   boolean isPredefined();
 
   boolean hasContext();
+
   Collection<CommonExercise> getDirectlyRelated();
 
   Collection<CommonExercise> getMentions();
+
+  boolean isSafeToDecode();
 
   /**
    * @see mitll.langtest.client.custom.dialog.EditItem#didICreateThisItem(CommonExercise)
