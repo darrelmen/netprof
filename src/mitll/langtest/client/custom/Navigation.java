@@ -28,6 +28,7 @@ import mitll.langtest.client.contextPractice.DialogWindow;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.custom.exercise.CommentNPFExercise;
+import mitll.langtest.client.custom.exercise.ContextCommentNPFExercise;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -142,7 +143,12 @@ public class Navigation implements RequiresResize, ShowTab {
         return new ExercisePanelFactory<CommonShell, CommonExercise>(service, feedback, controller, exerciseList) {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
-            return new CommentNPFExercise<>(e, controller, exerciseList, false, "classroom");
+            if (controller.getProps().canPracticeContext()) {
+              return new ContextCommentNPFExercise<>(e, controller, exerciseList, false, "classroom");
+            }
+            else {
+              return new CommentNPFExercise<>(e, controller, exerciseList, false, "classroom");
+            }
           }
         };
       }
