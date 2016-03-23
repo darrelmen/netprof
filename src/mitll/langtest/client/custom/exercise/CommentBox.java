@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 9/8/14.
  */
 public class CommentBox extends PopupContainer {
-  private final Logger logger = Logger.getLogger("CommentBox");
+  //private final Logger logger = Logger.getLogger("CommentBox");
 
   private static final String COMMENT_BUTTON_GROUP_NEW = "comment-button-group-new";
   private final String exerciseID;
