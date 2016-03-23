@@ -182,6 +182,11 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   }
 
   @Override
+  public boolean isSafeToDecode() {
+    return true;
+  }
+
+  @Override
   public MutableExercise getMutable() {
     return this;
   }
@@ -244,6 +249,11 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   @Override
   public void setRefSentences(Collection<String> orDefault) {
     this.refSentences = orDefault;
+  }
+
+  @Override
+  public void setSafeToDecode(boolean isSafeToDecode) {
+
   }
 
   @Override
