@@ -19,6 +19,8 @@ import java.util.logging.Logger;
 public class PropertyHandler {
   public static final String RTL = "rtl";
   public static final String IS_AMAS = "isAMAS";
+  public static final String TALKS_TO_DOMINO = "talksToDomino";
+  public static final String PRACTICE_CONTEXT = "practiceContext";
   private final Logger logger = Logger.getLogger("PropertyHandler");
 
   // property file property names
@@ -50,7 +52,7 @@ public class PropertyHandler {
   private static final String TURK_PARAM = "turk";
   private static final String NUM_GRADES_TO_COLLECT_PARAM = NUM_GRADES_TO_COLLECT;
 
-//  private static final String DLI_LANGUAGE_TESTING = "NetProF";
+  //  private static final String DLI_LANGUAGE_TESTING = "NetProF";
   private static final int DEFAULT_TIMEOUT = 45000;
   private static final String DEFAULT_EXERCISE = null;
   private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
@@ -76,12 +78,12 @@ public class PropertyHandler {
   private static final String PREFERRED_VOICES = "preferredVoices";
 
   private boolean adminView, analysis = false;
+  private boolean canPracticeContext = false;
   private boolean enableAllUsers;
   private boolean isAMAS;
   private boolean usePhoneToDisplay;
 
   private final String AMAS_WELCOME = "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)";
-//  private static final String PRONUNCIATION_FEEDBACK = "NetProF – Network Pronunciation Feedback";//"Classroom";//NetProF";//"PRONUNCIATION FEEDBACK";
   private static final String AMAS_PRONUNCIATION_FEEDBACK = "AMAS — Automatic Multi-Skilled Assessment System";
 
   private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
@@ -196,7 +198,8 @@ public class PropertyHandler {
   public static final String TEXT = "Text";
   private static final String AUDIO = "Audio";
   private String responseType = AUDIO;
-boolean talksToDomino = false;
+  boolean talksToDomino = false;
+
   /**
    * @param props
    * @see mitll.langtest.client.LangTest#onModuleLoad()
@@ -239,8 +242,9 @@ boolean talksToDomino = false;
       else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
       else if (key.equals(ENABLE_ALL_USERS)) enableAllUsers = getBoolean(value);
       else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
-      else if (key.equals("talksToDomino")) talksToDomino = getBoolean(value);
-      //else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
+      else if (key.equals(TALKS_TO_DOMINO)) talksToDomino = getBoolean(value);
+      else if (key.equals(PRACTICE_CONTEXT)) canPracticeContext = getBoolean(value);
+        //else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
       else if (key.equals(USE_PHONE_TO_DISPLAY)) {
         // logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
         usePhoneToDisplay = getBoolean(value);
@@ -380,6 +384,11 @@ boolean talksToDomino = false;
       analysis = !p.equals("false");
     }
 
+    p = Window.Location.getParameter("context");
+    if (p != null) {
+      canPracticeContext = !p.equals("false");
+    }
+
     String turkParam = Window.Location.getParameter(TURK_PARAM);
     if (turkParam != null) {
       turkID = turkParam;
@@ -461,7 +470,9 @@ boolean talksToDomino = false;
     return exercise_title;
   }
 
-  public String getAppTitle() { return appTitle;  }
+  public String getAppTitle() {
+    return appTitle;
+  }
 
   public boolean isDemoMode() {
     return demoMode;
@@ -473,6 +484,10 @@ boolean talksToDomino = false;
 
   public boolean useAnalysis() {
     return analysis;
+  }
+
+  public boolean canPracticeContext() {
+    return canPracticeContext;
   }
 
   public String getTurkID() {
@@ -522,8 +537,8 @@ boolean talksToDomino = false;
   }
 
   /**
-   * @see LangTest#isRightAlignContent()
    * @return
+   * @see LangTest#isRightAlignContent()
    */
   public boolean isRightAlignContent() {
     return rightAlignContent;
