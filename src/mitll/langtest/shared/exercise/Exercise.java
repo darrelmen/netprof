@@ -34,6 +34,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   private Collection<CommonExercise> directlyRelated = new ArrayList<>();
   private Collection<CommonExercise> mentions = new ArrayList<>();
+  private boolean safeToDecode;
 
   // for serialization
   public Exercise() {
@@ -256,4 +257,11 @@ public boolean hasContext() {
     return mentions;
   }
 
+  public boolean isSafeToDecode() {
+    return safeToDecode;
+  }
+
+  public void setSafeToDecode(boolean safeToDecode) {
+    this.safeToDecode = safeToDecode;
+  }
 }
