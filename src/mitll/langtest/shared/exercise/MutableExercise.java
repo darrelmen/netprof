@@ -29,4 +29,6 @@ public interface MutableExercise extends CommonShell, MutableShell {
   void setAvgScore(float v);
 
   void setRefSentences(Collection<String> orDefault);
+
+  void setSafeToDecode(boolean isSafeToDecode);
 }
