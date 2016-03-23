@@ -48,7 +48,7 @@ import java.util.logging.Logger;
  * Time: 5:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T> {
+public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExercise<T> {
   private Logger logger = Logger.getLogger("CommentNPFExercise");
 
   private static final String CONTEXT_SENTENCE = "Context Sentence";
@@ -74,14 +74,14 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @see mitll.langtest.client.custom.Navigation#Navigation(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback)
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory(PagingExerciseList, String, boolean)
    */
-  public CommentNPFExercise(T e, ExerciseController controller, ListInterface<CommonShell> listContainer,
-                            boolean addKeyHandler, String instance) {
+  public ContextCommentNPFExercise(T e, ExerciseController controller, ListInterface<CommonShell> listContainer,
+                                   boolean addKeyHandler, String instance) {
     super(e, controller, listContainer, 1.0f, addKeyHandler, instance);
   }
 
   /**
    * @return
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getQuestionContent
+   * @see GoodwaveExercisePanel#getQuestionContent
    */
   @Override
   protected Widget getItemContent(final T e) {
@@ -96,7 +96,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     entry.addStyleName("floatLeft");
     row.add(entry);
 
-    addContextButton(e, row);
+//    addContextButton(e, row);
 
     column.add(row);
 
@@ -113,6 +113,14 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
 
     if (!useMeaningInsteadOfEnglish && meaningValid) {
       column.add(getEntry(e, QCNPFExercise.MEANING, ExerciseFormatter.MEANING_PROMPT, e.getMeaning()));
+    }
+
+    // TODO : support multiple context sentences
+    for (CommonExercise exercise : e.getDirectlyRelated()) {
+      if (exercise.isSafeToDecode()) {
+        column.add(getContext(exercise, e.getForeignLanguage()));
+        break;
+      }
     }
 
     return column;
@@ -265,8 +273,8 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
   private Collection<String> getTokens(String sentence) {
     List<String> all = new ArrayList<String>();
     sentence = removePunct(sentence);
-    for (String untrimedToken : sentence.split(CommentNPFExercise.SPACE_REGEX)) { // split on spaces
-      String tt = untrimedToken.replaceAll(CommentNPFExercise.PUNCT_REGEX, ""); // remove all punct
+    for (String untrimedToken : sentence.split(ContextCommentNPFExercise.SPACE_REGEX)) { // split on spaces
+      String tt = untrimedToken.replaceAll(ContextCommentNPFExercise.PUNCT_REGEX, ""); // remove all punct
       String token = tt.trim();  // necessary?
       if (token.length() > 0) {
         all.add(token);
@@ -445,7 +453,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
 
       @Override
       protected void addNoRefAudioWidget(Panel vp) {
-        Widget entry = getEntry(REF_AUDIO, "ReferenceAudio", CommentNPFExercise.NO_REFERENCE_AUDIO, exercise.getAnnotation(REF_AUDIO));
+        Widget entry = getEntry(REF_AUDIO, "ReferenceAudio", ContextCommentNPFExercise.NO_REFERENCE_AUDIO, exercise.getAnnotation(REF_AUDIO));
         entry.setWidth("500px");
         vp.add(entry);
       }
