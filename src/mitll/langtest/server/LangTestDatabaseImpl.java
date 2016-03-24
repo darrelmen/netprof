@@ -74,6 +74,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
+  public static final int MP3_LENGTH = MP3.length();
   public static final String DATABASE_REFERENCE = "databaseReference";
   public static final String AUDIO_FILE_HELPER_REFERENCE = "audioFileHelperReference";
   private static final int SLOW_EXERCISE_EMAIL = 2000;
@@ -1028,7 +1029,10 @@ boolean stopOggCheck = false;
     ImageType imageType1 =
         imageType.equalsIgnoreCase(ImageType.WAVEFORM.toString()) ? ImageType.WAVEFORM :
             imageType.equalsIgnoreCase(ImageType.SPECTROGRAM.toString()) ? ImageType.SPECTROGRAM : null;
-    if (imageType1 == null) return new ImageResponse(); // success = false!
+    if (imageType1 == null) {
+      logger.error("getImageForAudioFile '" + imageType + "' is unknown?");
+      return new ImageResponse(); // success = false!
+    }
     String imageOutDir = pathHelper.getImageOutDir();
 
     if (DEBUG) {
@@ -1071,8 +1075,7 @@ boolean stopOggCheck = false;
   }
 
   private String getWavAudioFile(String audioFile) {
-    if (audioFile.endsWith("." +
-        AudioTag.COMPRESSED_TYPE)) {
+    if (audioFile.endsWith("." + AudioTag.COMPRESSED_TYPE) || audioFile.endsWith(MP3)) {
       String wavFile = removeSuffix(audioFile) + WAV;
       File test = pathHelper.getAbsoluteFile(wavFile);
       audioFile = test.exists() ? test.getAbsolutePath() : audioFileHelper.getWavForMP3(audioFile);
@@ -1082,12 +1085,12 @@ boolean stopOggCheck = false;
   }
 
   private String removeSuffix(String audioFile) {
-    return audioFile.substring(0, audioFile.length() - MP3.length());
+    return audioFile.substring(0, audioFile.length() - MP3_LENGTH);
   }
 
   private String ensureWAV(String audioFile) {
     if (!audioFile.endsWith(WAV1)) {
-      return audioFile.substring(0, audioFile.length() - MP3.length()) + WAV;
+      return audioFile.substring(0, audioFile.length() - MP3_LENGTH) + WAV;
     } else {
       return audioFile;
     }
