@@ -419,12 +419,11 @@ public class RefResultDecoder {
     final int count;
     final int changed;
 
-    public Info(int trimmed, int count, int changed) {
+    Info(int trimmed, int count, int changed) {
       this.trimmed = trimmed;
       this.count = count;
       this.changed = changed;
     }
-
   }
 
   private String getFile(AudioAttribute attribute) {
