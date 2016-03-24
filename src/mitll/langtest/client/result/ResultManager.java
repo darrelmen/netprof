@@ -85,6 +85,9 @@ public class ResultManager extends PagerTable {
   private int req = 0;
   private final ExerciseController controller;
 
+  private CellTable<MonitorResult> cellTable;
+  private Panel reviewContainer;
+
   /**
    * @param s
    * @param nameForAnswer
@@ -189,39 +192,50 @@ public class ResultManager extends PagerTable {
   private Panel getSearchBoxes() {
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("search_container");
-    //dialogVPanel.add(hp);
 
     for (final String type : typeOrder) {
-      Typeahead user = new Typeahead(new SuggestOracle() {
-        @Override
-        public void requestSuggestions(final Request request, final Callback callback) {
-          final Map<String, String> unitToValue = getUnitToValue();
-          //logger.info(" requestSuggestions got request for " + type + " : " + unitToValue);
-          service.getResultAlternatives(unitToValue, getUserID(), getText(), type, new AsyncCallback<Collection<String>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-
-            @Override
-            public void onSuccess(Collection<String> result) {
-              // logger.info(" request for " + type + " : " + unitToValue + " yielded " + result.size());
-              makeSuggestionResponse(result, callback, request);
-            }
-          });
-        }
-      });
-      final TextBox w = new TextBox();
-      w.getElement().setId("TextBox_" + type);
-      user.setWidget(w);
-      configureTextBox(w);
-
-      addCallbacks(user);
-      typeToSuggest.put(type, user);
-      ControlGroup controlGroup = TypeAhead.getControlGroup(type, user.asWidget());
-      hp.add(controlGroup);
+      Typeahead typeahead = getTypeahead(type);
+      typeToSuggest.put(type, typeahead);
+      hp.add(TypeAhead.getControlGroup(type, typeahead.asWidget()));
     }
 
-    userIDSuggest = new Typeahead(new SuggestOracle() {
+    hp.add(getUserIDSuggestWidget());
+    hp.add(getTextSuggestWidget());
+
+    return hp;
+  }
+
+  private Typeahead getTypeahead(final String whichField) {
+    return getTypeaheadUsing(whichField, new TextBox());
+  }
+
+  private Typeahead getTypeaheadUsing(final String whichField, TextBox w) {
+    Typeahead typeahead = new Typeahead(new SuggestOracle() {
+      @Override
+      public void requestSuggestions(final Request request, final Callback callback) {
+        //logger.info(" requestSuggestions got request for " + type + " : " + unitToValue);
+        service.getResultAlternatives(getUnitToValue(), getUserID(), getText(), whichField, new AsyncCallback<Collection<String>>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
+
+          @Override
+          public void onSuccess(Collection<String> result) {
+            // logger.info(" request for " + type + " : " + unitToValue + " yielded " + result.size());
+            makeSuggestionResponse(result, callback, request);
+          }
+        });
+      }
+    });
+    w.getElement().setId("TextBox_" + whichField);
+    typeahead.setWidget(w);
+    configureTextBox(w);
+    addCallbacks(typeahead);
+    return typeahead;
+  }
+
+  private ControlGroup getUserIDSuggestWidget() {
+/*    userIDSuggest = new Typeahead(new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
         //logger.info(" requestSuggestions got request for userid " + getUnitToValue() + " " + getText() + " " + getUserID());
@@ -241,15 +255,17 @@ public class ResultManager extends PagerTable {
     });
 
     TextBox w = new TextBox();
-
-    userIDSuggest.setWidget(w);
-    addCallbacks(userIDSuggest);
     w.getElement().setId("TextBox_userIDSuggest");
+    userIDSuggest.setWidget(w);
     configureTextBox(w);
+    addCallbacks(userIDSuggest);*/
 
-    ControlGroup controlGroup = TypeAhead.getControlGroup(USER_ID, userIDSuggest.asWidget());
-    hp.add(controlGroup);
+    userIDSuggest = getTypeahead(MonitorResult.USERID);
+    return TypeAhead.getControlGroup(USER_ID, userIDSuggest.asWidget());
+  }
 
+  private ControlGroup getTextSuggestWidget() {
+/*
     textSuggest = new Typeahead(new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
@@ -269,18 +285,20 @@ public class ResultManager extends PagerTable {
         });
       }
     });
+*/
     TextBox w1 = new TextBox();
     w1.setPlaceholder("Word (type or paste) or Item ID");
     w1.setDirectionEstimator(true);
+/*
     textSuggest.setWidget(w1);
     configureTextBox(w1);
     addCallbacks(textSuggest);
 
     w1.getElement().setId("TextBox_textSuggest");
+*/
+    textSuggest = getTypeaheadUsing(MonitorResult.TEXT, w1);
 
-    ControlGroup controlGroup2 = TypeAhead.getControlGroup("Text", textSuggest.asWidget());
-    hp.add(controlGroup2);
-    return hp;
+    return TypeAhead.getControlGroup("Text", textSuggest.asWidget());
   }
 
   private void makeSuggestionResponse(Collection<String> result, SuggestOracle.Callback callback, SuggestOracle.Request request) {
@@ -307,7 +325,7 @@ public class ResultManager extends PagerTable {
     return new KeyUpHandler() {
       @Override
       public void onKeyUp(KeyUpEvent event) {
-        //   logger.info(w.getId() + " KeyUpEvent event " + event + " item " + w.getText() + " " + w.getValue());
+        logger.info(w.getId() + " KeyUpEvent event " + event + " item " + w.getText() + " " + w.getValue());
         redraw();
       }
     };
@@ -318,12 +336,12 @@ public class ResultManager extends PagerTable {
       @Override
       public String onSelection(SuggestOracle.Suggestion selectedSuggestion) {
         String replacementString = selectedSuggestion.getReplacementString();
-        //logger.info("UpdaterCallback " + " got update " +" " + "--- > " + replacementString);
+        logger.info("UpdaterCallback " + " got update " +" " + " ---> '" + replacementString +"'");
 
         // NOTE : we need both a redraw on key up and one on selection!
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           public void execute() {
-            //logger.info("--> onSelection REDRAW ");
+            logger.info("--> getUpdaterCallback onSelection REDRAW ");
             redraw();
           }
         });
@@ -375,9 +393,6 @@ public class ResultManager extends PagerTable {
     return unitToValue;
   }
 
-  private CellTable<MonitorResult> cellTable;
-  private Panel reviewContainer;
-
   /**
    * Also shows on the bottom a widget for review.
    *
@@ -405,8 +420,7 @@ public class ResultManager extends PagerTable {
     createProvider(numResults, cellTable);
 
     // Add a ColumnSortEvent.AsyncHandler to connect sorting to the AsyncDataPRrovider.
-    ColumnSortEvent.AsyncHandler columnSortHandler = new ColumnSortEvent.AsyncHandler(cellTable);
-    cellTable.addColumnSortHandler(columnSortHandler);
+    cellTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(cellTable));
 
     Column<?, ?> time = getColumn(TIMESTAMP);
     cellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(time, false));
@@ -542,11 +556,9 @@ public class ResultManager extends PagerTable {
    * @param table
    * @return
    * @seex #getResultCellTable
-   * @seex #getAsyncTable(int)
+   * @see #getAsyncTable
    */
-
   private void addColumnsToTable(CellTable<MonitorResult> table) {
-    /*TextColumn<MonitorResult> id =*/
     addUserPlanExercise(table);
 
     final AbstractCell<SafeHtml> progressCell = new AbstractCell<SafeHtml>("click") {
@@ -784,10 +796,7 @@ public class ResultManager extends PagerTable {
 
   private static class MySuggestion implements SuggestOracle.Suggestion {
     private final String resp;
-
-    public MySuggestion(String resp) {
-      this.resp = resp;
-    }
+    MySuggestion(String resp) { this.resp = resp; }
 
     @Override
     public String getDisplayString() {
