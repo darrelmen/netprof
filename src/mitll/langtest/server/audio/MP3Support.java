@@ -16,17 +16,19 @@ import java.io.File;
 /**
  * Created by go22670 on 9/3/15.
  */
-public class MP3Support {
+class MP3Support {
   private static final Logger logger = Logger.getLogger(MP3Support.class);
+  private static final int SUFFIX_LENGTH = ("." + AudioTag.COMPRESSED_TYPE).length();
+  private static final String WAV = ".wav";
   private final PathHelper pathHelper;
-  ServerProperties serverProperties;
+  private ServerProperties serverProperties;
 
   /**
    * @see AudioFileHelper#AudioFileHelper(PathHelper, ServerProperties, DatabaseImpl, LogAndNotify)
    * @param pathHelper
    * @param serverProperties
    */
-  public MP3Support(PathHelper pathHelper, ServerProperties serverProperties) {
+  MP3Support(PathHelper pathHelper, ServerProperties serverProperties) {
     this.pathHelper = pathHelper;
     this.serverProperties = serverProperties;
   }
@@ -36,10 +38,9 @@ public class MP3Support {
    * @return
    * @see AudioFileHelper#getASRScoreForAudio
    */
-  public String dealWithMP3Audio(String testAudioFile) {
-    if (testAudioFile.endsWith("." + AudioTag.COMPRESSED_TYPE)) {
-      String noSuffix = removeSuffix(testAudioFile);
-      String wavFile = noSuffix + ".wav";
+  String dealWithMP3Audio(String testAudioFile) {
+    if (!testAudioFile.endsWith(WAV)) {
+      String wavFile = removeSuffix(testAudioFile) + WAV;
       File test = pathHelper.getAbsoluteFile(wavFile);
       if (!test.exists()) {
         logger.warn("expecting audio file with wav extension, but didn't find " + test.getAbsolutePath());
@@ -51,7 +52,7 @@ public class MP3Support {
   }
 
   private String removeSuffix(String audioFile) {
-    return audioFile.substring(0, audioFile.length() - ("." + AudioTag.COMPRESSED_TYPE).length());
+    return audioFile.substring(0, audioFile.length() - SUFFIX_LENGTH);
   }
 
   /**
@@ -60,9 +61,7 @@ public class MP3Support {
    * @see #dealWithMP3Audio(String)
    * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile
    */
-  public String getWavForMP3(String audioFile) {
-    return getWavForMP3(audioFile, pathHelper.getInstallPath());
-  }
+  String getWavForMP3(String audioFile) {  return getWavForMP3(audioFile, pathHelper.getInstallPath());  }
 
   /**
    * Ultimately does lame --decode from.mp3 to.wav
@@ -93,8 +92,7 @@ public class MP3Support {
         logger.error("getImageForAudioFile : can't find " + file.getAbsolutePath());
       }
     }
-    assert (audioFile.endsWith(".wav"));
+    assert (audioFile.endsWith(WAV));
     return audioFile;
   }
-
 }
