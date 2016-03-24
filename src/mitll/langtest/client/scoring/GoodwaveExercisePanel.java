@@ -29,6 +29,7 @@ import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -69,8 +70,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   private final ListInterface listContainer;
   private boolean isBusy = false;
 
-  private static final String WAV = ".wav";
-  private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
   private Image recordImage1;
   private Image recordImage2;
 
@@ -274,7 +273,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     String path = e.getRefAudio() != null ? e.getRefAudio() : e.getSlowAudioRef();
 
     if (path != null) {
-      path = wavToMP3(path);
+      path = compressedAudio.getPathNoSlashChange(path);
     }
     contentAudio = getAudioPanel(path);
     contentAudio.setScreenPortion(screenPortion);
@@ -296,9 +295,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     return new FastAndSlowASRScoringAudioPanel(getLocalExercise(), path, service, controller, scorePanel, instance);
   }
 
-  protected String wavToMP3(String path) {
-    return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
-  }
+  private CompressedAudio compressedAudio = new CompressedAudio();
 
   /**
    * @param commentToPost
