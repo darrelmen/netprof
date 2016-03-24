@@ -84,7 +84,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final String WAV1 = "wav";
   private RefResultDecoder refResultDecoder;
 
-  private static final boolean warnMissingFile = true;
+  private static final boolean WARN_MISSING_FILE = true;
 
   private DatabaseImpl<CommonExercise> db;
   private AudioFileHelper audioFileHelper;
@@ -93,6 +93,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private ServerProperties serverProps;
   private AudioConversion audioConversion;
   private PathHelper pathHelper;
+boolean stopOggCheck = false;
 
   /**
    * TODO : somehow make this typesafe
@@ -329,7 +330,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                                                               int userID,
                                                                               Collection<T> exercises,
                                                                               boolean predefExercises,
-                                                                              // long then,
                                                                               ExerciseTrie<T> fullTrie) {
     ExerciseTrie<T> trie = predefExercises ? fullTrie : new ExerciseTrie<T>(exercises, getLanguage(), audioFileHelper.getSmallVocabDecoder());
     exercises = trie.getExercises(prefix, audioFileHelper.getSmallVocabDecoder());
@@ -651,7 +651,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     CommonExercise firstExercise = exercises.isEmpty() ? null : exercises.iterator().next();
     if (firstExercise != null) {
       addAnnotationsAndAudio(userID, firstExercise, isFlashcardReq);
-      ensureMP3s(firstExercise);
+      ensureMP3s(firstExercise, pathHelper.getInstallPath());
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
 
@@ -819,8 +819,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
       then2 = System.currentTimeMillis();
 
-      //logger.debug("getExercise : returning " + byID);
-      ensureMP3s(byID);
+      logger.debug("getExercise : returning " + byID);
+      ensureMP3s(byID, pathHelper.getInstallPath());
 
       if (DEBUG) {
         for (AudioAttribute audioAttribute : byID.getAudioAttributes())
@@ -830,7 +830,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       now = System.currentTimeMillis();
       if (now - then2 > WARN_DUR) {
-        if (warnMissingFile) {
+        if (WARN_MISSING_FILE) {
           logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis " +
               "to ensure there are mp3s for exercise " + id + " for " + userID);
         }
@@ -888,13 +888,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @param byID
+   * @param parentDir
    * @seex LoadTesting#getExercise
    * @see #makeExerciseListWrapper(int, java.util.Collection, long, String, boolean, boolean)
    */
-  private void ensureMP3s(CommonExercise byID) {
+  private void ensureMP3s(CommonExercise byID, String parentDir) {
     Collection<AudioAttribute> audioAttributes = byID.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes) {
-      if (!ensureMP3(audioAttribute.getAudioRef(), byID.getForeignLanguage(), audioAttribute.getUser().getUserID())) {
+      if (!ensureMP3(audioAttribute.getAudioRef(), byID.getForeignLanguage(), audioAttribute.getUser().getUserID(), parentDir)) {
         audioAttribute.setAudioRef(AudioConversion.FILE_MISSING);
       }
     }
@@ -972,21 +973,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param title
    * @param artist
    * @return true if mp3 file exists
-   * @see #ensureMP3s(mitll.langtest.shared.exercise.CommonExercise)
+   * @see #ensureMP3s(CommonExercise, String)
    * @see #writeAudioFile
    */
   private boolean ensureMP3(String wavFile, String title, String artist) {
-    if (wavFile != null) {
-      String parent = pathHelper.getInstallPath();
+    String parent = pathHelper.getInstallPath();
+    return ensureMP3(wavFile, title, artist, parent);
+  }
 
+  int spew = 0;
+  private boolean ensureMP3(String wavFile, String title, String artist, String parent) {
+    if (wavFile != null) {
       if (!audioConversion.exists(wavFile, parent)) {
-        if (warnMissingFile) {
-          logger.warn("ensureMP3 : can't find " + wavFile + " under " + parent + " trying config... ");
-        }
+        //if (WARN_MISSING_FILE) {
+       //   logger.warn("ensureMP3 : can't find " + wavFile + " under " + parent + " trying config... ");
+       // }
         parent = configDir;
       }
       if (!audioConversion.exists(wavFile, parent)) {
-        if (warnMissingFile) logger.error("ensureMP3 : can't find " + wavFile + " under " + parent);
+        if (WARN_MISSING_FILE && spew++ < 10) logger.error("ensureMP3 : can't find " + wavFile + " under " + parent);
       }
       String s = audioConversion.ensureWriteMP3(wavFile, parent, false, title, artist);
       return !(s.equals(AudioConversion.FILE_MISSING));
@@ -1410,7 +1415,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 //      logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + userExercise.getID());
       db.getAudioDAO().updateExerciseID(audioAttribute.getUniqueID(), userExercise.getID());
     }
-  //  logger.debug("\treallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
+    //  logger.debug("\treallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
 
     return userExercise;
   }
@@ -2337,6 +2342,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public void destroy() {
     refResultDecoder.setStopDecode(true);
+    stopOggCheck = true;
     super.destroy();
     db.destroy(); // TODO : redundant with h2 shutdown hook?
   }
@@ -2362,7 +2368,33 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, audioFileHelper);
     refResultDecoder.doRefDecode(getExercises(), relativeConfigDir);
     if (serverProps.isAMAS()) audioFileHelper.makeAutoCRT(relativeConfigDir);
+
+    checkForOgg(getExercises());
   }
+
+  private void checkForOgg(final Collection<CommonExercise> exercises) {
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        sleep(1000);
+        String installPath = pathHelper.getInstallPath();
+        for (CommonExercise ex : getExercises()) {
+          if (stopOggCheck) break;
+          ensureMP3s(ex, installPath);
+          sleep(1000);
+        }
+      }
+    }).start();
+  }
+
+  private void sleep(int millis) {
+    try {
+      Thread.sleep(millis); // ???
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
 
   private String getLanguage() {
     return serverProps.getLanguage();
