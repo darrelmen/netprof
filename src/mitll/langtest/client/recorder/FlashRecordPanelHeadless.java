@@ -34,7 +34,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   private static final String PX = "8px";
   private static final int FLASH_RECORDING_STOP_DELAY = 210; // was 160
   private final String id = "flashcontent";
-  public static MicPermission micPermission;
+  static MicPermission micPermission;
   private boolean didPopup = false;
   private static boolean permissionReceived;
 
@@ -95,8 +95,9 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    */
   private void show() {
     setSize(WIDTH + "px", HEIGHT + "px");
-    if (BrowserCheck.getIEVersion() != -1) {
-      logger.info("Found IE Version " + BrowserCheck.getIEVersion());
+    int ieVersion = BrowserCheck.getIEVersion();
+    if (ieVersion != -1) {
+      logger.info("Found IE Version " + ieVersion);
     }
   }
 
