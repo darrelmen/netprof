@@ -16,6 +16,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
+import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -50,8 +51,6 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   private static final String SPECTROGRAM = "Spectrogram";
   private static final String WAVEFORM_TOOLTIP = "The waveform should only be used to determine when periods of silence" +
       " and speech occur, or whether the mic is working properly.";
-  private static final String WAV = ".wav";
-  private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
 
   private static final boolean WARN_ABOUT_MISSING_AUDIO = false;
   private static final int WINDOW_SIZE_CHANGE_THRESHOLD = 50;
@@ -336,8 +335,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @see mitll.langtest.client.result.ResultManager#getAsyncTable(int, Widget)
    */
   public String getImagesForPath(String path) {
-    path = wavToMP3(path);
-    path = ensureForwardSlashes(path);
+    path = getPath(path);
     if (debug) logger.info("AudioPanel : " + getElement().getId() + " getImagesForPath " + path);
     if (path != null) {
       this.audioPath = path;
@@ -357,14 +355,9 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     return path;
   }
 
+  private CompressedAudio compressedAudio = new CompressedAudio();
 
-  private String ensureForwardSlashes(String wavPath) {
-    return wavPath.replaceAll("\\\\", "/");
-  }
-
-  private String wavToMP3(String path) {
-    return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
-  }
+  private String getPath(String path) { return compressedAudio.getPath(path);  }
 
   /**
    * Note this is currently not very accurate with soundmanager2.
