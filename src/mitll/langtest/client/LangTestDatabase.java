@@ -33,7 +33,7 @@ import java.util.Map;
  */
 @RemoteServiceRelativePath("langtestdatabase")
 public interface LangTestDatabase extends RemoteService {
-  boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
+ // boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = true;
 
   <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection,
                                      String prefix, long userListID, int userID, String role,
