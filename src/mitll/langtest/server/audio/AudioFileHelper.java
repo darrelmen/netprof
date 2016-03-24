@@ -44,6 +44,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
 //  private static final int MIN_WARN_DUR = 30;
   private static final String REG = "reg";
   private static final String SLOW = "slow";
+  private static final int SUFFIX_LENGTH = ("." + AudioTag.COMPRESSED_TYPE).length();
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -885,7 +886,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
     return this.decodeCorrectnessChecker.getFlashcardAnswer(e, audioFile, answer, this.serverProps.getLanguage(), true, false, false);
   }*/
   private String removeSuffix(String audioFile) {
-    return audioFile.substring(0, audioFile.length() - ("." + AudioTag.COMPRESSED_TYPE).length());
+    return audioFile.substring(0, audioFile.length() - SUFFIX_LENGTH);
   }
 
   public String getWavForMP3(String audioFile) {
