@@ -292,9 +292,11 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     //}
   }
 
+  CompressedAudio compressedAudio = new CompressedAudio();
+
   private String loadAudio(String path) {
-    path = wavToMP3(path);
-    path = ensureForwardSlashes(path);
+    path = compressedAudio.getPath(path);
+ //   path = ensureForwardSlashes(path);
     if (isPlaying()) pause();
     startSong(path);
     return path;
@@ -302,7 +304,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
 
   /**
    * @param path
-   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getShowGroup(java.util.List)
+   * @see mitll.langtest.client.custom.exercise.CommentNPFExercise#getShowGroup
    */
   public void playAudio(String path) {
     if (currentPath.equals(path)) {
@@ -329,9 +331,9 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
       });
     }
   }
-
+/*
   private static final String WAV = ".wav";
-  private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
+  private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;*/
 
   public void loadAudioAgain(String path) {
     loadAudio(path);
@@ -342,6 +344,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     this.currentPath = path;
   }
 
+/*
   private String wavToMP3(String path) {
     return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
   }
@@ -349,6 +352,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private String ensureForwardSlashes(String wavPath) {
     return wavPath.replaceAll("\\\\", "/");
   }
+*/
 
 
   /**
