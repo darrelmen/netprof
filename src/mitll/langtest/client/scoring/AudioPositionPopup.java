@@ -19,7 +19,7 @@ class AudioPositionPopup extends SimplePanel implements AudioControl  {
 
   private float durationInMillis;
   private static final boolean debugPartial = false;
-  private static final boolean debug = false;
+//  private static final boolean debug = false;
   private final Panel imageContainer;
 
   /**
@@ -37,12 +37,12 @@ class AudioPositionPopup extends SimplePanel implements AudioControl  {
    */
   public void reinitialize(double durationInSeconds) {
     setWavDurationInSeconds(durationInSeconds);
-    if (debugPartial) System.out.println(this + "  : AudioPositionPopup.reinitialize dur = " + durationInSeconds + "/" + durationInMillis);
+//    if (debugPartial) System.out.println(this + "  : AudioPositionPopup.reinitialize dur = " + durationInSeconds + "/" + durationInMillis);
     reinitialize();
   }
 
   public void reinitialize() {
-    if (debugPartial) System.out.println(this + "  : AudioPositionPopup.reinitialize ");
+//    if (debugPartial) System.out.println(this + "  : AudioPositionPopup.reinitialize ");
     songFinished();
   }
 
@@ -69,7 +69,7 @@ class AudioPositionPopup extends SimplePanel implements AudioControl  {
 
   @Override
   public void songFinished() {
-    if (debugPartial) System.out.println(this + "  : AudioPositionPopup.songFinished ");
+ //   if (debugPartial) System.out.println(this + "  : AudioPositionPopup.songFinished ");
 
     setVisible(false);
 
@@ -102,7 +102,7 @@ class AudioPositionPopup extends SimplePanel implements AudioControl  {
       System.err.println("parent " + parent.getElement().getId() + " but container " + imageContainer.getElement().getId());
     }*/
     //positionInMillis -= (double)ScoringAudioPanel.MP3_HEADER_OFFSET;
-    float positionInMillisF = (float)positionInMillis - ScoringAudioPanel.MP3_HEADER_OFFSET*1000;
+    float positionInMillisF = (float)positionInMillis;// - ScoringAudioPanel.MP3_HEADER_OFFSET*1000;
     float horizontalFraction = positionInMillisF / durationInMillis;
     if (horizontalFraction > 1f) horizontalFraction = 1f;
     int pixelProgress = (int) Math.min(width - 2, ((float) width) * horizontalFraction);
@@ -111,14 +111,14 @@ class AudioPositionPopup extends SimplePanel implements AudioControl  {
     //getElement().getStyle().setTop(parent.getAbsoluteTop() + 1, Style.Unit.PX);
     setSize("2px", offsetHeight + "px");
 
-    if (debug) {
+/*    if (debug) {
       System.out.println(this + " showAt " + positionInMillis + " millis " + "/" +pixelProgress
         +" parent " + parent.getElement().getId()+ " width " + width+
         " millis " +
         " dim x " +
         getOffsetWidth() +
         " y " + offsetHeight);
-    }
+    }*/
   }
 
 /*
