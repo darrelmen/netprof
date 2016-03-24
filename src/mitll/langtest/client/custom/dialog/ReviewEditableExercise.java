@@ -32,6 +32,7 @@ import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.EmptyScoreListener;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
+import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.ExerciseAnnotation;
@@ -65,9 +66,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   private static final String FEMALE = "Female";
 
   private final PagingExerciseList<CommonShell, CommonExercise> exerciseList;
-  // private final ReloadableContainer predefinedContentList;
-  private static final String WAV = ".wav";
-  private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
 
   /**
    * @param itemMarker
@@ -243,12 +241,18 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   private final Set<Widget> audioWasPlayed = new HashSet<>();
   private final Set<Widget> toResize = new HashSet<>();
 
+  private CompressedAudio compressedAudio = new CompressedAudio();
+
+  private String getPath(String path) {
+    return compressedAudio.getPath(path);
+  }
+
   private <X extends CommonShell & AnnotationExercise> Widget getPanelForAudio(final X exercise,
                                                                                final AudioAttribute audio,
                                                                                RememberTabAndContent tabAndContent) {
     String audioRef = audio.getAudioRef();
     if (audioRef != null) {
-      audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
+      audioRef = compressedAudio.getPathNoSlashChange(audioRef);   // todo why do we have to do this?
     }
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, exercise.getForeignLanguage(), service, controller,
         controller.getProps().showSpectrogram(), new EmptyScoreListener(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED, exercise.getID(),
@@ -365,10 +369,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     } else {
       return null;
     }
-  }
-
-  private String wavToMP3(String path) {
-    return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
   }
 
   @Override
