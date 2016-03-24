@@ -67,10 +67,16 @@ public class PlayAudioWidget {
     return anchor;
   }
 
+  /**
+   * OK to have this be mp3 for now
+   * @param path
+   * @param title
+   * @return
+   */
   public static SafeHtml getAudioTagHTML(String path, String title) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<a href=\"" +
-        ensureForwardSlashes(path).replace(".wav", "." + AudioTag.COMPRESSED_TYPE) +
+        ensureForwardSlashes(path).replace(".wav", ".mp3") +
         "\"" +
         " title=\"" +
         title +
