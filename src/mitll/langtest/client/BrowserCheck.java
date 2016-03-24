@@ -8,10 +8,9 @@ import com.google.gwt.user.client.Window;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class BrowserCheck {
-  private final Logger logger = Logger.getLogger("BrowserCheck");
+  //private final Logger logger = Logger.getLogger("BrowserCheck");
 
   private static final String FIREFOX = "firefox";
   private static final String CHROME = "chrome";
@@ -101,7 +100,7 @@ public class BrowserCheck {
     try {
       ver = Integer.parseInt(major);
     } catch (NumberFormatException e) {
-      logger.warning("couldn't parse " + agent + " and " + major);
+   //   logger.warning("couldn't parse '" + agent + "' and '" + major + "'");
       //e.printStackTrace();
     }
     return browser + " " + ver;
