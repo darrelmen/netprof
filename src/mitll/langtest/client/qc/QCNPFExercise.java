@@ -33,6 +33,7 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
+import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
@@ -559,6 +560,8 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
         " age " + user.getAge();
   }
 
+  private CompressedAudio compressedAudio = new CompressedAudio();
+
   /**
    * Keep track of all audio elements -- have they all been played? If so, we can enable the approve & next buttons
    * Also, when all audio for a tab have been played, change tab icon to check
@@ -571,7 +574,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   private Pair getPanelForAudio(final T e, final AudioAttribute audio) {
     String audioRef = audio.getAudioRef();
     if (audioRef != null) {
-      audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
+      audioRef = compressedAudio.getPathNoSlashChange(audioRef);   // todo why do we have to do this?
     }
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<T>(audioRef, e.getForeignLanguage(), service, controller,
         controller.getProps().showSpectrogram(), scorePanel, 70, audio.isRegularSpeed() ? " Regular speed" : " Slow speed", e.getID(), e, instance);
