@@ -5,6 +5,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.server.database.hibernate.SessionManagement;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
@@ -70,6 +71,11 @@ public class SmallDatabaseImpl implements Database {
 
   @Override
   public LogAndNotify getLogAndNotify() {
+    return null;
+  }
+
+  @Override
+  public SessionManagement getSessionManagement() {
     return null;
   }
 
