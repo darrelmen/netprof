@@ -43,7 +43,6 @@ public class EventDAO extends DAO {
   private static final String WIDGETTYPE = "widgettype";
   private static final String HITID = "hitid";
   private static final String EXERCISEID = "exerciseid";
-  private static final String EVENTS = "Events";
   private static final String DEVICE = "device";
   private final UserDAO userDAO;
 
@@ -227,7 +226,7 @@ public class EventDAO extends DAO {
     List<Event> lists = new ArrayList<Event>();
 
     while (rs.next()) {
-      lists.add(new Event(
+      lists.add(new Event(//rs.getLong(ID),
           rs.getString("widgetid"),
           rs.getString(WIDGETTYPE),
           rs.getString(EXERCISEID),
@@ -242,86 +241,4 @@ public class EventDAO extends DAO {
     finish(connection, statement, rs);
     return lists;
   }
-
-  private static final List<String> COLUMNS2 = Arrays.asList("id", "type", "exercise", "context", "userid", "timestamp", "time_millis", "hitID", "device");
-
-  /**
-   * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-   * @param out
-   */
-  public void toXLSX(OutputStream out) {
-    long then = System.currentTimeMillis();
-
-    List<Event> all = getAll();
-    long now = System.currentTimeMillis();
-    if (now-then > 100) logger.info("toXLSX : took " + (now - then) + " millis to read " + all.size() +
-      " events from database");
-    then = now;
-
-    //Workbook wb = new XSSFWorkbook();
-    SXSSFWorkbook wb = new SXSSFWorkbook(1000); // keep 100 rows in memory, exceeding rows will be flushed to disk
-
-    Sheet sheet = wb.createSheet(EVENTS);
-    int rownum = 0;
-    Row headerRow = sheet.createRow(rownum++);
-    for (int i = 0; i < COLUMNS2.size(); i++) {
-      Cell headerCell = headerRow.createCell(i);
-      headerCell.setCellValue(COLUMNS2.get(i));
-    }
-
-    CellStyle cellStyle = wb.createCellStyle();
-    DataFormat dataFormat = wb.createDataFormat();
-
-    cellStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss"));
-
-    for (Event event : all) {
-      Row row = sheet.createRow(rownum++);
-      int j = 0;
-      Cell cell = row.createCell(j++);
-      cell.setCellValue(event.getWidgetID());
-
-      cell = row.createCell(j++);
-      cell.setCellValue(event.getWidgetType());
-
-      cell = row.createCell(j++);
-      cell.setCellValue(event.getExerciseID());
-
-      cell = row.createCell(j++);
-      cell.setCellValue(event.getContext());
-
-      cell = row.createCell(j++);
-      cell.setCellValue(event.getCreatorID());
-
-      cell = row.createCell(j++);
-      cell.setCellValue(new Date(event.getTimestamp()));
-      cell.setCellStyle(cellStyle);
-
-      cell = row.createCell(j++);
-      cell.setCellValue(event.getTimestamp());
-
-      cell = row.createCell(j++);
-      cell.setCellValue(event.getHitID());
-
-      cell = row.createCell(j++);
-      cell.setCellValue(event.getDevice());
-
-    }
-    now = System.currentTimeMillis();
-    if (now-then > 100) logger.warn("toXLSX : took " + (now-then) + " millis to write " + rownum+
-      " rows to sheet, or " + (now-then)/rownum + " millis/row");
-    then = now;
-    try {
-      wb.write(out);
-      now = System.currentTimeMillis();
-      if (now-then > 100) {
-        logger.warn("toXLSX : took " + (now-then) + " millis to write excel to output stream ");
-      }
-      out.close();
-      wb.dispose();
-    } catch (IOException e) {
-      logger.error("got " +e,e);
-      logAndNotify.logAndNotifyServerException(e);
-    }
-  }
-
 }
