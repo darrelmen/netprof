@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -49,8 +50,7 @@ public class UserDAOToExcel {
       "permissions",
       "items complete?",
       "num recordings",
-      "rate" +
-          SEC,
+      "rate" + SEC,
       IPADDR,
       TIMESTAMP,
       KIND,
@@ -85,7 +85,7 @@ public class UserDAOToExcel {
    * @param users
    * @return
    */
-  public JSON toJSON(List<User> users) {
+  public JSON toJSON(Collection<User> users) {
     JSONArray json = new JSONArray();
 
     for (User user : users) {
@@ -126,11 +126,11 @@ public class UserDAOToExcel {
     return json;
   }
 
-  public void toXLSX(OutputStream out, List<User> users, String language) {
+  public void toXLSX(OutputStream out, Collection<User> users, String language) {
     writeToStream(out, getSpreadsheet(users), language);
   }
 
-  private SXSSFWorkbook getSpreadsheet(List<User> users) {
+  private SXSSFWorkbook getSpreadsheet(Collection<User> users) {
     long then = System.currentTimeMillis();
 
     SXSSFWorkbook wb = new SXSSFWorkbook(1000); // keep 100 rows in memory, exceeding rows will be flushed to disk
@@ -213,5 +213,4 @@ public class UserDAOToExcel {
   private float roundToHundredth(double totalHours) {
     return ((float) ((Math.round(totalHours * 100)))) / 100f;
   }
-
 }
