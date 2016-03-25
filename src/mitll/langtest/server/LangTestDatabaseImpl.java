@@ -72,11 +72,14 @@ import java.util.*;
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, LogAndNotify {
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
-  private static final String WAV = ".wav";
-  private static final String MP3 = ".mp3";
-  public static final int MP3_LENGTH = MP3.length();
+
   public static final String DATABASE_REFERENCE = "databaseReference";
   public static final String AUDIO_FILE_HELPER_REFERENCE = "audioFileHelperReference";
+
+  private static final String WAV = ".wav";
+  private static final String MP3 = ".mp3";
+  private static final int MP3_LENGTH = MP3.length();
+
   private static final int SLOW_EXERCISE_EMAIL = 2000;
   private static final int MAX = 30;
   private static final int SLOW_MILLIS = 40;
@@ -94,7 +97,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private ServerProperties serverProps;
   private AudioConversion audioConversion;
   private PathHelper pathHelper;
-boolean stopOggCheck = false;
+  private boolean stopOggCheck = false;
 
   /**
    * TODO : somehow make this typesafe
@@ -165,11 +168,10 @@ boolean stopOggCheck = false;
     return ids;
   }
 
-
-  public ExerciseListWrapper<AmasExerciseImpl> getAMASExerciseIds(int reqID,
-                                                                  Map<String, Collection<String>> typeToSelection,
-                                                                  String prefix,
-                                                                  int userID) {
+  private ExerciseListWrapper<AmasExerciseImpl> getAMASExerciseIds(int reqID,
+                                                                   Map<String, Collection<String>> typeToSelection,
+                                                                   String prefix,
+                                                                   int userID) {
     Collection<AmasExerciseImpl> exercises;
 
     try {
@@ -319,7 +321,6 @@ boolean stopOggCheck = false;
 
   private <T extends CommonShell> void sortExercises(String role, List<T> commonExercises) {
     new ExerciseSorter(db.getTypeOrder()).getSortedByUnitThenAlpha(commonExercises, role.equals(Result.AUDIO_TYPE_RECORDER));
-    //new ExerciseSorter(getTypeOrder()).getSortedByUnitThenPhone(commonExercises, false, audioFileHelper.getPhoneToCount(), false);
   }
 
   private <T extends CommonShell> Collection<T> getExercisesForSearch(String prefix, int userID, Collection<T> exercises, boolean predefExercises) {
@@ -503,13 +504,8 @@ boolean stopOggCheck = false;
     String session = "";// getLatestSession(typeToSection, userID);
     //  logger.warn("getScoreForAnswer user " + userID + " ex " + exercise.getID() + " qid " +questionID + " type " +typeToSection + " session " + session);
     boolean correct = scoreForAnswer > 0.5;
-    // String exerciseID = exercise.getID();
     long resultID = db.getAnswerDAO().addTextAnswer(audioContext,
-        //(int) userID,
-        //exerciseID,
-        //questionID,
         answer,
-        //answerType,
         correct,
         (float) scoreForAnswer, (float) scoreForAnswer, session, timeSpent);
 
@@ -581,7 +577,6 @@ boolean stopOggCheck = false;
                                                                                        boolean onlyExamples, boolean incorrectFirst) {
     Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
     exercisesForState = filterByUnrecorded(userID, onlyUnrecordedByMe, onlyExamples, exercisesForState);
-    //exercisesForState = filterByOnlyAudioAnno(forgotUsername(), exercisesForState);
     return getExerciseListWrapperForPrefix(reqID, prefix, exercisesForState, userID, role, onlyExamples, incorrectFirst);
   }
 
@@ -914,12 +909,11 @@ boolean stopOggCheck = false;
       amasFullTrie = new ExerciseTrie<AmasExerciseImpl>(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
     }
 
-    try {
-
-      // audioFileHelper.checkLTS(exercises);
-    } catch (Exception e) {
-      logger.error("Got " + e, e);
-    }
+//    try {
+    // audioFileHelper.checkLTS(exercises);
+    //  } catch (Exception e) {
+    //  logger.error("Got " + e, e);
+    // }
     if (getServletContext().getAttribute(AUDIO_FILE_HELPER_REFERENCE) == null) {
       shareAudioFileHelper(getServletContext());
     }
@@ -983,12 +977,13 @@ boolean stopOggCheck = false;
   }
 
   int spew = 0;
+
   private boolean ensureMP3(String wavFile, String title, String artist, String parent) {
     if (wavFile != null) {
       if (!audioConversion.exists(wavFile, parent)) {
         //if (WARN_MISSING_FILE) {
-       //   logger.warn("ensureMP3 : can't find " + wavFile + " under " + parent + " trying config... ");
-       // }
+        //   logger.warn("ensureMP3 : can't find " + wavFile + " under " + parent + " trying config... ");
+        // }
         parent = configDir;
       }
       if (!audioConversion.exists(wavFile, parent)) {
@@ -1984,7 +1979,7 @@ boolean stopOggCheck = false;
     private final String value;
     private final MonitorResult e;
 
-    public ResultWrapper(String value, MonitorResult e) {
+    ResultWrapper(String value, MonitorResult e) {
       this.value = value;
       this.e = e;
     }
@@ -2028,17 +2023,11 @@ boolean stopOggCheck = false;
    * @param addToAudioTable     if true, add to audio table -- only when recording reference audio for an item.
    * @param allowAlternates
    * @return AudioAnswer object with information about the audio on the server, including if audio is valid (not too short, etc.)
-   * @paramx reqid               request id from the client, so it can potentially throw away out of order responses
-   * @paramx user                who is answering the question
-   * @paramx exercise            exercise within the plan
-   * @paramx questionID          question within the exercise
-   * @paramx audioType           regular or fast then slow audio recording
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    */
   @Override
   public AudioAnswer writeAudioFile(String base64EncodedString,
-
                                     AudioContext audioContext,
 
                                     boolean recordedWithFlash, String deviceType, String device,
@@ -2375,19 +2364,61 @@ boolean stopOggCheck = false;
     checkForOgg(getExercises());
   }
 
+  /**
+   * Make sure we have ogg versions of files.
+   * @param exercises
+   */
   private void checkForOgg(final Collection<CommonExercise> exercises) {
     new Thread(new Runnable() {
       @Override
       public void run() {
         sleep(1000);
-        String installPath = pathHelper.getInstallPath();
-        for (CommonExercise ex : getExercises()) {
-          if (stopOggCheck) break;
-          ensureMP3s(ex, installPath);
-          sleep(1000);
-        }
+        ensureMP3ForAll(exercises);
       }
     }).start();
+
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        ensureMP3ForAnswers();
+      }
+    }).start();
+  }
+
+  private void ensureMP3ForAnswers() {
+    Map<Long, User> userMap = db.getUserDAO().getUserMap();
+    String installPath = pathHelper.getInstallPath();
+    List<Result> results = db.getResultDAO().getResults();
+    logger.info("checkForOgg checking " + results.size() + " results");
+    int c = 0;
+    for (Result r : results) {
+      if (stopOggCheck) break;
+
+      if (r.getAnswer().endsWith(".wav") || r.getAnswer().endsWith(".mp3")) {
+//        if (c++ < 10) logger.info("checking " + r.getExerciseID() + " : " + r.getAnswer());
+        CommonExercise byID = db.getCustomOrPredefExercise(r.getExerciseID());  // allow custom items to mask out non-custom items
+        User user = userMap.get(r.getUserid());
+        boolean isThere = ensureMP3(r.getAnswer(), byID == null ? "" : byID.getForeignLanguage(), user == null ? "unk" : user.getUserID(), installPath);
+        if (c++ < 10 && !isThere) logger.info("no file at " + r.getAnswer() + " for " + r.getExerciseID());
+        sleep(50);
+      }
+    }
+  }
+
+  private void ensureMP3ForAll(Collection<CommonExercise> exercises) {
+    String installPath = pathHelper.getInstallPath();
+    int c = 0;
+    for (CommonExercise ex : exercises) {
+      if (stopOggCheck) break;
+     // if (c++ < 10) logger.info("checking audio attr for " + ex.getID());
+
+      try {
+        ensureMP3s(ex, installPath);
+      } catch (Exception e) {
+        logger.info("got " + e.getMessage() + " for " + ex.getID());
+      }
+      sleep(50);
+    }
   }
 
   private void sleep(int millis) {
@@ -2414,18 +2445,13 @@ boolean stopOggCheck = false;
    * @see #init()
    */
   private void readProperties(ServletContext servletContext) {
-    String config = servletContext.getInitParameter("config");
-    this.relativeConfigDir = "config" + File.separator + config;
+    this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
     this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
-
     pathHelper.setConfigDir(configDir);
 
     serverProps = new ServerProperties(servletContext, configDir);
     audioConversion = new AudioConversion(serverProps);
-
-    String h2DatabaseFile = serverProps.getH2Database();
-
-    db = makeDatabaseImpl(h2DatabaseFile);
+    db = makeDatabaseImpl(serverProps.getH2Database());
     shareDB(servletContext);
 //    shareLoadTesting(servletContext);
   }
