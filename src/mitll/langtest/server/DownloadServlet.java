@@ -5,12 +5,14 @@
 package mitll.langtest.server;
 
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.excel.EventDAOToExcel;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.User;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -239,18 +241,23 @@ public class DownloadServlet extends DatabaseServlet {
    */
   private void returnSpreadsheet(HttpServletResponse response, DatabaseImpl db, String encodedFileName) throws IOException {
     response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    ServletOutputStream outputStream = response.getOutputStream();
     if (encodedFileName.toLowerCase().contains("users")) {
-      response.setHeader("Content-Disposition", "attachment; filename=users.xlsx");
-      db.usersToXLSX(response.getOutputStream());
+      setResponseHeader(response, "users.xlsx");
+      db.usersToXLSX(outputStream);
     } else if (encodedFileName.toLowerCase().contains("results")) {
-      response.setHeader("Content-Disposition", "attachment; filename=results.xlsx");
-      db.getResultDAO().writeExcelToStream(db.getMonitorResults(), db.getTypeOrder(), response.getOutputStream());
+      setResponseHeader(response, "results.xlsx");
+      db.getResultDAO().writeExcelToStream(db.getMonitorResults(), db.getTypeOrder(), outputStream);
     } else if (encodedFileName.toLowerCase().contains("events")) {
-      response.setHeader("Content-Disposition", "attachment; filename=events.xlsx");
-      db.getEventDAO().toXLSX(response.getOutputStream());
+      setResponseHeader(response, "events.xlsx");
+      new EventDAOToExcel(db).toXLSX(db.getEventDAO().getAll(), outputStream);
     } else {
-      logger.warn("huh? can't handle request " + encodedFileName);
+      logger.error("returnSpreadsheet huh? can't handle request " + encodedFileName);
     }
+  }
+
+  private void setResponseHeader(HttpServletResponse response, String fileName) {
+    response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
   }
 
   /**
@@ -292,7 +299,7 @@ public class DownloadServlet extends DatabaseServlet {
   }
 
   private void setHeader(HttpServletResponse response, String fileName) {
-    response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+    setResponseHeader(response, fileName);
     response.setContentType("application/zip");
   }
 
