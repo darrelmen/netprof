@@ -6,7 +6,6 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.*;
 import mitll.langtest.server.amas.FileExerciseDAO;
-import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.analysis.Analysis;
@@ -17,6 +16,7 @@ import mitll.langtest.server.database.connection.PostgreSQLConnection;
 import mitll.langtest.server.database.contextPractice.ContextPracticeImport;
 import mitll.langtest.server.database.custom.*;
 import mitll.langtest.server.database.exercise.*;
+import mitll.langtest.server.database.hibernate.SessionManagement;
 import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.ParseResultJson;
@@ -98,6 +98,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private Analysis analysis;
   private final String absConfigDir;
   private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
+  private SessionManagement sessionManagement;
+  private String dbName;
 
   /**
    * @param configDir
@@ -118,6 +120,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         configDir, relativeConfigDir, dbName,
         serverProps,
         pathHelper, logAndNotify);
+    this.dbName = dbName;
   }
 
   public DatabaseImpl(DatabaseConnection connection,
@@ -160,6 +163,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   private Connection getConnection() {
     return getConnection(this.getClass().toString());
+  }
+
+  public void createDatabase() {
+    PostgreSQLConnection postgreSQLConnection = new PostgreSQLConnection(dbName, logAndNotify);
+
   }
 
   /**
@@ -453,10 +461,14 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
         audioDAO.markTranscripts();
       }
+
+      sessionManagement = new SessionManagement(dbName);
     }
   }
 
-  public void reloadExercises() { exerciseDAO.reload(); }
+  public void reloadExercises() {
+    exerciseDAO.reload();
+  }
 
   /**
    * @param mediaDir
@@ -931,7 +943,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private Map<String, CommonExercise> getIdToExerciseMap() {
     Map<String, CommonExercise> join = new HashMap<>();
 
-    for (CommonExercise exercise : getExercises()) { join.put(exercise.getID(), exercise); }
+    for (CommonExercise exercise : getExercises()) {
+      join.put(exercise.getID(), exercise);
+    }
 
     if (userExerciseDAO != null && exerciseDAO != null) {
       for (CommonExercise exercise : userExerciseDAO.getAll()) {
@@ -1198,8 +1212,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   /**
    * Special code to mask out unit/chapter from database in userexercise table.
-   *
+   * <p>
    * Must check update times to make sure we don't mask out a newer entry.
+   *
    * @param id
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String, long, boolean)
@@ -1494,4 +1509,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public LogAndNotify getLogAndNotify() {
     return logAndNotify;
   }
+
+  public SessionManagement getSessionManagement() {
+    return sessionManagement;
+  }
+
 }
