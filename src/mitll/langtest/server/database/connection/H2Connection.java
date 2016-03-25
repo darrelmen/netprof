@@ -1,7 +1,6 @@
 /*
  * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
  */
-
 package mitll.langtest.server.database.connection;
 
 import mitll.langtest.server.LogAndNotify;
@@ -34,7 +33,7 @@ public class H2Connection implements DatabaseConnection {
   private static final int MAX_MEMORY_ROWS = 1000000;
   private static final int maxMemoryRows = MAX_MEMORY_ROWS;
   private static final boolean USE_MVCC = false;
-  LogAndNotify logAndNotify;
+  private LogAndNotify logAndNotify;
 
   /**
    *
