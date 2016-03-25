@@ -715,11 +715,11 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
     }
 
     String vocab = asrScoring.getUsedTokens(lmSentences, unk); // this is basically the transcript
-    logger.info("from '" + lmSentences + "' to '" + vocab +"'");
+  //  logger.info("from '" + lmSentences + "' to '" + vocab +"'");
     String prefix = usePhoneToDisplay ? "phoneToDisplay" : "";
     String path = testAudioFile.getPath();
 
-    logger.info("getASRScoreForAudio audio file path is " + path);
+  //  logger.info("getASRScoreForAudio audio file path is " + path);
     return getASRScoreForAudio(0, path, vocab, lmSentences, 128, 128, false, true,
         canUseCache && serverProps.useScoreCache(), prefix, null, usePhoneToDisplay, useOldSchool);
   }
