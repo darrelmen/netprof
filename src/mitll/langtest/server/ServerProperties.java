@@ -73,6 +73,7 @@ public class ServerProperties {
   public static final String USE_H_2 = "useH2";
   public static final String USE_POSTGRE_SQL = "usePostgreSQL";
   public static final String TYPE_ORDER = "typeOrder";
+  public static final String SLEEP_BETWEEN_DECODES_MILLIS = "sleepBetweenDecodesMillis";
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
 
   /**
@@ -108,10 +109,10 @@ public class ServerProperties {
   private static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
   private static final String ADD_MISSING_INFO = "addMissingInfo";
   private static final int MIN_DYNAMIC_RANGE_DEFAULT = 20; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
+  private static final int SLEEP_BETWEEN_DECODES_DEFAULT = 100; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
   private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
   private static final String BEST_AUDIO = "bestAudio";
-  // private static final String READ_EXERCISES_FROM_DB = "readExercisesFromDB";
 
   private Properties props = new Properties();
 
@@ -122,7 +123,8 @@ public class ServerProperties {
   private final Set<Long> preferredVoices = new HashSet<Long>();
   private EmailList emailList;
   private final int userInitialScores = 20;
-  private boolean RTL;
+  //private boolean RTL;
+  private int sleepBetweenDecodes;
 
   /**
    * @param servletContext
@@ -145,7 +147,6 @@ public class ServerProperties {
   private ServerProperties(ServletContext servletContext, String configDir, String configFile) {
     if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
     readProps(configDir, configFile, getDateFromManifest(servletContext));
-
     readPhonemeMap(configDir);
   }
 
@@ -580,5 +581,9 @@ public class ServerProperties {
 
   public void setRTL(boolean isRTL) {
     props.setProperty("rtl", isRTL ? "true" : "false");
+  }
+
+  public int getSleepBetweenDecodes() {
+    return getIntPropertyDef(SLEEP_BETWEEN_DECODES_MILLIS, "" + SLEEP_BETWEEN_DECODES_DEFAULT);
   }
 }
