@@ -34,18 +34,18 @@ public class SessionManagement {
     StandardServiceRegistryBuilder configure = new StandardServiceRegistryBuilder()
         .configure();
 
-    logger.info("using " + dbName);
+    //logger.info("using " + dbName);
 
     doSpecialConfig(dbName, configure);
     final StandardServiceRegistry registry = configure // configures settings from hibernate.cfg.xml
         .build();
 
-    logger.debug("built the registry ");
+  //  logger.debug("built the registry ");
 
     try {
       Metadata metadata = new MetadataSources(registry).buildMetadata();
       sessionFactory = metadata.buildSessionFactory();
-      logger.info("made factory " + sessionFactory);
+      //logger.info("made factory " + sessionFactory);
     } catch (Exception e) {
       logger.error("got " + e, e);
       // The registry would be destroyed by the SessionFactory, but we had trouble building the SessionFactory
@@ -55,7 +55,7 @@ public class SessionManagement {
   }
 
   protected void doSpecialConfig(String dbName, StandardServiceRegistryBuilder configure) {
-    configure.applySetting("hibernate.connection.url", "jdbc:postgresql://localhost/" + dbName);
+    configure.applySetting("hibernate.connection.url", "jdbc:postgresql://localhost/" + dbName.toLowerCase());
     create(dbName);
   }
 
@@ -74,8 +74,8 @@ public class SessionManagement {
               ":5432/", PostgreSQLConnection.DEFAULT_USER,
           "");
 
-    //  String dbName1 = dbName.toLowerCase();
-      createDatabaseForgiving(dbName, conn);
+      String dbName1 = dbName.toLowerCase();
+      createDatabaseForgiving(dbName1, conn);
     } catch (SQLException e) {
       logger.error("Got " + e, e);
     }
