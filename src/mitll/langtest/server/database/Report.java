@@ -7,6 +7,7 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.instrumentation.EventDAO;
+import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
@@ -63,7 +64,7 @@ public class Report {
 
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
-  private final EventDAO eventDAO;
+  private final IEventDAO eventDAO;
   private final AudioDAO audioDAO;
   private final String prefix;
   private final String language;
@@ -78,7 +79,7 @@ public class Report {
       "WagnerSandy",
       "rbtrbt"));
 
-  public Report(UserDAO userDAO, ResultDAO resultDAO, EventDAO eventDAO, AudioDAO audioDAO, String language,
+  public Report(UserDAO userDAO, ResultDAO resultDAO, IEventDAO eventDAO, AudioDAO audioDAO, String language,
                 String prefix) {
     this.userDAO = userDAO;
     this.resultDAO = resultDAO;
