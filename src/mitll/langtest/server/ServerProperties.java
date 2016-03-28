@@ -37,7 +37,7 @@ public class ServerProperties {
   /**
    * TODO : read this from a config file, or maybe from the sites.json file on np
    */
-  public static final List<String> SITE_LIST = Arrays.asList(
+  private static final List<String> SITE_LIST = Arrays.asList(
       "Dari",
       "Egyptian",
       "English",
@@ -66,14 +66,15 @@ public class ServerProperties {
   private static final String MIRA_LEN = "https://mira.ll.mit.edu/scorer/item";
   private static final String MIRA_DEFAULT = MIRA_LEN;
   private static final String MIRA_CLASSIFIER_URL = "miraClassifierURL";
-  public static final String WEBSERVICE_HOST_IP1 = "webserviceHostIP";
-  public static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
-  public static final String LESSON_PLAN_FILE = "lessonPlanFile";
-  public static final String USE_MYSQL = "useMYSQL";
-  public static final String USE_H_2 = "useH2";
-  public static final String USE_POSTGRE_SQL = "usePostgreSQL";
-  public static final String TYPE_ORDER = "typeOrder";
-  public static final String SLEEP_BETWEEN_DECODES_MILLIS = "sleepBetweenDecodesMillis";
+  private static final String WEBSERVICE_HOST_IP1 = "webserviceHostIP";
+  private static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
+  private static final String LESSON_PLAN_FILE = "lessonPlanFile";
+  private static final String USE_MYSQL = "useMYSQL";
+  private static final String USE_H_2 = "useH2";
+  private static final String USE_POSTGRE_SQL = "usePostgreSQL";
+  private static final String USE_ORM = "useORM";
+  private static final String TYPE_ORDER = "typeOrder";
+  private static final String SLEEP_BETWEEN_DECODES_MILLIS = "sleepBetweenDecodesMillis";
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
 
   /**
@@ -577,6 +578,10 @@ public class ServerProperties {
 
   public boolean usePostgres() {
     return getDefaultFalse(USE_POSTGRE_SQL);
+  }
+
+  public boolean useORM() {
+    return getDefaultTrue(USE_ORM);
   }
 
   public void setRTL(boolean isRTL) {
