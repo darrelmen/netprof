@@ -4,6 +4,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.hibernate.AnnotationEvent;
 import mitll.langtest.server.database.hibernate.SessionManagement;
+import mitll.langtest.server.database.instrumentation.HEventDAO;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.instrumentation.Event;
@@ -23,7 +24,7 @@ public class EventReaderTest {
 
   @BeforeClass
   public static void setup() {
-    getDatabase("farsi");
+    getDatabase("spanish");
   }
 
   private static void getDatabase(String config) {
@@ -58,6 +59,38 @@ public class EventReaderTest {
     sessionManagement.doInTranscation((session)->{
       session.save( next1 );
     });
+
+    Event ret = sessionManagement.getFromTransaction(new SessionManagement.SessionSupplier<Event>() {
+      @Override
+      public Event get() {
+        List<Event> result = session.createQuery( "from Event" ).list();
+        return result.isEmpty() ? null : result.get(0);
+      }
+    });
+
+    try {
+      sessionManagement.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    logger.info("\n\ngot " + ret);
+  }
+
+  @Test
+  public void testEventCopy() {
+    SessionManagement sessionManagement = database.getSessionManagement();
+
+    HEventDAO heventDAO = new HEventDAO(database, database.getUserDAO().getDefectDetector());
+    heventDAO.addAll(database.getEventDAO().getAll());
+
+/*    Event next1 = all.iterator().next();
+
+    logger.info("original " + next1);
+
+    sessionManagement.doInTranscation((session)->{
+      session.save( next1 );
+    });*/
 
     Event ret = sessionManagement.getFromTransaction(new SessionManagement.SessionSupplier<Event>() {
       @Override

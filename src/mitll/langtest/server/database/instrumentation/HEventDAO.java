@@ -87,9 +87,16 @@ public class HEventDAO implements IEventDAO {
     return ret;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addPlayedMarkings(long, CommonExercise)
+   * @param userID
+   * @param firstExercise
+   */
   @Override
   public void addPlayedMarkings(long userID, CommonExercise firstExercise) {
     List<Event> allForUserAndExercise = getAllForUserAndExercise(userID, firstExercise);
+
+   // logger.info("addPlayedMarkings got " + allForUserAndExercise + " for " + userID + " and " +firstExercise.getID());
 
     Map<String, AudioAttribute> audioToAttr = firstExercise.getAudioRefToAttr();
     for (Event event : allForUserAndExercise) {
