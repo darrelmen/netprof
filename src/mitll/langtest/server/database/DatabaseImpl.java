@@ -18,6 +18,8 @@ import mitll.langtest.server.database.custom.*;
 import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.database.hibernate.SessionManagement;
 import mitll.langtest.server.database.instrumentation.EventDAO;
+import mitll.langtest.server.database.instrumentation.HEventDAO;
+import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.server.sorter.ExerciseSorter;
@@ -80,7 +82,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private UserListManager userListManager;
   private UserExerciseDAO userExerciseDAO;
   private AddRemoveDAO addRemoveDAO;
-  private EventDAO eventDAO;
+  private IEventDAO eventDAO;
 
   private ContextPractice contextPractice;
 
@@ -99,7 +101,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private final String absConfigDir;
   private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
   private SessionManagement sessionManagement;
-  private String dbName;
+//  private String dbName;
 
   /**
    * @param configDir
@@ -120,7 +122,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         configDir, relativeConfigDir, dbName,
         serverProps,
         pathHelper, logAndNotify);
-    this.dbName = dbName;
+  //  this.dbName = dbName;
   }
 
   public DatabaseImpl(DatabaseConnection connection,
@@ -165,15 +167,24 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return getConnection(this.getClass().toString());
   }
 
-  public void createDatabase() {
-    PostgreSQLConnection postgreSQLConnection = new PostgreSQLConnection(dbName, logAndNotify);
-
-  }
+//  public void createDatabase() {
+//    PostgreSQLConnection postgreSQLConnection = new PostgreSQLConnection(dbName, logAndNotify);
+//  }
 
   /**
    * Create or alter tables as needed.
    */
   private void initializeDAOs(PathHelper pathHelper) {
+    if (serverProps.useORM()) {
+      try {
+        String dbName = serverProps.getH2Database();
+        logger.info("dbname " + dbName);
+        sessionManagement = new SessionManagement(dbName);
+      } catch (Exception e) {
+        logger.error("Making session management, got " + e, e);
+      }
+    }
+
     userDAO = new UserDAO(this, getServerProps());
     addRemoveDAO = new AddRemoveDAO(this);
 
@@ -191,7 +202,16 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         new ReviewedDAO(this, ReviewedDAO.SECOND_STATE),
         pathHelper);
 
-    eventDAO = new EventDAO(this, userDAO);
+    if (sessionManagement != null) {
+
+      HEventDAO heventDAO = new HEventDAO(this, userDAO.getDefectDetector());
+
+      if (heventDAO.isEmpty()) { // need the old DAO initially
+        eventDAO = new EventDAO(this, userDAO.getDefectDetector());
+        heventDAO.addAll(eventDAO.getAll());
+      }
+      eventDAO = heventDAO;
+    }
 
     Connection connection1 = getConnection();
     try {
@@ -212,7 +232,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
 
     putBackWordAndPhone();
-
   }
 
   public ResultDAO getResultDAO() {
@@ -461,8 +480,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
         audioDAO.markTranscripts();
       }
-
-      sessionManagement = new SessionManagement(dbName);
     }
   }
 
@@ -895,7 +912,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     getLogAndNotify().logAndNotifyServerException(e);
   }
 
-  public EventDAO getEventDAO() {
+  public IEventDAO getEventDAO() {
     return eventDAO;
   }
 
@@ -1149,9 +1166,13 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return monitoringSupport.getResultStats();
   }
 
+  /**
+   * @see LangTestDatabaseImpl#destroy()
+   */
   public void destroy() {
     try {
       connection.contextDestroyed();
+      sessionManagement.close();
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
@@ -1513,5 +1534,4 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public SessionManagement getSessionManagement() {
     return sessionManagement;
   }
-
 }

@@ -146,11 +146,11 @@ public class Event implements IsSerializable, Comparable<Event> {
     this.exerciseID = exerciseID;
   }
 
-  private void setContext(String context) {
+  public void setContext(String context) {
     this.context = context;
   }
 
-  private void setCreatorID(long creatorID) {
+  public void setCreatorID(long creatorID) {
     this.creatorID = creatorID;
   }
 

@@ -13,14 +13,13 @@ public class EmailList {
   // MIT LL
   private static final String GORDON_VIDAVER = "gordon.vidaver@ll.mit.edu";
   private static final String DOUG_JONES = "daj@ll.mit.edu";
-  public static final String RAY_BUDD = "Raymond.Budd@ll.mit.edu";
+  static final String RAY_BUDD = "Raymond.Budd@ll.mit.edu";
 
   // DLI -
   private static final String GRIMMER = "michael.grimmer1@dliflc.edu";
   private static final String TAMAS_1 = "tamas.g.marius.civ@mail.mil";
   private static final String TAMAS_2 = "tamas.marius@dliflc.edu";
   private static final String SANDY   = "sandra.wagner@dliflc.edu";
-
 
   private static final String DEBUG_EMAIL = "debugEmail";
   private static final String TEST_EMAIL = "testEmail";
@@ -39,14 +38,12 @@ public class EmailList {
       "Sandy",
       "Gordon");
 
-
   private static final List<String> DLI_EMAILS = Arrays.asList(
       TAMAS_1,
       TAMAS_2,
       GRIMMER,
       SANDY,
       GORDON_VIDAVER);
-
 
   private static final Set<String> ADMINLIST = new HashSet<>(Arrays.asList("gvidaver", "tmarius",
       "mgrimmer",
