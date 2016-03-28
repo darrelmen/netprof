@@ -4,28 +4,14 @@
 
 package mitll.langtest.server.database.instrumentation;
 
-import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.DataFormat;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.*;
 
 /**
@@ -35,7 +21,7 @@ import java.util.*;
  * Time: 2:23 PM
  * To change this template use File | Settings | File Templates.
  */
-public class EventDAO extends DAO {
+public class EventDAO extends DAO implements IEventDAO {
   private static final Logger logger = Logger.getLogger(EventDAO.class);
 
   private static final String EVENT = "event";
@@ -44,16 +30,18 @@ public class EventDAO extends DAO {
   private static final String HITID = "hitid";
   private static final String EXERCISEID = "exerciseid";
   private static final String DEVICE = "device";
-  private final UserDAO userDAO;
+  // private final UserDAO userDAO;
+  long defectDetector = -1;
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
    * @param database
-   * @param userDAO
+   * @param defectDetector
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
    */
-  public EventDAO(Database database, UserDAO userDAO) {
+  public EventDAO(Database database, long defectDetector) {
     super(database);
-    this.userDAO = userDAO;
+    this.defectDetector = defectDetector;
+    //  this.userDAO = userDAO;
     try {
       createTable(database);
       createIndex(database, WIDGETTYPE, EVENT);
@@ -83,23 +71,23 @@ public class EventDAO extends DAO {
   private void createTable(Database database) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
-      EVENT +
-      " (" +
-      "uniqueid IDENTITY, " +
-      CREATORID + " INT, " +
-      EXERCISEID + " VARCHAR, " +
-      "context VARCHAR, " +
-      "widgetid VARCHAR, " +
-      WIDGETTYPE + " VARCHAR, " +
-      "modified TIMESTAMP, " +
-      HITID + " VARCHAR, " +
+        EVENT +
+        " (" +
+        "uniqueid IDENTITY, " +
+        CREATORID + " INT, " +
+        EXERCISEID + " VARCHAR, " +
+        "context VARCHAR, " +
+        "widgetid VARCHAR, " +
+        WIDGETTYPE + " VARCHAR, " +
+        "modified TIMESTAMP, " +
+        HITID + " VARCHAR, " +
         DEVICE + " VARCHAR, " +
         "FOREIGN KEY(" +
-      CREATORID +
-      ") REFERENCES " +
-      "USERS" +
-      "(ID)" +
-      ")");
+        CREATORID +
+        ") REFERENCES " +
+        "USERS" +
+        "(ID)" +
+        ")");
 
     finish(database, connection, statement);
   }
@@ -110,7 +98,8 @@ public class EventDAO extends DAO {
    *
    * @see mitll.langtest.server.database.DatabaseImpl#logEvent(String, String, String, String, long, String, String)
    */
-  public synchronized boolean add(Event event) {
+  @Override
+  public boolean add(Event event) {
     Connection connection = getConnection();
     boolean val = true;
     try {
@@ -120,7 +109,7 @@ public class EventDAO extends DAO {
           "INSERT INTO " + EVENT +
               "(" +
               CREATORID + "," +
-              EXERCISEID +"," +
+              EXERCISEID + "," +
               "context" + "," +
               "widgetid" + "," +
               WIDGETTYPE + "," +
@@ -134,8 +123,8 @@ public class EventDAO extends DAO {
       boolean missingCreator = creatorID == -1;
       if (missingCreator) {
         event.setTimestamp(System.currentTimeMillis());
-       // logger.warn("creator is " + creatorID + " for " + event);
-        creatorID = userDAO.getDefectDetector();
+        // logger.warn("creator is " + creatorID + " for " + event);
+        creatorID = defectDetector;// userDAO.getDefectDetector();
       }
       statement.setLong(i++, creatorID);
       statement.setString(i++, event.getExerciseID());
@@ -146,7 +135,7 @@ public class EventDAO extends DAO {
       statement.setString(i++, event.getDevice());
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
 
-      logger.debug(getDatabase().getLanguage() + " : Add " +event);
+      logger.debug(getDatabase().getLanguage() + " : Add " + event);
       int j = statement.executeUpdate();
 
       if (j != 1) {
@@ -165,6 +154,7 @@ public class EventDAO extends DAO {
     return val;
   }
 
+  @Override
   public List<Event> getAll() {
     try {
       return getEvents("SELECT * from " + EVENT);
@@ -177,6 +167,7 @@ public class EventDAO extends DAO {
     return Collections.emptyList();
   }
 
+  @Override
   public List<Event> getAllDevices() {
     try {
       return getEvents("SELECT * from " + EVENT + " where length(device)=36");
@@ -189,6 +180,7 @@ public class EventDAO extends DAO {
     return Collections.emptyList();
   }
 
+  @Override
   public void addPlayedMarkings(long userID, CommonExercise firstExercise) {
     List<Event> allForUserAndExercise = getAllForUserAndExercise(userID, firstExercise.getID());
     Map<String, AudioAttribute> audioToAttr = firstExercise.getAudioRefToAttr();
@@ -196,8 +188,7 @@ public class EventDAO extends DAO {
       AudioAttribute audioAttribute = audioToAttr.get(event.getContext());
       if (audioAttribute == null) {
         //logger.warn("addPlayedMarkings huh? can't find " + event.getContext() + " in " + audioToAttr.keySet());
-      }
-      else {
+      } else {
         audioAttribute.setHasBeenPlayed(true);
       }
     }
@@ -206,11 +197,11 @@ public class EventDAO extends DAO {
   private List<Event> getAllForUserAndExercise(long userid, String exid) {
     try {
       String sql = "SELECT * from " + EVENT + " where " +
-        WIDGETTYPE +
-        "='qcPlayAudio' AND " +
-        CREATORID +"="+userid + " and " +
-        EXERCISEID + "='" +exid+
-        "'";
+          WIDGETTYPE +
+          "='qcPlayAudio' AND " +
+          CREATORID + "=" + userid + " and " +
+          EXERCISEID + "='" + exid +
+          "'";
 
       return getEvents(sql);
     } catch (Exception ee) {
