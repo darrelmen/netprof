@@ -913,7 +913,7 @@ public class Report {
   private Set<Long> getEventsDevices(StringBuilder builder, Set<Long> students, JSONObject jsonObject, int year) {
     List<Event> all = eventDAO.getAllDevices();
     String activeUsers = "Active iPad/iPhone Users";
-    String tableLabel = "iPad/iPhone Time on Task";
+    String tableLabel  = "iPad/iPhone Time on Task";
     return getEvents(builder, students, all, activeUsers, tableLabel, jsonObject, year);
   }
 
