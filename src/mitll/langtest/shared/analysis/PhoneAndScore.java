@@ -4,6 +4,8 @@
 
 package mitll.langtest.shared.analysis;
 
+import mitll.langtest.server.database.phone.PhoneDAO;
+
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +18,7 @@ public class PhoneAndScore implements Comparable<PhoneAndScore> {
   private WordAndScore wordAndScore;
 
   /**
-   * @see mitll.langtest.server.database.PhoneDAO#getPhoneReport(String, Map, boolean)
+   * @see PhoneDAO#getPhoneReport
    * @param pronScore
    * @param timestamp
    */
@@ -31,7 +33,7 @@ public class PhoneAndScore implements Comparable<PhoneAndScore> {
   }
 
   /**
-   * @see mitll.langtest.server.database.PhoneDAO#getPhoneTimeSeries(List)
+   * @see PhoneDAO#getPhoneTimeSeries(List)
    * @return
    */
   public long getTimestamp() {

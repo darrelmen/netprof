@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 10/20/15.
  */
-class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
+public class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
   private static final String WORDS_USING = "Words with ";
   private final Logger logger = Logger.getLogger("PhoneExampleContainer");
 
@@ -208,8 +208,7 @@ class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
       public SafeHtml getValue(WordAndScore shell) {
         String columnText = new WordTable().toHTML(shell.getTranscript(), phone);
         if (columnText.isEmpty()) {
-          //CommonShell exercise = plot.getIdToEx().get(shell.getId());
-          String foreignLanguage = shell.getWord();//exercise == null ? "" : exercise.getForeignLanguage();
+          String foreignLanguage = shell.getWord();
           if (isSpanish) foreignLanguage = foreignLanguage.toUpperCase();
           columnText = new WordTable().getColoredSpan(foreignLanguage, shell.getScore());
         }

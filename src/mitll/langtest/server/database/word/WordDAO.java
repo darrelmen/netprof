@@ -2,10 +2,12 @@
  * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
  */
 
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.word;
 
-import mitll.langtest.server.LogAndNotify;
-import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.server.database.DAO;
+import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.ResultDAO;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -20,7 +22,7 @@ import java.util.List;
  * Time: 2:23 PM
  * To change this template use File | Settings | File Templates.
  */
-public class WordDAO extends DAO {
+public class WordDAO extends DAO implements IWordDAO {
   private static final Logger logger = Logger.getLogger(WordDAO.class);
 
   public static final String WORD = "word";
@@ -44,31 +46,6 @@ public class WordDAO extends DAO {
       database.closeConnection(connection);
     } catch (SQLException e) {
       logger.error("got " + e, e);
-    }
-  }
-
-  public static class Word {
-    long id;
-    long rid;
-    String word;
-    int seq;
-    float score;
-
-    public Word(long id, long rid, String word, int seq, float score) {
-      this(rid,word,seq,score);
-      this.id = id;
-    }
-
-    public Word(long rid, String word, int seq, float score) {
-
-      this.rid = rid;
-      this.word = word;
-      this.seq = seq;
-      this.score = score;
-    }
-
-    public String toString() {
-      return "# " + id + " rid " + rid + " " + word + " at " + seq + " score " + score;
     }
   }
 
@@ -121,10 +98,10 @@ public class WordDAO extends DAO {
               "VALUES(?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
       int i = 1;
 
-      statement.setLong(i++, word.rid);
-      statement.setString(i++, word.word);
-      statement.setInt(i++, word.seq);
-      statement.setFloat(i++, word.score);
+      statement.setLong(i++, word.getRid());
+      statement.setString(i++, word.getWord());
+      statement.setInt(i++, word.getSeq());
+      statement.setFloat(i++, word.getScore());
 
       int j = statement.executeUpdate();
 
@@ -148,6 +125,10 @@ public class WordDAO extends DAO {
     return 0;
   }
 
+  /**
+   * @see DatabaseImpl#putBackWordAndPhone
+   * @return
+   */
   public List<Word> getAll() {
     try {
       return getWords("SELECT * from " + WORD);
@@ -157,22 +138,6 @@ public class WordDAO extends DAO {
     }
     return Collections.emptyList();
   }
-
-/*  public List<Event> getAllForUserAndExercise(long userid, String exid) {
-    try {
-      String sql = "SELECT * from " + WORD + " where " +
-        WIDGETTYPE +
-        "='qcPlayAudio' AND " +
-        CREATORID +"="+userid + " and " +
-        EXERCISEID + "='" +exid+
-        "'";
-
-      return getEvents(sql);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return Collections.emptyList();
-  }*/
 
   private List<Word> getWords(String sql) throws SQLException {
     Connection connection = getConnection();
