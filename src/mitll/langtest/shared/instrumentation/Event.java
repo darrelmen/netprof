@@ -42,10 +42,8 @@ public class Event implements IsSerializable, Comparable<Event> {
    * @param device
    * @see mitll.langtest.server.database.custom.AnnotationDAO#getUserAnnotations(String)
    */
-  public Event(//long id,
-               String widgetID, String widgetType, String exerciseID, String context,
+  public Event(String widgetID, String widgetType, String exerciseID, String context,
                long userID, long timestamp, String hitID, String device) {
-    //this.id = id;
     this.widgetID = widgetID;
     this.widgetType = widgetType;
     this.exerciseID = exerciseID;
@@ -59,7 +57,6 @@ public class Event implements IsSerializable, Comparable<Event> {
   @Id
   @GeneratedValue(generator = "increment")
   @GenericGenerator(name = "increment", strategy = "increment")
-  //@Column(name = "uniqueid")
   public Long getId() {
     return id;
   }
@@ -68,27 +65,22 @@ public class Event implements IsSerializable, Comparable<Event> {
     this.id = id;
   }
 
-  //@Column(name = "widgettype")
   public String getWidgetID() {
     return widgetID;
   }
 
-  //@Column(name = "exerciseid")
   public String getExerciseID() {
     return exerciseID;
   }
 
-  //@Column(name = "creatorid")
   public String getContext() {
     return context;
   }
 
-  //@Column(name = "creatorid")
   public long getCreatorID() {
     return creatorID;
   }
 
-  //@Column(name = "modified")
   @Transient
   public long getTimestamp() {
     return timestamp;
@@ -107,17 +99,14 @@ public class Event implements IsSerializable, Comparable<Event> {
     this.timestamp = timestamp.getTime();
   }
 
-  //@Column(name = "creatorid")
   public String getDevice() {
     return device;
   }
 
-  //@Column(name = "creatorid")
   public String getWidgetType() {
     return widgetType;
   }
 
-  //@Column(name = "creatorid")
   public String getHitID() {
     return hitID;
   }
@@ -146,7 +135,7 @@ public class Event implements IsSerializable, Comparable<Event> {
     this.exerciseID = exerciseID;
   }
 
-  public void setContext(String context) {
+  private void setContext(String context) {
     this.context = context;
   }
 
@@ -160,5 +149,12 @@ public class Event implements IsSerializable, Comparable<Event> {
 
   private void setDevice(String device) {
     this.device = device;
+  }
+
+  public void truncate() {
+    String context = getContext();
+    if (context.length() > 255) {
+      setContext(context.substring(0, 255));
+    }
   }
 }

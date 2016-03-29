@@ -5,6 +5,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -278,7 +279,7 @@ public class JsonSupport {
     if (now - then > 500) logger.warn("took " + (now - then) + " millis to get ex->audio map");
 
     List<String> ids = new ArrayList<String>();
-    Map<String, String> idToRef = new HashMap<String, String>();
+    Map<String, String> exidToRefAudio = new HashMap<String, String>();
     for (CommonExercise exercise : exercisesForState) {
       List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
       if (audioAttributes != null) {
@@ -286,13 +287,13 @@ public class JsonSupport {
       }
       String id = exercise.getID();
       ids.add(id);
-      idToRef.put(id, exercise.getRefAudio());
+      exidToRefAudio.put(id, exercise.getRefAudio());
     }
 
     now = System.currentTimeMillis();
 
     if (now - then > 300) logger.warn("getJsonPhoneReport : took " + (now - then) + " millis to attach audio again!");
 
-    return phoneDAO.getWorstPhonesJson(userid, ids, idToRef);
+    return phoneDAO.getWorstPhonesJson(userid, ids, exidToRefAudio);
   }
 }
