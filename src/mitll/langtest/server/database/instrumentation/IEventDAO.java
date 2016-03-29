@@ -16,4 +16,6 @@ public interface IEventDAO {
   List<Event> getAllDevices();
 
   void addPlayedMarkings(long userID, CommonExercise firstExercise);
+
+  Number getNumRows();
 }
