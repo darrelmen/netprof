@@ -194,6 +194,11 @@ public class EventDAO extends DAO implements IEventDAO {
     }
   }
 
+  @Override
+  public Number getNumRows() {
+    return getCount("EVENT");
+  }
+
   private List<Event> getAllForUserAndExercise(long userid, String exid) {
     try {
       String sql = "SELECT * from " + EVENT + " where " +

@@ -4,6 +4,8 @@
 
 package mitll.langtest.shared.analysis;
 
+import mitll.langtest.server.database.phone.PhoneDAO;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +27,7 @@ public class PhoneReport implements Serializable {
   /**
    * @param overallPercent
    * @param phoneToWordAndScoreSorted
-   * @see mitll.langtest.server.database.PhoneDAO#getPhoneReport(Map, Map, float, float)
+   * @see PhoneDAO#getPhoneReport(Map, Map, float, float)
    */
   public PhoneReport(int overallPercent,
                      Map<String, List<WordAndScore>> phoneToWordAndScoreSorted,
