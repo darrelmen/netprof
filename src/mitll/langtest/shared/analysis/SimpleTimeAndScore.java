@@ -4,6 +4,8 @@
 
 package mitll.langtest.shared.analysis;
 
+import mitll.langtest.server.database.phone.PhoneDAO;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -12,7 +14,6 @@ import java.util.List;
  *
  * @see mitll.langtest.client.analysis.AnalysisPlot#addSeries
  */
-
 public class SimpleTimeAndScore implements Serializable {
   private long timestamp;
   private float score;
@@ -21,15 +22,20 @@ public class SimpleTimeAndScore implements Serializable {
   /**
    * @param timestamp
    * @param score
-   * @see mitll.langtest.server.database.PhoneDAO#getPhoneTimeSeries(List)
+   * @see PhoneDAO#getPhoneTimeSeries(List)
    */
-  public SimpleTimeAndScore( long timestamp, float score, WordAndScore wordAndScore) {
+  SimpleTimeAndScore(long timestamp, float score, WordAndScore wordAndScore) {
     this.timestamp = timestamp;
     this.score = score;
     this.wordAndScore = wordAndScore;
   }
 
-  public SimpleTimeAndScore( long timestamp, float score) {
+  /**
+   * @see BestScore#BestScore
+   * @param timestamp
+   * @param score
+   */
+  SimpleTimeAndScore( long timestamp, float score) {
     this.timestamp = timestamp;
     this.score = score;
     this.wordAndScore = null;
