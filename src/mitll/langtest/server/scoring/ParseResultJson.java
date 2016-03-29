@@ -9,6 +9,7 @@ import audio.image.TranscriptEvent;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import net.sf.json.JSONArray;
@@ -16,7 +17,6 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by go22670 on 9/28/15.
@@ -32,7 +32,7 @@ public class ParseResultJson {
 
   /**
    * @param properties
-   * @see mitll.langtest.server.database.PhoneDAO#PhoneDAO(Database)
+   * @see PhoneDAO#PhoneDAO(Database)
    */
   public ParseResultJson(ServerProperties properties) {
     this.props = properties;
@@ -79,7 +79,7 @@ public class ParseResultJson {
   /**
    * @param json
    * @return
-   * @see mitll.langtest.server.database.PhoneDAO#getPhoneReport(String, Map, boolean)
+   * @see PhoneDAO#getPhoneReport(String, Map, boolean)
    * @see DatabaseImpl#putBackWordAndPhone()
    * @see mitll.langtest.server.database.analysis.Analysis#getWordScore(List)
    */

@@ -4,6 +4,7 @@
 
 package mitll.langtest.server.database.analysis;
 
+import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.shared.analysis.*;
 import org.apache.log4j.Logger;
 
@@ -40,7 +41,7 @@ public class PhoneAnalysis {
 
   /**
    * @param phoneToAvgSorted
-   * @see mitll.langtest.server.database.PhoneDAO#setSessions(Map)
+   * @see PhoneDAO#setSessions(Map)
    */
   public void setSessions(Map<String, PhoneStats> phoneToAvgSorted) {
     for (Map.Entry<String, PhoneStats> pair : phoneToAvgSorted.entrySet()) {

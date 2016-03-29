@@ -20,6 +20,10 @@ import mitll.langtest.server.database.hibernate.SessionManagement;
 import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.server.database.instrumentation.HEventDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
+import mitll.langtest.server.database.phone.Phone;
+import mitll.langtest.server.database.phone.PhoneDAO;
+import mitll.langtest.server.database.word.Word;
+import mitll.langtest.server.database.word.WordDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.server.sorter.ExerciseSorter;
@@ -317,11 +321,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     //logger.info("skipped " + skipped);
 
-    List<WordDAO.Word> all = wordDAO.getAll();
+    List<Word> all = wordDAO.getAll();
     Set<Integer> already = new HashSet<>();
-    for (WordDAO.Word word : all) {
-      long rid = word.rid;
-      already.add((int) rid);
+    for (Word word : all) {
+      already.add((int) word.getRid());
     }
     //  logger.debug("putBackWordAndPhone current word results " + already.size());
     Set<Integer> allKeys = new HashSet<>(idToResult.keySet());
@@ -1482,12 +1485,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       for (TranscriptSegment segment : words) {
         String event = segment.getEvent();
         if (!event.equals(SLFFile.UNKNOWN_MODEL) && !event.equals(SIL)) {
-          long wid = getWordDAO().addWord(new WordDAO.Word(answerID, event, windex++, segment.getScore()));
+          long wid = getWordDAO().addWord(new Word(answerID, event, windex++, segment.getScore()));
           for (TranscriptSegment pseg : phones) {
             if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
               String pevent = pseg.getEvent();
               if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals(SIL)) {
-                getPhoneDAO().addPhone(new PhoneDAO.Phone(answerID, wid, pevent, pindex++, pseg.getScore()));
+                getPhoneDAO().addPhone(new Phone(answerID, wid, pevent, pindex++, pseg.getScore()));
               }
             }
           }
