@@ -1,6 +1,7 @@
 package mitll.langtest.server.database.instrumentation;
 
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.hibernate.HDAO;
 import mitll.langtest.server.database.hibernate.SessionManagement;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -14,16 +15,12 @@ import java.util.Map;
 /**
  * Created by go22670 on 3/28/16.
  */
-public class HEventDAO implements IEventDAO {
+public class HEventDAO extends HDAO<Event> implements IEventDAO {
   private static final Logger logger = Logger.getLogger(HEventDAO.class);
-
-  // private final Database database;
-  SessionManagement sessionManagement;
-  long defectDetector = -1;
+  private long defectDetector = -1;
 
   public HEventDAO(Database database, long defectDetector) {
-   // this.database = database;
-    sessionManagement = database.getSessionManagement();
+    super(database);
     this.defectDetector = defectDetector;
   }
 
@@ -32,9 +29,7 @@ public class HEventDAO implements IEventDAO {
       logger.info("Adding initial events from H2 " + allEvents.size());
       sessionManagement.doInTranscation((session) -> {
         for (Event event : allEvents) {
-          if (event.getContext().length() > 255) {
-            event.setContext(event.getContext().substring(0,255));
-          }
+          event.truncate();
           session.save(event);
         }
       });
@@ -55,48 +50,28 @@ public class HEventDAO implements IEventDAO {
   }
 
   public boolean isEmpty() {
-    Boolean ret = sessionManagement.getFromTransaction(new SessionManagement.SessionSupplier<Boolean>() {
-      @Override
-      public Boolean get() {
-        return session.createQuery("select 1 from Event ").setMaxResults(1).list().isEmpty();
-      }
-    });
-    return ret;
+    return isEmpty("Event");
   }
-
 
   @Override
   public List<Event> getAll() {
-    List<Event> ret = sessionManagement.getFromTransaction(new SessionManagement.SessionSupplier<List<Event>>() {
-      @Override
-      public List<Event> get() {
-        return session.createQuery("from Event ").list();
-      }
-    });
-    return ret;
+    return getAll("Event");
   }
 
   @Override
   public List<Event> getAllDevices() {
-    List<Event> ret = sessionManagement.getFromTransaction(new SessionManagement.SessionSupplier<List<Event>>() {
-      @Override
-      public List<Event> get() {
-        return session.createQuery("from Event  where length(device)=36").list();
-      }
-    });
-    return ret;
+    return getAll("Event where length(device)=36");
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addPlayedMarkings(long, CommonExercise)
    * @param userID
    * @param firstExercise
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addPlayedMarkings(long, CommonExercise)
    */
   @Override
   public void addPlayedMarkings(long userID, CommonExercise firstExercise) {
     List<Event> allForUserAndExercise = getAllForUserAndExercise(userID, firstExercise);
-
-   // logger.info("addPlayedMarkings got " + allForUserAndExercise + " for " + userID + " and " +firstExercise.getID());
+    // logger.info("addPlayedMarkings got " + allForUserAndExercise + " for " + userID + " and " +firstExercise.getID());
 
     Map<String, AudioAttribute> audioToAttr = firstExercise.getAudioRefToAttr();
     for (Event event : allForUserAndExercise) {
@@ -107,6 +82,11 @@ public class HEventDAO implements IEventDAO {
         audioAttribute.setHasBeenPlayed(true);
       }
     }
+  }
+
+  @Override
+  public Number getNumRows() {
+    return getNumRowsByClass(Event.class);
   }
 
   private List<Event> getAllForUserAndExercise(final long userID, final CommonExercise firstExercise) {
