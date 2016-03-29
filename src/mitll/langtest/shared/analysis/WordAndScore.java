@@ -4,7 +4,8 @@
 
 package mitll.langtest.shared.analysis;
 
-import mitll.langtest.server.database.PhoneDAO;
+import mitll.langtest.client.analysis.PhoneExampleContainer;
+import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 
@@ -39,7 +40,7 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
    * @param refAudio
    * @param scoreJson
    * @param timestamp
-   * @see PhoneDAO#getPhoneReport(String, Map, boolean)
+   * @see PhoneDAO#getAndRememberWordAndScore(Map, Map, Map, String, String, String, long, int, String, long, String, int, float)
    */
   public WordAndScore(String exid, String word, float score, long resultID, int wseq, int seq, String answerAudio,
                       String refAudio, String scoreJson, long timestamp) {
@@ -113,10 +114,18 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
     return scoreJson;
   }
 
+  /**
+   * @see PhoneDAO#setTranscript(WordAndScore, Map)
+   * @param transcript
+   */
   public void setTranscript(Map<NetPronImageType, List<TranscriptSegment>> transcript) {
     this.transcript = transcript;
   }
 
+  /**
+   * @see PhoneExampleContainer#getItemColumn
+   * @return
+   */
   public Map<NetPronImageType, List<TranscriptSegment>> getTranscript() {
     return transcript;
   }

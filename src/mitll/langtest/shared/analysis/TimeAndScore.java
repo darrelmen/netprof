@@ -4,6 +4,8 @@
 
 package mitll.langtest.shared.analysis;
 
+import mitll.langtest.server.database.phone.PhoneDAO;
+
 import java.util.List;
 
 /**
@@ -21,7 +23,7 @@ public class TimeAndScore extends SimpleTimeAndScore implements Comparable<Simpl
    * @param cumulativeAverage
    * @see UserPerformance#setRawBestScores(List)
    */
-  public TimeAndScore(BestScore bs, float cumulativeAverage) {
+  TimeAndScore(BestScore bs, float cumulativeAverage) {
     this(bs.getExId(), bs.getTimestamp(), bs.getScore(), cumulativeAverage, null);
   }
 
@@ -30,7 +32,7 @@ public class TimeAndScore extends SimpleTimeAndScore implements Comparable<Simpl
    * @param timestamp
    * @param score
    * @param cumulativeAverage
-   * @see mitll.langtest.server.database.PhoneDAO#getPhoneTimeSeries(List)
+   * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneTimeSeries(List)
    */
   public TimeAndScore(String id, long timestamp, float score, float cumulativeAverage, WordAndScore wordAndScore) {
     super(timestamp, score, wordAndScore);

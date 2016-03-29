@@ -4,6 +4,8 @@
 
 package mitll.langtest.shared.analysis;
 
+import mitll.langtest.server.database.phone.PhoneDAO;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +26,7 @@ public class PhoneStats implements Serializable {
 
   /**
    * @param count
-   * @see mitll.langtest.server.database.PhoneDAO#getPhoneReport(Map, Map, float, float)
+   * @see PhoneDAO#getPhoneReport(Map, Map, float, float)
    */
   public PhoneStats(int count, List<TimeAndScore> timeSeries) {
     this.count = count;
