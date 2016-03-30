@@ -473,7 +473,7 @@ public class AudioConversion {
       if (DEBUG) logger.debug("run lame on " + absolutePathToWav + " making " + mp3File);
 
       if (!convertToMP3FileAndCheck(getLame(), title, absolutePathToWav.getAbsolutePath(), mp3File, author)) {
-        if (spew2++ < 10) logger.warn("File missing for " + pathToWav);
+        if (spew2++ < 10) logger.warn("File missing for " + pathToWav + " for " +author);
         return FILE_MISSING;
       }
     }
