@@ -273,7 +273,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     String path = e.getRefAudio() != null ? e.getRefAudio() : e.getSlowAudioRef();
 
     if (path != null) {
-      path = compressedAudio.getPathNoSlashChange(path);
+      path = CompressedAudio.getPathNoSlashChange(path);
     }
     contentAudio = getAudioPanel(path);
     contentAudio.setScreenPortion(screenPortion);
@@ -295,7 +295,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     return new FastAndSlowASRScoringAudioPanel(getLocalExercise(), path, service, controller, scorePanel, instance);
   }
 
-  private CompressedAudio compressedAudio = new CompressedAudio();
+  //private CompressedAudio compressedAudio = new CompressedAudio();
 
   /**
    * @param commentToPost
