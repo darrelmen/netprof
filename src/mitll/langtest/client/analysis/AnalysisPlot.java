@@ -19,6 +19,7 @@ import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.TimeAndScore;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
 import org.moxieapps.gwt.highcharts.client.*;
 import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEvent;
 import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEventHandler;
@@ -234,20 +235,19 @@ class AnalysisPlot extends TimeSeriesPlot {
   }
 
   private void populateExerciseMap(LangTestDatabaseAsync service, int userid) {
-    service.getExerciseIds(1, new HashMap<String, Collection<String>>(), "", -1,
-        userid, "", false, false, false, false, new AsyncCallback<ExerciseListWrapper<CommonShell>>() {
-          @Override
-          public void onFailure(Throwable throwable) {
-            logger.warning("\n\n\n-> getExerciseIds " + throwable);
-          }
+    service.getExerciseIds(new ExerciseListRequest(1, userid), new AsyncCallback<ExerciseListWrapper<CommonShell>>() {
+      @Override
+      public void onFailure(Throwable throwable) {
+        logger.warning("\n\n\n-> getExerciseIds " + throwable);
+      }
 
-          @Override
-          public void onSuccess(ExerciseListWrapper<CommonShell> exerciseListWrapper) {
-            for (CommonShell shell : exerciseListWrapper.getExercises()) {
-              getIdToEx().put(shell.getID(), shell);
-            }
-          }
-        });
+      @Override
+      public void onSuccess(ExerciseListWrapper<CommonShell> exerciseListWrapper) {
+        for (CommonShell shell : exerciseListWrapper.getExercises()) {
+          getIdToEx().put(shell.getID(), shell);
+        }
+      }
+    });
   }
 
   /**
@@ -308,7 +308,7 @@ class AnalysisPlot extends TimeSeriesPlot {
     Collections.sort(grans);
     for (Long gran : grans) {
       String label = granToLabel.get(gran);
-   //   logger.info("addErrorBars Adding for " + label);
+      //   logger.info("addErrorBars Adding for " + label);
       List<PhoneSession> phoneSessions = granularityToSessions.get(gran);
       granToError.put(gran, addErrorBarSeries(phoneSessions, chart, label, true));
 
@@ -331,7 +331,7 @@ class AnalysisPlot extends TimeSeriesPlot {
    * @see #gotExtremes(AxisSetExtremesEvent)
    */
   private void setVisibility(long start, long end) {
-  //  logger.info("setVisibility from " + start + "/" + new Date(start) + " - " + new Date(end));
+    //  logger.info("setVisibility from " + start + "/" + new Date(start) + " - " + new Date(end));
     List<Long> grans = new ArrayList<>(granularityToSessions.keySet());
 
     Collections.sort(grans);
@@ -618,7 +618,7 @@ class AnalysisPlot extends TimeSeriesPlot {
       @Override
       public boolean onSetExtremes(AxisSetExtremesEvent axisSetExtremesEvent) {
         if (axisSetExtremesEvent != null) {
-         // logger.info("configureChart window " + firstTime + " " + lastTime);
+          // logger.info("configureChart window " + firstTime + " " + lastTime);
 
           gotExtremes(axisSetExtremesEvent);
         }
@@ -651,7 +651,7 @@ class AnalysisPlot extends TimeSeriesPlot {
       Number min = axisSetExtremesEvent.getMin();
       Number max = axisSetExtremesEvent.getMax();
 
-   //   logger.info("gotExtremes got min " + min + " max " + max);
+      //   logger.info("gotExtremes got min " + min + " max " + max);
       if (min != null && min.longValue() > 0) {
         long end = max.longValue();
         setVisibility(min.longValue(), end);
