@@ -292,10 +292,10 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     //}
   }
 
-  CompressedAudio compressedAudio = new CompressedAudio();
+  //CompressedAudio compressedAudio = new CompressedAudio();
 
   private String loadAudio(String path) {
-    path = compressedAudio.getPath(path);
+    path = CompressedAudio.getPath(path);
  //   path = ensureForwardSlashes(path);
     if (isPlaying()) pause();
     startSong(path);
