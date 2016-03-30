@@ -1212,6 +1212,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     if (userEx == null) {
       toRet = getExercise(id);
     } else {
+      //logger.info("got user ex for " + id);
       long updateTime = userEx.getUpdateTime();
       CommonExercise predef = getExercise(id);
 
@@ -1245,7 +1246,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return addRemoveDAO;
   }
 
-  private ExerciseDAO getExerciseDAO() {
+  public ExerciseDAO getExerciseDAO() {
     return exerciseDAO;
   }
 
