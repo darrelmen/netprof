@@ -247,8 +247,7 @@ public class PhoneDAO extends DAO implements IPhoneDAO<Phone> {
       // info from word table
       int wseq = rs.getInt(i++);
       String word = rs.getString(i++);
-      /*float wscore =*/
-      rs.getFloat(i++);
+      /*float wscore =*/ //rs.getFloat(i++);
 
       // info from phone table
       long rid = rs.getLong(RID1);
@@ -265,7 +264,9 @@ public class PhoneDAO extends DAO implements IPhoneDAO<Phone> {
       }
 
       WordAndScore wordAndScore = getAndRememberWordAndScore(idToRef, phoneToScores, phoneToWordAndScore,
-          exid, audioAnswer, scoreJson, resultTime, wseq, word, rid, phone, seq, phoneScore);
+          exid, audioAnswer, scoreJson, resultTime,
+          wseq, word,
+          rid, phone, seq, phoneScore);
 
       if (addTranscript) {
         addTranscript(stringToMap, scoreJson, wordAndScore);
@@ -351,7 +352,7 @@ public class PhoneDAO extends DAO implements IPhoneDAO<Phone> {
 
         "word.seq, " +
         "word.word, " +
-        "word.score wordscore, " +
+//        "word.score wordscore, " +
 
         "phone.* " +
 
@@ -359,6 +360,7 @@ public class PhoneDAO extends DAO implements IPhoneDAO<Phone> {
         "results, phone, word " +
 
         "where " +
+
         "results.id = phone.rid " + "AND " +
         ResultDAO.RESULTS + "." + ResultDAO.USERID + "=" + userid + " AND " +
         filterClause +
