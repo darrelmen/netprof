@@ -336,11 +336,11 @@ public class AudioDAO extends DAO {
           attr.setAudioRef(relativeConfigDir + File.separator + attr.getAudioRef());
           logger.debug("\tattachAudioAndFixPath now '" + attr.getAudioRef() + "'");
         } else {
-          // logger.debug("\tattachAudio couldn't find audio file at '" + attr.getAudioRef() + "'");
+          logger.debug("\tattachAudio couldn't find audio file at '" + attr.getAudioRef() + "'");
         }
       }
     } else {
-//      logger.info("not attaching audio " + attr.getUniqueID() + " to " + firstExercise.getID() + " since transcript has changed.");
+      logger.info("not attaching audio " + attr.getUniqueID() + " to " + firstExercise.getID() + " since transcript has changed.");
     }
   }
 
@@ -353,8 +353,7 @@ public class AudioDAO extends DAO {
    */
   private Collection<AudioAttribute> getAudioAttributes(String exid) {
     try {
-      String sql = SELECT_ALL +
-          " WHERE " + Database.EXID + "='" + exid + "' AND " + DEFECT + "=false";
+      String sql = SELECT_ALL + " WHERE " + Database.EXID + "='" + exid + "' AND " + DEFECT + "=false";
       Collection<AudioAttribute> resultsSQL = getResultsSQL(sql);
       Set<String> paths = new HashSet<>();
 
