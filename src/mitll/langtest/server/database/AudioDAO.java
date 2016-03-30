@@ -494,18 +494,28 @@ public class AudioDAO extends DAO {
    * @return
    * @see DatabaseImpl#getMaleFemaleProgress()
    */
-  public Map<String, Float> getRecordedReport(Map<Long, User> userMapMales, Map<Long, User> userMapFemales, float total,
+  public Map<String, Float> getRecordedReport(Map<Long, User> userMapMales,
+                                              Map<Long, User> userMapFemales,
+                                              float total,
                                               Set<String> uniqueIDs) {
-    float maleFast = getCountForGender(userMapMales.keySet(), REGULAR, uniqueIDs);
-    float maleSlow = getCountForGender(userMapMales.keySet(), SLOW, uniqueIDs);
-    float male = getCountBothSpeeds(userMapMales.keySet(), uniqueIDs);
+    Set<Long> maleIDs = userMapMales.keySet();
+    maleIDs = new HashSet<>(maleIDs);
+    maleIDs.add((long)UserDAO.DEFAULT_MALE_ID);
 
-    float femaleFast = getCountForGender(userMapFemales.keySet(), REGULAR, uniqueIDs);
-    float femaleSlow = getCountForGender(userMapFemales.keySet(), SLOW, uniqueIDs);
-    float female = getCountBothSpeeds(userMapFemales.keySet(), uniqueIDs);
+    float maleFast = getCountForGender(maleIDs, REGULAR, uniqueIDs);
+    float maleSlow = getCountForGender(maleIDs, SLOW, uniqueIDs);
+    float male = getCountBothSpeeds(maleIDs, uniqueIDs);
 
-    float cmale = getCountForGender(userMapMales.keySet(), CONTEXT_REGULAR, uniqueIDs);
-    float cfemale = getCountForGender(userMapFemales.keySet(), CONTEXT_REGULAR, uniqueIDs);
+    Set<Long> femaleIDs = userMapFemales.keySet();
+    femaleIDs = new HashSet<>(femaleIDs);
+    femaleIDs.add((long) UserDAO.DEFAULT_FEMALE_ID);
+
+    float femaleFast = getCountForGender(femaleIDs, REGULAR, uniqueIDs);
+    float femaleSlow = getCountForGender(femaleIDs, SLOW, uniqueIDs);
+    float female = getCountBothSpeeds(femaleIDs, uniqueIDs);
+
+    float cmale   = getCountForGender(maleIDs, CONTEXT_REGULAR, uniqueIDs);
+    float cfemale = getCountForGender(femaleIDs, CONTEXT_REGULAR, uniqueIDs);
 
     Map<String, Float> report = new HashMap<>();
     report.put(TOTAL, total);
