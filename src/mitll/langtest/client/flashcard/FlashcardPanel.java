@@ -868,10 +868,10 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     textWidget.removeStyleName(PLAYING_AUDIO_HIGHLIGHT);
   }
 
-  private CompressedAudio compressedAudio = new CompressedAudio();
+ // private CompressedAudio compressedAudio = new CompressedAudio();
 
   protected String getPath(String path) {
-    return compressedAudio.getPath(path);
+    return CompressedAudio.getPath(path);
   }
 
   /**
