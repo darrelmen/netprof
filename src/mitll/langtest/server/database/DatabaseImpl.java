@@ -1461,6 +1461,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
+   * @see LangTestDatabaseImpl#getMaleFemaleProgress()
    * @return
    */
   public Map<String, Float> getMaleFemaleProgress() {
@@ -1473,10 +1474,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     Set<String> uniqueIDs = new HashSet<String>();
 
     for (CommonShell shell : exercises) {
-      String id = shell.getID();
-      boolean add = uniqueIDs.add(id);
+      boolean add = uniqueIDs.add(shell.getID());
       if (!add) {
-        logger.warn("getMaleFemaleProgress found duplicate id " + id + " : " + shell);
+        logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
       }
     }
 /*    logger.info("found " + total + " total exercises, " +
