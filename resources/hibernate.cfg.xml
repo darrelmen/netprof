@@ -52,6 +52,8 @@
 
         <mapping class="mitll.langtest.shared.instrumentation.Event"/>
         <mapping class="mitll.langtest.server.database.phone.Phone"/>
+        <mapping class="mitll.langtest.server.database.word.Word"/>
+        <mapping class="mitll.langtest.shared.Result"/>
 
     </session-factory>
 
