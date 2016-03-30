@@ -134,7 +134,7 @@ public class ImportCourseExamples {
       for (Result r : exIdToResult.values()) {
         if (count %  100 == 0) {
           logger.debug("\tcount " + count +
-            " result = " + r.getUniqueID() + " for " + r.getID() + " type " + r.getAudioType() + " path " + r.getAnswer());
+            " result = " + r.getUniqueID() + " for " + r.getCompoundID() + " type " + r.getAudioType() + " path " + r.getAnswer());
         }
 
         audioDAO.add(r, oldToNew.get(r.getUserid()).intValue(), "bestAudio/" + r.getAnswer());

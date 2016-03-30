@@ -54,6 +54,10 @@ public class HDAO<T> {
     });
   }
 
+/*  public boolean isEmpty() {
+    return isEmptyForClass(getSelfClass());
+  }*/
+
   public boolean isEmptyForClass(Class objClass) {
     String s = "select 1 from " +objClass.getName();
     return sessionManagement.getFromTransaction(new SessionManagement.SessionSupplier<Boolean>() {
