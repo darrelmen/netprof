@@ -2,10 +2,13 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.hibernate.AnnotationEvent;
+import mitll.langtest.server.database.hibernate.HDAO;
 import mitll.langtest.server.database.hibernate.SessionManagement;
 import mitll.langtest.server.database.instrumentation.HEventDAO;
-import mitll.langtest.shared.SectionNode;
+import mitll.langtest.server.database.instrumentation.IEventDAO;
+import mitll.langtest.server.database.phone.HPhoneDAO;
+import mitll.langtest.server.database.phone.Phone;
+import mitll.langtest.server.database.word.Word;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.instrumentation.Event;
 import org.apache.log4j.Logger;
@@ -13,7 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.*;
+import java.util.List;
 
 /**
  * Created by go22670 on 2/17/16.
@@ -45,9 +48,42 @@ public class EventReaderTest {
   }
 
   @Test
-  public void testMe() {
-//    database.createDatabase();
+  public void testReadOne() {
+    IEventDAO eventDAO = database.getEventDAO();
+    boolean empty = ((HEventDAO) eventDAO).isEmpty();
 
+    logger.info("is empty " +empty);
+
+    Number numRows = eventDAO.getNumRows();
+    logger.info("num rows " + numRows);
+
+    Event next = eventDAO.getAll().iterator().next();
+    logger.info("first event " + next);
+
+    List<Event> all = eventDAO.getAllDevices();
+    logger.info("first device " + all.iterator().next());
+  }
+
+
+  @Test
+  public void testReadOnePhone() {
+    HPhoneDAO hPhoneDAO = new HPhoneDAO(database);
+    boolean phone = hPhoneDAO.isEmpty("Phone");
+    logger.info("is empty " +phone);
+
+    boolean phone2 = hPhoneDAO.isEmptyForClass(mitll.langtest.server.database.phone.Phone.class);
+    logger.info("is empty " +phone2);
+    Number numRows = hPhoneDAO.getNumRowsByClass(mitll.langtest.server.database.phone.Phone.class);
+    logger.info("num rows " + numRows);
+
+    HDAO<Word> wordHDAO = new HDAO<>(database);
+    boolean empty = wordHDAO.isEmpty("Word");
+    logger.info("is empty " +empty);
+
+  }
+
+  @Test
+  public void testMe() {
     List<Event> all = database.getEventDAO().getAll();
 
     SessionManagement sessionManagement = database.getSessionManagement();
@@ -83,14 +119,6 @@ public class EventReaderTest {
 
     HEventDAO heventDAO = new HEventDAO(database, database.getUserDAO().getDefectDetector());
     heventDAO.addAll(database.getEventDAO().getAll());
-
-/*    Event next1 = all.iterator().next();
-
-    logger.info("original " + next1);
-
-    sessionManagement.doInTranscation((session)->{
-      session.save( next1 );
-    });*/
 
     Event ret = sessionManagement.getFromTransaction(new SessionManagement.SessionSupplier<Event>() {
       @Override
