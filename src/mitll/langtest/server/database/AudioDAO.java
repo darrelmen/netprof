@@ -842,7 +842,7 @@ public class AudioDAO extends DAO {
     long timestamp = result.getTimestamp();
     String audioType = result.getAudioType();
     int durationInMillis = result.getDurationInMillis();
-    logger.debug("add result - " + result.getID() + " for " + userid + " ref " + audioRef);
+    logger.debug("add result - " + result.getCompoundID() + " for " + userid + " ref " + audioRef);
     return addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis, transcript);
   }
 
