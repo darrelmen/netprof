@@ -355,9 +355,9 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     return path;
   }
 
-  private CompressedAudio compressedAudio = new CompressedAudio();
+  //private CompressedAudio compressedAudio = new CompressedAudio();
 
-  private String getPath(String path) { return compressedAudio.getPath(path);  }
+  private String getPath(String path) { return CompressedAudio.getPath(path);  }
 
   /**
    * Note this is currently not very accurate with soundmanager2.
