@@ -45,7 +45,6 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
   private final LangTestDatabaseAsync service;
   private final String textToAlign;
   private final String identifier;
-  //private final SimpleColumnChart chart = new SimpleColumnChart();
   protected AudioAnswer lastResult;
 
   /**
