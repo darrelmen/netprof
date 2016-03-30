@@ -92,6 +92,9 @@ public class PhoneJSON {
   }
 
   /**
+   * LIMITED TO 30 examples!
+   * {@link #MAX_EXAMPLES}
+   *
    * @param resToAnswer
    * @param resToRef
    * @param resToResult
@@ -107,8 +110,7 @@ public class PhoneJSON {
 
     int count = 0;
     for (WordAndScore wordAndScore : value) {
-      JSONObject word = getJsonForWord(wordAndScore);
-      words.add(word);
+      words.add(getJsonForWord(wordAndScore));
       long resultID = wordAndScore.getResultID();
       resToAnswer.put(resultID, wordAndScore.getAnswerAudio());
       resToRef.put(resultID, wordAndScore.getRefAudio());
