@@ -305,7 +305,6 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 		}
 	}
 
-
 	public void setDependencies(String mediaDir, String installPath,
 															UserExerciseDAO userExerciseDAO, AddRemoveDAO addRemoveDAO, AudioDAO audioDAO) {
 		this.userExerciseDAO = userExerciseDAO;
@@ -327,6 +326,7 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 		synchronized (this) {
 			CommonExercise exercise = idToExercise.get(id);
 			//if (exercise == null) logger.warn("no '" +id+"'  in " + idToExercise.keySet().size()+" keys");
+		//	logger.debug("returning " +exercise + " for " +id);
 			return exercise;
 		}
 	}
