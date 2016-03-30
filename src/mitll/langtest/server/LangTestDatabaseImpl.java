@@ -686,7 +686,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param firstExercise
    * @param isFlashcardReq
    * @seex LoadTesting#getExercise(String, long, boolean)
-   * @see #makeExerciseListWrapper(int, java.util.Collection, long, String, boolean, boolean)
+   * @see #makeExerciseListWrapper
    */
   private void addAnnotationsAndAudio(long userID, CommonExercise firstExercise, boolean isFlashcardReq) {
     long then = System.currentTimeMillis();
@@ -1580,9 +1580,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       attachAudio(byID);
 
-/*      for (AudioAttribute audioAttribute : byID.getAudioAttributes()) {
-        logger.debug("after gender change, now " + audioAttribute);
+/*
+      String addr = Integer.toHexString(byID.hashCode());
+      for (AudioAttribute audioAttribute : byID.getAudioAttributes()) {
+        logger.debug("markGender 1 after gender change, now " + audioAttribute + " : " +audioAttribute.getUserid() + " on " + addr);
+      }
+*/
+
+      db.getExerciseDAO().addOverlay(byID);
+
+/*      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(exid);
+      String adrr3 = Integer.toHexString(customOrPredefExercise.hashCode());
+      logger.info("markGender getting " + adrr3 + " : " + customOrPredefExercise);
+      for (AudioAttribute audioAttribute : customOrPredefExercise.getAudioAttributes()) {
+        logger.debug("markGender 2 after gender change, now " + audioAttribute + " : " +audioAttribute.getUserid() + " on "+ adrr3);
       }*/
+
     }
     db.getSectionHelper().refreshExercise(byID);
   }
