@@ -6,6 +6,9 @@ package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Transient;
 import java.util.Date;
 
 /**
@@ -23,10 +26,11 @@ import java.util.Date;
  * Time: 5:45 PM
  * To change this template use File | Settings | File Templates.
  */
+@Entity
 public class Result implements IsSerializable, UserAndTime {
   private int uniqueID;
   private long userid;
-  public String plan;
+  private String plan;
   private String id;
   private int qid;
   private String answer;
@@ -88,7 +92,8 @@ public class Result implements IsSerializable, UserAndTime {
    * Compound key of exercise id and question id within that exercise.
    * @return
    */
-  public String getID() {  return getExerciseID() + "/" + qid;  }
+  @Transient
+  public String getCompoundID() {  return getExerciseID() + "/" + qid;  }
 
   public String getAudioType() {
     return audioType;
@@ -100,8 +105,13 @@ public class Result implements IsSerializable, UserAndTime {
 
   public float getPronScore() { return pronScore;  }
 
+  @Id
   public int getUniqueID() {
     return uniqueID;
+  }
+
+  private void setUniqueID(int uniqueID) {
+    this.uniqueID = uniqueID;
   }
 
   public long getUserid() {
@@ -147,5 +157,54 @@ public class Result implements IsSerializable, UserAndTime {
 
   public void setJsonScore(String jsonScore) {
     this.jsonScore = jsonScore;
+  }
+
+
+  private void setUserid(long userid) {
+    this.userid = userid;
+  }
+
+  private void setPlan(String plan) {
+    this.plan = plan;
+  }
+
+  private void setExerciseID(String id) {
+    this.id = id;
+  }
+
+  private void setQid(int qid) {
+    this.qid = qid;
+  }
+
+  private void setAnswer(String answer) {
+    this.answer = answer;
+  }
+
+  private void setValid(boolean valid) {
+    this.valid = valid;
+  }
+
+  private void setTimestamp(long timestamp) {
+    this.timestamp = timestamp;
+  }
+
+  private void setAudioType(String audioType) {
+    this.audioType = audioType;
+  }
+
+  private void setDurationInMillis(int durationInMillis) {
+    this.durationInMillis = durationInMillis;
+  }
+
+  private void setCorrect(boolean correct) {
+    this.correct = correct;
+  }
+
+  private void setPronScore(float pronScore) {
+    this.pronScore = pronScore;
+  }
+
+  private void setDevice(String device) {
+    this.device = device;
   }
 }

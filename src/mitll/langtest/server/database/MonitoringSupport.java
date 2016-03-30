@@ -188,7 +188,7 @@ public class MonitoringSupport {
     Map<String, Set<Long>> keyToUsers = new HashMap<String, Set<Long>>();
     List<Result> results = getResults();
     for (Result r : results) {
-      String key = r.getID();//getExerciseID() + "/" + r.getQid();
+      String key = r.getCompoundID();//getExerciseID() + "/" + r.getQid();
       Set<Long> usersForResult = keyToUsers.get(key);
 
       if (usersForResult == null) {
@@ -264,7 +264,7 @@ public class MonitoringSupport {
     SortedSet<String> resultKeys = new TreeSet<String>();
     for (Result r : results) {
       if (userMap.containsKey(r.getUserid())) {   // filter for just results by males or females
-        String key = r.getID();
+        String key = r.getCompoundID();
         resultKeys.add(key);
         Set<Long> usersForResult = keyToUsers.get(key);
 

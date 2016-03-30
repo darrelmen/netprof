@@ -2,8 +2,11 @@ package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.ResultDAO;
 import mitll.langtest.server.database.hibernate.HDAO;
 import org.apache.log4j.Logger;
+
+import java.util.List;
 
 /**
  * Created by go22670 on 3/29/16.
@@ -44,4 +47,34 @@ public class HPhoneDAO extends HDAO<Phone> implements IPhoneDAO<Phone> {
     return true;
 */
   }
+
+/*  public void doJoin() {
+    List<Object[]> stuff =
+  }
+
+  private String getJoinSQL(long userid, String filterClause) {
+    return "select " +
+
+        "results.exid," +
+        "results.answer," +
+        "results." + ResultDAO.SCORE_JSON + "," +
+        "results." + ResultDAO.PRON_SCORE + "," +
+        "results.time,  " +
+
+        "word.seq, " +
+        "word.word, " +
+        "word.score wordscore, " +
+
+        "phone.* " +
+
+        " from " +
+        "results, phone, word " +
+
+        "where " +
+        "results.id = phone.rid " + "AND " +
+        ResultDAO.RESULTS + "." + ResultDAO.USERID + "=" + userid + " AND " +
+        filterClause +
+        " AND phone.wid = word.id " +
+        " order by results.exid, results.time desc";
+  }*/
 }
