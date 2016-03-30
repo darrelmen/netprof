@@ -87,11 +87,14 @@ import java.util.logging.Logger;
  * - fix for issue with collapsing words with commas in them, added removeRefResult to scoreServlet, partial support for import to lists
  * 1.2.6
  * - fix for old bug where clicking on a word or phrase did a playback with a ~50 millisecond offset
+ * 1.2.7
+ * - allows you to filter out Default (no gender mark) audio in mark defects, and associated fixes
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  private static final String VERSION_INFO = "1.2.6";
+  private static final String VERSION_INFO = "1.2.7";
+
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
   private static final String UNKNOWN = "unknown";
