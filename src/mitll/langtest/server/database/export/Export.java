@@ -4,7 +4,6 @@ import mitll.langtest.server.amas.FileExerciseDAO;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.GradeDAO;
 import mitll.langtest.server.database.ResultDAO;
-import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.export.ExerciseExport;
 import mitll.langtest.server.export.ResponseAndGrade;
 import mitll.langtest.shared.Result;
@@ -186,7 +185,7 @@ public class Export {
     for (Result r : resultsForExercise) {
       ExerciseExport exerciseExport = qidToExport.get(r.getQid());
       if (exerciseExport == null) {
-        logger.warn("getExports : for " + r.getID() + " can't find r qid " + r.getQid() + " in keys " + qidToExport.keySet());
+        logger.warn("getExports : for " + r.getCompoundID() + " can't find r qid " + r.getQid() + " in keys " + qidToExport.keySet());
       } else {
         int rid = r.getUniqueID();
         List<Grade> gradesForResult = idToGrade.get(rid);
@@ -223,7 +222,7 @@ public class Export {
                     }
                   }
                 } else {
-                  logger.warn("getExports : skipping result " + r.getID() + " with empty answer.");
+                  logger.warn("getExports : skipping result " + r.getCompoundID() + " with empty answer.");
                 }
               }
             }
