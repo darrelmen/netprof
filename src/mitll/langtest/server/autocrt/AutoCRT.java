@@ -55,6 +55,7 @@ public class AutoCRT {
 
   private final boolean doEighty = false;
   private final boolean usePreDefOnly = false;
+  boolean comparisonTesting = false;
 
   /**
    * @param db
@@ -75,32 +76,34 @@ public class AutoCRT {
     this.miraURL = miraURL;
     this.useMiraClassifier = useMiraClassifier;
 
-    File file = getReportFile(miraFlavor);
-    logger.debug("wrote to " + file.getAbsolutePath());
-    try {
-      writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF8"));
-      writer.write("id,questionID,response," +
-          "score," +
-          "expectedGrade," +
-          "expectedCorrect," +
+    if (comparisonTesting) {
+      File file = getReportFile(miraFlavor);
+      logger.debug("wrote to " + file.getAbsolutePath());
+      try {
+        writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF8"));
+        writer.write("id,questionID,response," +
+            "score," +
+            "expectedGrade," +
+            "expectedCorrect," +
 
-          "jacobClassScore," +
-          "jacobClassCorrect," +
-          "jacobError,jacobABSError,jacobSquaredError," +
-          "jacobRight," +
+            "jacobClassScore," +
+            "jacobClassCorrect," +
+            "jacobError,jacobABSError,jacobSquaredError," +
+            "jacobRight," +
 
-          "miraClassRegressed," +
-          "miraClassGrade," +
-          "miraClassCorrect," +
-          "miraError,miraABSError,miraSquaredError," +
-          "miraRight," +
+            "miraClassRegressed," +
+            "miraClassGrade," +
+            "miraClassCorrect," +
+            "miraError,miraABSError,miraSquaredError," +
+            "miraRight," +
 
-          "answerKeySize" +
-          //"," +
-          //"answerKey" +
-          "\n");
-    } catch (IOException e) {
-      logger.error("got " + e.getMessage(), e);
+            "answerKeySize" +
+            //"," +
+            //"answerKey" +
+            "\n");
+      } catch (IOException e) {
+        logger.error("got " + e.getMessage(), e);
+      }
     }
   }
 
