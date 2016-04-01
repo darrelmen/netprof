@@ -3,6 +3,7 @@ package mitll.langtest.server.database.exercise;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.amas.ILRMapping;
 import mitll.langtest.server.audio.HTTPClient;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -12,18 +13,19 @@ import java.io.IOException;
 import java.util.*;
 
 /**
+ * Talk to domino-ws service to get content.
  * Created by go22670 on 2/10/16.
  */
 public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
   private static final Logger logger = Logger.getLogger(AMASJSONURLExerciseDAO.class);
 
   public static final String ENGLISH = "english";
-  public static final String ATT_LST = "att-lst";
+  private static final String ATT_LST = "att-lst";
 
   private final Map<String, AmasExerciseImpl> idToExercise = new HashMap<>();
-  protected final SectionHelper<AmasExerciseImpl> sectionHelper = new SectionHelper<>();
-  protected final String language;
-  protected final ServerProperties serverProps;
+  private final SectionHelper<AmasExerciseImpl> sectionHelper = new SectionHelper<>();
+//  private final String language;
+  private final ServerProperties serverProps;
 
   private List<AmasExerciseImpl> exercises = null;
 
@@ -32,33 +34,28 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
    */
   public AMASJSONURLExerciseDAO(ServerProperties serverProps) {
     this.serverProps = serverProps;
-    this.language = serverProps.getLanguage();
+  //  this.language = serverProps.getLanguage();
     sectionHelper.setPredefinedTypeOrder(Arrays.asList(ILRMapping.TEST_TYPE, ILRMapping.ILR_LEVEL));
     this.exercises = readExercises();
     populateIDToExercise(exercises);
   }
 
+  /**
+   * Remember id->exercise for later fast lookup
+   * @param exercises
+   */
   private void populateIDToExercise(Collection<AmasExerciseImpl> exercises) {
     for (AmasExerciseImpl e : exercises) idToExercise.put(e.getID(), e);
   }
 
-  List<AmasExerciseImpl> readExercises() {
+  /**
+   * On startup, talk to the domino-ws to get the content for AMAS site.
+   * @return
+   */
+  private List<AmasExerciseImpl> readExercises() {
     try {
-      String json = getJSON();
-
-      List<AmasExerciseImpl> exercises = getExercisesFromArray(json);
-
-      for (AmasExerciseImpl ex : exercises) {
-        Collection<SectionHelper.Pair> pairs = new ArrayList<>();
-//        logger.info("For " + ex.getID() + " " + ex.getUnitToValue());
-        for (Map.Entry<String, String> pair : ex.getUnitToValue().entrySet()) {
-          pairs.add(sectionHelper.addExerciseToLesson(ex, pair.getKey(), pair.getValue()));
-        }
-        sectionHelper.addAssociations(pairs);
-      }
-
-      //   logger.info("read " + exercises.size());
-      // sectionHelper.report();
+      List<AmasExerciseImpl> exercises = getExercisesFromArray(getJSON());
+      recordHierarchy(exercises);
       return exercises;
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -66,12 +63,17 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
     return Collections.emptyList();
   }
 
-  private String getJSON() throws IOException {
+  /**
+   * Talk to domino-ws service, e.g. http://domino-devel:9000/domino-ws/v1/projects/283/documents
+   * For more <a href="https://gh.ll.mit.edu/Domino/domino-ws">domino-ws on github</a>
+   * @return
+   */
+  private String getJSON() {
     logger.info(serverProps.getLanguage() + " Reading from " + serverProps.getLessonPlan());
     return new HTTPClient().readFromGET(serverProps.getLessonPlan());
   }
 
-  public List<AmasExerciseImpl> getExercisesFromArray(String json) {
+  private List<AmasExerciseImpl> getExercisesFromArray(String json) {
     JSONArray content = JSONArray.fromObject(json);
     List<AmasExerciseImpl> exercises = new ArrayList<>();
     for (int i = 0; i < content.size(); i++) {
@@ -82,6 +84,27 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
     return exercises;
   }
 
+  /**
+   * Use the unit/chapter meta data on exercies to build a hierarchy
+   * @param exercises
+   */
+  private void recordHierarchy(Collection<AmasExerciseImpl> exercises) {
+    for (AmasExerciseImpl ex : exercises) {
+      Collection<SectionHelper.Pair> pairs = new ArrayList<>();
+      for (Map.Entry<String, String> pair : ex.getUnitToValue().entrySet()) {
+        pairs.add(sectionHelper.addExerciseToLesson(ex, pair.getKey(), pair.getValue()));
+      }
+      sectionHelper.addAssociations(pairs);
+    }
+  }
+
+  /**
+   * Read JSON returned from domino-ws service for documents
+   * E.g. the url might look like : http://domino-devel:9000/domino-ws/v1/projects/283/documents
+   *
+   * @param jsonObject
+   * @return
+   */
   private AmasExerciseImpl toAMASExercise(JSONObject jsonObject) {
     JSONObject metadata = jsonObject.getJSONObject("metadata");
     JSONObject content = jsonObject.getJSONObject("content");
@@ -163,12 +186,20 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
     return answer.replaceAll("<p>", "").replaceAll("</p>", "").replaceAll("<br />", "").trim().replaceAll("(^\\h*)|(\\h*$)","");
   }
 
-
+  /**
+   * @see DatabaseImpl#getAMASExercises()
+   * @return
+   */
   @Override
   public List<AmasExerciseImpl> getRawExercises() {
     return exercises;
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getAMASExercise(String)
+   * @param id
+   * @return
+   */
   @Override
   public AmasExerciseImpl getExercise(String id) {
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
@@ -178,13 +209,29 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
     return idToExercise.get(id);
   }
 
+  /**
+   * @see DatabaseImpl#makeDAO(String, String, String)
+   * @return
+   */
   @Override
   public int getNumExercises() {
     return exercises.size();
   }
 
+  /**
+   * @see DatabaseImpl#getAMASSectionHelper()
+   * @return
+   */
   @Override
   public SectionHelper<AmasExerciseImpl> getSectionHelper() {
     return sectionHelper;
+  }
+
+  @Override
+  public void reload() {
+    exercises = null;
+    idToExercise.clear();
+    sectionHelper.clear();
+    getRawExercises();
   }
 }
