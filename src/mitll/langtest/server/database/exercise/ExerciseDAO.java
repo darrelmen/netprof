@@ -16,7 +16,10 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
+ * Container for exercises for the site.
+ * Mainly we want to be able to add and remove exercies, and add overlays of user exercises
+ * Also attaches audio (join) to exercises.
+ *
  * User: GO22670
  * Date: 10/8/12
  * Time: 3:42 PM
@@ -54,6 +57,4 @@ public interface ExerciseDAO<T extends CommonShell> extends SimpleExerciseDAO<T>
    * @see DatabaseImpl#getExerciseIDToRefAudio()
    */
   void attachAudio(Collection<CommonExercise> all);
-
-  void reload();
 }
