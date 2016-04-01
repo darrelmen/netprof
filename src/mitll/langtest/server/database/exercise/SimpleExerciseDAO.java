@@ -29,4 +29,6 @@ public interface SimpleExerciseDAO<T extends CommonShell> {
   int getNumExercises();
 
   SectionHelper<T> getSectionHelper();
+
+  void reload();
 }
