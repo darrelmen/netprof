@@ -34,8 +34,12 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
    */
   public AMASJSONURLExerciseDAO(ServerProperties serverProps) {
     this.serverProps = serverProps;
-  //  this.language = serverProps.getLanguage();
+
     sectionHelper.setPredefinedTypeOrder(Arrays.asList(ILRMapping.TEST_TYPE, ILRMapping.ILR_LEVEL));
+    readExercisesFromURL();
+  }
+
+  void readExercisesFromURL() {
     this.exercises = readExercises();
     populateIDToExercise(exercises);
   }
@@ -232,6 +236,6 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
     exercises = null;
     idToExercise.clear();
     sectionHelper.clear();
-    getRawExercises();
+    readExercisesFromURL();
   }
 }
