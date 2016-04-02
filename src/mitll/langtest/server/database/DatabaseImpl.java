@@ -391,14 +391,14 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return rawExercises;
   }
 
-  public Collection<AmasExerciseImpl> getAMASExercises() {
-    return fileExerciseDAO.getRawExercises();
-  }
-
+  /**
+   * Amas dedicated calls
+   * @return
+   */
+  public Collection<AmasExerciseImpl> getAMASExercises() { return fileExerciseDAO.getRawExercises();  }
   public AmasExerciseImpl getAMASExercise(String id) {
     return fileExerciseDAO.getExercise(id);
   }
-
   public SectionHelper<AmasExerciseImpl> getAMASSectionHelper() {
     return fileExerciseDAO.getSectionHelper();
   }
@@ -406,6 +406,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * Lazy, latchy instantiation of DAOs.
    * Not sure why it really has to be this way.
+   *
+   * Special check for amas exercises...
    *
    * @param mediaDir
    */
@@ -457,14 +459,16 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   public void reloadExercises() {
     if (exerciseDAO != null) {
+      logger.info("reloading from exercise dao");
       exerciseDAO.reload();
     } else {
       if (fileExerciseDAO != null) {
+        logger.info("reloading from fileExerciseDAO");
         fileExerciseDAO.reload();
+       // numExercises = fileExerciseDAO.getNumExercises();
       }
       else {
         logger.error("huh? no exercise DAO yet???");
-
       }
     }
   }
