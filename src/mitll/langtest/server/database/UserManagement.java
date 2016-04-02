@@ -27,15 +27,15 @@ import java.util.*;
  */
 public class UserManagement {
   private static final Logger logger = Logger.getLogger(UserManagement.class);
-  public static final String NPF_CLASSROOM_PREFIX = "https://np.ll.mit.edu/npfClassroom";
-  public static final String NO_USER = "-1";
+  private static final String NPF_CLASSROOM_PREFIX = "https://np.ll.mit.edu/npfClassroom";
+  private static final String NO_USER = "-1";
 
   private final int numExercises;
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
   private final UserListManager userListManager;
 
-  public UserManagement(UserDAO userDAO, int numExercises, ResultDAO resultDAO, UserListManager userListManager) {
+  UserManagement(UserDAO userDAO, int numExercises, ResultDAO resultDAO, UserListManager userListManager) {
     this.userDAO = userDAO;
     this.numExercises = numExercises;
     this.resultDAO = resultDAO;

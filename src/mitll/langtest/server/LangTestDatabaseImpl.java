@@ -74,8 +74,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
-  public static final String DATABASE_REFERENCE = "databaseReference";
-  public static final String AUDIO_FILE_HELPER_REFERENCE = "audioFileHelperReference";
+  static final String DATABASE_REFERENCE = "databaseReference";
+  static final String AUDIO_FILE_HELPER_REFERENCE = "audioFileHelperReference";
   private static final int SLOW_EXERCISE_EMAIL = 2000;
   private static final int MAX = 30;
   private static final int SLOW_MILLIS = 40;
@@ -163,8 +163,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return ids;
   }
 
-
-  public ExerciseListWrapper<AmasExerciseImpl> getAMASExerciseIds(int reqID,
+  private ExerciseListWrapper<AmasExerciseImpl> getAMASExerciseIds(int reqID,
                                                                   Map<String, Collection<String>> typeToSelection,
                                                                   String prefix,
                                                                   int userID) {
@@ -907,7 +906,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private Collection<AmasExerciseImpl> getAMASExercises() {
-//    logger.info("get exercises -------");
+    logger.info("get getAMASExercises -------");
     long then = System.currentTimeMillis();
     Collection<AmasExerciseImpl> exercises = db.getAMASExercises();
     if (amasFullTrie == null) {
@@ -915,7 +914,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     try {
-
       // audioFileHelper.checkLTS(exercises);
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -966,6 +964,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public void reloadExercises() {
+    logger.info("reloadExercises");
     db.reloadExercises();
   }
 
