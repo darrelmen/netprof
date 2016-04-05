@@ -313,7 +313,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   public boolean usingFlash()  { return permissionReceived; }
-  public boolean usingWebRTC() { return webAudio.isWebAudioMicAvailable(); }
+  public static boolean usingWebRTC() { return webAudio.isWebAudioMicAvailable(); }
 
   /**
    * Handles either state - either we have flash, in which case we ask flash for the wav file,
