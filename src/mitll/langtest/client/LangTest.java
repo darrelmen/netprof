@@ -93,7 +93,7 @@ import java.util.logging.Logger;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  private static final String VERSION_INFO = "1.2.7";
+  public static final String VERSION_INFO = "1.2.7";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
@@ -382,13 +382,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return browserCheck.getBrowserAndVersion();
   }
 
-  public String getInfoLine() {
+  String getInfoLine() {
     String releaseDate = VERSION +
         (props.getReleaseDate() != null ? " " + props.getReleaseDate() : "");
     return "<span><font size=-2>" +
         browserCheck.ver + "&nbsp;" +
-        releaseDate + (flashRecordPanel.usingWebRTC() ? " Flashless recording" : "") +
+        releaseDate + (usingWebRTC() ? " Flashless recording" : "") +
         "</font></span>";
+  }
+
+  private boolean usingWebRTC() {
+    return flashRecordPanel.usingWebRTC();
   }
 
   private void setupSoundManager() {
@@ -450,7 +454,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           showingPlugInNotice = true;
           List<String> messages = Arrays.asList("If you want to record audio, ",
               "plug in or enable your mic and reload the page.");
-          new ModalInfoDialog("Plug in microphone", messages, null,
+          new ModalInfoDialog("Plug in microphone", messages, Collections.emptyList() ,
+              null,
               new HiddenHandler() {
                 @Override
                 public void onHidden(HiddenEvent hiddenEvent) {
@@ -460,8 +465,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
                   initialUI.setSplash();
                   isMicConnected = false;
                 }
-              }
-          );
+              });
         }
       }
 
