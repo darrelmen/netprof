@@ -10,6 +10,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.user.client.Window;
@@ -17,14 +18,20 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.dialog.ModalInfoDialog;
+import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.shared.User;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Does fancy font sizing depending on available width...
  */
 public class Banner implements RequiresResize {
+  private final Logger logger = Logger.getLogger("Banner");
+
   private static final double MAX_FONT_EM = 1.7d;
   private static final int SLOP = 55;
   private static final String NEW_PRO_F1_PNG = "NewProF1.png";
@@ -59,7 +66,7 @@ public class Banner implements RequiresResize {
     isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
     HREF = "mailto:" +
         NETPROF_HELP_LL_MIT_EDU + "?" +
-        "cc=" + LTEA_DLIFLC_EDU + "&"+
+        "cc=" + LTEA_DLIFLC_EDU + "&" +
         "Subject=Question%20about%20" + props.getLanguage() + "%20NetProF";
   }
 
@@ -148,7 +155,7 @@ public class Banner implements RequiresResize {
   /**
    * @param splashText
    * @return
-   * @see #getHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
+   * @see #makeNPFHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
    */
   private Paragraph getSubtitle(String splashText) {
     subtitle = new Paragraph(splashText);
@@ -169,7 +176,7 @@ public class Banner implements RequiresResize {
    * @param results
    * @param monitoring
    * @param events
-   * @see #getHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
+   * @see #makeNPFHeaderRow
    */
   private void makeCogMenu(ClickHandler logoutClickHandler, ClickHandler users, ClickHandler results,
                            ClickHandler monitoring, ClickHandler events, ClickHandler reload) {
@@ -203,9 +210,9 @@ public class Banner implements RequiresResize {
 
   /**
    * @param val
-   * @see mitll.langtest.client.LangTest#gotUser(mitll.langtest.shared.User)
-   * @see mitll.langtest.client.LangTest#handleCDToken(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, String)
-   * @see mitll.langtest.client.LangTest#showLogin(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.InitialUI#gotUser(mitll.langtest.shared.User)
+   * @see mitll.langtest.client.InitialUI#handleCDToken(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, String)
+   * @see mitll.langtest.client.InitialUI#showLogin
    */
   public void setCogVisible(boolean val) {
     cogMenu.setVisible(val);
@@ -214,7 +221,7 @@ public class Banner implements RequiresResize {
 
   /**
    * @param v
-   * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
+   * @see mitll.langtest.client.InitialUI#showUserPermissions(long) (long)
    */
   public void setBrowserInfo(String v) {
     browserInfo.setHTML(v);
@@ -223,7 +230,7 @@ public class Banner implements RequiresResize {
   /**
    * @param userName
    * @return
-   * @see #getHeaderRow
+   * @see #makeNPFHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
    */
   private HTML getUserNameWidget(String userName) {
     userNameWidget = new HTML(userName);
@@ -260,6 +267,8 @@ public class Banner implements RequiresResize {
     w.setIcon(IconType.COG);
     w.setIconSize(IconSize.LARGE);
 
+    w.add(getAbout());
+
     userC = new NavLink("Users");
     userC.addClickHandler(users);
     w.add(userC);
@@ -276,12 +285,58 @@ public class Banner implements RequiresResize {
     eventsC.addClickHandler(events);
     w.add(eventsC);
 
+
     reloadLink = new NavLink("Reload from Domino");
     if (reload != null) {
       reloadLink.addClickHandler(reload);
       w.add(reloadLink);
     }
+
     return w;
+  }
+
+  private NavLink getAbout() {
+    NavLink about = new NavLink("About NetProF");
+    about.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent clickEvent) {
+        List<String> strings = java.util.Arrays.asList(
+            "Language",
+            "Version       ",
+            "Release Date  ",
+            "Model Version",
+            "Recording type");
+
+        List<String> values = null;
+        try {
+          String versionInfo = LangTest.VERSION_INFO;
+          String releaseDate = props.getReleaseDate();
+          String s = FlashRecordPanelHeadless.usingWebRTC() ? " Browser recording" : "Flash recording";
+          String model = props.getModelDir().replaceAll("models.", "");
+          values = java.util.Arrays.asList(
+              props.getLanguage(),
+              versionInfo,
+              releaseDate,
+              model, s
+          );
+        } catch (Exception e) {
+          logger.warning("got " + e);
+        }
+
+        new ModalInfoDialog("About NetProF", strings, values, null, null) {
+          @Override
+          protected FlexTable addContent(Collection<String> messages, Collection<String> values, Modal modal) {
+            FlexTable flexTable = super.addContent(messages, values, modal);
+
+            int rowCount = flexTable.getRowCount();
+            flexTable.setHTML(rowCount + 1, 0, "Need Help?");
+            flexTable.setHTML(rowCount + 1, 1, " <a href='" + HREF +            "'>Help Email</a>");
+            return flexTable;
+          }
+        };
+      }
+    });
+    return about;
   }
 
   public void setVisibleAdmin(boolean visibleAdmin) {
