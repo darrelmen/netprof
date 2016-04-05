@@ -17,8 +17,8 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PropertyHandler {
-  public static final String RTL = "rtl";
-  public static final String IS_AMAS = "isAMAS";
+  private static final String RTL = "rtl";
+  private static final String IS_AMAS = "isAMAS";
   private final Logger logger = Logger.getLogger("PropertyHandler");
 
   // property file property names
@@ -108,7 +108,7 @@ public class PropertyHandler {
       "Urdu");
 
   private static final List<String> AMAS_SITES = Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
-  private boolean beta;
+  private String modelDir;
 
   /**
    * @return
@@ -150,13 +150,17 @@ public class PropertyHandler {
     return talksToDomino;
   }
 
+  public String getModelDir() {
+    return modelDir;
+  }
+
   public enum LOGIN_TYPE {ANONYMOUS, STUDENT}
 
   private boolean spectrogram = false;
   private boolean clickAndHold = true;
   private boolean quietAudioOK;
   private boolean showContext = true;
-  private final Set<Long> preferredVoices = new HashSet<Long>();
+  private final Set<Long> preferredVoices = new HashSet<>();
   private String resetPassToken = "";
   private String cdEnableToken = "", emailRToken = "";
 
@@ -196,7 +200,7 @@ public class PropertyHandler {
   public static final String TEXT = "Text";
   private static final String AUDIO = "Audio";
   private String responseType = AUDIO;
-boolean talksToDomino = false;
+private boolean talksToDomino = false;
   /**
    * @param props
    * @see mitll.langtest.client.LangTest#onModuleLoad()
@@ -240,6 +244,7 @@ boolean talksToDomino = false;
       else if (key.equals(ENABLE_ALL_USERS)) enableAllUsers = getBoolean(value);
       else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
       else if (key.equals("talksToDomino")) talksToDomino = getBoolean(value);
+      else if (key.equals("scoringModel")) modelDir = value;
       //else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
       else if (key.equals(USE_PHONE_TO_DISPLAY)) {
         // logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
