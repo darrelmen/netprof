@@ -21,6 +21,7 @@ public class PropertyHandler {
   public static final String IS_AMAS = "isAMAS";
   public static final String TALKS_TO_DOMINO = "talksToDomino";
   public static final String PRACTICE_CONTEXT = "practiceContext";
+  public static final String FONT_FAMILY = "fontFamily";
   private final Logger logger = Logger.getLogger("PropertyHandler");
 
   // property file property names
@@ -110,7 +111,8 @@ public class PropertyHandler {
       "Urdu");
 
   private static final List<String> AMAS_SITES = Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
-  private boolean beta;
+ // private boolean beta;
+  private String fontFamily = "";
 
   /**
    * @return
@@ -150,6 +152,14 @@ public class PropertyHandler {
 
   public boolean talksToDomino() {
     return talksToDomino;
+  }
+
+  public String getFontFamily() {
+    return fontFamily;
+  }
+
+  public void setFontFamily(String fontFamily) {
+    this.fontFamily = fontFamily;
   }
 
   public enum LOGIN_TYPE {ANONYMOUS, STUDENT}
@@ -210,6 +220,9 @@ public class PropertyHandler {
     checkParams();
   }
 
+  /**
+   * Copy values from server props.
+   */
   private void useProps() {
     for (Map.Entry<String, String> kv : props.entrySet()) {
       String key = kv.getKey();
@@ -244,6 +257,7 @@ public class PropertyHandler {
       else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
       else if (key.equals(TALKS_TO_DOMINO)) talksToDomino = getBoolean(value);
       else if (key.equals(PRACTICE_CONTEXT)) canPracticeContext = getBoolean(value);
+      else if (key.equals(FONT_FAMILY)) fontFamily = value;
         //else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
       else if (key.equals(USE_PHONE_TO_DISPLAY)) {
         // logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
