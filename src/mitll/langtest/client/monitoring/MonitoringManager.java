@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 
 /**
  * Show lots of charts and graphs to allow us to follow progress of data collection.
- *
+ * <p>
  * User: go22670
  * Date: 5/18/12
  * Time: 5:43 PM
@@ -44,20 +44,21 @@ public class MonitoringManager {
   private static final int MIN_COUNT_FOR_DIALECT = 10;
   private static final int MIN_SIZE_TO_TRIGGER_FILTER = 15;
   private static final int ITEM_CHART_ITEM_WIDTH = 1000;
- // private static final int MAX_GRADE_ROUNDS = 3;
+  private static final String NUMBER_AT_RATE = "Number at Rate";
+  // private static final int MAX_GRADE_ROUNDS = 3;
 
   private final LangTestDatabaseAsync service;
   private String item = "Item";
-  private final String items = item+"s";
+  private final String items = item + "s";
   private String answer = "Answer";
-  private String answers = answer +"s";
+  private String answers = answer + "s";
   private String user = "Recorder";
-  private String users = user+"s";
+  private String users = user + "s";
 
   /**
-   * @see mitll.langtest.client.LangTest#onModuleLoad2
    * @param s
    * @param props
+   * @see mitll.langtest.client.LangTest#onModuleLoad2
    */
   public MonitoringManager(LangTestDatabaseAsync s, PropertyHandler props) {
     this.service = s;
@@ -85,26 +86,28 @@ public class MonitoringManager {
     dialogVPanel.setHeight("80%");
 
     int left = (Window.getClientWidth()) / 40;
-    int top  = (Window.getClientHeight()) / 160;
+    int top = (Window.getClientHeight()) / 160;
     dialogBox.setPopupPosition(left, top);
 
     ScrollPanel sp = new ScrollPanel();
-    sp.setHeight((int)(Window.getClientHeight()*0.88f) + "px");
-    sp.setWidth((int)(Window.getClientWidth()*0.90f) + "px");
+    sp.setHeight((int) (Window.getClientHeight() * 0.88f) + "px");
+    sp.setWidth((int) (Window.getClientWidth() * 0.90f) + "px");
 
     final VerticalPanel vp = new VerticalPanel();
-    vp.setWidth((int)(Window.getClientWidth()*0.88f) + "px");
+    vp.setWidth((int) (Window.getClientWidth() * 0.88f) + "px");
     sp.add(vp);
     dialogVPanel.add(sp);
 
-    doDesiredQuery(getVPanel(vp),null);
-    doSessionQuery(getVPanel(vp),null);
-    doMaleFemale(getVPanel(vp),null);
-    doResultQuery(getVPanel(vp),null);
-   // doGradeQuery(getVPanel(vp));
+    doDesiredQuery(getVPanel(vp));
+    doSessionQuery(getVPanel(vp));
+    doMaleFemale(getVPanel(vp));
+    doResultQuery(getVPanel(vp));
+    // doGradeQuery(getVPanel(vp));
     doGenderQuery(getVPanel(vp));
-   // doTimeUntilItems(getSPanel(vp));
-    doResultLineQuery(getVPanel(vp),null);
+    // doTimeUntilItems(getSPanel(vp));
+    if (false) {
+      doResultLineQuery(getVPanel(vp));
+    }
     doResultByDayQuery(getSPanel(vp));
     doResultByHourOfDayQuery(getSPanel(vp));
 
@@ -136,15 +139,14 @@ public class MonitoringManager {
     return toUse2;
   }
 
-  private static interface DoIt {
+  private interface DoIt {
     void go();
   }
 
   /**
-   *
    * @param vp
    */
-  private void doDesiredQuery(final Panel vp, final DoIt it) {
+  private void doDesiredQuery(final Panel vp) {
     service.getDesiredCounts(new AsyncCallback<Map<String, Map<Integer, Map<Integer, Integer>>>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -175,7 +177,7 @@ public class MonitoringManager {
 
         Panel hp2 = getItemCalculator(result, "desiredToFemale", "Female");
         vp.add(hp2);
-        if (it != null) it.go();
+        if (null != null) ((DoIt) null).go();
       }
 
       private Panel getItemCalculator(Map<String, Map<Integer, Map<Integer, Integer>>> result, String key, String gender) {
@@ -289,7 +291,7 @@ public class MonitoringManager {
         Integer minutesPerPerson = peopleToMinutesPer.get(firstPerson);
         // logger.info("looking for "+ firstPerson + " in " + peopleToMinutesPer + " found " + minutesPerPerson);
 
-        List<Integer> mins = new ArrayList<Integer>(values);
+        List<Integer> mins = new ArrayList<>(values);
         Collections.sort(mins);
         int index = mins.indexOf(minutesPerPerson);
         //  logger.info("index "+ index + " for " + minutesPerPerson + " in " + mins);
@@ -304,17 +306,17 @@ public class MonitoringManager {
   private List<Integer> getBoxForSet(ListBox box, Collection<Integer> desiredSet) {
     box.clear();
     List<Integer> desiredList = getSortedList(desiredSet);
-    for (Integer desired : desiredList) box.addItem(""+desired);
+    for (Integer desired : desiredList) box.addItem("" + desired);
     return desiredList;
   }
 
   private List<Integer> getSortedList(Collection<Integer> desiredSet) {
-    List<Integer> desiredList =new ArrayList<Integer>(desiredSet);
+    List<Integer> desiredList = new ArrayList<>(desiredSet);
     Collections.sort(desiredList);
     return desiredList;
   }
 
-  private void doSessionQuery(final Panel vp, final DoIt it) {
+  private void doSessionQuery(final Panel vp) {
     service.getResultStats(new AsyncCallback<Map<String, Number>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -340,7 +342,7 @@ public class MonitoringManager {
             long totalTime = 0;
             long total = 0;
             long valid = sessions.size();
-            Map<Long, Integer> rateToCount = new HashMap<Long, Integer>();
+            Map<Long, Integer> rateToCount = new HashMap<>();
             for (Session s : sessions) {
               totalTime += s.duration;
               total += s.getNumAnswers();
@@ -393,7 +395,7 @@ public class MonitoringManager {
             vp.add(flex);
             getRateChart(rateToCount, vp);
 
-            if (it != null) it.go();
+            if (null != null) ((DoIt) null).go();
           }
         });
       }
@@ -491,7 +493,7 @@ public class MonitoringManager {
   }*/
 
   private float roundToHundredth(double totalHours) {
-    return ((float)((Math.round(totalHours*100))))/100f;
+    return ((float) ((Math.round(totalHours * 100)))) / 100f;
   }
 
 /*  private ColumnChart getNumToHoursChart(Map<Integer, Float> rateToCount) {
@@ -520,39 +522,46 @@ public class MonitoringManager {
     return new ColumnChart(data, options);
   }*/
 
+  /**
+   * @param rateToCount
+   * @param vp
+   * @see #doSessionQuery(Panel)
+   */
   private void getRateChart(Map<Long, Integer> rateToCount, Panel vp) {
     Options options = Options.create();
-    options.setTitle("Number " +answers+ " at rate");
+    options.setTitle("Number " + answers + " at rate");
 
-    labelAxes(options,"Rate (seconds/" + item + ")","Count at rate");
+    labelAxes(options, "Rate (seconds/" + item + ")", "Count at rate");
 
     DataTable data = DataTable.create();
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Seconds/" +answers);
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Number at Rate");
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Seconds/" + answers);
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, NUMBER_AT_RATE);
 
     data.addRows(rateToCount.size());
 
     int r = 0;
-    List<Long> ages = new ArrayList<Long>(rateToCount.keySet());
+    List<Long> ages = new ArrayList<>(rateToCount.keySet());
     Collections.sort(ages);
+    if (ages.size() > 120) ages = ages.subList(0, 120);
+    logger.info("found " + ages.size() + " samples");
     for (Long age : ages) {
       Integer value = rateToCount.get(age);
-   //   if (value < 90) {
+      if (value < 120) {
         data.addRow();
         data.setValue(r, 0, age);
         data.setValue(r++, 1, value);
-     // }
+      }
     }
 
-    vp.add(new ColumnChart(data,options));
+    vp.add(new ColumnChart(data, options));
   }
 
-  private void labelAxes(Options options,String hAxisTitle ,String vAxisTitle) {
+  private void labelAxes(Options options, String hAxisTitle, String vAxisTitle) {
     AxisOptions options1 = AxisOptions.create();
     options1.setTitle(hAxisTitle);
 
     options.setHAxisOptions(options1);
-    options1.set("maxTextLines",2d);
+    options1.set("maxTextLines", 2d);
     AxisOptions options2 = AxisOptions.create();
     options2.setTitle(vAxisTitle);
 
@@ -560,7 +569,7 @@ public class MonitoringManager {
   }
 
 
-  private void labelAxes2(Options options,String hAxisTitle ,String vAxisTitle) {
+  private void labelAxes2(Options options, String hAxisTitle, String vAxisTitle) {
     AxisOptions options1 = AxisOptions.create();
     options1.setTitle(hAxisTitle);
     options.setHAxisOptions(options1);
@@ -571,9 +580,10 @@ public class MonitoringManager {
   }
 
 
-  private void doResultLineQuery(final Panel vp, final DoIt it) {
-    service.getResultPerExercise(new AsyncCallback<Map<String,Map<String, Integer>>>() {
-      public void onFailure(Throwable caught) {}
+  private void doResultLineQuery(final Panel vp) {
+    service.getResultPerExercise(new AsyncCallback<Map<String, Map<String, Integer>>>() {
+      public void onFailure(Throwable caught) {
+      }
 
       /**
        *
@@ -584,12 +594,12 @@ public class MonitoringManager {
         Map<String, Integer> overall = result.get("overall");
         int total = 0;
         for (Integer c : overall.values()) total += c;
-        float ratio = ((float) total)/((float)overall.size());
+        float ratio = ((float) total) / ((float) overall.size());
         vp.add(new HTML("<b>Avg " +
             answers +
             "/" +
             item +
-            " = " + roundToHundredth(ratio) +"</b>") );
+            " = " + roundToHundredth(ratio) + "</b>"));
 
         List<String> keys = getSortedKeys(overall);
         int size = keys.size();
@@ -599,13 +609,13 @@ public class MonitoringManager {
         int chartSamples = Math.min(ITEM_CHART_ITEM_WIDTH, size);
 
         for (int i = 0; i < size; i += chartSamples) {
-          Map<String, Map<String, Integer>> typeToList = new HashMap<String, Map<String, Integer>>();
+          Map<String, Map<String, Integer>> typeToList = new HashMap<>();
           int endIndex = Math.min(size, i + chartSamples);
-          endIndex = Math.min(keys.size(),endIndex);
+          endIndex = Math.min(keys.size(), endIndex);
           List<String> sublist = keys.subList(i, endIndex);
           for (Map.Entry<String, Map<String, Integer>> pair : result.entrySet()) {
             Map<String, Integer> exidToCount = pair.getValue();
-            Map<String, Integer> submap = new HashMap<String, Integer>();
+            Map<String, Integer> submap = new HashMap<>();
             for (String key : sublist) {
               Integer value = exidToCount.get(key);
               submap.put(key, value == null ? 0 : value);
@@ -614,8 +624,8 @@ public class MonitoringManager {
           }
           String title1 = title + " (" + i + "-" + (i + chartSamples) + ")";
           Widget lineChart = showItemIDs ?
-            getLineChartBigSet(sublist, typeToList, title1, size < 300, i) :
-            getLineChart(sublist, typeToList, title1, size < 300, i);
+              getLineChartBigSet(sublist, typeToList, title1, size < 300, i) :
+              getLineChart(sublist, typeToList, title1, size < 300, i);
 
           vp.add(lineChart);
         }
@@ -623,40 +633,40 @@ public class MonitoringManager {
         int maleTotal = 0;
         int femaleTotal = 0;
 
-        for (Integer c: result.get("male").values()) {
+        for (Integer c : result.get("male").values()) {
           maleTotal += c;
         }
-        for (Integer c: result.get("female").values()) {
+        for (Integer c : result.get("female").values()) {
           femaleTotal += c;
         }
-        vp.add(getGenderChart(maleTotal,femaleTotal));
-        if (it != null) it.go();
+        vp.add(getGenderChart(maleTotal, femaleTotal));
+        if (null != null) ((DoIt) null).go();
       }
     });
   }
 
   private List<String> getSortedKeys(Map<String, Integer> overall) {
-    List<String> keys = new ArrayList<String>(overall.keySet());
+    List<String> keys = new ArrayList<>(overall.keySet());
     List<String> strings = keys.subList(0, Math.min(200, keys.size()));
-    logger.info("keys " +strings);
+    logger.info("keys " + strings);
     sortKeysIntelligently(keys);
     return keys;
   }
 
-  private LineChart getLineChart(List<String> keys, Map<String, Map<String,Integer>> overallToExIDToCount, String title, boolean goBig, int offset) {
+  private LineChart getLineChart(List<String> keys, Map<String, Map<String, Integer>> overallToExIDToCount, String title, boolean goBig, int offset) {
     Options options = Options.create();
     options.setTitle(title);
-    labelAxes2(options,item +
-        " index",
+    labelAxes2(options, item +
+            " index",
         "# " + answers);
     DataTable data = DataTable.create();
     data.addColumn(AbstractDataTable.ColumnType.STRING, "ID");
     for (String key : overallToExIDToCount.keySet()) {
- //     logger.info("type " + key);
+      //     logger.info("type " + key);
       data.addColumn(AbstractDataTable.ColumnType.NUMBER, key);
     }
     int size = keys.size();
-  //  logger.info(" keys " + size + " table " + data);
+    //  logger.info(" keys " + size + " table " + data);
 
     data.addRows(size);
     int colCount = 1;
@@ -667,7 +677,7 @@ public class MonitoringManager {
     }
 
     for (String key : overallToExIDToCount.keySet()) {
-   //   logger.info("type " + key + " keys " + keys);
+      //   logger.info("type " + key + " keys " + keys);
       Map<String, Integer> exidToCount = overallToExIDToCount.get(key);
       r = 0;
       for (String exid : keys) {
@@ -676,19 +686,19 @@ public class MonitoringManager {
       }
       colCount++;
     }
-    if (goBig) options.setHeight((int)(Window.getClientHeight()*0.3f));
+    if (goBig) options.setHeight((int) (Window.getClientHeight() * 0.3f));
 
     LineChart lineChart = new LineChart(data, options);
     lineChart.setWidth("96%");
     return lineChart;
   }
 
-  private LineChart getLineChartBigSet(List<String> keys, Map<String, Map<String,Integer>> overallToExIDToCount,  String title, boolean goBig, int offset) {
+  private LineChart getLineChartBigSet(List<String> keys, Map<String, Map<String, Integer>> overallToExIDToCount, String title, boolean goBig, int offset) {
     Options options = Options.create();
     options.setTitle(title);
-    labelAxes2(options,item +
-      " index",
-      "# " + answers);
+    labelAxes2(options, item +
+            " index",
+        "# " + answers);
     DataTable data = DataTable.create();
     data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Index");
     for (String key : overallToExIDToCount.keySet()) {
@@ -718,22 +728,24 @@ public class MonitoringManager {
       }
       colCount++;
     }
-    if (goBig) options.setHeight((int)(Window.getClientHeight()*0.3f));
+    if (goBig) options.setHeight((int) (Window.getClientHeight() * 0.3f));
 
     LineChart lineChart = new LineChart(data, options);
     lineChart.setWidth("96%");
     return lineChart;
   }
 
-  private void doResultQuery(final Panel vp, final DoIt it) {
+  private void doResultQuery(final Panel vp) {
     service.getResultCountToCount(new AsyncCallback<Map<Integer, Integer>>() {
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
+
       public void onSuccess(Map<Integer, Integer> userToCount) {
         int total = 0;
         for (int v : userToCount.values()) total += v;
         Integer unanswered = userToCount.get(0);
         float ratio = total > 0 ? ((float) unanswered) / ((float) total) : 0;
-        int percent = (int) (ratio*100f);
+        int percent = (int) (ratio * 100f);
 
         vp.add(new HTML("<h2>Collection progress</h2>"));
         FlexTable flex = new FlexTable();
@@ -748,14 +760,14 @@ public class MonitoringManager {
         flex.setHTML(1, 1, numAnswered + " or " + (100 - percent) + "%");
         vp.add(flex);
         vp.add(getResultCountChart(userToCount));
-        if (it != null) it.go();
+        if (null != null) ((DoIt) null).go();
       }
     });
 
 
   }
 
-  private void doMaleFemale(final Panel vp, final DoIt it) {
+  private void doMaleFemale(final Panel vp) {
     service.getMaleFemaleProgress(new AsyncCallback<Map<String, Float>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -810,20 +822,22 @@ public class MonitoringManager {
         flex.setHTML(r, 1, result.get("femaleContext").intValue() + "");
         flex.setHTML(r++, 2, getPercent(result.get("femaleContext"), total) + "%");*/
         // do the next one...
-        if (it != null) it.go();
+        if (null != null) ((DoIt) null).go();
       }
     });
   }
 
-  private int getPercent(Float male, float total) {
-    float ratio = total > 0 ? male / ( total) : 0;
-    return (int) (ratio*100f);
+/*  private int getPercent(Float male, float total) {
+    float ratio = total > 0 ? male / (total) : 0;
+    return (int) (ratio * 100f);
   }
+*/
 
   private void doGenderQuery(final Panel vp) {
     service.getResultCountsByGender(new AsyncCallback<Map<String, Map<Integer, Integer>>>() {
       @Override
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
 
       @Override
       public void onSuccess(Map<String, Map<Integer, Integer>> result) {
@@ -858,6 +872,7 @@ public class MonitoringManager {
 
   /**
    * Handles a large exercise list by making a sequence of charts.
+   *
    * @param round
    * @param keys
    * @param correct
@@ -894,7 +909,6 @@ public class MonitoringManager {
       vp.add(gradeCounts);
     }
   }*/
-
   private void sortKeysIntelligently(List<String> keys) {
     String sample = keys.isEmpty() ? "" : keys.iterator().next();
     final boolean firstInt = Character.isDigit(sample.charAt(0));
@@ -949,7 +963,9 @@ public class MonitoringManager {
 
   private void doResultByDayQuery(final Panel vp) {
     service.getResultByDay(new AsyncCallback<Map<String, Integer>>() {
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
+
       public void onSuccess(Map<String, Integer> userToCount) {
         vp.add(getResultByDayChart(userToCount));
       }
@@ -958,7 +974,9 @@ public class MonitoringManager {
 
   private void doResultByHourOfDayQuery(final Panel vp) {
     service.getResultByHourOfDay(new AsyncCallback<Map<String, Integer>>() {
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
+
       public void onSuccess(Map<String, Integer> userToCount) {
         vp.add(getResultByHourOfDayChart(userToCount));
       }
@@ -968,24 +986,26 @@ public class MonitoringManager {
   /**
    * Tamas didn't want an age chart.
    *
-   * @see #showResults
    * @param vp
+   * @see #showResults
    */
   private void showUserInfo(final Panel vp) {
     service.getUserToResultCount(new AsyncCallback<Map<User, Integer>>() {
-      public void onFailure(Throwable caught) {}
+      public void onFailure(Throwable caught) {
+      }
+
       public void onSuccess(Map<User, Integer> userToCount) {
-        int total =0;
+        int total = 0;
         for (Integer count : userToCount.values()) total += count;
         vp.add(getPerUserChart(userToCount));
-  //      vp.add(getPerUserLineChart(userToCount));
+        //      vp.add(getPerUserLineChart(userToCount));
 
         vp.add(new HTML("Avg " + answers + " per " +
             user +
-            " = " + total/userToCount.size()));
+            " = " + total / userToCount.size()));
         vp.add(getUserChart(userToCount));
 
-       // vp.add(getAgeChart(userToCount));
+        // vp.add(getAgeChart(userToCount));
         vp.add(getLangChart(userToCount));
         vp.add(getDialectChart(userToCount));
         vp.add(getExperienceChart(userToCount));
@@ -1015,6 +1035,7 @@ public class MonitoringManager {
     return new ColumnChart(data, options);
   }
 
+/*
   private ColumnChart getAgeChart(Map<User, Integer> userToCount) {
     Options options = Options.create();
     options.setTitle(answers +
@@ -1024,32 +1045,35 @@ public class MonitoringManager {
     data.addColumn(AbstractDataTable.ColumnType.STRING, "Age");
     data.addColumn(AbstractDataTable.ColumnType.NUMBER, answers);
 
-    Map<Integer,Integer> ageToCount = new HashMap<Integer,Integer>();
-    for (Map.Entry<User,Integer> pair : userToCount.entrySet()) {
+    Map<Integer, Integer> ageToCount = new HashMap<Integer, Integer>();
+    for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
       User user = pair.getKey();
-      int age = (user.getAge() / 5)*5;
+      int age = (user.getAge() / 5) * 5;
       Integer c = ageToCount.get(age);
 
-      if (c == null) ageToCount.put(age,count); else ageToCount.put(age,c+count);
+      if (c == null) ageToCount.put(age, count);
+      else ageToCount.put(age, c + count);
     }
 
     int r = 0;
     List<Integer> ages = getSortedList(ageToCount.keySet());
     for (Integer age : ages) {
       data.addRow();
-      data.setValue(r, 0, (age -5)+"-"+ (age-1));
+      data.setValue(r, 0, (age - 5) + "-" + (age - 1));
       data.setValue(r++, 1, ageToCount.get(age));
     }
 
     return new ColumnChart(data, options);
   }
+*/
 
   /**
    * Number of answers per speaker chart
-   * @see #showUserInfo(com.google.gwt.user.client.ui.Panel)
+   *
    * @param userToCount
    * @return
+   * @see #showUserInfo(com.google.gwt.user.client.ui.Panel)
    */
   private ColumnChart getPerUserChart(Map<User, Integer> userToCount) {
     Options options = Options.create();
@@ -1064,63 +1088,66 @@ public class MonitoringManager {
     data.addColumn(AbstractDataTable.ColumnType.NUMBER, users +
         " with this many");
 
-    Map<Integer,Integer> ageToCount = new HashMap<Integer,Integer>();
-    for (Map.Entry<User,Integer> pair : userToCount.entrySet()) {
+    Map<Integer, Integer> ageToCount = new HashMap<>();
+    for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
-      int binned = count >= 100 ? (count / 100)*100 : count >= 10 ? (count / 10)*10 : count;
+      int binned = count >= 100 ? (count / 100) * 100 : count >= 10 ? (count / 10) * 10 : count;
       Integer c = ageToCount.get(binned);
-      if (c == null) ageToCount.put(binned,1); else ageToCount.put(binned,c+1);
+      if (c == null) ageToCount.put(binned, 1);
+      else ageToCount.put(binned, c + 1);
     }
 
     int r = 0;
     List<Integer> ages = getSortedList(ageToCount.keySet());
     for (Integer age : ages) {
       data.addRow();
-      data.setValue(r, 0, age >= 100 ? age +"-"+(age+99): (age >= 10 ? age +"-" +(age+9) : ""+age));
+      data.setValue(r, 0, age >= 100 ? age + "-" + (age + 99) : (age >= 10 ? age + "-" + (age + 9) : "" + age));
       data.setValue(r++, 1, ageToCount.get(age));
     }
 
     return new ColumnChart(data, options);
   }
 
-  private ColumnChart getExperienceToBoth(Map<Integer, Integer> expToIncorrect,Map<Integer, Integer> expToCorrect, String incorrect) {
-    Options options = Options.create();
-    //String incorrect = "Incorrect";
-    options.setTitle("Number of " + " " + incorrect + "/Correct by User Experience");
-
-    AxisOptions options1 = AxisOptions.create();
-    options1.setMinValue(-1);
-    options1.setMaxValue(18);
-    options.setHAxisOptions(options1);
-    options1.setTitle("Months experience");
-
-    //options.setHAxisOptions(options1);
-    AxisOptions options2 = AxisOptions.create();
-    options2.setTitle("# " + incorrect + "/Correct responses");
-    options.setVAxisOptions(options2);
-
-    DataTable data = DataTable.create();
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Experience");
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Num " + "Correct");
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Num " + incorrect);
-
-    int r = 0;
-    List<Integer> countsForUsers = getSortedList(expToIncorrect.keySet());
-    logger.info("exp " + countsForUsers);
-    for (Integer count : countsForUsers) {
-      if (count > 36) logger.info("Skipping " + count + "->" + expToIncorrect.get(count));
-      else {
-        data.addRow();
-        data.setValue(r, 0, count);
-        data.setValue(r, 1, expToCorrect.get(count));
-        data.setValue(r++, 2, expToIncorrect.get(count));
-      }
-    }
-
-    ColumnChart columnChart = new ColumnChart(data, options);
-    columnChart.setWidth("90%");
-    return columnChart;
-  }
+// --Commented out by Inspection START (4/5/16, 6:09 PM):
+//  private ColumnChart getExperienceToBoth(Map<Integer, Integer> expToIncorrect, Map<Integer, Integer> expToCorrect, String incorrect) {
+//    Options options = Options.create();
+//    //String incorrect = "Incorrect";
+//    options.setTitle("Number of " + " " + incorrect + "/Correct by User Experience");
+//
+//    AxisOptions options1 = AxisOptions.create();
+//    options1.setMinValue(-1);
+//    options1.setMaxValue(18);
+//    options.setHAxisOptions(options1);
+//    options1.setTitle("Months experience");
+//
+//    //options.setHAxisOptions(options1);
+//    AxisOptions options2 = AxisOptions.create();
+//    options2.setTitle("# " + incorrect + "/Correct responses");
+//    options.setVAxisOptions(options2);
+//
+//    DataTable data = DataTable.create();
+//    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Experience");
+//    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Num " + "Correct");
+//    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Num " + incorrect);
+//
+//    int r = 0;
+//    List<Integer> countsForUsers = getSortedList(expToIncorrect.keySet());
+//    logger.info("exp " + countsForUsers);
+//    for (Integer count : countsForUsers) {
+//      if (count > 36) logger.info("Skipping " + count + "->" + expToIncorrect.get(count));
+//      else {
+//        data.addRow();
+//        data.setValue(r, 0, count);
+//        data.setValue(r, 1, expToCorrect.get(count));
+//        data.setValue(r++, 2, expToIncorrect.get(count));
+//      }
+//    }
+//
+//    ColumnChart columnChart = new ColumnChart(data, options);
+//    columnChart.setWidth("90%");
+//    return columnChart;
+//  }
+// --Commented out by Inspection STOP (4/5/16, 6:09 PM)
 
  /* private ColumnChart getExperienceToIncorrect(Map<Integer, Integer> expToIncorrect, String incorrect) {
     Options options = Options.create();
@@ -1206,7 +1233,7 @@ public class MonitoringManager {
     data.addColumn(AbstractDataTable.ColumnType.NUMBER, items +
         " with this many");
 
-    Map<Integer, Integer> ageToCount = new HashMap<Integer, Integer>();
+    Map<Integer, Integer> ageToCount = new HashMap<>();
     for (Map.Entry<Integer, Integer> pair : resultToCount.entrySet()) {
       Integer count = pair.getKey();
     /*  int binned =
@@ -1217,10 +1244,10 @@ public class MonitoringManager {
 
       int binned =
           //count >= 100 ? (count / 100) * 100 :
-              count >= 30 ? (count / 10) * 10 :
+          count >= 30 ? (count / 10) * 10 :
               count >= 10 ? (count / 5) * 5 :
                   count;
-   //   int binned = count > 30 ? 31 : count;
+      //   int binned = count > 30 ? 31 : count;
       Integer c = ageToCount.get(binned);
       if (c == null) ageToCount.put(binned, pair.getValue());
       else ageToCount.put(binned, c + pair.getValue());
@@ -1229,21 +1256,21 @@ public class MonitoringManager {
     int r = 0;
     List<Integer> ages = getSortedList(ageToCount.keySet());
     for (Integer age : ages) {
-     // if (age > 1) {
-        data.addRow();
-        //     data.setValue(r, 0, age);
-     //   data.setValue(r, 0, age > 30 ?  "> 30" : "" + age);
+      // if (age > 1) {
+      data.addRow();
+      //     data.setValue(r, 0, age);
+      //   data.setValue(r, 0, age > 30 ?  "> 30" : "" + age);
   /*          age >= 100 ? ""+ age+"-"+(age+99) :
                 //(age >= 30 ? (age - 10) + "-" + age :
                     (age >= 10 ? age +"-"+(age+4) :
                         "" + age));*/
-        //age >= 100 ? ""+ age+"-"+(age+99) :
-        data.setValue(r, 0,
-            (age >= 30 ? age + "-" + (age+9) :
-            (age >= 10 ? age +"-"+(age+4) :
-                "" + age)));
-        data.setValue(r++, 1, ageToCount.get(age));
-    // }
+      //age >= 100 ? ""+ age+"-"+(age+99) :
+      data.setValue(r, 0,
+          (age >= 30 ? age + "-" + (age + 9) :
+              (age >= 10 ? age + "-" + (age + 4) :
+                  "" + age)));
+      data.setValue(r++, 1, ageToCount.get(age));
+      // }
     }
 
     return new ColumnChart(data, options);
@@ -1256,7 +1283,7 @@ public class MonitoringManager {
 
   private Widget getColumnChart(Map<String, Integer> dayToCount, String slot, boolean isDate) {
     Options options = getOptions(slot);
-    DataTable data = getDataTable(slot, dayToCount,isDate);
+    DataTable data = getDataTable(slot, dayToCount, isDate);
     return new ColumnChart(data, options);
   }
 
@@ -1293,14 +1320,14 @@ public class MonitoringManager {
 
   private Widget getResultByHourOfDayChart(Map<String, Integer> dayToCount) {
     String slot = "Hour of day (EST)";
-    return getColumnChart(dayToCount, slot,false);
+    return getColumnChart(dayToCount, slot, false);
   }
 
   private ColumnChart getLangChart(Map<User, Integer> userToCount) {
     String slot = "Language";
     Options options = getOptions(slot);
 
-    Map<String,Integer> langToCount = new HashMap<String,Integer>();
+    Map<String, Integer> langToCount = new HashMap<>();
 
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
@@ -1316,7 +1343,7 @@ public class MonitoringManager {
       }
     }
 
-    DataTable data = getDataTable(slot, langToCount,false);
+    DataTable data = getDataTable(slot, langToCount, false);
 
     return new ColumnChart(data, options);
   }
@@ -1325,7 +1352,7 @@ public class MonitoringManager {
     String slot = "Dialect";
     Options options = getOptions(slot);
 
-    Map<String,Integer> dialectToCount = new HashMap<String,Integer>();
+    Map<String, Integer> dialectToCount = new HashMap<>();
 
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
@@ -1344,7 +1371,7 @@ public class MonitoringManager {
 
     Map<String, Integer> dialectToCount2 = filterCount(dialectToCount, MIN_COUNT_FOR_DIALECT, 15);
 
-    DataTable data = getDataTable(slot, dialectToCount2,false);
+    DataTable data = getDataTable(slot, dialectToCount2, false);
 
     return new ColumnChart(data, options);
   }
@@ -1354,7 +1381,7 @@ public class MonitoringManager {
     String slot = "Browser";
     Options options = getOptions(slot);
 
-    Map<String,Integer> browserToCount = new HashMap<String,Integer>();
+    Map<String, Integer> browserToCount = new HashMap<>();
 
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
@@ -1363,7 +1390,7 @@ public class MonitoringManager {
       boolean badIP = ipaddr == null || ipaddr.length() == 0;
 //      if (badIP) {
 //        /System.err.println("huh? no ipaddr for " + user);
- //     }
+      //     }
       String slotToUse = badIP ? "Unknown" : checker.getBrowser(ipaddr);
       Integer c = browserToCount.get(slotToUse);
       if (count > 0) {
@@ -1379,7 +1406,7 @@ public class MonitoringManager {
 
   private Map<String, Integer> filterCount(Map<String, Integer> browserToCount, int minCount, int minSize) {
     if (browserToCount.size() < minSize) return browserToCount;
-    Map<String, Integer> browserToCount2 = new HashMap<String, Integer>();
+    Map<String, Integer> browserToCount2 = new HashMap<>();
 
     for (Map.Entry<String, Integer> pair : browserToCount.entrySet()) {
       if (pair.getValue() > minCount)
@@ -1389,58 +1416,58 @@ public class MonitoringManager {
   }
 
   /**
-   * @see #showUserInfo
    * @param userToCount
    * @return
+   * @see #showUserInfo
    */
   private ColumnChart getUserChart(Map<User, Integer> userToCount) {
     String slot = user;
     Options options = getOptions(slot);
 
-    Map<String,Integer> nameToCount = new HashMap<String, Integer>();
-    Set<String> males = new HashSet<String>();
+    Map<String, Integer> nameToCount = new HashMap<>();
+    Set<String> males = new HashSet<>();
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer doneByUser = pair.getValue();
       User user = pair.getKey();
       String name = user.getUserID();
       if (name == null || name.length() == 0) {
-        name = ""+ user.getId();
+        name = "" + user.getId();
       }
       name = name.trim();
       Integer count = nameToCount.get(name);
-      if (count == null) nameToCount.put(name,doneByUser);
-      else nameToCount.put(name,doneByUser+count);
+      if (count == null) nameToCount.put(name, doneByUser);
+      else nameToCount.put(name, doneByUser + count);
       if (user.isMale()) males.add(name);
     }
 
-    Map<Integer,List<String>> countToUser = new HashMap<Integer, List<String>>();
+    Map<Integer, List<String>> countToUser = new HashMap<>();
     for (Map.Entry<String, Integer> pair : nameToCount.entrySet()) {
       Integer doneByUser = pair.getValue();
       if (doneByUser > 5) {
         List<String> usersAtCount = countToUser.get(doneByUser);
-        if (usersAtCount == null) countToUser.put(doneByUser, usersAtCount = new ArrayList<String>());
+        if (usersAtCount == null) countToUser.put(doneByUser, usersAtCount = new ArrayList<>());
         String user = pair.getKey();
         usersAtCount.add(user);
       }
     }
-    List<Integer> counts = new ArrayList<Integer>(countToUser.keySet());
+    List<Integer> counts = new ArrayList<>(countToUser.keySet());
     Collections.sort(counts, new Comparator<Integer>() {
       @Override
       public int compare(Integer o1, Integer o2) {
-        return -1*o1.compareTo(o2);
+        return -1 * o1.compareTo(o2);
       }
     });
 
     DataTable data = DataTable.create();
     data.addColumn(AbstractDataTable.ColumnType.STRING, slot);
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Female "+ answers);
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Male "+ answers);
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Female " + answers);
+    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "Male " + answers);
     int r = 0;
 
     //logger.info("counts " + counts);
     for (Integer c : counts) {
       List<String> users = countToUser.get(c);
-    //  logger.info("\tcount " + c + " users " + users);
+      //  logger.info("\tcount " + c + " users " + users);
       for (String u : users) {
         data.addRow();
         data.setValue(r, 0, u);
@@ -1469,8 +1496,8 @@ public class MonitoringManager {
     Options options = Options.create();
     options.setTitle(answers +
         " by " + slot + " (months)");
-    labelAxes(options,"months experience","# "+answers);
-    Map<Integer,Integer> slotToCount = new HashMap<Integer,Integer>();
+    labelAxes(options, "months experience", "# " + answers);
+    Map<Integer, Integer> slotToCount = new HashMap<>();
 
     for (Map.Entry<User, Integer> pair : userToCount.entrySet()) {
       Integer count = pair.getValue();
@@ -1511,11 +1538,11 @@ public class MonitoringManager {
         "",//answers,//"",//"Number of " + answers,
         "Number of " +
             items);
-   // AxisOptions options1 = AxisOptions.create();
-   // options1.setTitle("# of items with this many answers");
-  //  options.setHAxisOptions(options1);
+    // AxisOptions options1 = AxisOptions.create();
+    // options1.setTitle("# of items with this many answers");
+    //  options.setHAxisOptions(options1);
 
-    Set<Integer> slots = new HashSet<Integer>(maleNumAnswerToCount.keySet());
+    Set<Integer> slots = new HashSet<>(maleNumAnswerToCount.keySet());
     slots.addAll(femaleNumAnswerToCount.keySet());
     List<Integer> slotValues = getSortedList(slots);
 
@@ -1559,54 +1586,56 @@ public class MonitoringManager {
     return new ColumnChart(data, options);
   }
 
-  private LineChart getGradeCounts(int round,
-                                   int start, int end,
-                                   List<String> keysToUse,
-                                   Map<String, Integer> correctToCount,
-                                   Map<String, Integer> incorrectToCount) {
-    Options options = Options.create();
-    options.setTitle("Number of " +
-      items +
-      " with this many " +
-      "grades" +
-      " correct/incorrect " + "Round #" + (round + 1)+
-        "(" + start + " - " + end +
-       ")"
-    );
-
-    labelAxes(options,
-      "",
-      "Number of " +
-        items);
-
-    DataTable data = DataTable.create();
-    data.addColumn(AbstractDataTable.ColumnType.STRING, answers);
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "" +
-      items +
-      " w/ # " +
-      answers +
-      ", Correct");
-    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "" +
-      items +
-      " w/ # " +
-      answers +
-      ", Incorrect");
-
-    int r = 0;
-    for (String key : keysToUse) {
-      Integer correct = correctToCount.get(key);
-      Integer incorrect = incorrectToCount.get(key);
-
-      data.addRow();
-      data.setValue(r, 0, key);
-      data.setValue(r, 1, correct == null ? 0 : correct);
-      data.setValue(r, 2, incorrect == null ? 0 : incorrect);
-      r++;
-    }
-
-    //return new ColumnChart(data, options);
-    return new LineChart(data, options);
-  }
+// --Commented out by Inspection START (4/5/16, 6:09 PM):
+//  private LineChart getGradeCounts(int round,
+//                                   int start, int end,
+//                                   List<String> keysToUse,
+//                                   Map<String, Integer> correctToCount,
+//                                   Map<String, Integer> incorrectToCount) {
+//    Options options = Options.create();
+//    options.setTitle("Number of " +
+//        items +
+//        " with this many " +
+//        "grades" +
+//        " correct/incorrect " + "Round #" + (round + 1) +
+//        "(" + start + " - " + end +
+//        ")"
+//    );
+//
+//    labelAxes(options,
+//        "",
+//        "Number of " +
+//            items);
+//
+//    DataTable data = DataTable.create();
+//    data.addColumn(AbstractDataTable.ColumnType.STRING, answers);
+//    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "" +
+//        items +
+//        " w/ # " +
+//        answers +
+//        ", Correct");
+//    data.addColumn(AbstractDataTable.ColumnType.NUMBER, "" +
+//        items +
+//        " w/ # " +
+//        answers +
+//        ", Incorrect");
+//
+//    int r = 0;
+//    for (String key : keysToUse) {
+//      Integer correct = correctToCount.get(key);
+//      Integer incorrect = incorrectToCount.get(key);
+//
+//      data.addRow();
+//      data.setValue(r, 0, key);
+//      data.setValue(r, 1, correct == null ? 0 : correct);
+//      data.setValue(r, 2, incorrect == null ? 0 : incorrect);
+//      r++;
+//    }
+//
+//    //return new ColumnChart(data, options);
+//    return new LineChart(data, options);
+//  }
+// --Commented out by Inspection STOP (4/5/16, 6:09 PM)
 
 
   private DataTable getDataTable(String slot, Map<String, Integer> langToCount, boolean isDate) {
@@ -1615,9 +1644,9 @@ public class MonitoringManager {
     data.addColumn(AbstractDataTable.ColumnType.NUMBER, answers);
     int r = 0;
 
-    List<String> slotValues = new ArrayList<String>(langToCount.keySet());
+    List<String> slotValues = new ArrayList<>(langToCount.keySet());
     if (isDate) {
-      Collections.sort(slotValues,new Comparator<String>() {
+      Collections.sort(slotValues, new Comparator<String>() {
         @Override
         public int compare(String o1, String o2) {
           String[] split = o1.split("-");
@@ -1632,8 +1661,7 @@ public class MonitoringManager {
           return y < y2 ? -1 : y > y2 ? +1 : m < m2 ? -1 : m > m2 ? +1 : d < d2 ? -1 : d > d2 ? +1 : 0;
         }
       });
-    }
-    else {
+    } else {
       Collections.sort(slotValues);
     }
 
