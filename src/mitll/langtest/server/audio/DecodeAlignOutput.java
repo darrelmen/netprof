@@ -26,13 +26,13 @@ public class DecodeAlignOutput {
   /**
    * @param alignmentScore
    */
-  public DecodeAlignOutput(PretestScore alignmentScore, boolean isDecode) {
+  DecodeAlignOutput(PretestScore alignmentScore, boolean isDecode) {
     this(alignmentScore.getHydecScore(), new ScoreToJSON().getJsonObject(alignmentScore).toString(),
         alignmentScore.getProcessDur(), false,
         alignmentScore);
   }
 
-  public DecodeAlignOutput(AudioAnswer decodeAnswer, boolean isDecode) {
+  DecodeAlignOutput(AudioAnswer decodeAnswer, boolean isDecode) {
     PretestScore pretestScore = decodeAnswer.getPretestScore();
     this.score = (float) decodeAnswer.getScore();
     this.json = new ScoreToJSON().getJsonFromAnswer(decodeAnswer).toString();
@@ -41,9 +41,9 @@ public class DecodeAlignOutput {
     this.isCorrect = decodeAnswer.isCorrect();
   }
 
-  public DecodeAlignOutput(float score, String json,
-                           long processDurInMillis, boolean isCorrect,
-                           PretestScore pretestScore) {
+  DecodeAlignOutput(float score, String json,
+                    long processDurInMillis, boolean isCorrect,
+                    PretestScore pretestScore) {
     this.score = score;
     this.json = json;
     this.numPhones = numPhones(pretestScore);
@@ -93,7 +93,6 @@ public class DecodeAlignOutput {
   public boolean isCorrect() {
     return isCorrect;
   }
-
  /*   public boolean isDecode() {
       return isDecode;
     }*/
