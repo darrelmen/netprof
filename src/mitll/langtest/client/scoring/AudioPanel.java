@@ -290,7 +290,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   public static class ImageAndCheck {
     private final Image image;
 
-    public ImageAndCheck() {
+    ImageAndCheck() {
       image = new Image();
       getImage().setVisible(false);
     }
@@ -371,7 +371,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     if (start >= end) {
       logger.warning("bad segment " + start + "-" + end);
     } else {
-      //logger.info("playSegment segment " + start + "-" + end);
+//      logger.info("playSegment segment " + start + "-" + end);
       playAudio.repeatSegment(start, end);
     }
   }
