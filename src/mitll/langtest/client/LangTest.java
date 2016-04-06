@@ -35,6 +35,8 @@ import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
+import mitll.langtest.client.recorder.RecordButtonPanel;
+import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.user.UserFeedback;
@@ -686,10 +688,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return flashRecordPanel;
   }
 
+  long then = 0;
   /**
    * Recording interface
+   * @see RecordButtonPanel#startRecording()
+   * @see PostAudioRecordButton#startRecording()
    */
   public void startRecording() {
+    then = System.currentTimeMillis();
     flashRecordPanel.recordOnClick();
   }
 
@@ -700,7 +706,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    */
   public void stopRecording(WavCallback wavCallback) {
-    // logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
+    //logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
     flashRecordPanel.stopRecording(wavCallback);
   }
 
