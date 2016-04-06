@@ -125,6 +125,7 @@ public class ServerProperties {
   private final int userInitialScores = 20;
   //private boolean RTL;
   private int sleepBetweenDecodes;
+  private long trimBeforeAndAfter;
 
   /**
    * @param servletContext
@@ -256,7 +257,7 @@ public class ServerProperties {
     return getDefaultFalse(NO_MODEL);
   }
 
-  public boolean removeExercisesWithMissingAudio() {
+  boolean removeExercisesWithMissingAudio() {
     return getDefaultTrue(REMOVE_EXERCISES_WITH_MISSING_AUDIO);
   }
 
@@ -272,6 +273,10 @@ public class ServerProperties {
     return getDefaultFalse("isAMAS");
   }
 
+  /**
+   * @see mitll.langtest.server.decoder.RefResultDecoder#doRefDecode(Collection, String)
+   * @return
+   */
   public boolean shouldTrimAudio() {
     return getDefaultTrue(DO_TRIM);
   }
@@ -587,5 +592,10 @@ public class ServerProperties {
 
   public int getSleepBetweenDecodes() {
     return getIntPropertyDef(SLEEP_BETWEEN_DECODES_MILLIS, "" + SLEEP_BETWEEN_DECODES_DEFAULT);
+  }
+
+  private static final float TRIM_SILENCE_BEFORE_AND_AFTER = 200;//0.30f;
+  public long getTrimBeforeAndAfter() {
+    return getIntPropertyDef("trimBeforeAndAfterMillis", "" + TRIM_SILENCE_BEFORE_AND_AFTER);
   }
 }
