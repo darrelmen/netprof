@@ -52,6 +52,7 @@ public class RecordButton extends Button {
   private RecordingListener recordingListener;
   private final PropertyHandler propertyHandler;
   private Timer afterStopTimer = null;
+  int afterStopDelayMillis = 50;
 
   public interface RecordingListener {
     void startRecording();
@@ -77,6 +78,7 @@ public class RecordButton extends Button {
     this.autoStopDelay = delay;
     setType(ButtonType.PRIMARY);
     setIcon(IconType.MICROPHONE);
+    this.afterStopDelayMillis = propertyHandler.getAfterStopDelayMillis();
 
     setupRecordButton();
     getElement().setId("record_button");
@@ -175,6 +177,7 @@ public class RecordButton extends Button {
   }
 
   /**
+   * Delay end of recording by some number of milliseconds
    * @see #doClick()
    */
   private void startOrStopRecording() {
@@ -190,7 +193,7 @@ public class RecordButton extends Button {
           stop();
         }
       };
-      afterStopTimer.schedule(50);
+      afterStopTimer.schedule(afterStopDelayMillis);
 
     } else {
       start();
