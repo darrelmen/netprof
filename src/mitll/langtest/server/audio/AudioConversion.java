@@ -43,21 +43,23 @@ public class AudioConversion {
   private static final String LAME = "lame";
   private static final double DIFF_THRESHOLD = 0.2;
   private static final boolean SPEW = true;
-  public static final String MP3 = ".mp3";
+  private static final String MP3 = ".mp3";
   private final AudioCheck audioCheck;
   private static final boolean DEBUG = false;
   private static final int MIN_WARN_DUR = 30;
 
   private final String soxPath;
   private final String language;
-  private final long trimMillisBeforeAndAfter;
+  private final long trimMillisBefore;
+  private final long trimMillisAfter;
 
   /**
    * @param props
    */
   public AudioConversion(ServerProperties props) {
     this.language = props.getLanguage();
-    trimMillisBeforeAndAfter = props.getTrimBeforeAndAfter();
+    trimMillisBefore = props.getTrimBefore();
+    trimMillisAfter  = props.getTrimAfter();
     soxPath = getSox();
     audioCheck = new AudioCheck(props);
   }
@@ -360,8 +362,7 @@ public class AudioConversion {
   }
 
   private String makeTempFile(String prefix) throws IOException {
-    File doHighPassFilter = makeTempDir(prefix);
-    return doHighPassFilter + File.separator + "temp" + prefix + ".wav";
+    return makeTempDir(prefix) + File.separator + "temp" + prefix + ".wav";
   }
 
   /**
@@ -377,14 +378,19 @@ public class AudioConversion {
   private String doTrimSilence(String pathToAudioFile) throws IOException {
     final String tempTrimmed = makeTempFile("doTrimSilence");
 
-//    logger.info("doTrimSilence running sox on " + pathToAudioFile + " to produce " + tempTrimmed);
-    //float trimSilenceBeforeAndAfter = TRIM_SILENCE_BEFORE_AND_AFTER;
-    String trimAmount = "0." + trimMillisBeforeAndAfter;//trimSilenceBeforeAndAfter;
+   // logger.info("doTrimSilence running sox on " + new File(pathToAudioFile).getAbsolutePath() + " to produce " + new File(tempTrimmed).getAbsolutePath());
+    String trimBefore = "0." + trimMillisBefore;
+    String trimAfter  = "0." + trimMillisAfter;
     ProcessBuilder soxFirst = new ProcessBuilder(
         getSox(),
         pathToAudioFile,
         tempTrimmed,
-        "vad", "-t", T_VALUE, "-p", trimAmount, "reverse", "vad", "-t", T_VALUE, "-p", trimAmount, "reverse");
+        "vad", "-t", T_VALUE, "-p", trimBefore, "reverse", "vad", "-t", T_VALUE, "-p", trimAfter, "reverse");
+
+
+/*    logger.error("doTrimSilence trim silence on " + pathToAudioFile);
+    String asRunnable = soxFirst.command().toString().replaceAll(",", " ");
+    logger.info("doTrimSilence " + asRunnable);*/
 
     if (!new ProcessRunner().runProcess(soxFirst)) {
       // logger.info("tempDir Exists " + exists);
@@ -394,9 +400,6 @@ public class AudioConversion {
       String asRunnable = soxFirst.command().toString().replaceAll(",", " ");
       logger.info("path " + asRunnable);
     }
-
-//    String asRunnable = soxFirst.command().toString().replaceAll(",", " ");
-    //logger.info("path " + asRunnable);
 
     return tempTrimmed;
   }
