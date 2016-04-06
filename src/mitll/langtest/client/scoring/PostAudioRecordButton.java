@@ -91,8 +91,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
     service.writeAudioFile(base64EncodedWavFile,
         audioContext,
-        //reqid, controller.getUser(), getExerciseID(),        index,
-        //getAudioType(),
         controller.usingFlashRecorder(), "browser", controller.getBrowserInfo(),
         false, recordInResults,
         shouldAddToAudioTable(), false,
@@ -104,7 +102,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
             logMessage("failed to post audio for " + controller.getUser() + " exercise " + getExerciseID());
             showPopup(AudioAnswer.Validity.INVALID.getPrompt());
           }
-
 
           public void onSuccess(AudioAnswer result) {
             long now = System.currentTimeMillis();
