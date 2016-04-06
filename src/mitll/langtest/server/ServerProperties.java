@@ -124,8 +124,10 @@ public class ServerProperties {
   private EmailList emailList;
   private final int userInitialScores = 20;
   //private boolean RTL;
-  private int sleepBetweenDecodes;
+/*  private int sleepBetweenDecodes;
   private long trimBeforeAndAfter;
+  private long trimBefore;
+  private long trimAfter;*/
 
   /**
    * @param servletContext
@@ -594,8 +596,14 @@ public class ServerProperties {
     return getIntPropertyDef(SLEEP_BETWEEN_DECODES_MILLIS, "" + SLEEP_BETWEEN_DECODES_DEFAULT);
   }
 
-  private static final float TRIM_SILENCE_BEFORE_AND_AFTER = 200;//0.30f;
-  public long getTrimBeforeAndAfter() {
-    return getIntPropertyDef("trimBeforeAndAfterMillis", "" + TRIM_SILENCE_BEFORE_AND_AFTER);
+  private static final long TRIM_SILENCE_BEFORE = 200;
+  private static final long TRIM_SILENCE_AFTER  = 200;
+
+  public long getTrimBefore() {
+    return getIntPropertyDef("trimBeforeMillis", "" + TRIM_SILENCE_BEFORE);
+  }
+
+  public long getTrimAfter() {
+    return getIntPropertyDef("trimAfterMillis", "" + TRIM_SILENCE_AFTER);
   }
 }
