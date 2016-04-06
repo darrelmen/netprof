@@ -295,8 +295,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     return new FastAndSlowASRScoringAudioPanel(getLocalExercise(), path, service, controller, scorePanel, instance);
   }
 
-  //private CompressedAudio compressedAudio = new CompressedAudio();
-
   /**
    * @param commentToPost
    * @param field
