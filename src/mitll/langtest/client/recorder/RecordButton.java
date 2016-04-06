@@ -60,7 +60,7 @@ public class RecordButton extends Button {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#PostAudioRecordButton(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, int, boolean, String, String)
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#PostAudioRecordButton
    * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#SimplePostAudioRecordButton(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, String, String, String, String)
    * @param delay
    * @param doClickAndHold
@@ -141,10 +141,6 @@ public class RecordButton extends Button {
       addMouseOutHandler(new MouseOutHandler() {
         @Override
         public void onMouseOut(MouseOutEvent event) {
-          /*if (mouseDown) {
-            mouseDown = false;
-            doClick();
-          }*/
           gotMouseOut();
         }
       });
@@ -161,7 +157,7 @@ public class RecordButton extends Button {
   private void gotMouseOut() {
     if (mouseDown) {
       mouseDown = false;
-      logger.info("got mouse out " + mouseDown);
+//      logger.info("got mouse out " + mouseDown);
       doClick();
     }
   }
@@ -175,6 +171,7 @@ public class RecordButton extends Button {
   }
 
   /**
+   * Wait after the user releases the button, since it seems to get cut off...
    * @see #doClick()
    */
   private void startOrStopRecording() {
@@ -190,7 +187,7 @@ public class RecordButton extends Button {
           stop();
         }
       };
-      afterStopTimer.schedule(50);
+      afterStopTimer.schedule(propertyHandler.getAfterStopDelayMillis());
 
     } else {
       start();
@@ -198,18 +195,27 @@ public class RecordButton extends Button {
     }
   }
 
+  /**
+   * @see #startOrStopRecording()
+   */
   protected void start() {
     recording = true;
     showRecording();
     recordingListener.startRecording();
   }
 
+  /**
+   * @see #startOrStopRecording()
+   */
   protected void stop() {
     recording = false;
     showStopped();
     recordingListener.stopRecording();
   }
 
+  /**
+   * @see #start()
+   */
   private void showRecording() {
     setIcon(IconType.STOP);
 
@@ -248,6 +254,7 @@ public class RecordButton extends Button {
   }
 
   /**
+   * @see #showRecording()
    * @return if we want to flip images
    */
   boolean showInitialRecordImage() {
@@ -255,6 +262,9 @@ public class RecordButton extends Button {
     return true;
   }
 
+  /**
+   * @see #flipImage()
+   */
   void showFirstRecordImage() {}
   void showSecondRecordImage() {}
 
@@ -283,6 +293,9 @@ public class RecordButton extends Button {
     recordTimer.schedule(autoStopDelay);
   }
 
+  /**
+   * @see #startOrStopRecording()
+   */
   private void cancelTimer() {
     if (recordTimer != null) {
       recordTimer.cancel();
@@ -300,8 +313,7 @@ public class RecordButton extends Button {
    * @return true if showed the popup
    */
   public boolean checkAndShowTooLoud(AudioAnswer.Validity validity) {
-    if (
-        getPlatform().contains(WINDOWS) && validity == AudioAnswer.Validity.TOO_LOUD) {
+    if (getPlatform().contains(WINDOWS) && validity == AudioAnswer.Validity.TOO_LOUD) {
       showTooLoud();
       return true;
     }
