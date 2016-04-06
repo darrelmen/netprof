@@ -39,7 +39,6 @@ public class AudioConversion {
   public static final String SIXTEEN_K_SUFFIX = "_16K";
   public static final String FILE_MISSING = "FILE_MISSING";
   private static final float SIXTEEN_K = 16000f;
-  private static final float TRIM_SILENCE_BEFORE_AND_AFTER = 0.30f;
   private static final String T_VALUE = "" + 7;
   private static final String LAME = "lame";
   private static final double DIFF_THRESHOLD = 0.2;
@@ -51,12 +50,14 @@ public class AudioConversion {
 
   private final String soxPath;
   private final String language;
+  private final long trimMillisBeforeAndAfter;
 
   /**
    * @param props
    */
   public AudioConversion(ServerProperties props) {
     this.language = props.getLanguage();
+    trimMillisBeforeAndAfter = props.getTrimBeforeAndAfter();
     soxPath = getSox();
     audioCheck = new AudioCheck(props);
   }
@@ -377,11 +378,13 @@ public class AudioConversion {
     final String tempTrimmed = makeTempFile("doTrimSilence");
 
 //    logger.info("doTrimSilence running sox on " + pathToAudioFile + " to produce " + tempTrimmed);
+    //float trimSilenceBeforeAndAfter = TRIM_SILENCE_BEFORE_AND_AFTER;
+    String trimAmount = "0." + trimMillisBeforeAndAfter;//trimSilenceBeforeAndAfter;
     ProcessBuilder soxFirst = new ProcessBuilder(
         getSox(),
         pathToAudioFile,
         tempTrimmed,
-        "vad", "-t", T_VALUE, "-p", "" + TRIM_SILENCE_BEFORE_AND_AFTER, "reverse", "vad", "-t", T_VALUE, "-p", "" + TRIM_SILENCE_BEFORE_AND_AFTER, "reverse");
+        "vad", "-t", T_VALUE, "-p", trimAmount, "reverse", "vad", "-t", T_VALUE, "-p", trimAmount, "reverse");
 
     if (!new ProcessRunner().runProcess(soxFirst)) {
       // logger.info("tempDir Exists " + exists);
@@ -453,6 +456,7 @@ public class AudioConversion {
   }
 
   int spew2 = 0;
+
   /**
    * @param pathToWav
    * @param realContextPath
@@ -473,7 +477,7 @@ public class AudioConversion {
       if (DEBUG) logger.debug("run lame on " + absolutePathToWav + " making " + mp3File);
 
       if (!convertToMP3FileAndCheck(getLame(), title, absolutePathToWav.getAbsolutePath(), mp3File, author)) {
-        if (spew2++ < 10) logger.warn("File missing for " + pathToWav + " for " +author);
+        if (spew2++ < 10) logger.warn("File missing for " + pathToWav + " for " + author);
         return FILE_MISSING;
       }
     }
@@ -617,6 +621,7 @@ public class AudioConversion {
   }
 
   int spew = 0;
+
   /**
    * @param lamePath
    * @param title
