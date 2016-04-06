@@ -5,6 +5,7 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.Window;
+import mitll.langtest.client.recorder.RecordButton;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -17,9 +18,15 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PropertyHandler {
+  private final Logger logger = Logger.getLogger("PropertyHandler");
+
   private static final String RTL = "rtl";
   private static final String IS_AMAS = "isAMAS";
-  private final Logger logger = Logger.getLogger("PropertyHandler");
+  /**
+   * Possibly we need to add a delay after button is released to actually tell flash to stop recording.
+   * @see RecordButton#startOrStopRecording()
+   */
+  private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 50;
 
   // property file property names
   private static final String ENABLE_ALL_USERS = "enableAllUsers";
@@ -50,7 +57,7 @@ public class PropertyHandler {
   private static final String TURK_PARAM = "turk";
   private static final String NUM_GRADES_TO_COLLECT_PARAM = NUM_GRADES_TO_COLLECT;
 
-//  private static final String DLI_LANGUAGE_TESTING = "NetProF";
+  //  private static final String DLI_LANGUAGE_TESTING = "NetProF";
   private static final int DEFAULT_TIMEOUT = 45000;
   private static final String DEFAULT_EXERCISE = null;
   private static final int NUM_GRADES_TO_COLLECT_DEFAULT = 1;
@@ -80,8 +87,7 @@ public class PropertyHandler {
   private boolean isAMAS;
   private boolean usePhoneToDisplay;
 
-  private final String AMAS_WELCOME = "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)";
-//  private static final String PRONUNCIATION_FEEDBACK = "NetProF – Network Pronunciation Feedback";//"Classroom";//NetProF";//"PRONUNCIATION FEEDBACK";
+  private static final String AMAS_WELCOME = "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)";
   private static final String AMAS_PRONUNCIATION_FEEDBACK = "AMAS — Automatic Multi-Skilled Assessment System";
 
   private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
@@ -109,6 +115,7 @@ public class PropertyHandler {
 
   private static final List<String> AMAS_SITES = Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
   private String modelDir;
+  private int afterStopDelayMillis;
 
   /**
    * @return
@@ -146,12 +153,20 @@ public class PropertyHandler {
     return false;
   }
 
-  public boolean talksToDomino() {
+  boolean talksToDomino() {
     return talksToDomino;
   }
 
   public String getModelDir() {
     return modelDir;
+  }
+
+  /**
+   * Typically 50 or 100 milliseconds.
+   * @return
+   */
+  public int getAfterStopDelayMillis() {
+    return afterStopDelayMillis;
   }
 
   public enum LOGIN_TYPE {ANONYMOUS, STUDENT}
@@ -200,7 +215,8 @@ public class PropertyHandler {
   public static final String TEXT = "Text";
   private static final String AUDIO = "Audio";
   private String responseType = AUDIO;
-private boolean talksToDomino = false;
+  private boolean talksToDomino = false;
+
   /**
    * @param props
    * @see mitll.langtest.client.LangTest#onModuleLoad()
@@ -245,7 +261,8 @@ private boolean talksToDomino = false;
       else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
       else if (key.equals("talksToDomino")) talksToDomino = getBoolean(value);
       else if (key.equals("scoringModel")) modelDir = value;
-      //else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
+      else if (key.equals("afterStopDelayMillis")) afterStopDelayMillis = getInt(value, DEFAULT_AFTER_STOP_DELAY_MILLIS, "afterStopDelayMillis");
+        //else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
       else if (key.equals(USE_PHONE_TO_DISPLAY)) {
         // logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
         usePhoneToDisplay = getBoolean(value);
@@ -466,7 +483,9 @@ private boolean talksToDomino = false;
     return exercise_title;
   }
 
-  public String getAppTitle() { return appTitle;  }
+  public String getAppTitle() {
+    return appTitle;
+  }
 
   public boolean isDemoMode() {
     return demoMode;
@@ -527,8 +546,8 @@ private boolean talksToDomino = false;
   }
 
   /**
-   * @see LangTest#isRightAlignContent()
    * @return
+   * @see LangTest#isRightAlignContent()
    */
   public boolean isRightAlignContent() {
     return rightAlignContent;
