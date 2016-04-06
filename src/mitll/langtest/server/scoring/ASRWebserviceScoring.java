@@ -403,6 +403,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     if (!transcriptCleaned.endsWith(";")) {
       transcriptCleaned = transcriptCleaned + ";";
     }
+    transcriptCleaned = transcriptCleaned.replaceAll(";;",";");
 
     String hydraInput =
         tmpDir + "/:" +
