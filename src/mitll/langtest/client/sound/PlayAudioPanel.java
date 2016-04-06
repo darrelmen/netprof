@@ -13,7 +13,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.exercise.ExerciseController;
 
 import java.util.ArrayList;
@@ -125,7 +124,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    */
   @Override
   protected void onUnload() {
-    if (DEBUG) System.out.println("doing unload of play ------------------> ");
+    if (DEBUG) logger.info("doing unload of play ------------------> ");
     super.onUnload();
 
     doPause();
@@ -172,7 +171,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     }
 
     if (minWidth > 0) {
-//      System.out.println("setting min width " + minWidth + " on " + playButton.getElement().getId());
+//      logger.info("setting min width " + minWidth + " on " + playButton.getElement().getId());
       if (minWidth == 12) offsetWidth = 12;
       playButton.getElement().getStyle().setProperty("minWidth", offsetWidth + "px");
     }
@@ -214,7 +213,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @see #doClick()
    */
   private void play() {
-    if (DEBUG) System.out.println("PlayAudioPanel :play " + playing);
+    if (DEBUG) logger.info("PlayAudioPanel :play " + playing);
     playing = true;
     setPlayButtonText();
     soundManager.play(currentSound);
@@ -223,7 +222,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private void setPlayButtonText() {
     boolean playing1 = isPlaying();
     String html = playing1 ? pauseLabel : playLabel;
-    // System.out.println("setPlayButtonText now playing = " + isPlaying());
+    // logger.info("setPlayButtonText now playing = " + isPlaying());
     playButton.setText(html);
     playButton.setIcon(playing1 ? IconType.PAUSE : IconType.PLAY);
   }
@@ -264,11 +263,11 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     if (currentSound != null) {
       soundManager.pause(currentSound);
       float start1 = startInSeconds * 1000f;
-      float end1 = endInSeconds * 1000f;
-      int s = (int) start1;
-      int e = (int) end1;
+      float end1   = endInSeconds   * 1000f;
+      int s = Math.round(start1);
+      int e = Math.round(end1);
 
-      //logger.info("playing from " + s + " to " + e);
+    //  logger.info("playing from " + s + " to " + e);
       soundManager.playInterval(currentSound, s, e);
     }
   }
@@ -287,16 +286,10 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     if (listener != null) {
       listener.update(position);
     }
-    //else {
-    //logger.info("PlayAudioPanel :update - no listener");
-    //}
   }
-
-  //CompressedAudio compressedAudio = new CompressedAudio();
 
   private String loadAudio(String path) {
     path = CompressedAudio.getPath(path);
- //   path = ensureForwardSlashes(path);
     if (isPlaying()) pause();
     startSong(path);
     return path;
@@ -310,8 +303,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     if (currentPath.equals(path)) {
       doClick();
     } else {
-      logger.info("playAudio - " + path);
-
+//      logger.info("playAudio - " + path);
       loadAudio(path);
       this.currentPath = path;
 
@@ -331,9 +323,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
       });
     }
   }
-/*
-  private static final String WAV = ".wav";
-  private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;*/
 
   public void loadAudioAgain(String path) {
     loadAudio(path);
@@ -343,17 +332,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private void setPath(String path) {
     this.currentPath = path;
   }
-
-/*
-  private String wavToMP3(String path) {
-    return (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
-  }
-
-  private String ensureForwardSlashes(String wavPath) {
-    return wavPath.replaceAll("\\\\", "/");
-  }
-*/
-
 
   /**
    * Check if soundmanager loaded properly, warn if it didn't.
@@ -374,7 +352,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
           destroySound();
           createSound(path);
         } else {
-          logger.info(new Date() + " Sound manager is not OK!.");
+          logger.info(" Sound manager is not OK!.");
           warnNoFlash.setVisible(true);
         }
       }
@@ -438,7 +416,6 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   public void songFirstLoaded(double durationEstimate) {
     if (DEBUG) {
       logger.info("PlayAudioPanel.songFirstLoaded : " + this);
-      //  new Exception().printStackTrace();
     }
 
     if (listener != null && listener != this) {
