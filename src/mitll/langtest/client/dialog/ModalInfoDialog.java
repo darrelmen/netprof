@@ -59,10 +59,6 @@ public class ModalInfoDialog {
     return getModal(title, Collections.singleton(message), Collections.emptyList(), widget, handler);
   }
 
-/*  public Modal getModal(String title, String message) {
-    return getModal(title, Collections.singleton(message), null, null);
-  }*/
-
   private Modal getModal(String title, Collection<String> messages, Collection<String> values, Widget widget, HiddenHandler handler) {
     final Modal modal = new Modal(true);
     modal.setTitle(title);
@@ -97,11 +93,9 @@ public class ModalInfoDialog {
     for (String m : messages) {
       flexTable.setHTML(r, 0, m);
 
-      // if (!values.isEmpty()) {
       if (iterator.hasNext()) {
         flexTable.setHTML(r, 1, "&nbsp;" + "<b>" + iterator.next() + "</b>");
       }
-      //  }
       r++;
     }
     modal.add(flexTable);
