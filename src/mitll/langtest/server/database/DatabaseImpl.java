@@ -6,7 +6,6 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.*;
 import mitll.langtest.server.amas.FileExerciseDAO;
-import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.analysis.Analysis;
@@ -203,8 +202,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
 
+    long then = System.currentTimeMillis();
     putBackWordAndPhone();
-
+    long now = System.currentTimeMillis();
+    if (now - then > 1000) logger.info("took " + (now - then) + " millis to put back word and phone");
   }
 
   public ResultDAO getResultDAO() {
@@ -456,7 +457,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
   }
 
-  public void reloadExercises() { exerciseDAO.reload(); }
+  public void reloadExercises() {
+    exerciseDAO.reload();
+  }
 
   /**
    * @param mediaDir
@@ -931,7 +934,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private Map<String, CommonExercise> getIdToExerciseMap() {
     Map<String, CommonExercise> join = new HashMap<>();
 
-    for (CommonExercise exercise : getExercises()) { join.put(exercise.getID(), exercise); }
+    for (CommonExercise exercise : getExercises()) {
+      join.put(exercise.getID(), exercise);
+    }
 
     if (userExerciseDAO != null && exerciseDAO != null) {
       for (CommonExercise exercise : userExerciseDAO.getAll()) {
@@ -1198,8 +1203,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   /**
    * Special code to mask out unit/chapter from database in userexercise table.
-   *
+   * <p>
    * Must check update times to make sure we don't mask out a newer entry.
+   *
    * @param id
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String, long, boolean)
@@ -1462,8 +1468,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
-   * @see LangTestDatabaseImpl#getMaleFemaleProgress()
    * @return
+   * @see LangTestDatabaseImpl#getMaleFemaleProgress()
    */
   public Map<String, Float> getMaleFemaleProgress() {
     UserDAO userDAO = getUserDAO();
