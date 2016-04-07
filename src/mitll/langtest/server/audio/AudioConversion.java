@@ -522,10 +522,11 @@ public class AudioConversion {
   }
 
   private String getExe(String binPath, String exe) {
+    String prepended = binPath + File.separator + exe;
     if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
-      return binPath + File.separator + exe + ".exe";
+      return prepended + ".exe";
     } else {
-      return binPath + File.separator + exe;
+      return prepended;
     }
   }
 
