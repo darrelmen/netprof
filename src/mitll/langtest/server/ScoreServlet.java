@@ -133,8 +133,9 @@ public class ScoreServlet extends DatabaseServlet {
         String[] split1 = queryString.split("&");
         if (split1.length == 2) {
           String removeExercisesWithMissingAudio = getRemoveExercisesParam(queryString);
-          if (removeExercisesWithMissingAudio.equals("true") || removeExercisesWithMissingAudio.equals("false")) {
-            toReturn = getJsonNestedChapters(removeExercisesWithMissingAudio.equals("true"));
+          boolean shouldRemoveExercisesWithNoAudio = removeExercisesWithMissingAudio.equals("true");
+          if (shouldRemoveExercisesWithNoAudio || removeExercisesWithMissingAudio.equals("false")) {
+            toReturn = getJsonNestedChapters(shouldRemoveExercisesWithNoAudio);
           } else {
             toReturn.put(ERROR, "expecting param " + REMOVE_EXERCISES_WITH_MISSING_AUDIO);
           }
