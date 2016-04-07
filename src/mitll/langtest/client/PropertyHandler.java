@@ -26,7 +26,7 @@ public class PropertyHandler {
    * Possibly we need to add a delay after button is released to actually tell flash to stop recording.
    * @see RecordButton#startOrStopRecording()
    */
-  private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 50;
+  private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 75;
 
   // property file property names
   private static final String ENABLE_ALL_USERS = "enableAllUsers";
