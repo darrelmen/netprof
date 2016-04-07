@@ -596,8 +596,8 @@ public class ServerProperties {
     return getIntPropertyDef(SLEEP_BETWEEN_DECODES_MILLIS, "" + SLEEP_BETWEEN_DECODES_DEFAULT);
   }
 
-  private static final long TRIM_SILENCE_BEFORE = 200;
-  private static final long TRIM_SILENCE_AFTER  = 200;
+  private static final long TRIM_SILENCE_BEFORE = 300;
+  private static final long TRIM_SILENCE_AFTER  = 300;
 
   public long getTrimBefore() {
     return getIntPropertyDef("trimBeforeMillis", "" + TRIM_SILENCE_BEFORE);
