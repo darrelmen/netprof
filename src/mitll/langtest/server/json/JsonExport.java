@@ -146,7 +146,7 @@ public class JsonExport {
     return jsonArray;
   }
 
-  <T extends CommonShell> Collection<T> getSortedByID(Collection<T> exercises) {
+  private <T extends CommonShell> Collection<T> getSortedByID(Collection<T> exercises) {
     List<T> copy = new ArrayList<>(exercises);
     Collections.sort(copy, new Comparator<T>() {
       @Override
@@ -157,9 +157,9 @@ public class JsonExport {
     return copy;
   }
 
-  int c = 0;
+  private int c = 0;
 
-  <T extends CommonShell> void addUnitAndChapter(T exercise, JSONObject jsonForCommonExercise) {
+  private <T extends CommonShell> void addUnitAndChapter(T exercise, JSONObject jsonForCommonExercise) {
     for (String type : sectionHelper.getTypeOrder()) {
       String value = exercise.getUnitToValue().get(type);
       if (value == null) {
