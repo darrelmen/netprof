@@ -13,6 +13,7 @@ import mitll.langtest.shared.User;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.instrumentation.Event;
+import mitll.langtest.shared.instrumentation.SlimEvent;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -51,15 +52,15 @@ public class Report {
   private static final boolean DO_2014 = false;
   private static final String NEW_I_PAD_I_PHONE_USERS = "New iPad/iPhone Users";
   private static final String TIME_ON_TASK = "Time on Task";
-  public static final String MM_DD = "MM-dd";
-  public static final String ALL_NEW_USERS = "All New Users";
-  public static final String ALL_USERS = "allUsers";
-  public static final String I_PAD_USERS = "iPadUsers";
-  public static final String OVERALL_TIME_ON_TASK = "overallTimeOnTask";
-  public static final String DEVICE_TIME_ON_TASK = "deviceTimeOnTask";
-  public static final String UNIQUE_USERS_YTD = "uniqueUsersYTD";
-  public static final String ALL_RECORDINGS1 = "allRecordings";
-  public static final String DEVICE_RECORDINGS1 = "deviceRecordings";
+  private static final String MM_DD = "MM-dd";
+  private static final String ALL_NEW_USERS = "All New Users";
+  private static final String ALL_USERS = "allUsers";
+  private static final String I_PAD_USERS = "iPadUsers";
+  private static final String OVERALL_TIME_ON_TASK = "overallTimeOnTask";
+  private static final String DEVICE_TIME_ON_TASK = "deviceTimeOnTask";
+  private static final String UNIQUE_USERS_YTD = "uniqueUsersYTD";
+  private static final String ALL_RECORDINGS1 = "allRecordings";
+  private static final String DEVICE_RECORDINGS1 = "deviceRecordings";
 
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
@@ -208,14 +209,15 @@ public class Report {
   }
 
   /**
-   * @see DatabaseImpl#getReport(int, JSONObject)
    * @param jsonObject
    * @param year
    * @return
+   * @see DatabaseImpl#getReport(int, JSONObject)
    */
   public String getReport(JSONObject jsonObject, int year) {
-  //  logger.info("doing year " + year);
-    setUserStart();
+    //  logger.info("doing year " + year);
+    List<SlimEvent> allSlim = eventDAO.getAllSlim();
+    setUserStart(allSlim);
 
     StringBuilder builder = new StringBuilder();
     builder.append("<html><head><body>");
@@ -231,7 +233,7 @@ public class Report {
     jsonObject.put(I_PAD_USERS, iPadUsers);
 
     JSONObject timeOnTaskJSON = new JSONObject();
-    Set<Long> events = getEvents(builder, users, timeOnTaskJSON, year);
+    Set<Long> events = getEvents(builder, users, timeOnTaskJSON, year, allSlim);
     jsonObject.put(OVERALL_TIME_ON_TASK, timeOnTaskJSON);
 
     JSONObject deviceTimeOnTaskJSON = new JSONObject();
@@ -603,8 +605,8 @@ public class Report {
 
   /**
    * @param builder
-   * @paramx language
    * @param year
+   * @paramx language
    * @see #doReport
    */
   private void getResults(StringBuilder builder, Set<Long> students, /*PathHelper pathHelper, String language,*/
@@ -890,17 +892,20 @@ public class Report {
    * @param jsonObject
    * @see #doReport
    */
-  private Set<Long> getEvents(StringBuilder builder, Set<Long> students, JSONObject jsonObject, int year) {
-    return getEvents(builder, students, eventDAO.getAll(), ACTIVE_USERS, TIME_ON_TASK, jsonObject, year);
+  private Set<Long> getEvents(StringBuilder builder, Set<Long> students, JSONObject jsonObject, int year, Collection<SlimEvent> all) {
+    return getEvents(builder, students, all, ACTIVE_USERS, TIME_ON_TASK, jsonObject, year);
   }
 
   /**
    * Look at the event table to determine the first moment a user did anything
    * There was a bug where the user timestamp was not set properly.
    */
-  private void setUserStart() {
-    List<Event> all = eventDAO.getAll();
-    for (Event event : all) {
+/*  private void setUserStart() {
+    List<SlimEvent> all = eventDAO.getAllSlim();
+    setUserToStart(all);
+  }*/
+  private void setUserStart(Collection<SlimEvent> all) {
+    for (SlimEvent event : all) {
       long creatorID = event.getCreatorID();
       long timestamp = event.getTimestamp();
       if (!userToStart.containsKey(creatorID) || timestamp < userToStart.get(creatorID)) {
@@ -910,7 +915,7 @@ public class Report {
   }
 
   private Set<Long> getEventsDevices(StringBuilder builder, Set<Long> students, JSONObject jsonObject, int year) {
-    List<Event> all = eventDAO.getAllDevices();
+    List<SlimEvent> all = eventDAO.getAllDevicesSlim();
     String activeUsers = "Active iPad/iPhone Users";
     String tableLabel = "iPad/iPhone Time on Task";
     return getEvents(builder, students, all, activeUsers, tableLabel, jsonObject, year);
@@ -926,11 +931,11 @@ public class Report {
    * @param year
    * @see #getEvents
    */
-  private Set<Long> getEvents(StringBuilder builder, Set<Long> students, List<Event> all, String activeUsers,
+  private Set<Long> getEvents(StringBuilder builder, Set<Long> students, Collection<SlimEvent> all, String activeUsers,
                               String tableLabel, JSONObject jsonObject, int year) {
     Map<Integer, Set<Long>> monthToCount = new TreeMap<>();
-    Map<Integer, Map<Long, Set<Event>>> monthToCount2 = new TreeMap<>();
-    Map<Integer, Map<Long, Set<Event>>> weekToCount2 = new TreeMap<>();
+    Map<Integer, Map<Long, Set<SlimEvent>>> monthToCount2 = new TreeMap<>();
+    Map<Integer, Map<Long, Set<SlimEvent>>> weekToCount2 = new TreeMap<>();
 
     Map<Integer, Set<Long>> weekToCount = new TreeMap<>();
     Set<Long> teachers = new HashSet<>();
@@ -947,7 +952,7 @@ public class Report {
 
     Set<Long> users = new HashSet<>();
 
-    for (Event event : all) {
+    for (SlimEvent event : all) {
       long creatorID = event.getCreatorID();
       long timestamp = event.getTimestamp();
       if (timestamp > time && timestamp < time1 &&
@@ -962,7 +967,7 @@ public class Report {
       }
     }
 
-    dumpActiveUsers(activeUsers, teachers, skipped, users);
+    //dumpActiveUsers(activeUsers, teachers, skipped, users);
 
     JSONObject activeJSON = new JSONObject();
     builder.append(getSectionReport(-1, monthToCount, weekToCount, activeUsers, activeJSON, year));
@@ -1005,28 +1010,38 @@ public class Report {
     return users;
   }
 
-  private void dumpActiveUsers(String activeUsers, Set<Long> teachers, int skipped, Set<Long> users) {
+/*  private void dumpActiveUsers(String activeUsers, Set<Long> teachers, int skipped, Set<Long> users) {
     List<Long> longs = new ArrayList<>(users);
     Collections.sort(longs);
 //    logger.debug(activeUsers + " getEvents skipped " + skipped + " events from teachers " + teachers + "\nusers " + longs);
-  }
+  }*/
 
   private boolean isValidUser(long creatorID) {
     return creatorID != 1;
   }
 
+  /**
+   * @param calendar
+   * @param monthToCount
+   * @param monthToUserToEvents
+   * @param weekToUserToEvents
+   * @param weekToCount
+   * @param event
+   * @param creatorID
+   * @see #getEvents(StringBuilder, Set, List, String, String, JSONObject, int)
+   */
   private void statsForEvent(Calendar calendar,
                              Map<Integer, Set<Long>> monthToCount,
-                             Map<Integer, Map<Long, Set<Event>>> monthToUserToEvents,
-                             Map<Integer, Map<Long, Set<Event>>> weekToUserToEvents,
+                             Map<Integer, Map<Long, Set<SlimEvent>>> monthToUserToEvents,
+                             Map<Integer, Map<Long, Set<SlimEvent>>> weekToUserToEvents,
                              Map<Integer, Set<Long>> weekToCount,
-                             Event event, long creatorID) {
+                             SlimEvent event, long creatorID) {
     calendar.setTimeInMillis(event.getTimestamp());
 
     // months
     int month = calendar.get(Calendar.MONTH);
 
-    Map<Long, Set<Event>> userToEvents = monthToUserToEvents.get(month);
+    Map<Long, Set<SlimEvent>> userToEvents = monthToUserToEvents.get(month);
     Set<Long> users = monthToCount.get(month);
     if (users == null) {
       monthToCount.put(month, users = new HashSet<>());
@@ -1037,7 +1052,7 @@ public class Report {
       monthToUserToEvents.put(month, userToEvents = new HashMap<>());
     }
 
-    Set<Event> events = userToEvents.get(creatorID);
+    Set<SlimEvent> events = userToEvents.get(creatorID);
     if (events == null) userToEvents.put(creatorID, events = new TreeSet<>());
     events.add(event);
 
@@ -1078,21 +1093,21 @@ public class Report {
    * @param monthToCount2
    * @return in minutes
    */
-  private Map<Integer, Long> getMonthToDur(Map<Integer, Map<Long, Set<Event>>> monthToCount2) {
+  private Map<Integer, Long> getMonthToDur(Map<Integer, Map<Long, Set<SlimEvent>>> monthToCount2) {
     Map<Integer, Long> monthToDur = new TreeMap<>();
-    for (Map.Entry<Integer, Map<Long, Set<Event>>> monthToUserToEvents : monthToCount2.entrySet()) {
+    for (Map.Entry<Integer, Map<Long, Set<SlimEvent>>> monthToUserToEvents : monthToCount2.entrySet()) {
       Integer month = monthToUserToEvents.getKey();
       //logger.debug("month " + month);
 
-      Map<Long, Set<Event>> userToEvents = monthToUserToEvents.getValue();
+      Map<Long, Set<SlimEvent>> userToEvents = monthToUserToEvents.getValue();
 
-      for (Map.Entry<Long, Set<Event>> eventsForUser : userToEvents.entrySet()) {
+      for (Map.Entry<Long, Set<SlimEvent>> eventsForUser : userToEvents.entrySet()) {
 //        Long user = eventsForUser.getKey();
         long start = 0;
         long dur = 0;
         long last = 0;
         //      Event sevent = null, levent = null;
-        for (Event event : eventsForUser.getValue()) {
+        for (SlimEvent event : eventsForUser.getValue()) {
           long now = event.getTimestamp();
           if (start == 0) {
             start = now;
@@ -1123,21 +1138,21 @@ public class Report {
     return monthToDur;
   }
 
-  private Map<Integer, Long> getWeekToDur(Map<Integer, Map<Long, Set<Event>>> weekToCount) {
+  private Map<Integer, Long> getWeekToDur(Map<Integer, Map<Long, Set<SlimEvent>>> weekToCount) {
     Map<Integer, Long> weekToDur = new TreeMap<>();
-    for (Map.Entry<Integer, Map<Long, Set<Event>>> weekToUserToEvents : weekToCount.entrySet()) {
+    for (Map.Entry<Integer, Map<Long, Set<SlimEvent>>> weekToUserToEvents : weekToCount.entrySet()) {
       Integer week = weekToUserToEvents.getKey();
       //logger.debug("week " + week);
 
-      Map<Long, Set<Event>> userToEvents = weekToUserToEvents.getValue();
+      Map<Long, Set<SlimEvent>> userToEvents = weekToUserToEvents.getValue();
 
-      for (Map.Entry<Long, Set<Event>> eventsForUser : userToEvents.entrySet()) {
+      for (Map.Entry<Long, Set<SlimEvent>> eventsForUser : userToEvents.entrySet()) {
         //  Long user = eventsForUser.getKey();
         //logger.debug("\tuser " + user);
         long start = 0;
         long dur = 0;
         long last = 0;
-        for (Event event : eventsForUser.getValue()) {
+        for (SlimEvent event : eventsForUser.getValue()) {
           long now = event.getTimestamp();
           if (start == 0) {
             start = now;
