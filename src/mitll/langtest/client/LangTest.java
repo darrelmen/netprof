@@ -91,6 +91,8 @@ import java.util.logging.Logger;
  * - fix for old bug where clicking on a word or phrase did a playback with a ~50 millisecond offset
  * 1.2.7
  * - allows you to filter out Default (no gender mark) audio in mark defects, and associated fixes
+ * 1.2.8
+ * - Added About NetProF dialog that shows model info, etc. and small tweaks to audio trimming, etc.
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
