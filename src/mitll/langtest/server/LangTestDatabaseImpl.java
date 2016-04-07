@@ -824,7 +824,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
       then2 = System.currentTimeMillis();
 
-      logger.debug("getExercise : returning " + byID);
+      //logger.debug("getExercise : returning " + byID);
       ensureMP3s(byID, pathHelper.getInstallPath());
 
       if (DEBUG) {
