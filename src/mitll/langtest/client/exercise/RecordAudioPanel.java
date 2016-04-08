@@ -239,7 +239,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     public void stopRecording() {
     //  now = System.currentTimeMillis();
      // System.out.println("stopRecording " + now + " diff " + (now-then) + " millis");
-
       super.stopRecording();
       showStop();
     }
