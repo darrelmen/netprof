@@ -48,8 +48,8 @@ import java.util.logging.Logger;
 public class UserPassLogin extends UserDialog {
   private final Logger logger = Logger.getLogger("UserPassLogin");
 
-  private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store or";
-  private static final String IPAD_LINE_2 = "Click this link to install <a href='https://np.ll.mit.edu/iOSNetProF/'>iOS NetProF" + "</a>.";
+  private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";
+  private static final String IPAD_LINE_2 = "Or click this link to install <a href='https://np.ll.mit.edu/iOSNetProF/'>iOS NetProF" + "</a>.";
   private static final String IPAD_LINE_3 = "Otherwise, you will not be able to record yourself practicing vocabulary.";
 
   private static final String WAIT_FOR_APPROVAL = "Wait for approval";
@@ -177,9 +177,12 @@ public class UserPassLogin extends UserDialog {
     modal.show();
   }
 
+  /**
+   * Don't redirect them to download site just yet.
+   */
   private void showSuggestApp() {
     List<String> messages = Arrays.asList(IPAD_LINE_1,
-        IPAD_LINE_2,
+       // IPAD_LINE_2,
         IPAD_LINE_3);
     Modal modal = new ModalInfoDialog().getModal(
         "Install App?",
