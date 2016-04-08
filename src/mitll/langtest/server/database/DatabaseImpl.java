@@ -346,7 +346,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public SectionHelper<CommonExercise> getSectionHelper() {
     if (serverProps.isAMAS()) {
-      //return fileExerciseDAO.getSectionHelper();
       return new SectionHelper<>();
     }
 
@@ -1336,13 +1335,17 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
+   * Expensive ?
    * @see ScoreServlet#getJSONExport
    */
   public void attachAllAudio() {
     AudioDAO audioDAO = getAudioDAO();
 
     Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
-    for (CommonExercise exercise : getExercises()) {
+
+    long then = System.currentTimeMillis();
+    Collection<CommonExercise> exercises = getExercises();
+    for (CommonExercise exercise : exercises) {
       List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
       if (audioAttributes != null) {
         audioDAO.attachAudio(exercise, installPath, configDir, audioAttributes);
@@ -1350,6 +1353,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       //if (!debug) ensureMP3s(exercise);
       // exercises.add(getJsonForExercise(exercise));
     }
+    long now = System.currentTimeMillis();
+    logger.info(getLanguage() + " took " + (now-then) + " millis to attachAllAudio to " + exercises.size()+ " exercises");
   }
 
   public String getUserListName(long listid) {
@@ -1363,7 +1368,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
   }
 
-  //  public <T extends CommonExercise> UserList<T> getUserListByID(long listid) {
   public UserList<CommonShell> getUserListByID(long listid) {
     return getUserListManager().getUserListByID(listid, getSectionHelper().getTypeOrder());
   }
