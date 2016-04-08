@@ -329,7 +329,7 @@ public class Report {
     JSONArray browserVerArray = new JSONArray();
 
     document.append(getWrapper("os", getCountTable("os", "count", familyArray, "os", getSorted(familyToCount))));
-    document.append(getWrapper("host", getCountTable("osversion", "count", hostArray, "host", getSorted(hostToCount))));
+    document.append(getWrapper("osversion", getCountTable("osversion", "count", hostArray, "osversion", getSorted(hostToCount))));
     document.append(getWrapper("browser", getCountTable("browser", "count", browserArray, "browser", getSorted(browserToCount))));
     document.append(getWrapper("browserVersion", getCountTable("browserVersion", "count", browserVerArray, "browserVersion", getSorted(browserVerToCount))));
 
