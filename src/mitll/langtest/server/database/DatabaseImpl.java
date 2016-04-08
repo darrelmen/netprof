@@ -1407,11 +1407,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param pathHelper
    * @param prefix
    */
-  public void doReport(PathHelper pathHelper, String prefix, int year) {
+  public JSONObject doReport(PathHelper pathHelper, String prefix, int year) {
     try {
-      getReport(prefix).writeReportToFile(pathHelper, serverProps.getLanguage(), year);
+      return getReport(prefix).writeReportToFile(pathHelper, serverProps.getLanguage(), year);
     } catch (IOException e) {
       logger.error("got " + e);
+      return null;
     }
   }
 
