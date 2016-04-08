@@ -933,16 +933,6 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
     return phoneToCount;
   }
 
-/*  public static class ScoreAndAnswer {
-    public final PretestScore score;
-    public final AudioAnswer answer;
-
-    public ScoreAndAnswer(PretestScore score, AudioAnswer answer) {
-      this.score = score;
-      this.answer = answer;
-    }
-  }*/
-
   /**
    * @return
    * @see #getASRScoreForAudio(int, String, String, Collection, int, int, boolean, boolean, boolean, String, Result, boolean, boolean)
