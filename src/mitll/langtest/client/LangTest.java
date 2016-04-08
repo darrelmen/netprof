@@ -97,7 +97,7 @@ import java.util.logging.Logger;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.2.7";
+  public static final String VERSION_INFO = "1.2.8";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
