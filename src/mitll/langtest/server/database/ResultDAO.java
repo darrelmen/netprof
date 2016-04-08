@@ -9,12 +9,13 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.UserPerformance;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
@@ -60,9 +61,9 @@ public class ResultDAO extends DAO {
   public static final String DEVICE = "device"; // device id, or browser type
   public static final String PROCESS_DUR = "processDur";
   public static final String ROUND_TRIP_DUR = "roundTripDur";
- // public static final int FIVE_MINUTES = 5 * 60 * 1000;
+  // public static final int FIVE_MINUTES = 5 * 60 * 1000;
   public static final int HOUR = 60 * 60 * 1000;
- // public static final int DAY = 24 * HOUR;
+  // public static final int DAY = 24 * HOUR;
   public static final String DEVICETYPE = "devicetype";
   public static final String VALIDITY = "validity";
   public static final String SNR = "SNR";
@@ -96,7 +97,7 @@ public class ResultDAO extends DAO {
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
   public UserPerformance getPerformanceForUser(long id, PhoneDAO phoneDAO, int minRecordings, Map<String, String> exToRef) {
-    return new Analysis(database, phoneDAO,exToRef).getPerformanceForUser(id, minRecordings);
+    return new Analysis(database, phoneDAO, exToRef).getPerformanceForUser(id, minRecordings);
   }
 
   /**
@@ -161,8 +162,9 @@ public class ResultDAO extends DAO {
 
   /**
    * So when updating old data that is missing word and phone alignment information, we have to put it back.
-   * @see mitll.langtest.server.decoder.RefResultDecoder#doMissingInfo
+   *
    * @return to re-process
+   * @see mitll.langtest.server.decoder.RefResultDecoder#doMissingInfo
    */
   public List<Result> getResultsToDecode() {
     try {
@@ -172,7 +174,7 @@ public class ResultDAO extends DAO {
           SCORE_JSON +
           " = '{}' " +
           "OR " + SCORE_JSON + " = '{\"words\":[]}')";
-    //  scoreJsonClause = "";
+      //  scoreJsonClause = "";
 
       String sql = "SELECT" +
           " * " +
@@ -180,13 +182,13 @@ public class ResultDAO extends DAO {
           RESULTS +
           " where " +
           PRON_SCORE +
-          ">=0" + " AND " +AUDIO_TYPE +" != 'regular' "+
-          " AND " +AUDIO_TYPE +" != 'slow' "+
-          " AND " +VALID + "=true " +
-          " AND " +DURATION + ">0.7 " +
+          ">=0" + " AND " + AUDIO_TYPE + " != 'regular' " +
+          " AND " + AUDIO_TYPE + " != 'slow' " +
+          " AND " + VALID + "=true " +
+          " AND " + DURATION + ">0.7 " +
           scoreJsonClause;
 
-      logger.info("sql\n" +sql);
+      logger.info("sql\n" + sql);
       return getResultsSQL(sql);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -560,9 +562,8 @@ public class ResultDAO extends DAO {
    * @return
    * @see #attachScoreHistory
    */
-  private List<CorrectAndScore> getCorrectAndScores(long userID, CommonExercise firstExercise, boolean isFlashcardRequest) {
-    String id = firstExercise.getID();
-    return getResultsForExIDInForUser(userID, isFlashcardRequest, id);
+  private List<CorrectAndScore> getCorrectAndScores(long userID, HasID firstExercise, boolean isFlashcardRequest) {
+    return getResultsForExIDInForUser(userID, isFlashcardRequest, firstExercise.getID());
   }
 
   /**
@@ -704,8 +705,14 @@ public class ResultDAO extends DAO {
       PreparedStatement statement = connection.prepareStatement(sql);
       statement.setLong(1, userid);
 
+      long then = System.currentTimeMillis();
       List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement);
+      long now = System.currentTimeMillis();
 
+      if (now - then > 200) {
+        logger.warn("getResultsForExIDInForUser " + getLanguage() + " took " + (now - then) + " millis : " +
+            " query for " + ids.size() + " and userid " + userid + " returned " + scores.size() + " scores");
+      }
       if (debug) {
         logger.debug("getResultsForExIDInForUser for  " + sql + " got\n\t" + scores.size());
       }
@@ -890,7 +897,7 @@ public class ResultDAO extends DAO {
           trimPathForWebPage2(answer), // answer
           valid, // valid
           timestamp.getTime(),
-          type, dur, correct, pronScore, device, rs.getBoolean(WITH_FLASH), processDur, roundTripDur,validity,snr);
+          type, dur, correct, pronScore, device, rs.getBoolean(WITH_FLASH), processDur, roundTripDur, validity, snr);
       results.add(result);
     }
     finish(connection, statement, rs);
