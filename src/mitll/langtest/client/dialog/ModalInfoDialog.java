@@ -14,6 +14,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.Widget;
 
 import java.util.Collection;
@@ -43,27 +44,27 @@ public class ModalInfoDialog {
   }
 
   public ModalInfoDialog(String title, Widget widget) {
-    this(title, MESSAGES, Collections.emptyList(), widget, null);
+    this(title, MESSAGES, Collections.emptyList(), widget, null, false);
   }
 
   public ModalInfoDialog(String title, String message, HiddenHandler handler) {
-    this(title, Collections.singleton(message), Collections.emptyList(), null, handler);
+    this(title, Collections.singleton(message), Collections.emptyList(), null, handler, false);
   }
 
-  public ModalInfoDialog(String title, Collection<String> messages, Collection<String> values, Widget widget, HiddenHandler handler) {
-    Modal modal = getModal(title, messages, values, widget, handler);
+  public ModalInfoDialog(String title, Collection<String> messages, Collection<String> values, Widget widget, HiddenHandler handler, boolean bigger) {
+    Modal modal = getModal(title, messages, values, widget, handler, bigger);
     modal.show();
   }
 
-  public Modal getModal(String title, String message, Widget widget, HiddenHandler handler) {
-    return getModal(title, Collections.singleton(message), Collections.emptyList(), widget, handler);
+  public Modal getModal(String title, String message, Widget widget, HiddenHandler handler, boolean bigger) {
+    return getModal(title, Collections.singleton(message), Collections.emptyList(), widget, handler, bigger);
   }
 
-  private Modal getModal(String title, Collection<String> messages, Collection<String> values, Widget widget, HiddenHandler handler) {
+  public Modal getModal(String title, Collection<String> messages, Collection<String> values, Widget widget, HiddenHandler handler, boolean bigger) {
     final Modal modal = new Modal(true);
     modal.setTitle(title);
 
-    addContent(messages, values, modal);
+    addContent(messages, values, modal, bigger);
 
     if (widget != null) modal.add(widget);
 
@@ -84,10 +85,13 @@ public class ModalInfoDialog {
     return modal;
   }
 
-  protected FlexTable addContent(Collection<String> messages, Collection<String> values, Modal modal) {
+  protected FlexTable addContent(Collection<String> messages, Collection<String> values, Modal modal, boolean bigger) {
     FlexTable flexTable = new FlexTable();
 
     int r = 0;
+
+    HTMLTable.RowFormatter rf = flexTable.getRowFormatter();
+
 
     Iterator<String> iterator = values.iterator();
     for (String m : messages) {
@@ -95,6 +99,9 @@ public class ModalInfoDialog {
 
       if (iterator.hasNext()) {
         flexTable.setHTML(r, 1, "&nbsp;" + "<b>" + iterator.next() + "</b>");
+      }
+      if (bigger) {
+        rf.addStyleName(r, "Instruction-title");
       }
       r++;
     }
