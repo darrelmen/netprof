@@ -26,6 +26,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
@@ -36,6 +37,9 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -43,6 +47,10 @@ import java.util.logging.Logger;
  */
 public class UserPassLogin extends UserDialog {
   private final Logger logger = Logger.getLogger("UserPassLogin");
+
+  private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store or";
+  private static final String IPAD_LINE_2 = "Click this link to install <a href='https://np.ll.mit.edu/iOSNetProF/'>iOS NetProF" + "</a>.";
+  private static final String IPAD_LINE_3 = "Otherwise, you will not be able to record yourself practicing vocabulary.";
 
   private static final String WAIT_FOR_APPROVAL = "Wait for approval";
   private static final String YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL = "You will get an approval message by email.";
@@ -116,7 +124,12 @@ public class UserPassLogin extends UserDialog {
     super(service, props);
     keyStorage = new KeyStorage(props.getLanguage(), 1000000);
 
-    checkWelcome();
+    boolean willShow = checkWelcome();
+    if (!willShow) {
+      if (BrowserCheck.isIPad()) {
+        showSuggestApp();
+      }
+    }
 
     this.userManager = userManager;
     this.eventRegistration = eventRegistration;
@@ -136,11 +149,12 @@ public class UserPassLogin extends UserDialog {
     };
   }
 
-  private void checkWelcome() {
+  private boolean checkWelcome() {
     if (!hasShownWelcome() && props.shouldShowWelcome()) {
       keyStorage.storeValue(SHOWN_HELLO, "yes");
       showWelcome();
-    }
+      return true;
+    } else return false;
   }
 
   private boolean hasShownWelcome() {
@@ -149,13 +163,35 @@ public class UserPassLogin extends UserDialog {
 
   private void showWelcome() {
     Modal modal = new ModalInfoDialog().getModal(props.getWelcomeMessage(),
-        //"<h4>" + CLASSROOM + " has been updated.</h4>" +
         getLoginInfo(), null, new HiddenHandler() {
+          @Override
+          public void onHidden(HiddenEvent hiddenEvent) {
+            if (BrowserCheck.isIPad()) {
+              showSuggestApp();
+            } else {
+              setFocusOnUserID();
+            }
+          }
+        }, false);
+    modal.setMaxHeigth((600) + "px");
+    modal.show();
+  }
+
+  private void showSuggestApp() {
+    List<String> messages = Arrays.asList(IPAD_LINE_1,
+        IPAD_LINE_2,
+        IPAD_LINE_3);
+    Modal modal = new ModalInfoDialog().getModal(
+        "Install App?",
+        messages,
+        Collections.emptySet(),
+        null, new HiddenHandler() {
           @Override
           public void onHidden(HiddenEvent hiddenEvent) {
             setFocusOnUserID();
           }
-        });
+        },
+        true);
     modal.setMaxHeigth((600) + "px");
     modal.show();
   }
@@ -351,7 +387,7 @@ public class UserPassLogin extends UserDialog {
         if (!user.getText().isEmpty()) {
           eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "left username field '" + user.getText() + "'");
 
-      //    logger.info("checking makeSignInUserName " + user.getText());
+          //    logger.info("checking makeSignInUserName " + user.getText());
           service.userExists(user.getText(), "", new AsyncCallback<User>() {
             @Override
             public void onFailure(Throwable caught) {
