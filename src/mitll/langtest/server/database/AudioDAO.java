@@ -135,7 +135,8 @@ public class AudioDAO extends DAO {
       //  }
     }
     long now = System.currentTimeMillis();
-    logger.info("getExToAudio took " + (now - then) + " millis to get  " + audioAttributes1.size() + " audio entries");
+    logger.info("getExToAudio (" +database.getLanguage()+
+        ") took " + (now - then) + " millis to get  " + audioAttributes1.size() + " audio entries");
 //    logger.debug("map size is " + exToAudio.size());
     return exToAudio;
   }
