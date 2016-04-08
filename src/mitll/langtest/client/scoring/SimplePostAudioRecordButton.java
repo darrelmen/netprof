@@ -202,9 +202,11 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
 
   public abstract void useResult(AudioAnswer result);
 
+/*
   public boolean hasValidAudio() {
     return validAudio;
   }
+*/
 
   public HorizontalPanel getSentColors(String sentToColor){
 	  HorizontalPanel colorfulSent = new HorizontalPanel();
