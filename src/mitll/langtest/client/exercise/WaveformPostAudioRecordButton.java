@@ -87,11 +87,8 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     if (parentPanel instanceof BusyPanel) {
       ((BusyPanel) parentPanel).setBusy(false);
     }
-    long now = System.currentTimeMillis();
+    controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "stopRecording, duration " + (System.currentTimeMillis() - then) + " millis");
 
-    controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "stopRecording, duration " + (now - then) + " millis");
-
-  //  recordAudioPanel.getWaveform().setVisible(true);
     recordAudioPanel.getWaveform().setUrl(LangTest.LANGTEST_IMAGES + "animated_progress.gif");
 
     super.stopRecording();
