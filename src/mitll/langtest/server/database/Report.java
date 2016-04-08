@@ -12,10 +12,11 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.instrumentation.SlimEvent;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import net.sf.uadetector.*;
+import net.sf.uadetector.service.UADetectorServiceFactory;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedWriter;
@@ -79,8 +80,8 @@ public class Report {
       "WagnerSandy",
       "rbtrbt"));
 
-  public Report(UserDAO userDAO, ResultDAO resultDAO, EventDAO eventDAO, AudioDAO audioDAO, String language,
-                String prefix) {
+  Report(UserDAO userDAO, ResultDAO resultDAO, EventDAO eventDAO, AudioDAO audioDAO, String language,
+         String prefix) {
     this.userDAO = userDAO;
     this.resultDAO = resultDAO;
     this.eventDAO = eventDAO;
@@ -97,8 +98,8 @@ public class Report {
    *
    * @see mitll.langtest.server.database.DatabaseImpl#doReport
    */
-  public void doReport(ServerProperties serverProps, String site, MailSupport mailSupport,
-                       PathHelper pathHelper) {
+  void doReport(ServerProperties serverProps, String site, MailSupport mailSupport,
+                PathHelper pathHelper) {
     List<String> reportEmails = serverProps.getReportEmails();
 
     // check if it's a monday
@@ -143,7 +144,6 @@ public class Report {
     JSONObject jsonObject = new JSONObject();
     writeReportToFile(file, pathHelper, language, jsonObject, year);
     logger.debug("wrote to " + file.getAbsolutePath());
-
     //logger.debug("\n" + jsonObject.toString());
 
     return jsonObject;
@@ -227,6 +227,7 @@ public class Report {
     Set<Long> users = getUsers(builder, allUsers, year);
     jsonObject.put(ALL_USERS, allUsers);
 
+
     // ipad users
     JSONObject iPadUsers = new JSONObject();
     getUsers(builder, userDAO.getUsersDevices(), NEW_I_PAD_I_PHONE_USERS, iPadUsers, year);
@@ -268,8 +269,97 @@ public class Report {
     addRefAudio(builder, calendar, january1st, january1stNextYear, audioDAO.getAudioAttributes(), referenceRecordings, year);
     jsonObject.put("referenceRecordings", referenceRecordings);
 
+    JSONObject browserReport = new JSONObject();
+    getBrowserReport(getValidUsers(fixUserStarts()), year, browserReport, builder);
+    jsonObject.put("browsers", browserReport);
+
     builder.append("</body></head></html>");
     return builder.toString();
+  }
+
+
+  private void getBrowserReport(List<User> fusers, int year, JSONObject section, StringBuilder document) {
+    List<User> usersByYear = filterUsersByYear(fusers, year);
+
+    UserAgentStringParser parser = UADetectorServiceFactory.getResourceModuleParser();
+
+    Map<String, Integer> osToCount = new HashMap<>();
+    Map<String, Integer> hostToCount = new HashMap<>();
+    Map<String, Integer> familyToCount = new HashMap<>();
+    Map<String, Integer> browserToCount = new HashMap<>();
+    Map<String, Integer> browserVerToCount = new HashMap<>();
+    for (User f : usersByYear) {
+      if (f.getIpaddr() != null) {
+        ReadableUserAgent agent = parser.parse(f.getIpaddr());
+        //logger.info("Got " + agent);
+        ReadableDeviceCategory.Category category = agent.getDeviceCategory().getCategory();
+        String host;
+        if (category == ReadableDeviceCategory.Category.UNKNOWN) {
+          host = "iOS NetProF";
+          incr(osToCount, host);
+          incr(hostToCount, host);
+          incr(familyToCount, host);
+        } else {
+          String suffix = f.getIpaddr().contains("iPad") ? "iPad" : f.getIpaddr().contains("iPhone") ? "iPhone" : "";
+          VersionNumber versionNumber = agent.getOperatingSystem().getVersionNumber();
+          incr(familyToCount, agent.getOperatingSystem().getFamily().getName());
+          host = suffix + " " + agent.getOperatingSystem().getName();
+
+          String version = versionNumber.getMajor() + "." + versionNumber.getMinor();// + (versionNumber.getBugfix().isEmpty() ? "" : "." + versionNumber.getBugfix());
+
+          String hostVersion = (agent.getOperatingSystem().getFamily() == OperatingSystemFamily.WINDOWS) ? host : host + " " + version;
+          incr(osToCount, hostVersion);
+          incr(hostToCount, host);
+
+//            logger.info("\tGot family   " + agent.getFamily().getName());
+          //          logger.info("\tGot major version   " + agent.getVersionNumber().getMajor());
+          String browser = agent.getFamily().getName() + " " + agent.getVersionNumber().getMajor();
+       //   logger.info("\tGot browser   " + browser);
+          incr(browserVerToCount, browser);
+          incr(browserToCount, agent.getFamily().getName());
+
+        }
+      }
+      // logger.info("osToCount " + osToCount);
+
+    }
+    JSONArray hostArray = new JSONArray();
+    JSONArray familyArray = new JSONArray();
+    JSONArray browserArray = new JSONArray();
+    JSONArray browserVerArray = new JSONArray();
+
+    document.append(getWrapper("os", getCountTable("os", "count", familyArray, "os", getSorted(familyToCount))));
+    document.append(getWrapper("host", getCountTable("osversion", "count", hostArray, "host", getSorted(hostToCount))));
+    document.append(getWrapper("browser", getCountTable("browser", "count", browserArray, "browser", getSorted(browserToCount))));
+    document.append(getWrapper("browserVersion", getCountTable("browserVersion", "count", browserVerArray, "browserVersion", getSorted(browserVerToCount))));
+
+    section.put("OperatingSystem", familyArray);
+    section.put("OperatingSystemVersion", hostArray);
+    section.put("Browser", browserArray);
+    section.put("BrowserVersion", browserVerArray);
+  }
+
+  private List<User> filterUsersByYear(List<User> fusers, int year) {
+    Calendar calendar = getCalendarForYear(year);
+    YearTimeRange yearTimeRange = new YearTimeRange(year, calendar).invoke();
+    List<User> forYear = new ArrayList<>();
+    for (User t : fusers) if (yearTimeRange.inYear(t.getTimestampMillis())) forYear.add(t);
+    return forYear;
+  }
+
+  private Map<String,Integer> getSorted(Map<String, Integer> osToCount) {
+    List<String> sorted = new ArrayList<>(osToCount.keySet());
+    Collections.sort(sorted);
+    Map<String,Integer> ret = new TreeMap<>();
+    for (String key : sorted) {
+    //  logger.info(key + " : " + osToCount.get(key));
+      ret.put(key,osToCount.get(key));
+    }
+    return ret;
+  }
+
+  private void incr(Map<String, Integer> osToCount, String host) {
+    osToCount.put(host, osToCount.getOrDefault(host, 0) + 1);
   }
 
   private void openCSVWriter(PathHelper pathHelper, String language) {
@@ -318,6 +408,12 @@ public class Report {
     return getUsers(builder, fixUserStarts(), ALL_NEW_USERS, jsonObject, year);
   }
 
+  /**
+   * setUserStart must be called first
+   *
+   * @return
+   * @see #setUserStart(Collection)
+   */
   private List<User> fixUserStarts() {
     List<User> users = userDAO.getUsers();
     for (User user : users) {
@@ -328,6 +424,12 @@ public class Report {
       //  }
     }
     return users;
+  }
+
+  private List<User> getValidUsers(List<User> all) {
+    List<User> valid = new ArrayList<>();
+    for (User u : all) if (!shouldSkipUser(u)) valid.add(u);
+    return valid;
   }
 
   /**
@@ -365,9 +467,7 @@ public class Report {
       }
       if (contains) isStudent = false;
 
-      if (user.getId() == 3 || user.getId() == 1 ||
-          lincoln.contains(user.getUserID()) || user.getUserID().startsWith("gvidaver")
-          ) {
+      if (shouldSkipUser(user)) {
         if (SHOW_TEACHER_SKIPS) logger.warn("skipping ? " + user);
         continue;
       }
@@ -398,6 +498,11 @@ public class Report {
 
 //    logger.info("Students " + students);
     return students;
+  }
+
+  private boolean shouldSkipUser(User user) {
+    return user.getId() == 3 || user.getId() == 1 ||
+        lincoln.contains(user.getUserID()) || user.getUserID().startsWith("gvidaver");
   }
 
 /*  private static class YearStats {
@@ -438,7 +543,8 @@ public class Report {
    */
   private String getSectionReport(int ytd,
                                   Map<Integer, ?> monthToCount,
-                                  Map<Integer, ?> weekToCount, String users1,
+                                  Map<Integer, ?> weekToCount,
+                                  String users1,
                                   JSONObject jsonObject, int year) {
     JSONObject yearJSON = new JSONObject();
     JSONArray monthArray = new JSONArray();
@@ -456,6 +562,7 @@ public class Report {
 
     return getYearMonthWeekTable(users1, yearCol, monthCol, weekCol);
   }
+
 
   private void writeMonthToCSV(Map<Integer, ?> monthToCount, String users1, String language, int year) {
     StringBuilder builder = new StringBuilder();
@@ -493,6 +600,12 @@ public class Report {
         "</tr></table>";
   }
 
+  private String getWrapper(String users1, String content) {
+    return "<h2>" + users1 + "</h2>" +
+        content;
+  }
+
+
 /*  private String getYTD(int ytd, String users1, JSONObject jsonObject) {
     String ytd1 = getYTD(ytd, users1, jsonObject, getYear());
     return ytd1;
@@ -523,21 +636,37 @@ public class Report {
    * @param jsonArray
    * @return html for month
    */
-  private String getMonthToCount(Map<Integer, ?> monthToCount, String unit, String count, String tableLabel,
-                                 JSONArray jsonArray, int year) {
+  private String getMonthToCount(Map<Integer, ?> monthToCount,
+                                 String unit,
+                                 String count,
+                                 String tableLabel,
+                                 JSONArray jsonArray,
+                                 int year) {
     writeMonthToCSV(monthToCount, tableLabel.isEmpty() ? count : tableLabel, language, year);
+    return getCountTable(monthToCount, unit, count, jsonArray, "month");
+  }
 
-    String s = "";
+  private String getCountTable(Map<Integer, ?> monthToCount, String unit, String count, JSONArray jsonArray, String label) {
+    TreeMap<String, Object> monthToValue = new TreeMap<>();
+
     for (Map.Entry<Integer, ?> pair : monthToCount.entrySet()) {
+      monthToValue.put(getMonth(pair.getKey()), pair.getValue());
+    }
+
+    return getCountTable(unit, count, jsonArray, label, monthToValue);
+  }
+
+  private String getCountTable(String unit, String count, JSONArray jsonArray, String label, Map<String, ?> monthToValue) {
+    String s = "";
+    for (Map.Entry<String, ?> pair : monthToValue.entrySet()) {
       Object value = pair.getValue();
       if (value instanceof Collection<?>) {
         value = ((Collection<?>) value).size();
       }
-      Integer key = pair.getKey();
-      String month = getMonth(key);
+      String month = pair.getKey();
 
       JSONObject jsonObject = new JSONObject();
-      jsonObject.put("month", key);
+      jsonObject.put(label, month);
       jsonObject.put("count", value);
       //   jsonObject.put("unit", unit);
       jsonArray.add(jsonObject);
@@ -546,9 +675,7 @@ public class Report {
     }
     return "<table style='background-color: #eaf5fb' >" +
         "<tr>" +
-        "<th>" +
-        unit +
-        "</th>" +
+        "<th>" + unit + "</th>" +
         "<th>" + count + "</th>" +
         "</tr>" +
         s +
@@ -622,7 +749,6 @@ public class Report {
   }
 
   private void getResultsForSet(StringBuilder builder, Set<Long> students,
-                                //PathHelper pathHelper,
                                 Collection<Result> results,
                                 String recordings,// String language,
                                 JSONObject jsonObject, int year) {
@@ -788,9 +914,7 @@ public class Report {
         calendar.get(Calendar.MONTH) + "," +
         calendar.get(Calendar.DAY_OF_MONTH);
     Integer countAtDay = dayToCount.get(key);
-    dayToCount.put(
-        key
-        , countAtDay == null ? 1 : countAtDay + 1);
+    dayToCount.put(key, countAtDay == null ? 1 : countAtDay + 1);
     weekToCount.put(w, (integer2 == null) ? 1 : integer2 + 1);
   }
 
@@ -900,10 +1024,6 @@ public class Report {
    * Look at the event table to determine the first moment a user did anything
    * There was a bug where the user timestamp was not set properly.
    */
-/*  private void setUserStart() {
-    List<SlimEvent> all = eventDAO.getAllSlim();
-    setUserToStart(all);
-  }*/
   private void setUserStart(Collection<SlimEvent> all) {
     for (SlimEvent event : all) {
       long creatorID = event.getCreatorID();
@@ -942,21 +1062,14 @@ public class Report {
     int skipped = 0;
 
     Calendar calendar = getCalendarForYear(year);
-    Date january1st = getJanuaryFirst(calendar, year);
-    Date january1stNextYear = getNextYear(year);
-    if (DEBUG) logger.info("getEvents from " + january1st + " to " + january1stNextYear);
-    long time = january1st.getTime();
-    long time1 = january1stNextYear.getTime();
-
-//    logger.info("students " + students);
+    YearTimeRange yearTimeRange = new YearTimeRange(year, calendar).invoke();
 
     Set<Long> users = new HashSet<>();
 
     for (SlimEvent event : all) {
       long creatorID = event.getCreatorID();
       long timestamp = event.getTimestamp();
-      if (timestamp > time && timestamp < time1 &&
-          students.contains(creatorID)) {
+      if (yearTimeRange.inYear(timestamp) && students.contains(creatorID)) {
         if (isValidUser(creatorID)) {
           users.add(creatorID);
           statsForEvent(calendar, monthToCount, monthToCount2, weekToCount2, weekToCount, event, creatorID);
@@ -1194,5 +1307,38 @@ public class Report {
         "NOVEMBER",
         "DECEMBER",
         "UNDECEMBER").get(i);
+  }
+
+  private class YearTimeRange {
+    private int year;
+    private Calendar calendar;
+    private long time;
+    private long time1;
+
+    public YearTimeRange(int year, Calendar calendar) {
+      this.year = year;
+      this.calendar = calendar;
+    }
+
+    public long getStart() {
+      return time;
+    }
+
+    public long getEnd() {
+      return time1;
+    }
+
+    public boolean inYear(long test) {
+      return test > time && test <= time1;
+    }
+
+    public YearTimeRange invoke() {
+      Date january1st = getJanuaryFirst(calendar, year);
+      Date january1stNextYear = getNextYear(year);
+      if (DEBUG) logger.info("getEvents from " + january1st + " to " + january1stNextYear);
+      time = january1st.getTime();
+      time1 = january1stNextYear.getTime();
+      return this;
+    }
   }
 }
