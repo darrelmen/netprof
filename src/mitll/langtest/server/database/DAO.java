@@ -48,6 +48,7 @@ public class DAO {
     return numColumns;
   }
 
+  protected String getLanguage() { return database.getLanguage(); }
   /**
    * @param table
    * @return column names, all lower case
