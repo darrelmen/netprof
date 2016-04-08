@@ -469,7 +469,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
                   initialUI.setSplash();
                   isMicConnected = false;
                 }
-              });
+              }, false);
         }
       }
 
