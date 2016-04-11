@@ -23,6 +23,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -111,22 +113,27 @@ public class Report {
     }
   }
 
+  /**
+   * @see #doReport(ServerProperties, String, MailSupport, PathHelper)
+   * @param language
+   * @param site
+   * @param mailSupport
+   * @param pathHelper
+   * @param reportEmails who to send to
+   * @param year which year you want data for
+   */
   private void writeAndSendReport(String language, String site, MailSupport mailSupport,
                                   PathHelper pathHelper, List<String> reportEmails, int year) {
     SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
     String today = simpleDateFormat2.format(new Date());
     File file = getReportFile(pathHelper, today, language);
-    //logger.debug("checking file " + file.getAbsolutePath());
     if (file.exists()) {
-      logger.debug("already did report for " + today + " : " + file.getAbsolutePath());
+      logger.debug("writeAndSendReport already did report for " + today + " : " + file.getAbsolutePath());
     } else {
-      logger.debug("Site real path " + site);
+      logger.debug("writeAndSendReport Site real path " + site);
       try {
-        JSONObject jsonObject = new JSONObject();
-
-        String message = writeReportToFile(file, pathHelper, language, jsonObject, year);
+        String message = writeReportToFile(file, pathHelper, language, new JSONObject(), year);
         sendEmails(language, site, mailSupport, reportEmails, message);
-
       } catch (IOException e) {
         logger.error("got " + e, e);
       }
@@ -139,13 +146,12 @@ public class Report {
    * @throws IOException
    * @see DatabaseImpl#doReport
    */
-  public JSONObject writeReportToFile(PathHelper pathHelper, String language, int year) throws IOException {
+  JSONObject writeReportToFile(PathHelper pathHelper, String language, int year) throws IOException {
     File file = getReportPath(pathHelper, language);
     JSONObject jsonObject = new JSONObject();
     writeReportToFile(file, pathHelper, language, jsonObject, year);
     logger.debug("wrote to " + file.getAbsolutePath());
     //logger.debug("\n" + jsonObject.toString());
-
     return jsonObject;
   }
 
@@ -155,11 +161,19 @@ public class Report {
     return getReportFile(pathHelper, today, language);
   }
 
+  /**
+   * Label report with hostname.
+   * @param language
+   * @param site
+   * @param mailSupport
+   * @param reportEmails
+   * @param message
+   */
   private void sendEmails(String language, String site, MailSupport mailSupport, List<String> reportEmails, String message) {
     String suffix = "";
     if (site != null && site.contains("npfClassroom")) {
       site = site.substring(site.indexOf("npfClassroom"));
-      suffix = " at " + site;
+      suffix = " at " + site + getHostInfo();
     }
 
     String subject = "Weekly Usage Report for " + language + suffix;
@@ -214,19 +228,20 @@ public class Report {
    * @return
    * @see DatabaseImpl#getReport(int, JSONObject)
    */
-  public String getReport(JSONObject jsonObject, int year) {
+  String getReport(JSONObject jsonObject, int year) {
     //  logger.info("doing year " + year);
     List<SlimEvent> allSlim = eventDAO.getAllSlim();
     setUserStart(allSlim);
 
     StringBuilder builder = new StringBuilder();
-    builder.append("<html><head><body>");
+    builder.append("<html><head>" +
+        "<title>Report for " + language + " on " +getHostInfo()+"</title>" +
+        "<body>");
 
     // all users
     JSONObject allUsers = new JSONObject();
     Set<Long> users = getUsers(builder, allUsers, year);
     jsonObject.put(ALL_USERS, allUsers);
-
 
     // ipad users
     JSONObject iPadUsers = new JSONObject();
@@ -405,7 +420,17 @@ public class Report {
    * @see #doReport
    */
   private Set<Long> getUsers(StringBuilder builder, JSONObject jsonObject, int year) {
-    return getUsers(builder, fixUserStarts(), ALL_NEW_USERS, jsonObject, year);
+    return getUsers(builder, fixUserStarts(), ALL_NEW_USERS + getHostInfo(), jsonObject, year);
+  }
+
+  private String getHostInfo() {
+    String suffix = "";
+    try {
+      suffix = " on " + InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      logger.error("got " + e);
+    }
+    return suffix;
   }
 
   /**
