@@ -5,6 +5,8 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.audio.AudioCheck;
+import mitll.langtest.shared.MonitorResult;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
@@ -85,6 +87,75 @@ public class AnswerDAO extends DAO {
       database.closeConnection(connection);
     }
     return -1;
+  }
+
+  public long addResultToTable(MonitorResult info) throws SQLException {
+    Connection connection = database.getConnection(this.getClass().toString());
+
+    logger.debug("addAnswerToTable : adding answer for " + info);
+
+    PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
+        ResultDAO.RESULTS +
+        "(" +
+        "userid," +
+        "plan," +
+        Database.EXID + "," +
+        "qid," +
+        Database.TIME + "," +
+        "answer," +
+        "valid," +
+        ResultDAO.FLQ + "," +
+        ResultDAO.SPOKEN + "," +
+        ResultDAO.AUDIO_TYPE + "," +
+        ResultDAO.DURATION + "," +
+        ResultDAO.CORRECT + "," +
+        ResultDAO.PRON_SCORE + "," +
+        ResultDAO.DEVICE_TYPE + "," +
+        ResultDAO.DEVICE + "," +
+        ResultDAO.SCORE_JSON + "," +
+        ResultDAO.WITH_FLASH + "," +
+        ResultDAO.PROCESS_DUR + "," +
+        ResultDAO.ROUND_TRIP_DUR + "," +
+        ResultDAO.VALIDITY + "," +
+        ResultDAO.SNR +
+        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+
+    int i = 1;
+
+ //   boolean isAudioAnswer = info.getAnswer() == null || info.getAnswer().length() == 0;
+
+    statement.setInt(i++, (int)info.getUserid());
+    statement.setString(i++, PLAN); // obsolete
+    statement.setString(i++, copyStringChar(info.getId()));
+    statement.setInt(i++, 1);
+    statement.setTimestamp(i++, new Timestamp(info.getTimestamp()));
+    statement.setString(i++, copyStringChar(info.getAnswer()));
+    statement.setBoolean(i++, info.isValid());
+    statement.setBoolean(i++, true); // obsolete
+    statement.setBoolean(i++, true); // obsolete
+    statement.setString(i++, copyStringChar(info.getAudioType()));
+    statement.setInt(i++, (int) info.getDurationInMillis());
+
+    statement.setBoolean(i++, info.isCorrect());
+    statement.setFloat(i++, info.getPronScore());
+/*    statement.setString(i++, info.getDeviceType());
+    statement.setString(i++, info.getSimpleDevice());
+    statement.setString(i++, info.getScoreJSON());*/
+    statement.setBoolean(i++, info.isWithFlash());
+    statement.setInt(i++, info.getProcessDur());
+    statement.setInt(i++, info.getRoundTripDur()); // always zero?
+    statement.setString(i++, info.getValidity());
+    statement.setFloat(i++, info.getSnr());
+
+//    resultDAO.invalidateCachedResults();
+
+    statement.executeUpdate();
+
+    long newID = getGeneratedKey(statement);
+
+    statement.close();
+
+    return newID;
   }
 
   /**
