@@ -351,11 +351,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * <p>
    * Or if looking for example audio, find ones missing examples.
    *
+   * @param exercises to filter
+   * @return exercises missing audio, what we want to record
    * @paramx userID                   exercise not recorded by this user and matching the user's gender
    * @paramx onlyUnrecordedByMyGender do we filter by gender
    * @paramx onlyExamples             only example audio
-   * @param exercises                to filter
-   * @return exercises missing audio, what we want to record
    * @see #getExerciseIds
    * @see #getExercisesForSelectionState
    */
@@ -363,7 +363,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                                         ExerciseListRequest request,
                                                         Collection<CommonExercise> exercises) {
 
-   // boolean onlyUnrecordedByMyGender = request.isOnlyUnrecordedByMe();
+    // boolean onlyUnrecordedByMyGender = request.isOnlyUnrecordedByMe();
     boolean onlyExamples = request.isOnlyExamples();
 
     if (request.isOnlyUnrecordedByMe()) {
@@ -633,20 +633,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Send the first exercise along so we don't have to ask for it after we get the initial list
    *
-   * @paramx reqID
    * @param exercises
+   * @return
+   * @paramx reqID
    * @paramx userID
    * @paramx role
    * @paramx onlyExamples
    * @paramx isFlashcardReq
-   * @return
    * @see #getExerciseIds
    * @see #getExerciseListWrapperForPrefix
    */
-  private <T extends CommonShell> ExerciseListWrapper<T> makeExerciseListWrapper(
-
-      ExerciseListRequest request,
-      Collection<CommonExercise> exercises) {
+  private <T extends CommonShell> ExerciseListWrapper<T> makeExerciseListWrapper(ExerciseListRequest request,
+                                                                                 Collection<CommonExercise> exercises) {
     CommonExercise firstExercise = exercises.isEmpty() ? null : exercises.iterator().next();
 
     int reqID = request.getReqID();
@@ -984,11 +982,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see #writeAudioFile
    */
   private boolean ensureMP3(String wavFile, String title, String artist) {
-    String parent = pathHelper.getInstallPath();
-    return ensureMP3(wavFile, title, artist, parent);
+    return ensureMP3(wavFile, title, artist, pathHelper.getInstallPath());
   }
 
-  int spew = 0;
+//  int spew = 0;
 
   private boolean ensureMP3(String wavFile, String title, String artist, String parent) {
     if (wavFile != null) {
@@ -998,7 +995,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         // }
         parent = configDir;
       }
-      if (!audioConversion.exists(wavFile, parent) && wavFile.contains("1310")) {
+      if (!audioConversion.exists(wavFile, parent)) {// && wavFile.contains("1310")) {
         if (WARN_MISSING_FILE/* && spew++ < 10*/) {
           logger.error("ensureMP3 : can't find " + wavFile + " under " + parent + " for " + title + " " + artist);
         }
@@ -1006,9 +1003,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       String s = audioConversion.ensureWriteMP3(wavFile, parent, false, title, artist);
       boolean isMissing = s.equals(AudioConversion.FILE_MISSING);
-      if (isMissing && wavFile.contains("1310")) {
+/*      if (isMissing && wavFile.contains("1310")) {
         logger.error("ensureMP3 : can't find " + wavFile + " under " + parent + " for " + title + " " + artist);
-      }
+      }*/
       return !isMissing;
     }
     return false;
@@ -2068,8 +2065,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                     boolean recordInResults, boolean addToAudioTable,
                                     boolean allowAlternates) {
     String exercise = audioContext.getId();
-    int user = audioContext.getUserid();
-    String audioType = audioContext.getAudioType();
 
     boolean amas = serverProps.isAMAS();
     CommonShell exercise1 = amas ?
@@ -2084,7 +2079,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 //					" exercise1 " + exercise1.getForeignLanguage() + " refs " + exercise1.getRefSentences());
 //		}
 
-    // AudioContext audioContext   = new AudioContext(reqid, user, exercise, questionID, audioType);
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", "", deviceType, device, recordedWithFlash);
 
     AudioAnswer audioAnswer = amas ?
@@ -2094,29 +2088,33 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
             audioContext, recordingInfo,
             recordInResults, doFlashcard, allowAlternates, addToAudioTable);
 
+    int user = audioContext.getUserid();
     if (addToAudioTable && audioAnswer.isValid()) {
-      AudioAttribute attribute = addToAudioTable(user, audioType, exercise1, exercise, audioAnswer);
-      audioAnswer.setAudioAttribute(attribute);
-    } else {
-      // So Wade has observed that this really messes up the ASR -- silence doesn't appear as silence after you multiply
-      // the signal.  Also, the user doesn't get feedback that their mic gain is too high/too low or that they
-      // are speaking too softly or too loudly.
+      audioAnswer.setAudioAttribute(addToAudioTable(user, audioContext.getAudioType(), exercise1, exercise, audioAnswer));
+    } //else {
+    // So Wade has observed that this really messes up the ASR -- silence doesn't appear as silence after you multiply
+    // the signal.  Also, the user doesn't get feedback that their mic gain is too high/too low or that they
+    // are speaking too softly or too loudly.
 
-      // normalizeLevel(audioAnswer);
+    // normalizeLevel(audioAnswer);
+    // }
 
-      String foreignLanguage = exercise1 == null ? "unknown" : exercise1.getForeignLanguage();
-      String userID = getUserID(user);
-      if (userID == null) {
-        logger.warn("huh? no user for " + user);
-      }
-
-      ensureMP3(audioAnswer.getPath(), foreignLanguage, userID);
-    }
     if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
       logger.warn("huh? got zero length recording " + user + " " + exercise);
       logEvent("audioRecording", "writeAudioFile", exercise, "Writing audio - got zero duration!", user, "unknown", device);
+    } else {
+      ensureCompressedEquivalent(user, exercise1, audioAnswer);
     }
+
     return audioAnswer;
+  }
+
+  private void ensureCompressedEquivalent(int user, CommonShell exercise1, AudioAnswer audioAnswer) {
+    String foreignLanguage = exercise1 == null ? "unknown" : exercise1.getForeignLanguage();
+    String userID = getUserID(user);
+    if (userID == null) { logger.warn("ensureCompressedEquivalent huh? no user for " + user); }
+
+    ensureMP3(audioAnswer.getPath(), foreignLanguage, userID);
   }
 
   private String getUserID(int user) {
