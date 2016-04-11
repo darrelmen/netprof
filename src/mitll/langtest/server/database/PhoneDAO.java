@@ -116,13 +116,12 @@ public class PhoneDAO extends DAO {
     finish(database, connection, statement);
   }
 
-
   /**
    * <p>
    *
    * @param phone
    */
-  public boolean addPhone(Phone phone) {
+  boolean addPhone(Phone phone) {
     Connection connection = getConnection();
     boolean val = true;
     try {
