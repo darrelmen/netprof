@@ -399,21 +399,6 @@ public class Report {
         "</tr></table>";
   }
 
-/*
-  public int getActiveUsersYTD() {
-    StringBuilder builder = new StringBuilder();
-    builder.append("<html><head><body>");
-
-    Set<Long> users = getUsers(builder);
-    Set<Long> events = getEvents(builder, users);
-    Set<Long> eventsDevices = getEventsDevices(builder, users);
-
-    events.addAll(eventsDevices);
-
-    return events.size();
-  }
-*/
-
   /**
    * @param builder
    * @return
@@ -428,7 +413,12 @@ public class Report {
     try {
       suffix = " on " + InetAddress.getLocalHost().getHostName();
     } catch (UnknownHostException e) {
-      logger.error("got " + e);
+      logger.error("getHostInfo got " + e);
+      try {
+        suffix = " on " + e.getMessage().split(":")[1];
+      } catch (Exception e1) {
+        logger.error("got " + e1);
+      }
     }
     return suffix;
   }
