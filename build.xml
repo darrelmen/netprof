@@ -38,9 +38,6 @@
         <pathelement location="war/WEB-INF/lib/json-lib-2.4-jdk15.jar"/>
         <pathelement location="war/WEB-INF/lib/commons-codec-1.6.jar"/>
         <pathelement location="war/WEB-INF/lib/guava-19.0.jar"/>
-        <!--        <pathelement location="war/WEB-INF/lib/guava-19.0.jar"/>
-                <pathelement location="war/WEB-INF/lib/guava-gwt-19.0.jar"/>-->
-
         <pathelement location="war/WEB-INF/lib/log4j-1.2.17.jar"/>
         <path refid="imagewriter.classpath"/>
         <pathelement location="war/WEB-INF/lib/pronz.jar"/>
@@ -60,10 +57,9 @@
 
         <pathelement location="war/WEB-INF/lib/uadetector-core-0.9.22.jar"/>
         <pathelement location="war/WEB-INF/lib/uadetector-resources-2014.10.jar"/>
+        <pathelement location="war/WEB-INF/lib/slf4j-log4j12-1.7.21.jar"/>
         <pathelement location="war/WEB-INF/lib/slf4j-api-1.7.21.jar"/>
         <pathelement location="war/WEB-INF/lib/quality-check-1.3.jar"/>
-
-
     </path>
     <target name="init" depends="clean">
         <mkdir dir="war/WEB-INF/classes"/>
