@@ -40,6 +40,21 @@ public class JSONURLExerciseDAO extends JSONExerciseDAO {
 
   /**
    * TODO :  Consider reading font from project info
+   *
+   * name: "ENGLISH",
+   defaultWordSpacing: true,
+   direction: "LTR",
+   systemFontNames: "Times New Roman",
+   fontFaceURL: null,
+   bitmapped: false,
+   langCode: "eng",
+   lineHeight: 125,
+   fontSize: 14,
+   digraph: "EN",
+   script: "auto",
+   fontWeight: "Normal",
+   trigraph: "ENG"
+
    * @param serverProps
    */
   private void readProjectInfo(ServerProperties serverProps) {
@@ -59,6 +74,11 @@ public class JSONURLExerciseDAO extends JSONExerciseDAO {
     //  logger.info("got language " + npLang);
     boolean isLTR = language.get("direction").equals("LTR");
     serverProps.setRTL(!isLTR);
+
+    String systemFontNames = language.getString("systemFontNames");
+    String fontFaceURL = language.getString("fontFaceURL");
+    serverProps.setFontNames(systemFontNames);
+    serverProps.setFontFaceURL(fontFaceURL);
   }
 
   @Override
