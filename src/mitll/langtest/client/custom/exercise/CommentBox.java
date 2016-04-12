@@ -66,6 +66,8 @@ public class CommentBox extends PopupContainer {
 
     if (field.endsWith(AudioTag.COMPRESSED_TYPE)) {
       field = field.replaceAll("." + AudioTag.COMPRESSED_TYPE, ".wav");
+    } else if (field.endsWith(".mp3")) {
+      field = field.replaceAll(".mp3", ".wav");
     }
 
     final HidePopupTextBox commentEntryText = new HidePopupTextBox();
@@ -182,7 +184,6 @@ public class CommentBox extends PopupContainer {
   }
 
   /**
-   *
    * @param commentButton
    * @param clearButton
    * @param isCorrect
@@ -229,21 +230,21 @@ public class CommentBox extends PopupContainer {
   private final Map<String, String> fieldToComment = new HashMap<>();
 
   /**
-   * @see #configureCommentButton(Button, boolean, PopupPanel, String, TextBox)
    * @param commentButton
+   * @see #configureCommentButton(Button, boolean, PopupPanel, String, TextBox)
    */
   private void showQC(UIObject commentButton) {
     commentButton.addStyleName(COMMENT_BUTTON_GROUP_NEW);
-  //  commentButton.removeStyleName("blueBackground");
+    //  commentButton.removeStyleName("blueBackground");
   }
 
   /**
-   * @see #showOrHideCommentButton(UIObject, UIObject, boolean)
    * @param commentButton
+   * @see #showOrHideCommentButton(UIObject, UIObject, boolean)
    */
   private void showQCHasComment(UIObject commentButton) {
     commentButton.removeStyleName(COMMENT_BUTTON_GROUP_NEW);
-   // child.addStyleName("blueBackground");
+    // child.addStyleName("blueBackground");
   }
 
   /**

@@ -33,7 +33,6 @@ import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -158,33 +157,7 @@ public class Navigation implements RequiresResize, ShowTab {
       makeDialogWindow(service, controller);
     }
 
-    markDefectsHelper = new SimpleChapterNPFHelper<CommonShell, CommonExercise>(service, feedback, userManager, controller, learnHelper) {
-      @Override
-      protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(LangTestDatabaseAsync service,
-                                                                            UserFeedback feedback,
-                                                                            UserManager userManager,
-                                                                            ExerciseController controller,
-                                                                            SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
-        return new MyFlexListLayout<CommonShell, CommonExercise>(service, feedback, controller, outer) {
-          @Override
-          protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
-                                                                                     Panel currentExercisePanel,
-                                                                                     String instanceName, boolean incorrectFirst) {
-            return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst);
-          }
-        };
-      }
-
-      protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
-        return new ExercisePanelFactory<CommonShell, CommonExercise>(service, feedback, controller, exerciseList) {
-          @Override
-          public Panel getExercisePanel(CommonExercise e) {
-            return new QCNPFExercise<>(e, controller, exerciseList, MARK_DEFECTS1);
-          }
-        };
-      }
-    };
-
+    markDefectsHelper = new MarkDefectsChapterNPFHelper(service, feedback, userManager, controller, learnHelper);
     practiceHelper = new PracticeHelper(service, feedback, userManager, controller);
     recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller, true, learnHelper);
     recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false, learnHelper);
