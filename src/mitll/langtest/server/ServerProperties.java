@@ -73,6 +73,7 @@ public class ServerProperties {
   public static final String USE_H_2 = "useH2";
   public static final String USE_POSTGRE_SQL = "usePostgreSQL";
   public static final String TYPE_ORDER = "typeOrder";
+  public static final String FONT_FAMILY = "fontFamily";
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
 
   /**
@@ -123,7 +124,7 @@ public class ServerProperties {
   private EmailList emailList;
   private final int userInitialScores = 20;
   private boolean RTL;
-  private String fontNames;
+  private String fontFamily;
   private String fontFaceURL;
 
   /**
@@ -369,6 +370,12 @@ public class ServerProperties {
     miraClassifierURL = props.getProperty(MIRA_CLASSIFIER_URL, MIRA_DEFAULT);
 
     if (getLessonPlan().startsWith("http")) props.setProperty("talksToDomino", TRUE);
+
+    if (getFontFamily() != null) {
+      props.setProperty(FONT_FAMILY, getFontFamily());
+      logger.info(FONT_FAMILY +
+          "=" + getFontFamily() + " : " + props.getProperty(FONT_FAMILY));
+    }
   }
 
   private boolean getDefaultFalse(String param) {
@@ -584,16 +591,21 @@ public class ServerProperties {
     props.setProperty("rtl", isRTL ? "true" : "false");
   }
 
-  public void setFontNames(String fontNames) {
-    this.fontNames = fontNames;
+  public void setFontFamily(String fontNames) {
+    this.fontFamily = fontNames;
+    props.setProperty(FONT_FAMILY, fontNames);
   }
 
-  public String getFontNames() {
-    return fontNames;
+  private String getFontFamily() {
+    return fontFamily;
   }
 
   public void setFontFaceURL(String fontFaceURL) {
     this.fontFaceURL = fontFaceURL;
+  }
+
+  public String getFontFaceURL() {
+    return fontFaceURL;
   }
 
   /**
