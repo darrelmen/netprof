@@ -164,7 +164,7 @@ public class AudioDAO extends DAO {
 
     long then = System.currentTimeMillis();
     try {
-      logger.debug("updateTranscript ");
+//      logger.debug("updateTranscript ");
       Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + AUDIO + " " +
           "SET " + TRANSCRIPT + "=? " +
@@ -188,7 +188,7 @@ public class AudioDAO extends DAO {
 
     long now = System.currentTimeMillis();
 
-    if (c > 0) {
+    if (c > 0 || (now-then)>100) {
       logger.info("updateTranscript did " + c + "/" + audio.size() + " in " + (now - then) + " millis");
     }
     return c;
