@@ -51,6 +51,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
   /**
    * JUST FOR TESTING
+   *
    * @param file
    * @param serverProperties
    */
@@ -76,9 +77,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     shouldHaveRefAudio = false;
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
-    this.unitIndex    = serverProps.getUnitChapterWeek()[0];
+    this.unitIndex = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
-    this.weekIndex    = serverProps.getUnitChapterWeek()[2];
+    this.weekIndex = serverProps.getUnitChapterWeek()[2];
     if (DEBUG) logger.debug("unit " + unitIndex + " chapter " + chapterIndex + " week " + weekIndex);
   }
 
@@ -369,14 +370,14 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     return exercises;
   }
 
-  private List<String> getHeader( Row next) {
+  private List<String> getHeader(Row next) {
     List<String> columns = new ArrayList<String>();
 
-      Iterator<Cell> cellIterator = next.cellIterator();
-      while (cellIterator.hasNext()) {
-        Cell next1 = cellIterator.next();
-        columns.add(next1.toString().trim());
-      }
+    Iterator<Cell> cellIterator = next.cellIterator();
+    while (cellIterator.hasNext()) {
+      Cell next1 = cellIterator.next();
+      columns.add(next1.toString().trim());
+    }
 
     return columns;
   }
@@ -549,9 +550,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   }
 
   /**
-   * @see #readFromSheet(Sheet)
    * @param exercises
    * @param imported
+   * @see #readFromSheet(Sheet)
    */
   private void rememberExercise(Collection<CommonExercise> exercises,
                                 CommonExercise imported) {
@@ -582,7 +583,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                                      String english, String foreignLanguagePhrase, String translit, String meaning,
                                      String context, String contextTranslation,
                                      String audioIndex) {
-    Exercise imported = new Exercise(id, context,contextTranslation,meaning, audioIndex);
+    Exercise imported = new Exercise(id, context, contextTranslation, meaning, audioIndex);
 
     imported.setEnglishSentence(english);
     if (translit.length() > 0) {
