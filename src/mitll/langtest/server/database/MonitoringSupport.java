@@ -761,7 +761,7 @@ public class MonitoringSupport {
     return resultDAO.getResults();
   }
 
-   public static void main(String [] arg) {
+/*   public static void main(String [] arg) {
    //  DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\DLITest\\","farsi2");
    //  langTestDatabase.setInstallPath("C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu","C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu\\5000-no-english.unvow.farsi.txt","",false);
 
@@ -808,5 +808,5 @@ public class MonitoringSupport {
      answerToCount4.put(4,0);
      answerToCount4.put(5,0);
      monitoringSupport.getResourceCounts(answerToCount4);
-   }
+   }*/
 }

@@ -202,8 +202,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
 
+    long then = System.currentTimeMillis();
     putBackWordAndPhone();
-
+    long now = System.currentTimeMillis();
+    if (now - then > 1000) logger.info("took " + (now - then) + " millis to put back word and phone");
   }
 
   public ResultDAO getResultDAO() {
@@ -1236,6 +1238,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     if (userEx == null) {
       toRet = getExercise(id);
     } else {
+      //logger.info("got user ex for " + id);
       long updateTime = userEx.getUpdateTime();
       CommonExercise predef = getExercise(id);
 
@@ -1269,7 +1272,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return addRemoveDAO;
   }
 
-  private ExerciseDAO getExerciseDAO() {
+  public ExerciseDAO getExerciseDAO() {
     return exerciseDAO;
   }
 
@@ -1353,13 +1356,17 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
+   * Expensive ?
    * @see ScoreServlet#getJSONExport
    */
   public void attachAllAudio() {
     AudioDAO audioDAO = getAudioDAO();
 
     Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
-    for (CommonExercise exercise : getExercises()) {
+
+    long then = System.currentTimeMillis();
+    Collection<CommonExercise> exercises = getExercises();
+    for (CommonExercise exercise : exercises) {
       List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
       if (audioAttributes != null) {
         audioDAO.attachAudio(exercise, installPath, configDir, audioAttributes);
@@ -1367,6 +1374,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       //if (!debug) ensureMP3s(exercise);
       // exercises.add(getJsonForExercise(exercise));
     }
+    long now = System.currentTimeMillis();
+    logger.info(getLanguage() + " took " + (now-then) + " millis to attachAllAudio to " + exercises.size()+ " exercises");
   }
 
   public String getUserListName(long listid) {
@@ -1380,7 +1389,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
   }
 
-  //  public <T extends CommonExercise> UserList<T> getUserListByID(long listid) {
   public UserList<CommonShell> getUserListByID(long listid) {
     return getUserListManager().getUserListByID(listid, getSectionHelper().getTypeOrder());
   }
@@ -1420,11 +1428,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param pathHelper
    * @param prefix
    */
-  public void doReport(PathHelper pathHelper, String prefix, int year) {
+  public JSONObject doReport(PathHelper pathHelper, String prefix, int year) {
     try {
-      getReport(prefix).writeReportToFile(pathHelper, serverProps.getLanguage(), year);
+      return getReport(prefix).writeReportToFile(pathHelper, serverProps.getLanguage(), year);
     } catch (IOException e) {
       logger.error("got " + e);
+      return null;
     }
   }
 
@@ -1486,6 +1495,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   /**
    * @return
+   * @see LangTestDatabaseImpl#getMaleFemaleProgress()
    */
   public Map<String, Float> getMaleFemaleProgress() {
     UserDAO userDAO = getUserDAO();
@@ -1497,10 +1507,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     Set<String> uniqueIDs = new HashSet<String>();
 
     for (CommonShell shell : exercises) {
-      String id = shell.getID();
-      boolean add = uniqueIDs.add(id);
+      boolean add = uniqueIDs.add(shell.getID());
       if (!add) {
-        logger.warn("getMaleFemaleProgress found duplicate id " + id + " : " + shell);
+        logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
       }
     }
 /*    logger.info("found " + total + " total exercises, " +
