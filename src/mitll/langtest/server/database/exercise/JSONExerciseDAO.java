@@ -1,9 +1,11 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.shared.exercise.CommonExercise;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -22,7 +24,6 @@ public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Comm
   private static final Logger logger = Logger.getLogger(JSONExerciseDAO.class);
 
   private static final String ENCODING = "UTF8";
-
   private final String jsonFile;
 
   /**
@@ -54,15 +55,5 @@ public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Comm
       logger.error("got " +e,e);
     }
     return Collections.emptyList();
-  }
-
-  void populateSections(Collection<CommonExercise> exercises) {
-    for (CommonExercise ex : exercises) {
-      Collection<SectionHelper.Pair> pairs = new ArrayList<>();
-      for (Map.Entry<String,String> pair : ex.getUnitToValue().entrySet()) {
-        pairs.add(getSectionHelper().addExerciseToLesson(ex, pair.getKey(), pair.getValue()));
-      }
-      getSectionHelper().addAssociations(pairs);
-    }
   }
 }

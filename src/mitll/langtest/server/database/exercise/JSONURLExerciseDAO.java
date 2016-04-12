@@ -22,7 +22,6 @@ import java.util.*;
  */
 public class JSONURLExerciseDAO extends JSONExerciseDAO {
   private static final Logger logger = Logger.getLogger(JSONURLExerciseDAO.class);
-  private static final String DOCUMENTS = "documents";
   private final Collection<String> typeOrder;
 
   /**
@@ -35,50 +34,7 @@ public class JSONURLExerciseDAO extends JSONExerciseDAO {
     super("", serverProps, userListManager, addDefects);
     this.typeOrder = serverProps.getTypes();
 
-    readProjectInfo(serverProps);
-  }
-
-  /**
-   * TODO :  Consider reading font from project info
-   *
-   * name: "ENGLISH",
-   defaultWordSpacing: true,
-   direction: "LTR",
-   systemFontNames: "Times New Roman",
-   fontFaceURL: null,
-   bitmapped: false,
-   langCode: "eng",
-   lineHeight: 125,
-   fontSize: 14,
-   digraph: "EN",
-   script: "auto",
-   fontWeight: "Normal",
-   trigraph: "ENG"
-
-   * @param serverProps
-   */
-  private void readProjectInfo(ServerProperties serverProps) {
-    String baseURL = serverProps.getLessonPlan();
-
-    if (baseURL.endsWith(DOCUMENTS)) {
-      baseURL = baseURL.substring(0, baseURL.length() - DOCUMENTS.length());
-    }
-//    else if (baseURL.endsWith("exam"))
-    String projectInfo = new HTTPClient().readFromGET(baseURL);
-    JSONObject jsonObject = JSONObject.fromObject(projectInfo);
-    JSONObject language = jsonObject.getJSONObject("language");
-    String upperName = language.getString("name");
-
-    // TODO : consider setting language here.
-    String npLang = upperName.substring(0,1) + upperName.substring(1).toLowerCase();
-    //  logger.info("got language " + npLang);
-    boolean isLTR = language.get("direction").equals("LTR");
-    serverProps.setRTL(!isLTR);
-
-    String systemFontNames = language.getString("systemFontNames");
-    String fontFaceURL = language.getString("fontFaceURL");
-    serverProps.setFontNames(systemFontNames);
-    serverProps.setFontFaceURL(fontFaceURL);
+    new DominoReader().readProjectInfo(serverProps);
   }
 
   @Override
