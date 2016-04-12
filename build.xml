@@ -75,8 +75,8 @@
 
     <target depends="build" name="amasMSA">
         <jar destfile="amasMSA.war" basedir="war"
-             includes="images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/amasMSA/**,soundmanager2.js,scoring/models.dli-ara/**"
-             excludes="WEB=INF/lib/pronz.jar">
+             includes="images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/amasMSA/**,soundmanager2.js,scoring/models.dli-ara/**,scoring/configurations/**,scoring/bin.linux64/**"
+             excludes="WEB=INF/lib/pronz.jar,media/**">
 
             <manifest>
                 <attribute name="Built-Date" value="${current.time}"/>
