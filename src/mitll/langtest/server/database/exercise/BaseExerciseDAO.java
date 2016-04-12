@@ -454,4 +454,14 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 			fieldToDefect.put(QCNPFExercise.ENGLISH, "contains semicolon - should this item be split?");
     }*/
 	}
+
+	void populateSections(Collection<CommonExercise> exercises) {
+    for (CommonExercise ex : exercises) {
+      Collection<SectionHelper.Pair> pairs = new ArrayList<>();
+      for (Map.Entry<String,String> pair : ex.getUnitToValue().entrySet()) {
+        pairs.add(getSectionHelper().addExerciseToLesson(ex, pair.getKey(), pair.getValue()));
+      }
+      getSectionHelper().addAssociations(pairs);
+    }
+  }
 }
