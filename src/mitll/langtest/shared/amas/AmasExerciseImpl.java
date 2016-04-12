@@ -1,5 +1,6 @@
 package mitll.langtest.shared.amas;
 
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MutableShell;
 import mitll.langtest.shared.exercise.STATE;
@@ -25,11 +26,11 @@ public class AmasExerciseImpl implements CommonShell {
   public static final String FL = "fl";
 
   private String content;
-  private String contentTrans;
+  //private String contentTrans;
 
   private String orient;
-  private String orientTrans;
-  private String ilr;
+  //private String orientTrans;
+  //private String ilr;
   private boolean isListening;
   private String audioURL;
   private Map<String, String> unitToValue = new HashMap<String, String>();
@@ -64,11 +65,11 @@ public class AmasExerciseImpl implements CommonShell {
     this.id = id;
     this.content = content;
     this.altID = id;  // TODO : how does this work? do we need to worry about it?
-    this.contentTrans = contentTrans;
+    //this.contentTrans = contentTrans;
     this.orient = orient;
-    this.orientTrans = orientTrans;
+   // this.orientTrans = orientTrans;
     this.isListening = isListening;
-    this.ilr = ilr;
+   // this.ilr = ilr;
     this.audioURL = audioURL;
   }
 
@@ -76,7 +77,7 @@ public class AmasExerciseImpl implements CommonShell {
     return altID;
   }
 
-  public void addQuestion(boolean isFL, String question, String answer) throws Exception {
+  private void addQuestion(boolean isFL, String question, String answer) throws Exception {
     addQuestion(isFL ? FL : EN, question, answer);
   }
 
@@ -88,13 +89,13 @@ public class AmasExerciseImpl implements CommonShell {
     addQuestion(isFL ? FL : EN, question, alternateAnswers);
   }
 
-  public void addQuestion(String lang, String question, String answer) {
+  private void addQuestion(String lang, String question, String answer) {
     List<String> serializableCollection = new ArrayList<>();
     serializableCollection.add(answer);
     addQuestion(lang, new QAPair(question, serializableCollection));
   }
 
-  public void addQuestion(String lang, String question, String[] alternateAnswers) {
+  private void addQuestion(String lang, String question, String[] alternateAnswers) {
     addQuestion(lang, new QAPair(question, Arrays.asList(alternateAnswers)));
   }
 
@@ -272,6 +273,10 @@ public class AmasExerciseImpl implements CommonShell {
     return isListening;
   }
 
+  /**
+   * @see mitll.langtest.client.amas.AudioExerciseContent#addAudioRow(AmasExerciseImpl, String, boolean, Panel, int, int)
+   * @return
+   */
   public String getAudioURL() {
     return audioURL;
   }
