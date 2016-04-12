@@ -33,7 +33,9 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
+import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
+import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.MiniUser;
@@ -49,8 +51,9 @@ import java.util.logging.Logger;
  * Time: 5:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class QCNPFExercise<T extends CommonShell & AudioRefExercise & AnnotationExercise & ScoredExercise> extends GoodwaveExercisePanel<T> {
-  private final Logger logger = Logger.getLogger("QCNPFExercise");
+public class QCNPFExercise<T extends CommonShell & AudioRefExercise & AnnotationExercise & ScoredExercise>
+    extends GoodwaveExercisePanel<T> {
+  private Logger logger = Logger.getLogger("QCNPFExercise");
 
   private static final String DEFECT = "Defect?";
 
@@ -75,8 +78,10 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
   private static final int DEFAULT_MALE_ID = -2;
   private static final int DEFAULT_FEMALE_ID = -3;
-  private static final MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, 0, "Male", false);
-  private static final MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, "Female", false);
+  public static final String MALE = "Male";
+  private static final MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, 0, MALE, false);
+  public static final String FEMALE = "Female";
+  private static final MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, FEMALE, false);
 
   private Set<String> incorrectFields;
   private List<RequiresResize> toResize;
@@ -85,6 +90,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   private Button approvedButton;
   private Tooltip approvedTooltip;
   private Tooltip nextTooltip;
+  //private CompressedAudio compressedAudio = new CompressedAudio();
 
   /**
    * @param e
@@ -139,14 +145,14 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    */
   protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
-                                                 final ListInterface<CommonShell> listContainer, boolean addKeyHandler) {
+                                                              final ListInterface<CommonShell> listContainer, boolean addKeyHandler) {
     NavigationHelper<CommonShell> navHelper = new NavigationHelper<CommonShell>(exercise, controller,
         new PostAnswerProvider() {
-      @Override
-      public void postAnswers(ExerciseController controller, HasID completedExercise) {
-        nextWasPressed(listContainer, completedExercise);
-      }
-    },
+          @Override
+          public void postAnswers(ExerciseController controller, HasID completedExercise) {
+            nextWasPressed(listContainer, completedExercise);
+          }
+        },
         listContainer, addKeyHandler) {
       /**
        * So only allow next button when all audio has been played
@@ -356,8 +362,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
       List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
       List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
 
-      tabs = new ArrayList<RememberTabAndContent>();
-
+      tabs = new ArrayList<>();
       TabPanel tabPanel = new TabPanel();
       addTabsForUsers(e, tabPanel, malesMap, maleUsers);
       addTabsForUsers(e, tabPanel, femalesMap, femaleUsers);
@@ -373,7 +378,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     ExerciseAnnotation refAudio = e.getAnnotation(REF_AUDIO);
     Panel column = new FlowPanel();
     column.addStyleName("blockStyle");
-    column.add(getCommentWidget(REF_AUDIO, new Label(NO_AUDIO_RECORDED), refAudio,false));
+    column.add(getCommentWidget(REF_AUDIO, new Label(NO_AUDIO_RECORDED), refAudio, false));
     return column;
   }
 
@@ -388,9 +393,12 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    * @see #getScoringAudioPanel
    */
   private void addTabsForUsers(T e, TabPanel tabPanel, Map<MiniUser, List<AudioAttribute>> malesMap, List<MiniUser> maleUsers) {
+    if (logger == null) logger = Logger.getLogger("QCNPFExercise");
     int me = controller.getUser();
     for (MiniUser user : maleUsers) {
       String tabTitle = getUserTitle(me, user);
+
+     // logger.info("addTabsForUsers for user " + user + " got " + tabTitle);
 
       RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle);
       tabPanel.add(tabAndContent.getTab().asTabLink());
@@ -403,6 +411,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
       List<AudioAttribute> audioAttributes = malesMap.get(user);
       for (AudioAttribute audio : audioAttributes) {
+     //   logger.info("addTabsForUsers for " + e.getID() + " got " + audio);
         if (!audio.isHasBeenPlayed()) allHaveBeenPlayed = false;
         Pair panelForAudio1 = getPanelForAudio(e, audio);
 
@@ -410,7 +419,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
         tabAndContent.addWidget(panelForAudio1.audioPanel);
         toResize.add(panelForAudio1.audioPanel);
 
-        if (user.isDefault()) {    // add widgets to mark gender on default audio
+        if (user.getId() == UserDAO.DEFAULT_USER_ID) {    // add widgets to mark gender on default audio
           addGenderAssignmentButtons(tabAndContent, audioAttributes, audio, panelForAudio);
         } else {
           tabAndContent.getContent().add(panelForAudio);
@@ -426,7 +435,8 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     }
   }
 
-  private void addGenderAssignmentButtons(RememberTabAndContent tabAndContent, List<AudioAttribute> audioAttributes, AudioAttribute audio, Widget panelForAudio) {
+  private void addGenderAssignmentButtons(RememberTabAndContent tabAndContent, List<AudioAttribute> audioAttributes,
+                                          AudioAttribute audio, Widget panelForAudio) {
     Panel vp = new VerticalPanel();
     Panel hp = new HorizontalPanel();
 
@@ -439,6 +449,10 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     tabAndContent.getContent().add(vp);
   }
 
+  /**
+   * @see #addGenderAssignmentButtons(RememberTabAndContent, List, AudioAttribute, Widget)
+   * @return
+   */
   private Button getNextButton() {
     final Button next = new Button("Next");
     next.setType(ButtonType.SUCCESS);
@@ -468,39 +482,43 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    * @return
    * @see #addTabsForUsers
    */
-  private DivWidget getGenderGroup(final RememberTabAndContent tabAndContent, final AudioAttribute audio, final Button next, final List<AudioAttribute> allByUser) {
+  private DivWidget getGenderGroup(final RememberTabAndContent tabAndContent, final AudioAttribute audio,
+                                   final Button next, final List<AudioAttribute> allByUser) {
     ButtonToolbar w = new ButtonToolbar();
     ButtonGroup buttonGroup = new ButtonGroup();
     buttonGroup.setToggle(ToggleType.RADIO);
     w.add(buttonGroup);
 
-    final Button onButton = makeGroupButton(buttonGroup, "MALE");
+    final Button male = makeGroupButton(buttonGroup, "MALE");
 
     if (audio.getExid() == null) {
       audio.setExid(exercise.getID());
     }
-    onButton.addClickHandler(new ClickHandler() {
+    male.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        markGender(DEFAULT_MALE, onButton, audio, tabAndContent, allByUser, next, true);
+        markGender(DEFAULT_MALE, male, audio, tabAndContent, allByUser, next, true);
       }
     });
 
-    final Button offButton = makeGroupButton(buttonGroup, "FEMALE");
+    final Button female = makeGroupButton(buttonGroup, "FEMALE");
 
-    offButton.addClickHandler(new ClickHandler() {
+    female.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        markGender(DEFAULT_FEMALE, offButton, audio, tabAndContent, allByUser, next, false);
+        markGender(DEFAULT_FEMALE, female, audio, tabAndContent, allByUser, next, false);
       }
     });
 
     return w;
   }
 
-  private void markGender(final MiniUser defaultFemale, final Button offButton,
-                          final AudioAttribute audio, final RememberTabAndContent tabAndContent,
-                          final List<AudioAttribute> allByUser, final Button next,
+  private void markGender(final MiniUser defaultWithGender,
+                          final Button offButton,
+                          final AudioAttribute audio,
+                          final RememberTabAndContent tabAndContent,
+                          final List<AudioAttribute> allByUser,
+                          final Button next,
                           boolean isMale) {
     offButton.setEnabled(false);
 
@@ -512,30 +530,62 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
       @Override
       public void onSuccess(Void result) {
-        audio.setUser(defaultFemale);
+        audio.setUser(defaultWithGender);
         showGenderChange(offButton, tabAndContent, allByUser, next);
       }
     });
   }
 
-  private void showGenderChange(Button onButton, RememberTabAndContent tabAndContent, List<AudioAttribute> allByUser, Button next) {
+  /**
+   * Only show next button if both reg and slow have been set (if both are there)
+   *
+   * @param onButton
+   * @param tabAndContent
+   * @param allByUser
+   * @param next
+   * @see #markGender(MiniUser, Button, AudioAttribute, RememberTabAndContent, List, Button, boolean)
+   */
+  private void showGenderChange(Button onButton,
+                                RememberTabAndContent tabAndContent,
+                                List<AudioAttribute> allByUser,
+                                Button next) {
     onButton.setEnabled(true);
     tabAndContent.getTab().setHeading(getTabLabelFromAudio(allByUser));
-    next.setVisible(true);
+
+    boolean anyDefault = false;
+    for (AudioAttribute audioAttribute : allByUser) {
+      if (isGenericDefault(audioAttribute)) {
+        anyDefault = true;
+        break;
+      }
+    }
+    next.setVisible(!anyDefault);
   }
 
-  private String getTabLabelFromAudio(List<AudioAttribute> allByUser) {
+  private String getTabLabelFromAudio(Collection<AudioAttribute> allByUser) {
     StringBuilder builder = new StringBuilder();
-    AudioAttribute last = allByUser.get(allByUser.size() - 1);
+    int i = 0;
     for (AudioAttribute audioAttribute : allByUser) {
-      builder.append(isGenericDefault(audioAttribute) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : audioAttribute.isMale() ? "Male" : "Female");
-      if (audioAttribute != last) builder.append("/");
+      boolean genericDefault = isGenericDefault(audioAttribute);
+//      logger.info("getTabLabelFromAudio For " + audioAttribute +
+//          "\n\tgot " + audioAttribute.getUser() + " genericDefault " + genericDefault);
+      builder.append(genericDefault ?
+          GoodwaveExercisePanel.DEFAULT_SPEAKER :
+          audioAttribute.isMale() ? MALE : FEMALE);
+      if (++i < allByUser.size()) {
+        /*if (audioAttribute != last)*/ builder.append("/");
+      }
     }
     return builder.toString();
   }
 
   private boolean isGenericDefault(AudioAttribute audioAttribute) {
-    return audioAttribute.getUser().getId() == -1;
+    MiniUser user = audioAttribute.getUser();
+    return isDefaultNoGenderUser(user);
+  }
+
+  private boolean isDefaultNoGenderUser(MiniUser user) {
+    return user.getId() == UserDAO.DEFAULT_USER_ID;
   }
 
   private Button makeGroupButton(ButtonGroup buttonGroup, String title) {
@@ -547,13 +597,16 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   }
 
   private String getUserTitle(int me, MiniUser user) {
-    return
-        user.getId() == -1 ? GoodwaveExercisePanel.DEFAULT_SPEAKER :
-            (user.getId() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
+    long id = user.getId();
+    if (id == UserDAO.DEFAULT_USER_ID)        return GoodwaveExercisePanel.DEFAULT_SPEAKER;
+    else if (id == UserDAO.DEFAULT_MALE_ID)   return "Default Male";
+    else if (id == UserDAO.DEFAULT_FEMALE_ID) return "Default Female";
+    else return
+          (user.getId() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
   }
 
   private String getUserTitle(MiniUser user) {
-    return (user.isMale() ? "Male" : "Female") +
+    return (user.isMale() ? MALE : FEMALE) +
         (user.isAdmin()
             ? " (" + user.getUserID() + ")" : "") +
         " age " + user.getAge();
@@ -571,17 +624,21 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   private Pair getPanelForAudio(final T e, final AudioAttribute audio) {
     String audioRef = audio.getAudioRef();
     if (audioRef != null) {
-      audioRef = wavToMP3(audioRef);   // todo why do we have to do this?
+      // if (logger == null) logger = Logger.getLogger("QCNPFExercise");
+      //   logger.info("getPanelForAudio path before for " + e.getID() + " : " +audioRef + " and " +audio);
+      audioRef = CompressedAudio.getPathNoSlashChange(audioRef);   // todo why do we have to do this?
+      // logger.info("getPanelForAudio path after  " + audioRef);
     }
+    String speed = audio.isRegularSpeed() ? " Regular speed" : " Slow speed";
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<T>(audioRef, e.getForeignLanguage(), service, controller,
-        controller.getProps().showSpectrogram(), scorePanel, 70, audio.isRegularSpeed() ? " Regular speed" : " Slow speed", e.getID(), e, instance);
+        controller.getProps().showSpectrogram(), scorePanel, 70, speed, e.getID(), e, instance);
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     audioPanel.addPlayListener(new PlayListener() {
       @Override
       public void playStarted() {
         audioWasPlayed.add(audioPanel);
-        logger.info("playing audio " + audio.getAudioRef() + " has " + tabs.size() + " tabs, now " + audioWasPlayed.size() + " played");
+       // logger.info("playing audio " + audio.getAudioRef() + " has " + tabs.size() + " tabs, now " + audioWasPlayed.size() + " played");
         //if (audioWasPlayed.size() == toResize.size()) {
         // all components played
         setApproveButtonState();
@@ -598,7 +655,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     });
     ExerciseAnnotation audioAnnotation = e.getAnnotation(audio.getAudioRef());
 
-    Widget entry = getCommentWidget(audio.getAudioRef(), audioPanel, audioAnnotation,false);
+    Widget entry = getCommentWidget(audio.getAudioRef(), audioPanel, audioAnnotation, false);
     return new Pair(entry, audioPanel);
   }
 
@@ -651,12 +708,6 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     if (addLeftMargin) {
       content.getElement().getStyle().setMarginLeft(80, Style.Unit.PX);
     }
-    //else {
-/*      if (logger == null) {
-        logger = Logger.getLogger("QCNPFExercise");
-      }
-      logger.warning("not adding left margin for " + field);*/
-   // }
     row.add(content);
 
     Panel rowContainer = new FlowPanel();
@@ -665,9 +716,6 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     rowContainer.addStyleName("blockStyle");
     rowContainer.add(row);
     rowContainer.add(commentRow);
-
-    // why????
-    //  rowContainer.setWidth("650px");
 
     return rowContainer;
   }
