@@ -33,12 +33,7 @@ import java.util.Map;
  */
 @RemoteServiceRelativePath("langtestdatabase")
 public interface LangTestDatabase extends RemoteService {
-  boolean WRITE_ALTERNATE_COMPRESSED_AUDIO = false;
-
-  <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection,
-                                     String prefix, long userListID, int userID, String role,
-                                     boolean onlyUnrecordedByMe, boolean onlyExamples, boolean incorrectFirstOrder,
-                                     boolean onlyWithAudioAnno);
+  <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request);
 
   List<CommonShell> getShells(List<String> ids);
 
@@ -66,12 +61,12 @@ public interface LangTestDatabase extends RemoteService {
 
 
   /**
-   * TODO : return result id
    * @see mitll.langtest.client.amas.TextResponse#getScoreForGuess
    * @param audioContext
-   *@param answer
+   * @param answer
    * @param timeSpent
-   * @param typeToSection    @return
+   * @param typeToSection
+   * @return
    */
   Answer getScoreForAnswer(AudioContext audioContext, String answer, long timeSpent, Map<String, Collection<String>> typeToSection);
 

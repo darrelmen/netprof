@@ -16,17 +16,18 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioTag {
-  private static final boolean INCLUDE_ALTERNATE_COMPRESSED = LangTestDatabase.WRITE_ALTERNATE_COMPRESSED_AUDIO;
-  private static final String ALTERNATE_TYPE = "ogg";
+  private static final boolean INCLUDE_ALTERNATE_COMPRESSED = true;
+  private static final String ALTERNATE_TYPE = "mp3";
   private static final boolean INCLUDE_ALTERNATE_AUDIO = true;
   private static final String PRELOAD_HINT = "auto";
-  public static final String COMPRESSED_TYPE = "mp3";//"ogg";//"mp3";
+  public static final String COMPRESSED_TYPE = "ogg";
 
   public SafeHtml getAudioTag(String result) {
     return getAudioTag(result, true);
   }
 
   /**
+   * TODO : do this better, with a gwt Audio widget
    * @param result
    * @return
    * @see mitll.langtest.client.result.ResultManager#addColumnsToTable
