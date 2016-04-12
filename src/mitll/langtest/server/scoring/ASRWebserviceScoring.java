@@ -310,7 +310,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
   /**
    * TODO : Some phrases seem to break lts process?
    * This will work for both align and decode modes, although align will ignore the unknownmodel.
-   *
+   * <p>
    * Create a dcodr input string dictionary, a sequence of words and their phone sequence:
    * e.g. [distra?do,d i s t rf a i d o sp;UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil]
    *
@@ -361,12 +361,13 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
   /**
    * TODO : (3/20/16) sp breaks wsdcodr when sent directly
    * wsdcodr expects a pronunciation like : distraido,d i s t rf a i d o sp;
+   *
    * @param word
    * @param apply
    * @return
    */
   private String getPronStringForWord(String word, String[] apply) {
-    return word + "," + listToSpaceSepSequence(apply) +" sp" + ";";
+    return word + "," + listToSpaceSepSequence(apply) + " sp" + ";";
   }
 
   private String listToSpaceSepSequence(String[] pron) {
@@ -403,8 +404,18 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
       cleaned = slfFile.cleanToken(slfOut[1]);
     }
 
-    String hydraInput = tmpDir + "/:" + audioPath + ":" + hydraDict + ":" +
-        smallLM + ":xxx,0," + end + ",[<s>;" + cleaned.replaceAll("\\p{Z}", ";") + ";</s>]";
+    String transcriptCleaned = cleaned.replaceAll("\\p{Z}", ";");
+    if (!transcriptCleaned.endsWith(";")) {
+      transcriptCleaned = transcriptCleaned + ";";
+    }
+    transcriptCleaned = transcriptCleaned.replaceAll(";;",";");
+
+    String hydraInput =
+        tmpDir + "/:" +
+            audioPath + ":" +
+            hydraDict + ":" +
+            smallLM + ":xxx,0," + end + "," +
+            "[<s>;" + transcriptCleaned + "</s>]";
 
     long then = System.currentTimeMillis();
     String resultsStr = runHydra(hydraInput, new HTTPClient(ip, port, "dcodr"));

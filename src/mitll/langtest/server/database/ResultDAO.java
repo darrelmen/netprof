@@ -9,12 +9,13 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.UserPerformance;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
@@ -34,7 +35,7 @@ import java.util.*;
 public class ResultDAO extends DAO {
   private static final Logger logger = Logger.getLogger(ResultDAO.class);
 
-  private static final Map<String, String> EMPTY_MAP = new HashMap<String, String>();
+  private static final Map<String, String> EMPTY_MAP = new HashMap<>();
   private static final int MINUTE = 60 * 1000;
   private static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
 
@@ -55,22 +56,22 @@ public class ResultDAO extends DAO {
   public static final String DURATION = "duration";
   public static final String CORRECT = "correct";
   public static final String PRON_SCORE = "pronscore";
-  static final String STIMULUS = "stimulus";
+  private static final String STIMULUS = "stimulus";
   public static final String DEVICE_TYPE = "deviceType";  // iPad, iPhone, browser, etc.
   public static final String DEVICE = "device"; // device id, or browser type
   public static final String PROCESS_DUR = "processDur";
   public static final String ROUND_TRIP_DUR = "roundTripDur";
- // public static final int FIVE_MINUTES = 5 * 60 * 1000;
-  public static final int HOUR = 60 * 60 * 1000;
- // public static final int DAY = 24 * HOUR;
-  public static final String DEVICETYPE = "devicetype";
+  // public static final int FIVE_MINUTES = 5 * 60 * 1000;
+ // public static final int HOUR = 60 * 60 * 1000;
+  // public static final int DAY = 24 * HOUR;
+  private static final String DEVICETYPE = "devicetype";
   public static final String VALIDITY = "validity";
   public static final String SNR = "SNR";
-  static final String SESSION = "session"; // from ODA
+  private static final String SESSION = "session"; // from ODA
 
 
   public static final String USER_SCORE = "userscore";
-  public static final String CLASSIFIER_SCORE = "classifierscore";
+  //public static final String CLASSIFIER_SCORE = "classifierscore";
 
   private final boolean debug = false;
 
@@ -96,7 +97,7 @@ public class ResultDAO extends DAO {
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
   public UserPerformance getPerformanceForUser(long id, PhoneDAO phoneDAO, int minRecordings, Map<String, String> exToRef) {
-    return new Analysis(database, phoneDAO,exToRef).getPerformanceForUser(id, minRecordings);
+    return new Analysis(database, phoneDAO, exToRef).getPerformanceForUser(id, minRecordings);
   }
 
   /**
@@ -123,7 +124,7 @@ public class ResultDAO extends DAO {
     } catch (Exception ee) {
       logException(ee);
     }
-    return new ArrayList<Result>();
+    return new ArrayList<>();
   }
 
   public List<Result> getResultsForPractice() {
@@ -143,7 +144,7 @@ public class ResultDAO extends DAO {
     } catch (Exception ee) {
       logException(ee);
     }
-    return new ArrayList<Result>();
+    return new ArrayList<>();
   }
 
   public List<Result> getResultsDevices() {
@@ -156,13 +157,14 @@ public class ResultDAO extends DAO {
       logger.error("got " + ee, ee);
       logException(ee);
     }
-    return new ArrayList<Result>();
+    return new ArrayList<>();
   }
 
   /**
    * So when updating old data that is missing word and phone alignment information, we have to put it back.
-   * @see mitll.langtest.server.decoder.RefResultDecoder#doMissingInfo
+   *
    * @return to re-process
+   * @see mitll.langtest.server.decoder.RefResultDecoder#doMissingInfo
    */
   public List<Result> getResultsToDecode() {
     try {
@@ -172,7 +174,7 @@ public class ResultDAO extends DAO {
           SCORE_JSON +
           " = '{}' " +
           "OR " + SCORE_JSON + " = '{\"words\":[]}')";
-    //  scoreJsonClause = "";
+      //  scoreJsonClause = "";
 
       String sql = "SELECT" +
           " * " +
@@ -180,19 +182,19 @@ public class ResultDAO extends DAO {
           RESULTS +
           " where " +
           PRON_SCORE +
-          ">=0" + " AND " +AUDIO_TYPE +" != 'regular' "+
-          " AND " +AUDIO_TYPE +" != 'slow' "+
-          " AND " +VALID + "=true " +
-          " AND " +DURATION + ">0.7 " +
+          ">=0" + " AND " + AUDIO_TYPE + " != 'regular' " +
+          " AND " + AUDIO_TYPE + " != 'slow' " +
+          " AND " + VALID + "=true " +
+          " AND " + DURATION + ">0.7 " +
           scoreJsonClause;
 
-      logger.info("sql\n" +sql);
+      logger.info("sql\n" + sql);
       return getResultsSQL(sql);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
       logException(ee);
     }
-    return new ArrayList<Result>();
+    return new ArrayList<>();
   }
 
   private List<CorrectAndScore> getCorrectAndScores() {
@@ -211,7 +213,7 @@ public class ResultDAO extends DAO {
     } catch (Exception ee) {
       logException(ee);
     }
-    return new ArrayList<CorrectAndScore>();
+    return new ArrayList<>();
   }
 
   public List<MonitorResult> getMonitorResults() {
@@ -231,7 +233,7 @@ public class ResultDAO extends DAO {
       logException(ee);
     }
 
-    return new ArrayList<MonitorResult>();
+    return new ArrayList<>();
   }
 
   public Result getResultByID(long id) {
@@ -260,7 +262,7 @@ public class ResultDAO extends DAO {
    */
   public void addUnitAndChapterToResults(List<MonitorResult> monitorResults, Map<String, CommonExercise> join) {
     int n = 0;
-    Set<String> unknownIDs = new HashSet<String>();
+    Set<String> unknownIDs = new HashSet<>();
     for (MonitorResult result : monitorResults) {
       String id = result.getId();
       if (id.contains("\\/")) id = id.substring(0, id.length() - 2);
@@ -292,7 +294,7 @@ public class ResultDAO extends DAO {
       logException(ee);
     }
 
-    return new ArrayList<MonitorResult>();
+    return new ArrayList<>();
   }
 
   /**
@@ -311,7 +313,7 @@ public class ResultDAO extends DAO {
    */
   public SessionsAndScores getSessionsForUserIn2(Collection<String> ids, long latestResultID, long userid,
                                                  Collection<String> allIds, Map<String, CollationKey> idToKey) {
-    List<Session> sessions = new ArrayList<Session>();
+    List<Session> sessions = new ArrayList<>();
     Map<Long, List<CorrectAndScore>> userToAnswers = populateUserToAnswers(getResultsForExIDIn(ids, true));
     if (debug) logger.debug("Got " + userToAnswers.size() + " user->answer map");
     for (Map.Entry<Long, List<CorrectAndScore>> userToResults : userToAnswers.entrySet()) {
@@ -339,9 +341,9 @@ public class ResultDAO extends DAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
    */
   public <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises, long userid, Collator collator) {
-    List<String> allIds = new ArrayList<String>();
+    List<String> allIds = new ArrayList<>();
     Map<String, T> idToEx = new HashMap<>();
-    Map<String, CollationKey> idToKey = new HashMap<String, CollationKey>();
+    Map<String, CollationKey> idToKey = new HashMap<>();
     for (T exercise : exercises) {
       String id = exercise.getID();
       allIds.add(id);
@@ -500,7 +502,7 @@ public class ResultDAO extends DAO {
    * @see #getSortedAVPHistory(List, Collection, Map)
    */
   private List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(List<CorrectAndScore> results, Collection<String> allIds) {
-    SortedMap<String, ExerciseCorrectAndScore> idToScores = new TreeMap<String, ExerciseCorrectAndScore>();
+    SortedMap<String, ExerciseCorrectAndScore> idToScores = new TreeMap<>();
     if (results != null) {
       for (CorrectAndScore r : results) {
         String id = r.getId();
@@ -516,7 +518,7 @@ public class ResultDAO extends DAO {
     for (String id : allIds) {
       if (!idToScores.containsKey(id)) idToScores.put(id, new ExerciseCorrectAndScore(id));
     }
-    return new ArrayList<ExerciseCorrectAndScore>(idToScores.values());
+    return new ArrayList<>(idToScores.values());
   }
 
   public static class SessionsAndScores {
@@ -560,9 +562,8 @@ public class ResultDAO extends DAO {
    * @return
    * @see #attachScoreHistory
    */
-  private List<CorrectAndScore> getCorrectAndScores(long userID, CommonExercise firstExercise, boolean isFlashcardRequest) {
-    String id = firstExercise.getID();
-    return getResultsForExIDInForUser(userID, isFlashcardRequest, id);
+  private List<CorrectAndScore> getCorrectAndScores(long userID, HasID firstExercise, boolean isFlashcardRequest) {
+    return getResultsForExIDInForUser(userID, isFlashcardRequest, firstExercise.getID());
   }
 
   /**
@@ -633,7 +634,7 @@ public class ResultDAO extends DAO {
     } catch (Exception ee) {
       logException(ee);
     }
-    return new ArrayList<CorrectAndScore>();
+    return new ArrayList<>();
   }
 
 
@@ -661,7 +662,7 @@ public class ResultDAO extends DAO {
       logger.error("exception getting results for user " + userid + " and ids " + ids);
       logException(ee);
     }
-    return new ArrayList<CorrectAndScore>();
+    return new ArrayList<>();
   }
 
   private List<CorrectAndScore> getCorrectAndScoresForUser(long userid, String sql) throws SQLException {
@@ -704,8 +705,14 @@ public class ResultDAO extends DAO {
       PreparedStatement statement = connection.prepareStatement(sql);
       statement.setLong(1, userid);
 
+      long then = System.currentTimeMillis();
       List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement);
+      long now = System.currentTimeMillis();
 
+      if (now - then > 200) {
+        logger.warn("getResultsForExIDInForUser " + getLanguage() + " took " + (now - then) + " millis : " +
+            " query for " + ids.size() + " and userid " + userid + " returned " + scores.size() + " scores");
+      }
       if (debug) {
         logger.debug("getResultsForExIDInForUser for  " + sql + " got\n\t" + scores.size());
       }
@@ -714,7 +721,7 @@ public class ResultDAO extends DAO {
       logger.error("exception getting results for user " + userid + " and ids " + ids);
       logException(ee);
     }
-    return new ArrayList<CorrectAndScore>();
+    return new ArrayList<>();
   }
 
   private String getAVPClause(boolean matchAVP) {
@@ -778,6 +785,7 @@ public class ResultDAO extends DAO {
    * @see LangTestDatabaseImpl#getUsersWithRecordings()
    * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis
    */
+/*
   public Collection<User> getUsersWithRecordings(UserDAO userDAO) {
     Set<User> users = new HashSet<>();
     try {
@@ -795,8 +803,6 @@ public class ResultDAO extends DAO {
           " order by " +
           USERID;
 
-//      String sql1 = "SELECT DISTINCT " + USERID +
-//          " FROM " + RESULTS + " where " + PRON_SCORE + " > -0.1";
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
 
@@ -815,6 +821,7 @@ public class ResultDAO extends DAO {
     }
     return users;
   }
+*/
 
   /**
    * Get a list of Results for this Query.
@@ -827,7 +834,7 @@ public class ResultDAO extends DAO {
    */
   private List<Result> getResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
-    List<Result> results = new ArrayList<Result>();
+    List<Result> results = new ArrayList<>();
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
       long userID = rs.getLong(USERID);
@@ -864,7 +871,7 @@ public class ResultDAO extends DAO {
 
   private List<MonitorResult> getMonitorResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
-    List<MonitorResult> results = new ArrayList<MonitorResult>();
+    List<MonitorResult> results = new ArrayList<>();
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
       long userID = rs.getLong(USERID);
@@ -878,19 +885,26 @@ public class ResultDAO extends DAO {
       boolean correct = rs.getBoolean(CORRECT);
       float pronScore = rs.getFloat(PRON_SCORE);
       String dtype = rs.getString(DEVICE_TYPE);
-      String device = dtype == null ? "Unk" : dtype.equals("browser") ? rs.getString(DEVICE) : (dtype + "/" + rs.getString(DEVICE));
+      String simpleDevice = rs.getString(DEVICE);
+      String device = dtype == null ? "Unk" : dtype.equals("browser") ? simpleDevice : (dtype + "/" + simpleDevice);
       String validity = rs.getString(VALIDITY);
       float snr = rs.getFloat(SNR);
 
       int processDur = rs.getInt(PROCESS_DUR);
       int roundTripDur = rs.getInt(ROUND_TRIP_DUR);
+    //  String json = rs.getString(SCORE_JSON);
 
       MonitorResult result = new MonitorResult(uniqueID, userID, //id
           exid,
           trimPathForWebPage2(answer), // answer
           valid, // valid
           timestamp.getTime(),
-          type, dur, correct, pronScore, device, rs.getBoolean(WITH_FLASH), processDur, roundTripDur,validity,snr);
+          type, dur, correct, pronScore, device, rs.getBoolean(WITH_FLASH),
+          processDur, roundTripDur, validity, snr);
+
+/*      result.setDeviceType(dtype);
+      result.setSimpleDevice(simpleDevice);
+      result.setScoreJSON(json);*/
       results.add(result);
     }
     finish(connection, statement, rs);
@@ -913,7 +927,7 @@ public class ResultDAO extends DAO {
    */
   private List<CorrectAndScore> getScoreResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
-    List<CorrectAndScore> results = new ArrayList<CorrectAndScore>();
+    List<CorrectAndScore> results = new ArrayList<>();
 
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
@@ -1033,10 +1047,10 @@ public class ResultDAO extends DAO {
    */
   public SessionInfo getSessions() {
     Map<Long, List<CorrectAndScore>> userToAnswers = populateUserToAnswers(getCorrectAndScores());
-    List<Session> sessions = new ArrayList<Session>();
+    List<Session> sessions = new ArrayList<>();
 
-    Map<Long, List<Session>> userToSessions = new HashMap<Long, List<Session>>();
-    Map<Long, Float> userToRate = new HashMap<Long, Float>();
+    Map<Long, List<Session>> userToSessions = new HashMap<>();
+    Map<Long, Float> userToRate = new HashMap<>();
 
     for (Map.Entry<Long, List<CorrectAndScore>> userToAnswersEntry : userToAnswers.entrySet()) {
       sessions.addAll(makeSessionsForUser(userToSessions, userToAnswersEntry));
@@ -1086,7 +1100,7 @@ public class ResultDAO extends DAO {
     Session s = null;
     long last = 0;
 
-    List<Session> sessions = new ArrayList<Session>();
+    List<Session> sessions = new ArrayList<>();
 
     for (CorrectAndScore r : answersForUser) {
       long timestamp = r.getTimestamp();
@@ -1095,7 +1109,7 @@ public class ResultDAO extends DAO {
         sessions.add(s);
 
         List<Session> sessions1 = userToSessions.get(userid);
-        if (sessions1 == null) userToSessions.put(userid, sessions1 = new ArrayList<Session>());
+        if (sessions1 == null) userToSessions.put(userid, sessions1 = new ArrayList<>());
         sessions1.add(s);
       } else {
         s.duration += timestamp - last;
@@ -1115,9 +1129,9 @@ public class ResultDAO extends DAO {
     Session s = null;
     long lastTimestamp = 0;
 
-    Set<String> expected = new HashSet<String>(ids);
+    Set<String> expected = new HashSet<>(ids);
 
-    List<Session> sessions = new ArrayList<Session>();
+    List<Session> sessions = new ArrayList<>();
 
     int id = 0;
     for (CorrectAndScore r : answersForUser) {
@@ -1126,7 +1140,7 @@ public class ResultDAO extends DAO {
       long timestamp = r.getTimestamp();
       if (s == null || timestamp - lastTimestamp > SESSION_GAP || !expected.contains(id1)) {
         sessions.add(s = new Session(id++, r.getUserid(), timestamp));
-        expected = new HashSet<String>(ids); // start a new set of expected items
+        expected = new HashSet<>(ids); // start a new set of expected items
 //        logger.debug("\tpartitionIntoSessions2 expected " +expected.size());
       } else {
         s.duration += timestamp - lastTimestamp;
@@ -1176,11 +1190,11 @@ public class ResultDAO extends DAO {
   }
 
   private Map<Long, List<CorrectAndScore>> populateUserToAnswers(List<CorrectAndScore> results) {
-    Map<Long, List<CorrectAndScore>> userToAnswers = new HashMap<Long, List<CorrectAndScore>>();
+    Map<Long, List<CorrectAndScore>> userToAnswers = new HashMap<>();
     for (CorrectAndScore r : results) {
       long userid = r.getUserid();
       List<CorrectAndScore> results1 = userToAnswers.get(userid);
-      if (results1 == null) userToAnswers.put(userid, results1 = new ArrayList<CorrectAndScore>());
+      if (results1 == null) userToAnswers.put(userid, results1 = new ArrayList<>());
       results1.add(r);
     }
     return userToAnswers;
@@ -1370,7 +1384,7 @@ public class ResultDAO extends DAO {
 
   private Map<Long, Map<String, Result>> getUserToResults(String typeToUse, UserDAO userDAO) {
     List<Result> results = getResults();
-    Map<Long, Map<String, Result>> userToResult = new HashMap<Long, Map<String, Result>>();
+    Map<Long, Map<String, Result>> userToResult = new HashMap<>();
 
     Map<Long, User> userMap = userDAO.getUserMap();
 
@@ -1380,7 +1394,7 @@ public class ResultDAO extends DAO {
         if (user != null && user.getExperience() == 240) {    // only natives!
           Map<String, Result> results1 = userToResult.get(r.getUserid());
           if (results1 == null)
-            userToResult.put(r.getUserid(), results1 = new HashMap<String, Result>());
+            userToResult.put(r.getUserid(), results1 = new HashMap<>());
           String exerciseID = r.getExerciseID();
           Result result = results1.get(exerciseID);
           if (result == null || (r.getTimestamp() > result.getTimestamp())) {

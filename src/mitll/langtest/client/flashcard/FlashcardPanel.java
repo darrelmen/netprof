@@ -30,6 +30,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
+import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.AudioRefExercise;
@@ -50,8 +51,6 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
 
   static final int DELAY_MILLIS = 1000;
 
-  private static final String WAV = ".wav";
-  private static final String MP3 = "." + AudioTag.COMPRESSED_TYPE;
   static final String ON = "On";
   static final String OFF = "Off";
   private static final String SHOW = "START WITH";
@@ -869,19 +868,15 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     textWidget.removeStyleName(PLAYING_AUDIO_HIGHLIGHT);
   }
 
-  String getPath(String path) {
-    path = (path.endsWith(WAV)) ? path.replace(WAV, MP3) : path;
-    path = ensureForwardSlashes(path);
-    return path;
-  }
+ // private CompressedAudio compressedAudio = new CompressedAudio();
 
-  private String ensureForwardSlashes(String wavPath) {
-    return wavPath.replaceAll("\\\\", "/");
+  protected String getPath(String path) {
+    return CompressedAudio.getPath(path);
   }
 
   /**
    * @return
-   * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, String)
+   * @see BootstrapExercisePanel#getAnswerWidget
    */
   boolean otherReasonToIgnoreKeyPress() {
     return commentBox.isPopupShowing();

@@ -47,6 +47,7 @@ public class Result implements IsSerializable, UserAndTime {
   public static final String AUDIO_TYPE_PRACTICE = "practice";
   public static final String AUDIO_TYPE_REVIEW = "review";
   public static final String AUDIO_TYPE_RECORDER = "recorder";
+  //private Long userID;
 
   public Result() {}
 
@@ -147,5 +148,9 @@ public class Result implements IsSerializable, UserAndTime {
 
   public void setJsonScore(String jsonScore) {
     this.jsonScore = jsonScore;
+  }
+
+  public void setUserID(Long userID) {
+    this.userid = userID;
   }
 }
