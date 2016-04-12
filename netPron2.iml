@@ -43,6 +43,7 @@
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/.settings" />
+      <excludeFolder url="file://$MODULE_DIR$/bestAudioOrig" />
       <excludeFolder url="file://$MODULE_DIR$/extras" />
       <excludeFolder url="file://$MODULE_DIR$/gwt" />
       <excludeFolder url="file://$MODULE_DIR$/gwt-unitCache" />
