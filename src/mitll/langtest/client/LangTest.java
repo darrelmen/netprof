@@ -35,6 +35,8 @@ import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
+import mitll.langtest.client.recorder.RecordButtonPanel;
+import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.user.UserFeedback;
@@ -85,11 +87,17 @@ import java.util.logging.Logger;
  * - support for domino NetProF integration
  * 1.2.5
  * - fix for issue with collapsing words with commas in them, added removeRefResult to scoreServlet, partial support for import to lists
+ * 1.2.6
+ * - fix for old bug where clicking on a word or phrase did a playback with a ~50 millisecond offset
+ * 1.2.7
+ * - allows you to filter out Default (no gender mark) audio in mark defects, and associated fixes
+ * 1.2.8
+ * - Added About NetProF dialog that shows model info, etc. and small tweaks to audio trimming, etc.
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  private static final String VERSION_INFO = "1.2.5";
+  public static final String VERSION_INFO = "1.2.8";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
@@ -378,13 +386,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return browserCheck.getBrowserAndVersion();
   }
 
-  public String getInfoLine() {
+  String getInfoLine() {
     String releaseDate = VERSION +
         (props.getReleaseDate() != null ? " " + props.getReleaseDate() : "");
     return "<span><font size=-2>" +
         browserCheck.ver + "&nbsp;" +
-        releaseDate + (flashRecordPanel.usingWebRTC() ? " Flashless recording" : "") +
+        releaseDate + (usingWebRTC() ? " Flashless recording" : "") +
         "</font></span>";
+  }
+
+  private boolean usingWebRTC() {
+    return flashRecordPanel.usingWebRTC();
   }
 
   private void setupSoundManager() {
@@ -446,7 +458,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           showingPlugInNotice = true;
           List<String> messages = Arrays.asList("If you want to record audio, ",
               "plug in or enable your mic and reload the page.");
-          new ModalInfoDialog("Plug in microphone", messages, null,
+          new ModalInfoDialog("Plug in microphone", messages, Collections.emptyList() ,
+              null,
               new HiddenHandler() {
                 @Override
                 public void onHidden(HiddenEvent hiddenEvent) {
@@ -456,8 +469,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
                   initialUI.setSplash();
                   isMicConnected = false;
                 }
-              }
-          );
+              }, false);
         }
       }
 
@@ -678,10 +690,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return flashRecordPanel;
   }
 
+  long then = 0;
   /**
    * Recording interface
+   * @see RecordButtonPanel#startRecording()
+   * @see PostAudioRecordButton#startRecording()
    */
   public void startRecording() {
+    then = System.currentTimeMillis();
     flashRecordPanel.recordOnClick();
   }
 
@@ -692,7 +708,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    */
   public void stopRecording(WavCallback wavCallback) {
-    // logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
+    //logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
     flashRecordPanel.stopRecording(wavCallback);
   }
 
