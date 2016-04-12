@@ -77,13 +77,11 @@ public class AudioConversion {
    * @see AudioFileHelper#writeAudioFile(String, int, CommonExercise, int, String, int, String, boolean, String, String, boolean, boolean, boolean, boolean)
    * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment
    */
-  public AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString, File file,
+  AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString, File file,
                                                              boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
     long then = System.currentTimeMillis();
     file.getParentFile().mkdirs();
-    byte[] byteArray = getBytesFromBase64String(base64EncodedString);
-
-    writeToFile(byteArray, file);
+    writeToFile(getBytesFromBase64String(base64EncodedString), file);
 
     if (!file.exists()) {
       logger.error("writeAudioFile : huh? can't find " + file.getAbsolutePath());
@@ -92,11 +90,11 @@ public class AudioConversion {
     if (valid.isValid()) {
       valid.setDuration(trimSilence(file).getDuration());
     }
+
     long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > MIN_WARN_DUR) {
-      logger.debug("writeAudioFile: took " + diff + " millis to write wav file " + valid.durationInMillis +
-          " millis long");
+      logger.debug("writeAudioFile: took " + diff + " millis to write wav file " + valid.durationInMillis + " millis long");
     }
     return valid;
   }
