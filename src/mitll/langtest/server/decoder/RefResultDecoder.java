@@ -293,22 +293,13 @@ public class RefResultDecoder {
    */
   private Set<String> getDecodedFiles() {
     List<Result> results = db.getRefResultDAO().getResults();
-//    logger.debug(getLanguage() + " found " + results.size() + " previous ref results");
-
     Set<String> decodedFiles = new HashSet<>();
-//    int count = 0;
     for (Result res : results) {
-//      if (count++ < 20) {
-//        logger.debug("\t found " + res);
-//      }
-
       String[] bestAudios = res.getAnswer().split(File.separator);
       if (bestAudios.length > 1) {
         String bestAudio = bestAudios[bestAudios.length - 1];
-        //		logger.debug("added " + bestAudio);
         decodedFiles.add(bestAudio);
         if (stopDecode) break;
-        //	logger.debug("previously found " + res);
       }
     }
     return decodedFiles;
@@ -349,7 +340,7 @@ public class RefResultDecoder {
 
         if (fileExists) {
           audioFileHelper.decodeOneAttribute(exercise, attribute, doHydec);
-          sleep(SLEEP_BETWEEN_DECODES);
+          sleep(serverProps.getSleepBetweenDecodes());
           count++;
         }
       } catch (Exception e) {
@@ -419,12 +410,11 @@ public class RefResultDecoder {
     final int count;
     final int changed;
 
-    public Info(int trimmed, int count, int changed) {
+    Info(int trimmed, int count, int changed) {
       this.trimmed = trimmed;
       this.count = count;
       this.changed = changed;
     }
-
   }
 
   private String getFile(AudioAttribute attribute) {

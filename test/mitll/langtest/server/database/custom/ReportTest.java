@@ -3,7 +3,6 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
@@ -11,7 +10,6 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import org.apache.log4j.Logger;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -19,11 +17,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by GO22670 on 1/30/14.
@@ -364,14 +361,14 @@ public class ReportTest {
         "DECEMBER").get(i);
   }
 
-  @AfterClass
+/*  @AfterClass
   public static void tearDown() {
     try {
       database.closeConnection();
     } catch (SQLException e) {
       e.printStackTrace();
     }
-  }
+  }*/
 
   private static String getConfigDir() {
     return "war" + File.separator + "config" + File.separator + ENGLISH;

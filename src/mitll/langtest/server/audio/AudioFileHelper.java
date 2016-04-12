@@ -44,6 +44,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
 //  private static final int MIN_WARN_DUR = 30;
   private static final String REG = "reg";
   private static final String SLOW = "slow";
+  private static final int SUFFIX_LENGTH = ("." + AudioTag.COMPRESSED_TYPE).length();
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -717,11 +718,11 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
     }
 
     String vocab = asrScoring.getUsedTokens(lmSentences, unk); // this is basically the transcript
-    logger.info("from '" + lmSentences + "' to '" + vocab +"'");
+  //  logger.info("from '" + lmSentences + "' to '" + vocab +"'");
     String prefix = usePhoneToDisplay ? "phoneToDisplay" : "";
     String path = testAudioFile.getPath();
 
-    logger.info("getASRScoreForAudio audio file path is " + path);
+  //  logger.info("getASRScoreForAudio audio file path is " + path);
     return getASRScoreForAudio(0, path, vocab, lmSentences, 128, 128, false, true,
         canUseCache && serverProps.useScoreCache(), prefix, null, usePhoneToDisplay, useOldSchool);
   }
@@ -888,7 +889,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
     return this.decodeCorrectnessChecker.getFlashcardAnswer(e, audioFile, answer, this.serverProps.getLanguage(), true, false, false);
   }*/
   private String removeSuffix(String audioFile) {
-    return audioFile.substring(0, audioFile.length() - ("." + AudioTag.COMPRESSED_TYPE).length());
+    return audioFile.substring(0, audioFile.length() - SUFFIX_LENGTH);
   }
 
   public String getWavForMP3(String audioFile) {
@@ -934,16 +935,6 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
   public Map<String, Integer> getPhoneToCount() {
     return phoneToCount;
   }
-
-/*  public static class ScoreAndAnswer {
-    public final PretestScore score;
-    public final AudioAnswer answer;
-
-    public ScoreAndAnswer(PretestScore score, AudioAnswer answer) {
-      this.score = score;
-      this.answer = answer;
-    }
-  }*/
 
   /**
    * @return

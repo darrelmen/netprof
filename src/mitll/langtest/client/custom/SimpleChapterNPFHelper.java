@@ -78,7 +78,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @see Navigation#addTabs
    * @see mitll.langtest.client.custom.Navigation#selectPreviousTab
    */
-  public void showNPF(TabAndContent tabAndContent, String instanceName) {
+  void showNPF(TabAndContent tabAndContent, String instanceName) {
     // logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();

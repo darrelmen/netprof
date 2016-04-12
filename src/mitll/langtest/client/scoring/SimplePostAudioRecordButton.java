@@ -45,7 +45,6 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
   private final LangTestDatabaseAsync service;
   private final String textToAlign;
   private final String identifier;
-  //private final SimpleColumnChart chart = new SimpleColumnChart();
   protected AudioAnswer lastResult;
 
   /**
@@ -203,9 +202,11 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
 
   public abstract void useResult(AudioAnswer result);
 
+/*
   public boolean hasValidAudio() {
     return validAudio;
   }
+*/
 
   public HorizontalPanel getSentColors(String sentToColor){
 	  HorizontalPanel colorfulSent = new HorizontalPanel();
