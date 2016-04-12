@@ -925,8 +925,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see #getMonitorResults()
    */
   public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults) {
-    Map<String, CommonExercise> join = getIdToExerciseMap();
-    resultDAO.addUnitAndChapterToResults(monitorResults, join);
+    resultDAO.addUnitAndChapterToResults(monitorResults, getIdToExerciseMap());
     return monitorResults;
   }
 
