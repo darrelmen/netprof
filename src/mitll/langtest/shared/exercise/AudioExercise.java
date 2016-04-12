@@ -183,7 +183,7 @@ public class AudioExercise extends ExerciseShell {
     for (AudioAttribute audioAttribute : audioAttributes.values()) {
       MiniUser user = audioAttribute.getUser();
       if (user == null) {
-        System.err.println ("getByGender : huh? there's no user attached to " + audioAttribute);
+        //logger.error ("getByGender : huh? there's no user attached to " + audioAttribute);
       }
       else if (isMale && user.isMale() || (!isMale && !user.isMale())) {
         males.add(audioAttribute);

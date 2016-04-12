@@ -41,7 +41,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   private PretestScore result;
   private boolean showOnlyOneExercise = false; // true for when called from the headstart website
   private static final boolean debug = false;
-  public static final float MP3_HEADER_OFFSET = 0f;//0.048f;
+ // public static final float MP3_HEADER_OFFSET = 0f;//0.048f;
 
   /**
    * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, LangTestDatabaseAsync, ExerciseController, ScoreListener, String, String, T, String)
@@ -320,7 +320,8 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
 
     @Override
     public void onSegmentClick(TranscriptSegment segment) {
-      playSegment(MP3_HEADER_OFFSET+segment.getStart(), MP3_HEADER_OFFSET+segment.getEnd());
+   //   playSegment(MP3_HEADER_OFFSET+segment.getStart(), MP3_HEADER_OFFSET+segment.getEnd());
+      playSegment(segment.getStart(), segment.getEnd());
       long user = (long) controller.getUser();
       controller.getButtonFactory().logEvent(widget, type.toString(), exerciseID, "Clicked on " + segment.getEvent(), user);
     }
