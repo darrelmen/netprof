@@ -31,6 +31,7 @@ import java.util.logging.Logger;
  */
 public abstract class AmasExercisePanel extends VerticalPanel implements
     PostAnswerProvider, ProvidesResize, RequiresResize, ExerciseQuestionState {
+  public static final String LISTEN_TO_THIS = "Listen to this audio and answer the question below";
   private final Logger logger = Logger.getLogger("AmasExercisePanel");
 
   private static final int QUESTION_WIDTH = 700;
@@ -88,11 +89,8 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
     } else if (e.getOrient() != null) {
       addInstructions("Orientation : " + e.getOrient(), true);
       logger.info("AmasExercisePanel for " + e.getID() + " audio " + e.getAudioURL());
-      add(new Heading(4, "Listen to this audio and answer the question below"));
-      Audio ifSupported = Audio.createIfSupported();
-      String audioURL = e.getAudioURL();
-      ifSupported.setSrc(audioURL);
-      add(ifSupported);
+      add(new Heading(4, LISTEN_TO_THIS));
+      add(getAudioTag(e));
     }
     add(hp);
 
@@ -102,6 +100,21 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
     add(amasNavigationHelper);
     amasNavigationHelper.addStyleName("topMargin");
     getElement().setId("AmasExercisePanel");
+  }
+
+  /**
+   *
+   * @param e
+   * @return
+   */
+  private Audio getAudioTag(AmasExerciseImpl e) {
+    Audio ifSupported = Audio.createIfSupported();
+    ifSupported.setControls(true);  // this is absolutely necessary - if missing, won't show up at all!
+    String audioURL = e.getAudioURL();
+    ifSupported.setSrc(audioURL);
+    String suffix = audioURL.substring(audioURL.length()-3);
+    ifSupported.getAudioElement().setAttribute("type","audio/"+suffix);
+    return ifSupported;
   }
 
   private AmasNavigationHelper getNavigationHelper(ExerciseController controller) {
