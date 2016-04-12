@@ -125,7 +125,9 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
 
     Heading promptOnRight = new Heading(4, text);
 
-    if (useLanguage) promptOnRight.addStyleName(controller.getLanguage().toLowerCase());
+    if (useLanguage) {
+      setLanguageSpecificFont(promptOnRight);
+    }
     idInfoOnLeft.add(promptOnRight);
     promptOnRight.addStyleName("floatRight");
 
@@ -176,9 +178,22 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
     widget.addStyleName("wrapword");
     widget.addStyleName("rightTenMargin");
     widget.addStyleName("leftTenMargin");
-    widget.addStyleName(controller.getLanguage().toLowerCase());
+    setLanguageSpecificFont(widget);
 
     return widget;
+  }
+
+  private void setLanguageSpecificFont(Widget widget) {
+    widget.addStyleName(controller.getLanguage().toLowerCase());
+
+    String fontFamily = controller.getProps().getFontFamily();
+    if (!fontFamily.isEmpty()) {
+      logger.info("using font family " +fontFamily);
+      widget.getElement().getStyle().setProperty("fontFamily",fontFamily);
+    }
+    else {
+      logger.info("not using font family property");
+    }
   }
 
 /*  private Heading getItemHeader(int index, int totalInQuiz, String id) {
