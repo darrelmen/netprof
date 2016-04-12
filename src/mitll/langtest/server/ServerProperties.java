@@ -123,6 +123,8 @@ public class ServerProperties {
   private EmailList emailList;
   private final int userInitialScores = 20;
   private boolean RTL;
+  private String fontNames;
+  private String fontFaceURL;
 
   /**
    * @param servletContext
@@ -580,5 +582,25 @@ public class ServerProperties {
 
   public void setRTL(boolean isRTL) {
     props.setProperty("rtl", isRTL ? "true" : "false");
+  }
+
+  public void setFontNames(String fontNames) {
+    this.fontNames = fontNames;
+  }
+
+  public String getFontNames() {
+    return fontNames;
+  }
+
+  public void setFontFaceURL(String fontFaceURL) {
+    this.fontFaceURL = fontFaceURL;
+  }
+
+  /**
+   * Something like : "https://domino-devel/dominoNP/attach/"
+   * @return
+   */
+  public String getAudioAttachPrefix() {
+    return props.getProperty("audioAttachPrefix");//,"https://domino-devel/dominoNP/attach/");
   }
 }

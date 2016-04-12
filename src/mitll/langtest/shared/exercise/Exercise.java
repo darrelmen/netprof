@@ -147,7 +147,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return this;
   }
 
-  protected void addContext(String context, String contextTranslation) {
+  private void addContext(String context, String contextTranslation) {
     if (!context.isEmpty()) {
       Exercise contextExercise = new Exercise("c" + id, context, contextTranslation);
       addContextExercise(contextExercise);
@@ -237,7 +237,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
 
-  protected void addContextExercise(CommonExercise contextExercise) {
+  private void addContextExercise(CommonExercise contextExercise) {
     directlyRelated.add(contextExercise);
   }
 
