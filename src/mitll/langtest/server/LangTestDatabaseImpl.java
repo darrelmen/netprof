@@ -985,7 +985,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return ensureMP3(wavFile, title, artist, pathHelper.getInstallPath());
   }
 
-//  int spew = 0;
+  // int spew = 0;
 
   private boolean ensureMP3(String wavFile, String title, String artist, String parent) {
     if (wavFile != null) {
@@ -995,11 +995,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         // }
         parent = configDir;
       }
-      if (!audioConversion.exists(wavFile, parent)) {// && wavFile.contains("1310")) {
-        if (WARN_MISSING_FILE/* && spew++ < 10*/) {
+/*      if (!audioConversion.exists(wavFile, parent)) {// && wavFile.contains("1310")) {
+        if (WARN_MISSING_FILE && spew++ < 10) {
           logger.error("ensureMP3 : can't find " + wavFile + " under " + parent + " for " + title + " " + artist);
         }
-      }
+      }*/
 
       String s = audioConversion.ensureWriteMP3(wavFile, parent, false, title, artist);
       boolean isMissing = s.equals(AudioConversion.FILE_MISSING);
@@ -1725,6 +1725,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   // Results ---------------------
 
   /**
+   * TODO : consider doing offset/limit on database query.
+   * TODO : super expensive on long lists
+   * <p>
    * Sometimes we type faster than we can respond, so we can throw away stale requests.
    * <p>
    * Filter results by search criteria -- unit->value map (e.g. chapter=5), userid, and foreign language text
@@ -1753,6 +1756,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       start = 0;
     }
     List<MonitorResult> resultList = results.subList(start, min);
+    logger.info("ensure compressed audio for " + resultList.size() + " items.");
+    for (MonitorResult result : resultList) {
+      ensureCompressedAudio((int) result.getUserid(), db.getCustomOrPredefExercise(result.getId()), result.getAnswer());
+    }
     return new ResultAndTotal(new ArrayList<MonitorResult>(resultList), n, req);
   }
 
@@ -1762,6 +1769,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * TODO : don't fetch everything from the database if you don't have to.
+   * Use offset and limit to restrict?
+   * 
    * @param unitToValue
    * @param userid
    * @param flText
@@ -1781,6 +1791,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText + " returning " + monitorResultsByID.size() + " results...");
       return monitorResultsByID;
     }
+
+    boolean filterByUser = userid > -1;
 
     Collection<MonitorResult> results = db.getMonitorResults();
 
@@ -1806,7 +1818,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
     }
 
-    if (userid > -1) { // asking for userid
+    if (filterByUser) { // asking for userid
       // make trie from results
       //      logger.debug("making trie for userid " + userid);
 
@@ -1821,7 +1833,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     // must be asking for text
-    if (flText != null && !flText.isEmpty()) { // asking for text
+    boolean filterByText = flText != null && !flText.isEmpty();
+    if (filterByText) { // asking for text
       trie = new Trie<MonitorResult>();
       trie.startMakingNodes();
       //     logger.debug("searching over " + results.size());
@@ -2110,11 +2123,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private void ensureCompressedEquivalent(int user, CommonShell exercise1, AudioAnswer audioAnswer) {
+    String path = audioAnswer.getPath();
+    ensureCompressedAudio(user, exercise1, path);
+  }
+
+  private void ensureCompressedAudio(int user, CommonShell exercise1, String path) {
     String foreignLanguage = exercise1 == null ? "unknown" : exercise1.getForeignLanguage();
     String userID = getUserID(user);
-    if (userID == null) { logger.warn("ensureCompressedEquivalent huh? no user for " + user); }
+    if (userID == null) {
+      logger.warn("ensureCompressedEquivalent huh? no user for " + user);
+    }
 
-    ensureMP3(audioAnswer.getPath(), foreignLanguage, userID);
+    ensureMP3(path, foreignLanguage, userID);
   }
 
   private String getUserID(int user) {
