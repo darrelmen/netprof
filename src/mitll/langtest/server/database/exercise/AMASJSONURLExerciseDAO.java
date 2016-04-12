@@ -9,7 +9,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
-import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -40,8 +40,7 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
   }
 
   void readExercisesFromURL() {
-    this.exercises = readExercises();
-    populateIDToExercise(exercises);
+    populateIDToExercise(this.exercises = readExercises());
   }
 
   /**
@@ -120,6 +119,13 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
     String srcAudio = null;
     try {
       srcAudio = attlist.has("src-att") ? attlist.getString("src-att") : "";
+      if (!srcAudio.isEmpty()) {
+        if (!srcAudio.startsWith("http")) {
+         // srcAudio = URLEncoder.encode(srcAudio, "UTF-8");
+          srcAudio = srcAudio.replaceAll("\\s++","%20");
+          srcAudio = serverProps.getAudioAttachPrefix()+srcAudio;
+        }
+      }
     } catch (Exception e) {
       logger.error("reading hub :" + hubDID + " and " + jsonObject +
           " Got " + e, e);
