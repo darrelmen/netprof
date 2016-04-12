@@ -4,6 +4,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MutableShell;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import net.sf.json.JSONObject;
 
 import java.io.InputStream;
 import java.util.*;
@@ -51,7 +52,7 @@ public class AmasExerciseImpl implements CommonShell {
 
   /**
    * @param id
-   * @see mitll.langtest.server.amas.FileExerciseDAO#readTSVLine(String, String, String, int)
+   * @see mitll.langtest.server.database.exercise.AMASJSONURLExerciseDAO#toAMASExercise(JSONObject)
    */
   public AmasExerciseImpl(String id, String content, //String altID,
                           String contentTrans,
@@ -249,21 +250,23 @@ public class AmasExerciseImpl implements CommonShell {
     return Collections.singleton(getForeignLanguage());
   }
 
+/*
   public String getContentTrans() {
     return contentTrans;
   }
+*/
 
   public String getOrient() {
     return orient;
   }
 
-  public String getOrientTrans() {
+/*  public String getOrientTrans() {
     return orientTrans;
   }
 
   public String getIlr() {
     return ilr;
-  }
+  }*/
 
   public boolean isListening() {
     return isListening;
