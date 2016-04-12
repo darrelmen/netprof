@@ -13,12 +13,15 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.Widget;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -28,56 +31,51 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class ModalInfoDialog {
+  private final Logger logger = Logger.getLogger("ModalInfoDialog");
+
   private static final List<String> MESSAGES = Collections.emptyList();
   private final KeyPressHelper enterKeyButtonHelper = new KeyPressHelper();
 
-  public ModalInfoDialog() {}
+  public ModalInfoDialog() {
+  }
 
   public ModalInfoDialog(String title, String message) {
     this(title, message, null);
   }
 
   public ModalInfoDialog(String title, Widget widget) {
-    this(title, MESSAGES, widget, null);
+    this(title, MESSAGES, Collections.emptyList(), widget, null, false);
   }
 
   public ModalInfoDialog(String title, String message, HiddenHandler handler) {
-    this(title, Collections.singleton(message), null, handler);
+    this(title, Collections.singleton(message), Collections.emptyList(), null, handler, false);
   }
 
-  public ModalInfoDialog(String title, Collection<String> messages, Widget widget, HiddenHandler handler) {
-    getModal(title, messages, widget, handler).show();
+  public ModalInfoDialog(String title, Collection<String> messages, Collection<String> values, Widget widget, HiddenHandler handler, boolean bigger) {
+    Modal modal = getModal(title, messages, values, widget, handler, bigger);
+    modal.show();
   }
 
-  public Modal getModal(String title, String message, Widget widget, HiddenHandler handler) {
-    return getModal(title, Collections.singleton(message), widget, handler);
+  public Modal getModal(String title, String message, Widget widget, HiddenHandler handler, boolean bigger) {
+    return getModal(title, Collections.singleton(message), Collections.emptyList(), widget, handler, bigger);
   }
 
-/*  public Modal getModal(String title, String message) {
-    return getModal(title, Collections.singleton(message), null, null);
-  }*/
-
-  private Modal getModal(String title, Collection<String> messages, Widget widget, HiddenHandler handler) {
+  public Modal getModal(String title, Collection<String> messages, Collection<String> values, Widget widget, HiddenHandler handler, boolean bigger) {
     final Modal modal = new Modal(true);
     modal.setTitle(title);
-    for (String m : messages) {
-      // Heading w = new Heading(messageHeading);
-      HTML w = new HTML(m);
-      //   w.setText(m);
-      modal.add(w);
-    }
+
+    addContent(messages, values, modal, bigger);
+
     if (widget != null) modal.add(widget);
-    //modal.add(new Heading(4));
 
     final Button begin = getOKButton(modal);
     begin.addStyleName("floatRight");
     modal.add(begin);
 
     if (handler != null) {
-      System.out.println("\tModalInfoDialog.added hidden handler ");
-
       modal.addHiddenHandler(handler);
     }
+
     modal.addHiddenHandler(new HiddenHandler() {
       @Override
       public void onHidden(HiddenEvent hiddenEvent) {
@@ -85,6 +83,30 @@ public class ModalInfoDialog {
       }
     });
     return modal;
+  }
+
+  protected FlexTable addContent(Collection<String> messages, Collection<String> values, Modal modal, boolean bigger) {
+    FlexTable flexTable = new FlexTable();
+
+    int r = 0;
+
+    HTMLTable.RowFormatter rf = flexTable.getRowFormatter();
+
+
+    Iterator<String> iterator = values.iterator();
+    for (String m : messages) {
+      flexTable.setHTML(r, 0, m);
+
+      if (iterator.hasNext()) {
+        flexTable.setHTML(r, 1, "&nbsp;" + "<b>" + iterator.next() + "</b>");
+      }
+      if (bigger) {
+        rf.addStyleName(r, "Instruction-title");
+      }
+      r++;
+    }
+    modal.add(flexTable);
+    return flexTable;
   }
 
   private Button getOKButton(final Modal modal) {

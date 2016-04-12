@@ -17,7 +17,9 @@ import mitll.langtest.client.BrowserCheck;
 public class ExceptionHandlerDialog {
   public ExceptionHandlerDialog(Throwable throwable) { showException(null, throwable);  }
 
+/*
   public ExceptionHandlerDialog(){}
+*/
 
   private void showException(BrowserCheck browserCheck, Throwable throwable) {
     String text = getExceptionAsString(throwable);
