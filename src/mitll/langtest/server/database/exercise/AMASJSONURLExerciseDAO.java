@@ -37,6 +37,8 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
 
     sectionHelper.setPredefinedTypeOrder(Arrays.asList(ILRMapping.TEST_TYPE, ILRMapping.ILR_LEVEL));
     readExercisesFromURL();
+
+    new DominoReader().readProjectInfo(serverProps);
   }
 
   void readExercisesFromURL() {
@@ -72,7 +74,6 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
    * @return
    */
   private String getJSON() {
-    logger.info(serverProps.getLanguage() + " Reading from " + serverProps.getLessonPlan());
     return new HTTPClient().readFromGET(serverProps.getLessonPlan());
   }
 
