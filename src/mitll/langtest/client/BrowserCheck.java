@@ -8,8 +8,11 @@ import com.google.gwt.user.client.Window;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class BrowserCheck {
+  private final Logger logger = Logger.getLogger("BrowserCheck");
+
   private static final String FIREFOX = "firefox";
   private static final String CHROME = "chrome";
   private static final String MSIE = "msie";
@@ -17,10 +20,12 @@ public class BrowserCheck {
   private static final String IE = "IE";
 
   private String browser = "Unknown";
-  public int ver = 0;
+  int ver = 0;
   private String version = "";
 
   private final Map<String, Integer> browserToVersion = new HashMap<String, Integer>();
+
+//  private String hostGuess;
 
   public BrowserCheck() {
     browserToVersion.put(FIREFOX, 14);
@@ -33,7 +38,7 @@ public class BrowserCheck {
    * @return
    * @see LangTest#onModuleLoad2()
    */
-  public BrowserCheck checkForCompatibleBrowser() {
+  BrowserCheck checkForCompatibleBrowser() {
     if (browser.equals("Unknown")) getBrowserAndVersion();
     Integer min = browserToVersion.get(browser);
     if (browser.toLowerCase().contains("ie")) { // just skip IE
@@ -62,13 +67,23 @@ public class BrowserCheck {
     return getBrowserAndVersion().equals("IE 7");
   }
 
+  public boolean isIE() {
+    return browser.equals("IE");
+  }
+
+  public static boolean isIPad() {
+    String userAgent = getUserAgent();
+    boolean b = userAgent.contains("ipad") || userAgent.contains("iphone") || userAgent.contains("ipod");
+    //if (b) logger.info("found iPad " + userAgent);
+    return b;
+  }
+
   /**
    * @return
-   * @see mitll.langtest.client.LangTest#getReleaseStatus()
+   * @see LangTest#getBrowserInfo()
    */
-  public String getBrowserAndVersion() {
-    String agent = getUserAgent();
-    return getBrowser(agent);
+  String getBrowserAndVersion() {
+    return getBrowser(getUserAgent());
   }
 
   public String getBrowser(String agent) {
@@ -96,8 +111,8 @@ public class BrowserCheck {
     try {
       ver = Integer.parseInt(major);
     } catch (NumberFormatException e) {
-      System.err.println("couldn't parse " + agent + " and " + major);
-      e.printStackTrace();
+      //   logger.warning("couldn't parse '" + agent + "' and '" + major + "'");
+      //e.printStackTrace();
     }
     return browser + " " + ver;
   }
