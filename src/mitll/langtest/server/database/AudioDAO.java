@@ -135,7 +135,8 @@ public class AudioDAO extends DAO {
       //  }
     }
     long now = System.currentTimeMillis();
-    logger.info("getExToAudio took " + (now - then) + " millis to get  " + audioAttributes1.size() + " audio entries");
+    logger.info("getExToAudio (" +database.getLanguage()+
+        ") took " + (now - then) + " millis to get  " + audioAttributes1.size() + " audio entries");
 //    logger.debug("map size is " + exToAudio.size());
     return exToAudio;
   }
@@ -336,11 +337,11 @@ public class AudioDAO extends DAO {
           attr.setAudioRef(relativeConfigDir + File.separator + attr.getAudioRef());
           logger.debug("\tattachAudioAndFixPath now '" + attr.getAudioRef() + "'");
         } else {
-          // logger.debug("\tattachAudio couldn't find audio file at '" + attr.getAudioRef() + "'");
+//          logger.debug("\tattachAudio couldn't find audio file at '" + attr.getAudioRef() + "'");
         }
       }
     } else {
-//      logger.info("not attaching audio " + attr.getUniqueID() + " to " + firstExercise.getID() + " since transcript has changed.");
+      logger.info("not attaching audio " + attr.getUniqueID() + " to " + firstExercise.getID() + " since transcript has changed.");
     }
   }
 
@@ -353,8 +354,7 @@ public class AudioDAO extends DAO {
    */
   private Collection<AudioAttribute> getAudioAttributes(String exid) {
     try {
-      String sql = SELECT_ALL +
-          " WHERE " + Database.EXID + "='" + exid + "' AND " + DEFECT + "=false";
+      String sql = SELECT_ALL + " WHERE " + Database.EXID + "='" + exid + "' AND " + DEFECT + "=false";
       Collection<AudioAttribute> resultsSQL = getResultsSQL(sql);
       Set<String> paths = new HashSet<>();
 
@@ -494,18 +494,28 @@ public class AudioDAO extends DAO {
    * @return
    * @see DatabaseImpl#getMaleFemaleProgress()
    */
-  public Map<String, Float> getRecordedReport(Map<Long, User> userMapMales, Map<Long, User> userMapFemales, float total,
+  public Map<String, Float> getRecordedReport(Map<Long, User> userMapMales,
+                                              Map<Long, User> userMapFemales,
+                                              float total,
                                               Set<String> uniqueIDs) {
-    float maleFast = getCountForGender(userMapMales.keySet(), REGULAR, uniqueIDs);
-    float maleSlow = getCountForGender(userMapMales.keySet(), SLOW, uniqueIDs);
-    float male = getCountBothSpeeds(userMapMales.keySet(), uniqueIDs);
+    Set<Long> maleIDs = userMapMales.keySet();
+    maleIDs = new HashSet<>(maleIDs);
+    maleIDs.add((long)UserDAO.DEFAULT_MALE_ID);
 
-    float femaleFast = getCountForGender(userMapFemales.keySet(), REGULAR, uniqueIDs);
-    float femaleSlow = getCountForGender(userMapFemales.keySet(), SLOW, uniqueIDs);
-    float female = getCountBothSpeeds(userMapFemales.keySet(), uniqueIDs);
+    float maleFast = getCountForGender(maleIDs, REGULAR, uniqueIDs);
+    float maleSlow = getCountForGender(maleIDs, SLOW, uniqueIDs);
+    float male = getCountBothSpeeds(maleIDs, uniqueIDs);
 
-    float cmale = getCountForGender(userMapMales.keySet(), CONTEXT_REGULAR, uniqueIDs);
-    float cfemale = getCountForGender(userMapFemales.keySet(), CONTEXT_REGULAR, uniqueIDs);
+    Set<Long> femaleIDs = userMapFemales.keySet();
+    femaleIDs = new HashSet<>(femaleIDs);
+    femaleIDs.add((long) UserDAO.DEFAULT_FEMALE_ID);
+
+    float femaleFast = getCountForGender(femaleIDs, REGULAR, uniqueIDs);
+    float femaleSlow = getCountForGender(femaleIDs, SLOW, uniqueIDs);
+    float female = getCountBothSpeeds(femaleIDs, uniqueIDs);
+
+    float cmale   = getCountForGender(maleIDs, CONTEXT_REGULAR, uniqueIDs);
+    float cfemale = getCountForGender(femaleIDs, CONTEXT_REGULAR, uniqueIDs);
 
     Map<String, Float> report = new HashMap<>();
     report.put(TOTAL, total);

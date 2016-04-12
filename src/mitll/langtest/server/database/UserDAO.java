@@ -49,11 +49,18 @@ public class UserDAO extends DAO {
   private static final String DIALECT = "dialect";
   private static final String TIMESTAMP = "timestamp";
   public static final int DEFAULT_USER_ID = -1;
+  /**
+   * After a default user has been marked male
+   */
   public static final int DEFAULT_MALE_ID = -2;
+  /**
+   * After a default user has been marked female
+   */
   public static final int DEFAULT_FEMALE_ID = -3;
   public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 99, 0, "default", false);
-  public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 99, 0, "Male", false);
-  public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, 1, "Female", false);
+
+  static MiniUser DEFAULT_MALE   = new MiniUser(DEFAULT_MALE_ID,   99, 0, "Male", false);
+  static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, 1, "Female", false);
 
   private Collection<String> admins;
 
