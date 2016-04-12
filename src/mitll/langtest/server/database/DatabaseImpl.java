@@ -343,8 +343,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see DatabaseImpl#getTypeOrder
    */
   public SectionHelper<CommonExercise> getSectionHelper() {
-    if (serverProps.isAMAS()) {
-      //return fileExerciseDAO.getSectionHelper();
+    if (isAmas()) {
       return new SectionHelper<>();
     }
 
@@ -352,15 +351,19 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return exerciseDAO.getSectionHelper();
   }
 
+  boolean isAmas() {
+    return serverProps.isAMAS();
+  }
+
   public Collection<String> getTypeOrder() {
-    SectionHelper sectionHelper = (serverProps.isAMAS()) ? getAMASSectionHelper() : getSectionHelper();
+    SectionHelper sectionHelper = (isAmas()) ? getAMASSectionHelper() : getSectionHelper();
     if (sectionHelper == null) logger.warn("no section helper for " + this);
     List<String> objects = Collections.emptyList();
     return (sectionHelper == null) ? objects : sectionHelper.getTypeOrder();
   }
 
   public Collection<SectionNode> getSectionNodes() {
-    SectionHelper<?> sectionHelper = (serverProps.isAMAS()) ? getAMASSectionHelper() : getSectionHelper();
+    SectionHelper<?> sectionHelper = (isAmas()) ? getAMASSectionHelper() : getSectionHelper();
     return sectionHelper.getSectionNodes();
   }
 
@@ -381,7 +384,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see #getExercises()
    */
   public Collection<CommonExercise> getExercises() {
-    if (serverProps.isAMAS()) {
+    if (isAmas()) {
       return Collections.emptyList();
     }
     List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
@@ -393,12 +396,17 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   /**
    * Amas dedicated calls
+   *
    * @return
    */
-  public Collection<AmasExerciseImpl> getAMASExercises() { return fileExerciseDAO.getRawExercises();  }
+  public Collection<AmasExerciseImpl> getAMASExercises() {
+    return fileExerciseDAO.getRawExercises();
+  }
+
   public AmasExerciseImpl getAMASExercise(String id) {
     return fileExerciseDAO.getExercise(id);
   }
+
   public SectionHelper<AmasExerciseImpl> getAMASSectionHelper() {
     return fileExerciseDAO.getSectionHelper();
   }
@@ -406,7 +414,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * Lazy, latchy instantiation of DAOs.
    * Not sure why it really has to be this way.
-   *
+   * <p>
    * Special check for amas exercises...
    *
    * @param mediaDir
@@ -415,7 +423,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     if (exerciseDAO == null) {
       synchronized (this) {
         boolean isURL = serverProps.getLessonPlan().startsWith("http");
-        boolean amas = serverProps.isAMAS();
+        boolean amas = isAmas();
         if (amas) {
           int numExercises;
 //          logger.info("Got " + lessonPlanFile);
@@ -465,9 +473,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       if (fileExerciseDAO != null) {
         logger.info("reloading from fileExerciseDAO");
         fileExerciseDAO.reload();
-       // numExercises = fileExerciseDAO.getNumExercises();
-      }
-      else {
+        // numExercises = fileExerciseDAO.getNumExercises();
+      } else {
         logger.error("huh? no exercise DAO yet???");
       }
     }
@@ -923,7 +930,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     List<MonitorResult> monitorResults = resultDAO.getMonitorResults();
 
     for (MonitorResult result : monitorResults) {
-      CommonExercise exercise = getExercise(result.getId());
+      CommonShell exercise = isAmas() ? getAMASExercise(result.getId()) : getExercise(result.getId());
       if (exercise != null) {
         result.setDisplayID(exercise.getDisplayID());
       }
@@ -938,8 +945,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see #getMonitorResults()
    */
   public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults) {
-    Map<String, CommonExercise> join = getIdToExerciseMap();
-    resultDAO.addUnitAndChapterToResults(monitorResults, join);
+    resultDAO.addUnitAndChapterToResults(monitorResults, getIdToExerciseMap());
     return monitorResults;
   }
 
