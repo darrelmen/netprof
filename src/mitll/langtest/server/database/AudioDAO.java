@@ -165,7 +165,7 @@ public class AudioDAO extends DAO {
 
     long then = System.currentTimeMillis();
     try {
-      logger.debug("updateTranscript ");
+  //    logger.debug("updateTranscript ");
       Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + AUDIO + " " +
           "SET " + TRANSCRIPT + "=? " +
