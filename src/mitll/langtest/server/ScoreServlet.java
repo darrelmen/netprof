@@ -252,17 +252,16 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private int getYear(String queryString) {
     String[] split1 = queryString.split("&");
-    int year;
+    int year = -1;
     if (split1.length == 2) {
       String param = split1[1];
 //      logger.info("Got param " + param);
-      year = getParamIntValue(param, YEAR);
-      if (year == -1) {
-        year = Calendar.getInstance().get(Calendar.YEAR);
-      }
-    } else {
-      year = Calendar.getInstance().get(Calendar.YEAR);
+      int paramIntValue = getParamIntValue(param, YEAR);
+      if (paramIntValue > 0) year = paramIntValue;
     }
+   // else {
+   //   year = Calendar.getInstance().get(Calendar.YEAR);
+   // }
     return year;
   }
 
@@ -310,7 +309,7 @@ public class ScoreServlet extends DatabaseServlet {
       }
     } catch (NumberFormatException e) {
       logger.warn("got " + e + " on " + arg);
-      return -1;
+      return 0;
     }
   }
 
