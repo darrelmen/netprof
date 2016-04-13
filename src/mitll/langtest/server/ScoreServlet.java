@@ -532,7 +532,10 @@ public class ScoreServlet extends DatabaseServlet {
     response.setContentType("test/html; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
 
-    response.setHeader("Content-disposition", "attachment; filename=reportForYear" + year + ".html");
+    String fileName = year == -1 ? "reportFor" + getLanguage() : ("reportFor" +getLanguage()+"_forYear" + year);
+
+    response.setHeader("Content-disposition", "attachment; filename=" +
+        fileName + ".html");
   }
 
   /**
