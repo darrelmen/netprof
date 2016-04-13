@@ -1335,6 +1335,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   /**
    * Expensive ?
+   *
    * @see ScoreServlet#getJSONExport
    */
   public void attachAllAudio() {
@@ -1353,7 +1354,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       // exercises.add(getJsonForExercise(exercise));
     }
     long now = System.currentTimeMillis();
-    logger.info(getLanguage() + " took " + (now-then) + " millis to attachAllAudio to " + exercises.size()+ " exercises");
+    logger.info(getLanguage() + " took " + (now - then) + " millis to attachAllAudio to " + exercises.size() + " exercises");
   }
 
   public String getUserListName(long listid) {
@@ -1399,6 +1400,13 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private Report getReport(String prefix) {
     return new Report(userDAO, resultDAO, eventDAO, audioDAO, serverProps.getLanguage(), prefix);
   }
+
+  /**
+   * FOR TESTING
+   * @param pathHelper
+   * @return
+   */
+  public JSONObject doReport(PathHelper pathHelper) { return doReport(pathHelper, "", -1);  }
 
   /**
    * JUST FOR TESTING
