@@ -1416,7 +1416,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public JSONObject doReport(PathHelper pathHelper, String prefix, int year) {
     try {
-      return getReport(prefix).writeReportToFile(pathHelper, serverProps.getLanguage(), year);
+      Report report = getReport(prefix);
+      return report.writeReportToFile(pathHelper, serverProps.getLanguage(), year);
     } catch (IOException e) {
       logger.error("got " + e);
       return null;
