@@ -241,13 +241,16 @@ public class Report {
    * @see #writeReportToFile
    */
   private String doReport(PathHelper pathHelper, String language, JSONObject jsonObject, int year) {
+    logger.info(language +" doReport for " + year);
     openCSVWriter(pathHelper, language);
+    return getReport(language, jsonObject, year);
+  }
 
+  public String getReport(String language, JSONObject jsonObject, int year) {
     StringBuilder builder = new StringBuilder();
     builder.append(getHeader());
     jsonObject.put("host", getHostInfo());
     JSONArray dataArray = new JSONArray();
-
 
     if (year == -1) {
       SlimEvent firstSlim = eventDAO.getFirstSlim();
@@ -256,7 +259,10 @@ public class Report {
       instance.clear();
       instance.setTimeInMillis(timestamp);
       int firstYear = instance.get(Calendar.YEAR);
-      for (int i = firstYear; i <= Calendar.getInstance().get(Calendar.YEAR); i++) {
+      int thisYear = Calendar.getInstance().get(Calendar.YEAR);
+      logger.info(language +" doReport for " + firstYear + "->" + thisYear);
+
+      for (int i = firstYear; i <= thisYear; i++) {
         addYear(dataArray, builder, i);
       }
     } else {
@@ -276,15 +282,16 @@ public class Report {
   }
 
   /**
+   * @see #addYear(JSONArray, StringBuilder, int)
    * @param jsonObject
    * @param year
    * @return
    * @see DatabaseImpl#getReport(int, JSONObject)
    */
-  String getReport(JSONObject jsonObject, int year) {
+  private String getReport(JSONObject jsonObject, int year) {
     jsonObject.put("forYear", year);
 
-    //  logger.info("doing year " + year);
+    logger.info(language + " : doing year " + year);
     List<SlimEvent> allSlim = eventDAO.getAllSlim();
     setUserStart(allSlim);
 
