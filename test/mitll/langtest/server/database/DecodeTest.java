@@ -49,7 +49,7 @@ public class DecodeTest extends BaseTest {
   }
 
   @Test
-  public void testSpanish() {
+  public void testSpanish2() {
     DatabaseImpl db = getDatabase("spanish");
     AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), db.getServerProps(), db, null);
 
