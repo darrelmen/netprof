@@ -1394,7 +1394,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see mitll.langtest.server.ScoreServlet#getReport(JSONObject, int)
    */
   public String getReport(int year, JSONObject jsonObject) {
-    return getReport("").getReport(jsonObject, year);
+    return getReport("").getReport(serverProps.getLanguage(), jsonObject, year);
   }
 
   private Report getReport(String prefix) {
