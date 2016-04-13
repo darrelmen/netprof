@@ -94,6 +94,23 @@ public class Report {
     this.audioDAO = audioDAO;
     this.language = language;
     this.prefix = prefix;
+
+
+/*    Date now = new Date();
+    Calendar c =Calendar.getInstance();
+    c.setTimeInMillis(now.getTime());
+    int thisWeek = c.get(Calendar.WEEK_OF_YEAR);
+    logger.info ("now " +now + " " + thisWeek);
+
+    Calendar calendarForYear = getCalendarForYear(2016);
+    logger.info("before " + calendarForYear.getTime());
+    calendarForYear.set(Calendar.WEEK_OF_YEAR,thisWeek);
+    calendarForYear.set(Calendar.DAY_OF_WEEK,1);
+
+    int thisWeek2 = calendarForYear.get(Calendar.WEEK_OF_YEAR);
+
+    logger.info("after " + thisWeek2 + " : " + calendarForYear.getTime());*/
+
   }
 
   /**
@@ -318,12 +335,12 @@ public class Report {
     }
 
     JSONObject referenceRecordings = new JSONObject();
-    addRefAudio(builder, calendar, january1st, january1stNextYear, audioDAO.getAudioAttributes(), referenceRecordings, year);
+    addRefAudio(builder, calendar, audioDAO.getAudioAttributes(), referenceRecordings, year);
     jsonObject.put("referenceRecordings", referenceRecordings);
 
     JSONObject browserReport = new JSONObject();
     getBrowserReport(getValidUsers(fixUserStarts()), year, browserReport, builder);
-    jsonObject.put("HostInfo", browserReport);
+    jsonObject.put("hostInfo", browserReport);
 
     return builder.toString();
   }
@@ -560,8 +577,8 @@ public class Report {
     int weekTotal = 0;
     for (Integer count : weekToCount.values()) weekTotal += count;
 
-    logger.info("users month total " + monthTotal + " week total " + weekTotal);
     if (monthTotal != weekTotal) {
+      logger.info("users month total " + monthTotal + " week total " + weekTotal);
       logger.info("weeks\n" + weekToCount);
       logger.info("users " + weekToCount.keySet());
     }
@@ -769,8 +786,9 @@ public class Report {
     Calendar calendar = getCalendarForYear(year);
     SimpleDateFormat df = new SimpleDateFormat(MM_DD);
     Integer max = getMax(weekToCount);
+    long initial = calendar.getTimeInMillis();
 
-//    logger.info("before  " + year + " = " + calendar.getTime() + " or " + df.format(calendar.getTime()));
+//    logger.info(unit +" before  " + year + " = " + calendar.getTime() + " or " + df.format(calendar.getTime()));
 
     for (int week = 1; week <= max; week++) {
       // for (Map.Entry<Integer, ?> pair : weekToCount.entrySet()) {
@@ -780,12 +798,17 @@ public class Report {
         value = ((Collection<?>) value).size();
       }
 
-      //   logger.info("before week " +week + " = " + calendar.getTime() + " or " + df.format(calendar.getTime()));
+      // logger.info("before week " +week + " = " + calendar.getTime() + " or " + df.format(calendar.getTime()));
 
       calendar.set(Calendar.WEEK_OF_YEAR, week);
+      calendar.set(Calendar.DAY_OF_WEEK, 1);
+      calendar.set(Calendar.YEAR, year);
+
       Date time = calendar.getTime();
-      String format1 = df.format(time);
-      //   logger.info("week " +week + " = " + time + " or " + format1);
+      boolean before = time.getTime() < initial;
+      String format1 = before ? new SimpleDateFormat("MM-dd-yy").format(time) : df.format(time);
+/*      logger.info("after  week " + week + " = " + time + " " + time.getTime() +
+          " or " + format1 + " = " + value);*/
 
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("weekOfYear", week);
@@ -926,8 +949,6 @@ public class Report {
    * @see #getResults
    */
   private <T extends UserAndTime> void addRefAudio(StringBuilder builder, Calendar calendar,
-                                                   Date january1st,
-                                                   Date january1stThisYear,
                                                    Collection<T> refAudio, JSONObject jsonObject, int year) {
     int ytd = 0;
     Map<Integer, Integer> monthToCount = new TreeMap<>();
@@ -942,6 +963,20 @@ public class Report {
         tallyByMonthAndWeek(calendar, monthToCount, weekToCount, result, userToDayToCount);
       }
     }
+
+    int monthTotal = 0;
+    for (Integer count : monthToCount.values()) monthTotal += count;
+
+    int weekTotal = 0;
+    for (Integer count : weekToCount.values()) weekTotal += count;
+
+    if (monthTotal != weekTotal) {
+      logger.info("ref audio month total " + monthTotal + " week total " + weekTotal);
+      logger.info("ref weeks " + weekToCount.keySet());
+    }
+
+//    logger.info("addRefAudio month\n" + monthToCount);
+//    logger.info("week  \n" + weekToCount);
 
     builder.append(getSectionReport(ytd, monthToCount, weekToCount, REF_AUDIO_RECORDINGS, jsonObject, year));
   }
@@ -977,12 +1012,16 @@ public class Report {
     Map<String, Integer> dayToCount = userToDayToCount.get(userid);
     if (dayToCount == null) userToDayToCount.put(userid, dayToCount = new TreeMap<>());
     String key = calendar.get(Calendar.YEAR) + "," +
-        calendar.get(Calendar.MONTH) + "," +
+        month + "," +
         calendar.get(Calendar.DAY_OF_MONTH);
     dayToCount.put(key, dayToCount.getOrDefault(key, 0) + 1);
 
     int w = calendar.get(Calendar.WEEK_OF_YEAR);
-    weekToCount.put(w, weekToCount.getOrDefault(w, 0) + 1);
+    Integer orDefault = weekToCount.getOrDefault(w, 0);
+//    if (orDefault == 0) {
+//      logger.debug("got " + w + " for " + new Date(timestamp) + " ");
+//    }
+    weekToCount.put(w, orDefault + 1);
   }
 
   /**
@@ -1389,5 +1428,9 @@ public class Report {
       time1 = january1stNextYear.getTime();
       return this;
     }
+  }
+
+  public static void main(String[] arg) {
+
   }
 }
