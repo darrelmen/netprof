@@ -326,7 +326,8 @@ public class AudioDAO extends DAO {
                                      String installPath,
                                      String relativeConfigDir,
                                      AudioConversion audioConversion, AudioAttribute attr) {
-    if (attr.hasMatchingTranscript(firstExercise.getForeignLanguage())) {
+    String foreignLanguage = firstExercise.getForeignLanguage();
+    if (attr.hasMatchingTranscript(foreignLanguage)) {
       firstExercise.getMutableAudio().addAudio(attr);
 
       if (attr.getAudioRef() == null)
@@ -341,7 +342,10 @@ public class AudioDAO extends DAO {
         }
       }
     } else {
-      logger.info("not attaching audio " + attr.getUniqueID() + " to " + firstExercise.getID() + " since transcript has changed.");
+      logger.info("not attaching audio " + attr.getUniqueID() + " to " + firstExercise.getID() + " since transcript has changed. Audio '" +
+          attr.getTranscript()+
+          "' vs exercise '" +foreignLanguage+
+          "'");
     }
   }
 
