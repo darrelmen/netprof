@@ -387,10 +387,9 @@ public class AudioConversion {
         tempTrimmed,
         "vad", "-t", T_VALUE, "-p", trimBefore, "reverse", "vad", "-t", T_VALUE, "-p", trimAfter, "reverse");
 
-
-    logger.error("doTrimSilence trim silence on " + pathToAudioFile);
-    String asRunnable = soxFirst.command().toString().replaceAll(",", " ");
-    logger.info("doTrimSilence " + asRunnable);
+//    logger.error("doTrimSilence trim silence on " + pathToAudioFile);
+//    String asRunnable = soxFirst.command().toString().replaceAll(",", " ");
+ //   logger.info("doTrimSilence " + asRunnable);
 
     if (!new ProcessRunner().runProcess(soxFirst)) {
       // logger.info("tempDir Exists " + exists);
