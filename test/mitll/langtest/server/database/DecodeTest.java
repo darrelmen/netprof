@@ -19,6 +19,13 @@ public class DecodeTest extends BaseTest {
 
 
   @Test
+  public void testDominoSpanish() {
+    DatabaseImpl russian = getDatabase("dominoSpanish");
+    Collection exercises = russian.getExercises();
+    logger.info("First " +exercises.iterator().next());
+  }
+
+  @Test
   public void testSpanish() {
     DatabaseImpl russian = getDatabase("mandarin");
     JSONObject war = russian.doReport(new PathHelper("war"), "", 2016);
