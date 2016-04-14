@@ -73,8 +73,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   String foreignLanguage,
                   String meaning,
                   String transliteration,
-                  String context,
-                  String contextTranslation,
                   String displayID) {
     super(id);
     setEnglishSentence(englishSentence);
@@ -82,7 +80,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     setForeignLanguage(foreignLanguage);
     setTransliteration(transliteration);
     this.displayID = displayID;
-    addContext(context, contextTranslation);
   }
 
   @Override
@@ -147,7 +144,12 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return this;
   }
 
-  private void addContext(String context, String contextTranslation) {
+  /**
+   * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#addContextSentences(JSONObject, Exercise)
+   * @param context
+   * @param contextTranslation
+   */
+  public void addContext(String context, String contextTranslation) {
     if (!context.isEmpty()) {
       Exercise contextExercise = new Exercise("c" + id, context, contextTranslation);
       addContextExercise(contextExercise);
@@ -217,7 +219,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
       }
     }
 
-    return "Exercise " + Integer.toHexString(hashCode()) + " " +getID() + "/"+getDisplayID()+
+    return "Exercise " + Integer.toHexString(hashCode()) + " " + getID() + "/" + getDisplayID() +
         " english '" + getEnglish() +
         "'/'" + getForeignLanguage() + "' " +
         "meaning '" + getMeaning() +
@@ -236,7 +238,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return updateTime;
   }
 
-
   private void addContextExercise(CommonExercise contextExercise) {
     directlyRelated.add(contextExercise);
   }
@@ -245,9 +246,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
     mentions.add(exercise);
   }
 
-public boolean hasContext() {
-  return !getDirectlyRelated().isEmpty();
-}
+  public boolean hasContext() {
+    return !getDirectlyRelated().isEmpty();
+  }
 
   public Collection<CommonExercise> getDirectlyRelated() {
     return directlyRelated;

@@ -42,11 +42,10 @@ public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Comm
 
   @Override
   List<CommonExercise> readExercises() {
-    JsonExport jsonExport = new JsonExport(null, sectionHelper, null);
-
     try {
       Path path = Paths.get(jsonFile);
-      List<CommonExercise> exercises = jsonExport.getExercises(new String(Files.readAllBytes(path), ENCODING));
+      List<CommonExercise> exercises =
+          new JsonExport(null, sectionHelper, null).getExercises(new String(Files.readAllBytes(path), ENCODING));
       populateSections(exercises);
 
       logger.info("read " +exercises.size() + " from " + jsonFile + " at " + path.toFile().getAbsolutePath());
