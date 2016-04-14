@@ -15,12 +15,12 @@ import java.util.*;
 
 /**
  * Read from a domino url - either documents or exam
- *
+ * <p>
  * For exam, maybe we need a "latestExam" link?
- *
+ * <p>
  * Created by go22670 on 2/10/16.
  */
-public class JSONURLExerciseDAO extends JSONExerciseDAO {
+public class JSONURLExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
   private static final Logger logger = Logger.getLogger(JSONURLExerciseDAO.class);
   private final Collection<String> typeOrder;
 
@@ -31,7 +31,7 @@ public class JSONURLExerciseDAO extends JSONExerciseDAO {
       ServerProperties serverProps,
       UserListManager userListManager,
       boolean addDefects) {
-    super("", serverProps, userListManager, addDefects);
+    super(serverProps, userListManager, addDefects);
     this.typeOrder = serverProps.getTypes();
 
     new DominoReader().readProjectInfo(serverProps);
@@ -49,6 +49,10 @@ public class JSONURLExerciseDAO extends JSONExerciseDAO {
     return Collections.emptyList();
   }
 
+  /**
+   * E.g read from http://domino-devel:9000/domino-ws/v1/projects/354/documents
+   * @return
+   */
   private String getJSON() {
     logger.info(serverProps.getLanguage() + " Reading from " + serverProps.getLessonPlan());
     this.now = System.currentTimeMillis();
@@ -69,29 +73,49 @@ public class JSONURLExerciseDAO extends JSONExerciseDAO {
 
   private long now = System.currentTimeMillis();
 
+  /**
+   * Grab info from the json object -
+   * expect nested objects "content" and "metadata"
+   *
+   * e.g.
+   *
+   *
+   * id: 45678,
+   * content: {
+   *    trans: "absentminded ; distracted",
+   *    meaning: "",
+   *    orient: "",
+   *    pass: "distraÃ­do",
+   *    translit: "",
+   *    q-lst: {
+   *     0: {
+   *      qNum: 0,
+   *      stem: "El hombre estÃ¡ distraÃ­do.",
+   *      trans: "The man is distracted."
+   *      }
+   *    }
+   * },
+   * metadata: {
+   *    chapter: "28",
+   *    unit: "3",
+   *    npDID: "50264"
+   * },
+   * updateTime: "2016-04-14T15:05:12.009Z",
+   * }
+   * @param jsonObject
+   * @return
+   */
   private Exercise toExercise(JSONObject jsonObject) {
     JSONObject metadata = jsonObject.getJSONObject("metadata");
-    JSONObject content = jsonObject.getJSONObject("content");
-    String updateTime = jsonObject.getString("updateTime");
-    String dominoID = ""+jsonObject.getInt("id");
-    boolean isLegacy = metadata.containsKey("npDID");
-    String npDID = isLegacy ? metadata.getString("npDID") : dominoID;
-
-    long updateMillis = now;
-    try {
-      Date update = dateFmt.parse(updateTime);
-      updateMillis = update.getTime();
-    } catch (ParseException e) {
-      logger.warn(e.getMessage() + " : can't parse date '" + updateTime + "' for " + npDID);
-    }
+    JSONObject content  = jsonObject.getJSONObject("content");
+    String updateTime   = jsonObject.getString("updateTime");
+    String dominoID     = "" + jsonObject.getInt("id");
+    String npDID = isLegacyExercise(metadata) ? metadata.getString("npDID") : dominoID;
 
     String fl = noMarkup(content.getString("pass"));
     String english = noMarkup(content.getString("trans"));
     String meaning = noMarkup(content.getString("meaning"));
     String transliteration = noMarkup(content.getString("translit"));
-
-    String context = noMarkup(content.getString("context"));
-    String contextTranslation = noMarkup(content.getString("context_trans"));
 
     Exercise exercise = new Exercise(
         npDID,
@@ -99,21 +123,55 @@ public class JSONURLExerciseDAO extends JSONExerciseDAO {
         fl,
         meaning,
         transliteration,
-        context,
-        contextTranslation, dominoID);
-    exercise.setUpdateTime(updateMillis);
-    if (!isLegacy) logger.info("NOT LEGACY " + exercise);
+        dominoID);
 
-    for (String type : typeOrder) {
-      try {
-        exercise.addUnitToValue(type, noMarkup(content.getString(type.toLowerCase())));
-      } catch (Exception e) {
-        logger.error("couldn't find unit/chapter '" + type + "' in content - see typeOrder property");
-      }
-    }
+    addContextSentences(content, exercise);
+
+    exercise.setUpdateTime(getUpdateTimestamp(updateTime, npDID));
+    //if (!isLegacy) logger.info("NOT LEGACY " + exercise);
+
+    addUnitAndChapterInfo(metadata, exercise);
 
     return exercise;
   }
 
-  private String noMarkup(String source) { return source.replaceAll("\\<.*?>","");}
+  private boolean isLegacyExercise(JSONObject metadata) {
+    return metadata.containsKey("npDID");
+  }
+
+  private long getUpdateTimestamp(String updateTime, String npDID) {
+    long updateMillis = now;
+    try {
+      Date update = dateFmt.parse(updateTime);
+      updateMillis = update.getTime();
+    } catch (ParseException e) {
+      logger.warn(e.getMessage() + " : can't parse date '" + updateTime + "' for " + npDID);
+    }
+    return updateMillis;
+  }
+
+  private void addUnitAndChapterInfo(JSONObject metadata, Exercise exercise) {
+    for (String type : typeOrder) {
+      try {
+        String unitOrChapter = metadata.getString(type.toLowerCase());
+        exercise.addUnitToValue(type, noMarkup(unitOrChapter));
+      } catch (Exception e) {
+        logger.error("couldn't find unit/chapter '" + type + "' in content - see typeOrder property");
+      }
+    }
+  }
+
+  private void addContextSentences(JSONObject content, Exercise exercise) {
+    JSONObject contextSentences = content.getJSONObject("q-lst");
+    for (Object key : contextSentences.keySet()) {
+      JSONObject pair = contextSentences.getJSONObject(key.toString());
+      String stem = pair.getString("stem");
+      String trans = pair.getString("trans");
+      exercise.addContext(stem, trans);
+    }
+  }
+
+  private String noMarkup(String source) {
+    return source.replaceAll("\\<.*?>", "");
+  }
 }

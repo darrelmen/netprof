@@ -332,6 +332,7 @@ public class JsonExport {
   }
 
   /**
+   * TODO : consider making context sentences a subobject analogous to domino export json
    * @param jsonObject
    * @param types
    * @return
@@ -345,8 +346,6 @@ public class JsonExport {
         jsonObject.getString(FL),
         jsonObject.getString(MN),
         jsonObject.getString(TL),
-        jsonObject.getString(CT),
-        jsonObject.getString(CTR),
         id);
 
     try {
