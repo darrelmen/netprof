@@ -43,13 +43,13 @@
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/.settings" />
+      <excludeFolder url="file://$MODULE_DIR$/bestAudio" />
       <excludeFolder url="file://$MODULE_DIR$/bestAudioOrig" />
       <excludeFolder url="file://$MODULE_DIR$/extras" />
       <excludeFolder url="file://$MODULE_DIR$/gwt" />
       <excludeFolder url="file://$MODULE_DIR$/gwt-unitCache" />
       <excludeFolder url="file://$MODULE_DIR$/gwt27" />
       <excludeFolder url="file://$MODULE_DIR$/gwt28" />
-
       <excludeFolder url="file://$MODULE_DIR$/imagewriter" />
       <excludeFolder url="file://$MODULE_DIR$/rec" />
       <excludeFolder url="file://$MODULE_DIR$/recover" />
@@ -114,6 +114,5 @@
     <orderEntry type="library" name="uadetector-resources-2014.10" level="project" />
     <orderEntry type="library" name="slf4j-api-1.7.21" level="project" />
     <orderEntry type="library" name="quality-check-1.3" level="project" />
-
   </component>
 </module>
