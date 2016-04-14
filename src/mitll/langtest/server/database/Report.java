@@ -65,9 +65,15 @@ public class Report {
   private static final String ALL_RECORDINGS1 = "allRecordings";
   private static final String DEVICE_RECORDINGS1 = "deviceRecordings";
   private static final String MONTH1 = "month";
-  private static final String YTD = "count";
-  public static final String YTD1 = " YTD ";
-  public static final String REF_AUDIO_RECORDINGS = "Ref Audio Recordings";
+  public static final String COUNT = "count";
+  private static final String YTD = COUNT;
+  private static final String YTD1 = " YTD ";
+  private static final String REF_AUDIO_RECORDINGS = "Ref Audio Recordings";
+  private static final String OPERATING_SYSTEM = "operatingSystem";
+  private static final String OPERATING_SYSTEM_VERSION = "operatingSystemVersion";
+  private static final String BROWSER = "browser";
+  private static final String BROWSER_VERSION = "browserVersion";
+  public static final String NAME = "name";
 
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
@@ -145,8 +151,7 @@ public class Report {
    */
   private void writeAndSendReport(String language, String site, MailSupport mailSupport,
                                   PathHelper pathHelper, List<String> reportEmails, int year) {
-    SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
-    String today = simpleDateFormat2.format(new Date());
+    String today = new SimpleDateFormat("MM_dd_yy").format(new Date());
     File file = getReportFile(pathHelper, today, language);
     if (file.exists()) {
       logger.debug("writeAndSendReport already did report for " + today + " : " + file.getAbsolutePath());
@@ -412,15 +417,15 @@ public class Report {
     JSONArray browserArray = new JSONArray();
     JSONArray browserVerArray = new JSONArray();
 
-    document.append(getWrapper("OperatingSystem", getCountTable("OS", "count", familyArray, "OperatingSystem", getSorted(familyToCount))));
-    document.append(getWrapper("OperatingSystemVersion", getCountTable("OS_Version", "count", hostArray, "osversion", getSorted(hostToCount))));
-    document.append(getWrapper("Browser", getCountTable("browser", "count", browserArray, "browser", getSorted(browserToCount))));
-    document.append(getWrapper("BrowserVersion", getCountTable("browserVersion", "count", browserVerArray, "browserVersion", getSorted(browserVerToCount))));
+    document.append(getWrapper(OPERATING_SYSTEM,         getCountTable(NAME, COUNT, familyArray, NAME, getSorted(familyToCount))));
+    document.append(getWrapper(OPERATING_SYSTEM_VERSION, getCountTable(NAME, COUNT, hostArray, NAME, getSorted(hostToCount))));
+    document.append(getWrapper(BROWSER,                   getCountTable(NAME, COUNT, browserArray, NAME, getSorted(browserToCount))));
+    document.append(getWrapper(BROWSER_VERSION,          getCountTable(NAME, COUNT, browserVerArray, NAME, getSorted(browserVerToCount))));
 
-    section.put("OperatingSystem", familyArray);
-    section.put("OperatingSystemVersion", hostArray);
-    section.put("Browser", browserArray);
-    section.put("BrowserVersion", browserVerArray);
+    section.put(OPERATING_SYSTEM, familyArray);
+    section.put(OPERATING_SYSTEM_VERSION, hostArray);
+    section.put(BROWSER, browserArray);
+    section.put(BROWSER_VERSION, browserVerArray);
   }
 
   private List<User> filterUsersByYear(List<User> fusers, int year) {
@@ -766,7 +771,7 @@ public class Report {
   private void addJsonRow(JSONArray jsonArray, String label, Object value, Object month) {
     JSONObject jsonObject = new JSONObject();
     jsonObject.put(label, month);
-    jsonObject.put("count", value);
+    jsonObject.put(COUNT, value);
     jsonArray.add(jsonObject);
   }
 
@@ -819,7 +824,7 @@ public class Report {
 
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("weekOfYear", week);
-      jsonObject.put("count", value);
+      jsonObject.put(COUNT, value);
       jsonArray.add(jsonObject);
 
       s += "<tr><td>" +
