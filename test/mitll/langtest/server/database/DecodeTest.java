@@ -17,14 +17,18 @@ public class DecodeTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(DecodeTest.class);
   public static final boolean DO_ONE = false;
 
-
   @Test
-  public void testSpanish() {
+  public void testMandarin() {
     DatabaseImpl russian = getDatabase("mandarin");
-    JSONObject war = russian.doReport(new PathHelper("war"), "", 2016);
+    JSONObject war = russian.doReport(new PathHelper("war"), "", 2015);
     logger.info("json:\n"+war);
   }
 
+  @Test
+  public void testFullMandarin() {
+    JSONObject war = getDatabase("mandarin").doReport(new PathHelper("war"));
+    logger.info("json:\n"+war);
+  }
 
   @Test
   public void testRussian() {
