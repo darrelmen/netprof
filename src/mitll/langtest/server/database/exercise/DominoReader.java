@@ -7,7 +7,7 @@ import net.sf.json.JSONObject;
 /**
  * Created by go22670 on 4/5/16.
  */
-public class DominoReader {
+class DominoReader {
   private static final String DOCUMENTS = "documents";
 
   /**
@@ -28,7 +28,7 @@ public class DominoReader {
    "trigraph": "ARB"
    * @param serverProps
    */
-  protected void readProjectInfo(ServerProperties serverProps) {
+  void readProjectInfo(ServerProperties serverProps) {
     String baseURL = serverProps.getLessonPlan();
 
     if (baseURL.endsWith(DOCUMENTS)) {
