@@ -112,7 +112,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
           if (!validForeignPhrase) {
             if (count < 10) {
               logger.error("huh? for " + exercise.getID() + " we can't parse " + exercise.getID() +
-                  " " + exercise.getEnglish() + " fl " + exercise.getForeignLanguage());
+                  " " + exercise.getEnglish() + " fl '" + exercise.getForeignLanguage() + "'");
             }
             count++;
           } else {
@@ -819,6 +819,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
     }
     sentence = sentence.replaceAll(","," ");
     sentence = getSentenceToUse(sentence);
+    sentence = sentence.trim();
 
     ASR asrScoring = useOldSchool || serverProps.getOldSchoolService() ? oldschoolScoring : getASRScoring();
 
