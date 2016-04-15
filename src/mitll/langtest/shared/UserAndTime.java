@@ -10,4 +10,6 @@ package mitll.langtest.shared;
 public interface UserAndTime {
   long getUserid();
   long getTimestamp();
+  String getExid();
+  String getID();
 }
