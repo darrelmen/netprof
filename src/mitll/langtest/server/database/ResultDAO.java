@@ -4,7 +4,6 @@
 
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
@@ -12,6 +11,7 @@ import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -20,6 +20,7 @@ import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.monitoring.Session;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.OutputStream;
@@ -27,6 +28,8 @@ import java.sql.*;
 import java.text.CollationKey;
 import java.text.Collator;
 import java.util.*;
+
+import static mitll.langtest.server.database.Database.EXID;
 
 /**
  * Create, drop, alter, read from the results table.
@@ -62,7 +65,7 @@ public class ResultDAO extends DAO {
   public static final String PROCESS_DUR = "processDur";
   public static final String ROUND_TRIP_DUR = "roundTripDur";
   // public static final int FIVE_MINUTES = 5 * 60 * 1000;
- // public static final int HOUR = 60 * 60 * 1000;
+  // public static final int HOUR = 60 * 60 * 1000;
   // public static final int DAY = 24 * HOUR;
   private static final String DEVICETYPE = "devicetype";
   public static final String VALIDITY = "validity";
@@ -83,7 +86,7 @@ public class ResultDAO extends DAO {
     super(database);
   }
 
-  private List<Result> cachedResultsForQuery = null;
+  //private List<Result> cachedResultsForQuery = null;
   private List<CorrectAndScore> cachedResultsForQuery2 = null;
   private List<MonitorResult> cachedMonitorResultsForQuery = null;
 
@@ -106,20 +109,21 @@ public class ResultDAO extends DAO {
    * @return
    * @see UserManagement#populateUserToNumAnswers
    * @see #getUserToResults
+   * @see Report#getResults(StringBuilder, Set, JSONObject, int)
    */
   public List<Result> getResults() {
     try {
-      synchronized (this) {
+/*      synchronized (this) {
         if (cachedResultsForQuery != null) {
           return cachedResultsForQuery;
         }
-      }
+      }*/
       String sql = "SELECT * FROM " + RESULTS;
       List<Result> resultsForQuery = getResultsSQL(sql);
 
-      synchronized (this) {
+/*      synchronized (this) {
         cachedResultsForQuery = resultsForQuery;
-      }
+      }*/
       return resultsForQuery;
     } catch (Exception ee) {
       logException(ee);
@@ -127,19 +131,30 @@ public class ResultDAO extends DAO {
     return new ArrayList<>();
   }
 
-  public List<Result> getResultsForPractice() {
+  Collection<UserAndTime> getUserAndTimes() {
     try {
-      synchronized (this) {
+      String sql = "SELECT " + USERID + "," + EXID + "," + Database.TIME + ", "
+          + QID + " FROM " + RESULTS;
+      return getUserAndTimeSQL(sql);
+    } catch (Exception ee) {
+      logException(ee);
+    }
+    return new ArrayList<>();
+  }
+
+  List<Result> getResultsForPractice() {
+    try {
+/*      synchronized (this) {
         if (cachedResultsForQuery != null) {
           return cachedResultsForQuery;
         }
-      }
+      }*/
       String sql = "SELECT * FROM " + RESULTS + " where " + AUDIO_TYPE + " is not null";
       List<Result> resultsForQuery = getResultsSQL(sql);
 
-      synchronized (this) {
+/*      synchronized (this) {
         cachedResultsForQuery = resultsForQuery;
-      }
+      }*/
       return resultsForQuery;
     } catch (Exception ee) {
       logException(ee);
@@ -147,11 +162,9 @@ public class ResultDAO extends DAO {
     return new ArrayList<>();
   }
 
-  public List<Result> getResultsDevices() {
+  List<Result> getResultsDevices() {
     try {
-      String sql = "SELECT * FROM " + RESULTS + " where " +
-          DEVICETYPE +
-          " like 'i%'";
+      String sql = "SELECT * FROM " + RESULTS + " where " + DEVICETYPE + " like 'i%'";
       return getResultsSQL(sql);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -288,7 +301,7 @@ public class ResultDAO extends DAO {
 
   public List<MonitorResult> getMonitorResultsByID(String id) {
     try {
-      String sql = "SELECT * FROM " + RESULTS + " WHERE " + Database.EXID + "='" + id + "'";
+      String sql = "SELECT * FROM " + RESULTS + " WHERE " + EXID + "='" + id + "'";
       return getMonitorResultsSQL(sql);
     } catch (Exception ee) {
       logException(ee);
@@ -621,7 +634,7 @@ public class ResultDAO extends DAO {
           //AUDIO_TYPE + (matchAVP?"=":"<>") + "'avp'" +" AND " +
           getAVPClause(matchAVP) + " AND " +
 
-          Database.EXID + " in (" + list + ")" +
+          EXID + " in (" + list + ")" +
           " order by " + Database.TIME + " asc";
 
       Connection connection = database.getConnection(this.getClass().toString());
@@ -655,7 +668,7 @@ public class ResultDAO extends DAO {
 
           VALID + "=true" +
           " AND " +
-          Database.EXID + " in (" + list + ")";
+          EXID + " in (" + list + ")";
 
       return getCorrectAndScoresForUser(userid, sql);
     } catch (Exception ee) {
@@ -699,7 +712,7 @@ public class ResultDAO extends DAO {
           VALID + "=true" + " AND " +
           getAVPClause(matchAVP) +
           " AND " +
-          Database.EXID + " in (" + list + ")";
+          EXID + " in (" + list + ")";
 
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(sql);
@@ -730,7 +743,7 @@ public class ResultDAO extends DAO {
 
   private String getCSSelect() {
     return "SELECT " + ID + ", " + USERID + ", " +
-        Database.EXID + ", " + Database.TIME + ", " + CORRECT + ", " + PRON_SCORE + ", " + ANSWER + ", " + SCORE_JSON;
+        EXID + ", " + Database.TIME + ", " + CORRECT + ", " + PRON_SCORE + ", " + ANSWER + ", " + SCORE_JSON;
   }
 
   /**
@@ -754,11 +767,18 @@ public class ResultDAO extends DAO {
     return getMonitorResultsForQuery(connection, statement);
   }
 
+  private List<UserAndTime> getUserAndTimeSQL(String sql) throws SQLException {
+    Connection connection = database.getConnection(this.getClass().toString());
+    PreparedStatement statement = connection.prepareStatement(sql);
+
+    return getUserAndTimeForQuery(connection, statement);
+  }
+
   /**
    * @see mitll.langtest.server.database.AnswerDAO#addAnswerToTable
    */
-  public synchronized void invalidateCachedResults() {
-    cachedResultsForQuery = null;
+  synchronized void invalidateCachedResults() {
+    //cachedResultsForQuery = null;
     cachedResultsForQuery2 = null;
     cachedMonitorResultsForQuery = null;
   }
@@ -780,50 +800,6 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @param userDAO
-   * @return
-   * @see LangTestDatabaseImpl#getUsersWithRecordings()
-   * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis
-   */
-/*
-  public Collection<User> getUsersWithRecordings(UserDAO userDAO) {
-    Set<User> users = new HashSet<>();
-    try {
-      Connection connection = database.getConnection(this.getClass().toString());
-      String sql = "SELECT " +
-          USERID +
-          ", count(" +
-          USERID +
-          ") FROM " +
-          RESULTS +
-          " where " +
-          PRON_SCORE +
-          " > 0 group by " +
-          USERID +
-          " order by " +
-          USERID;
-
-      PreparedStatement statement = connection.prepareStatement(sql);
-      ResultSet rs = statement.executeQuery();
-
-      Map<Long, User> userMap = userDAO.getUserMap();
-
-      while (rs.next()) {
-        long userid = rs.getLong(1);
-        int count = rs.getInt(2);
-        if (count > 1) {
-          users.add(userMap.get(userid));
-        }
-      }
-      finish(connection, statement, rs);
-    } catch (Exception ee) {
-      logException(ee);
-    }
-    return users;
-  }
-*/
-
-  /**
    * Get a list of Results for this Query.
    *
    * @param connection
@@ -835,11 +811,12 @@ public class ResultDAO extends DAO {
   private List<Result> getResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
     List<Result> results = new ArrayList<>();
+    long then = System.currentTimeMillis();
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
       long userID = rs.getLong(USERID);
       String plan = rs.getString(PLAN);
-      String exid = rs.getString(Database.EXID);
+      String exid = rs.getString(EXID);
       int qid = rs.getInt(QID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       String answer = rs.getString(ANSWER);
@@ -865,6 +842,25 @@ public class ResultDAO extends DAO {
       results.add(result);
     }
     finish(connection, statement, rs);
+    long now = System.currentTimeMillis();
+    long diff = now - then;
+    if (diff > 100) logger.warn("took " + diff + " to get " + results.size() + " results");
+    return results;
+  }
+
+  private List<UserAndTime> getUserAndTimeForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+    ResultSet rs = statement.executeQuery();
+    List<UserAndTime> results = new ArrayList<>();
+    while (rs.next()) {
+      long userID = rs.getLong(USERID);
+      String exid = rs.getString(EXID);
+      Timestamp timestamp = rs.getTimestamp(Database.TIME);
+
+      UserAndTime userAndTime = new MyUserAndTime(userID, exid, timestamp.getTime(), rs.getInt(QID));
+
+      results.add(userAndTime);
+    }
+    finish(connection, statement, rs);
 
     return results;
   }
@@ -875,7 +871,7 @@ public class ResultDAO extends DAO {
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
       long userID = rs.getLong(USERID);
-      String exid = rs.getString(Database.EXID);
+      String exid = rs.getString(EXID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       String answer = rs.getString(ANSWER);
       boolean valid = rs.getBoolean(VALID);
@@ -892,7 +888,7 @@ public class ResultDAO extends DAO {
 
       int processDur = rs.getInt(PROCESS_DUR);
       int roundTripDur = rs.getInt(ROUND_TRIP_DUR);
-    //  String json = rs.getString(SCORE_JSON);
+      //  String json = rs.getString(SCORE_JSON);
 
       MonitorResult result = new MonitorResult(uniqueID, userID, //id
           exid,
@@ -932,7 +928,7 @@ public class ResultDAO extends DAO {
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
       long userid = rs.getInt(USERID);
-      String id = rs.getString(Database.EXID);
+      String id = rs.getString(EXID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       boolean correct = rs.getBoolean(CORRECT);
       float pronScore = rs.getFloat(PRON_SCORE);
@@ -1255,7 +1251,7 @@ public class ResultDAO extends DAO {
 
     database.closeConnection(connection);
 
-    createIndex(database, Database.EXID, RESULTS);
+    createIndex(database, EXID, RESULTS);
     createIndex(database, VALID, RESULTS);
     createIndex(database, AUDIO_TYPE, RESULTS);
   }
@@ -1278,7 +1274,7 @@ public class ResultDAO extends DAO {
         ID + " IDENTITY, " +
         USERID + " INT, " +
         "plan VARCHAR, " +
-        Database.EXID + " VARCHAR, " +
+        EXID + " VARCHAR, " +
         "qid INT," +
         Database.TIME + " TIMESTAMP, " +// " AS CURRENT_TIMESTAMP," +
         "answer CLOB," +
@@ -1377,18 +1373,24 @@ public class ResultDAO extends DAO {
     }
   }
 
+  /**
+   * Just for import
+   *
+   * @param isRegular
+   * @param userDAO
+   * @return
+   */
   public Map<Long, Map<String, Result>> getUserToResults(boolean isRegular, UserDAO userDAO) {
     String typeToUse = isRegular ? Result.AUDIO_TYPE_REGULAR : Result.AUDIO_TYPE_SLOW;
     return getUserToResults(typeToUse, userDAO);
   }
 
   private Map<Long, Map<String, Result>> getUserToResults(String typeToUse, UserDAO userDAO) {
-    List<Result> results = getResults();
     Map<Long, Map<String, Result>> userToResult = new HashMap<>();
 
     Map<Long, User> userMap = userDAO.getUserMap();
 
-    for (Result r : results) {
+    for (Result r : getResults()) {
       if (r.isValid() && r.getAudioType().equals(typeToUse)) {
         User user = userMap.get(r.getUserid());
         if (user != null && user.getExperience() == 240) {    // only natives!
@@ -1413,5 +1415,39 @@ public class ResultDAO extends DAO {
    */
   public void writeExcelToStream(Collection<MonitorResult> results, Collection<String> typeOrder, OutputStream out) {
     new ResultDAOToExcel().writeExcelToStream(results, typeOrder, out);
+  }
+
+  private static class MyUserAndTime implements UserAndTime {
+    private final long userID;
+    private final String exid;
+    private final long time;
+    private final int qid;
+
+    MyUserAndTime(long userID, String exid, long time, int qid) {
+      this.userID = userID;
+      this.exid = exid;
+      this.time = time;
+      this.qid = qid;
+    }
+
+    @Override
+    public long getUserid() {
+      return userID;
+    }
+
+    @Override
+    public long getTimestamp() {
+      return time;
+    }
+
+    @Override
+    public String getExid() {
+      return exid;
+    }
+
+    @Override
+    public String getID() {
+      return getExid() + "/" + qid;
+    }
   }
 }
