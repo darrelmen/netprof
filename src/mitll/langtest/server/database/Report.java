@@ -853,10 +853,10 @@ public class Report {
   private void getResults(StringBuilder builder, Set<Long> students, /*PathHelper pathHelper, String language,*/
                           JSONObject jsonObject, int year) {
     List<Result> results = resultDAO.getResults();
-    getResultsForSet(builder, students, /*pathHelper,*/ results, ALL_RECORDINGS, /*language,*/ jsonObject, year);
+    getResultsForSet(builder, students, results, ALL_RECORDINGS,  jsonObject, year);
   }
 
-  private void getResultsDevices(StringBuilder builder, Set<Long> students,/* PathHelper pathHelper, String language,*/
+  private void getResultsDevices(StringBuilder builder, Set<Long> students,
                                  JSONObject jsonObject, int year) {
     List<Result> results = resultDAO.getResultsDevices();
     getResultsForSet(builder, students, /*pathHelper, */results, DEVICE_RECORDINGS, /*language,*/ jsonObject, year);
@@ -864,7 +864,7 @@ public class Report {
 
   private void getResultsForSet(StringBuilder builder, Set<Long> students,
                                 Collection<Result> results,
-                                String recordings,// String language,
+                                String recordings,
                                 JSONObject jsonObject, int year) {
     YearTimeRange yearTimeRange = new YearTimeRange(year, getCalendarForYear(year)).invoke();
 
@@ -905,14 +905,15 @@ public class Report {
         if (yearTimeRange.inYear(timestamp)) {
           if (result.isValid()) {
             if (!isRefAudioResult(exToAudio, result)) {
-              if (students.contains(result.getUserid())) {
+              long userid = result.getUserid();
+              if (students.contains(userid)) {
                 //if (result.getAudioType().equals("unset") || result.getAudioType().equals("_by_WebRTC")) {
                 if (result.getPronScore() > -1) {
-                  if (isValidUser(result.getUserid())) {
-                    if (WRITE_RESULTS_TO_FILE) {
+                  if (isValidUser(userid)) {
+           /*         if (WRITE_RESULTS_TO_FILE) {
                       writer.write(result.toString());
                       writer.write("\n");
-                    }
+                    }*/
                     ytd++;
                     tallyByMonthAndWeek(calendar, monthToCount, weekToCount, result, userToDayToCount);
                   }
@@ -920,7 +921,7 @@ public class Report {
                   invalidScore++;
                 }
               } else {
-                skipped.add(result.getUserid());
+                skipped.add(userid);
                 teacherAudio++;
               }
             }
