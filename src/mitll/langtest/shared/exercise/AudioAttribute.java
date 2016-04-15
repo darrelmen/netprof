@@ -113,6 +113,11 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return exid;
   }
 
+  @Override
+  public String getID() {
+    return exid +"/1";
+  }
+
   public void setAudioRef(String audioRef) {
     this.audioRef = audioRef;
   }
