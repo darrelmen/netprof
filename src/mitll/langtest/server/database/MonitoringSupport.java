@@ -4,24 +4,15 @@
 
 package mitll.langtest.server.database;
 
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.UserAndTime;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.monitoring.Session;
 import org.apache.log4j.Logger;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,41 +21,41 @@ import java.util.TreeSet;
  * Time: 11:18 AM
  * To change this template use File | Settings | File Templates.
  */
-public class MonitoringSupport {
+class MonitoringSupport {
   private static final int MIN_DESIRED = 2;
   private static final int MAX_PEOPLE = 21;
   private static final Logger logger = Logger.getLogger(MonitoringSupport.class);
 
   private static final int MINUTE_MILLIS = 60 * 1000;
-  private static final float MINUTE_MILLIS_FLOAT = (float)MINUTE_MILLIS;
+  private static final float MINUTE_MILLIS_FLOAT = (float) MINUTE_MILLIS;
 
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
 
   private MonitoringSupport() {
-    this(null,null);
+    this(null, null);
   }
 
-  public MonitoringSupport(UserDAO userDAO, ResultDAO resultDAO) {
+  MonitoringSupport(UserDAO userDAO, ResultDAO resultDAO) {
     this.userDAO = userDAO;
     this.resultDAO = resultDAO;
   }
 
   /**
    * TODO : worry about duplicate userid?
+   *
    * @return map of user to number of answers the user entered
    */
   public Map<User, Integer> getUserToResultCount() {
     List<User> users = getUsers();
-    List<Result> results = getResults();
 
-    Map<User,Integer> idToCount = new HashMap<User, Integer>();
-    Map<Long,User> idToUser = new HashMap<Long, User>();
+    Map<User, Integer> idToCount = new HashMap<User, Integer>();
+    Map<Long, User> idToUser = new HashMap<Long, User>();
     for (User u : users) {
-      idToUser.put(u.getId(),u);
-      idToCount.put(u,0);
+      idToUser.put(u.getId(), u);
+      idToCount.put(u, 0);
     }
-    for (Result r : results) {
+    for (UserAndTime r : resultDAO.getUserAndTimes()) {
       User user = idToUser.get(r.getUserid());
       Integer c = idToCount.get(user);
       if (c != null) {
@@ -74,17 +65,15 @@ public class MonitoringSupport {
     return idToCount;
   }
 
-  public Map<User, Integer> getUserToPractice() {
+/*  public Map<User, Integer> getUserToPractice() {
     List<User> users = getUsers();
-    List<Result> results = getResults();
-
-    Map<User,Integer> idToCount = new HashMap<User, Integer>();
-    Map<Long,User> idToUser = new HashMap<Long, User>();
+    Map<User, Integer> idToCount = new HashMap<User, Integer>();
+    Map<Long, User> idToUser = new HashMap<Long, User>();
     for (User u : users) {
-      idToUser.put(u.getId(),u);
-      idToCount.put(u,0);
+      idToUser.put(u.getId(), u);
+      idToCount.put(u, 0);
     }
-    for (Result r : results) {
+    for (UserAndTime r : resultDAO.getUserAndTimes()) {
       User user = idToUser.get(r.getUserid());
       Integer c = idToCount.get(user);
       if (c != null) {
@@ -92,14 +81,15 @@ public class MonitoringSupport {
       }
     }
     return idToCount;
-  }
+  }*/
 
   /**
    * Determine sessions per user.  If two consecutive items are more than {@link ResultDAO#SESSION_GAP} seconds
    * apart, then we've reached a session boundary.
    * Remove all sessions that have just one answer - must be test sessions.
-   *
+   * <p>
    * Multiple answers to the same exercise count as one answer.
+   *
    * @return list of duration and numAnswer pairs
    */
   public ResultDAO.SessionInfo getSessions() {
@@ -109,12 +99,12 @@ public class MonitoringSupport {
   private long getRateInMillis(Collection<Session> sessionCollection) {
     long totalTime = 0;
     long total = 0;
-    for (Session s: sessionCollection) {
-        totalTime += s.duration;
-        total += s.getNumAnswers();
+    for (Session s : sessionCollection) {
+      totalTime += s.duration;
+      total += s.getNumAnswers();
     }
     if (total == 0) return 0l;
-    return totalTime/total;
+    return totalTime / total;
   }
 
   /**
@@ -160,14 +150,15 @@ public class MonitoringSupport {
 
   /**
    * TODO : worry about duplicate userid?
+   *
    * @return
    */
-  public Map<Integer, Integer> getResultCountToCount(Collection<CommonExercise> exercises) {
-    Map<String, Integer> idToCount = getExToCount(exercises);
-    Map<Integer,Integer> resCountToCount = new HashMap<Integer, Integer>();
+  Map<Integer, Integer> getResultCountToCount(Collection<CommonExercise> exercises) {
+    Map<String, Integer> idToCount = getExToCount(exercises,resultDAO.getUserAndTimes());
+    Map<Integer, Integer> resCountToCount = new HashMap<Integer, Integer>();
 
-    for (int i =0; i< 10; i++) {
-      resCountToCount.put(i,0);
+    for (int i = 0; i < 10; i++) {
+      resCountToCount.put(i, 0);
     }
 
     for (Integer c : idToCount.values()) {
@@ -179,15 +170,19 @@ public class MonitoringSupport {
   }
 
   /**
-   * @see #getResultPerExercise(java.util.List)
-   * @see #getResultCountToCount
    * @return
+   * @see #getResultPerExercise
+   * @see #getResultCountToCount
    */
-  private Map<String, Integer> getExToCount(Collection<CommonExercise> exercises) {
+/*  private Map<String, Integer> getExToCount(Collection<CommonExercise> exercises) {
+    Collection<UserAndTime> results = resultDAO.getUserAndTimes();
+    return getExToCount(exercises, results);
+  }*/
+
+  private Map<String, Integer> getExToCount(Collection<CommonExercise> exercises, Collection<UserAndTime> results) {
     Map<String, Integer> idToCount = getInitialIdToCount(exercises);
     Map<String, Set<Long>> keyToUsers = new HashMap<String, Set<Long>>();
-    List<Result> results = getResults();
-    for (Result r : results) {
+    for (UserAndTime r : results) {
       String key = r.getID();//getExerciseID() + "/" + r.getQid();
       Set<Long> usersForResult = keyToUsers.get(key);
 
@@ -253,18 +248,19 @@ public class MonitoringSupport {
    * @param isMale
    * @return
    */
-  private Map<String, Integer> getExToCountMaleOrFemale(Collection<CommonExercise> exercises, boolean isMale) {
+  private Map<String, Integer> getExToCountMaleOrFemale(Collection<CommonExercise> exercises, boolean isMale, Collection<UserAndTime> results) {
+    // List<Result> results = getResults();
+
     Map<String, Integer> idToCount = getInitialIdToCount(exercises);
 
     Map<Long, User> userMap = userDAO.getUserMap(isMale);
     Map<String, Set<Long>> keyToUsers = new HashMap<String, Set<Long>>();
 
-    List<Result> results = getResults();
-   // logger.debug("results " + results.size() + ","+(isMale ? "male":"female") + " users num = " + userMap.size());
+    // logger.debug("results " + results.size() + ","+(isMale ? "male":"female") + " users num = " + userMap.size());
     SortedSet<String> resultKeys = new TreeSet<String>();
-    for (Result r : results) {
+    for (UserAndTime r : results) {
       if (userMap.containsKey(r.getUserid())) {   // filter for just results by males or females
-        String key = r.getID();
+        String key = r.getExid();
         resultKeys.add(key);
         Set<Long> usersForResult = keyToUsers.get(key);
 
@@ -274,22 +270,22 @@ public class MonitoringSupport {
         if (!usersForResult.contains(r.getUserid())) {
           usersForResult.add(r.getUserid());
           Integer c = idToCount.get(key);
-          int value = (c == null) ? 1 : c+1;
+          int value = (c == null) ? 1 : c + 1;
           idToCount.put(key, value);
         }
       }
     }
-   // logger.debug("keyToUsers " + keyToUsers.keySet().size() + " results : " +keyToUsers);
+    // logger.debug("keyToUsers " + keyToUsers.keySet().size() + " results : " +keyToUsers);
     //logger.debug("idToCount size = " + idToCount.size() + " resultKeys " +idToCount.keySet());
     //logger.debug("result id resultKeys = " + resultKeys);
 
     // post condition -- the result exercise foreign keys should be a subset of the exercise keys (exid/qid)
     if (resultKeys.size() > idToCount.keySet().size()) {
       logger.error("huh? there are " + resultKeys.size() +
-        " result keys but only " + idToCount.keySet().size() + " exercise keys.");
-    }
-    else {
-      /*boolean b =*/ resultKeys.removeAll(idToCount.keySet());
+          " result keys but only " + idToCount.keySet().size() + " exercise keys.");
+    } else {
+      /*boolean b =*/
+      resultKeys.removeAll(idToCount.keySet());
       if (!resultKeys.isEmpty()) {
         logger.error("some result keys are not in the exercise keys " + resultKeys);
       }
@@ -300,15 +296,16 @@ public class MonitoringSupport {
 
   /**
    * Make a map of exerciseid->0
+   *
    * @param exercises
    * @return
    */
   private Map<String, Integer> getInitialIdToCount(Collection<CommonExercise> exercises) {
-    Map<String,Integer> idToCount = new HashMap<String, Integer>();
+    Map<String, Integer> idToCount = new HashMap<String, Integer>();
     for (CommonExercise e : exercises) {
       //if (e.getNumQuestions() == 0) {
-        String key = e.getID() + "/0";
-        idToCount.put(key,0);
+      String key = e.getID() + "/0";
+      idToCount.put(key, 0);
 /*      }
       else {
         for (int i = 1; i < e.getNumQuestions()+1; i++) {   // for some reason we start from 1!
@@ -324,7 +321,7 @@ public class MonitoringSupport {
    * Sort first by exercise id then by question within the exercise
    */
   private static class CompoundKey implements Comparable<CompoundKey> {
-    public final int first,second;
+    public final int first, second;
 
     public CompoundKey(int first, int second) {
       this.first = first;
@@ -333,7 +330,7 @@ public class MonitoringSupport {
 
     @Override
     public boolean equals(Object obj) {
-      CompoundKey other =(CompoundKey) obj;
+      CompoundKey other = (CompoundKey) obj;
       return compareTo(other) == 0;
     }
 
@@ -342,147 +339,151 @@ public class MonitoringSupport {
       return first < o.first ? -1 : first > o.first ? +1 : second < o.second ? -1 : second > o.second ? +1 : 0;
     }
 
-    public String toString() { return first +"/"+second; }
+    public String toString() {
+      return first + "/" + second;
+    }
   }
 
   /**
    * Get counts of answers by date
    * TODO : worry about duplicate userid?
+   *
    * @return
    */
   public Map<String, Integer> getResultByDay() {
-    List<Result> results = getResults();
     SimpleDateFormat df = new SimpleDateFormat("MM-dd-yy");
-    Map<String,Integer> dayToCount = new HashMap<String, Integer>();
-    for (Result r : results) {
+    Map<String, Integer> dayToCount = new HashMap<String, Integer>();
+    for (UserAndTime r : resultDAO.getUserAndTimes()) {
       Date date = new Date(r.getTimestamp());
       String day = df.format(date);
       Integer c = dayToCount.get(day);
       if (c == null) {
         dayToCount.put(day, 1);
-      }
-      else dayToCount.put(day, c + 1);
+      } else dayToCount.put(day, c + 1);
     }
     return dayToCount;
   }
 
   /**
    * get counts of answers by hours of the day
+   *
    * @return
    */
   public Map<String, Integer> getResultByHourOfDay() {
-    List<Result> results = getResults();
     SimpleDateFormat df = new SimpleDateFormat("HH");
-    Map<String,Integer> dayToCount = new HashMap<String, Integer>();
-    for (Result r : results) {
+    Map<String, Integer> dayToCount = new HashMap<String, Integer>();
+    for (UserAndTime r : resultDAO.getUserAndTimes()) {
       Date date = new Date(r.getTimestamp());
       String day = df.format(date);
       Integer c = dayToCount.get(day);
       if (c == null) {
         dayToCount.put(day, 1);
-      }
-      else dayToCount.put(day, c + 1);
+      } else dayToCount.put(day, c + 1);
     }
     return dayToCount;
   }
 
   /**
    * Split exid->count by gender.
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise
+   *
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise
    */
   public Map<String, Map<String, Integer>> getResultPerExercise(Collection<CommonExercise> exercises) {
-    Map<String,Map<String, Integer>> typeToList = new HashMap<String,Map<String, Integer>>();
-    typeToList.put("overall",getExToCount(exercises));
-    typeToList.put("male",getExToCountMaleOrFemale(exercises,true));
-    typeToList.put("female",getExToCountMaleOrFemale(exercises,false));
+    Map<String, Map<String, Integer>> typeToList = new HashMap<String, Map<String, Integer>>();
+    Collection<UserAndTime> results = resultDAO.getUserAndTimes();
+
+    typeToList.put("overall", getExToCount(exercises, results));
+    typeToList.put("male", getExToCountMaleOrFemale(exercises, true, results));
+    typeToList.put("female", getExToCountMaleOrFemale(exercises, false, results));
 
     return typeToList;
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getResultCountsByGender()
    * @param exercises
    * @return
+   * @see mitll.langtest.server.database.DatabaseImpl#getResultCountsByGender()
    */
-  public Map<String,Map<Integer,Integer>> getResultCountsByGender(Collection<CommonExercise> exercises) {
+  public Map<String, Map<Integer, Integer>> getResultCountsByGender(Collection<CommonExercise> exercises) {
     //logger.debug("Examining " +exercises.size() + " exercises...");
-    Map<String,Map<Integer,Integer>> typeToNumAnswerToCount = new HashMap<String, Map<Integer, Integer>>();
+    Map<String, Map<Integer, Integer>> typeToNumAnswerToCount = new HashMap<String, Map<Integer, Integer>>();
 
-    Map<String, Integer> exToCountMaleOrFemale = getExToCountMaleOrFemale(exercises, true);
+    Collection<UserAndTime> userAndTimes = resultDAO.getUserAndTimes();
+    Map<String, Integer> exToCountMaleOrFemale = getExToCountMaleOrFemale(exercises, true, userAndTimes);
     //logger.debug("male map " +exToCountMaleOrFemale);
 
     List<Integer> male = getCountArray(exToCountMaleOrFemale);
-    List<Integer> female = getCountArray(getExToCountMaleOrFemale(exercises,false));
+    List<Integer> female = getCountArray(getExToCountMaleOrFemale(exercises, false, userAndTimes));
 
     //logger.debug("num male " +male.size() + " : " + male + " female " +female.size());
 
-    Map<Integer,Integer> maleAnswerToCount = new HashMap<Integer,Integer>();
-    Map<Integer,Integer> femaleAnswerToCount = new HashMap<Integer,Integer>();
+    Map<Integer, Integer> maleAnswerToCount = new HashMap<Integer, Integer>();
+    Map<Integer, Integer> femaleAnswerToCount = new HashMap<Integer, Integer>();
 
-    for (int i =0; i< 10; i++) {   // make sure we have zero entries for 0-9
-      maleAnswerToCount.put(i,0);
-      femaleAnswerToCount.put(i,0);
+    for (int i = 0; i < 10; i++) {   // make sure we have zero entries for 0-9
+      maleAnswerToCount.put(i, 0);
+      femaleAnswerToCount.put(i, 0);
     }
 
     for (Integer countAtExercise : male) {
       Integer count = maleAnswerToCount.get(countAtExercise);
-      int currentValue = (count == null) ? 1 : count+1;
+      int currentValue = (count == null) ? 1 : count + 1;
       maleAnswerToCount.put(countAtExercise, currentValue);
     }
 
     for (Integer countAtExercise : female) {
       Integer count = femaleAnswerToCount.get(countAtExercise);
-      if (count == null) femaleAnswerToCount.put(countAtExercise,1);
-      else femaleAnswerToCount.put(countAtExercise,count+1);
+      if (count == null) femaleAnswerToCount.put(countAtExercise, 1);
+      else femaleAnswerToCount.put(countAtExercise, count + 1);
     }
 
     logger.debug("getResultCountsByGender : male " + maleAnswerToCount);
     //logger.debug("getResultCountsByGender : female " + femaleAnswerToCount);
 
-    typeToNumAnswerToCount.put("maleCount",maleAnswerToCount);
-    typeToNumAnswerToCount.put("femaleCount",femaleAnswerToCount);
+    typeToNumAnswerToCount.put("maleCount", maleAnswerToCount);
+    typeToNumAnswerToCount.put("femaleCount", femaleAnswerToCount);
     return typeToNumAnswerToCount;
   }
 
-  public Map<String,Map<Integer, Map<Integer, Integer>>> getDesiredCounts(Collection<CommonExercise> exercises) {
-    Map<String,Map<Integer, Map<Integer, Integer>>> typeToNumAnswerToCount = new HashMap<String, Map<Integer, Map<Integer, Integer>>>();
+  public Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts(Collection<CommonExercise> exercises, Collection<UserAndTime> userAndTimes) {
+    Map<String, Map<Integer, Map<Integer, Integer>>> typeToNumAnswerToCount = new HashMap<String, Map<Integer, Map<Integer, Integer>>>();
 
-    List<Integer> male = getCountArray(getExToCountMaleOrFemale(exercises,true));
-    List<Integer> female = getCountArray(getExToCountMaleOrFemale(exercises,false));
+    List<Integer> male = getCountArray(getExToCountMaleOrFemale(exercises, true, userAndTimes));
+    List<Integer> female = getCountArray(getExToCountMaleOrFemale(exercises, false, userAndTimes));
 
-    Map<Integer,Integer> maleAnswerToCount = new HashMap<Integer,Integer>();
-    Map<Integer,Integer> femaleAnswerToCount = new HashMap<Integer,Integer>();
+    Map<Integer, Integer> maleAnswerToCount = new HashMap<Integer, Integer>();
+    Map<Integer, Integer> femaleAnswerToCount = new HashMap<Integer, Integer>();
 
-    for (int i =0; i< 10; i++) {
-      maleAnswerToCount.put(i,0);
-      femaleAnswerToCount.put(i,0);
+    for (int i = 0; i < 10; i++) {
+      maleAnswerToCount.put(i, 0);
+      femaleAnswerToCount.put(i, 0);
     }
 
     for (Integer countAtExercise : male) {
       Integer count = maleAnswerToCount.get(countAtExercise);
-      if (count == null) maleAnswerToCount.put(countAtExercise,1);
-      else maleAnswerToCount.put(countAtExercise,count+1);
+      if (count == null) maleAnswerToCount.put(countAtExercise, 1);
+      else maleAnswerToCount.put(countAtExercise, count + 1);
     }
 
     for (Integer countAtExercise : female) {
       Integer count = femaleAnswerToCount.get(countAtExercise);
-      if (count == null) femaleAnswerToCount.put(countAtExercise,1);
-      else femaleAnswerToCount.put(countAtExercise,count+1);
+      if (count == null) femaleAnswerToCount.put(countAtExercise, 1);
+      else femaleAnswerToCount.put(countAtExercise, count + 1);
     }
 
-    Map<Integer, Map<Integer, Integer>> maleDesiredToPeopleToNumPer   = getResourceCounts(maleAnswerToCount);
+    Map<Integer, Map<Integer, Integer>> maleDesiredToPeopleToNumPer = getResourceCounts(maleAnswerToCount);
     Map<Integer, Map<Integer, Integer>> femaleDesiredToPeopleToNumPer = getResourceCounts(femaleAnswerToCount);
-    typeToNumAnswerToCount.put("desiredToMale",maleDesiredToPeopleToNumPer);
-    typeToNumAnswerToCount.put("desiredToFemale",femaleDesiredToPeopleToNumPer);
-  //  logger.info("got " + maleDesiredToPeopleToNumPer);
+    typeToNumAnswerToCount.put("desiredToMale", maleDesiredToPeopleToNumPer);
+    typeToNumAnswerToCount.put("desiredToFemale", femaleDesiredToPeopleToNumPer);
+    //  logger.info("got " + maleDesiredToPeopleToNumPer);
     long rateInMillis = getRateInMillis(getSessions().sessions);// logger.info("total at");
-    float rateInHours =((float)rateInMillis)/MINUTE_MILLIS_FLOAT;
+    float rateInHours = ((float) rateInMillis) / MINUTE_MILLIS_FLOAT;
 
-    Map<Integer, Map<Integer, Integer>> maleDesiredToPeopleToHours   = getResourceCounts(maleAnswerToCount,rateInHours);
-    Map<Integer, Map<Integer, Integer>> femaleDesiredToPeopleToHours= getResourceCounts(femaleAnswerToCount,rateInHours);
-    typeToNumAnswerToCount.put("desiredToMaleHours",maleDesiredToPeopleToHours);
-    typeToNumAnswerToCount.put("desiredToFemaleHours",femaleDesiredToPeopleToHours);
+    Map<Integer, Map<Integer, Integer>> maleDesiredToPeopleToHours = getResourceCounts(maleAnswerToCount, rateInHours);
+    Map<Integer, Map<Integer, Integer>> femaleDesiredToPeopleToHours = getResourceCounts(femaleAnswerToCount, rateInHours);
+    typeToNumAnswerToCount.put("desiredToMaleHours", maleDesiredToPeopleToHours);
+    typeToNumAnswerToCount.put("desiredToFemaleHours", femaleDesiredToPeopleToHours);
 
     return typeToNumAnswerToCount;
   }
@@ -495,7 +496,7 @@ public class MonitoringSupport {
     //int minPeople = 1;
     int maxPeople = MAX_PEOPLE;
     int maxDesired = 7;
-    Map<Integer,Map<Integer,Integer>> desiredToNumPeopleToPerPerson = new HashMap<Integer, Map<Integer, Integer>>();
+    Map<Integer, Map<Integer, Integer>> desiredToNumPeopleToPerPerson = new HashMap<Integer, Map<Integer, Integer>>();
     //Map<Integer,Integer> numDesiredToTotal = new HashMap<Integer, Integer>();
     for (int numDesiredPer = MIN_DESIRED; numDesiredPer < maxDesired; numDesiredPer++) {
       int total = 0;
@@ -514,13 +515,13 @@ public class MonitoringSupport {
           total += numPer;
         }
       }
-      total = Math.round((float)total*rateInMinutes);
+      total = Math.round((float) total * rateInMinutes);
 
-      int peopleStart = Math.max(1,numDesiredPer - numAnswersStart);
+      int peopleStart = Math.max(1, numDesiredPer - numAnswersStart);
 
       //System.out.println("num answer start " + numAnswersStart + " people start " +peopleStart);
       for (int people = peopleStart; people < maxPeople; people++) {
-        float numPerPerson = (float) total/(float) people;
+        float numPerPerson = (float) total / (float) people;
       /*  for (int numAnswers = 0; numAnswers < numDesiredPer; numAnswers++) {
           Integer count = maleAnswerToCount.get(numAnswers);
           int numPer = (numDesiredPer-numAnswers) * count;
@@ -534,7 +535,7 @@ public class MonitoringSupport {
       //numDesiredToTotal.put(numDesiredPer,total);
     }
     //System.out.println("total " + numDesiredToTotal);
-  //  System.out.println("desired to people " + desiredToNumPeopleToPerPerson);
+    //  System.out.println("desired to people " + desiredToNumPeopleToPerPerson);
 
     return desiredToNumPeopleToPerPerson;
   }
@@ -543,12 +544,13 @@ public class MonitoringSupport {
    * Get list of counts of answers for each exercise, in order.
    * If the exercise ids are numbers, sort them as numbers, not as strings.
    * We don't want 11 to be between 109 and 110.
+   *
    * @param exToCount
    * @return list of counts of answers per exercise
    */
   private List<Integer> getCountArray(Map<String, Integer> exToCount) {
     List<Integer> countArray = new ArrayList<Integer>(exToCount.size());
- //   String next = exToCount.keySet().iterator().next();
+    //   String next = exToCount.keySet().iterator().next();
     boolean isInt = true;
     for (String id : exToCount.keySet()) {
       try {
@@ -598,21 +600,21 @@ public class MonitoringSupport {
 
   /**
    * Return some statistics related to the hours of audio that have been collected
-   * @see mitll.langtest.server.database.DatabaseImpl#getResultStats()
+   *
    * @return
+   * @see mitll.langtest.server.database.DatabaseImpl#getResultStats()
    */
-  public Map<String,Number> getResultStats() {
-    List<Result> results = getResults();
+  Map<String, Number> getResultStats() {
     double total = 0;
     int count = 0;
     int badDur = 0;
     int maxWarns = 0;
-    for (Result r : results) {
+    for (Result r : resultDAO.getResults()) {
       total += r.getDurationInMillis();
       if (r.getDurationInMillis() > 0) {
         count++;
       } else if (true
-          //r.spoken /*|| r.audioType.equals(Result.AUDIO_TYPE_UNSET)*/
+        //r.spoken /*|| r.audioType.equals(Result.AUDIO_TYPE_UNSET)*/
           ) {
         if (r.getAnswer().endsWith(".wav")) {
           badDur++;
@@ -623,30 +625,33 @@ public class MonitoringSupport {
       }
     }
 
+/*
     if (maxWarns > 0 && maxWarns < results.size()) {
       logger.warn("got " + maxWarns + " bad audio recordings out of " + results.size());
     }
+*/
 
-    Map<String,Number> typeToStat = new HashMap<String,Number>();
-    List<User> users = getUsers();
+    Map<String, Number> typeToStat = new HashMap<String, Number>();
+/*    List<User> users = getUsers();
 
-    Map<Long,User> idToUser = new HashMap<Long, User>();
+    Map<Long, User> idToUser = new HashMap<Long, User>();
     for (User u : users) {
-      idToUser.put(u.getId(),u);
-    }
+      idToUser.put(u.getId(), u);
+    }*/
 
+/*
     Map<Integer, Integer> resultIDToExp = new HashMap<Integer, Integer>();
     Set<Long> unknownUsers = new HashSet<Long>();
-    for (Result r : results) {
+    for (UserAndTime r : resultDAO.getUserAndTimes()) {
       User user = idToUser.get(r.getUserid());
       if (user == null) {
         unknownUsers.add(r.getUserid());
         //System.err.println("unknown user " + r.userid);
-      }
-      else resultIDToExp.put(r.getUniqueID(), user.getExperience());
+      } else resultIDToExp.put(r.getUniqueID(), user.getExperience());
     }
 
     logger.warn("getResultStats : found " + unknownUsers.size() + " unknown users : " + unknownUsers);
+*/
 
 /*    Collection<Grade> grades1 = gradeDAO.getGrades();
     for (int i = 0; i < 3; i++) {
@@ -677,10 +682,10 @@ public class MonitoringSupport {
       }
     }*/
 
-    Number aDouble = total / ((double)HOUR);
+    Number aDouble = total / ((double) HOUR);
     typeToStat.put("totalHrs", aDouble);
-    double value = count > 0 ? total / ((double)count) : 0;
-    typeToStat.put("avgSecs", value/1000);
+    double value = count > 0 ? total / ((double) count) : 0;
+    typeToStat.put("avgSecs", value / 1000);
     typeToStat.put("totalAudioAnswers", count);
     typeToStat.put("badRecordings", badDur);
 
@@ -699,12 +704,13 @@ public class MonitoringSupport {
     final Map<Integer,Integer> expToIncorrect = new HashMap<Integer, Integer>();
     final Map<Integer,Integer> expToCorrect = new HashMap<Integer, Integer>();
 
-    *//**
-     *
-     * @paramx gradeDAO
-     * @paramx idToUser
-     * @paramx index
-     *//*
+    */
+
+  /**
+   * @paramx gradeDAO
+   * @paramx idToUser
+   * @paramx index
+   *//*
     public GradeInfo( Collection<Grade> grades, Map<Integer,Integer> resultToExp, int index) {
       Set<String> exids = new HashSet<String>();
       for (Grade g : grades) {
@@ -745,7 +751,6 @@ public class MonitoringSupport {
       return exp;
     }
   }*/
-
   private List<User> getUsers() {
     return userDAO.getUsers();
   }
@@ -755,58 +760,9 @@ public class MonitoringSupport {
    * Pulls the list of results out of the database.
    *
    * @return
-   * @see #getExToCount(java.util.List)
+   * @see #getExToCount
    */
-  private List<Result> getResults() {
+/*  private List<Result> getResults() {
     return resultDAO.getResults();
-  }
-
-/*   public static void main(String [] arg) {
-   //  DatabaseImpl langTestDatabase = new DatabaseImpl("C:\\Users\\go22670\\DLITest\\","farsi2");
-   //  langTestDatabase.setInstallPath("C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu","C:\\Users\\go22670\\DLITest\\clean\\netPron2\\war\\config\\urdu\\5000-no-english.unvow.farsi.txt","",false);
-
-
-     long rateInMillis = 15*1000;
-     float rateInMinutes = (float) rateInMillis/MINUTE_MILLIS_FLOAT;
-
-     MonitoringSupport monitoringSupport = new MonitoringSupport();
-     Map<Integer,Integer> answerToCount = new HashMap<Integer, Integer>();
-     answerToCount.put(0,16);
-     answerToCount.put(1,8);
-     answerToCount.put(2,4);
-     answerToCount.put(3,2);
-     answerToCount.put(4,1);
-     answerToCount.put(5,0);
-     monitoringSupport.getResourceCounts(answerToCount);
-     monitoringSupport.getResourceCounts(answerToCount,rateInMinutes);
-
-     Map<Integer,Integer> answerToCount2 = new HashMap<Integer, Integer>();
-     answerToCount2.put(0,100);
-     answerToCount2.put(1,50);
-     answerToCount2.put(2,0);
-     answerToCount2.put(3,0);
-     answerToCount2.put(4,0);
-     answerToCount2.put(5,0);
-     monitoringSupport.getResourceCounts(answerToCount2);
-     monitoringSupport.getResourceCounts(answerToCount2,rateInMinutes);
-
-     Map<Integer,Integer> answerToCount3 = new HashMap<Integer, Integer>();
-     answerToCount3.put(0,0);
-     answerToCount3.put(1,10);
-     answerToCount3.put(2,5);
-     answerToCount3.put(3,0);
-     answerToCount3.put(4,0);
-     answerToCount3.put(5,0);
-    monitoringSupport.getResourceCounts(answerToCount3);
-     monitoringSupport.getResourceCounts(answerToCount3,rateInMinutes);
-
-     Map<Integer,Integer> answerToCount4 = new HashMap<Integer, Integer>();
-     answerToCount4.put(0,0);
-     answerToCount4.put(1,0);
-     answerToCount4.put(2,5);
-     answerToCount4.put(3,0);
-     answerToCount4.put(4,0);
-     answerToCount4.put(5,0);
-     monitoringSupport.getResourceCounts(answerToCount4);
-   }*/
+  }*/
 }
