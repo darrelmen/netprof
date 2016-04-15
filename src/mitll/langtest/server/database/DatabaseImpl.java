@@ -1125,7 +1125,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   public Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts() {
-    return monitoringSupport.getDesiredCounts(getExercises());
+    return monitoringSupport.getDesiredCounts(getExercises(), resultDAO.getUserAndTimes());
   }
 
   /**
@@ -1403,10 +1403,13 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   /**
    * FOR TESTING
+   *
    * @param pathHelper
    * @return
    */
-  public JSONObject doReport(PathHelper pathHelper) { return doReport(pathHelper, "", -1);  }
+  public JSONObject doReport(PathHelper pathHelper) {
+    return doReport(pathHelper, "", -1);
+  }
 
   /**
    * JUST FOR TESTING
