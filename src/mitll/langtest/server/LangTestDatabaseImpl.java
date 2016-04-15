@@ -2411,15 +2411,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     refResultDecoder.doRefDecode(getExercises(), relativeConfigDir);
     if (serverProps.isAMAS()) audioFileHelper.makeAutoCRT(relativeConfigDir);
 
-    checkForOgg(getExercises());
+    //checkForOgg(getExercises());
   }
 
   /**
    * Make sure we have ogg versions of files.
    *
-   * @param exercises
+   * @paramx exercises
    */
-  private void checkForOgg(final Collection<CommonExercise> exercises) {
+/*  private void checkForOgg(final Collection<CommonExercise> exercises) {
     new Thread(new Runnable() {
       @Override
       public void run() {
@@ -2434,9 +2434,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         ensureMP3ForAnswers();
       }
     }).start();
-  }
+  }*/
 
-  private void ensureMP3ForAnswers() {
+/*  private void ensureMP3ForAnswers() {
     Map<Long, User> userMap = db.getUserDAO().getUserMap();
     String installPath = pathHelper.getInstallPath();
     List<Result> results = db.getResultDAO().getResults();
@@ -2454,9 +2454,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         sleep(50);
       }
     }
-  }
+  }*/
 
-  private void ensureMP3ForAll(Collection<CommonExercise> exercises) {
+/*  private void ensureMP3ForAll(Collection<CommonExercise> exercises) {
     String installPath = pathHelper.getInstallPath();
     int c = 0;
     for (CommonExercise ex : exercises) {
@@ -2470,7 +2470,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
       sleep(50);
     }
-  }
+  }*/
 
   private void sleep(int millis) {
     try {
