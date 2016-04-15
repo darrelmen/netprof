@@ -49,6 +49,7 @@ public class LTSFactory implements CollationSort {
    */
   private LTSFactory(Language thisLanguage) {
     this.thisLanguage = thisLanguage;
+    logger.info("got " +thisLanguage + " " + thisLanguage.name());
     String name = thisLanguage.name();
     String classPrefix = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
     String className = "corpus." + classPrefix + "LTS";
@@ -57,6 +58,8 @@ public class LTSFactory implements CollationSort {
       switch (thisLanguage) {
         case ARABIC:
         case MSA:
+          ltsForLanguage = new ModernStandardArabicLTS();
+          break;
         case MANDARIN:
           ltsForLanguage = unknown;
           break;
@@ -74,7 +77,7 @@ public class LTSFactory implements CollationSort {
     }
 
     if (isEmpty(ltsForLanguage)) {
-      logger.debug("lts for " + name + " found at " + className + " is " + ltsForLanguage);
+      logger.debug("lts for '" + name + "' found at " + className + " is " + ltsForLanguage);
     }
   }
 
@@ -88,7 +91,7 @@ public class LTSFactory implements CollationSort {
    * @param thisLanguage
    * @see mitll.langtest.server.scoring.ASRScoring#ASRScoring
    */
-  public LTSFactory(String thisLanguage) {
+  LTSFactory(String thisLanguage) {
     this(Language.valueOf(thisLanguage.toUpperCase()));
   }
 
