@@ -15,7 +15,10 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.instrumentation.SlimEvent;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import net.sf.uadetector.*;
+import net.sf.uadetector.OperatingSystemFamily;
+import net.sf.uadetector.ReadableUserAgent;
+import net.sf.uadetector.UserAgentStringParser;
+import net.sf.uadetector.VersionNumber;
 import net.sf.uadetector.service.UADetectorServiceFactory;
 import org.apache.log4j.Logger;
 
@@ -246,16 +249,18 @@ public class Report {
    * @see #writeReportToFile
    */
   private String doReport(PathHelper pathHelper, String language, JSONObject jsonObject, int year) {
-    logger.info(language +" doReport for " + year);
+    logger.info(language + " doReport for " + year);
     openCSVWriter(pathHelper, language);
     return getReport(language, jsonObject, year);
   }
 
-  public String getReport(String language, JSONObject jsonObject, int year) {
+  String getReport(String language, JSONObject jsonObject, int year) {
     StringBuilder builder = new StringBuilder();
     builder.append(getHeader());
     jsonObject.put("host", getHostInfo());
     JSONArray dataArray = new JSONArray();
+    List<SlimEvent> allSlim = eventDAO.getAllSlim();
+    List<SlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim();
 
     if (year == -1) {
       SlimEvent firstSlim = eventDAO.getFirstSlim();
@@ -265,13 +270,13 @@ public class Report {
       instance.setTimeInMillis(timestamp);
       int firstYear = instance.get(Calendar.YEAR);
       int thisYear = Calendar.getInstance().get(Calendar.YEAR);
-      logger.info(language +" doReport for " + firstYear + "->" + thisYear);
+      logger.info(language + " doReport for " + firstYear + "->" + thisYear);
 
       for (int i = firstYear; i <= thisYear; i++) {
-        addYear(dataArray, builder, i);
+        addYear(dataArray, builder, i, allSlim, allDevicesSlim);
       }
     } else {
-      addYear(dataArray, builder, year);
+      addYear(dataArray, builder, year, allSlim, allDevicesSlim);
     }
 
     jsonObject.put("data", dataArray);
@@ -279,25 +284,26 @@ public class Report {
     return builder.toString();
   }
 
-  private void addYear(JSONArray dataArray, StringBuilder builder, int i) {
+  private void addYear(JSONArray dataArray, StringBuilder builder, int i, List<SlimEvent> allSlim, List<SlimEvent> allDevicesSlim) {
     JSONObject forYear = new JSONObject();
     builder.append("<h1>" + i + "</h1>");
-    builder.append(getReport(forYear, i));
+    builder.append(getReport(forYear, i, allSlim, allDevicesSlim));
     dataArray.add(forYear);
   }
 
   /**
-   * @see #addYear(JSONArray, StringBuilder, int)
    * @param jsonObject
    * @param year
    * @return
+   * @see #addYear
    * @see DatabaseImpl#getReport(int, JSONObject)
    */
-  private String getReport(JSONObject jsonObject, int year) {
+  private String getReport(JSONObject jsonObject, int year, List<SlimEvent> allSlim, List<SlimEvent> allDevicesSlim) {
     jsonObject.put("forYear", year);
 
+    long then = System.currentTimeMillis();
     logger.info(language + " : doing year " + year);
-    List<SlimEvent> allSlim = eventDAO.getAllSlim();
+
     setUserStart(allSlim);
 
     StringBuilder builder = new StringBuilder();
@@ -317,7 +323,7 @@ public class Report {
     jsonObject.put(OVERALL_TIME_ON_TASK, timeOnTaskJSON);
 
     JSONObject deviceTimeOnTaskJSON = new JSONObject();
-    Set<Long> eventsDevices = getEventsDevices(builder, users, deviceTimeOnTaskJSON, year);
+    Set<Long> eventsDevices = getEventsDevices(builder, users, deviceTimeOnTaskJSON, year, allDevicesSlim);
     jsonObject.put(DEVICE_TIME_ON_TASK, deviceTimeOnTaskJSON);
 
     events.addAll(eventsDevices);
@@ -354,6 +360,8 @@ public class Report {
     getBrowserReport(getValidUsers(fixUserStarts()), year, browserReport, builder);
     jsonObject.put("hostInfo", browserReport);
 
+    long now = System.currentTimeMillis();
+    logger.info(language + " took " + (now - then) + " millis to generate report for " + year);
     return builder.toString();
   }
 
@@ -367,6 +375,15 @@ public class Report {
         "<body><h2>Host : " + getHostInfo() + "</h2>\n";
   }
 
+  private Map<String, ReadableUserAgent> userAgentToReadable = new HashMap<>();
+
+  /**
+   * @param fusers
+   * @param year
+   * @param section
+   * @param document
+   * @see #getReport
+   */
   private void getBrowserReport(List<User> fusers, int year, JSONObject section, StringBuilder document) {
     List<User> usersByYear = filterUsersByYear(fusers, year);
 
@@ -377,19 +394,32 @@ public class Report {
     Map<String, Integer> familyToCount = new HashMap<>();
     Map<String, Integer> browserToCount = new HashMap<>();
     Map<String, Integer> browserVerToCount = new HashMap<>();
+    int miss = 0;
     for (User f : usersByYear) {
-      if (f.getIpaddr() != null) {
-        ReadableUserAgent agent = parser.parse(f.getIpaddr());
-        //logger.info("Got " + agent);
-        ReadableDeviceCategory.Category category = agent.getDeviceCategory().getCategory();
-        String host;
-        if (category == ReadableDeviceCategory.Category.UNKNOWN) {
-          host = "iOS NetProF";
+      String ipaddr = f.getIpaddr();
+
+      if (ipaddr != null) {
+        String device = f.getDevice();
+        boolean isIOS = device != null && device.startsWith("i");// == ReadableDeviceCategory.Category.UNKNOWN;
+        if (isIOS) {
+          String host = "iOS NetProF";
           incr(osToCount, host);
           incr(hostToCount, host);
           incr(familyToCount, host);
         } else {
-          String suffix = f.getIpaddr().contains("iPad") ? "iPad" : f.getIpaddr().contains("iPhone") ? "iPhone" : "";
+          if (ipaddr.contains("at")) ipaddr = ipaddr.split("at")[0].trim();
+          ReadableUserAgent agent = userAgentToReadable.get(ipaddr);
+          if (agent == null) {
+            //  logger.debug("cache miss for " + ipaddr);
+            miss++;
+            agent = parser.parse(ipaddr);
+            userAgentToReadable.put(ipaddr, agent);
+          }
+          //logger.info("Got " + agent);
+          //ReadableDeviceCategory.Category category = agent.getDeviceCategory().getCategory();
+          String host;
+
+          String suffix = ipaddr.contains("iPad") ? "iPad" : ipaddr.contains("iPhone") ? "iPhone" : "";
           VersionNumber versionNumber = agent.getOperatingSystem().getVersionNumber();
           incr(familyToCount, agent.getOperatingSystem().getFamily().getName());
           host = suffix + " " + agent.getOperatingSystem().getName();
@@ -417,15 +447,18 @@ public class Report {
     JSONArray browserArray = new JSONArray();
     JSONArray browserVerArray = new JSONArray();
 
-    document.append(getWrapper(OPERATING_SYSTEM,         getCountTable(NAME, COUNT, familyArray, NAME, getSorted(familyToCount))));
+    document.append(getWrapper(OPERATING_SYSTEM, getCountTable(NAME, COUNT, familyArray, NAME, getSorted(familyToCount))));
     document.append(getWrapper(OPERATING_SYSTEM_VERSION, getCountTable(NAME, COUNT, hostArray, NAME, getSorted(hostToCount))));
-    document.append(getWrapper(BROWSER,                   getCountTable(NAME, COUNT, browserArray, NAME, getSorted(browserToCount))));
-    document.append(getWrapper(BROWSER_VERSION,          getCountTable(NAME, COUNT, browserVerArray, NAME, getSorted(browserVerToCount))));
+    document.append(getWrapper(BROWSER, getCountTable(NAME, COUNT, browserArray, NAME, getSorted(browserToCount))));
+    document.append(getWrapper(BROWSER_VERSION, getCountTable(NAME, COUNT, browserVerArray, NAME, getSorted(browserVerToCount))));
 
     section.put(OPERATING_SYSTEM, familyArray);
     section.put(OPERATING_SYSTEM_VERSION, hostArray);
     section.put(BROWSER, browserArray);
     section.put(BROWSER_VERSION, browserVerArray);
+
+    if (miss > 0)
+      logger.info(language + " for " + year + " users by year " + userAgentToReadable.size() + " miss " + miss);
   }
 
   private List<User> filterUsersByYear(List<User> fusers, int year) {
@@ -461,22 +494,10 @@ public class Report {
     }
   }
 
-/*  private String getActiveUserHeader(Set<Long> events, int year) {
-    SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM/dd/yy");
-    String start = simpleDateFormat2.format(getJanuaryFirst(getCalendarForYear(year), year));
-    String end = simpleDateFormat2.format(getNextYear(year));
-
-    return "<h2>Unique Active Users between " + start + " and " + end +
-        "</h2>" +
-        "<table ><tr>" +
-        top + events.size() + "</td>" +
-        "</tr></table>";
-  }*/
-
   /**
    * @param builder
    * @return
-   * @see #getReport(JSONObject, int)
+   * @see #getReport
    */
   private Set<Long> getUsers(StringBuilder builder, JSONObject jsonObject, int year) {
     return getUsers(builder, fixUserStarts(), ALL_NEW_USERS, jsonObject, year);
@@ -715,6 +736,16 @@ public class Report {
     return getIntCountTable(unit, count, jsonArray, MONTH1, monthToCount);
   }
 
+  /**
+   * Does months - 1-12
+   *
+   * @param unit
+   * @param count
+   * @param jsonArray
+   * @param label
+   * @param monthToValue
+   * @return
+   */
   private String getIntCountTable(String unit, String count, JSONArray jsonArray, String label, Map<Integer, ?> monthToValue) {
     StringBuilder s = new StringBuilder();
     Integer max = getMax(monthToValue);
@@ -725,7 +756,7 @@ public class Report {
         value = ((Collection<?>) value).size();
       }
       if (value == null) value = 0;
-      addJsonRow(jsonArray, label, value, month);
+      addJsonRow(jsonArray, label, value, month + 1);
       s.append(getHTMLRow(getMonth(month), value));
     }
     return getTableHTML(unit, count, s.toString());
@@ -853,7 +884,7 @@ public class Report {
   private void getResults(StringBuilder builder, Set<Long> students, /*PathHelper pathHelper, String language,*/
                           JSONObject jsonObject, int year) {
     List<Result> results = resultDAO.getResults();
-    getResultsForSet(builder, students, results, ALL_RECORDINGS,  jsonObject, year);
+    getResultsForSet(builder, students, results, ALL_RECORDINGS, jsonObject, year);
   }
 
   private void getResultsDevices(StringBuilder builder, Set<Long> students,
@@ -1130,11 +1161,18 @@ public class Report {
     }
   }
 
-  private Set<Long> getEventsDevices(StringBuilder builder, Set<Long> students, JSONObject jsonObject, int year) {
-    List<SlimEvent> all = eventDAO.getAllDevicesSlim();
+  /**
+   * @param builder
+   * @param students
+   * @param jsonObject
+   * @param year
+   * @return
+   * @see #getReport(JSONObject, int, List)
+   */
+  private Set<Long> getEventsDevices(StringBuilder builder, Set<Long> students, JSONObject jsonObject, int year, List<SlimEvent> allDevicesSlim) {
     String activeUsers = "Active iPad/iPhone Users";
     String tableLabel = "iPad/iPhone Time on Task";
-    return getEvents(builder, students, all, activeUsers, tableLabel, jsonObject, year);
+    return getEvents(builder, students, allDevicesSlim, activeUsers, tableLabel, jsonObject, year);
   }
 
   /**
