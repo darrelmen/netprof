@@ -14,7 +14,6 @@ import corpus.LTS;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.SLFFile;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -64,7 +63,7 @@ public abstract class Scoring {
   /**
    * By keeping these here, we ensure that we only ever read the dictionary once
    */
-  HTKDictionary htkDictionary;
+  final HTKDictionary htkDictionary;
   final ConfigFileCreator configFileCreator;
   final boolean isMandarin;
 
@@ -80,11 +79,12 @@ public abstract class Scoring {
    * @param deployPath
    * @see ASRScoring#ASRScoring
    */
-  Scoring(String deployPath, ServerProperties props, LogAndNotify langTestDatabase) {
+  Scoring(String deployPath, ServerProperties props, LogAndNotify langTestDatabase, HTKDictionary htkDictionary) {
     this.deployPath = deployPath;
     this.scoringDir = getScoringDir(deployPath);
     this.props = props;
     this.langTestDatabase = langTestDatabase;
+    this.htkDictionary = htkDictionary;
 
     // logger.debug("Creating ASRScoring object");
     lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
@@ -98,16 +98,16 @@ public abstract class Scoring {
     ltsFactory = new LTSFactory(languageProperty);
     this.configFileCreator = new ConfigFileCreator(properties, getLTS(), scoringDir);
 
-    readDictionary();
+   // readDictionary();
     makeDecoder();
     checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language, props.hasModel());
   }
 
-  protected LTS getLTS() {
+  LTS getLTS() {
     return ltsFactory.getLTSClass();
   }
 
-  private static String getScoringDir(String deployPath) {
+  public static String getScoringDir(String deployPath) {
     return deployPath + File.separator + SCORING;
   }
 
@@ -156,7 +156,7 @@ public abstract class Scoring {
     boolean foundATranscript = false;
     // These may not all exist. The speech file is created only by multisv right now.
     String phoneLabFile = prependDeploy(audioFileNoSuffix + ".phones.lab");
-    Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
+    Map<ImageType, String> typeToFile = new HashMap<>();
 
     if (phoneLab != null) {
 //      logger.debug("phoneLab: " + phoneLab);
@@ -217,7 +217,7 @@ public abstract class Scoring {
     boolean foundATranscript = false;
     // These may not all exist. The speech file is created only by multisv right now.
     String phoneLabFile = prependDeploy(audioFileNoSuffix + ".phones.lab");
-    Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
+    Map<ImageType, String> typeToFile = new HashMap<>();
     if (new File(phoneLabFile).exists()) {
       logger.info("using " + phoneLabFile);
       typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
@@ -285,7 +285,7 @@ public abstract class Scoring {
     if (decode || imageWidth < 0) {  // hack to skip image generation
       // These may not all exist. The speech file is created only by multisv right now.
       String phoneLabFile = prependDeploy(audioFileNoSuffix + ".phones.lab");
-      Map<ImageType, String> typeToFile = new HashMap<ImageType, String>();
+      Map<ImageType, String> typeToFile = new HashMap<>();
       if (new File(phoneLabFile).exists()) {
         typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
       }
@@ -318,7 +318,7 @@ public abstract class Scoring {
   // JESS reupdate here
   private EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes, boolean useWebservice,
                                         boolean usePhoneToDisplay) {
-    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
+    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<>();
     try {
       for (Map.Entry<ImageType, String> o : imageTypes.entrySet()) {
         ImageType imageType = o.getKey();
@@ -328,7 +328,7 @@ public abstract class Scoring {
             transcriptReader.readEventsFromFile(o.getValue(), isPhone, props.getPhoneToDisplay()));
 
       }
-      return new EventAndFileInfo(new HashMap<ImageType, String>(), typeToEvent);
+      return new EventAndFileInfo(new HashMap<>(), typeToEvent);
     } catch (IOException e) {
       e.printStackTrace();
       return null;
@@ -344,7 +344,7 @@ public abstract class Scoring {
    * @return map of image type to URL
    */
   Map<NetPronImageType, String> getTypeToRelativeURLMap(Map<ImageType, String> typeToImageFile) {
-    Map<NetPronImageType, String> sTypeToImage = new HashMap<NetPronImageType, String>();
+    Map<NetPronImageType, String> sTypeToImage = new HashMap<>();
     if (typeToImageFile == null) {
       logger.error("huh? typeToImageFile is null?");
     } else {
@@ -404,54 +404,42 @@ public abstract class Scoring {
     return checkLTSHelper.getBagOfPhones(foreignLanguagePhrase);
   }
 
-  /**
-   * @see #ASRScoring
-   */
-  private void readDictionary() {
-    htkDictionary = makeDict();
-    //logger.info(this + " dict now " + htkDictionary);
-  }
-
-  /**
-   * @return
-   * @see #readDictionary()
-   */
-  private HTKDictionary makeDict() {
-    String dictFile = configFileCreator.getDictFile();
-    if (dictFile != null && new File(dictFile).exists()) {
-      long then = System.currentTimeMillis();
-      HTKDictionary htkDictionary = new HTKDictionary(dictFile);
-      long now = System.currentTimeMillis();
-      int size = htkDictionary.size(); // force read from lazy val
-      if (now - then > 300) {
-        logger.info("for " + languageProperty + " read dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
-      }
-      return htkDictionary;
-    } else {
-      if (props.isNoModel()) {
-        logger.info("---> makeDict : Can't find dict file at " + dictFile);
-      }
-      else {
-        logger.error("\n\n\n---> makeDict : Can't find dict file at " + dictFile);
-      }
-      return new HTKDictionary();
-    }
-  }
-
   public SmallVocabDecoder getSmallVocabDecoder() {
     return svDecoderHelper;
   }
-
-  /**
-   * @param toSort
-   * @param <T>
-   * @seex ASR#sort(List)
-   */
-/*  public <T extends CommonExercise> void sort(List<T> toSort) {
-    ltsFactory.sort(toSort);
-  }*/
-
   public Collator getCollator() {
     return ltsFactory.getCollator();
+  }
+
+  /**
+   * Take the events (originally from a .lab file generated in pronz) for WORDS and string them together into a
+   * sentence.
+   * We might consider defensively sorting the events by time.
+   *
+   * @param eventAndFileInfo
+   * @return
+   * @see ASRWebserviceScoring#getPretestScore
+   */
+  String getRecoSentence(EventAndFileInfo eventAndFileInfo) {
+    StringBuilder b = new StringBuilder();
+    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
+      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
+      if (key == NetPronImageType.WORD_TRANSCRIPT) {
+        Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
+        for (Float timeStamp : timeToEvent.keySet()) {
+          String event = timeToEvent.get(timeStamp).event;
+          if (!event.equals("<s>") && !event.equals("</s>") && !event.equals("sil")) {
+            String trim = event.trim();
+            if (trim.length() > 0) {
+              //logger.debug("Got " + event + " trim '" +trim+ "'");
+              b.append(trim);
+              b.append(" ");
+            }
+          }
+        }
+      }
+    }
+
+    return b.toString().trim();
   }
 }
