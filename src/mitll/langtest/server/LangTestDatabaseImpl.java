@@ -7,6 +7,7 @@ package mitll.langtest.server;
 import audio.image.ImageType;
 import audio.imagewriter.SimpleImageWriter;
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
@@ -97,7 +98,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private ServerProperties serverProps;
   private AudioConversion audioConversion;
   private PathHelper pathHelper;
-  private boolean stopOggCheck = false;
+  //private boolean stopOggCheck = false;
 
   /**
    * TODO : somehow make this typesafe
@@ -1860,7 +1861,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param flText
    * @param which
    * @return
-   * @see mitll.langtest.client.result.ResultManager#populateTable(int, com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.DialogBox, com.github.gwtbootstrap.client.ui.Button)
+   * @see mitll.langtest.client.result.ResultManager#getTypeaheadUsing(String, TextBox)
    */
   @Override
   public Collection<String> getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which) {
