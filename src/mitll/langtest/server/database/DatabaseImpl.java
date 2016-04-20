@@ -1397,8 +1397,14 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return getReport("").getReport(serverProps.getLanguage(), jsonObject, year);
   }
 
+  private Report reportCache;
+
   private Report getReport(String prefix) {
-    return new Report(userDAO, resultDAO, eventDAO, audioDAO, serverProps.getLanguage(), prefix);
+    if (reportCache == null) {
+      Report report = new Report(userDAO, resultDAO, eventDAO, audioDAO, serverProps.getLanguage(), prefix);
+      this.reportCache = report;
+    }
+    return reportCache;
   }
 
   /**
