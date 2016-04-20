@@ -10,6 +10,7 @@ import audio.image.TranscriptEvent;
 import audio.imagewriter.EventAndFileInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import corpus.HTKDictionary;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
@@ -57,11 +58,10 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @param langTestDatabase
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
    */
-  public ASRScoring(String deployPath, ServerProperties serverProperties, LogAndNotify langTestDatabase) {
-    super(deployPath, serverProperties, langTestDatabase);
+  public ASRScoring(String deployPath, ServerProperties serverProperties, LogAndNotify langTestDatabase, HTKDictionary htkDictionary) {
+    super(deployPath, serverProperties, langTestDatabase, htkDictionary);
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
   }
-
 
   /**
    * @param testAudioDir
@@ -395,37 +395,6 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
   }
 
   /**
-   * Take the events (originally from a .lab file generated in pronz) for WORDS and string them together into a
-   * sentence.
-   *
-   * @param eventAndFileInfo
-   * @return
-   * @see #scoreRepeatExercise
-   */
-  private String getRecoSentence(EventAndFileInfo eventAndFileInfo) {
-    StringBuilder b = new StringBuilder();
-    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
-      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      if (key == NetPronImageType.WORD_TRANSCRIPT) {
-        Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
-        for (Float timeStamp : timeToEvent.keySet()) {
-          String event = timeToEvent.get(timeStamp).event;
-          if (!event.equals("<s>") && !event.equals("</s>") && !event.equals("sil")) {
-            String trim = event.trim();
-            if (trim.length() > 0) {
-              //logger.debug("Got " + event + " trim '" +trim+ "'");
-              b.append(trim);
-              b.append(" ");
-            }
-          }
-        }
-      }
-    }
-
-    return b.toString().trim();
-  }
-
-  /**
    * Filter out sil.
    * <p>
    * Make sure that when we scale the phone scores by {@link #SCORE_SCALAR} we do it for both the scores and the image.
@@ -447,7 +416,6 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 
   private Map<String, Float> getTokenToScore(Map<String, Float> phones) {
     if (phones == null) {
-
 //            logger.warn("getTokenToScore : no scores in " + scores.eventScores + " for '" + token + "'");
       return Collections.emptyMap();
     } else {
