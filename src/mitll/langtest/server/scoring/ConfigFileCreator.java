@@ -4,7 +4,10 @@
 
 package mitll.langtest.server.scoring;
 
+import corpus.HTKDictionary;
 import corpus.LTS;
+import mitll.langtest.server.LogAndNotify;
+import mitll.langtest.server.ServerProperties;
 
 import java.io.File;
 import java.util.HashMap;
@@ -50,6 +53,12 @@ public class ConfigFileCreator {
 
  // private static final String DEFAULT_MODELS_DIR = "models.dli-levantine";
 
+  /**
+   * @see Scoring#Scoring(String, ServerProperties, LogAndNotify, HTKDictionary)
+   * @param properties
+   * @param letterToSoundClass
+   * @param scoringDir
+   */
   public ConfigFileCreator(Map<String, String> properties, LTS letterToSoundClass, String scoringDir) {
     this.properties = properties;
     this.letterToSoundClass = letterToSoundClass;
