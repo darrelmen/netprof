@@ -9,6 +9,7 @@ import audio.image.TranscriptEvent;
 import audio.imagewriter.EventAndFileInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import corpus.HTKDictionary;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
@@ -66,8 +67,8 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
    * @see mitll.langtest.server.audio.AudioFileHelper#makeASRScoring()
    */
-  public ASRWebserviceScoring(String deployPath, ServerProperties properties, LogAndNotify langTestDatabase) {
-    super(deployPath, properties, langTestDatabase);
+  public ASRWebserviceScoring(String deployPath, ServerProperties properties, LogAndNotify langTestDatabase, HTKDictionary htkDictionary) {
+    super(deployPath, properties, langTestDatabase, htkDictionary);
     decodeAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
     alignAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
     ip = properties.getWebserviceIP();
@@ -268,7 +269,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    * @param processDur
    * @param usePhoneToDisplay
    * @return
-   * @see #scoreRepeatExercise(String, String, String, Collection, String, int, int, boolean, boolean, String, boolean, String, Result, boolean)
+   * @see #scoreRepeatExercise
    */
   private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
                                        boolean decode, String prefix, String noSuffix, Scores scores, String phoneLab,
@@ -383,7 +384,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
    */
   private Object[] runHydra(String audioPath, String transcript, Collection<String> lmSentences, String tmpDir, boolean decode, int end) {
     // reference trans
-    String cleaned = slfFile.cleanToken(transcript);
+    String cleaned = slfFile.cleanToken(transcript).trim();
     if (isMandarin) {
       cleaned = (decode ? SLFFile.UNKNOWN_MODEL + " " : "") + getSegmented(transcript.trim()); // segmentation method will filter out the UNK model
     }
@@ -399,18 +400,15 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
       cleaned = slfFile.cleanToken(slfOut[1]);
     }
 
-    String transcriptCleaned = cleaned.replaceAll("\\p{Z}", ";");
-    if (!transcriptCleaned.endsWith(";")) {
-      transcriptCleaned = transcriptCleaned + ";";
-    }
-    transcriptCleaned = transcriptCleaned.replaceAll(";;",";");
+    String sep = ";";
+    String after = getCleanedTranscript(cleaned, sep);
 
     String hydraInput =
         tmpDir + "/:" +
             audioPath + ":" +
             hydraDict + ":" +
             smallLM + ":xxx,0," + end + "," +
-            "[<s>;" + transcriptCleaned + "</s>]";
+            "[<s>" + after + "</s>]";
 
     long then = System.currentTimeMillis();
     String resultsStr = runHydra(hydraInput, new HTTPClient(ip, port, "dcodr"));
@@ -433,7 +431,7 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
         return null;
       }
       // TODO makes this a tuple3 type
-      String[] split = results[0].split(";");
+      String[] split = results[0].split(sep);
       Scores scores = new Scores(split);
       // clean up tmp directory if above score threshold
       logger.debug(languageProperty + " : Took " + timeToRunHydra + " millis to run hydra - overall score: " + split[0]);
@@ -447,6 +445,19 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
 		}*/
       return new Object[]{scores, results[1].replaceAll("#", ""), results[2].replaceAll("#", "")}; // where are the # coming from?
     }
+  }
+
+  private String getCleanedTranscript(String cleaned, String sep) {
+    String s = cleaned.replaceAll("\\p{Z}", sep);
+    String transcriptCleaned = sep + s.trim();
+
+    if (!transcriptCleaned.endsWith(sep)) {
+      transcriptCleaned = transcriptCleaned + sep;
+    }
+
+    String after = transcriptCleaned.replaceAll(";;", sep);
+
+    return after;
   }
 
   private String getFailureMessage(String audioPath, String transcript, Collection<String> lmSentences, boolean decode) {
@@ -549,44 +560,6 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
     return typeToEndTimes;
   }
 
-  /**
-   * Take the events (originally from a .lab file generated in pronz) for WORDS and string them together into a
-   * sentence.
-   * We might consider defensively sorting the events by time.
-   *
-   * @param eventAndFileInfo
-   * @return
-   * @see #scoreRepeatExercise
-   */
-  private String getRecoSentence(EventAndFileInfo eventAndFileInfo) {
-    StringBuilder b = new StringBuilder();
-    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
-      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      if (key == NetPronImageType.WORD_TRANSCRIPT) {
-        Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
-        //        List<TranscriptEvent> sorted = new ArrayList<TranscriptEvent>(timeToEvent.values());
-        //        Collections.sort(sorted);
-        //        for (TranscriptEvent transcriptEvent : sorted) {
-        //					String event = transcriptEvent.event;
-        for (Float timeStamp : timeToEvent.keySet()) {
-          String event = timeToEvent.get(timeStamp).event;
-          if (!event.equals("<s>") && !event.equals("</s>") && !event.equals("sil")) {
-            String trim = event.trim();
-            if (trim.length() > 0) {
-              b.append(trim);
-              b.append(" ");
-            }
-            //   else {
-            //logger.warn("huh? event " + transcriptEvent + " had an event word that was zero length?");
-            //     }
-          }
-        }
-      }
-    }
-
-    return b.toString().trim();
-  }
-
   private Map<String, Float> getPhoneToScore(Scores scores) {
     Map<String, Float> phones = scores.eventScores.get(Scores.PHONES);
     return getTokenToScore(scores, phones, true);
@@ -614,4 +587,13 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
       return phoneToScore;
     }
   }
+
+/*  public static void main(String[] arg) {
+    String transcript = "~ 쯤";
+    String cleaned = new SLFFile().cleanToken(transcript).trim();
+    System.out.println("cleaned " + cleaned);
+
+    String cleanedTranscript = ASRWebserviceScoring.getCleanedTranscript(cleaned, ";");
+    System.out.println("After " + cleanedTranscript);
+  }*/
 }
