@@ -229,7 +229,11 @@ public class ResultDAO extends DAO {
     return new ArrayList<>();
   }
 
-  public List<MonitorResult> getMonitorResults() {
+  /**
+   * @see DatabaseImpl#getMonitorResults()
+   * @return
+   */
+  List<MonitorResult> getMonitorResults() {
     try {
       synchronized (this) {
         if (cachedMonitorResultsForQuery != null) {
