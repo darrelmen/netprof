@@ -2385,7 +2385,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public void destroy() {
     refResultDecoder.setStopDecode(true);
-    stopOggCheck = true;
+    //stopOggCheck = true;
     super.destroy();
     db.destroy(); // TODO : redundant with h2 shutdown hook?
   }
