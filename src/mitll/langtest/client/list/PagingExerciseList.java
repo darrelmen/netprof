@@ -81,7 +81,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   @Override
-  public void setState(String id, STATE state) { byID(id).setState(state);  }
+  public void setState(String id, STATE state) {
+    byID(id).setState(state);
+  }
 
   @Override
   public void setSecondState(String id, STATE state) {
@@ -217,10 +219,14 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
         @Override
         public void gotTypeAheadEntry(String text) {
           controller.logEvent(getTypeAhead(), "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
-          loadExercises(getHistoryToken(text, ""), text, false);
+          gotTypeAheadEvent(text);
         }
       };
     }
+  }
+
+  private void gotTypeAheadEvent(String text) {
+    loadExercises(getHistoryToken(text, ""), text, false);
   }
 
   /**
@@ -230,7 +236,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   public void searchBoxEntry(String text) {
     if (showTypeAhead) {
       typeAhead.setText(text);
-      pushNewItem(text, "");
+      gotTypeAheadEvent(text);
     }
   }
 
