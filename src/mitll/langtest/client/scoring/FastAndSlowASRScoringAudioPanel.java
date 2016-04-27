@@ -267,8 +267,8 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
         }
       });
     }
-    if (firstAttr == null)
-      logger.warning("huh? no attribute ");
+//    if (firstAttr == null)
+//      logger.warning("huh? no attribute ");
   }
 
   /**
