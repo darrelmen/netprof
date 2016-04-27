@@ -8,56 +8,56 @@ import java.util.*;
 import java.util.logging.Logger;
 
 /**
-* Created with IntelliJ IDEA.
-* User: GO22670
-* Date: 4/18/13
-* Time: 6:31 PM
-* To change this template use File | Settings | File Templates.
-*/
+ * Created with IntelliJ IDEA.
+ * User: GO22670
+ * Date: 4/18/13
+ * Time: 6:31 PM
+ * To change this template use File | Settings | File Templates.
+ */
 public class SelectionState {
   private final Logger logger = Logger.getLogger("SelectionState");
 
-  public static final String INSTANCE = "instance";
-  private String item;
+  static final String INSTANCE = "instance";
+  private String item = "";
   private final Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
   private String instance = "";
   private String search = "";
   private static final boolean DEBUG = false;
 
   /**
-   * @see ExerciseList#getIDFromToken(String)
-   * @see HistoryExerciseList#getSelectionState(String)
    * @param token
    * @param removePlus
+   * @see HistoryExerciseList#getIDFromToken
+   * @see HistoryExerciseList#getSelectionState(String)
    */
-  public SelectionState(String token, boolean removePlus) {
-    String token1 = removePlus ? unencodeToken(token) : unencodeToken2(token);
-    parseToken(token1);
+  SelectionState(String token, boolean removePlus) {
+    parseToken(removePlus ? unencodeToken(token) : unencodeToken2(token));
+  }
+
+  private String unencodeToken(String token) {
+    return unencodeToken2(token).replaceAll("\\+", " ");
+  }
+
+  private String unencodeToken2(String token) {
+    return token.replaceAll("%3D", "=").replaceAll("%3B", ";").replaceAll("%2", " ");
   }
 
   /**
    * @seex mitll.langtest.client.flashcard.BootstrapFlashcardExerciseList#getExercises(long, boolean)
    */
-  public boolean isEmpty() { return getTypeToSection().isEmpty(); }
-
-  private String unencodeToken(String token) {
-    token = unencodeToken2(token).replaceAll("\\+", " ");
-    return token;
-  }
-
-  private String unencodeToken2(String token) {
-    token = token.replaceAll("%3D", "=").replaceAll("%3B", ";").replaceAll("%2", " ");
-    return token;
+  public boolean isEmpty() {
+    return getTypeToSection().isEmpty();
   }
 
 
   /**
    * Deals with responseType being on the URL.
+   *
    * @param token
    */
   private void parseToken(String token) {
     //token = token.contains("###") ? token.split("###")[0] : token;
-   // token = token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0]; // remove any other parameters
+    // token = token.split(ResponseExerciseList.RESPONSE_TYPE_DIVIDER)[0]; // remove any other parameters
     String[] parts = token.split(";");
 
     for (String part : parts) {
@@ -66,8 +66,8 @@ public class SelectionState {
       if (part.contains("=")) {
         String[] segments = part.split("=");
         if (DEBUG) logger.info("\tpart " + part + " : " + Arrays.asList(segments));
-        if (segments.length >1) {
-          String type    = segments[0].trim();
+        if (segments.length > 1) {
+          String type = segments[0].trim();
           String section = segments[1].trim();
 
           if (type.equals("#item") || type.equals("item")) {
@@ -102,7 +102,7 @@ public class SelectionState {
     }*/
 
     if (DEBUG) logger.info("parseToken : got " + this + " from token '" + token + "'");
-  //  logger.info(getInfo());
+    //  logger.info(getInfo());
   }
 
   private void add(String type, Collection<String> section) {
@@ -126,6 +126,7 @@ public class SelectionState {
   public String getInstance() {
     return instance;
   }
+
   public String getSearch() {
     return search;
   }
@@ -136,7 +137,7 @@ public class SelectionState {
       builder.append(section).append(", ");
     }
     String s = builder.toString();
-    return s.substring(0, Math.max(0,s.length() - 2));
+    return s.substring(0, Math.max(0, s.length() - 2));
   }
 
   public String getInfo() {
