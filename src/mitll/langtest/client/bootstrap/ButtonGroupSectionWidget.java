@@ -19,7 +19,7 @@ import java.util.*;
  * Time: 11:19 AM
  * To change this template use File | Settings | File Templates.
  */
-class ButtonGroupSectionWidget implements SectionWidget {
+public class ButtonGroupSectionWidget implements SectionWidget {
   private Button clearButton;
   private final String type;
 
