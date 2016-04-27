@@ -211,7 +211,7 @@ public class NPFHelper implements RequiresResize {
     for (CommonShell ex : ul.getExercises()) {
       copy.add(ex);
     }
-    npfExerciseList.rememberAndLoadFirst(copy, toSelect, "");
+    npfExerciseList.rememberAndLoadFirst(copy,"", "", toSelect.getID());
     npfExerciseList.setWidth("270px");
     npfExerciseList.getElement().getStyle().setProperty("minWidth", "270px");
   }

@@ -52,7 +52,7 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#doAfterEditComplete(ListInterface, boolean)
    * @param id
    */
-  void reloadWith(String id);
+ // void reloadWith(String id);
 
   /**
    * @see mitll.langtest.client.custom.content.NPFHelper#doInternalLayout(UserList, String)
