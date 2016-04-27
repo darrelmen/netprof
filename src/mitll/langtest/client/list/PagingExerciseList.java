@@ -40,7 +40,7 @@ import java.util.logging.Logger;
  * Time: 5:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingExerciseList<T extends CommonShell, U extends Shell> extends ExerciseList<T, U> {
+public abstract class PagingExerciseList<T extends CommonShell, U extends Shell> extends ExerciseList<T, U> {
   private final Logger logger = Logger.getLogger("PagingExerciseList");
 
   protected final ExerciseController controller;
@@ -81,10 +81,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
   }
 
   @Override
-  public void setState(String id, STATE state) {
-    T t = byID(id);
-    t.setState(state);
-  }
+  public void setState(String id, STATE state) { byID(id).setState(state);  }
 
   @Override
   public void setSecondState(String id, STATE state) {
@@ -116,7 +113,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
     service.getExerciseIds(
         getRequest(prefix),
-        new SetExercisesCallback(""));
+        new SetExercisesCallback("", prefix, ""));
   }
 
   ExerciseListRequest getRequest(String prefix) {
@@ -451,7 +448,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
 
   /**
    * @return
-   * @see HistoryExerciseList#loadExercisesUsingPrefix(java.util.Map, String, boolean)
+   * @see HistoryExerciseList#loadExercisesUsingPrefix(Map, String, boolean, String)
    */
   boolean getUnrecorded() {
     return unrecorded;
