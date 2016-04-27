@@ -9,7 +9,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -110,8 +109,8 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
           }
 
           @Override
-          protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno) {
-            super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno);
+          protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno, String exerciseID) {
+            super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, exerciseID);
             filterOnly.setText(setCheckboxTitle(userManager));
           }
 
