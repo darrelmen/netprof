@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * User: GO22670
@@ -53,7 +54,7 @@ import java.util.List;
  */
 public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & ScoredExercise> extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
-  //private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
+  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
   private static final String MANDARIN = "Mandarin";
   private static final String KOREAN = "Korean";
@@ -417,10 +418,9 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
         public void onClick(ClickEvent clickEvent) {
           Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             public void execute() {
-              // String test = "{man’s}";
               String s1 = html.replaceAll(CommentNPFExercise.PUNCT_REGEX, " ").replaceAll("’", " ");
               String s2 = s1.split(CommentNPFExercise.SPACE_REGEX)[0].toLowerCase();
-              //   logger.warning("search on {" +s2 +"}");
+           //   logger.info("push clicked on character/word " + s2);
               listContainer.searchBoxEntry(s2);
             }
           });
