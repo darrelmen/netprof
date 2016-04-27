@@ -34,8 +34,8 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
   private final Logger logger = Logger.getLogger("HistoryExerciseList");
 
   public static final String ANY = "Clear";
-  protected static final boolean DEBUG_ON_VALUE_CHANGE = true;
-  private static final boolean DEBUG = true;
+  protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
+  private static final boolean DEBUG = false;
 
   private HandlerRegistration handlerRegistration;
   protected long userID;
@@ -58,7 +58,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     addHistoryListener();
   }
 
-  public V getSectionWidget(String type) {
+  protected V getSectionWidget(String type) {
     return sectionWidgetContainer.getWidget(type);
   }
 
@@ -82,7 +82,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
 
     String s = (hasItemID ? super.getHistoryToken(search, id) + ";" : "search=" + search + ";") +
         unitAndChapterSelection + instanceSuffix;
-    logger.info("getHistoryToken '" + s + "'");
+    //logger.info("getHistoryToken '" + s + "'");
     return s;
   }
 
@@ -172,8 +172,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
       logger.info("HistoryExerciseList.pushNewItem : push history '" + historyToken + "' search '" + search + "' : " + exerciseID);
 
     String currentToken = History.getToken();
-    logger.info("HistoryExerciseList.pushNewItem : current currentToken '" + currentToken + "' vs new id '" + exerciseID + "'");
-
+   // logger.info("HistoryExerciseList.pushNewItem : current currentToken '" + currentToken + "' vs new id '" + exerciseID + "'");
     //currentToken = getSelectionFromToken(currentToken);
 //    if (DEBUG)
 //      logger.info("HistoryExerciseList.pushNewItem : current currentToken '" + currentToken + "' vs new id '" + exerciseID + "'");
@@ -189,7 +188,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
   }
 
   protected void setHistoryItem(String historyToken) {
-    logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
+   // logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
     History.newItem(historyToken);
   }
 
@@ -266,15 +265,10 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     Map<String, Collection<String>> selectionState2 = new HashMap<>();
 
     // make sure we all types have selections, even if it's the default Clear (ANY) selection
-    Collection<String> types = sectionWidgetContainer.getTypes();
-    for (String type : types) {
+    for (String type : sectionWidgetContainer.getTypes()) {
       selectionState2.put(type, Collections.singletonList(HistoryExerciseList.ANY));
     }
-
     selectionState2.putAll(selectionState.getTypeToSection());
-//    for (Map.Entry<String, Collection<String>> pair : selectionState.getTypeToSection().entrySet()) {
-//      selectionState2.put(pair.getKey(), pair.getValue());
-//    }
 
     boolean hasNonClearSelection = false;
     List<String> typesWithSelections = new ArrayList<>();
@@ -301,7 +295,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
         if (!sectionWidgetContainer.hasType(type)) {
           if (!type.equals("item")) {
             logger.warning("restoreListBoxState for " + selectionState + " : huh? bad type '" + type +
-                "', expecting something in " + types);
+                "', expecting something in " + sectionWidgetContainer.getTypes());
           }
         } else {
           typesWithSelections.add(type);
@@ -325,7 +319,6 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
 
       for (String type : afterFirst) {
         //logger.info("restoreListBoxState : clearing enabled on " + type);
-
         clearEnabled(type);
       }
     }
@@ -380,7 +373,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
 
     boolean restored = restoreUIState(selectionState, event.getValue());
     if (!item.isEmpty() && hasExercise(item) && !restored) {
-      logger.info("onValueChange : checkAndAskServer for item '" + item + "'");
+//      logger.info("HistoryExerciseList.onValueChange : checkAndAskServer for item '" + item + "'");
       checkAndAskServer(item);
     } else {
       try {
@@ -392,18 +385,22 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     }
   }
 
+  /**
+   *
+   * @param selectionState
+   * @param value
+   * @return true if we're just clicking on a different item in the list and don't need to reload the exercise list
+   */
   private boolean restoreUIState(SelectionState selectionState, String value) {
     String uiSelectionState = sectionWidgetContainer.getHistoryToken();
-
     String search = selectionState.getSearch();
     boolean searchIsSame = getTypeAheadText().equals(search);
 
-    logger.info("token " + value + " vs " + selectionState);
-
     if (value.contains(uiSelectionState) && searchIsSame) {
-      return false;
+      if (DEBUG_ON_VALUE_CHANGE) {
+        logger.info("HistoryExerciseList.onValueChange : selectionState '" + selectionState + "' no change....");
+      } return false;
     } else {
-
       restoreListBoxState(selectionState);
       if (DEBUG_ON_VALUE_CHANGE) {
         logger.info("HistoryExerciseList.onValueChange : selectionState '" + selectionState + "' search from token '" + search +
@@ -414,22 +411,6 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
       return true;
     }
   }
-
-  /*private String getTokenFromEvent(ValueChangeEvent<String> event) {
-    String token = event.getValue();
-    token = allowPlusInURL ? unencodeTokenDontRemovePlus(token) : unencodeToken(token);
-    return token;
-  }
-
-  private String unencodeTokenDontRemovePlus(String token) {
-    token = token.replaceAll("%3D", "=").replaceAll("%3B", ";").replaceAll("%2", " ");
-    return token;
-  }
-
-  private String unencodeToken(String token) {
-    token = unencodeTokenDontRemovePlus(token).replaceAll("\\+", " ");
-    return token;
-  }*/
 
   /**
    * When we get a history token push, select the exercise type, section, and optionally item.
