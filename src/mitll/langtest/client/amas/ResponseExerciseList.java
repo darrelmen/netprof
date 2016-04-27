@@ -26,14 +26,12 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 
@@ -168,7 +166,6 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
     return pagingContainer;
   }
 
-
   /**
    * Adds the response type to the end of the history token
    *
@@ -178,7 +175,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
     //logger.info("------------ ResponseExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
     historyToken = historyToken.contains(RESPONSE_TYPE_DIVIDER) ? historyToken.split(RESPONSE_TYPE_DIVIDER)[0] : historyToken;
     String historyToken1 = historyToken + RESPONSE_TYPE_DIVIDER + RESPONSE_TYPE + "=" + response;
-    logger.info("setHistoryItem : history new item  " +historyToken1);
+    logger.info("ResponseExerciseList.setHistoryItem : history new item '" +historyToken1 +"'");
     History.newItem(historyToken1);
   }
 
@@ -340,7 +337,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
    */
 //  @Override
   protected void loadExercises(final Map<String, Collection<String>> typeToSection) {
-    loadExercisesUsingPrefix(typeToSection, getPrefix(), false);
+    loadExercisesUsingPrefix(typeToSection, getPrefix(), false, "");
   }
 
   /**
