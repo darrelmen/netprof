@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
+
 /**
  * Does audio playback and fetches and shows various audio images (waveform, spectrogram, etc.) with a red line
  * indicating audio position during playback.<br></br>
@@ -476,12 +478,10 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     final int toUse = Math.max(MIN_WIDTH, width);
     float heightForType = type.equals(WAVEFORM) ? getWaveformHeight() : SPECTROGRAM_HEIGHT;
     int height = Math.max(10, (int) (((float) Window.getClientHeight()) / 1200f * heightForType));
-    if (path != null) {
-      int reqid = getReqID(type);
+    if (path != null && !path.equals(FILE_MISSING)) {
       final long then = System.currentTimeMillis();
-
 //      logger.info("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
-      controller.getImage(reqid, path, type, toUse, height, exerciseID, new AsyncCallback<ImageResponse>() {
+      controller.getImage(getReqID(type), path, type, toUse, height, exerciseID, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {
           long now = System.currentTimeMillis();
           logger.info("getImageURLForAudio : (failure) took " + (now - then) + " millis");

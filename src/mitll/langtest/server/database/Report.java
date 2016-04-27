@@ -670,7 +670,7 @@ public class Report {
     return getYearMonthWeekTable(users1, yearCol, monthCol, weekCol);
   }
 
-  private void writeMonthToCSV(Map<Integer, ?> monthToCount, String users1, String language, int year) {
+/*  private void writeMonthToCSV(Map<Integer, ?> monthToCount, String users1, String language, int year) {
     StringBuilder builder = new StringBuilder();
     //int i = getYear();
 
@@ -695,7 +695,7 @@ public class Report {
     } catch (IOException e) {
       logger.error("Got " + e, e);
     }
-  }
+  }*/
 
   private String getYearMonthWeekTable(String users1, String yearCol, String monthCol, String weekCol) {
     return "<h2>" + users1 + "</h2>" +
@@ -742,7 +742,7 @@ public class Report {
                                  String tableLabel,
                                  JSONArray jsonArray,
                                  int year) {
-    writeMonthToCSV(monthToCount, tableLabel.isEmpty() ? count : tableLabel, language, year);
+   // writeMonthToCSV(monthToCount, tableLabel.isEmpty() ? count : tableLabel, language, year);
     return getIntCountTable(unit, count, jsonArray, MONTH1, monthToCount);
   }
 
