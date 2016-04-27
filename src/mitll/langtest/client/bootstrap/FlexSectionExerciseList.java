@@ -25,7 +25,6 @@ import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
-import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -45,8 +44,6 @@ public class FlexSectionExerciseList extends NPExerciseList {
   private static final int UNACCOUNTED_WIDTH = 60;
   private static final int CLASSROOM_VERTICAL_EXTRA = 330;
   private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
-//  private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet and audio for selected sections.";
-//  private static final String DOWNLOAD_AUDIO = "downloadAudio";
 
   private final List<ButtonType> buttonTypes = new ArrayList<ButtonType>();
   private final Map<String, ButtonType> typeToButton = new HashMap<String, ButtonType>();
@@ -94,7 +91,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
 
   /**
    * @param userID
-   * @see mitll.langtest.client.LangTest#configureUIGivenUser(long)
+   * @see mitll.langtest.client.InitialUI#configureUIGivenUser
    */
   public boolean getExercises(final long userID) {
     //System.out.println("FlexSectionExerciseList.getExercises : Get exercises for user=" + userID + " instance " + getInstance());
@@ -146,7 +143,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
 /*    System.out.println("FlexSectionExerciseList.addButtonRow for user = " + userID + " got types " +
       types + " num root nodes " + rootNodes.size() + " instance " + instance);*/
     if (types.isEmpty()) {
-      System.err.println("huh? types is empty?");
+      logger.warning("huh? types is empty?");
       return;
     }
     showDefaultStatus();
@@ -159,7 +156,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
     populateButtonGroups(types);
 
     String firstType = types.iterator().next(); // e.g. unit!
-    ButtonGroupSectionWidget buttonGroupSectionWidget = (ButtonGroupSectionWidget) typeToBox.get(firstType);
+    ButtonGroupSectionWidget buttonGroupSectionWidget = getGroupSection(firstType);
 
     boolean usuallyThereWillBeAHorizScrollbar = rootNodes.size() > 6;
 
@@ -189,7 +186,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
       panelInsideScrollPanel.add(sectionColumn);
 
       if (subType != null) {
-        ButtonGroupSectionWidget sectionWidget1 = (ButtonGroupSectionWidget) typeToBox.get(subType);
+        ButtonGroupSectionWidget sectionWidget1 = getGroupSection(subType);
 
         // System.out.println("addButtonRow adding row for " + subType + " under " + sectionInFirstType);
 
@@ -222,6 +219,10 @@ public class FlexSectionExerciseList extends NPExerciseList {
     container.add(bottomRow);
   }
 
+  private ButtonGroupSectionWidget getGroupSection(String type) {
+    return sectionWidgetContainer.getWidget(type);
+  }
+
   private DivWidget getBottomRow() {
     FlexTable links = downloadHelper.getDownloadLinks();
     // else {
@@ -236,107 +237,9 @@ public class FlexSectionExerciseList extends NPExerciseList {
     return bottomRow;
   }
 
-/*
-  private FlexTable getDownloadLinks() {
-    FlexTable links = new FlexTable();
-    links.setWidget(0, 0,downloadLink = downloadHelper.getDownloadLink());
-    if (controller.isTeacher()) {
-      links.setWidget(0, 1,contextDownloadLink = downloadHelper.getContextDownloadLink());
-    }
-    return links;
-  }
-*/
-
-  /**
-   * @return
-   * @see #addButtonRow
-   */
-/*
-  private Anchor getDownloadLink() {
-    final Anchor downloadLink = new Anchor(getDownloadURL());
-    addTooltip(downloadLink);
-    downloadLink.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.logEvent(downloadLink,"DownloadLink","N/A","downloading audio");
-      }
-    });
-    downloadLink.getElement().setId("DownloadLink_" + getInstance());
-    return downloadLink;
-  }
-
-  private Anchor getContextDownloadLink() {
-    final Anchor downloadLink = new Anchor(getDownloadContextURL());
-    new TooltipHelper().addTooltip(downloadLink, "Download spreadsheet and context audio for selected sections.");
-    downloadLink.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.logEvent(downloadLink,"ContextDownloadLink","N/A","downloading context audio");
-      }
-    });
-    downloadLink.getElement().setId("ContextDownloadLink_" + getInstance());
-    return downloadLink;
-  }
-
-  private SafeHtml getDownloadURL() {
-    SelectionState selectionState = getSelectionState();
-    return getURLForDownload(selectionState);
-  }
-
-  SelectionState getSelectionState() {
-    return getSelectionState(getHistoryToken("",""));
-  }
-
-  private SafeHtml getDownloadContextURL() {
-    SelectionState selectionState = getSelectionState();
-    return getURLForContextDownload(selectionState);
-  }
-
-  */
-
   SelectionState getSelectionState() {
     return getSelectionState(getHistoryToken("", ""));
   }
-
-/**
- * @see #showSelectionState(mitll.langtest.client.list.SelectionState)
- * @param selectionState
- * @return
- *//*
-
-  private SafeHtml getURLForDownload(SelectionState selectionState) {
-    return getUrlDownloadLink(selectionState, DOWNLOAD_AUDIO,"download","Download");
-  }
-
-  private SafeHtml getURLForContextDownload(SelectionState selectionState) {
-    return getUrlDownloadLink(selectionState, DOWNLOAD_AUDIO,"context","Context");
-  }
-
-  private SafeHtml getUrlDownloadLink(SelectionState selectionState, String command, String request,String title) {
-    Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
-
-    SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<a class='" +"icon-download"+
-      "' href='" +
-        command +
-      "?request="+request+"&" +typeToSection+
-      "'" +
-      ">");
-    sb.appendEscaped(" " + title);
-    sb.appendHtmlConstant("</a>");
-    return sb.toSafeHtml();
-  }
-*/
-
-  /**
-   * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
-   * @see #getDownloadLink
-   * @param widget
-   * @return
-   */
-/*  private Tooltip addTooltip(Widget widget) {
-    return new TooltipHelper().addTooltip(widget, FlexSectionExerciseList.DOWNLOAD_SPREADSHEET);
-  }*/
 
   /**
    * Label is in column 0
@@ -374,7 +277,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
 
     for (String type : types) {
       if (type.equals(firstType)) continue;
-      makeSectionWidget(labelColumn, clearColumnContainer, type, (ButtonGroupSectionWidget) typeToBox.get(type));
+      makeSectionWidget(labelColumn, clearColumnContainer, type, getGroupSection(type));
     }
     return clearColumnContainer;
   }
@@ -431,13 +334,13 @@ public class FlexSectionExerciseList extends NPExerciseList {
    * @see #addButtonRow(java.util.Collection, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
    */
   private void populateButtonGroups(Collection<String> types) {
-    typeToBox.clear();
+    sectionWidgetContainer.clear();
     typeToButton.clear();
 
     int j = 0;
     for (String type : types) {
       ButtonGroupSectionWidget buttonGroupSectionWidget1 = new ButtonGroupSectionWidget(type);
-      typeToBox.put(type, buttonGroupSectionWidget1);
+      sectionWidgetContainer.setWidget(type, buttonGroupSectionWidget1);
       typeToButton.put(type, buttonTypes.get(j++ % types.size()));
     }
   }
@@ -605,7 +508,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
    */
   @Override
   protected void selectItem(String type, Collection<String> sections) {
-    ButtonGroupSectionWidget listBox = (ButtonGroupSectionWidget) typeToBox.get(type);
+    ButtonGroupSectionWidget listBox = getGroupSection(type);
     listBox.clearSelectionState();
     //System.out.println("FlexSectionExerciseList.selectItem : instance " + instance+ " selecting " + type + "=" + sections);
     listBox.selectItem(sections);
@@ -613,10 +516,10 @@ public class FlexSectionExerciseList extends NPExerciseList {
 
   @Override
   public boolean loadByID(String id) {
-  //  logger.info("loadByID loading exercise " + id);
+    //  logger.info("loadByID loading exercise " + id);
 
     if (hasExercise(id)) {
-    //  logger.info("loadByID found exercise " + id);
+      //  logger.info("loadByID found exercise " + id);
       loadExercise(id);
       return true;
     } else {
@@ -629,7 +532,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
   private void clearSelections() {
     //logger.info("clearSelections");
 
-    for (String type : typeToBox.keySet()) typeToBox.get(type).clearAll();
+    sectionWidgetContainer.clearSelections();
     reload();
   }
 
@@ -653,13 +556,11 @@ public class FlexSectionExerciseList extends NPExerciseList {
    */
   @Override
   protected void clearEnabled(String type) {
-    ButtonGroupSectionWidget listBox = (ButtonGroupSectionWidget) typeToBox.get(type);
-    listBox.clearEnabled();
+    getGroupSection(type).clearEnabled();
   }
 
   protected void enableAllButtonsFor(String type) {
-    ButtonGroupSectionWidget listBox = (ButtonGroupSectionWidget) typeToBox.get(type);
-    listBox.enableAll();
+    getGroupSection(type).enableAll();
   }
 
   /**
@@ -794,9 +695,9 @@ public class FlexSectionExerciseList extends NPExerciseList {
         sectionWidget.addRow(rowForSection);
         rowForSection.addStyleName("rowPadding");
 
-        System.out.println("\taddButtonGroup : for " + typeForOriginal + "=" + section + " recurse on " + children.size() +
-            " children at " + subType);
-        ButtonGroupSectionWidget sectionWidget1 = (ButtonGroupSectionWidget) typeToBox.get(subType);
+//        logger.info("\taddButtonGroup : for " + typeForOriginal + "=" + section + " recurse on " + children.size() +
+//            " children at " + subType);
+        ButtonGroupSectionWidget sectionWidget1 = getGroupSection(subType);
         List<ButtonWithChildren> subButtons =
             addButtonGroup(horizontalContainerForChildren, children, subType, subs, sectionWidget1);
         buttonForSection.setChildren(subButtons);
@@ -860,7 +761,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
    * @param buttonType
    * @param isClear
    * @return
-   * @see #addButtonGroup(com.google.gwt.user.client.ui.Panel, java.util.List, String, java.util.List, ButtonGroupSectionWidget)
+   * @see #addButtonGroup
    * @see #makeSectionWidget
    */
   private ButtonWithChildren makeSubgroupButton(final ButtonGroupSectionWidget sectionWidgetFinal,
@@ -900,7 +801,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
     return widgets;
   }
 
-  public static class ButtonWithChildren extends Button {
+  static class ButtonWithChildren extends Button {
     private List<ButtonWithChildren> children = new ArrayList<ButtonWithChildren>();
     private final String type;
     private ButtonWithChildren parent;
@@ -914,7 +815,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
 
     /**
      * @param children
-     * @see FlexSectionExerciseList#addButtonGroup(com.google.gwt.user.client.ui.Panel, java.util.List, String, java.util.List, ButtonGroupSectionWidget)
+     * @see FlexSectionExerciseList#addButtonGroup
      * @see FlexSectionExerciseList#addButtonRow
      */
     public void setChildren(List<ButtonWithChildren> children) {
