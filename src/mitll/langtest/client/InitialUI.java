@@ -129,7 +129,7 @@ public class InitialUI {
         });
       }
     };
-    logger.info("talks to domino " + props.talksToDomino());
+   // logger.info("talks to domino " + props.talksToDomino());
     reload = (props.talksToDomino()) ?reload:null;
     Widget title = banner.makeNPFHeaderRow(props.getSplash(), props.isBeta(), getGreeting(),
         getReleaseStatus(),
@@ -177,6 +177,7 @@ public class InitialUI {
    * @seex mitll.langtest.client.LangTest.LogoutClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
    */
   private void resetState() {
+    logger.info("clearing current history token");
     History.newItem(""); // clear history!
     userManager.clearUser();
     lastUser = NO_USER_INITIAL;
