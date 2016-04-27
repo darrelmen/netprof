@@ -89,8 +89,8 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
 
           @Override
           protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix,
-                                                  boolean onlyWithAudioAnno) {
-            super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno);
+                                                  boolean onlyWithAudioAnno, String exerciseID) {
+            super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, exerciseID);
             statsFlashcardFactory.setSelection(typeToSection);
           }
         };
