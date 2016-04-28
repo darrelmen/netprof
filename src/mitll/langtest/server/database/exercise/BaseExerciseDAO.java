@@ -85,7 +85,7 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 
 		Set<String> transcriptChanged = new HashSet<>();
 
-   // logger.info("afterReadingExercises trying to attach audio to " + exercises.size());
+    logger.info("afterReadingExercises trying to attach audio to " + exercises.size());
 		for (CommonExercise ex : exercises) {
 			attachAudio.attachAudio(ex, transcriptChanged);
 			String refAudioIndex = ex.getRefAudioIndex();
@@ -218,7 +218,9 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 						Map<String, String> unitToValue = exercise.getUnitToValue();
 						userExercise.getCombinedMutableUserExercise().setUnitToValue(unitToValue);
 
-						//logger.debug("addOverlays refresh exercise for " + userExercise.getID() + " " + userExercise.getUnitToValue());
+						logger.debug("addOverlays refresh exercise for " + userExercise.getID() + " '" +userExercise.getForeignLanguage()+
+								"' vs '" +exercise.getForeignLanguage()+
+                "'");
 						sectionHelper.refreshExercise(userExercise);
 						addOverlay(userExercise);
 
@@ -299,10 +301,9 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 	 */
 	public boolean remove(String id) {
 		synchronized (this) {
-			CommonExercise remove = idToExercise.remove(id);
-			if (remove == null) return false;
-			return exercises.remove(remove);
-		}
+      CommonExercise remove = idToExercise.remove(id);
+      return remove != null && exercises.remove(remove);
+    }
 	}
 
 	public void setDependencies(String mediaDir, String installPath,
@@ -371,12 +372,12 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 	 * @see #getRawExercises()
 	 */
 	private void addNewExercises() {
-		for (String id : addRemoveDAO.getAdds()) {
-			CommonExercise where = userExerciseDAO.getWhere(id);
+		for (AddRemoveDAO.IdAndTime id : addRemoveDAO.getAdds()) {
+			CommonExercise where = userExerciseDAO.getWhere(id.getId());
 			if (where == null) {
 				logger.error("getRawExercises huh? couldn't find user exercise from add exercise table in user exercise table : " + id);
 			} else {
-				if (isKnownExercise(id)) {
+				if (isKnownExercise(id.getId())) {
 					logger.debug("addNewExercises SKIPPING new user exercise " + where.getID() + " since already added from spreadsheet : " + where);
 				} else {
 					logger.debug("addNewExercises adding new user exercise " + where.getID() + " : " + where);
@@ -393,20 +394,22 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 
 	private Collection<String> removeExercises() {
 		if (addRemoveDAO != null) {
-			Collection<String> removes = addRemoveDAO.getRemoves();
+			Collection<AddRemoveDAO.IdAndTime> removes = addRemoveDAO.getRemoves();
 
 			if (!removes.isEmpty())
 				logger.debug("removeExercises : Removing " + removes.size() + " exercises marked as deleted.");
 
-			for (String id : removes) {
-				CommonExercise remove = idToExercise.remove(id);
-				if (remove != null) {
+      Set<String> idsToRemove = new HashSet<>();
+			for (AddRemoveDAO.IdAndTime id : removes) {
+				CommonExercise remove = idToExercise.remove(id.getId());
+				if (remove != null && remove.getUpdateTime() < id.getTimestamp()) {
 					boolean remove1 = exercises.remove(remove);
 					if (!remove1) logger.error("huh? remove inconsistency??");
 					getSectionHelper().removeExercise(remove);
+          idsToRemove.add(id.getId());
 				}
 			}
-			return removes;
+			return idsToRemove;
 		} else {
 			return Collections.emptyList();
 		}
