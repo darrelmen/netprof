@@ -125,7 +125,7 @@ public class AttachAudio {
 	 */
 	private <T extends CommonExercise> int attachAudio(T imported, int missing,
 																										 Collection<AudioAttribute> audioAttributes,
-																										 Collection<String> transcriptChanged) {
+																										 Collection<String> transcriptChangedIDs) {
 		MutableAudioExercise mutableAudio = imported.getMutableAudio();
 
 		if (audioAttributes == null) {
@@ -159,7 +159,7 @@ public class AttachAudio {
 							audio.setAudioRef(child);   // remember to prefix the path
 							mutableAudio.addAudio(audio);
 						} else {
-							transcriptChanged.add(audio.getExid());
+							transcriptChangedIDs.add(audio.getExid());
 /*							if (m++ < 10) {
 								logger.warn("for " + imported + " audio transcript " + audio.getTranscript() +
 										" doesn't match : '" + removePunct(audio.getTranscript()) + "' vs '" + removePunct(imported.getForeignLanguage()) + "'");
