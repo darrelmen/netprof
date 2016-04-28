@@ -97,11 +97,13 @@ import java.util.logging.Logger;
  * - Updated reporting to show all years, fill in month/week gaps with zeros
  * 1.2.10
  * - More small report changes
+ * 1.2.11
+ * - Fixed bugs with browser history forwards/backwards and clicking on characters
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.2.10";
+  public static final String VERSION_INFO = "1.3.0";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
