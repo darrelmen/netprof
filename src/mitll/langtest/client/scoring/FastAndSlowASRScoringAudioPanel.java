@@ -254,9 +254,10 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
         slow.setValue(true);
     }
     AudioAttribute firstAttr = (regular != null) ? regAttr : slowAttr;
-    if ((regular == null) && (slow == null))
-      logger.warning("no radio choice got selected??? ");
 
+    if ((regular == null) && (slow == null)) {
+     // logger.warning("no radio choice got selected??? ");
+    }
     else {
       //System.out.println("GoodwaveExercisePanel.addRegularAndSlow showing " +firstAttr);
       final AudioAttribute ffirstAttr = firstAttr;
