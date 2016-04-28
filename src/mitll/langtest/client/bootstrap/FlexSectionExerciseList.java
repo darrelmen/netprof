@@ -22,6 +22,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.NPExerciseList;
+import mitll.langtest.client.list.SectionWidgetContainer;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
@@ -89,6 +90,16 @@ public class FlexSectionExerciseList extends NPExerciseList {
     downloadHelper = new DownloadHelper(controller, instance, this, controller.isTeacher());
   }
 
+  protected SectionWidgetContainer<ButtonGroupSectionWidget> getSectionWidgetContainer() {
+    return new SectionWidgetContainer<ButtonGroupSectionWidget>() {
+      protected void selectItem(String type, Collection<String> sections) {
+        ButtonGroupSectionWidget listBox = getGroupSection(type);
+        listBox.clearSelectionState();
+        logger.info("FlexSectionExerciseList.selectItem : selecting " + type + "=" + sections);
+        listBox.selectItem(sections);
+      }
+    };
+  }
   /**
    * @param userID
    * @see mitll.langtest.client.InitialUI#configureUIGivenUser
@@ -128,10 +139,10 @@ public class FlexSectionExerciseList extends NPExerciseList {
     addButtonRow(controller.getStartupInfo().getSectionNodes(), container, typeOrder);
   }
 
-  @Override
+/*  @Override
   protected Collection<String> getTypeOrder(Map<String, Collection<String>> selectionState2) {
     return typeOrder;
-  }
+  }*/
 
   /**
    * @param rootNodes
@@ -238,7 +249,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
   }
 
   SelectionState getSelectionState() {
-    return getSelectionState(getHistoryToken("", ""));
+    return getSelectionState(getHistoryTokenFromUIState("", ""));
   }
 
   /**
@@ -502,17 +513,17 @@ public class FlexSectionExerciseList extends NPExerciseList {
   /**
    * So when we get a URL with a bookmark in it, we have to make the UI appear consistent with it.
    *
-   * @param type
-   * @param sections
+   * @paramx type
+   * @paramx sections
    * @see mitll.langtest.client.list.HistoryExerciseList#restoreListBoxState(mitll.langtest.client.list.SelectionState)
    */
-  @Override
+/*  @Override
   protected void selectItem(String type, Collection<String> sections) {
     ButtonGroupSectionWidget listBox = getGroupSection(type);
     listBox.clearSelectionState();
     //System.out.println("FlexSectionExerciseList.selectItem : instance " + instance+ " selecting " + type + "=" + sections);
     listBox.selectItem(sections);
-  }
+  }*/
 
   @Override
   public boolean loadByID(String id) {
@@ -531,7 +542,6 @@ public class FlexSectionExerciseList extends NPExerciseList {
 
   private void clearSelections() {
     //logger.info("clearSelections");
-
     sectionWidgetContainer.clearSelections();
     reload();
   }
@@ -549,11 +559,11 @@ public class FlexSectionExerciseList extends NPExerciseList {
     rememberedID = null;
   }
 
-
   /**
    * @param type
    * @see HistoryExerciseList#restoreListBoxState(mitll.langtest.client.list.SelectionState)
    */
+/*
   @Override
   protected void clearEnabled(String type) {
     getGroupSection(type).clearEnabled();
@@ -562,6 +572,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
   protected void enableAllButtonsFor(String type) {
     getGroupSection(type).enableAll();
   }
+*/
 
   /**
    * @seex HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
