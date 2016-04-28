@@ -6,6 +6,7 @@ package mitll.langtest.shared.exercise;
 
 import mitll.langtest.server.database.ResultDAO;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import net.sf.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -197,6 +198,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
         " unit->lesson " + getUnitToValue();
   }
 
+  /**
+   * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#toExercise
+   * @param updateTime
+   */
   public void setUpdateTime(long updateTime) {
     this.updateTime = updateTime;
   }
