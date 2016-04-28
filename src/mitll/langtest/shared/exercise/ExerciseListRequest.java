@@ -26,21 +26,24 @@ public class ExerciseListRequest implements Serializable {
   public ExerciseListRequest() {
   }
 
-  public ExerciseListRequest(int reqID,
-                             int userID
-  ) {
+  public ExerciseListRequest(int reqID, int userID) {
     this.reqID = reqID;
     this.userID = userID;
   }
 
-
+  public boolean sameAs(ExerciseListRequest other) {
+    return prefix.equals(other.getPrefix()) &&
+        typeToSelection.equals(other.getTypeToSelection()) &&
+        onlyUnrecordedByMe == other.onlyUnrecordedByMe &&
+        onlyExamples == other.onlyExamples &&
+        incorrectFirstOrder == other.incorrectFirstOrder  &&
+        onlyWithAudioAnno == other.onlyWithAudioAnno  &&
+        onlyDefaultAudio == other.onlyDefaultAudio  &&
+        userListID == other.userListID;
+  }
   public int getReqID() {
     return reqID;
   }
-
-/*  public void setReqID(int reqID) {
-    this.reqID = reqID;
-  }*/
 
   public Map<String, Collection<String>> getTypeToSelection() {
     return typeToSelection;
@@ -123,12 +126,6 @@ public class ExerciseListRequest implements Serializable {
     return this;
   }
 
-  public String toString() {
-    return " prefix '" + prefix +
-        "' and user list id " + userListID + " user " + userID + " role " + role +
-        " filter " + onlyUnrecordedByMe + " only examples " + onlyExamples + " only with audio " + onlyWithAudioAnno;
-  }
-
   public boolean isOnlyDefaultAudio() {
     return onlyDefaultAudio;
   }
@@ -136,5 +133,11 @@ public class ExerciseListRequest implements Serializable {
   public ExerciseListRequest setOnlyDefaultAudio(boolean onlyDefaultAudio) {
     this.onlyDefaultAudio = onlyDefaultAudio;
     return this;
+  }
+
+  public String toString() {
+    return "prefix '" + prefix + "' selection " + getTypeToSelection() +
+        " and user list id " + userListID + " user " + userID + " role " + role +
+        " filter " + onlyUnrecordedByMe + " only examples " + onlyExamples + " only with audio " + onlyWithAudioAnno;
   }
 }
