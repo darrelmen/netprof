@@ -140,14 +140,18 @@ public class RefResultDecoder {
       int maleAudio = 0;
       int femaleAudio = 0;
       int defaultAudio = 0;
+      Set<String> failed = new TreeSet<>();
       for (CommonExercise exercise : exercises) {
         if (stopDecode) return;
 
         List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
         if (audioAttributes != null) {
 //					logger.warn("hmm - audio recorded for " + )
-          db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
+          boolean didAll = db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
           attrc += audioAttributes.size();
+          if (!didAll) {
+            failed.add(exercise.getID());
+          }
         }
 
         Set<Long> preferredVoices = serverProps.getPreferredVoices();
@@ -190,6 +194,9 @@ public class RefResultDecoder {
       logger.debug("trimRef : Out of " + attrc + " best audio files, " + maleAudio + " male, " + femaleAudio + " female, " +
           defaultAudio + " default " + "examined " + count +
           " trimmed " + trimmed + " dropped ref result rows = " + changed);
+      if (!failed.isEmpty()) {
+        logger.warn("failed to attach audio to " + failed.size() + " exercises : " + failed);
+      }
     }
   }
 
