@@ -21,9 +21,10 @@ public interface SectionWidget {
   String getCurrentSelection();
   void clearSelectionState();
 
-  void selectItem(Collection<String> section, boolean doToggle);
+ // void selectItem(Collection<String> section, boolean doToggle);
 
   void clearAll();
+  void clearEnabled();
   void enableAll();
 
   void addButton(Button b);
@@ -32,9 +33,6 @@ public interface SectionWidget {
   String getType();
 
   boolean hasOnlyOne();
-//  boolean selectItem(String item);
-//
+
   List<String> getCurrentSelections();
-//
-//  boolean selectItems(Collection<String> section);
 }
