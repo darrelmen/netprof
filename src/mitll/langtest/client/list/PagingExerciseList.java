@@ -110,16 +110,16 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   void loadExercises(String selectionState, String prefix, boolean onlyWithAudioAnno) {
     scheduleWaitTimer();
 
-    lastReqID++;
     logger.info("PagingExerciseList.loadExercises : looking for " +
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
+    ExerciseListRequest request = getRequest(prefix);
     service.getExerciseIds(
-        getRequest(prefix),
-        new SetExercisesCallback("", prefix, ""));
+        request,
+        new SetExercisesCallback("", prefix, "", request));
   }
 
   ExerciseListRequest getRequest(String prefix) {
-    return new ExerciseListRequest(lastReqID, controller.getUser())
+    return new ExerciseListRequest(incrRequest(), controller.getUser())
         .setPrefix(prefix)
         .setUserListID(userListID)
         .setRole(getRole())
@@ -226,7 +226,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   private void gotTypeAheadEvent(String text) {
-    loadExercises(getHistoryToken(text, ""), text, false);
+    loadExercises(getHistoryTokenFromUIState(text, ""), text, false);
   }
 
   /**
@@ -291,7 +291,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     Window.alert("Please stop recording before changing items.");
   }
 
-  String getHistoryToken(String search, String id) {
+  String getHistoryTokenFromUIState(String search, String id) {
     return "search=" + search + ";item=" + id;
   }
 
