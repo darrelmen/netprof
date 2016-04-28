@@ -7,6 +7,7 @@ package mitll.langtest.client.bootstrap;
 import com.github.gwtbootstrap.client.ui.Button;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,6 +17,8 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 class ButtonContainer {
+  private final Logger logger = Logger.getLogger("ButtonContainer");
+
   private final List<Button> buttons = new ArrayList<Button>();
   private final Set<Button> enabled = new HashSet<Button>();
   private final Set<Button> disabled = new HashSet<Button>();
@@ -43,7 +46,7 @@ class ButtonContainer {
    Set<Button> toSelectSet = new HashSet<Button>();
    for (String toSelect : sections) {
      Collection<Button> buttonsAtName = nameToButton.get(toSelect);
-     if (buttonsAtName == null) System.err.println("getButtonsByName : huh? can't find " + toSelect + " in " + nameToButton.keySet());
+     if (buttonsAtName == null) logger.warning("getButtonsByName : huh? can't find " + toSelect + " in " + nameToButton.keySet());
      toSelectSet.addAll(buttonsAtName);
    }
    return toSelectSet;
@@ -63,7 +66,7 @@ class ButtonContainer {
   }*/
 
   public void enableAll() {
-   // System.out.println("----> enableAll for " + this);
+   // logger.info("----> enableAll for " + this);
     enabled.addAll(buttons);
     disabled.clear();
     showEnabled();
@@ -75,14 +78,14 @@ class ButtonContainer {
    * @param isEnable
    */
   public void rememberEnabled(Collection<FlexSectionExerciseList.ButtonWithChildren> buttonChildren, boolean isEnable) {
-    if (debug) System.out.println(this + " rememberEnabled for " + buttonChildren + " : to enable = " + isEnable);
+    if (debug) logger.info(this + " rememberEnabled for " + buttonChildren + " : to enable = " + isEnable);
 
     if (!buttons.containsAll(buttonChildren)) {
-      System.err.println(this + " rememberEnabled  children = " + buttonChildren + " are not part of this set of buttons");
+      logger.warning(this + " rememberEnabled  children = " + buttonChildren + " are not part of this set of buttons");
     }
     if (isEnable) {
    /*   if (enabled.size() == buttons.size()) {
-        System.out.println("\n\n\n"+this + " rememberEnabled everything enabled, so clearing first ----> ");
+        logger.info("\n\n\n"+this + " rememberEnabled everything enabled, so clearing first ----> ");
 
         clearEnabled();
       }*/
@@ -92,30 +95,27 @@ class ButtonContainer {
       enabled.removeAll(buttonChildren);
     }
 /*    if (enabled.isEmpty()) {
-      System.out.println("\n\n\n"+this + " rememberEnabled enabled is empty so enabling all!");
+      logger.info("\n\n\n"+this + " rememberEnabled enabled is empty so enabling all!");
 
       enabled.addAll(buttons);
     }*/
     disabled.clear();
     disabled.addAll(buttons);
     disabled.removeAll(enabled);
-    if (debug) System.out.println(this + " rememberEnabled after ");
+   // if (debug) logger.info(this + " rememberEnabled after ");
   }
 
   /**
    * @see mitll.langtest.client.bootstrap.ButtonGroupSectionWidget#clearEnabled()
-   * @see FlexSectionExerciseList#clearEnabled(String)
    */
   public void clearEnabled() {
-   // System.out.println(this + " : clearEnabled ");
-
+    logger.info(this + " : clearEnabled ");
     enabled.clear();
     disabled.addAll(buttons);
   }
 
   public void showEnabled() {
-   // System.out.println(this + " : showEnabled ");
-
+   // logger.info(this + " : showEnabled ");
     for (Button b : enabled) {
       b.setEnabled(true);
     }
