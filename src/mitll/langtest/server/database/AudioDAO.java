@@ -46,6 +46,7 @@ public class AudioDAO extends DAO {
   private static final String TRANSCRIPT = "transcript";
   public static final String UNKNOWN = "unknown";
   public static final String TOTAL = "total";
+  public static final String TOTAL_CONTEXT = "totalContext";
   public static final String MALE = "male";
   public static final String FEMALE = "female";
   public static final String MALE_FAST = "maleFast";
@@ -522,7 +523,8 @@ public class AudioDAO extends DAO {
   public Map<String, Float> getRecordedReport(Map<Long, User> userMapMales,
                                               Map<Long, User> userMapFemales,
                                               float total,
-                                              Set<String> uniqueIDs) {
+                                              Set<String> uniqueIDs,
+                                              float totalContext) {
     Set<Long> maleIDs = userMapMales.keySet();
     maleIDs = new HashSet<>(maleIDs);
     maleIDs.add((long) UserDAO.DEFAULT_MALE_ID);
@@ -539,11 +541,12 @@ public class AudioDAO extends DAO {
     float femaleSlow = getCountForGender(femaleIDs, SLOW, uniqueIDs);
     float female = getCountBothSpeeds(femaleIDs, uniqueIDs);
 
-    float cmale = getCountForGender(maleIDs, CONTEXT_REGULAR, uniqueIDs);
+    float cmale   = getCountForGender(maleIDs,   CONTEXT_REGULAR, uniqueIDs);
     float cfemale = getCountForGender(femaleIDs, CONTEXT_REGULAR, uniqueIDs);
 
     Map<String, Float> report = new HashMap<>();
     report.put(TOTAL, total);
+    report.put(TOTAL_CONTEXT, totalContext);
     report.put(MALE, male);
     report.put(FEMALE, female);
     report.put(MALE_FAST, maleFast);
