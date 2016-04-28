@@ -240,10 +240,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       this.selectionID = selectionID;
       this.searchIfAny = searchIfAny;
       this.exerciseID = exerciseID;
-
-      // if (selectionID.equals("-1")) {
-      //   new Exception().printStackTrace();
-      // }
     }
 
     public void onFailure(Throwable caught) {
@@ -258,7 +254,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
           logger.info("----> SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
       } else {
         gotExercises(result);
-        String idToUse = exerciseID.isEmpty() ? result.getFirstExercise().getID() : exerciseID;
+        String idToUse = exerciseID.isEmpty() ? result.getFirstExercise() == null ? "" : result.getFirstExercise().getID() : exerciseID;
         rememberAndLoadFirst(result.getExercises(), selectionID, searchIfAny, idToUse);
       }
     }
