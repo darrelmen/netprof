@@ -43,6 +43,6 @@ public class NPFlexSectionExerciseList extends FlexSectionExerciseList {
 
   @Override
   protected void noSectionsGetExercises(long userID) {
-    loadExercises(getHistoryToken("", ""), getPrefix(), false);
+    loadExercises(getHistoryTokenFromUIState("", ""), getPrefix(), false);
   }
 }
