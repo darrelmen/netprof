@@ -531,7 +531,6 @@ public class FlexSectionExerciseList extends NPExerciseList {
 
   private void clearSelections() {
     //logger.info("clearSelections");
-
     sectionWidgetContainer.clearSelections();
     reload();
   }
