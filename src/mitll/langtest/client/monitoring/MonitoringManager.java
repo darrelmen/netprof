@@ -780,58 +780,9 @@ public class MonitoringManager {
         RecordingProgressTable flex = new RecordingProgressTable();
         vp.add(flex);
         flex.populate(result);
-
-/*        float total = result.get("total");
-        //logger.info("ref audio coverage " + result);
-
-        int r = 0;
-
-        flex.setHTML(r, 0, "<b>Reference Audio Type</b>");
-        flex.setHTML(r, 1, "<b>Male/Female</b>");
-        flex.setHTML(r++, 2,"<b>% (of " + ((int)total)+ ")</b>");
-
-        flex.setHTML(r, 0, "Male " + answer);
-        flex.setHTML(r, 1, result.get("male").intValue() + "");
-        flex.setHTML(r++, 2, getPercent(result.get("male"), total) + "%");
-
-        flex.setHTML(r, 0, "Male regular speed " + answer);
-        flex.setHTML(r, 1, ""+result.get("maleFast").intValue());
-        flex.setHTML(r++, 2, getPercent(result.get("maleFast"), total) + "%");
-
-        flex.setHTML(r, 0, "Male slow speed " + answer);
-        flex.setHTML(r, 1, ""+result.get("maleSlow").intValue());
-        flex.setHTML(r++, 2, getPercent(result.get("maleSlow"), total) + "%");
-
-        flex.setHTML(r, 0, "Female " + answer);
-        flex.setHTML(r, 1,""+result.get("female").intValue());
-        flex.setHTML(r++, 2, getPercent(result.get("female"), total) + "%");
-
-        flex.setHTML(r, 0, "Female regular speed " + answer);
-        flex.setHTML(r, 1, ""+result.get("femaleFast").intValue());
-        flex.setHTML(r++, 2, getPercent(result.get("femaleFast"), total) + "%");
-
-        flex.setHTML(r, 0, "Female slow speed " + answer);
-        flex.setHTML(r, 1, ""+result.get("femaleSlow").intValue());
-        flex.setHTML(r++, 2, getPercent(result.get("femaleSlow"), total) + "%");
-
-        flex.setHTML(r, 0, "Context Male " + answer);
-        flex.setHTML(r, 1, result.get("maleContext").intValue() + "");
-        flex.setHTML(r++, 2, getPercent(result.get("maleContext"), total) + "%");
-
-        flex.setHTML(r, 0, "Context Female " + answer);
-        flex.setHTML(r, 1, result.get("femaleContext").intValue() + "");
-        flex.setHTML(r++, 2, getPercent(result.get("femaleContext"), total) + "%");*/
-        // do the next one...
-        if (null != null) ((DoIt) null).go();
       }
     });
   }
-
-/*  private int getPercent(Float male, float total) {
-    float ratio = total > 0 ? male / (total) : 0;
-    return (int) (ratio * 100f);
-  }
-*/
 
   private void doGenderQuery(final Panel vp) {
     service.getResultCountsByGender(new AsyncCallback<Map<String, Map<Integer, Integer>>>() {
