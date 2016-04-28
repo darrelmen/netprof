@@ -204,7 +204,7 @@ public class Report {
     String suffix = "";
     if (site != null && site.contains("npfClassroom")) {
       site = site.substring(site.indexOf("npfClassroom"));
-      suffix = " at " + site + getHostInfo();
+      suffix = " at " + site + " on " +  getHostInfo();
     }
 
     String subject = "Weekly Usage Report for " + language + suffix;
@@ -380,9 +380,10 @@ public class Report {
   }
 
   private String getHeader() {
+    String hostInfo = getHostInfo();
     return "<html><head>" +
-        "<title>Report for " + language + " on " + getHostInfo() + "</title>" +
-        "<body><h2>Host : " + getHostInfo() + "</h2>\n";
+        "<title>Report for " + language + " on " + hostInfo + "</title>" +
+        "<body><h2>Host : " + hostInfo + "</h2>\n";
   }
 
   private Map<String, ReadableUserAgent> userAgentToReadable = new HashMap<>();
