@@ -1504,14 +1504,16 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public Map<String, Float> getMaleFemaleProgress() {
     UserDAO userDAO = getUserDAO();
-    Map<Long, User> userMapMales = userDAO.getUserMap(true);
+    Map<Long, User> userMapMales   = userDAO.getUserMap(true);
     Map<Long, User> userMapFemales = userDAO.getUserMap(false);
 
     Collection<? extends CommonShell> exercises = getExercises();
     float total = exercises.size();
     Set<String> uniqueIDs = new HashSet<String>();
 
+    int context = 0;
     for (CommonShell shell : exercises) {
+      if (!shell.getContext().isEmpty()) context++;
       boolean add = uniqueIDs.add(shell.getID());
       if (!add) {
         logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
@@ -1521,7 +1523,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         uniqueIDs.size() +
         " unique");*/
 
-    return getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs);
+    return getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs, context);
   }
 
   public String toString() {
