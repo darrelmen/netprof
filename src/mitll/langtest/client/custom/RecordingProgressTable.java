@@ -27,6 +27,7 @@ public class RecordingProgressTable extends FlexTable {
    */
   public void populate(Map<String, Float> result) {
     float total = result.get("total");
+    float ctotal = result.get("totalContext");
 
     getElement().setId("RecordingProgressTable");
 
@@ -52,17 +53,17 @@ public class RecordingProgressTable extends FlexTable {
     col = 0;
     r++;
     for (int i = 0; i < labels.size(); i++) {
-      col = setLabelAndVal(result, total, r, col, labels.get(i), keys.get(i));
+      col = setLabelAndVal(result, ctotal, r, col, labels.get(i), keys.get(i));
     }
   }
 
-  int setLabelAndVal(Map<String, Float> result, float total, int r, int col, String label, String key) {
+  private int setLabelAndVal(Map<String, Float> result, float total, int r, int col, String label, String key) {
     setHTML(r, col++, label);
     col = setCol(result, total, r, col, key);
     return col;
   }
 
-  int setCol(Map<String, Float> result, float total, int r, int col, String male) {
+  private int setCol(Map<String, Float> result, float total, int r, int col, String male) {
     String sp = "&nbsp;";
     String p = "<b>";
     String s = "</b>" + sp;
