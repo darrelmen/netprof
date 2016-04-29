@@ -22,6 +22,7 @@ import java.util.logging.Logger;
  */
 public class AMASInitialUI extends InitialUI {
   private final Logger logger = Logger.getLogger("AMASInitialUI");
+  protected AutoCRTChapterNPFHelper learnHelper;
 
   public AMASInitialUI(LangTest langTest, UserManager userManager) {
     super(langTest, userManager);
