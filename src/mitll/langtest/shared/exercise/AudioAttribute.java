@@ -31,7 +31,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public static final String SLOW = "slow";
   public static final String REGULAR = "regular";
   public static final String REGULAR_AND_SLOW = "regular and slow";
-  public static final String CONTEXT = "context";
+  private static final String CONTEXT = "context";
 
   private MiniUser user;
 
