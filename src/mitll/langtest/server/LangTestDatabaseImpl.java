@@ -1181,6 +1181,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return getPretestScore(reqid, resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, false);
   }
 
+  /**
+   * Be careful - we lookup audio file by .wav extension
+   * @param reqid
+   * @param resultID
+   * @param testAudioFile
+   * @param sentence
+   * @param width
+   * @param height
+   * @param useScoreToColorBkg
+   * @param exerciseID
+   * @param usePhoneToDisplay
+   * @return
+   */
   private PretestScore getPretestScore(int reqid, long resultID, String testAudioFile, String sentence,
                                        int width, int height, boolean useScoreToColorBkg, String exerciseID, boolean usePhoneToDisplay) {
     if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
@@ -1188,7 +1201,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     String[] split = testAudioFile.split(File.separator);
     String answer = split[split.length - 1];
-    Result cachedResult = db.getRefResultDAO().getResult(exerciseID, answer.replaceAll(".mp3", ".wav"));
+    String wavEndingAudio = answer.replaceAll(".mp3", ".wav").replaceAll(".ogg", ".wav");
+    Result cachedResult = db.getRefResultDAO().getResult(exerciseID, wavEndingAudio);
     if (cachedResult != null) {
       logger.debug("getASRScoreForAudio Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID());
     } else {
