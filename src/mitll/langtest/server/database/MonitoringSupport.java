@@ -154,7 +154,7 @@ class MonitoringSupport {
    * @return
    */
   Map<Integer, Integer> getResultCountToCount(Collection<CommonExercise> exercises) {
-    Map<String, Integer> idToCount = getExToCount(exercises,resultDAO.getUserAndTimes());
+    Map<String, Integer> idToCount = getExToCount(exercises, resultDAO.getUserAndTimes());
     Map<Integer, Integer> resCountToCount = new HashMap<Integer, Integer>();
 
     for (int i = 0; i < 10; i++) {
@@ -178,7 +178,6 @@ class MonitoringSupport {
     Collection<UserAndTime> results = resultDAO.getUserAndTimes();
     return getExToCount(exercises, results);
   }*/
-
   private Map<String, Integer> getExToCount(Collection<CommonExercise> exercises, Collection<UserAndTime> results) {
     Map<String, Integer> idToCount = getInitialIdToCount(exercises);
     Map<String, Set<Long>> keyToUsers = new HashMap<String, Set<Long>>();
@@ -577,12 +576,14 @@ class MonitoringSupport {
           String[] split = pair.getKey().split("/");
           String left = split[0];
           int exid = Integer.parseInt(left);
-          String right = split[1];
-          int qid = Integer.parseInt(right);
-
+          int qid = 0;
+          if (split.length > 1) {
+            String right = split[1];
+            qid = Integer.parseInt(right);
+          }
           keyToCount.put(new CompoundKey(exid, qid), pair.getValue());
-        } catch (NumberFormatException e) {
-          e.printStackTrace();
+        } catch (Exception e) {
+          logger.error("Got " + e, e);
         }
       }
       countArray.addAll(keyToCount.values());
