@@ -132,7 +132,7 @@ public class SectionWidgetContainer<T extends SectionWidget> {
    */
   String getHistoryToken() {
     if (typeToBox.isEmpty()) {
-      return History.getToken();
+      return "";// History.getToken();
     }
     logger.info("getHistoryTokenFromUIState examining " +typeToBox.size() + " boxes.");
     StringBuilder unitAndChapterSelection = new StringBuilder();
@@ -190,7 +190,6 @@ public class SectionWidgetContainer<T extends SectionWidget> {
     }
     return count;
   }
-
 
   /**
    * @param type
