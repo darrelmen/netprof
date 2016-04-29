@@ -97,6 +97,8 @@ import java.util.logging.Logger;
  * - Updated reporting to show all years, fill in month/week gaps with zeros
  * 1.2.10
  * - More small report changes
+ * 1.2.11
+ * - Better support for 
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
