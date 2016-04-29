@@ -14,6 +14,7 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -54,6 +55,7 @@ import java.util.logging.Logger;
  */
 public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & ScoredExercise> extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
+  public static final String CONTEXT = "Context";
   private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
   private static final String MANDARIN = "Mandarin";
@@ -113,6 +115,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     addContent();
   }
 
+  protected boolean isRTL(T exercise) {
+    return isRTLContent(exercise.getForeignLanguage());
+  }
+
   private void addContent() {
     final Panel center = new VerticalPanel();
     center.getElement().setId("GoodwaveVerticalCenter");
@@ -138,7 +144,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
       center.add(navigationHelper);
     }
   }
-
 
   protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
                                                               final ListInterface<CommonShell> listContainer, boolean addKeyHandler) {
@@ -348,7 +353,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
 
     // TODO : for now, since we need to deal with underline... somehow...
     // and when clicking inside dialog, seems like we need to dismiss dialog...
-    if (label.contains("Context")) {
+    if (label.contains(CONTEXT)) {
       InlineHTML englishPhrase = new InlineHTML(value, WordCountDirectionEstimator.get().estimateDirection(value));
       englishPhrase.addStyleName("Instruction-data-with-wrap");
       if (label.contains("Meaning")) {
@@ -392,7 +397,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
       tokens = Arrays.asList(value.split(CommentNPFExercise.SPACE_REGEX));
     }
 
-    if (controller.isRightAlignContent() && flLine) {
+    if (isRTL(exercise) && flLine) {
       Collections.reverse(tokens);
     }
     for (String token : tokens) {
@@ -401,6 +406,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
 
     nameValueRow.add(horizontal);
     horizontal.addStyleName("leftFiveMargin");
+  }
+
+  protected boolean isRTLContent(String content) {
+    return controller.isRightAlignContent() || WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
   }
 
   private boolean hasClickableCharacters(String language) {
@@ -420,7 +429,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
             public void execute() {
               String s1 = html.replaceAll(CommentNPFExercise.PUNCT_REGEX, " ").replaceAll("’", " ");
               String s2 = s1.split(CommentNPFExercise.SPACE_REGEX)[0].toLowerCase();
-           //   logger.info("push clicked on character/word " + s2);
               listContainer.searchBoxEntry(s2);
             }
           });
@@ -644,7 +652,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
      * @see #makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String, String, String)
      */
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
-      public MyPostAudioRecordButton(ExerciseController controller) {
+      MyPostAudioRecordButton(ExerciseController controller) {
         super(getLocalExercise().getID(), controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index,
             true,
             RECORD_YOURSELF, controller.getProps().doClickAndHold() ? RELEASE_TO_STOP : "Stop");
