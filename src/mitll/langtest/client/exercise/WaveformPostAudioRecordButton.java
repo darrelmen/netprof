@@ -39,7 +39,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
    * @param playButtonSuffix
    * @param stopButtonText
    */
-  public WaveformPostAudioRecordButton(String exerciseID,
+  protected WaveformPostAudioRecordButton(String exerciseID,
                                        ExerciseController controller,
                                        Panel widgets,
                                        RecordAudioPanel recordAudioPanel, LangTestDatabaseAsync service, int index,
