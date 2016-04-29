@@ -11,6 +11,7 @@ import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.HistoryExerciseList;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * A group of buttons that need to maintain
@@ -20,6 +21,8 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class ButtonGroupSectionWidget implements SectionWidget {
+  private final Logger logger = Logger.getLogger("ButtonGroupSectionWidget");
+
   private Button clearButton;
   private final String type;
 
@@ -107,7 +110,7 @@ public class ButtonGroupSectionWidget implements SectionWidget {
    * @see #getCurrentSelection()
    */
   private String getCurrentSelectionInternal() {
-    //  System.out.println("ButtonGroupSectionWidget.getCurrentSelectionInternal for " + type + " checking " + buttons.size() + " buttons.");
+    //  logger.info("ButtonGroupSectionWidget.getCurrentSelectionInternal for " + type + " checking " + buttons.size() + " buttons.");
     StringBuilder builder = new StringBuilder();
     Set<String> unique = new HashSet<String>();
     List<String> inOrder = new ArrayList<String>();
@@ -143,7 +146,7 @@ public class ButtonGroupSectionWidget implements SectionWidget {
       for (String toSelect : sections) {
         Collection<Button> buttonsAtName = buttons.getButtonsForName(toSelect);
         if (buttonsAtName == null) {
-          System.err.println(">>>> selectItem " + type + "=" + toSelect + " unknown button?");
+          logger.warning(">>>> selectItem " + type + "=" + toSelect + " unknown button?");
         } else {
           for (Button b : buttonsAtName) {
             toggleButton(true, b);
@@ -162,7 +165,7 @@ public class ButtonGroupSectionWidget implements SectionWidget {
    * @see FlexSectionExerciseList#selectItem(String, java.util.Collection)
    */
   public void selectItem(Collection<String> sections) {
-    if (debug) System.out.println("ButtonGroupSectionWidget: selectItem " + this + " : " + type + "=" + sections);
+    if (debug) logger.info("ButtonGroupSectionWidget: selectItem " + this + " : " + type + "=" + sections);
 
     if (isClearSelection(sections)) {
       clearAll();
@@ -186,7 +189,7 @@ public class ButtonGroupSectionWidget implements SectionWidget {
         }
       }
       if (count != sections.size()) {
-        if (debug) System.out.println("Note : selectItem " +
+        if (debug) logger.info("Note : selectItem " +
           " : " + type + "=" + sections + " (" + sections.size() +
           ") but only " + count + " selected");
       }
@@ -195,20 +198,20 @@ public class ButtonGroupSectionWidget implements SectionWidget {
       if (childGroup != null) {
         childGroup.recurseShowEnabled();
       } else {
-        if (debug) System.out.println("selectItem " +
+        if (debug) logger.info("selectItem " +
           " : " + type + "=" + sections + " (" + sections.size() +
           ") no child group.");
       }
       currentSelection = null;   // this just means we have to reset this on the next call to getCurrentSelection
 
       if (count > 0) {
-        if (debug) System.out.println("ButtonGroupSectionWidget: selectItem " + this +
+        if (debug) logger.info("ButtonGroupSectionWidget: selectItem " + this +
           " row is selected since " + count + " items are selected.");
         for (Panel p : rows) p.addStyleName(color);
       }
       // boolean anythingSelected = isAnythingSelected();
    /*     if (didSelect && !anythingSelected) {
-        System.err.println(">>>> selectItem " + type + "=" + sections + " but nothing selected?");
+        logger.warning(">>>> selectItem " + type + "=" + sections + " but nothing selected?");
       } */
       setClearButtonState(count > 0);
     }
@@ -235,7 +238,7 @@ public class ButtonGroupSectionWidget implements SectionWidget {
     for (Button unselectCandidate : buttons.getButtons()) {
       if (!toSelectSet.contains(unselectCandidate)) {
         if (unselectCandidate.isActive()) {
-          if (debug) System.out.println("ButtonGroupSectionWidget: unselecting " + unselectCandidate.getText());
+          if (debug) logger.info("ButtonGroupSectionWidget: unselecting " + unselectCandidate.getText());
 
           unselectCandidate.setActive(false);
           selected.remove(unselectCandidate);
@@ -255,8 +258,8 @@ public class ButtonGroupSectionWidget implements SectionWidget {
     b.setActive(active);
     if (active) selected.add(b);
     else selected.remove(b);
-    //   if (active) System.out.println("\ttoggleButton " + b.getText() + " is active");
-    //  else  System.out.println("\t\ttoggleButton " + b.getText() + " is inactive");
+    //   if (active) logger.info("\ttoggleButton " + b.getText() + " is active");
+    //  else  logger.info("\t\ttoggleButton " + b.getText() + " is inactive");
 
     return active;
   }
@@ -273,17 +276,17 @@ public class ButtonGroupSectionWidget implements SectionWidget {
     List<FlexSectionExerciseList.ButtonWithChildren> buttonChildren = bb.getButtonChildren();
     if (!buttonChildren.isEmpty()) {
       childGroup = buttonChildren.iterator().next().getButtonGroup();
-      if (debug) System.out.println("enableChildrenButtons : " + this + " child group " + childGroup + " and recursing over " + buttonChildren.size() + " children");
+      if (debug) logger.info("enableChildrenButtons : " + this + " child group " + childGroup + " and recursing over " + buttonChildren.size() + " children");
       childGroup.buttons.rememberEnabled(buttonChildren, active);
 
       // recurse!
       for (FlexSectionExerciseList.ButtonWithChildren childButton : buttonChildren) {
-        if (debug) System.out.println("\tenableChildrenButtons : " + this + " recurse " + childButton);
+        if (debug) logger.info("\tenableChildrenButtons : " + this + " recurse " + childButton);
 
         enableChildrenButtons(childButton, active);
       }
     } else {
-      // System.out.println("enableChildrenButtons : " + this + " no children of " + bb);
+      // logger.info("enableChildrenButtons : " + this + " no children of " + bb);
     }
     return childGroup;
   }
@@ -293,7 +296,7 @@ public class ButtonGroupSectionWidget implements SectionWidget {
     FlexSectionExerciseList.ButtonWithChildren firstButton = buttons.getFirstButton();
     if (firstButton != null && firstButton.getButtonChildren() != null && !firstButton.getButtonChildren().isEmpty()) {
       FlexSectionExerciseList.ButtonWithChildren firstChild = firstButton.getButtonChildren().iterator().next();
-      System.out.println("recurseShowEnabled : " + this + " recurse on " + firstButton.getButtonGroup());
+      logger.info("recurseShowEnabled : " + this + " recurse on " + firstButton.getButtonGroup());
 
       firstChild.getButtonGroup().recurseShowEnabled();
     }
@@ -305,7 +308,7 @@ public class ButtonGroupSectionWidget implements SectionWidget {
    * @see #selectItem(java.util.Collection)
    */
   public void clearAll() {
-    //System.out.println("clearAll : ---------> disable clear button for type " + type + " checking " + buttons + " buttons <----------- ");
+    logger.info("clearAll : ---------> disable clear button for type " + type + " checking " + buttons + " buttons <----------- ");
     // manager the selected set
     clearSelection();
     currentSelection = null;
@@ -337,11 +340,11 @@ public class ButtonGroupSectionWidget implements SectionWidget {
     if (clearButton != null) {
       clearButton.setEnabled(anythingSelected);
       if (!anythingSelected) {
-        System.out.println("\tsetClearButtonState  : selectItem clear color");
+        logger.info("\tsetClearButtonState  : selectItem clear color");
         for (Panel p : rows) p.removeStyleName(color);
       }
     } else {
-      System.err.println("clear button is not set? ");
+      logger.warning("clear button is not set? ");
     }
   }
 
@@ -349,6 +352,7 @@ public class ButtonGroupSectionWidget implements SectionWidget {
    * @see FlexSectionExerciseList#clearEnabled(String)
    */
   public void clearEnabled() {
+   // logger.info("clear enabled for " +type);
     buttons.clearEnabled();
   }
 
