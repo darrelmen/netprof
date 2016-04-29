@@ -80,9 +80,13 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     String instanceSuffix = getInstance().isEmpty() ? "" : ";" + SelectionState.INSTANCE + "=" + getInstance();
     boolean hasItemID = id != null && id.length() > 0;
 
-    String s = (hasItemID ? super.getHistoryToken(search, id) + ";" : "search=" + search + ";") +
+    String s = (hasItemID ?
+        super.getHistoryToken(search, id) + ";" :
+        "search=" + search + ";") +
         unitAndChapterSelection + instanceSuffix;
-    //logger.info("getHistoryToken '" + s + "'");
+
+  //  logger.info("getHistoryToken (" +getInstance() + ") '" + s + "'");
+
     return s;
   }
 
@@ -188,7 +192,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
   }
 
   protected void setHistoryItem(String historyToken) {
-   // logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
+    logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
     History.newItem(historyToken);
   }
 
@@ -201,10 +205,10 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
   protected void pushFirstListBoxSelection() {
     String initToken = History.getToken();
     if (initToken.length() == 0) {
-      //logger.info("pushFirstListBoxSelection : history token is blank " + getInstance());
+      logger.info("pushFirstListBoxSelection : history token is blank " + getInstance());
       pushNewSectionHistoryToken();
     } else {
-      //logger.info("pushFirstListBoxSelection fire history for token from URL: " + initToken + " instance " + getInstance());
+      logger.info("pushFirstListBoxSelection fire history for token from URL: " + initToken + " instance " + getInstance());
       History.fireCurrentHistoryState();
     }
   }
@@ -303,7 +307,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
       }
     }
 
-    //logger.info("restoreListBoxState :typesWithSelections " + typesWithSelections);
+    logger.info("restoreListBoxState :typesWithSelections " + typesWithSelections);
 
     // clear enabled state for all items below first selection...
     if (!typesWithSelections.isEmpty()) {
@@ -315,10 +319,10 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
         if (type.equals(first)) start = true;
       }
 
-      //logger.info("restoreListBoxState : afterFirst " + afterFirst);
+      logger.info("restoreListBoxState : afterFirst " + afterFirst);
 
       for (String type : afterFirst) {
-        //logger.info("restoreListBoxState : clearing enabled on " + type);
+        logger.info("restoreListBoxState : clearing enabled on " + type);
         clearEnabled(type);
       }
     }
@@ -359,7 +363,8 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
             "' that is not mine '" + getInstance() + "'");
       }
       if (getCreatedPanel() == null) {
-        noSectionsGetExercises(controller.getUser());
+        //noSectionsGetExercises(controller.getUser());
+
       }
       return;
     }
@@ -419,8 +424,8 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    */
   protected void loadExercises(String selectionState, String prefix, boolean onlyWithAudioAnno) {
     Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
-/*    logger.info("HistoryExerciseList.loadExercises : looking for " +
-      "'" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());*/
+    logger.info("HistoryExerciseList.loadExercises : looking for " +
+      "'" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());
     loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, "");
   }
 
