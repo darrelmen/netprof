@@ -6,6 +6,8 @@ package mitll.langtest.client.list;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.i18n.client.HasDirection;
+import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -62,7 +64,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   private boolean pendingReq = false;
   protected ExerciseListRequest lastSuccessfulRequest = null;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param currentExerciseVPanel
@@ -264,7 +266,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       } else {
         lastSuccessfulRequest = request;
         gotExercises(result);
-        String idToUse = exerciseID.isEmpty() ? result.getFirstExercise().getID() : exerciseID;
+        String idToUse = exerciseID.isEmpty() ? result.getFirstExercise() == null ? "" : result.getFirstExercise().getID() : exerciseID;
         rememberAndLoadFirst(result.getExercises(), selectionID, searchIfAny, idToUse);
       }
     }
@@ -795,6 +797,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   @Override
   public boolean onFirst() {
     return onFirst(getCurrentExercise());
+  }
+
+  public boolean isRTL() {
+    return !isEmpty() && WordCountDirectionEstimator.get().estimateDirection(getAt(0).getForeignLanguage()) == HasDirection.Direction.RTL;
   }
 
   /**
