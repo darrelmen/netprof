@@ -9,7 +9,6 @@ import audio.imagewriter.SimpleImageWriter;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import corpus.HTKDictionary;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -1055,7 +1054,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     long then = System.currentTimeMillis();
 
-    String absolutePathToImage = imageWriter.writeImage(wavAudioFile, pathHelper.getAbsoluteFile(imageOutDir).getAbsolutePath(),
+    String absolutePathToImage = imageWriter.writeImage(wavAudioFile, getAbsoluteFile(imageOutDir).getAbsolutePath(),
         width, height, imageType1, exerciseID);
     long now = System.currentTimeMillis();
     long diff = now - then;
@@ -1090,7 +1089,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private String getWavAudioFile(String audioFile) {
     if (audioFile.endsWith("." + AudioTag.COMPRESSED_TYPE) || audioFile.endsWith(MP3)) {
       String wavFile = removeSuffix(audioFile) + WAV;
-      File test = pathHelper.getAbsoluteFile(wavFile);
+      File test = getAbsoluteFile(wavFile);
       audioFile = test.exists() ? test.getAbsolutePath() : audioFileHelper.getWavForMP3(audioFile);
     }
 
@@ -1774,7 +1773,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * TODO : don't fetch everything from the database if you don't have to.
    * Use offset and limit to restrict?
-   * 
+   *
    * @param unitToValue
    * @param userid
    * @param flText
@@ -2179,30 +2178,52 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @param user        who recorded audio
    * @param audioType   regular or slow
-   * @param exercise1   for which exercise
+   * @param exercise1   for which exercise - how could this be null?
+   * @param exerciseID  perhaps sometimes we want to override the exercise id?
    * @param audioAnswer holds the path of the temporary recorded file
    * @return AudioAttribute that represents the audio that has been added to the exercise
    * @see #writeAudioFile
    */
-  private AudioAttribute addToAudioTable(int user, String audioType, CommonShell exercise1, String exerciseID,
+  private AudioAttribute addToAudioTable(int user, String audioType,
+                                         CommonShell exercise1,
+                                         String exerciseID,
                                          AudioAnswer audioAnswer) {
-    String exercise = exercise1 == null ? exerciseID : exercise1.getID();
-    File fileRef = pathHelper.getAbsoluteFile(audioAnswer.getPath());
-    String destFileName = audioType + "_" + System.currentTimeMillis() + "_by_" + user + ".wav";
-    String foreignLanguage = exercise1 == null ? "" : exercise1.getForeignLanguage();
-    User userWhere = db.getUserDAO().getUserWhere(user);
-    String artist = userWhere == null ? "" + user : userWhere.getUserID();
+    String idToUse = exercise1 == null ? exerciseID : exercise1.getID();
+
+    String audioTranscript = getAudioTranscript(audioType, exercise1);
+
     String permanentAudioPath = new PathWriter().
-        getPermanentAudioPath(pathHelper, fileRef, destFileName, true, exercise, foreignLanguage, artist, serverProps);
+        getPermanentAudioPath(pathHelper,
+            getAbsoluteFile(audioAnswer.getPath()),
+            getPermanentName(user, audioType), true, idToUse, audioTranscript, getArtist(user), serverProps);
+
     AudioAttribute audioAttribute =
-        db.getAudioDAO().addOrUpdate(user, exercise, audioType, permanentAudioPath, System.currentTimeMillis(),
-            audioAnswer.getDurationInMillis(), foreignLanguage);
+        db.getAudioDAO().addOrUpdate(user, idToUse, audioType, permanentAudioPath, System.currentTimeMillis(),
+            audioAnswer.getDurationInMillis(), audioTranscript);
     audioAnswer.setPath(audioAttribute.getAudioRef());
     logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " audio answer has " + audioAttribute);
 
     // what state should we mark recorded audio?
-    setExerciseState(exercise, user, exercise1);
+    setExerciseState(idToUse, user, exercise1);
     return audioAttribute;
+  }
+
+  private File getAbsoluteFile(String path) {
+    return pathHelper.getAbsoluteFile(path);
+  }
+
+  private String getAudioTranscript(String audioType, CommonShell exercise1) {
+    return exercise1 == null ? "" :
+        audioType.equals(AudioAttribute.CONTEXT_AUDIO_TYPE) ? exercise1.getContext() : exercise1.getForeignLanguage();
+  }
+
+  private String getPermanentName(int user, String audioType) {
+    return audioType + "_" + System.currentTimeMillis() + "_by_" + user + ".wav";
+  }
+
+  private String getArtist(int user) {
+    User userWhere = db.getUserDAO().getUserWhere(user);
+    return userWhere == null ? "" + user : userWhere.getUserID();
   }
 
   /**
@@ -2212,13 +2233,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param user
    * @param exercise1
    */
-  private void setExerciseState(String exercise, int user, CommonShell exercise1) {
+  private void setExerciseState(String exercise, int user, Shell exercise1) {
     if (exercise1 != null) {
-      STATE currentState = getUserListManager().getCurrentState(exercise);
+      UserListManager userListManager = getUserListManager();
+      STATE currentState = userListManager.getCurrentState(exercise);
       if (currentState == STATE.APPROVED) { // clear approved on new audio -- we need to review it again
-        getUserListManager().setState(exercise1, STATE.UNSET, user);
+        userListManager.setState(exercise1, STATE.UNSET, user);
       }
-      getUserListManager().setSecondState(exercise1, STATE.RECORDED, user);
+      userListManager.setSecondState(exercise1, STATE.RECORDED, user);
     }
   }
 
@@ -2474,7 +2496,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       sleep(50);
     }
   }*/
-
   private void sleep(int millis) {
     try {
       Thread.sleep(millis); // ???
