@@ -12,7 +12,7 @@ import java.util.Map;
  * Created by go22670 on 4/27/16.
  */
 public class SectionWidgetContainer<T extends SectionWidget> {
-  protected final Map<String, T> typeToBox = new HashMap<>();
+  private final Map<String, T> typeToBox = new HashMap<>();
 
   public T getWidget(String type) {
     return typeToBox.get(type);
@@ -23,15 +23,13 @@ public class SectionWidgetContainer<T extends SectionWidget> {
   }
 
   /**
-   * @param search
-   * @param id
    * @return
    * @see ExerciseList#pushNewItem(String, String)
    * @see HistoryExerciseList#pushNewSectionHistoryToken()
    */
   protected String getHistoryToken() {
     if (typeToBox.isEmpty()) {
-      return History.getToken();
+      return "";// History.getToken();
     }
     //logger.info("getHistoryToken for " + id + " examining " +typeToBox.size() + " boxes.");
     StringBuilder unitAndChapterSelection = new StringBuilder();
@@ -59,7 +57,7 @@ public class SectionWidgetContainer<T extends SectionWidget> {
 
   public Collection<T> getValues() { return typeToBox.values(); }
 
-  public boolean hasType(String type) {
+  boolean hasType(String type) {
     return typeToBox.containsKey(type);
   }
 
@@ -84,7 +82,6 @@ public class SectionWidgetContainer<T extends SectionWidget> {
     return count;
   }
 
-
   /**
    * @param type
    * @param sections
@@ -93,7 +90,6 @@ public class SectionWidgetContainer<T extends SectionWidget> {
   protected void selectItem(String type, Collection<String> sections) {
     typeToBox.get(type).selectItem(sections, false);
   }
-
 
   public void clear() {
     typeToBox.clear();
