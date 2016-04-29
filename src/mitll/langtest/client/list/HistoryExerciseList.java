@@ -344,7 +344,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
       }
     }
 
-    //logger.info("restoreListBoxState :typesWithSelections " + typesWithSelections);
+    logger.info("restoreListBoxState :typesWithSelections " + typesWithSelections);
 
     // clear enabled state for all items below first selection...
     if (!typesWithSelections.isEmpty()) {
@@ -356,10 +356,10 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
         if (type.equals(first)) start = true;
       }
 
-      //logger.info("restoreListBoxState : afterFirst " + afterFirst);
+      logger.info("restoreListBoxState : afterFirst " + afterFirst);
 
       for (String type : afterFirst) {
-        //logger.info("restoreListBoxState : clearing enabled on " + type);
+        logger.info("restoreListBoxState : clearing enabled on " + type);
         clearEnabled(type);
       }
     }
@@ -400,7 +400,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
             "' that is not mine '" + getInstance() + "'");
       }
       if (getCreatedPanel() == null) {
-        noSectionsGetExercises(controller.getUser());
+   //     noSectionsGetExercises(controller.getUser());
       }
       return;
     }
