@@ -8,11 +8,8 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import org.apache.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
@@ -30,6 +27,9 @@ public class AddRemoveDAO extends DAO {
   private static final String ADDREMOVE = "addremove";
   public static final String ADD = "ADD";
   public static final String REMOVE = "REMOVE";
+  private static final String EXERCISEID = "exerciseid";
+  private static final String MODIFIED = "modified";
+  private static final String OPERATION = "operation";
 
   public AddRemoveDAO(Database database) {
     super(database);
@@ -47,18 +47,20 @@ public class AddRemoveDAO extends DAO {
    * @param database
    * @throws java.sql.SQLException
    */
-  void createTable(Database database) throws SQLException {
+  private void createTable(Database database) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement;
 
-    statement = connection.prepareStatement("CREATE TABLE if not exists " +
-      ADDREMOVE +
-      " (" +
-      "uniqueid IDENTITY, " +
-      "exerciseid VARCHAR, " +
-      "operation VARCHAR, " +
-      "modified TIMESTAMP" +
-      ")");
+    statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " +
+        ADDREMOVE +
+        " (" +
+        "uniqueid IDENTITY, " +
+        EXERCISEID +
+        " VARCHAR, " +
+        "operation VARCHAR, " +
+        MODIFIED +
+        " TIMESTAMP" +
+        ")");
     finish(database, connection, statement);
   }
 
@@ -78,9 +80,13 @@ public class AddRemoveDAO extends DAO {
 
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
-        "INSERT INTO " + ADDREMOVE +
-          "(exerciseid,operation,modified) " +
-          "VALUES(?,?,?);");
+          "INSERT INTO " + ADDREMOVE +
+              "(" +
+              EXERCISEID +
+              ",operation," +
+              MODIFIED +
+              ") " +
+              "VALUES(?,?,?);");
       int i = 1;
       statement.setString(i++, exerciseID);
       statement.setString(i++, operation);
@@ -100,37 +106,47 @@ public class AddRemoveDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
    * @return
+   * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
    */
-  public Set<String> getAdds() { return getIds(ADD); }
+  public Collection<IdAndTime> getAdds() {
+    return getIds(ADD);
+  }
 
   /**
-   * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
    * @return
+   * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
    */
-  public Set<String> getRemoves() {  return getIds(REMOVE); }
+  public Collection<IdAndTime> getRemoves() {
+    return getIds(REMOVE);
+  }
 
-  public Set<String> getIds(String operation) {
-    String sql = "SELECT DISTINCT exerciseid from " + ADDREMOVE + " where operation='" +
-      operation +
-      "'" +
-      "";// +
-      //" order by exerciseid";
+  private Collection<IdAndTime> getIds(String operation) {
+    String sql = "SELECT DISTINCT " +
+        EXERCISEID + "," +
+        MODIFIED +
+        " from " + ADDREMOVE +
+        " where " +
+        OPERATION +
+        "='" +
+        operation +
+        "'";
 
-    Set<String> lists = Collections.emptySet();
+    Set<IdAndTime> lists = Collections.emptySet();
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
-      lists = new TreeSet<String>();
+      lists = new TreeSet<>();
 
       while (rs.next()) {
-        lists.add(rs.getString(1));
+        String id = rs.getString(1);
+        long mod = rs.getTimestamp(2).getTime();
+        lists.add(new IdAndTime(id, mod));
       }
 
       // logger.debug("getReviewed sql " + sql + " yielded " + lists.size());
-      if (!lists.isEmpty())  logger.debug("getReviewed yielded " + lists.size());
+      if (!lists.isEmpty()) logger.debug("getReviewed yielded " + lists.size());
       finish(connection, statement, rs);
     } catch (SQLException e) {
       logger.error("Got " + e + " doing " + sql, e);
@@ -138,5 +154,36 @@ public class AddRemoveDAO extends DAO {
     return lists;
   }
 
-  public int getCount() { return getCount(ADDREMOVE);  }
+  public static class IdAndTime implements Comparable<IdAndTime> {
+    private final String id;
+    private final long timestamp;
+
+    public IdAndTime(String id, long timestamp) {
+      this.id = id;
+      this.timestamp = timestamp;
+    }
+
+    public String getId() {
+      return id;
+    }
+
+    public long getTimestamp() {
+      return timestamp;
+    }
+
+    @Override
+    public int compareTo(IdAndTime o) {
+      int i = id.compareTo(o.id);
+      return i == 0 ? Long.valueOf(timestamp).compareTo(o.getTimestamp()) : i;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+      return compareTo((IdAndTime) other) == 0;
+    }
+  }
+
+  private int getCount() {
+    return getCount(ADDREMOVE);
+  }
 }
