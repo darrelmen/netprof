@@ -385,7 +385,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
 
   /**
    * @param selectionState
-   * @see HistoryExerciseList#onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
+   * @see HistoryExerciseList#restoreUIState(SelectionState, String)
    */
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {
