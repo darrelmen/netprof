@@ -40,8 +40,8 @@ public class Banner implements RequiresResize {
   private static final String LOG_OUT = "Log Out";
   private static final double MIN_RATIO = 0.7;
   private static final int min = 720;
-  private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@ll.mit.edu";
-  private static final String LTEA_DLIFLC_EDU = "ltea@dliflc.edu";
+  private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
+//  private static final String LTEA_DLIFLC_EDU = "ltea@dliflc.edu";
   private final String HREF;
   private static final String NEED_HELP_QUESTIONS_CONTACT_US = "Need Help? Questions? Contact us.";
 
@@ -66,7 +66,7 @@ public class Banner implements RequiresResize {
     isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
     HREF = "mailto:" +
         NETPROF_HELP_LL_MIT_EDU + "?" +
-        "cc=" + LTEA_DLIFLC_EDU + "&" +
+     //   "cc=" + LTEA_DLIFLC_EDU + "&" +
         "Subject=Question%20about%20" + props.getLanguage() + "%20NetProF";
   }
 
