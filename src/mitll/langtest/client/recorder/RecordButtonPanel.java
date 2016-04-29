@@ -223,6 +223,10 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     });
   }
 
+  /**
+   * Like not what you want - should be based on tab it's recorded in.
+   * @return
+   */
   private String getAudioType() {
     return controller.getAudioType();
   }
