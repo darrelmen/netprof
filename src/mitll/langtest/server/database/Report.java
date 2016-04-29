@@ -204,7 +204,7 @@ public class Report {
     String suffix = "";
     if (site != null && site.contains("npfClassroom")) {
       site = site.substring(site.indexOf("npfClassroom"));
-      suffix = " at " + site + " on " +  getHostInfo();
+      suffix = " at " + site + " on " + getHostInfo();
     }
 
     String subject = "Weekly Usage Report for " + language + suffix;
@@ -290,8 +290,10 @@ public class Report {
   }
 
   private void addYear(JSONArray dataArray, StringBuilder builder, int i,
-                       List<SlimEvent> allSlim, List<SlimEvent> allDevicesSlim,
-                       Map<String, List<AudioAttribute>> exToAudio, Collection<AudioAttribute> audioAttributes,
+                       List<SlimEvent> allSlim,
+                       List<SlimEvent> allDevicesSlim,
+                       Map<String, List<AudioAttribute>> exToAudio,
+                       Collection<AudioAttribute> audioAttributes,
                        List<Result> results, List<Result> resultsDevices) {
     JSONObject forYear = new JSONObject();
     builder.append("<h1>" + i + "</h1>");
@@ -306,9 +308,13 @@ public class Report {
    * @see #addYear
    * @see DatabaseImpl#getReport(int, JSONObject)
    */
-  private String getReport(JSONObject jsonObject, int year, List<SlimEvent> allSlim, List<SlimEvent> allDevicesSlim,
-                           Map<String, List<AudioAttribute>> exToAudio, Collection<AudioAttribute> audioAttributes,
-                           List<Result> results, List<Result> resultsDevices) {
+  private String getReport(JSONObject jsonObject, int year,
+                           List<SlimEvent> allSlim,
+                           List<SlimEvent> allDevicesSlim,
+                           Map<String, List<AudioAttribute>> exToAudio,
+                           Collection<AudioAttribute> audioAttributes,
+                           List<Result> results,
+                           List<Result> resultsDevices) {
     jsonObject.put("forYear", year);
 
     long then = System.currentTimeMillis();
@@ -337,14 +343,6 @@ public class Report {
     jsonObject.put(DEVICE_TIME_ON_TASK, deviceTimeOnTaskJSON);
 
     events.addAll(eventsDevices);
-
-/*
-    builder.append(getActiveUserHeader(events, year));
-*/
-/*
-    JSONObject uniqueUsersYTD = new JSONObject();
-    uniqueUsersYTD.put("count", events.size());
-    jsonObject.put(UNIQUE_USERS_YTD, uniqueUsersYTD);*/
 
     JSONObject allRecordings = new JSONObject();
     getResults(builder, users, allRecordings, year, exToAudio, results);
@@ -743,7 +741,7 @@ public class Report {
                                  String tableLabel,
                                  JSONArray jsonArray,
                                  int year) {
-   // writeMonthToCSV(monthToCount, tableLabel.isEmpty() ? count : tableLabel, language, year);
+    // writeMonthToCSV(monthToCount, tableLabel.isEmpty() ? count : tableLabel, language, year);
     return getIntCountTable(unit, count, jsonArray, MONTH1, monthToCount);
   }
 
@@ -896,21 +894,21 @@ public class Report {
   private void getResults(StringBuilder builder, Set<Long> students,
                           JSONObject jsonObject, int year, Map<String, List<AudioAttribute>> exToAudio,
                           List<Result> results) {
-    //List<Result> results = resultDAO.getResults();
     getResultsForSet(builder, students, results, ALL_RECORDINGS, jsonObject, year, exToAudio);
   }
 
   private void getResultsDevices(StringBuilder builder, Set<Long> students,
-                                 JSONObject jsonObject, int year, Map<String, List<AudioAttribute>> exToAudio,
+                                 JSONObject jsonObject, int year, Map<String,
+      List<AudioAttribute>> exToAudio,
                                  List<Result> results) {
-    //List<Result> results = resultDAO.getResultsDevices();
-    getResultsForSet(builder, students, /*pathHelper, */results, DEVICE_RECORDINGS, /*language,*/ jsonObject, year, exToAudio);
+    getResultsForSet(builder, students, results, DEVICE_RECORDINGS, jsonObject, year, exToAudio);
   }
 
   private void getResultsForSet(StringBuilder builder, Set<Long> students,
                                 Collection<Result> results,
                                 String recordings,
-                                JSONObject jsonObject, int year, Map<String, List<AudioAttribute>> exToAudio) {
+                                JSONObject jsonObject, int year,
+                                Map<String, List<AudioAttribute>> exToAudio) {
     YearTimeRange yearTimeRange = new YearTimeRange(year, getCalendarForYear(year)).invoke();
 
     int ytd = 0;
