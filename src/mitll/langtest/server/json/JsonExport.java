@@ -40,19 +40,22 @@ public class JsonExport {
   private final Map<String, Integer> phoneToCount;
   private final SectionHelper<CommonExercise> sectionHelper;
   private final Collection<Long> preferredVoices;
+  private final boolean isEnglish;
 
   /**
    * @param phoneToCount
    * @param sectionHelper
    * @param preferredVoices
+   * @param isEnglish
    * @see mitll.langtest.server.ScoreServlet#getJsonNestedChapters(boolean)
    */
   public JsonExport(Map<String, Integer> phoneToCount,
                     SectionHelper<CommonExercise> sectionHelper,
-                    Collection<Long> preferredVoices) {
+                    Collection<Long> preferredVoices, boolean isEnglish) {
     this.phoneToCount = phoneToCount;
     this.sectionHelper = sectionHelper;
     this.preferredVoices = preferredVoices;
+    this.isEnglish = isEnglish;
   }
 
   /**
@@ -303,7 +306,7 @@ public class JsonExport {
     ex.put(ID, exercise.getID());
     ex.put(FL, exercise.getForeignLanguage());
     ex.put(TL, exercise.getTransliteration() == null ? "" : exercise.getTransliteration());
-    ex.put(EN, exercise.getEnglish());
+    ex.put(EN, isEnglish && !exercise.getMeaning().isEmpty() ? exercise.getMeaning() : exercise.getEnglish());
     if (addMeaning) ex.put(MN, exercise.getMeaning());
     ex.put(CT, exercise.getContext() == null ? "" : exercise.getContext());
     ex.put(CTR, exercise.getContextTranslation() == null ? "" : exercise.getContextTranslation());
