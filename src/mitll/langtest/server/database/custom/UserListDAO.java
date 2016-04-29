@@ -269,6 +269,10 @@ public class UserListDAO extends DAO {
    */
   public UserList<CommonShell> getWithExercises(long unique) {
     UserList<CommonShell> where = getWhere(unique, true);
+    if (where == null) {
+      logger.error("couldn't find list by " + unique);
+      return new UserList<>();
+    }
     populateList(where);
     return where;
   }
