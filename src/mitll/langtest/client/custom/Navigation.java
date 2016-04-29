@@ -157,6 +157,10 @@ public class Navigation implements RequiresResize, ShowTab {
     recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false, learnHelper);
   }
 
+  public boolean isRTL() {
+    return controller.getProps().isRightAlignContent() || (learnHelper.getExerciseList() != null && learnHelper.getExerciseList().isRTL());
+  }
+
   private void makeDialogWindow(final LangTestDatabaseAsync service, final ExerciseController controller) {
     GWT.runAsync(new RunAsyncCallback() {
       public void onFailure(Throwable caught) {
