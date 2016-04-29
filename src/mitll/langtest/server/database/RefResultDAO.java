@@ -81,7 +81,7 @@ public class RefResultDAO extends DAO {
    * @return id of new row in result table
    * @see DatabaseImpl#addRefAnswer
    */
-  public long addAnswer(Database database,
+  long addAnswer(Database database,
                         int userID, String id,
                         String audioFile,
                         long durationInMillis,
