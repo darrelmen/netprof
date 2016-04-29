@@ -837,7 +837,7 @@ public class AudioDAO extends DAO {
         new Exception().printStackTrace();
       }
 
-      long newid = add(connection, result, userid, path, "unknown");
+      long newid = add(connection, result, userid, path, "unknownTranscript");
       database.closeConnection(connection);
       long now = System.currentTimeMillis();
       if (now - then > 100) System.out.println("took " + (now - then) + " millis to record answer.");
@@ -850,6 +850,7 @@ public class AudioDAO extends DAO {
   }
 
   /**
+   * Go back and mark gender on really old audio that had no user info on it.
    * @param userid
    * @param attr
    * @return
