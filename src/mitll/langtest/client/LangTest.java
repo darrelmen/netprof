@@ -98,7 +98,7 @@ import java.util.logging.Logger;
  * 1.2.10
  * - More small report changes
  * 1.2.11
- * - Better support for 
+ * - Better support for keeping track of transcripts on audio files and noticing when they're out of sync with current content
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
