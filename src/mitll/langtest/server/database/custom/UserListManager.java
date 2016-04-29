@@ -796,7 +796,7 @@ public class UserListManager {
    * @param shell
    * @param state
    * @param creatorID
-   * @see mitll.langtest.server.LangTestDatabaseImpl#setExerciseState(String, int, mitll.langtest.shared.exercise.CommonExercise)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#setExerciseState
    * @see mitll.langtest.server.database.DatabaseImpl#duplicateExercise
    * @see mitll.langtest.server.database.custom.UserListManager#markState(java.util.Collection)
    */
@@ -809,7 +809,7 @@ public class UserListManager {
    * @param shell
    * @param state
    * @param creatorID
-   * @see mitll.langtest.server.LangTestDatabaseImpl#setExerciseState(String, int, mitll.langtest.shared.exercise.CommonExercise)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#setExerciseState
    * @see mitll.langtest.server.database.custom.UserListManager#markState(String, mitll.langtest.shared.exercise.STATE, long)
    */
   public void setSecondState(Shell shell, STATE state, long creatorID) {
@@ -820,7 +820,7 @@ public class UserListManager {
   /**
    * @param exerciseID
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#setExerciseState(String, int, mitll.langtest.shared.exercise.CommonExercise)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#setExerciseState
    */
   public STATE getCurrentState(String exerciseID) {
     return reviewedDAO.getCurrentState(exerciseID);
