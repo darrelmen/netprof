@@ -142,6 +142,7 @@ public class AudioDAO extends DAO {
   }
 
   /**
+   * Go back and mark transcripts on audio cuts that were not marked properly initially.
    * @see DatabaseImpl#makeDAO(String, String, String)
    */
   void markTranscripts() {
@@ -150,18 +151,46 @@ public class AudioDAO extends DAO {
     Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
     for (AudioAttribute audio : audioAttributes1) {
       CommonShell exercise = exerciseDAO.getExercise(audio.getExid());
-      String english = exercise == null ? "" : exercise.getEnglish();
-      if (audio.getTranscript() == null || audio.getTranscript().isEmpty() || audio.getTranscript().equals(english)) {
-        if (exercise != null) {
-          audio.setTranscript(exercise.getForeignLanguage());
-          toUpdate.add(audio);
+      if (exercise != null) {
+        String english = exercise.getEnglish();
+        String fl = exercise.getForeignLanguage();
+        String transcript = audio.getTranscript();
+        if (audio.isContextAudio()) {
+          String context = exercise.getContext();
+          if ((transcript == null ||
+              transcript.isEmpty() ||
+              transcript.equals(english) ||
+              transcript.equals(fl)) &&
+              (!context.isEmpty() && !context.equals(transcript))
+              ) {
+            audio.setTranscript(context);
+            toUpdate.add(audio);
+            logger.info("context update " + exercise.getID() + "/" +audio.getUniqueID()+" to " + context);
+          }
+        }
+        else {
+          if ((transcript == null ||
+              transcript.isEmpty() ||
+              transcript.equals(english)) &&
+              (!fl.isEmpty() && !fl.equals(transcript))
+              ) {
+            audio.setTranscript(fl);
+            logger.info("update " + exercise.getID() + "/" +audio.getUniqueID()+" to " + fl + " from " + exercise.getEnglish());
+
+            toUpdate.add(audio);
+          }
         }
       }
     }
     updateTranscript(toUpdate);
   }
 
-  private int updateTranscript(List<AudioAttribute> audio) {
+  /**
+   * @see #markTranscripts()
+   * @param audio
+   * @return
+   */
+  private int updateTranscript(Collection<AudioAttribute> audio) {
     int c = 0;
 
     long then = System.currentTimeMillis();
@@ -195,7 +224,11 @@ public class AudioDAO extends DAO {
     return c;
   }
 
-  public void setExerciseDAO(ExerciseDAO<?> exerciseDAO) {
+  /**
+   * @see DatabaseImpl#makeDAO(String, String, String)
+   * @param exerciseDAO
+   */
+  void setExerciseDAO(ExerciseDAO<?> exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
   }
 
@@ -296,9 +329,11 @@ public class AudioDAO extends DAO {
         boolean didIt = attachAudioAndFixPath(firstExercise, installPath, relativeConfigDir, audioConversion, attr);
         if (!didIt) {
           if (allSucceeded) {
+            String foreignLanguage = attr.isContextAudio() ? firstExercise.getContext() : firstExercise.getForeignLanguage();
             logger.info("not attaching audio\t" + attr.getUniqueID() + " to\t" + firstExercise.getID() +
-                "\tsince transcript has changed : old '" + attr.getTranscript() +
-                "' vs new '" + firstExercise.getForeignLanguage() +
+                "\tsince transcript has changed : old '" +
+                attr.getTranscript() +
+                "' vs new '" + foreignLanguage +
                 "'");
           }
           allSucceeded = false;
@@ -350,7 +385,8 @@ public class AudioDAO extends DAO {
                                         String relativeConfigDir,
                                         AudioConversion audioConversion,
                                         AudioAttribute attr) {
-    if (attr.hasMatchingTranscript(firstExercise.getForeignLanguage())) {
+    String against = attr.isContextAudio() ? firstExercise.getContext() : firstExercise.getForeignLanguage();
+    if (attr.hasMatchingTranscript(against)) {
       firstExercise.getMutableAudio().addAudio(attr);
 
       if (attr.getAudioRef() == null)
@@ -541,7 +577,7 @@ public class AudioDAO extends DAO {
     float femaleSlow = getCountForGender(femaleIDs, SLOW, uniqueIDs);
     float female = getCountBothSpeeds(femaleIDs, uniqueIDs);
 
-    float cmale   = getCountForGender(maleIDs,   CONTEXT_REGULAR, uniqueIDs);
+    float cmale = getCountForGender(maleIDs, CONTEXT_REGULAR, uniqueIDs);
     float cfemale = getCountForGender(femaleIDs, CONTEXT_REGULAR, uniqueIDs);
 
     Map<String, Float> report = new HashMap<>();
