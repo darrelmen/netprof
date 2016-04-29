@@ -447,7 +447,9 @@ public class ScoreServlet extends DatabaseServlet {
 
     JSONObject jsonObject = new JSONObject();
     if (requestType != null) {
-      logger.debug("doPost got request " + requestType + " device " + deviceType + "/" + device);
+      if (!requestType.startsWith(EVENT)) {
+        logger.debug("doPost got request " + requestType + " device " + deviceType + "/" + device);
+      }
 
       if (requestType.startsWith(ADD_USER)) {
         userManagement.addUser(request, requestType, deviceType, device, jsonObject);
@@ -555,18 +557,21 @@ public class ScoreServlet extends DatabaseServlet {
       logger.warn("getJsonNestedChapters " + getLanguage() + " getJSONExport took " + (now-then) + " millis");
     }
     then = now;
-    JSONArray contentAsJson = jsonExport.getContentAsJson(removeExercisesWithMissingAudio);
 
+    jsonObject.put(CONTENT, jsonExport.getContentAsJson(removeExercisesWithMissingAudio));
     now = System.currentTimeMillis();
     if (now-then>1000) {
       logger.warn("getJsonNestedChapters " + getLanguage() + " getContentAsJson took " + (now-then) + " millis");
     }
-    jsonObject.put(CONTENT, contentAsJson);
     addVersion(jsonObject);
 
     return jsonObject;
   }
 
+  /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
+   * @return
+   */
   private JSONObject getJSONForExercises() {
     return getJSONExerciseExport(getJSONExport());
   }
@@ -586,7 +591,8 @@ public class ScoreServlet extends DatabaseServlet {
     JsonExport jsonExport = new JsonExport(
         audioFileHelper == null ? stringIntegerMap : audioFileHelper.getPhoneToCount(),
         db.getSectionHelper(),
-        serverProps.getPreferredVoices()
+        serverProps.getPreferredVoices(),
+        serverProps.getLanguage().equalsIgnoreCase("english")
     );
 
     db.attachAllAudio();
@@ -900,7 +906,6 @@ public class ScoreServlet extends DatabaseServlet {
         serverProps = db.getServerProps();
         audioFileHelper = getAudioFileHelperRef();
         this.userManagement = new RestUserManagement(db, serverProps, pathHelper);
-        //loadTesting = getLoadTesting();
         removeExercisesWithMissingAudioDefault = serverProps.removeExercisesWithMissingAudio();
       }
     }
