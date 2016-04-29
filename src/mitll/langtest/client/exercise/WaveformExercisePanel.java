@@ -13,10 +13,7 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.exercise.AudioRefExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.STATE;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,8 +43,8 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
    * @param instance
    * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#getFactory(mitll.langtest.client.list.PagingExerciseList)
    */
-  public WaveformExercisePanel(final T e, final LangTestDatabaseAsync service,
-                               final ExerciseController controller, ListInterface<L> exerciseList,
+  public WaveformExercisePanel(T e, LangTestDatabaseAsync service,
+                               ExerciseController controller, ListInterface<L> exerciseList,
                                boolean doNormalRecording, String instance) {
     super(e, service, controller, exerciseList, doNormalRecording ? "" : EXAMPLE_RECORD, instance);
     getElement().setId("WaveformExercisePanel");
@@ -80,14 +77,13 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
     add(new Heading(4, isExampleRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));
   }
 
+  private boolean isNormalRecord()  { return !isExampleRecord(); }
   private boolean isExampleRecord() {
     return message.equals(EXAMPLE_RECORD);
   }
-  private boolean isNormalRecord() { return !isExampleRecord(); }
 
   @Override
   protected String getExerciseContent(T e) {
-    //System.out.println("normal recording for " +e.getID());
     String context = isNormalRecord() ? e.getForeignLanguage() :
         hasContext(exercise) ? exercise.getContext() : "No in-context audio for this exercise.";
     return ExerciseFormatter.getArabic(context);
@@ -127,7 +123,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
   private void addExampleSentenceRecorder(T exercise, LangTestDatabaseAsync service, ExerciseController controller,
                                           int index, Panel vp) {
     RecordAudioPanel fast = new RecordAudioPanel<T>(exercise, controller, this, service, index, false,
-        "context=" + Result.AUDIO_TYPE_REGULAR, instance);
+        AudioAttribute.CONTEXT_AUDIO_TYPE, instance);
     audioPanels.add(fast);
     vp.add(fast);
 
@@ -137,7 +133,6 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
 
   private VerticalPanel addRecordAudioPanelNoCaption(T exercise, LangTestDatabaseAsync service,
                                             ExerciseController controller, int index, Panel vp, String audioType) {
-//    System.out.println("addRecordAudioPanel " + exercise + " audioType " +audioType);
     RecordAudioPanel fast = new RecordAudioPanel<T>(exercise, controller, this, service, index, false, audioType, instance);
     audioPanels.add(fast);
     vp.add(fast);
@@ -146,31 +141,6 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
     addAnswerWidget(index, fast);
     return fast;
   }
-
-  /**
-   * TODO : don't copy code
-   * @return
-   */
-/*  private Panel getUnitLessonForExercise() {
-    Panel flow = new HorizontalPanel();
-    flow.getElement().setId("getUnitLessonForExercise_unitLesson");
-    flow.addStyleName("leftFiveMargin");
-    flow.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
-    //System.out.println("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
-
-    for (String type : controller.getStartupInfo().getTypeOrder()) {
-      Heading child = new Heading(GoodwaveExercisePanel.HEADING_FOR_UNIT_LESSON, type, exercise.getUnitToValue().get(type));
-      child.addStyleName("rightFiveMargin");
-      flow.add(child);
-    }
-    return flow;
-  }
-
-  private Widget getItemHeader(HasID e) {
-    Heading w = new Heading(GoodwaveExercisePanel.HEADING_FOR_UNIT_LESSON, GoodwaveExercisePanel.ITEM, e.getID());
-    w.getElement().setId("ItemHeading");
-    return w;
-  }*/
 
   protected Widget getContentScroller(HTML maybeRTLContent) {
     return maybeRTLContent;
