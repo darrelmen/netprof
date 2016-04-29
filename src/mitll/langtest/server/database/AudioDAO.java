@@ -61,6 +61,8 @@ public class AudioDAO extends DAO {
   private final UserDAO userDAO;
   private ExerciseDAO<?> exerciseDAO;
 
+  private static final boolean DEBUG_ATTACH = false;
+
   /**
    * @param database
    * @param userDAO
@@ -328,7 +330,7 @@ public class AudioDAO extends DAO {
         audioPaths.add(attr.getAudioRef());
         boolean didIt = attachAudioAndFixPath(firstExercise, installPath, relativeConfigDir, audioConversion, attr);
         if (!didIt) {
-          if (allSucceeded) {
+          if (DEBUG_ATTACH && allSucceeded) {
             String foreignLanguage = attr.isContextAudio() ? firstExercise.getContext() : firstExercise.getForeignLanguage();
             logger.info("not attaching audio\t" + attr.getUniqueID() + " to\t" + firstExercise.getID() +
                 "\tsince transcript has changed : old '" +
@@ -347,7 +349,7 @@ public class AudioDAO extends DAO {
       if (!audioPaths.contains(attr.getAudioRef())) {
         boolean didIt = attachAudioAndFixPath(firstExercise, installPath, relativeConfigDir, audioConversion, attr);
         if (!didIt) {
-          if (allSucceeded) {
+          if (DEBUG_ATTACH && allSucceeded) {
             logger.info("not attaching audio\t" + attr.getUniqueID() + " to\t" + firstExercise.getID() +
                 "\tsince transcript has changed : old '" + attr.getTranscript() +
                 "' vs new '" + firstExercise.getForeignLanguage() +
