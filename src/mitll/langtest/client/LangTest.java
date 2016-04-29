@@ -99,11 +99,17 @@ import java.util.logging.Logger;
  * - More small report changes
  * 1.2.11
  * - Better support for keeping track of transcripts on audio files and noticing when they're out of sync with current content
+ * 1.2.12
+ * - Fix for lookup for ref audio, fix for sending meaning back in nested chapters score servlet call
+ * 1.2.13
+ * - fix for highlight on context sentence where now does max coverage, remove email cc to ltea,
+ * looks at content to determine whether RTL language, bug where exercise lists wouldn't come up,
+ * bug where didn't use cached alignment from refresult table, fix for sending meaning for english in nestedChapters
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.2.10";
+  public static final String VERSION_INFO = "1.2.12";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
@@ -679,7 +685,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public boolean isRightAlignContent() {
-    return props.isRightAlignContent();
+    return props.isRightAlignContent() || initialUI.isRTL();
   }
 
   public LangTestDatabaseAsync getService() {
