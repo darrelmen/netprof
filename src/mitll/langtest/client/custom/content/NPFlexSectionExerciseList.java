@@ -14,8 +14,6 @@ import mitll.langtest.client.user.UserManager;
  * Created by go22670 on 1/26/16.
  */
 public class NPFlexSectionExerciseList extends FlexSectionExerciseList {
-  //private FlexListLayout flexListLayout;
-
   /**
    * @param topRow
    * @param currentExercisePanel
@@ -28,7 +26,6 @@ public class NPFlexSectionExerciseList extends FlexSectionExerciseList {
                                    boolean incorrectFirst) {
     super(topRow, currentExercisePanel, flexListLayout.service, flexListLayout.feedback,
         flexListLayout.controller, instanceName, incorrectFirst);
-    //this.flexListLayout = flexListLayout;
   }
 
   @Override
