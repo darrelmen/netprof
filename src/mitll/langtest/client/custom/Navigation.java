@@ -536,7 +536,7 @@ public class Navigation implements RequiresResize, ShowTab {
     TabAndContent tabAndContent = nameToTab.get(value);
     Integer tabIndex = nameToIndex.get(value);
 
-//    logger.info("selectPreviousTab '" + value + "' index " + tabIndex + " tabAndContent " + tabAndContent);
+    logger.info("selectPreviousTab '" + value + "' index " + tabIndex + " tabAndContent " + tabAndContent);
 
     String orig = value;
     if (tabIndex == null) {
@@ -646,7 +646,7 @@ public class Navigation implements RequiresResize, ShowTab {
     } else if (toUse.getTab() == null) {
       logger.warning("huh? toUse has a null tab? " + toUse);
     } else {
-      // logger.info("click on tab " + toUse);
+      logger.info("click on tab " + toUse);
       toUse.clickOnTab();
     }
   }
@@ -664,15 +664,9 @@ public class Navigation implements RequiresResize, ShowTab {
 
   @Override
   public void onResize() {
-    //  logger.info("got onResize");
     learnHelper.onResize();
-    //npfHelper.onResize();
-    //   avpHelper.onResize();
-    // defectHelper.onResize();
-    // reviewItem.onResize();
     recorderHelper.onResize();
     recordExampleHelper.onResize();
-    //editItem.onResize();
     markDefectsHelper.onResize();
     practiceHelper.onResize();
     listManager.onResize();
