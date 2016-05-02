@@ -93,9 +93,10 @@ public class FlexSectionExerciseList extends NPExerciseList {
   protected SectionWidgetContainer<ButtonGroupSectionWidget> getSectionWidgetContainer() {
     return new SectionWidgetContainer<ButtonGroupSectionWidget>() {
       protected void selectItem(String type, Collection<String> sections) {
+//        logger.info("FlexSectionExerciseList.selectItem : selecting " + type + "=" + sections);
+
         ButtonGroupSectionWidget listBox = getGroupSection(type);
         listBox.clearSelectionState();
-        logger.info("FlexSectionExerciseList.selectItem : selecting " + type + "=" + sections);
         listBox.selectItem(sections);
       }
     };
@@ -138,11 +139,6 @@ public class FlexSectionExerciseList extends NPExerciseList {
     typeOrder = controller.getStartupInfo().getTypeOrder();
     addButtonRow(controller.getStartupInfo().getSectionNodes(), container, typeOrder);
   }
-
-/*  @Override
-  protected Collection<String> getTypeOrder(Map<String, Collection<String>> selectionState2) {
-    return typeOrder;
-  }*/
 
   /**
    * @param rootNodes
@@ -510,25 +506,9 @@ public class FlexSectionExerciseList extends NPExerciseList {
     });
   }
 
-  /**
-   * So when we get a URL with a bookmark in it, we have to make the UI appear consistent with it.
-   *
-   * @paramx type
-   * @paramx sections
-   * @see mitll.langtest.client.list.HistoryExerciseList#restoreListBoxState(mitll.langtest.client.list.SelectionState)
-   */
-/*  @Override
-  protected void selectItem(String type, Collection<String> sections) {
-    ButtonGroupSectionWidget listBox = getGroupSection(type);
-    listBox.clearSelectionState();
-    //System.out.println("FlexSectionExerciseList.selectItem : instance " + instance+ " selecting " + type + "=" + sections);
-    listBox.selectItem(sections);
-  }*/
-
   @Override
   public boolean loadByID(String id) {
     //  logger.info("loadByID loading exercise " + id);
-
     if (hasExercise(id)) {
       //  logger.info("loadByID found exercise " + id);
       loadExercise(id);
@@ -558,21 +538,6 @@ public class FlexSectionExerciseList extends NPExerciseList {
     }
     rememberedID = null;
   }
-
-  /**
-   * @param type
-   * @see HistoryExerciseList#restoreListBoxState(mitll.langtest.client.list.SelectionState)
-   */
-/*
-  @Override
-  protected void clearEnabled(String type) {
-    getGroupSection(type).clearEnabled();
-  }
-
-  protected void enableAllButtonsFor(String type) {
-    getGroupSection(type).enableAll();
-  }
-*/
 
   /**
    * @seex HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
@@ -847,16 +812,6 @@ public class FlexSectionExerciseList extends NPExerciseList {
     public ButtonWithChildren getParentButton() {
       return parent;
     }
-
-/*    public List<ButtonWithChildren> getSiblings() {
-      List<ButtonWithChildren> siblings = new ArrayList<ButtonWithChildren>();
-      if (parent != null) {
-        for (ButtonWithChildren button : parent.children) {
-          if (button != this) siblings.add(button);
-        }
-      }
-      return siblings;
-    }*/
 
     public void setParentButton(ButtonWithChildren parent) {
       this.parent = parent;
