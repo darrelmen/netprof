@@ -237,11 +237,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     private final String searchIfAny;
     private final String exerciseID;
     private final ExerciseListRequest request;
+    //private final boolean setTypeAheadText;
 
     /**
      * @param selectionID
      * @param searchIfAny
      * @param exerciseID
+     * @paramx setTypeAheadText
      * @see #getExercises(long)
      */
     SetExercisesCallback(String selectionID, String searchIfAny, String exerciseID, ExerciseListRequest request) {
@@ -249,11 +251,11 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       this.searchIfAny = searchIfAny;
       this.exerciseID = exerciseID;
       this.request = request;
+   //   this.setTypeAheadText = setTypeAheadText;
     }
 
     public void onFailure(Throwable caught) {
       logger.warning("SetExercisesCallback.onFailure " + lastReqID);
-
       gotExercises(false);
       dealWithRPCError(caught);
     }
@@ -261,10 +263,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     public void onSuccess(ExerciseListWrapper<T> result) {
       if (DEBUG) logger.info("\tExerciseList.SetExercisesCallback Got " + result.getExercises().size() + " results");
       if (isStaleResponse(result)) {
-        if (DEBUG)
+        if (DEBUG || true)
           logger.info("SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
+        ignoreStaleRequest(result);
       } else {
         lastSuccessfulRequest = request;
+        if (DEBUG || true) logger.info("last req now " + lastSuccessfulRequest);
         gotExercises(result);
         String idToUse = exerciseID.isEmpty() ? result.getFirstExercise() == null ? "" : result.getFirstExercise().getID() : exerciseID;
         rememberAndLoadFirst(result.getExercises(), selectionID, searchIfAny, idToUse);
@@ -272,13 +276,18 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
   }
 
+  protected abstract void ignoreStaleRequest(ExerciseListWrapper<T> result);
+
   private void gotExercises(ExerciseListWrapper<T> result) {
     gotExercises(true);
-    if (DEBUG) logger.info("ExerciseList.gotExercises result = " + result);
+    if (DEBUG || true) logger.info("ExerciseList.gotExercises result = " + result);
 
     boolean isEmpty = result.getExercises().isEmpty();
     if (isEmpty) {
       gotEmptyExerciseList();
+    }
+    else {
+      logger.info("list non empty");
     }
   }
 
@@ -395,19 +404,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         return;
       }
     }
-/*    if (firstExercise != null) {
-//      CommonShell firstExerciseShell = findFirstExercise();
-//      if (firstExerciseShell.getID().equals(firstExercise.getID())) {
-      //  if (DEBUG) logger.info("ExerciseList : rememberAndLoadFirst using first = " + firstExercise);
-
-      pushFirstSelection(firstExercise.getID(), searchIfAny);
-      //   useExercise(firstExercise);   // allows us to skip another round trip with the server to ask for the first exercise
-//      } else {
-//        if (DEBUG) logger.info("ExerciseList : rememberAndLoadFirst finding first - " +
-//            firstExerciseShell.getID() + " != " +firstExercise.getID());
-//        loadFirstExercise();
-//      }
-    } else*/
     if (exerciseID.isEmpty()) {
       loadFirstExercise();
     } else {
@@ -605,11 +601,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
+        logger.info("ExerciseList.useExercise : item id " + itemID + " currentExercise " +getCurrentExercise() +
+      " or " + getCurrentExerciseID() + " instance " + instance);
         createdPanel = makeExercisePanel(commonExercise);
       }
     });
-/*    logger.info("ExerciseList.useExercise : item id " + itemID + " currentExercise " +getCurrentExercise() +
-      " or " + getCurrentExerciseID() + " instance " + instance);*/
+
   }
 
   public String getCurrentExerciseID() {
@@ -698,6 +695,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   private void removeComponents() {
     super.clear();
+  }
+
+  void showEmptyExercise() {
+    createdPanel = new SimplePanel();
+    createdPanel.getElement().setId("placeHolderWhenNoExercises");
+    innerContainer.setWidget(createdPanel);
   }
 
   @Override

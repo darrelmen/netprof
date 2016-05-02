@@ -1,6 +1,5 @@
 package mitll.langtest.client.list;
 
-import com.google.gwt.user.client.History;
 import mitll.langtest.client.amas.SingleSelectExerciseList;
 import mitll.langtest.client.exercise.SectionWidget;
 
@@ -13,7 +12,8 @@ import java.util.logging.Logger;
 public class SectionWidgetContainer<T extends SectionWidget> {
   private final Logger logger = Logger.getLogger("SectionWidgetContainer");
 
-  private final boolean DEBUG =true;
+  private static final boolean DEBUG = false;
+
   private final Map<String, T> typeToBox = new HashMap<>();
 
   public T getWidget(String type) {
@@ -28,14 +28,14 @@ public class SectionWidgetContainer<T extends SectionWidget> {
    * Given a selectionState state, make sure the list boxes are consistent with it.
    *
    * @param selectionState
-   * @see #onValueChange
+   * @see HistoryExerciseList#restoreListBoxState(SelectionState)
    */
   void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
     Map<String, Collection<String>> selectionState2 = getCompleteState(selectionState);
 
-    logger.info("original state " + selectionState);
-    logger.info("type order     " + typeOrder);
-    logger.info("overlay state  " + selectionState2);
+//    logger.info("original state " + selectionState);
+//    logger.info("type order     " + typeOrder);
+//    logger.info("overlay state  " + selectionState2);
 
     boolean hasNonClearSelection = false;
     List<String> typesWithSelections = new ArrayList<>();
@@ -45,11 +45,14 @@ public class SectionWidgetContainer<T extends SectionWidget> {
     }
     for (String type : typeOrder) {
       Collection<String> selections = selectionState2.get(type);
-      if (selections.iterator().next().equals(HistoryExerciseList.ANY)) {
+      if (selections == null) {
+        logger.warning("huh? no selection in selection state " + selectionState2.keySet() + " for " + type);
+      }
+      if (selections != null && selections.iterator().next().equals(HistoryExerciseList.ANY)) {
         if (hasNonClearSelection) {
           if (DEBUG) logger.info("restoreListBoxState : skipping type since below a selection = " + type);
         } else {
-          if (DEBUG)  logger.info("restoreListBoxState : clearing " + type);
+          if (DEBUG) logger.info("restoreListBoxState : clearing " + type);
           selectItem(type, selections);
         }
       } else {
@@ -84,7 +87,7 @@ public class SectionWidgetContainer<T extends SectionWidget> {
       if (DEBUG) logger.info("restoreListBoxState : afterFirst " + afterFirst);
 
       for (String type : afterFirst) {
-        if (DEBUG) logger.info("restoreListBoxState : clearing enabled on '" + type +"'");
+        if (DEBUG) logger.info("restoreListBoxState : clearing enabled on '" + type + "'");
         clearEnabled(type);
       }
     }
@@ -95,7 +98,7 @@ public class SectionWidgetContainer<T extends SectionWidget> {
     }
     String unitAndChapterSelection = getHistoryToken();
 
-    logger.info("UI should now show " + selectionState.getTypeToSection() + " vs actual " + unitAndChapterSelection);
+    if (DEBUG) logger.info("UI should now show " + selectionState.getTypeToSection() + " vs actual " + unitAndChapterSelection);
   }
 
   private Map<String, Collection<String>> getCompleteState(SelectionState selectionState) {
@@ -119,11 +122,16 @@ public class SectionWidgetContainer<T extends SectionWidget> {
     widget.clearSelectionState();
 
     String currentSelection = widget.getCurrentSelection();
-    logger.info("after clear of " + type + " = " +currentSelection);
-    logger.info("after clear of " + type + " = " +widget.getCurrentSelections());
+ //   logger.info("after clear of " + type + " = " + currentSelection);
+  //  logger.info("after clear of " + type + " = " + widget.getCurrentSelections());
   }
 
-  private void enableAllButtonsFor(String type) {  getWidget(type).enableAll();  }
+  private void enableAllButtonsFor(String type) {
+    T widget = getWidget(type);
+    if (widget != null) {
+      widget.enableAll();
+    }
+  }
 
   /**
    * @return
@@ -132,21 +140,23 @@ public class SectionWidgetContainer<T extends SectionWidget> {
    */
   String getHistoryToken() {
     if (typeToBox.isEmpty()) {
-      return "";// History.getToken();
+      return "";
     }
-    logger.info("getHistoryTokenFromUIState examining " +typeToBox.size() + " boxes.");
-    StringBuilder unitAndChapterSelection = new StringBuilder();
-    for (String type : getTypes()) {
-      String section = getCurrentSelection(type);
-      logger.info("getHistoryTokenFromUIState type " +type+ " section " +section);
+    else {
+      //  logger.info("getHistoryTokenFromUIState examining " + typeToBox.size() + " boxes.");
+      StringBuilder unitAndChapterSelection = new StringBuilder();
+      for (String type : getTypes()) {
+        String section = getCurrentSelection(type);
+     //   logger.info("getHistoryTokenFromUIState type " + type + " section " + section);
 
-      if (!section.equals(HistoryExerciseList.ANY)) {
-        unitAndChapterSelection.append(type + "=" + section + ";");
+        if (!section.equals(HistoryExerciseList.ANY)) {
+          unitAndChapterSelection.append(type + "=" + section + ";");
+        }
       }
-    }
-    logger.info("getHistoryTokenFromUIState unitAndChapterSelection " +unitAndChapterSelection);
+    //  logger.info("getHistoryTokenFromUIState unitAndChapterSelection " + unitAndChapterSelection);
 
-    return unitAndChapterSelection.toString();
+      return unitAndChapterSelection.toString();
+    }
   }
 
   /**
@@ -178,7 +188,7 @@ public class SectionWidgetContainer<T extends SectionWidget> {
    * @see SingleSelectExerciseList#gotSelection()
    * @see SingleSelectExerciseList#restoreListFromHistory
    */
-  protected int getNumSelections() {
+  int getNumSelections() {
     int count = 0;
     // logger.info("type now " + typeToSelection);
     for (T widget : typeToBox.values()) {
