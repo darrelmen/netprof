@@ -42,6 +42,7 @@ import java.util.logging.Logger;
 public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     extends VerticalPanel
     implements ListInterface<T>, ProvidesResize {
+  public static final String EMPTY_PANEL = "placeHolderWhenNoExercises";
   private final Logger logger = Logger.getLogger("ExerciseList");
 
   private static final int MAX_MSG_LEN = 200;
@@ -125,7 +126,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   public boolean getExercises(long userID) {
     if (DEBUG) logger.info("ExerciseList.getExercises for user " + userID + " instance " + getInstance());
     ExerciseListRequest request = getRequest();
-    service.getExerciseIds(request, new SetExercisesCallback("", "", "",request));
+    service.getExerciseIds(request, new SetExercisesCallback("", "", "", request));
     return true;
   }
 
@@ -251,7 +252,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       this.searchIfAny = searchIfAny;
       this.exerciseID = exerciseID;
       this.request = request;
-   //   this.setTypeAheadText = setTypeAheadText;
+      //   this.setTypeAheadText = setTypeAheadText;
     }
 
     public void onFailure(Throwable caught) {
@@ -263,12 +264,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     public void onSuccess(ExerciseListWrapper<T> result) {
       if (DEBUG) logger.info("\tExerciseList.SetExercisesCallback Got " + result.getExercises().size() + " results");
       if (isStaleResponse(result)) {
-        if (DEBUG || true)
+        if (DEBUG)
           logger.info("SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
         ignoreStaleRequest(result);
       } else {
         lastSuccessfulRequest = request;
-        if (DEBUG || true) logger.info("last req now " + lastSuccessfulRequest);
+        if (DEBUG) logger.info("last req now " + lastSuccessfulRequest);
         gotExercises(result);
         String idToUse = exerciseID.isEmpty() ? result.getFirstExercise() == null ? "" : result.getFirstExercise().getID() : exerciseID;
         rememberAndLoadFirst(result.getExercises(), selectionID, searchIfAny, idToUse);
@@ -280,14 +281,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   private void gotExercises(ExerciseListWrapper<T> result) {
     gotExercises(true);
-    if (DEBUG || true) logger.info("ExerciseList.gotExercises result = " + result);
+    if (DEBUG) logger.info("ExerciseList.gotExercises result = " + result);
 
     boolean isEmpty = result.getExercises().isEmpty();
     if (isEmpty) {
       gotEmptyExerciseList();
-    }
-    else {
-      logger.info("list non empty");
+    } else {
+      //  logger.info("list non empty");
     }
   }
 
@@ -318,8 +318,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         logger.info("\tExerciseList.SetExercisesCallbackWithID Got " + result.getExercises().size() + " results, id = " +
             id);
       if (isStaleResponse(result)) {
-        if (DEBUG || true) logger.info("----> SetExercisesCallbackWithID.onSuccess ignoring result " + result.getReqID() +
-            " b/c before latest " + lastReqID);
+        if (DEBUG || true)
+          logger.info("----> SetExercisesCallbackWithID.onSuccess ignoring result " + result.getReqID() +
+              " b/c before latest " + lastReqID);
       } else {
         gotExercises(result);
         Collection<T> exercises = result.getExercises();
@@ -498,7 +499,14 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     if (DEBUG)
       logger.info(getClass() + " : (" + instance + ") ExerciseList.checkAndAskServer - askServerForExercise = " + id);
     if (hasExercise(id)) {
-      askServerForExercise(id);
+//      if (//!getCurrentExerciseID().equals(id) ||
+//          createdPanel == null ||
+//          (
+//              createdPanel.getElement().getId().equals(EMPTY_PANEL))) {
+        askServerForExercise(id);
+//      } else {
+//        logger.info("got " + hasExercise(id) + " current " + getCurrentExerciseID() + " vs " + id);
+//      }
     } else if (!id.equals(EditItem.NEW_EXERCISE_ID)) {
       logger.warning("checkAndAskServer : can't load " + id);
     }
@@ -601,8 +609,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
-        logger.info("ExerciseList.useExercise : item id " + itemID + " currentExercise " +getCurrentExercise() +
-      " or " + getCurrentExerciseID() + " instance " + instance);
+/*        logger.info("ExerciseList.useExercise : item id " + itemID + " currentExercise " +getCurrentExercise() +
+      " or " + getCurrentExerciseID() + " instance " + instance);*/
+
         createdPanel = makeExercisePanel(commonExercise);
       }
     });
@@ -699,8 +708,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   void showEmptyExercise() {
     createdPanel = new SimplePanel();
-    createdPanel.getElement().setId("placeHolderWhenNoExercises");
+    createdPanel.getElement().setId(EMPTY_PANEL);
     innerContainer.setWidget(createdPanel);
+
   }
 
   @Override
