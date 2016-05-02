@@ -21,11 +21,13 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 
+import java.util.logging.Logger;
+
 /**
  * Created by go22670 on 9/25/14.
  */
 public class TypeAhead {
-//  private Logger logger = Logger.getLogger("TypeAhead");
+  private Logger logger = Logger.getLogger("TypeAhead");
   private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
   private final TextBox typeAhead = new TextBox();
 
@@ -71,6 +73,7 @@ public class TypeAhead {
     getTypeAhead().setDirectionEstimator(true);   // automatically detect whether text is RTL
     getTypeAhead().addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
+      //  logger.info("got key up " + event);
         gotTypeAheadEntry(getTypeAhead().getText());
       }
     });
@@ -114,7 +117,11 @@ public class TypeAhead {
     return userGroup;
   }
 
-  public TextBox getTypeAhead() {
+  /**
+   * @see PagingExerciseList#addTypeAhead(Panel)
+   * @return
+   */
+  TextBox getTypeAhead() {
     return typeAhead;
   }
 
