@@ -23,7 +23,7 @@ import java.util.Map;
  */
 class DownloadHelper {
   private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet and audio for selected sections.";
-  private static final String DOWNLOAD_AUDIO = "downloadAudio";
+  public static final String DOWNLOAD_AUDIO = "downloadAudio";
 
   private final EventRegistration eventRegistration;
   private final String instance;
@@ -32,7 +32,7 @@ class DownloadHelper {
   private Anchor contextDownloadLink;
   private final boolean isTeacher;
 
-  public DownloadHelper(EventRegistration eventRegistration, String instance,
+  DownloadHelper(EventRegistration eventRegistration, String instance,
                         FlexSectionExerciseList exerciseList, boolean isTeacher) {
     this.eventRegistration = eventRegistration;
     this.instance = instance;
@@ -40,7 +40,7 @@ class DownloadHelper {
     this.isTeacher = isTeacher;
   }
 
-  public FlexTable getDownloadLinks() {
+  FlexTable getDownloadLinks() {
     FlexTable links = new FlexTable();
     links.setWidget(0, 0,downloadLink = getDownloadLink());
     if (isTeacher) {
@@ -48,11 +48,11 @@ class DownloadHelper {
     }
     return links;
   }
-  public void updateDownloadLinks(SelectionState selectionState) {
+
+  void updateDownloadLinks(SelectionState selectionState) {
     if (downloadLink != null)        downloadLink.setHTML(getURLForDownload(selectionState));
     if (contextDownloadLink != null) contextDownloadLink.setHTML(getURLForContextDownload(selectionState));
   }
-
 
   /**
    * @return
@@ -101,15 +101,16 @@ class DownloadHelper {
   }
 */
 
-
+  /**
+   * @see #getDownloadLink()
+   * @return
+   */
   private SafeHtml getDownloadURL() {
-    SelectionState selectionState = exerciseList.getSelectionState();
-    return getURLForDownload(selectionState);
+    return getURLForDownload(exerciseList.getSelectionState());
   }
 
   private SafeHtml getDownloadContextURL() {
-    SelectionState selectionState = exerciseList.getSelectionState();
-    return getURLForContextDownload(selectionState);
+    return getURLForContextDownload(exerciseList.getSelectionState());
   }
 
   /**
