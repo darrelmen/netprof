@@ -108,6 +108,8 @@ import java.util.logging.Logger;
  * bug where didn't use cached alignment from refresult table, fix for sending meaning for english in nestedChapters
  * 1.3.0
  * - fixes for history stack
+ * 1.3.1
+ * - fix for bug where couldn't jump from word in analysis
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
