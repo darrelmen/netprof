@@ -57,7 +57,7 @@ public class ButtonGroupSectionWidget implements SectionWidget {
    * @see FlexSectionExerciseList#addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection, boolean)
    * @see FlexSectionExerciseList#addColumnButton(com.google.gwt.user.client.ui.FlowPanel, String, ButtonGroupSectionWidget)
    */
-  public void addRow(Panel row) {
+  void addRow(Panel row) {
     this.rows.add(row);
   }
 
@@ -140,6 +140,7 @@ public class ButtonGroupSectionWidget implements SectionWidget {
    * @see FlexSectionExerciseList#addClickHandlerToButton(mitll.langtest.client.bootstrap.FlexSectionExerciseList.ButtonWithChildren, String, ButtonGroupSectionWidget) (String, java.util.Collection)
    */
   void simpleSelectItem(Collection<String> sections) {
+    logger.info("ButtonGroupSectionWidget: simpleSelectItem " + this + " : " + type + "=" + sections);
     clearSelectionState();
     if (isClearSelection(sections)) {
       clearSelection();
@@ -157,25 +158,18 @@ public class ButtonGroupSectionWidget implements SectionWidget {
     }
   }
 
-  private boolean isClearSelection(Collection<String> sections) {
-    return sections.size() == 1 && sections.iterator().next().equals(HistoryExerciseList.ANY);
-  }
-
   /**
    * @param sections
    * @see FlexSectionExerciseList#getSectionWidgetContainer
    */
   void selectItem(Collection<String> sections) {
-    //if (debug) System.out.println("ButtonGroupSectionWidget: selectItem " + this + " : " + type + "=" + sections);
-
+ //   logger.info("ButtonGroupSectionWidget: selectItem " + this + " : " + type + "=" + sections);
     if (isClearSelection(sections)) {
       clearAll();
     } else {
-
       clearExistingSelections(sections);
 
       Collection<Button> buttonsByName = buttons.getButtonsByName(sections);
-
       // recurseShowParentEnabled();
 
       // recurse down the tree, selecting as we go
@@ -217,6 +211,10 @@ public class ButtonGroupSectionWidget implements SectionWidget {
       } */
       setClearButtonState(count > 0);
     }
+  }
+
+  private boolean isClearSelection(Collection<String> sections) {
+    return sections.size() == 1 && sections.iterator().next().equals(HistoryExerciseList.ANY);
   }
 
   private boolean hasEnabledPathToParent(FlexSectionExerciseList.ButtonWithChildren buttonWithChildren) {
@@ -262,7 +260,6 @@ public class ButtonGroupSectionWidget implements SectionWidget {
     else selected.remove(b);
     //   if (active) logger.info("\ttoggleButton " + b.getText() + " is active");
     //  else  logger.info("\t\ttoggleButton " + b.getText() + " is inactive");
-
     return active;
   }
 
@@ -310,10 +307,10 @@ public class ButtonGroupSectionWidget implements SectionWidget {
    * @see #selectItem(java.util.Collection)
    */
   public void clearAll() {
-   // logger.info("clearAll : ---------> disable clear button for type " + type + " checking " + buttons + " buttons <----------- ");
+//    logger.info("clearAll : ---------> disable clear button for type " + type + " checking " + buttons + " buttons <----------- ");
     // manager the selected set
     clearSelection();
-    currentSelection = null;
+    clearSelectionState();
 
     // set the clear button state
     clearButton.setEnabled(false);
