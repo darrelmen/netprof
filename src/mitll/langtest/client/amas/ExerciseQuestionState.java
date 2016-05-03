@@ -10,6 +10,5 @@ import com.google.gwt.user.client.ui.Widget;
  * To change this template use File | Settings | File Templates.
  */
 interface ExerciseQuestionState {
-  //void recordIncomplete(Widget answer);
   void recordCompleted(Widget answer);
 }
