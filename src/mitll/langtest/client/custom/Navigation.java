@@ -37,6 +37,8 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -617,6 +619,11 @@ public class Navigation implements RequiresResize, ShowTab {
     clickOnTab(tabAndContent);
   }
 
+  /**
+   * @see mitll.langtest.client.analysis.PhoneExampleContainer#gotClickOnItem(WordAndScore)
+   * @see mitll.langtest.client.analysis.WordContainer#gotClickOnItem(WordScore)
+   * @param id
+   */
   @Override
   public void showLearnAndItem(String id) {
     if (id.startsWith(CUSTOM)) {
@@ -646,7 +653,7 @@ public class Navigation implements RequiresResize, ShowTab {
     } else if (toUse.getTab() == null) {
       logger.warning("huh? toUse has a null tab? " + toUse);
     } else {
-      logger.info("click on tab " + toUse);
+     // logger.info("click on tab " + toUse);
       toUse.clickOnTab();
     }
   }
