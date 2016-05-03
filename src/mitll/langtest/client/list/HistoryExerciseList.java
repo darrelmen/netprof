@@ -192,7 +192,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
   }
 
   protected void setHistoryItem(String historyToken) {
-    logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
+ //   logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
     History.newItem(historyToken);
   }
 
