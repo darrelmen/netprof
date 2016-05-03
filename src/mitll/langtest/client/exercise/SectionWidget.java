@@ -6,6 +6,7 @@ package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.list.SectionWidgetContainer;
 
 import java.util.Collection;
 import java.util.List;
@@ -21,8 +22,10 @@ public interface SectionWidget {
   String getCurrentSelection();
   void clearSelectionState();
 
- // void selectItem(Collection<String> section, boolean doToggle);
-
+  /**
+   * @see mitll.langtest.client.bootstrap.ButtonGroupSectionWidget#selectItem(Collection)
+   * @see SectionWidgetContainer#clearSelections()
+   */
   void clearAll();
   void clearEnabled();
   void enableAll();
