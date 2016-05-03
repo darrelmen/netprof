@@ -40,6 +40,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -502,6 +503,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
    * An ASR scoring panel with a record button.
    */
   private class ASRRecordAudioPanel extends ASRScoringAudioPanel<T> {
+    public static final String DOWNLOAD_AUDIO = "downloadAudio";
     private final int index;
     private PostAudioRecordButton postAudioRecordButton;
     private PlayAudioPanel playAudioPanel;
@@ -632,11 +634,13 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
 
     /**
      * @see mitll.langtest.server.DownloadServlet#returnAudioFile(javax.servlet.http.HttpServletResponse, mitll.langtest.server.database.DatabaseImpl, String)
+     * @see #useResult(PretestScore, ImageAndCheck, ImageAndCheck, boolean, String)
      */
     private void setDownloadHref() {
       downloadContainer.setVisible(true);
 
-      String href = "downloadAudio?file=" +
+      String href = DOWNLOAD_AUDIO +
+          "?file=" +
           audioPath +
           "&" +
           "exerciseID=" +
