@@ -106,6 +106,8 @@ import java.util.logging.Logger;
  * - fix for highlight on context sentence where now does max coverage, remove email cc to ltea,
  * looks at content to determine whether RTL language, bug where exercise lists wouldn't come up,
  * bug where didn't use cached alignment from refresult table, fix for sending meaning for english in nestedChapters
+ * 1.3.0
+ * - fixes for history stack
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
