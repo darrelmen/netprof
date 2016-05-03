@@ -6,6 +6,7 @@ package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Command;
@@ -22,6 +23,7 @@ import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.STATE;
@@ -284,12 +286,18 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     }
   }
 
-  protected void popRequest() {
-    pendingRequests.pop();
-    List<Long> toRemove = new ArrayList<>();
-    long now = System.currentTimeMillis();
-    for (Long pending : pendingRequests) if (pending < now - TEN_SECONDS) toRemove.add(pending);
-    pendingRequests.removeAll(toRemove);
+  /**
+   * @see HistoryExerciseList#onValueChange(ValueChangeEvent)
+   * @see HistoryExerciseList#ignoreStaleRequest(ExerciseListWrapper)
+   */
+  void popRequest() {
+    if (!pendingRequests.isEmpty()) {
+      pendingRequests.pop();
+      List<Long> toRemove = new ArrayList<>();
+      long now = System.currentTimeMillis();
+      for (Long pending : pendingRequests) if (pending < now - TEN_SECONDS) toRemove.add(pending);
+      pendingRequests.removeAll(toRemove);
+    }
   }
 
   @Override
