@@ -20,6 +20,11 @@ public class SectionWidgetContainer<T extends SectionWidget> {
     return typeToBox.get(type);
   }
 
+  /**
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#populateButtonGroups(Collection)
+   * @param type
+   * @param value
+   */
   public void setWidget(String type, T value) {
     typeToBox.put(type, value);
   }
@@ -33,7 +38,7 @@ public class SectionWidgetContainer<T extends SectionWidget> {
   void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
     Map<String, Collection<String>> selectionState2 = getCompleteState(selectionState);
 
-//    logger.info("original state " + selectionState);
+//    logger.info("restoreListBoxState original state " + selectionState);
 //    logger.info("type order     " + typeOrder);
 //    logger.info("overlay state  " + selectionState2);
 
@@ -98,7 +103,8 @@ public class SectionWidgetContainer<T extends SectionWidget> {
     }
     String unitAndChapterSelection = getHistoryToken();
 
-    if (DEBUG) logger.info("UI should now show " + selectionState.getTypeToSection() + " vs actual " + unitAndChapterSelection);
+    if (DEBUG)
+      logger.info("UI should now show " + selectionState.getTypeToSection() + " vs actual " + unitAndChapterSelection);
   }
 
   private Map<String, Collection<String>> getCompleteState(SelectionState selectionState) {
@@ -121,9 +127,9 @@ public class SectionWidgetContainer<T extends SectionWidget> {
     widget.clearEnabled();
     widget.clearSelectionState();
 
-    String currentSelection = widget.getCurrentSelection();
- //   logger.info("after clear of " + type + " = " + currentSelection);
-  //  logger.info("after clear of " + type + " = " + widget.getCurrentSelections());
+    //   String currentSelection = widget.getCurrentSelection();
+    //   logger.info("after clear of " + type + " = " + currentSelection);
+    //  logger.info("after clear of " + type + " = " + widget.getCurrentSelections());
   }
 
   private void enableAllButtonsFor(String type) {
@@ -141,19 +147,18 @@ public class SectionWidgetContainer<T extends SectionWidget> {
   String getHistoryToken() {
     if (typeToBox.isEmpty()) {
       return "";
-    }
-    else {
+    } else {
       //  logger.info("getHistoryTokenFromUIState examining " + typeToBox.size() + " boxes.");
       StringBuilder unitAndChapterSelection = new StringBuilder();
       for (String type : getTypes()) {
         String section = getCurrentSelection(type);
-     //   logger.info("getHistoryTokenFromUIState type " + type + " section " + section);
+        //   logger.info("getHistoryTokenFromUIState type " + type + " section " + section);
 
         if (!section.equals(HistoryExerciseList.ANY)) {
           unitAndChapterSelection.append(type + "=" + section + ";");
         }
       }
-    //  logger.info("getHistoryTokenFromUIState unitAndChapterSelection " + unitAndChapterSelection);
+      //  logger.info("getHistoryTokenFromUIState unitAndChapterSelection " + unitAndChapterSelection);
 
       return unitAndChapterSelection.toString();
     }
@@ -207,7 +212,6 @@ public class SectionWidgetContainer<T extends SectionWidget> {
    * @see #restoreListBoxState(SelectionState)
    */
   protected void selectItem(String type, Collection<String> sections) {
-    //typeToBox.get(type).selectItem(sections, false);
     logger.warning("doing NO OP");
   }
 
@@ -216,7 +220,7 @@ public class SectionWidgetContainer<T extends SectionWidget> {
   }
 
   public void clearSelections() {
-    //logger.info("clearSelections");
-    for (String type : typeToBox.keySet()) typeToBox.get(type).clearAll();
+    Set<String> types = typeToBox.keySet();
+    for (String type : types) typeToBox.get(type).clearAll();
   }
 }
