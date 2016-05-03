@@ -260,7 +260,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
    * @param endInSeconds
    */
   private void playSegment(float startInSeconds, float endInSeconds) {
-    if (currentSound != null) {
+    if (currentSound != null & soundManager != null) {
       soundManager.pause(currentSound);
       float start1 = startInSeconds * 1000f;
       float end1   = endInSeconds   * 1000f;
@@ -279,7 +279,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     if (DEBUG) logger.info("PlayAudioPanel :pause");
 
     setPlayLabel();
-    soundManager.pause(currentSound);
+    if (soundManager != null) soundManager.pause(currentSound);
   }
 
   public void update(double position) {
