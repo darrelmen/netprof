@@ -136,7 +136,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         .setIncorrectFirstOrder(incorrectFirstOrder);
   }
 
-  protected int incrRequest() {
+  int incrRequest() {
     return ++lastReqID;
   }
 
@@ -145,6 +145,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see NPFHelper#reload
    */
   public void reload() {
+    //logger.info("reload -");
     getExercises(controller.getUser());
   }
 
@@ -238,7 +239,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     private final String searchIfAny;
     private final String exerciseID;
     private final ExerciseListRequest request;
-    //private final boolean setTypeAheadText;
 
     /**
      * @param selectionID
@@ -252,7 +252,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       this.searchIfAny = searchIfAny;
       this.exerciseID = exerciseID;
       this.request = request;
-      //   this.setTypeAheadText = setTypeAheadText;
     }
 
     public void onFailure(Throwable caught) {
