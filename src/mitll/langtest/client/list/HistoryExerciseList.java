@@ -21,7 +21,6 @@ import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -42,7 +41,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
   protected long userID;
   protected final SectionWidgetContainer<V> sectionWidgetContainer;
 
-  protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
+  protected static final boolean DEBUG_ON_VALUE_CHANGE = true;
   private static final boolean DEBUG = false;
 
   /**
