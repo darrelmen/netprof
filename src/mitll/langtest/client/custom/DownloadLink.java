@@ -10,13 +10,19 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Anchor;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.HasID;
 
 /**
  * Created by go22670 on 10/20/15.
+ * @see ListManager#makeTabContent(UserList, String, HasID)
  */
 class DownloadLink {
+  public static final String DOWNLOAD_AUDIO = "downloadAudio";
+  public static final String DOWNLOAD_SPREADSHEET_AND_AUDIO = "Download spreadsheet and audio for list.";
+
   private final ExerciseController controller;
-  public DownloadLink(ExerciseController controller) {
+  DownloadLink(ExerciseController controller) {
     this.controller = controller;
   }
   /**
@@ -28,7 +34,7 @@ class DownloadLink {
    */
   public Anchor getDownloadLink(long listid, String linkid, final String name) {
     final Anchor downloadLink = new Anchor(getURLForDownload(listid));
-    new TooltipHelper().addTooltip(downloadLink, "Download spreadsheet and audio for list.");
+    new TooltipHelper().addTooltip(downloadLink, DOWNLOAD_SPREADSHEET_AND_AUDIO);
     downloadLink.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -49,7 +55,7 @@ class DownloadLink {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<a class='" + "icon-download" +
         "' href='" +
-        "downloadAudio" +
+        DOWNLOAD_AUDIO +
         "?list=" + listid +
         "'" +
         ">");
